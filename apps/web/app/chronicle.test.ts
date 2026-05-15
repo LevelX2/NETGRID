@@ -282,6 +282,49 @@ describe("formatChronicleEvent", () => {
     expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+2 Credits", "1 beiseite", "Würfe 4, 5"]));
   });
 
+  it("shows Schlaghund tag-check damage without internal state", () => {
+    const item = formatChronicleEvent(
+      makeEvent("gain_credit", {
+        actor: "corp",
+        title: "Schlaghund",
+        cardDefinitionId: "onr_v1_339_schlaghund",
+        v1921AssetAbility: "schlaghund_tag_damage",
+        v1921DieRoll: 4,
+        runnerTags: 6,
+        tagThresholdMet: true,
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: 10,
+        selfTrashed: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Die Korp hat Schlaghund aktiviert und eine 4 gewürfelt.");
+    expect(item.description).toBe("6 Tags reichen aus: 10 Meat Damage und Schlaghund wird getrasht.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Schlaghund", "Wurf 4", "6 Tags", "Damage"]));
+    expect(JSON.stringify(item)).not.toContain("cardInstances");
+  });
+
+  it("shows Rio de Janeiro City Grid after passed ICE without hidden server data", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+        sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+        passedIceDefinitionId: "simple_barrier_ice",
+        serverLabel: "Remote 1",
+        v1921DieRoll: 1,
+        rioRunEnded: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(item.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Fort 1", "Wurf 1", "Run endet"]));
+  });
+
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {

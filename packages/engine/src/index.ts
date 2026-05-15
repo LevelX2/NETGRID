@@ -622,15 +622,25 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [V1921_PLAYFUL_AI_ID]: {
-    name: "onr_v1921_runner_event_deterministic_die_probe",
+    name: "onr_v1921_runner_event_playful_ai_dice_loop",
     resolve: (state, legalAction) => {
-      const randomPurpose = `v1921.die.${V1921_PLAYFUL_AI_ID}.event_probe`;
-      const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+      const dieRoll = rollDeterministicDie(
+        state,
+        `v1921.die.${V1921_PLAYFUL_AI_ID}.dice_loop.initial`,
+      );
+      startV1921PlayfulAiChoice(
+        state,
+        String(legalAction.payload?.cardId ?? ""),
+        dieRoll,
+        [dieRoll],
+      );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1921RunnerEventAbility: "deterministic_die_probe",
-        randomPurpose,
+        v1921RunnerEventAbility: "playful_ai_dice_loop",
         v1921DieRoll: dieRoll,
+        playfulAiDieRolls: String(dieRoll),
+        playfulAiChoiceOpened: true,
+        playfulAiRemainingDice: 1,
         randomCounterAfter: state.randomCounter,
       };
     },
@@ -3314,26 +3324,10 @@ function corpMainActions(state: GameState): LegalAction[] {
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: deterministischen Wuerfel werfen`,
+          `${definition.title}: Wuerfel gegen Tags werfen`,
           assetId,
           [{ clicks: 1 }],
-          { cardId: assetId, v1921AssetAbility: "deterministic_die_probe" },
-        ),
-      );
-    }
-    if (definition.id === V1921_RIO_DE_JANEIRO_CITY_GRID_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Server-Wuerfelprobe`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1921UpgradeAbility: "deterministic_server_die_probe",
-          },
+          { cardId: assetId, v1921AssetAbility: "schlaghund_tag_damage" },
         ),
       );
     }
@@ -6375,6 +6369,11 @@ function performAction(
       if (
         legalAction.payload?.v1921AssetAbility === "deterministic_die_probe"
       ) {
+        throw new Error("Schlaghund nutzt keine Wuerfelprobe mehr.");
+      }
+      if (
+        legalAction.payload?.v1921AssetAbility === "schlaghund_tag_damage"
+      ) {
         if (legalAction.side !== "corp")
           throw new Error("Nur die Korp darf V1.9.21-Asset-Zufall nutzen.");
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
@@ -6387,41 +6386,40 @@ function performAction(
           throw new Error(
             "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
           );
-        const randomPurpose = `v1921.die.${definition.id}.asset_probe`;
-        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+        const randomPurpose = `v1921.die.${definition.id}.tag_damage`;
+        const dieRoll = rollDeterministicDie(state, randomPurpose);
+        const runnerTags = state.runner.tags;
+        const tagThresholdMet = runnerTags >= dieRoll;
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           randomPurpose,
           v1921DieRoll: dieRoll,
+          runnerTags,
+          tagThresholdMet,
           randomCounterAfter: state.randomCounter,
         };
+        if (!tagThresholdMet) return;
+        resolveDamageOperation(
+          state,
+          legalAction,
+          "meat",
+          10,
+          V1921_SCHLAGHUND_ID,
+        );
+        if (!state.pendingChoice) {
+          trashCorpInstalledCardToArchives(state, sourceCardId);
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            selfTrashed: true,
+          };
+        }
         return;
       }
       if (
         legalAction.payload?.v1921UpgradeAbility ===
         "deterministic_server_die_probe"
       ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf V1.9.21-Upgrade-Zufall nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.21-Upgrade-Zufallsfaehigkeit ist nicht rezzed installiert.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1921_RIO_DE_JANEIRO_CITY_GRID_ID)
-          throw new Error(
-            "Die V1.9.21-Upgrade-Zufallsfaehigkeit passt nicht zur Karte.",
-          );
-        const randomPurpose = `v1921.die.${definition.id}.server_probe`;
-        const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          randomPurpose,
-          v1921DieRoll: dieRoll,
-          randomCounterAfter: state.randomCounter,
-        };
-        return;
+        throw new Error("Rio de Janeiro City Grid nutzt automatische Trigger.");
       }
       if (
         legalAction.payload?.v1921RunnerProgramAbility ===
@@ -8158,7 +8156,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     return;
   }
   applyBartmossPostEncounterTrigger(state, run, legalAction);
-  movePastCurrentIce(state);
+  movePastCurrentIce(state, legalAction);
 }
 
 function encounterWasFullyBrokenByRunner(
@@ -8484,7 +8482,7 @@ function traceBidChoice(
   };
 }
 
-function movePastCurrentIce(state: GameState): void {
+function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.position.kind !== "ice")
     throw new Error("Runner ist nicht an ICE positioniert.");
@@ -8497,6 +8495,13 @@ function movePastCurrentIce(state: GameState): void {
     mustInstance(state.cardInstances, passedIceId).rezzed
       ? passedIceId
       : undefined;
+  if (
+    passedIceId &&
+    mustInstance(state.cardInstances, passedIceId).rezzed &&
+    applyRioDeJaneiroCityGridPassedIceTrigger(state, run, passedIceId, legalAction)
+  ) {
+    return;
+  }
   if (nextIndex < server.ice.length) {
     const approachedIceId = mustArrayValue(
       server.ice,
@@ -8551,6 +8556,52 @@ function movePastCurrentIce(state: GameState): void {
     phase: "access",
   };
   enterAccess(state);
+}
+
+function applyRioDeJaneiroCityGridPassedIceTrigger(
+  state: GameState,
+  run: ActiveRun,
+  passedIceId: CardInstanceId,
+  legalAction?: LegalAction,
+): boolean {
+  if (run.position.kind !== "ice") return false;
+  const server = mustServer(state, run.position.serverId);
+  const rioIds = server.root
+    .filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      return (
+        instance?.rezzed === true &&
+        definitionFor(state, cardId).id === V1921_RIO_DE_JANEIRO_CITY_GRID_ID
+      );
+    })
+    .sort();
+  if (rioIds.length === 0) return false;
+
+  for (const rioId of rioIds) {
+    const randomPurpose = `v1921.die.${V1921_RIO_DE_JANEIRO_CITY_GRID_ID}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    const runEnded = dieRoll === 1;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+        sourceCardId: rioId,
+        sourceDefinitionId: V1921_RIO_DE_JANEIRO_CITY_GRID_ID,
+        passedIceId,
+        passedIceDefinitionId: definitionFor(state, passedIceId).id,
+        serverLabel: server.label,
+        v1921DieRoll: dieRoll,
+        randomPurpose,
+        randomCounterAfter: state.randomCounter,
+        rioRunEnded: runEnded,
+      };
+    }
+    if (runEnded) {
+      finishRun(state, false, legalAction);
+      return true;
+    }
+  }
+  return false;
 }
 
 function resolveVacuumLinkRewindSubroutine(
@@ -12431,6 +12482,10 @@ function resolvePendingChoice(
     resolveV1922RunnerGripTrashChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
+    resolveV1921PlayfulAiChoice(state, legalAction, playerAction);
+    return;
+  }
   if (
     state.pendingChoice.source.startsWith(
       "v1922.runner_installed_trash_gain_credits",
@@ -14561,6 +14616,113 @@ function selectedChoiceCardIds(
   });
 }
 
+function startV1921PlayfulAiChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  dieRoll: number,
+  dieRolls: number[],
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (!sourceCardId || !state.cardInstances[sourceCardId])
+    throw new Error("Playful AI hat keine gueltige Quelle.");
+  state.pendingChoice = {
+    choiceId: `v1921_playful_ai_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1921.playful_ai:${sourceCardId}:${dieRoll}:${dieRolls.join(",")}:${state.stateVersion + 1}`,
+    prompt: "Playful AI: Credits nehmen oder Wuerfel beiseitelegen?",
+    kind: "select_option",
+    options: [
+      {
+        id: "take_credits",
+        label: `${dieRoll} Credits nehmen`,
+        publicLabel: "Credits genommen",
+        value: "take_credits",
+      },
+      {
+        id: "set_aside",
+        label: "Wuerfel beiseitelegen",
+        publicLabel: "Wuerfel beiseitegelegt",
+        value: "set_aside",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+}
+
+function resolveV1921PlayfulAiChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1921.playful_ai"))
+    throw new Error("Es ist keine Playful-AI-Choice offen.");
+  const [, sourceCardId, dieRollRaw, dieRollsRaw] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    !state.runner.heap.includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== V1921_PLAYFUL_AI_ID
+  )
+    throw new Error("Die Playful-AI-Choice gehoert nicht zur gespielten Karte.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const dieRoll = Number(dieRollRaw);
+  if (!Number.isInteger(dieRoll) || dieRoll < 1 || dieRoll > 6)
+    throw new Error("Playful-AI-Wurf ist ungueltig.");
+  const priorRolls = (dieRollsRaw ?? "")
+    .split(",")
+    .filter(Boolean)
+    .map((value) => Number(value));
+  if (
+    priorRolls.length === 0 ||
+    priorRolls.some((roll) => !Number.isInteger(roll) || roll < 1 || roll > 6)
+  )
+    throw new Error("Playful-AI-Wurfserie ist ungueltig.");
+
+  delete state.pendingChoice;
+  let gainedCredits = 0;
+  let setAsideDice = 0;
+  let complete = true;
+  let choiceOpened = false;
+  const dieRolls = priorRolls.slice();
+  if (selectedOptionId === "take_credits") {
+    gainedCredits = dieRoll;
+    credits(state, "runner", gainedCredits);
+  } else if (selectedOptionId === "set_aside") {
+    setAsideDice = 1;
+    const nextRoll = rollDeterministicDie(
+      state,
+      `v1921.die.${V1921_PLAYFUL_AI_ID}.dice_loop.followup.${state.stateVersion + 1}.${dieRolls.length}`,
+    );
+    dieRolls.push(nextRoll);
+    complete = false;
+    choiceOpened = true;
+    startV1921PlayfulAiChoice(state, sourceCardId, nextRoll, dieRolls);
+  } else {
+    throw new Error("Playful-AI-Auswahl ist ungueltig.");
+  }
+
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1921RunnerEventAbility: "playful_ai_dice_loop",
+    sourceDefinitionId: V1921_PLAYFUL_AI_ID,
+    v1921DieRoll: dieRolls[dieRolls.length - 1] ?? dieRoll,
+    playfulAiDieRolls: dieRolls.join(","),
+    playfulAiGainedCredits: gainedCredits,
+    playfulAiSetAsideDice: setAsideDice,
+    playfulAiRolledDice: dieRolls.length,
+    playfulAiDiceQueuedBeforeRolls: priorRolls.length,
+    playfulAiDiceQueuedAfterRolls: choiceOpened ? 1 : 0,
+    playfulAiRemainingDice: choiceOpened ? 1 : 0,
+    playfulAiChoiceOpened: choiceOpened,
+    playfulAiComplete: complete,
+    randomCounterAfter: state.randomCounter,
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
 function shuffleRunnerStack(state: GameState, purpose: string): void {
   const random = {
     counter: state.randomCounter,
@@ -15921,6 +16083,11 @@ function publicContextForAction(
     context.v1921AssetAbility = legalAction.payload.v1921AssetAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (typeof legalAction.payload.runnerTags === "number")
+      context.runnerTags = legalAction.payload.runnerTags;
+    if (typeof legalAction.payload.tagThresholdMet === "boolean")
+      context.tagThresholdMet = legalAction.payload.tagThresholdMet;
+    if (legalAction.payload.selfTrashed === true) context.selfTrashed = true;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")
@@ -15930,6 +16097,14 @@ function publicContextForAction(
     context.v1921UpgradeAbility = legalAction.payload.v1921UpgradeAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (typeof legalAction.payload.sourceDefinitionId === "string")
+      context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
+    if (typeof legalAction.payload.passedIceDefinitionId === "string")
+      context.passedIceDefinitionId = legalAction.payload.passedIceDefinitionId;
+    if (typeof legalAction.payload.serverLabel === "string")
+      context.serverLabel = legalAction.payload.serverLabel;
+    if (typeof legalAction.payload.rioRunEnded === "boolean")
+      context.rioRunEnded = legalAction.payload.rioRunEnded;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")
@@ -16073,6 +16248,27 @@ function publicContextForAction(
       legalAction.payload.v1921RunnerEventAbility;
     if (typeof legalAction.payload.v1921DieRoll === "number")
       context.v1921DieRoll = legalAction.payload.v1921DieRoll;
+    if (
+      Array.isArray(legalAction.payload.playfulAiDieRolls) ||
+      typeof legalAction.payload.playfulAiDieRolls === "string"
+    )
+      context.playfulAiDieRolls = legalAction.payload.playfulAiDieRolls;
+    for (const key of [
+      "playfulAiGainedCredits",
+      "playfulAiSetAsideDice",
+      "playfulAiRolledDice",
+      "playfulAiDiceQueuedBeforeRolls",
+      "playfulAiDiceQueuedAfterRolls",
+      "playfulAiRemainingDice",
+      "runnerCreditsAfter",
+    ]) {
+      const value = legalAction.payload[key];
+      if (typeof value === "number") context[key] = value;
+    }
+    if (typeof legalAction.payload.playfulAiChoiceOpened === "boolean")
+      context.playfulAiChoiceOpened = legalAction.payload.playfulAiChoiceOpened;
+    if (typeof legalAction.payload.playfulAiComplete === "boolean")
+      context.playfulAiComplete = legalAction.payload.playfulAiComplete;
     if (typeof legalAction.payload.randomCounterAfter === "number")
       context.randomCounterAfter = legalAction.payload.randomCounterAfter;
     if (typeof legalAction.payload.randomPurpose === "string")
@@ -16826,6 +17022,8 @@ function resolveV1922HammerStealthLossChoice(
   if (!choice || !choice.source.startsWith("v1922.hammer_stealth_loss"))
     throw new Error("Hammer-Stealth-Choice ist nicht offen.");
   const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
+    throw new Error("Hammer-Stealth-Auswahl enthaelt doppelte Optionen.");
   const lossByCardId = new Map<CardInstanceId, number>();
   for (const optionId of selectedOptionIds) {
     const option = choice.options.find((candidate) => candidate.id === optionId);
@@ -16836,9 +17034,14 @@ function resolveV1922HammerStealthLossChoice(
     if (!cardId) throw new Error("Ungueltige Hammer-Stealth-Auswahl.");
     lossByCardId.set(cardId, (lossByCardId.get(cardId) ?? 0) + 1);
   }
+  const installed = runnerInstalledCardIds(state);
   for (const [cardId, amount] of lossByCardId) {
+    if (!installed.includes(cardId))
+      throw new Error("Die Stealth-Quelle ist nicht mehr installiert.");
     if (!cardHasSubtype(definitionFor(state, cardId), "stealth"))
       throw new Error("Nur Stealth-Karten koennen gewaehlt werden.");
+    if (cardCounter(state, cardId, "recurring_credit") < amount)
+      throw new Error("Nicht genug Stealth-Credits fuer die Auswahl.");
     spendCardCounter(state, cardId, "recurring_credit", amount);
   }
   delete state.pendingChoice;

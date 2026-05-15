@@ -371,7 +371,6 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       if (
         stringValue(payload.v1921RunnerProgramAbility) === "deterministic_die_probe" ||
         stringValue(payload.v1921RunnerResourceAbility) === "deterministic_die_probe" ||
-        stringValue(payload.v1921UpgradeAbility) === "deterministic_server_die_probe" ||
         stringValue(payload.v1921AssetAbility) === "deterministic_die_probe"
       ) {
         const dieRoll = numberValue(payload.v1921DieRoll);
@@ -380,6 +379,21 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert${dieRoll !== undefined ? ` und eine ${dieRoll} gewürfelt` : ""}`);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push("Würfel", ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []));
+        break;
+      }
+      if (stringValue(payload.v1921AssetAbility) === "schlaghund_tag_damage") {
+        const dieRoll = numberValue(payload.v1921DieRoll);
+        const runnerTags = numberValue(payload.runnerTags);
+        const thresholdMet = payload.tagThresholdMet === true;
+        const damageAmount = numberValue(payload.damageAmount) ?? 0;
+        category = thresholdMet ? "danger" : "card";
+        importance = thresholdMet ? "critical" : "important";
+        title = phrase(subject, `Schlaghund aktiviert${dieRoll !== undefined ? ` und eine ${dieRoll} gewürfelt` : ""}`);
+        description = thresholdMet
+          ? `${runnerTags ?? 0} Tags reichen aus: ${damageAmount} Meat Damage und Schlaghund wird getrasht.`
+          : `${runnerTags ?? 0} Tags reichen nicht aus.`;
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Schlaghund", ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), `${runnerTags ?? 0} Tags`, thresholdMet ? "Damage" : "Kein Schaden");
         break;
       }
       category = "economy";
@@ -510,6 +524,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Subroutine", "Gebrochen", ...(cardTitle ? [cardTitle] : []));
       break;
     case "continue_run":
+      if (stringValue(payload.v1921UpgradeAbility) === "rio_de_janeiro_passed_ice") {
+        const dieRoll = numberValue(payload.v1921DieRoll);
+        const runEnded = payload.rioRunEnded === true;
+        const passedIce = stringValue(payload.passedIceDefinitionId) ?? "ein gerezztes ICE";
+        category = "run";
+        importance = runEnded ? "critical" : "important";
+        title = phrase(subject, `${passedIce} passiert und Rio de Janeiro City Grid würfelt${dieRoll !== undefined ? ` eine ${dieRoll}` : ""}`);
+        description = runEnded ? "Der Run endet durch Rio de Janeiro City Grid." : "Der Run läuft weiter.";
+        cardDefinitionId = cardDefinitionId ?? stringValue(payload.sourceDefinitionId);
+        chips.push("Rio", ...(serverLabel ? [serverLabel] : []), ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), runEnded ? "Run endet" : "Weiter");
+        break;
+      }
       if (payload.traceStarted === true) {
         const baseTraceStrength = numberValue(payload.baseTraceStrength);
         category = "danger";
@@ -1181,6 +1207,11 @@ function numberValue(value: unknown): number | undefined {
 }
 
 function numberArrayValue(value: unknown): number[] {
+  if (typeof value === "string")
+    return value
+      .split(",")
+      .map((item) => Number(item.trim()))
+      .filter((item) => Number.isFinite(item));
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
 }

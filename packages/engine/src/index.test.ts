@@ -9542,15 +9542,15 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     ).toBe("playable_mvp");
   });
 
-  it("records Schlaghund deterministic die probes through LegalAction and replay", () => {
+  it("resolves Schlaghund as a tag-threshold die roll with meat damage and self-trash", () => {
     let state = apply(
       createGameAfterSetup({
-        seed: "v1921-schlaghund-die-probe",
+        seed: "v1921-schlaghund-tag-damage",
         runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
         corpDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
           id: "onr_v1_corp_v1921_random_probe",
-          name: "O:NR V1.9.21 Random Probe Corp",
+          name: "O:NR V1.9.21 Schlaghund Corp",
           cards: [
             { id: "onr_v1_339_schlaghund", quantity: 1 },
             ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
@@ -9564,6 +9564,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
+    state.runner.tags = 6;
 
     const assetId = putCorpRootInRemote(state, "onr_v1_339_schlaghund");
     state.cardInstances[assetId] = {
@@ -9576,7 +9577,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.v1921AssetAbility === "deterministic_die_probe" &&
+        action.payload?.v1921AssetAbility === "schlaghund_tag_damage" &&
         String(action.payload?.cardId) === assetId,
     );
     const wrongSide = applyAction(state, {
@@ -9611,13 +9612,19 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     const randomRecord = state.randomDrawRecords.at(-1);
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
     expect(randomRecord?.purpose).toBe(
-      "v1921.die.onr_v1_339_schlaghund.asset_probe",
+      "v1921.die.onr_v1_339_schlaghund.tag_damage",
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
-      v1921AssetAbility: "deterministic_die_probe",
-      randomPurpose: "v1921.die.onr_v1_339_schlaghund.asset_probe",
+      v1921AssetAbility: "schlaghund_tag_damage",
+      randomPurpose: "v1921.die.onr_v1_339_schlaghund.tag_damage",
       randomCounterAfter: randomBefore + 1,
+      runnerTags: 6,
+      tagThresholdMet: true,
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 10,
+      selfTrashed: true,
     });
     const publicRoll = Number(
       state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0,
@@ -9625,6 +9632,10 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(Number.isInteger(publicRoll)).toBe(true);
     expect(publicRoll).toBeGreaterThanOrEqual(1);
     expect(publicRoll).toBeLessThanOrEqual(6);
+    expect(state.corp.archives).toContain(assetId);
+    expect(
+      state.corp.servers.some((server) => server.root.includes(assetId)),
+    ).toBe(false);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
     );
@@ -9637,75 +9648,74 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
 
-  it("records Rio de Janeiro City Grid server die probes without leaking hidden zones", () => {
-    let state = apply(
+  it("rolls Rio de Janeiro City Grid automatically after passing rezzed ICE on its fort", () => {
+    let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v1921-rio-server-die-probe",
+        seed: "v1921-rio-after-pass-ice",
+        baseline: MVP_0_99_BASELINE,
         runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
         corpDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
-          id: "onr_v1_corp_v1921_rio_random_probe",
-          name: "O:NR V1.9.21 Rio Random Probe Corp",
+          id: "onr_v1_corp_v1921_rio_after_pass",
+          name: "O:NR V1.9.21 Rio After Pass Corp",
           cards: [
             { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
             ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
           ],
         },
         agendaPointsToWin: 7,
       }),
-      "corp",
-      (action) => action.type === "mandatory_draw",
     );
+    state.runner.credits = 20;
+    state.runner.clicks = 4;
     state.corp.credits = 20;
     state.corp.clicks = 3;
-    state.corp.maxHandSize = 100;
 
     const upgradeId = putCorpRootInRemote(
       state,
       "onr_v1_367_rio-de-janeiro-city-grid",
     );
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
     state.cardInstances[upgradeId] = {
       ...state.cardInstances[upgradeId]!,
       faceup: true,
       rezzed: true,
     };
-    const legal = mustAction(
-      state,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1921UpgradeAbility ===
-          "deterministic_server_die_probe" &&
-        String(action.payload?.cardId) === upgradeId,
-    );
-    const wrongSide = applyAction(state, {
-      matchId: state.matchId,
-      side: "runner",
-      actionId: legal.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      idempotencyKey: "v1921-rio-wrong-side",
-    });
-    expect(wrongSide.ok).toBe(false);
-    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
 
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(state.run?.encounteredIceId).toBe(iceId);
+    state.run = {
+      ...state.run!,
+      brokenSubroutineIndexes: [0],
+    };
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const randomBefore = state.randomDrawRecords.length;
-    state = apply(
-      state,
-      "corp",
-      (action) => action.actionId === legal.actionId,
-    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
-    expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.server_probe",
+    const rioPurpose = String(state.randomDrawRecords.at(-1)?.purpose ?? "");
+    expect(rioPurpose).toContain(
+      "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.passed_ice.",
     );
+    expect(rioPurpose).toContain(`.${iceId}.${upgradeId}`);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      v1921UpgradeAbility: "deterministic_server_die_probe",
-      randomPurpose:
-        "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.server_probe",
+      actionType: "continue_run",
+      v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+      sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+      passedIceDefinitionId: "simple_barrier_ice",
+      serverLabel: "Remote 1",
       randomCounterAfter: randomBefore + 1,
     });
     const publicRoll = Number(
@@ -9894,14 +9904,14 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(withoutAiBoon.run?.aiBoonRunStrength).toBeUndefined();
   });
 
-  it("records Playful AI event die probes through play_event replay", () => {
+  it("plays Playful AI as a public dice-loop choice and resolves credits through replay", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v1921-playful-ai-event-die-probe",
+        seed: "v1921-playful-ai-dice-loop",
         runnerDeck: {
           ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          id: "onr_v1_runner_v1921_playful_ai_random_probe",
-          name: "O:NR V1.9.21 Playful AI Random Probe Runner",
+          id: "onr_v1_runner_v1921_playful_ai_loop",
+          name: "O:NR V1.9.21 Playful AI Loop Runner",
           cards: [
             { id: "onr_v1_104_playful-ai", quantity: 1 },
             ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
@@ -9944,12 +9954,13 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.runner.heap).toContain(eventId);
     expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
     expect(state.randomDrawRecords.at(-1)?.purpose).toBe(
-      "v1921.die.onr_v1_104_playful-ai.event_probe",
+      "v1921.die.onr_v1_104_playful-ai.dice_loop.initial",
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
-      v1921RunnerEventAbility: "deterministic_die_probe",
-      randomPurpose: "v1921.die.onr_v1_104_playful-ai.event_probe",
+      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      playfulAiChoiceOpened: true,
+      playfulAiRemainingDice: 1,
       randomCounterAfter: randomBefore + 1,
     });
     const publicRoll = Number(
@@ -9961,6 +9972,17 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
     );
+    expect(state.pendingChoice?.source).toContain("v1921.playful_ai");
+    const creditsBeforeChoice = state.runner.credits;
+    state = applyChoice(state, "runner", "take_credits");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.credits).toBeGreaterThan(creditsBeforeChoice);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      playfulAiGainedCredits: publicRoll,
+      playfulAiComplete: true,
+    });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
