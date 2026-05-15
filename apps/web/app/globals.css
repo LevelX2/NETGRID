@@ -2575,7 +2575,6 @@ select {
 
 .stat.hasStatHelp {
   cursor: help;
-  z-index: 120;
 }
 
 .stat.hasStatHelp:focus-visible {
@@ -2588,7 +2587,7 @@ select {
   right: 0;
   left: auto;
   top: calc(100% + 6px);
-  z-index: 400;
+  z-index: 70;
   width: min(260px, calc(100vw - 28px));
   padding: 8px 10px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
