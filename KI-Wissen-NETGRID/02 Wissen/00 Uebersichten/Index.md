@@ -161,6 +161,8 @@
 - `docs/derived/MVP_0.91_DETAILED_PLAN.md`: detaillierte spätere V0.91-Planung für Kartenbild-Asset-Gate und Bild-Import nach V0.9.
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für Kartenbilder.
+- `docs/derived/CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md`: Zwei-Stufen-Plan für Kartenbild-Performance, zentrale Bildarchitektur, Cache-/Thumbnail-Pfad und Klärung selbst generierter NETGRID-Rückseiten als erlaubte generische Platzhalter.
+- `docs/derived/CARD_IMAGE_PERFORMANCE_STAGE_1_IMPLEMENTATION_PROMPT.md`: ausführbarer Umsetzungsprompt für den ersten Kartenbild-Performance-Slice mit Bildroute-Cache, serverseitigem Lookup, Lazy-/Tooltip-Härtung und Hidden-Info-Gates.
 - `docs/derived/MVP_0.92_REQUIREMENTS.md`: eingefrorene V0.92-Anforderungen für Mechanik-Inventar und M1-Gate.
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V1.1.3/V1.1.2K, aktualisiert nach V1.2.0/V1.2.1/V1.2.2; aktueller maschinenlesbarer JSON-Stand ist `data/rules/mechanics-coverage-1.2.2.json`.
 - `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`: Spezifikation für V0.93 Effects, Abilities, Timing, Choices und Eventklassifikation.

@@ -7,7 +7,9 @@ Stand: 2026-05-03
 
 Diese Spezifikation erweitert die V0.7-CardView-Planung um spätere echte Kartenbilder, ohne den bestehenden Hidden-Info-Vertrag aufzuweichen. Sie beschreibt Anzeigeorte, Fallbacks, Alt-Texte, DOM-Regeln und Matchgrenzen.
 
-Im aktuellen V0.91-Gate ist nur die Anzeige von Original-NETGRID-1996-Frontbildern aus einem nicht versionierten lokalen Cache freigegeben. Die Nutzung bleibt privat/familiär lokal. Android:NETGRID-/NSG-Bilder, Card Backs, standalone Frames/Logos und öffentliche Verteilung bleiben blockiert.
+Im aktuellen V0.91-Gate ist nur die Anzeige von Original-NETGRID-1996-Frontbildern aus einem nicht versionierten lokalen Cache freigegeben. Die Nutzung bleibt privat/familiär lokal. Android:NETGRID-/NSG-Bilder, offizielle oder externe Card Backs, standalone Frames/Logos und öffentliche Verteilung bleiben blockiert.
+
+Nach Nutzerklärung vom 2026-05-15 sind die zwei selbst generierten NETGRID-Kartenrückseiten des Projekts als generische eigene Platzhalter erlaubt. Sie dürfen keine Kartenidentität, Seite, Typ, Zone oder Ladeunterschiede verdeckter Karten verraten und ersetzen keine Freigabe für offizielle oder externe Card Backs.
 
 ## Anzeigeorte
 
@@ -76,6 +78,8 @@ Für Hidden Cards:
 
 Hidden Cards haben keine Bildladeversuche und damit auch keinen Bildfehlerzustand.
 
+Zulässig bleibt ein einheitlicher generischer Platzhalterzustand. Dieser darf visuell eine der selbst generierten NETGRID-Rückseiten nutzen, solange keine echte Frontbildroute, keine fremde oder offizielle Rückseite und keine kartenspezifische URL oder Metadaten verwendet werden.
+
 ## API-Payloads
 
 Spätere Bild-APIs dürfen nur liefern:
@@ -113,4 +117,4 @@ Bildmodus ist eine lokale Anzeigepräferenz:
 
 ## Bestehende V0.7-Grenze
 
-V0.7 bleibt gültig: Außerhalb der ausdrücklich freigegebenen privaten lokalen O:NR-1996-Frontbilder rendert die App weiterhin ausschließlich generische Platzhalter und Textkarten. V0.91 hebt keine Sperre für Android:NETGRID, NSG-Bilder, Card Backs oder öffentliche Assetnutzung auf.
+V0.7 bleibt gültig: Außerhalb der ausdrücklich freigegebenen privaten lokalen O:NR-1996-Frontbilder rendert die App weiterhin ausschließlich generische Platzhalter und Textkarten. V0.91 hebt keine Sperre für Android:NETGRID, NSG-Bilder, offizielle oder externe Card Backs oder öffentliche Assetnutzung auf. Die zwei selbst generierten NETGRID-Rückseiten sind nur als eigene generische Platzhalter erlaubt.

@@ -56,6 +56,7 @@ Diese Quellen sind keine öffentliche Lizenz. Die Freigabe beruht auf der bewuss
 | `local_cache_allowed` | `true` |
 | `image_url_versioning_allowed` | `false` |
 | `official_card_backs_allowed` | `false` |
+| `self_generated_netgrid_back_placeholders_allowed` | `true` |
 | `standalone_card_frames_allowed` | `false` |
 | `standalone_logos_allowed` | `false` |
 | `public_redistribution_allowed` | `false` |
@@ -70,7 +71,7 @@ Das Asset-Gate bleibt nur unter diesen Bedingungen auf `ready_for_implementation
 - Quelle, Sets, Bildgrößen und Dateikonventionen sind dokumentiert,
 - Download und Cache sind nur für einen nicht versionierten lokalen Ordner freigegeben,
 - versionierte Metadaten enthalten keine Remote-Per-Card-Bild-URLs,
-- vollständige Kartenbilder und Card Backs werden nicht ins Repository aufgenommen,
+- vollständige Frontbilder und offizielle oder externe Card Backs werden nicht ins Repository aufgenommen,
 - Match-Runtime hat keine externe Bildabhängigkeit,
 - Hidden-Card-Payloads und DOM bleiben identitätsneutral,
 - alle Must-Anforderungen sind in der Testmatrix abgedeckt.
@@ -79,13 +80,15 @@ Das Asset-Gate bleibt nur unter diesen Bedingungen auf `ready_for_implementation
 
 V0.91 schließt aus:
 
-- offizielle Card Backs,
+- offizielle oder externe Card Backs,
 - standalone Card Frames,
 - standalone Logos,
 - FFG-/WotC-/NSG-Assets als öffentlich verbreitete Dateien,
 - öffentliche oder halböffentliche Weiterverteilung gecachter Kartenbilder,
 - Bilddateien in Git,
 - Bilddaten oder Bildmetadaten in Engine, KI, GameState, LegalActions, PlayerActions, PublicEvents, Replays, Logs, StateHash oder Hidden-Info-Payloads.
+
+Erlaubt bleiben die zwei selbst generierten NETGRID-Rückseiten des Projekts als generische eigene Platzhalter. Diese Erlaubnis gilt nicht für offizielle, externe oder nachgebaute fremde Card Backs.
 
 ## Policy-Artefakte
 
