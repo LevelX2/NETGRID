@@ -485,6 +485,21 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         );
         break;
       }
+      if (actionType === "play_event" && hiddenZoneAction === "v1911_expose_outermost_ice_each_data_fort") {
+        const exposedCount = numberValue(payload.revealedCount) ?? 0;
+        const serverLabels = (stringValue(payload.exposedServerLabels) ?? "")
+          .split(",")
+          .map((label) => displayServerLabel(label.trim()))
+          .filter((label): label is string => Boolean(label));
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "Ice and Data's Guide to the Net"} gespielt und ${cardCountText(exposedCount)} äußerstes ICE aufgedeckt`);
+        description = serverLabels.length > 0 ? `Betroffene Forts: ${serverLabels.join(", ")}.` : undefined;
+        chips.push("Event", "Expose", `${exposedCount} ICE`, ...serverLabels);
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        break;
+      }
       const playEffect = mergedPlayEffect ?? effect;
       category = playEffect.category ?? category;
       title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);

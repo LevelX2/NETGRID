@@ -15,7 +15,7 @@ Jobstatus: `done`; Umsetzung und Checks sind grün.
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
 | Fortress Respecification | `onr_v1_088_fortress-respecification` | V1.9.11-Expose-Pfad bleibt absichtlich öffentlich, aber Hidden-Zone-Barriere und Serverquelle sind payloadfähig | Wrong-side-/Stale-, Payload-Leakscan- und Replay-Test ergänzt |
-| Ice and Data's Guide to the Net | `onr_v1_092_ice-and-datas-guide-to-the-net` | Reveal zeigt genau die oberste Stackkarte und keine darunterliegenden Stackdaten | Leerer-Stack-, Corp-View-Leakscan- und Replay-Test ergänzt |
+| Ice and Data's Guide to the Net | `onr_v1_092_ice-and-datas-guide-to-the-net` | Korrigiert auf Expose der äußersten ICE aller Data Forts mit ICE statt Stack-Top-Reveal | Wrong-Side-/Stale-, Keine-ICE-, Nicht-äußerstes-ICE-/Stack-Leakscan- und Replay-Test ergänzt |
 | Private LDL Access | `onr_v1_106_private-ldl-access` | HQ-Run accessed R&D statt HQ und lässt HQ-Karten ungeöffnet | Source-bound Run-/Access-Test, PublicPayload-Leakscan und Replay ergänzt |
 | HQ Interface | `onr_v1_129_hq-interface` | HQ-Multiaccess mit mehreren Kopien bleibt auf HQ beschränkt und payloadfähig | Bonus-/Effektiv-Access-Payload und Replay-Test ergänzt |
 | Restrictive Net Zoning | `onr_v1_173_restrictive-net-zoning` | Mehrere Kopien stacken servergebunden auf Corp-ICE-Installkosten | Zwei-Kopien-Tax-Test ergänzt |

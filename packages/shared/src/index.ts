@@ -2412,10 +2412,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     cost: 0,
-    rulesText: "Reveal the top card of your stack.",
+    rulesText: "Expose the outermost ice of each data fort.",
     mechanics: [
       "play_event",
-      "reveal",
+      "expose",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],

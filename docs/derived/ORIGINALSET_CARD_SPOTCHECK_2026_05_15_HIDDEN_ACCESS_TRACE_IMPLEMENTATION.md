@@ -7,7 +7,7 @@ Der sequenzielle Job `spotcheck-2026-05-15-hidden-access-trace` wurde umgesetzt.
 ## Umgesetzte Härtungen
 
 - `Fortress Respecification`: Expose-Pfad für V1.9.11 dokumentiert die Hidden-Zone-Barriere und den gewählten Server source-bound; fokussierter Test prüft wrong-side, stale State, PublicPayload-Redaction und Replay.
-- `Ice and Data's Guide to the Net`: Stack-Top-Reveal publiziert genau die oberste Karte; Test sichert leeren Stack, keine darunterliegenden Stack-Leaks, Corp-View-Redaction und Replay.
+- `Ice and Data's Guide to the Net`: Korrektur nach `Runnerspoiler 1.0.txt`; die Karte exposed jetzt die äußersten ICE aller Data Forts mit ICE statt die Runner-Stackspitze zu revealen. Test sichert Wrong-Side/Stale, keine-ICE-Guard, keine nicht-äußersten ICE-/Stack-/R&D-/CardInstance-Leaks und Replay.
 - `Private LDL Access`: HQ-Run mit R&D-Access-Override bleibt source-bound; Test sichert, dass HQ-Karten ungeöffnet bleiben und PublicPayloads keine HQ-Titel leaken.
 - `HQ Interface`: HQ-Multiaccess dokumentiert Basis-Access, installierten HQ-Interface-Bonus und effektive Access-Zahl öffentlich, ohne HQ-Karten zu leaken.
 - `Restrictive Net Zoning`: Zwei installierte Kopien stacken servergebunden auf die Corp-ICE-Installkosten; fokussierter Test sichert den Tax-Payload.

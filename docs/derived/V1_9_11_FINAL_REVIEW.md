@@ -33,6 +33,8 @@ Die Karten sind über bestehende und eng ergänzte side-sichere Engine-Pfade fü
 
 Nachtrag 2026-05-14: `Sneak Preview` wurde nach Quellenprüfung aus dem falschen Stack-Reveal-Adapter herausgelöst. Die Karte nutzt jetzt eine vorgelagerte Quellenwahl (`Heap` oder `Stack`), installiert das gewählte Programm kostenlos, mischt nur nach Stack-Suche und nimmt die konkrete Programm-Instanz am Runner-Zugende nur zurück, wenn sie noch installiert ist.
 
+Nachtrag 2026-05-15: `Ice and Data's Guide to the Net` wurde nach Quellenprüfung aus dem falschen Stack-Reveal-Adapter herausgelöst. Die Karte exposed jetzt die äußersten ICE aller Data Forts mit ICE; PublicPayload und Chronik enthalten nur Expose-Definition-IDs, Server-Metadaten und Counts.
+
 Ergänzte oder finalisierte Hauptartefakte:
 
 - `packages/shared/src/index.ts`

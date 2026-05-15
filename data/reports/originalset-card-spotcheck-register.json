@@ -30,7 +30,7 @@
           "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net",
           "title": "Ice and Data's Guide to the Net",
           "spotcheckStatus": "completed",
-          "result": "hardened_stack_top_reveal_empty_stack_redaction_replay",
+          "result": "corrected_outermost_ice_each_data_fort_expose_no_stack_reveal",
           "followUpStatus": "completed"
         },
         {

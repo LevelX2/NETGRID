@@ -35,6 +35,8 @@ Nachtrag 2026-05-14: Die lokale Errata-Quelle `docs/source/Netrunner_Errata_v1.7
 
 Nachtrag 2026-05-14: `Sneak Preview` war in der Erstumsetzung fälschlich als einfacher Stack-Top-Reveal-Adapter umgesetzt. Die bestätigte lokale Textquelle lautet: Kosten 3, Quelle vor der Suche wählen (`Heap` oder `Stack`), ein Programm kostenlos installieren, nur nach Stack-Suche den Stack mischen und das Programm am Ende des Runner-Zuges in den Grip zurücknehmen, falls dieselbe Instanz noch installiert ist. Die lokale Errata präzisiert, dass ein später getrashtes oder anderweitig aus dem Spiel entferntes Programm nicht zurückkehrt. Runtime, Manifest, AI-Hint, Choice-UI und Tests wurden auf diesen zweistufigen Heap-/Stack-Resolver korrigiert; sichtbare UI-Texte verwenden `Heap` statt `Trash`.
 
+Nachtrag 2026-05-15: `Ice and Data's Guide to the Net` war fälschlich als Stack-Top-Reveal umgesetzt. Die lokale Primärquelle `docs/source/Runnerspoiler 1.0.txt` bestätigt `Expose the outermost ice of each data fort.` Runtime, Kartentext, Manifest, AI-Hint, Szenario-Text, Chronik und Spotcheck-Test wurden auf einen nicht-zielenden Expose-Resolver korrigiert, der nur die äußersten ICE aller Data Forts mit ICE publiziert.
+
 ## Geänderte Hauptbereiche
 
 - `packages/shared/src/index.ts`: lokale WIP-Definitionen für alle 16 V1.9.11-Zielkarten ergänzt.

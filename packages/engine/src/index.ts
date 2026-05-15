@@ -889,14 +889,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   "onr_v1_092_ice-and-datas-guide-to-the-net": {
-    name: "onr_v1911_runner_event_reveal_stack_top",
-    canPlay: (state) => state.runner.stack.length > 0,
+    name: "onr_v1911_runner_event_expose_outermost_ice_each_data_fort",
+    canPlay: (state) => outermostIceExposures(state).length > 0,
     resolve: (state, legalAction) => {
-      revealRunnerStackTop(state, legalAction);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneAction: "v1911_reveal_stack_top",
-      };
+      exposeOutermostIceOfEachDataFort(state, legalAction);
     },
   },
   "onr_v1_099_mantis-fixer-at-large": {
@@ -15823,6 +15819,38 @@ function exposeCorpCardInServer(
   };
 }
 
+function outermostIceExposures(
+  state: GameState,
+): Array<{ server: CorpServer; cardId: CardInstanceId }> {
+  return state.corp.servers
+    .filter((server) => server.ice.length > 0)
+    .map((server) => ({
+      server,
+      cardId: server.ice[outermostIceIndex(server)]!,
+    }));
+}
+
+function exposeOutermostIceOfEachDataFort(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const exposures = outermostIceExposures(state);
+  if (exposures.length === 0)
+    throw new Error("Es liegt kein outermost ICE zum Exposen in einem Data Fort.");
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+    publicRevealKind: "expose",
+    revealedCount: exposures.length,
+    publicRevealDefinitionIds: exposures
+      .map(({ cardId }) => definitionFor(state, cardId).id)
+      .join(","),
+    exposedServerIds: exposures.map(({ server }) => server.id).join(","),
+    exposedServerLabels: exposures.map(({ server }) => server.label).join(","),
+  };
+}
+
 function swapCorpHqAndRdTop(state: GameState): void {
   const hqCardId = state.corp.hq[0];
   const rdCardId = state.corp.rd[0];
@@ -16884,6 +16912,10 @@ function publicContextForAction(
     if (typeof legalAction.payload.publicRevealDefinitionIds === "string")
       context.publicRevealDefinitionIds =
         legalAction.payload.publicRevealDefinitionIds;
+    if (typeof legalAction.payload.exposedServerIds === "string")
+      context.exposedServerIds = legalAction.payload.exposedServerIds;
+    if (typeof legalAction.payload.exposedServerLabels === "string")
+      context.exposedServerLabels = legalAction.payload.exposedServerLabels;
     context.redactedKind = "hidden_zone";
   }
   if (typeof legalAction.payload?.archivesAutoAccessedCount === "number")

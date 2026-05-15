@@ -16,7 +16,7 @@ V1.9.11 bearbeitet ausschließlich die Hidden-Zone-Familie für genau diese 16 K
 | Forgotten Backup Chip | `onr_v1_087_forgotten-backup-chip` | Runner | Event | Heap-/Stack-Search-Tool |
 | Fortress Respecification | `onr_v1_088_fortress-respecification` | Runner | Event | Server-/Fort-Reveal/Expose |
 | Gideon's Pawnshop | `onr_v1_089_gideons-pawnshop` | Runner | Event | Errata 2026-05-14: Trash-/Heap-Suche und Rücknahme in die Hand, kein Stack-Search und kein Shuffle |
-| Ice and Data's Guide to the Net | `onr_v1_092_ice-and-datas-guide-to-the-net` | Runner | Event | Reveal-/Look-Pfad |
+| Ice and Data's Guide to the Net | `onr_v1_092_ice-and-datas-guide-to-the-net` | Runner | Event | Expose der äußersten ICE aller Data Forts |
 | Mantis, Fixer-at-Large | `onr_v1_099_mantis-fixer-at-large` | Runner | Event | Search-/Reveal-Pfad |
 | Sneak Preview | `onr_v1_110_sneak-preview` | Runner | Event | Reveal-/Preview-Pfad |
 | Aujourd'Oui | `onr_v1_151_aujourdoui` | Runner | Resource | installierter Search-/Reveal-Helfer |

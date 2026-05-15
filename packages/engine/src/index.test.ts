@@ -13959,7 +13959,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
   const hiddenLeakPattern =
     /"privatePayload"|"cardInstances"|"hq"|"rd"|"grip"|"stack"/;
 
-  it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone reveal payloads", () => {
+  it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone expose payloads", () => {
     let exposeState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-fortress"));
     exposeState.runner.credits = 20;
     moveRunnerCardToGrip(exposeState, "onr_v1_088_fortress-respecification");
@@ -14022,8 +14022,10 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       revealState,
       "onr_v1_092_ice-and-datas-guide-to-the-net",
     );
-    putRunnerCardOnTopOfStack(revealState, "simple_fracter");
-    putRunnerCardOnTopOfStack(revealState, "simple_decoder");
+    putCorpIceOnServer(revealState, "hq", "simple_barrier_ice");
+    putCorpRootInRemote(revealState, "simple_upgrade");
+    putCorpIceOnServer(revealState, "remote_1", "simple_code_gate_ice");
+    putCorpIceOnServer(revealState, "remote_1", "simple_sentry_ice");
     const revealAction = mustAction(
       revealState,
       "runner",
@@ -14034,21 +14036,46 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     );
     const revealInitial = structuredClone(revealState);
     const revealReplayStart = revealState.eventLog.length;
+    const revealWrongSide = applyAction(revealState, {
+      matchId: revealState.matchId,
+      side: "corp",
+      actionId: revealAction.actionId,
+      clientKnownStateVersion: revealState.stateVersion,
+      idempotencyKey: "spotcheck-ice-data-wrong-side",
+    });
+    expect(revealWrongSide.ok).toBe(false);
+    if (!revealWrongSide.ok)
+      expect(revealWrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const revealStale = applyAction(revealState, {
+      matchId: revealState.matchId,
+      side: "runner",
+      actionId: revealAction.actionId,
+      clientKnownStateVersion: revealState.stateVersion - 1,
+      idempotencyKey: "spotcheck-ice-data-stale",
+    });
+    expect(revealStale.ok).toBe(false);
+    if (!revealStale.ok) expect(revealStale.error.code).toBe("ERR_STALE_STATE");
     revealState = apply(
       revealState,
       "runner",
       (action) => action.actionId === revealAction.actionId,
     );
     expect(revealState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      publicRevealKind: "reveal",
-      publicRevealDefinitionId: "simple_decoder",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
+      publicRevealKind: "expose",
+      revealedCount: 2,
+      publicRevealDefinitionIds: "simple_barrier_ice,simple_sentry_ice",
+      exposedServerIds: "hq,remote_1",
     });
     expect(
       JSON.stringify(revealState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(/simple_fracter|Simple Fracter|stack/);
+    ).not.toMatch(
+      /simple_code_gate_ice|Simple Code Gate ICE|"stack"|"rd"|"cardInstances"/,
+    );
     expect(
-      JSON.stringify(getPlayerView(revealState, "corp")),
-    ).not.toContain("Simple Fracter");
+      JSON.stringify(getPlayerView(revealState, "runner")),
+    ).not.toContain("simple_code_gate_ice");
     const revealReplay = replayEvents(
       revealInitial,
       revealState.eventLog.slice(revealReplayStart),
@@ -14056,18 +14083,17 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     expect(revealReplay.ok).toBe(true);
     expect(hashState(revealReplay.state)).toBe(hashState(revealState));
 
-    let emptyStack = toRunnerTurn(v1911HiddenZoneGame("spotcheck-ice-data-empty"));
-    emptyStack.runner.credits = 20;
+    let noIceState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-ice-data-no-ice"));
+    noIceState.runner.credits = 20;
     moveRunnerCardToGrip(
-      emptyStack,
+      noIceState,
       "onr_v1_092_ice-and-datas-guide-to-the-net",
     );
-    emptyStack.runner.stack = [];
     expect(
-      getLegalActions(emptyStack, "runner").some(
+      getLegalActions(noIceState, "runner").some(
         (action) =>
           action.type === "play_event" &&
-          sourceDefinition(emptyStack, action) ===
+          sourceDefinition(noIceState, action) ===
             "onr_v1_092_ice-and-datas-guide-to-the-net",
       ),
     ).toBe(false);
@@ -24629,6 +24655,8 @@ const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
     { id: "onr_v1_203_hostile-takeover", quantity: 3 },
     { id: "simple_upgrade", quantity: 2 },
     { id: "simple_barrier_ice", quantity: 2 },
+    { id: "simple_code_gate_ice", quantity: 2 },
+    { id: "simple_sentry_ice", quantity: 2 },
     { id: "simple_economy_operation", quantity: 4 },
   ],
 };
