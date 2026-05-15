@@ -21,7 +21,7 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 |
 | scoreWindowMissed | 0 | 0 |
 | remoteOverbuild | 0 | 0 |
-| economyStall | 6 | 3 |
+| economyStall | 3 | 3 |
 | repeatedLowValueCentralRun | 0 | 0 |
 | rigStall | 0 | 0 |
 | assetTrashNeglect | 0 | 0 |
@@ -50,9 +50,9 @@ Keine Beispiele im analysierten Lauf.
 
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-005 | 22 | runner | start_run | runner.plan.contest_remote | remote_1 | economy_stall |
-| ai-v143-tuning-005 | 25 | runner | start_run | runner.plan.contest_remote | remote_1 | economy_stall |
-| ai-v143-tuning-005 | 28 | runner | start_run | runner.plan.contest_remote | remote_1 | economy_stall |
+| ai-v143-tuning-005 | 22 | runner | start_run | runner.plan.pressure_rnd | rd | economy_stall |
+| ai-v143-tuning-006 | 20 | corp | install_card | corp.plan.protect_hq | hq | economy_stall |
+| ai-v143-tuning-006 | 32 | corp | install_card | corp.plan.protect_rnd | rd | economy_stall |
 
 ### repeatedLowValueCentralRun
 
@@ -72,11 +72,12 @@ Keine Beispiele im analysierten Lauf.
 - `repeatedLowValueCentralRun` fällt nach dem Recent-Central-Pressure-Guard auf 0.
 - `rigStall` fällt nach dem Underprepared-Central-Pressure-Guard auf 0.
 - `economyStall` zählt laufende Run-Folgeaktionen wie Pump, Break, Continue, Access und Steal nicht mehr als Planungsfehler.
-- Der Rest liegt jetzt auf neuen `contest_remote`-Starts bei niedriger Creditreserve.
+- Schwache `contest_remote`-Schleifen bei niedriger Creditreserve fallen nach dem Remote-Contest-Pacing aus dem Restbild heraus.
+- Der Rest liegt jetzt auf einem Runner-R&D-Druckstart und zwei Corp-Protect-Installs bei niedriger Creditreserve.
 
 ## Nächster Umsetzungsschritt
 
-Der nächste Tuning-Schritt sollte jetzt Remote-Contest-Pacing genauer bewerten:
+Der nächste Tuning-Schritt sollte jetzt die letzten Economy-Stall-Restfälle enger bewerten:
 
-1. `contest_remote` sollte bei niedriger Creditreserve nur dann vor Economy/Draw/Rig-Aufbau liegen, wenn die sichtbare Remote-Drohung hoch genug ist.
-2. Wiederholter Remote-Contest auf denselben sichtbaren Remote sollte eine Frische- oder Wiederholungsbremse bekommen, damit der Runner nicht in einer Credit-armen Remote-Schleife bleibt.
+1. Runner-Zentraldruck bei 1 Credit sollte auch mit sichtbarem Rig nur bei wirklich hoher Access-Erwartung vor Economy liegen.
+2. Corp-Protect-Pläne sollten bei niedriger Creditreserve stärker gegen Economy-Erholung abgewogen werden, sofern kein unmittelbares Score- oder Run-Schutzfenster besteht.

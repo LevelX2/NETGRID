@@ -1545,6 +1545,69 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(evaluateServerAccessValue(input, candidate).reasons).toContain("recent_central_pressure_repeated");
   });
 
+  it("paces low-reserve remote contest unless the visible threat is urgent", () => {
+    const lowThreatInput = runnerActionPhaseInput("ai-v141-low-reserve-remote", (state) => {
+      state.runner.credits = 1;
+      ensureRemoteServer(state, "remote_1");
+      putCorpRootInRemote(state, "simple_agenda", 0);
+    });
+    const urgentInput = runnerActionPhaseInput("ai-v141-urgent-remote", (state) => {
+      state.runner.credits = 1;
+      ensureRemoteServer(state, "remote_1");
+      putCorpRootInRemote(state, "simple_agenda", 2);
+    });
+    const lowRemoteRun = lowThreatInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const lowGain = lowThreatInput.legalActions.find((action) => action.type === "gain_credit");
+    const urgentRemoteRun = urgentInput.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const urgentGain = urgentInput.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(lowRemoteRun).toBeDefined();
+    expect(lowGain).toBeDefined();
+    expect(urgentRemoteRun).toBeDefined();
+    expect(urgentGain).toBeDefined();
+    if (!lowRemoteRun || !lowGain || !urgentRemoteRun || !urgentGain) throw new Error("Missing remote pacing fixture actions");
+
+    const lowCandidate = generateRunnerPlanCandidates({ ...lowThreatInput, legalActions: [lowRemoteRun, lowGain] }).find((candidate) => candidate.kind === "contest_remote");
+    const lowDecision = chooseRunnerPlanDecision({ ...lowThreatInput, legalActions: [lowRemoteRun, lowGain] });
+    const urgentDecision = chooseRunnerPlanDecision({ ...urgentInput, legalActions: [urgentRemoteRun, urgentGain] });
+
+    expect(lowCandidate).toBeDefined();
+    if (!lowCandidate) throw new Error("Missing low-reserve contest_remote candidate");
+    expect(evaluateRemoteThreat(lowThreatInput, lowCandidate).reasons).toContain("remote_contest_credit_reserve_low");
+    expect(lowDecision.debug.planKind).toBe("recover_economy");
+    expect(urgentDecision.debug.planKind).toBe("contest_remote");
+  });
+
+  it("penalizes immediate repeated remote contest", () => {
+    const input = runnerActionPhaseInput("ai-v141-repeated-remote", (state) => {
+      ensureRemoteServer(state, "remote_1");
+      putCorpRootInRemote(state, "simple_agenda", 0);
+    });
+    const remoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    expect(remoteRun).toBeDefined();
+    if (!remoteRun) throw new Error("Missing repeated remote contest fixture action");
+
+    const repeatedInput = {
+      ...input,
+      eventTail: [
+        {
+          eventId: "ai-v141-repeated-remote-event",
+          type: "run_started",
+          stateVersionBefore: input.playerView.stateVersion - 1,
+          stateVersionAfter: input.playerView.stateVersion,
+          stateHashAfter: "fnv1a:remote001",
+          visibilityClass: "public",
+          publicPayload: { actionType: "start_run", serverId: "remote_1" }
+        } satisfies PublicGameEvent
+      ]
+    };
+    const candidate = generateRunnerPlanCandidates({ ...repeatedInput, legalActions: [remoteRun] }).find((plan) => plan.kind === "contest_remote");
+
+    expect(candidate).toBeDefined();
+    if (!candidate) throw new Error("Missing repeated contest_remote candidate");
+    expect(evaluateRemoteThreat(repeatedInput, candidate).reasons).toContain("recent_remote_contest_repeated");
+  });
+
   it("uses deck doctrine as a bounded Runner plan weight", () => {
     const input = runnerActionPhaseInput("ai-runner-doctrine-plan-weight", () => undefined);
     const pressureRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");

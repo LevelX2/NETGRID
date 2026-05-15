@@ -20,7 +20,7 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 | 0 |
 | scoreWindowMissed | 0 | 0 | 0 |
 | remoteOverbuild | 0 | 0 | 0 |
-| economyStall | 6 | 6 | 0 |
+| economyStall | 3 | 3 | 0 |
 | repeatedLowValueCentralRun | 0 | 0 | 0 |
 | rigStall | 0 | 0 | 0 |
 | assetTrashNeglect | 0 | 0 | 0 |
@@ -46,4 +46,6 @@ Der aktuelle Kandidat verletzt in diesem engen Tuning-Lauf keine harte Safety- o
 
 Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht mehr an. Nach dem Runner-Zentraldruck-Guard fallen auch `repeatedLowValueCentralRun` und `rigStall` in diesem Tuning-Lauf auf 0. Nach der Economy-Stall-Trennung zählen laufende Run-Folgeaktionen wie Pump, Break, Continue, Access und Steal nicht mehr als Planungsfehler.
 
-Übrig bleibt `economyStall` mit 6 Treffern. Die Beispiele liegen jetzt auf neuen `contest_remote`-Starts bei niedriger Creditreserve; das ist der nächste konkrete Tuning-Kandidat.
+Nach dem Remote-Contest-Pacing fallen die schwachen `contest_remote`-Schleifen bei niedriger Creditreserve aus dem Restbild heraus.
+
+Übrig bleibt `economyStall` mit 3 Treffern. Die Beispiele liegen nun auf einem neuen Runner-R&D-Druckstart bei niedriger Creditreserve sowie zwei Corp-Protect-Installs bei niedrigem Creditstand; das ist der nächste konkrete Tuning-Kandidat.

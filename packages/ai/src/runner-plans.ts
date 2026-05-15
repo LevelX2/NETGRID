@@ -574,6 +574,8 @@ export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPl
   const server = target ? features.serverFeatures.get(target) : undefined;
   const blocked = target ? features.blockedRunServers.has(target) : false;
   const remoteThreat = target?.startsWith("remote_") ? (server?.rootCount ?? 0) * 40 + (server?.advancedRootCount ?? 0) * 55 : 0;
+  const lowReserveRemotePenalty = lowReserveRemoteContestPenalty(input, candidate, target, server);
+  const recentRemotePenalty = recentRemoteContestPenalty(input, candidate, target);
   const remoteBeliefBoost =
     target?.startsWith("remote_")
       ? Math.round(
@@ -586,14 +588,52 @@ export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPl
     return {
       score: -90,
       reasons: ["remote_threat_unreachable_by_visible_ice"],
-      evidence: [`remote_target:${target?.startsWith("remote_") ? target : "none"}`, `advanced_roots:${server?.advancedRootCount ?? 0}`, `remote_belief_boost:${remoteBeliefBoost}`]
+      evidence: [
+        `remote_target:${target?.startsWith("remote_") ? target : "none"}`,
+        `advanced_roots:${server?.advancedRootCount ?? 0}`,
+        `remote_belief_boost:${remoteBeliefBoost}`,
+        `low_reserve_remote_penalty:${lowReserveRemotePenalty}`,
+        `recent_remote_penalty:${recentRemotePenalty}`
+      ]
     };
   }
   return {
-    score: candidate.kind === "contest_remote" ? remoteThreat + 80 + remoteBeliefBoost : candidate.kind === "safe_probe_run" ? Math.min(30, remoteThreat) : 0,
-    reasons: remoteThreat > 0 ? ["remote_threat_visible"] : ["remote_threat_uncertain"],
-    evidence: [`remote_target:${target?.startsWith("remote_") ? target : "none"}`, `advanced_roots:${server?.advancedRootCount ?? 0}`, `remote_belief_boost:${remoteBeliefBoost}`]
+    score: candidate.kind === "contest_remote" ? remoteThreat + 80 + remoteBeliefBoost - lowReserveRemotePenalty - recentRemotePenalty : candidate.kind === "safe_probe_run" ? Math.min(30, remoteThreat) : 0,
+    reasons: sortedUnique([
+      remoteThreat > 0 ? "remote_threat_visible" : "remote_threat_uncertain",
+      ...(lowReserveRemotePenalty > 0 ? ["remote_contest_credit_reserve_low"] : []),
+      ...(recentRemotePenalty > 0 ? ["recent_remote_contest_repeated"] : [])
+    ]),
+    evidence: [
+      `remote_target:${target?.startsWith("remote_") ? target : "none"}`,
+      `advanced_roots:${server?.advancedRootCount ?? 0}`,
+      `remote_belief_boost:${remoteBeliefBoost}`,
+      `low_reserve_remote_penalty:${lowReserveRemotePenalty}`,
+      `recent_remote_penalty:${recentRemotePenalty}`
+    ]
   };
+}
+
+function lowReserveRemoteContestPenalty(input: AiDecisionInput, candidate: RunnerPlanCandidate, target: string | undefined, server: RunnerServerFeatures | undefined): number {
+  if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_")) return 0;
+  if (input.playerView.own.credits > 1) return 0;
+  if ((server?.advancedRootCount ?? 0) > 0) return 0;
+  if (input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2) return 0;
+  return 260;
+}
+
+function recentRemoteContestPenalty(input: AiDecisionInput, candidate: RunnerPlanCandidate, target: string | undefined): number {
+  if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_")) return 0;
+  const history = mergedPublicHistory(input);
+  const lastSameRemoteRun = findLastIndex(
+    history,
+    (event) => serverIdFromEvent(event) === target && (event.publicPayload.actionType === "start_run" || event.type === "run_started")
+  );
+  if (lastSameRemoteRun < 0) return 0;
+  const last = history[lastSameRemoteRun];
+  if (!last) return 0;
+  const distance = input.playerView.stateVersion - eventVersion(last);
+  return distance <= 8 ? 180 : 0;
 }
 
 export function evaluateCorpScoringThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {
