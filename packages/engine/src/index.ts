@@ -943,8 +943,15 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   "onr_v1_079_bodyweight-synthetic-blood": {
     name: "onr_runner_event_draw_5",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
+      const stackBefore = state.runner.stack.length;
       drawRunnerCards(state, 5);
+      const drawnCount = stackBefore - state.runner.stack.length;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        drawnCount,
+        runnerGripAfter: state.runner.grip.length,
+      };
     },
   },
   "onr_v1_095_jack-n-joe": {
@@ -955,8 +962,13 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   "onr_v1_097_livewires-contacts": {
     name: "onr_runner_event_gain_credits_3",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       state.runner.credits += 3;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gainedCredits: 3,
+        runnerCreditsAfter: state.runner.credits,
+      };
     },
   },
   onr_v1_108_score: {
@@ -1363,9 +1375,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   "onr_v1_285_closed-accounts": {
     name: "onr_corp_operation_closed_accounts",
     canPlay: (state) => state.runner.tags > 0,
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       requireRunnerTagged(state);
+      const creditsLost = state.runner.credits;
       state.runner.credits = 0;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        creditsLost,
+        runnerCreditsAfter: state.runner.credits,
+      };
     },
   },
   "onr_v1_286_corporate-detective-agency": {
@@ -1388,9 +1406,14 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   "onr_v1_287_datapool-by-zetatech": {
     name: "onr_corp_operation_give_two_tags",
     canPlay: (state) => state.runner.tags > 0,
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       requireRunnerTagged(state);
       state.runner.tags += 2;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        tagsAdded: 2,
+        runnerTagsAfter: state.runner.tags,
+      };
     },
   },
   "onr_v1_299_power-grid-overload": {
@@ -1429,8 +1452,13 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
   "onr_v1_290_efficiency-experts": {
     name: "onr_corp_operation_gain_credits_3",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       state.corp.credits += 3;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gainedCredits: 3,
+        corpCreditsAfter: state.corp.credits,
+      };
     },
   },
   [V1922_OFF_SITE_BACKUPS_ID]: {
@@ -5361,6 +5389,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
                 breakerId,
                 iceId: encounteredIceId,
                 subroutineIndex: index,
+                targetIceDefinitionId: iceDefinition.id,
                 breakSubroutineBaseCost: breakAbility.cost.credits,
                 ...(additionalBreakCost > 0
                   ? {
@@ -5393,6 +5422,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   actions.push(
     action(state, "runner", "continue_run", continueLabel, "game_rule", [], {
       encounterContinue: true,
+      sourceDefinitionId: iceDefinition.id,
       unbrokenSubroutineCount: nextSubroutines.length,
       encounterWillEndRun: willEndRun,
     }),
@@ -15834,6 +15864,23 @@ function publicContextForAction(
   }
   if (typeof legalAction.payload?.badPublicityAfter === "number")
     context.badPublicityAfter = legalAction.payload.badPublicityAfter;
+  for (const key of [
+    "gainedCredits",
+    "runnerCreditsAfter",
+    "corpCreditsAfter",
+    "drawnCount",
+    "runnerGripAfter",
+    "creditsLost",
+    "tagsAdded",
+    "runnerTagsAfter",
+    "sourceDefinitionId",
+    "subroutineIndex",
+    "targetIceDefinitionId",
+    "breakSubroutineBaseCost",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (value !== undefined) context[key] = value;
+  }
   if (typeof legalAction.payload?.ambushDefinitionId === "string")
     context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
   if (typeof legalAction.payload?.tagConditionMet === "boolean")

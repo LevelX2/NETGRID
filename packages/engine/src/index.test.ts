@@ -20740,6 +20740,663 @@ describe("V1.2.2 Special Zones, Ownership and Control", () => {
   });
 });
 
+describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
+  it("publishes focused economy payloads for Livewire's Contacts and Efficiency Experts", () => {
+    let runnerState = toRunnerTurn(v106kCardReleaseGame("spotcheck-livewire"));
+    runnerState.runner.credits = 5;
+    runnerState.runner.clicks = 4;
+    const livewireId = moveRunnerCardToGrip(
+      runnerState,
+      "onr_v1_097_livewires-contacts",
+    );
+    const livewire = mustAction(
+      runnerState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(runnerState, action) ===
+          "onr_v1_097_livewires-contacts",
+    );
+    expect(livewire.costs[0]).toMatchObject({ clicks: 1, credits: 0 });
+    expect(
+      applyAction(runnerState, {
+        matchId: runnerState.matchId,
+        side: "corp",
+        actionId: livewire.actionId,
+        clientKnownStateVersion: runnerState.stateVersion,
+        idempotencyKey: "spotcheck-livewire-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(runnerState, {
+        matchId: runnerState.matchId,
+        side: "runner",
+        actionId: livewire.actionId,
+        clientKnownStateVersion: runnerState.stateVersion - 1,
+        idempotencyKey: "spotcheck-livewire-stale",
+      }).ok,
+    ).toBe(false);
+
+    const livewireInitial = structuredClone(runnerState);
+    const livewireReplayStart = runnerState.eventLog.length;
+    const runnerCreditsBefore = runnerState.runner.credits;
+    runnerState = apply(
+      runnerState,
+      "runner",
+      (action) => action.actionId === livewire.actionId,
+    );
+    expect(runnerState.runner.credits).toBe(runnerCreditsBefore + 3);
+    expect(runnerState.runner.heap).toContain(livewireId);
+    expect(runnerState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_097_livewires-contacts",
+      gainedCredits: 3,
+      runnerCreditsAfter: runnerState.runner.credits,
+    });
+    expect(
+      JSON.stringify(runnerState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/runner_|corp_|privatePayload|cardInstances/);
+    const livewireReplay = replayEvents(
+      livewireInitial,
+      runnerState.eventLog.slice(livewireReplayStart),
+    );
+    expect(livewireReplay.ok).toBe(true);
+    expect(hashState(livewireReplay.state)).toBe(hashState(runnerState));
+
+    let corpState = createGameAfterSetup({
+      seed: "spotcheck-efficiency",
+      runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
+      corpDeck: ONR_V1_0_6K_CORP_DECK,
+      agendaPointsToWin: 7,
+    });
+    corpState = apply(corpState, "corp", (action) => action.type === "mandatory_draw");
+    corpState.corp.credits = 5;
+    corpState.corp.clicks = 3;
+    const efficiencyId = moveCorpCardToHq(
+      corpState,
+      "onr_v1_290_efficiency-experts",
+    );
+    const efficiency = mustAction(
+      corpState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(corpState, action) ===
+          "onr_v1_290_efficiency-experts",
+    );
+    expect(efficiency.costs[0]).toMatchObject({ clicks: 1, credits: 0 });
+    expect(
+      applyAction(corpState, {
+        matchId: corpState.matchId,
+        side: "runner",
+        actionId: efficiency.actionId,
+        clientKnownStateVersion: corpState.stateVersion,
+        idempotencyKey: "spotcheck-efficiency-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(corpState, {
+        matchId: corpState.matchId,
+        side: "corp",
+        actionId: efficiency.actionId,
+        clientKnownStateVersion: corpState.stateVersion - 1,
+        idempotencyKey: "spotcheck-efficiency-stale",
+      }).ok,
+    ).toBe(false);
+
+    const efficiencyInitial = structuredClone(corpState);
+    const efficiencyReplayStart = corpState.eventLog.length;
+    const corpCreditsBefore = corpState.corp.credits;
+    corpState = apply(
+      corpState,
+      "corp",
+      (action) => action.actionId === efficiency.actionId,
+    );
+    expect(corpState.corp.credits).toBe(corpCreditsBefore + 3);
+    expect(corpState.corp.archives).toContain(efficiencyId);
+    expect(corpState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_290_efficiency-experts",
+      gainedCredits: 3,
+      corpCreditsAfter: corpState.corp.credits,
+    });
+    expect(
+      JSON.stringify(corpState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/corp_hq|privatePayload|cardInstances/);
+    const efficiencyReplay = replayEvents(
+      efficiencyInitial,
+      corpState.eventLog.slice(efficiencyReplayStart),
+    );
+    expect(efficiencyReplay.ok).toBe(true);
+    expect(hashState(efficiencyReplay.state)).toBe(hashState(corpState));
+  });
+
+  it("draws Bodyweight Synthetic Blood without public draw-content leaks", () => {
+    for (const [seed, stackDefinitions, expectedDrawn] of [
+      [
+        "spotcheck-bodyweight-five",
+        [
+          "simple_economy_event",
+          "onr_v1_095_jack-n-joe",
+          "onr_v1_097_livewires-contacts",
+          "onr_v1_108_score",
+          "onr_v1_145_wutech-mem-chip",
+        ],
+        5,
+      ],
+      [
+        "spotcheck-bodyweight-short",
+        ["simple_economy_event", "onr_v1_095_jack-n-joe"],
+        2,
+      ],
+    ] as const) {
+      let state = toRunnerTurn(v106kCardReleaseGame(seed));
+      state.runner.credits = 10;
+      state.runner.clicks = 4;
+      const eventId = moveRunnerCardToGrip(
+        state,
+        "onr_v1_079_bodyweight-synthetic-blood",
+      );
+      for (const id of state.runner.stack.slice()) {
+        removeEverywhere(state, id);
+        state.runner.heap.push(id);
+        state.cardInstances[id] = {
+          ...state.cardInstances[id]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+          rezzed: true,
+        };
+      }
+      for (const definitionId of stackDefinitions.slice().reverse()) {
+        putRunnerCardOnTopOfStack(state, definitionId);
+      }
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const gripBefore = state.runner.grip.length;
+      const action = mustAction(
+        state,
+        "runner",
+        (candidate) =>
+          candidate.type === "play_event" &&
+          sourceDefinition(state, candidate) ===
+            "onr_v1_079_bodyweight-synthetic-blood",
+      );
+      state = apply(state, "runner", (candidate) => candidate.actionId === action.actionId);
+      expect(state.runner.heap).toContain(eventId);
+      expect(state.runner.grip.length).toBe(gripBefore - 1 + expectedDrawn);
+      expect(state.runner.stack).toHaveLength(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_event",
+        cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        drawnCount: expectedDrawn,
+        runnerGripAfter: state.runner.grip.length,
+      });
+      const publicPayload = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
+      expect(publicPayload).not.toMatch(
+        /simple_economy_event|jack-n-joe|livewires|score|wutech|runner_/,
+      );
+      const corpOpponentView = JSON.stringify(getPlayerView(state, "corp").opponent);
+      expect(corpOpponentView).toContain('"handCount":');
+      expect(corpOpponentView).not.toContain("gripOrHq");
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("revalidates tagged Corp operations and redacts Punitive Counterstrike damage", () => {
+    for (const spec of [
+      {
+        definitionId: "onr_v1_285_closed-accounts",
+        cost: 1,
+        assertAfter: (state: GameState) => {
+          expect(state.runner.credits).toBe(0);
+          expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+            creditsLost: 7,
+            runnerCreditsAfter: 0,
+          });
+        },
+      },
+      {
+        definitionId: "onr_v1_287_datapool-by-zetatech",
+        cost: 1,
+        assertAfter: (state: GameState) => {
+          expect(state.runner.tags).toBe(3);
+          expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+            tagsAdded: 2,
+            runnerTagsAfter: 3,
+          });
+        },
+      },
+      {
+        definitionId: "onr_v1_301_punitive-counterstrike",
+        cost: 0,
+        assertAfter: (state: GameState) => {
+          expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+            damageResolved: true,
+            damageType: "meat",
+            damageAmount: 2,
+            cardsTrashed: 2,
+          });
+          expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+            /runner_|grip|stack|cardInstances|privatePayload/,
+          );
+        },
+      },
+    ] as const) {
+      let noTagState = createGameAfterSetup({
+        seed: `spotcheck-no-tag-${spec.definitionId}`,
+        runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
+        corpDeck: ONR_V1_0_6K_CORP_DECK,
+        agendaPointsToWin: 7,
+      });
+      noTagState = apply(noTagState, "corp", (action) => action.type === "mandatory_draw");
+      noTagState.corp.credits = 10;
+      noTagState.corp.clicks = 3;
+      moveCorpCardToHq(noTagState, spec.definitionId);
+      expect(
+        getLegalActions(noTagState, "corp").some(
+          (action) =>
+            action.type === "play_operation" &&
+            sourceDefinition(noTagState, action) === spec.definitionId,
+        ),
+      ).toBe(false);
+
+      let state = structuredClone(noTagState);
+      state.runner.tags = 1;
+      state.runner.credits = 7;
+      const action = mustAction(
+        state,
+        "corp",
+        (candidate) =>
+          candidate.type === "play_operation" &&
+          sourceDefinition(state, candidate) === spec.definitionId,
+      );
+      expect(action.costs[0]).toMatchObject({ clicks: 1, credits: spec.cost });
+      expect(
+        applyAction(state, {
+          matchId: state.matchId,
+          side: "runner",
+          actionId: action.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          idempotencyKey: `spotcheck-${spec.definitionId}-wrong-side`,
+        }).ok,
+      ).toBe(false);
+      expect(
+        applyAction(state, {
+          matchId: state.matchId,
+          side: "corp",
+          actionId: action.actionId,
+          clientKnownStateVersion: state.stateVersion - 1,
+          idempotencyKey: `spotcheck-${spec.definitionId}-stale`,
+        }).ok,
+      ).toBe(false);
+      const tagDrift = structuredClone(state);
+      tagDrift.runner.tags = 0;
+      expect(
+        applyAction(tagDrift, {
+          matchId: tagDrift.matchId,
+          side: "corp",
+          actionId: action.actionId,
+          clientKnownStateVersion: tagDrift.stateVersion,
+          idempotencyKey: `spotcheck-${spec.definitionId}-tag-drift`,
+        }).ok,
+      ).toBe(false);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "corp", (candidate) => candidate.actionId === action.actionId);
+      expect(state.corp.archives.some((id) => state.cardInstances[id]?.definitionId === spec.definitionId)).toBe(true);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_operation",
+        cardDefinitionId: spec.definitionId,
+      });
+      spec.assertAfter(state);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("resolves Nerve Labyrinth net damage plus end-the-run without grip leaks", () => {
+    let state = toRunnerTurn(v112kCardReleaseGame("spotcheck-nerve-labyrinth"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_257_nerve-labyrinth");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_257_nerve-labyrinth",
+    );
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      sourceDefinitionId: "onr_v1_257_nerve-labyrinth",
+      encounterWillEndRun: true,
+    });
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: continueAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "spotcheck-nerve-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: continueAction.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: "spotcheck-nerve-stale",
+      }).ok,
+    ).toBe(false);
+    state = apply(state, "runner", (action) => action.actionId === continueAction.actionId);
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      sourceDefinitionId: "onr_v1_257_nerve-labyrinth",
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 2,
+      cardsTrashed: 2,
+      result: "ended",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /runner_|grip|stack|cardInstances|privatePayload/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Pi in the 'Face and Endless Corridor subroutine indices side-safe", () => {
+    let piState = toRunnerTurn(v112kCardReleaseGame("spotcheck-pi-face"));
+    piState.runner.credits = 20;
+    piState.corp.credits = 20;
+    installRunnerProgramForTest(piState, "onr_v1_040_loony-goon");
+    putCorpIceOnServer(piState, "rd", "onr_v1_259_in-the-face");
+    expect(JSON.stringify(getPlayerView(piState, "runner"))).not.toContain(
+      "onr_v1_259_in-the-face",
+    );
+    const piInitial = structuredClone(piState);
+    const piReplayStart = piState.eventLog.length;
+    piState = apply(
+      piState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    piState = apply(
+      piState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(piState, action) === "onr_v1_259_in-the-face",
+    );
+    expect(JSON.stringify(getPlayerView(piState, "runner"))).toContain(
+      "onr_v1_259_in-the-face",
+    );
+    for (let pump = 0; pump < 3; pump += 1) {
+      piState = apply(
+        piState,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(piState, action) === "onr_v1_040_loony-goon",
+      );
+    }
+    const piBreak = mustAction(
+      piState,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(piState, action) === "onr_v1_040_loony-goon",
+    );
+    expect(piBreak.payload).toMatchObject({
+      subroutineIndex: 0,
+      targetIceDefinitionId: "onr_v1_259_in-the-face",
+    });
+    expect(
+      applyAction(piState, {
+        matchId: piState.matchId,
+        side: "corp",
+        actionId: piBreak.actionId,
+        clientKnownStateVersion: piState.stateVersion,
+        idempotencyKey: "spotcheck-pi-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(piState, {
+        matchId: piState.matchId,
+        side: "runner",
+        actionId: piBreak.actionId,
+        clientKnownStateVersion: piState.stateVersion - 1,
+        idempotencyKey: "spotcheck-pi-stale",
+      }).ok,
+    ).toBe(false);
+    piState = apply(piState, "runner", (action) => action.actionId === piBreak.actionId);
+    expect(piState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      subroutineIndex: 0,
+      targetIceDefinitionId: "onr_v1_259_in-the-face",
+    });
+    piState = apply(piState, "runner", (action) => action.type === "continue_run");
+    const piReplay = replayEvents(piInitial, piState.eventLog.slice(piReplayStart));
+    expect(piReplay.ok).toBe(true);
+    expect(hashState(piReplay.state)).toBe(hashState(piState));
+
+    let piUnbroken = toRunnerTurn(v112kCardReleaseGame("spotcheck-pi-unbroken"));
+    piUnbroken.corp.credits = 20;
+    putCorpIceOnServer(piUnbroken, "rd", "onr_v1_259_in-the-face");
+    piUnbroken = apply(
+      piUnbroken,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    piUnbroken = apply(
+      piUnbroken,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(piUnbroken, action) === "onr_v1_259_in-the-face",
+    );
+    piUnbroken = apply(
+      piUnbroken,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(piUnbroken.run).toBeUndefined();
+    expect(piUnbroken.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_259_in-the-face",
+      result: "ended",
+    });
+
+    let corridor = toRunnerTurn(v105kCardReleaseGame("spotcheck-endless-corridor"));
+    corridor.runner.credits = 20;
+    corridor.corp.credits = 20;
+    installRunnerProgramForTest(corridor, "onr_v1_052_raffles");
+    putCorpIceOnServer(corridor, "rd", "onr_v1_239_endless-corridor");
+    const corridorInitial = structuredClone(corridor);
+    const corridorReplayStart = corridor.eventLog.length;
+    corridor = apply(
+      corridor,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    corridor = apply(
+      corridor,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(corridor, action) === "onr_v1_239_endless-corridor",
+    );
+    const corridorBreaks = getLegalActions(corridor, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(corridor, action) === "onr_v1_052_raffles",
+    );
+    expect(corridorBreaks.map((action) => action.payload?.subroutineIndex)).toEqual([
+      0,
+      1,
+    ]);
+    const firstBreak = corridorBreaks[0];
+    expect(firstBreak).toBeDefined();
+    if (!firstBreak) throw new Error("Missing Endless Corridor break action");
+    expect(
+      applyAction(corridor, {
+        matchId: corridor.matchId,
+        side: "corp",
+        actionId: firstBreak.actionId,
+        clientKnownStateVersion: corridor.stateVersion,
+        idempotencyKey: "spotcheck-corridor-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(corridor, {
+        matchId: corridor.matchId,
+        side: "runner",
+        actionId: firstBreak.actionId,
+        clientKnownStateVersion: corridor.stateVersion - 1,
+        idempotencyKey: "spotcheck-corridor-stale",
+      }).ok,
+    ).toBe(false);
+    corridor = apply(corridor, "runner", (action) => action.actionId === firstBreak.actionId);
+    corridor = apply(
+      corridor,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(corridor, action) === "onr_v1_052_raffles" &&
+        action.payload?.subroutineIndex === 1,
+    );
+    corridor = apply(corridor, "runner", (action) => action.type === "continue_run");
+    expect(corridor.run?.phase).toBe("access");
+    const corridorReplay = replayEvents(
+      corridorInitial,
+      corridor.eventLog.slice(corridorReplayStart),
+    );
+    expect(corridorReplay.ok).toBe(true);
+    expect(hashState(corridorReplay.state)).toBe(hashState(corridor));
+
+    let unbroken = toRunnerTurn(v105kCardReleaseGame("spotcheck-endless-unbroken"));
+    unbroken.corp.credits = 20;
+    putCorpIceOnServer(unbroken, "rd", "onr_v1_239_endless-corridor");
+    unbroken = apply(
+      unbroken,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    unbroken = apply(
+      unbroken,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(unbroken, action) === "onr_v1_239_endless-corridor",
+    );
+    unbroken = apply(unbroken, "runner", (action) => action.type === "continue_run");
+    expect(unbroken.run).toBeUndefined();
+    expect(unbroken.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_239_endless-corridor",
+      result: "ended",
+    });
+  });
+
+  it("attributes Antiquated Interface Routines strength only to its own fort", () => {
+    let state = v163CardReleaseGame("spotcheck-antiquated-interface");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 40;
+    state.corp.clicks = 3;
+    state.corp.maxHandSize = 100;
+    putCorpRootInRemote(state, "onr_v1_350_antiquated-interface-routines");
+    putCorpIceOnServer(state, "remote_1", "onr_v1_232_crystal-wall");
+    putCorpIceOnServer(state, "rd", "onr_v1_233_d-arc-knight");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Antiquated Interface Routines",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const rezUpgrade = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_350_antiquated-interface-routines",
+    );
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: rezUpgrade.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "spotcheck-antiquated-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: rezUpgrade.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: "spotcheck-antiquated-stale",
+      }).ok,
+    ).toBe(false);
+    state = apply(state, "corp", (action) => action.actionId === rezUpgrade.actionId);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
+      "Antiquated Interface Routines",
+    );
+
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
+    );
+    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(4);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_233_d-arc-knight",
+    );
+    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(2);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 const ONR_V1_0_5K_FINAL_CARD_IDS = [
   "onr_v1_015_codeslinger",
   "onr_v1_052_raffles",

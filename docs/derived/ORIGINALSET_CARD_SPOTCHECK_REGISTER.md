@@ -4,6 +4,25 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-contacts-datapool
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_CONTACTS_DATAPOOL_IMPLEMENTATION.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Livewire's Contacts | `onr_v1_097_livewires-contacts` | Engine-Pfad funktioniert mit Creditgain 3 und öffentlichem Credit-Payload | Fokussierte Side-/Stale-/Replay-Abdeckung ergänzt |
+| Nerve Labyrinth | `onr_v1_257_nerve-labyrinth` | Engine-Pfad funktioniert mit 2 Net Damage plus End-the-run | Damage-Redaction, Continue-Revalidation und Replay ergänzt |
+| Punitive Counterstrike | `onr_v1_301_punitive-counterstrike` | Engine-Pfad funktioniert tagged-only mit 2 Meat Damage | No-tag-, Side-/Stale-, Hidden-Info- und Replay-Test ergänzt |
+| Efficiency Experts | `onr_v1_290_efficiency-experts` | Engine-Pfad funktioniert mit Creditgain 3 und öffentlichem Credit-Payload | Fokussierte Side-/Stale-/Replay-Abdeckung ergänzt |
+| Bodyweight Synthetic Blood | `onr_v1_079_bodyweight-synthetic-blood` | Engine-Pfad funktioniert mit Draw 5 und kurzem Stack ohne Draw-Content-Leak | Draw-Count-, Corp-View- und Replay-Test ergänzt |
+| Pi in the 'Face | `onr_v1_259_in-the-face` | Engine-Pfad funktioniert mit rezzed Sichtbarkeit, brechbarer ETR-Subroutine und unbroken Run-Ende | Visibility-, Break-Revalidation- und Replay-Test ergänzt |
+| Antiquated Interface Routines | `onr_v1_350_antiquated-interface-routines` | Engine-Pfad funktioniert als rezzed +1-Stärkemodifier nur im eigenen Fort | Rez-Revalidation, Fremdfort-Check und Replay ergänzt |
+| Endless Corridor | `onr_v1_239_endless-corridor` | Engine-Pfad funktioniert mit zwei indexstabilen End-the-run-Subroutinen | Index-, Side-/Stale-, Unbroken-ETR- und Replay-Test ergänzt |
+| Closed Accounts | `onr_v1_285_closed-accounts` | Engine-Pfad funktioniert tagged-only und setzt Runner-Credits auf 0 | No-tag-, Tag-drift-, Side-/Stale- und Payload-Test ergänzt |
+| Datapool by Zetatech | `onr_v1_287_datapool-by-zetatech` | Engine-Pfad funktioniert tagged-only und gibt exakt 2 Tags | No-tag-, Tag-drift-, Side-/Stale- und Payload-Test ergänzt |
+
 ## Runde 2026-05-15-hammer-rio
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
