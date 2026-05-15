@@ -8271,7 +8271,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
       );
-      expect(definition?.mechanics).toContain("hidden_zone_tool");
+      if (definitionId === "onr_v1_250_ice-pick-willie") {
+        expect(definition?.mechanics).toContain("trash_installed_program");
+      } else {
+        expect(definition?.mechanics).toContain("hidden_zone_tool");
+      }
     }
     expect(
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
@@ -8449,12 +8453,16 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
   });
 
-  it("resolves Ice Pick Willie as a subroutine-bound public R&D top reveal", () => {
+  it("resolves Ice Pick Willie as program trash plus end-the-run without R&D reveal", () => {
     let state = toRunnerTurn(v1911HiddenZoneGame("v1911-ice-pick-willie"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_250_ice-pick-willie");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const rdTopId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const trashedProgramId = installRunnerProgramForTest(
+      state,
+      "simple_decoder",
+    );
 
     state = apply(
       state,
@@ -8477,12 +8485,18 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.payload?.encounterContinue === true,
     );
 
+    expect(state.run).toBeUndefined();
+    expect(state.runner.heap).toContain(trashedProgramId);
+    expect(state.cardInstances[rdTopId]?.faceup).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_corp_reveal_rd_top",
-      revealKind: "reveal",
-      cardDefinitionId: "simple_economy_operation",
+      trashedCardDefinitionId: "simple_decoder",
+      trashedCardType: "program",
+      trashedCount: 1,
+      encounterWillEndRun: true,
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "simple_economy_operation",
+    );
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "simple_economy_operation_",
     );
@@ -12489,6 +12503,51 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     }
   });
 
+  it("applies Cerberus 3 net damage and does not give a false tag on trace success", () => {
+    let state = toRunnerTurn(v1915RunAccessGame("spotcheck-cerberus-damage"));
+    drawRunnerCardsForTest(state, 5);
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    state.corp.credits = 12;
+    state.runner.credits = 0;
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_227_cerberus",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.runner.grip.length).toBe(gripBefore - 3);
+    expect(state.trace).toMatchObject({
+      sourceDefinitionId: "onr_v1_227_cerberus",
+      successEffect: { type: "none" },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 3,
+      traceStarted: true,
+      sourceDefinitionId: "onr_v1_227_cerberus",
+    });
+
+    state = applyChoice(state, "corp", "bid_1");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      tagsAdded: 0,
+    });
+  });
+
   it("allows New Blood only after a visible Runner run attempt last turn", () => {
     let noRun = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-no-run"));
     const noRunOperationId = moveCorpCardToHq(noRun, "onr_v1_294_new-blood");
@@ -13648,7 +13707,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       {
         definitionId: "onr_v1_345_trap",
         expectedTagsAdded: 1,
-        damageAmount: 1,
+        damageAmount: 3,
       },
     ] as const;
     for (const { definitionId, expectedTagsAdded, damageAmount } of ambushes) {

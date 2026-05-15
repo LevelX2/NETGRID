@@ -9911,7 +9911,7 @@ function resolveV1917AmbushOnAccess(
     return;
   }
   if (definition.id === V1917_TRAP_ID) state.runner.tags += 1;
-  const damageAmount = definition.id === V1917_SETUP_ID ? 2 : 1;
+  const damageAmount = definition.id === V1917_SETUP_ID ? 2 : 3;
   const summary = doDamage(state, {
     damageId: `v1917.ambush.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
     damageType: "net",

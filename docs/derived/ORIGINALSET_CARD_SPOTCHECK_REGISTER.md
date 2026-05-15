@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-trace-cache-ambush
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md`
+
+Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, mehrere Vollresolver bleiben als Removal Condition offen.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Signpost | `onr_v1_063_signpost` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
+| Deal with Militech | `onr_v1_082_deal-with-militech` | Blockiert: Research-Bedingung und Militech-Counter auf Icebreakern fehlen | Eigenen Research-/Counter-Resolver umsetzen |
+| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Blockiert: Multi-Expose-Choice ohne Zielidentitäts-Leak fehlt | Eigenen Expose-Choice-Resolver umsetzen |
+| Sneak Preview | `onr_v1_110_sneak-preview` | Blockiert: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return fehlt | Eigenen Temporary-Install-Resolver umsetzen |
+| Code Viral Cache | `onr_v1_155_code-viral-cache` | Blockiert: Purge-Replacement und Korp-Trash-Aktion fehlen | Eigenen Purge-Replacement-Resolver umsetzen |
+| The Springboard | `onr_v1_181_the-springboard` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
+| Cerberus | `onr_v1_227_cerberus` | Teilfix umgesetzt: 3 Net Damage und kein falscher Trace-Tag; Counter-Loop bleibt offen | Cerberus-Counter-/Runstart-Damage-Resolver umsetzen |
+| Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Teilfix umgesetzt: Program-Trash plus End-the-run statt R&D-Reveal | Teilfix grün |
+| TRAP! | `onr_v1_345_trap` | Teilfix umgesetzt: 3 Net Damage plus Tag aus legalem Access; Archives-No-op bleibt | Teilfix grün |
+| Paris City Grid | `onr_v1_365_paris-city-grid` | Blockiert: servergebundener Trace-Bit-Pool und Refresh fehlen | Eigenen Trace-Pool-Payment-Resolver umsetzen |
+
 ## Runde 2026-05-15-virus-link-archives
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

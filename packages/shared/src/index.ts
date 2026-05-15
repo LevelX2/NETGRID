@@ -3961,7 +3961,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 0,
     rulesText:
-      "Access ambush asset with reveal, tag and damage surfaces. Access-triggered effects are resolved only from legal access windows.",
+      "If you pay 0 when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -7062,11 +7062,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "killer"],
     rezCost: 5,
     strength: 1,
-    rulesText: "[Subroutine] Reveal the top card of R&D.",
+    rulesText: "[Subroutine] Trash a program.\n[Subroutine] End the run.",
     subroutines: [
-      onrRevealCorpRdTop("onr_v1_250_ice_pick_willie_reveal_rd_top"),
+      onrTrashInstalledProgram("onr_v1_250_ice_pick_willie_trash_program"),
+      onrEtr("onr_v1_250_ice_pick_willie_etr"),
     ],
-    mechanics: ["reveal", "hidden_zone_tool"],
+    mechanics: ["trash_installed_program", "end_the_run"],
   }),
   onrIce({
     id: "onr_v1_251_jack-attack",
@@ -8148,22 +8149,21 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 11,
     strength: 5,
     rulesText:
-      "Trace 5. If successful, give the Runner 1 tag. Do 1 net damage. End the run.",
+      "[Subroutine] Do 3 Net damage.\n[Subroutine] Trace 5 - If trace is successful, give Runner a Cerberus counter. Each Cerberus counter does 2 Net damage at the start of each run. Runner may remove a Cerberus counter by taking an action to spend 4.\n[Subroutine] End the run.",
     subroutines: [
+      onrNetDamage("onr_v1_227_cerberus_net_damage", 3),
       {
         id: "onr_v1_227_cerberus_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "none" },
       },
-      onrNetDamage("onr_v1_227_cerberus_net_damage", 1),
       onrEtr("onr_v1_227_cerberus_etr"),
     ],
     mechanics: [
       "trace",
       "link",
       "bid_amount",
-      "add_tag",
       "damage",
       "end_the_run",
       "run_flow",
