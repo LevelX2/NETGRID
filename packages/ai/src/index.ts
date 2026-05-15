@@ -1922,6 +1922,8 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
   const economyAction =
     action.type === "gain_credit" ||
     ((action.type === "play_event" || action.type === "play_operation") && rolesForAction(input, action).some((role) => role.includes("economy") || role === "tempo"));
+  const economyStallExempt = decision.fallbackUsed || action.type === "mandatory_draw" || action.type === "end_turn" || action.type === "decline_rez" || action.type === "resolve_choice";
+  const visibleRemoteContest = targetServerId?.startsWith("remote_") === true && (targetServer?.rootCount ?? 0) > 0;
 
   if (input.side === "corp" && action.type === "install_card" && action.payload?.placement !== "ice" && sourceDefinition?.type === "agenda") {
     if (targetServerId === "new_remote" || ((targetServer?.iceCount ?? 0) === 0 && (targetServer?.rootCount ?? 0) === 0)) tags.push("naked_agenda_install");
@@ -1936,8 +1938,9 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
   ) {
     tags.push("remote_overbuild");
   }
-  if (lowCredits && !economyAction && action.type !== "mandatory_draw" && action.type !== "end_turn") tags.push("economy_stall");
-  if (input.side === "runner" && features.rigRoles.size === 0 && action.type === "start_run" && input.playerView.opponent.agendaPoints < input.playerView.agendaPointsToWin - 2) tags.push("rig_stall");
+  if (lowCredits && !economyAction && !economyStallExempt) tags.push("economy_stall");
+  if (input.side === "runner" && features.rigRoles.size === 0 && action.type === "start_run" && !visibleRemoteContest && input.playerView.opponent.agendaPoints < input.playerView.agendaPointsToWin - 2)
+    tags.push("rig_stall");
   if (legalTrashAvailable && action.type !== "trash_accessed_card") tags.push("asset_trash_neglect");
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");

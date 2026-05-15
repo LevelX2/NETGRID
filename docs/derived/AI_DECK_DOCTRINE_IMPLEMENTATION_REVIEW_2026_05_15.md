@@ -51,6 +51,6 @@ Teilweise grün:
 ## Offene Punkte
 
 - Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
-- Die Fallanalyse zeigt, dass `economyStall` und `rigStall` noch zu grob sein können; vor Gewichtungs-Tuning sollten diese Tags präzisiert werden.
+- `economyStall` und `rigStall` wurden als Metriken präzisiert; `rigStall` fällt im aktuellen engen Benchmark nicht mehr an, während `nakedAgendaInstalls` als klarer nächster KI-Fix-Kandidat bleibt.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.

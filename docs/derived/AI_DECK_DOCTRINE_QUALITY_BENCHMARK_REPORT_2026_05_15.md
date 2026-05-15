@@ -20,9 +20,9 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 | 0 |
 | scoreWindowMissed | 0 | 0 | 0 |
 | remoteOverbuild | 0 | 0 | 0 |
-| economyStall | 43 | 43 | 0 |
+| economyStall | 30 | 30 | 0 |
 | repeatedLowValueCentralRun | 6 | 6 | 0 |
-| rigStall | 4 | 4 | 0 |
+| rigStall | 0 | 0 | 0 |
 | assetTrashNeglect | 0 | 0 | 0 |
 
 ## Safety Delta
@@ -44,4 +44,4 @@ Stand: 2026-05-15
 
 Der aktuelle Kandidat verletzt in diesem engen Tuning-Lauf keine harte Safety- oder Doctrine-Schwelle. Die Deltas sind in dieser Matrix noch neutral; der Benchmark ist damit als Guard aktiv, aber noch kein Beleg für bessere Gewichtungen.
 
-Die auffälligsten absoluten Zähler bleiben `economyStall` und `nakedAgendaInstalls`. Der nächste Tuning-Schritt sollte diese Fälle nicht pauschal über Gewichte korrigieren, sondern zuerst mit konkreten Action-Sequenzen oder fokussierten Seeds prüfen, ob die Tags echte Fehlentscheidungen oder bewusst akzeptierte Kurzfristzüge markieren.
+Die auffälligsten absoluten Zähler bleiben `economyStall`, `repeatedLowValueCentralRun` und `nakedAgendaInstalls`. `rigStall` fällt nach der Präzisierung nicht mehr an. Der nächste Tuning-Schritt sollte nackte Agenda-Installs als echten KI-Fix-Kandidaten priorisieren und bei Economy-/Central-Run-Tags weiter prüfen, ob HQ-Druck bei niedrigen Credits tatsächlich schlecht oder situativ gerechtfertigt ist.

@@ -21,9 +21,9 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 |
 | scoreWindowMissed | 0 | 0 |
 | remoteOverbuild | 0 | 0 |
-| economyStall | 43 | 3 |
+| economyStall | 30 | 3 |
 | repeatedLowValueCentralRun | 6 | 3 |
-| rigStall | 4 | 3 |
+| rigStall | 0 | 0 |
 | assetTrashNeglect | 0 | 0 |
 
 ## Examples
@@ -53,8 +53,8 @@ Keine Beispiele im analysierten Lauf.
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
 | ai-v143-tuning-001 | 11 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
-| ai-v143-tuning-001 | 12 | corp | decline_rez | fallback.first_legal_action | none | economy_stall, fallback |
-| ai-v143-tuning-001 | 13 | corp | decline_rez | fallback.first_legal_action | none | economy_stall, fallback |
+| ai-v143-tuning-001 | 14 | runner | access_card | runner.access.open_card | none | economy_stall |
+| ai-v143-tuning-001 | 15 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
 
 ### repeatedLowValueCentralRun
 
@@ -68,9 +68,7 @@ Keine Beispiele im analysierten Lauf.
 
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-002 | 7 | runner | start_run | runner.plan.contest_remote | remote_1 | rig_stall |
-| ai-v143-tuning-003 | 7 | runner | start_run | runner.plan.contest_remote | remote_1 | rig_stall |
-| ai-v143-tuning-004 | 7 | runner | start_run | runner.plan.contest_remote | remote_1 | rig_stall |
+Keine Beispiele im analysierten Lauf.
 
 ### assetTrashNeglect
 
@@ -79,13 +77,13 @@ Keine Beispiele im analysierten Lauf.
 ## Interpretation
 
 - `nakedAgendaInstalls` ist ein echter Kandidat für den nächsten KI-Fix: Die Beispiele sind Corp-Installationen in `new_remote` mit `corp.plan.score_next_turn`.
-- `economyStall` enthält mindestens teilweise zu grobe Tags: `decline_rez` während eines Run-Fensters wird als Stall gezählt, obwohl es eine reaktive Entscheidung sein kann.
+- `economyStall` wurde präzisiert: reaktive `decline_rez`- und Fallback-Fenster werden nicht mehr als Stall gezählt. Übrig bleiben Runner-Aktionen mit niedrigem Creditstand.
 - `repeatedLowValueCentralRun` bündelt in den Beispielen HQ-Druck bei zugleich niedrigem Economy-Zustand; hier sollte zuerst geprüft werden, ob der Runner-Druck wirklich niedrigwertig ist oder ob die Metrik die Boardlage zu grob bewertet.
-- `rigStall` zeigt frühe Remote-Contest-Runs ohne sichtbares Rig. Das kann ein echter Fehler oder ein berechtigter Contest gegen sichtbaren Score-Druck sein; die nächste Präzisierung sollte Corp-Scoringdruck und Run-Erreichbarkeit einbeziehen.
+- `rigStall` fällt nach Präzisierung nicht mehr an, weil sichtbarer Remote-Contest nicht pauschal als Rig-Stall gilt.
 
 ## Nächster Umsetzungsschritt
 
-Vor dem Gewichtungs-Tuning sollten zwei Metriken präzisiert werden:
+Vor dem Gewichtungs-Tuning sollte jetzt ein enger KI-Fix für nackte Agenda-Installs folgen:
 
-1. `economyStall`: Reaktive Fenster wie `decline_rez` und Pflicht-/Fallback-Situationen getrennt zählen.
-2. `nakedAgendaInstalls`: Zwischen ungeschütztem nacktem Install und geplantem Score-Next-Turn mit plausibler Schutz-/Scorelinie unterscheiden.
+1. `corp.plan.score_next_turn` darf Agenden nicht in `new_remote` installieren, wenn kein vorhandener Schutzpfad besteht.
+2. Economy-/Central-Run-Tags sollten danach weiter beobachtet werden, aber nicht zuerst über Gewichte korrigiert werden.

@@ -2250,6 +2250,8 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(analysis.redactionSafe).toBe(true);
     expect(analysis.totals).toEqual(benchmark.candidate);
     expect(analysis.examples.economyStall.length).toBeLessThanOrEqual(2);
+    expect(analysis.examples.economyStall.every((example) => example.actionType !== "decline_rez")).toBe(true);
+    expect(analysis.examples.rigStall.every((example) => !(example.targetServerId ?? "").startsWith("remote_"))).toBe(true);
     expect(report).toContain("## Examples");
     expect(report).toContain("### economyStall");
     expect(JSON.stringify({ analysis, report })).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
