@@ -22,6 +22,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - Ein Doctrine-Quality-Benchmark vergleicht Baseline und aktuellen Kandidaten auf denselben Seeds und liefert Doctrine- sowie Safety-Deltas.
 - Der Simulationspfad speist eigene Decksnapshots nur für den aktuellen Kandidaten in die KI ein; historische Benchmark-Profile bleiben ohne diese neue Doctrine-Information.
 - Ein erster Benchmark-Report liegt unter `docs/derived/AI_DECK_DOCTRINE_QUALITY_BENCHMARK_REPORT_2026_05_15.md`.
+- Ein Holdout-Benchmark-Report liegt unter `docs/derived/AI_DECK_DOCTRINE_HOLDOUT_BENCHMARK_REPORT_2026_05_15.md`.
 - Eine redaktionssichere Fallanalyse für Doctrine-Metriken liegt unter `docs/derived/AI_DECK_DOCTRINE_QUALITY_CASE_ANALYSIS_2026_05_15.md`.
 - Multiplayer-Server übergibt beim KI-Zug nur den privaten Snapshot der aktiven KI-Seite an `buildAiDecisionInput`.
 - `DecisionDebug` enthält nur aggregierte Doktrin-Tags, Confidence, Risk Flags und Evidenz, keine Deckliste oder Deckreihenfolge.
@@ -35,6 +36,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
 - `apps/server/src/multiplayer.ts`: Snapshot-Übergabe für die aktive KI-Seite.
 - `docs/derived/AI_DECK_DOCTRINE_QUALITY_BENCHMARK_REPORT_2026_05_15.md`: erster reproduzierbarer Doctrine-Quality-Report.
+- `docs/derived/AI_DECK_DOCTRINE_HOLDOUT_BENCHMARK_REPORT_2026_05_15.md`: Holdout-Nachweis für Doctrine-Fehlerklassen und Safety-Deltas.
 - `docs/derived/AI_DECK_DOCTRINE_QUALITY_CASE_ANALYSIS_2026_05_15.md`: Beispiele pro Doctrine-Fehlerklasse.
 - `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz, Mulligan, Doctrine-Qualitätsmetriken und Benchmark-Deltas.
 
@@ -56,6 +58,6 @@ Teilweise grün:
 
 - Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
 - Nackte Agenda-Installationen in `new_remote` werden nicht mehr als `score_next_turn`/`build_scoring_remote`-Schritt aufgenommen, wenn kein geschützter Zielserver besteht.
-- Im engen 6-Seed-/40-Action-Doctrine-Benchmark stehen alle Doctrine-Fehlerklassen bei 0; als nächstes sollte dieser Stand über Holdout- und längere Selfplay-Läufe geprüft werden.
+- Im engen 6-Seed-/40-Action-Doctrine-Benchmark und im 9-Seed-Holdout-Lauf stehen alle Doctrine-Fehlerklassen bei 0; als nächstes sollte dieser Stand über längere Selfplay-Läufe geprüft werden.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.

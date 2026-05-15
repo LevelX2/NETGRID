@@ -2430,7 +2430,7 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
 
   it("analyzes doctrine quality case examples without private state", () => {
     const benchmark = runDoctrineQualityBenchmark({
-      includeHoldout: false,
+      includeHoldout: true,
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
       maxActions: 24,
@@ -2446,7 +2446,10 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(analysis.totals).toEqual(benchmark.candidate);
     expect(analysis.examples.economyStall.length).toBeLessThanOrEqual(2);
     expect(analysis.examples.economyStall.every((example) => example.actionType !== "decline_rez")).toBe(true);
+    expect(analysis.examples.economyStall.every((example) => example.reasonCode !== "corp.plan.recover_economy" && example.reasonCode !== "runner.plan.recover_economy")).toBe(true);
     expect(analysis.examples.economyStall.every((example) => !["access_card", "break_subroutine", "continue_run", "pump_breaker", "steal_agenda"].includes(example.actionType))).toBe(true);
+    expect(analysis.examples.agendaFloodExposure.every((example) => !["decline_rez", "end_turn", "mandatory_draw", "resolve_choice", "rez_ice"].includes(example.actionType))).toBe(true);
+    expect(analysis.examples.agendaFloodExposure.every((example) => example.reasonCode !== "corp.plan.protect_hq" && example.reasonCode !== "corp.plan.protect_rnd")).toBe(true);
     expect(analysis.examples.rigStall.every((example) => !(example.targetServerId ?? "").startsWith("remote_"))).toBe(true);
     expect(report).toContain("## Examples");
     expect(report).toContain("### economyStall");

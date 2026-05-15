@@ -1928,7 +1928,7 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
   if (input.side === "corp" && action.type === "install_card" && action.payload?.placement !== "ice" && sourceDefinition?.type === "agenda") {
     if (targetServerId === "new_remote" || ((targetServer?.iceCount ?? 0) === 0 && (targetServer?.rootCount ?? 0) === 0)) tags.push("naked_agenda_install");
   }
-  if (input.side === "corp" && agendaInHand >= 3) tags.push("agenda_flood_exposure");
+  if (input.side === "corp" && agendaInHand >= 3 && !isAgendaFloodExposureExemptAction(action, decision)) tags.push("agenda_flood_exposure");
   if (legalScoreAvailable && action.type !== "score_agenda") tags.push("score_window_missed");
   if (
     input.side === "corp" &&
@@ -1949,9 +1949,17 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
 
 function isEconomyStallExemptAction(input: AiDecisionInput, action: LegalAction, decision: AiDecision): boolean {
   if (decision.fallbackUsed) return true;
+  if (decision.reasonCode.endsWith(".recover_economy")) return true;
   if (action.type === "mandatory_draw" || action.type === "end_turn" || action.type === "decline_rez" || action.type === "resolve_choice") return true;
   if (input.side !== "runner") return false;
   return action.type === "pump_breaker" || action.type === "break_subroutine" || action.type === "continue_run" || action.type === "access_card" || action.type === "steal_agenda";
+}
+
+function isAgendaFloodExposureExemptAction(action: LegalAction, decision: AiDecision): boolean {
+  if (decision.fallbackUsed) return true;
+  if (decision.reasonCode.endsWith(".recover_economy")) return true;
+  if (decision.reasonCode.endsWith(".protect_hq") || decision.reasonCode.endsWith(".protect_rnd")) return true;
+  return action.type === "mandatory_draw" || action.type === "end_turn" || action.type === "decline_rez" || action.type === "rez_ice" || action.type === "resolve_choice";
 }
 
 function repeatedLowValueCentralRunTags(actionSequence: AiSimulationSummary["actionSequence"]): string[] {
