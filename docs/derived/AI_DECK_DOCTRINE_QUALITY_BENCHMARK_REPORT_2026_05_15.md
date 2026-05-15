@@ -54,4 +54,6 @@ Nach der Runner-Mulligan-Erweiterung bleibt der enge 6-Seed-/40-Action-Lauf stab
 
 Nach dem ersten Early-Turn-Doctrine-Slice bleibt der enge Lauf ebenfalls stabil. `current_candidate` hat weiter 0 Doctrine-Fehlerklassen; `decline_trash` wird nun als bewusste Runner-Access-Entscheidung behandelt, sodass der Fallback-Anteil im Kandidatenlauf bei `0.008` liegt.
 
+Nach dem ersten Corp-Scoring-Progress-Slice bleibt der enge Lauf weiterhin stabil: geschützte Agenda-Installationen werden gegenüber redundanter Zentralverteidigung priorisiert, ohne nackte Agenda-Installs, Agenda-Flood-Exposure oder Score-Window-Misses auszulösen.
+
 Alle Doctrine-Fehlerklassen stehen in diesem 6-Seed-/40-Action-Lauf bei 0. Das ist ein enger Tuning-Nachweis, kein Ersatz für Holdout-/Selfplay-Auswertung.

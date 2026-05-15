@@ -30,6 +30,7 @@ export {
   evaluateAgendaRisk,
   evaluateCorpPlan,
   evaluateEconomyReserve,
+  evaluateCorpScoringProgress,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
   evaluateScoringWindow,

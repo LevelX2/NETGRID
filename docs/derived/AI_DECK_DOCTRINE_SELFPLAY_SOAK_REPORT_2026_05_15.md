@@ -20,7 +20,7 @@ Stand: 2026-05-15
 | basic_runner_ai | 9 | 0 | 0 | 0 | 0 | 0.222 | 0 | 0.778 | 72.222 |
 | plan_corp_v1_4_0 | 9 | 0 | 0 | 0 | 0.001 | 0 | 0 | 1 | 80 |
 | plan_runner_v1_4_1 | 9 | 0 | 0 | 0 | 0.011 | 0 | 0 | 1 | 80 |
-| belief_ai_v1_4_2 | 9 | 0 | 0 | 0 | 0.015 | 0 | 0 | 1 | 80 |
+| belief_ai_v1_4_2 | 9 | 0 | 0 | 0 | 0.021 | 0 | 0 | 1 | 80 |
 | current_candidate | 9 | 0 | 0 | 0 | 0.019 | 0 | 0 | 1 | 80 |
 
 ## Current Candidate Doctrine Metrics
@@ -43,13 +43,13 @@ Stand: 2026-05-15
 | random_legal_bot | 11 | 0 | 50 | 2 | 27 | 4 |
 | basic_corp_ai | 20 | 0 | 48 | 3 | 5 | 7 |
 | basic_runner_ai | 12 | 0 | 37 | 22 | 0 | 0 |
-| plan_corp_v1_4_0 | 0 | 0 | 49 | 43 | 0 | 0 |
+| plan_corp_v1_4_0 | 0 | 0 | 49 | 44 | 0 | 0 |
 | plan_runner_v1_4_1 | 16 | 0 | 10 | 5 | 0 | 0 |
-| belief_ai_v1_4_2 | 0 | 0 | 0 | 0 | 0 | 0 |
+| belief_ai_v1_4_2 | 0 | 0 | 1 | 0 | 0 | 0 |
 | current_candidate | 0 | 0 | 0 | 0 | 0 | 0 |
 
 ## Interpretation
 
-Der längere Selfplay-/Soak-Lauf bestätigt den Holdout-Stand für `current_candidate` auch mit aktivem Runner-Mulligan und Early-Turn-Doctrine: keine IllegalActions, keine Replay-Fehler, keine Timeouts und keine Doctrine-Fehlerklassen. Gegenüber `belief_ai_v1_4_2` bleibt die Doctrine-Seite stabil; das Fallback-Niveau ist minimal höher (`0.019` statt `0.015`) und deutlich niedriger als vor der expliziten `decline_trash`-Bewertung.
+Der längere Selfplay-/Soak-Lauf bestätigt den Holdout-Stand für `current_candidate` auch mit aktivem Runner-Mulligan, Early-Turn-Doctrine und Corp-Scoring-Progress: keine IllegalActions, keine Replay-Fehler, keine Timeouts und keine Doctrine-Fehlerklassen. Gegenüber `belief_ai_v1_4_2` bleibt die Doctrine-Seite stabiler; das Fallback-Niveau ist leicht niedriger (`0.019` statt `0.021`) und deutlich niedriger als vor der expliziten `decline_trash`-Bewertung.
 
-Alle Spiele von `current_candidate` erreichen in diesem 80-Action-Lauf das Action-Limit. Das ist kein Safety-Fehler, zeigt aber, dass der nächste fachlich sinnvolle Ausbau nicht weitere Mikro-Gewichtung auf denselben Seeds ist, sondern Spielprogression nach der frühen Aufbauphase: Matchabschluss-/Scoring-Dynamik und bessere Corp-Score-Abschlussfenster.
+Alle Spiele von `current_candidate` erreichen in diesem 80-Action-Lauf weiterhin das Action-Limit. Das ist kein Safety-Fehler, zeigt aber, dass der nächste fachlich sinnvolle Ausbau nicht weitere Mikro-Gewichtung auf denselben Seeds ist, sondern stärkere Matchabschluss-Dynamik über mehrere Score-Zyklen hinweg.

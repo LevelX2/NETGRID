@@ -1,7 +1,7 @@
 # AI Deck Doctrine Implementation Review
 
 Stand: 2026-05-15  
-Status: Corp-MVP, Runner-Plananbindung, Runner-Setup-Mulligan und Early-Turn-Doctrine umgesetzt
+Status: Corp-MVP, Runner-Plananbindung, Runner-Setup-Mulligan, Early-Turn-Doctrine und Corp-Scoring-Progress umgesetzt
 
 ## Umgesetzter Scope
 
@@ -16,6 +16,7 @@ Status: Corp-MVP, Runner-Plananbindung, Runner-Setup-Mulligan und Early-Turn-Doc
 - Runner-Early-Turn-Planung nutzt die Deck-Doktrin als bounded Zusatzscore: `rig_builder` bevorzugt frühes Rig-Setup, `economy_dense` stabilisiert die frühe Creditreserve, Druckarchetypen bekommen frühe Druckboni nur bei sichtbarer Bereitschaft.
 - Runner-Access-Fenster für `decline_trash` werden als bewusste Access-Entscheidung gewertet statt als Fallback.
 - Corp-Zentral-ICE-Protection wird bei sehr niedriger Creditreserve gegen Economy-Erholung abgewogen, wenn der Zielserver bereits geschützt ist oder kein unmittelbarer Schutzdruck besteht.
+- Corp-Scoring-Progress gewichtet echte Score-Fenster und geschützte Agenda-Installationen stärker, wenn die Corp nach der frühen Phase noch keine Agenda-Punkte hat; redundante Zentralverteidigung wird dann gedämpft, sobald HQ und R&D bereits geschützt sind.
 - Corp-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus.
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
@@ -36,6 +37,7 @@ Status: Corp-MVP, Runner-Plananbindung, Runner-Setup-Mulligan und Early-Turn-Doc
 - `packages/ai/src/deck-doctrine.ts`: Profilgenerator sowie Corp- und Runner-Mulligan-Bewertung.
 - `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Corp-/Runner-Setup-Mulligan-Auswahl, Debug-Zusammenfassung, Doctrine-Metriken und Exports.
 - `packages/ai/src/corp-plans.ts`: planbezogener Doctrine-Bonus und redigierte Plan-Debugdaten.
+- `packages/ai/src/corp-plans.ts`: zusätzlich Scoring-Progress-Gewichtung für echte Score-Fenster, geschützte Agenda-Installationen und redundante Zentralverteidigung.
 - `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus, Guards gegen unvorbereiteten zentralen Druck, Remote-Contest-Pacing und redigierte Plan-Debugdaten.
 - `packages/ai/src/runner-plans.ts`: zusätzlich Early-Turn-Doctrine-Scoring für Runner-Setup-, Economy- und Druckprioritäten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
@@ -67,4 +69,4 @@ Teilweise grün:
 - Im engen 6-Seed-/40-Action-Doctrine-Benchmark, im 9-Seed-Holdout-Lauf und im 9-Seed-/80-Action-Selfplay stehen alle Doctrine-Fehlerklassen für `current_candidate` bei 0.
 - Alle `current_candidate`-Spiele im 80-Action-Selfplay erreichen das Action-Limit; nächster Ausbaukandidat ist deshalb Spielprogression, nicht weiteres Micro-Tuning auf denselben Seeds.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
-- Runner-Mulligan und ein erster archetypspezifischer Early-Turn-Slice sind umgesetzt; offen bleibt mehr Spielabschluss-/Scoring-Dynamik nach der frühen Aufbauphase.
+- Runner-Mulligan, ein erster archetypspezifischer Early-Turn-Slice und ein erster Corp-Scoring-Progress-Slice sind umgesetzt; offen bleibt stärkere Matchabschluss-Dynamik über längere Spiele hinweg.

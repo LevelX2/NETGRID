@@ -44,6 +44,7 @@ import {
   evaluateRunnerEarlyTurnDoctrine,
   evaluateRunnerPlan,
   evaluateAgendaRisk,
+  evaluateCorpScoringProgress,
   evaluateEconomyReserve,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
@@ -1283,6 +1284,44 @@ describe("V1.4.0 plan-based Corp AI", () => {
 
     expect(selected?.payload?.serverId).toBe("remote_1");
     expect(decision.reasonCode).toBe("corp.plan.score_next_turn");
+  });
+
+  it("pushes protected Corp scoring progress before redundant central defense", () => {
+    const input = corpActionPhaseInput("ai-v140-scoring-progress", (state) => {
+      state.stateVersion = 32;
+      state.corp.credits = 8;
+      state.corp.clicks = 3;
+      ensureRemoteServer(state, "remote_1");
+      putCorpIceOnServer(state, "hq", "simple_barrier_ice");
+      putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      putCorpIceOnServer(state, "remote_1", "simple_sentry_ice");
+      moveCorpCardToHq(state, "simple_agenda");
+      moveUnusedCorpCardToHq(state, "simple_barrier_ice");
+    });
+    const protectedAgendaInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement !== "ice" && action.payload?.serverId === "remote_1" && sourceDefinitionFromInput(input, action) === "simple_agenda"
+    );
+    const centralIceInstall = input.legalActions.find((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(protectedAgendaInstall).toBeDefined();
+    expect(centralIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!protectedAgendaInstall || !centralIceInstall || !gain) throw new Error("Missing Corp scoring-progress fixture actions");
+
+    const scopedInput = { ...input, actionNumber: 32, legalActions: [protectedAgendaInstall, centralIceInstall, gain] };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find((candidate) => candidate.kind === "score_next_turn");
+    const protectCandidate = generateCorpPlanCandidates(scopedInput).find((candidate) => candidate.kind === "protect_rnd");
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    expect(protectCandidate).toBeDefined();
+    if (!scoreCandidate || !protectCandidate) throw new Error("Missing Corp scoring-progress candidates");
+    expect(evaluateCorpScoringProgress(scopedInput, scoreCandidate).reasons).toContain("protected_agenda_scoring_progress");
+    expect(evaluateCorpScoringProgress(scopedInput, protectCandidate).reasons).toContain("central_defense_saturated_before_scoring");
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(protectedAgendaInstall.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(/cardInstances|privatePayload|simple_agenda/);
   });
 
   it("loads post-V1.9.9 AI hints into Corp plan roles", () => {
@@ -3706,6 +3745,18 @@ function moveRunnerProgramToRig(state: GameState, definitionId: string): CardIns
 
 function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.corp.hq.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
+  return id;
+}
+
+function moveUnusedCorpCardToHq(state: GameState, definitionId: string): CardInstanceId {
+  const serverCardIds = new Set(state.corp.servers.flatMap((server) => [...server.ice, ...server.root]));
+  const entry = Object.entries(state.cardInstances).find(([id, card]) => card.definitionId === definitionId && !serverCardIds.has(id));
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing unused ${definitionId}`);
+  const id = entry[0];
   removeEverywhere(state, id);
   state.corp.hq.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };

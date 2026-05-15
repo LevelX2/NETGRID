@@ -312,6 +312,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const economyReserve = evaluateEconomyReserve(input, candidate);
   const iceRez = evaluateIceRez(input, candidate);
   const scoringWindow = evaluateScoringWindow(input, candidate);
+  const scoringProgress = evaluateCorpScoringProgress(input, candidate);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
@@ -323,6 +324,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     economyReserve.score * profile.weights.economyReserve +
     iceRez.score * profile.weights.iceRez +
     scoringWindow.score * profile.weights.scoringWindow +
+    scoringProgress.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(input, candidate, profile.riskTolerance) -
@@ -338,6 +340,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     ...economyReserve.evidence,
     ...iceRez.evidence,
     ...scoringWindow.evidence,
+    ...scoringProgress.evidence,
     ...remoteRootExposureEvidence(input, candidate),
     ...remoteIntent.evidence,
     `belief_version:${beliefState.version}`,
@@ -347,7 +350,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -431,6 +434,51 @@ export function evaluateScoringWindow(input: AiDecisionInput, candidate: CorpPla
     reasons: hasScoreAction ? ["legal_score_action"] : hasAdvanceAction ? ["legal_advance_action"] : ["no_current_score_window"],
     evidence: [`score_action:${hasScoreAction}`, `advance_action:${hasAdvanceAction}`, `clicks:${features.clicks}`]
   };
+}
+
+export function evaluateCorpScoringProgress(input: AiDecisionInput, candidate: CorpPlanCandidate): CorpPlanEvaluatorResult {
+  const features = extractCorpPlanFeatures(input);
+  const hqIce = features.serverFeatures.get("hq")?.iceCount ?? 0;
+  const rdIce = features.serverFeatures.get("rd")?.iceCount ?? 0;
+  const centralIce = hqIce + rdIce;
+  const stalledWithoutPoints = features.agendaPoints === 0 && input.actionNumber >= 24;
+  const lateWithoutPoints = features.agendaPoints === 0 && input.actionNumber >= 48;
+  const scoreActions = actionsForCandidate(input, candidate);
+  const hasScoreAction = scoreActions.some((action) => action.type === "score_agenda");
+  const hasProtectedAgendaInstall = scoreActions.some((action) => action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole) && remoteRootActionSecurityScore(input, action) > 0);
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (candidate.kind === "score_now" && hasScoreAction) {
+    score += 180;
+    reasons.push("corp_score_window_close_now");
+  }
+  if ((candidate.kind === "score_next_turn" || candidate.kind === "build_scoring_remote") && hasProtectedAgendaInstall) {
+    score += stalledWithoutPoints ? 120 : 55;
+    if (lateWithoutPoints) score += 55;
+    reasons.push("protected_agenda_scoring_progress");
+  }
+  if ((candidate.kind === "protect_hq" || candidate.kind === "protect_rnd") && stalledWithoutPoints && hqIce > 0 && rdIce > 0) {
+    score -= lateWithoutPoints ? 105 : 65;
+    reasons.push("central_defense_saturated_before_scoring");
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      `scoring_progress_score:${score}`,
+      `corp_points:${features.agendaPoints}`,
+      `scoring_progress_action:${input.actionNumber}`,
+      `central_ice:${centralIce}`,
+      `protected_agenda_install:${hasProtectedAgendaInstall}`,
+      `score_now_action:${hasScoreAction}`
+    ]
+  };
+}
+
+function actionsForCandidate(input: AiDecisionInput, candidate: CorpPlanCandidate): LegalAction[] {
+  return candidate.legalActionIds.map((actionId) => input.legalActions.find((action) => action.actionId === actionId)).filter((action): action is LegalAction => Boolean(action));
 }
 
 export function evaluateRemoteIntentMemory(input: AiDecisionInput, beliefState: BeliefState = reconstructBeliefState(input)): RemoteIntentMemory {
