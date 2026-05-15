@@ -415,6 +415,14 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(
       expect.arrayContaining([...ONR_V1_9_22_RELEASE_CARD_IDS]),
     );
+    expect(
+      cardsById["onr_v1_308_acme-savings-and-loan"]?.text,
+    ).toBe(
+      "Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain 12 credits and trash ACME S&L. For the remainder of the game, pay 1 credit at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay 12 credits.",
+    );
+    expect(
+      cardsById["onr_v1_308_acme-savings-and-loan"]?.text,
+    ).not.toContain("gain 3 credits");
     for (const cardId of ONR_V1_RUNTIME_RELEASE_CARD_IDS) {
       const card = cardsById[cardId];
       expect(card, cardId).toBeDefined();

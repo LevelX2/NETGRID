@@ -2301,7 +2301,7 @@ const ONR_V1_9_5_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_219_superior-net-barriers":
     "While scored, all wall ice gets +1 strength.",
   "onr_v1_308_acme-savings-and-loan":
-    "When rezzed, gain 3 credits. At the start of each of your turns, gain 1 credit while ACME Savings and Loan is rezzed.",
+    "Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain 12 credits and trash ACME S&L. For the remainder of the game, pay 1 credit at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay 12 credits.",
 };
 
 const ONR_V1_9_6_TEXT_OVERRIDES: Partial<Record<string, string>> = {

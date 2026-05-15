@@ -49,6 +49,25 @@ Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_CONTACTS_DATA
 | Closed Accounts | `onr_v1_285_closed-accounts` | Engine-Pfad funktioniert tagged-only und setzt Runner-Credits auf 0 | No-tag-, Tag-drift-, Side-/Stale- und Payload-Test ergänzt |
 | Datapool by Zetatech | `onr_v1_287_datapool-by-zetatech` | Engine-Pfad funktioniert tagged-only und gibt exakt 2 Tags | No-tag-, Tag-drift-, Side-/Stale- und Payload-Test ergänzt |
 
+## Runde 2026-05-15-immunity-cinderella
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_IMMUNITY_CINDERELLA_IMPLEMENTATION.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Diplomatic Immunity | `onr_v1_160_diplomatic-immunity` | Nacharbeit umgesetzt: installiertes Resource-Profil verhindert Meat Damage; Korp kann per Agenda-Punkt-Forfeit canceln | Prevention-/Cancel-Payload, Agenda-Kosten und Replay ergänzt |
+| AI Chief Financial Officer | `onr_v1_188_ai-chief-financial-officer` | Engine-Pfad bleibt Hidden-Zone-sicher und zieht hart maximal 5 Karten | Sourcebindung, kurze R&D, wrong-side/stale und Replay ergänzt |
+| Corporate War | `onr_v1_196_corporate-war` | Engine-Pfad funktioniert an der exakt-12-Credits-Schwelle | Grenzwert-, Payload- und Replay-Test ergänzt |
+| Political Coup | `onr_v1_209_political-coup` | Engine-Pfad bleibt source-bound bei mehreren gescorten Kopien | Power-Counter-Kosten, Payload und Replay ergänzt |
+| Ball and Chain | `onr_v1_222_ball-and-chain` | Nacharbeit umgesetzt: Future-Encounter-Tax bezahlt oder beendet Run am nächsten ICE | Taxquelle, Zahlung/Nichtzahlung und Replay ergänzt |
+| Cinderella | `onr_v1_228_cinderella` | Nacharbeit umgesetzt: Trace-Erfolg beendet Run, trasht Hardware und verursacht 2 nicht verhinderbares Meat Damage ohne Tag | Shared-/Manifest-/AI-Vertrag und Replay-Test korrigiert |
+| Homewrecker | `onr_v1_248_homewrecker` | Nacharbeit umgesetzt: Trace-Erfolg analog Cinderella mit Trace 5 | Shared-/Manifest-/AI-Vertrag und Replay-Test korrigiert |
+| Management Shake-Up | `onr_v1_292_management-shake-up` | Nacharbeit umgesetzt: drei Advancement-Counter auf advancebare installierte Korp-Karten | Manifest-/AI-Vertrag, Payload und Replay ergänzt |
+| Corprunner's Shattered Remains | `onr_v1_315_corprunners-shattered-remains` | Nacharbeit umgesetzt: Hardwaretrash skaliert mit Advancement-Countern | Mehrhardware-Test und Count-Payload ergänzt |
+| Tokyo-Chiba Infighting | `onr_v1_371_tokyo-chiba-infighting` | Engine-Pfad funktioniert servergebunden mit 2 Credits nach erfolglosem Run | Source-/Server-/Credit-Payload und Replay ergänzt |
+
 ## Runde 2026-05-15-hammer-rio
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

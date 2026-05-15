@@ -35,7 +35,7 @@
       "id": "corp_v195_acme_savings_and_loan",
       "planKinds": [
         "recover_economy",
-        "bait_runner"
+        "managed_risk_economy"
       ],
       "cards": [
         "onr_v1_308_acme-savings-and-loan"

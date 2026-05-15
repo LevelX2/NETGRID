@@ -7657,7 +7657,14 @@ describe("V1.9.5 Mechanikpaket N", () => {
       (DEMO_CARDS_BY_ID["onr_v1_279_wall-of-static"]?.strength ?? 0) + 1,
     );
 
-    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    const scoredAgendaId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_203_hostile-takeover",
+    );
+    const acmeId = moveCorpCardToHq(
+      state,
+      "onr_v1_308_acme-savings-and-loan",
+    );
     state.activeSide = "corp";
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
@@ -7677,14 +7684,209 @@ describe("V1.9.5 Mechanikpaket N", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
     );
-    expect(state.corp.credits).toBe(13);
+    expect(state.corp.credits).toBe(22);
+    expect(state.corp.scoreArea).not.toContain(scoredAgendaId);
+    expect(state.corp.archives).toContain(acmeId);
+    expect(state.acmeSavingsAndLoanObligations).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      cardDefinitionId: "onr_v1_308_acme-savings-and-loan",
+      agendaPointCost: 1,
+      gainedCredits: 12,
+      selfTrashed: true,
+      acmeSavingsAndLoanObligationsAfter: 1,
+    });
 
-    state.activeSide = "runner";
-    state.phase = "runner_action_phase";
-    state.timingPoint = "runner_action.main";
-    state.runner.clicks = 1;
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    expect(state.corp.credits).toBe(14);
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(21);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+      acmeSavingsAndLoanAbility: "end_of_turn_payment",
+      acmeSavingsAndLoanPaymentPaid: 1,
+      corpCreditsAfter: 21,
+    });
+  });
+
+  it("requires 1 agenda point to rez ACME Savings and Loan", () => {
+    let state = apply(
+      v195CardReleaseGame("v195-acme-rez-cost-no-agenda"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_308_acme-savings-and-loan",
+      ),
+    ).toBe(false);
+  });
+
+  it("makes the Corp lose at end of turn when an ACME obligation cannot be paid", () => {
+    let state = apply(
+      v195CardReleaseGame("v195-acme-unpaid-loss"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    scoreCorpAgendaForTest(state, "onr_v1_203_hostile-takeover");
+    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+
+    state.corp.credits = 0;
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+
+    expect(state.winner).toBe("runner");
+    expect(state.gameEndReason).toBe("acme_savings_and_loan_unpaid");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+      acmeSavingsAndLoanAbility: "end_of_turn_payment",
+      acmeSavingsAndLoanPaymentFailed: true,
+      gameEndReason: "acme_savings_and_loan_unpaid",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"hq"|"rd"|"cardInstances"|"privatePayload"/,
+    );
+  });
+
+  it("lets the Corp pay 12 credits to remove an ACME obligation and score 1 agenda point", () => {
+    let state = apply(
+      v195CardReleaseGame("v195-acme-remove-obligation"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    scoreCorpAgendaForTest(state, "onr_v1_203_hostile-takeover");
+    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBefore = state.corp.credits;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.acmeSavingsAndLoanAbility === "remove_obligation",
+    );
+
+    expect(state.corp.credits).toBe(creditsBefore - 12);
+    expect(state.acmeSavingsAndLoanObligations).toBe(0);
+    expect(state.corpBonusAgendaPoints).toBe(1);
+    expect(agendaPoints(state, "corp")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      acmeSavingsAndLoanAbility: "remove_obligation",
+      acmeSavingsAndLoanPaymentPaid: 12,
+      gainedAgendaPoints: 1,
+      acmeSavingsAndLoanObligationsAfter: 0,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("revalidates ACME removal actions for side, stale state and active obligation", () => {
+    let state = apply(
+      v195CardReleaseGame("v195-acme-removal-revalidation"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    scoreCorpAgendaForTest(state, "onr_v1_203_hostile-takeover");
+    moveCorpCardToHq(state, "onr_v1_308_acme-savings-and-loan");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_308_acme-savings-and-loan",
+    );
+    const removeAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.acmeSavingsAndLoanAbility === "remove_obligation",
+    );
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: removeAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "v195-acme-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: removeAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "v195-acme-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const noObligation = structuredClone(state);
+    noObligation.acmeSavingsAndLoanObligations = 0;
+    const missingObligation = applyAction(noObligation, {
+      matchId: noObligation.matchId,
+      side: "corp",
+      actionId: removeAction.actionId,
+      clientKnownStateVersion: noObligation.stateVersion,
+      idempotencyKey: "v195-acme-no-obligation",
+    });
+    expect(missingObligation.ok).toBe(false);
+    if (!missingObligation.ok)
+      expect(missingObligation.error.code).toBe("ERR_UNKNOWN_ACTION");
   });
 });
 
@@ -8697,6 +8899,19 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       hardwareState,
       "onr_v1_315_corprunners-shattered-remains",
     );
+    const shatteredId = hardwareState.corp.servers
+      .flatMap((server) => server.root)
+      .find(
+        (id) =>
+          hardwareState.cardInstances[id]?.definitionId ===
+          "onr_v1_315_corprunners-shattered-remains",
+      );
+    expect(shatteredId).toBeDefined();
+    if (shatteredId)
+      hardwareState.cardInstances[shatteredId] = {
+        ...hardwareState.cardInstances[shatteredId]!,
+        advancementCounters: 1,
+      };
     hardwareState = apply(
       hardwareState,
       "runner",
@@ -21834,6 +22049,445 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
   });
 });
 
+describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () => {
+  it("routes Diplomatic Immunity through a Corp cancel window and replay-safe prevention", () => {
+    let state = createGameAfterSetup({
+      seed: "spotcheck-diplomatic-immunity-prevent",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        cards: [
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.tags = 1;
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    state.corp.clicks = 3;
+    installRunnerResourceForTest(state, "onr_v1_160_diplomatic-immunity");
+    scoreCorpAgendaForTest(state, "simple_agenda");
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "v120.event_modification.prevent",
+    });
+    const preventOption = state.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice").actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [String(preventOption)],
+      },
+    });
+    expect(wrongSide.ok).toBe(false);
+    state = applyChoice(state, "corp", String(preventOption));
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "prevented",
+      sourceDefinitionId: "onr_v1_160_diplomatic-immunity",
+      damageAmount: 0,
+      preventedAmount: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /runner_|grip|stack|cardInstances|privatePayload/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let cancelState = createGameAfterSetup({
+      seed: "spotcheck-diplomatic-immunity-cancel",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        cards: [
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    cancelState = apply(cancelState, "corp", (action) => action.type === "mandatory_draw");
+    cancelState.runner.tags = 1;
+    cancelState.corp.credits = 10;
+    installRunnerResourceForTest(cancelState, "onr_v1_160_diplomatic-immunity");
+    const agendaId = scoreCorpAgendaForTest(cancelState, "simple_agenda");
+    moveCorpCardToHq(cancelState, "onr_v1_301_punitive-counterstrike");
+    cancelState = apply(
+      cancelState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(cancelState, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    cancelState = applyChoice(cancelState, "corp", "pass");
+    expect(cancelState.specialZones?.removedFromGame).toContain(agendaId);
+    const cancelPayload = cancelState.eventLog.at(-1)?.publicPayload;
+    expect(cancelPayload).toMatchObject({
+      eventModificationDecision: "cancel",
+      agendaPointCost: 1,
+      damageAmount: 2,
+      cardsTrashed: 2,
+    });
+    expect(Number(cancelPayload?.agendaPointCostPaid ?? 0)).toBeGreaterThanOrEqual(
+      1,
+    );
+  });
+
+  it("hardens AI Chief Financial Officer source binding, short decks and payload redaction", () => {
+    let state = createGameAfterSetup({
+      seed: "spotcheck-ai-cfo",
+      runnerDeck: ONR_V1_9_2_RUNNER_DECK,
+      corpDeck: ONR_V1_9_2_CORP_DECK,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const firstCfo = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_188_ai-chief-financial-officer",
+    );
+    const secondCfo = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_188_ai-chief-financial-officer",
+    );
+    keepOnlyCorpHqCards(state, [
+      moveCorpCardToHq(state, "simple_agenda"),
+      moveCorpCardToHq(state, "onr_v1_203_hostile-takeover"),
+    ]);
+    keepOnlyCorpArchivesCards(state, []);
+    while (state.corp.rd.length > 3) {
+      const id = state.corp.rd.pop();
+      if (id) {
+        removeEverywhere(state, id);
+        delete state.cardInstances[id];
+      }
+    }
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.agendaAbility === "ai_chief_financial_officer" &&
+        action.payload?.cardId === secondCfo,
+    );
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+      }).ok,
+    ).toBe(false);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === legal.actionId);
+    expect(state.corp.hq.length).toBeLessThanOrEqual(5);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      agendaAbility: "ai_chief_financial_officer",
+      cardDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+      sourceDefinitionId: "onr_v1_188_ai-chief-financial-officer",
+      hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"hq"|"rd"|"archives"|"cardInstances"|"privatePayload"|simple_agenda/,
+    );
+    expect(state.corp.scoreArea).toEqual(expect.arrayContaining([firstCfo, secondCfo]));
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Corporate War and Political Coup source-bound and replay-stable", () => {
+    let warState = createGameAfterSetup({
+      seed: "spotcheck-corporate-war-exact-12",
+      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        cards: [
+          { id: "onr_v1_196_corporate-war", quantity: 2 },
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    warState = apply(warState, "corp", (action) => action.type === "mandatory_draw");
+    warState.corp.credits = 12;
+    warState.corp.clicks = 10;
+    const warId = putCorpRootInRemote(warState, "onr_v1_196_corporate-war");
+    warState.cardInstances[warId] = {
+      ...warState.cardInstances[warId]!,
+      advancementCounters: 3,
+    };
+    const warInitial = structuredClone(warState);
+    const warReplayStart = warState.eventLog.length;
+    warState = apply(
+      warState,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(warState, action) === "onr_v1_196_corporate-war",
+    );
+    expect(warState.corp.credits).toBe(24);
+    expect(warState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      corporateWarThresholdMet: true,
+      onScoreGainCredits: 12,
+    });
+    expect(replayEvents(warInitial, warState.eventLog.slice(warReplayStart)).ok).toBe(true);
+
+    let coupState = createGameAfterSetup({
+      seed: "spotcheck-political-coup",
+      runnerDeck: ONR_V1_8_1_RUNNER_DECK,
+      corpDeck: ONR_V1_8_1_CORP_DECK,
+      agendaPointsToWin: 7,
+    });
+    coupState = apply(coupState, "corp", (action) => action.type === "mandatory_draw");
+    const firstCoup = scoreCorpAgendaForTest(coupState, "onr_v1_209_political-coup");
+    const secondCoup = scoreCorpAgendaForTest(coupState, "onr_v1_209_political-coup");
+    setCardCounterForTest(coupState, firstCoup, "power", 12);
+    setCardCounterForTest(coupState, secondCoup, "power", 12);
+    const coup = mustAction(
+      coupState,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.agendaAbility === "political_coup" &&
+        action.payload?.cardId === secondCoup,
+    );
+    const coupInitial = structuredClone(coupState);
+    coupState = apply(coupState, "corp", (action) => action.actionId === coup.actionId);
+    expect(cardCounterAmount(coupState, firstCoup, "power")).toBe(12);
+    expect(cardCounterAmount(coupState, secondCoup, "power")).toBe(9);
+    expect(coupState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      agendaAbility: "political_coup",
+      spentPowerCounters: 3,
+      gainedCredits: 3,
+    });
+    expect(replayEvents(coupInitial, coupState.eventLog.slice(coupInitial.eventLog.length)).ok).toBe(true);
+  });
+
+  it("resolves Cinderella and Homewrecker as unpreventable hardware-trash trace ICE", () => {
+    for (const [definitionId, traceStrength] of [
+      ["onr_v1_228_cinderella", 6],
+      ["onr_v1_248_homewrecker", 5],
+    ] as const) {
+      let state = toRunnerTurn(v1914TraceTagResourceGame(`spotcheck-${definitionId}`));
+      state.runner.credits = 20;
+      state.corp.credits = 20;
+      installRunnerHardwareForTest(state, "onr_v1_120_armadillo-armored-road-home");
+      installRunnerHardwareForTest(
+        state,
+        "onr_v1_132_microtech-trode-set",
+      );
+      installRunnerResourceForTest(state, "onr_v1_167_leland-corporate-bodyguard");
+      putCorpIceOnServer(state, "rd", definitionId);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      expect(state.trace).toMatchObject({ baseTraceStrength: traceStrength });
+      state = applyChoice(state, "corp", "bid_10");
+      state = applyChoice(state, "runner", "bid_0");
+      expect(state.runner.tags).toBe(0);
+      expect(state.pendingChoice).toBeUndefined();
+      expect(state.run).toBeUndefined();
+      expect(state.runner.heap.length).toBeGreaterThan(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        traceSuccessful: true,
+        tagsAdded: 0,
+        traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+        trashedCount: 1,
+        damageCannotBePrevented: true,
+        damageAmount: 2,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        /grip|stack|cardInstances|privatePayload/,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+
+      let miss = toRunnerTurn(v1914TraceTagResourceGame(`spotcheck-${definitionId}-miss`));
+      miss.runner.credits = 20;
+      miss.corp.credits = 20;
+      installRunnerHardwareForTest(miss, "onr_v1_132_microtech-trode-set");
+      putCorpIceOnServer(miss, "rd", definitionId);
+      miss = apply(miss, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+      miss = apply(miss, "corp", (action) => action.type === "rez_ice" && sourceDefinition(miss, action) === definitionId);
+      miss = apply(miss, "runner", (action) => action.type === "continue_run");
+      miss = applyChoice(miss, "corp", "bid_0");
+      miss = applyChoice(miss, "runner", "bid_20");
+      expect(miss.run?.phase).toBe("encounter_ice");
+      expect(miss.runner.heap.some((id) => miss.cardInstances[id]?.definitionId === "onr_v1_132_microtech-trode-set")).toBe(false);
+    }
+  });
+
+  it("places Management Shake-Up advancement counters and scales Shattered Remains hardware trash", () => {
+    let state = v1919AgendaOveradvanceGame("spotcheck-management-shake-up");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 50;
+    state.corp.clicks = 10;
+    const agendaId = putCorpRootInRemote(state, "onr_v1_202_genetics-visionary-acquisition");
+    const virusId = putCorpRootInRemote(state, "onr_v1_348_virus-test-site");
+    moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_292_management-shake-up",
+    );
+    expect(
+      (state.cardInstances[agendaId]?.advancementCounters ?? 0) +
+        (state.cardInstances[virusId]?.advancementCounters ?? 0),
+    ).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v1919OperationAbility: "add_advancement_counters",
+      addedAdvancementCounters: 3,
+      targetCount: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /targetCardDefinitionId|cardInstances|privatePayload/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let access = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-shattered-remains",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
+          cards: [
+            { id: "simple_setup_hardware", quantity: 2 },
+            ...ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK.cards.filter(
+              (card) => card.id !== "simple_setup_hardware",
+            ),
+          ],
+        },
+        corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    access.runner.credits = 20;
+    const firstHardware = installRunnerHardwareForTest(access, "simple_setup_hardware");
+    const secondHardware = moveRunnerCardCopyToGrip(access, "simple_setup_hardware");
+    removeEverywhere(access, secondHardware);
+    access.runner.rig.hardware.push(secondHardware);
+    access.cardInstances[secondHardware] = {
+      ...access.cardInstances[secondHardware]!,
+      zone: { side: "runner", zone: "rig" },
+      faceup: true,
+      rezzed: true,
+    };
+    const shatteredId = putCorpRootInRemote(
+      access,
+      "onr_v1_315_corprunners-shattered-remains",
+    );
+    access.cardInstances[shatteredId] = {
+      ...access.cardInstances[shatteredId]!,
+      advancementCounters: 2,
+    };
+    const accessInitial = structuredClone(access);
+    const accessReplayStart = access.eventLog.length;
+    access = apply(access, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    access = apply(access, "runner", (action) => action.type === "access_card");
+    expect(access.runner.heap).toEqual(expect.arrayContaining([firstHardware, secondHardware]));
+    expect(access.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1919_access_ambush_trash_installed",
+      ambushDefinitionId: "onr_v1_315_corprunners-shattered-remains",
+      advancementCounterCount: 2,
+      trashedCount: 2,
+    });
+    expect(replayEvents(accessInitial, access.eventLog.slice(accessReplayStart)).ok).toBe(true);
+  });
+
+  it("keeps Ball and Chain tax and Tokyo-Chiba Infighting run bonus scoped to the current run/server", () => {
+    let taxState = toRunnerTurn(v181CardReleaseGame("spotcheck-ball-chain-tax"));
+    taxState.runner.credits = 0;
+    taxState.corp.credits = 20;
+    putCorpIceOnServer(taxState, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(taxState, "rd", "onr_v1_222_ball-and-chain");
+    taxState = apply(taxState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    taxState = apply(taxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(taxState, action) === "onr_v1_222_ball-and-chain");
+    taxState = apply(taxState, "runner", (action) => action.type === "continue_run");
+    const initial = structuredClone(taxState);
+    const replayStart = taxState.eventLog.length;
+    taxState = apply(taxState, "runner", (action) => action.type === "continue_run");
+    taxState = apply(taxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(taxState, action) === "simple_barrier_ice");
+    expect(taxState.run).toBeUndefined();
+    expect(taxState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      encounterTaxForFutureIce: 1,
+      encounterTaxPaid: 0,
+      encounterTaxSource: "onr_v1_222_ball-and-chain",
+      result: "ended",
+    });
+    expect(replayEvents(initial, taxState.eventLog.slice(replayStart)).ok).toBe(true);
+
+    let tokyo = v163CardReleaseGame("spotcheck-tokyo-chiba-bonus");
+    tokyo = apply(tokyo, "corp", (action) => action.type === "mandatory_draw");
+    tokyo.corp.credits = 10;
+    tokyo.corp.clicks = 3;
+    const tokyoId = putCorpRootInRemote(tokyo, "onr_v1_371_tokyo-chiba-infighting");
+    putCorpIceOnServer(tokyo, "remote_1", "onr_v1_232_crystal-wall");
+    tokyo.cardInstances[tokyoId] = {
+      ...tokyo.cardInstances[tokyoId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    tokyo = toRunnerTurnFromCorpMain(tokyo);
+    tokyo = apply(tokyo, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    tokyo = apply(tokyo, "corp", (action) => action.type === "rez_ice" && sourceDefinition(tokyo, action) === "onr_v1_232_crystal-wall");
+    const creditsBefore = tokyo.corp.credits;
+    tokyo = apply(tokyo, "runner", (action) => action.type === "continue_run");
+    expect(tokyo.corp.credits).toBe(creditsBefore + 2);
+    expect(tokyo.eventLog.at(-1)?.publicPayload).toMatchObject({
+      tokyoChibaInfightingBonus: true,
+      corpCreditsGained: 2,
+      corpCreditsAfter: creditsBefore + 2,
+    });
+  });
+});
+
 const ONR_V1_0_5K_FINAL_CARD_IDS = [
   "onr_v1_015_codeslinger",
   "onr_v1_052_raffles",
@@ -24009,13 +24663,16 @@ function sourceDefinition(
 
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  return ids.reduce(
+  const scoredPoints = ids.reduce(
     (sum, id) =>
       sum +
       (DEMO_CARDS_BY_ID[state.cardInstances[id]?.definitionId ?? ""]
         ?.agendaPoints ?? 0),
     0,
   );
+  return side === "corp"
+    ? scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0))
+    : scoredPoints;
 }
 
 function cardCounterAmount(

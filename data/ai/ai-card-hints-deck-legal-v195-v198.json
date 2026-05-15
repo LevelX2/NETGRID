@@ -46,26 +46,34 @@
       "roles": [
         "asset",
         "economy_asset",
-        "persistent_income"
+        "agenda_point_cost",
+        "persistent_liability"
       ],
       "planRoles": [
         "recover_economy",
-        "bait_runner"
+        "managed_risk_economy"
       ],
       "requiredMechanics": [
         "install_remote",
         "rez_card",
+        "agenda_point_rez_cost",
+        "on_rez_credit_gain",
+        "self_trash_on_rez",
         "trash_on_access",
-        "start_of_turn_trigger",
-        "gain_credit"
+        "end_of_turn_payment",
+        "lose_the_game",
+        "paid_effect_removal",
+        "score_agenda_point"
       ],
       "valueHints": {
-        "economy": 3,
-        "threat": 1
+        "economy": 4,
+        "risk": 4
       },
       "riskTags": [
-        "timer_pressure",
-        "agenda_dependency"
+        "agenda_point_cost",
+        "end_turn_payment",
+        "lose_condition",
+        "persistent_public_state"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

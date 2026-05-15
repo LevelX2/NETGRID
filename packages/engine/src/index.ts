@@ -200,6 +200,7 @@ const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
+const DIPLOMATIC_IMMUNITY_ID = "onr_v1_160_diplomatic-immunity";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
 const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
@@ -209,6 +210,8 @@ const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
 const FANG_2_0_ID = "onr_v1_241_fang-2-0";
+const CINDERELLA_ID = "onr_v1_228_cinderella";
+const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
 const V1917_ECONOMY_ASSET_IDS = new Set([
   "onr_v1_309_bbs-whispering-campaign",
@@ -1626,14 +1629,10 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       ),
   },
   [V1919_MANAGEMENT_SHAKE_UP_ID]: {
-    name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (state) => v1919CorpAgendaCounterTarget(state) !== undefined,
+    name: "onr_v1919_corp_operation_add_three_advancement_counters",
+    canPlay: (state) => v1919AdvanceableInstalledTargets(state).length > 0,
     resolve: (state, legalAction) =>
-      resolveV1919CounterOperation(
-        state,
-        legalAction,
-        V1919_MANAGEMENT_SHAKE_UP_ID,
-      ),
+      resolveManagementShakeUpOperation(state, legalAction),
   },
   [V1919_PROJECT_CONSULTANTS_ID]: {
     name: "onr_v1919_corp_operation_advance_installed_agenda",
@@ -1717,9 +1716,9 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
     },
   },
   [ACME_SAVINGS_AND_LOAN_ID]: {
-    name: "corp_asset_acme_rez_gain_3",
+    name: "corp_asset_acme_rez_gain_12_self_trash_persistent_debt",
     resolve: (state) => {
-      state.corp.credits += 3;
+      state.corp.credits += 12;
     },
   },
 };
@@ -1870,6 +1869,8 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     winner: null,
     agendaPointsToWin:
       config.agendaPointsToWin ?? STANDARD_AGENDA_POINTS_TO_WIN,
+    acmeSavingsAndLoanObligations: 0,
+    corpBonusAgendaPoints: 0,
     setup:
       config.setupMode === "completed"
         ? {
@@ -2556,6 +2557,18 @@ export function validateGameState(state: GameState): ValidationResult {
         "runnerAgendaPointsToForfeit must be a non-negative integer.",
       );
   }
+  if (state.acmeSavingsAndLoanObligations !== undefined) {
+    const obligations = state.acmeSavingsAndLoanObligations;
+    if (!Number.isInteger(obligations) || obligations < 0)
+      errors.push(
+        "acmeSavingsAndLoanObligations must be a non-negative integer.",
+      );
+  }
+  if (state.corpBonusAgendaPoints !== undefined) {
+    const points = state.corpBonusAgendaPoints;
+    if (!Number.isInteger(points) || points < 0)
+      errors.push("corpBonusAgendaPoints must be a non-negative integer.");
+  }
   if (
     state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits !== undefined
   ) {
@@ -2908,6 +2921,25 @@ function corpMainActions(state: GameState): LegalAction[] {
       { clicks: 1 },
     ]),
   );
+  if (acmeSavingsAndLoanObligationCount(state) > 0 && state.corp.credits >= 12) {
+    actions.push(
+      action(
+        state,
+        "corp",
+        "trigger_ability",
+        "ACME Savings and Loan: 12 Credits zahlen und 1 Agenda-Punkt scoren",
+        "game_rule",
+        [{ clicks: 1, credits: 12 }],
+        {
+          acmeSavingsAndLoanAbility: "remove_obligation",
+          acmeSavingsAndLoanCreditCost: 12,
+          acmeSavingsAndLoanScoreAgendaPoints: 1,
+          acmeSavingsAndLoanObligationsBefore:
+            acmeSavingsAndLoanObligationCount(state),
+        },
+      ),
+    );
+  }
   if (state.corp.rd.length > 0)
     actions.push(
       action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [
@@ -3087,8 +3119,17 @@ function corpMainActions(state: GameState): LegalAction[] {
       if (
         (definition.type === "asset" || definition.type === "upgrade") &&
         !mustInstance(state.cardInstances, id).rezzed &&
-        state.corp.credits >= rezCost
+        state.corp.credits >= rezCost &&
+        (definition.id !== ACME_SAVINGS_AND_LOAN_ID ||
+          corpAgendaPointTotal(state) >= 1)
       ) {
+        const acmeRezCost =
+          definition.id === ACME_SAVINGS_AND_LOAN_ID
+            ? {
+                agendaPointCost: 1,
+                acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+              }
+            : {};
         actions.push(
           action(
             state,
@@ -3100,6 +3141,7 @@ function corpMainActions(state: GameState): LegalAction[] {
             {
               cardId: id,
               rootRez: true,
+              ...acmeRezCost,
               ...(rezCostReductionSourceDefinitionIds.length > 0
                 ? {
                     rezCostReductionSourceDefinitionIds:
@@ -7095,6 +7137,7 @@ function performAction(
         String(legalAction.payload?.cardId),
         legalAction.payload?.rootRez === true ||
           legalAction.payload?.assetRez === true,
+        legalAction,
       );
       expireV1922CorporateRetreatAbilities(state);
       return;
@@ -7323,7 +7366,7 @@ function performAction(
       resolvePendingChoice(state, legalAction, playerAction);
       return;
     case "end_turn":
-      endTurn(state, legalAction.side);
+      endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
       if (legalAction.payload?.runnerAbility === "remove_data_raven_counter") {
@@ -7366,6 +7409,47 @@ function performAction(
           ...(legalAction.payload ?? {}),
           fangRunLockCleared: true,
           runnerCreditsAfter: state.runner.credits,
+        };
+        return;
+      }
+      if (
+        legalAction.payload?.acmeSavingsAndLoanAbility ===
+        "remove_obligation"
+      ) {
+        if (legalAction.side !== "corp")
+          throw new Error("Nur die Korp darf ACME Savings and Loan abloesen.");
+        const obligationsBefore = acmeSavingsAndLoanObligationCount(state);
+        if (obligationsBefore <= 0)
+          throw new Error(
+            "Es gibt keine aktive ACME-Savings-and-Loan-Verpflichtung.",
+          );
+        const creditCost = Number(
+          legalAction.payload?.acmeSavingsAndLoanCreditCost ?? 0,
+        );
+        if (!Number.isInteger(creditCost) || creditCost !== 12)
+          throw new Error("ACME Savings and Loan verlangt genau 12 Credits.");
+        const scorePoints = Number(
+          legalAction.payload?.acmeSavingsAndLoanScoreAgendaPoints ?? 0,
+        );
+        if (!Number.isInteger(scorePoints) || scorePoints !== 1)
+          throw new Error(
+            "ACME Savings and Loan scored genau 1 Agenda-Punkt.",
+          );
+        spendClick(state, "corp");
+        spendCredits(state, "corp", creditCost);
+        removeAcmeSavingsAndLoanObligation(state);
+        state.corpBonusAgendaPoints =
+          Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0)) +
+          scorePoints;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          acmeSavingsAndLoanObligationsBefore: obligationsBefore,
+          acmeSavingsAndLoanObligationsAfter:
+            acmeSavingsAndLoanObligationCount(state),
+          acmeSavingsAndLoanPaymentPaid: creditCost,
+          gainedAgendaPoints: scorePoints,
+          corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
+          corpCreditsAfter: state.corp.credits,
         };
         return;
       }
@@ -7461,15 +7545,14 @@ function resolveAiChiefFinancialOfficer(
       zone: { side: "corp", zone: "rd" },
     };
   }
-  const drawAmount = Math.max(
-    0,
-    Math.floor(Number(legalAction.payload?.drawCardsAmount ?? 5)),
-  );
+  const drawAmount = 5;
   const beforeDraw = state.corp.hq.length;
   drawCorpCards(state, drawAmount);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     cardId: agendaId,
+    cardDefinitionId: AI_CHIEF_FINANCIAL_OFFICER_ID,
+    sourceDefinitionId: AI_CHIEF_FINANCIAL_OFFICER_ID,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
     shuffledCardsCount: previousHq.length + previousArchives.length,
@@ -7842,7 +7925,7 @@ function startRun(
       "Server has no approached ice.",
     );
     state.run.approachedIceId = approachedIceId;
-    approachOrEncounterIce(state, approachedIceId);
+    approachOrEncounterIce(state, approachedIceId, legalAction);
   } else {
     enterAccess(state, legalAction);
   }
@@ -7940,8 +8023,41 @@ function resolveApproachIceExposeAbility(
   state.timingPoint = "run.approach_ice";
 }
 
-function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
+function rezCard(
+  state: GameState,
+  cardId: string,
+  rootRez: boolean,
+  legalAction?: LegalAction,
+): void {
   const definition = definitionFor(state, cardId);
+  if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
+    if (!legalAction)
+      throw new Error("ACME Savings and Loan braucht eine LegalAction.");
+    const agendaCost = Number(legalAction?.payload?.agendaPointCost ?? 0);
+    if (!Number.isInteger(agendaCost) || agendaCost !== 1)
+      throw new Error("ACME Savings and Loan kostet genau 1 Agenda-Punkt.");
+    const costResult = spendCorpAgendaPointCost(state, agendaCost);
+    legalAction.payload = {
+      ...(legalAction?.payload ?? {}),
+      agendaPointCost: agendaCost,
+      agendaPointCostPaid: costResult.paidPoints,
+      acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+      acmeSavingsAndLoanObligationsBefore:
+        acmeSavingsAndLoanObligationCount(state),
+      ...(costResult.bonusPointsSpent > 0
+        ? { corpBonusAgendaPointsSpent: costResult.bonusPointsSpent }
+        : {}),
+      ...(costResult.forfeitedAgendaDefinitionIds.length > 0
+        ? {
+            forfeitedAgendaDefinitionIds:
+              costResult.forfeitedAgendaDefinitionIds.join(","),
+            specialZone: "removed_from_game",
+            specialZoneVisibility: "public",
+            specialZoneReason: "acme_savings_and_loan_rez_cost",
+          }
+        : {}),
+    };
+  }
   spendCredits(state, "corp", rezCostForCard(state, cardId));
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
@@ -7953,10 +8069,24 @@ function rezCard(state: GameState, cardId: string, rootRez: boolean): void {
   }
   if (rootRez && CORP_ROOT_REZ_RESOLVERS[definition.id]) {
     CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
+    if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
+      addAcmeSavingsAndLoanObligation(state, 1);
+      trashCorpInstalledCardToArchives(state, cardId as CardInstanceId);
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: 12,
+          selfTrashed: true,
+          acmeSavingsAndLoanObligationsAfter:
+            acmeSavingsAndLoanObligationCount(state),
+          corpCreditsAfter: state.corp.credits,
+        };
+      }
+    }
     return;
   }
   if (rootRez) return;
-  beginEncounter(state, cardId as CardInstanceId);
+  beginEncounter(state, cardId as CardInstanceId, legalAction);
 }
 
 function passApproachedIce(state: GameState): void {
@@ -7973,6 +8103,7 @@ function passApproachedIce(state: GameState): void {
 function approachOrEncounterIce(
   state: GameState,
   approachedIceId: CardInstanceId,
+  legalAction?: LegalAction,
 ): void {
   const run = mustRun(state);
   const ice = mustInstance(state.cardInstances, approachedIceId);
@@ -7983,7 +8114,7 @@ function approachOrEncounterIce(
     return;
   }
   if (ice.rezzed) {
-    beginEncounter(state, approachedIceId);
+    beginEncounter(state, approachedIceId, legalAction);
     return;
   }
   const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
@@ -8002,6 +8133,7 @@ function approachOrEncounterIce(
 function beginEncounter(
   state: GameState,
   encounteredIceId: CardInstanceId,
+  legalAction?: LegalAction,
 ): void {
   const run = mustRun(state);
   run.phase = "encounter_ice";
@@ -8038,10 +8170,26 @@ function beginEncounter(
   );
   if (encounterTax > 0) {
     if (availableRunnerRunCredits(state) < encounterTax) {
-      finishRun(state, false);
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          encounterTaxForFutureIce: encounterTax,
+          encounterTaxPaid: 0,
+          encounterTaxSource: "onr_v1_222_ball-and-chain",
+        };
+      }
+      finishRun(state, false, legalAction);
       return;
     }
     spendRunnerRunCredits(state, encounterTax);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        encounterTaxForFutureIce: encounterTax,
+        encounterTaxPaid: encounterTax,
+        encounterTaxSource: "onr_v1_222_ball-and-chain",
+      };
+    }
   }
   state.timingPoint = "run.encounter_ice";
   state.activeSide = "runner";
@@ -8279,7 +8427,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   run.jackOutLockedUntilEncounterEnds = false;
   resetBreakerStrength(state);
   if (ended) {
-    finishRun(state, false);
+    finishRun(state, false, legalAction);
     return;
   }
   applyBartmossPostEncounterTrigger(state, run, legalAction);
@@ -9571,7 +9719,8 @@ function resolveV1919AssetOnAccess(
       return byInstallCost !== 0 ? byInstallCost : left.localeCompare(right);
     });
     const trashLimit =
-      definition.id === V1919_EXPERIMENTAL_AI_ID
+      definition.id === V1919_EXPERIMENTAL_AI_ID ||
+      definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
         ? Math.max(0, mustInstance(state.cardInstances, cardId).advancementCounters)
         : 1;
     const selectedTargetIds = targetCardIds.slice(0, trashLimit);
@@ -9586,7 +9735,8 @@ function resolveV1919AssetOnAccess(
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1919_access_ambush_trash_installed",
         ambushDefinitionId: definition.id,
-        ...(definition.id === V1919_EXPERIMENTAL_AI_ID
+        ...(definition.id === V1919_EXPERIMENTAL_AI_ID ||
+        definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
           ? { advancementCounterCount: trashLimit }
           : {}),
         trashedCount: selectedTargetIds.length,
@@ -10093,21 +10243,20 @@ function tokyoChibaUnsuccessfulRunBonus(
   state: GameState,
   run: GameState["run"],
   successful: boolean,
-): number {
-  if (!run || successful) return 0;
+): { amount: number; sourceCardId?: CardInstanceId } {
+  if (!run || successful) return { amount: 0 };
   const attackedServer = state.corp.servers.find(
     (server) => server.id === run.attackedServerId,
   );
-  if (!attackedServer) return 0;
-  return attackedServer.root.some((cardId) => {
+  if (!attackedServer) return { amount: 0 };
+  const sourceCardId = attackedServer.root.find((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
     return (
       instance.rezzed &&
       definitionFor(state, cardId).id === "onr_v1_371_tokyo-chiba-infighting"
     );
-  })
-    ? 2
-    : 0;
+  });
+  return sourceCardId ? { amount: 2, sourceCardId } : { amount: 0 };
 }
 
 function finishRun(
@@ -10130,7 +10279,20 @@ function finishRun(
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
   const corpBonus = tokyoChibaUnsuccessfulRunBonus(state, run, successful);
   state.runner.credits += bonus;
-  state.corp.credits += corpBonus;
+  state.corp.credits += corpBonus.amount;
+  if (run && corpBonus.amount > 0 && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      tokyoChibaInfightingBonus: true,
+      sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+      serverId: run.attackedServerId,
+      corpCreditsGained: corpBonus.amount,
+      corpCreditsAfter: state.corp.credits,
+      ...(corpBonus.sourceCardId
+        ? { sourceCardId: corpBonus.sourceCardId }
+        : {}),
+    };
+  }
   if (allNighterBonusRunOnFinish && !state.winner) {
     ensureRunnerTurnFlags(state).allNighterBonusRunPending = true;
   }
@@ -10352,7 +10514,11 @@ function resolvePattelsVirusCounterChoice(
   delete state.pendingChoice;
 }
 
-function endTurn(state: GameState, side: Side): void {
+function endTurn(
+  state: GameState,
+  side: Side,
+  legalAction: LegalAction,
+): void {
   if (side === "runner") {
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
@@ -10367,8 +10533,48 @@ function endTurn(state: GameState, side: Side): void {
     corpFlags.scoredBlackOpsAgendaLastTurn =
       corpFlags.scoredBlackOpsAgendaThisTurn;
     corpFlags.scoredBlackOpsAgendaThisTurn = false;
+    resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
+    if (state.winner) return;
   }
   startDiscardPhase(state, side);
+}
+
+function resolveAcmeSavingsAndLoanEndOfCorpTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const obligations = acmeSavingsAndLoanObligationCount(state);
+  if (obligations <= 0) return;
+  const creditsBefore = state.corp.credits;
+  if (creditsBefore < obligations) {
+    state.winner = "runner";
+    state.gameEndReason = "acme_savings_and_loan_unpaid";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    delete state.pendingChoice;
+    delete state.run;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      acmeSavingsAndLoanAbility: "end_of_turn_payment",
+      acmeSavingsAndLoanObligations: obligations,
+      acmeSavingsAndLoanPaymentDue: obligations,
+      acmeSavingsAndLoanPaymentPaid: 0,
+      acmeSavingsAndLoanPaymentFailed: true,
+      corpCreditsBefore: creditsBefore,
+      corpCreditsAfter: state.corp.credits,
+    };
+    return;
+  }
+  state.corp.credits -= obligations;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    acmeSavingsAndLoanAbility: "end_of_turn_payment",
+    acmeSavingsAndLoanObligations: obligations,
+    acmeSavingsAndLoanPaymentDue: obligations,
+    acmeSavingsAndLoanPaymentPaid: obligations,
+    corpCreditsBefore: creditsBefore,
+    corpCreditsAfter: state.corp.credits,
+  };
 }
 
 function startDiscardPhase(state: GameState, side: Side): void {
@@ -10542,14 +10748,6 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   }, 0);
   if (polymerCount > 0) {
     credits(state, "corp", polymerCount);
-  }
-  const acmeCount = rezzedCorpRootCardIds(state).reduce((sum, cardId) => {
-    return definitionFor(state, cardId).id === ACME_SAVINGS_AND_LOAN_ID
-      ? sum + 1
-      : sum;
-  }, 0);
-  if (acmeCount > 0) {
-    credits(state, "corp", acmeCount);
   }
   let v1917RecurringAssetCount = 0;
   for (const cardId of rezzedCorpRootCardIds(state)) {
@@ -11015,6 +11213,7 @@ function collectEventModificationCandidates(
   event: ImminentEvent,
 ): EventModificationCandidate[] {
   if (event.eventType !== "damage") return [];
+  if (event.payload.cannotBePrevented === true) return [];
   const runtime = collectRuntimeDamagePreventionCandidates(state, event);
   const harness = collectHarnessDamagePreventionCandidates(state, event);
   return [...runtime, ...harness];
@@ -11035,6 +11234,25 @@ function collectRuntimeDamagePreventionCandidates(
   const candidates: EventModificationCandidate[] = [];
   for (const cardId of installed) {
     const definition = definitionFor(state, cardId);
+    if (definition.id === DIPLOMATIC_IMMUNITY_ID && damageType === "meat") {
+      candidates.push({
+        candidateId: `v1920_diplomatic_immunity_prevent_${sanitizeId(cardId)}_${amount}`,
+        eventId: event.eventId,
+        kind: "prevent",
+        controller: corpAgendaPointTotal(state) >= 1 ? "corp" : "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: definition.id,
+          label: definition.title,
+        },
+        priority: 140,
+        visibility: "hidden_info_barrier",
+        optional: true,
+        preventAmount: amount,
+      });
+      continue;
+    }
     const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
     if (!profile || !profile.damageTypes.includes(damageType)) continue;
     const used = damagePreventionUsedThisTurn(state, cardId);
@@ -11136,6 +11354,7 @@ function collectReplacementCandidates(
   event: ImminentEvent,
 ): ReplacementCandidate[] {
   if (event.eventType !== "damage") return [];
+  if (event.payload.cannotBePrevented === true) return [];
   const candidates: ReplacementCandidate[] = [];
   const damageAmount = numberPayload(event, "amount");
   if (
@@ -11238,16 +11457,23 @@ function eventModificationChoice(
     "Event-Modification-Kandidat fehlt.",
   );
   const amount = numberPayload(event, "amount");
+  const diplomaticImmunityCancel =
+    candidate.sourceRef.definitionId === DIPLOMATIC_IMMUNITY_ID &&
+    candidate.controller === "corp";
   const options = [
     {
       id: "pass",
-      label: "Nicht verhindern",
+      label: diplomaticImmunityCancel
+        ? "1 Agenda-Punkt zahlen und Prevention canceln"
+        : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
     {
       id: candidate.candidateId,
       label:
-        candidate.sourceRef.kind === "card"
+        diplomaticImmunityCancel
+          ? "Diplomatic Immunity wirken lassen"
+          : candidate.sourceRef.kind === "card"
           ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
           : `${candidate.preventAmount ?? amount} Schaden verhindern`,
       publicLabel: "Event Modification",
@@ -11289,12 +11515,42 @@ function resolveEventModificationChoice(
     redactedKind: "event_modification",
   };
   if (selected === "pass") {
+    const diplomaticImmunityCancel =
+      window.candidates[0]?.sourceRef.definitionId ===
+        DIPLOMATIC_IMMUNITY_ID && window.side === "corp";
+    let agendaPointCostPaid = 0;
+    let forfeitedAgendaDefinitionIds = "";
+    if (diplomaticImmunityCancel) {
+      const forfeitedAgendaIds = chooseCorpAgendasForPointCost(state, 1);
+      agendaPointCostPaid = forfeitedAgendaIds.reduce(
+        (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
+        0,
+      );
+      if (agendaPointCostPaid < 1)
+        throw new Error("Diplomatic Immunity kann nicht gecancelt werden.");
+      forfeitedAgendaDefinitionIds = forfeitedAgendaIds
+        .map((cardId) => definitionFor(state, cardId).id)
+        .join(",");
+      for (const agendaId of forfeitedAgendaIds)
+        forfeitCorpAgendaForPointCost(state, agendaId);
+    }
     const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
       ...basePayload,
-      eventModificationDecision: "pass",
+      eventModificationDecision: diplomaticImmunityCancel ? "cancel" : "pass",
       eventModificationOutcome: "original_resolved",
       originalAmount: numberPayload(event, "amount"),
+      ...(diplomaticImmunityCancel
+        ? {
+            sourceDefinitionId: DIPLOMATIC_IMMUNITY_ID,
+            agendaPointCost: 1,
+            agendaPointCostPaid,
+            forfeitedAgendaDefinitionIds,
+            specialZone: "removed_from_game",
+            specialZoneVisibility: "public",
+            specialZoneReason: "diplomatic_immunity_cancel",
+          }
+        : {}),
     };
     setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
@@ -11330,6 +11586,9 @@ function resolveEventModificationChoice(
     preventedAmount,
     finalAmount,
     sourceKind: candidate.sourceRef.kind,
+    ...(candidate.sourceRef.definitionId
+      ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+      : {}),
   };
   setDamagePayload(legalAction, summary);
   clearEventModificationState(state);
@@ -11752,6 +12011,72 @@ function forfeitCorpAgendaForPointCost(
   };
 }
 
+function acmeSavingsAndLoanObligationCount(state: GameState): number {
+  return Math.max(0, Math.floor(state.acmeSavingsAndLoanObligations ?? 0));
+}
+
+function addAcmeSavingsAndLoanObligation(
+  state: GameState,
+  amount: number,
+): void {
+  if (!Number.isInteger(amount) || amount <= 0)
+    throw new Error("ACME-Verpflichtungsmenge ist ungueltig.");
+  state.acmeSavingsAndLoanObligations =
+    acmeSavingsAndLoanObligationCount(state) + amount;
+}
+
+function removeAcmeSavingsAndLoanObligation(state: GameState): void {
+  const current = acmeSavingsAndLoanObligationCount(state);
+  if (current <= 0)
+    throw new Error("Es gibt keine ACME-Savings-and-Loan-Verpflichtung.");
+  state.acmeSavingsAndLoanObligations = current - 1;
+}
+
+type CorpAgendaPointCostResult = {
+  paidPoints: number;
+  bonusPointsSpent: number;
+  forfeitedAgendaIds: CardInstanceId[];
+  forfeitedAgendaDefinitionIds: CardDefinitionId[];
+};
+
+function spendCorpAgendaPointCost(
+  state: GameState,
+  requiredPoints: number,
+): CorpAgendaPointCostResult {
+  if (!Number.isInteger(requiredPoints) || requiredPoints <= 0)
+    throw new Error("Agenda-Punkt-Kosten sind ungueltig.");
+  let remaining = requiredPoints;
+  let paidPoints = 0;
+  const bonusBefore = Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0));
+  const bonusPointsSpent = Math.min(bonusBefore, remaining);
+  if (bonusPointsSpent > 0) {
+    state.corpBonusAgendaPoints = bonusBefore - bonusPointsSpent;
+    remaining -= bonusPointsSpent;
+    paidPoints += bonusPointsSpent;
+  }
+  const forfeitedAgendaIds: CardInstanceId[] = [];
+  const forfeitedAgendaDefinitionIds: CardDefinitionId[] = [];
+  if (remaining > 0) {
+    for (const agendaId of v1919CorpScoredAgendaForfeitTargets(state)) {
+      const points = agendaPointsForScoredCard(state, agendaId);
+      forfeitedAgendaIds.push(agendaId);
+      forfeitedAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
+      paidPoints += points;
+      remaining -= points;
+      forfeitCorpAgendaForPointCost(state, agendaId);
+      if (remaining <= 0) break;
+    }
+  }
+  if (paidPoints < requiredPoints)
+    throw new Error("Die Korp hat nicht genug Agenda-Punkte.");
+  return {
+    paidPoints,
+    bonusPointsSpent,
+    forfeitedAgendaIds,
+    forfeitedAgendaDefinitionIds,
+  };
+}
+
 function v1919InstalledAgendaTarget(
   state: GameState,
 ): CardInstanceId | undefined {
@@ -11819,6 +12144,57 @@ function resolveV1919CounterOperation(
     targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
     addedCounterAmount: 1,
     remainingCounters: cardCounter(state, targetAgendaId, "power"),
+  };
+}
+
+function v1919AdvanceableInstalledTargets(state: GameState): CardInstanceId[] {
+  return state.corp.servers
+    .slice()
+    .sort((left, right) => left.id.localeCompare(right.id))
+    .flatMap((server) =>
+      server.root
+        .slice()
+        .sort()
+        .filter((cardId) => {
+          const definition = definitionFor(state, cardId);
+          return (
+            definition.type === "agenda" ||
+            definition.id === V1919_EXPERIMENTAL_AI_ID ||
+            definition.id === V1919_INFORMATION_LAUNDERING_ID ||
+            definition.id === V1919_VIRUS_TEST_SITE_ID
+          );
+        }),
+    );
+}
+
+function resolveManagementShakeUpOperation(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const targets = v1919AdvanceableInstalledTargets(state);
+  if (targets.length === 0)
+    throw new Error("Management Shake-Up findet keine advancebare Karte.");
+  const placements: Record<CardInstanceId, number> = {};
+  for (let index = 0; index < 3; index += 1) {
+    const targetId = mustArrayValue(
+      targets,
+      index % targets.length,
+      "Management-Shake-Up-Ziel fehlt.",
+    );
+    placements[targetId] = (placements[targetId] ?? 0) + 1;
+  }
+  for (const [targetId, amount] of Object.entries(placements)) {
+    mustInstance(state.cardInstances, targetId).advancementCounters += amount;
+  }
+  const targetCount = Object.keys(placements).length;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1919OperationAbility: "add_advancement_counters",
+    addedAdvancementCounters: 3,
+    targetCount,
+    managementShakeUpDistribution: Object.entries(placements)
+      .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
+      .join(","),
   };
 }
 
@@ -12397,6 +12773,7 @@ function action(
       type === "trash_resource" ||
       payload?.v1917AssetAbility ||
       payload?.runnerAbility ||
+      payload?.acmeSavingsAndLoanAbility ||
       (side === "runner" && type === "install_card")
         ? "public"
         : "private_to_actor",
@@ -14175,10 +14552,11 @@ function resolveSystematicLayoffsForfeit(
 }
 
 function corpAgendaPointTotal(state: GameState): number {
-  return state.corp.scoreArea.reduce(
+  const scoredPoints = state.corp.scoreArea.reduce(
     (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
     0,
   );
+  return scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0));
 }
 
 function chooseCorpAgendasForPointCost(
@@ -15126,6 +15504,53 @@ function spendKrumzTraceBits(state: GameState, amount: number): number {
   return spent;
 }
 
+function runnerInstalledHardwareTrashTarget(
+  state: GameState,
+): CardInstanceId | undefined {
+  return state.runner.rig.hardware
+    .slice()
+    .sort((left, right) => {
+      const leftDefinition = definitionFor(state, left);
+      const rightDefinition = definitionFor(state, right);
+      const byInstallCost =
+        (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
+      return byInstallCost !== 0 ? byInstallCost : left.localeCompare(right);
+    })[0];
+}
+
+function resolveTraceHardwareWreckerSuccess(
+  state: GameState,
+  sourceDefinitionId: CardDefinitionId,
+  sourceCardInstanceId: CardInstanceId,
+  traceId: string,
+): Record<string, unknown> {
+  const targetHardwareId = runnerInstalledHardwareTrashTarget(state);
+  const targetDefinitionId = targetHardwareId
+    ? definitionFor(state, targetHardwareId).id
+    : undefined;
+  if (targetHardwareId) trashRunnerInstalledCardToHeap(state, targetHardwareId);
+  const damageAmount = 2;
+  const summary = doDamage(state, {
+    damageId: `${traceId}.${sourceCardInstanceId}.unpreventable_meat`,
+    damageType: "meat",
+    amount: damageAmount,
+    source: `trace_success:${sourceDefinitionId}`,
+  });
+  return {
+    traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+    sourceDefinitionId,
+    trashedCardType: "hardware",
+    trashedCount: targetHardwareId ? 1 : 0,
+    ...(targetDefinitionId ? { trashedCardDefinitionId: targetDefinitionId } : {}),
+    damageCannotBePrevented: true,
+    damageResolved: true,
+    damageType: summary.damageType,
+    damageAmount: summary.amount,
+    cardsTrashed: summary.cardsTrashed,
+    flatline: summary.flatline,
+  };
+}
+
 function resolveTraceCorpBid(
   state: GameState,
   legalAction: LegalAction,
@@ -15204,6 +15629,7 @@ function resolveTraceRunnerBid(
   const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
   let fangRunLockCreditCost = 0;
   let fangRunEnded = false;
+  let traceHardwareWreckerPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
   if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
     addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
@@ -15223,7 +15649,19 @@ function resolveTraceRunnerBid(
         [trace.subroutineIndex]: successful,
       };
     }
-    if (fangRunEnded) {
+    if (
+      successful &&
+      (trace.sourceDefinitionId === CINDERELLA_ID ||
+        trace.sourceDefinitionId === HOMEWRECKER_ID)
+    ) {
+      traceHardwareWreckerPayload = resolveTraceHardwareWreckerSuccess(
+        state,
+        trace.sourceDefinitionId,
+        trace.sourceCardInstanceId,
+        trace.traceId,
+      );
+      if (!state.winner && state.run) finishRun(state, false);
+    } else if (fangRunEnded) {
       finishRun(state, false);
     } else {
       state.timingPoint = "run.encounter_ice";
@@ -15258,6 +15696,7 @@ function resolveTraceRunnerBid(
           fangRunLockCreditCost,
         }
       : {}),
+    ...traceHardwareWreckerPayload,
   };
 }
 
@@ -15509,6 +15948,8 @@ function makeActionId(
   if (payload?.v1921RunnerResourceAbility)
     parts.push(String(payload.v1921RunnerResourceAbility));
   if (payload?.runnerAbility) parts.push(String(payload.runnerAbility));
+  if (payload?.acmeSavingsAndLoanAbility)
+    parts.push(String(payload.acmeSavingsAndLoanAbility));
   if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId)
@@ -15714,10 +16155,15 @@ function publicContextForAction(
         ? "Remote"
         : "ICE";
   if (legalAction.type === "rez_ice") {
+    if (legalAction.payload?.encounterTaxForFutureIce !== undefined)
+      context.result = state.run ? "continued" : "ended";
     for (const key of [
       "rezCostPaid",
       "rezCostReductionAmount",
       "rezCostReductionSourceDefinitionIds",
+      "encounterTaxForFutureIce",
+      "encounterTaxPaid",
+      "encounterTaxSource",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -15775,6 +16221,13 @@ function publicContextForAction(
       "imminentEventId",
       "imminentEventType",
       "affectedSide",
+      "agendaPointCost",
+      "agendaPointCostPaid",
+      "forfeitedAgendaDefinitionIds",
+      "specialZone",
+      "specialZoneVisibility",
+      "specialZoneReason",
+      "sourceDefinitionId",
       "originalAmount",
       "preventedAmount",
       "finalAmount",
@@ -15825,6 +16278,11 @@ function publicContextForAction(
       "hackerTrackerCountersAdded",
       "fangRunEnded",
       "fangRunLockCreditCost",
+      "traceSuccessEffect",
+      "trashedCardDefinitionId",
+      "trashedCardType",
+      "trashedCount",
+      "damageCannotBePrevented",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -15844,6 +16302,17 @@ function publicContextForAction(
       context.unbrokenSubroutineCount =
         legalAction.payload.unbrokenSubroutineCount;
       context.encounterWillEndRun = legalAction.payload.encounterWillEndRun;
+    }
+    for (const key of [
+      "encounterTaxForFutureIce",
+      "encounterTaxPaid",
+      "encounterTaxSource",
+      "tokyoChibaInfightingBonus",
+      "corpCreditsGained",
+      "corpCreditsAfter",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
     }
     if (legalAction.payload?.bartmossPostEncounterChecked === true) {
       context.bartmossPostEncounterChecked = true;
@@ -16073,6 +16542,12 @@ function publicContextForAction(
     context.selectedServerId = legalAction.payload.selectedServerId;
   if (typeof legalAction.payload?.agendaAbility === "string")
     context.agendaAbility = legalAction.payload.agendaAbility;
+  if (typeof legalAction.payload?.cardDefinitionId === "string")
+    context.cardDefinitionId = legalAction.payload.cardDefinitionId;
+  if (typeof legalAction.payload?.spentPowerCounters === "number")
+    context.spentPowerCounters = legalAction.payload.spentPowerCounters;
+  if (typeof legalAction.payload?.gainedCredits === "number")
+    context.gainedCredits = legalAction.payload.gainedCredits;
   for (const key of [
     "targetIceDefinitionId",
     "strengthBonus",
@@ -16148,6 +16623,36 @@ function publicContextForAction(
       if (value !== undefined) context[key] = value;
     }
   }
+  if (typeof legalAction.payload?.acmeSavingsAndLoanAbility === "string") {
+    context.acmeSavingsAndLoanAbility =
+      legalAction.payload.acmeSavingsAndLoanAbility;
+    for (const key of [
+      "agendaPointCost",
+      "agendaPointCostPaid",
+      "corpBonusAgendaPointsSpent",
+      "forfeitedAgendaDefinitionIds",
+      "gainedCredits",
+      "selfTrashed",
+      "acmeSavingsAndLoanObligations",
+      "acmeSavingsAndLoanObligationsBefore",
+      "acmeSavingsAndLoanObligationsAfter",
+      "acmeSavingsAndLoanCreditCost",
+      "acmeSavingsAndLoanPaymentDue",
+      "acmeSavingsAndLoanPaymentPaid",
+      "acmeSavingsAndLoanPaymentFailed",
+      "acmeSavingsAndLoanScoreAgendaPoints",
+      "gainedAgendaPoints",
+      "corpBonusAgendaPointsAfter",
+      "corpCreditsBefore",
+      "corpCreditsAfter",
+      "specialZone",
+      "specialZoneVisibility",
+      "specialZoneReason",
+    ]) {
+      const value = legalAction.payload[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
   if (typeof legalAction.payload?.v1918UpgradeAbility === "string") {
     context.v1918UpgradeAbility = legalAction.payload.v1918UpgradeAbility;
     if (typeof legalAction.payload.runStartTaxPaid === "number")
@@ -16197,6 +16702,8 @@ function publicContextForAction(
     if (typeof legalAction.payload.addedAdvancementCounters === "number")
       context.addedAdvancementCounters =
         legalAction.payload.addedAdvancementCounters;
+    if (typeof legalAction.payload.targetCount === "number")
+      context.targetCount = legalAction.payload.targetCount;
     if (typeof legalAction.payload.advancementCountersAfter === "number")
       context.advancementCountersAfter =
         legalAction.payload.advancementCountersAfter;
@@ -16829,7 +17336,13 @@ function canSeeSpecialZoneCard(instance: CardInstance, viewer: Side): boolean {
 
 function agendaPoints(state: GameState, side: Side): number {
   const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  return ids.reduce((sum, id) => sum + agendaPointsForScoredCard(state, id), 0);
+  const scoredPoints = ids.reduce(
+    (sum, id) => sum + agendaPointsForScoredCard(state, id),
+    0,
+  );
+  return side === "corp"
+    ? scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0))
+    : scoredPoints;
 }
 
 function credits(state: GameState, side: Side, amount: number): void {

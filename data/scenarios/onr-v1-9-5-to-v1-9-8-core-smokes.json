@@ -5,7 +5,7 @@
     {
       "id": "v195-static-and-asset",
       "release": "V1.9.5",
-      "purpose": "Superior Net Barriers wall strength and ACME rez/start credits"
+      "purpose": "Superior Net Barriers wall strength and ACME agenda-point rez cost, on-rez gain, self-trash, end-turn payment, loss and paid removal"
     },
     {
       "id": "v196-data-raven",

@@ -128,16 +128,15 @@
       "roles": [
         "runner",
         "resource",
-        "prevention"
+        "prevention",
+        "agenda_point_cancel"
       ],
       "planRoles": [
         "remote_upgrade_modifier"
       ],
       "requiredMechanics": [
         "event_modification_prevention_avoid_resolver",
-        "scored_agenda_static_active_resolver",
-        "agenda_difficulty_overadvance_resolver",
-        "global_static_modifier_layer_resolver",
+        "agenda_point_cost_resolver",
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
@@ -145,7 +144,8 @@
       },
       "riskTags": [
         "modifier_layering",
-        "state_hash_replay_stable"
+        "state_hash_replay_stable",
+        "corp_cancel_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

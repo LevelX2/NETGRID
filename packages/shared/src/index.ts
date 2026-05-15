@@ -81,6 +81,7 @@ export type StateHash = string;
 export type Winner = Side | "draw";
 export type GameEndReason =
   | "agenda_points"
+  | "acme_savings_and_loan_unpaid"
   | "corp_deck_empty"
   | "flatline"
   | "unknown";
@@ -904,6 +905,8 @@ export type GameState = {
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
   }>;
+  acmeSavingsAndLoanObligations?: number;
+  corpBonusAgendaPoints?: number;
   identityAbilityUsage?: Partial<
     Record<
       Side,
@@ -3558,14 +3561,19 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 0,
     rulesText:
-      "When rezzed, gain 3 credits. At the start of each of your turns, gain 1 credit while ACME Savings and Loan is rezzed.",
+      "Rezzing ACME S&L costs 1 agenda point, in addition to the normal cost. When you rez ACME S&L, gain 12 credits and trash ACME S&L. For the remainder of the game, pay 1 credit at the end of each of your turns, or lose the game. You can remove this effect, and score 1 agenda point, by taking an action to pay 12 credits.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_asset_node",
-      "persistent_modifier",
-      "start_of_turn_credit",
+      "agenda_point_rez_cost",
+      "on_rez_credit_gain",
+      "self_trash_on_rez",
+      "persistent_special_state",
+      "end_of_turn_credit_tax",
+      "lose_the_game",
+      "agenda_point_score_action",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4393,11 +4401,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 10,
     rulesText:
-      "Operation with agenda and counter economy surfaces. Resolution is deterministic and replayable.",
+      "Operation that places 3 advancement counters across installed advanceable Corp cards. Resolution is deterministic and replayable.",
     mechanics: [
       "play_operation",
-      "counter",
-      "scored_agenda",
+      "advance",
+      "advancement_counter",
       "agenda_difficulty",
       "overadvance",
       ONR_V1_LOCAL_PRIVATE,
@@ -5748,11 +5756,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "Installed resource with prevention and global agenda-cost modifier surfaces. Effects remain display-only until explicit resolver coverage.",
+      "Installed resource that prevents Meat damage unless the Corp forfeits 1 agenda point to cancel that prevention window.",
     mechanics: [
       "install_resource",
       "damage_prevention",
-      "global_static_modifier",
+      "agenda_point_cost",
+      "event_modification_prevention",
       "persistent_special_state",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -7720,23 +7729,23 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 8,
     strength: 6,
     rulesText:
-      "Trace 6. If successful, give the Runner 1 tag. Do 1 meat damage.",
+      "Trace 6. If successful, end the run, trash 1 installed Runner hardware, and do 2 meat damage that cannot be prevented.",
     subroutines: [
       {
         id: "onr_v1_228_cinderella_trace",
         type: "initiate_trace",
         baseTraceStrength: 6,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "none" },
       },
-      onrMeatDamage("onr_v1_228_cinderella_damage", 1),
     ],
     mechanics: [
       "trace",
       "link",
       "bid_amount",
-      "add_tag",
+      "trash_hardware",
       "damage",
       "damage_prevention",
+      "end_the_run",
       ONR_V1_LOCAL_PRIVATE,
     ],
   }),
@@ -7797,22 +7806,20 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 7,
     strength: 5,
     rulesText:
-      "Trace 5. If successful, give the Runner 1 tag. Do 2 meat damage. End the run.",
+      "Trace 5. If successful, end the run, trash 1 installed Runner hardware, and do 2 meat damage that cannot be prevented.",
     subroutines: [
       {
         id: "onr_v1_248_homewrecker_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "none" },
       },
-      onrMeatDamage("onr_v1_248_homewrecker_damage", 2),
-      onrEtr("onr_v1_248_homewrecker_etr"),
     ],
     mechanics: [
       "trace",
       "link",
       "bid_amount",
-      "add_tag",
+      "trash_hardware",
       "damage",
       "damage_prevention",
       "end_the_run",

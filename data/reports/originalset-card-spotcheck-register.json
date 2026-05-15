@@ -206,6 +206,85 @@
       ]
     },
     {
+      "roundId": "2026-05-15-immunity-cinderella",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_IMMUNITY_CINDERELLA_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-immunity-cinderella.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_160_diplomatic-immunity",
+          "title": "Diplomatic Immunity",
+          "spotcheckStatus": "completed",
+          "result": "implemented_damage_prevention_agenda_point_cancel",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_188_ai-chief-financial-officer",
+          "title": "AI Chief Financial Officer",
+          "spotcheckStatus": "completed",
+          "result": "hardened_source_bound_hidden_zone_shuffle_draw_5",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_196_corporate-war",
+          "title": "Corporate War",
+          "spotcheckStatus": "completed",
+          "result": "hardened_exact_12_credit_threshold_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_209_political-coup",
+          "title": "Political Coup",
+          "spotcheckStatus": "completed",
+          "result": "hardened_source_bound_power_counter_action_payload",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_222_ball-and-chain",
+          "title": "Ball and Chain",
+          "spotcheckStatus": "completed",
+          "result": "implemented_future_encounter_tax_payload_and_run_end",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_228_cinderella",
+          "title": "Cinderella",
+          "spotcheckStatus": "completed",
+          "result": "corrected_trace_success_hardware_trash_unpreventable_damage_end_run",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_248_homewrecker",
+          "title": "Homewrecker",
+          "spotcheckStatus": "completed",
+          "result": "corrected_trace_success_hardware_trash_unpreventable_damage_end_run",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_292_management-shake-up",
+          "title": "Management Shake-Up",
+          "spotcheckStatus": "completed",
+          "result": "implemented_three_advancement_counters_on_advanceable_installed_cards",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_315_corprunners-shattered-remains",
+          "title": "Corprunner's Shattered Remains",
+          "spotcheckStatus": "completed",
+          "result": "implemented_advancement_counter_scaled_hardware_trash",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_371_tokyo-chiba-infighting",
+          "title": "Tokyo-Chiba Infighting",
+          "spotcheckStatus": "completed",
+          "result": "hardened_server_bound_unsuccessful_run_credit_bonus_payload",
+          "followUpStatus": "completed"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-hammer-rio",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HAMMER_RIO_IMPLEMENTATION.md",
