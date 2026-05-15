@@ -17806,6 +17806,113 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
   });
 
+  it("trashes fully-broken passed ice with Startup Immolator and revalidates the post-pass window", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-startup-immolator-trash-ice",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_startup_immolator_runner",
+          name: "Spotcheck Startup Immolator Runner",
+          cards: [
+            { id: "onr_v1_068_startup-immolator", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_startup_immolator_corp",
+          name: "Spotcheck Startup Immolator Corp",
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 10;
+    installRunnerProgramForTest(state, "simple_fracter");
+    installRunnerProgramForTest(state, "onr_v1_068_startup-immolator");
+    putCorpRootInRemote(state, "simple_economy_asset");
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const startupAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1922RunnerProgramAbility ===
+          "startup_immolator_trash_ice",
+    );
+    expect(startupAction.payload?.targetIceId).toBe(iceId);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === startupAction.actionId,
+    );
+    expect(state.corp.archives).toContain(iceId);
+    expect(
+      state.corp.servers.find((server) => server.id === "remote_1")?.ice,
+    ).not.toContain(iceId);
+    expect(state.runner.credits).toBe(15);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.v1922RunnerProgramAbility ===
+            "startup_immolator_trash_ice",
+      ),
+    ).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+      rezCostPaid: 3,
+      trashedCardDefinitionId: "simple_barrier_ice",
+      trashedCount: 1,
+      startupImmolatorExhausted: true,
+    });
+    expect(
+      JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({

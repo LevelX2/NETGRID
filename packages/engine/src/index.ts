@@ -372,6 +372,7 @@ const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
 const V1922_FALSE_ECHO_ID = "onr_v1_026_false-echo";
 const V1922_NETSPACE_INVERTER_ID = "onr_v1_044_netspace-inverter";
 const V1922_SPEED_TRAP_ID = "onr_v1_067_speed-trap";
+const V1922_STARTUP_IMMOLATOR_ID = "onr_v1_068_startup-immolator";
 const V1922_ARASAKA_PORTABLE_PROTOTYPE_ID =
   "onr_v1_119_arasaka-portable-prototype";
 const V1922_PANDORAS_DECK_ID = "onr_v1_136_pandoras-deck";
@@ -5940,6 +5941,7 @@ function runnerMovementActions(state: GameState): LegalAction[] {
     ];
   }
   const actions: LegalAction[] = [];
+  actions.push(...startupImmolatorPostPassActions(state, run));
   const jackOutAdditionalCost = runJackOutAdditionalCost(run);
   if (availableRunnerRunCredits(state) >= jackOutAdditionalCost) {
     actions.push(
@@ -5966,6 +5968,43 @@ function runnerMovementActions(state: GameState): LegalAction[] {
     action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
   );
   return actions;
+}
+
+function startupImmolatorPostPassActions(
+  state: GameState,
+  run: ActiveRun,
+): LegalAction[] {
+  const targetIceId = run.startupImmolatorPendingPassedIceId;
+  if (!targetIceId || !state.cardInstances[targetIceId]) return [];
+  if (!rezzedInstalledIceIds(state).includes(targetIceId)) return [];
+  if (!run.fullyBrokenIceIds?.includes(targetIceId)) return [];
+  const used = new Set(
+    ensureRunnerTurnFlags(state).startupImmolatorUsedSourceIdsThisTurn ?? [],
+  );
+  const rezCost = rezCostForCard(state, targetIceId);
+  if (state.runner.credits < rezCost) return [];
+  const targetDefinition = definitionFor(state, targetIceId);
+  return state.runner.rig.programs
+    .filter((cardId) => definitionFor(state, cardId).id === V1922_STARTUP_IMMOLATOR_ID)
+    .filter((cardId) => !used.has(cardId))
+    .sort()
+    .map((sourceCardId) =>
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        `${definitionFor(state, sourceCardId).title}: ICE trashen`,
+        sourceCardId,
+        rezCost > 0 ? [{ credits: rezCost }] : [],
+        {
+          cardId: sourceCardId,
+          targetIceId,
+          targetIceDefinitionId: targetDefinition.id,
+          v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+          rezCostPaid: rezCost,
+        },
+      ),
+    );
 }
 
 function runJackOutAdditionalCost(run: ActiveRun): number {
@@ -7844,6 +7883,13 @@ function performAction(
         return;
       }
       if (
+        legalAction.payload?.v1922RunnerProgramAbility ===
+        "startup_immolator_trash_ice"
+      ) {
+        resolveStartupImmolatorTrashIce(state, legalAction);
+        return;
+      }
+      if (
         legalAction.payload?.resourceAbility ===
         "short_term_contract_take_credits"
       ) {
@@ -8098,6 +8144,59 @@ function resolveNetspaceInverterReverseIce(
     serverLabel: publicServerLabel(state, server.id) ?? server.id,
     iceCount: server.ice.length,
     serverIceOrderReversed: true,
+  };
+}
+
+function resolveStartupImmolatorTrashIce(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Startup Immolator nutzen.");
+  const run = mustRun(state);
+  if (run.phase !== "movement")
+    throw new Error("Startup Immolator ist nur nach dem Passieren von ICE legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const targetIceId = String(legalAction.payload?.targetIceId ?? "");
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Startup Immolator ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== V1922_STARTUP_IMMOLATOR_ID)
+    throw new Error("Die Startup-Immolator-Faehigkeit passt nicht zur Karte.");
+  const flags = ensureRunnerTurnFlags(state);
+  const used = flags.startupImmolatorUsedSourceIdsThisTurn ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Startup Immolator wurde in diesem Zug bereits genutzt.");
+  if (
+    !targetIceId ||
+    run.startupImmolatorPendingPassedIceId !== targetIceId ||
+    !run.fullyBrokenIceIds?.includes(targetIceId) ||
+    !rezzedInstalledIceIds(state).includes(targetIceId)
+  )
+    throw new Error("Das Startup-Immolator-Ziel ist nicht legal.");
+  const rezCost = rezCostForCard(state, targetIceId);
+  const paid = Number(legalAction.payload?.rezCostPaid ?? rezCost);
+  if (!Number.isInteger(paid) || paid !== rezCost)
+    throw new Error("Startup Immolator muss exakt die Rez-Kosten zahlen.");
+  spendCredits(state, "runner", rezCost);
+  const targetDefinitionId = definitionFor(state, targetIceId).id;
+  trashCorpInstalledCardToArchives(state, targetIceId);
+  flags.startupImmolatorUsedSourceIdsThisTurn = [...used, sourceCardId];
+  const {
+    startupImmolatorPendingPassedIceId: _startupPending,
+    ...runWithoutStartupPending
+  } = run;
+  void _startupPending;
+  if (state.run) state.run = runWithoutStartupPending;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+    sourceDefinitionId: V1922_STARTUP_IMMOLATOR_ID,
+    targetIceDefinitionId: targetDefinitionId,
+    rezCostPaid: rezCost,
+    trashedCount: 1,
+    trashedCardDefinitionId: targetDefinitionId,
+    runnerCreditsAfter: state.runner.credits,
+    startupImmolatorExhausted: true,
   };
 }
 
@@ -9598,6 +9697,12 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
     mustInstance(state.cardInstances, passedIceId).rezzed
       ? passedIceId
       : undefined;
+  const startupImmolatorPendingPassedIceId =
+    passedIceId &&
+    mustInstance(state.cardInstances, passedIceId).rezzed &&
+    run.fullyBrokenIceIds?.includes(passedIceId)
+      ? passedIceId
+      : undefined;
   if (
     passedIceId &&
     mustInstance(state.cardInstances, passedIceId).rezzed &&
@@ -9621,6 +9726,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
         position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
         approachedIceId,
         ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
+        ...(startupImmolatorPendingPassedIceId
+          ? { startupImmolatorPendingPassedIceId }
+          : {}),
         brokenSubroutineIndexes: [],
         resolvedSubroutineIndexes: [],
       };
@@ -9634,6 +9742,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
       ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
+      ...(startupImmolatorPendingPassedIceId
+        ? { startupImmolatorPendingPassedIceId }
+        : {}),
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
     };
@@ -9648,6 +9759,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       position: { kind: "server", serverId: server.id },
       phase: "movement",
       ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
+      ...(startupImmolatorPendingPassedIceId
+        ? { startupImmolatorPendingPassedIceId }
+        : {}),
     };
     state.timingPoint = "run.jack_out_window";
     state.activeSide = "runner";
@@ -9807,6 +9921,14 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
       )
     )
       return;
+  }
+  if (run.startupImmolatorPendingPassedIceId) {
+    const {
+      startupImmolatorPendingPassedIceId: _startupPending,
+      ...runWithoutStartupPending
+    } = run;
+    void _startupPending;
+    state.run = runWithoutStartupPending;
   }
   if (run.position.kind === "ice") {
     const server = mustServer(state, run.position.serverId);
@@ -17878,6 +18000,17 @@ function publicContextForAction(
       context.gainedCredits = legalAction.payload.gainedCredits;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")
       context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
+    if (typeof legalAction.payload.rezCostPaid === "number")
+      context.rezCostPaid = legalAction.payload.rezCostPaid;
+    if (typeof legalAction.payload.trashedCount === "number")
+      context.trashedCount = legalAction.payload.trashedCount;
+    if (typeof legalAction.payload.trashedCardDefinitionId === "string")
+      context.trashedCardDefinitionId =
+        legalAction.payload.trashedCardDefinitionId;
+    if (typeof legalAction.payload.targetIceDefinitionId === "string")
+      context.targetIceDefinitionId = legalAction.payload.targetIceDefinitionId;
+    if (legalAction.payload.startupImmolatorExhausted === true)
+      context.startupImmolatorExhausted = true;
     if (typeof legalAction.payload.futureActionDebtAdded === "number")
       context.futureActionDebtAdded = legalAction.payload.futureActionDebtAdded;
     if (typeof legalAction.payload.futureActionDebtPending === "number")

@@ -810,6 +810,7 @@ export type RunState = {
   fatalDamageActiveForEncounter?: boolean;
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
+  startupImmolatorPendingPassedIceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   aardvarkInterceptionIceIds?: CardInstanceId[];
@@ -5642,12 +5643,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     memoryCost: 1,
     rulesText:
-      "Install as a program. Its post-break ICE-trash ability remains gated until the all-subroutines-broken contract is confirmed.",
+      "During a run, after passing ice whose subroutines were all broken, exhaust Startup Immolator and pay that ice's rez cost to trash it.",
     mechanics: [
       "install_program",
       "memory",
+      "post_encounter_trigger",
+      "trash_ice",
+      "rez_cost_payment",
       "per_card_longtail",
-      "ability_contract_pending",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
