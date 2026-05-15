@@ -1822,6 +1822,53 @@ select {
   color: var(--text);
 }
 
+.deckTableSelectionButton.active {
+  border-color: var(--runner);
+  color: var(--text);
+  background: color-mix(in srgb, var(--runner), transparent 78%);
+}
+
+.deckTableSelectionCount {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--field-bg);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.deckTableSelectionClear {
+  color: var(--muted);
+}
+
+.deckTableSaveState {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 9px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--muted);
+  background: var(--field-bg);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.deckTableSaveState.dirty {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 45%);
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger), transparent 88%);
+}
+
+.deckTableSaveState.ok {
+  border-color: color-mix(in srgb, var(--ok), var(--line) 55%);
+  color: var(--ok);
+}
+
 .deckTableLibraryControls {
   display: flex;
   flex-wrap: wrap;
@@ -1895,6 +1942,25 @@ select {
   align-items: center;
 }
 
+.deckTablePileTitleRow {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 4px;
+  align-items: center;
+}
+
+.deckTablePileTitleRow > strong,
+.deckTablePileTitleRow > input {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+
+.deckTablePileTitleRow > .deckTableSelectPileButton {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: stretch;
+}
+
 .deckTablePileHeader strong {
   min-width: 0;
   color: var(--text);
@@ -1903,6 +1969,44 @@ select {
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: center;
+}
+
+.deckTablePileMoveHandle,
+.deckTableSelectPileButton {
+  min-width: 0;
+  min-height: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0 5px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  background: var(--field-bg);
+  cursor: pointer;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.deckTablePileMoveHandle {
+  grid-column: 1;
+  grid-row: 2;
+  cursor: grab;
+}
+
+.deckTablePileMoveHandle:active {
+  cursor: grabbing;
+}
+
+.deckTablePileMoveHandle:hover,
+.deckTableSelectPileButton:hover,
+.deckTableSelectPileButton.active {
+  border-color: var(--focus);
+  color: var(--text);
+}
+
+.deckTableSelectPileButton.active {
+  background: color-mix(in srgb, var(--runner), transparent 80%);
 }
 
 .deckTablePileHeader input,
@@ -1926,6 +2030,8 @@ select {
 
 .deckTableCard {
   position: relative;
+  z-index: var(--deck-table-card-z, 1);
+  isolation: isolate;
   display: block;
   width: var(--deck-table-card-width, 94px);
   min-height: 0;
@@ -1943,6 +2049,17 @@ select {
 
 .deckTableCard:active {
   cursor: grabbing;
+}
+
+.deckTableCard:hover,
+.deckTableCard:focus-within {
+  z-index: 220;
+}
+
+.deckTableCard.selected .deckCardThumb.table {
+  outline: 2px solid var(--runner);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgb(93 225 196 / 0.2), 0 14px 22px rgb(0 0 0 / 0.38);
 }
 
 .deckTableCardInner {
@@ -1973,6 +2090,24 @@ select {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  pointer-events: none;
+}
+
+.deckTableSelectionBadge {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  min-width: 20px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--runner), white 15%);
+  border-radius: 999px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--runner), black 38%);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.36);
+  font-size: 11px;
+  font-weight: 900;
   pointer-events: none;
 }
 
@@ -2125,6 +2260,8 @@ select {
 
 .deckTableLibraryCard {
   position: relative;
+  z-index: var(--deck-table-card-z, 1);
+  isolation: isolate;
   display: block;
   width: 100%;
   min-width: 0;
@@ -2184,6 +2321,7 @@ select {
 
 .deckTableLibraryCard.selected,
 .deckTableLibraryCard:hover {
+  z-index: 220;
   outline: 1px solid var(--focus);
   outline-offset: 2px;
 }
