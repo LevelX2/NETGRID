@@ -16,7 +16,7 @@
     ]
   },
   "artifacts": {
-    "aiHints": "data/ai/ai-card-hints-deck-legal-v1921-draft.json",
+    "aiHints": "data/ai/ai-card-hints-active.json",
     "aiSmokes": "data/scenarios/ai-deck-legal-v1921-draft-smokes.json",
     "engineSmoke": "data/scenarios/v1921-deterministic-random-wip-smoke.json",
     "cardManifest": "data/manifests/card-implementation-manifest-1.9.21.json",
@@ -35,37 +35,37 @@
     {
       "cardId": "onr_v1_002_ai-boon",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_002_ai-boon",
+      "hintRef": "ai-card-hints-active:onr_v1_002_ai-boon",
       "scenarioRefs": ["runner_v1921_random_programs"]
     },
     {
       "cardId": "onr_v1_008_boardwalk",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_008_boardwalk",
+      "hintRef": "ai-card-hints-active:onr_v1_008_boardwalk",
       "scenarioRefs": ["runner_v1921_random_programs"]
     },
     {
       "cardId": "onr_v1_104_playful-ai",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_104_playful-ai",
+      "hintRef": "ai-card-hints-active:onr_v1_104_playful-ai",
       "scenarioRefs": ["runner_v1921_random_event_resource"]
     },
     {
       "cardId": "onr_v1_172_quest-for-cattekin",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_172_quest-for-cattekin",
+      "hintRef": "ai-card-hints-active:onr_v1_172_quest-for-cattekin",
       "scenarioRefs": ["runner_v1921_random_event_resource"]
     },
     {
       "cardId": "onr_v1_339_schlaghund",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_339_schlaghund",
+      "hintRef": "ai-card-hints-active:onr_v1_339_schlaghund",
       "scenarioRefs": ["corp_v1921_random_root"]
     },
     {
       "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1921-draft:onr_v1_367_rio-de-janeiro-city-grid",
+      "hintRef": "ai-card-hints-active:onr_v1_367_rio-de-janeiro-city-grid",
       "scenarioRefs": ["corp_v1921_random_root"]
     }
   ]

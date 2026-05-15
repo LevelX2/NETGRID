@@ -146,7 +146,7 @@
     "reason": "Fetch 4.0.1, Hunter and Trojan Horse were already runtime-, AI- and test-covered but were missing from the card-implementation manifest trail.",
     "noNewRuntimePromotion": true,
     "aiApprovalManifest": "data/manifests/deck-legal-ai-approval-corp-tag-slice-manifest.json",
-    "aiHints": "data/ai/ai-card-hints-corp-tag-approval-slice.json",
+    "aiHints": "data/ai/ai-card-hints-active.json",
     "aiScenario": "data/scenarios/ai-corp-tag-approval-slice-smokes.json"
   }
 }

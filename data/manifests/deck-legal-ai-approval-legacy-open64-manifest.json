@@ -3,7 +3,7 @@
   "id": "deck-legal-ai-approval-legacy-open64-manifest",
   "batchId": "deck_legal_ai_approval_legacy_open64",
   "status": "implemented_for_ai_approval",
-  "aiHintsId": "ai-card-hints-deck-legal-legacy-open64",
+  "aiHintsId": "ai-card-hints-active",
   "scenarioId": "ai-deck-legal-legacy-open64-smokes",
   "gateAssertions": {
     "allSliceCardsRuntimeCatalogReady": true,
@@ -32,7 +32,7 @@
     {
       "cardId": "onr_v1_081_custodial-position",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_081_custodial-position",
+      "hintRef": "ai-card-hints-active:onr_v1_081_custodial-position",
       "scenarioRefs": [
         "runner_v123_multiaccess_and_reset"
       ]
@@ -40,7 +40,7 @@
     {
       "cardId": "onr_v1_085_executive-wiretaps",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_085_executive-wiretaps",
+      "hintRef": "ai-card-hints-active:onr_v1_085_executive-wiretaps",
       "scenarioRefs": [
         "runner_v123_multiaccess_and_reset"
       ]
@@ -48,7 +48,7 @@
     {
       "cardId": "onr_v1_101_mit-west-tier",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_101_mit-west-tier",
+      "hintRef": "ai-card-hints-active:onr_v1_101_mit-west-tier",
       "scenarioRefs": [
         "runner_v123_multiaccess_and_reset"
       ]
@@ -56,7 +56,7 @@
     {
       "cardId": "onr_v1_297_overtime-incentives",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_297_overtime-incentives",
+      "hintRef": "ai-card-hints-active:onr_v1_297_overtime-incentives",
       "scenarioRefs": [
         "corp_legacy_economy_draw_ops"
       ]
@@ -64,7 +64,7 @@
     {
       "cardId": "onr_v1_253_laser-wire",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_253_laser-wire",
+      "hintRef": "ai-card-hints-active:onr_v1_253_laser-wire",
       "scenarioRefs": [
         "corp_legacy_damage_ice_pressure"
       ]
@@ -72,7 +72,7 @@
     {
       "cardId": "onr_v1_257_nerve-labyrinth",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_257_nerve-labyrinth",
+      "hintRef": "ai-card-hints-active:onr_v1_257_nerve-labyrinth",
       "scenarioRefs": [
         "corp_legacy_damage_ice_pressure"
       ]
@@ -80,7 +80,7 @@
     {
       "cardId": "onr_v1_259_in-the-face",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_259_in-the-face",
+      "hintRef": "ai-card-hints-active:onr_v1_259_in-the-face",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -88,7 +88,7 @@
     {
       "cardId": "onr_v1_261_quandary",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_261_quandary",
+      "hintRef": "ai-card-hints-active:onr_v1_261_quandary",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -96,7 +96,7 @@
     {
       "cardId": "onr_v1_262_razor-wire",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_262_razor-wire",
+      "hintRef": "ai-card-hints-active:onr_v1_262_razor-wire",
       "scenarioRefs": [
         "corp_legacy_damage_ice_pressure"
       ]
@@ -104,7 +104,7 @@
     {
       "cardId": "onr_v1_263_reinforced-wall",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_263_reinforced-wall",
+      "hintRef": "ai-card-hints-active:onr_v1_263_reinforced-wall",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -112,7 +112,7 @@
     {
       "cardId": "onr_v1_265_rock-is-strong",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_265_rock-is-strong",
+      "hintRef": "ai-card-hints-active:onr_v1_265_rock-is-strong",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -120,7 +120,7 @@
     {
       "cardId": "onr_v1_266_scramble",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_266_scramble",
+      "hintRef": "ai-card-hints-active:onr_v1_266_scramble",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -128,7 +128,7 @@
     {
       "cardId": "onr_v1_269_shotgun-wire",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_269_shotgun-wire",
+      "hintRef": "ai-card-hints-active:onr_v1_269_shotgun-wire",
       "scenarioRefs": [
         "corp_legacy_damage_ice_pressure"
       ]
@@ -136,7 +136,7 @@
     {
       "cardId": "onr_v1_270_sleeper",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_270_sleeper",
+      "hintRef": "ai-card-hints-active:onr_v1_270_sleeper",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -144,7 +144,7 @@
     {
       "cardId": "onr_v1_278_wall-of-ice",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_278_wall-of-ice",
+      "hintRef": "ai-card-hints-active:onr_v1_278_wall-of-ice",
       "scenarioRefs": [
         "corp_legacy_damage_ice_pressure"
       ]
@@ -152,7 +152,7 @@
     {
       "cardId": "onr_v1_279_wall-of-static",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_279_wall-of-static",
+      "hintRef": "ai-card-hints-active:onr_v1_279_wall-of-static",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -160,7 +160,7 @@
     {
       "cardId": "onr_v1_295_night-shift",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_295_night-shift",
+      "hintRef": "ai-card-hints-active:onr_v1_295_night-shift",
       "scenarioRefs": [
         "corp_legacy_economy_draw_ops"
       ]
@@ -168,7 +168,7 @@
     {
       "cardId": "onr_v1_220_tycho-extension",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_220_tycho-extension",
+      "hintRef": "ai-card-hints-active:onr_v1_220_tycho-extension",
       "scenarioRefs": [
         "corp_legacy_agenda_scoring"
       ]
@@ -176,7 +176,7 @@
     {
       "cardId": "onr_v1_244_filter",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_244_filter",
+      "hintRef": "ai-card-hints-active:onr_v1_244_filter",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -184,7 +184,7 @@
     {
       "cardId": "onr_v1_245_fire-wall",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_245_fire-wall",
+      "hintRef": "ai-card-hints-active:onr_v1_245_fire-wall",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -192,7 +192,7 @@
     {
       "cardId": "onr_v1_252_keeper",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_252_keeper",
+      "hintRef": "ai-card-hints-active:onr_v1_252_keeper",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -200,7 +200,7 @@
     {
       "cardId": "onr_v1_256_mazer",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_256_mazer",
+      "hintRef": "ai-card-hints-active:onr_v1_256_mazer",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -208,7 +208,7 @@
     {
       "cardId": "onr_v1_281_accounts-receivable",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_281_accounts-receivable",
+      "hintRef": "ai-card-hints-active:onr_v1_281_accounts-receivable",
       "scenarioRefs": [
         "corp_legacy_economy_draw_ops"
       ]
@@ -216,7 +216,7 @@
     {
       "cardId": "onr_v1_282_annual-reviews",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_282_annual-reviews",
+      "hintRef": "ai-card-hints-active:onr_v1_282_annual-reviews",
       "scenarioRefs": [
         "corp_legacy_economy_draw_ops"
       ]
@@ -224,7 +224,7 @@
     {
       "cardId": "onr_v1_285_closed-accounts",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_285_closed-accounts",
+      "hintRef": "ai-card-hints-active:onr_v1_285_closed-accounts",
       "scenarioRefs": [
         "corp_legacy_tag_damage_ops"
       ]
@@ -232,7 +232,7 @@
     {
       "cardId": "onr_v1_288_day-shift",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_288_day-shift",
+      "hintRef": "ai-card-hints-active:onr_v1_288_day-shift",
       "scenarioRefs": [
         "corp_legacy_economy_draw_ops"
       ]
@@ -240,7 +240,7 @@
     {
       "cardId": "onr_v1_290_efficiency-experts",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_290_efficiency-experts",
+      "hintRef": "ai-card-hints-active:onr_v1_290_efficiency-experts",
       "scenarioRefs": [
         "corp_legacy_economy_draw_ops"
       ]
@@ -248,7 +248,7 @@
     {
       "cardId": "onr_v1_301_punitive-counterstrike",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_301_punitive-counterstrike",
+      "hintRef": "ai-card-hints-active:onr_v1_301_punitive-counterstrike",
       "scenarioRefs": [
         "corp_legacy_tag_damage_ops"
       ]
@@ -256,7 +256,7 @@
     {
       "cardId": "onr_v1_302_scorched-earth",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_302_scorched-earth",
+      "hintRef": "ai-card-hints-active:onr_v1_302_scorched-earth",
       "scenarioRefs": [
         "corp_legacy_tag_damage_ops"
       ]
@@ -264,7 +264,7 @@
     {
       "cardId": "onr_v1_307_urban-renewal",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_307_urban-renewal",
+      "hintRef": "ai-card-hints-active:onr_v1_307_urban-renewal",
       "scenarioRefs": [
         "corp_legacy_tag_damage_ops"
       ]
@@ -272,7 +272,7 @@
     {
       "cardId": "onr_v1_203_hostile-takeover",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_203_hostile-takeover",
+      "hintRef": "ai-card-hints-active:onr_v1_203_hostile-takeover",
       "scenarioRefs": [
         "corp_legacy_agenda_scoring"
       ]
@@ -280,7 +280,7 @@
     {
       "cardId": "onr_v1_230_cortical-scanner",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_230_cortical-scanner",
+      "hintRef": "ai-card-hints-active:onr_v1_230_cortical-scanner",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -288,7 +288,7 @@
     {
       "cardId": "onr_v1_232_crystal-wall",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_232_crystal-wall",
+      "hintRef": "ai-card-hints-active:onr_v1_232_crystal-wall",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -296,7 +296,7 @@
     {
       "cardId": "onr_v1_237_data-wall",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_237_data-wall",
+      "hintRef": "ai-card-hints-active:onr_v1_237_data-wall",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -304,7 +304,7 @@
     {
       "cardId": "onr_v1_238_data-wall-2-0",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_238_data-wall-2-0",
+      "hintRef": "ai-card-hints-active:onr_v1_238_data-wall-2-0",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]
@@ -312,7 +312,7 @@
     {
       "cardId": "onr_v1_239_endless-corridor",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-legacy-open64:onr_v1_239_endless-corridor",
+      "hintRef": "ai-card-hints-active:onr_v1_239_endless-corridor",
       "scenarioRefs": [
         "corp_legacy_simple_ice_defense"
       ]

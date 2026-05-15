@@ -269,7 +269,7 @@
     "status": "complete",
     "finalReview": "docs/derived/V1_9_22_FINAL_REVIEW.md",
     "aiArtifacts": [
-      "data/ai/ai-card-hints-deck-legal-v1922.json",
+      "data/ai/ai-card-hints-active.json",
       "data/manifests/deck-legal-ai-approval-v1922-manifest.json",
       "data/scenarios/ai-deck-legal-v1922-smokes.json"
     ],

@@ -3,7 +3,7 @@
   "id": "deck-legal-ai-approval-v190-manifest",
   "batchId": "deck_legal_ai_approval_v190",
   "status": "implemented_for_ai_approval",
-  "aiHintsId": "ai-card-hints-deck-legal-v190",
+  "aiHintsId": "ai-card-hints-active",
   "scenarioId": "ai-deck-legal-v190-smokes",
   "gateAssertions": {
     "allSliceCardsRuntimeCatalogReady": true,
@@ -32,7 +32,7 @@
     {
       "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_005_bartmoss-memorial-icebreaker",
+      "hintRef": "ai-card-hints-active:onr_v1_005_bartmoss-memorial-icebreaker",
       "scenarioRefs": [
         "runner_v190_random_breakers_and_black_ops_punish"
       ]
@@ -40,7 +40,7 @@
     {
       "cardId": "onr_v1_007_blink",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_007_blink",
+      "hintRef": "ai-card-hints-active:onr_v1_007_blink",
       "scenarioRefs": [
         "runner_v190_random_breakers_and_black_ops_punish"
       ]
@@ -48,7 +48,7 @@
     {
       "cardId": "onr_v1_115_terrorist-reprisal",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_115_terrorist-reprisal",
+      "hintRef": "ai-card-hints-active:onr_v1_115_terrorist-reprisal",
       "scenarioRefs": [
         "runner_v190_random_breakers_and_black_ops_punish"
       ]
@@ -56,7 +56,7 @@
     {
       "cardId": "onr_v1_223_banpei",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_223_banpei",
+      "hintRef": "ai-card-hints-active:onr_v1_223_banpei",
       "scenarioRefs": [
         "corp_v190_banpei_and_vacuum_link_defense"
       ]
@@ -64,7 +64,7 @@
     {
       "cardId": "onr_v1_275_vacuum-link",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v190:onr_v1_275_vacuum-link",
+      "hintRef": "ai-card-hints-active:onr_v1_275_vacuum-link",
       "scenarioRefs": [
         "corp_v190_banpei_and_vacuum_link_defense"
       ]

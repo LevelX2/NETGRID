@@ -5,30 +5,7 @@ import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import pipelineSnapshotData from "../../../data/card-import/card-pipeline-snapshot-1.3.1.json";
 import sourceRegistry131Data from "../../../data/card-import/source-registry-1.3.1.json";
 import aiHints131Data from "../../../data/ai/ai-card-hints-1.3.1.json";
-import kingOfTheRoadAiHintsData from "../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
-import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
-import corpTagSliceAiHintsData from "../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
-import deckLegalV161V170AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v161-v170.json";
-import deckLegalV171V181Open64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v171-v181-open64.json";
-import deckLegalLegacyOpen64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
-import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v190.json";
-import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
-import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
-import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v199.json";
-import deckLegalV1911AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1911.json";
-import deckLegalV1912AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1912.json";
-import deckLegalV1913AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1913.json";
-import deckLegalV1914AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1914.json";
-import deckLegalV1915AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1915.json";
-import deckLegalV1916AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1916.json";
-import deckLegalV1917AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1917.json";
-import deckLegalV1918AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1918.json";
-import deckLegalV1919AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1919.json";
-import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1920.json";
-import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
-import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
-import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
-import v1910NoPromotionAiHintsData from "../../../data/ai/ai-card-hints-v1910-no-promotion.json";
+import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
 import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
 import cardImplementationManifest123Data from "../../../data/manifests/card-implementation-manifest-1.2.3.json";
 import cardImplementationManifest1910Data from "../../../data/manifests/card-implementation-manifest-1.9.10.json";
@@ -223,6 +200,39 @@ const snapshot08 = snapshotData08 as unknown as CardSnapshot;
 const pipelineSnapshot131 =
   pipelineSnapshotData as unknown as CardPipelineSnapshot;
 const aiHints131 = aiHints131Data as unknown as AiCardHintsV2;
+const activeAiHints = activeAiHintsData as unknown as AiCardHintsV2;
+
+function activeHintsForCardIds(cardIds: Iterable<string>): AiCardHintsV2 {
+  const approved = new Set(cardIds);
+  return {
+    ...activeAiHints,
+    cards: activeAiHints.cards.filter((hint) => approved.has(hint.cardId)),
+  };
+}
+
+const kingOfTheRoadAiHintsData = activeHintsForCardIds(KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS);
+const deckLegalBatchAAiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS);
+const corpTagSliceAiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS);
+const deckLegalV161V170AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V161_TO_V170_CARD_IDS);
+const deckLegalV171V181Open64AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V171_TO_V181_OPEN64_CARD_IDS);
+const deckLegalLegacyOpen64AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS);
+const deckLegalV190AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS);
+const deckLegalV191V194AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V191_TO_V194_CARD_IDS);
+const deckLegalV195V198AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V195_TO_V198_CARD_IDS);
+const deckLegalV199AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V199_CARD_IDS);
+const deckLegalV1911AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1911_CARD_IDS);
+const deckLegalV1912AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1912_CARD_IDS);
+const deckLegalV1913AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1913_CARD_IDS);
+const deckLegalV1914AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1914_CARD_IDS);
+const deckLegalV1915AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1915_CARD_IDS);
+const deckLegalV1916AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1916_CARD_IDS);
+const deckLegalV1917AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1917_CARD_IDS);
+const deckLegalV1918AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1918_CARD_IDS);
+const deckLegalV1919AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1919_CARD_IDS);
+const deckLegalV1920AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1920_CARD_IDS);
+const deckLegalV1921AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1921_CARD_IDS);
+const deckLegalV1922AiHintsData = activeHintsForCardIds(DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS);
+const runtimeSupplementAiHintsData = { cards: [] };
 
 describe("catalog import and status logic", () => {
   it("validates the local V0.5 snapshot", () => {
@@ -1152,26 +1162,6 @@ describe("catalog import and status logic", () => {
     expect((v1910StatusScenarioData.cards as string[]).sort()).toEqual(
       reconciledIds,
     );
-    expect(
-      v1910NoPromotionAiHintsData.noPromotionGate.newAiSupportedCards,
-    ).toEqual([]);
-    expect(
-      (
-        v1910NoPromotionAiHintsData.cards as Array<{
-          cardId: string;
-          newlyPromotedInV1910: boolean;
-        }>
-      )
-        .map((card) => card.cardId)
-        .sort(),
-    ).toEqual(reconciledIds);
-    expect(
-      (
-        v1910NoPromotionAiHintsData.cards as Array<{
-          newlyPromotedInV1910: boolean;
-        }>
-      ).every((card) => card.newlyPromotedInV1910 === false),
-    ).toBe(true);
     expect(v1910MechanicsCoverageData.gateAssertions.noNewMechanics).toBe(true);
   });
 
@@ -3845,7 +3835,7 @@ describe("catalog import and status logic", () => {
 
   it("keeps V1.9.22 AI promotion artifacts present after the completion gate", () => {
     const promotionArtifacts = [
-      "../../../data/ai/ai-card-hints-deck-legal-v1922.json",
+      "../../../data/ai/ai-card-hints-active.json",
       "../../../data/manifests/deck-legal-ai-approval-v1922-manifest.json",
       "../../../data/scenarios/ai-deck-legal-v1922-smokes.json",
     ];

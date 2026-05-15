@@ -1,45 +1,5 @@
-import { createRuntimeCardsById } from "@netgrid/catalog";
-import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
-import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
-import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
-import corpTagSliceAiHintsData from "../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
-import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
-import deckLegalV161V170AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v161-v170.json";
-import deckLegalV171V181Open64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v171-v181-open64.json";
-import deckLegalLegacyOpen64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
-import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v190.json";
-import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
-import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
-import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v199.json";
-import deckLegalV1911AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1911.json";
-import deckLegalV1912AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1912.json";
-import deckLegalV1913AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1913.json";
-import deckLegalV1914AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1914.json";
-import deckLegalV1915AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1915.json";
-import deckLegalV1916AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1916.json";
-import deckLegalV1917AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1917.json";
-import deckLegalV1918AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1918.json";
-import deckLegalV1919AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1919.json";
-import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1920.json";
-import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
-import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import type { AiDeckDoctrineProfile, AiDecisionInput, DeckPublicMetadata, Side } from "@netgrid/shared";
-
-type CardRole = {
-  cardId: string;
-  side: Side;
-  roles: string[];
-  riskTags?: string[];
-};
-
-type AiCardHint = {
-  cardId: string;
-  side: Side;
-  roles: string[];
-  planRoles: string[];
-  aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
-  valueHints?: Record<string, number>;
-};
+import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 
 export type AiDeckDoctrineDeckSnapshot = {
   deckSnapshotId: string;
@@ -59,35 +19,7 @@ export type OpeningHandEvaluation = {
 export type CorpOpeningHandEvaluation = OpeningHandEvaluation;
 export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 
-const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
-const AI_HINTS = new Map(
-  [
-    ...(aiCardHintsData.cards as AiCardHint[]),
-    ...(runtimeSupplementAiHintsData.cards as AiCardHint[]),
-    ...(corpTagSliceAiHintsData.cards as AiCardHint[]),
-    ...(deckLegalBatchAAiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV161V170AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV171V181Open64AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalLegacyOpen64AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV190AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV191V194AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV195V198AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV199AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1911AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1912AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1913AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1914AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1915AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1916AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1917AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1918AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1919AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1920AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1921AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1922AiHintsData.cards as AiCardHint[])
-  ].map((hint) => [hint.cardId, hint])
-);
-const RUNTIME_CARDS = createRuntimeCardsById();
+const AI_HINTS = createAiHintsByCard();
 
 const CORP_DOCTRINE_PLAN_WEIGHTS: Record<string, Record<string, number>> = {
   rush: { score_now: 18, score_next_turn: 22, build_scoring_remote: 10, protect_hq: 4, protect_rnd: 4, recover_economy: 6, bait_runner: -4 },
@@ -254,7 +186,7 @@ export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpening
 function rolesForCard(cardId: string): string[] {
   if (!cardId) return [];
   const runtimeCard = RUNTIME_CARDS[cardId];
-  const roleRecord = CARD_ROLES.get(cardId);
+  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
   const hint = AI_HINTS.get(cardId);
   const inferred = inferredRoles(runtimeCard);
   return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? []), ...inferred]);

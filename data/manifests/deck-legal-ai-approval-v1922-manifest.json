@@ -57,7 +57,7 @@
     ]
   },
   "artifacts": {
-    "aiHints": "data/ai/ai-card-hints-deck-legal-v1922.json",
+    "aiHints": "data/ai/ai-card-hints-active.json",
     "aiSmokes": "data/scenarios/ai-deck-legal-v1922-smokes.json",
     "engineSmoke": "data/scenarios/v1922-per-card-longtail-release-smoke.json",
     "cardManifest": "data/manifests/card-implementation-manifest-1.9.22.json",
@@ -77,7 +77,7 @@
     {
       "cardId": "onr_v1_026_false-echo",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_026_false-echo",
+      "hintRef": "ai-card-hints-active:onr_v1_026_false-echo",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -85,7 +85,7 @@
     {
       "cardId": "onr_v1_027_flak",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_027_flak",
+      "hintRef": "ai-card-hints-active:onr_v1_027_flak",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -93,7 +93,7 @@
     {
       "cardId": "onr_v1_031_hammer",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_031_hammer",
+      "hintRef": "ai-card-hints-active:onr_v1_031_hammer",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -101,7 +101,7 @@
     {
       "cardId": "onr_v1_037_japanese-water-torture",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_037_japanese-water-torture",
+      "hintRef": "ai-card-hints-active:onr_v1_037_japanese-water-torture",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -109,7 +109,7 @@
     {
       "cardId": "onr_v1_044_netspace-inverter",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_044_netspace-inverter",
+      "hintRef": "ai-card-hints-active:onr_v1_044_netspace-inverter",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -117,7 +117,7 @@
     {
       "cardId": "onr_v1_045_newsgroup-filter",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_045_newsgroup-filter",
+      "hintRef": "ai-card-hints-active:onr_v1_045_newsgroup-filter",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -125,7 +125,7 @@
     {
       "cardId": "onr_v1_048_poltergeist",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_048_poltergeist",
+      "hintRef": "ai-card-hints-active:onr_v1_048_poltergeist",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -133,7 +133,7 @@
     {
       "cardId": "onr_v1_051_rabbit",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_051_rabbit",
+      "hintRef": "ai-card-hints-active:onr_v1_051_rabbit",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -141,7 +141,7 @@
     {
       "cardId": "onr_v1_055_reflector",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_055_reflector",
+      "hintRef": "ai-card-hints-active:onr_v1_055_reflector",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -149,7 +149,7 @@
     {
       "cardId": "onr_v1_057_scatter-shot",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_057_scatter-shot",
+      "hintRef": "ai-card-hints-active:onr_v1_057_scatter-shot",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -157,7 +157,7 @@
     {
       "cardId": "onr_v1_061_shield",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_061_shield",
+      "hintRef": "ai-card-hints-active:onr_v1_061_shield",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -165,7 +165,7 @@
     {
       "cardId": "onr_v1_067_speed-trap",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_067_speed-trap",
+      "hintRef": "ai-card-hints-active:onr_v1_067_speed-trap",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -173,7 +173,7 @@
     {
       "cardId": "onr_v1_068_startup-immolator",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_068_startup-immolator",
+      "hintRef": "ai-card-hints-active:onr_v1_068_startup-immolator",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -181,7 +181,7 @@
     {
       "cardId": "onr_v1_075_zetatech-software-installer",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_075_zetatech-software-installer",
+      "hintRef": "ai-card-hints-active:onr_v1_075_zetatech-software-installer",
       "scenarioRefs": [
         "runner_v1922_program_longtail"
       ]
@@ -189,7 +189,7 @@
     {
       "cardId": "onr_v1_077_anonymous-tip",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_077_anonymous-tip",
+      "hintRef": "ai-card-hints-active:onr_v1_077_anonymous-tip",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -197,7 +197,7 @@
     {
       "cardId": "onr_v1_080_core-command-jettison-ice",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_080_core-command-jettison-ice",
+      "hintRef": "ai-card-hints-active:onr_v1_080_core-command-jettison-ice",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -205,7 +205,7 @@
     {
       "cardId": "onr_v1_086_forged-activation-orders",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_086_forged-activation-orders",
+      "hintRef": "ai-card-hints-active:onr_v1_086_forged-activation-orders",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -213,7 +213,7 @@
     {
       "cardId": "onr_v1_093_if-you-want-it-done-right",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_093_if-you-want-it-done-right",
+      "hintRef": "ai-card-hints-active:onr_v1_093_if-you-want-it-done-right",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -221,7 +221,7 @@
     {
       "cardId": "onr_v1_100_misc-for-sale",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_100_misc-for-sale",
+      "hintRef": "ai-card-hints-active:onr_v1_100_misc-for-sale",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -229,7 +229,7 @@
     {
       "cardId": "onr_v1_102_open-ended-mileage-program",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_102_open-ended-mileage-program",
+      "hintRef": "ai-card-hints-active:onr_v1_102_open-ended-mileage-program",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -237,7 +237,7 @@
     {
       "cardId": "onr_v1_103_organ-donor",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_103_organ-donor",
+      "hintRef": "ai-card-hints-active:onr_v1_103_organ-donor",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -245,7 +245,7 @@
     {
       "cardId": "onr_v1_109_security-code-worm-chip",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_109_security-code-worm-chip",
+      "hintRef": "ai-card-hints-active:onr_v1_109_security-code-worm-chip",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -253,7 +253,7 @@
     {
       "cardId": "onr_v1_113_synchronized-attack-on-hq",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_113_synchronized-attack-on-hq",
+      "hintRef": "ai-card-hints-active:onr_v1_113_synchronized-attack-on-hq",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -261,7 +261,7 @@
     {
       "cardId": "onr_v1_117_valu-pak-software-bundle",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_117_valu-pak-software-bundle",
+      "hintRef": "ai-card-hints-active:onr_v1_117_valu-pak-software-bundle",
       "scenarioRefs": [
         "runner_v1922_event_longtail"
       ]
@@ -269,7 +269,7 @@
     {
       "cardId": "onr_v1_119_arasaka-portable-prototype",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_119_arasaka-portable-prototype",
+      "hintRef": "ai-card-hints-active:onr_v1_119_arasaka-portable-prototype",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -277,7 +277,7 @@
     {
       "cardId": "onr_v1_122_artemis-2020",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_122_artemis-2020",
+      "hintRef": "ai-card-hints-active:onr_v1_122_artemis-2020",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -285,7 +285,7 @@
     {
       "cardId": "onr_v1_123_bodyweight-data-creche",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_123_bodyweight-data-creche",
+      "hintRef": "ai-card-hints-active:onr_v1_123_bodyweight-data-creche",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -293,7 +293,7 @@
     {
       "cardId": "onr_v1_124_corolla-speed-chip",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_124_corolla-speed-chip",
+      "hintRef": "ai-card-hints-active:onr_v1_124_corolla-speed-chip",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -301,7 +301,7 @@
     {
       "cardId": "onr_v1_131_microtech-backup-drive",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_131_microtech-backup-drive",
+      "hintRef": "ai-card-hints-active:onr_v1_131_microtech-backup-drive",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -309,7 +309,7 @@
     {
       "cardId": "onr_v1_136_pandoras-deck",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_136_pandoras-deck",
+      "hintRef": "ai-card-hints-active:onr_v1_136_pandoras-deck",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -317,7 +317,7 @@
     {
       "cardId": "onr_v1_137_parraline-5750",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_137_parraline-5750",
+      "hintRef": "ai-card-hints-active:onr_v1_137_parraline-5750",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -325,7 +325,7 @@
     {
       "cardId": "onr_v1_138_pk-6089a",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_138_pk-6089a",
+      "hintRef": "ai-card-hints-active:onr_v1_138_pk-6089a",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -333,7 +333,7 @@
     {
       "cardId": "onr_v1_147_zz22-speed-chip",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_147_zz22-speed-chip",
+      "hintRef": "ai-card-hints-active:onr_v1_147_zz22-speed-chip",
       "scenarioRefs": [
         "runner_v1922_hardware_longtail"
       ]
@@ -341,7 +341,7 @@
     {
       "cardId": "onr_v1_195_corporate-retreat",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_195_corporate-retreat",
+      "hintRef": "ai-card-hints-active:onr_v1_195_corporate-retreat",
       "scenarioRefs": [
         "corp_v1922_agenda_longtail"
       ]
@@ -349,7 +349,7 @@
     {
       "cardId": "onr_v1_196_corporate-war",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_196_corporate-war",
+      "hintRef": "ai-card-hints-active:onr_v1_196_corporate-war",
       "scenarioRefs": [
         "corp_v1922_agenda_longtail"
       ]
@@ -357,7 +357,7 @@
     {
       "cardId": "onr_v1_197_data-fort-reclamation",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_197_data-fort-reclamation",
+      "hintRef": "ai-card-hints-active:onr_v1_197_data-fort-reclamation",
       "scenarioRefs": [
         "corp_v1922_agenda_longtail"
       ]
@@ -365,7 +365,7 @@
     {
       "cardId": "onr_v1_206_marine-arcology",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_206_marine-arcology",
+      "hintRef": "ai-card-hints-active:onr_v1_206_marine-arcology",
       "scenarioRefs": [
         "corp_v1922_agenda_longtail"
       ]
@@ -373,7 +373,7 @@
     {
       "cardId": "onr_v1_210_political-overthrow",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_210_political-overthrow",
+      "hintRef": "ai-card-hints-active:onr_v1_210_political-overthrow",
       "scenarioRefs": [
         "corp_v1922_agenda_longtail"
       ]
@@ -381,7 +381,7 @@
     {
       "cardId": "onr_v1_216_security-purge",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_216_security-purge",
+      "hintRef": "ai-card-hints-active:onr_v1_216_security-purge",
       "scenarioRefs": [
         "corp_v1922_agenda_longtail"
       ]
@@ -389,7 +389,7 @@
     {
       "cardId": "onr_v1_247_haunting-inquisition",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_247_haunting-inquisition",
+      "hintRef": "ai-card-hints-active:onr_v1_247_haunting-inquisition",
       "scenarioRefs": [
         "corp_v1922_ice_longtail"
       ]
@@ -397,7 +397,7 @@
     {
       "cardId": "onr_v1_274_tutor",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_274_tutor",
+      "hintRef": "ai-card-hints-active:onr_v1_274_tutor",
       "scenarioRefs": [
         "corp_v1922_ice_longtail"
       ]
@@ -405,7 +405,7 @@
     {
       "cardId": "onr_v1_276_viral-15",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_276_viral-15",
+      "hintRef": "ai-card-hints-active:onr_v1_276_viral-15",
       "scenarioRefs": [
         "corp_v1922_ice_longtail"
       ]
@@ -413,7 +413,7 @@
     {
       "cardId": "onr_v1_277_virizz",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_277_virizz",
+      "hintRef": "ai-card-hints-active:onr_v1_277_virizz",
       "scenarioRefs": [
         "corp_v1922_ice_longtail"
       ]
@@ -421,7 +421,7 @@
     {
       "cardId": "onr_v1_280_zombie",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_280_zombie",
+      "hintRef": "ai-card-hints-active:onr_v1_280_zombie",
       "scenarioRefs": [
         "corp_v1922_ice_longtail"
       ]
@@ -429,7 +429,7 @@
     {
       "cardId": "onr_v1_289_edgerunner-inc-temps",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_289_edgerunner-inc-temps",
+      "hintRef": "ai-card-hints-active:onr_v1_289_edgerunner-inc-temps",
       "scenarioRefs": [
         "corp_v1922_operation_longtail"
       ]
@@ -437,7 +437,7 @@
     {
       "cardId": "onr_v1_296_off-site-backups",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_296_off-site-backups",
+      "hintRef": "ai-card-hints-active:onr_v1_296_off-site-backups",
       "scenarioRefs": [
         "corp_v1922_operation_longtail"
       ]
@@ -445,7 +445,7 @@
     {
       "cardId": "onr_v1_298_planning-consultants",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v1922:onr_v1_298_planning-consultants",
+      "hintRef": "ai-card-hints-active:onr_v1_298_planning-consultants",
       "scenarioRefs": [
         "corp_v1922_operation_longtail"
       ]

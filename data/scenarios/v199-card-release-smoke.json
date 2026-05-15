@@ -34,6 +34,6 @@
   "coverageRefs": {
     "engine": "packages/engine/src/index.test.ts::V1.9.9 Mechanikpaket R",
     "ai": "packages/ai/src/index.test.ts::resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions",
-    "catalog": "data/ai/ai-card-hints-deck-legal-v199.json"
+    "catalog": "data/ai/ai-card-hints-active.json"
   }
 }

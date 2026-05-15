@@ -5,7 +5,7 @@
   "sourceDeckId": "local_runner_adb10896",
   "deckSnapshotId": "king_of_the_road_runner_ai_snapshot_v1",
   "corpPairingSnapshotId": "demo_corp_008_snapshot_v0_8",
-  "aiHintsId": "ai-card-hints-king-of-the-road-ai-approval",
+  "aiHintsId": "ai-card-hints-active",
   "scenarioId": "ai-kotr-runner-approval-smokes",
   "gateAssertions": {
     "localRunnerDeckRead": true,
@@ -24,19 +24,19 @@
     "noPublicPlatformFeatures": true
   },
   "cards": [
-    { "cardId": "onr_v1_006_black-dahlia", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_006_black-dahlia", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_016_cyfermaster", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_016_cyfermaster", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_040_loony-goon", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_040_loony-goon", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_052_raffles", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_052_raffles", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_054_raptor", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_054_raptor", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_060_shaka", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_060_shaka", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_070_tinweasel", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_070_tinweasel", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_072_wild-card", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_072_wild-card", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_073_wizards-book", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_073_wizards-book", "scenarioRefs": ["build_rig"] },
-    { "cardId": "onr_v1_079_bodyweight-synthetic-blood", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_079_bodyweight-synthetic-blood", "scenarioRefs": ["draw_for_answers"] },
-    { "cardId": "onr_v1_095_jack-n-joe", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_095_jack-n-joe", "scenarioRefs": ["draw_for_answers"] },
-    { "cardId": "onr_v1_097_livewires-contacts", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_097_livewires-contacts", "scenarioRefs": ["recover_economy"] },
-    { "cardId": "onr_v1_108_score", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_108_score", "scenarioRefs": ["recover_economy", "pressure_rnd"] },
-    { "cardId": "onr_v1_145_wutech-mem-chip", "status": "ai_supported", "hintRef": "ai-card-hints-king-of-the-road-ai-approval:onr_v1_145_wutech-mem-chip", "scenarioRefs": ["build_rig"] }
+    { "cardId": "onr_v1_006_black-dahlia", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_006_black-dahlia", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_016_cyfermaster", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_016_cyfermaster", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_040_loony-goon", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_040_loony-goon", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_052_raffles", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_052_raffles", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_054_raptor", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_054_raptor", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_060_shaka", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_060_shaka", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_070_tinweasel", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_070_tinweasel", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_072_wild-card", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_072_wild-card", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_073_wizards-book", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_073_wizards-book", "scenarioRefs": ["build_rig"] },
+    { "cardId": "onr_v1_079_bodyweight-synthetic-blood", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_079_bodyweight-synthetic-blood", "scenarioRefs": ["draw_for_answers"] },
+    { "cardId": "onr_v1_095_jack-n-joe", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_095_jack-n-joe", "scenarioRefs": ["draw_for_answers"] },
+    { "cardId": "onr_v1_097_livewires-contacts", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_097_livewires-contacts", "scenarioRefs": ["recover_economy"] },
+    { "cardId": "onr_v1_108_score", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_108_score", "scenarioRefs": ["recover_economy", "pressure_rnd"] },
+    { "cardId": "onr_v1_145_wutech-mem-chip", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_145_wutech-mem-chip", "scenarioRefs": ["build_rig"] }
   ]
 }

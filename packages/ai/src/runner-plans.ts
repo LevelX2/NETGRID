@@ -1,31 +1,8 @@
-import { createRuntimeCardsById } from "@netgrid/catalog";
-import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
-import aiCardHintsData from "../../../data/ai/ai-card-hints-1.3.1.json";
-import kingOfTheRoadAiHintsData from "../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
-import deckLegalBatchAAiHintsData from "../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
-import deckLegalV161V170AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v161-v170.json";
-import deckLegalV171V181Open64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v171-v181-open64.json";
-import deckLegalLegacyOpen64AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
-import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v190.json";
-import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
-import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
-import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v199.json";
-import deckLegalV1911AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1911.json";
-import deckLegalV1912AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1912.json";
-import deckLegalV1913AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1913.json";
-import deckLegalV1914AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1914.json";
-import deckLegalV1915AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1915.json";
-import deckLegalV1916AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1916.json";
-import deckLegalV1917AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1917.json";
-import deckLegalV1918AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1918.json";
-import deckLegalV1919AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1919.json";
-import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1920.json";
-import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
-import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
-import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
+import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory } from "./belief-state";
+import { assessKnownRezzedIcePath, serverIdFromEvent } from "./visible-run-analysis";
 
 export type RunnerPlanKind =
   | "pressure_rnd"
@@ -110,20 +87,6 @@ export type RunnerPlanEvaluatorResult = {
   evidence: string[];
 };
 
-type CardRole = {
-  cardId: string;
-  side: Side;
-  roles: string[];
-};
-
-type AiCardHint = {
-  cardId: string;
-  side: Side;
-  roles: string[];
-  planRoles: string[];
-  aiSupportStatus: "none" | "hinted_only" | "scenario_ready" | "ai_supported";
-};
-
 type RunnerPlanProfile = {
   profileId: string;
   legacyProfileIds: string[];
@@ -149,36 +112,8 @@ type RunnerFeatures = {
 };
 type RunnerServerFeatures = RunnerFeatures["serverFeatures"] extends Map<string, infer Server> ? Server : never;
 
-const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
-const AI_HINTS = new Map(
-  [
-    ...(aiCardHintsData.cards as AiCardHint[]),
-    ...(kingOfTheRoadAiHintsData.cards as AiCardHint[]),
-    ...(runtimeSupplementAiHintsData.cards as AiCardHint[]),
-    ...(deckLegalBatchAAiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV161V170AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV171V181Open64AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalLegacyOpen64AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV190AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV191V194AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV195V198AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV199AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1911AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1912AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1913AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1914AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1915AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1916AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1917AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1918AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1919AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1920AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1921AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV1922AiHintsData.cards as AiCardHint[])
-  ].map((hint) => [hint.cardId, hint])
-);
+const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
-const RUNTIME_CARDS = createRuntimeCardsById();
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "gain_credit", "draw_card", "trash_accessed_card"]);
 
 export function hasRunnerPlanAction(input: AiDecisionInput): boolean {
@@ -840,7 +775,7 @@ function findVisibleCard(input: AiDecisionInput, instanceId: string): VisibleCar
 
 function rolesForCardId(cardId: string | undefined): string[] {
   if (!cardId || !isAiSupportedCard(cardId)) return [];
-  const roleRecord = CARD_ROLES.get(cardId);
+  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
   const hint = AI_HINTS.get(cardId);
   return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? [])]);
 }
@@ -898,96 +833,10 @@ function publicServerMentions(input: AiDecisionInput, serverId: string | undefin
   return input.eventTail.filter((event) => serverIdFromEvent(event) === serverId).length;
 }
 
-function serverIdFromEvent(event: PublicGameEvent): string | undefined {
-  const candidate = event.publicPayload.serverId ?? event.publicPayload.attackedServerId ?? event.publicPayload.server ?? event.publicPayload.targetServerId;
-  if (typeof candidate === "string") return candidate;
-  const label = typeof event.publicPayload.serverLabel === "string" ? event.publicPayload.serverLabel : undefined;
-  if (!label) return undefined;
-  if (label === "HQ") return "hq";
-  if (label === "R&D" || label === "F&E (R&D)" || label === "F&E") return "rd";
-  if (label === "Archives" || label === "Archive") return "archives";
-  const remoteMatch = /^Remote\s+(\d+)$/i.exec(label);
-  if (!remoteMatch) return undefined;
-  return `remote_${remoteMatch[1]}`;
-}
-
 function isLowInformationRunTarget(features: RunnerFeatures, serverId: string): boolean {
   const server = features.serverFeatures.get(serverId);
   if (!server) return false;
   return server.iceCount <= 1 && server.rootCount === 0;
-}
-
-function assessKnownRezzedIcePath(
-  iceCards: Array<{ definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[]; strength?: number }>,
-  rigCards: VisibleCard[],
-  runnerCredits: number
-): { blocked: boolean; visibleBreakCost?: number } {
-  let visibleBreakCost = 0;
-  const breakerStrengths = new Map(rigCards.map((card) => [card.instanceId, card.strength ?? 0]));
-  for (const ice of iceCards.slice().reverse()) {
-    if (!ice.definitionId || !ice.known || ice.rezzed !== true) continue;
-    const endTheRunCount = endTheRunSubroutineCount(ice.definitionId);
-    if (endTheRunCount === 0) continue;
-    const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, endTheRunCount, breakerStrengths);
-    if (!breakAssessment) return { blocked: true, ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}) };
-    visibleBreakCost += breakAssessment.cost;
-    breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
-  }
-  return visibleBreakCost > 0 ? { blocked: visibleBreakCost > runnerCredits, visibleBreakCost } : { blocked: false };
-}
-
-function minimumCreditsToBreakEndTheRunSubroutines(
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
-  rigCards: VisibleCard[],
-  endTheRunCount: number,
-  breakerStrengths: Map<string, number>
-): { cost: number; breakerInstanceId: string; endingStrength: number } | undefined {
-  const costs = rigCards
-    .map((card) => creditsToBreakEndTheRunSubroutinesWithBreaker(card, ice, endTheRunCount, breakerStrengths.get(card.instanceId)))
-    .filter((cost): cost is { cost: number; breakerInstanceId: string; endingStrength: number } => cost !== undefined)
-    .sort((left, right) => left.cost - right.cost || left.breakerInstanceId.localeCompare(right.breakerInstanceId));
-  if (costs.length === 0) return undefined;
-  return costs[0];
-}
-
-function creditsToBreakEndTheRunSubroutinesWithBreaker(
-  breakerCard: VisibleCard,
-  ice: { definitionId?: string; subtypes?: string[]; strength?: number },
-  endTheRunCount: number,
-  currentBreakerStrength = breakerCard.strength ?? 0
-): { cost: number; breakerInstanceId: string; endingStrength: number } | undefined {
-  if (!breakerCard.known || !breakerCard.definitionId || !ice.definitionId) return undefined;
-  const breakerDefinitionId = breakerCard.definitionId;
-  const iceDefinitionId = ice.definitionId;
-  const breakerDefinition = DEMO_CARDS_BY_ID[breakerDefinitionId];
-  const iceDefinition = DEMO_CARDS_BY_ID[iceDefinitionId];
-  if (!breakerDefinition || !iceDefinition) return undefined;
-  const breakAbility = breakerDefinition.abilities?.find(
-    (ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || (ice.subtypes ?? iceDefinition.subtypes).includes(ability.iceSubtype))
-  );
-  if (!breakAbility) return undefined;
-  const breakerStrength = currentBreakerStrength;
-  const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
-  const pumpAbility = breakerDefinition.abilities?.find((ability) => ability.type === "pump_strength");
-  let pumpCost = 0;
-  let endingStrength = breakerStrength;
-  if (breakerStrength < iceStrength) {
-    if (!pumpAbility || (pumpAbility.amount ?? 0) <= 0) return undefined;
-    const requiredPumps = Math.ceil((iceStrength - breakerStrength) / Math.max(1, pumpAbility.amount ?? 1));
-    pumpCost = requiredPumps * (pumpAbility.cost.credits ?? 0);
-    endingStrength += requiredPumps * Math.max(1, pumpAbility.amount ?? 1);
-  }
-  const breakCount = Math.max(1, breakAbility.count ?? 1);
-  const breakUses = Math.ceil(endTheRunCount / breakCount);
-  return {
-    cost: pumpCost + breakUses * (breakAbility.cost.credits ?? 0),
-    breakerInstanceId: breakerCard.instanceId,
-    endingStrength
-  };
-}
-
-function endTheRunSubroutineCount(iceDefinitionId: string): number {
-  return DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.filter((subroutine) => subroutine.type === "end_the_run").length ?? 0;
 }
 
 function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudgetMs: number, timeoutUsed: boolean, beliefState: BeliefState): RunnerPlanDecision {

@@ -3,6 +3,15 @@ import { readFileSync } from "node:fs";
 import { catalogDetailResponse, catalogListResponse, catalogStatusSummaryResponse } from "../../apps/web/app/api/cards/catalog-data";
 import { deckSnapshotsResponse, deckTemplatesResponse, deckValidationResponse } from "../../apps/web/app/api/decks/deck-data";
 
+function activeHintsForManifest(manifest: { cards: Array<{ cardId: string }> }) {
+  const activeHints = JSON.parse(readFileSync("data/ai/ai-card-hints-active.json", "utf8")) as { cards: Array<{ cardId: string }> };
+  const cardIds = new Set(manifest.cards.map((card) => card.cardId));
+  return {
+    ...activeHints,
+    cards: activeHints.cards.filter((hint) => cardIds.has(hint.cardId))
+  };
+}
+
 describe("Client visibility contract", () => {
   it("keeps the browser page away from full GameState and engine authority", () => {
     const page = readFileSync("apps/web/app/page.tsx", "utf8");
@@ -367,8 +376,8 @@ describe("Client visibility contract", () => {
   });
 
   it("keeps King of the Road AI approval artifacts free of runtime hidden-info payloads", () => {
-    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-king-of-the-road-ai-approval.json", "utf8"));
     const manifest = JSON.parse(readFileSync("data/manifests/king-of-the-road-ai-approval-manifest.json", "utf8"));
+    const hints = activeHintsForManifest(manifest);
     const scenario = JSON.parse(readFileSync("data/scenarios/ai-kotr-runner-approval-smokes.json", "utf8"));
     const serialized = JSON.stringify({ hints, manifest, scenario });
 
@@ -386,8 +395,8 @@ describe("Client visibility contract", () => {
   });
 
   it("keeps Batch A AI approval artifacts free of runtime hidden-info payloads", () => {
-    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-deck-legal-batch-a.json", "utf8"));
     const manifest = JSON.parse(readFileSync("data/manifests/deck-legal-ai-approval-batch-a-manifest.json", "utf8"));
+    const hints = activeHintsForManifest(manifest);
     const scenario = JSON.parse(readFileSync("data/scenarios/ai-runner-rig-low-risk-batch-a-smokes.json", "utf8"));
     const serialized = JSON.stringify({ hints, manifest, scenario });
 
@@ -405,8 +414,8 @@ describe("Client visibility contract", () => {
   });
 
   it("keeps V1.7.1 to V1.8.1 Open64 AI approval artifacts free of runtime hidden-info payloads", () => {
-    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-deck-legal-v171-v181-open64.json", "utf8"));
     const manifest = JSON.parse(readFileSync("data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json", "utf8"));
+    const hints = activeHintsForManifest(manifest);
     const scenario = JSON.parse(readFileSync("data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json", "utf8"));
     const serialized = JSON.stringify({ hints, manifest, scenario });
 
@@ -424,8 +433,8 @@ describe("Client visibility contract", () => {
   });
 
   it("keeps legacy Open64 AI approval artifacts free of runtime hidden-info payloads", () => {
-    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-deck-legal-legacy-open64.json", "utf8"));
     const manifest = JSON.parse(readFileSync("data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json", "utf8"));
+    const hints = activeHintsForManifest(manifest);
     const scenario = JSON.parse(readFileSync("data/scenarios/ai-deck-legal-legacy-open64-smokes.json", "utf8"));
     const serialized = JSON.stringify({ hints, manifest, scenario });
 
@@ -443,8 +452,8 @@ describe("Client visibility contract", () => {
   });
 
   it("keeps V1.9.0 AI approval artifacts free of runtime hidden-info payloads", () => {
-    const hints = JSON.parse(readFileSync("data/ai/ai-card-hints-deck-legal-v190.json", "utf8"));
     const manifest = JSON.parse(readFileSync("data/manifests/deck-legal-ai-approval-v190-manifest.json", "utf8"));
+    const hints = activeHintsForManifest(manifest);
     const scenario = JSON.parse(readFileSync("data/scenarios/ai-deck-legal-v190-smokes.json", "utf8"));
     const serialized = JSON.stringify({ hints, manifest, scenario });
 

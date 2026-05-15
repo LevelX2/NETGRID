@@ -28,7 +28,7 @@
     ]
   },
   "artifacts": {
-    "aiHints": "data/ai/ai-card-hints-deck-legal-v1917.json",
+    "aiHints": "data/ai/ai-card-hints-active.json",
     "aiSmokes": "data/scenarios/ai-deck-legal-v1917-smokes.json",
     "engineSmoke": "data/scenarios/v1917-generic-asset-node-release-smoke.json",
     "cardManifest": "data/manifests/card-implementation-manifest-1.9.17.json",

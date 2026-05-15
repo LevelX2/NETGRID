@@ -8,30 +8,7 @@ import {
   type CatalogSide,
   type CatalogStatusKey
 } from "@netgrid/catalog";
-import aiCardHintsData from "../../../../../data/ai/ai-card-hints-1.3.1.json";
-import kingOfTheRoadAiHintsData from "../../../../../data/ai/ai-card-hints-king-of-the-road-ai-approval.json";
-import deckLegalBatchAAiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-batch-a.json";
-import deckLegalV161V170AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v161-v170.json";
-import deckLegalV171V181Open64AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v171-v181-open64.json";
-import deckLegalLegacyOpen64AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-legacy-open64.json";
-import deckLegalV190AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v190.json";
-import deckLegalV191V194AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
-import deckLegalV195V198AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
-import deckLegalV199AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v199.json";
-import deckLegalV1911AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1911.json";
-import deckLegalV1912AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1912.json";
-import deckLegalV1913AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1913.json";
-import deckLegalV1914AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1914.json";
-import deckLegalV1915AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1915.json";
-import deckLegalV1916AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1916.json";
-import deckLegalV1917AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1917.json";
-import deckLegalV1918AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1918.json";
-import deckLegalV1919AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1919.json";
-import deckLegalV1920AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1920.json";
-import deckLegalV1921AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1921.json";
-import deckLegalV1922AiHintsData from "../../../../../data/ai/ai-card-hints-deck-legal-v1922.json";
-import runtimeSupplementAiHintsData from "../../../../../data/ai/ai-card-hints-runtime-supplement.json";
-import corpTagSliceAiHintsData from "../../../../../data/ai/ai-card-hints-corp-tag-approval-slice.json";
+import activeAiHintsData from "../../../../../data/ai/ai-card-hints-active.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
 type CatalogAiHint = {
@@ -46,34 +23,7 @@ type CatalogAiHint = {
 };
 
 const AI_HINTS_BY_CARD_ID = new Map(
-  (
-    [
-      ...(aiCardHintsData.cards as CatalogAiHint[]),
-      ...(kingOfTheRoadAiHintsData.cards as CatalogAiHint[]),
-      ...(runtimeSupplementAiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalBatchAAiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV161V170AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV171V181Open64AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalLegacyOpen64AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV190AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV191V194AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV195V198AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV199AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1911AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1912AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1913AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1914AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1915AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1916AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1917AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1918AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1919AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1920AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1921AiHintsData.cards as CatalogAiHint[]),
-      ...(deckLegalV1922AiHintsData.cards as CatalogAiHint[]),
-      ...(corpTagSliceAiHintsData.cards as CatalogAiHint[])
-    ]
-  ).map((hint) => [hint.cardId, hint])
+  (activeAiHintsData.cards as CatalogAiHint[]).map((hint) => [hint.cardId, hint])
 );
 
 export function catalogListResponse(searchParams: URLSearchParams) {

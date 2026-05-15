@@ -3,7 +3,7 @@
   "id": "deck-legal-ai-approval-v195-v198-manifest",
   "batchId": "deck_legal_ai_approval_v195_to_v198",
   "status": "implemented_for_ai_approval",
-  "aiHintsId": "ai-card-hints-deck-legal-v195-v198",
+  "aiHintsId": "ai-card-hints-active",
   "scenarioId": "ai-deck-legal-v195-v198-smokes",
   "gateAssertions": {
     "allSliceCardsRuntimeCatalogReady": true,
@@ -32,7 +32,7 @@
     {
       "cardId": "onr_v1_219_superior-net-barriers",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_219_superior-net-barriers",
+      "hintRef": "ai-card-hints-active:onr_v1_219_superior-net-barriers",
       "scenarioRefs": [
         "corp_v195_superior_net_barriers"
       ]
@@ -40,7 +40,7 @@
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_308_acme-savings-and-loan",
+      "hintRef": "ai-card-hints-active:onr_v1_308_acme-savings-and-loan",
       "scenarioRefs": [
         "corp_v195_acme_savings_and_loan"
       ]
@@ -48,7 +48,7 @@
     {
       "cardId": "onr_v1_236_data-raven",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_236_data-raven",
+      "hintRef": "ai-card-hints-active:onr_v1_236_data-raven",
       "scenarioRefs": [
         "corp_v196_data_raven_tag_pressure"
       ]
@@ -56,7 +56,7 @@
     {
       "cardId": "onr_v1_001_afreet",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_001_afreet",
+      "hintRef": "ai-card-hints-active:onr_v1_001_afreet",
       "scenarioRefs": [
         "runner_v197_afreet_hosting"
       ]
@@ -64,7 +64,7 @@
     {
       "cardId": "onr_v1_018_dogcatcher",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_018_dogcatcher",
+      "hintRef": "ai-card-hints-active:onr_v1_018_dogcatcher",
       "scenarioRefs": [
         "runner_v198_dogcatcher_and_dropp_breakers"
       ]
@@ -72,7 +72,7 @@
     {
       "cardId": "onr_v1_019_dropp",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v195-v198:onr_v1_019_dropp",
+      "hintRef": "ai-card-hints-active:onr_v1_019_dropp",
       "scenarioRefs": [
         "runner_v198_dogcatcher_and_dropp_breakers"
       ]

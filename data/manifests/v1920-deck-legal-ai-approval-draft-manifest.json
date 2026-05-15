@@ -36,7 +36,7 @@
     ]
   },
   "artifacts": {
-    "aiHints": "data\\ai\\ai-card-hints-deck-legal-v1920-draft.json",
+    "aiHints": "data\\ai\\ai-card-hints-active",
     "aiSmokes": "data\\scenarios\\ai-deck-legal-v1920-draft-smokes.json",
     "engineSmoke": "data/scenarios/v1920-global-modifier-special-state-wip-smoke.json",
     "cardManifest": "data/manifests/card-implementation-manifest-1.9.20.json",
@@ -55,7 +55,7 @@
     {
       "cardId": "onr_v1_022_emergency-self-construct",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_022_emergency-self-construct",
+      "hintRef": "ai-card-hints-active:onr_v1_022_emergency-self-construct",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -63,7 +63,7 @@
     {
       "cardId": "onr_v1_029_gremlins",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_029_gremlins",
+      "hintRef": "ai-card-hints-active:onr_v1_029_gremlins",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -71,7 +71,7 @@
     {
       "cardId": "onr_v1_133_militech-mram-chip",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_133_militech-mram-chip",
+      "hintRef": "ai-card-hints-active:onr_v1_133_militech-mram-chip",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -79,7 +79,7 @@
     {
       "cardId": "onr_v1_134_mram-chip",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_134_mram-chip",
+      "hintRef": "ai-card-hints-active:onr_v1_134_mram-chip",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -87,7 +87,7 @@
     {
       "cardId": "onr_v1_160_diplomatic-immunity",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_160_diplomatic-immunity",
+      "hintRef": "ai-card-hints-active:onr_v1_160_diplomatic-immunity",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -95,7 +95,7 @@
     {
       "cardId": "onr_v1_168_loan-from-chiba",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_168_loan-from-chiba",
+      "hintRef": "ai-card-hints-active:onr_v1_168_loan-from-chiba",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -103,7 +103,7 @@
     {
       "cardId": "onr_v1_171_preying-mantis",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_171_preying-mantis",
+      "hintRef": "ai-card-hints-active:onr_v1_171_preying-mantis",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]
@@ -111,7 +111,7 @@
     {
       "cardId": "onr_v1_190_bioweapons-engineering",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_190_bioweapons-engineering",
+      "hintRef": "ai-card-hints-active:onr_v1_190_bioweapons-engineering",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -119,7 +119,7 @@
     {
       "cardId": "onr_v1_191_black-ice-quality-assurance",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_191_black-ice-quality-assurance",
+      "hintRef": "ai-card-hints-active:onr_v1_191_black-ice-quality-assurance",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -127,7 +127,7 @@
     {
       "cardId": "onr_v1_192_corporate-boon",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_192_corporate-boon",
+      "hintRef": "ai-card-hints-active:onr_v1_192_corporate-boon",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -135,7 +135,7 @@
     {
       "cardId": "onr_v1_200_encryption-breakthrough",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_200_encryption-breakthrough",
+      "hintRef": "ai-card-hints-active:onr_v1_200_encryption-breakthrough",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -143,7 +143,7 @@
     {
       "cardId": "onr_v1_204_ice-transmutation",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_204_ice-transmutation",
+      "hintRef": "ai-card-hints-active:onr_v1_204_ice-transmutation",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -151,7 +151,7 @@
     {
       "cardId": "onr_v1_205_main-office-relocation",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_205_main-office-relocation",
+      "hintRef": "ai-card-hints-active:onr_v1_205_main-office-relocation",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -159,7 +159,7 @@
     {
       "cardId": "onr_v1_218_subsidiary-branch",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_218_subsidiary-branch",
+      "hintRef": "ai-card-hints-active:onr_v1_218_subsidiary-branch",
       "scenarioRefs": [
         "corp_v1920_scored_modifier_agenda"
       ]
@@ -167,7 +167,7 @@
     {
       "cardId": "onr_v1_313_city-surveillance",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_313_city-surveillance",
+      "hintRef": "ai-card-hints-active:onr_v1_313_city-surveillance",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -175,7 +175,7 @@
     {
       "cardId": "onr_v1_322_euromarket-consortium",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_322_euromarket-consortium",
+      "hintRef": "ai-card-hints-active:onr_v1_322_euromarket-consortium",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -183,7 +183,7 @@
     {
       "cardId": "onr_v1_324_fortress-architects",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_324_fortress-architects",
+      "hintRef": "ai-card-hints-active:onr_v1_324_fortress-architects",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -191,7 +191,7 @@
     {
       "cardId": "onr_v1_325_hacker-tracker-central",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_325_hacker-tracker-central",
+      "hintRef": "ai-card-hints-active:onr_v1_325_hacker-tracker-central",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -199,7 +199,7 @@
     {
       "cardId": "onr_v1_327_i-got-a-rock",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_327_i-got-a-rock",
+      "hintRef": "ai-card-hints-active:onr_v1_327_i-got-a-rock",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -207,7 +207,7 @@
     {
       "cardId": "onr_v1_331_nevinyrral",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_331_nevinyrral",
+      "hintRef": "ai-card-hints-active:onr_v1_331_nevinyrral",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -215,7 +215,7 @@
     {
       "cardId": "onr_v1_332_newsgroup-taunting",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_332_newsgroup-taunting",
+      "hintRef": "ai-card-hints-active:onr_v1_332_newsgroup-taunting",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -223,7 +223,7 @@
     {
       "cardId": "onr_v1_334_pacifica-regional-ai",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_334_pacifica-regional-ai",
+      "hintRef": "ai-card-hints-active:onr_v1_334_pacifica-regional-ai",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -231,7 +231,7 @@
     {
       "cardId": "onr_v1_335_remote-facility",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_335_remote-facility",
+      "hintRef": "ai-card-hints-active:onr_v1_335_remote-facility",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -239,7 +239,7 @@
     {
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_338_rustbelt-hq-branch",
+      "hintRef": "ai-card-hints-active:onr_v1_338_rustbelt-hq-branch",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -247,7 +247,7 @@
     {
       "cardId": "onr_v1_343_south-african-mining-corp",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_343_south-african-mining-corp",
+      "hintRef": "ai-card-hints-active:onr_v1_343_south-african-mining-corp",
       "scenarioRefs": [
         "corp_v1920_rezzed_modifier_asset"
       ]
@@ -255,7 +255,7 @@
     {
       "cardId": "onr_v1_360_jerusalem-city-grid",
       "status": "hinted_only",
-      "hintRef": "ai-card-hints-deck-legal-v1920-draft:onr_v1_360_jerusalem-city-grid",
+      "hintRef": "ai-card-hints-active:onr_v1_360_jerusalem-city-grid",
       "scenarioRefs": [
         "corp_v1920_root_modifier_upgrade"
       ]

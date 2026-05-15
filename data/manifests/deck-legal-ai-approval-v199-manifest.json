@@ -3,7 +3,7 @@
   "id": "deck-legal-ai-approval-v199-manifest",
   "batchId": "deck_legal_ai_approval_v199",
   "status": "implemented_for_ai_approval",
-  "aiHintsId": "ai-card-hints-deck-legal-v199",
+  "aiHintsId": "ai-card-hints-active",
   "scenarioId": "ai-deck-legal-v199-smokes",
   "gateAssertions": {
     "allSliceCardsRuntimeCatalogReady": true,
@@ -24,25 +24,25 @@
     {
       "cardId": "onr_v1_349_aardvark",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v199:onr_v1_349_aardvark",
+      "hintRef": "ai-card-hints-active:onr_v1_349_aardvark",
       "scenarioRefs": ["corp_v199_aardvark_worm_intercept"]
     },
     {
       "cardId": "onr_v1_351_bizarre-encryption-scheme",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v199:onr_v1_351_bizarre-encryption-scheme",
+      "hintRef": "ai-card-hints-active:onr_v1_351_bizarre-encryption-scheme",
       "scenarioRefs": ["corp_v199_bizarre_encryption_delay"]
     },
     {
       "cardId": "onr_v1_352_chester-mix",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v199:onr_v1_352_chester-mix",
+      "hintRef": "ai-card-hints-active:onr_v1_352_chester-mix",
       "scenarioRefs": ["corp_v199_chester_mix_cost_reduction"]
     },
     {
       "cardId": "onr_v1_353_chimera",
       "status": "ai_supported",
-      "hintRef": "ai-card-hints-deck-legal-v199:onr_v1_353_chimera",
+      "hintRef": "ai-card-hints-active:onr_v1_353_chimera",
       "scenarioRefs": ["runner_v199_chimera_daemon_choice"]
     }
   ],

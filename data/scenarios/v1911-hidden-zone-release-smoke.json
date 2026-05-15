@@ -49,6 +49,6 @@
   "coverageRefs": {
     "engine": "packages/engine/src/index.test.ts::V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP",
     "ai": "packages/ai/src/index.test.ts::answers V1.9.11 Corp R&D reorder choices with all required side-safe options",
-    "catalog": "data/ai/ai-card-hints-deck-legal-v1911.json"
+    "catalog": "data/ai/ai-card-hints-active.json"
   }
 }

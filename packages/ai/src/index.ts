@@ -3,12 +3,13 @@ import aiProfilesData from "../../../data/ai/ai-profiles-0.9.json";
 import soakSeedsData from "../../../data/ai/ai-soak-seeds-0.9.json";
 import benchmarkProfiles143Data from "../../../data/ai/ai-benchmark-profiles-1.4.3.json";
 import soakSeeds143Data from "../../../data/ai/ai-soak-seeds-1.4.3.json";
-import cardRoleManifestData from "../../../data/ai/card-role-manifest-0.9.json";
 import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import { CARD_ROLES_BY_CARD } from "./ai-hints";
+import { canBreakerDefinitionBreakIce, iceHasEndTheRun } from "./visible-run-analysis";
 import { DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
@@ -66,13 +67,6 @@ type RankedChoice = {
   score: number;
   evidence: string[];
   confidence?: number;
-};
-
-type CardRole = {
-  cardId: string;
-  side: Side;
-  roles: string[];
-  riskTags?: string[];
 };
 
 type AiProfileData = {
@@ -299,7 +293,6 @@ export type V143ExploitRegressionResult = {
   message: string;
 };
 
-const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_PROFILES = aiProfilesData.profiles as AiProfileData[];
 const SOAK_SEEDS = soakSeedsData as {
   tuningSeeds: string[];
@@ -1795,7 +1788,7 @@ function findVisibleCard(input: AiDecisionInput, instanceId: string) {
 
 function rolesForCardId(cardId: string | undefined): string[] {
   if (!cardId) return [];
-  return CARD_ROLES.get(cardId)?.roles ?? [];
+  return CARD_ROLES_BY_CARD.get(cardId)?.roles ?? [];
 }
 
 function profileWeights(input: AiDecisionInput): Record<string, number> {
@@ -1863,21 +1856,6 @@ function pumpCanLeadToBreak(input: AiDecisionInput, action: LegalAction): boolea
   const encounteredIce = input.playerView.run?.encounteredIce;
   if (!breaker?.definitionId || !encounteredIce?.definitionId) return true;
   return canBreakerDefinitionBreakIce(breaker.definitionId, encounteredIce.definitionId);
-}
-
-function canBreakerDefinitionBreakIce(breakerDefinitionId: string, iceDefinitionId: string): boolean {
-  const breakerDefinition = DEMO_CARDS_BY_ID[breakerDefinitionId];
-  const iceDefinition = DEMO_CARDS_BY_ID[iceDefinitionId];
-  if (!breakerDefinition || !iceDefinition) return false;
-  return Boolean(
-    breakerDefinition.abilities?.some(
-      (ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype))
-    )
-  );
-}
-
-function iceHasEndTheRun(iceDefinitionId: string): boolean {
-  return Boolean(DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.some((subroutine) => subroutine.type === "end_the_run"));
 }
 
 function scoreCorpRootInstall(roles: string[], action: LegalAction, features: AiFeatures, profile: Record<string, number>): number {
