@@ -282,6 +282,34 @@ describe("formatChronicleEvent", () => {
     expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+2 Credits", "1 beiseite", "Würfe 4, 5"]));
   });
 
+  it("describes Edited Shipping Manifests access replacement without hidden card identities", () => {
+    const item = formatChronicleEvent(
+      makeEvent("play_event", {
+        actor: "runner",
+        title: "Edited Shipping Manifests",
+        cardDefinitionId: "onr_v1_084_edited-shipping-manifests",
+        accessReplacement: "corp_lose_credits_runner_tag_corp_draw",
+        creditLoss: 1,
+        corpCreditsAfter: 7,
+        tagsAdded: 1,
+        runnerTagsAfter: 1,
+        corpDrawnCount: 1,
+        hiddenZoneBarrier: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Edited Shipping Manifests gespielt: Korp verliert 1 Credit, Runner erhält 1 Tag, Korp zieht eine Karte.");
+    expect(item.description).toBe("Der erfolgreiche Run wurde ohne Zugriff auf verdeckte Korp-Karten ersetzt.");
+    expect(item.category).toBe("danger");
+    expect(item.importance).toBe("important");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(expect.arrayContaining(["Access ersetzt", "Korp -1", "+1 Tag", "Korp zieht 1"]));
+    expect(JSON.stringify(item)).not.toContain("cardInstances");
+    expect(JSON.stringify(item)).not.toContain("\"hq\"");
+    expect(JSON.stringify(item)).not.toContain("\"rd\"");
+  });
+
   it("shows Schlaghund tag-check damage without internal state", () => {
     const item = formatChronicleEvent(
       makeEvent("gain_credit", {

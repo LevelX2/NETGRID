@@ -466,6 +466,25 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Trace", ...(baseTraceStrength !== undefined ? [`Base ${baseTraceStrength}`] : []), actionType === "play_event" ? "Event" : "Operation");
         break;
       }
+      if (actionType === "play_event" && stringValue(payload.accessReplacement)) {
+        const creditLoss = numberValue(payload.creditLoss) ?? 0;
+        const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
+        const corpDrawnCount = numberValue(payload.corpDrawnCount) ?? 0;
+        const effectParts = accessReplacementEffectParts(creditLoss, tagsAdded, corpDrawnCount);
+        category = tagsAdded > 0 ? "danger" : creditLoss > 0 ? "economy" : "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt: ${effectParts.join(", ")}`);
+        description = "Der erfolgreiche Run wurde ohne Zugriff auf verdeckte Korp-Karten ersetzt.";
+        chips.push(
+          "Event",
+          "Access ersetzt",
+          ...(creditLoss > 0 ? [`Korp -${creditLoss}`] : []),
+          ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
+          ...(corpDrawnCount > 0 ? [`Korp zieht ${corpDrawnCount}`] : [])
+        );
+        break;
+      }
       const playEffect = mergedPlayEffect ?? effect;
       category = playEffect.category ?? category;
       title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
@@ -1048,6 +1067,14 @@ function traceStartTitle(subject: string, cardTitle: string | undefined, baseTra
 
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function accessReplacementEffectParts(creditLoss: number, tagsAdded: number, corpDrawnCount: number): string[] {
+  const parts: string[] = [];
+  if (creditLoss > 0) parts.push(`Korp verliert ${creditText(creditLoss)}`);
+  if (tagsAdded > 0) parts.push(`Runner erhält ${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`);
+  if (corpDrawnCount > 0) parts.push(`Korp zieht ${cardCountText(corpDrawnCount)}`);
+  return parts.length > 0 ? parts : ["der Zugriff wird ersetzt"];
 }
 
 function searchDestinationLabel(destination: string | undefined): string {
