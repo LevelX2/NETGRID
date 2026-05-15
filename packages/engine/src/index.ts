@@ -258,6 +258,7 @@ const V1918_NEW_GALVESTON_CITY_GRID_ID = "onr_v1_362_new-galveston-city-grid";
 const V1918_OMNI_KISMET_ID = "onr_v1_364_omni-kismet-ph-d";
 const V1918_PARIS_CITY_GRID_ID = "onr_v1_365_paris-city-grid";
 const V1918_RED_HERRINGS_ID = "onr_v1_366_red-herrings";
+const V1918_SINGAPORE_CITY_GRID_ID = "onr_v1_369_singapore-city-grid";
 const V1918_TURBEAU_DELACROIX_ID = "onr_v1_372_turbeau-delacroix";
 const V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID =
   "onr_v1_373_twenty-four-hour-surveillance";
@@ -5634,7 +5635,59 @@ function corpRunRootRezActions(state: GameState): LegalAction[] {
       ),
     );
   }
+  actions.push(...singaporeCityGridRunActions(state, run, server));
   return actions;
+}
+
+function singaporeCityGridRunActions(
+  state: GameState,
+  run: ActiveRun,
+  server: CorpServer,
+): LegalAction[] {
+  if (run.attackedServerId !== server.id) return [];
+  const hqIceIds = state.corp.hq
+    .filter((cardId) => definitionFor(state, cardId).type === "ice")
+    .sort();
+  if (hqIceIds.length === 0) return [];
+  const used = new Set(run.singaporeCityGridUsedSourceIdsThisRun ?? []);
+  const unrezzedIceTargets = server.ice
+    .map((cardId, iceIndex) => ({ cardId, iceIndex }))
+    .filter(({ cardId }) => !mustInstance(state.cardInstances, cardId).rezzed)
+    .sort((left, right) => left.iceIndex - right.iceIndex);
+  if (unrezzedIceTargets.length === 0) return [];
+  return server.root
+    .slice()
+    .sort()
+    .filter((cardId) => !used.has(cardId))
+    .filter((cardId) => {
+      const instance = mustInstance(state.cardInstances, cardId);
+      return (
+        instance.rezzed &&
+        definitionFor(state, cardId).id === V1918_SINGAPORE_CITY_GRID_ID
+      );
+    })
+    .flatMap((sourceCardId) => {
+      const definition = definitionFor(state, sourceCardId);
+      return unrezzedIceTargets.map(({ cardId: targetIceId, iceIndex }) =>
+        action(
+          state,
+          "corp",
+          "trigger_ability",
+          `${definition.title}: ICE in ${server.label} austauschen`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            targetIceId,
+            serverId: server.id,
+            iceIndex,
+            v1918UpgradeAbility: "singapore_city_grid_hq_ice_swap",
+            hiddenZoneBarrier: true,
+            hiddenZoneAction: "v1918_singapore_city_grid_choice",
+          },
+        ),
+      );
+    });
 }
 
 function isApproachIceExposeWindowOpen(state: GameState): boolean {
@@ -8056,6 +8109,13 @@ function performAction(
       }
       if (legalAction.payload?.approachIceExposeDecision) {
         resolveApproachIceExposeAbility(state, legalAction);
+        return;
+      }
+      if (
+        legalAction.payload?.v1918UpgradeAbility ===
+        "singapore_city_grid_hq_ice_swap"
+      ) {
+        startSingaporeCityGridSwapChoice(state, legalAction);
         return;
       }
       throw new Error(
@@ -14361,6 +14421,10 @@ function resolvePendingChoice(
     resolveIceTransmutationChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1918.singapore_city_grid")) {
+    resolveSingaporeCityGridSwapChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1922.corp_rd_arrange_top5")) {
     resolveV1922CorpRdTopReorderChoice(state, legalAction, playerAction);
     return;
@@ -16099,6 +16163,156 @@ function resolveIceTransmutationChoice(
     duplicatedSubroutineCount:
       (definitionFor(state, targetIceId).subroutines?.length ?? 0) *
       cardCounter(state, targetIceId, "mark"),
+  };
+}
+
+function startSingaporeCityGridSwapChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Singapore City Grid nutzen.");
+  const run = mustRun(state);
+  if (
+    state.timingPoint !== "run.approach_ice" &&
+    state.timingPoint !== "run.jack_out_window"
+  )
+    throw new Error("Singapore City Grid ist nur waehrend eines Runs legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  const targetIceId = String(legalAction.payload?.targetIceId ?? "");
+  const iceIndex = Number(legalAction.payload?.iceIndex ?? -1);
+  if (serverId !== run.attackedServerId)
+    throw new Error("Singapore City Grid ist nicht an diesen Run gebunden.");
+  const server = mustServer(state, serverId);
+  if (!server.root.includes(sourceCardId))
+    throw new Error("Singapore City Grid ist nicht im angegriffenen Fort.");
+  const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
+  if (
+    !sourceInstance.rezzed ||
+    definitionFor(state, sourceCardId).id !== V1918_SINGAPORE_CITY_GRID_ID
+  )
+    throw new Error("Singapore City Grid ist nicht rezzed installiert.");
+  if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
+    throw new Error("Singapore City Grid wurde in diesem Run bereits genutzt.");
+  if (
+    !Number.isInteger(iceIndex) ||
+    iceIndex < 0 ||
+    server.ice[iceIndex] !== targetIceId
+  )
+    throw new Error("Das Singapore-City-Grid-ICE-Ziel ist ungueltig.");
+  const targetInstance = mustInstance(state.cardInstances, targetIceId);
+  if (targetInstance.rezzed)
+    throw new Error("Singapore City Grid darf nur unrezzed ICE austauschen.");
+  const hqIceIds = state.corp.hq
+    .filter((cardId) => definitionFor(state, cardId).type === "ice")
+    .sort();
+  if (hqIceIds.length === 0)
+    throw new Error("In HQ liegt kein ICE fuer Singapore City Grid.");
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1918_singapore_city_grid_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1918.singapore_city_grid:${sourceCardId}:${server.id}:${targetIceId}:${iceIndex}:${run.runId}`,
+    prompt: "Singapore City Grid: ICE aus HQ wählen.",
+    kind: "select_cards",
+    options: hqIceIds.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      publicLabel: "HQ-ICE",
+      value: cardId,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1918_singapore_city_grid_choice",
+    choiceVisibility: "hidden_info_barrier",
+    selectedCount: 1,
+    serverLabel: server.label,
+    oncePerRunConsumed: false,
+  };
+}
+
+function resolveSingaporeCityGridSwapChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1918.singapore_city_grid"))
+    throw new Error("Es ist keine Singapore-City-Grid-Choice offen.");
+  const [, sourceCardId, serverIdRaw, targetIceId, iceIndexRaw, runId] =
+    choice.source.split(":");
+  if (!sourceCardId || !serverIdRaw || !targetIceId || !runId)
+    throw new Error("Die Singapore-City-Grid-Choice ist ungueltig.");
+  const serverId = serverIdRaw as Exclude<ServerId, "new_remote">;
+  const iceIndex = Number(iceIndexRaw ?? -1);
+  const run = mustRun(state);
+  if (run.runId !== runId || run.attackedServerId !== serverId)
+    throw new Error(
+      "Die Singapore-City-Grid-Choice gehoert nicht zu diesem Run.",
+    );
+  const server = mustServer(state, serverId);
+  if (!server.root.includes(sourceCardId))
+    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Fort.");
+  if (
+    definitionFor(state, sourceCardId).id !== V1918_SINGAPORE_CITY_GRID_ID ||
+    !mustInstance(state.cardInstances, sourceCardId).rezzed
+  )
+    throw new Error("Singapore City Grid ist nicht mehr rezzed installiert.");
+  if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
+    throw new Error("Singapore City Grid wurde in diesem Run bereits genutzt.");
+  if (
+    !Number.isInteger(iceIndex) ||
+    iceIndex < 0 ||
+    server.ice[iceIndex] !== targetIceId
+  )
+    throw new Error("Das Singapore-City-Grid-ICE-Ziel ist nicht mehr legal.");
+  const targetInstance = mustInstance(state.cardInstances, targetIceId);
+  if (targetInstance.rezzed)
+    throw new Error("Singapore City Grid darf nur unrezzed ICE austauschen.");
+  const hqIceId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!hqIceId || !state.corp.hq.includes(hqIceId))
+    throw new Error("Das Singapore-City-Grid-HQ-ICE ist nicht mehr in HQ.");
+  if (definitionFor(state, hqIceId).type !== "ice")
+    throw new Error("Singapore City Grid darf nur ICE aus HQ waehlen.");
+  const hqIndex = state.corp.hq.indexOf(hqIceId);
+  state.corp.hq[hqIndex] = targetIceId;
+  server.ice[iceIndex] = hqIceId;
+  state.cardInstances[targetIceId] = {
+    ...targetInstance,
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "hq" },
+  };
+  state.cardInstances[hqIceId] = {
+    ...mustInstance(state.cardInstances, hqIceId),
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "serverIce", serverId },
+  };
+  run.singaporeCityGridUsedSourceIdsThisRun = [
+    ...(run.singaporeCityGridUsedSourceIdsThisRun ?? []),
+    sourceCardId,
+  ];
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1918_singapore_city_grid_swap",
+    sourceDefinitionId: V1918_SINGAPORE_CITY_GRID_ID,
+    serverLabel: server.label,
+    iceIndex,
+    swappedIceCount: 1,
+    oncePerRunConsumed: true,
   };
 }
 
@@ -17882,6 +18096,12 @@ function publicContextForAction(
       context.installedIceCount = legalAction.payload.installedIceCount;
     if (typeof legalAction.payload.installedRootCount === "number")
       context.installedRootCount = legalAction.payload.installedRootCount;
+    if (typeof legalAction.payload.swappedIceCount === "number")
+      context.swappedIceCount = legalAction.payload.swappedIceCount;
+    if (typeof legalAction.payload.iceIndex === "number")
+      context.iceIndex = legalAction.payload.iceIndex;
+    if (typeof legalAction.payload.choiceVisibility === "string")
+      context.choiceVisibility = legalAction.payload.choiceVisibility;
     if (typeof legalAction.payload.temporaryCreditsProvided === "number")
       context.temporaryCreditsProvided =
         legalAction.payload.temporaryCreditsProvided;

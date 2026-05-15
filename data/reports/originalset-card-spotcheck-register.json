@@ -16,79 +16,78 @@
       "roundId": "2026-05-15-stealth-ap-citygrid",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_STEALTH_AP_CITYGRID_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-stealth-ap-citygrid.md",
-      "jobStatus": "blocked",
-      "blockerReason": "Singapore City Grid needs a hidden-info-safe HQ-ICE swap resolver.",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-stealth-ap-citygrid.md",
+      "jobStatus": "done",
       "cards": [
         {
           "cardId": "onr_v1_071_vewy-vewy-quiet",
           "title": "Vewy Vewy Quiet",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_two_recurring_icebreaker_run_credits",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_132_microtech-trode-set",
           "title": "Microtech 'Trode Set",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_break_cost_modifier_ap_net_damage_reduction",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_156_corporate-ally",
           "title": "Corporate Ally",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_multi_agenda_forfeit_no_agenda_gate_payload_replay_hardening",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_180_smiths-pawnshop",
           "title": "Smith's Pawnshop",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_start_turn_choice_pass_wrong_side_stale_removed_target_replay",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_224_bolter-cluster",
           "title": "Bolter Cluster",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_four_net_damage_next_ice_no_break",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_240_fang",
           "title": "Fang",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_trace_success_run_lock_no_tag",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_251_jack-attack",
           "title": "Jack Attack",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_jack_out_lock_trace_payload_cleanup_replay_hardening",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_258_neural-blade",
           "title": "Neural Blade",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_one_net_damage_next_ice_no_break",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_346_vacant-soulkiller",
           "title": "Vacant Soulkiller",
-          "spotcheckStatus": "blocked",
+          "spotcheckStatus": "completed",
           "result": "partial_fix_advancement_scaled_core_damage",
-          "followUpStatus": "partial_fixed_and_tested"
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_369_singapore-city-grid",
           "title": "Singapore City Grid",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_hidden_info_safe_hq_ice_swap_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_hidden_info_safe_hq_ice_swap_resolver",
+          "followUpStatus": "fixed_and_tested"
         }
       ]
     },

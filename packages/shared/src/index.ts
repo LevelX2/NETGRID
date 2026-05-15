@@ -824,6 +824,7 @@ export type RunState = {
   redHerringsTaxSourceByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, CardInstanceId>
   >;
+  singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
   speedTrapPendingRezCardId?: CardInstanceId;
@@ -4256,13 +4257,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 5,
     rulesText:
-      "Rezzed city-grid upgrade handled by the generic upgrade/root/server resolver and tied to its installed server.",
+      "Once during a run on this fort, the Corp may swap an unrezzed ICE on this fort with an ICE from HQ. The replacement ICE enters concealed and unrezzed.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_upgrade_root_server",
       "city_grid",
+      "hidden_zone",
+      "swap",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

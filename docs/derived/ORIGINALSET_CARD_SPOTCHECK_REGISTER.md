@@ -10,7 +10,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_STEALTH_AP_CITYGRID_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes und die drei offenen Härtungen wurden umgesetzt, Singapore City Grid bleibt als Removal Condition offen.
+Jobstatus: `done`; Umsetzung, Härtungen und Pflichtchecks sind grün.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -23,7 +23,7 @@ Jobstatus: `blocked`; grüne Teilfixes und die drei offenen Härtungen wurden um
 | Jack Attack | `onr_v1_251_jack-attack` | Härtung umgesetzt: Jack-out-Lock plus Trace-Tag payload-, cleanup- und replay-stabil | Härtung grün |
 | Neural Blade | `onr_v1_258_neural-blade` | Teilfix umgesetzt: 1 Net Damage plus Next-ICE-No-Break-Modifier | Teilfix grün |
 | Vacant Soulkiller | `onr_v1_346_vacant-soulkiller` | Teilfix umgesetzt: Core/Brain Damage skaliert mit Advancement-Countern | Teilfix grün |
-| Singapore City Grid | `onr_v1_369_singapore-city-grid` | Blockiert: Hidden-Info-sicherer HQ-ICE-Swap-Resolver fehlt | Eigenen Resolver-Scope umsetzen |
+| Singapore City Grid | `onr_v1_369_singapore-city-grid` | Nacharbeit umgesetzt: einmal-pro-Run HQ-ICE-Swap mit Corp-privater Hidden-Info-Choice | Resolver-, Redaction-, Once-per-run- und Replay-Test ergänzt |
 
 ## Runde 2026-05-15-prevention-upgrade-access
 

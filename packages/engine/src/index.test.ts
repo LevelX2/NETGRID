@@ -25521,6 +25521,166 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("resolves Singapore City Grid as a hidden-info-safe once-per-run HQ ICE swap", () => {
+    const singaporeCorpDeck: DeckDefinition = {
+      ...ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+      id: "spotcheck_singapore_city_grid_corp",
+      name: "Spotcheck Singapore City Grid Corp",
+      cards: [
+        { id: "onr_v1_369_singapore-city-grid", quantity: 1 },
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "simple_code_gate_ice", quantity: 1 },
+        ...ONR_V1_9_17_GENERIC_ASSET_CORP_DECK.cards.filter(
+          (card) =>
+            card.id !== "onr_v1_369_singapore-city-grid" &&
+            card.id !== "simple_barrier_ice" &&
+            card.id !== "simple_code_gate_ice",
+        ),
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-singapore-city-grid",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
+        corpDeck: singaporeCorpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const singaporeId = putCorpRootInRemote(
+      state,
+      "onr_v1_369_singapore-city-grid",
+    );
+    state.cardInstances[singaporeId] = {
+      ...state.cardInstances[singaporeId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const installedIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_barrier_ice",
+    );
+    const hqIceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+    keepOnlyCorpHqCards(state, [hqIceId]);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const swapAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1918UpgradeAbility ===
+          "singapore_city_grid_hq_ice_swap",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: swapAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "spotcheck-singapore-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === swapAction.actionId,
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    const runnerViewDuringChoice = getPlayerView(state, "runner");
+    expect(runnerViewDuringChoice.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(runnerViewDuringChoice)).not.toContain(
+      "simple_code_gate_ice",
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1918_singapore_city_grid_choice",
+      choiceVisibility: "hidden_info_barrier",
+      serverLabel: "Remote 1",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_code_gate_ice|"hq"|"cardInstances"|"privatePayload"/,
+    );
+
+    const resolveAction = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${hqIceId}`],
+      },
+      idempotencyKey: "spotcheck-singapore-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    state = applyChoice(state, "corp", `card_${hqIceId}`);
+    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    expect(remote?.ice[0]).toBe(hqIceId);
+    expect(state.corp.hq).toContain(installedIceId);
+    expect(state.corp.hq).not.toContain(hqIceId);
+    expect(state.cardInstances[hqIceId]).toMatchObject({
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "serverIce", serverId: "remote_1" },
+    });
+    expect(state.cardInstances[installedIceId]).toMatchObject({
+      faceup: false,
+      rezzed: false,
+      zone: { side: "corp", zone: "hq" },
+    });
+    const runnerServer = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(runnerServer?.ice[0]?.known).toBe(false);
+    expect(JSON.stringify(runnerServer)).not.toContain("simple_code_gate_ice");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "v1918_singapore_city_grid_swap",
+      sourceDefinitionId: "onr_v1_369_singapore-city-grid",
+      serverLabel: "Remote 1",
+      iceIndex: 0,
+      swappedIceCount: 1,
+      oncePerRunConsumed: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_code_gate_ice|simple_barrier_ice|"hq"|"cardInstances"|"privatePayload"/,
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.payload?.v1918UpgradeAbility ===
+          "singapore_city_grid_hq_ice_swap",
+      ),
+    ).toBe(false);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });
 
 const ONR_V1_0_5K_FINAL_CARD_IDS = [
