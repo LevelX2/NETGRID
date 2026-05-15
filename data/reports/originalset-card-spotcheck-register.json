@@ -11,6 +11,84 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-turbeau-tutor",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TURBEAU_TUTOR_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-turbeau-tutor.md",
+      "cards": [
+        {
+          "cardId": "onr_v1_372_turbeau-delacroix",
+          "title": "Turbeau Delacroix",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_access_trace4_once_per_run_no_run_tax",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_357_dieter-esslin",
+          "title": "Dieter Esslin",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_simple_one_net_access_ambush",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_314_corporate-negotiating-center",
+          "title": "Corporate Negotiating Center",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_start_turn_hq_agenda_reveal_credit",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_330_krumz",
+          "title": "Krumz",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_trace_bid_bit_source_refresh",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_327_i-got-a-rock",
+          "title": "I Got a Rock",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_tagged_runner_agenda_point_cost_meat_damage",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_356_dedicated-response-team",
+          "title": "Dedicated Response Team",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_tag_condition_three_meat_no_tag_gain",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_304_systematic-layoffs",
+          "title": "Systematic Layoffs",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_scored_agenda_forfeit_choice",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_336_rescheduler",
+          "title": "Rescheduler",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_hq_shuffle_into_rd_draw_count",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_274_tutor",
+          "title": "Tutor",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_existing_future_encounter_modifier_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_204_ice-transmutation",
+          "title": "Ice Transmutation",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_score_rezzed_ice_strength_subroutine_modifier",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-ramming-galveston",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_RAMMING_GALVESTON_IMPLEMENTATION.md",

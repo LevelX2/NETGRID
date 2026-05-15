@@ -45,7 +45,7 @@
       "label": "Agenda-Kosten, Forfeit und Counter",
       "currentStatus": "implemented_release",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch, Vapor Ops und Fait Accompli laden Power-Counter über explizite LegalActions; Systematic Layoffs, Arasaka Owns You und Olivia Salazar forfeiten Agenden als öffentliche Removed-from-game-Kosten.",
+      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch, Vapor Ops und Fait Accompli laden Power-Counter über explizite LegalActions; Systematic Layoffs forfeitet eine legal gewählte gescorte Korp-Agenda und gewinnt Credits in Höhe ihrer Agenda-Punkte, Arasaka Owns You und Olivia Salazar forfeiten Agenden als öffentliche Removed-from-game-Kosten.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "counter_smoke", "forfeit_cost_smoke"]
     },
     {

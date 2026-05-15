@@ -8551,6 +8551,45 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
   });
 
+  it("opens a Systematic Layoffs target choice when multiple Corp agendas are scored", () => {
+    let state = v1919AgendaOveradvanceGame("v1919-systematic-layoffs-choice");
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const firstAgendaId = scoreCorpAgendaForTest(state, "simple_agenda");
+    const secondAgendaId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_202_genetics-visionary-acquisition",
+    );
+    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+    );
+
+    expect(state.pendingChoice?.source).toContain("v1919.systematic_layoffs");
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(2);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    state = applyChoices(state, "corp", [`card_${secondAgendaId}`]);
+
+    expect(state.specialZones?.removedFromGame).toContain(secondAgendaId);
+    expect(state.corp.scoreArea).toContain(firstAgendaId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      v1919OperationAbility: "forfeit_scored_agenda",
+      forfeitedAgendaDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
+      specialZone: "removed_from_game",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("resolves remaining V1.9.19 access ambush damage and installed-hardware paths", () => {
     let hardwareState = toRunnerTurn(
       v1919AgendaOveradvanceGame("v1919-corprunner-ambush"),
@@ -8780,7 +8819,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
       expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier/,
+        /persistent_special_state|action_economy|modify_hand_limit|modify_memory_limit|global_static_modifier|meat_damage|tag_condition/,
       );
     }
     expect(
@@ -8853,6 +8892,114 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       revealedCount: 1,
       gainedCredits: 1,
     });
+  });
+
+  it("uses I Got a Rock only against a double-tagged Runner with agenda-point costs", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-i-got-a-rock-tagged-finisher",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.runner.tags = 2;
+    drawRunnerCardsForTest(state, 5);
+    const scoredAgendaId = scoreCorpAgendaForTest(
+      state,
+      "onr_v1_204_ice-transmutation",
+    );
+    const rockId = putCorpRootInRemote(state, "onr_v1_327_i-got-a-rock");
+    state.cardInstances[rockId] = {
+      ...state.cardInstances[rockId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1920AssetAbility ===
+          "i_got_a_rock_tagged_meat_damage",
+    );
+
+    expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
+    expect(state.winner).toBe("corp");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
+      agendaPointCost: 3,
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 15,
+      flatline: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"grip"|cardInstances|privatePayload/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("scores Ice Transmutation and persists a public rezzed-ICE modifier", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-ice-transmutation-target",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const agendaId = putCorpRootInRemote(state, "onr_v1_204_ice-transmutation");
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      advancementCounters: 5,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === agendaId,
+    );
+
+    expect(state.pendingChoice?.source).toContain("v1920.ice_transmutation");
+    expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
+      iceId,
+    );
+    state = applyChoices(state, "corp", [`card_${iceId}`]);
+
+    expect(cardCounterAmount(state, iceId, "mark")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      agendaAbility: "v1920_ice_transmutation",
+      targetIceDefinitionId: "onr_v1_232_crystal-wall",
+      strengthBonus: 1,
+      duplicatedSubroutineCount: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
@@ -11779,7 +11926,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone/,
+        /generic_asset_node|access_ambush|trace|hosting|recurring|damage|hidden_zone|hq_agenda_reveal|hq_shuffle_into_rd/,
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
@@ -11923,7 +12070,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const economyAssets = [
       "onr_v1_309_bbs-whispering-campaign",
       "onr_v1_311_braindance-campaign",
-      "onr_v1_314_corporate-negotiating-center",
       "onr_v1_321_esa-contract",
       "onr_v1_326_holovid-campaign",
       "onr_v1_329_investment-firm",
@@ -12039,7 +12185,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("refreshes all scoped V1.9.17 recurring assets together without hidden payloads", () => {
     const recurringAssets = [
       "onr_v1_311_braindance-campaign",
-      "onr_v1_314_corporate-negotiating-center",
       "onr_v1_326_holovid-campaign",
       "onr_v1_329_investment-firm",
     ] as const;
@@ -12130,7 +12275,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("starts V1.9.17 trace asset abilities through the side-safe trace window", () => {
     const traceAssets = [
       ["onr_v1_310_blood-cat", 5],
-      ["onr_v1_330_krumz", 3],
     ] as const;
     for (const [definitionId, baseTraceStrength] of traceAssets) {
       let state = v1917GenericAssetGame(
@@ -12186,54 +12330,125 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     }
   });
 
-  it("keeps V1.9.17 Corp hidden-zone asset choices side-private and replay-safe", () => {
-    let revealState = v1917GenericAssetGame("v1917-hidden-zone-reveal");
-    revealState.corp.credits = 10;
-    revealState = apply(
-      revealState,
-      "corp",
-      (action) => action.type === "mandatory_draw",
-    );
-    const negotiatingCenterId = moveCorpCardToHq(
-      revealState,
-      "onr_v1_314_corporate-negotiating-center",
-    );
-    revealState = apply(
-      revealState,
+  it("uses Krumz as a trace-only bit source and refreshes it at Corp turn start", () => {
+    let state = v1917GenericAssetGame("v1917-krumz-trace-bit-source");
+    state.corp.credits = 10;
+    state.runner.credits = 0;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const krumzId = moveCorpCardToHq(state, "onr_v1_330_krumz");
+    state = apply(
+      state,
       "corp",
       (action) =>
         action.type === "install_card" &&
-        action.payload?.cardId === negotiatingCenterId &&
+        action.payload?.cardId === krumzId &&
         action.payload?.serverId === "new_remote",
     );
-    revealState = apply(
-      revealState,
+    state = apply(
+      state,
       "corp",
       (action) =>
         action.type === "rez_ice" &&
-        sourceDefinition(revealState, action) ===
-          "onr_v1_314_corporate-negotiating-center",
+        sourceDefinition(state, action) === "onr_v1_330_krumz",
     );
-    putCorpCardOnTopOfRd(revealState, "simple_economy_operation");
+    expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
+    const bloodCatId = moveCorpCardToHq(state, "onr_v1_310_blood-cat");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === bloodCatId &&
+        action.payload?.serverId === "new_remote",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_310_blood-cat",
+    );
+    state.corp.credits = 0;
 
-    revealState = apply(
-      revealState,
+    state = apply(
+      state,
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "reveal_rd_top",
+        action.payload?.v1917AssetAbility === "trace_3_tag" &&
+        action.payload?.cardId === bloodCatId,
     );
-    expect(revealState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_corp_reveal_rd_top",
-      revealKind: "reveal",
-      cardDefinitionId: "simple_economy_operation",
+    expect(state.pendingChoice?.options.some((option) => option.id === "bid_1")).toBe(
+      true,
+    );
+    state = applyChoice(state, "corp", "bid_1");
+
+    expect(cardCounterAmount(state, krumzId, "bit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "corp_bid",
+      corpBid: 1,
+      corpCreditBid: 0,
+      krumzBitsSpent: 1,
     });
-    expect(JSON.stringify(getPlayerView(revealState, "runner"))).not.toContain(
-      "simple_economy_operation_",
+
+    state = applyChoice(state, "runner", "bid_0");
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(cardCounterAmount(state, krumzId, "bit")).toBe(1);
+  });
+
+  it("resolves Corporate Negotiating Center as start-of-turn HQ agenda reveal", () => {
+    let state = toRunnerTurn(
+      v1917GenericAssetGame("v1917-corporate-negotiating-center-hq"),
+    );
+    state.corp.credits = 10;
+    const negotiatingCenterId = putCorpRootInRemote(
+      state,
+      "onr_v1_314_corporate-negotiating-center",
+    );
+    state.cardInstances[negotiatingCenterId] = {
+      ...state.cardInstances[negotiatingCenterId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const agendaId = moveCorpCardToHq(state, "simple_agenda");
+    const operationId = moveCorpCardToHq(state, "simple_economy_operation");
+    const creditsBefore = state.corp.credits;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.pendingChoice?.source).toContain(
+      "v1917.corp_negotiating_center",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(1);
+    expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
+      agendaId,
+    );
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      operationId,
     );
 
-    let reorderState = v1917GenericAssetGame("v1917-hidden-zone-reorder");
+    state = applyChoices(state, "corp", [`card_${agendaId}`]);
+
+    expect(state.corp.hq).toEqual(expect.arrayContaining([agendaId, operationId]));
+    expect(state.corp.credits).toBe(creditsBefore + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+      revealedAgendaDefinitionIds: "simple_agenda",
+      revealedCount: 1,
+      gainedCredits: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("resolves Rescheduler as deterministic HQ shuffle into R&D and draw", () => {
+    let reorderState = v1917GenericAssetGame("v1917-rescheduler-hq-shuffle");
     reorderState.corp.credits = 10;
     reorderState = apply(
       reorderState,
@@ -12259,11 +12474,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.type === "rez_ice" &&
         sourceDefinition(reorderState, action) === "onr_v1_336_rescheduler",
     );
-    const secondId = putCorpCardOnTopOfRd(
+    const hqAgendaId = moveCorpCardToHq(reorderState, "simple_agenda");
+    const hqOperationId = moveCorpCardToHq(
       reorderState,
       "simple_economy_operation",
     );
-    const firstId = putCorpCardOnTopOfRd(reorderState, "simple_agenda");
+    const hqCount = reorderState.corp.hq.length;
     const initial = structuredClone(reorderState);
     const replayStart = reorderState.eventLog.length;
 
@@ -12272,28 +12488,18 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "reorder_rd_top2",
+        action.payload?.v1917AssetAbility === "rescheduler_hq_shuffle_draw",
     );
-    expect(reorderState.pendingChoice?.source).toContain(
-      "v1917.corp_rd_arrange_top2",
-    );
-    expect(
-      getPlayerView(reorderState, "corp").pendingChoice?.options.some(
-        (option) => option.value === firstId,
-      ),
-    ).toBe(true);
-    expect(getPlayerView(reorderState, "runner").pendingChoice).toBeUndefined();
-    reorderState = applyChoices(reorderState, "corp", [
-      `card_${secondId}`,
-      `card_${firstId}`,
-    ]);
 
-    expect(reorderState.corp.rd[0]).toBe(secondId);
-    expect(reorderState.corp.rd[1]).toBe(firstId);
+    expect(reorderState.corp.hq.length).toBe(hqCount);
+    expect(reorderState.corp.hq).not.toEqual(
+      expect.arrayContaining([hqAgendaId, hqOperationId]),
+    );
     expect(reorderState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_corp_reorder_rd_top2",
-      arrangedCount: 2,
+      hiddenZoneAction: "v1917_rescheduler_hq_shuffle_draw",
+      hqCardCount: hqCount,
+      drawnCount: hqCount,
     });
     const replay = replayEvents(
       initial,
@@ -17254,20 +17460,23 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       {
         definitionId: "onr_v1_356_dedicated-response-team",
         damageType: "meat",
-        expectedTagsAdded: 1,
+        damageAmount: 3,
+        startingTags: 1,
       },
       {
         definitionId: "onr_v1_357_dieter-esslin",
         damageType: "net",
-        expectedTagsAdded: 0,
+        damageAmount: 1,
+        startingTags: 0,
       },
     ] as const;
 
-    for (const { definitionId, damageType, expectedTagsAdded } of cases) {
+    for (const { definitionId, damageType, damageAmount, startingTags } of cases) {
       let state = toRunnerTurn(
         v1917GenericAssetGame(`v1918-upgrade-access-ambush-${definitionId}`),
       );
       state.runner.credits = 10;
+      state.runner.tags = startingTags;
       const upgradeId = putCorpRootInRemote(state, definitionId);
       state.cardInstances[upgradeId] = {
         ...state.cardInstances[upgradeId]!,
@@ -17289,15 +17498,17 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       state = apply(state, "runner", (action) => action.type === "access_card");
 
       expect(state.run?.accessedCardId).toBe(upgradeId);
-      expect(state.runner.tags).toBe(tagsBefore + expectedTagsAdded);
-      expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
+      expect(state.runner.tags).toBe(tagsBefore);
+      expect(state.runner.grip.length).toBe(
+        Math.max(0, gripBefore - damageAmount),
+      );
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1918_upgrade_access_ambush",
         ambushDefinitionId: definitionId,
         damageResolved: true,
         damageType,
-        damageAmount: 1,
+        damageAmount,
       });
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         /"privatePayload"|"cardInstances"|"hq"|"rd"/,
@@ -17307,6 +17518,45 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     }
+  });
+
+  it("skips Dedicated Response Team damage for an untagged Runner without adding tags", () => {
+    let state = toRunnerTurn(
+      v1917GenericAssetGame("v1918-dedicated-response-untagged"),
+    );
+    state.runner.credits = 10;
+    state.runner.tags = 0;
+    const upgradeId = putCorpRootInRemote(
+      state,
+      "onr_v1_356_dedicated-response-team",
+    );
+    state.cardInstances[upgradeId] = {
+      ...state.cardInstances[upgradeId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const gripBefore = state.runner.grip.length;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.grip.length).toBe(gripBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      ambushDefinitionId: "onr_v1_356_dedicated-response-team",
+      tagConditionMet: false,
+      damageSkippedReason: "runner_not_tagged",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("starts Turbeau Delacroix through the side-safe access trace window", () => {
@@ -17337,7 +17587,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 10,
+      baseTraceStrength: 4,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
     });
     expect(state.pendingChoice?.side).toBe("corp");
@@ -17349,6 +17599,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1918_upgrade_access_trace",
       ambushDefinitionId: "onr_v1_372_turbeau-delacroix",
+      oncePerRunConsumed: true,
+      baseTraceStrength: 4,
     });
 
     state = applyChoice(state, "corp", "bid_0");
@@ -22392,6 +22644,30 @@ function scoreRunnerAgendaForTest(
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
     zone: { side: "runner", zone: "scoreArea" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
+function scoreCorpAgendaForTest(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === definitionId &&
+      !state.runner.scoreArea.includes(id) &&
+      !state.corp.scoreArea.includes(id),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing unscored ${definitionId}`);
+  const id = entry[0];
+  removeEverywhere(state, id);
+  state.corp.scoreArea.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "scoreArea" },
     faceup: true,
     rezzed: true,
   };

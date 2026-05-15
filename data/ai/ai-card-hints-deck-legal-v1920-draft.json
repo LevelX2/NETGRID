@@ -352,8 +352,9 @@
         "corp_score_agenda"
       ],
       "requiredMechanics": [
-        "persistent_special_state_resolver",
-        "hidden_zone_search_reveal_reorder_resolver"
+        "score_trigger_rezzed_ice_choice_resolver",
+        "ice_strength_modifier_resolver",
+        "subroutine_modifier_resolver"
       ],
       "valueHints": {
         "modifier": 1
@@ -361,6 +362,7 @@
       "riskTags": [
         "wip_no_ai_promotion",
         "modifier_layering",
+        "score_window",
         "state_hash_replay_required"
       ],
       "aiSupportStatus": "hinted_only",
@@ -557,24 +559,27 @@
       "roles": [
         "corp",
         "asset",
-        "damage"
+        "damage",
+        "tag_condition"
       ],
       "planRoles": [
-        "remote_asset_modifier"
+        "remote_asset_finisher"
       ],
       "requiredMechanics": [
         "generic_asset_node_ability_resolver",
-        "scored_agenda_static_active_resolver",
-        "agenda_difficulty_overadvance_resolver",
-        "global_static_modifier_layer_resolver",
+        "agenda_point_cost_resolver",
+        "tag_condition_avoid_remove_resolver",
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
-        "modifier": 1
+        "damage": 15,
+        "agendaPointCost": 3
       },
       "riskTags": [
         "wip_no_ai_promotion",
-        "modifier_layering",
+        "damage_window",
+        "tag_condition_revalidated",
+        "agenda_point_cost",
         "state_hash_replay_required"
       ],
       "aiSupportStatus": "hinted_only",

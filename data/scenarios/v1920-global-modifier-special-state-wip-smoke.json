@@ -39,6 +39,8 @@
     "Remote Facility, Nevinyrral and Pacifica Regional AI open rezzed Corp action-economy LegalActions that revalidate source, side and gained-action amount.",
     "The covered V1.9.20 action-economy action rejects wrong-side and stale applyAction submissions.",
     "Fortress Architects reduces ICE rez costs from a visible rezzed root source through the global static modifier layer.",
+    "Ice Transmutation scores into a rezzed-ICE target choice, then applies public strength and subroutine modifiers replay-stably.",
+    "I Got a Rock opens only for a double-tagged Runner with enough scored Corp agenda points and resolves 15 Meat Damage through the damage system.",
     "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
     "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
     "Covered MRAM, action-economy, global rez-cost, handlimit and recurring-state paths replay deterministically and reproduce final StateHash.",

@@ -23,8 +23,8 @@
   "assertions": [
     "V1.9.18 runtime definitions exist for all 15 target cards with final display-only text and no WIP prefix.",
     "Crybaby covers the first generic upgrade/root path for Corp install, root rez, Runner access, trash-on-access, Archives visibility and payload redaction.",
-    "Dedicated Response Team and Dieter Esslin cover side-safe access ambush damage windows through legal Runner access.",
-    "Turbeau Delacroix covers a side-safe access trace window with Corp and Runner trace bid choices.",
+    "Dedicated Response Team covers tagged-runner 3 Meat Damage and untagged no-op access; Dieter Esslin covers 1 Net Damage without hidden-zone payloads.",
+    "Turbeau Delacroix covers a once-per-run side-safe Trace 4 access window with Corp and Runner trace bid choices.",
     "Red Herrings covers a server-bound agenda steal tax on legal agenda access.",
     "V1.9.18 city grids cover server-bound region replacement with older region visibility in Archives.",
     "Crystal Palace Station Grid and Dr. Dreff cover explicit Power-counter LegalActions for rezzed server upgrades.",

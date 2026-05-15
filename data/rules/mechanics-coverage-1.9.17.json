@@ -43,7 +43,7 @@
       "label": "Trace, Hidden-Zone und Ambush Assets",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.17",
-      "currentScopeNote": "Blood Cat/Krumz, Corporate Negotiating Center/Rescheduler und Setup!/TRAP! nutzen bestehende side-sichere Trace-, Hidden-Zone- und Access-Ambush-Barrieren.",
+      "currentScopeNote": "Blood Cat nutzt den side-sicheren Trace-Pfad; Krumz liefert rezzed Trace-Bid-Bits mit Corp-Start-Refresh; Corporate Negotiating Center und Rescheduler nutzen side-sichere HQ-Hidden-Zone-Pfade ohne ungezeigte Kartenleaks; Setup!/TRAP! nutzen Access-Ambush-Barrieren.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     },
     {

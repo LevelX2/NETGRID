@@ -4,6 +4,25 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-turbeau-tutor
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TURBEAU_TUTOR_IMPLEMENTATION.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Turbeau Delacroix | `onr_v1_372_turbeau-delacroix` | Nacharbeit umgesetzt: Access-Trace 4, einmal pro Run auf dem Fort, keine Run-Start-Tax | Engine-Test und AI-/Manifest-Vertrag korrigiert |
+| Dieter Esslin | `onr_v1_357_dieter-esslin` | Nacharbeit umgesetzt: einfacher 1-Net-Damage-Access-Ambush ohne Hidden-Zone-Stub | PublicPayload und Tests präzisiert |
+| Corporate Negotiating Center | `onr_v1_314_corporate-negotiating-center` | Nacharbeit umgesetzt: Start-of-turn-HQ-Agenda-Reveal mit Creditgewinn | Hidden-Info-Choice, Replay und AI-Hint korrigiert |
+| Krumz | `onr_v1_330_krumz` | Nacharbeit umgesetzt: Trace-Bid-Bit mit Corp-Start-Refresh statt eigener Trace | Trace-Kostenlogik und PublicPayload ergänzt |
+| I Got a Rock | `onr_v1_327_i-got-a-rock` | Nacharbeit umgesetzt: doppelt getaggter Runner, 3 Agenda-Punkte Kosten, 15 Meat Damage | Engine-Test und AI-/Manifest-Vertrag ergänzt |
+| Dedicated Response Team | `onr_v1_356_dedicated-response-team` | Nacharbeit umgesetzt: 3 Meat Damage nur bei bereits getaggtem Runner, kein Tag-Gain | Damage-/No-op-Test und AI-Hint korrigiert |
+| Systematic Layoffs | `onr_v1_304_systematic-layoffs` | Nacharbeit umgesetzt: explizite Forfeit-Choice bei mehreren Corp-Agenden | Choice-Revalidation und Registervertrag ergänzt |
+| Rescheduler | `onr_v1_336_rescheduler` | Nacharbeit umgesetzt: HQ in R&D mischen und gleiche Anzahl ziehen | Hidden-Info-/RandomDrawRecord-Test ergänzt |
+| Tutor | `onr_v1_274_tutor` | Nachtest bestätigt: bestehender V1.9.22-Resolver bleibt replay-stabil | Kein Codefix nötig |
+| Ice Transmutation | `onr_v1_204_ice-transmutation` | Nacharbeit umgesetzt: Score-Choice auf rezzed ICE, +1 Stärke und Subroutine-Duplikation | Engine-Test und V1.9.20 Artefakte korrigiert |
+
 ## Runde 2026-05-15-ramming-galveston
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

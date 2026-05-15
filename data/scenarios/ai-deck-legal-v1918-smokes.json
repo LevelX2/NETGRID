@@ -30,7 +30,6 @@
       "side": "corp",
       "coversCards": [
         "onr_v1_358_dr-dreff",
-        "onr_v1_372_turbeau-delacroix",
         "onr_v1_373_twenty-four-hour-surveillance"
       ],
       "expectedDecisionFamilies": ["install_card", "rez_ice", "start_run", "end_turn"],

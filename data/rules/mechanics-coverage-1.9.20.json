@@ -57,7 +57,7 @@
       "label": "Globale statische Modifier",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle mit side-sicherem PublicEvent und replay-stabilem StateHash ab.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Fortress Architects deckt den ersten rezzed globalen ICE-Rez-Kostenmodifier aus sichtbarer Root-Quelle ab. Ice Transmutation scoret auf ein rezzed ICE-Ziel und legt +1 Stärke sowie wiederholte printed Subroutinen replay-stabil auf das öffentliche ICE.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",

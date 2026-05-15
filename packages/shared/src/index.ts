@@ -771,6 +771,9 @@ export type RunState = {
   encounterTaxForFutureIce?: number;
   breakSubroutineAdditionalCost?: number;
   futureEncounterEndTheRunSourceIceId?: CardInstanceId;
+  turbeauAccessTraceConsumedByServer?: Partial<
+    Record<Exclude<ServerId, "new_remote">, CardInstanceId[]>
+  >;
   viral15ActiveSourceIceId?: CardInstanceId;
   viral15PendingPassedIceId?: CardInstanceId;
   futureEncounterIceStrengthBonus?: number;
@@ -3638,15 +3641,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 3,
     rulesText:
-      "Rezzed asset for Corp economy with a side-safe reveal/search surface. Hidden-zone information is exposed only through legal choices.",
+      "At the start of each Corp turn, the Corp may reveal agenda cards from HQ. Gain 1 credit for each agenda revealed this way.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
-      "generic_asset_node",
       "economy",
-      "hidden_zone_search_reveal",
-      "recurring_start_turn",
+      "hq_agenda_reveal",
+      "start_of_turn",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -3791,14 +3793,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 2,
     rulesText:
-      "Rezzed AI asset with trace and hosting surfaces. Trace bids and hosted references remain explicit and side-safe.",
+      "When rezzed, put 1 bit on Krumz. Use this bit only during Corp trace bids. If spent, replace it at the start of the next Corp turn.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
-      "generic_asset_node",
       "trace",
-      "hosting",
+      "trace_bid_credit_source",
+      "counter",
+      "recurring_start_turn",
       "ai_asset_node",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -3833,14 +3836,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 3,
     rulesText:
-      "Rezzed asset with side-safe hidden-zone reorder/search handling. Any revealed card information is scoped to the legal action result.",
+      "[A]: Note the number of cards in HQ. Shuffle those cards into R&D, then draw that many cards.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
-      "generic_asset_node",
       "gray_ops",
-      "hidden_zone_search_reveal",
+      "hq_shuffle_into_rd",
+      "draw",
+      "deterministic_shuffle",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4010,7 +4014,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 2,
     rulesText:
-      "Rezzed server upgrade with access-triggered ambush, tag and meat-damage surfaces. Damage and tags stay in explicit resolver windows.",
+      "Whenever Runner accesses Dedicated Response Team, do 3 Meat damage if Runner is tagged.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4018,8 +4022,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "generic_upgrade_root_server",
       "access_breach",
       "access_ambush",
-      "tag",
       "meat_damage",
+      "tag_condition",
       "prevention",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -4034,16 +4038,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 3,
     rulesText:
-      "Rezzed server upgrade with access, hidden-zone and net-damage surfaces. Hidden information is projected only through redacted choices.",
+      "Whenever Runner accesses Dieter Esslin, do 1 Net damage.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_upgrade_root_server",
       "access_breach",
-      "hidden_zone_search_reveal",
       "access_ambush",
       "net_damage",
+      "prevention",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4239,14 +4243,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 2,
     rulesText:
-      "Trace 10 - If trace is successful, give Runner a tag. Use this ability only when Runner accesses Turbeau Delacroix, and only once during each run on this fort.",
+      "Trace 4 - If trace is successful, give Runner a tag. Use this ability only when Runner accesses Turbeau Delacroix, and only once during each run on this fort.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_upgrade_root_server",
       "trace",
-      "run_flow",
       "access_breach",
       "tag",
       "access_ambush",
@@ -4447,14 +4450,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 5,
     rulesText:
-      "Operation with agenda-point economy and counter surfaces. Forfeit and point-cost branches require legal choices.",
+      "Forfeit a scored Corp agenda. Gain credits equal to that agenda's agenda points, minimum 1.",
     mechanics: [
       "play_operation",
-      "counter",
       "forfeit_agenda",
       "scored_agenda",
-      "agenda_difficulty",
-      "overadvance",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -5872,7 +5872,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     advancementRequirement: 5,
     agendaPoints: 3,
     rulesText:
-      "Agenda with ICE conversion and persistent-state surfaces. ICE changes remain explicit resolver outcomes.",
+      "When scored, choose a rezzed piece of ice. It gets +1 strength and each of its printed subroutines is repeated directly after itself.",
     mechanics: [
       "install_remote",
       "advance",
@@ -5880,8 +5880,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "steal",
       "scored_agenda",
       "persistent_special_state",
-      "global_static_modifier",
-      "hidden_zone_tool",
+      "ice_strength_modifier",
+      "subroutine_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -6028,16 +6028,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 3,
     trashCost: 2,
     rulesText:
-      "Asset with agenda, damage and global modifier surfaces. Ambush and damage outcomes stay access-window gated.",
+      "[A], 3 agenda points: Do 15 Meat damage. Use only if Runner has two or more tags.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_asset_node",
-      "access_ambush",
-      "damage",
-      "global_static_modifier",
+      "meat_damage",
+      "tag_condition",
       "scored_agenda",
+      "agenda_point_cost",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

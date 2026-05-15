@@ -157,11 +157,12 @@
       "title": "Ice Transmutation",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "persistent_special_state_resolver; hidden_zone_search_reveal_reorder_resolver",
+      "resolverFamily": "score_trigger_rezzed_ice_choice_resolver; ice_strength_modifier_resolver; subroutine_modifier_resolver",
       "roleTags": [
         "corp",
         "agenda",
-        "ice"
+        "ice",
+        "modifier"
       ]
     },
     {
@@ -241,11 +242,12 @@
       "title": "I Got a Rock",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "generic_asset_node_ability_resolver; scored_agenda_static_active_resolver; agenda_difficulty_overadvance_resolver; global_static_modifier_layer_resolver; damage_event_prevention_resolver",
+      "resolverFamily": "generic_asset_node_ability_resolver; agenda_point_cost_resolver; tag_condition_avoid_remove_resolver; damage_event_prevention_resolver",
       "roleTags": [
         "corp",
         "asset",
-        "damage"
+        "damage",
+        "tag_condition"
       ]
     },
     {

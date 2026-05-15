@@ -43,7 +43,7 @@
       "label": "Power Counter und Run-Start-Tax",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.18",
-      "currentScopeNote": "Crystal Palace Station Grid und Dr. Dreff koennen Power Counter ueber Corp-LegalActions legen; Dr. Dreff, Turbeau Delacroix und Twenty-Four-Hour Surveillance besteuern Runner-Run-Starts inklusive Stealth-Recurring-Credit-Zahlung.",
+      "currentScopeNote": "Crystal Palace Station Grid und Dr. Dreff koennen Power Counter ueber Corp-LegalActions legen; Dr. Dreff und Twenty-Four-Hour Surveillance besteuern Runner-Run-Starts inklusive Stealth-Recurring-Credit-Zahlung.",
       "coverage": ["unit", "legal_action", "state_hash"]
     },
     {
@@ -59,7 +59,7 @@
       "label": "Access-Ambush und Hidden-Zone-Upgrades",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.18",
-      "currentScopeNote": "Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings und Turbeau Delacroix nutzen bestehende Access-, Ambush- und Trace-Barrieren; New Galveston nutzt keine Hidden-Zone-Reveal-Aktion mehr, sondern servergebundene Trashkosten-Revalidation mit public Kostenpayload.",
+      "currentScopeNote": "Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings und Turbeau Delacroix nutzen bestehende Access-, Ambush- und Trace-Barrieren; Dedicated verursacht nur bei bereits getaggtem Runner 3 Meat Damage, Dieter schlicht 1 Net Damage, Turbeau einmal pro Run auf dem Fort Trace 4. New Galveston nutzt keine Hidden-Zone-Reveal-Aktion mehr, sondern servergebundene Trashkosten-Revalidation mit public Kostenpayload.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     }
   ],

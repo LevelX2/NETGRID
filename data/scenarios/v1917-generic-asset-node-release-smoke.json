@@ -29,8 +29,8 @@
     "All scoped economy assets expose distinct public gain-credit LegalActions with target-safe action IDs.",
     "All scoped recurring assets refresh deterministic Corp start-of-turn credits without accumulation.",
     "Hosted Corp cards cascade to Archives when a V1.9.17 host asset is trashed on access.",
-    "Blood Cat and Krumz use the existing side-safe Trace 3 bid window.",
-    "Corporate Negotiating Center and Rescheduler use hidden-zone barriers for R&D reveal and Korp-private reorder.",
+    "Blood Cat uses the side-safe Trace 3 bid window; Krumz contributes a rezzed trace-bid bit and refreshes it at Corp turn start.",
+    "Corporate Negotiating Center reveals selected HQ agendas at Corp turn start; Rescheduler shuffles HQ into R&D and draws the same count without leaking hidden card identities.",
     "Cowboy Sysop targets only visible installed Runner cards and Disinfectant, Inc. removes visible virus counters through applyAction revalidation.",
     "Solo Squad, Setup! and TRAP! resolve typed damage/tag paths without hidden payload leaks.",
     "Covered V1.9.17 branches replay to the same final StateHash."
