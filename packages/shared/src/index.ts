@@ -136,6 +136,7 @@ export type SubroutineType =
   | "set_run_future_strength_bonus"
   | "set_next_encounter_unless_fully_break_damage"
   | "set_next_encounter_lock"
+  | "set_next_encounter_no_break_subroutines"
   | "set_run_jack_out_lock"
   | "set_runner_forgo_next_action"
   | "set_runner_run_lock_actions"
@@ -1526,6 +1527,12 @@ function onrSetNextEncounterFatalDamage(
 
 function onrSetNextEncounterLock(id: string): SubroutineDefinition {
   return { id, type: "set_next_encounter_lock" };
+}
+
+function onrSetNextEncounterNoBreakSubroutines(
+  id: string,
+): SubroutineDefinition {
+  return { id, type: "set_next_encounter_no_break_subroutines" };
 }
 
 function onrSetRunJackOutLock(id: string): SubroutineDefinition {
@@ -6804,12 +6811,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "ap", "hellbolt"],
     rezCost: 7,
     strength: 4,
-    rulesText: "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+    rulesText:
+      "[Subroutine] Do 4 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
-      onrNetDamage("onr_v1_224_bolter_cluster_net_damage", 1),
-      onrEtr("onr_v1_224_bolter_cluster_etr"),
+      onrNetDamage("onr_v1_224_bolter_cluster_net_damage", 4),
+      onrSetNextEncounterNoBreakSubroutines(
+        "onr_v1_224_bolter_cluster_next_ice_no_break",
+      ),
     ],
-    mechanics: ["damage", "flatline", "end_the_run", "event_modification"],
+    mechanics: ["damage", "flatline", "next_encounter_penalty", "run_modifier"],
   }),
   onrIce({
     id: "onr_v1_225_canis-major",
@@ -7216,9 +7226,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "ap", "sword"],
     rezCost: 4,
     strength: 4,
-    rulesText: "[Subroutine] Do 2 net damage.",
-    subroutines: [onrNetDamage("onr_v1_258_neural_blade_net_damage", 2)],
-    mechanics: ["damage", "flatline", "event_modification"],
+    rulesText:
+      "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
+    subroutines: [
+      onrNetDamage("onr_v1_258_neural_blade_net_damage", 1),
+      onrSetNextEncounterNoBreakSubroutines(
+        "onr_v1_258_neural_blade_next_ice_no_break",
+      ),
+    ],
+    mechanics: ["damage", "flatline", "next_encounter_penalty", "run_modifier"],
   }),
   onrIce({
     id: "onr_v1_259_in-the-face",
@@ -7845,22 +7861,22 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "pit_bull"],
     rezCost: 5,
     strength: 4,
-    rulesText: "Trace 4. If successful, give the Runner 1 tag. End the run.",
+    rulesText:
+      "Trace 4. If successful, end the run. The Runner cannot make another run until they take an action to pay 2.",
     subroutines: [
       {
         id: "onr_v1_240_fang_trace",
         type: "initiate_trace",
         baseTraceStrength: 4,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "none" },
       },
-      onrEtr("onr_v1_240_fang_etr"),
     ],
     mechanics: [
       "trace",
       "link",
       "bid_amount",
-      "add_tag",
       "end_the_run",
+      "run_lock",
       ONR_V1_LOCAL_PRIVATE,
     ],
   }),
@@ -8402,8 +8418,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     memoryCost: 1,
-    recurringCredits: 1,
-    rulesText: "Stealth program with recurring run credits.",
+    recurringCredits: 2,
+    rulesText:
+      "2 recurring credits for icebreaker costs during runs; these credits cannot be used for noisy icebreakers.",
     mechanics: [
       "install_program",
       "memory",

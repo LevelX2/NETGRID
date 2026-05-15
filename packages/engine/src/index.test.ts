@@ -8948,7 +8948,14 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     coreDamageState.runner.credits = 20;
     const coreBefore = coreDamageState.runner.coreDamage;
-    putCorpRootInRemote(coreDamageState, "onr_v1_346_vacant-soulkiller");
+    const vacantSoulkillerId = putCorpRootInRemote(
+      coreDamageState,
+      "onr_v1_346_vacant-soulkiller",
+    );
+    coreDamageState.cardInstances[vacantSoulkillerId] = {
+      ...coreDamageState.cardInstances[vacantSoulkillerId]!,
+      advancementCounters: 1,
+    };
     coreDamageState = apply(
       coreDamageState,
       "runner",
@@ -11143,7 +11150,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       eventModificationDecision: "apply",
-      preventedAmount: 2,
+      preventedAmount: 1,
       damageAmount: 0,
     });
 
@@ -18337,7 +18344,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       eventModificationDecision: "apply",
-      preventedAmount: 2,
+      preventedAmount: 1,
       damageAmount: 0,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -25042,6 +25049,235 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("loads Vewy Vewy Quiet with two recurring run credits", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-vewy-vewy-quiet",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
+        corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_071_vewy-vewy-quiet");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_071_vewy-vewy-quiet",
+    );
+    const vewyId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_071_vewy-vewy-quiet",
+    );
+    expect(vewyId).toBeDefined();
+    if (!vewyId) throw new Error("Missing Vewy Vewy Quiet");
+    expect(cardCounterAmount(state, vewyId, "recurring_credit")).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      recurringCreditsLoaded: 2,
+    });
+  });
+
+  it("uses Bolter Cluster and Neural Blade next-ICE no-break modifiers without a jack-out lock", () => {
+    for (const [definitionId, expectedDamage] of [
+      ["onr_v1_224_bolter-cluster", 4],
+      ["onr_v1_258_neural-blade", 1],
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `spotcheck-${definitionId}`,
+          baseline: MVP_0_99_BASELINE,
+          runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
+          corpDeck: {
+            ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+            id: `spotcheck_${definitionId}_corp`,
+            name: `Spotcheck ${definitionId} Corp`,
+            cards: [
+              { id: definitionId, quantity: 1 },
+              { id: "simple_code_gate_ice", quantity: 1 },
+              ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK.cards.filter(
+                (card) => card.id !== definitionId,
+              ),
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 30;
+      state.corp.credits = 30;
+      installRunnerProgramForTest(state, "simple_decoder");
+      putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      putCorpIceOnServer(state, "rd", definitionId);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = encounterIce(state, "rd", definitionId);
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: expectedDamage,
+      });
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "simple_code_gate_ice",
+      );
+      const runnerActions = getLegalActions(state, "runner");
+      expect(state.run?.noBreakSubroutinesActive).toBe(true);
+      expect(state.run?.jackOutLockedUntilEncounterEnds ?? false).toBe(false);
+      expect(runnerActions.some((action) => action.type === "break_subroutine")).toBe(false);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("applies Fang trace success as a pay-to-run lock instead of a tag", () => {
+    let state = toRunnerTurn(v1914TraceTagResourceGame("spotcheck-fang-run-lock"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpIceOnServer(state, "rd", "onr_v1_240_fang");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = encounterIce(state, "rd", "onr_v1_240_fang");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace).toMatchObject({
+      baseTraceStrength: 4,
+      sourceDefinitionId: "onr_v1_240_fang",
+    });
+    state = applyChoice(state, "corp", "bid_5");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.tags).toBe(0);
+    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+    expect(getLegalActions(state, "runner").some((action) => action.type === "start_run")).toBe(false);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.fangRunLockCreditCost === 2,
+    );
+    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(0);
+    expect(getLegalActions(state, "runner").some((action) => action.type === "start_run")).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("scales Vacant Soulkiller core damage from advancement counters including zero", () => {
+    for (const advancementCounters of [0, 3]) {
+      let state = toRunnerTurn(
+        v1919AgendaOveradvanceGame(`spotcheck-vacant-soulkiller-${advancementCounters}`),
+      );
+      state.runner.credits = 20;
+      const vacantId = putCorpRootInRemote(state, "onr_v1_346_vacant-soulkiller");
+      state.cardInstances[vacantId] = {
+        ...state.cardInstances[vacantId]!,
+        advancementCounters,
+      };
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "remote_1",
+      );
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      expect(state.runner.coreDamage).toBe(advancementCounters);
+      const expectedPayload: Record<string, unknown> = {
+        hiddenZoneAction: "v1919_access_ambush_damage",
+        ambushDefinitionId: "onr_v1_346_vacant-soulkiller",
+        advancementCounterCount: advancementCounters,
+      };
+      if (advancementCounters > 0)
+        expectedPayload.damageAmount = advancementCounters;
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject(
+        expectedPayload,
+      );
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        /"cardInstances"|"privatePayload"|"hq"|"rd"/,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("charges Microtech Trode Set for breaks and reduces unbroken AP net damage to one", () => {
+    const microtechRunnerDeck: DeckDefinition = {
+      ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+      id: "spotcheck_microtech_break_runner",
+      name: "Spotcheck Microtech Break Runner",
+      cards: [
+        { id: "onr_v1_132_microtech-trode-set", quantity: 1 },
+        { id: "simple_killer", quantity: 1 },
+        ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK.cards.filter(
+          (card) =>
+            card.id !== "onr_v1_132_microtech-trode-set" &&
+            card.id !== "simple_killer",
+        ),
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-microtech-trode-set",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: microtechRunnerDeck,
+        corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    installRunnerHardwareForTest(state, "onr_v1_132_microtech-trode-set");
+    const killerId = installRunnerProgramForTest(state, "simple_killer");
+    state.cardInstances[killerId] = {
+      ...state.cardInstances[killerId]!,
+      strengthModifier: 10,
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_224_bolter-cluster");
+    state = encounterIce(state, "rd", "onr_v1_224_bolter-cluster");
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "break_subroutine",
+    );
+    expect(breakAction.costs).toEqual([{ credits: 2 }]);
+    expect(breakAction.payload).toMatchObject({
+      breakSubroutineAdditionalCost: 1,
+      runnerHardwareAbility: "microtech_trode_set_break_cost_modifier",
+    });
+
+    let damageState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-microtech-ap-reduction",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+        corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    damageState.runner.credits = 30;
+    damageState.corp.credits = 30;
+    installRunnerHardwareForTest(damageState, "onr_v1_132_microtech-trode-set");
+    putCorpIceOnServer(damageState, "rd", "onr_v1_224_bolter-cluster");
+    damageState = encounterIce(damageState, "rd", "onr_v1_224_bolter-cluster");
+    damageState = apply(damageState, "runner", (action) => action.type === "continue_run");
+    expect(damageState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerHardwareAbility: "microtech_trode_set_ap_net_damage_reduction",
+      printedDamageAmount: 4,
+      damageAmount: 1,
+    });
   });
 });
 

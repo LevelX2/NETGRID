@@ -211,7 +211,9 @@ const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
+const FANG_ID = "onr_v1_240_fang";
 const FANG_2_0_ID = "onr_v1_241_fang-2-0";
+const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 const CINDERELLA_ID = "onr_v1_228_cinderella";
 const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
@@ -5057,6 +5059,20 @@ function runBreakSubroutineAdditionalCost(run: GameState["run"]): number {
   return Math.max(0, Math.floor(run.breakSubroutineAdditionalCost ?? 0));
 }
 
+function microtechTrodeSetBreakAdditionalCost(state: GameState): number {
+  return state.runner.rig.hardware.some(
+    (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
+  )
+    ? 1
+    : 0;
+}
+
+function hasInstalledMicrotechTrodeSet(state: GameState): boolean {
+  return state.runner.rig.hardware.some(
+    (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
+  );
+}
+
 function iceRezCostReductionFor(
   state: GameState,
   iceId: CardInstanceId,
@@ -5774,17 +5790,19 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
         ability.type === "break_subroutine" &&
         breakAbilityMatchesIce(ability, iceDefinition),
     );
+    const additionalBreakCost =
+      runBreakSubroutineAdditionalCost(run) +
+      microtechTrodeSetBreakAdditionalCost(state);
     if (
       !run.noBreakSubroutinesActive &&
       breakAbility &&
       breakerStrength >= encounteredIceStrength &&
       availableRunnerRunCredits(state, breakerId) >=
-        breakAbility.cost.credits + runBreakSubroutineAdditionalCost(run) &&
+        breakAbility.cost.credits + additionalBreakCost &&
       (breaker.id !== RAMMING_PISTON_ID ||
         runnerStealthRecurringCredits(state) >=
           (breakAbility.postBreakStealthLoss ?? 0))
     ) {
-      const additionalBreakCost = runBreakSubroutineAdditionalCost(run);
       const totalBreakCost = breakAbility.cost.credits + additionalBreakCost;
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
@@ -5819,7 +5837,15 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
                   ? {
                       breakSubroutineAdditionalCost: additionalBreakCost,
                       breakSubroutineTotalCost: totalBreakCost,
-                      v1922CorpIceAbility: "virizz_break_cost_modifier",
+                      ...(runBreakSubroutineAdditionalCost(run) > 0
+                        ? { v1922CorpIceAbility: "virizz_break_cost_modifier" }
+                        : {}),
+                      ...(microtechTrodeSetBreakAdditionalCost(state) > 0
+                        ? {
+                            runnerHardwareAbility:
+                              "microtech_trode_set_break_cost_modifier",
+                          }
+                        : {}),
                     }
                   : {}),
               },
@@ -9241,12 +9267,28 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     }
     if (subroutine.type === "do_damage") {
       const damageType = subroutine.damageType ?? "net";
+      const printedAmount = subroutine.amount ?? 1;
+      const microtechApNetReduction =
+        damageType === "net" &&
+        printedAmount > 1 &&
+        cardHasSubtype(definition, "ap") &&
+        hasInstalledMicrotechTrodeSet(state);
+      const damageAmount = microtechApNetReduction ? 1 : printedAmount;
       const event = createDamageImminentEvent(state, {
         damageId: `${run.runId}.${run.encounteredIceId}.${index}`,
         damageType,
-        amount: subroutine.amount ?? 1,
+        amount: damageAmount,
         source: `subroutine:${definition.id}:${subroutine.id}`,
       });
+      if (microtechApNetReduction && legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          runnerHardwareAbility: "microtech_trode_set_ap_net_damage_reduction",
+          sourceDefinitionId: MICROTECH_TRODE_SET_ID,
+          printedDamageAmount: printedAmount,
+          damageAmount,
+        };
+      }
       if (
         legalAction &&
         (openReplacementWindow(state, event, legalAction) ||
@@ -9337,9 +9379,13 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       run.nextEncounterFatalDamage =
         Math.max(0, Math.floor(run.nextEncounterFatalDamage ?? 0)) + amount;
     }
-    if (subroutine.type === "set_next_encounter_lock") {
+    if (
+      subroutine.type === "set_next_encounter_lock" ||
+      subroutine.type === "set_next_encounter_no_break_subroutines"
+    ) {
       run.nextEncounterNoBreakSubroutines = true;
-      run.nextEncounterJackOutLock = true;
+      if (subroutine.type === "set_next_encounter_lock")
+        run.nextEncounterJackOutLock = true;
     }
     if (subroutine.type === "set_run_jack_out_lock") {
       run.jackOutLockedForRun = true;
@@ -10822,10 +10868,27 @@ function resolveV1919AssetOnAccess(
   );
   const damageAmount =
     definition.id === V1919_VACANT_SOULKILLER_ID
-      ? 1
+      ? advancementCounterCount
       : definition.id === V1919_VIRUS_TEST_SITE_ID
         ? Math.max(1, advancementCounterCount * 2)
         : 2;
+  if (damageAmount <= 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1919_access_ambush_damage",
+      ambushDefinitionId: definition.id,
+      advancementCounterCount,
+      damageAmount: 0,
+      ...(accessServerId === "rd"
+        ? {
+            publicRevealKind: "reveal",
+            publicRevealDefinitionId: definition.id,
+          }
+        : {}),
+    };
+    return;
+  }
   const summary = doDamage(state, {
     damageId: `v1919.asset_access.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
     damageType,
@@ -10838,7 +10901,8 @@ function resolveV1919AssetOnAccess(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1919_access_ambush_damage",
     ambushDefinitionId: definition.id,
-    ...(definition.id === V1919_VIRUS_TEST_SITE_ID
+    ...(definition.id === V1919_VIRUS_TEST_SITE_ID ||
+    definition.id === V1919_VACANT_SOULKILLER_ID
       ? { advancementCounterCount, damageAmount }
       : {}),
     ...(accessServerId === "rd"
@@ -17007,7 +17071,11 @@ function resolveTraceRunnerBid(
     addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
     dataRavenCounterAdded = 1;
   }
-  if (successful && trace.sourceDefinitionId === FANG_2_0_ID) {
+  if (
+    successful &&
+    (trace.sourceDefinitionId === FANG_ID ||
+      trace.sourceDefinitionId === FANG_2_0_ID)
+  ) {
     fangRunLockCreditCost = 2;
     ensureRunnerTurnFlags(state).fangRunLockCreditCost = fangRunLockCreditCost;
     fangRunEnded = true;
@@ -17923,6 +17991,10 @@ function publicContextForAction(
   if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string")
     context.v1922RunnerProgramAbility =
       legalAction.payload.v1922RunnerProgramAbility;
+  if (typeof legalAction.payload?.runnerHardwareAbility === "string")
+    context.runnerHardwareAbility = legalAction.payload.runnerHardwareAbility;
+  if (typeof legalAction.payload?.printedDamageAmount === "number")
+    context.printedDamageAmount = legalAction.payload.printedDamageAmount;
   if (typeof legalAction.payload?.redHerringsCardId === "string")
     context.redHerringsCardId = legalAction.payload.redHerringsCardId;
   if (legalAction.payload?.redHerringsTaxPersistsForRun === true)
