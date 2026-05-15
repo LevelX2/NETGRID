@@ -10451,6 +10451,7 @@ function trashRunnerInstalledProgram(
     rezzed: true,
     zone: { side: "runner", zone: "heap" },
   };
+  clearCardCounters(state, cardId);
 }
 
 function runnerProgramUsesMemory(
@@ -10499,7 +10500,7 @@ function trashRunnerInstalledCardToHeap(
     rezzed: true,
     zone: { side: "runner", zone: "heap" },
   };
-  if (definition.id === BROKER_ID) clearCardCounters(state, cardId);
+  clearCardCounters(state, cardId);
 }
 
 function trashCorpInstalledCardToArchives(
