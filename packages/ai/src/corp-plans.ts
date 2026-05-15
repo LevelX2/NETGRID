@@ -391,12 +391,23 @@ export function evaluateEconomyReserve(input: AiDecisionInput, candidate: CorpPl
   const features = extractCorpPlanFeatures(input);
   const hasEconomyRole = candidate.requiredRoles.some((role) => role.includes("economy") || role.includes("draw"));
   const lowCredits = features.credits < 5;
-  const score = candidate.kind === "recover_economy" ? (lowCredits ? 170 : 80) + (hasEconomyRole ? 45 : 0) : lowCredits ? -40 : 20;
+  const centralProtectPenalty = lowReserveCentralProtectPenalty(input, candidate, features);
+  const score = candidate.kind === "recover_economy" ? (lowCredits ? 170 : 80) + (hasEconomyRole ? 45 : 0) : lowCredits ? -40 - centralProtectPenalty : 20;
   return {
     score,
-    reasons: lowCredits ? ["credit_reserve_low"] : ["credit_reserve_stable"],
-    evidence: [`credits:${features.credits}`, `clicks:${features.clicks}`, `economy_role:${hasEconomyRole}`]
+    reasons: sortedUnique([lowCredits ? "credit_reserve_low" : "credit_reserve_stable", ...(centralProtectPenalty > 0 ? ["central_protect_credit_reserve_low"] : [])]),
+    evidence: [`credits:${features.credits}`, `clicks:${features.clicks}`, `economy_role:${hasEconomyRole}`, `central_protect_penalty:${centralProtectPenalty}`]
   };
+}
+
+function lowReserveCentralProtectPenalty(input: AiDecisionInput, candidate: CorpPlanCandidate, features: CorpPlanFeatures): number {
+  if (candidate.kind !== "protect_hq" && candidate.kind !== "protect_rnd") return 0;
+  if (features.credits > 1) return 0;
+  const serverId = candidate.kind === "protect_hq" ? "hq" : "rd";
+  const server = features.serverFeatures.get(serverId);
+  const recentPressure = input.eventTail.filter((event) => serverIdFromEvent(event) === serverId && (event.type.includes("run") || event.type.includes("access") || event.type.includes("breach"))).length;
+  if (recentPressure >= 2 && (server?.iceCount ?? 0) === 0) return 0;
+  return 180;
 }
 
 export function evaluateIceRez(input: AiDecisionInput, candidate: CorpPlanCandidate): CorpPlanEvaluatorResult {

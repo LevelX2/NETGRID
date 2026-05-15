@@ -13,6 +13,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - Sichtbare Run-Blocker, Kosten- und Unreachable-Remote-Guards bleiben stärker als aggressive Runner-Doktrin.
 - Runner-Zentraldruck auf HQ/R&D wird bei leerem Rig, niedriger Creditreserve, sichtbarem zentralem ICE oder sehr frischer Wiederholung gegen Economy-, Draw- und Rig-Aufbau abgewogen.
 - Runner-Remote-Contest wird bei niedriger Creditreserve und schwacher sichtbarer Remote-Drohung gedrosselt; sehr frischer Contest desselben Remotes wird zusätzlich abgewertet.
+- Corp-Zentral-ICE-Protection wird bei sehr niedriger Creditreserve gegen Economy-Erholung abgewogen, wenn der Zielserver bereits geschützt ist oder kein unmittelbarer Schutzdruck besteht.
 - Corp-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus.
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
@@ -55,6 +56,6 @@ Teilweise grün:
 
 - Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
 - Nackte Agenda-Installationen in `new_remote` werden nicht mehr als `score_next_turn`/`build_scoring_remote`-Schritt aufgenommen, wenn kein geschützter Zielserver besteht.
-- Nach dem Remote-Contest-Pacing bleiben ein Runner-R&D-Druckstart und zwei Corp-Protect-Installs bei niedriger Creditreserve als nächste Economy-Stall-Restfälle.
+- Im engen 6-Seed-/40-Action-Doctrine-Benchmark stehen alle Doctrine-Fehlerklassen bei 0; als nächstes sollte dieser Stand über Holdout- und längere Selfplay-Läufe geprüft werden.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.

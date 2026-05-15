@@ -21,7 +21,7 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 |
 | scoreWindowMissed | 0 | 0 |
 | remoteOverbuild | 0 | 0 |
-| economyStall | 3 | 3 |
+| economyStall | 0 | 0 |
 | repeatedLowValueCentralRun | 0 | 0 |
 | rigStall | 0 | 0 |
 | assetTrashNeglect | 0 | 0 |
@@ -48,11 +48,7 @@ Keine Beispiele im analysierten Lauf.
 
 ### economyStall
 
-| Seed | Action | Side | Type | Reason | Server | Tags |
-| --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-005 | 22 | runner | start_run | runner.plan.pressure_rnd | rd | economy_stall |
-| ai-v143-tuning-006 | 20 | corp | install_card | corp.plan.protect_hq | hq | economy_stall |
-| ai-v143-tuning-006 | 32 | corp | install_card | corp.plan.protect_rnd | rd | economy_stall |
+Keine Beispiele im analysierten Lauf.
 
 ### repeatedLowValueCentralRun
 
@@ -73,11 +69,12 @@ Keine Beispiele im analysierten Lauf.
 - `rigStall` fällt nach dem Underprepared-Central-Pressure-Guard auf 0.
 - `economyStall` zählt laufende Run-Folgeaktionen wie Pump, Break, Continue, Access und Steal nicht mehr als Planungsfehler.
 - Schwache `contest_remote`-Schleifen bei niedriger Creditreserve fallen nach dem Remote-Contest-Pacing aus dem Restbild heraus.
-- Der Rest liegt jetzt auf einem Runner-R&D-Druckstart und zwei Corp-Protect-Installs bei niedriger Creditreserve.
+- Runner-Zentraldruck durch sichtbares ICE bei 1 Credit und redundante Corp-Zentral-ICE-Protection bei 1 Credit werden nun gegen Economy-Erholung abgewogen.
+- Im engen Tuning-Lauf bleiben keine Doctrine-Fehlerbeispiele übrig.
 
 ## Nächster Umsetzungsschritt
 
-Der nächste Tuning-Schritt sollte jetzt die letzten Economy-Stall-Restfälle enger bewerten:
+Der nächste Tuning-Schritt sollte nicht weiter auf denselben sechs Seeds optimieren, sondern die Robustheit prüfen:
 
-1. Runner-Zentraldruck bei 1 Credit sollte auch mit sichtbarem Rig nur bei wirklich hoher Access-Erwartung vor Economy liegen.
-2. Corp-Protect-Pläne sollten bei niedriger Creditreserve stärker gegen Economy-Erholung abgewogen werden, sofern kein unmittelbares Score- oder Run-Schutzfenster besteht.
+1. Holdout-Seeds und längere Selfplay-Läufe gegen die neuen Pacing-Regeln prüfen.
+2. Erst bei stabilen Holdout-Werten Runner-Mulligan und archetypspezifische Early-Turn-Planung angehen.

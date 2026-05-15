@@ -390,7 +390,7 @@ function centralPressureWithoutRigPenalty(input: AiDecisionInput, candidate: Run
     if (features.credits === 3) return centralIceCount > 0 ? 230 : 120;
     return 0;
   }
-  if (features.credits <= 1) return 120;
+  if (features.credits <= 1) return centralIceCount > 0 ? 230 : 170;
   if (features.credits === 2) return 70;
   return 0;
 }

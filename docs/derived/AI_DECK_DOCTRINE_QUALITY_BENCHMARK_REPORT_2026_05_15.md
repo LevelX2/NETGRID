@@ -20,7 +20,7 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 | 0 |
 | scoreWindowMissed | 0 | 0 | 0 |
 | remoteOverbuild | 0 | 0 | 0 |
-| economyStall | 3 | 3 | 0 |
+| economyStall | 0 | 0 | 0 |
 | repeatedLowValueCentralRun | 0 | 0 | 0 |
 | rigStall | 0 | 0 | 0 |
 | assetTrashNeglect | 0 | 0 | 0 |
@@ -48,4 +48,6 @@ Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht meh
 
 Nach dem Remote-Contest-Pacing fallen die schwachen `contest_remote`-Schleifen bei niedriger Creditreserve aus dem Restbild heraus.
 
-Übrig bleibt `economyStall` mit 3 Treffern. Die Beispiele liegen nun auf einem neuen Runner-R&D-Druckstart bei niedriger Creditreserve sowie zwei Corp-Protect-Installs bei niedrigem Creditstand; das ist der nächste konkrete Tuning-Kandidat.
+Nach dem letzten Low-Reserve-Pacing fallen auch die verbleibenden Economy-Stall-Restfälle aus dem engen Tuning-Lauf heraus: Runner-Zentraldruck durch sichtbares ICE bei 1 Credit und redundante Corp-Zentral-ICE-Protection bei 1 Credit werden nun gegen Economy-Erholung abgewogen.
+
+Alle Doctrine-Fehlerklassen stehen in diesem 6-Seed-/40-Action-Lauf bei 0. Das ist ein enger Tuning-Nachweis, kein Ersatz für Holdout-/Selfplay-Auswertung.

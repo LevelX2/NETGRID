@@ -922,6 +922,54 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(chooseCorpPlanDecision(economyInput).debug.planKind).toBe("recover_economy");
   });
 
+  it("recovers economy before low-reserve central ICE protection without urgent pressure", () => {
+    const input = corpActionPhaseInput("ai-v140-low-reserve-central-protect", (state) => {
+      state.corp.credits = 1;
+      moveCorpCardToHq(state, "simple_barrier_ice");
+    });
+    const rdIce = input.legalActions.find((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(rdIce).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdIce || !gain) throw new Error("Missing low-reserve central-protect fixture actions");
+
+    const protectCandidate = generateCorpPlanCandidates({ ...input, legalActions: [rdIce, gain] }).find((candidate) => candidate.kind === "protect_rnd");
+    const decision = chooseCorpPlanDecision({ ...input, legalActions: [rdIce, gain] });
+
+    expect(protectCandidate).toBeDefined();
+    if (!protectCandidate) throw new Error("Missing protect_rnd candidate");
+    expect(evaluateEconomyReserve(input, protectCandidate).reasons).toContain("central_protect_credit_reserve_low");
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+  });
+
+  it("recovers economy before adding redundant central ICE at low reserve", () => {
+    const input = withPublicServerEventTail(
+      corpActionPhaseInput("ai-v140-low-reserve-redundant-central-protect", (state) => {
+        state.corp.credits = 1;
+        putCorpIceOnServer(state, "hq", "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_code_gate_ice");
+      }),
+      ["hq", "hq"]
+    );
+    const hqIce = input.legalActions.find((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "hq");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(hqIce).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqIce || !gain) throw new Error("Missing low-reserve redundant central-protect fixture actions");
+
+    const protectCandidate = generateCorpPlanCandidates({ ...input, legalActions: [hqIce, gain] }).find((candidate) => candidate.kind === "protect_hq");
+    const decision = chooseCorpPlanDecision({ ...input, legalActions: [hqIce, gain] });
+
+    expect(protectCandidate).toBeDefined();
+    if (!protectCandidate) throw new Error("Missing protect_hq candidate");
+    expect(evaluateEconomyReserve(input, protectCandidate).reasons).toContain("central_protect_credit_reserve_low");
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+  });
+
   it("builds deterministic deck doctrine profiles without raw private card state", () => {
     const profile = buildDeckDoctrineProfile(snapshotById("demo_corp_008_snapshot_v0_8"));
     const second = buildDeckDoctrineProfile(snapshotById("demo_corp_008_snapshot_v0_8"));
@@ -1530,6 +1578,29 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(pressureCandidate).toBeDefined();
     if (!pressureCandidate) throw new Error("Missing underprepared pressure_hq candidate");
     expect(evaluateRunnerRig(input, pressureCandidate).reasons).toContain("central_pressure_underprepared");
+  });
+
+  it("recovers economy before low-reserve central pressure through visible ICE", () => {
+    const input = runnerActionPhaseInput("ai-v141-low-reserve-rd-ice", (state) => {
+      state.runner.credits = 1;
+      moveRunnerProgramToRig(state, "simple_fracter");
+      putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    });
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!rdRun || !gainCredit) throw new Error("Missing low-reserve R&D pressure fixture actions");
+
+    const pressureCandidate = generateRunnerPlanCandidates({ ...input, legalActions: [rdRun, gainCredit] }).find((candidate) => candidate.kind === "pressure_rnd");
+    const decision = chooseRunnerPlanDecision({ ...input, legalActions: [rdRun, gainCredit] });
+
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_rnd candidate");
+    expect(evaluateRunnerRig(input, pressureCandidate).reasons).toContain("central_pressure_underprepared");
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gainCredit.actionId);
   });
 
   it("penalizes immediate repeated central pressure", () => {
@@ -3492,6 +3563,14 @@ function moveRunnerCardToGrip(state: GameState, definitionId: string): CardInsta
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "grip" }, faceup: true, rezzed: true };
+  return id;
+}
+
+function moveRunnerProgramToRig(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.programs.unshift(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "runner", zone: "rig" }, faceup: true, rezzed: true };
   return id;
 }
 
