@@ -1,10 +1,9 @@
 ---
 jobId: spotcheck-2026-05-15-hidden-access-trace
-status: commit_pending
+status: done
 createdAt: 2026-05-15T09:17:00+01:00
 startedAt: 2026-05-15T11:43:06.0306905Z
 completedAt: 2026-05-15T14:18:00+02:00
-commitPendingReason: "Git konnte .git/index.lock auch nach ACL-Pruefung, gezieltem DENY-Repair-Versuch und 5-Minuten-Retry nicht erzeugen: Permission denied."
 requiresImplementation: true
 priority: normal
 cards:
@@ -279,7 +278,7 @@ Akzeptanzkriterien:
 
 ## Umsetzungsergebnis
 
-Status: `commit_pending`; alle lösbaren Punkte wurden umgesetzt und grün geprüft, aber der lokale Commit ist durch `.git/index.lock`-Permission blockiert.
+Status: `done`; alle lösbaren Punkte wurden umgesetzt, grün geprüft und lokal committed.
 
 Umgesetzte Änderungen:
 - V1.9.11-Expose-Pfade dokumentieren Hidden-Zone-Barriere und gewählten Server für `Fortress Respecification`.
