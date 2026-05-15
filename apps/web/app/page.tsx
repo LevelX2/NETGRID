@@ -3423,7 +3423,7 @@ export default function Page() {
               onCopyJoinLink={copyJoinLink}
             />
           ) : null}
-          <div className="entryContent">
+          <div className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}>
           {entryTab === "play" && !showingStartLobby && !session && recentSession ? (
             <section className="resumeSessionPanel">
               <div>
@@ -7494,6 +7494,7 @@ function DeckEditorPanel({
   const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [builderSetFilter, setBuilderSetFilter] = useState<CatalogSetFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
+  const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [deckSideFilter, setDeckSideFilter] = useState<DeckSideFilter>("all");
   const [previewCardId, setPreviewCardId] = useState<string | null>(null);
@@ -7645,16 +7646,20 @@ function DeckEditorPanel({
                   <input value={selectedDeck.notes ?? ""} onChange={(event) => onUpdateDeck({ ...selectedDeck, notes: event.target.value })} />
                 </label>
               </div>
-              {previewCard ? (
-                <DeckBuilderPreview
-                  card={previewCard}
-                  detail={cardDetailsById[previewCard.catalogCardId]}
-                  quantity={previewQuantity}
-                  onAdd={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity + 1)}
-                  onRemove={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity - 1)}
-                />
-              ) : null}
               <div className="deckBuilderGrid">
+                <aside className="deckPreviewColumn">
+                  {previewCard ? (
+                    <DeckBuilderPreview
+                      card={previewCard}
+                      detail={cardDetailsById[previewCard.catalogCardId]}
+                      quantity={previewQuantity}
+                      onAdd={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity + 1)}
+                      onRemove={() => onUpdateQuantity(previewCard.catalogCardId, previewQuantity - 1)}
+                    />
+                  ) : (
+                    <p className="meta deckEmpty">Wähle eine Karte für die Vorschau.</p>
+                  )}
+                </aside>
                 <section className="deckLibraryPanel">
                   <div className="deckBuilderPanelHeader">
                     <div>
@@ -7669,41 +7674,49 @@ function DeckEditorPanel({
                     Suche
                     <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Typ, Subtyp" />
                   </label>
-                  <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
-                    {DECK_SOURCE_FILTERS.map((filter) => (
-                      <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
-                        <span>{filter.label}</span>
-                        <small>{builderSetCounts[filter.key]}</small>
-                      </button>
-                    ))}
-                  </div>
                   <div className="deckBuilderFilterLine">
+                    <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
+                      {DECK_SOURCE_FILTERS.map((filter) => (
+                        <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
+                          <span>{filter.label}</span>
+                          <small>{builderSetCounts[filter.key]}</small>
+                        </button>
+                      ))}
+                    </div>
                     <label className={`deckBuilderToggle ${builderOnlyInDeck ? "checked" : ""}`}>
                       <input checked={builderOnlyInDeck} onChange={(event) => setBuilderOnlyInDeck(event.target.checked)} type="checkbox" />
                       Nur im Deck
                     </label>
-                    <button type="button" onClick={() => setVisibleBuilderTypes(true)}>
-                      Alle Typen
-                    </button>
-                    <button type="button" onClick={() => setVisibleBuilderTypes(false)}>
-                      Keine Typen
+                    <button className={builderFiltersOpen ? "active" : ""} type="button" onClick={() => setBuilderFiltersOpen((current) => !current)} aria-expanded={builderFiltersOpen}>
+                      <ListFilter size={14} />
+                      Filter
                     </button>
                   </div>
-                  <div className="deckBuilderTypes">
-                    {visibleTypeFilterGroups.map((group) => (
-                      <div className={`typeFilterGroup ${group.side}`} key={group.title}>
-                        <div className="typeFilterGrid">
-                          {group.filters.map((filter) => (
-                            <label className={`typeToggle ${group.side} ${builderTypeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
-                              <input checked={builderTypeFilters[filter.key]} onChange={(event) => setBuilderTypeFilters((current) => ({ ...current, [filter.key]: event.target.checked }))} type="checkbox" />
-                              <span>{filter.label}</span>
-                              <small>{builderTypeCounts[filter.key] ?? 0}</small>
-                            </label>
-                          ))}
-                        </div>
+                  {builderFiltersOpen ? (
+                    <div className="deckBuilderTypes">
+                      <div className="deckBuilderTypeActions">
+                        <button type="button" onClick={() => setVisibleBuilderTypes(true)}>
+                          Alle Typen
+                        </button>
+                        <button type="button" onClick={() => setVisibleBuilderTypes(false)}>
+                          Keine Typen
+                        </button>
                       </div>
-                    ))}
-                  </div>
+                      {visibleTypeFilterGroups.map((group) => (
+                        <div className={`typeFilterGroup ${group.side}`} key={group.title}>
+                          <div className="typeFilterGrid">
+                            {group.filters.map((filter) => (
+                              <label className={`typeToggle ${group.side} ${builderTypeFilters[filter.key] ? "checked" : ""}`} key={filter.key}>
+                                <input checked={builderTypeFilters[filter.key]} onChange={(event) => setBuilderTypeFilters((current) => ({ ...current, [filter.key]: event.target.checked }))} type="checkbox" />
+                                <span>{filter.label}</span>
+                                <small>{builderTypeCounts[filter.key] ?? 0}</small>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
                   <div className="deckLibraryList">
                     {libraryCards.map((card) => (
                       <DeckLibraryCard
@@ -7720,69 +7733,73 @@ function DeckEditorPanel({
                     {libraryCards.length === 0 ? <p className="meta deckEmpty">Keine passende Karte gefunden.</p> : null}
                   </div>
                 </section>
-                <section className="deckListPanel">
-                  <div className="deckBuilderPanelHeader">
-                    <div>
-                      <h3>Deckliste</h3>
-                      <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                <div className="deckListColumn">
+                  <section className="deckListPanel">
+                    <div className="deckBuilderPanelHeader">
+                      <div>
+                        <h3>Deckliste</h3>
+                        <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                      </div>
+                      <Layers3 size={17} />
                     </div>
-                    <Layers3 size={17} />
-                  </div>
-                  <div className="deckCardList">
-                    {deckRows.map((row, index) => {
-                      const group = deckBuilderCardGroup(row.card);
-                      const previousGroup = index > 0 ? deckBuilderCardGroup(deckRows[index - 1]?.card ?? null) : "";
-                      return (
-                        <Fragment key={row.entry.cardId}>
-                          {group !== previousGroup ? <div className="deckCardGroup">{group}</div> : null}
-                          <DeckListCard
-                            card={row.card}
-                            cardId={row.entry.cardId}
-                            detail={row.card ? cardDetailsById[row.card.catalogCardId] : undefined}
-                            quantity={row.entry.quantity}
-                            onIncrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity + 1)}
-                            onDecrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity - 1)}
-                            onRemove={() => onUpdateQuantity(row.entry.cardId, 0)}
-                            onSelect={() => setPreviewCardId(row.entry.cardId)}
-                          />
-                        </Fragment>
-                      );
-                    })}
-                    {deckRows.length === 0 ? <p className="meta deckEmpty">Dieses Deck ist noch leer.</p> : null}
-                  </div>
-                </section>
+                    <div className="deckCardList">
+                      {deckRows.map((row, index) => {
+                        const group = deckBuilderCardGroup(row.card);
+                        const previousGroup = index > 0 ? deckBuilderCardGroup(deckRows[index - 1]?.card ?? null) : "";
+                        return (
+                          <Fragment key={row.entry.cardId}>
+                            {group !== previousGroup ? <div className="deckCardGroup">{group}</div> : null}
+                            <DeckListCard
+                              card={row.card}
+                              cardId={row.entry.cardId}
+                              detail={row.card ? cardDetailsById[row.card.catalogCardId] : undefined}
+                              quantity={row.entry.quantity}
+                              onIncrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity + 1)}
+                              onDecrement={() => onUpdateQuantity(row.entry.cardId, row.entry.quantity - 1)}
+                              onRemove={() => onUpdateQuantity(row.entry.cardId, 0)}
+                              onSelect={() => setPreviewCardId(row.entry.cardId)}
+                            />
+                          </Fragment>
+                        );
+                      })}
+                      {deckRows.length === 0 ? <p className="meta deckEmpty">Dieses Deck ist noch leer.</p> : null}
+                    </div>
+                  </section>
+                  <section className="deckControlsPanel">
+                    <div className="deckActions">
+                      <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty}>
+                        <Save size={15} />
+                        Speichern
+                      </button>
+                      <button className="button primary" onClick={onValidate}>
+                        <Check size={15} />
+                        Prüfen
+                      </button>
+                      <button className="button" onClick={onUseForMatch} disabled={!validatedSnapshot}>
+                        <Play size={15} />
+                        Im Matchstart auswählen
+                      </button>
+                      <button className="button" onClick={onExport}>
+                        <Download size={15} />
+                        Export
+                      </button>
+                      <button className="button" onClick={onDuplicate}>
+                        <CopyPlus size={15} />
+                        Duplizieren
+                      </button>
+                      <button className="button" onClick={onDelete}>
+                        <Trash2 size={15} />
+                        Löschen
+                      </button>
+                    </div>
+                    <p className={`deckSaveStatus ${selectedDeckDirty ? "dirty" : validation?.ok ? "ok" : validation && !validation.ok ? "bad" : "ok"}`}>
+                      {selectedDeckDirty ? "Ungespeicherte Änderungen" : validation?.ok ? "Gespeichert · geprüft · matchstartfähig" : validation && !validation.ok ? "Gespeichert · geprüft · nicht matchstartfähig" : "Gespeichert"}
+                    </p>
+                    <DeckValidationSummary validation={validation} snapshot={validatedSnapshot} />
+                    {exportText ? <textarea className="deckTextArea" value={exportText} readOnly /> : null}
+                  </section>
+                </div>
               </div>
-              <div className="deckActions">
-                <button className="button primary" onClick={onSave} disabled={!selectedDeckDirty}>
-                  <Save size={15} />
-                  Speichern
-                </button>
-                <button className="button primary" onClick={onValidate}>
-                  <Check size={15} />
-                  Prüfen
-                </button>
-                <button className="button" onClick={onUseForMatch} disabled={!validatedSnapshot}>
-                  <Play size={15} />
-                  Im Matchstart auswählen
-                </button>
-                <button className="button" onClick={onExport}>
-                  <Download size={15} />
-                  Export
-                </button>
-                <button className="button" onClick={onDuplicate}>
-                  <CopyPlus size={15} />
-                  Duplizieren
-                </button>
-                <button className="button" onClick={onDelete}>
-                  <Trash2 size={15} />
-                  Löschen
-                </button>
-              </div>
-              <p className={`deckSaveStatus ${selectedDeckDirty ? "dirty" : validation?.ok ? "ok" : validation && !validation.ok ? "bad" : "ok"}`}>
-                {selectedDeckDirty ? "Ungespeicherte Änderungen" : validation?.ok ? "Gespeichert · geprüft · matchstartfähig" : validation && !validation.ok ? "Gespeichert · geprüft · nicht matchstartfähig" : "Gespeichert"}
-              </p>
-              <DeckValidationSummary validation={validation} snapshot={validatedSnapshot} />
-              {exportText ? <textarea className="deckTextArea" value={exportText} readOnly /> : null}
             </>
           ) : (
             <p className="meta deckEmpty">
