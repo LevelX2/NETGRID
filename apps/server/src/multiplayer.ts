@@ -2230,11 +2230,13 @@ export class MultiplayerService {
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return false;
     const controller = record.match.aiControllers?.[side];
+    const ownDeckSnapshot = record.privateDeckSnapshots?.[side];
     const input = buildAiDecisionInput(state, side, {
       difficulty: controller?.difficulty ?? "normal",
       profileId: controller?.profileId ?? `${side}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
       decisionId: `${record.match.matchId}:${state.stateVersion}:${side}`,
-      actionNumber: state.stateVersion
+      actionNumber: state.stateVersion,
+      ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
     });
     const decision = chooseAiAction(input);
     const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];

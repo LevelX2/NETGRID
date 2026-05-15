@@ -26,6 +26,7 @@ import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions
 import {
   assertAiInputIsSideSafe,
   beliefStateInvariantSignature,
+  buildDeckDoctrineProfile,
   buildObservedFacts,
   buildAiDecisionInput,
   chooseAiAction,
@@ -36,6 +37,8 @@ import {
   corpPlanUsesOnlyAiSupportedCards,
   chooseRunnerPlanDecision,
   estimateRunCost,
+  evaluateCorpOpeningHand,
+  evaluateCorpPlan,
   evaluateRunnerPlan,
   evaluateAgendaRisk,
   evaluateEconomyReserve,
@@ -61,7 +64,7 @@ import {
   simulateAiGame,
   simulateAiSoak
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
+import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { MVP_0_99_BASELINE } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
@@ -894,6 +897,158 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(chooseCorpPlanDecision(scoreNextInput).debug.planKind).toBe("score_next_turn");
     expect(generateCorpPlanCandidates(remoteBuildInput).some((candidate) => candidate.kind === "build_scoring_remote")).toBe(true);
     expect(chooseCorpPlanDecision(economyInput).debug.planKind).toBe("recover_economy");
+  });
+
+  it("builds deterministic deck doctrine profiles without raw private card state", () => {
+    const profile = buildDeckDoctrineProfile(snapshotById("demo_corp_008_snapshot_v0_8"));
+    const second = buildDeckDoctrineProfile(snapshotById("demo_corp_008_snapshot_v0_8"));
+    const tagProfile = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-tag-corp",
+      side: "corp",
+      cards: [
+        { cardId: "simple_tag_ice", quantity: 3 },
+        { cardId: "onr_v1_249_hunter", quantity: 3 },
+        { cardId: "onr_v1_236_data-raven", quantity: 3 },
+        { cardId: "onr_v1_203_hostile-takeover", quantity: 3 }
+      ]
+    });
+
+    expect(profile).toEqual(second);
+    expect(profile.side).toBe("corp");
+    expect(profile.archetypeTags.length).toBeGreaterThan(0);
+    expect(profile.planWeights).not.toEqual({});
+    expect(tagProfile.archetypeTags).toContain("tag_pressure");
+    expect(JSON.stringify(profile)).not.toMatch(/cardInstances|privatePayload|sessionToken/);
+  });
+
+  it("uses deck doctrine as a bounded Corp plan weight", () => {
+    const input = corpActionPhaseInput("ai-doctrine-plan-weight", (state) => {
+      state.corp.credits = 7;
+      putCorpRootInRemote(state, "simple_agenda", 2);
+    });
+    const candidate = generateCorpPlanCandidates(input).find((plan) => plan.kind === "score_next_turn");
+    const doctrine = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-rush-corp",
+      side: "corp",
+      cards: [
+        { cardId: "simple_agenda", quantity: 9 },
+        { cardId: "simple_barrier_ice", quantity: 9 },
+        { cardId: "simple_economy_operation", quantity: 6 }
+      ]
+    });
+
+    expect(candidate).toBeDefined();
+    if (!candidate) throw new Error("Missing score_next_turn candidate");
+    const neutralScore = evaluateCorpPlan(input, candidate).score;
+    const doctrineScore = evaluateCorpPlan({ ...input, ownDeckDoctrine: doctrine }, candidate).score;
+
+    expect(doctrine.archetypeTags).toContain("rush");
+    expect(doctrineScore).toBeGreaterThan(neutralScore);
+  });
+
+  it("keeps naked-agenda protection stronger than rush doctrine", () => {
+    const input = corpActionPhaseInput("ai-doctrine-naked-agenda-guard", (state) => {
+      state.corp.credits = 7;
+      moveCorpCardToHq(state, "simple_agenda");
+      moveCorpCardToHq(state, "simple_barrier_ice");
+    });
+    const doctrine = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-rush-corp",
+      side: "corp",
+      cards: [
+        { cardId: "simple_agenda", quantity: 9 },
+        { cardId: "simple_barrier_ice", quantity: 9 },
+        { cardId: "simple_economy_operation", quantity: 6 }
+      ]
+    });
+    const nakedAgendaInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement !== "ice" && action.payload?.serverId === "new_remote" && sourceDefinitionFromInput(input, action) === "simple_agenda"
+    );
+    const rdIceInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd" && sourceDefinitionFromInput(input, action) === "simple_barrier_ice"
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(nakedAgendaInstall).toBeDefined();
+    expect(rdIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!nakedAgendaInstall || !rdIceInstall || !gain) throw new Error("Missing doctrine guard fixture actions");
+    const decision = chooseCorpAction({ ...input, ownDeckDoctrine: doctrine, legalActions: [nakedAgendaInstall, rdIceInstall, gain] });
+
+    expect(decision.actionId).toBe(rdIceInstall.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.protect_rnd");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_agenda_1/);
+  });
+
+  it("evaluates Corp mulligan choices from opening hand and deck doctrine", () => {
+    const baseInput = corpActionPhaseInput("ai-doctrine-mulligan", (state) => {
+      state.corp.credits = 5;
+    });
+    const doctrine = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-glacier-corp",
+      side: "corp",
+      cards: [
+        { cardId: "simple_agenda", quantity: 6 },
+        { cardId: "simple_barrier_ice", quantity: 12 },
+        { cardId: "simple_economy_operation", quantity: 6 }
+      ]
+    });
+    const choiceAction: LegalAction = { ...baseInput.legalActions[0]!, actionId: "corp.resolve_choice.setup_mulligan", type: "resolve_choice", source: "game_rule" };
+    const choice = {
+      choiceId: "setup_mulligan_corp",
+      side: "corp" as const,
+      source: "setup.mulligan",
+      prompt: "Mulligan?",
+      kind: "select_option" as const,
+      options: [
+        { id: "keep", label: "Behalten", value: "keep" },
+        { id: "mulligan", label: "Mulligan", value: "mulligan" }
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: baseInput.actionNumber,
+      visibility: "private_to_side" as const
+    };
+    const floodInput = {
+      ...baseInput,
+      ownDeckDoctrine: doctrine,
+      legalActions: [choiceAction],
+      playerView: {
+        ...baseInput.playerView,
+        pendingChoice: choice,
+        own: {
+          ...baseInput.playerView.own,
+          gripOrHq: [
+            visibleCard("simple_agenda", "agenda_a"),
+            visibleCard("simple_agenda", "agenda_b"),
+            visibleCard("simple_agenda", "agenda_c"),
+            visibleCard("simple_economy_operation", "economy_a"),
+            visibleCard("simple_economy_asset", "asset_a")
+          ]
+        }
+      }
+    };
+    const keepInput = {
+      ...floodInput,
+      playerView: {
+        ...floodInput.playerView,
+        own: {
+          ...floodInput.playerView.own,
+          gripOrHq: [
+            visibleCard("simple_barrier_ice", "ice_a"),
+            visibleCard("simple_barrier_ice", "ice_b"),
+            visibleCard("simple_economy_operation", "economy_b"),
+            visibleCard("simple_agenda", "agenda_d"),
+            visibleCard("simple_economy_asset", "asset_b")
+          ]
+        }
+      }
+    };
+
+    expect(evaluateCorpOpeningHand(floodInput).decision).toBe("mulligan");
+    expect(chooseCorpAction(floodInput).selectedChoices).toEqual({ choiceId: "setup_mulligan_corp", selectedOptionIds: ["mulligan"] });
+    expect(evaluateCorpOpeningHand(keepInput).decision).toBe("keep");
+    expect(chooseCorpAction(keepInput).selectedChoices).toEqual({ choiceId: "setup_mulligan_corp", selectedOptionIds: ["keep"] });
   });
 
   it("prefers ICE protection over installing a naked agenda in a new remote", () => {
@@ -3028,6 +3183,10 @@ function moveCorpCardToHq(state: GameState, definitionId: string): CardInstanceI
   state.corp.hq.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
   return id;
+}
+
+function visibleCard(definitionId: string, instanceId: string): VisibleCard {
+  return { instanceId, definitionId, known: true, title: definitionId };
 }
 
 function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {

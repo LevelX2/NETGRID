@@ -8,7 +8,8 @@ import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regr
 import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
-import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
   BeliefEntry,
@@ -51,6 +52,8 @@ export {
   runnerPlanUsesOnlyAiSupportedCards
 } from "./runner-plans";
 export type { RunnerPlanCandidate, RunnerPlanDebug, RunnerPlanDecision, RunnerPlanEvaluatorResult, RunnerPlanKind, RunnerPlanScore, RunnerPlanStep } from "./runner-plans";
+export { buildDeckDoctrineProfile, evaluateCorpOpeningHand } from "./deck-doctrine";
+export type { AiDeckDoctrineDeckSnapshot, CorpOpeningHandEvaluation } from "./deck-doctrine";
 
 type RankedChoice = {
   action: LegalAction | undefined;
@@ -309,9 +312,12 @@ export function buildAiDecisionInput(
     actionNumber?: number;
     profileId?: string;
     eventTail?: PublicGameEvent[];
+    ownDeckSnapshot?: AiDeckDoctrineDeckSnapshot;
+    ownDeckDoctrine?: AiDeckDoctrineProfile;
   } = {}
 ): AiDecisionInput {
   const playerView = getPlayerView(state, side);
+  const ownDeckDoctrine = options.ownDeckDoctrine ?? (options.ownDeckSnapshot ? buildDeckDoctrineProfile(options.ownDeckSnapshot) : undefined);
   return {
     side,
     playerView,
@@ -321,7 +327,8 @@ export function buildAiDecisionInput(
     seed: state.seed,
     decisionId: options.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`,
     actionNumber: options.actionNumber ?? state.stateVersion,
-    profileId: options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`
+    profileId: options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
+    ...(ownDeckDoctrine ? { ownDeckDoctrine } : {})
   };
 }
 
@@ -1003,6 +1010,7 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
     hypotheses: toStringArray(beliefSummary.hypotheses),
     uncertainty: toStringArray(beliefSummary.uncertainty),
     invalidations: toStringArray(beliefSummary.invalidations),
+    ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine) } : {}),
     ...(input.side === "runner" ? { opponentModel: toRecord(beliefSummary.runnerOpponentModel) } : { opponentModel: toRecord(beliefSummary.corpOpponentModel) })
   };
   const choice = choices
@@ -1064,6 +1072,11 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
 function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
+  if (choice.source === "setup.mulligan" && input.side === "corp") {
+    const opening = evaluateCorpOpeningHand(input);
+    const selected = choice.options.find((option) => option.id === opening.decision) ?? choice.options[0];
+    return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {
     const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
     const selected = choice.options
@@ -1288,10 +1301,18 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
 
   switch (action.type) {
     case "resolve_choice":
-      score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
-      reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "corp.trace.bid_visible_amount" : "corp.choice.resolve";
-      explanation = "Die Corp beantwortet eine sichtbare legale Choice.";
-      evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+      if (input.playerView.pendingChoice?.source === "setup.mulligan") {
+        const opening = evaluateCorpOpeningHand(input);
+        score = 920;
+        reasonCode = opening.decision === "mulligan" ? "corp.setup.mulligan" : "corp.setup.keep";
+        explanation = opening.decision === "mulligan" ? "Die Corp nimmt anhand von Start-Hand und Deckprofil einen Mulligan." : "Die Corp behält eine startfähige Hand anhand von Start-Hand und Deckprofil.";
+        evidence.push("choice_legal", "choice_source:setup.mulligan", ...opening.reasons, ...opening.evidence);
+      } else {
+        score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
+        reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "corp.trace.bid_visible_amount" : "corp.choice.resolve";
+        explanation = "Die Corp beantwortet eine sichtbare legale Choice.";
+        evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+      }
       break;
     case "mandatory_draw":
       score = 1000;
@@ -1621,6 +1642,18 @@ function toStringArray(value: unknown): string[] {
 function toRecord(value: unknown): Record<string, unknown> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
   return value as Record<string, unknown>;
+}
+
+function deckDoctrineDebug(profile: AiDeckDoctrineProfile): Record<string, unknown> {
+  return {
+    schemaVersion: profile.schemaVersion,
+    deckSnapshotId: profile.deckSnapshotId,
+    side: profile.side,
+    confidence: profile.confidence,
+    archetypeTags: profile.archetypeTags.slice(0, 4),
+    riskFlags: profile.riskFlags.slice(0, 6),
+    evidence: profile.evidence.slice(0, 6)
+  };
 }
 
 function confidence(score: number): number {

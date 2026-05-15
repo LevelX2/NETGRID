@@ -516,6 +516,26 @@ export type DeckPublicMetadata = {
   deckHash: string;
 };
 
+export type AiDeckDoctrineProfile = {
+  schemaVersion: "ai-deck-doctrine-v1";
+  deckSnapshotId: string;
+  deckHash: string;
+  side: Side;
+  formatProfileId?: string;
+  confidence: number;
+  archetypeTags: string[];
+  roleCounts: Record<string, number>;
+  roleDensity: Record<string, number>;
+  planWeights: Record<string, number>;
+  mulliganWeights: Record<string, number>;
+  riskFlags: string[];
+  evidence: Array<{
+    kind: "role_count" | "density" | "missing_role" | "curve" | "agenda_density" | "ice_mix" | "economy_mix";
+    label: string;
+    value: number | string;
+  }>;
+};
+
 export type RulesBaseline = {
   rulesVersion: "26.03";
   cardTextSource: "manual";
@@ -1152,6 +1172,7 @@ export type AiDecisionInput = {
   decisionId: string;
   actionNumber: number;
   profileId: string;
+  ownDeckDoctrine?: AiDeckDoctrineProfile;
 };
 
 export type AiDecision = {

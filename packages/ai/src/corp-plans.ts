@@ -23,7 +23,7 @@ import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal
 import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
 import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
-import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type { AiDeckDoctrineProfile, AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 
 export type CorpPlanKind =
@@ -81,6 +81,14 @@ export type CorpPlanDebug = {
   invalidations?: string[];
   beliefUncertainty?: string[];
   opponentModel?: Record<string, unknown>;
+  ownDeckDoctrine?: {
+    deckSnapshotId: string;
+    side: Side;
+    confidence: number;
+    archetypeTags: string[];
+    riskFlags: string[];
+  };
+  doctrinePlanWeight?: number;
 };
 
 export type CorpPlanDecision = {
@@ -235,6 +243,7 @@ export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBu
   if (!action) return fallbackPlanDecision(input, "plan_without_legal_action", timeBudgetMs, false, beliefState);
   const beliefSummary = beliefDebugSummary(beliefState);
   const opponentModel = toRecord(beliefSummary.corpOpponentModel);
+  const doctrinePlanWeight = doctrinePlanWeightFor(input, selected.candidate.kind);
   return {
     selectedPlanId: selected.candidate.planId,
     selectedActionId: action.actionId,
@@ -255,6 +264,7 @@ export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBu
       profileId: profile.profileId,
       timeBudgetMs,
       timeoutUsed: false,
+      ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine), doctrinePlanWeight } : {}),
       memoryVersion: String(beliefSummary.memoryVersion ?? ""),
       facts: toStringArray(beliefSummary.facts),
       hypotheses: toStringArray(beliefSummary.hypotheses),
@@ -304,8 +314,10 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const scoringWindow = evaluateScoringWindow(input, candidate);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const base = baseScoreForPlan(candidate.kind);
+  const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const score =
     base +
+    doctrinePlanWeight +
     agendaRisk.score * profile.weights.agendaRisk +
     serverThreat.score * profile.weights.serverThreat +
     economyReserve.score * profile.weights.economyReserve +
@@ -318,6 +330,8 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const evidence = [
     `plan:${candidate.kind}`,
     `difficulty:${input.difficulty}`,
+    `doctrine_plan_weight:${doctrinePlanWeight}`,
+    ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
     ...agendaRisk.evidence,
     ...serverThreat.evidence,
@@ -594,6 +608,7 @@ function fallbackDebug(
     profileId: corpPlanProfile(input).profileId,
     timeBudgetMs: timeBudgetMs ?? corpPlanProfile(input).timeBudgetMs,
     timeoutUsed,
+    ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine), doctrinePlanWeight: 0 } : {}),
     memoryVersion: String(beliefSummary.memoryVersion ?? ""),
     facts: toStringArray(beliefSummary.facts),
     hypotheses: toStringArray(beliefSummary.hypotheses),
@@ -633,6 +648,24 @@ function baseScoreForPlan(kind: CorpPlanKind): number {
     case "bait_runner":
       return 210;
   }
+}
+
+function doctrinePlanWeightFor(input: AiDecisionInput, kind: CorpPlanKind): number {
+  const profile = input.ownDeckDoctrine;
+  if (!profile || profile.side !== "corp") return 0;
+  const raw = profile.planWeights[kind] ?? 0;
+  const confidence = Number.isFinite(profile.confidence) ? profile.confidence : 0.5;
+  return Math.round(raw * Math.max(0.25, Math.min(1, confidence)));
+}
+
+function deckDoctrineDebug(profile: AiDeckDoctrineProfile): NonNullable<CorpPlanDebug["ownDeckDoctrine"]> {
+  return {
+    deckSnapshotId: profile.deckSnapshotId,
+    side: profile.side,
+    confidence: profile.confidence,
+    archetypeTags: profile.archetypeTags.slice(0, 4),
+    riskFlags: profile.riskFlags.slice(0, 6)
+  };
 }
 
 function visibleRiskPenalty(candidate: CorpPlanCandidate, riskTolerance: number): number {
