@@ -1509,6 +1509,42 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(chooseRunnerPlanDecision({ ...safeProbeInput, legalActions: [safeProbeRun] }).debug.planKind).toBe("safe_probe_run");
   });
 
+  it("recovers economy instead of making underprepared central pressure runs", () => {
+    const input = runnerActionPhaseInput("ai-v141-underprepared-central", (state) => {
+      state.runner.credits = 1;
+    });
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(rdRun).toBeDefined();
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!rdRun || !hqRun || !gainCredit) throw new Error("Missing underprepared central-pressure fixture actions");
+
+    const decision = chooseRunnerPlanDecision({ ...input, legalActions: [rdRun, hqRun, gainCredit] });
+    const pressureCandidate = generateRunnerPlanCandidates({ ...input, legalActions: [rdRun, hqRun, gainCredit] }).find((candidate) => candidate.kind === "pressure_hq");
+
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gainCredit.actionId);
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing underprepared pressure_hq candidate");
+    expect(evaluateRunnerRig(input, pressureCandidate).reasons).toContain("central_pressure_underprepared");
+  });
+
+  it("penalizes immediate repeated central pressure", () => {
+    const input = withPublicServerEventTail(runnerActionPhaseInput("ai-v141-repeated-central", () => undefined), ["hq"]);
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    expect(hqRun).toBeDefined();
+    if (!hqRun) throw new Error("Missing repeated central-pressure fixture action");
+
+    const candidate = generateRunnerPlanCandidates({ ...input, legalActions: [hqRun] }).find((plan) => plan.kind === "pressure_hq");
+
+    expect(candidate).toBeDefined();
+    if (!candidate) throw new Error("Missing pressure_hq candidate");
+    expect(evaluateServerAccessValue(input, candidate).reasons).toContain("recent_central_pressure_repeated");
+  });
+
   it("uses deck doctrine as a bounded Runner plan weight", () => {
     const input = runnerActionPhaseInput("ai-runner-doctrine-plan-weight", () => undefined);
     const pressureRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");

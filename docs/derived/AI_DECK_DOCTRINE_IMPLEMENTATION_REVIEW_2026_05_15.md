@@ -11,6 +11,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - Runner-Profilgenerator erzeugt planbezogene Gewichte für `pressure_rnd`, `pressure_hq`, `contest_remote`, `build_rig`, `recover_economy`, `draw_for_answers`, `trash_asset` und `safe_probe_run`.
 - Runner-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus, skaliert mit Profil-Confidence.
 - Sichtbare Run-Blocker, Kosten- und Unreachable-Remote-Guards bleiben stärker als aggressive Runner-Doktrin.
+- Runner-Zentraldruck auf HQ/R&D wird bei leerem Rig, niedriger Creditreserve, sichtbarem zentralem ICE oder sehr frischer Wiederholung gegen Economy-, Draw- und Rig-Aufbau abgewogen.
 - Corp-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus.
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
@@ -27,7 +28,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - `packages/ai/src/deck-doctrine.ts`: Profilgenerator und Corp-Mulligan-Bewertung.
 - `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Setup-Mulligan-Auswahl, Debug-Zusammenfassung und Exports.
 - `packages/ai/src/corp-plans.ts`: planbezogener Doctrine-Bonus und redigierte Plan-Debugdaten.
-- `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus und redigierte Plan-Debugdaten.
+- `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus, Guards gegen unvorbereiteten zentralen Druck und redigierte Plan-Debugdaten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
 - `apps/server/src/multiplayer.ts`: Snapshot-Übergabe für die aktive KI-Seite.
 - `docs/derived/AI_DECK_DOCTRINE_QUALITY_BENCHMARK_REPORT_2026_05_15.md`: erster reproduzierbarer Doctrine-Quality-Report.
@@ -52,6 +53,6 @@ Teilweise grün:
 
 - Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
 - Nackte Agenda-Installationen in `new_remote` werden nicht mehr als `score_next_turn`/`build_scoring_remote`-Schritt aufgenommen, wenn kein geschützter Zielserver besteht.
-- Nach dem Corp-Fix bleiben Runner-Zentralruns ohne Rig und mit niedrigen Credits als nächster Tuning-Kandidat.
+- Nach dem Runner-Zentraldruck-Fix bleiben `economyStall`-Restfälle in laufenden Encounter-/Access-Folgen als nächster Tuning-Kandidat.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.

@@ -20,9 +20,9 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 | 0 |
 | scoreWindowMissed | 0 | 0 | 0 |
 | remoteOverbuild | 0 | 0 | 0 |
-| economyStall | 34 | 34 | 0 |
-| repeatedLowValueCentralRun | 8 | 8 | 0 |
-| rigStall | 8 | 8 | 0 |
+| economyStall | 16 | 16 | 0 |
+| repeatedLowValueCentralRun | 0 | 0 | 0 |
+| rigStall | 0 | 0 | 0 |
 | assetTrashNeglect | 0 | 0 | 0 |
 
 ## Safety Delta
@@ -42,6 +42,6 @@ Stand: 2026-05-15
 
 ## Interpretation
 
-Der aktuelle Kandidat verletzt in diesem engen Tuning-Lauf keine harte Safety- oder Doctrine-Schwelle. Die Deltas sind in dieser Matrix noch neutral; der Benchmark ist damit als Guard aktiv, aber noch kein Beleg für bessere Gewichtungen.
+Der aktuelle Kandidat verletzt in diesem engen Tuning-Lauf keine harte Safety- oder Doctrine-Schwelle. Die Deltas bleiben neutral, weil Baseline und Kandidat in diesem lokalen Vergleich denselben aktuellen Bewertungsstand nutzen; die absoluten Zähler zeigen aber den Effekt der Tuning-Schritte.
 
-Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht mehr an. Die auffälligsten absoluten Zähler liegen jetzt auf Runner-Seite: `economyStall`, `repeatedLowValueCentralRun` und `rigStall`. Der nächste Tuning-Schritt sollte daher prüfen, ob zentrale Runs ohne Rig und mit niedrigen Credits zu aggressiv bewertet werden.
+Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht mehr an. Nach dem Runner-Zentraldruck-Guard fallen auch `repeatedLowValueCentralRun` und `rigStall` in diesem Tuning-Lauf auf 0. Übrig bleibt `economyStall`, nun vor allem in laufenden Encounter-/Access-Folgen statt als neuer unvorbereiteter HQ/R&D-Start.

@@ -21,9 +21,9 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 |
 | scoreWindowMissed | 0 | 0 |
 | remoteOverbuild | 0 | 0 |
-| economyStall | 34 | 3 |
-| repeatedLowValueCentralRun | 8 | 3 |
-| rigStall | 8 | 3 |
+| economyStall | 16 | 3 |
+| repeatedLowValueCentralRun | 0 | 0 |
+| rigStall | 0 | 0 |
 | assetTrashNeglect | 0 | 0 |
 
 ## Examples
@@ -50,27 +50,17 @@ Keine Beispiele im analysierten Lauf.
 
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-001 | 11 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
-| ai-v143-tuning-001 | 14 | runner | access_card | runner.access.open_card | none | economy_stall |
-| ai-v143-tuning-001 | 15 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
+| ai-v143-tuning-001 | 22 | runner | pump_breaker | runner.encounter.pump_breaker | none | economy_stall |
+| ai-v143-tuning-001 | 23 | runner | continue_run | runner.plan.safe_probe_run | none | economy_stall |
+| ai-v143-tuning-004 | 27 | runner | pump_breaker | runner.encounter.pump_breaker | none | economy_stall |
 
 ### repeatedLowValueCentralRun
 
-| Seed | Action | Side | Type | Reason | Server | Tags |
-| --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-001 | 15 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
-| ai-v143-tuning-002 | 25 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
-| ai-v143-tuning-002 | 29 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
+Keine Beispiele im analysierten Lauf.
 
 ### rigStall
 
-| Seed | Action | Side | Type | Reason | Server | Tags |
-| --- | ---: | --- | --- | --- | --- | --- |
-| Seed | Action | Side | Type | Reason | Server | Tags |
-| --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-002 | 10 | runner | start_run | runner.plan.pressure_rnd | rd | rig_stall |
-| ai-v143-tuning-002 | 21 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
-| ai-v143-tuning-002 | 25 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
+Keine Beispiele im analysierten Lauf.
 
 ### assetTrashNeglect
 
@@ -79,13 +69,13 @@ Keine Beispiele im analysierten Lauf.
 ## Interpretation
 
 - `nakedAgendaInstalls` fällt nach dem Scoring-Remote-Guard nicht mehr an.
-- `economyStall` wurde präzisiert: reaktive `decline_rez`- und Fallback-Fenster werden nicht mehr als Stall gezählt. Übrig bleiben Runner-Aktionen mit niedrigem Creditstand.
-- `repeatedLowValueCentralRun` bündelt in den Beispielen HQ-Druck bei zugleich niedrigem Economy-Zustand; hier sollte zuerst geprüft werden, ob der Runner-Druck wirklich niedrigwertig ist oder ob die Metrik die Boardlage zu grob bewertet.
-- `rigStall` liegt jetzt auf zentralen Runs ohne sichtbares Rig, besonders HQ/R&D-Druck.
+- `repeatedLowValueCentralRun` fällt nach dem Recent-Central-Pressure-Guard auf 0.
+- `rigStall` fällt nach dem Underprepared-Central-Pressure-Guard auf 0.
+- `economyStall` bleibt als nächster Restbereich bestehen, liegt in den Beispielen aber nicht mehr auf neuen unvorbereiteten HQ/R&D-Starts, sondern auf Encounter-/Access-Folgeaktionen bei niedrigem Creditstand.
 
 ## Nächster Umsetzungsschritt
 
-Der nächste Tuning-Schritt sollte jetzt Runner-Zentraldruck ohne Rig enger bewerten:
+Der nächste Tuning-Schritt sollte jetzt `economyStall` genauer trennen:
 
-1. `pressure_hq` und `pressure_rnd` sollten bei 0 sichtbaren Breakern und niedrigen Credits stärker gegen `build_rig`, `recover_economy` oder `draw_for_answers` abgewogen werden.
-2. Die Metrik sollte anschließend prüfen, ob `rigStall` und `repeatedLowValueCentralRun` sinken, ohne Remote-Contest gegen echte Score-Drohungen zu schwächen.
+1. Neue aktive Starts bei niedrigem Creditstand sollten weiterhin gegen Economy/Draw/Rig-Aufbau abgewogen werden.
+2. Laufende Run-Folgeaktionen wie Pump, Continue, Access oder Steal sollten separat bewertet werden, damit die Metrik nicht erfolgreiche oder bereits verpflichtete Run-Linien als Planungsfehler zählt.

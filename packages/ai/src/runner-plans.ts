@@ -354,17 +354,45 @@ export function evaluateRunnerRig(input: AiDecisionInput, candidate: RunnerPlanC
   const breakerCount = [...features.rigRoles].filter((role) => role.startsWith("breaker_")).length;
   const handBreakerRoles = [...features.handRoles].filter((role) => role.startsWith("breaker_"));
   const reservePenalty = candidate.kind === "build_rig" ? lowReserveInstallPenalty(input, candidate, features.credits) : 0;
+  const centralPressurePenalty = centralPressureWithoutRigPenalty(input, candidate, features, breakerCount);
   const score =
     candidate.kind === "build_rig"
       ? 150 + Math.max(0, 3 - breakerCount) * 45 + (features.memoryRemaining <= 1 ? 35 : 0) - reservePenalty
       : isRunPlan(candidate.kind)
-        ? breakerCount * 30 - Math.max(0, 2 - features.credits) * 30
+        ? breakerCount * 30 - Math.max(0, 2 - features.credits) * 30 - centralPressurePenalty
         : handBreakerRoles.length * 8;
   return {
     score,
-    reasons: sortedUnique([breakerCount > 0 ? "visible_rig_has_breaker_roles" : "visible_rig_incomplete", ...(reservePenalty > 0 ? ["credit_reserve_after_install_low"] : [])]),
-    evidence: [`rig_breakers:${breakerCount}`, `hand_breaker_roles:${handBreakerRoles.length}`, `memory_remaining:${features.memoryRemaining}`, `credits:${features.credits}`]
+    reasons: sortedUnique([
+      breakerCount > 0 ? "visible_rig_has_breaker_roles" : "visible_rig_incomplete",
+      ...(reservePenalty > 0 ? ["credit_reserve_after_install_low"] : []),
+      ...(centralPressurePenalty > 0 ? ["central_pressure_underprepared"] : [])
+    ]),
+    evidence: [
+      `rig_breakers:${breakerCount}`,
+      `hand_breaker_roles:${handBreakerRoles.length}`,
+      `memory_remaining:${features.memoryRemaining}`,
+      `credits:${features.credits}`,
+      `central_pressure_penalty:${centralPressurePenalty}`
+    ]
   };
+}
+
+function centralPressureWithoutRigPenalty(input: AiDecisionInput, candidate: RunnerPlanCandidate, features: RunnerFeatures, breakerCount: number): number {
+  if (candidate.kind !== "pressure_rnd" && candidate.kind !== "pressure_hq") return 0;
+  if (input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2) return 0;
+  const target = targetServerId(input, candidate);
+  if (target !== "rd" && target !== "hq") return 0;
+  const centralIceCount = features.serverFeatures.get(target)?.iceCount ?? 0;
+  if (breakerCount === 0) {
+    if (features.credits <= 1) return 240;
+    if (features.credits === 2) return 180;
+    if (features.credits === 3) return centralIceCount > 0 ? 230 : 120;
+    return 0;
+  }
+  if (features.credits <= 1) return 120;
+  if (features.credits === 2) return 70;
+  return 0;
 }
 
 export function estimateRunCost(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
@@ -425,11 +453,13 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
   const lowValueKnownHq = isKnownLowValueHqHand(input, target, hqHandMemory);
   const staleHqPenalty =
     target === "hq" && (candidate.kind === "pressure_hq" || candidate.kind === "safe_probe_run") && lowValueKnownHq ? (candidate.kind === "pressure_hq" ? 430 : 230) : 0;
+  const recentCentralPenalty = recentCentralPressurePenalty(input, candidate, target);
+  evidence.push(`recent_central_penalty:${recentCentralPenalty}`);
   const score =
     candidate.kind === "pressure_rnd"
-      ? 135 + history * 10 - staleRndPenalty
+      ? 135 + history * 10 - staleRndPenalty - recentCentralPenalty
     : candidate.kind === "pressure_hq"
-        ? 110 + Math.max(0, 5 - input.playerView.opponent.handCount) * 4 + history * 8 - staleHqPenalty
+        ? 110 + Math.max(0, 5 - input.playerView.opponent.handCount) * 4 + history * 8 - staleHqPenalty - recentCentralPenalty
       : candidate.kind === "contest_remote"
           ? 90 + (server?.rootCount ?? 0) * 55 + (server?.advancedRootCount ?? 0) * 35
       : candidate.kind === "trash_asset"
@@ -441,6 +471,7 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
     "server_value_from_visible_projection",
     ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : []),
     ...(staleHqPenalty > 0 ? ["known_hq_hand_low_value"] : []),
+    ...(recentCentralPenalty > 0 ? ["recent_central_pressure_repeated"] : []),
     ...(staleArchivesPenalty > 0 ? ["known_archives_access_not_fresh"] : [])
   ];
   return {
@@ -448,6 +479,22 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
     reasons,
     evidence
   };
+}
+
+function recentCentralPressurePenalty(input: AiDecisionInput, candidate: RunnerPlanCandidate, target: string | undefined): number {
+  if ((candidate.kind !== "pressure_hq" && candidate.kind !== "pressure_rnd") || (target !== "hq" && target !== "rd")) return 0;
+  const history = mergedPublicHistory(input);
+  const lastSameCentralRun = findLastIndex(
+    history,
+    (event) => serverIdFromEvent(event) === target && (event.publicPayload.actionType === "start_run" || event.type === "run_started")
+  );
+  if (lastSameCentralRun < 0) return 0;
+  const last = history[lastSameCentralRun];
+  if (!last) return 0;
+  const currentVersion = input.playerView.stateVersion;
+  const distance = currentVersion - eventVersion(last);
+  if (distance > 8) return 0;
+  return target === "hq" ? 170 : 140;
 }
 
 function staleArchivesRepeatPenalty(input: AiDecisionInput, target: string | undefined, server: RunnerServerFeatures | undefined): number {
