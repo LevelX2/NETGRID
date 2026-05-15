@@ -13,6 +13,120 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-breaker-modifier-random",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_BREAKER_MODIFIER_RANDOM_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-breaker-modifier-random.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_007_blink",
+          "title": "Blink",
+          "spotcheckStatus": "completed",
+          "result": "existing_random_break_damage_path_revalidation_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_030_grubb",
+          "title": "Grubb",
+          "spotcheckStatus": "completed",
+          "result": "existing_run_remainder_strength_path_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_034_incubator",
+          "title": "Incubator",
+          "spotcheckStatus": "completed",
+          "result": "existing_counter_transform_choice_path_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_051_rabbit",
+          "title": "Rabbit",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_installed_ice_trace_limit_modifier",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "title": "Forgotten Backup Chip",
+          "spotcheckStatus": "completed",
+          "result": "existing_hidden_stack_program_search_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_112_stumble-through-wilderspace",
+          "title": "Stumble through Wilderspace",
+          "spotcheckStatus": "completed",
+          "result": "existing_trace_aware_run_access_contract_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_122_artemis-2020",
+          "title": "Artemis 2020",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_mu_recurring_deck_unique",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_194_corporate-downsizing",
+          "title": "Corporate Downsizing",
+          "spotcheckStatus": "completed",
+          "result": "existing_scored_rd_top_reveal_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_217_strike-force-kali",
+          "title": "Strike Force Kali",
+          "spotcheckStatus": "completed",
+          "result": "existing_tagged_meat_damage_agenda_action_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_219_superior-net-barriers",
+          "title": "Superior Net Barriers",
+          "spotcheckStatus": "completed",
+          "result": "existing_scored_wall_strength_modifier_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_271_tko-2-0",
+          "title": "TKO 2.0",
+          "spotcheckStatus": "completed",
+          "result": "existing_forgo_next_action_ice_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_280_zombie",
+          "title": "Zombie",
+          "spotcheckStatus": "completed",
+          "result": "existing_core_damage_etr_ice_retained",
+          "followUpStatus": "existing_coverage_retained"
+        },
+        {
+          "cardId": "onr_v1_313_city-surveillance",
+          "title": "City Surveillance",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_rezzed_runner_draw_tax",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_343_south-african-mining-corp",
+          "title": "South African Mining Corp",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_rezzed_self_trash_gain_8",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_360_jerusalem-city-grid",
+          "title": "Jerusalem City Grid",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_server_bound_wall_rez_strength_modifier",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-ambush-hidden-trace",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AMBUSH_HIDDEN_TRACE_IMPLEMENTATION.md",

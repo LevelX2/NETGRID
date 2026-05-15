@@ -836,6 +836,8 @@ export type TraceState = {
   sourceDefinitionId: CardDefinitionId;
   subroutineIndex?: number;
   baseTraceStrength: number;
+  corpBidMax?: number;
+  rabbitTraceLimitReduction?: number;
   status: "corp_bid" | "runner_bid";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
@@ -4897,12 +4899,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 10,
+    memoryLimitBonus: 2,
+    recurringCredits: 2,
     rulesText:
-      "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "Provides +2 MU. Put 2 recurring credits on Artemis 2020 when it is installed. Use these credits only to pay for using icebreakers during runs. If you use any of these credits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
     mechanics: [
       "install_hardware",
       "memory",
+      "deck_unique",
+      "recurring_credit",
+      "icebreaker_recurring_credit",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -5528,12 +5535,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     memoryCost: 1,
     rulesText:
-      "Install as a program. Its trace-limit modifier remains gated until the source filter contract is confirmed.",
+      "Ice that attempts to trace the Runner has its Corp trace-bid limit reduced by 1.",
     mechanics: [
       "install_program",
       "memory",
+      "trace",
+      "trace_limit_modifier",
       "per_card_longtail",
-      "ability_contract_pending",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -5968,12 +5976,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "City Surveillance",
     side: "corp",
     type: "asset",
-    subtypes: [],
+    subtypes: ["gray_ops"],
     implementationStatus: "playable_mvp",
     rezCost: 1,
     trashCost: 2,
     rulesText:
-      "Rezzed asset with global tag and run-surveillance modifier surfaces. Effects are visible and source-bound.",
+      "For each card Runner draws, give Runner a tag unless Runner pays 1 credit to avoid that tag. City Surveillance may be rezzed just before the card is drawn.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -5981,6 +5989,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "generic_asset_node",
       "global_static_modifier",
       "tag",
+      "runner_draw_tax",
       "persistent_special_state",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -6192,16 +6201,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     rezCost: 0,
     trashCost: 1,
-    rulesText:
-      "Rezzed transactions asset with economy, handsize and global static modifier surfaces. Credit effects are public and deterministic.",
+    rulesText: "[A], trash: Gain 8 credits.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_asset_node",
       "gain_credits",
-      "modify_hand_limit",
-      "global_static_modifier",
+      "self_trash",
+      "legal_action_only",
+      "persistent_special_state",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -6215,7 +6224,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     trashCost: 5,
     rulesText:
-      "Rezzed city-grid upgrade with server-bound global modifier surfaces. Region scope stays tied to its installed server.",
+      "Cost to rez walls on this fort is reduced by 9. All walls on this fort have +1 strength. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
     mechanics: [
       "install_remote",
       "rez_card",

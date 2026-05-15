@@ -322,6 +322,10 @@ const V1920_HACKER_TRACKER_CENTRAL_ID =
   "onr_v1_325_hacker-tracker-central";
 const V1920_I_GOT_A_ROCK_ID = "onr_v1_327_i-got-a-rock";
 const V1920_NEWSGROUP_TAUNTING_ID = "onr_v1_332_newsgroup-taunting";
+const V1920_CITY_SURVEILLANCE_ID = "onr_v1_313_city-surveillance";
+const V1920_SOUTH_AFRICAN_MINING_CORP_ID =
+  "onr_v1_343_south-african-mining-corp";
+const V1920_JERUSALEM_CITY_GRID_ID = "onr_v1_360_jerusalem-city-grid";
 const V1920_ACTION_ASSET_IDS = new Set([
   "onr_v1_331_nevinyrral",
   "onr_v1_334_pacifica-regional-ai",
@@ -360,6 +364,8 @@ const V1922_SHIELD_ID = "onr_v1_061_shield";
 const V1922_JAPANESE_WATER_TORTURE_ID = "onr_v1_037_japanese-water-torture";
 const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
   "onr_v1_075_zetatech-software-installer";
+const V1922_RABBIT_ID = "onr_v1_051_rabbit";
+const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_DATA_FORT_RECLAMATION_ID =
@@ -503,9 +509,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   simple_draw_event: {
     name: "runner_event_draw_2",
-    resolve: (state) => {
-      drawRunnerCard(state);
-      drawRunnerCard(state);
+    resolve: (state, legalAction) => {
+      let summary = drawRunnerCard(state);
+      summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+      applyRunnerDrawSummaryPayload(state, legalAction, summary);
     },
   },
   simple_run_event: {
@@ -530,10 +537,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   v08_deep_draw_event: {
     name: "runner_event_draw_3",
-    resolve: (state) => {
-      drawRunnerCard(state);
-      drawRunnerCard(state);
-      drawRunnerCard(state);
+    resolve: (state, legalAction) => {
+      let summary = drawRunnerCard(state);
+      summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+      summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+      applyRunnerDrawSummaryPayload(state, legalAction, summary);
     },
   },
   v08_overclock_run_event: {
@@ -948,19 +956,27 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     name: "onr_runner_event_draw_5",
     resolve: (state, legalAction) => {
       const stackBefore = state.runner.stack.length;
-      drawRunnerCards(state, 5);
+      const drawSummary = drawRunnerCards(state, 5);
       const drawnCount = stackBefore - state.runner.stack.length;
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         drawnCount,
         runnerGripAfter: state.runner.grip.length,
       };
+      applyRunnerDrawSummaryPayload(state, legalAction, {
+        ...drawSummary,
+        drawnCount,
+      });
     },
   },
   "onr_v1_095_jack-n-joe": {
     name: "onr_runner_event_draw_3",
-    resolve: (state) => {
-      drawRunnerCards(state, 3);
+    resolve: (state, legalAction) => {
+      applyRunnerDrawSummaryPayload(
+        state,
+        legalAction,
+        drawRunnerCards(state, 3),
+      );
     },
   },
   "onr_v1_097_livewires-contacts": {
@@ -1722,6 +1738,60 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
     },
   },
 };
+
+type RunnerDrawSummary = {
+  drawnCount: number;
+  citySurveillanceSourceCount: number;
+  citySurveillanceCreditsPaid: number;
+  citySurveillanceTagsAdded: number;
+};
+
+function emptyRunnerDrawSummary(): RunnerDrawSummary {
+  return {
+    drawnCount: 0,
+    citySurveillanceSourceCount: 0,
+    citySurveillanceCreditsPaid: 0,
+    citySurveillanceTagsAdded: 0,
+  };
+}
+
+function mergeRunnerDrawSummary(
+  left: RunnerDrawSummary,
+  right: RunnerDrawSummary,
+): RunnerDrawSummary {
+  return {
+    drawnCount: left.drawnCount + right.drawnCount,
+    citySurveillanceSourceCount: Math.max(
+      left.citySurveillanceSourceCount,
+      right.citySurveillanceSourceCount,
+    ),
+    citySurveillanceCreditsPaid:
+      left.citySurveillanceCreditsPaid + right.citySurveillanceCreditsPaid,
+    citySurveillanceTagsAdded:
+      left.citySurveillanceTagsAdded + right.citySurveillanceTagsAdded,
+  };
+}
+
+function applyRunnerDrawSummaryPayload(
+  state: GameState,
+  legalAction: LegalAction,
+  summary: RunnerDrawSummary,
+): void {
+  if (summary.drawnCount <= 0) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    drawnCount: summary.drawnCount,
+    ...(summary.citySurveillanceSourceCount > 0
+      ? {
+          citySurveillanceSourceCount: summary.citySurveillanceSourceCount,
+          citySurveillanceCreditsPaid: summary.citySurveillanceCreditsPaid,
+          citySurveillanceTagsAdded: summary.citySurveillanceTagsAdded,
+          runnerCreditsAfter: state.runner.credits,
+          runnerTagsAfter: state.runner.tags,
+        }
+      : {}),
+  };
+}
 
 export function createGame(config: CreateGameConfig = {}): GameState {
   const seed = config.seed ?? "mvp-0.1-default-seed";
@@ -3115,7 +3185,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       }
       const rezCost = rezCostForCard(state, id);
       const rezCostReductionSourceDefinitionIds =
-        rezCostReductionSourceDefinitionIdsFor(state, definition);
+        rezCostReductionSourceDefinitionIdsFor(state, id, definition);
       if (
         (definition.type === "asset" || definition.type === "upgrade") &&
         !mustInstance(state.cardInstances, id).rezzed &&
@@ -3391,6 +3461,24 @@ function corpMainActions(state: GameState): LegalAction[] {
             cardId: assetId,
             v1920AssetAbility: "gain_actions",
             gainedActions: 2,
+          },
+        ),
+      );
+    }
+    if (definition.id === V1920_SOUTH_AFRICAN_MINING_CORP_ID) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 8 Credits und trashen`,
+          assetId,
+          [{ clicks: 1 }],
+          {
+            cardId: assetId,
+            v1920AssetAbility: "south_african_mining_corp_gain_8_trash",
+            gainCreditsAmount: 8,
+            trashOnUse: true,
           },
         ),
       );
@@ -4750,6 +4838,13 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       corpServerIdForInstalledCard(state, sourceId) === iceServerId
     )
       bonus += 1;
+    if (
+      sourceDefinition.id === V1920_JERUSALEM_CITY_GRID_ID &&
+      iceServerId &&
+      corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
+      cardHasSubtype(iceDefinition, "wall")
+    )
+      bonus += 1;
   }
   for (const agendaId of scoredCorpAgendaIds(state)) {
     const agendaDefinition = definitionFor(state, agendaId);
@@ -4815,8 +4910,10 @@ function runBreakSubroutineAdditionalCost(run: GameState["run"]): number {
 
 function iceRezCostReductionFor(
   state: GameState,
+  iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): number {
+  const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let reduction = 0;
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
@@ -4836,14 +4933,23 @@ function iceRezCostReductionFor(
     )
       reduction += 2;
     if (sourceDefinition.id === V1920_FORTRESS_ARCHITECTS_ID) reduction += 1;
+    if (
+      sourceDefinition.id === V1920_JERUSALEM_CITY_GRID_ID &&
+      iceServerId &&
+      corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
+      cardHasSubtype(iceDefinition, "wall")
+    )
+      reduction += 9;
   }
   return reduction;
 }
 
 function rezCostReductionSourceDefinitionIdsFor(
   state: GameState,
+  iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): CardDefinitionId[] {
+  const iceServerId = corpServerIdForInstalledCard(state, iceId);
   const sourceIds: CardDefinitionId[] = [];
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
@@ -4864,6 +4970,13 @@ function rezCostReductionSourceDefinitionIdsFor(
       sourceIds.push(sourceDefinition.id);
     if (sourceDefinition.id === V1920_FORTRESS_ARCHITECTS_ID)
       sourceIds.push(sourceDefinition.id);
+    if (
+      sourceDefinition.id === V1920_JERUSALEM_CITY_GRID_ID &&
+      iceServerId &&
+      corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
+      cardHasSubtype(iceDefinition, "wall")
+    )
+      sourceIds.push(sourceDefinition.id);
   }
   return sourceIds;
 }
@@ -4872,7 +4985,7 @@ function rezCostForCard(state: GameState, cardId: CardInstanceId): number {
   const definition = definitionFor(state, cardId);
   const baseCost = definition.rezCost ?? 0;
   if (definition.type !== "ice") return baseCost;
-  const reduction = iceRezCostReductionFor(state, definition);
+  const reduction = iceRezCostReductionFor(state, cardId, definition);
   return Math.max(0, baseCost - reduction);
 }
 
@@ -5282,8 +5395,12 @@ function corpApproachActions(state: GameState): LegalAction[] {
   const definition = definitionFor(state, run.approachedIceId);
   const actions: LegalAction[] = [];
   const rezCost = rezCostForCard(state, run.approachedIceId);
-  const rezCostReductionSourceDefinitionIds =
-    rezCostReductionSourceDefinitionIdsFor(state, definition);
+      const rezCostReductionSourceDefinitionIds =
+        rezCostReductionSourceDefinitionIdsFor(
+          state,
+          run.approachedIceId,
+          definition,
+        );
   if (!ice.rezzed && state.corp.credits >= rezCost) {
     actions.push(
       action(
@@ -6506,6 +6623,37 @@ function performAction(
       }
       if (
         legalAction.payload?.v1920AssetAbility ===
+        "south_african_mining_corp_gain_8_trash"
+      ) {
+        if (legalAction.side !== "corp")
+          throw new Error("Nur die Korp darf South African Mining Corp nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
+          throw new Error(
+            "South African Mining Corp ist nicht rezzed installiert.",
+          );
+        if (
+          definitionFor(state, sourceCardId).id !==
+          V1920_SOUTH_AFRICAN_MINING_CORP_ID
+        )
+          throw new Error(
+            "Die South-African-Mining-Corp-Faehigkeit passt nicht zur Karte.",
+          );
+        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+        if (!Number.isInteger(gainAmount) || gainAmount !== 8)
+          throw new Error("South African Mining Corp gewaehrt genau 8 Credits.");
+        credits(state, "corp", gainAmount);
+        trashCorpInstalledCardToArchives(state, sourceCardId);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: gainAmount,
+          selfTrashed: true,
+          corpCreditsAfter: state.corp.credits,
+        };
+        return;
+      }
+      if (
+        legalAction.payload?.v1920AssetAbility ===
         "i_got_a_rock_tagged_meat_damage"
       ) {
         if (legalAction.side !== "corp")
@@ -7026,14 +7174,24 @@ function performAction(
       if (legalAction.payload?.drawCardAfter === true) {
         if (legalAction.side !== "runner")
           throw new Error("Nur der Runner darf mit diesem Effekt ziehen.");
-        drawRunnerCard(state);
+        applyRunnerDrawSummaryPayload(
+          state,
+          legalAction,
+          drawRunnerCard(state),
+        );
       }
       return;
     case "draw_card":
       spendClick(state, legalAction.side);
-      legalAction.side === "runner"
-        ? drawRunnerCard(state)
-        : drawCorpCard(state);
+      if (legalAction.side === "runner") {
+        applyRunnerDrawSummaryPayload(
+          state,
+          legalAction,
+          drawRunnerCard(state),
+        );
+      } else {
+        drawCorpCard(state);
+      }
       return;
     case "play_event":
       playRunnerEvent(state, legalAction);
@@ -7510,7 +7668,7 @@ function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
       zone: { side: "runner", zone: "stack" },
     };
   }
-  drawRunnerCards(state, 5);
+  const drawSummary = drawRunnerCards(state, 5);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     cardId,
@@ -7520,6 +7678,7 @@ function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
     specialZoneVisibility: "public",
     specialZoneReason: "onr_v1_101_mit_west_tier",
   };
+  applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
 }
 
 function resolveAiChiefFinancialOfficer(
@@ -7655,7 +7814,8 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     if (definition.type === "hardware") {
       const trashedDeckDefinitionIds: string[] = [];
       if (
-        definition.id === BODYWEIGHT_DATA_CRECHE_ID &&
+        (definition.id === BODYWEIGHT_DATA_CRECHE_ID ||
+          definition.id === V1922_ARTEMIS_2020_ID) &&
         cardHasSubtype(definition, "deck")
       ) {
         for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
@@ -8653,12 +8813,20 @@ function startTraceFromSubroutine(
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = definitionFor(state, sourceCardInstanceId);
   const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
+  const baseCorpBidMax =
+    state.corp.credits +
+    hackerTrackerCounterTotal(state) +
+    krumzTraceBitTotal(state);
+  const rabbitTraceLimitReduction = rabbitTraceLimitReductionForIceTrace(state);
+  const corpBidMax = Math.max(0, baseCorpBidMax - rabbitTraceLimitReduction);
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinition.id,
     subroutineIndex,
     baseTraceStrength,
+    corpBidMax,
+    ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
     status: "corp_bid",
     successEffect,
   };
@@ -8667,9 +8835,7 @@ function startTraceFromSubroutine(
     "corp",
     traceId,
     `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
-    state.corp.credits +
-      hackerTrackerCounterTotal(state) +
-      krumzTraceBitTotal(state),
+    corpBidMax,
   );
   state.activeSide = "corp";
   state.timingPoint = "run.encounter_ice";
@@ -8681,8 +8847,20 @@ function startTraceFromSubroutine(
       sourceCardId: sourceCardInstanceId,
       sourceDefinitionId: sourceDefinition.id,
       baseTraceStrength,
+      corpBidMax,
+      ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
     };
   }
+}
+
+function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
+  return state.runner.rig.programs.some(
+    (cardId) =>
+      definitionFor(state, cardId).id === V1922_RABBIT_ID &&
+      mustInstance(state.cardInstances, cardId).rezzed,
+  )
+    ? 1
+    : 0;
 }
 
 function startTraceFromOperation(
@@ -9192,6 +9370,7 @@ function applySuccessfulRunAccessReplacement(
       accessReplacement: run.successfulRunAccessReplacement ?? "corp_lose_credits",
       creditLoss,
       corpCreditsAfter: state.corp.credits,
+      tagsAdded: runnerTagGain,
       runnerTagsAfter: state.runner.tags,
       corpDrawnCount: corpDraw,
       hiddenZoneBarrier: true,
@@ -10971,18 +11150,39 @@ function drawCorpCards(state: GameState, amount: number): void {
   for (let index = 0; index < amount; index += 1) drawCorpCard(state);
 }
 
-function drawRunnerCard(state: GameState): void {
+function drawRunnerCard(state: GameState): RunnerDrawSummary {
+  const summary = emptyRunnerDrawSummary();
   const cardId = state.runner.stack.shift();
-  if (!cardId) return;
+  if (!cardId) return summary;
   state.runner.grip.push(cardId);
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
     zone: { side: "runner", zone: "grip" },
   };
+  summary.drawnCount = 1;
+  const citySurveillanceIds = rezzedCorpRootCardIds(state).filter(
+    (sourceId) =>
+      definitionFor(state, sourceId).id === V1920_CITY_SURVEILLANCE_ID,
+  );
+  summary.citySurveillanceSourceCount = citySurveillanceIds.length;
+  for (const _sourceId of citySurveillanceIds) {
+    void _sourceId;
+    if (state.runner.credits > 0) {
+      spendCredits(state, "runner", 1);
+      summary.citySurveillanceCreditsPaid += 1;
+    } else {
+      state.runner.tags += 1;
+      summary.citySurveillanceTagsAdded += 1;
+    }
+  }
+  return summary;
 }
 
-function drawRunnerCards(state: GameState, amount: number): void {
-  for (let index = 0; index < amount; index += 1) drawRunnerCard(state);
+function drawRunnerCards(state: GameState, amount: number): RunnerDrawSummary {
+  let summary = emptyRunnerDrawSummary();
+  for (let index = 0; index < amount; index += 1)
+    summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+  return summary;
 }
 
 function doDamage(
@@ -15594,6 +15794,12 @@ function resolveTraceCorpBid(
     traceId: trace.traceId,
     traceStep: "corp_bid",
     baseTraceStrength: trace.baseTraceStrength,
+    ...(typeof trace.corpBidMax === "number"
+      ? { corpBidMax: trace.corpBidMax }
+      : {}),
+    ...(typeof trace.rabbitTraceLimitReduction === "number"
+      ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
+      : {}),
     corpBid: bid,
     corpCreditBid: creditBid,
     ...(krumzBitsSpent > 0 ? { krumzBitsSpent } : {}),
@@ -16263,6 +16469,8 @@ function publicContextForAction(
       "traceId",
       "traceStep",
       "baseTraceStrength",
+      "corpBidMax",
+      "rabbitTraceLimitReduction",
       "corpBid",
       "traceStrength",
       "runnerLink",
@@ -16328,6 +16536,11 @@ function publicContextForAction(
     context.sourceCardId = legalAction.payload.sourceCardId;
     context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     context.baseTraceStrength = legalAction.payload.baseTraceStrength;
+    if (typeof legalAction.payload.corpBidMax === "number")
+      context.corpBidMax = legalAction.payload.corpBidMax;
+    if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")
+      context.rabbitTraceLimitReduction =
+        legalAction.payload.rabbitTraceLimitReduction;
     if (legalAction.payload.oncePerRunConsumed === true)
       context.oncePerRunConsumed = true;
   }
@@ -16514,6 +16727,9 @@ function publicContextForAction(
     "corpCreditsAfter",
     "drawnCount",
     "runnerGripAfter",
+    "citySurveillanceSourceCount",
+    "citySurveillanceCreditsPaid",
+    "citySurveillanceTagsAdded",
     "creditsLost",
     "tagsAdded",
     "runnerTagsAfter",
@@ -16785,6 +17001,11 @@ function publicContextForAction(
     context.v1920AssetAbility = legalAction.payload.v1920AssetAbility;
     if (typeof legalAction.payload.gainedActions === "number")
       context.gainedActions = legalAction.payload.gainedActions;
+    if (typeof legalAction.payload.gainedCredits === "number")
+      context.gainedCredits = legalAction.payload.gainedCredits;
+    if (typeof legalAction.payload.corpCreditsAfter === "number")
+      context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
+    if (legalAction.payload.selfTrashed === true) context.selfTrashed = true;
     if (
       typeof legalAction.payload.newsgroupTauntingRunStartTaxCredits ===
       "number"
@@ -17584,6 +17805,13 @@ function runnerRunRecurringCreditSourceIds(
           breakerId &&
           state.runner.rig.programs.includes(breakerId) &&
           cardHasSubtype(definitionFor(state, breakerId), "killer"),
+      );
+    }
+    if (definition.id === V1922_ARTEMIS_2020_ID) {
+      return Boolean(
+        state.run &&
+          breakerId &&
+          state.runner.rig.programs.includes(breakerId),
       );
     }
     if (!noisyBreaker) return true;

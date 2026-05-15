@@ -9830,6 +9830,294 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("applies Rabbit only to Corp ICE trace bid limits", () => {
+    const runnerDeck: DeckDefinition = {
+      ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+      id: "spotcheck_rabbit_trace_runner",
+      name: "Spotcheck Rabbit Trace Runner",
+      cards: [
+        { id: "onr_v1_051_rabbit", quantity: 1 },
+        ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK.cards,
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-rabbit-trace",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck,
+        corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    installRunnerProgramForTest(state, "onr_v1_051_rabbit");
+    putCorpIceOnServer(state, "rd", "onr_v1_221_asp");
+    state.corp.credits = 20;
+    state.runner.credits = 4;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_221_asp",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.pendingChoice?.side).toBe("corp");
+    const expectedCorpBidMax = state.corp.credits - 1;
+    expect(
+      state.pendingChoice?.options.some(
+        (option) => option.id === `bid_${expectedCorpBidMax}`,
+      ),
+    ).toBe(true);
+    expect(
+      state.pendingChoice?.options.some(
+        (option) => option.id === `bid_${state.corp.credits}`,
+      ),
+    ).toBe(false);
+    expect(state.trace).toMatchObject({
+      sourceDefinitionId: "onr_v1_221_asp",
+      corpBidMax: expectedCorpBidMax,
+      rabbitTraceLimitReduction: 1,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStarted: true,
+      corpBidMax: expectedCorpBidMax,
+      rabbitTraceLimitReduction: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("loads Artemis MU and recurring icebreaker credits while replacing older decks", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-artemis-recurring",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_artemis_runner",
+          name: "Spotcheck Artemis Runner",
+          cards: [
+            { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
+            { id: "onr_v1_122_artemis-2020", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    moveRunnerCardToGrip(state, "onr_v1_119_arasaka-portable-prototype");
+    moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_119_arasaka-portable-prototype",
+    );
+    const oldDeckId = state.runner.rig.hardware.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_119_arasaka-portable-prototype",
+    );
+    const memoryBefore = state.runner.memoryLimit;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_122_artemis-2020",
+    );
+    const artemisId = state.runner.rig.hardware.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_122_artemis-2020",
+    );
+    expect(artemisId).toBeDefined();
+    if (!artemisId) throw new Error("Missing Artemis");
+    expect(state.runner.memoryLimit).toBe(memoryBefore + 2);
+    expect(cardCounterAmount(state, artemisId, "recurring_credit")).toBe(2);
+    if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
+  });
+
+  it("resolves South African Mining Corp as rezzed self-trash economy", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-south-african-mining",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 5;
+    state.corp.clicks = 3;
+    const assetId = putCorpRootInRemote(
+      state,
+      "onr_v1_343_south-african-mining-corp",
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.payload?.v1920AssetAbility ===
+          "south_african_mining_corp_gain_8_trash",
+      ),
+    ).toBe(false);
+    state.cardInstances[assetId] = {
+      ...state.cardInstances[assetId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.payload?.v1920AssetAbility ===
+        "south_african_mining_corp_gain_8_trash",
+    );
+
+    expect(state.corp.credits).toBe(13);
+    expect(state.corp.archives).toContain(assetId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v1920AssetAbility: "south_african_mining_corp_gain_8_trash",
+      gainedCredits: 8,
+      selfTrashed: true,
+      corpCreditsAfter: 13,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Jerusalem City Grid wall modifiers server-bound", () => {
+    const approachWall = (
+      seed: string,
+      iceServerId: "rd" | "remote_1",
+    ): GameState => {
+      let state = apply(
+        createGameAfterSetup({
+          seed,
+          runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          agendaPointsToWin: 7,
+        }),
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      state.corp.credits = 20;
+      const gridId = putCorpRootInRemote(
+        state,
+        "onr_v1_360_jerusalem-city-grid",
+      );
+      state.cardInstances[gridId] = {
+        ...state.cardInstances[gridId]!,
+        faceup: true,
+        rezzed: true,
+      };
+      putCorpIceOnServer(state, iceServerId, "onr_v1_232_crystal-wall");
+      state = toRunnerTurnFromCorpMain(state);
+      state.runner.credits = 20;
+      state.runner.clicks = 4;
+      return apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === iceServerId,
+      );
+    };
+    const ownServerState = approachWall(
+      "spotcheck-jerusalem-city-grid-own",
+      "remote_1",
+    );
+    const otherServerState = approachWall(
+      "spotcheck-jerusalem-city-grid-other",
+      "rd",
+    );
+    const ownServerRez = mustAction(
+      ownServerState,
+      "corp",
+      (action) => action.type === "rez_ice",
+    );
+    const otherServerRez = mustAction(
+      otherServerState,
+      "corp",
+      (action) => action.type === "rez_ice",
+    );
+    expect(ownServerRez.costs[0]?.credits).toBe(0);
+    expect(ownServerRez.payload?.rezCostReductionSourceDefinitionIds).toContain(
+      "onr_v1_360_jerusalem-city-grid",
+    );
+    expect(otherServerRez.costs[0]?.credits).toBe(4);
+  });
+
+  it("applies City Surveillance draw tax only from rezzed public assets", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-city-surveillance-draw-tax",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    const cityId = putCorpRootInRemote(state, "onr_v1_313_city-surveillance");
+    state.runner.credits = 1;
+    state.runner.tags = 0;
+    state.runner.clicks = 4;
+    const unrezzed = apply(
+      state,
+      "runner",
+      (action) => action.type === "draw_card",
+    );
+    expect(unrezzed.runner.credits).toBe(1);
+    expect(unrezzed.runner.tags).toBe(0);
+
+    state = unrezzed;
+    state.cardInstances[cityId] = {
+      ...state.cardInstances[cityId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.tags).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      drawnCount: 1,
+      citySurveillanceSourceCount: 1,
+      citySurveillanceCreditsPaid: 1,
+      citySurveillanceTagsAdded: 0,
+      runnerCreditsAfter: 0,
+    });
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.runner.tags).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      citySurveillanceSourceCount: 1,
+      citySurveillanceCreditsPaid: 0,
+      citySurveillanceTagsAdded: 1,
+      runnerTagsAfter: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
 });
 
 describe("V1.9.21 Deterministic Random WIP", () => {
@@ -13430,6 +13718,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       accessReplacement: "corp_lose_credits_runner_tag_corp_draw",
       creditLoss: 1,
       corpDrawnCount: 1,
+      tagsAdded: 1,
       runnerTagsAfter: 1,
       hiddenZoneBarrier: true,
     });
@@ -14136,7 +14425,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           name: "O:NR V1.9.22 misc.for-sale",
           cards: [
             { id: "onr_v1_100_misc-for-sale", quantity: 1 },
-            { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
+            { id: "simple_setup_hardware", quantity: 1 },
             { id: "onr_v1_122_artemis-2020", quantity: 1 },
             ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
           ],
@@ -14147,15 +14436,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state.runner.credits = 100;
     state.runner.clicks = 10;
-    moveRunnerCardToGrip(state, "onr_v1_119_arasaka-portable-prototype");
+    moveRunnerCardToGrip(state, "simple_setup_hardware");
     moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_119_arasaka-portable-prototype",
+        sourceDefinition(state, action) === "simple_setup_hardware",
     );
     state = apply(
       state,
