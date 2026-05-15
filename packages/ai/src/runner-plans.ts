@@ -24,7 +24,7 @@ import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal
 import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
-import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory } from "./belief-state";
 
 export type RunnerPlanKind =
@@ -85,6 +85,14 @@ export type RunnerPlanDebug = {
   invalidations?: string[];
   beliefUncertainty?: string[];
   opponentModel?: Record<string, unknown>;
+  ownDeckDoctrine?: {
+    schemaVersion: string;
+    side: Side;
+    confidence: number;
+    archetypeTags: string[];
+    riskFlags: string[];
+  };
+  doctrinePlanWeight?: number;
 };
 
 export type RunnerPlanDecision = {
@@ -226,6 +234,7 @@ export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { time
   if (!action) return fallbackPlanDecision(input, "plan_without_legal_action", timeBudgetMs, false, beliefState);
   const beliefSummary = beliefDebugSummary(beliefState);
   const opponentModel = toRecord(beliefSummary.runnerOpponentModel);
+  const doctrinePlanWeight = doctrinePlanWeightFor(input, selected.candidate.kind);
   return {
     selectedPlanId: selected.candidate.planId,
     selectedActionId: action.actionId,
@@ -252,7 +261,8 @@ export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { time
       hypotheses: toStringArray(beliefSummary.hypotheses),
       invalidations: toStringArray(beliefSummary.invalidations),
       beliefUncertainty: toStringArray(beliefSummary.uncertainty),
-      ...(opponentModel ? { opponentModel } : {})
+      ...(opponentModel ? { opponentModel } : {}),
+      ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine), doctrinePlanWeight } : {})
     }
   };
 }
@@ -305,9 +315,11 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const access = evaluateServerAccessValue(input, candidate, beliefState);
   const remote = evaluateRemoteThreat(input, candidate, beliefState);
   const corpThreat = evaluateCorpScoringThreat(input, candidate, beliefState);
+  const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
     baseScoreForPlan(candidate.kind) +
+    doctrinePlanWeight +
     rig.score * profile.weights.runnerRig +
     runCost.score * profile.weights.runCost +
     access.score * profile.weights.serverAccessValue +
@@ -323,6 +335,8 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
+      `doctrine_plan_weight:${doctrinePlanWeight}`,
+      ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
       ...candidate.visibleBenefits,
       ...rig.evidence,
       ...runCost.evidence,
@@ -849,7 +863,8 @@ function fallbackDebug(
     hypotheses: toStringArray(beliefSummary.hypotheses),
     invalidations: toStringArray(beliefSummary.invalidations),
     beliefUncertainty: toStringArray(beliefSummary.uncertainty),
-    ...(opponentModel ? { opponentModel } : {})
+    ...(opponentModel ? { opponentModel } : {}),
+    ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine), doctrinePlanWeight: 0 } : {})
   };
 }
 
@@ -872,6 +887,24 @@ function baseScoreForPlan(kind: RunnerPlanKind): number {
     case "safe_probe_run":
       return 185;
   }
+}
+
+function doctrinePlanWeightFor(input: AiDecisionInput, kind: RunnerPlanKind): number {
+  const profile = input.ownDeckDoctrine;
+  if (!profile || profile.side !== "runner") return 0;
+  const raw = profile.planWeights[kind] ?? 0;
+  const confidence = Number.isFinite(profile.confidence) ? profile.confidence : 0.5;
+  return Math.round(raw * Math.max(0.25, Math.min(1, confidence)));
+}
+
+function deckDoctrineDebug(profile: AiDeckDoctrineProfile): NonNullable<RunnerPlanDebug["ownDeckDoctrine"]> {
+  return {
+    schemaVersion: profile.schemaVersion,
+    side: profile.side,
+    confidence: profile.confidence,
+    archetypeTags: profile.archetypeTags.slice(0, 3),
+    riskFlags: profile.riskFlags.slice(0, 5)
+  };
 }
 
 function visibleBenefitsForPlan(kind: RunnerPlanKind): string[] {

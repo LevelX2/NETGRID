@@ -584,9 +584,23 @@ describe("MVP 0.3 Runner AI", () => {
     if (!blockedRun || !gain) throw new Error("Missing fixture actions");
 
     const decision = chooseRunnerAction({ ...input, legalActions: [blockedRun, gain] });
+    const doctrine = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-rnd-runner",
+      side: "runner",
+      cards: [
+        { cardId: "simple_run_event", quantity: 9 },
+        { cardId: "simple_fracter", quantity: 3 },
+        { cardId: "simple_economy_event", quantity: 3 }
+      ]
+    });
+    const doctrineDecision = chooseRunnerAction({ ...input, ownDeckDoctrine: doctrine, legalActions: [blockedRun, gain] });
 
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(doctrineDecision.actionId).toBe(gain.actionId);
+    expect(doctrineDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(JSON.stringify(doctrineDecision.decisionDebug)).toContain("ownDeckDoctrine");
+    expect(JSON.stringify(doctrineDecision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|simple_run_event/);
   });
 
   it("backs off from HQ when the visible sentry breaker cannot pay the rezzed ICE", () => {
@@ -919,6 +933,21 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(profile.planWeights).not.toEqual({});
     expect(tagProfile.archetypeTags).toContain("tag_pressure");
     expect(JSON.stringify(profile)).not.toMatch(/cardInstances|privatePayload|sessionToken/);
+
+    const runnerProfile = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-rnd-runner",
+      side: "runner",
+      cards: [
+        { cardId: "simple_run_event", quantity: 6 },
+        { cardId: "simple_fracter", quantity: 3 },
+        { cardId: "simple_economy_event", quantity: 3 }
+      ]
+    });
+
+    expect(runnerProfile.side).toBe("runner");
+    expect(runnerProfile.archetypeTags.length).toBeGreaterThan(0);
+    expect(runnerProfile.planWeights.pressure_rnd).toBeGreaterThan(0);
+    expect(JSON.stringify(runnerProfile)).not.toMatch(/cardInstances|privatePayload|sessionToken/);
   });
 
   it("uses deck doctrine as a bounded Corp plan weight", () => {
@@ -1447,6 +1476,41 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(safeProbeRun).toBeDefined();
     if (!safeProbeRun) throw new Error("Missing safe probe run");
     expect(chooseRunnerPlanDecision({ ...safeProbeInput, legalActions: [safeProbeRun] }).debug.planKind).toBe("safe_probe_run");
+  });
+
+  it("uses deck doctrine as a bounded Runner plan weight", () => {
+    const input = runnerActionPhaseInput("ai-runner-doctrine-plan-weight", () => undefined);
+    const pressureRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const pressureGain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(pressureRun).toBeDefined();
+    expect(pressureGain).toBeDefined();
+    if (!pressureRun || !pressureGain) throw new Error("Missing Runner doctrine fixture actions");
+
+    const pressureInput = { ...input, legalActions: [pressureRun, pressureGain] };
+    const candidate = generateRunnerPlanCandidates(pressureInput).find((plan) => plan.kind === "pressure_rnd");
+    const doctrine = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-rnd-runner",
+      side: "runner",
+      cards: [
+        { cardId: "simple_run_event", quantity: 9 },
+        { cardId: "simple_fracter", quantity: 3 },
+        { cardId: "simple_economy_event", quantity: 3 }
+      ]
+    });
+
+    expect(candidate).toBeDefined();
+    if (!candidate) throw new Error("Missing pressure_rnd candidate");
+    const neutralScore = evaluateRunnerPlan(pressureInput, candidate).score;
+    const doctrineScore = evaluateRunnerPlan({ ...pressureInput, ownDeckDoctrine: doctrine }, candidate).score;
+    const decision = chooseRunnerPlanDecision({ ...pressureInput, ownDeckDoctrine: doctrine });
+
+    expect(doctrine.planWeights.pressure_rnd).toBeGreaterThan(0);
+    expect(doctrineScore).toBeGreaterThan(neutralScore);
+    expect(decision.debug.planKind).toBe("pressure_rnd");
+    expect(decision.debug.doctrinePlanWeight).toBeGreaterThan(0);
+    expect(decision.debug.ownDeckDoctrine?.side).toBe("runner");
+    expect(JSON.stringify(decision.debug)).not.toMatch(/cardInstances|privatePayload/);
+    expect(JSON.stringify(decision.debug.ownDeckDoctrine)).not.toMatch(/simple_run_event|simple_fracter|simple_economy_event/);
   });
 
   it("handles access trash, jack-out and legal fallback without hidden-info claims", () => {

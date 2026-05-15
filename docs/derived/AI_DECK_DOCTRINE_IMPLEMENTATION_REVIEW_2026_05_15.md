@@ -1,14 +1,16 @@
 # AI Deck Doctrine Implementation Review
 
 Stand: 2026-05-15  
-Status: erster Corp-MVP umgesetzt
+Status: Corp-MVP und Runner-Plananbindung umgesetzt
 
 ## Umgesetzter Scope
 
 - Neue deterministische Deck-Doktrin-Projektion aus eigenem Decksnapshot, Runtime-Karten, Rollenmanifest und AI-Hints.
 - Gemeinsamer Shared-Typ `AiDeckDoctrineProfile` und optionaler `ownDeckDoctrine`-Input für KI-Entscheidungen.
 - Corp-Archetypen: `rush`, `glacier`, `tag_pressure`, `asset_remote`, `operation_economy`, `central_defense`.
-- Runner-Profilgenerator ist vorbereitet, aber noch nicht in Runner-Planentscheidungen gewichtet.
+- Runner-Profilgenerator erzeugt planbezogene Gewichte für `pressure_rnd`, `pressure_hq`, `contest_remote`, `build_rig`, `recover_economy`, `draw_for_answers`, `trash_asset` und `safe_probe_run`.
+- Runner-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus, skaliert mit Profil-Confidence.
+- Sichtbare Run-Blocker, Kosten- und Unreachable-Remote-Guards bleiben stärker als aggressive Runner-Doktrin.
 - Corp-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus.
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
@@ -20,9 +22,10 @@ Status: erster Corp-MVP umgesetzt
 - `packages/ai/src/deck-doctrine.ts`: Profilgenerator und Corp-Mulligan-Bewertung.
 - `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Setup-Mulligan-Auswahl, Debug-Zusammenfassung und Exports.
 - `packages/ai/src/corp-plans.ts`: planbezogener Doctrine-Bonus und redigierte Plan-Debugdaten.
+- `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus und redigierte Plan-Debugdaten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
 - `apps/server/src/multiplayer.ts`: Snapshot-Übergabe für die aktive KI-Seite.
-- `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Plan-Gewichtung, Agenda-Schutz und Mulligan.
+- `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz und Mulligan.
 
 ## Verifikation
 
@@ -40,6 +43,6 @@ Teilweise grün:
 
 ## Offene Punkte
 
-- Runner-Doktrin ist nur vorbereitet und muss in einem späteren Slice in Runner-Pläne einfließen.
 - Selfplay-Metriken für nackte Agenda-Installs, verpasste Score-Fenster und Economy-Stalls sind noch Planungs-/Analysearbeit.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
+- Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.
