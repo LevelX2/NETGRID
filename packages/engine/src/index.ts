@@ -10499,6 +10499,7 @@ function trashRunnerInstalledCardToHeap(
     rezzed: true,
     zone: { side: "runner", zone: "heap" },
   };
+  if (definition.id === BROKER_ID) clearCardCounters(state, cardId);
 }
 
 function trashCorpInstalledCardToArchives(
@@ -17849,6 +17850,13 @@ function setCardCounter(
     Object.keys(counters).length > 0
       ? { ...withoutCounters, counters }
       : withoutCounters;
+}
+
+function clearCardCounters(state: GameState, cardId: CardInstanceId): void {
+  const instance = mustInstance(state.cardInstances, cardId);
+  const { counters: _counters, ...withoutCounters } = instance;
+  void _counters;
+  state.cardInstances[cardId] = withoutCounters;
 }
 
 function addCardCounter(

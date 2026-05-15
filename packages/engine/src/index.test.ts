@@ -11764,6 +11764,16 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         "onr_v1_154_broker",
     );
     expect(brokerId).toBeDefined();
+    if (!brokerId) throw new Error("Broker was not installed.");
+    resourceState = apply(
+      resourceState,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits" &&
+        action.payload?.cardId === brokerId,
+    );
+    expect(resourceState.cardInstances[brokerId]?.counters?.power).toBe(3);
     resourceState.runner.tags = 1;
     resourceState = apply(
       resourceState,
@@ -11785,6 +11795,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     expect(resourceState.runner.rig.resources).not.toContain(brokerId);
     expect(resourceState.runner.heap).toContain(brokerId);
+    expect(resourceState.cardInstances[brokerId]?.counters).toBeUndefined();
   });
 
   it("restores Broker load and take-credit resource actions with one use per Broker each Runner turn", () => {
