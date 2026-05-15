@@ -120,6 +120,18 @@ export type AiQualityMetrics = {
   roleCoverage: string[];
   progressScore: number;
   holdout: boolean;
+  doctrine: AiDoctrineQualityMetrics;
+};
+
+export type AiDoctrineQualityMetrics = {
+  nakedAgendaInstalls: number;
+  agendaFloodExposure: number;
+  scoreWindowMissed: number;
+  remoteOverbuild: number;
+  economyStall: number;
+  repeatedLowValueCentralRun: number;
+  rigStall: number;
+  assetTrashNeglect: number;
 };
 
 export type AiSoakResult = {
@@ -286,6 +298,8 @@ export type AiSimulationSummary = {
     evidence: string[];
     fallbackUsed: boolean;
     timeoutUsed: boolean;
+    targetServerId?: string;
+    qualityTags: string[];
     stateHashAfter: string;
   }>;
   errors: string[];
@@ -485,6 +499,8 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
       evidence: decision.evidence ?? [],
       fallbackUsed: decision.fallbackUsed,
       timeoutUsed: decision.timeoutUsed ?? false,
+      ...(typeof action.payload?.serverId === "string" ? { targetServerId: action.payload.serverId } : {}),
+      qualityTags: qualityTagsForAction(input, action, decision),
       stateHashAfter: result.stateHash
     });
     state = result.state;
@@ -540,6 +556,10 @@ export function simulateAiSoak(config: Partial<AiSimulationConfig> = {}): AiSoak
       holdoutSeeds: SOAK_SEEDS.holdoutSeeds
     }
   };
+}
+
+export function summarizeDoctrineQualityMetrics(actionSequence: AiSimulationSummary["actionSequence"]): AiDoctrineQualityMetrics {
+  return doctrineMetricsFor([...actionSequence.flatMap((entry) => entry.qualityTags), ...repeatedLowValueCentralRunTags(actionSequence)]);
 }
 
 export function listV143BenchmarkProfiles(): SimulationBenchmarkProfile[] {
@@ -1597,6 +1617,7 @@ function scrubEvidence(evidence: string[]): string[] {
 function metricsFor(actionSequence: AiSimulationSummary["actionSequence"], errors: string[], replayOk: boolean, holdout: boolean): AiQualityMetrics {
   const actions = actionSequence.length || 1;
   const reasonCodeCoverage = sortedUnique(actionSequence.map((entry) => entry.reasonCode.split(".").slice(0, 2).join(".")));
+  const doctrine = summarizeDoctrineQualityMetrics(actionSequence);
   return {
     illegalActions: errors.length,
     fallbackRate: round(actionSequence.filter((entry) => entry.fallbackUsed).length / actions),
@@ -1605,8 +1626,74 @@ function metricsFor(actionSequence: AiSimulationSummary["actionSequence"], error
     actionTypeCoverage: sortedUnique(actionSequence.map((entry) => entry.actionType)),
     roleCoverage: sortedUnique(actionSequence.flatMap((entry) => entry.evidence.filter((item) => item.startsWith("role:")).map((item) => item.slice("role:".length)))),
     progressScore: round(actionSequence.length + (replayOk ? 10 : 0) - errors.length * 10),
-    holdout
+    holdout,
+    doctrine
   };
+}
+
+function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decision: AiDecision): string[] {
+  const tags: string[] = [];
+  const features = extractAiFeatures(input);
+  const sourceCard = action.source === "basic_action" || action.source === "game_rule" ? undefined : findVisibleCard(input, action.source);
+  const sourceDefinition = sourceCard?.definitionId ? DEMO_CARDS_BY_ID[sourceCard.definitionId] : undefined;
+  const targetServerId = typeof action.payload?.serverId === "string" ? action.payload.serverId : undefined;
+  const targetServer = targetServerId ? features.serverFeaturesById.get(targetServerId) : undefined;
+  const agendaInHand = input.playerView.own.gripOrHq.filter((card) => card.definitionId && DEMO_CARDS_BY_ID[card.definitionId]?.type === "agenda").length;
+  const legalScoreAvailable = input.side === "corp" && input.legalActions.some((candidate) => candidate.type === "score_agenda");
+  const legalTrashAvailable = input.side === "runner" && input.legalActions.some((candidate) => candidate.type === "trash_accessed_card");
+  const lowCredits = input.playerView.own.credits <= 1;
+  const economyAction =
+    action.type === "gain_credit" ||
+    ((action.type === "play_event" || action.type === "play_operation") && rolesForAction(input, action).some((role) => role.includes("economy") || role === "tempo"));
+
+  if (input.side === "corp" && action.type === "install_card" && action.payload?.placement !== "ice" && sourceDefinition?.type === "agenda") {
+    if (targetServerId === "new_remote" || ((targetServer?.iceCount ?? 0) === 0 && (targetServer?.rootCount ?? 0) === 0)) tags.push("naked_agenda_install");
+  }
+  if (input.side === "corp" && agendaInHand >= 3) tags.push("agenda_flood_exposure");
+  if (legalScoreAvailable && action.type !== "score_agenda") tags.push("score_window_missed");
+  if (
+    input.side === "corp" &&
+    action.type === "install_card" &&
+    targetServerId?.startsWith("remote_") &&
+    ((action.payload?.placement === "ice" && (targetServer?.iceCount ?? 0) >= 2) || (action.payload?.placement !== "ice" && (targetServer?.rootCount ?? 0) >= 2))
+  ) {
+    tags.push("remote_overbuild");
+  }
+  if (lowCredits && !economyAction && action.type !== "mandatory_draw" && action.type !== "end_turn") tags.push("economy_stall");
+  if (input.side === "runner" && features.rigRoles.size === 0 && action.type === "start_run" && input.playerView.opponent.agendaPoints < input.playerView.agendaPointsToWin - 2) tags.push("rig_stall");
+  if (legalTrashAvailable && action.type !== "trash_accessed_card") tags.push("asset_trash_neglect");
+  if (decision.timeoutUsed) tags.push("timeout");
+  if (decision.fallbackUsed) tags.push("fallback");
+  return sortedUnique(tags);
+}
+
+function repeatedLowValueCentralRunTags(actionSequence: AiSimulationSummary["actionSequence"]): string[] {
+  const tags: string[] = [];
+  const lastCentralRunByServer = new Map<string, number>();
+  for (const [index, entry] of actionSequence.entries()) {
+    if (entry.side !== "runner" || entry.actionType !== "start_run" || !entry.targetServerId || !["rd", "hq", "archives"].includes(entry.targetServerId)) continue;
+    const previous = lastCentralRunByServer.get(entry.targetServerId);
+    if (previous !== undefined && index - previous <= 4 && !entry.reasonCode.includes("contest") && !entry.reasonCode.includes("trash")) tags.push("repeated_low_value_central_run");
+    lastCentralRunByServer.set(entry.targetServerId, index);
+  }
+  return tags;
+}
+
+function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
+  return {
+    nakedAgendaInstalls: countTag(tags, "naked_agenda_install"),
+    agendaFloodExposure: countTag(tags, "agenda_flood_exposure"),
+    scoreWindowMissed: countTag(tags, "score_window_missed"),
+    remoteOverbuild: countTag(tags, "remote_overbuild"),
+    economyStall: countTag(tags, "economy_stall"),
+    repeatedLowValueCentralRun: countTag(tags, "repeated_low_value_central_run"),
+    rigStall: countTag(tags, "rig_stall"),
+    assetTrashNeglect: countTag(tags, "asset_trash_neglect")
+  };
+}
+
+function countTag(tags: string[], tag: string): number {
+  return tags.filter((candidate) => candidate === tag).length;
 }
 
 function isHoldoutSeed(seed: string): boolean {
