@@ -201,6 +201,7 @@ const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const DIPLOMATIC_IMMUNITY_ID = "onr_v1_160_diplomatic-immunity";
+const BROKER_ID = "onr_v1_154_broker";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
 const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
@@ -4462,6 +4463,48 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
+      if (
+        definition.id === BROKER_ID &&
+        !runnerUsedBrokerThisTurn(state, resourceId)
+      ) {
+        const storedCredits = cardCounter(state, resourceId, "power");
+        actions.push(
+          action(
+            state,
+            "runner",
+            "trigger_ability",
+            `${definition.title}: 3 Credits auf Broker legen`,
+            resourceId,
+            [{ clicks: 1 }],
+            {
+              cardId: resourceId,
+              resourceAbility: "broker_load_credits",
+              counterType: "power",
+              addCounterAmount: 3,
+              gainCreditsAmount: 0,
+            },
+          ),
+        );
+        if (storedCredits > 0) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: ${storedCredits} ${storedCredits === 1 ? "Credit" : "Credits"} nehmen`,
+              resourceId,
+              [{ clicks: 1 }],
+              {
+                cardId: resourceId,
+                resourceAbility: "broker_take_credits",
+                counterType: "power",
+                removePowerCounterAmount: storedCredits,
+                gainCreditsAmount: storedCredits,
+              },
+            ),
+          );
+        }
+      }
       if (definition.id === "onr_v1_159_databroker") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
@@ -7529,6 +7572,13 @@ function performAction(
       endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
+      if (
+        legalAction.payload?.resourceAbility === "broker_load_credits" ||
+        legalAction.payload?.resourceAbility === "broker_take_credits"
+      ) {
+        resolveBrokerAbility(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.runnerAbility === "remove_data_raven_counter") {
         if (legalAction.side !== "runner")
           throw new Error("Nur der Runner darf Data-Raven-Counter entfernen.");
@@ -7621,6 +7671,60 @@ function performAction(
         "Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.",
       );
   }
+}
+
+function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Broker nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("Broker ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== BROKER_ID)
+    throw new Error("Die Broker-Faehigkeit passt nicht zur Karte.");
+  if (runnerUsedBrokerThisTurn(state, sourceCardId))
+    throw new Error("Dieser Broker wurde in diesem Zug bereits genutzt.");
+
+  spendClick(state, "runner");
+  if (legalAction.payload?.resourceAbility === "broker_load_credits") {
+    const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
+    if (!Number.isInteger(addAmount) || addAmount !== 3)
+      throw new Error("Broker legt genau 3 Credits aus der Bank auf Broker.");
+    addCardCounter(state, sourceCardId, "power", addAmount);
+    markBrokerUsedThisTurn(state, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      addedCounterAmount: addAmount,
+      remainingCounters: cardCounter(state, sourceCardId, "power"),
+      gainedCredits: 0,
+      runnerCreditsAfter: state.runner.credits,
+    };
+    return;
+  }
+
+  const storedCredits = cardCounter(state, sourceCardId, "power");
+  if (storedCredits <= 0)
+    throw new Error("Auf Broker liegen keine Credits.");
+  const removeAmount = Number(
+    legalAction.payload?.removePowerCounterAmount ?? 0,
+  );
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (
+    !Number.isInteger(removeAmount) ||
+    removeAmount !== storedCredits ||
+    !Number.isInteger(gainAmount) ||
+    gainAmount !== storedCredits
+  )
+    throw new Error("Broker nimmt immer alle gespeicherten Credits.");
+  spendCardCounter(state, sourceCardId, "power", removeAmount);
+  credits(state, "runner", gainAmount);
+  markBrokerUsedThisTurn(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    removedCounterAmount: removeAmount,
+    gainedCredits: gainAmount,
+    remainingCounters: cardCounter(state, sourceCardId, "power"),
+    runnerCreditsAfter: state.runner.credits,
+  };
 }
 
 function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
@@ -10905,6 +11009,7 @@ function startRunnerTurn(state: GameState): void {
   flags.runAttemptsLastTurn = 0;
   flags.successfulHqRunThisTurn = false;
   flags.damagePreventionUsage = {};
+  flags.brokerActionCardIdsThisTurn = [];
   flags.startOfTurnFloatingCreditsApplied = false;
   flags.allNighterBonusRunPending = false;
   flags.valuPakProgramInstallActionsRemaining = 0;
@@ -12129,6 +12234,27 @@ function runnerHasInstalledCorporateAlly(state: GameState): boolean {
   );
 }
 
+function runnerUsedBrokerThisTurn(
+  state: GameState,
+  brokerId: CardInstanceId,
+): boolean {
+  return (
+    ensureRunnerTurnFlags(state).brokerActionCardIdsThisTurn?.includes(
+      brokerId,
+    ) === true
+  );
+}
+
+function markBrokerUsedThisTurn(
+  state: GameState,
+  brokerId: CardInstanceId,
+): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const used = flags.brokerActionCardIdsThisTurn ?? [];
+  if (!used.includes(brokerId)) used.push(brokerId);
+  flags.brokerActionCardIdsThisTurn = used.slice().sort();
+}
+
 function corpHasScoredExecutiveExtraction(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
@@ -13014,6 +13140,7 @@ function action(
       type === "score_agenda" ||
       type === "trash_resource" ||
       payload?.v1917AssetAbility ||
+      payload?.resourceAbility ||
       payload?.runnerAbility ||
       payload?.acmeSavingsAndLoanAbility ||
       (side === "runner" && type === "install_card")
@@ -16196,6 +16323,7 @@ function makeActionId(
     parts.push(String(payload.v1921RunnerProgramAbility));
   if (payload?.v1921RunnerResourceAbility)
     parts.push(String(payload.v1921RunnerResourceAbility));
+  if (payload?.resourceAbility) parts.push(String(payload.resourceAbility));
   if (payload?.runnerAbility) parts.push(String(payload.runnerAbility));
   if (payload?.acmeSavingsAndLoanAbility)
     parts.push(String(payload.acmeSavingsAndLoanAbility));
@@ -16801,6 +16929,12 @@ function publicContextForAction(
     "gainedCredits",
     "runnerCreditsAfter",
     "corpCreditsAfter",
+    "resourceAbility",
+    "counterType",
+    "addedCounterAmount",
+    "remainingCounters",
+    "gainCreditsAmount",
+    "removePowerCounterAmount",
     "drawnCount",
     "runnerGripAfter",
     "citySurveillanceSourceCount",
@@ -18668,6 +18802,7 @@ function ensureRunnerTurnFlags(
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
     damagePreventionUsage: {},
+    brokerActionCardIdsThisTurn: [],
     startOfTurnFloatingCreditsApplied: false,
     allNighterBonusRunPending: false,
     forgoNextActionPending: false,
@@ -18685,6 +18820,7 @@ function ensureRunnerTurnFlags(
   flags.runAttemptsLastTurn ??= 0;
   flags.successfulHqRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
+  flags.brokerActionCardIdsThisTurn ??= [];
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;

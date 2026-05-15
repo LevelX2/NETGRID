@@ -11787,6 +11787,109 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(resourceState.runner.heap).toContain(brokerId);
   });
 
+  it("restores Broker load and take-credit resource actions with one use per Broker each Runner turn", () => {
+    let state = toRunnerTurn(
+      v1914TraceTagResourceGame("v1914-broker-resource-actions"),
+    );
+    state.runner.credits = 12;
+    moveRunnerCardToGrip(state, "onr_v1_154_broker");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_154_broker",
+    );
+    const brokerId = state.runner.rig.resources.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+    );
+    expect(brokerId).toBeDefined();
+    if (!brokerId) throw new Error("Broker was not installed.");
+
+    let brokerActions = getLegalActions(state, "runner").filter(
+      (action) => action.payload?.cardId === brokerId,
+    );
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.resourceAbility === "broker_load_credits",
+      ),
+    ).toBe(true);
+    expect(
+      brokerActions.some(
+        (action) => action.payload?.resourceAbility === "broker_take_credits",
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits" &&
+        action.payload?.cardId === brokerId,
+    );
+    expect(state.cardInstances[brokerId]?.counters?.power).toBe(3);
+    brokerActions = getLegalActions(state, "runner").filter(
+      (action) => action.payload?.cardId === brokerId,
+    );
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.payload?.resourceAbility === "broker_load_credits" ||
+          action.payload?.resourceAbility === "broker_take_credits",
+      ),
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state = toRunnerTurnFromCorpMain(state);
+    const creditsBeforeTake = state.runner.credits;
+    brokerActions = getLegalActions(state, "runner").filter(
+      (action) => action.payload?.cardId === brokerId,
+    );
+    expect(
+      brokerActions.some(
+        (action) => action.payload?.resourceAbility === "broker_load_credits",
+      ),
+    ).toBe(true);
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.resourceAbility === "broker_take_credits" &&
+          action.payload?.gainCreditsAmount === 3,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_take_credits" &&
+        action.payload?.cardId === brokerId,
+    );
+    expect(state.runner.credits).toBe(creditsBeforeTake + 3);
+    expect(state.cardInstances[brokerId]?.counters?.power ?? 0).toBe(0);
+    brokerActions = getLegalActions(state, "runner").filter(
+      (action) => action.payload?.cardId === brokerId,
+    );
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.payload?.resourceAbility === "broker_load_credits" ||
+          action.payload?.resourceAbility === "broker_take_credits",
+      ),
+    ).toBe(false);
+  });
+
   it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
     let state = toRunnerTurn(
       v1914TraceTagResourceGame("v1914-power-grid-overload"),
