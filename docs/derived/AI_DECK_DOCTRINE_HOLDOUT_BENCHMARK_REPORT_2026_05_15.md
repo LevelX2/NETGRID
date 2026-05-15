@@ -65,4 +65,6 @@ Der erste Early-Turn-Doctrine-Slice bleibt im Holdout ebenfalls innerhalb der Ga
 
 Der erste Corp-Scoring-Progress-Slice bleibt im Holdout ebenfalls innerhalb der Gate-Schwellen: geschützte Agenda-Installationen werden gegenüber redundanter Zentralverteidigung gestärkt, ohne neue Doctrine-Zähler im Candidate-Lauf.
 
+Draw-for-Scoring bleibt im Holdout ebenfalls innerhalb der Gate-Schwellen. `current_candidate` behält 0 Doctrine-Fehlerklassen; die Safety-Deltas bleiben unverändert.
+
 Nächster sinnvoller Schritt ist nach dem längeren Selfplay-/Soak-Lauf stärkere Matchabschluss-Dynamik statt weiterer Gewichtungsoptimierung auf derselben Seed-Menge.

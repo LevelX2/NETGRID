@@ -56,4 +56,6 @@ Nach dem ersten Early-Turn-Doctrine-Slice bleibt der enge Lauf ebenfalls stabil.
 
 Nach dem ersten Corp-Scoring-Progress-Slice bleibt der enge Lauf weiterhin stabil: geschützte Agenda-Installationen werden gegenüber redundanter Zentralverteidigung priorisiert, ohne nackte Agenda-Installs, Agenda-Flood-Exposure oder Score-Window-Misses auszulösen.
 
+Nach dem Draw-for-Scoring-Slice bleibt der enge Lauf unverändert gate-stabil: Bei geschützten Centrals und stabiler Creditreserve zieht die Corp eher nach Agendas, wenn kein Score-Plan in HQ liegt; Doctrine- und Safety-Deltas bleiben neutral.
+
 Alle Doctrine-Fehlerklassen stehen in diesem 6-Seed-/40-Action-Lauf bei 0. Das ist ein enger Tuning-Nachweis, kein Ersatz für Holdout-/Selfplay-Auswertung.

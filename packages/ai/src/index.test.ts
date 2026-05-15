@@ -1324,6 +1324,28 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(/cardInstances|privatePayload|simple_agenda/);
   });
 
+  it("draws for scoring when Corp has stable credits and protected centrals but no agenda", () => {
+    const input = corpActionPhaseInput("ai-v140-draw-for-scoring", (state) => {
+      state.corp.credits = 5;
+      state.corp.clicks = 3;
+      putCorpIceOnServer(state, "hq", "simple_barrier_ice");
+      putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      moveCorpHqAgendasToRd(state);
+    });
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(draw).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!draw || !gain) throw new Error("Missing Corp draw-for-scoring fixture actions");
+
+    const decision = chooseCorpPlanDecision({ ...input, legalActions: [gain, draw] });
+
+    expect(input.playerView.own.gripOrHq.some((card) => card.definitionId === "simple_agenda")).toBe(false);
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(draw.actionId);
+  });
+
   it("loads post-V1.9.9 AI hints into Corp plan roles", () => {
     let state = createGameAfterSetup({
       seed: "ai-v1922-hints-in-plan",
@@ -3761,6 +3783,17 @@ function moveUnusedCorpCardToHq(state: GameState, definitionId: string): CardIns
   state.corp.hq.unshift(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "hq" }, faceup: false, rezzed: false };
   return id;
+}
+
+function moveCorpHqAgendasToRd(state: GameState): void {
+  const cardsById = createRuntimeCardsById();
+  for (const id of state.corp.hq.slice()) {
+    const card = state.cardInstances[id];
+    if (!card || cardsById[card.definitionId]?.type !== "agenda") continue;
+    state.corp.hq = state.corp.hq.filter((candidate) => candidate !== id);
+    state.corp.rd.push(id);
+    state.cardInstances[id] = { ...card, zone: { side: "corp", zone: "rd" }, faceup: false, rezzed: false };
+  }
 }
 
 function visibleCard(definitionId: string, instanceId: string): VisibleCard {

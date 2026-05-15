@@ -554,12 +554,25 @@ function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: Lega
   if (kind === "score_next_turn" && action.type === "advance_card") return 90;
   if ((kind === "protect_hq" || kind === "protect_rnd") && action.type === "install_card" && action.payload?.placement === "ice") return 85;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
+  if (kind === "recover_economy" && action.type === "draw_card" && shouldCorpDrawForScoring(input)) return 78;
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action);
   if ((kind === "build_scoring_remote" || kind === "bait_runner") && action.type === "install_card" && action.payload?.placement !== "ice") return 75 + boundedRemotePriorityBonus(input, action);
   if (action.type === "draw_card") return 45;
   if (action.type === "end_turn") return 5;
   return 20;
+}
+
+function shouldCorpDrawForScoring(input: AiDecisionInput): boolean {
+  if (input.side !== "corp" || input.playerView.activeSide !== "corp" || input.playerView.phase !== "corp_action_phase") return false;
+  if (input.playerView.own.credits < 4 || input.playerView.own.clicks < 2) return false;
+  if (input.playerView.own.stackOrRdCount <= 0) return false;
+  const hqIce = input.playerView.servers.find((server) => server.id === "hq")?.ice.length ?? 0;
+  const rdIce = input.playerView.servers.find((server) => server.id === "rd")?.ice.length ?? 0;
+  if (hqIce <= 0 || rdIce <= 0) return false;
+  const agendaInHand = input.playerView.own.gripOrHq.some((card) => card.definitionId && RUNTIME_CARDS[card.definitionId]?.type === "agenda");
+  if (agendaInHand) return false;
+  return !input.legalActions.some((action) => action.type === "score_agenda" || action.type === "advance_card" || (action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole)));
 }
 
 function extractCorpPlanFeatures(input: AiDecisionInput): CorpPlanFeatures {
