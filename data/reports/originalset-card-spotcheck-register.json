@@ -13,6 +13,85 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-hidden-access-trace",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HIDDEN_ACCESS_TRACE_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-hidden-access-trace.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_088_fortress-respecification",
+          "title": "Fortress Respecification",
+          "spotcheckStatus": "completed",
+          "result": "hardened_v1911_expose_payload_server_revalidation_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_092_ice-and-datas-guide-to-the-net",
+          "title": "Ice and Data's Guide to the Net",
+          "spotcheckStatus": "completed",
+          "result": "hardened_stack_top_reveal_empty_stack_redaction_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_106_private-ldl-access",
+          "title": "Private LDL Access",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hq_run_rd_access_override_no_hq_leak_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_129_hq-interface",
+          "title": "HQ Interface",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hq_multiaccess_bonus_payload_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_173_restrictive-net-zoning",
+          "title": "Restrictive Net Zoning",
+          "spotcheckStatus": "completed",
+          "result": "hardened_two_copy_server_bound_ice_install_tax",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_211_polymer-breakthrough",
+          "title": "Polymer Breakthrough",
+          "spotcheckStatus": "completed",
+          "result": "hardened_multi_scored_start_turn_credit_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_213_private-cybernet-police",
+          "title": "Private Cybernet Police",
+          "spotcheckStatus": "completed",
+          "result": "hardened_trace5_wrong_side_tag_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_235_data-naga",
+          "title": "Data Naga",
+          "spotcheckStatus": "completed",
+          "result": "hardened_program_trash_subroutine_payload_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_275_vacuum-link",
+          "title": "Vacuum Link",
+          "spotcheckStatus": "completed",
+          "result": "hardened_deterministic_rewind_no_rewind_payload_replay",
+          "followUpStatus": "completed"
+        },
+        {
+          "cardId": "onr_v1_334_pacifica-regional-ai",
+          "title": "Pacifica Regional AI",
+          "spotcheckStatus": "completed",
+          "result": "hardened_action_economy_zero_click_payload_replay",
+          "followUpStatus": "completed"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-breaker-modifier-random",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_BREAKER_MODIFIER_RANDOM_IMPLEMENTATION.md",

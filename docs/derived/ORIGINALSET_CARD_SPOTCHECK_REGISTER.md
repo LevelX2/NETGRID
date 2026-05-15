@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-hidden-access-trace
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HIDDEN_ACCESS_TRACE_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Checks sind grün.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Fortress Respecification | `onr_v1_088_fortress-respecification` | V1.9.11-Expose-Pfad bleibt absichtlich öffentlich, aber Hidden-Zone-Barriere und Serverquelle sind payloadfähig | Wrong-side-/Stale-, Payload-Leakscan- und Replay-Test ergänzt |
+| Ice and Data's Guide to the Net | `onr_v1_092_ice-and-datas-guide-to-the-net` | Reveal zeigt genau die oberste Stackkarte und keine darunterliegenden Stackdaten | Leerer-Stack-, Corp-View-Leakscan- und Replay-Test ergänzt |
+| Private LDL Access | `onr_v1_106_private-ldl-access` | HQ-Run accessed R&D statt HQ und lässt HQ-Karten ungeöffnet | Source-bound Run-/Access-Test, PublicPayload-Leakscan und Replay ergänzt |
+| HQ Interface | `onr_v1_129_hq-interface` | HQ-Multiaccess mit mehreren Kopien bleibt auf HQ beschränkt und payloadfähig | Bonus-/Effektiv-Access-Payload und Replay-Test ergänzt |
+| Restrictive Net Zoning | `onr_v1_173_restrictive-net-zoning` | Mehrere Kopien stacken servergebunden auf Corp-ICE-Installkosten | Zwei-Kopien-Tax-Test ergänzt |
+| Polymer Breakthrough | `onr_v1_211_polymer-breakthrough` | Mehrere gescorte Kopien geben exakt je 1 Credit am Corp-Zugstart | Mehrkopien- und Replay-Test ergänzt |
+| Private Cybernet Police | `onr_v1_213_private-cybernet-police` | Gescorte Agenda startet Trace 5 und gibt bei Erfolg exakt 1 Tag | Wrong-side-, Trace- und Replay-Test ergänzt |
+| Data Naga | `onr_v1_235_data-naga` | Ungebrochene Subroutine trasht deterministisch ein installiertes Runner-Programm und endet den Run | PublicPayload-Leakscan und Replay-Test ergänzt |
+| Vacuum Link | `onr_v1_275_vacuum-link` | Rewind/No-Rewind-Würfe bleiben deterministisch und payloadfähig | Rewind-/No-Rewind-Seedschleife und Replay-Test ergänzt |
+| Pacifica Regional AI | `onr_v1_334_pacifica-regional-ai` | Rezzed Pacifica-Aktion bleibt source-bound, kostet 1 Click und gibt exakt 2 Clicks | 0-Click-Grenze, PublicPayload und Replay-Test ergänzt |
+
 ## Runde 2026-05-15-breaker-modifier-random
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

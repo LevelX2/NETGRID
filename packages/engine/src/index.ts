@@ -866,6 +866,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        exposedServerId: String(legalAction.payload?.serverId ?? ""),
         hiddenZoneAction: "v1911_expose_server_card",
       };
     },
@@ -8022,6 +8024,8 @@ function startRun(
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
   trashTopRunnersConferenceOnRunStart(state);
   const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
+  const baseAccessCount = Math.max(1, Math.floor(accessCount));
+  const effectiveAccessCount = baseAccessCount + installedAccessBonus;
   state.phase = "run";
   state.activeSide = "runner";
   state.run = {
@@ -8042,7 +8046,7 @@ function startRun(
     aardvarkInterceptionIceIds: [],
     blinkUsedSubroutinesByBreakerThisEncounter: {},
     successful: false,
-    accessCount: Math.max(1, Math.floor(accessCount)) + installedAccessBonus,
+    accessCount: effectiveAccessCount,
     ...(options?.freeTrashAccessZones?.length
       ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
       : {}),
@@ -8076,6 +8080,15 @@ function startRun(
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      serverId,
+      baseAccessCount,
+      installedAccessBonus,
+      effectiveAccessCount,
+    };
+  }
   applyAiBoonRunStart(state, legalAction);
   if (server.ice.length > 0) {
     const iceIndex = outermostIceIndex(server);
@@ -9184,6 +9197,16 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
     if (breach.queue.length === 0) {
       finishRun(state, true, legalAction);
       return;
+    }
+    if (legalAction) {
+      const hqAccessBonus =
+        breach.serverId === "hq" ? runnerHqAccessBonus(state) : 0;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        baseAccessCount: run.accessCount ?? 1,
+        installedAccessBonus: hqAccessBonus,
+        effectiveAccessCount: breach.queue.length,
+      };
     }
     const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
     void _accessedCardId;
@@ -10698,6 +10721,14 @@ function endTurn(
   side: Side,
   legalAction: LegalAction,
 ): void {
+  const polymerBreakthroughCreditsGained =
+    side === "runner"
+      ? state.corp.scoreArea.reduce((sum, cardId) => {
+          return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID
+            ? sum + 1
+            : sum;
+        }, 0)
+      : 0;
   if (side === "runner") {
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
@@ -10716,6 +10747,17 @@ function endTurn(
     if (state.winner) return;
   }
   startDiscardPhase(state, side);
+  if (
+    side === "runner" &&
+    polymerBreakthroughCreditsGained > 0 &&
+    state.activeSide === "corp"
+  ) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      polymerBreakthroughCreditsGained,
+      corpCreditsAfter: state.corp.credits,
+    };
+  }
 }
 
 function resolveAcmeSavingsAndLoanEndOfCorpTurn(
@@ -15577,6 +15619,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
+      exposedServerId: String(legalAction.payload?.serverId ?? ""),
       hiddenZoneAction: "v1911_expose_server_card",
     };
     return;
@@ -16297,6 +16340,32 @@ function publicContextForAction(
   const agendaId = cardId ?? sourceCardId;
 
   if (serverLabel) context.serverLabel = serverLabel;
+  if (legalAction.type === "start_run" && state.run) {
+    const runAccessCount = Math.max(1, Math.floor(state.run.accessCount ?? 1));
+    const runInstalledAccessBonus =
+      state.run.attackedServerId === "hq"
+        ? runnerHqAccessBonus(state)
+        : v1915InstalledAccessBonus(state, state.run.attackedServerId);
+    context.baseAccessCount = Math.max(
+      1,
+      runAccessCount - runInstalledAccessBonus,
+    );
+    context.installedAccessBonus = runInstalledAccessBonus;
+    context.effectiveAccessCount = runAccessCount;
+  }
+  for (const key of [
+    "baseAccessCount",
+    "installedAccessBonus",
+    "effectiveAccessCount",
+    "vacuumLinkDieRoll",
+    "vacuumLinkRewindApplied",
+    "vacuumLinkRewindRezzedIceBack",
+    "vacuumLinkTargetIceIndex",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (typeof value === "number" || typeof value === "boolean")
+      context[key] = value;
+  }
   if (legalAction.type === "install_card") {
     const definition = cardId ? definitionFor(state, cardId) : undefined;
     context.zoneLabel =
@@ -16702,6 +16771,13 @@ function publicContextForAction(
   }
   if (legalAction.payload?.publicRevealKind)
     context.revealKind = legalAction.payload.publicRevealKind;
+  if (typeof legalAction.payload?.publicRevealKind === "string")
+    context.publicRevealKind = legalAction.payload.publicRevealKind;
+  if (typeof legalAction.payload?.publicRevealDefinitionId === "string")
+    context.publicRevealDefinitionId =
+      legalAction.payload.publicRevealDefinitionId;
+  if (typeof legalAction.payload?.exposedServerId === "string")
+    context.exposedServerId = legalAction.payload.exposedServerId;
   if (
     legalAction.type === "move_to_set_aside" ||
     legalAction.type === "move_to_removed_from_game" ||

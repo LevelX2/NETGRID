@@ -13852,6 +13852,558 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
   });
 });
 
+describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => {
+  const hiddenLeakPattern =
+    /"privatePayload"|"cardInstances"|"hq"|"rd"|"grip"|"stack"/;
+
+  it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone reveal payloads", () => {
+    let exposeState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-fortress"));
+    exposeState.runner.credits = 20;
+    moveRunnerCardToGrip(exposeState, "onr_v1_088_fortress-respecification");
+    putCorpRootInRemote(exposeState, "simple_upgrade");
+    putCorpIceOnServer(exposeState, "remote_1", "simple_barrier_ice");
+    const exposeAction = mustAction(
+      exposeState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(exposeState, action) ===
+          "onr_v1_088_fortress-respecification" &&
+        action.payload?.serverId === "remote_1",
+    );
+    const exposeInitial = structuredClone(exposeState);
+    const exposeReplayStart = exposeState.eventLog.length;
+    const wrongSide = applyAction(exposeState, {
+      matchId: exposeState.matchId,
+      side: "corp",
+      actionId: exposeAction.actionId,
+      clientKnownStateVersion: exposeState.stateVersion,
+      idempotencyKey: "spotcheck-fortress-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(exposeState, {
+      matchId: exposeState.matchId,
+      side: "runner",
+      actionId: exposeAction.actionId,
+      clientKnownStateVersion: exposeState.stateVersion - 1,
+      idempotencyKey: "spotcheck-fortress-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    exposeState = apply(
+      exposeState,
+      "runner",
+      (action) => action.actionId === exposeAction.actionId,
+    );
+    expect(exposeState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_expose_server_card",
+      exposedServerId: "remote_1",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "simple_upgrade",
+    });
+    expect(
+      JSON.stringify(exposeState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/simple_barrier_ice|Simple Barrier ICE|cardInstances/);
+    const exposeReplay = replayEvents(
+      exposeInitial,
+      exposeState.eventLog.slice(exposeReplayStart),
+    );
+    expect(exposeReplay.ok).toBe(true);
+    expect(hashState(exposeReplay.state)).toBe(hashState(exposeState));
+
+    let revealState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-ice-data"));
+    revealState.runner.credits = 20;
+    moveRunnerCardToGrip(
+      revealState,
+      "onr_v1_092_ice-and-datas-guide-to-the-net",
+    );
+    putRunnerCardOnTopOfStack(revealState, "simple_fracter");
+    putRunnerCardOnTopOfStack(revealState, "simple_decoder");
+    const revealAction = mustAction(
+      revealState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(revealState, action) ===
+          "onr_v1_092_ice-and-datas-guide-to-the-net",
+    );
+    const revealInitial = structuredClone(revealState);
+    const revealReplayStart = revealState.eventLog.length;
+    revealState = apply(
+      revealState,
+      "runner",
+      (action) => action.actionId === revealAction.actionId,
+    );
+    expect(revealState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: "simple_decoder",
+    });
+    expect(
+      JSON.stringify(revealState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/simple_fracter|Simple Fracter|stack/);
+    expect(
+      JSON.stringify(getPlayerView(revealState, "corp")),
+    ).not.toContain("Simple Fracter");
+    const revealReplay = replayEvents(
+      revealInitial,
+      revealState.eventLog.slice(revealReplayStart),
+    );
+    expect(revealReplay.ok).toBe(true);
+    expect(hashState(revealReplay.state)).toBe(hashState(revealState));
+
+    let emptyStack = toRunnerTurn(v1911HiddenZoneGame("spotcheck-ice-data-empty"));
+    emptyStack.runner.credits = 20;
+    moveRunnerCardToGrip(
+      emptyStack,
+      "onr_v1_092_ice-and-datas-guide-to-the-net",
+    );
+    emptyStack.runner.stack = [];
+    expect(
+      getLegalActions(emptyStack, "runner").some(
+        (action) =>
+          action.type === "play_event" &&
+          sourceDefinition(emptyStack, action) ===
+            "onr_v1_092_ice-and-datas-guide-to-the-net",
+      ),
+    ).toBe(false);
+  });
+
+  it("keeps Private LDL Access and HQ Interface source-bound and hidden-info safe", () => {
+    let ldlState = toRunnerTurn(v171CardReleaseGame("spotcheck-private-ldl"));
+    ldlState.runner.credits = 20;
+    moveRunnerCardToGrip(ldlState, "onr_v1_106_private-ldl-access");
+    putCorpCardOnTopOfRd(ldlState, "onr_v1_203_hostile-takeover");
+    const hqHiddenCard = moveCorpCardToHq(ldlState, "simple_economy_operation");
+    keepOnlyCorpHqCard(ldlState, hqHiddenCard);
+    const ldlAction = mustAction(
+      ldlState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(ldlState, action) ===
+          "onr_v1_106_private-ldl-access" &&
+        action.payload?.serverId === "hq",
+    );
+    const ldlInitial = structuredClone(ldlState);
+    const ldlReplayStart = ldlState.eventLog.length;
+    ldlState = apply(
+      ldlState,
+      "runner",
+      (action) => action.actionId === ldlAction.actionId,
+    );
+    expect(ldlState.run).toMatchObject({
+      attackedServerId: "hq",
+      accessServerOverride: "rd",
+    });
+    ldlState = apply(ldlState, "runner", (action) => action.type === "access_card");
+    expect(ldlState.corp.hq).toContain(hqHiddenCard);
+    expect(ldlState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      serverLabel: "R&D",
+      cardDefinitionId: "onr_v1_203_hostile-takeover",
+    });
+    expect(
+      JSON.stringify(
+        ldlState.eventLog.map((event) => event.publicPayload),
+      ),
+    ).not.toMatch(
+      /simple_economy_operation|Simple Economy Operation/,
+    );
+    const ldlReplay = replayEvents(
+      ldlInitial,
+      ldlState.eventLog.slice(ldlReplayStart),
+    );
+    expect(ldlReplay.ok).toBe(true);
+    expect(hashState(ldlReplay.state)).toBe(hashState(ldlState));
+
+    let hqState = toRunnerTurn(v171CardReleaseGame("spotcheck-hq-interface"));
+    hqState.runner.credits = 20;
+    moveRunnerCardToGrip(hqState, "onr_v1_129_hq-interface");
+    hqState = apply(
+      hqState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(hqState, action) === "onr_v1_129_hq-interface",
+    );
+    moveRunnerCardCopyToGrip(hqState, "onr_v1_129_hq-interface");
+    hqState = apply(
+      hqState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(hqState, action) === "onr_v1_129_hq-interface",
+    );
+    const hqCards = [
+      moveCorpCardToHq(hqState, "simple_economy_operation"),
+      moveCorpCardToHq(hqState, "onr_v1_295_night-shift"),
+      moveCorpCardToHq(hqState, "onr_v1_203_hostile-takeover"),
+    ];
+    keepOnlyCorpHqCards(hqState, hqCards);
+    const hqInitial = structuredClone(hqState);
+    const hqReplayStart = hqState.eventLog.length;
+    hqState = apply(
+      hqState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expect(hqState.run?.breach?.queue).toHaveLength(3);
+    expect(hqState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      serverLabel: "HQ",
+      baseAccessCount: 1,
+      installedAccessBonus: 2,
+      effectiveAccessCount: 3,
+    });
+    expect(
+      JSON.stringify(hqState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/simple_economy_operation|onr_v1_295_night-shift|Hostile Takeover/);
+    const hqReplay = replayEvents(
+      hqInitial,
+      hqState.eventLog.slice(hqReplayStart),
+    );
+    expect(hqReplay.ok).toBe(true);
+    expect(hashState(hqReplay.state)).toBe(hashState(hqState));
+  });
+
+  it("keeps Restrictive Net Zoning and Polymer Breakthrough source-scoped", () => {
+    let zoningState = toRunnerTurn(v181CardReleaseGame("spotcheck-zoning"));
+    zoningState.runner.credits = 20;
+    moveRunnerCardToGrip(zoningState, "onr_v1_173_restrictive-net-zoning");
+    zoningState = apply(
+      zoningState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(zoningState, action) ===
+          "onr_v1_173_restrictive-net-zoning" &&
+        action.payload?.selectedServerId === "rd",
+    );
+    moveRunnerCardCopyToGrip(zoningState, "onr_v1_173_restrictive-net-zoning");
+    zoningState = apply(
+      zoningState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(zoningState, action) ===
+          "onr_v1_173_restrictive-net-zoning" &&
+        action.payload?.selectedServerId === "rd",
+    );
+    zoningState = apply(zoningState, "runner", (action) => action.type === "end_turn");
+    zoningState = apply(zoningState, "corp", (action) => action.type === "mandatory_draw");
+    zoningState.corp.credits = 20;
+    zoningState.corp.clicks = 3;
+    moveCorpCardToHq(zoningState, "simple_barrier_ice");
+    const taxedInstall = mustAction(
+      zoningState,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(zoningState, action) === "simple_barrier_ice" &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice",
+    );
+    expect(taxedInstall.payload).toMatchObject({
+      iceInstallAdditionalCost: 2,
+      iceInstallTotalCost: 2,
+    });
+
+    let polymerState = toRunnerTurn(v192CardReleaseGame("spotcheck-polymer"));
+    polymerState.corp.credits = 5;
+    scoreCorpAgendaForTest(polymerState, "onr_v1_211_polymer-breakthrough");
+    scoreCorpAgendaForTest(polymerState, "onr_v1_211_polymer-breakthrough");
+    const polymerInitial = structuredClone(polymerState);
+    const polymerReplayStart = polymerState.eventLog.length;
+    polymerState = apply(
+      polymerState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    expect(polymerState.corp.credits).toBe(7);
+    expect(polymerState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+    });
+    const polymerReplay = replayEvents(
+      polymerInitial,
+      polymerState.eventLog.slice(polymerReplayStart),
+    );
+    expect(polymerReplay.ok).toBe(true);
+    expect(hashState(polymerReplay.state)).toBe(hashState(polymerState));
+  });
+
+  it("revalidates Private Cybernet Police and Data Naga focused resolution paths", () => {
+    let policeState = apply(
+      v193CardReleaseGame("spotcheck-private-cybernet"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    policeState.corp.credits = 20;
+    policeState.runner.credits = 0;
+    policeState.corp.clicks = 3;
+    scoreCorpAgendaForTest(policeState, "onr_v1_213_private-cybernet-police");
+    const policeAction = mustAction(
+      policeState,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinition(policeState, action) ===
+          "onr_v1_213_private-cybernet-police",
+    );
+    const policeWrongSide = applyAction(policeState, {
+      matchId: policeState.matchId,
+      side: "runner",
+      actionId: policeAction.actionId,
+      clientKnownStateVersion: policeState.stateVersion,
+      idempotencyKey: "spotcheck-private-cybernet-wrong-side",
+    });
+    expect(policeWrongSide.ok).toBe(false);
+    if (!policeWrongSide.ok)
+      expect(policeWrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const policeInitial = structuredClone(policeState);
+    const policeReplayStart = policeState.eventLog.length;
+    policeState = apply(
+      policeState,
+      "corp",
+      (action) => action.actionId === policeAction.actionId,
+    );
+    expect(policeState.trace).toMatchObject({ baseTraceStrength: 5 });
+    policeState = applyChoice(policeState, "corp", "bid_0");
+    policeState = applyChoice(policeState, "runner", "bid_0");
+    expect(policeState.runner.tags).toBe(1);
+    const policeReplay = replayEvents(
+      policeInitial,
+      policeState.eventLog.slice(policeReplayStart),
+    );
+    expect(policeReplay.ok).toBe(true);
+    expect(hashState(policeReplay.state)).toBe(hashState(policeState));
+
+    let nagaState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-data-naga",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_2_RUNNER_DECK,
+          id: "spotcheck_data_naga_runner",
+          cards: [
+            ...ONR_V1_9_2_RUNNER_DECK.cards,
+            { id: "onr_v1_014_codecracker", quantity: 1 },
+          ],
+        },
+        corpDeck: ONR_V1_9_2_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    nagaState.runner.credits = 20;
+    nagaState.corp.credits = 20;
+    const dwarfId = installRunnerProgramForTest(nagaState, "onr_v1_021_dwarf");
+    const codecrackerId = installRunnerProgramForTest(
+      nagaState,
+      "onr_v1_014_codecracker",
+    );
+    putCorpIceOnServer(nagaState, "rd", "onr_v1_235_data-naga");
+    nagaState = apply(
+      nagaState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    nagaState = apply(
+      nagaState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(nagaState, action) === "onr_v1_235_data-naga",
+    );
+    const continueAction = mustAction(
+      nagaState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    const nagaInitial = structuredClone(nagaState);
+    const nagaReplayStart = nagaState.eventLog.length;
+    nagaState = apply(
+      nagaState,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(nagaState.runner.heap).toContain(dwarfId);
+    expect(nagaState.runner.heap).not.toContain(codecrackerId);
+    expect(nagaState.run).toBeUndefined();
+    expect(nagaState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      trashedCardDefinitionId: "onr_v1_021_dwarf",
+      trashedCardType: "program",
+      trashedCount: 1,
+    });
+    expect(JSON.stringify(nagaState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenLeakPattern,
+    );
+    const nagaReplay = replayEvents(
+      nagaInitial,
+      nagaState.eventLog.slice(nagaReplayStart),
+    );
+    expect(nagaReplay.ok).toBe(true);
+    expect(hashState(nagaReplay.state)).toBe(hashState(nagaState));
+  });
+
+  it("keeps Vacuum Link and Pacifica Regional AI deterministic and revalidated", () => {
+    let rewound = false;
+    let notRewound = false;
+    for (let attempt = 0; attempt < 260 && (!rewound || !notRewound); attempt += 1) {
+      let state = toRunnerTurn(v190CardReleaseGame(`spotcheck-vacuum-${attempt}`));
+      state.runner.credits = 40;
+      state.corp.credits = 20;
+      moveRunnerCardToGrip(
+        state,
+        "onr_v1_005_bartmoss-memorial-icebreaker",
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_005_bartmoss-memorial-icebreaker",
+      );
+      const bartmossId = state.runner.rig.programs.find(
+        (id) =>
+          state.cardInstances[id]?.definitionId ===
+          "onr_v1_005_bartmoss-memorial-icebreaker",
+      );
+      expect(bartmossId).toBeDefined();
+      putCorpIceOnServer(state, "rd", "onr_v1_275_vacuum-link");
+      putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "simple_barrier_ice",
+      );
+      for (let pump = 0; pump < 3; pump += 1) {
+        state = apply(
+          state,
+          "runner",
+          (action) =>
+            action.type === "pump_breaker" &&
+            String(action.payload?.breakerId) === bartmossId,
+        );
+      }
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === bartmossId,
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "onr_v1_275_vacuum-link",
+      );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      if (
+        typeof state.eventLog.at(-1)?.publicPayload?.vacuumLinkDieRoll !==
+          "number" &&
+        getLegalActions(state, "runner").some(
+          (action) => action.type === "continue_run",
+        )
+      ) {
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "continue_run",
+        );
+      }
+      const payload = state.eventLog.at(-1)?.publicPayload;
+      expect(payload).toMatchObject({
+        actionType: "continue_run",
+        vacuumLinkDieRoll: expect.any(Number),
+      });
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+      if (payload?.vacuumLinkRewindApplied === true) rewound = true;
+      if (payload?.vacuumLinkRewindApplied === false) notRewound = true;
+    }
+    expect(rewound).toBe(true);
+    expect(notRewound).toBe(true);
+
+    let pacificaState = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-pacifica",
+        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    pacificaState.corp.credits = 20;
+    pacificaState.corp.clicks = 3;
+    const pacificaId = putCorpRootInRemote(
+      pacificaState,
+      "onr_v1_334_pacifica-regional-ai",
+    );
+    pacificaState.cardInstances[pacificaId] = {
+      ...pacificaState.cardInstances[pacificaId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const pacificaAction = mustAction(
+      pacificaState,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1920AssetAbility === "gain_actions" &&
+        String(action.payload?.cardId) === pacificaId,
+    );
+    const zeroClickState = structuredClone(pacificaState);
+    zeroClickState.corp.clicks = 0;
+    const zeroClick = applyAction(zeroClickState, {
+      matchId: zeroClickState.matchId,
+      side: "corp",
+      actionId: pacificaAction.actionId,
+      clientKnownStateVersion: zeroClickState.stateVersion,
+      idempotencyKey: "spotcheck-pacifica-zero-click",
+    });
+    expect(zeroClick.ok).toBe(false);
+    const pacificaInitial = structuredClone(pacificaState);
+    const pacificaReplayStart = pacificaState.eventLog.length;
+    const clicksBefore = pacificaState.corp.clicks;
+    pacificaState = apply(
+      pacificaState,
+      "corp",
+      (action) => action.actionId === pacificaAction.actionId,
+    );
+    expect(pacificaState.corp.clicks).toBe(clicksBefore + 1);
+    expect(pacificaState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "gain_credit",
+      v1920AssetAbility: "gain_actions",
+      gainedActions: 2,
+      corpClicksAfter: clicksBefore + 1,
+    });
+    const pacificaReplay = replayEvents(
+      pacificaInitial,
+      pacificaState.eventLog.slice(pacificaReplayStart),
+    );
+    expect(pacificaReplay.ok).toBe(true);
+    expect(hashState(pacificaReplay.state)).toBe(hashState(pacificaState));
+  });
+});
+
 describe("V1.9.22 Per-card Longtail WIP", () => {
   it("adds the first V1.9.22 runner hardware runtime definitions without catalog release promotion", () => {
     const runnerHardwareIds = [

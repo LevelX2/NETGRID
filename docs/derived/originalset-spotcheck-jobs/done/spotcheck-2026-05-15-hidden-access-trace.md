@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-15-hidden-access-trace
-status: ready_for_implementation
+status: done
 createdAt: 2026-05-15T09:17:00+01:00
+startedAt: 2026-05-15T11:43:06.0306905Z
+completedAt: 2026-05-15T14:18:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -273,3 +275,24 @@ Akzeptanzkriterien:
 - corepack pnpm --filter @netgrid/web test -- chronicle.test.ts
 - corepack pnpm --filter @netgrid/catalog test
 - corepack pnpm typecheck
+
+## Umsetzungsergebnis
+
+Status: `done`; alle lösbaren Punkte wurden umgesetzt und grün geprüft.
+
+Umgesetzte Änderungen:
+- V1.9.11-Expose-Pfade dokumentieren Hidden-Zone-Barriere und gewählten Server für `Fortress Respecification`.
+- Öffentliche Reveal-/Expose-Payloads führen `publicRevealDefinitionId` zusätzlich zur sichtbaren Definition/Titel-Zusammenfassung.
+- HQ-Multiaccess-Payloads dokumentieren Basis-Access, installierten Bonus und effektive Access-Zahl ohne HQ-Kartenleak.
+- `Fortress Respecification`, `Ice and Data's Guide to the Net`, `Private LDL Access`, `HQ Interface`, `Restrictive Net Zoning`, `Polymer Breakthrough`, `Private Cybernet Police`, `Data Naga`, `Vacuum Link` und `Pacifica Regional AI` haben fokussierte Revalidation-/Payload-/Replay-Tests erhalten.
+
+Checks:
+- `corepack pnpm --filter @netgrid/engine test` - grün, 370 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 14 Testdateien / 123 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 44 Tests.
+- `corepack pnpm typecheck` - grün.
+
+Abschlussbewertung:
+- Keine verdeckten HQ-, R&D-, Stack- oder CardInstance-Daten werden über die neuen PublicPayloads exponiert.
+- Keine Katalog-, Manifest- oder AI-Promotion war erforderlich.
+- Kein fachlicher Blocker verbleibt für diesen Job; offen ist nur der lokale Commit nach Behebung der `.git`-Permission.
