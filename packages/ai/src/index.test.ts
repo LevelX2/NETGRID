@@ -48,6 +48,7 @@ import {
   evaluateEconomyReserve,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
+  evaluateRemoteScoreHorizon,
   evaluateRunnerContestCapacity,
   evaluateScoringWindow,
   evaluateServerThreat,
@@ -1104,6 +1105,38 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(lockedScore.evidence).toContain("runner_contest_capacity:low");
     expect(contestingScore.evidence).toContain("runner_contest_capacity:high");
     expect(JSON.stringify(lockedScore.evidence)).not.toMatch(/cardInstances|privatePayload|simple_agenda_1/);
+  });
+
+  it("weights near-term remote score horizons before generic economy", () => {
+    const input = corpActionPhaseInput("ai-corp-score-horizon", (state) => {
+      state.corp.credits = 7;
+      state.runner.credits = 0;
+      ensureRemoteServer(state, "remote_1");
+      putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      putCorpRootInRemote(state, "simple_agenda", 2);
+    });
+    const advance = input.legalActions.find((action) => action.type === "advance_card" && sourceDefinitionFromInput(input, action) === "simple_agenda");
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain) throw new Error("Missing Corp score-horizon fixture actions");
+
+    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const candidate = generateCorpPlanCandidates(scopedInput).find((plan) => plan.kind === "score_next_turn");
+
+    expect(candidate).toBeDefined();
+    if (!candidate) throw new Error("Missing score-horizon candidate");
+
+    const horizon = evaluateRemoteScoreHorizon(scopedInput, candidate);
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(horizon.reasons).toContain("score_horizon_opens_score_window");
+    expect(horizon.evidence).toContain("score_horizon_advances_remaining_after_action:0");
+    expect(horizon.evidence).toContain("score_horizon_contest_capacity:low");
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(/cardInstances|privatePayload|simple_agenda/);
   });
 
   it("evaluates Corp mulligan choices from opening hand and deck doctrine", () => {

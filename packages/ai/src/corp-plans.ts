@@ -164,6 +164,20 @@ export type RunnerContestCapacity = {
   evidence: string[];
 };
 
+export type RemoteScoreHorizon = {
+  actionId: string;
+  serverId?: string;
+  actionType: LegalAction["type"];
+  scoreModifier: number;
+  advancementRequirement?: number;
+  advancementCountersAfterAction?: number;
+  advancesRemainingAfterAction?: number;
+  estimatedTurnsToScore?: number;
+  contestCapacity?: RunnerContestCapacity["capacity"];
+  reasons: string[];
+  evidence: string[];
+};
+
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_HINTS = new Map(
   [
@@ -325,6 +339,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const scoringWindow = evaluateScoringWindow(input, candidate);
   const scoringProgress = evaluateCorpScoringProgress(input, candidate);
   const runnerContest = evaluateRemoteScoringContest(input, candidate, beliefState);
+  const scoringHorizon = evaluateRemoteScoreHorizon(input, candidate, beliefState);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
@@ -338,6 +353,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     scoringWindow.score * profile.weights.scoringWindow +
     scoringProgress.score +
     runnerContest.score +
+    scoringHorizon.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(input, candidate, profile.riskTolerance) -
@@ -347,6 +363,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     `difficulty:${input.difficulty}`,
     `doctrine_plan_weight:${doctrinePlanWeight}`,
     ...runnerContest.evidence,
+    ...scoringHorizon.evidence,
     ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
     ...agendaRisk.evidence,
@@ -364,7 +381,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -531,6 +548,83 @@ export function evaluateRunnerContestCapacity(input: AiDecisionInput, serverId: 
     `runner_remote_pressure:${round(remotePressure)}`
   ];
   return runnerContestCapacityResult(serverId, knownPath.capacity, runnerCredits, installedBreakers, knownPath.visibleBreakCost, knownPath.reasons, evidence);
+}
+
+export function evaluateRemoteScoreHorizon(input: AiDecisionInput, candidate: CorpPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): CorpPlanEvaluatorResult {
+  if (candidate.kind !== "score_now" && candidate.kind !== "score_next_turn" && candidate.kind !== "build_scoring_remote") {
+    return { score: 0, reasons: [], evidence: [] };
+  }
+  const horizons = actionsForCandidate(input, candidate)
+    .map((action) => remoteScoreHorizonForAction(input, action, beliefState))
+    .filter((horizon): horizon is RemoteScoreHorizon => Boolean(horizon))
+    .sort((left, right) => right.scoreModifier - left.scoreModifier || left.actionId.localeCompare(right.actionId));
+  const best = horizons[0];
+  if (!best) return { score: 0, reasons: [], evidence: ["score_horizon:none"] };
+  return {
+    score: best.scoreModifier,
+    reasons: best.reasons,
+    evidence: best.evidence
+  };
+}
+
+function remoteScoreHorizonForAction(input: AiDecisionInput, action: LegalAction, beliefState: BeliefState): RemoteScoreHorizon | undefined {
+  if (action.type !== "score_agenda" && action.type !== "advance_card" && action.type !== "install_card") return undefined;
+  const card = findVisibleCard(input, action.source);
+  if (!card?.definitionId || !isAgendaDefinition(card.definitionId)) return undefined;
+  const requirement = card.advancementRequirement ?? DEMO_CARDS_BY_ID[card.definitionId]?.advancementRequirement ?? 0;
+  const countersBefore = card.advancementCounters ?? 0;
+  const countersAfter = action.type === "advance_card" ? countersBefore + 1 : action.type === "install_card" ? 0 : countersBefore;
+  const advancesRemaining = Math.max(0, requirement - countersAfter);
+  const serverId = remoteServerIdForAction(input, action);
+  const contest = serverId?.startsWith("remote_") ? evaluateRunnerContestCapacity(input, serverId, beliefState) : undefined;
+  const estimatedTurnsToScore = action.type === "score_agenda" ? 0 : estimateTurnsToScore(advancesRemaining);
+  const scoreModifier = scoreHorizonModifier(action.type, advancesRemaining, contest?.capacity);
+  const reasons = scoreHorizonReasons(action.type, advancesRemaining, contest?.capacity);
+  const evidence = [
+    `score_horizon_action:${action.type}`,
+    `score_horizon_advancement_requirement:${requirement}`,
+    `score_horizon_counters_after_action:${countersAfter}`,
+    `score_horizon_advances_remaining_after_action:${advancesRemaining}`,
+    `score_horizon_turns_to_score:${estimatedTurnsToScore}`,
+    ...(contest ? [`score_horizon_contest_capacity:${contest.capacity}`] : [])
+  ];
+  return {
+    actionId: action.actionId,
+    ...(serverId ? { serverId } : {}),
+    actionType: action.type,
+    scoreModifier,
+    advancementRequirement: requirement,
+    advancementCountersAfterAction: countersAfter,
+    advancesRemainingAfterAction: advancesRemaining,
+    estimatedTurnsToScore,
+    ...(contest ? { contestCapacity: contest.capacity } : {}),
+    reasons,
+    evidence
+  };
+}
+
+function scoreHorizonModifier(actionType: LegalAction["type"], advancesRemaining: number, contestCapacity: RunnerContestCapacity["capacity"] | undefined): number {
+  if (actionType === "score_agenda") return 130;
+  const proximity = advancesRemaining <= 0 ? 120 : advancesRemaining === 1 ? 80 : advancesRemaining === 2 ? 45 : advancesRemaining <= 4 ? 15 : -10;
+  const contest = contestCapacity === "low" ? 35 : contestCapacity === "high" ? -45 : 0;
+  const longHighRiskPenalty = advancesRemaining >= 3 && contestCapacity === "high" ? 30 : 0;
+  return proximity + contest - longHighRiskPenalty;
+}
+
+function scoreHorizonReasons(actionType: LegalAction["type"], advancesRemaining: number, contestCapacity: RunnerContestCapacity["capacity"] | undefined): string[] {
+  const reasons: string[] = [];
+  if (actionType === "score_agenda") reasons.push("score_horizon_score_now");
+  else if (advancesRemaining <= 0) reasons.push("score_horizon_opens_score_window");
+  else if (advancesRemaining <= 2) reasons.push("score_horizon_near_term_score");
+  else reasons.push("score_horizon_long_score_plan");
+  if (contestCapacity === "low") reasons.push("score_horizon_runner_contest_low");
+  if (contestCapacity === "high") reasons.push("score_horizon_runner_contest_high");
+  return reasons;
+}
+
+function estimateTurnsToScore(advancesRemaining: number): number {
+  if (advancesRemaining <= 0) return 0;
+  return Math.ceil(advancesRemaining / 3);
 }
 
 function runnerContestCapacityResult(
@@ -719,13 +813,13 @@ function selectPlanAction(input: AiDecisionInput, candidate: CorpPlanCandidate):
 
 function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: LegalAction): number {
   if (kind === "score_now" && action.type === "score_agenda") return 100;
-  if (kind === "score_next_turn" && action.type === "advance_card") return 90;
+  if (kind === "score_next_turn" && action.type === "advance_card") return 90 + boundedScoreHorizonActionBonus(input, action);
   if ((kind === "protect_hq" || kind === "protect_rnd") && action.type === "install_card" && action.payload?.placement === "ice") return 85;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
   if (kind === "recover_economy" && action.type === "draw_card" && shouldCorpDrawForScoring(input)) return 78;
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
-  if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action);
-  if ((kind === "build_scoring_remote" || kind === "bait_runner") && action.type === "install_card" && action.payload?.placement !== "ice") return 75 + boundedRemotePriorityBonus(input, action);
+  if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action) + boundedScoreHorizonActionBonus(input, action);
+  if ((kind === "build_scoring_remote" || kind === "bait_runner") && action.type === "install_card" && action.payload?.placement !== "ice") return 75 + boundedRemotePriorityBonus(input, action) + boundedScoreHorizonActionBonus(input, action);
   if (action.type === "draw_card") return 45;
   if (action.type === "end_turn") return 5;
   return 20;
@@ -989,12 +1083,22 @@ function boundedRemotePriorityBonus(input: AiDecisionInput, action: LegalAction)
   return Math.max(-45, Math.min(20, Math.round(score / 6)));
 }
 
+function boundedScoreHorizonActionBonus(input: AiDecisionInput, action: LegalAction): number {
+  const horizon = remoteScoreHorizonForAction(input, action, reconstructBeliefState(input));
+  if (!horizon) return 0;
+  return Math.max(-25, Math.min(25, Math.round(horizon.scoreModifier / 6)));
+}
+
 function isSafeScoringRootAction(input: AiDecisionInput, action: LegalAction): boolean {
   return rolesForAction(input, action).some(isAgendaRole) && remoteRootActionSecurityScore(input, action) > 0;
 }
 
 function isAgendaRole(role: string): boolean {
   return role === "agenda" || role === "corp_score_agenda" || role === "score_agenda" || role.startsWith("agenda_");
+}
+
+function isAgendaDefinition(definitionId: string): boolean {
+  return DEMO_CARDS_BY_ID[definitionId]?.type === "agenda" || RUNTIME_CARDS[definitionId]?.type === "agenda";
 }
 
 function explanationForPlan(kind: CorpPlanDebug["planKind"]): string {
@@ -1024,7 +1128,7 @@ function isRemoteServerId(value: unknown): boolean {
 
 function scrubPlanEvidence(evidence: string[]): string[] {
   const forbidden = ["cardInstances", "privatePayload", "sessionToken", "reconnectToken", "joinToken", "tokenHash", "fullGameState", "FullState"];
-  return evidence.filter((entry) => !forbidden.some((needle) => entry.includes(needle)) && !entry.includes("runner_simple_")).slice(0, 24);
+  return evidence.filter((entry) => !forbidden.some((needle) => entry.includes(needle)) && !entry.includes("runner_simple_")).slice(0, 32);
 }
 
 function confidence(score: number, actionCount: number): number {
