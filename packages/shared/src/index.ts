@@ -3881,7 +3881,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 0,
     rulesText:
-      "Access ambush asset with reveal, access-queue and net-damage surfaces. Ambush resolution is gated by legal access timing.",
+      "When accessed, do 2 net damage. Ignore this effect from Archives. From R&D, reveal Setup! publicly.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4561,7 +4561,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 1,
     rulesText:
-      "Rezzed transactions asset with economy and agenda-difficulty surfaces. Credit effects are public and deterministic.",
+      "Advanceable transactions asset. [A], trash: gain 4 credits for each advancement counter on Information Laundering.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4632,7 +4632,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 0,
     rulesText:
-      "Access ambush asset with net-damage, hidden-zone and agenda-difficulty surfaces. Reveals remain redacted.",
+      "Advanceable access ambush. When accessed, do at least 1 net damage, or 2 net damage per advancement counter. Ignore from Archives. From R&D, reveal publicly.",
     mechanics: [
       "install_remote",
       "rez_card",

@@ -13,6 +13,121 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-ambush-hidden-trace",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AMBUSH_HIDDEN_TRACE_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-ambush-hidden-trace.md",
+      "jobStatus": "blocked",
+      "blockerReason": "Four larger full resolver contracts remain: Self-Modifying Code, Fait Accompli, Emergency Self-Construct and Crystal Palace Station Grid counters.",
+      "cards": [
+        {
+          "cardId": "onr_v1_348_virus-test-site",
+          "title": "Virus Test Site",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_access_damage_scaling_archives_skip_rd_reveal",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_340_setup",
+          "title": "Setup!",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_two_net_damage_archives_skip_rd_reveal",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_246_fragmentation-storm",
+          "title": "Fragmentation Storm",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_program_trash_public_payload",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_017_deep-thought",
+          "title": "Deep Thought",
+          "spotcheckStatus": "blocked",
+          "result": "existing_recurring_virus_purge_path_retained",
+          "followUpStatus": "follow_up_recommended"
+        },
+        {
+          "cardId": "onr_v1_328_information-laundering",
+          "title": "Information Laundering",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_advancement_scaled_gain_self_trash_payload",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "title": "Edited Shipping Manifests",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_redacted_corp_draw_count",
+          "followUpStatus": "partial_fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_059_self-modifying-code",
+          "title": "Self-Modifying Code",
+          "spotcheckStatus": "blocked",
+          "result": "blocked_full_run_bound_stack_program_install_resolver_missing",
+          "followUpStatus": "blocked"
+        },
+        {
+          "cardId": "onr_v1_151_aujourdoui",
+          "title": "Aujourd'Oui",
+          "spotcheckStatus": "blocked",
+          "result": "existing_hidden_zone_search_reveal_path_retained",
+          "followUpStatus": "follow_up_recommended"
+        },
+        {
+          "cardId": "onr_v1_169_n-e-t-o",
+          "title": "N.E.T.O.",
+          "spotcheckStatus": "blocked",
+          "result": "existing_search_only_hidden_zone_path_retained",
+          "followUpStatus": "follow_up_recommended"
+        },
+        {
+          "cardId": "onr_v1_355_crystal-palace-station-grid",
+          "title": "Crystal Palace Station Grid",
+          "spotcheckStatus": "blocked",
+          "result": "blocked_counter_effect_contract_not_finalized",
+          "followUpStatus": "blocked"
+        },
+        {
+          "cardId": "onr_v1_022_emergency-self-construct",
+          "title": "Emergency Self-Construct",
+          "spotcheckStatus": "blocked",
+          "result": "blocked_flatline_damage_replacement_resolver_missing",
+          "followUpStatus": "blocked"
+        },
+        {
+          "cardId": "onr_v1_025_fait-accompli",
+          "title": "Fait Accompli",
+          "spotcheckStatus": "blocked",
+          "result": "blocked_fort_bound_fait_counter_agenda_difficulty_resolver_missing",
+          "followUpStatus": "blocked"
+        },
+        {
+          "cardId": "onr_v1_260_pocket-virtual-reality",
+          "title": "Pocket Virtual Reality",
+          "spotcheckStatus": "blocked",
+          "result": "existing_trace6_tag_path_retained",
+          "followUpStatus": "follow_up_recommended"
+        },
+        {
+          "cardId": "onr_v1_107_romp-through-hq",
+          "title": "Romp through HQ",
+          "spotcheckStatus": "blocked",
+          "result": "existing_hq_free_trash_path_retained",
+          "followUpStatus": "follow_up_recommended"
+        },
+        {
+          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+          "title": "Skälderviken SA Beta Test Site",
+          "spotcheckStatus": "blocked",
+          "result": "partial_fix_black_ice_rez_cost_source_payload",
+          "followUpStatus": "partial_fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-contacts-datapool",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_CONTACTS_DATAPOOL_IMPLEMENTATION.md",

@@ -1111,12 +1111,19 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     requiresServer: true,
     canPlayForServer: (_state, serverId) => serverId === "hq",
     resolve: (state, legalAction) => {
-      startRun(state, "hq", undefined, 1, {
-        successfulRunAccessReplacement: "corp_lose_credits",
-        successfulRunCreditLoss: 1,
-        successfulRunRunnerTagGain: 1,
-        successfulRunCorpDraw: 1,
-      });
+      startRun(
+        state,
+        "hq",
+        undefined,
+        1,
+        {
+          successfulRunAccessReplacement: "corp_lose_credits",
+          successfulRunCreditLoss: 1,
+          successfulRunRunnerTagGain: 1,
+          successfulRunCorpDraw: 1,
+        },
+        legalAction,
+      );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         serverId: "hq",
@@ -3057,7 +3064,9 @@ function corpMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, id);
       if (
         definition.type === "agenda" ||
-        definition.id === V1919_EXPERIMENTAL_AI_ID
+        definition.id === V1919_EXPERIMENTAL_AI_ID ||
+        definition.id === V1919_INFORMATION_LAUNDERING_ID ||
+        definition.id === V1919_VIRUS_TEST_SITE_ID
       ) {
         if (state.corp.credits >= 1)
           actions.push(
@@ -3073,6 +3082,8 @@ function corpMainActions(state: GameState): LegalAction[] {
           );
       }
       const rezCost = rezCostForCard(state, id);
+      const rezCostReductionSourceDefinitionIds =
+        rezCostReductionSourceDefinitionIdsFor(state, definition);
       if (
         (definition.type === "asset" || definition.type === "upgrade") &&
         !mustInstance(state.cardInstances, id).rezzed &&
@@ -3086,7 +3097,19 @@ function corpMainActions(state: GameState): LegalAction[] {
             `Karte in ${server.label} rezzen`,
             id,
             [{ credits: rezCost }],
-            { cardId: id, rootRez: true },
+            {
+              cardId: id,
+              rootRez: true,
+              ...(rezCostReductionSourceDefinitionIds.length > 0
+                ? {
+                    rezCostReductionSourceDefinitionIds:
+                      rezCostReductionSourceDefinitionIds.join(","),
+                    rezCostReductionAmount:
+                      (definition.rezCost ?? 0) - rezCost,
+                    rezCostPaid: rezCost,
+                  }
+                : {}),
+            },
           ),
         );
       }
@@ -3290,18 +3313,25 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (definition.id === V1919_INFORMATION_LAUNDERING_ID) {
+      const advancementCounterCount = Math.max(
+        0,
+        Math.floor(mustInstance(state.cardInstances, assetId).advancementCounters),
+      );
+      const gainCreditsAmount = advancementCounterCount * 4;
       actions.push(
         action(
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: 2 Credits`,
+          `${definition.title}: ${gainCreditsAmount} Credits und trashen`,
           assetId,
           [{ clicks: 1 }],
           {
             cardId: assetId,
             v1919AssetAbility: "gain_credits",
-            gainCreditsAmount: 2,
+            advancementCounterCount,
+            gainCreditsAmount,
+            trashOnUse: true,
           },
         ),
       );
@@ -4768,6 +4798,34 @@ function iceRezCostReductionFor(
   return reduction;
 }
 
+function rezCostReductionSourceDefinitionIdsFor(
+  state: GameState,
+  iceDefinition: CardDefinition,
+): CardDefinitionId[] {
+  const sourceIds: CardDefinitionId[] = [];
+  for (const sourceId of rezzedCorpRootCardIds(state)) {
+    const sourceDefinition = definitionFor(state, sourceId);
+    if (
+      sourceDefinition.id === V1917_DATA_MASONS_ID &&
+      cardHasSubtype(iceDefinition, "wall")
+    )
+      sourceIds.push(sourceDefinition.id);
+    if (
+      sourceDefinition.id === "onr_v1_320_encoder-inc" &&
+      cardHasSubtype(iceDefinition, "code_gate")
+    )
+      sourceIds.push(sourceDefinition.id);
+    if (
+      sourceDefinition.id === "onr_v1_341_skalderviken-sa-beta-test-site" &&
+      cardHasSubtype(iceDefinition, "black_ice")
+    )
+      sourceIds.push(sourceDefinition.id);
+    if (sourceDefinition.id === V1920_FORTRESS_ARCHITECTS_ID)
+      sourceIds.push(sourceDefinition.id);
+  }
+  return sourceIds;
+}
+
 function rezCostForCard(state: GameState, cardId: CardInstanceId): number {
   const definition = definitionFor(state, cardId);
   const baseCost = definition.rezCost ?? 0;
@@ -5178,6 +5236,8 @@ function corpApproachActions(state: GameState): LegalAction[] {
   const definition = definitionFor(state, run.approachedIceId);
   const actions: LegalAction[] = [];
   const rezCost = rezCostForCard(state, run.approachedIceId);
+  const rezCostReductionSourceDefinitionIds =
+    rezCostReductionSourceDefinitionIdsFor(state, definition);
   if (!ice.rezzed && state.corp.credits >= rezCost) {
     actions.push(
       action(
@@ -5187,7 +5247,17 @@ function corpApproachActions(state: GameState): LegalAction[] {
         `${definition.title} rezzen`,
         run.approachedIceId,
         [{ credits: rezCost }],
-        { cardId: run.approachedIceId },
+        {
+          cardId: run.approachedIceId,
+          ...(rezCostReductionSourceDefinitionIds.length > 0
+            ? {
+                rezCostReductionSourceDefinitionIds:
+                  rezCostReductionSourceDefinitionIds.join(","),
+                rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
+                rezCostPaid: rezCost,
+              }
+            : {}),
+        },
       ),
     );
   }
@@ -6339,15 +6409,23 @@ function performAction(
           throw new Error(
             "Die V1.9.19-Asset-Economy-Faehigkeit passt nicht zur Karte.",
           );
+        const advancementCounterCount = Math.max(
+          0,
+          Math.floor(mustInstance(state.cardInstances, sourceCardId).advancementCounters),
+        );
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 2)
+        const expectedGain = advancementCounterCount * 4;
+        if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
           throw new Error(
-            "Information Laundering gewaehrt in diesem V1.9.19-WIP genau 2 Credits.",
+            "Information Laundering gewaehrt 4 Credits pro Advancement-Counter.",
           );
         credits(state, "corp", gainAmount);
+        trashCorpInstalledCardToArchives(state, sourceCardId);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
+          advancementCounterCount,
           gainedCredits: gainAmount,
+          selfTrashed: true,
           corpCreditsAfter: state.corp.credits,
         };
         return;
@@ -8046,8 +8124,18 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         resolveBanpeiProgramTrashSubroutine(state, legalAction);
       } else {
         const targetProgramId = pickRunnerProgramForUninstall(state);
-        if (targetProgramId)
+        if (targetProgramId) {
+          const targetDefinitionId = definitionFor(state, targetProgramId).id;
           trashRunnerInstalledProgram(state, targetProgramId);
+          if (legalAction) {
+            legalAction.payload = {
+              ...(legalAction.payload ?? {}),
+              trashedCardDefinitionId: targetDefinitionId,
+              trashedCardType: "program",
+              trashedCount: 1,
+            };
+          }
+        }
       }
     }
     if (subroutine.type === "set_run_encounter_tax") {
@@ -8948,6 +9036,7 @@ function applySuccessfulRunAccessReplacement(
       creditLoss,
       corpCreditsAfter: state.corp.credits,
       runnerTagsAfter: state.runner.tags,
+      corpDrawnCount: corpDraw,
       hiddenZoneBarrier: true,
     };
   }
@@ -9270,11 +9359,26 @@ function resolveV1917AmbushOnAccess(
       "V1.9.17-Ambush darf nur aus einem legalen Access-Fenster ausloesen.",
     );
   }
+  const accessServerId = String(legalAction.payload?.serverId ?? "");
+  const accessedFromArchives =
+    accessServerId === "archives" ||
+    mustInstance(state.cardInstances, cardId).zone.zone === "archives";
+  if (accessedFromArchives) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_access_ambush",
+      ambushDefinitionId: definition.id,
+      ambushSkippedReason: "archives",
+    };
+    return;
+  }
   if (definition.id === V1917_TRAP_ID) state.runner.tags += 1;
+  const damageAmount = definition.id === V1917_SETUP_ID ? 2 : 1;
   const summary = doDamage(state, {
     damageId: `v1917.ambush.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
     damageType: "net",
-    amount: 1,
+    amount: damageAmount,
     source: definition.id,
   });
   setDamagePayload(legalAction, summary);
@@ -9283,6 +9387,13 @@ function resolveV1917AmbushOnAccess(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1917_access_ambush",
     ambushDefinitionId: definition.id,
+    damageAmount,
+    ...(accessServerId === "rd"
+      ? {
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: definition.id,
+        }
+      : {}),
     ...(definition.id === V1917_TRAP_ID
       ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags }
       : {}),
@@ -9420,6 +9531,20 @@ function resolveV1919AssetOnAccess(
       "V1.9.19-Asset-Ambush darf nur aus einem legalen Access-Fenster ausloesen.",
     );
   }
+  const accessServerId = String(legalAction.payload?.serverId ?? "");
+  const accessedFromArchives =
+    accessServerId === "archives" ||
+    mustInstance(state.cardInstances, cardId).zone.zone === "archives";
+  if (accessedFromArchives && definition.id === V1919_VIRUS_TEST_SITE_ID) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1919_access_ambush_damage",
+      ambushDefinitionId: definition.id,
+      ambushSkippedReason: "archives",
+    };
+    return;
+  }
 
   if (
     definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID ||
@@ -9476,7 +9601,16 @@ function resolveV1919AssetOnAccess(
 
   const damageType: DamageType =
     definition.id === V1919_VACANT_SOULKILLER_ID ? "core" : "net";
-  const damageAmount = definition.id === V1919_VACANT_SOULKILLER_ID ? 1 : 2;
+  const advancementCounterCount = Math.max(
+    0,
+    Math.floor(mustInstance(state.cardInstances, cardId).advancementCounters),
+  );
+  const damageAmount =
+    definition.id === V1919_VACANT_SOULKILLER_ID
+      ? 1
+      : definition.id === V1919_VIRUS_TEST_SITE_ID
+        ? Math.max(1, advancementCounterCount * 2)
+        : 2;
   const summary = doDamage(state, {
     damageId: `v1919.asset_access.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
     damageType,
@@ -9489,6 +9623,15 @@ function resolveV1919AssetOnAccess(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1919_access_ambush_damage",
     ambushDefinitionId: definition.id,
+    ...(definition.id === V1919_VIRUS_TEST_SITE_ID
+      ? { advancementCounterCount, damageAmount }
+      : {}),
+    ...(accessServerId === "rd"
+      ? {
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: definition.id,
+        }
+      : {}),
   };
 }
 
@@ -15561,6 +15704,16 @@ function publicContextForAction(
       legalAction.payload?.assetRez === true
         ? "Remote"
         : "ICE";
+  if (legalAction.type === "rez_ice") {
+    for (const key of [
+      "rezCostPaid",
+      "rezCostReductionAmount",
+      "rezCostReductionSourceDefinitionIds",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
   if (
     legalAction.type === "break_subroutine" &&
     typeof legalAction.payload?.postBreakStealthLoss === "number"
@@ -15670,6 +15823,13 @@ function publicContextForAction(
   }
   if (legalAction.type === "continue_run") {
     context.result = state.run ? "continued" : "ended";
+    if (typeof legalAction.payload?.trashedCardDefinitionId === "string")
+      context.trashedCardDefinitionId =
+        legalAction.payload.trashedCardDefinitionId;
+    if (typeof legalAction.payload?.trashedCardType === "string")
+      context.trashedCardType = legalAction.payload.trashedCardType;
+    if (typeof legalAction.payload?.trashedCount === "number")
+      context.trashedCount = legalAction.payload.trashedCount;
     if (legalAction.payload?.encounterContinue === true) {
       context.encounterContinue = true;
       context.unbrokenSubroutineCount =
@@ -15786,6 +15946,10 @@ function publicContextForAction(
       context.gainedCredits = legalAction.payload.gainedCredits;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")
       context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
+    if (typeof legalAction.payload.accessReplacement === "string")
+      context.accessReplacement = legalAction.payload.accessReplacement;
+    if (typeof legalAction.payload.creditLoss === "number")
+      context.creditLoss = legalAction.payload.creditLoss;
     if (typeof legalAction.payload.ambushDefinitionId === "string")
       context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
     if (typeof legalAction.payload.advancementCounterCount === "number")
@@ -15820,6 +15984,8 @@ function publicContextForAction(
       context.hqCardCount = legalAction.payload.hqCardCount;
     if (typeof legalAction.payload.drawnCount === "number")
       context.drawnCount = legalAction.payload.drawnCount;
+    if (typeof legalAction.payload.corpDrawnCount === "number")
+      context.corpDrawnCount = legalAction.payload.corpDrawnCount;
     if (typeof legalAction.payload.randomDrawRecordPurpose === "string")
       context.randomDrawRecordPurpose =
         legalAction.payload.randomDrawRecordPurpose;
@@ -15887,6 +16053,8 @@ function publicContextForAction(
     context.tagConditionMet = legalAction.payload.tagConditionMet;
   if (typeof legalAction.payload?.damageSkippedReason === "string")
     context.damageSkippedReason = legalAction.payload.damageSkippedReason;
+  if (typeof legalAction.payload?.ambushSkippedReason === "string")
+    context.ambushSkippedReason = legalAction.payload.ambushSkippedReason;
   if (typeof legalAction.payload?.onScoreGainCredits === "number")
     context.onScoreGainCredits = legalAction.payload.onScoreGainCredits;
   if (typeof legalAction.payload?.securityNetOptimizationServerId === "string")
@@ -16002,6 +16170,14 @@ function publicContextForAction(
       context.addedCounterAmount = legalAction.payload.addedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number")
       context.remainingCounters = legalAction.payload.remainingCounters;
+    if (typeof legalAction.payload.advancementCounterCount === "number")
+      context.advancementCounterCount =
+        legalAction.payload.advancementCounterCount;
+    if (typeof legalAction.payload.gainedCredits === "number")
+      context.gainedCredits = legalAction.payload.gainedCredits;
+    if (typeof legalAction.payload.corpCreditsAfter === "number")
+      context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
+    if (legalAction.payload.selfTrashed === true) context.selfTrashed = true;
   }
   if (typeof legalAction.payload?.v1919OperationAbility === "string") {
     context.v1919OperationAbility = legalAction.payload.v1919OperationAbility;
