@@ -4898,6 +4898,10 @@ function corpIceInstallBaseCost(server: CorpServer): number {
   return Math.max(0, server.ice.length);
 }
 
+function outermostIceIndex(server: CorpServer): number {
+  return server.ice.length - 1;
+}
+
 function poxCountersForServer(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
@@ -7684,7 +7688,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         ? createRemote(state)
         : mustServer(state, String(legalAction.payload?.serverId));
     spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
-    server.ice.unshift(cardId);
+    server.ice.push(cardId);
     state.cardInstances[cardId] = {
       ...mustInstance(state.cardInstances, cardId),
       faceup: false,
@@ -7783,7 +7787,11 @@ function startRun(
     phase: "approach_ice",
     position:
       server.ice.length > 0
-        ? { kind: "ice", serverId: server.id, iceIndex: 0 }
+        ? {
+            kind: "ice",
+            serverId: server.id,
+            iceIndex: outermostIceIndex(server),
+          }
         : { kind: "server", serverId: server.id },
     brokenSubroutineIndexes: [],
     resolvedSubroutineIndexes: [],
@@ -7827,9 +7835,10 @@ function startRun(
   };
   applyAiBoonRunStart(state, legalAction);
   if (server.ice.length > 0) {
+    const iceIndex = outermostIceIndex(server);
     const approachedIceId = mustArrayValue(
       server.ice,
-      0,
+      iceIndex,
       "Server has no approached ice.",
     );
     state.run.approachedIceId = approachedIceId;
@@ -8605,7 +8614,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   if (run.position.kind !== "ice")
     throw new Error("Runner ist nicht an ICE positioniert.");
   const server = mustServer(state, run.position.serverId);
-  const nextIndex = run.position.iceIndex + 1;
+  const nextIndex = run.position.iceIndex - 1;
   const passedIceId = run.encounteredIceId;
   const viral15PendingPassedIceId =
     run.viral15ActiveSourceIceId &&
@@ -8620,7 +8629,7 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   ) {
     return;
   }
-  if (nextIndex < server.ice.length) {
+  if (nextIndex >= 0) {
     const approachedIceId = mustArrayValue(
       server.ice,
       nextIndex,
@@ -8759,9 +8768,9 @@ function resolveVacuumLinkRewindSubroutine(
     return false;
   }
 
-  let targetIndex = 0;
+  let targetIndex = outermostIceIndex(server);
   let remainingRezzedBack = die;
-  for (let index = currentIndex - 1; index >= 0; index -= 1) {
+  for (let index = currentIndex + 1; index < server.ice.length; index += 1) {
     const cardId = server.ice[index];
     if (!cardId || !mustInstance(state.cardInstances, cardId).rezzed) continue;
     remainingRezzedBack -= 1;
@@ -8770,7 +8779,7 @@ function resolveVacuumLinkRewindSubroutine(
       break;
     }
   }
-  if (remainingRezzedBack > 0) targetIndex = 0;
+  if (remainingRezzedBack > 0) targetIndex = outermostIceIndex(server);
   const targetIceId = mustArrayValue(
     server.ice,
     targetIndex,
@@ -12066,7 +12075,7 @@ function resolveV1922SecurityPurge(
     removeFromAllZones(state, cardId);
     if (definition.type === "ice") {
       const server = createRemote(state);
-      server.ice.unshift(cardId);
+      server.ice.push(cardId);
       state.cardInstances[cardId] = {
         ...mustInstance(state.cardInstances, cardId),
         faceup: true,
@@ -12189,7 +12198,7 @@ function resolveV1922DataFortReclamationChoice(
     const definition = definitionFor(state, cardId);
     removeFromAllZones(state, cardId);
     if (definition.type === "ice") {
-      server.ice.unshift(cardId);
+      server.ice.push(cardId);
       state.cardInstances[cardId] = {
         ...mustInstance(state.cardInstances, cardId),
         faceup: false,

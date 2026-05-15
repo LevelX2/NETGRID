@@ -427,6 +427,7 @@ describe("MVP 0.1 turns and cards", () => {
 
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer?.ice).toHaveLength(3);
+    expect(rdServer?.ice).toEqual([firstIceId, secondIceId, thirdIceId]);
     expect(state.corp.credits).toBe(17);
   });
 });
@@ -666,6 +667,91 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(state.eventLog.at(-1)?.publicPayload.accessedCardId).toBeUndefined();
     expect(state.run).toBeUndefined();
     expect(state.timingPoint).toBe("runner_action.main");
+  });
+
+  it("encounters multi-ICE servers from the outermost installed ICE inward before access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "multi-ice-outer-to-inner-run",
+        runnerDeckId: "demo_runner_004",
+        corpDeckId: "demo_corp_004",
+      }),
+    );
+    state.runner.credits = 20;
+    installRunnerProgramForTest(state, "efficient_fracter");
+    const innerIceId = putCorpIceCopyOnServer(
+      state,
+      "rd",
+      "simple_barrier_ice",
+    );
+    const outerIceId = putCorpIceCopyOnServer(
+      state,
+      "rd",
+      "simple_barrier_ice",
+    );
+    for (const iceId of [innerIceId, outerIceId]) {
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    expect(rdServer?.ice).toEqual([innerIceId, outerIceId]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.run?.position).toEqual({
+      kind: "ice",
+      serverId: "rd",
+      iceIndex: 1,
+    });
+    expect(state.run?.encounteredIceId).toBe(outerIceId);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "pump_breaker");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "break_subroutine",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.phase).toBe("encounter_ice");
+    expect(state.run?.position).toEqual({
+      kind: "ice",
+      serverId: "rd",
+      iceIndex: 0,
+    });
+    expect(state.run?.encounteredIceId).toBe(innerIceId);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "pump_breaker");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "break_subroutine",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.phase).toBe("access");
+    expect(state.run?.position).toEqual({ kind: "server", serverId: "rd" });
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "access_card",
+      ),
+    ).toBe(true);
   });
 
   it("ends the run on an unbroken End the Run subroutine", () => {
@@ -5511,7 +5597,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     if (!rdServer) throw new Error("Missing R&D server");
     for (const iceId of [innerIceId, outerIceId]) {
       removeEverywhere(state, iceId);
-      rdServer.ice.unshift(iceId);
+      rdServer.ice.push(iceId);
       state.cardInstances[iceId] = {
         ...state.cardInstances[iceId]!,
         zone: { side: "corp", zone: "serverIce", serverId: "rd" },
@@ -6506,7 +6592,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
           "expected run position to be ice after vacuum-link rewind",
         );
       }
-      expect(run.position.iceIndex).toBe(0);
+      expect(run.position.iceIndex).toBe(1);
       const movementActions = getLegalActions(state, "runner")
         .map((action) => action.type)
         .sort();
@@ -10884,7 +10970,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     const rd = state.corp.servers.find((server) => server.id === "rd");
     expect(rd).toBeDefined();
     if (!rd) throw new Error("Missing R&D server");
-    rd.ice.unshift(aspInstanceId);
+    rd.ice.push(aspInstanceId);
     state.cardInstances[aspInstanceId] = {
       instanceId: aspInstanceId,
       definitionId: "onr_v1_221_asp",
@@ -11968,7 +12054,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer).toBeDefined();
     if (!rdServer) throw new Error("Missing R&D server");
-    rdServer.ice.unshift(dArcKnightId);
+    rdServer.ice.push(dArcKnightId);
     state.cardInstances[dArcKnightId] = {
       instanceId: dArcKnightId,
       definitionId: "onr_v1_233_d-arc-knight",
@@ -14077,7 +14163,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const rdServer = state.corp.servers.find((server) => server.id === "rd");
     expect(rdServer).toBeDefined();
     if (!rdServer) throw new Error("Missing R&D server");
-    rdServer.ice.unshift(blackIceId);
+    rdServer.ice.push(blackIceId);
     state.cardInstances[blackIceId] = {
       instanceId: blackIceId,
       definitionId: "onr_v1_231_cortical-scrub",
@@ -24224,7 +24310,36 @@ function putCorpIceOnServer(
   expect(server).toBeDefined();
   if (!server) throw new Error("Missing server");
   removeEverywhere(state, id);
-  server.ice.unshift(id);
+  server.ice.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: false,
+    rezzed: false,
+  };
+  return id;
+}
+
+function putCorpIceCopyOnServer(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  definitionId: string,
+): CardInstanceId {
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  expect(server).toBeDefined();
+  if (!server) throw new Error("Missing server");
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === definitionId &&
+      !server.ice.includes(id as CardInstanceId),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing ICE copy ${definitionId}`);
+  const id = entry[0] as CardInstanceId;
+  removeEverywhere(state, id);
+  server.ice.push(id);
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
     zone: { side: "corp", zone: "serverIce", serverId },
