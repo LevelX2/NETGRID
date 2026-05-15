@@ -19,7 +19,7 @@
   "assertions": [
     "Runtime definitions exist for all V1.9.12 target cards.",
     "Virus programs receive virus counters on install and remain purgeable by the Corp-only three-click purge action.",
-    "Recurring counters on Runner programs and resources are initialized and refreshed without accumulation; The Shell Traders is not modeled as a recurring-credit card.",
+    "Recurring counters on Runner programs and resources are initialized and refreshed without accumulation; Skivviss uses successful R&D-run virus counters and Rigged Investments uses a six-bit start-of-turn depot instead of recurring credits; The Shell Traders is not modeled as a recurring-credit card.",
     "The Shell Traders sets aside Runner grip program/hardware cards with public Shell counters, removes Shell counters through start-of-turn and paid paths, and installs the target for free when the last Shell counter is removed.",
     "I Spy, Deal with Militech and Hunt Club BBS use side-safe Hidden-Zone paths.",
     "Detroit Police Contract uses a typed scored-agenda counter action."

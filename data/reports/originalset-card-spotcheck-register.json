@@ -11,6 +11,84 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-ramming-galveston",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_RAMMING_GALVESTON_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-ramming-galveston.md",
+      "cards": [
+        {
+          "cardId": "onr_v1_053_ramming-piston",
+          "title": "Ramming Piston",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_wall_breaker_pump_exact_stealth_loss",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_064_skivviss",
+          "title": "Skivviss",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_rd_success_virus_counter_corp_start_draw",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_080_core-command-jettison-ice",
+          "title": "Core Command: Jettison Ice",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_hq_success_rez_cost_trash_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_118_weather-to-finance-pipe",
+          "title": "Weather-to-Finance Pipe",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_hq_access_replacement_payload_improved",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_123_bodyweight-data-creche",
+          "title": "Bodyweight Data Creche",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_install_cost_mu_deck_unique_bonus_run",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_174_rigged-investments",
+          "title": "Rigged Investments",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_bit_depot_start_turn_credit_auto_trash",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_177_the-short-circuit",
+          "title": "The Short Circuit",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_private_stack_program_search_trash_on_use",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_236_data-raven",
+          "title": "Data Raven",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_runner_counter_removal",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_323_experimental-ai",
+          "title": "Experimental AI",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_advancement_counter_program_trash_count",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_362_new-galveston-city-grid",
+          "title": "New Galveston City Grid",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_server_trash_cost_modifier_no_hidden_reveal",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-netwatch-spinn",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_NETWATCH_SPINN_IMPLEMENTATION.md",

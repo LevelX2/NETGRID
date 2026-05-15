@@ -349,6 +349,10 @@ const V1922_SECURITY_CODE_WORM_CHIP_ID = "onr_v1_109_security-code-worm-chip";
 const V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID =
   "onr_v1_113_synchronized-attack-on-hq";
 const V1922_VALU_PAK_SOFTWARE_BUNDLE_ID = "onr_v1_117_valu-pak-software-bundle";
+const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
+const SKIVVISS_ID = "onr_v1_064_skivviss";
+const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
+const RIGGED_INVESTMENTS_ID = "onr_v1_174_rigged-investments";
 const V1922_NEWSGROUP_FILTER_ID = "onr_v1_045_newsgroup-filter";
 const V1922_SHIELD_ID = "onr_v1_061_shield";
 const V1922_JAPANESE_WATER_TORTURE_ID = "onr_v1_037_japanese-water-torture";
@@ -3019,14 +3023,17 @@ function corpMainActions(state: GameState): LegalAction[] {
   for (const server of state.corp.servers) {
     for (const id of server.root) {
       const definition = definitionFor(state, id);
-      if (definition.type === "agenda") {
+      if (
+        definition.type === "agenda" ||
+        definition.id === V1919_EXPERIMENTAL_AI_ID
+      ) {
         if (state.corp.credits >= 1)
           actions.push(
             action(
               state,
               "corp",
               "advance_card",
-              `Agenda in ${server.label} advancen`,
+              `${definition.title} in ${server.label} advancen`,
               id,
               [{ clicks: 1, credits: 1 }],
               { cardId: id },
@@ -3178,26 +3185,6 @@ function corpMainActions(state: GameState): LegalAction[] {
             v1918UpgradeAbility: "add_power_counter",
             counterType: "power",
             addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (
-      definition.id === V1918_NEW_GALVESTON_CITY_GRID_ID &&
-      state.corp.rd.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "reveal_rd_top",
-            hiddenZoneAction: "v1918_city_grid_reveal_rd_top",
           },
         ),
       );
@@ -3834,6 +3821,27 @@ function runnerMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
+    for (const dataRavenId of rezzedInstalledIceIds(state).sort()) {
+      if (definitionFor(state, dataRavenId).id !== DATA_RAVEN_ID) continue;
+      if (cardCounter(state, dataRavenId, "power") <= 0) continue;
+      if (state.runner.credits < 1) continue;
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          "Data-Raven-Counter entfernen",
+          dataRavenId,
+          [{ clicks: 1, credits: 1 }],
+          {
+            cardId: dataRavenId,
+            runnerAbility: "remove_data_raven_counter",
+            counterType: "power",
+            removeCounterAmount: 1,
+          },
+        ),
+      );
+    }
   }
   for (const id of state.runner.grip) {
     const definition = definitionFor(state, id);
@@ -4084,7 +4092,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
       if (
         (definition.id === SELF_MODIFYING_CODE_ID ||
           definition.id === AUJOURD_OUI_ID ||
-          definition.id === NETO_ID) &&
+          definition.id === NETO_ID ||
+          definition.id === THE_SHORT_CIRCUIT_ID) &&
         state.runner.stack.some(
           (id) => definitionFor(state, id).type === "program",
         )
@@ -4127,8 +4136,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         }
       }
       if (
-        (definition.id === THE_SHORT_CIRCUIT_ID ||
-          definition.id === AUJOURD_OUI_ID) &&
+        definition.id === AUJOURD_OUI_ID &&
         state.runner.stack.length > 0
       ) {
         actions.push(
@@ -4371,7 +4379,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
           {
             ...runPayload,
             bonusRunNoClick: true,
-            bonusRunSource: ALL_NIGHTER_ID,
+            bonusRunSource:
+              flags.bodyweightDataCrecheExtraRunPending === true
+                ? BODYWEIGHT_DATA_CRECHE_ID
+                : ALL_NIGHTER_ID,
           },
         ),
       );
@@ -5275,7 +5286,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       breakAbility &&
       breakerStrength >= encounteredIceStrength &&
       availableRunnerRunCredits(state, breakerId) >=
-        breakAbility.cost.credits + runBreakSubroutineAdditionalCost(run)
+        breakAbility.cost.credits + runBreakSubroutineAdditionalCost(run) &&
+      (breaker.id !== RAMMING_PISTON_ID ||
+        runnerStealthRecurringCredits(state) >=
+          (breakAbility.postBreakStealthLoss ?? 0))
     ) {
       const additionalBreakCost = runBreakSubroutineAdditionalCost(run);
       const totalBreakCost = breakAbility.cost.credits + additionalBreakCost;
@@ -5621,6 +5635,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   }
   if (definition.type === "asset" || definition.type === "upgrade") {
     const actions: LegalAction[] = [];
+    const trashCost = effectiveAccessTrashCost(state, run.accessedCardId);
     if (freeTrashEnabled) {
       actions.push(
         action(
@@ -5636,7 +5651,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
           },
         ),
       );
-    } else if (state.runner.credits >= (definition.trashCost ?? 0)) {
+    } else if (state.runner.credits >= trashCost.totalCost) {
       actions.push(
         action(
           state,
@@ -5644,7 +5659,12 @@ function runnerAccessActions(state: GameState): LegalAction[] {
           "trash_accessed_card",
           `${definition.title} trashen`,
           run.accessedCardId,
-          [{ credits: definition.trashCost ?? 0 }],
+          [{ credits: trashCost.totalCost }],
+          {
+            accessTrashBaseCost: trashCost.baseCost,
+            accessTrashCostModifier: trashCost.modifier,
+            accessTrashTotalCost: trashCost.totalCost,
+          },
         ),
       );
     }
@@ -5741,6 +5761,34 @@ function isCurrentAccessFromArchives(
     return currentEntry.zone === "archives";
   const zone = mustInstance(state.cardInstances, cardId).zone;
   return zone.side === "corp" && zone.zone === "archives";
+}
+
+function effectiveAccessTrashCost(
+  state: GameState,
+  cardId: CardInstanceId,
+): { baseCost: number; modifier: number; totalCost: number } {
+  const definition = definitionFor(state, cardId);
+  const baseCost = definition.trashCost ?? 0;
+  let modifier = 0;
+  const zone = mustInstance(state.cardInstances, cardId).zone;
+  if (
+    zone.side === "corp" &&
+    zone.zone === "serverRoot" &&
+    (definition.type === "asset" || definition.type === "upgrade") &&
+    definition.id !== V1918_NEW_GALVESTON_CITY_GRID_ID
+  ) {
+    const server = mustServer(state, zone.serverId);
+    const hasRezzedNewGalveston = server.root.some((rootId) => {
+      if (rootId === cardId) return false;
+      const rootInstance = state.cardInstances[rootId];
+      return (
+        rootInstance?.rezzed === true &&
+        definitionFor(state, rootId).id === V1918_NEW_GALVESTON_CITY_GRID_ID
+      );
+    });
+    if (hasRezzedNewGalveston) modifier += 2;
+  }
+  return { baseCost, modifier, totalCost: baseCost + modifier };
 }
 
 function performAction(
@@ -6784,6 +6832,7 @@ function performAction(
     case "start_run":
       if (legalAction.payload?.bonusRunNoClick === true) {
         ensureRunnerTurnFlags(state).allNighterBonusRunPending = false;
+        ensureRunnerTurnFlags(state).bodyweightDataCrecheExtraRunPending = false;
       } else {
         spendClick(state, "runner");
       }
@@ -7066,6 +7115,30 @@ function performAction(
       endTurn(state, legalAction.side);
       return;
     case "trigger_ability":
+      if (legalAction.payload?.runnerAbility === "remove_data_raven_counter") {
+        if (legalAction.side !== "runner")
+          throw new Error("Nur der Runner darf Data-Raven-Counter entfernen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedInstalledIceIds(state).includes(sourceCardId))
+          throw new Error("Data Raven ist nicht mehr rezzed installiert.");
+        if (definitionFor(state, sourceCardId).id !== DATA_RAVEN_ID)
+          throw new Error("Die Counter-Entfernung passt nicht zur Karte.");
+        const removeAmount = Number(
+          legalAction.payload?.removeCounterAmount ?? 0,
+        );
+        if (!Number.isInteger(removeAmount) || removeAmount !== 1)
+          throw new Error("Es wird genau 1 Data-Raven-Counter entfernt.");
+        spendClick(state, "runner");
+        spendCredits(state, "runner", 1);
+        spendCardCounter(state, sourceCardId, "power", removeAmount);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          removedCounterAmount: removeAmount,
+          remainingCounters: cardCounter(state, sourceCardId, "power"),
+          runnerCreditsAfter: state.runner.credits,
+        };
+        return;
+      }
       if (
         legalAction.payload?.v1920RunnerRunLockAbility ===
         "fang_2_0_pay_to_run"
@@ -7286,9 +7359,23 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     );
     removeFromAllZones(state, cardId);
     if (definition.type === "hardware") {
+      const trashedDeckDefinitionIds: string[] = [];
+      if (
+        definition.id === BODYWEIGHT_DATA_CRECHE_ID &&
+        cardHasSubtype(definition, "deck")
+      ) {
+        for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
+          if (!cardHasSubtype(definitionFor(state, oldDeckId), "deck"))
+            continue;
+          trashedDeckDefinitionIds.push(definitionFor(state, oldDeckId).id);
+          trashRunnerInstalledCardToHeap(state, oldDeckId);
+        }
+      }
       state.runner.rig.hardware.push(cardId);
       if (definition.mechanics.includes("modify_memory_limit"))
         state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
+      else if ((definition.memoryLimitBonus ?? 0) > 0)
+        state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
       if ((definition.recurringCredits ?? 0) > 0)
         setCardCounter(
           state,
@@ -7296,6 +7383,13 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
+      if (trashedDeckDefinitionIds.length > 0) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          deckUniqueReplacement: true,
+          trashedDeckDefinitionIds: trashedDeckDefinitionIds.join(","),
+        };
+      }
     } else if (definition.type === "program") {
       state.runner.rig.programs.push(cardId);
       if (!hostOnCardId) state.runner.memoryUsed += definition.memoryCost ?? 0;
@@ -7308,7 +7402,8 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         );
       if (
         definition.mechanics.includes("virus") &&
-        definition.id !== BUTCHER_BOY_ID
+        definition.id !== BUTCHER_BOY_ID &&
+        definition.id !== SKIVVISS_ID
       )
         addCardCounter(state, cardId, "virus", 1);
     } else if (definition.type === "resource") {
@@ -7320,6 +7415,15 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
+      if (definition.id === RIGGED_INVESTMENTS_ID) {
+        setCardCounter(state, cardId, "bit", 6);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          counterType: "bit",
+          addedCounterAmount: 6,
+          remainingCounters: 6,
+        };
+      }
     } else {
       throw new Error(
         "Nur Programme, Hardware und Resources koennen vom Runner installiert werden.",
@@ -8428,7 +8532,7 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   markSuccessfulRunForTurn(state, run);
   if (run.successfulRunAccessReplacement === "corp_lose_credits") {
-    applySuccessfulRunAccessReplacement(state, run);
+    applySuccessfulRunAccessReplacement(state, run, legalAction);
     finishRun(state, true, legalAction);
     return;
   }
@@ -8605,6 +8709,7 @@ function recordArchivesAutoAccess(
 function applySuccessfulRunAccessReplacement(
   state: GameState,
   run: ActiveRun,
+  legalAction?: LegalAction,
 ): void {
   const creditLoss = Math.max(0, Math.floor(run.successfulRunCreditLoss ?? 0));
   if (creditLoss > 0) {
@@ -8617,6 +8722,16 @@ function applySuccessfulRunAccessReplacement(
   if (runnerTagGain > 0) state.runner.tags += runnerTagGain;
   const corpDraw = Math.max(0, Math.floor(run.successfulRunCorpDraw ?? 0));
   if (corpDraw > 0) drawCorpCards(state, corpDraw);
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      accessReplacement: run.successfulRunAccessReplacement ?? "corp_lose_credits",
+      creditLoss,
+      corpCreditsAfter: state.corp.credits,
+      runnerTagsAfter: state.runner.tags,
+      hiddenZoneBarrier: true,
+    };
+  }
 }
 
 function buildBreachState(state: GameState, run: ActiveRun): ActiveBreach {
@@ -9059,23 +9174,39 @@ function resolveV1919AssetOnAccess(
       definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
         ? state.runner.rig.hardware
         : state.runner.rig.programs;
-    const targetCardId = candidates.slice().sort((left, right) => {
+    const targetCardIds = candidates.slice().sort((left, right) => {
       const leftDefinition = definitionFor(state, left);
       const rightDefinition = definitionFor(state, right);
       const byInstallCost =
         (rightDefinition.installCost ?? 0) - (leftDefinition.installCost ?? 0);
       return byInstallCost !== 0 ? byInstallCost : left.localeCompare(right);
-    })[0];
-    if (targetCardId) {
-      const targetDefinition = definitionFor(state, targetCardId);
-      trashRunnerInstalledCardToHeap(state, targetCardId);
+    });
+    const trashLimit =
+      definition.id === V1919_EXPERIMENTAL_AI_ID
+        ? Math.max(0, mustInstance(state.cardInstances, cardId).advancementCounters)
+        : 1;
+    const selectedTargetIds = targetCardIds.slice(0, trashLimit);
+    if (selectedTargetIds.length > 0) {
+      const targetDefinitionIds = selectedTargetIds.map(
+        (targetCardId) => definitionFor(state, targetCardId).id,
+      );
+      for (const targetCardId of selectedTargetIds)
+        trashRunnerInstalledCardToHeap(state, targetCardId);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1919_access_ambush_trash_installed",
         ambushDefinitionId: definition.id,
-        trashedCardDefinitionId: targetDefinition.id,
-        trashedCardType: targetDefinition.type,
+        ...(definition.id === V1919_EXPERIMENTAL_AI_ID
+          ? { advancementCounterCount: trashLimit }
+          : {}),
+        trashedCount: selectedTargetIds.length,
+        trashedCardDefinitionId: targetDefinitionIds[0] ?? "",
+        trashedCardDefinitionIds: targetDefinitionIds.join(","),
+        trashedCardType:
+          definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
+            ? "hardware"
+            : "program",
       };
       return;
     }
@@ -9287,12 +9418,24 @@ function trashAccessedCard(
     typeof rawOverride === "number"
       ? Math.max(0, Math.floor(rawOverride))
       : undefined;
-  const trashCost = overrideCost ?? definition.trashCost ?? 0;
+  const effectiveCost = effectiveAccessTrashCost(
+    state,
+    cardId as CardInstanceId,
+  );
+  const trashCost = overrideCost ?? effectiveCost.totalCost;
   const sourceZone = mustInstance(state.cardInstances, cardId).zone;
   if (sourceZone.side === "corp" && sourceZone.zone === "archives") {
     throw new Error("Karten in Archives können beim Zugriff nicht getrasht werden.");
   }
   spendCredits(state, "runner", trashCost);
+  if (legalAction && overrideCost === undefined) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      accessTrashBaseCost: effectiveCost.baseCost,
+      accessTrashCostModifier: effectiveCost.modifier,
+      accessTrashTotalCost: trashCost,
+    };
+  }
   trashCorpInstalledCardToArchives(state, cardId);
   if (state.run?.breach) {
     completeCurrentBreachAccess(state, "trashed", legalAction);
@@ -9569,6 +9712,10 @@ function finishRun(
   if (run) applyDupreRunEndCounters(state, run);
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(state, run, legalAction);
+  if (run && successful) {
+    applySkivvissSuccessfulRunCounter(state, run, legalAction);
+    applyBodyweightDataCrecheSuccessfulRun(state, run, legalAction);
+  }
   if (run && successful && run.attackedServerId === "hq")
     ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
   const allNighterBonusRunOnFinish =
@@ -9606,6 +9753,57 @@ function applyDupreRunEndCounters(state: GameState, run: ActiveRun): void {
       selectedServerId: run.attackedServerId,
     };
     addCardCounter(state, breakerId, "power", 1);
+  }
+}
+
+function applySkivvissSuccessfulRunCounter(
+  state: GameState,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  if (run.attackedServerId !== "rd") return;
+  const sourceIds = state.runner.rig.programs
+    .filter((cardId) => definitionFor(state, cardId).id === SKIVVISS_ID)
+    .sort();
+  if (sourceIds.length === 0) return;
+  for (const cardId of sourceIds) addCardCounter(state, cardId, "virus", 1);
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      skivvissCountersAdded: sourceIds.length,
+      skivvissCounterTotal: sourceIds.reduce(
+        (sum, cardId) => sum + cardCounter(state, cardId, "virus"),
+        0,
+      ),
+    };
+  }
+}
+
+function applyBodyweightDataCrecheSuccessfulRun(
+  state: GameState,
+  _run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const sourceId = state.runner.rig.hardware
+    .slice()
+    .sort()
+    .find((cardId) => definitionFor(state, cardId).id === BODYWEIGHT_DATA_CRECHE_ID);
+  if (!sourceId) return;
+  const flags = ensureRunnerTurnFlags(state);
+  if (
+    flags.bodyweightDataCrecheExtraRunUsedThisTurn ||
+    flags.bodyweightDataCrecheExtraRunPending
+  )
+    return;
+  flags.bodyweightDataCrecheExtraRunPending = true;
+  flags.bodyweightDataCrecheExtraRunUsedThisTurn = true;
+  flags.allNighterBonusRunPending = true;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      bodyweightDataCrecheExtraRunPending: true,
+      sourceDefinitionId: BODYWEIGHT_DATA_CRECHE_ID,
+    };
   }
 }
 
@@ -9877,6 +10075,8 @@ function startRunnerTurn(state: GameState): void {
   flags.allNighterBonusRunPending = false;
   flags.valuPakProgramInstallActionsRemaining = 0;
   flags.valuPakTemporaryProgramInstallCredits = 0;
+  flags.bodyweightDataCrecheExtraRunPending = false;
+  flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
   resolveBizarreEncryptionDelayedAgendas(state);
@@ -9922,6 +10122,12 @@ function resolveBizarreEncryptionDelayedAgendas(state: GameState): void {
 }
 
 function applyCorpStartOfTurnEffects(state: GameState): void {
+  const skivvissDraws = state.runner.rig.programs.reduce((sum, cardId) => {
+    return definitionFor(state, cardId).id === SKIVVISS_ID
+      ? sum + cardCounter(state, cardId, "virus")
+      : sum;
+  }, 0);
+  if (skivvissDraws > 0) drawCorpCards(state, skivvissDraws);
   const polymerCount = state.corp.scoreArea.reduce((sum, cardId) => {
     return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID
       ? sum + 1
@@ -9976,6 +10182,14 @@ function applyRunnerStartOfTurnEffects(state: GameState): void {
     0,
   );
   if (dataRavenCounters > 0) state.runner.tags += dataRavenCounters;
+  for (const cardId of state.runner.rig.resources.slice().sort()) {
+    if (definitionFor(state, cardId).id !== RIGGED_INVESTMENTS_ID) continue;
+    if (cardCounter(state, cardId, "bit") <= 0) continue;
+    spendCardCounter(state, cardId, "bit", 1);
+    credits(state, "runner", 1);
+    if (cardCounter(state, cardId, "bit") <= 0)
+      trashRunnerInstalledCardToHeap(state, cardId);
+  }
   if (!flags.startOfTurnFloatingCreditsApplied) {
     const butcherBoyCounterTotal = installedVirusCounterTotalForDefinition(
       state,
@@ -11929,7 +12143,8 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("v098.search_stack") ||
     state.pendingChoice.source.startsWith("v1911.search_stack") ||
-    state.pendingChoice.source.startsWith("v1912.search_stack")
+    state.pendingChoice.source.startsWith("v1912.search_stack") ||
+    state.pendingChoice.source.startsWith("v1911.short_circuit_search")
   ) {
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
     return;
@@ -12387,14 +12602,38 @@ function resolveRunnerStackSearchChoice(
     ...mustInstance(state.cardInstances, cardId),
     zone: { side: "runner", zone: "grip" },
   };
+  let shortCircuitSourceId: CardInstanceId | undefined;
+  if (choice.source.startsWith("v1911.short_circuit_search:")) {
+    shortCircuitSourceId = choice.source.split(":")[1] as
+      | CardInstanceId
+      | undefined;
+    if (
+      !shortCircuitSourceId ||
+      !state.runner.rig.resources.includes(shortCircuitSourceId) ||
+      definitionFor(state, shortCircuitSourceId).id !== THE_SHORT_CIRCUIT_ID
+    )
+      throw new Error("The Short Circuit ist nicht mehr installiert.");
+    trashRunnerInstalledCardToHeap(state, shortCircuitSourceId);
+  }
   shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "search_stack",
+    hiddenZoneAction: shortCircuitSourceId
+      ? "v1911_short_circuit_search"
+      : "search_stack",
     selectedCount: 1,
+    searchDestination: "runner_grip",
     shuffled: true,
+    ...(shortCircuitSourceId
+      ? {
+          publicRevealDefinitionId: definitionFor(state, cardId).id,
+          publicRevealKind: "reveal",
+          trashOnUse: true,
+          trashedCardDefinitionId: THE_SHORT_CIRCUIT_ID,
+        }
+      : {}),
   };
 }
 
@@ -13843,21 +14082,29 @@ function resolveV1911RunnerHiddenZoneAbility(
     SELF_MODIFYING_CODE_ID,
     AUJOURD_OUI_ID,
     NETO_ID,
+    THE_SHORT_CIRCUIT_ID,
   ]);
   const allowedExposeIds = new Set([MOUSE_ID, SEEYA_ID]);
-  const allowedRevealIds = new Set([THE_SHORT_CIRCUIT_ID, AUJOURD_OUI_ID]);
+  const allowedRevealIds = new Set([AUJOURD_OUI_ID]);
   if (ability === "search_stack_program_to_grip") {
     if (!allowedSearchIds.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
     startRunnerStackSearchChoice(
       state,
-      "v1911.search_stack",
-      "v1911_search_stack",
+      sourceDefinition.id === THE_SHORT_CIRCUIT_ID
+        ? `v1911.short_circuit_search:${sourceCardId}`
+        : "v1911.search_stack",
+      sourceDefinition.id === THE_SHORT_CIRCUIT_ID
+        ? "v1911_short_circuit_search"
+        : "v1911_search_stack",
     );
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_search_stack",
+      hiddenZoneAction:
+        sourceDefinition.id === THE_SHORT_CIRCUIT_ID
+          ? "v1911_short_circuit_search"
+          : "v1911_search_stack",
     };
     return;
   }
@@ -14773,6 +15020,9 @@ function publicContextForAction(
       context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     if (typeof legalAction.payload.ambushDefinitionId === "string")
       context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
+    if (typeof legalAction.payload.advancementCounterCount === "number")
+      context.advancementCounterCount =
+        legalAction.payload.advancementCounterCount;
     if (typeof legalAction.payload.runnerTagsAfter === "number")
       context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
     if (typeof legalAction.payload.trashedCardDefinitionId === "string")
@@ -14803,6 +15053,14 @@ function publicContextForAction(
   if (typeof legalAction.payload?.archivesAutoAccessedCount === "number")
     context.archivesAutoAccessedCount =
       legalAction.payload.archivesAutoAccessedCount;
+  for (const key of [
+    "accessTrashBaseCost",
+    "accessTrashCostModifier",
+    "accessTrashTotalCost",
+  ]) {
+    const value = legalAction.payload?.[key];
+    if (typeof value === "number") context[key] = value;
+  }
   if (legalAction.payload?.publicRevealKind)
     context.revealKind = legalAction.payload.publicRevealKind;
   if (
@@ -15806,10 +16064,16 @@ function applyPostBreakStealthLoss(
   const lossAmount = ability?.postBreakStealthLoss ?? 0;
   if (lossAmount <= 0) return;
   const stealthSources = runnerStealthRecurringCreditSources(state);
-  const requiredLoss = Math.min(
-    lossAmount,
-    stealthSources.reduce((sum, source) => sum + source.available, 0),
+  const availableStealth = stealthSources.reduce(
+    (sum, source) => sum + source.available,
+    0,
   );
+  if (breakerDefinition.id === RAMMING_PISTON_ID && availableStealth < lossAmount)
+    throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
+  const requiredLoss =
+    breakerDefinition.id === RAMMING_PISTON_ID
+      ? lossAmount
+      : Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return;
   if (stealthSources.length > 1) {
     startV1922HammerStealthLossChoice(
@@ -15839,6 +16103,9 @@ function applyPostBreakStealthLoss(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     postBreakStealthLoss: spent,
+    ...(breakerDefinition.id === RAMMING_PISTON_ID
+      ? { v1922RunnerProgramAbility: "ramming_piston_stealth_loss" }
+      : {}),
   };
 }
 
@@ -15857,6 +16124,13 @@ function runnerStealthRecurringCreditSources(
     if (available > 0) sources.push({ cardId, available });
   }
   return sources;
+}
+
+function runnerStealthRecurringCredits(state: GameState): number {
+  return runnerStealthRecurringCreditSources(state).reduce(
+    (sum, source) => sum + source.available,
+    0,
+  );
 }
 
 function startV1922HammerStealthLossChoice(
@@ -15885,7 +16159,7 @@ function startV1922HammerStealthLossChoice(
     choiceId: `choice_v1922_hammer_stealth_loss_${state.stateVersion + 1}`,
     side: "runner",
     source: `v1922.hammer_stealth_loss:${breakerId}:${state.stateVersion + 1}`,
-    prompt: "Stealth-Verlust fuer Hammer verteilen.",
+    prompt: "Stealth-Verlust verteilen.",
     kind: "select_cards",
     options,
     minSelections: requiredLoss,
@@ -16502,6 +16776,8 @@ function ensureRunnerTurnFlags(
     fangRunLockCreditCost: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
+    bodyweightDataCrecheExtraRunPending: false,
+    bodyweightDataCrecheExtraRunUsedThisTurn: false,
   });
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
@@ -16517,6 +16793,8 @@ function ensureRunnerTurnFlags(
   flags.fangRunLockCreditCost ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
+  flags.bodyweightDataCrecheExtraRunPending ??= false;
+  flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
   return flags;
 }
 

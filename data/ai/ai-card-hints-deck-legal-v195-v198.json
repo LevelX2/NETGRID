@@ -93,6 +93,7 @@
         "encounter_ice",
         "trace",
         "counter",
+        "runner_counter_removal",
         "end_the_run"
       ],
       "valueHints": {
@@ -102,6 +103,7 @@
       "riskTags": [
         "tag_window",
         "counter_pressure",
+        "runner_removal_window",
         "hidden_ice"
       ],
       "aiSupportStatus": "ai_supported",

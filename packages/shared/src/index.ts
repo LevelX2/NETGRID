@@ -925,6 +925,8 @@ export type GameState = {
     valuPakProgramInstallActionsRemaining?: number;
     valuPakTemporaryProgramInstallCredits?: number;
     shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
+    bodyweightDataCrecheExtraRunPending?: boolean;
+    bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -2181,17 +2183,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 3,
     memoryCost: 1,
-    recurringCredits: 1,
     rulesText:
-      "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "Whenever you make a successful run on R&D, put a Virus counter on Skivviss. Each Skivviss counter forces the Corp to draw 1 additional card at the start of each Corp turn. The Corp may purge Virus counters.",
     mechanics: [
       "install_program",
       "memory",
       "counter",
       "virus",
+      "successful_run_trigger",
+      "corp_start_turn_draw",
       "purge",
-      "recurring_credit",
-      "recurring_start_turn",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2730,13 +2731,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 4,
-    recurringCredits: 2,
     rulesText:
-      "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
+      "Install with 6 Bits. At the start of each Runner turn, take 1 Bit from Rigged Investments as 1 credit. Trash Rigged Investments when the last Bit is removed.",
     mechanics: [
       "install_resource",
-      "recurring_credit",
-      "recurring_start_turn",
+      "counter",
+      "runner_start_turn_credit",
+      "auto_trash",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2785,10 +2786,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "Installed Hidden-Zone helper: reveal the top card of your stack.",
+      "[A], trash The Short Circuit: Search your stack for a program, reveal it, add it to your grip, then shuffle your stack.",
     mechanics: [
       "install_resource",
+      "search",
       "reveal",
+      "shuffle",
+      "trash_on_use",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -4112,14 +4116,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 4,
     rulesText:
-      "Rezzed city-grid upgrade with hidden-zone reveal surfaces. Reveals and server effects stay side-safe and server-bound.",
+      "Region. While rezzed, each other asset and upgrade in this fort costs the Runner +2 credits to trash.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_upgrade_root_server",
       "city_grid",
-      "hidden_zone_search_reveal",
+      "region",
+      "trash_cost_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4842,12 +4847,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 3,
+    memoryLimitBonus: 1,
     rulesText:
-      "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "Deck. +1 MU. You may have only one deck installed. Once per turn, immediately after a successful run, make another run without spending an action.",
     mechanics: [
       "install_hardware",
       "memory",
+      "deck_unique",
+      "successful_run_trigger",
+      "bonus_run",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -7356,13 +7365,32 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 4,
     memoryCost: 1,
     strength: 5,
-    rulesText: "Installed program for trace-risk runs and trace bid support.",
+    rulesText:
+      "[2]: Break wall subroutine. [1]: +1 strength. After each wall subroutine broken with Ramming Piston, lose a total of 2 credits from Stealth cards.",
+    abilities: [
+      {
+        id: "ramming_piston_break_wall",
+        type: "break_subroutine",
+        cost: { credits: 2 },
+        iceSubtype: "wall",
+        timingPoint: "run.encounter_ice",
+        postBreakStealthLoss: 2,
+      },
+      {
+        id: "ramming_piston_pump",
+        type: "pump_strength",
+        cost: { credits: 1 },
+        amount: 1,
+        timingPoint: "run.encounter_ice",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",
-      "trace",
-      "link",
-      "bid_amount",
+      "icebreaker",
+      "wall_breaker",
+      "pump_strength",
+      "stealth_loss",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

@@ -8456,6 +8456,10 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       accessState,
       "onr_v1_323_experimental-ai",
     );
+    accessState.cardInstances[experimentalAiId] = {
+      ...accessState.cardInstances[experimentalAiId]!,
+      advancementCounters: 1,
+    };
     accessState = apply(
       accessState,
       "runner",
@@ -9749,7 +9753,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     ).toBe("playable_mvp");
   });
 
-  it("installs V1.9.12 virus and recurring cards, purges only virus counters and refreshes recurring pools", () => {
+  it("installs V1.9.12 virus cards and Rigged Investments bit depot, then purges only virus counters", () => {
     let state = toRunnerTurn(
       v1912CounterRecurringGame("v1912-virus-recurring"),
     );
@@ -9815,8 +9819,8 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     }
     if (investmentsId)
       expect(
-        state.cardInstances[investmentsId]?.counters?.recurring_credit,
-      ).toBe(2);
+        state.cardInstances[investmentsId]?.counters?.bit,
+      ).toBe(6);
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -9838,24 +9842,27 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       );
     }
     if (investmentsId) {
+      expect(state.cardInstances[investmentsId]?.counters?.bit).toBe(6);
       expect(
         state.cardInstances[investmentsId]?.counters?.recurring_credit,
-      ).toBe(2);
+      ).toBeUndefined();
       state.cardInstances[investmentsId] = {
         ...state.cardInstances[investmentsId]!,
         counters: {
           ...state.cardInstances[investmentsId]!.counters,
-          recurring_credit: 0,
+          bit: 1,
         },
       };
     }
 
     state.corp.maxHandSize = 100;
+    const runnerCreditsBeforeStart = state.runner.credits;
     state = apply(state, "corp", (action) => action.type === "end_turn");
-    if (investmentsId)
-      expect(
-        state.cardInstances[investmentsId]?.counters?.recurring_credit,
-      ).toBe(2);
+    if (investmentsId) {
+      expect(state.runner.credits).toBe(runnerCreditsBeforeStart + 1);
+      expect(state.runner.rig.resources).not.toContain(investmentsId);
+      expect(state.runner.heap).toContain(investmentsId);
+    }
   });
 
   it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
@@ -10521,7 +10528,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         "playable_mvp",
       );
       expect(definition?.mechanics.join(" "), definitionId).toMatch(
-        /trace|link|tag|resource|damage|hidden_zone|counter/,
+        /trace|link|tag|resource|damage|hidden_zone|counter|icebreaker|stealth/,
       );
       expect(definition?.rulesText, definitionId).not.toContain("WIP");
     }
@@ -17503,19 +17510,15 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       runnerTagsAfter: 1,
     });
 
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1918UpgradeAbility === "reveal_rd_top",
-    );
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1918_city_grid_reveal_rd_top",
-    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1918UpgradeAbility === "reveal_rd_top",
+      ),
+    ).toBe(false);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"/,
+      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
     );
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -17616,6 +17619,334 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(runReplay.ok).toBe(true);
     expect(hashState(runReplay.state)).toBe(hashState(runState));
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
+  it("uses Ramming Piston as a wall breaker with exact Stealth follow-up loss", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-ramming-piston",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_ramming_runner",
+          name: "Spotcheck Ramming Runner",
+          cards: [
+            { id: "onr_v1_053_ramming-piston", quantity: 1 },
+            { id: "onr_v1_011_cloak", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      }),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_011_cloak");
+    moveRunnerCardToGrip(state, "onr_v1_053_ramming-piston");
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    state = apply(
+      state,
+      "runner",
+      (action) => sourceDefinition(state, action) === "onr_v1_011_cloak",
+    );
+    const cloakId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_011_cloak",
+    );
+    expect(cloakId).toBeDefined();
+    if (!cloakId) throw new Error("Missing Cloak");
+    setCardCounterForTest(state, cloakId, "recurring_credit", 5);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
+    );
+    const rammingId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_053_ramming-piston",
+    );
+    expect(rammingId).toBeDefined();
+    if (!rammingId) throw new Error("Missing Ramming Piston");
+    state.cardInstances[rammingId] = {
+      ...state.cardInstances[rammingId]!,
+      strengthModifier: 10,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
+    );
+    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_053_ramming-piston",
+      postBreakStealthLoss: 2,
+    });
+  });
+
+  it("adds Skivviss counters on successful R&D runs and converts them into Corp start-turn draws", () => {
+    let state = toRunnerTurn(
+      v1912CounterRecurringGame("spotcheck-skivviss-rd"),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_064_skivviss");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_064_skivviss",
+    );
+    const skivvissId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_064_skivviss",
+    );
+    expect(skivvissId).toBeDefined();
+    if (!skivvissId) throw new Error("Missing Skivviss");
+    expect(cardCounterAmount(state, skivvissId, "virus")).toBe(0);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(cardCounterAmount(state, skivvissId, "virus")).toBe(1);
+    const hqBeforeCorpTurn = state.corp.hq.length;
+    state.corp.maxHandSize = 100;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 1);
+  });
+
+  it("uses The Short Circuit as a trash-on-use private stack tutor", () => {
+    let state = toRunnerTurn(v1911HiddenZoneGame("spotcheck-short-circuit"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_177_the-short-circuit");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_177_the-short-circuit",
+    );
+    const shortCircuitId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_177_the-short-circuit",
+    );
+    expect(shortCircuitId).toBeDefined();
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "search_stack_program_to_grip" &&
+        sourceDefinition(state, action) === "onr_v1_177_the-short-circuit",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetProgramId);
+    if (shortCircuitId) expect(state.runner.heap).toContain(shortCircuitId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1911_short_circuit_search",
+      cardDefinitionId: "simple_decoder",
+      trashedCardDefinitionId: "onr_v1_177_the-short-circuit",
+    });
+  });
+
+  it("enforces Bodyweight Data Creche install cost, MU, deck replacement and bonus run", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-bodyweight-creche",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_bodyweight_runner",
+          name: "Spotcheck Bodyweight Runner",
+          cards: [
+            { id: "onr_v1_122_artemis-2020", quantity: 1 },
+            { id: "onr_v1_123_bodyweight-data-creche", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
+    moveRunnerCardToGrip(state, "onr_v1_123_bodyweight-data-creche");
+    state = apply(
+      state,
+      "runner",
+      (action) => sourceDefinition(state, action) === "onr_v1_122_artemis-2020",
+    );
+    const oldDeckId = state.runner.rig.hardware.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_122_artemis-2020",
+    );
+    const memoryBefore = state.runner.memoryLimit;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_123_bodyweight-data-creche",
+    );
+    expect(state.runner.memoryLimit).toBeGreaterThanOrEqual(
+      memoryBefore - 1,
+    );
+    if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const bonusRun = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.bonusRunSource === "onr_v1_123_bodyweight-data-creche",
+    );
+    const clicksBeforeBonus = state.runner.clicks;
+    expect(bonusRun.costs).not.toContainEqual(
+      expect.objectContaining({ clicks: expect.any(Number) }),
+    );
+    state = apply(state, "runner", (action) => action.actionId === bonusRun.actionId);
+    expect(state.runner.clicks).toBeLessThanOrEqual(clicksBeforeBonus);
+  });
+
+  it("lets the Runner remove Data Raven counters for an action and 1 credit", () => {
+    let state = toRunnerTurn(v196CardReleaseGame("spotcheck-data-raven-remove"));
+    state.runner.credits = 5;
+    const dataRavenId = putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+    state.cardInstances[dataRavenId] = {
+      ...state.cardInstances[dataRavenId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    setCardCounterForTest(state, dataRavenId, "power", 2);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerAbility === "remove_data_raven_counter",
+    );
+    expect(cardCounterAmount(state, dataRavenId, "power")).toBe(1);
+    expect(state.runner.credits).toBe(4);
+    expect(state.runner.clicks).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerAbility: "remove_data_raven_counter",
+      removedCounterAmount: 1,
+      remainingCounters: 1,
+    });
+  });
+
+  it("uses Experimental AI advancement counters as the installed-program trash count", () => {
+    let state = toRunnerTurn(
+      v1919AgendaOveradvanceGame("spotcheck-experimental-ai"),
+    );
+    installRunnerProgramForTest(state, "simple_decoder");
+    installRunnerProgramForTest(state, "simple_fracter");
+    const experimentalAiId = putCorpRootInRemote(
+      state,
+      "onr_v1_323_experimental-ai",
+    );
+    state.cardInstances[experimentalAiId] = {
+      ...state.cardInstances[experimentalAiId]!,
+      advancementCounters: 2,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runner.heap.map((id) => state.cardInstances[id]?.definitionId)).toEqual(
+      expect.arrayContaining(["simple_decoder", "simple_fracter"]),
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      advancementCounterCount: 2,
+      trashedCount: 2,
+    });
+  });
+
+  it("applies New Galveston City Grid as a server-bound trash-cost modifier without R&D reveal", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-new-galveston",
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_new_galveston_corp",
+          name: "Spotcheck New Galveston Corp",
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 20;
+    const assetId = putCorpRootInRemote(state, "simple_economy_asset");
+    const gridId = putCorpRootInRemote(
+      state,
+      "onr_v1_362_new-galveston-city-grid",
+    );
+    const server = state.corp.servers.find((candidate) => candidate.id === "remote_1");
+    expect(server).toBeDefined();
+    if (!server) throw new Error("Missing remote");
+    server.root = [assetId, gridId];
+    state.cardInstances[assetId] = {
+      ...state.cardInstances[assetId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.cardInstances[gridId] = {
+      ...state.cardInstances[gridId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const trashAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+    expect(trashAction.payload?.accessTrashCostModifier).toBe(2);
+    state = apply(state, "runner", (action) => action.actionId === trashAction.actionId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      accessTrashCostModifier: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"rd"|R&D|cardInstances/,
+    );
   });
 });
 

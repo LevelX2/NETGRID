@@ -19,7 +19,7 @@
   "assertions": [
     "Runtime definitions exist for all V1.9.12 target cards.",
     "Virus programs receive virus counters on install and remain purgeable by the Corp-only three-click purge action.",
-    "Recurring counters on Runner programs and resources are initialized and refreshed without accumulation.",
+    "Recurring counters on Runner programs and resources are initialized and refreshed without accumulation; Skivviss uses successful R&D-run virus counters and Rigged Investments uses a six-bit start-of-turn depot instead of recurring credits.",
     "I Spy, Deal with Militech and Hunt Club BBS use side-safe Hidden-Zone paths.",
     "Detroit Police Contract uses a typed scored-agenda counter action."
   ],

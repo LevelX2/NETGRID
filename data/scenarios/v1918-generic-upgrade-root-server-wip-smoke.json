@@ -28,7 +28,7 @@
     "Red Herrings covers a server-bound agenda steal tax on legal agenda access.",
     "V1.9.18 city grids cover server-bound region replacement with older region visibility in Archives.",
     "Crystal Palace Station Grid and Dr. Dreff cover explicit Power-counter LegalActions for rezzed server upgrades.",
-    "New Galveston City Grid covers a side-safe R&D top reveal from a rezzed city-grid upgrade.",
+    "New Galveston City Grid covers a rezzed, server-bound +2 trash-cost modifier for other nodes and upgrades in its fort, with no R&D top reveal payload.",
     "Paris City Grid covers a rezzed city-grid Trace 2 tag window with bid choices.",
     "Omni Kismet and Paris City Grid cover tagged-runner condition LegalActions.",
     "Twenty-Four-Hour Surveillance covers a rezzed server-bound run-start tax payable through Runner run/stealth recurring credits.",

@@ -762,15 +762,20 @@
       "roles": [
         "runner",
         "hardware",
+        "deck",
+        "memory",
+        "bonus_run",
         "per_card_longtail"
       ],
       "planRoles": [
-        "runner_install_hardware"
+        "runner_install_hardware",
+        "run_pressure"
       ],
       "requiredMechanics": [
         "per_card_longtail_resolver_gate",
-        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
-        "install_hardware_memory_surface"
+        "install_hardware_memory_surface",
+        "deck_unique_replacement",
+        "successful_run_bonus_run"
       ],
       "valueHints": {
         "perCardLongtailPriority": 2
@@ -778,7 +783,8 @@
       "riskTags": [
         "legal_actions_only",
         "public_payload_only",
-        "replay_statehash_required"
+        "replay_statehash_required",
+        "once_per_turn"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

@@ -35,7 +35,7 @@
       "label": "City Grid und Region Upgrades",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.18",
-      "currentScopeNote": "Crystal Palace Station Grid, New Galveston City Grid und Paris City Grid haben side-sichere Root-Upgrade-Aktionen; Singapore City Grid bleibt bis zur Promotion als Runtime-Definition ohne Sonderpfad dokumentiert.",
+      "currentScopeNote": "Crystal Palace Station Grid und Paris City Grid haben side-sichere Root-Upgrade-Aktionen; New Galveston City Grid nutzt einen rezzed, servergebundenen +2-Trashkosten-Modifikator fuer andere Nodes/Upgrades im Fort; Singapore City Grid bleibt bis zur Promotion als Runtime-Definition ohne Sonderpfad dokumentiert.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     },
     {
@@ -59,7 +59,7 @@
       "label": "Access-Ambush und Hidden-Zone-Upgrades",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.18",
-      "currentScopeNote": "Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings und Turbeau Delacroix nutzen bestehende Access-, Ambush- und Trace-Barrieren; New Galveston nutzt R&D-Top-Reveal ohne private Payloads.",
+      "currentScopeNote": "Crybaby, Dedicated Response Team, Dieter Esslin, Red Herrings und Turbeau Delacroix nutzen bestehende Access-, Ambush- und Trace-Barrieren; New Galveston nutzt keine Hidden-Zone-Reveal-Aktion mehr, sondern servergebundene Trashkosten-Revalidation mit public Kostenpayload.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     }
   ],

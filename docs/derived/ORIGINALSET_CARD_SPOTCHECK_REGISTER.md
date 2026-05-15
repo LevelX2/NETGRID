@@ -4,6 +4,25 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-ramming-galveston
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_RAMMING_GALVESTON_IMPLEMENTATION.md`
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Ramming Piston | `onr_v1_053_ramming-piston` | Nacharbeit umgesetzt: echter Wall-Breaker mit Pump und exakt 2 Stealth-Folgekosten | Engine-Test und AI-/Manifest-Vertrag korrigiert |
+| Skivviss | `onr_v1_064_skivviss` | Nacharbeit umgesetzt: erfolgreiche R&D-Runs legen Virus-Counter, Corp-Zugstart zieht Zusatzkarten | Recurring-Stub entfernt; V1.9.12 Artefakte korrigiert |
+| Core Command: Jettison Ice | `onr_v1_080_core-command-jettison-ice` | Engine-Pfad funktioniert: erfolgreicher HQ-Run, Rez-Kosten-Zahlung und öffentlicher ICE-Trash | Bestehende V1.9.22-Abdeckung bleibt grün |
+| Weather-to-Finance Pipe | `onr_v1_118_weather-to-finance-pipe` | Engine-Pfad funktioniert; Access-Replacement-Payload ist chronikfähiger | Hidden-Zone-Barriere und Creditverlust-Payload präzisiert |
+| Bodyweight Data Creche | `onr_v1_123_bodyweight-data-creche` | Nacharbeit umgesetzt: Installkosten 3, +1 MU, Deck-Einzigartigkeit und Bonus-Run | Engine-Test, AI-Hint und V1.9.22 Contract ergänzt |
+| Rigged Investments | `onr_v1_174_rigged-investments` | Nacharbeit umgesetzt: sechs Bit-Counter, Start-of-turn-Credit und Auto-Trash | Recurring-Stub entfernt; V1.9.12 Artefakte korrigiert |
+| The Short Circuit | `onr_v1_177_the-short-circuit` | Nacharbeit umgesetzt: private Stack-Programm-Suche, Reveal, Shuffle und Trash-on-use | Engine-Test und V1.9.11 Artefakte korrigiert |
+| Data Raven | `onr_v1_236_data-raven` | Nacharbeit umgesetzt: Runner kann Counter für `[A]` und 1 Credit entfernen | Engine-Test und AI-Hint ergänzt |
+| Experimental AI | `onr_v1_323_experimental-ai` | Nacharbeit umgesetzt: Advancement-Counter steuern Programm-Trash-Anzahl | Engine-Test und V1.9.19 Artefakte korrigiert |
+| New Galveston City Grid | `onr_v1_362_new-galveston-city-grid` | Nacharbeit umgesetzt: servergebundener +2-Trashkosten-Modifikator statt R&D-Reveal | Engine-Test und V1.9.18 Artefakte korrigiert |
+
 ## Runde 2026-05-15-netwatch-spinn
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

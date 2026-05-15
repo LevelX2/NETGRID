@@ -362,10 +362,12 @@
       "cardCode": "onr_v1_119_arasaka-portable-prototype",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface",
+      "resolverFamily": "per_card_longtail_resolver_gate; install_hardware_memory_surface; deck_unique_replacement; successful_run_bonus_run",
       "coveredSmokes": [
         "runtime_definition_guard",
         "install_hardware_legal_action",
+        "deck_unique_replacement",
+        "successful_run_bonus_run",
         "wrong_side_revalidation",
         "stale_state_revalidation",
         "public_payload_visibility",
