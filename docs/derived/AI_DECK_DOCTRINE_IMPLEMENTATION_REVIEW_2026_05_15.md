@@ -15,6 +15,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
 - Simulationsreports zählen nun konkrete Doctrine-Fehlerklassen: nackte Agenda-Installs, Agenda-Flood-Exposure, verpasste Score-Fenster, Remote-Overbuild, Economy-Stalls, wiederholte Low-Value-Central-Runs, Rig-Stalls und Asset-Trash-Neglect.
+- Ein Doctrine-Quality-Benchmark vergleicht Baseline und aktuellen Kandidaten auf denselben Seeds und liefert Doctrine- sowie Safety-Deltas.
 - Multiplayer-Server übergibt beim KI-Zug nur den privaten Snapshot der aktiven KI-Seite an `buildAiDecisionInput`.
 - `DecisionDebug` enthält nur aggregierte Doktrin-Tags, Confidence, Risk Flags und Evidenz, keine Deckliste oder Deckreihenfolge.
 
@@ -26,7 +27,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus und redigierte Plan-Debugdaten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
 - `apps/server/src/multiplayer.ts`: Snapshot-Übergabe für die aktive KI-Seite.
-- `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz, Mulligan und Doctrine-Qualitätsmetriken.
+- `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz, Mulligan, Doctrine-Qualitätsmetriken und Benchmark-Deltas.
 
 ## Verifikation
 
@@ -44,6 +45,6 @@ Teilweise grün:
 
 ## Offene Punkte
 
-- Doctrine-Fehlerklassen werden gezählt, aber noch nicht gegen eine eingefrorene Baseline ausgewertet.
+- Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.

@@ -56,6 +56,7 @@ import {
   createBeliefSimulationWorld,
   runV143ExploitRegressionFixtures,
   runV143SimulationLeague,
+  runDoctrineQualityBenchmark,
   generateCorpPlanCandidates,
   generateRunnerPlanCandidates,
   runnerPlanUsesOnlyAiSupportedCards,
@@ -2185,6 +2186,27 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(league.profiles.every((profile) => profile.illegalActions === 0)).toBe(true);
     expect(league.profiles.every((profile) => profile.replayFailures === 0)).toBe(true);
     expect(JSON.stringify(league)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  }, 30_000);
+
+  it("compares doctrine quality metrics between baseline and current candidate", () => {
+    const benchmark = runDoctrineQualityBenchmark({
+      includeHoldout: false,
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 30,
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate"
+    });
+
+    expect(benchmark.version).toBe("ai-deck-doctrine-quality-v1");
+    expect(benchmark.baselineProfile).toBe("belief_ai_v1_4_2");
+    expect(benchmark.candidateProfile).toBe("current_candidate");
+    expect(benchmark.seeds.length).toBeGreaterThan(0);
+    expect(benchmark.baselineRun.games).toBe(benchmark.seeds.length);
+    expect(benchmark.candidateRun.games).toBe(benchmark.seeds.length);
+    expect(benchmark.delta.nakedAgendaInstalls).toBe(benchmark.candidate.nakedAgendaInstalls - benchmark.baseline.nakedAgendaInstalls);
+    expect(benchmark.safety.illegalActionDelta).toBe(benchmark.candidateRun.illegalActions - benchmark.baselineRun.illegalActions);
+    expect(JSON.stringify(benchmark)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
   }, 30_000);
 
   it("evaluates holdout tuning gate for regression and improvement", () => {

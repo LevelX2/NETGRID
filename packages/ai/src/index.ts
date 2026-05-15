@@ -134,6 +134,26 @@ export type AiDoctrineQualityMetrics = {
   assetTrashNeglect: number;
 };
 
+export type AiDoctrineQualityDelta = AiDoctrineQualityMetrics;
+
+export type AiDoctrineQualityBenchmarkResult = {
+  version: "ai-deck-doctrine-quality-v1";
+  baselineProfile: SimulationBenchmarkProfileId;
+  candidateProfile: SimulationBenchmarkProfileId;
+  seeds: string[];
+  baseline: AiDoctrineQualityMetrics;
+  candidate: AiDoctrineQualityMetrics;
+  delta: AiDoctrineQualityDelta;
+  safety: {
+    illegalActionDelta: number;
+    replayFailureDelta: number;
+    timeoutRateDelta: number;
+    fallbackRateDelta: number;
+  };
+  baselineRun: V143SimulationRunResult;
+  candidateRun: V143SimulationRunResult;
+};
+
 export type AiSoakResult = {
   summaries: AiSimulationSummary[];
   aggregate: {
@@ -215,6 +235,11 @@ export type V143SoakResult = {
 };
 
 export type V143LeagueConfig = Partial<AiSimulationConfig> & { includeHoldout?: boolean };
+
+export type AiDoctrineQualityBenchmarkConfig = V143LeagueConfig & {
+  baselineProfile?: SimulationBenchmarkProfileId;
+  candidateProfile?: SimulationBenchmarkProfileId;
+};
 
 export type V143ExploitFixture = {
   fixtureId: string;
@@ -595,6 +620,35 @@ export function runV143SimulationLeague(config: V143LeagueConfig = {}): V143Soak
   };
 }
 
+export function runDoctrineQualityBenchmark(config: AiDoctrineQualityBenchmarkConfig = {}): AiDoctrineQualityBenchmarkResult {
+  const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
+  const candidateProfileId = config.candidateProfile ?? "current_candidate";
+  const baselineProfile = benchmarkProfileById(baselineProfileId);
+  const candidateProfile = benchmarkProfileById(candidateProfileId);
+  const seeds = config.includeHoldout === false ? SOAK_SEEDS_143.tuningSeeds : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+  const baselineRun = runV143Profile(baselineProfile, seeds, config);
+  const candidateRun = runV143Profile(candidateProfile, seeds, config);
+  const baseline = sumDoctrineMetrics(baselineRun.summaries.map((summary) => summary.metrics.doctrine));
+  const candidate = sumDoctrineMetrics(candidateRun.summaries.map((summary) => summary.metrics.doctrine));
+  return {
+    version: "ai-deck-doctrine-quality-v1",
+    baselineProfile: baselineProfileId,
+    candidateProfile: candidateProfileId,
+    seeds,
+    baseline,
+    candidate,
+    delta: diffDoctrineMetrics(candidate, baseline),
+    safety: {
+      illegalActionDelta: candidateRun.illegalActions - baselineRun.illegalActions,
+      replayFailureDelta: candidateRun.replayFailures - baselineRun.replayFailures,
+      timeoutRateDelta: round(candidateRun.timeouts / Math.max(candidateRun.games, 1) - baselineRun.timeouts / Math.max(baselineRun.games, 1)),
+      fallbackRateDelta: round(candidateRun.fallbackRate - baselineRun.fallbackRate)
+    },
+    baselineRun,
+    candidateRun
+  };
+}
+
 export function evaluateV143TuningGate(candidate: V143SimulationRunResult, baseline: V143SimulationRunResult): V143TuningGateResult {
   const holdoutDelta = {
     winRate: round((candidate.winRates.runner ?? 0) - (baseline.winRates.runner ?? 0)),
@@ -909,6 +963,16 @@ function runV143Profile(profile: SimulationBenchmarkProfile, seeds: string[], co
     replayFailures: summaries.filter((summary) => !summary.replayOk).length,
     notableExploitRefs: sortedUnique(exploitRefs),
     summaries
+  };
+}
+
+function benchmarkProfileById(profileId: SimulationBenchmarkProfileId): SimulationBenchmarkProfile {
+  const profile = BENCHMARK_PROFILES_143.profiles.find((candidate) => candidate.benchmarkProfileId === profileId);
+  if (profile) return profile;
+  return {
+    benchmarkProfileId: profileId,
+    runnerMode: profileId,
+    corpMode: profileId
   };
 }
 
@@ -1689,6 +1753,48 @@ function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
     repeatedLowValueCentralRun: countTag(tags, "repeated_low_value_central_run"),
     rigStall: countTag(tags, "rig_stall"),
     assetTrashNeglect: countTag(tags, "asset_trash_neglect")
+  };
+}
+
+function sumDoctrineMetrics(metrics: AiDoctrineQualityMetrics[]): AiDoctrineQualityMetrics {
+  return metrics.reduce(
+    (sum, entry) => ({
+      nakedAgendaInstalls: sum.nakedAgendaInstalls + entry.nakedAgendaInstalls,
+      agendaFloodExposure: sum.agendaFloodExposure + entry.agendaFloodExposure,
+      scoreWindowMissed: sum.scoreWindowMissed + entry.scoreWindowMissed,
+      remoteOverbuild: sum.remoteOverbuild + entry.remoteOverbuild,
+      economyStall: sum.economyStall + entry.economyStall,
+      repeatedLowValueCentralRun: sum.repeatedLowValueCentralRun + entry.repeatedLowValueCentralRun,
+      rigStall: sum.rigStall + entry.rigStall,
+      assetTrashNeglect: sum.assetTrashNeglect + entry.assetTrashNeglect
+    }),
+    emptyDoctrineMetrics()
+  );
+}
+
+function diffDoctrineMetrics(candidate: AiDoctrineQualityMetrics, baseline: AiDoctrineQualityMetrics): AiDoctrineQualityDelta {
+  return {
+    nakedAgendaInstalls: candidate.nakedAgendaInstalls - baseline.nakedAgendaInstalls,
+    agendaFloodExposure: candidate.agendaFloodExposure - baseline.agendaFloodExposure,
+    scoreWindowMissed: candidate.scoreWindowMissed - baseline.scoreWindowMissed,
+    remoteOverbuild: candidate.remoteOverbuild - baseline.remoteOverbuild,
+    economyStall: candidate.economyStall - baseline.economyStall,
+    repeatedLowValueCentralRun: candidate.repeatedLowValueCentralRun - baseline.repeatedLowValueCentralRun,
+    rigStall: candidate.rigStall - baseline.rigStall,
+    assetTrashNeglect: candidate.assetTrashNeglect - baseline.assetTrashNeglect
+  };
+}
+
+function emptyDoctrineMetrics(): AiDoctrineQualityMetrics {
+  return {
+    nakedAgendaInstalls: 0,
+    agendaFloodExposure: 0,
+    scoreWindowMissed: 0,
+    remoteOverbuild: 0,
+    economyStall: 0,
+    repeatedLowValueCentralRun: 0,
+    rigStall: 0,
+    assetTrashNeglect: 0
   };
 }
 
