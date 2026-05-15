@@ -9325,7 +9325,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible MU", () => {
+  it("installs V1.9.20 MRAM hardware through legal actions and recomputes visible hand size", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-mram-memory",
@@ -9340,7 +9340,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    const beforeLimit = state.runner.memoryLimit;
+    const beforeMemoryLimit = state.runner.memoryLimit;
+    const beforeMaxHandSize = getPlayerView(state, "runner").own.maxHandSize;
     state = apply(
       state,
       "runner",
@@ -9348,7 +9349,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_133_militech-mram-chip",
     );
-    expect(state.runner.memoryLimit).toBe(beforeLimit + 2);
+    expect(state.runner.memoryLimit).toBe(beforeMemoryLimit);
+    expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
+      beforeMaxHandSize + 3,
+    );
     state = apply(
       state,
       "runner",
@@ -9356,20 +9360,21 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_134_mram-chip",
     );
-    expect(state.runner.memoryLimit).toBe(beforeLimit + 3);
+    expect(state.runner.memoryLimit).toBe(beforeMemoryLimit);
 
     const runnerView = getPlayerView(state, "runner");
-    expect(runnerView.own.memoryLimit).toBe(beforeLimit + 3);
+    expect(runnerView.own.memoryLimit).toBe(beforeMemoryLimit);
+    expect(runnerView.own.maxHandSize).toBe(beforeMaxHandSize + 5);
     expect(
       runnerView.own.rig?.find(
         (card) => card.definitionId === "onr_v1_133_militech-mram-chip",
-      )?.memoryLimitBonus,
-    ).toBe(2);
+      )?.maxHandSizeBonus,
+    ).toBe(3);
     expect(
       runnerView.own.rig?.find(
         (card) => card.definitionId === "onr_v1_134_mram-chip",
-      )?.memoryLimitBonus,
-    ).toBe(1);
+      )?.maxHandSizeBonus,
+    ).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.some(
         (card) => card.definitionId === "onr_v1_133_militech-mram-chip",
@@ -11718,6 +11723,63 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       if (definition?.type === "program")
         expect(state.runner.memoryUsed, definitionId).toBeGreaterThan(0);
     }
+
+    let shortTermState = toRunnerTurn(
+      v1914TraceTagResourceGame("v1914-short-term-contract"),
+    );
+    shortTermState.runner.credits = 20;
+    shortTermState.runner.clicks = 10;
+    const shortTermId = moveRunnerCardToGrip(
+      shortTermState,
+      "onr_v1_178_short-term-contract",
+    );
+    const initial = structuredClone(shortTermState);
+    const replayStart = shortTermState.eventLog.length;
+    shortTermState = apply(
+      shortTermState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === shortTermId,
+    );
+    expect(cardCounterAmount(shortTermState, shortTermId, "power")).toBe(12);
+    expect(
+      getPlayerView(shortTermState, "runner").own.rig?.find(
+        (card) => card.instanceId === shortTermId,
+      )?.counters?.power,
+    ).toBe(12);
+
+    for (let use = 1; use <= 6; use += 1) {
+      const creditsBefore = shortTermState.runner.credits;
+      shortTermState = apply(
+        shortTermState,
+        "runner",
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.resourceAbility ===
+            "short_term_contract_take_credits" &&
+          String(action.payload?.cardId) === shortTermId,
+      );
+      expect(shortTermState.runner.credits).toBe(creditsBefore + 2);
+      expect(cardCounterAmount(shortTermState, shortTermId, "power")).toBe(
+        Math.max(0, 12 - use * 2),
+      );
+    }
+
+    expect(shortTermState.runner.rig.resources).not.toContain(shortTermId);
+    expect(shortTermState.runner.heap).toContain(shortTermId);
+    expect(shortTermState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      resourceAbility: "short_term_contract_take_credits",
+      gainedCredits: 2,
+      remainingCounters: 0,
+      shortTermContractTrashed: true,
+    });
+    const shortTermReplay = replayEvents(
+      initial,
+      shortTermState.eventLog.slice(replayStart),
+    );
+    expect(shortTermReplay.ok).toBe(true);
+    expect(hashState(shortTermReplay.state)).toBe(hashState(shortTermState));
 
     let linkState = toRunnerTurn(
       v1914TraceTagResourceGame("v1914-installed-link"),

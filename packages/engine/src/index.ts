@@ -202,6 +202,7 @@ const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const DIPLOMATIC_IMMUNITY_ID = "onr_v1_160_diplomatic-immunity";
 const BROKER_ID = "onr_v1_154_broker";
+const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
 const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
@@ -4502,6 +4503,28 @@ function runnerMainActions(state: GameState): LegalAction[] {
           );
         }
       }
+      if (definition.id === SHORT_TERM_CONTRACT_ID) {
+        const storedCredits = cardCounter(state, resourceId, "power");
+        if (storedCredits >= 2) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: 2 Credits nehmen`,
+              resourceId,
+              [{ clicks: 1 }],
+              {
+                cardId: resourceId,
+                resourceAbility: "short_term_contract_take_credits",
+                counterType: "power",
+                removePowerCounterAmount: 2,
+                gainCreditsAmount: 2,
+              },
+            ),
+          );
+        }
+      }
       if (definition.id === "onr_v1_159_databroker") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
@@ -7647,6 +7670,13 @@ function performAction(
       return;
     case "trigger_ability":
       if (
+        legalAction.payload?.resourceAbility ===
+        "short_term_contract_take_credits"
+      ) {
+        resolveShortTermContractAbility(state, legalAction);
+        return;
+      }
+      if (
         legalAction.payload?.resourceAbility === "broker_load_credits" ||
         legalAction.payload?.resourceAbility === "broker_take_credits"
       ) {
@@ -7797,6 +7827,49 @@ function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void 
     removedCounterAmount: removeAmount,
     gainedCredits: gainAmount,
     remainingCounters: cardCounter(state, sourceCardId, "power"),
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function resolveShortTermContractAbility(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Short-Term Contract nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("Short-Term Contract ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== SHORT_TERM_CONTRACT_ID)
+    throw new Error("Die Short-Term-Contract-Faehigkeit passt nicht zur Karte.");
+
+  const removeAmount = Number(
+    legalAction.payload?.removePowerCounterAmount ?? 0,
+  );
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (
+    !Number.isInteger(removeAmount) ||
+    removeAmount !== 2 ||
+    !Number.isInteger(gainAmount) ||
+    gainAmount !== 2
+  )
+    throw new Error("Short-Term Contract nimmt genau 2 Credits.");
+  if (cardCounter(state, sourceCardId, "power") < removeAmount)
+    throw new Error("Auf Short-Term Contract liegen nicht genug Credits.");
+
+  spendClick(state, "runner");
+  spendCardCounter(state, sourceCardId, "power", removeAmount);
+  credits(state, "runner", gainAmount);
+  const remainingCounters = cardCounter(state, sourceCardId, "power");
+  const shortTermContractTrashed = remainingCounters === 0;
+  if (shortTermContractTrashed)
+    trashRunnerInstalledCardToHeap(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    removedCounterAmount: removeAmount,
+    gainedCredits: gainAmount,
+    remainingCounters,
+    shortTermContractTrashed,
     runnerCreditsAfter: state.runner.credits,
   };
 }
@@ -8049,6 +8122,15 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
+      if (definition.id === SHORT_TERM_CONTRACT_ID) {
+        setCardCounter(state, cardId, "power", 12);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          counterType: "power",
+          addedCounterAmount: 12,
+          remainingCounters: 12,
+        };
+      }
       if (definition.id === RIGGED_INVESTMENTS_ID) {
         setCardCounter(state, cardId, "bit", 6);
         legalAction.payload = {
@@ -11374,7 +11456,11 @@ function handForSide(state: GameState, side: Side): CardInstanceId[] {
 function maxHandSize(state: GameState, side: Side): number {
   if (side === "corp")
     return state.corp.maxHandSize + v1920CorpMaxHandSizeModifier(state);
-  return state.runner.maxHandSize - state.runner.coreDamage;
+  return (
+    state.runner.maxHandSize +
+    runnerInstalledMaxHandSizeModifier(state) -
+    state.runner.coreDamage
+  );
 }
 
 function v1920CorpMaxHandSizeModifier(state: GameState): number {
@@ -11384,6 +11470,15 @@ function v1920CorpMaxHandSizeModifier(state: GameState): number {
   )
     ? 1
     : 0;
+}
+
+function runnerInstalledMaxHandSizeModifier(state: GameState): number {
+  return state.runner.rig.hardware.reduce((sum, cardId) => {
+    const bonus = definitionFor(state, cardId).maxHandSizeBonus ?? 0;
+    if (!Number.isInteger(bonus))
+      throw new Error("Handlimit-Bonus ist ungueltig.");
+    return sum + bonus;
+  }, 0);
 }
 
 function drawCorpCard(state: GameState): void {
@@ -17097,6 +17192,7 @@ function publicContextForAction(
     "counterType",
     "addedCounterAmount",
     "remainingCounters",
+    "shortTermContractTrashed",
     "gainCreditsAmount",
     "removePowerCounterAmount",
     "drawnCount",
@@ -17819,6 +17915,9 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
       : {}),
     ...(definition.memoryLimitBonus !== undefined
       ? { memoryLimitBonus: definition.memoryLimitBonus }
+      : {}),
+    ...(definition.maxHandSizeBonus !== undefined
+      ? { maxHandSizeBonus: definition.maxHandSizeBonus }
       : {}),
     ...(definition.rezCost !== undefined
       ? { rezCost: definition.rezCost }

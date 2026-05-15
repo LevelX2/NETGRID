@@ -482,6 +482,7 @@ export type CardDefinition = {
   installCost?: number;
   memoryCost?: number;
   memoryLimitBonus?: number;
+  maxHandSizeBonus?: number;
   strength?: number;
   baseLink?: number;
   rezCost?: number;
@@ -1050,6 +1051,7 @@ export type VisibleCard = {
   installCost?: number;
   memoryCost?: number;
   memoryLimitBonus?: number;
+  maxHandSizeBonus?: number;
   rezCost?: number;
   baseLink?: number;
   rezzed?: boolean;
@@ -5732,12 +5734,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    memoryLimitBonus: 2,
+    maxHandSizeBonus: 3,
     rulesText:
-      "Provides +2 MU. The memory modifier is installed, visible and recomputed from public rig state.",
+      "Hand size +3. The hand-size modifier is installed, visible and recomputed from public rig state.",
     mechanics: [
       "install_hardware",
-      "modify_memory_limit",
+      "modify_hand_limit",
       "persistent_special_state",
       "action_economy",
       ONR_V1_LOCAL_PRIVATE,
@@ -5751,12 +5753,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    memoryLimitBonus: 1,
+    maxHandSizeBonus: 2,
     rulesText:
-      "Provides +1 MU. The memory modifier is installed, visible and recomputed from public rig state.",
+      "Hand size +2. The hand-size modifier is installed, visible and recomputed from public rig state.",
     mechanics: [
       "install_hardware",
-      "modify_memory_limit",
+      "modify_hand_limit",
       "persistent_special_state",
       "action_economy",
       ONR_V1_LOCAL_PRIVATE,
@@ -7696,7 +7698,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText: "Installed resource economy action with tag-risk interaction.",
+    rulesText:
+      "Put 12 credits on Short-Term Contract when installed. [A]: Take 2 credits from it. Trash it when empty.",
     mechanics: [
       "install_resource",
       "resource_action",
