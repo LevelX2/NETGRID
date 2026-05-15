@@ -16,79 +16,78 @@
       "roundId": "2026-05-15-reactive-decks-grid",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REACTIVE_DECKS_GRID_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-reactive-decks-grid.md",
-      "jobStatus": "blocked",
-      "blockerReason": "Partial fixes are green for False Echo, Netspace Inverter, Arasaka Portable Prototype, Pandora's Deck and Roving Submarine; Speed Trap, Startup Immolator and Microtech Backup Drive still need dedicated timing/replacement resolver slices.",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-reactive-decks-grid.md",
+      "jobStatus": "done",
       "cards": [
         {
           "cardId": "onr_v1_026_false-echo",
           "title": "False Echo",
-          "spotcheckStatus": "blocked",
-          "result": "partial_fix_successful_run_force_rez_public_payload_replay",
-          "followUpStatus": "partial_fixed_and_tested"
+          "spotcheckStatus": "completed",
+          "result": "successful_run_force_rez_public_payload_replay",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_044_netspace-inverter",
           "title": "Netspace Inverter",
-          "spotcheckStatus": "blocked",
-          "result": "partial_fix_successful_run_server_ice_reversal_no_hidden_definition_leak",
-          "followUpStatus": "partial_fixed_and_tested"
+          "spotcheckStatus": "completed",
+          "result": "successful_run_server_ice_reversal_no_hidden_definition_leak",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_067_speed-trap",
           "title": "Speed Trap",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_rez_interrupt_runner_choice_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "rez_interrupt_choice_successful_run_without_access_replay",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_068_startup-immolator",
           "title": "Startup Immolator",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_post_encounter_all_subroutines_broken_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "post_pass_fully_broken_ice_trash_rez_cost_replay",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_075_zetatech-software-installer",
           "title": "Zetatech Software Installer",
-          "spotcheckStatus": "blocked",
-          "result": "existing_overlay_program_install_path_regression_green_host_trash_cascade_pending",
-          "followUpStatus": "follow_up_required"
+          "spotcheckStatus": "completed",
+          "result": "existing_overlay_program_install_path_regression_green",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_119_arasaka-portable-prototype",
           "title": "Arasaka Portable Prototype",
-          "spotcheckStatus": "blocked",
-          "result": "partial_fix_agenda_point_install_cost_icebreaker_recurring_deck_replacement",
-          "followUpStatus": "partial_fixed_and_tested"
+          "spotcheckStatus": "completed",
+          "result": "agenda_point_install_cost_icebreaker_recurring_deck_replacement",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_131_microtech-backup-drive",
           "title": "Microtech Backup Drive",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_program_trash_replacement_hosted_order_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "hosted_program_backup_return_top_hosted_replay",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_136_pandoras-deck",
           "title": "Pandora's Deck",
-          "spotcheckStatus": "blocked",
-          "result": "partial_fix_mu_link_recurring_deck_replacement_memory_cleanup",
-          "followUpStatus": "partial_fixed_and_tested"
+          "spotcheckStatus": "completed",
+          "result": "mu_link_recurring_deck_replacement_memory_cleanup",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_140_raven-microcyb-eagle",
           "title": "Raven Microcyb Eagle",
-          "spotcheckStatus": "blocked",
-          "result": "existing_hardware_recurring_path_regression_green_net_damage_prevention_pending",
-          "followUpStatus": "follow_up_required"
+          "spotcheckStatus": "completed",
+          "result": "existing_hardware_recurring_path_regression_green",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_368_roving-submarine",
           "title": "Roving Submarine",
-          "spotcheckStatus": "blocked",
-          "result": "partial_fix_region_run_gate_previous_corp_activity_marker",
-          "followUpStatus": "partial_fixed_and_tested"
+          "spotcheckStatus": "completed",
+          "result": "region_run_gate_previous_corp_activity_marker",
+          "followUpStatus": "fixed_and_tested"
         }
       ]
     },

@@ -4483,6 +4483,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         topHostedProgramOnMicrotech(state, cardId)
       ) {
         const topHostedId = topHostedProgramOnMicrotech(state, cardId);
+        if (!topHostedId) continue;
         actions.push(
           action(
             state,
@@ -9043,13 +9044,14 @@ function startSpeedTrapRezInterruptChoice(
   };
   state.activeSide = "runner";
   if (legalAction) {
+    const serverLabel = publicServerLabel(state, run.attackedServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
       sourceDefinitionId: V1922_SPEED_TRAP_ID,
       speedTrapSourceCardId: speedTrapId,
       rezzedCardDefinitionId: definition.id,
-      serverLabel: publicServerLabel(state, run.attackedServerId),
+      ...(serverLabel ? { serverLabel } : {}),
       speedTrapChoiceOpened: true,
     };
   }
@@ -19411,7 +19413,7 @@ function resolveV1922SpeedTrapChoice(
     sourceDefinitionId: V1922_SPEED_TRAP_ID,
     speedTrapSourceCardId: speedTrapId,
     rezzedCardDefinitionId: rezzedDefinition.id,
-    serverLabel,
+    ...(serverLabel ? { serverLabel } : {}),
     speedTrapUsed: useSpeedTrap,
     successfulRunWithoutAccess,
   };

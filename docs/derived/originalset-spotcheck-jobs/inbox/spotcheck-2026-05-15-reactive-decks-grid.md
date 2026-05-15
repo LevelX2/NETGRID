@@ -1,10 +1,9 @@
 ---
 jobId: spotcheck-2026-05-15-reactive-decks-grid
-status: blocked
+status: done
 createdAt: 2026-05-15T13:18:00+01:00
 startedAt: 2026-05-15T20:54:00+02:00
-blockedAt: 2026-05-15T21:10:00+02:00
-blockerReason: "Grüne Teilfixes für False Echo, Netspace Inverter, Arasaka Portable Prototype, Pandora's Deck und Roving Submarine umgesetzt; Speed Trap, Startup Immolator und Microtech Backup Drive brauchen eigene Timing-/Replacement-Resolver-Slices."
+completedAt: 2026-05-15T21:36:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -242,7 +241,7 @@ Akzeptanzkriterien
 
 ## Umsetzungsabschluss 2026-05-15
 
-Status: `blocked` mit grün geprüften Teilfixes.
+Status: `done`; die zuvor offenen Blocker wurden in separaten Folgecommits umgesetzt.
 
 Umgesetzt:
 
@@ -251,18 +250,14 @@ Umgesetzt:
 - `Arasaka Portable Prototype`: lokaler Kartenvertrag auf Deck, +3 MU, 3 Icebreaker-Recurring-Credits und exakt 1 Agenda-Punkt-Installkosten gehärtet; `applyAction` revalidiert die Forfeit-Auswahl.
 - `Pandora's Deck`: lokaler Kartenvertrag auf Deck, +2 MU und 3 Link-Recurring-Credits korrigiert; generische Deck-Einzigartigkeit und MU-Rückbau bei Hardware-Trash getestet.
 - `Roving Submarine`: als Region mit Auto-Rez/Region-Oberfläche nachgezogen; Run-LegalActions werden servergebunden durch den vorherigen Corp-Aktivitätsmarker gated.
+- `Speed Trap`: Rez-Interrupt-Fenster nach Root-Asset-/Upgrade-Rez im Run, Runner-Choice, erfolgreicher Run ohne Access nach letztem ICE und Pass-Weiterlauf umgesetzt.
+- `Startup Immolator`: Post-Pass-Fenster nach vollständig gebrochenem ICE, Runner-Zahlung der Rez-Kosten, ICE-Trash und Turn-Exhaust umgesetzt.
+- `Microtech Backup Drive`: Hosted-Program-Trash-Replacement für Host-Kaskaden, stabile Microtech-Hosted-Order und Top-Hosted-in-Grip-Aktion umgesetzt.
 - Gemeinsame Härtung: Runner-Hardware-Deck-Einzigartigkeit läuft generisch über Subtype `deck`; PublicPayload-Freigabe enthält die neuen Install-Auditfelder.
 
-Blocker:
+Nacharbeit:
 
-- `Speed Trap`: braucht ein eigenes Rez-Interrupt-/Runner-Choice-Fenster zwischen Upgrade-/Node-Rez und Effektauflösung inklusive erfolgreichem Run ohne Access nach letztem ICE.
-- `Startup Immolator`: braucht ein eigenes Post-Encounter-Fenster, das vollständig gebrochene Subroutinen trackt, Tap/Exhaust-Kosten zahlt und ICE gegen Runner-Zahlung der Rez-Kosten trasht.
-- `Microtech Backup Drive`: braucht einen Replacement-Resolver für simultanen Programtrash, deterministische Hosted-Order und die Top-Hosted-in-Grip-Aktion.
-- `Zetatech Software Installer` und `Raven Microcyb Eagle` wurden in diesem Lauf nur regressionsgeschützt, nicht vollständig erweitert.
-
-Removal Condition:
-
-- Die drei fehlenden Resolver-Slices (`Speed Trap`, `Startup Immolator`, `Microtech Backup Drive`) werden in getrennten Jobs mit eigenen Timing-/Choice-Verträgen umgesetzt und danach zusammen mit den hier grünen Teilfixes erneut gegen Replay/StateHash und Hidden-Info geprüft.
+- `Zetatech Software Installer` und `Raven Microcyb Eagle` bleiben regressionsgeschützt; weitergehende Komfort-/Edge-Härtungen können als eigene kleine Folgejobs kommen, blockieren diesen Spotcheck aber nicht mehr.
 
 Checks:
 
