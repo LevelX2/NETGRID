@@ -1487,7 +1487,18 @@ function deckTableEntryNumericValue(entry: DeckTableLayoutEntry, detailsById: Re
 function deckTableEntryBuildCost(entry: DeckTableLayoutEntry, detailsById: Record<string, CatalogCardDetail>): number | null {
   const detail = detailsById[entry.cardId];
   if (!detail) return null;
+  if (detail.type === "agenda") return detail.numeric.advancementRequirement ?? null;
   return detail.numeric.installCost ?? detail.numeric.rezCost ?? detail.numeric.cost ?? null;
+}
+
+function deckTableBuildCostGroupName(key: string, entries: DeckTableLayoutEntry[], cardLookup: Map<string, CatalogCardSummary>): string {
+  if (key === "overflow") return "Weitere Kosten";
+  if (key === "none") return "Keine Kartenkosten";
+  const hasAgenda = entries.some((entry) => cardLookup.get(entry.cardId)?.type === "agenda");
+  const hasNonAgenda = entries.some((entry) => cardLookup.get(entry.cardId)?.type !== "agenda");
+  if (hasAgenda && !hasNonAgenda) return `Benötigt ${key}`;
+  if (hasAgenda && hasNonAgenda) return `Kosten/Benötigt ${key}`;
+  return `Kosten ${key}`;
 }
 
 function deckTableTypeGroupOrder(side: Side, label: string): number {
@@ -1552,7 +1563,7 @@ function distributeDeckTableByInstallCost(layout: DeckTableLayout, side: Side, c
     piles: Array.from({ length: groupCount }, (_, index) => {
       const [key, entries] = visibleGroups[index] ?? [String(index), []];
       const sourcePile = layout.piles[index];
-      const name = key === "overflow" ? "Weitere Kosten" : key === "none" ? "Keine Kartenkosten" : `Kosten ${key}`;
+      const name = deckTableBuildCostGroupName(key, entries, cardLookup);
       return {
         id: sourcePile?.id ?? `pile-${index + 1}`,
         name: entries.length > 0 ? name : defaultDeckTablePileName(side, index),
@@ -7938,6 +7949,7 @@ function DeckEditorPanel({
       }) as CSSProperties,
     [tableCardWidth, tableLibraryCardWidth, tableLibraryColumnCount, tableLibraryOverlapPercent, tableLibraryWidth, tableOverlapPercent]
   );
+  const tableWidthControlValue = DECK_TABLE_LIBRARY_WIDTH_MIN + DECK_TABLE_LIBRARY_WIDTH_MAX - tableLibraryWidth;
   const currentTableViewSettings = (): DeckTableViewSettings => ({
     cardWidth: tableCardWidth,
     overlapPercent: tableOverlapPercent,
@@ -7972,6 +7984,9 @@ function DeckEditorPanel({
     };
     setTableLibraryWidth(next.libraryWidth);
     rememberTableViewSettings(next);
+  };
+  const updateTableWidthSetting = (value: number) => {
+    updateTableLibraryWidthSetting(DECK_TABLE_LIBRARY_WIDTH_MIN + DECK_TABLE_LIBRARY_WIDTH_MAX - value);
   };
   const updateTableLibraryCardWidthSetting = (value: number) => {
     const next = {
@@ -8503,10 +8518,6 @@ function DeckEditorPanel({
                         <span>Überlappung</span>
                         <input min={DECK_TABLE_LIBRARY_OVERLAP_MIN} max={DECK_TABLE_LIBRARY_OVERLAP_MAX} step={DECK_TABLE_LIBRARY_OVERLAP_STEP} type="range" value={tableLibraryOverlapPercent} onChange={(event) => updateTableLibraryOverlapSetting(Number(event.target.value))} />
                       </label>
-                      <label>
-                        <span>Breite</span>
-                        <input min={DECK_TABLE_LIBRARY_WIDTH_MIN} max={DECK_TABLE_LIBRARY_WIDTH_MAX} step={DECK_TABLE_LIBRARY_WIDTH_STEP} type="range" value={tableLibraryWidth} onChange={(event) => updateTableLibraryWidthSetting(Number(event.target.value))} />
-                      </label>
                     </div>
                   ) : null}
                   <div className="deckLibraryList">
@@ -8586,6 +8597,7 @@ function DeckEditorPanel({
                       controlsOpen={tableControlsOpen}
                       costDetailsReady={deckTableCostDetailsReady}
                       overlapPercent={tableOverlapPercent}
+                      tableWidth={tableWidthControlValue}
                       dirty={selectedDeckDirty}
                       selectedCardIndexes={selectedTableCardIndexes}
                       selectedCardKeys={selectedTableCardKeySet}
@@ -8602,6 +8614,7 @@ function DeckEditorPanel({
                       onArrangeDeck={arrangeTableDeck}
                       onSave={onSave}
                       onSelectPile={toggleTablePileSelection}
+                      onSetTableWidth={updateTableWidthSetting}
                       onSetCardWidth={updateTableCardWidthSetting}
                       onToggleControls={() => setTableControlsOpen((current) => !current)}
                       onSetOverlapPercent={updateTableOverlapSetting}
@@ -8738,6 +8751,7 @@ function DeckTableBoard({
   controlsOpen,
   costDetailsReady,
   overlapPercent,
+  tableWidth,
   dirty,
   selectedCardIndexes,
   selectedCardKeys,
@@ -8754,6 +8768,7 @@ function DeckTableBoard({
   onArrangeDeck,
   onSave,
   onSelectPile,
+  onSetTableWidth,
   onSetCardWidth,
   onSetOverlapPercent,
   onSetPileCount,
@@ -8771,6 +8786,7 @@ function DeckTableBoard({
   controlsOpen: boolean;
   costDetailsReady: boolean;
   overlapPercent: number;
+  tableWidth: number;
   dirty: boolean;
   selectedCardIndexes: Map<string, number>;
   selectedCardKeys: Set<string>;
@@ -8787,6 +8803,7 @@ function DeckTableBoard({
   onArrangeDeck(mode: DeckTableArrangeMode): void;
   onSave(): void;
   onSelectPile(pileId: string): void;
+  onSetTableWidth(value: number): void;
   onSetCardWidth(value: number): void;
   onSetOverlapPercent(value: number): void;
   onSetPileCount(value: number): void;
@@ -8835,6 +8852,10 @@ function DeckTableBoard({
       </div>
       {controlsOpen ? (
         <div className="deckTableControls" aria-label="Tischdarstellung">
+          <label>
+            <span>Tischbreite</span>
+            <input min={DECK_TABLE_LIBRARY_WIDTH_MIN} max={DECK_TABLE_LIBRARY_WIDTH_MAX} step={DECK_TABLE_LIBRARY_WIDTH_STEP} type="range" value={tableWidth} onChange={(event) => onSetTableWidth(Number(event.target.value))} />
+          </label>
           <label>
             <span>Kartengröße</span>
             <input min={DECK_TABLE_CARD_WIDTH_MIN} max={DECK_TABLE_CARD_WIDTH_MAX} step={DECK_TABLE_CARD_WIDTH_STEP} type="range" value={cardWidth} onChange={(event) => onSetCardWidth(Number(event.target.value))} />
