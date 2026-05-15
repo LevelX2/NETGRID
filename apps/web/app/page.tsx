@@ -3397,7 +3397,7 @@ export default function Page() {
             </button>
             <button className={`entryTab ${entryTab === "decks" ? "active" : ""}`} onClick={() => setEntryTab("decks")} type="button" aria-current={entryTab === "decks" ? "page" : undefined}>
               <Layers3 size={16} />
-              Meine Decks
+              Deck-Editor
             </button>
             <button className={`entryTab ${entryTab === "options" ? "active" : ""}`} onClick={() => setEntryTab("options")} type="button" aria-current={entryTab === "options" ? "page" : undefined}>
               <SlidersHorizontal size={16} />
@@ -7421,7 +7421,7 @@ function DeckSlotSelect({
         ))}
         {localDecks.map((deck) => (
           <option value={`local:${deck.deckId}`} key={deck.deckId}>
-            Meine Decks · {deck.name}
+            Deck-Editor · {deck.name}
           </option>
         ))}
       </select>
@@ -7515,10 +7515,11 @@ function DeckEditorPanel({
         if (builderOnlyInDeck && !deckQuantities.has(card.catalogCardId)) return false;
         if (!catalogCardMatchesTypeFilters(card, builderTypeFilters)) return false;
         if (!search) return true;
-        return [card.title, card.type, card.faction, ...card.subtypes].some((value) => value.toLowerCase().includes(search));
+        const detail = cardDetailsById[card.catalogCardId];
+        return [card.title, card.type, card.faction, ...card.subtypes, detail?.text ?? ""].some((value) => value.toLowerCase().includes(search));
       })
       .sort((left, right) => deckBuilderCardGroup(left).localeCompare(deckBuilderCardGroup(right)) || left.title.localeCompare(right.title));
-  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, deckQuantities, sourceFilteredPlayableCards]);
+  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, cardDetailsById, deckQuantities, sourceFilteredPlayableCards]);
   const deckRows = useMemo(
     () =>
       (selectedDeck?.cards ?? [])
@@ -7559,9 +7560,9 @@ function DeckEditorPanel({
     <section className="deckPanel panel">
       <div className="catalogHeader">
         <div>
-          <h2>Meine Decks</h2>
+          <h2>Deck-Editor</h2>
           <p className="meta">
-            Meine Decks · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
+            Deck-Editor · {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
           </p>
           <p className="meta" title={storagePath || "Lokale Datei-Deckbibliothek"}>
             Lokale Datei-Deckbibliothek {storagePath ? "aktiv" : "wird geladen"}
@@ -7672,7 +7673,7 @@ function DeckEditorPanel({
                   </div>
                   <label className="deckBuilderSearch">
                     Suche
-                    <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Typ, Subtyp" />
+                    <input value={builderSearch} onChange={(event) => setBuilderSearch(event.target.value)} placeholder="Titel, Regeltext, Typ, Subtyp" />
                   </label>
                   <div className="deckBuilderFilterLine">
                     <div className="deckSourceFilter" role="group" aria-label="Kartenset anzeigen">
