@@ -4,9 +4,9 @@ status: blocked
 createdAt: 2026-05-15T15:13:00+01:00
 startedAt: 2026-05-15T21:52:00+02:00
 blockedAt: 2026-05-15T21:59:30+02:00
-blockerReason: "Singapore City Grid needs a dedicated hidden-info-safe HQ-ICE swap choice/resolver; Corporate Ally, Smith's Pawnshop and Jack Attack still need focused hardening tests before the full ten-card job can be marked done."
-attemptedFixes: "Implemented and tested safe partial fixes for Vewy Vewy Quiet, Microtech 'Trode Set, Bolter Cluster, Fang, Neural Blade and Vacant Soulkiller."
-removalCondition: "Implement Singapore City Grid's once-per-run server-bound unrezzed-ICE/HQ-ICE concealed swap with hidden-info-barrier choices, then add the remaining Corporate Ally, Smith's Pawnshop and Jack Attack replay/payload hardening tests."
+blockerReason: "Singapore City Grid needs a dedicated hidden-info-safe HQ-ICE swap choice/resolver before the full ten-card job can be marked done."
+attemptedFixes: "Implemented and tested safe partial fixes for Vewy Vewy Quiet, Microtech 'Trode Set, Corporate Ally, Smith's Pawnshop, Bolter Cluster, Fang, Jack Attack, Neural Blade and Vacant Soulkiller."
+removalCondition: "Implement Singapore City Grid's once-per-run server-bound unrezzed-ICE/HQ-ICE concealed swap with hidden-info-barrier choices, concealed replacement ICE and replay/state-hash coverage."
 requiresImplementation: true
 priority: normal
 cards:
@@ -242,17 +242,18 @@ Umgesetzt:
 - Vacant Soulkiller skaliert Core/Brain Damage nach Advancement-Countern und behandelt 0 Counter als No-Damage-Fall.
 - Microtech 'Trode Set erhöht Break-Kosten um 1 und reduziert ungebrochenen AP-Net-Damage auf 1.
 - PublicPayload-Kontext wurde für die Microtech-AP-Reduktion explizit gemacht; Replay/StateHash-Smokes wurden ergänzt.
+- Corporate Ally wurde mit deterministischem Mehragenda-Forfeit, No-agenda-Gate, Payload-Leakscan und Replay/StateHash gehärtet.
+- Smith's Pawnshop wurde mit Pass-Replay, wrong-side/stale-Guards und Removed-target-Revalidation gehärtet.
+- Jack Attack wurde mit direktem Jack-out-Lock-, Trace-Tag-, Payload-Leakscan-, Run-End-Cleanup- und Replay/StateHash-Test gehärtet.
 
 Blockierend offen:
 
 - Singapore City Grid braucht einen eigenen Hidden-Info-sicheren HQ-ICE-Swap-Resolver mit Corp-privater HQ-ICE-Auswahl, einmal pro Run, servergebunden und concealed neuer ICE-Instanz. Das darf nicht als Textparser- oder PublicPayload-Abkürzung umgesetzt werden.
-- Corporate Ally braucht noch fokussierte Mehragenda-/Choice-/Payload-Härtung.
-- Smith's Pawnshop braucht noch fokussierte Start-of-turn-Choice-/Stale-/Removed-target-/Replay-Härtung.
-- Jack Attack braucht noch direkten Payload-/Replay-Test für Jack-out-Lock plus Trace-Tag-Kombination.
 
 Fokussierter Check:
 
 - `corepack pnpm --filter @netgrid/engine test -- -t "Vewy Vewy Quiet|Bolter Cluster|Fang trace|Vacant Soulkiller|Microtech Trode Set|remaining V1.9.19 access ambush|side-safe prevention choices|installs Shield"` - grün.
+- `corepack pnpm --filter @netgrid/engine test -- -t "Corporate Ally|Smith's Pawnshop|Jack Attack"` - grün.
 
 Pflichtchecks:
 
@@ -265,4 +266,4 @@ Finaler Status: `blocked`
 
 Removal Condition:
 
-Singapore City Grid vollständig mit Hidden-Zone-Barriere implementieren und danach die offenen Corporate-Ally-, Smith's-Pawnshop- und Jack-Attack-Härtungen ergänzen; anschließend die Pflichtchecks erneut ausführen und den Job auf `done` heben.
+Singapore City Grid vollständig mit Hidden-Zone-Barriere implementieren; anschließend die Pflichtchecks erneut ausführen und den Job auf `done` heben.

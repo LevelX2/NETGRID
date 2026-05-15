@@ -8184,6 +8184,16 @@ describe("V1.9.9 Mechanikpaket R", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "corp"
+    ) {
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
     expect(state.runner.scoreArea).toContain(agendaId);
     expect(state.bizarreEncryptionDelayedAgendas).toBeUndefined();
   });
@@ -25278,6 +25288,238 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       printedDamageAmount: 4,
       damageAmount: 1,
     });
+  });
+
+  it("hardens Corporate Ally for deterministic multi-agenda forfeit and payload redaction", () => {
+    let state = toRunnerTurn(v180CardReleaseGame("spotcheck-corporate-ally-hardening"));
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    const firstAgendaId = scoreRunnerAgendaForTest(
+      state,
+      "onr_v1_203_hostile-takeover",
+    );
+    const secondAgendaId = scoreRunnerAgendaForTest(
+      state,
+      "onr_v1_203_hostile-takeover",
+    );
+    state.runner.scoreArea = [secondAgendaId, firstAgendaId];
+    const expectedForfeitId = [firstAgendaId, secondAgendaId].sort()[0];
+    const corporateAllyId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_156_corporate-ally",
+    );
+    const install = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === corporateAllyId,
+    );
+    expect(install.payload).toMatchObject({
+      installAgendaPointCost: 1,
+      forfeitAgendaCardId: expectedForfeitId,
+      installCostReason: "corporate_ally",
+    });
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === install.actionId);
+    expect(state.runner.scoreArea).not.toContain(expectedForfeitId);
+    expect(state.runner.scoreArea).toContain(
+      expectedForfeitId === firstAgendaId ? secondAgendaId : firstAgendaId,
+    );
+    expect(state.specialZones?.removedFromGame).toContain(expectedForfeitId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "onr_v1_156_corporate-ally",
+      agendaPointCostPaid: 1,
+      forfeitedAgendaCardId: expectedForfeitId,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let noAgendaState = toRunnerTurn(
+      v180CardReleaseGame("spotcheck-corporate-ally-no-agenda"),
+    );
+    noAgendaState.runner.credits = 30;
+    moveRunnerCardToGrip(noAgendaState, "onr_v1_156_corporate-ally");
+    expect(
+      getLegalActions(noAgendaState, "runner").some(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(noAgendaState, action) === "onr_v1_156_corporate-ally",
+      ),
+    ).toBe(false);
+  });
+
+  it("hardens Smith's Pawnshop pass, stale/wrong-side and removed-target choices", () => {
+    let state = toRunnerTurn(v170CardReleaseGame("spotcheck-smiths-hardening"));
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_180_smiths-pawnshop");
+    moveRunnerCardToGrip(state, "onr_v1_028_force-shield");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_180_smiths-pawnshop",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_028_force-shield",
+    );
+    const shieldId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_028_force-shield",
+    );
+    expect(shieldId).toBeDefined();
+    if (!shieldId) throw new Error("Missing Force Shield");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "corp"
+    ) {
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
+    expect(state.pendingChoice?.source.startsWith("v170.smiths_pawnshop")).toBe(
+      true,
+    );
+    const resolveAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: ["pass"],
+      },
+      idempotencyKey: "spotcheck-smiths-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: ["pass"],
+      },
+      idempotencyKey: "spotcheck-smiths-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const passInitial = structuredClone(state);
+    const passReplayStart = state.eventLog.length;
+    const passState = applyChoice(state, "runner", "pass");
+    expect(passState.runner.heap).not.toContain(shieldId);
+    expect(passState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+    });
+    expect(passState.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "trashedCardId",
+    );
+    const passReplay = replayEvents(
+      passInitial,
+      passState.eventLog.slice(passReplayStart),
+    );
+    expect(passReplay.ok).toBe(true);
+    expect(hashState(passReplay.state)).toBe(hashState(passState));
+
+    const removedTargetState = structuredClone(state);
+    const shieldOptionId =
+      removedTargetState.pendingChoice?.options.find(
+        (option) => option.value === shieldId,
+      )?.id ?? "";
+    expect(shieldOptionId).not.toBe("");
+    removeEverywhere(removedTargetState, shieldId);
+    removedTargetState.runner.heap.push(shieldId);
+    removedTargetState.cardInstances[shieldId] = {
+      ...removedTargetState.cardInstances[shieldId]!,
+      zone: { side: "runner", zone: "heap" },
+      faceup: true,
+      rezzed: true,
+    };
+    const removedTargetResult = applyAction(removedTargetState, {
+      matchId: removedTargetState.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: removedTargetState.stateVersion,
+      selectedChoices: {
+        choiceId: removedTargetState.pendingChoice?.choiceId,
+        selectedOptionIds: [shieldOptionId],
+      },
+      idempotencyKey: "spotcheck-smiths-removed-target",
+    });
+    expect(removedTargetResult.ok).toBe(false);
+    if (!removedTargetResult.ok)
+      expect(removedTargetResult.error.code).toBe("ERR_INVALID_TARGET");
+  });
+
+  it("hardens Jack Attack jack-out lock, trace payload and run-end cleanup", () => {
+    let state = toRunnerTurn(v193CardReleaseGame("spotcheck-jack-attack-hardening"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    putCorpIceOnServer(state, "rd", "onr_v1_251_jack-attack");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = encounterIce(state, "rd", "onr_v1_251_jack-attack");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.jackOutLockedForRun).toBe(true);
+    expect(state.trace).toMatchObject({
+      baseTraceStrength: 5,
+      sourceDefinitionId: "onr_v1_251_jack-attack",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      sourceDefinitionId: "onr_v1_251_jack-attack",
+    });
+    state = applyChoice(state, "corp", "bid_0");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      traceSuccessful: true,
+      tagsAdded: 1,
+      baseTraceStrength: 5,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(
+      getLegalActions(state, "runner").some((action) => action.type === "jack_out"),
+    ).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run).toBeUndefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      ),
+    ).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 

@@ -10,17 +10,17 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_STEALTH_AP_CITYGRID_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, Singapore City Grid und drei Härtungspfade bleiben als Removal Condition offen.
+Jobstatus: `blocked`; grüne Teilfixes und die drei offenen Härtungen wurden umgesetzt, Singapore City Grid bleibt als Removal Condition offen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
 | Vewy Vewy Quiet | `onr_v1_071_vewy-vewy-quiet` | Teilfix umgesetzt: zwei Recurring-Counter für Icebreaker-Runkosten | Teilfix grün |
 | Microtech 'Trode Set | `onr_v1_132_microtech-trode-set` | Teilfix umgesetzt: +1 Break-Kosten und AP-Net-Damage-Reduktion auf 1 | Teilfix grün |
-| Corporate Ally | `onr_v1_156_corporate-ally` | Blockiert: Mehragenda-/Choice-/Payload-Härtung fehlt noch | Fokussierten Härtungstest ergänzen |
-| Smith's Pawnshop | `onr_v1_180_smiths-pawnshop` | Blockiert: Start-of-turn-Choice-/Removed-target-/Replay-Härtung fehlt noch | Fokussierten Härtungstest ergänzen |
+| Corporate Ally | `onr_v1_156_corporate-ally` | Härtung umgesetzt: deterministischer Mehragenda-Forfeit, No-agenda-Gate, Payload-Leakscan und Replay | Härtung grün |
+| Smith's Pawnshop | `onr_v1_180_smiths-pawnshop` | Härtung umgesetzt: Pass-Replay, wrong-side/stale und Removed-target-Revalidation | Härtung grün |
 | Bolter Cluster | `onr_v1_224_bolter-cluster` | Teilfix umgesetzt: 4 Net Damage plus Next-ICE-No-Break-Modifier | Teilfix grün |
 | Fang | `onr_v1_240_fang` | Teilfix umgesetzt: Trace-Erfolg beendet Run und setzt 2-Credit-Run-Sperre statt Tag | Teilfix grün |
-| Jack Attack | `onr_v1_251_jack-attack` | Blockiert: direkter Payload-/Replay-Test für Jack-out-Lock plus Trace fehlt noch | Fokussierten Härtungstest ergänzen |
+| Jack Attack | `onr_v1_251_jack-attack` | Härtung umgesetzt: Jack-out-Lock plus Trace-Tag payload-, cleanup- und replay-stabil | Härtung grün |
 | Neural Blade | `onr_v1_258_neural-blade` | Teilfix umgesetzt: 1 Net Damage plus Next-ICE-No-Break-Modifier | Teilfix grün |
 | Vacant Soulkiller | `onr_v1_346_vacant-soulkiller` | Teilfix umgesetzt: Core/Brain Damage skaliert mit Advancement-Countern | Teilfix grün |
 | Singapore City Grid | `onr_v1_369_singapore-city-grid` | Blockiert: Hidden-Info-sicherer HQ-ICE-Swap-Resolver fehlt | Eigenen Resolver-Scope umsetzen |
