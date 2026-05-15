@@ -21,7 +21,7 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 |
 | scoreWindowMissed | 0 | 0 |
 | remoteOverbuild | 0 | 0 |
-| economyStall | 16 | 3 |
+| economyStall | 6 | 3 |
 | repeatedLowValueCentralRun | 0 | 0 |
 | rigStall | 0 | 0 |
 | assetTrashNeglect | 0 | 0 |
@@ -50,9 +50,9 @@ Keine Beispiele im analysierten Lauf.
 
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-001 | 22 | runner | pump_breaker | runner.encounter.pump_breaker | none | economy_stall |
-| ai-v143-tuning-001 | 23 | runner | continue_run | runner.plan.safe_probe_run | none | economy_stall |
-| ai-v143-tuning-004 | 27 | runner | pump_breaker | runner.encounter.pump_breaker | none | economy_stall |
+| ai-v143-tuning-005 | 22 | runner | start_run | runner.plan.contest_remote | remote_1 | economy_stall |
+| ai-v143-tuning-005 | 25 | runner | start_run | runner.plan.contest_remote | remote_1 | economy_stall |
+| ai-v143-tuning-005 | 28 | runner | start_run | runner.plan.contest_remote | remote_1 | economy_stall |
 
 ### repeatedLowValueCentralRun
 
@@ -71,11 +71,12 @@ Keine Beispiele im analysierten Lauf.
 - `nakedAgendaInstalls` fällt nach dem Scoring-Remote-Guard nicht mehr an.
 - `repeatedLowValueCentralRun` fällt nach dem Recent-Central-Pressure-Guard auf 0.
 - `rigStall` fällt nach dem Underprepared-Central-Pressure-Guard auf 0.
-- `economyStall` bleibt als nächster Restbereich bestehen, liegt in den Beispielen aber nicht mehr auf neuen unvorbereiteten HQ/R&D-Starts, sondern auf Encounter-/Access-Folgeaktionen bei niedrigem Creditstand.
+- `economyStall` zählt laufende Run-Folgeaktionen wie Pump, Break, Continue, Access und Steal nicht mehr als Planungsfehler.
+- Der Rest liegt jetzt auf neuen `contest_remote`-Starts bei niedriger Creditreserve.
 
 ## Nächster Umsetzungsschritt
 
-Der nächste Tuning-Schritt sollte jetzt `economyStall` genauer trennen:
+Der nächste Tuning-Schritt sollte jetzt Remote-Contest-Pacing genauer bewerten:
 
-1. Neue aktive Starts bei niedrigem Creditstand sollten weiterhin gegen Economy/Draw/Rig-Aufbau abgewogen werden.
-2. Laufende Run-Folgeaktionen wie Pump, Continue, Access oder Steal sollten separat bewertet werden, damit die Metrik nicht erfolgreiche oder bereits verpflichtete Run-Linien als Planungsfehler zählt.
+1. `contest_remote` sollte bei niedriger Creditreserve nur dann vor Economy/Draw/Rig-Aufbau liegen, wenn die sichtbare Remote-Drohung hoch genug ist.
+2. Wiederholter Remote-Contest auf denselben sichtbaren Remote sollte eine Frische- oder Wiederholungsbremse bekommen, damit der Runner nicht in einer Credit-armen Remote-Schleife bleibt.

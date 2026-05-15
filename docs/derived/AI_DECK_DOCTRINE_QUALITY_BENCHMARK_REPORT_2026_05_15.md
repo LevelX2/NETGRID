@@ -20,7 +20,7 @@ Stand: 2026-05-15
 | agendaFloodExposure | 0 | 0 | 0 |
 | scoreWindowMissed | 0 | 0 | 0 |
 | remoteOverbuild | 0 | 0 | 0 |
-| economyStall | 16 | 16 | 0 |
+| economyStall | 6 | 6 | 0 |
 | repeatedLowValueCentralRun | 0 | 0 | 0 |
 | rigStall | 0 | 0 | 0 |
 | assetTrashNeglect | 0 | 0 | 0 |
@@ -44,4 +44,6 @@ Stand: 2026-05-15
 
 Der aktuelle Kandidat verletzt in diesem engen Tuning-Lauf keine harte Safety- oder Doctrine-Schwelle. Die Deltas bleiben neutral, weil Baseline und Kandidat in diesem lokalen Vergleich denselben aktuellen Bewertungsstand nutzen; die absoluten Zähler zeigen aber den Effekt der Tuning-Schritte.
 
-Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht mehr an. Nach dem Runner-Zentraldruck-Guard fallen auch `repeatedLowValueCentralRun` und `rigStall` in diesem Tuning-Lauf auf 0. Übrig bleibt `economyStall`, nun vor allem in laufenden Encounter-/Access-Folgen statt als neuer unvorbereiteter HQ/R&D-Start.
+Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht mehr an. Nach dem Runner-Zentraldruck-Guard fallen auch `repeatedLowValueCentralRun` und `rigStall` in diesem Tuning-Lauf auf 0. Nach der Economy-Stall-Trennung zählen laufende Run-Folgeaktionen wie Pump, Break, Continue, Access und Steal nicht mehr als Planungsfehler.
+
+Übrig bleibt `economyStall` mit 6 Treffern. Die Beispiele liegen jetzt auf neuen `contest_remote`-Starts bei niedriger Creditreserve; das ist der nächste konkrete Tuning-Kandidat.

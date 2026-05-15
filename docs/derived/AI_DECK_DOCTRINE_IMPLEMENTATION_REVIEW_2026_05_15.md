@@ -16,6 +16,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
 - Simulationsreports zählen nun konkrete Doctrine-Fehlerklassen: nackte Agenda-Installs, Agenda-Flood-Exposure, verpasste Score-Fenster, Remote-Overbuild, Economy-Stalls, wiederholte Low-Value-Central-Runs, Rig-Stalls und Asset-Trash-Neglect.
+- Economy-Stall zählt neue Planstarts bei niedriger Creditreserve, nimmt laufende Runner-Run-Folgeaktionen aber aus, damit Pump, Break, Continue, Access und Steal nicht als neue Planungsfehler erscheinen.
 - Ein Doctrine-Quality-Benchmark vergleicht Baseline und aktuellen Kandidaten auf denselben Seeds und liefert Doctrine- sowie Safety-Deltas.
 - Der Simulationspfad speist eigene Decksnapshots nur für den aktuellen Kandidaten in die KI ein; historische Benchmark-Profile bleiben ohne diese neue Doctrine-Information.
 - Ein erster Benchmark-Report liegt unter `docs/derived/AI_DECK_DOCTRINE_QUALITY_BENCHMARK_REPORT_2026_05_15.md`.
@@ -26,7 +27,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 ## Geänderte Hauptartefakte
 
 - `packages/ai/src/deck-doctrine.ts`: Profilgenerator und Corp-Mulligan-Bewertung.
-- `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Setup-Mulligan-Auswahl, Debug-Zusammenfassung und Exports.
+- `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Setup-Mulligan-Auswahl, Debug-Zusammenfassung, Doctrine-Metriken und Exports.
 - `packages/ai/src/corp-plans.ts`: planbezogener Doctrine-Bonus und redigierte Plan-Debugdaten.
 - `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus, Guards gegen unvorbereiteten zentralen Druck und redigierte Plan-Debugdaten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
@@ -53,6 +54,6 @@ Teilweise grün:
 
 - Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
 - Nackte Agenda-Installationen in `new_remote` werden nicht mehr als `score_next_turn`/`build_scoring_remote`-Schritt aufgenommen, wenn kein geschützter Zielserver besteht.
-- Nach dem Runner-Zentraldruck-Fix bleiben `economyStall`-Restfälle in laufenden Encounter-/Access-Folgen als nächster Tuning-Kandidat.
+- Nach der Economy-Stall-Trennung bleiben neue `contest_remote`-Starts bei niedriger Creditreserve als nächster Tuning-Kandidat.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.

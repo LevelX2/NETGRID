@@ -1922,7 +1922,7 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
   const economyAction =
     action.type === "gain_credit" ||
     ((action.type === "play_event" || action.type === "play_operation") && rolesForAction(input, action).some((role) => role.includes("economy") || role === "tempo"));
-  const economyStallExempt = decision.fallbackUsed || action.type === "mandatory_draw" || action.type === "end_turn" || action.type === "decline_rez" || action.type === "resolve_choice";
+  const economyStallExempt = isEconomyStallExemptAction(input, action, decision);
   const visibleRemoteContest = targetServerId?.startsWith("remote_") === true && (targetServer?.rootCount ?? 0) > 0;
 
   if (input.side === "corp" && action.type === "install_card" && action.payload?.placement !== "ice" && sourceDefinition?.type === "agenda") {
@@ -1945,6 +1945,13 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
   if (decision.timeoutUsed) tags.push("timeout");
   if (decision.fallbackUsed) tags.push("fallback");
   return sortedUnique(tags);
+}
+
+function isEconomyStallExemptAction(input: AiDecisionInput, action: LegalAction, decision: AiDecision): boolean {
+  if (decision.fallbackUsed) return true;
+  if (action.type === "mandatory_draw" || action.type === "end_turn" || action.type === "decline_rez" || action.type === "resolve_choice") return true;
+  if (input.side !== "runner") return false;
+  return action.type === "pump_breaker" || action.type === "break_subroutine" || action.type === "continue_run" || action.type === "access_card" || action.type === "steal_agenda";
 }
 
 function repeatedLowValueCentralRunTags(actionSequence: AiSimulationSummary["actionSequence"]): string[] {
