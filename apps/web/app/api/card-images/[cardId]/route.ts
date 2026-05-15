@@ -1,104 +1,87 @@
-import { existsSync } from "node:fs";
-import { readFile } from "node:fs/promises";
-import path from "node:path";
+import { createHash } from "node:crypto";
+import { readFile, stat } from "node:fs/promises";
 import { NextResponse } from "next/server";
+import { lookupCardImage, type CardImageLookupResult } from "../card-image-lookup";
 
-const REPO_ROOT = resolveRepoRoot();
-const IMAGE_DIR = path.join(REPO_ROOT, "data", "local-assets", "card-images");
-const LOCAL_ONR_SNAPSHOT_PATH = path.join(REPO_ROOT, "data", "local", "card-import", "onr-v1-limited", "card-snapshot-onr-v1-limited.local.json");
+const LOCAL_ONR_CACHE_CONTROL = "private, max-age=3600, must-revalidate";
+const VERSIONED_CACHE_CONTROL = "private, max-age=31536000, immutable";
 
-const CARD_IMAGES: Record<string, string> = {
-  corp_identity_001: "generated-identities/corp_identity_001.png",
-  efficient_fracter: "generated-icebreakers/efficient_fracter.png",
-  runner_identity_001: "generated-identities/runner_identity_001.png",
-  simple_agenda: "generated-agendas/simple_agenda.png",
-  simple_barrier_ice: "generated-ice/simple_barrier_ice.png",
-  simple_code_gate_ice: "generated-ice/simple_code_gate_ice.png",
-  simple_decoder: "generated-icebreakers/simple_decoder.png",
-  simple_draw_event: "generated-events/simple_draw_event.png",
-  simple_draw_operation: "generated-operations/simple_draw_operation.png",
-  simple_economy_asset: "generated-assets/simple_economy_asset.png",
-  simple_economy_event: "generated-events/simple_economy_event.png",
-  simple_economy_operation: "generated-operations/simple_economy_operation.png",
-  simple_fracter: "generated-icebreakers/simple_fracter.png",
-  simple_killer: "generated-icebreakers/simple_killer.png",
-  simple_priority_agenda: "generated-agendas/simple_priority_agenda.png",
-  simple_run_event: "generated-events/simple_run_event.png",
-  simple_sentry_ice: "generated-ice/simple_sentry_ice.png",
-  simple_setup_hardware: "generated-hardware/simple_setup_hardware.png",
-  simple_tag_ice: "generated-ice/simple_tag_ice.png",
-  simple_tag_punishment_operation: "generated-operations/simple_tag_punishment_operation.png",
-  simple_taxing_barrier_ice: "generated-ice/simple_taxing_barrier_ice.png",
-  simple_upgrade: "generated-assets/simple_upgrade.png",
-  v08_adaptive_killer: "generated-icebreakers/v08_adaptive_killer.png",
-  v08_archive_planning_operation: "generated-operations/v08_archive_planning_operation.png",
-  v08_burst_credit_event: "generated-events/v08_burst_credit_event.png",
-  v08_cashout_asset: "generated-assets/v08_cashout_asset.png",
-  v08_credit_surge_operation: "generated-operations/v08_credit_surge_operation.png",
-  v08_deep_draw_event: "generated-events/v08_deep_draw_event.png",
-  v08_gate_ice: "generated-ice/v08_gate_ice.png",
-  v08_memory_chip: "generated-hardware/v08_memory_chip.png",
-  v08_overclock_run_event: "generated-events/v08_overclock_run_event.png",
-  v08_precise_decoder: "generated-icebreakers/v08_precise_decoder.png",
-  v08_project_agenda: "generated-agendas/v08_project_agenda.png",
-  v08_steady_fracter: "generated-icebreakers/v08_steady_fracter.png",
-  v08_wall_ice: "generated-ice/v08_wall_ice.png",
-  v08_watchdog_ice: "generated-ice/v08_watchdog_ice.png",
-  v094_neural_sentry_ice: "generated-ice/v094_neural_sentry_ice.png"
-};
-
-export async function GET(_request: Request, context: { params: Promise<{ cardId: string }> }) {
+export async function GET(request: Request, context: { params: Promise<{ cardId: string }> }) {
   const { cardId } = await context.params;
-  const fileName = CARD_IMAGES[cardId] ?? (await localOnrImagePath(cardId));
-  if (!fileName) return NextResponse.json({ error: { code: "card_image_not_found", message: "Kartenbild wurde nicht gefunden." } }, { status: 404 });
+  const image = await lookupCardImage(cardId, request.url);
+  if (!image) return safeImageError("card_image_not_found", "Kartenbild wurde nicht gefunden.", 404);
 
-  const filePath = path.resolve(IMAGE_DIR, fileName);
-  if (!filePath.startsWith(`${IMAGE_DIR}${path.sep}`)) return NextResponse.json({ error: { code: "card_image_blocked", message: "Kartenbild wurde blockiert." } }, { status: 403 });
+  let fileStat: Awaited<ReturnType<typeof stat>>;
+  try {
+    fileStat = await stat(image.absolutePath);
+    if (!fileStat.isFile()) return safeImageError("card_image_missing", "Kartenbilddatei fehlt lokal.", 404);
+  } catch {
+    return safeImageError("card_image_missing", "Kartenbilddatei fehlt lokal.", 404);
+  }
+
+  const validators = imageValidators(image, fileStat);
+  const headers = imageResponseHeaders(image, fileStat, validators);
+  if (clientHasFreshImage(request, validators)) return new NextResponse(null, { status: 304, headers });
 
   try {
-    const image = await readFile(filePath);
-    return new NextResponse(image, {
-      status: 200,
+    const body = await readFile(image.absolutePath);
+    return new NextResponse(body, { status: 200, headers });
+  } catch {
+    return safeImageError("card_image_missing", "Kartenbilddatei fehlt lokal.", 404);
+  }
+}
+
+function imageResponseHeaders(
+  image: CardImageLookupResult,
+  fileStat: Awaited<ReturnType<typeof stat>>,
+  validators: { etag: string; lastModified: string }
+): Headers {
+  const headers = new Headers({
+    "Cache-Control": cacheControlForCardImage(image),
+    "Content-Length": String(fileStat.size),
+    "Content-Type": "image/png",
+    ETag: validators.etag,
+    "Last-Modified": validators.lastModified,
+    "X-Content-Type-Options": "nosniff"
+  });
+  return headers;
+}
+
+function imageValidators(image: CardImageLookupResult, fileStat: Awaited<ReturnType<typeof stat>>): { etag: string; lastModified: string } {
+  const hash = createHash("sha256")
+    .update(`${image.kind}:${image.cardId}:${Number(fileStat.size)}:${Math.floor(Number(fileStat.mtimeMs))}`)
+    .digest("base64url")
+    .slice(0, 24);
+  return {
+    etag: `"${hash}"`,
+    lastModified: fileStat.mtime.toUTCString()
+  };
+}
+
+export function cacheControlForCardImage(image: Pick<CardImageLookupResult, "kind" | "versioned">): string {
+  return image.kind === "generated" && image.versioned ? VERSIONED_CACHE_CONTROL : LOCAL_ONR_CACHE_CONTROL;
+}
+
+export function clientHasFreshImage(request: Request, validators: { etag: string; lastModified: string }): boolean {
+  const ifNoneMatch = request.headers.get("if-none-match");
+  if (ifNoneMatch) return ifNoneMatch.split(",").map((value) => value.trim()).some((value) => value === "*" || value === validators.etag);
+
+  const ifModifiedSince = request.headers.get("if-modified-since");
+  if (!ifModifiedSince) return false;
+  const sinceMs = Date.parse(ifModifiedSince);
+  const lastModifiedMs = Date.parse(validators.lastModified);
+  return Number.isFinite(sinceMs) && Number.isFinite(lastModifiedMs) && lastModifiedMs <= sinceMs;
+}
+
+function safeImageError(code: string, message: string, status: 403 | 404): NextResponse {
+  return NextResponse.json(
+    { error: { code, message } },
+    {
+      status,
       headers: {
-        "Cache-Control": "no-store, max-age=0",
-        "Content-Type": "image/png"
+        "Cache-Control": "private, no-store",
+        "X-Content-Type-Options": "nosniff"
       }
-    });
-  } catch {
-    return NextResponse.json({ error: { code: "card_image_missing", message: "Kartenbilddatei fehlt lokal." } }, { status: 404 });
-  }
-}
-
-async function localOnrImagePath(cardId: string): Promise<string | null> {
-  if (!cardId.startsWith("onr_v1_")) return null;
-
-  try {
-    const snapshot = JSON.parse(await readFile(LOCAL_ONR_SNAPSHOT_PATH, "utf8")) as LocalOnrSnapshot;
-    const card = snapshot.cards.find((entry) => entry.catalogCardId === cardId);
-    const relativePath = card?.onr?.imageAsset?.relativePath;
-    if (!isSafeLocalImagePath(relativePath)) return null;
-    return relativePath;
-  } catch {
-    return null;
-  }
-}
-
-function isSafeLocalImagePath(value: string | undefined): value is string {
-  return Boolean(value && value.startsWith("onr-1996/") && value.endsWith(".png") && !value.includes("..") && !path.isAbsolute(value));
-}
-
-type LocalOnrSnapshot = {
-  cards: Array<{
-    catalogCardId: string;
-    onr?: {
-      imageAsset?: {
-        relativePath?: string;
-      };
-    };
-  }>;
-};
-
-function resolveRepoRoot(): string {
-  const candidates = [process.cwd(), path.resolve(process.cwd(), "..", "..")];
-  return candidates.find((candidate) => existsSync(path.join(candidate, "data", "card-import"))) ?? process.cwd();
+    }
+  );
 }

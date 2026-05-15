@@ -116,6 +116,7 @@ import {
   type CuePositionPreference,
   type CuePositionPreset
 } from "./action-board-ui";
+import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-image-service";
 import {
   deriveMatchStart,
   humanAiSideLabel,
@@ -756,59 +757,11 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
   agendaPoints: "Agenda"
 };
 
-const LOCAL_CARD_IMAGE_IDS = new Set([
-  "corp_identity_001",
-  "efficient_fracter",
-  "runner_identity_001",
-  "simple_agenda",
-  "simple_barrier_ice",
-  "simple_code_gate_ice",
-  "simple_decoder",
-  "simple_draw_event",
-  "simple_draw_operation",
-  "simple_economy_asset",
-  "simple_economy_event",
-  "simple_economy_operation",
-  "simple_fracter",
-  "simple_killer",
-  "simple_priority_agenda",
-  "simple_run_event",
-  "simple_sentry_ice",
-  "simple_setup_hardware",
-  "simple_tag_ice",
-  "simple_tag_punishment_operation",
-  "simple_taxing_barrier_ice",
-  "simple_upgrade",
-  "v08_adaptive_killer",
-  "v08_archive_planning_operation",
-  "v08_burst_credit_event",
-  "v08_cashout_asset",
-  "v08_credit_surge_operation",
-  "v08_deep_draw_event",
-  "v08_gate_ice",
-  "v08_memory_chip",
-  "v08_overclock_run_event",
-  "v08_precise_decoder",
-  "v08_steady_fracter",
-  "v08_project_agenda",
-  "v08_wall_ice",
-  "v08_watchdog_ice",
-  "v094_neural_sentry_ice"
-]);
-
-const LOCAL_CARD_IMAGE_VERSION = "2026-05-04-generated-card-art-1";
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
 const SCORE_AREA_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
-
-function localCardImageUrl(cardId: string): string | undefined {
-  const encodedCardId = encodeURIComponent(cardId);
-  if (LOCAL_CARD_IMAGE_IDS.has(cardId)) return `/api/card-images/${encodedCardId}?v=${LOCAL_CARD_IMAGE_VERSION}`;
-  if (cardId.startsWith("onr_v1_")) return `/api/card-images/${encodedCardId}`;
-  return undefined;
-}
 
 function normalizeCueAutoDismissMs(value: unknown): CueAutoDismissMs {
   if (value === 0 || value === 1500 || value === 2500 || value === 4000 || value === 6000) return value;
@@ -917,7 +870,7 @@ function isOperationCardType(type: string | undefined | null): boolean {
 }
 
 function hasGeneratedCardArt(cardId: string | undefined | null): boolean {
-  return typeof cardId === "string" && LOCAL_CARD_IMAGE_IDS.has(cardId);
+  return isGeneratedCardImageId(cardId);
 }
 
 function CardImageOverlay({
@@ -5601,7 +5554,7 @@ function OpponentActionOverlay({
                 <CardView card={relatedCard} displayMode={cueCardDisplayMode} compact preview />
               </div>
             ) : (
-              <div className={`opponentCueCardBack ${cue.actor === "runner" ? "runner" : "corp"}`} aria-hidden="true">
+              <div className="opponentCueCardBack" aria-hidden="true">
                 <span>Verdeckte Karte</span>
               </div>
             )}
@@ -7004,7 +6957,7 @@ function ChronicleCardTrigger({
       }}
     >
       {children}
-      {tooltipId && card ? (
+      {showTooltip && tooltipId && card ? (
         <span
           className={`chronicleCardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
           id={tooltipId}
@@ -7023,7 +6976,7 @@ function ChronicleCardTrigger({
         >
           {showImageTooltip ? (
             <span className={`chronicleCardImageFrame ${showHardwareOverlay || showOperationOverlay ? "withOverlay" : ""}`}>
-              <img className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
+              <CardImage className="chronicleCardImage" src={imageUrl} alt={`Kartenbild ${card.title}`} />
               {showHardwareOverlay ? (
                 <HardwareImageOverlay
                   title={card.title}
@@ -7368,7 +7321,7 @@ function CatalogPanel({
               </div>
               {catalogImageUrl ? (
                 <div className={`catalogImagePreview ${catalogImagePreviewMode}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})}>
-                  <img src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
+                  <CardImage src={catalogImageUrl} alt={`Kartenbild ${detail.title}`} priority {...(catalogImageTooltip ? { title: catalogImageTooltip } : {})} />
                   {showCatalogHardwareOverlay ? (
                     <HardwareImageOverlay
                       title={detail.title}
@@ -8043,7 +7996,7 @@ function DeckCardTooltipTrigger({
       }}
     >
       {children}
-      {tooltipId && card ? (
+      {showTooltip && tooltipId && card ? (
         <span
           className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${showTooltip ? " visible" : ""}`}
           id={tooltipId}
@@ -8064,7 +8017,7 @@ function DeckCardTooltipTrigger({
             <>
               {showHardwareOverlay ? <HardwareImageOverlay title={card.title} rulesText={rulesText} installCost={detail?.numeric.installCost} /> : null}
               {showOperationOverlay ? <OperationImageOverlay title={card.title} rulesText={rulesText} cost={detail?.numeric.cost} /> : null}
-              <img className="cardTooltipImage" src={tooltipImageUrl} alt={`Kartenbild ${card.title ?? "Karte"}`} />
+              <CardImage className="cardTooltipImage" src={tooltipImageUrl} alt={`Kartenbild ${card.title ?? "Karte"}`} />
             </>
           ) : (
             <>
@@ -8237,7 +8190,7 @@ function DeckCardThumb({
     <span className={`deckCardThumb ${large ? "large" : ""} ${preview ? "preview" : ""} ${imageUrl ? "hasImage" : ""}`} aria-hidden="true">
       {imageUrl ? (
         <>
-          <img src={imageUrl} alt="" />
+          <CardImage src={imageUrl} decorative />
           {showHardwareOverlay ? (
             <HardwareImageOverlay
               title={title}
@@ -8839,7 +8792,7 @@ function CardView({
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
-  const hiddenBackClass = !card.known && hiddenSide ? ` hidden${hiddenSide === "runner" ? "Runner" : "Corp"}Back` : "";
+  const hiddenBackClass = !card.known && hiddenSide ? " hiddenBack" : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
@@ -9063,7 +9016,7 @@ function CardView({
     []
   );
 
-  const tooltipElement = tooltipId ? (
+  const tooltipElement = showTooltip && tooltipId ? (
     <span
       className={`cardTooltip ${tooltipPlacement} mode-${tooltipMode}${showImageTooltip ? " imageOnly" : ""}${tooltipPinnedVisible ? " pinned" : ""}${showTooltip ? " visible" : ""}`}
       id={tooltipId}
@@ -9089,7 +9042,7 @@ function CardView({
       }}
     >
       {showImageTooltip ? (
-        <img
+        <CardImage
           className="cardTooltipImage"
           src={tooltipImageUrl}
           alt={`Kartenbild ${card.title ?? "Karte"}`}
@@ -9201,7 +9154,7 @@ function CardView({
         data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
       >
-        {visualImageUrl ? <img className="cardImage" src={visualImageUrl} alt="" aria-hidden="true" /> : null}
+        {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} decorative /> : null}
         {isHardwareImageCard ? (
           <HardwareImageOverlay
             title={card.title ?? "Hardware"}
