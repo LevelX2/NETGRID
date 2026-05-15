@@ -8336,7 +8336,7 @@ function DeckEditorPanel({
     <section className={`deckPickerPanel ${deckPickerOpen ? "" : "collapsed"}`}>
       <div className="deckPickerHeader">
         <div>
-          <h3>Decks</h3>
+          <h3>Meine Decks</h3>
           <p className="meta">
             {localDecks.length} gespeichert · Runner {runnerDeckCount} · Korp {corpDeckCount}
           </p>
