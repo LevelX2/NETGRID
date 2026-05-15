@@ -41,6 +41,7 @@ import {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
   evaluateCorpPlan,
+  evaluateRunnerEarlyTurnDoctrine,
   evaluateRunnerPlan,
   evaluateAgendaRisk,
   evaluateEconomyReserve,
@@ -71,7 +72,7 @@ import {
   simulateAiSoak,
   summarizeDoctrineQualityMetrics
 } from "./index";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import type { AiDeckDoctrineProfile, CardInstanceId, ChoiceRequest, DeckDefinition, GameState, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { MVP_0_99_BASELINE } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
@@ -1793,6 +1794,37 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(JSON.stringify(decision.debug.ownDeckDoctrine)).not.toMatch(/simple_run_event|simple_fracter|simple_economy_event/);
   });
 
+  it("uses Runner deck doctrine for early-turn setup priorities", () => {
+    const input = runnerActionPhaseInput("ai-runner-doctrine-early-turn", (state) => {
+      state.runner.credits = 4;
+      putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+      moveRunnerCardToGrip(state, "simple_fracter");
+    });
+    const installBreaker = input.legalActions.find((action) => action.type === "install_card" && sourceDefinitionFromInput(input, action) === "simple_fracter");
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    const doctrine = runnerDoctrineForTest("synthetic-early-rig-runner", ["rig_builder"], { build_rig: 24, recover_economy: 10, pressure_rnd: -4 });
+
+    expect(installBreaker).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!installBreaker || !rdRun || !gainCredit) throw new Error("Missing early-turn Runner doctrine fixture actions");
+
+    const doctrineInput = { ...input, ownDeckDoctrine: doctrine, legalActions: [rdRun, installBreaker, gainCredit] };
+    const buildCandidate = generateRunnerPlanCandidates(doctrineInput).find((candidate) => candidate.kind === "build_rig");
+    const pressureCandidate = generateRunnerPlanCandidates(doctrineInput).find((candidate) => candidate.kind === "pressure_rnd");
+    const decision = chooseRunnerPlanDecision(doctrineInput);
+
+    expect(buildCandidate).toBeDefined();
+    expect(pressureCandidate).toBeDefined();
+    if (!buildCandidate || !pressureCandidate) throw new Error("Missing early-turn Runner doctrine candidates");
+    expect(evaluateRunnerEarlyTurnDoctrine(doctrineInput, buildCandidate).reasons).toContain("early_rig_builder_setup");
+    expect(evaluateRunnerEarlyTurnDoctrine(doctrineInput, pressureCandidate).reasons).toContain("early_rig_builder_pressure_not_ready");
+    expect(evaluateRunnerPlan(doctrineInput, buildCandidate).score).toBeGreaterThan(evaluateRunnerPlan(doctrineInput, pressureCandidate).score);
+    expect(decision.debug.planKind).toBe("build_rig");
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(/cardInstances|privatePayload|simple_fracter/);
+  });
+
   it("handles access trash, jack-out and legal fallback without hidden-info claims", () => {
     let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-v141-trash-jackout" }));
     const assetId = moveCorpCardToHq(state, "simple_economy_asset");
@@ -1829,6 +1861,22 @@ describe("V1.4.1 plan-based Runner AI", () => {
       } satisfies LegalAction);
     expect(jack).toBeDefined();
     expect(chooseRunnerPlanDecision({ ...jackInput, legalActions: [jack] }).debug.planKind).toBe("safe_probe_run");
+  });
+
+  it("treats declining an accessed trash as an explicit Runner access decision", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-runner-decline-trash" }));
+    const assetId = moveCorpCardToHq(state, "simple_economy_asset");
+    keepOnlyCorpHqCard(state, assetId);
+    state.runner.credits = 0;
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.1-normal" });
+    const decision = chooseRunnerAction(input);
+
+    expect(input.legalActions.some((action) => action.type === "decline_trash")).toBe(true);
+    expect(decision.reasonCode).toBe("runner.access.decline_trash");
+    expect(decision.fallbackUsed).toBe(false);
+    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload|Simple Economy Asset/);
   });
 
   it("keeps hidden-state invariance for equal Runner-visible projections", () => {
@@ -3701,6 +3749,23 @@ function sourceDefinitionFromInput(input: ReturnType<typeof buildAiDecisionInput
     .flat()
     .find((card) => card.instanceId === action.source && card.known);
   return visible?.definitionId;
+}
+
+function runnerDoctrineForTest(deckSnapshotId: string, archetypeTags: string[], planWeights: Record<string, number>): AiDeckDoctrineProfile {
+  return {
+    schemaVersion: "ai-deck-doctrine-v1",
+    deckSnapshotId,
+    deckHash: `test:${deckSnapshotId}`,
+    side: "runner",
+    confidence: 0.95,
+    archetypeTags,
+    roleCounts: {},
+    roleDensity: {},
+    planWeights,
+    mulliganWeights: {},
+    riskFlags: [],
+    evidence: []
+  };
 }
 
 function choiceRequest(state: GameState, side: Side): ChoiceRequest {

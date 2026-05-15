@@ -32,7 +32,7 @@ Stand: 2026-05-15
 | illegalActionDelta | 0 |
 | replayFailureDelta | 0 |
 | timeoutRateDelta | 0 |
-| fallbackRateDelta | 0.005 |
+| fallbackRateDelta | -0.003 |
 
 ## Gate-Auswertung
 
@@ -61,4 +61,6 @@ Die Metrik wurde dabei präzisiert: `recover_economy` zählt nicht als `economyS
 
 Der Runner-Mulligan ist in diesem Holdout-Lauf ebenfalls aktiv und bleibt neutral gegenüber den Gate-Schwellen: keine IllegalActions, Replay-Fehler, Timeouts oder neuen Doctrine-Zähler im Candidate-Lauf.
 
-Nächster sinnvoller Schritt ist nach dem längeren Selfplay-/Soak-Lauf die archetypspezifische Early-Turn-Planung statt weiterer Gewichtungsoptimierung auf derselben Seed-Menge.
+Der erste Early-Turn-Doctrine-Slice bleibt im Holdout ebenfalls innerhalb der Gate-Schwellen. Durch die explizite Runner-Entscheidung für `decline_trash` sinkt das Fallback-Delta leicht auf `-0.003`.
+
+Nächster sinnvoller Schritt ist nach dem längeren Selfplay-/Soak-Lauf mehr Spielabschluss-/Scoring-Dynamik statt weiterer Gewichtungsoptimierung auf derselben Seed-Menge.

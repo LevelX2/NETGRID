@@ -315,11 +315,13 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const access = evaluateServerAccessValue(input, candidate, beliefState);
   const remote = evaluateRemoteThreat(input, candidate, beliefState);
   const corpThreat = evaluateCorpScoringThreat(input, candidate, beliefState);
+  const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
     baseScoreForPlan(candidate.kind) +
     doctrinePlanWeight +
+    earlyTurn.score +
     rig.score * profile.weights.runnerRig +
     runCost.score * profile.weights.runCost +
     access.score * profile.weights.serverAccessValue +
@@ -331,7 +333,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -343,9 +345,90 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...access.evidence,
       ...remote.evidence,
       ...corpThreat.evidence,
+      ...earlyTurn.evidence,
       `belief_version:${beliefState.version}`,
       ...(beliefState.runnerOpponentModel ? [`belief_credit_reserve:${beliefState.runnerOpponentModel.corpCreditReserveInterpretation}`] : [])
     ])
+  };
+}
+
+export function evaluateRunnerEarlyTurnDoctrine(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+  const doctrine = input.ownDeckDoctrine;
+  if (!doctrine || doctrine.side !== "runner") {
+    return { score: 0, reasons: [], evidence: ["early_turn_doctrine:none"] };
+  }
+  const earlyTurn = isEarlyRunnerTurn(input);
+  const features = extractRunnerFeatures(input);
+  const rigBreakerCount = [...features.rigRoles].filter((role) => role.startsWith("breaker_")).length;
+  const handBreakerCount = [...features.handRoles].filter((role) => role.startsWith("breaker_")).length;
+  const handEconomyCount = [...features.handRoles].filter((role) => role === "economy" || role === "tempo" || role === "draw").length;
+  const target = targetServerId(input, candidate);
+  const visibleIce = target ? (features.serverFeatures.get(target)?.iceCount ?? 0) : 0;
+  const tags = doctrine.archetypeTags.slice(0, 3);
+  const tagSet = new Set(tags);
+  let score = 0;
+  const reasons: string[] = [];
+
+  if (earlyTurn && tagSet.has("rig_builder")) {
+    if (candidate.kind === "build_rig" && rigBreakerCount === 0 && handBreakerCount > 0) {
+      score += 70;
+      reasons.push("early_rig_builder_setup");
+    }
+    if (candidate.kind === "recover_economy" && features.credits < 4) {
+      score += 45;
+      reasons.push("early_rig_builder_credit_floor");
+    }
+    if ((candidate.kind === "pressure_rnd" || candidate.kind === "pressure_hq") && rigBreakerCount === 0 && (visibleIce > 0 || features.credits < 4)) {
+      score -= 50;
+      reasons.push("early_rig_builder_pressure_not_ready");
+    }
+  }
+
+  if (earlyTurn && tagSet.has("economy_dense")) {
+    if (candidate.kind === "recover_economy" && (features.credits < 5 || handEconomyCount > 0)) {
+      score += 55;
+      reasons.push("early_economy_dense_reserve");
+    }
+    if (candidate.kind === "draw_for_answers" && handBreakerCount === 0) {
+      score += 25;
+      reasons.push("early_economy_dense_find_setup");
+    }
+    if (isRunPlan(candidate.kind) && rigBreakerCount === 0 && features.credits < 4) {
+      score -= 35;
+      reasons.push("early_economy_dense_run_paced");
+    }
+  }
+
+  if (earlyTurn && tagSet.has("rnd_pressure") && candidate.kind === "pressure_rnd") {
+    const pressureReady = features.credits >= 3 && (rigBreakerCount > 0 || visibleIce === 0);
+    score += pressureReady ? 40 : -50;
+    reasons.push(pressureReady ? "early_rnd_pressure_ready" : "early_rnd_pressure_not_ready");
+  }
+  if (earlyTurn && tagSet.has("hq_pressure") && candidate.kind === "pressure_hq") {
+    const pressureReady = features.credits >= 3 && (rigBreakerCount > 0 || visibleIce === 0);
+    score += pressureReady ? 40 : -50;
+    reasons.push(pressureReady ? "early_hq_pressure_ready" : "early_hq_pressure_not_ready");
+  }
+  if (earlyTurn && tagSet.has("remote_contest") && candidate.kind === "contest_remote") {
+    const server = target ? features.serverFeatures.get(target) : undefined;
+    const pressureReady = features.credits >= 3 && ((server?.advancedRootCount ?? 0) > 0 || rigBreakerCount > 0 || visibleIce === 0);
+    score += pressureReady ? 35 : -45;
+    reasons.push(pressureReady ? "early_remote_contest_ready" : "early_remote_contest_not_ready");
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      `early_turn:${earlyTurn}`,
+      `early_turn_doctrine:${tags.join(",") || "neutral"}`,
+      `early_turn_score:${score}`,
+      `early_rig_breakers:${rigBreakerCount}`,
+      `early_hand_breakers:${handBreakerCount}`,
+      `early_hand_economy:${handEconomyCount}`,
+      `early_credits:${features.credits}`,
+      `early_visible_ice:${visibleIce}`
+    ]
   };
 }
 
@@ -1028,6 +1111,12 @@ function uncertaintyForPlan(kind: RunnerPlanKind): string[] {
 
 function isRunPlan(kind: RunnerPlanKind): boolean {
   return kind === "pressure_rnd" || kind === "pressure_hq" || kind === "contest_remote" || kind === "safe_probe_run";
+}
+
+function isEarlyRunnerTurn(input: AiDecisionInput): boolean {
+  if (input.playerView.phase !== "runner_action_phase" || input.playerView.activeSide !== "runner") return false;
+  const scoredAgendaCount = input.playerView.own.scoreArea.length + input.playerView.opponent.scoreArea.length;
+  return input.actionNumber <= 12 && scoredAgendaCount === 0;
 }
 
 function visibleRiskPenalty(candidate: RunnerPlanCandidate, riskTolerance: number): number {

@@ -52,4 +52,6 @@ Nach dem letzten Low-Reserve-Pacing fallen auch die verbleibenden Economy-Stall-
 
 Nach der Runner-Mulligan-Erweiterung bleibt der enge 6-Seed-/40-Action-Lauf stabil: der Runner beantwortet Setup-Mulligans anhand von Breaker-Zugang, Economy, Setup, Druckoptionen und Doktrin, ohne neue Doctrine-Fehlerklassen oder Safety-Deltas zu erzeugen.
 
+Nach dem ersten Early-Turn-Doctrine-Slice bleibt der enge Lauf ebenfalls stabil. `current_candidate` hat weiter 0 Doctrine-Fehlerklassen; `decline_trash` wird nun als bewusste Runner-Access-Entscheidung behandelt, sodass der Fallback-Anteil im Kandidatenlauf bei `0.008` liegt.
+
 Alle Doctrine-Fehlerklassen stehen in diesem 6-Seed-/40-Action-Lauf bei 0. Das ist ein enger Tuning-Nachweis, kein Ersatz für Holdout-/Selfplay-Auswertung.

@@ -42,6 +42,7 @@ export {
   chooseRunnerPlanAction,
   chooseRunnerPlanDecision,
   estimateRunCost,
+  evaluateRunnerEarlyTurnDoctrine,
   evaluateCorpScoringThreat,
   evaluateRemoteThreat,
   evaluateRunnerPlan,
@@ -453,6 +454,7 @@ function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "runner.trace.bid_visible_amount" ||
     decision.reasonCode === "runner.access.steal_agenda" ||
     decision.reasonCode === "runner.access.open_card" ||
+    decision.reasonCode === "runner.access.decline_trash" ||
     decision.reasonCode === "runner.encounter.break_etr" ||
     decision.reasonCode === "runner.encounter.pump_breaker" ||
     decision.reasonCode === "runner.tag.clear_visible_tag" ||
@@ -1499,6 +1501,12 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       explanation = "Eine zugreifbare Karte kann legal entfernt werden.";
       evidence.push("trash_legal");
       break;
+    case "decline_trash":
+      score = 650;
+      reasonCode = "runner.access.decline_trash";
+      explanation = "Der Runner lehnt das Trashen im Zugriff bewusst ab, wenn kein höherwertiger Trash-Plan greift.";
+      evidence.push("decline_trash_legal");
+      break;
     case "break_subroutine":
       score = 740;
       reasonCode = "runner.encounter.break_etr";
@@ -1938,7 +1946,7 @@ function qualityTagsForAction(input: AiDecisionInput, action: LegalAction, decis
   if (input.side === "corp" && action.type === "install_card" && action.payload?.placement !== "ice" && sourceDefinition?.type === "agenda") {
     if (targetServerId === "new_remote" || ((targetServer?.iceCount ?? 0) === 0 && (targetServer?.rootCount ?? 0) === 0)) tags.push("naked_agenda_install");
   }
-  if (input.side === "corp" && agendaInHand >= 3 && !isAgendaFloodExposureExemptAction(action, decision)) tags.push("agenda_flood_exposure");
+  if (input.side === "corp" && agendaInHand >= 3 && !isAgendaFloodExposureExemptAction(action, decision, sourceDefinition)) tags.push("agenda_flood_exposure");
   if (legalScoreAvailable && action.type !== "score_agenda") tags.push("score_window_missed");
   if (
     input.side === "corp" &&
@@ -1965,10 +1973,11 @@ function isEconomyStallExemptAction(input: AiDecisionInput, action: LegalAction,
   return action.type === "pump_breaker" || action.type === "break_subroutine" || action.type === "continue_run" || action.type === "access_card" || action.type === "steal_agenda";
 }
 
-function isAgendaFloodExposureExemptAction(action: LegalAction, decision: AiDecision): boolean {
+function isAgendaFloodExposureExemptAction(action: LegalAction, decision: AiDecision, sourceDefinition?: { type?: string }): boolean {
   if (decision.fallbackUsed) return true;
   if (decision.reasonCode.endsWith(".recover_economy")) return true;
   if (decision.reasonCode.endsWith(".protect_hq") || decision.reasonCode.endsWith(".protect_rnd")) return true;
+  if (action.type === "install_card" && action.payload?.placement !== "ice" && sourceDefinition?.type !== "agenda") return true;
   return action.type === "mandatory_draw" || action.type === "end_turn" || action.type === "decline_rez" || action.type === "rez_ice" || action.type === "resolve_choice";
 }
 
