@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-agenda-run-recurring
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AGENDA_RUN_RECURRING_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung, Härtungen und Pflichtchecks sind grün.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Artificial Security Directors | `onr_v1_189_artificial-security-directors` | Engine-Pfad bleibt stabil; V1.9.19-Agenda-/Operation-Zielinfrastruktur fokussiert nachgetestet | Replay-, Wrong-Side/Stale- und PublicPayload-Härtung ergänzt |
+| Submarine Uplink | `onr_v1_182_submarine-uplink` | Base-Link wirkt als einzelne Trace-Link-Quelle und kumuliert nicht mit stärkerer Base-Link-Quelle | Trace-Fenster-Nachtest ergänzt |
+| Genetics-Visionary Acquisition | `onr_v1_202_genetics-visionary-acquisition` | Engine-Pfad bleibt stabil; Agenda-/Overadvance-Zielinfrastruktur fokussiert nachgetestet | Replay- und Payload-Härtung ergänzt |
+| Team Restructuring | `onr_v1_305_team-restructuring` | Power-Counter-Zielwahl auf Korp-Agenda deterministisch und öffentlich nachvollziehbar | Operation-Zieltest ergänzt |
+| Silver Lining Recovery Protocol | `onr_v1_303_silver-lining-recovery-protocol` | Credit-Gain-Pfad karten-ID-spezifisch geprüft | Ziel-/Choice-freier PublicPayload-Test ergänzt |
+| Shredder Uplink Protocol | `onr_v1_062_shredder-uplink-protocol` | R&D/HQ-Access-Bonus weist Shredder als Quelle aus und leakt keine Folgekarte | Access-Queue- und Payload-Härtung ergänzt |
+| Corolla Speed Chip | `onr_v1_124_corolla-speed-chip` | Nacharbeit umgesetzt: 1 recurring credit nur für Killer-Nutzung während Runs, mit Refresh | Shared-Vertrag, Engine-Pfad und Tests ergänzt |
+| Mystery Box | `onr_v1_043_mystery-box` | Nacharbeit umgesetzt: Top-5-Reveal, Programmauswahl, Free-Install, Self-Trash und Shuffle | LegalAction-/Choice-/Replay-Härtung ergänzt |
+| Newsgroup Filter | `onr_v1_045_newsgroup-filter` | Bestehende Gain-2-Aktion bleibt main-window- und source-gebunden | Removed-source- und Timing-Negativtest ergänzt |
+| Project Consultants | `onr_v1_300_project-consultants` | Installierte Agenda-Zielwahl deterministisch und payloadfähig | Wrong-Side/Stale-/Zielpayload-Test ergänzt |
+
 ## Runde 2026-05-15-stealth-ap-citygrid
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

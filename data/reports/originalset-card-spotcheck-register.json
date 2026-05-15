@@ -13,6 +13,85 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-agenda-run-recurring",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AGENDA_RUN_RECURRING_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-agenda-run-recurring.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_189_artificial-security-directors",
+          "title": "Artificial Security Directors",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_v1919_agenda_operation_target_revalidation_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_182_submarine-uplink",
+          "title": "Submarine Uplink",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_single_base_link_trace_source_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_202_genetics-visionary-acquisition",
+          "title": "Genetics-Visionary Acquisition",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_v1919_agenda_operation_target_revalidation_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_305_team-restructuring",
+          "title": "Team Restructuring",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_power_counter_agenda_target_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+          "title": "Silver Lining Recovery Protocol",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_gain_three_credits_no_target_choice_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_062_shredder-uplink-protocol",
+          "title": "Shredder Uplink Protocol",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_access_bonus_source_payload_no_future_card_leak",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_124_corolla-speed-chip",
+          "title": "Corolla Speed Chip",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_one_killer_run_recurring_credit_refresh",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_043_mystery-box",
+          "title": "Mystery Box",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_top5_reveal_program_choice_free_install_self_trash_shuffle",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_045_newsgroup-filter",
+          "title": "Newsgroup Filter",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_main_window_source_revalidation_payload_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_300_project-consultants",
+          "title": "Project Consultants",
+          "spotcheckStatus": "completed",
+          "result": "engine_ok_installed_agenda_target_revalidation_payload",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-stealth-ap-citygrid",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_STEALTH_AP_CITYGRID_IMPLEMENTATION.md",

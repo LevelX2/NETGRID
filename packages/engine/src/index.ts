@@ -374,6 +374,7 @@ const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
 const V1922_RABBIT_ID = "onr_v1_051_rabbit";
 const V1922_SCATTER_SHOT_ID = "onr_v1_057_scatter-shot";
 const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
+const V1922_COROLLA_SPEED_CHIP_ID = "onr_v1_124_corolla-speed-chip";
 const V1922_FALSE_ECHO_ID = "onr_v1_026_false-echo";
 const V1922_NETSPACE_INVERTER_ID = "onr_v1_044_netspace-inverter";
 const V1922_SPEED_TRAP_ID = "onr_v1_067_speed-trap";
@@ -6054,6 +6055,7 @@ function runnerMovementActions(state: GameState): LegalAction[] {
   }
   const actions: LegalAction[] = [];
   actions.push(...startupImmolatorPostPassActions(state, run));
+  actions.push(...mysteryBoxRunActions(state, run));
   const jackOutAdditionalCost = runJackOutAdditionalCost(run);
   if (availableRunnerRunCredits(state) >= jackOutAdditionalCost) {
     actions.push(
@@ -6080,6 +6082,44 @@ function runnerMovementActions(state: GameState): LegalAction[] {
     action(state, "runner", "continue_run", "Run fortsetzen", "game_rule"),
   );
   return actions;
+}
+
+function mysteryBoxRunActions(
+  state: GameState,
+  run: ActiveRun,
+): LegalAction[] {
+  const used = new Set(run.mysteryBoxUsedSourceIdsThisRun ?? []);
+  if (state.runner.stack.length === 0) return [];
+  return state.runner.rig.programs
+    .slice()
+    .sort()
+    .filter((cardId) => !used.has(cardId))
+    .filter((cardId) => definitionFor(state, cardId).id === MYSTERY_BOX_ID)
+    .map((sourceCardId) => {
+      const topCards = state.runner.stack.slice(0, 5);
+      const programCount = topCards.filter(
+        (cardId) => definitionFor(state, cardId).type === "program",
+      ).length;
+      return action(
+        state,
+        "runner",
+        "trigger_ability",
+        `${definitionFor(state, sourceCardId).title}: Stack-Spitze pruefen`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+          revealCount: topCards.length,
+          revealedCardDefinitionIds: topCards
+            .map((cardId) => definitionFor(state, cardId).id)
+            .join(","),
+          revealedProgramCount: programCount,
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "mystery_box_stack_top5_reveal",
+        },
+      );
+    });
 }
 
 function startupImmolatorPostPassActions(
@@ -6216,10 +6256,13 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   const successfulRunActions = successfulRunProgramActions(state, run);
   if (successfulRunActions.length > 0) return successfulRunActions;
   if (!run.accessedCardId) {
+    const mysteryBoxActions = mysteryBoxRunActions(state, run);
     if (hasPendingAccessCandidate(state, run))
       return [
+        ...mysteryBoxActions,
         action(state, "runner", "access_card", "Karte accessen", "game_rule"),
       ];
+    if (mysteryBoxActions.length > 0) return mysteryBoxActions;
     return [
       action(
         state,
@@ -8003,6 +8046,13 @@ function performAction(
         return;
       }
       if (
+        legalAction.payload?.v1915RunnerProgramAbility ===
+        "mystery_box_top5_program_install"
+      ) {
+        resolveMysteryBoxTop5ProgramInstall(state, legalAction);
+        return;
+      }
+      if (
         legalAction.payload?.v1922RunnerHardwareAbility ===
         "microtech_backup_drive_return_top_hosted"
       ) {
@@ -8324,6 +8374,159 @@ function resolveStartupImmolatorTrashIce(
     trashedCardDefinitionId: targetDefinitionId,
     runnerCreditsAfter: state.runner.credits,
     startupImmolatorExhausted: true,
+  };
+}
+
+function resolveMysteryBoxTop5ProgramInstall(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Mystery Box nutzen.");
+  const run = mustRun(state);
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Mystery Box ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
+    throw new Error("Die Mystery-Box-Faehigkeit passt nicht zur Karte.");
+  const used = run.mysteryBoxUsedSourceIdsThisRun ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Mystery Box wurde in diesem Run bereits genutzt.");
+  const topCards = state.runner.stack.slice(0, 5);
+  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
+  const programIds = topCards.filter(
+    (cardId) => definitionFor(state, cardId).type === "program",
+  );
+  run.mysteryBoxUsedSourceIdsThisRun = [...used, sourceCardId].sort();
+  if (programIds.length === 0) {
+    state.runner.stack = shuffleStateIds(
+      state,
+      state.runner.stack,
+      `v1915.mystery_box.shuffle.no_program.${sourceCardId}.${run.runId}`,
+    );
+    for (const cardId of state.runner.stack) {
+      state.cardInstances[cardId] = {
+        ...mustInstance(state.cardInstances, cardId),
+        zone: { side: "runner", zone: "stack" },
+      };
+    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      programFound: false,
+      installedProgramCount: 0,
+      selfTrashed: false,
+      randomCounterAfter: state.randomCounter,
+    };
+    return;
+  }
+  startMysteryBoxProgramChoice(state, sourceCardId, topCards, programIds);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    programFound: true,
+    choiceVisibility: "public",
+  };
+}
+
+function startMysteryBoxProgramChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  topCards: CardInstanceId[],
+  programIds: CardInstanceId[],
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1915_mystery_box_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1915.mystery_box:${sourceCardId}:${topCards.join(",")}:${state.stateVersion + 1}`,
+    prompt: "Mystery-Box-Programm installieren",
+    kind: "select_cards",
+    options: programIds.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+}
+
+function resolveMysteryBoxChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1915.mystery_box"))
+    throw new Error("Es ist keine Mystery-Box-Choice offen.");
+  const sourceCardId = choice.source.split(":")[1] ?? "";
+  if (!sourceCardId || !state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Mystery Box ist nicht mehr installiert.");
+  if (definitionFor(state, sourceCardId).id !== MYSTERY_BOX_ID)
+    throw new Error("Die Mystery-Box-Choice passt nicht zur Quelle.");
+  const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
+  const currentTopCards = state.runner.stack.slice(0, 5);
+  if (!selectedId || !currentTopCards.includes(selectedId))
+    throw new Error("Das gewaehlte Programm liegt nicht mehr im Reveal-Fenster.");
+  const selectedDefinition = definitionFor(state, selectedId);
+  if (selectedDefinition.type !== "program")
+    throw new Error("Mystery Box kann nur ein Programm installieren.");
+  if (
+    state.runner.memoryUsed + (selectedDefinition.memoryCost ?? 0) >
+    state.runner.memoryLimit
+  )
+    throw new Error("Nicht genug Memory fuer das Mystery-Box-Programm.");
+
+  removeFromAllZones(state, selectedId);
+  state.runner.rig.programs.push(selectedId);
+  state.runner.memoryUsed += selectedDefinition.memoryCost ?? 0;
+  state.cardInstances[selectedId] = {
+    ...mustInstance(state.cardInstances, selectedId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+  };
+  if ((selectedDefinition.recurringCredits ?? 0) > 0)
+    setCardCounter(
+      state,
+      selectedId,
+      "recurring_credit",
+      selectedDefinition.recurringCredits ?? 0,
+    );
+  if (
+    selectedDefinition.mechanics.includes("virus") &&
+    selectedDefinition.id !== BUTCHER_BOY_ID &&
+    selectedDefinition.id !== SKIVVISS_ID
+  )
+    addCardCounter(state, selectedId, "virus", 1);
+
+  trashRunnerInstalledCardToHeap(state, sourceCardId);
+  state.runner.stack = shuffleStateIds(
+    state,
+    state.runner.stack,
+    `v1915.mystery_box.shuffle.after_install.${sourceCardId}.${selectedId}`,
+  );
+  for (const cardId of state.runner.stack) {
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      zone: { side: "runner", zone: "stack" },
+    };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1915RunnerProgramAbility: "mystery_box_top5_program_install",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "mystery_box_program_install",
+    installedProgramDefinitionId: selectedDefinition.id,
+    installedProgramCount: 1,
+    selfTrashed: true,
+    randomCounterAfter: state.randomCounter,
   };
 }
 
@@ -8852,6 +9055,8 @@ function startRun(
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
   trashTopRunnersConferenceOnRunStart(state);
   const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
+  const installedAccessBonusSourceDefinitionIds =
+    v1915InstalledAccessBonusSourceDefinitionIds(state, server.id);
   const baseAccessCount = Math.max(1, Math.floor(accessCount));
   const effectiveAccessCount = baseAccessCount + installedAccessBonus;
   state.phase = "run";
@@ -8915,6 +9120,12 @@ function startRun(
       baseAccessCount,
       installedAccessBonus,
       effectiveAccessCount,
+      ...(installedAccessBonusSourceDefinitionIds.length > 0
+        ? {
+            installedAccessBonusSourceDefinitionIds:
+              installedAccessBonusSourceDefinitionIds.join(","),
+          }
+        : {}),
     };
   }
   applyAiBoonRunStart(state, legalAction);
@@ -10159,13 +10370,26 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
       return;
     }
     if (legalAction) {
+      const v1915AccessBonus = v1915InstalledAccessBonus(
+        state,
+        breach.serverId,
+      );
       const hqAccessBonus =
         breach.serverId === "hq" ? runnerHqAccessBonus(state) : 0;
+      const installedAccessBonus = v1915AccessBonus + hqAccessBonus;
+      const installedAccessBonusSourceDefinitionIds =
+        v1915InstalledAccessBonusSourceDefinitionIds(state, breach.serverId);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        baseAccessCount: run.accessCount ?? 1,
-        installedAccessBonus: hqAccessBonus,
+        baseAccessCount: Math.max(1, breach.queue.length - installedAccessBonus),
+        installedAccessBonus,
         effectiveAccessCount: breach.queue.length,
+        ...(installedAccessBonusSourceDefinitionIds.length > 0
+          ? {
+              installedAccessBonusSourceDefinitionIds:
+                installedAccessBonusSourceDefinitionIds.join(","),
+            }
+          : {}),
       };
     }
     const { accessedCardId: _accessedCardId, ...runWithoutAccessedCard } = run;
@@ -10404,28 +10628,27 @@ function v1915InstalledAccessBonus(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
 ): number {
-  let bonus = 0;
-  if (
-    serverId === "hq" &&
-    runnerHasInstalledDefinition(state, EXPERT_SCHEDULE_ANALYZER_ID)
-  )
-    bonus += 1;
-  if (
-    serverId === "rd" &&
-    runnerHasInstalledDefinition(state, MICROTECH_AI_INTERFACE_ID)
-  )
-    bonus += 1;
-  if (
-    (serverId === "hq" || serverId === "rd") &&
-    runnerHasInstalledDefinition(state, SHREDDER_UPLINK_PROTOCOL_ID)
-  )
-    bonus += 1;
-  if (
-    serverId === "archives" &&
-    runnerHasInstalledDefinition(state, RECORD_RECONSTRUCTOR_ID)
-  )
-    bonus += 1;
-  return bonus;
+  return v1915InstalledAccessBonusSourceDefinitionIds(state, serverId).length;
+}
+
+function v1915InstalledAccessBonusSourceDefinitionIds(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): CardDefinitionId[] {
+  const sources: CardDefinitionId[] = [];
+  const pushIfInstalled = (definitionId: CardDefinitionId): void => {
+    if (runnerHasInstalledDefinition(state, definitionId))
+      sources.push(definitionId);
+  };
+  if (serverId === "hq")
+    pushIfInstalled(EXPERT_SCHEDULE_ANALYZER_ID);
+  if (serverId === "rd")
+    pushIfInstalled(MICROTECH_AI_INTERFACE_ID);
+  if (serverId === "hq" || serverId === "rd")
+    pushIfInstalled(SHREDDER_UPLINK_PROTOCOL_ID);
+  if (serverId === "archives")
+    pushIfInstalled(RECORD_RECONSTRUCTOR_ID);
+  return sources.sort();
 }
 
 function v1915InstalledRevealHelperIds(state: GameState): CardDefinitionId[] {
@@ -14425,6 +14648,10 @@ function resolvePendingChoice(
     resolveSingaporeCityGridSwapChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v1915.mystery_box")) {
+    resolveMysteryBoxChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1922.corp_rd_arrange_top5")) {
     resolveV1922CorpRdTopReorderChoice(state, legalAction, playerAction);
     return;
@@ -17749,9 +17976,8 @@ function publicContextForAction(
   if (legalAction.type === "start_run" && state.run) {
     const runAccessCount = Math.max(1, Math.floor(state.run.accessCount ?? 1));
     const runInstalledAccessBonus =
-      state.run.attackedServerId === "hq"
-        ? runnerHqAccessBonus(state)
-        : v1915InstalledAccessBonus(state, state.run.attackedServerId);
+      v1915InstalledAccessBonus(state, state.run.attackedServerId) +
+      (state.run.attackedServerId === "hq" ? runnerHqAccessBonus(state) : 0);
     context.baseAccessCount = Math.max(
       1,
       runAccessCount - runInstalledAccessBonus,
@@ -17772,6 +17998,9 @@ function publicContextForAction(
     if (typeof value === "number" || typeof value === "boolean")
       context[key] = value;
   }
+  if (typeof legalAction.payload?.installedAccessBonusSourceDefinitionIds === "string")
+    context.installedAccessBonusSourceDefinitionIds =
+      legalAction.payload.installedAccessBonusSourceDefinitionIds;
   if (legalAction.type === "install_card") {
     const definition = cardId ? definitionFor(state, cardId) : undefined;
     context.zoneLabel =
@@ -18453,6 +18682,11 @@ function publicContextForAction(
   }
   if (typeof legalAction.payload?.v1919OperationAbility === "string") {
     context.v1919OperationAbility = legalAction.payload.v1919OperationAbility;
+    if (typeof legalAction.payload.targetCardId === "string")
+      context.targetCardId = legalAction.payload.targetCardId;
+    if (typeof legalAction.payload.targetCardDefinitionId === "string")
+      context.targetCardDefinitionId =
+        legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.addedCounterAmount === "number")
       context.addedCounterAmount = legalAction.payload.addedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number")
@@ -18476,6 +18710,28 @@ function publicContextForAction(
       context.specialZoneVisibility = legalAction.payload.specialZoneVisibility;
     if (typeof legalAction.payload.specialZoneReason === "string")
       context.specialZoneReason = legalAction.payload.specialZoneReason;
+  }
+  if (typeof legalAction.payload?.v1915RunnerProgramAbility === "string") {
+    context.v1915RunnerProgramAbility =
+      legalAction.payload.v1915RunnerProgramAbility;
+    if (typeof legalAction.payload.revealCount === "number")
+      context.revealCount = legalAction.payload.revealCount;
+    if (typeof legalAction.payload.revealedCardDefinitionIds === "string")
+      context.revealedCardDefinitionIds =
+        legalAction.payload.revealedCardDefinitionIds;
+    if (typeof legalAction.payload.revealedProgramCount === "number")
+      context.revealedProgramCount = legalAction.payload.revealedProgramCount;
+    if (typeof legalAction.payload.installedProgramDefinitionId === "string")
+      context.installedProgramDefinitionId =
+        legalAction.payload.installedProgramDefinitionId;
+    if (typeof legalAction.payload.installedProgramCount === "number")
+      context.installedProgramCount = legalAction.payload.installedProgramCount;
+    if (typeof legalAction.payload.selfTrashed === "boolean")
+      context.selfTrashed = legalAction.payload.selfTrashed;
+    if (legalAction.payload.programFound === false)
+      context.programFound = false;
+    if (typeof legalAction.payload.randomCounterAfter === "number")
+      context.randomCounterAfter = legalAction.payload.randomCounterAfter;
   }
   if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string") {
     context.v1922RunnerProgramAbility =
@@ -19404,7 +19660,10 @@ function runnerRunRecurringCreditSourceIds(
   return runnerRig.filter((cardId) => {
     if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
     const definition = definitionFor(state, cardId);
-    if (definition.id === "onr_v1_147_zz22-speed-chip") {
+    if (
+      definition.id === "onr_v1_147_zz22-speed-chip" ||
+      definition.id === V1922_COROLLA_SPEED_CHIP_ID
+    ) {
       return Boolean(
         state.run &&
           breakerId &&

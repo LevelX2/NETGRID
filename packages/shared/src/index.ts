@@ -813,6 +813,7 @@ export type RunState = {
   fullyBrokenIceIds?: CardInstanceId[];
   startupImmolatorPendingPassedIceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
+  mysteryBoxUsedSourceIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
   aardvarkInterceptionIceIds?: CardInstanceId[];
   blinkUsedSubroutinesByBreakerThisEncounter?: Partial<
@@ -4989,11 +4990,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
     installCost: 0,
+    recurringCredits: 1,
     rulesText:
-      "Installed hardware chip with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "1 recurring credit. Use this credit only for Killer icebreaker use during runs.",
     mechanics: [
       "install_hardware",
       "memory",
+      "recurring_credit",
+      "recurring_start_turn",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],
