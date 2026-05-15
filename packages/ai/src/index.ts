@@ -134,6 +134,7 @@ export type AiDoctrineQualityMetrics = {
   assetTrashNeglect: number;
 };
 
+export type AiDoctrineQualityMetricName = keyof AiDoctrineQualityMetrics;
 export type AiDoctrineQualityDelta = AiDoctrineQualityMetrics;
 
 export type AiDoctrineQualityBenchmarkResult = {
@@ -170,6 +171,26 @@ export type AiDoctrineQualityGateResult = {
   thresholds: AiDoctrineQualityGateThresholds;
   hardFailures: string[];
   warnings: string[];
+};
+
+export type AiDoctrineQualityCaseExample = {
+  metric: AiDoctrineQualityMetricName;
+  seed: string;
+  actionIndex: number;
+  stateVersionBefore: number;
+  side: Side;
+  actionType: LegalAction["type"];
+  reasonCode: string;
+  targetServerId?: string;
+  qualityTags: string[];
+};
+
+export type AiDoctrineQualityCaseAnalysis = {
+  version: "ai-deck-doctrine-case-analysis-v1";
+  maxExamplesPerMetric: number;
+  totals: AiDoctrineQualityMetrics;
+  examples: Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>;
+  redactionSafe: boolean;
 };
 
 export type AiSoakResult = {
@@ -764,6 +785,67 @@ export function formatDoctrineQualityBenchmarkReport(
       ? "Der Kandidat verletzt keine harte Safety- oder Doctrine-Schwelle. Einzelne Warnungen bleiben Review-Material, bevor Gewichte angepasst werden."
       : "Der Kandidat verletzt mindestens eine harte Schwelle. Gewichtungs- oder Planänderungen sollten vor weiterer Ausweitung geprüft werden."
   ].join("\n");
+}
+
+export function analyzeDoctrineQualityCases(summaries: AiSimulationSummary[], options: { maxExamplesPerMetric?: number } = {}): AiDoctrineQualityCaseAnalysis {
+  const maxExamplesPerMetric = options.maxExamplesPerMetric ?? 3;
+  const examples = emptyDoctrineCaseExamples();
+  for (const summary of summaries) {
+    for (const [actionIndex, entry] of summary.actionSequence.entries()) {
+      for (const tag of entry.qualityTags) {
+        const metric = doctrineMetricForQualityTag(tag);
+        if (!metric || examples[metric].length >= maxExamplesPerMetric) continue;
+        examples[metric].push(doctrineCaseExample(summary.seed, actionIndex, entry, metric));
+      }
+    }
+    collectRepeatedLowValueCentralRunExamples(summary, examples, maxExamplesPerMetric);
+  }
+  const analysis: AiDoctrineQualityCaseAnalysis = {
+    version: "ai-deck-doctrine-case-analysis-v1",
+    maxExamplesPerMetric,
+    totals: sumDoctrineMetrics(summaries.map((summary) => summary.metrics.doctrine)),
+    examples,
+    redactionSafe: true
+  };
+  return {
+    ...analysis,
+    redactionSafe: isRedactionSafeCaseAnalysis(analysis)
+  };
+}
+
+export function formatDoctrineQualityCaseAnalysisReport(analysis: AiDoctrineQualityCaseAnalysis, title = "AI Deck Doctrine Quality Case Analysis"): string {
+  const lines = [
+    `# ${title}`,
+    "",
+    `Version: ${analysis.version}`,
+    `Max examples per metric: ${analysis.maxExamplesPerMetric}`,
+    `Redaction safe: ${analysis.redactionSafe ? "yes" : "no"}`,
+    "",
+    "## Totals",
+    "",
+    "| Metric | Count | Examples |",
+    "| --- | ---: | ---: |",
+    ...DOCTRINE_QUALITY_METRICS.map((metric) => `| ${metric} | ${analysis.totals[metric]} | ${analysis.examples[metric].length} |`),
+    "",
+    "## Examples",
+    ""
+  ];
+  for (const metric of DOCTRINE_QUALITY_METRICS) {
+    lines.push(`### ${metric}`, "");
+    const examples = analysis.examples[metric];
+    if (examples.length === 0) {
+      lines.push("Keine Beispiele im analysierten Lauf.", "");
+      continue;
+    }
+    lines.push("| Seed | Action | Side | Type | Reason | Server | Tags |", "| --- | ---: | --- | --- | --- | --- | --- |");
+    for (const example of examples) {
+      lines.push(
+        `| ${example.seed} | ${example.actionIndex} | ${example.side} | ${example.actionType} | ${example.reasonCode} | ${example.targetServerId ?? "none"} | ${example.qualityTags.join(", ")} |`
+      );
+    }
+    lines.push("");
+  }
+  return lines.join("\n");
 }
 
 export function evaluateV143TuningGate(candidate: V143SimulationRunResult, baseline: V143SimulationRunResult): V143TuningGateResult {
@@ -1874,6 +1956,17 @@ function repeatedLowValueCentralRunTags(actionSequence: AiSimulationSummary["act
   return tags;
 }
 
+const DOCTRINE_QUALITY_METRICS: AiDoctrineQualityMetricName[] = [
+  "nakedAgendaInstalls",
+  "agendaFloodExposure",
+  "scoreWindowMissed",
+  "remoteOverbuild",
+  "economyStall",
+  "repeatedLowValueCentralRun",
+  "rigStall",
+  "assetTrashNeglect"
+];
+
 function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
   return {
     nakedAgendaInstalls: countTag(tags, "naked_agenda_install"),
@@ -1885,6 +1978,81 @@ function doctrineMetricsFor(tags: string[]): AiDoctrineQualityMetrics {
     rigStall: countTag(tags, "rig_stall"),
     assetTrashNeglect: countTag(tags, "asset_trash_neglect")
   };
+}
+
+function emptyDoctrineCaseExamples(): Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]> {
+  return {
+    nakedAgendaInstalls: [],
+    agendaFloodExposure: [],
+    scoreWindowMissed: [],
+    remoteOverbuild: [],
+    economyStall: [],
+    repeatedLowValueCentralRun: [],
+    rigStall: [],
+    assetTrashNeglect: []
+  };
+}
+
+function doctrineMetricForQualityTag(tag: string): AiDoctrineQualityMetricName | undefined {
+  switch (tag) {
+    case "naked_agenda_install":
+      return "nakedAgendaInstalls";
+    case "agenda_flood_exposure":
+      return "agendaFloodExposure";
+    case "score_window_missed":
+      return "scoreWindowMissed";
+    case "remote_overbuild":
+      return "remoteOverbuild";
+    case "economy_stall":
+      return "economyStall";
+    case "rig_stall":
+      return "rigStall";
+    case "asset_trash_neglect":
+      return "assetTrashNeglect";
+    default:
+      return undefined;
+  }
+}
+
+function collectRepeatedLowValueCentralRunExamples(
+  summary: AiSimulationSummary,
+  examples: Record<AiDoctrineQualityMetricName, AiDoctrineQualityCaseExample[]>,
+  maxExamplesPerMetric: number
+): void {
+  const metric: AiDoctrineQualityMetricName = "repeatedLowValueCentralRun";
+  const lastCentralRunByServer = new Map<string, number>();
+  for (const [actionIndex, entry] of summary.actionSequence.entries()) {
+    if (entry.side !== "runner" || entry.actionType !== "start_run" || !entry.targetServerId || !["rd", "hq", "archives"].includes(entry.targetServerId)) continue;
+    const previous = lastCentralRunByServer.get(entry.targetServerId);
+    if (previous !== undefined && actionIndex - previous <= 4 && !entry.reasonCode.includes("contest") && !entry.reasonCode.includes("trash") && examples[metric].length < maxExamplesPerMetric) {
+      examples[metric].push(doctrineCaseExample(summary.seed, actionIndex, entry, metric));
+    }
+    lastCentralRunByServer.set(entry.targetServerId, actionIndex);
+  }
+}
+
+function doctrineCaseExample(
+  seed: string,
+  actionIndex: number,
+  entry: AiSimulationSummary["actionSequence"][number],
+  metric: AiDoctrineQualityMetricName
+): AiDoctrineQualityCaseExample {
+  return {
+    metric,
+    seed,
+    actionIndex,
+    stateVersionBefore: entry.stateVersionBefore,
+    side: entry.side,
+    actionType: entry.actionType,
+    reasonCode: entry.reasonCode,
+    ...(entry.targetServerId ? { targetServerId: entry.targetServerId } : {}),
+    qualityTags: entry.qualityTags.slice().sort()
+  };
+}
+
+function isRedactionSafeCaseAnalysis(analysis: AiDoctrineQualityCaseAnalysis): boolean {
+  const serialized = JSON.stringify(analysis);
+  return !FORBIDDEN_AI_INPUT_FIELDS.some((needle) => serialized.includes(needle));
 }
 
 function sumDoctrineMetrics(metrics: AiDoctrineQualityMetrics[]): AiDoctrineQualityMetrics {

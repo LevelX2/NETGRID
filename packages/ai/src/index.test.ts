@@ -25,6 +25,7 @@ import {
 import { applyAction, applyEffectCommands, createGameAfterSetup, getLegalActions, getPlayerView, hashState, replayEvents } from "@netgrid/engine";
 import {
   assertAiInputIsSideSafe,
+  analyzeDoctrineQualityCases,
   beliefStateInvariantSignature,
   buildDeckDoctrineProfile,
   buildObservedFacts,
@@ -59,6 +60,7 @@ import {
   runV143SimulationLeague,
   runDoctrineQualityBenchmark,
   formatDoctrineQualityBenchmarkReport,
+  formatDoctrineQualityCaseAnalysisReport,
   generateCorpPlanCandidates,
   generateRunnerPlanCandidates,
   runnerPlanUsesOnlyAiSupportedCards,
@@ -2229,6 +2231,28 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(report).toContain(`Gate: ${gate.accepted ? "PASS" : "FAIL"}`);
     expect(gate.thresholds.maxCandidateIllegalActions).toBe(0);
     expect(JSON.stringify({ gate, report })).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  }, 30_000);
+
+  it("analyzes doctrine quality case examples without private state", () => {
+    const benchmark = runDoctrineQualityBenchmark({
+      includeHoldout: false,
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 24,
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate"
+    });
+    const analysis = analyzeDoctrineQualityCases(benchmark.candidateRun.summaries, { maxExamplesPerMetric: 2 });
+    const report = formatDoctrineQualityCaseAnalysisReport(analysis);
+
+    expect(analysis.version).toBe("ai-deck-doctrine-case-analysis-v1");
+    expect(analysis.maxExamplesPerMetric).toBe(2);
+    expect(analysis.redactionSafe).toBe(true);
+    expect(analysis.totals).toEqual(benchmark.candidate);
+    expect(analysis.examples.economyStall.length).toBeLessThanOrEqual(2);
+    expect(report).toContain("## Examples");
+    expect(report).toContain("### economyStall");
+    expect(JSON.stringify({ analysis, report })).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
   }, 30_000);
 
   it("evaluates holdout tuning gate for regression and improvement", () => {
