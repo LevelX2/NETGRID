@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-prevention-upgrade-access
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_PREVENTION_UPGRADE_ACCESS_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Checks sind grün.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| If You Want It Done Right... | `onr_v1_093_if-you-want-it-done-right` | Bestehender privater Stack-Top-5-Choice blieb Hidden-Info- und replay-stabil | Bestehende V1.9.22-Abdeckung bestätigt |
+| Armored Fridge | `onr_v1_121_armored-fridge` | Nacharbeit umgesetzt: sieben öffentliche Counter, Meat-Prevention mit Counterverbrauch und Auto-Trash bei leerer Quelle | Install-, Prevention-, Payload- und Replay-Test ergänzt |
+| Code Corpse | `onr_v1_229_code-corpse` | Bestehender Core-Damage-/End-the-run-ICE-Pfad blieb stabil | Bestehende V1.6.1-Abdeckung bestätigt |
+| Shotgun Wire | `onr_v1_269_shotgun-wire` | Bestehender Net-Damage-/End-the-run-Wall-Pfad blieb stabil | Bestehende ICE-Abdeckung bestätigt |
+| Power Grid Overload | `onr_v1_299_power-grid-overload` | Bestehender tagged-only-Hardwaretrash blieb LegalAction- und Payload-seitig stabil | Bestehende V1.9.14-Abdeckung bestätigt |
+| Solo Squad | `onr_v1_342_solo-squad` | Nacharbeit umgesetzt: Meat-Damage-Fähigkeit nur bei getaggtem Runner und Tag-Drift-Revalidation | No-tag- und Revalidation-Test ergänzt |
+| Bizarre Encryption Scheme | `onr_v1_351_bizarre-encryption-scheme` | Bestehender Access-Replacement-/Delayed-Agenda-Pfad blieb stabil | Bestehende V1.9.9-Abdeckung bestätigt |
+| Jenny Jett | `onr_v1_359_jenny-jett` | Bestehender generischer Upgrade-/Root-Server-Pfad blieb stabil | Bestehende V1.9.18-Abdeckung bestätigt |
+| Olivia Salazar | `onr_v1_363_olivia-salazar` | Bestehender Agenda-Steal-Kostenpfad blieb servergebunden stabil | Bestehende V1.9.19-Abdeckung bestätigt |
+| Twenty-Four-Hour Surveillance | `onr_v1_373_twenty-four-hour-surveillance` | Bestehender servergebundener Run-Start-Tax blieb zahlungs- und replay-stabil | Bestehende V1.9.18-Abdeckung bestätigt |
+
 ## Runde 2026-05-15-reactive-decks-grid
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

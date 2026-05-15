@@ -3083,11 +3083,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 3,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 2 meat damage.",
+      "Install with 7 Ablative counters. Remove 1 counter to prevent 1 meat damage; trash Armored Fridge when none remain.",
     mechanics: [
       "install_hardware",
+      "counter",
       "damage_prevention",
-      "damage_prevention_turn_limit",
+      "damage_prevention_counter_cost",
       "meat_damage",
       ONR_V1_LOCAL_PRIVATE,
     ],

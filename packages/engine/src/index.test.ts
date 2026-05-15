@@ -11012,6 +11012,92 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
   });
 
+  it("spends Armored Fridge counters for meat prevention and trashes the empty source", () => {
+    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-armored-fridge"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_121_armored-fridge");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_121_armored-fridge",
+    );
+    const armoredFridgeId = state.runner.rig.hardware.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_v1_121_armored-fridge",
+    );
+    expect(armoredFridgeId).toBeDefined();
+    if (!armoredFridgeId) throw new Error("Missing Armored Fridge install");
+    expect(cardCounterAmount(state, armoredFridgeId, "power")).toBe(7);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      counterType: "power",
+      addedCounterAmount: 7,
+      remainingCounters: 7,
+    });
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.runner.tags = 1;
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const gripBefore = state.runner.grip.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    state = applyChoice(
+      state,
+      "runner",
+      String(state.pendingChoice?.options.find((option) => option.id !== "pass")?.id),
+    );
+    expect(cardCounterAmount(state, armoredFridgeId, "power")).toBe(6);
+    expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      preventedAmount: 1,
+      damageAmount: 1,
+      counterType: "power",
+      removedCounterAmount: 1,
+      remainingCounters: 6,
+      sourceTrashed: false,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /Simple|Armored Fridge"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    setCardCounterForTest(state, armoredFridgeId, "power", 1);
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    state = applyChoice(
+      state,
+      "runner",
+      String(state.pendingChoice?.options.find((option) => option.id !== "pass")?.id),
+    );
+    expect(state.runner.rig.hardware).not.toContain(armoredFridgeId);
+    expect(state.runner.heap).toContain(armoredFridgeId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      remainingCounters: 0,
+      sourceTrashed: true,
+    });
+  });
+
   it("opens side-safe prevention choices for Corp ICE net damage and replays the resolved StateHash", () => {
     let state = toRunnerTurn(v1913DamagePreventionGame("v1913-ice-prevention"));
     state.runner.credits = 20;
@@ -13607,9 +13693,34 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "onr_v1_342_solo-squad",
     );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1917AssetAbility === "meat_damage_1",
+      ),
+    ).toBe(false);
+    state.runner.tags = 1;
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const gripBefore = state.runner.grip.length;
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1917AssetAbility === "meat_damage_1",
+    );
+    const tagDrift = structuredClone(state);
+    tagDrift.runner.tags = 0;
+    const driftResult = applyAction(tagDrift, {
+      matchId: tagDrift.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: tagDrift.stateVersion,
+      idempotencyKey: "v1917-solo-squad-tag-drift",
+    });
+    expect(driftResult.ok).toBe(false);
 
     state = apply(
       state,

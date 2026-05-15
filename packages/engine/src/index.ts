@@ -241,6 +241,8 @@ const V1917_COWBOY_SYSOP_ID = "onr_v1_316_cowboy-sysop";
 const V1917_DATA_MASONS_ID = "onr_v1_317_data-masons";
 const V1917_DISINFECTANT_ID = "onr_v1_319_disinfectant-inc";
 const V1917_SOLO_SQUAD_ID = "onr_v1_342_solo-squad";
+const V1913_ARMORED_FRIDGE_ID = "onr_v1_121_armored-fridge";
+const V1913_ARMORED_FRIDGE_STARTING_COUNTERS = 7;
 const V1917_SETUP_ID = "onr_v1_340_setup";
 const V1917_TRAP_ID = "onr_v1_345_trap";
 const V1917_SPINN_PUBLIC_RELATIONS_ID = "onr_v1_344_spinn-public-relations";
@@ -438,8 +440,8 @@ const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<
     damageTypes: ["net", "core"],
     priority: 120,
   },
-  "onr_v1_121_armored-fridge": {
-    maxPerTurn: 2,
+  [V1913_ARMORED_FRIDGE_ID]: {
+    maxPerTurn: V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
     damageTypes: ["meat"],
     priority: 120,
   },
@@ -3305,7 +3307,11 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1917_SOLO_SQUAD_ID && state.runner.grip.length > 0) {
+    if (
+      definition.id === V1917_SOLO_SQUAD_ID &&
+      state.runner.tags > 0 &&
+      state.runner.grip.length > 0
+    ) {
       actions.push(
         action(
           state,
@@ -6705,6 +6711,7 @@ function performAction(
           throw new Error(
             "Solo Squad nutzt in diesem V1.9.17-WIP genau 1 Meat Damage.",
           );
+        requireRunnerTagged(state);
         resolveDamageOperation(
           state,
           legalAction,
@@ -8549,6 +8556,20 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
+      if (definition.id === V1913_ARMORED_FRIDGE_ID) {
+        setCardCounter(
+          state,
+          cardId,
+          "power",
+          V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
+        );
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          counterType: "power",
+          addedCounterAmount: V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
+          remainingCounters: V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
+        };
+      }
       if (trashedDeckDefinitionIds.length > 0) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -12477,6 +12498,27 @@ function collectRuntimeDamagePreventionCandidates(
       });
       continue;
     }
+    if (definition.id === V1913_ARMORED_FRIDGE_ID) {
+      const remainingCounters = cardCounter(state, cardId, "power");
+      if (remainingCounters <= 0) continue;
+      candidates.push({
+        candidateId: `v1913_armored_fridge_prevent_${sanitizeId(cardId)}_${remainingCounters}`,
+        eventId: event.eventId,
+        kind: "prevent",
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: definition.id,
+          label: definition.title,
+        },
+        priority: 120,
+        visibility: "hidden_info_barrier",
+        optional: true,
+        preventAmount: 1,
+      });
+      continue;
+    }
     const profile = RUNTIME_DAMAGE_PREVENTION_PROFILES[definition.id];
     if (!profile || !profile.damageTypes.includes(damageType)) continue;
     const used = damagePreventionUsedThisTurn(state, cardId);
@@ -12796,6 +12838,11 @@ function resolveEventModificationChoice(
   );
   const finalAmount = Math.max(0, originalAmount - preventedAmount);
   registerDamagePreventionUsage(state, candidate, preventedAmount);
+  const preventionCostPayload = applyRuntimeDamagePreventionCost(
+    state,
+    candidate,
+    preventedAmount,
+  );
   const summary = resolveDamageImminentEvent(state, {
     ...event,
     payload: { ...event.payload, amount: finalAmount },
@@ -12813,6 +12860,7 @@ function resolveEventModificationChoice(
     ...(candidate.sourceRef.definitionId
       ? { sourceDefinitionId: candidate.sourceRef.definitionId }
       : {}),
+    ...preventionCostPayload,
   };
   setDamagePayload(legalAction, summary);
   clearEventModificationState(state);
@@ -13071,6 +13119,36 @@ function registerDamagePreventionUsage(
   const usage = (flags.damagePreventionUsage ??= {});
   usage[candidate.sourceRef.instanceId] =
     (usage[candidate.sourceRef.instanceId] ?? 0) + preventedAmount;
+}
+
+function applyRuntimeDamagePreventionCost(
+  state: GameState,
+  candidate: EventModificationCandidate,
+  preventedAmount: number,
+): Record<string, unknown> {
+  if (
+    preventedAmount <= 0 ||
+    candidate.sourceRef.kind !== "card" ||
+    !candidate.sourceRef.instanceId ||
+    candidate.sourceRef.definitionId !== V1913_ARMORED_FRIDGE_ID
+  ) {
+    return {};
+  }
+  const sourceCardId = candidate.sourceRef.instanceId;
+  if (!state.runner.rig.hardware.includes(sourceCardId))
+    throw new Error("Armored Fridge ist nicht mehr installiert.");
+  if (cardCounter(state, sourceCardId, "power") <= 0)
+    throw new Error("Armored Fridge hat keine Ablative Counter mehr.");
+  spendCardCounter(state, sourceCardId, "power", 1);
+  const remainingCounters = cardCounter(state, sourceCardId, "power");
+  const sourceTrashed = remainingCounters <= 0;
+  if (sourceTrashed) trashRunnerInstalledCardToHeap(state, sourceCardId);
+  return {
+    counterType: "power",
+    removedCounterAmount: 1,
+    remainingCounters,
+    sourceTrashed,
+  };
 }
 
 function sanitizeId(value: string): string {
@@ -17884,6 +17962,7 @@ function publicContextForAction(
     "resourceAbility",
     "counterType",
     "addedCounterAmount",
+    "removedCounterAmount",
     "remainingCounters",
     "shortTermContractTrashed",
     "gainCreditsAmount",
@@ -17910,6 +17989,8 @@ function publicContextForAction(
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
   }
+  if (typeof legalAction.payload?.sourceTrashed === "boolean")
+    context.sourceTrashed = legalAction.payload.sourceTrashed;
   if (typeof legalAction.payload?.ambushDefinitionId === "string")
     context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
   if (typeof legalAction.payload?.tagConditionMet === "boolean")
