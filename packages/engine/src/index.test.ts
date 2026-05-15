@@ -11901,6 +11901,68 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     ).toBe(false);
   });
 
+  it("clears counters when installed Runner cards leave the rig for grip or stack", () => {
+    let state = toRunnerTurn(
+      v1914TraceTagResourceGame("v1914-rig-exit-clears-counters"),
+    );
+    state.runner.credits = 12;
+    const brokerId = installRunnerResourceForTest(
+      state,
+      "onr_v1_154_broker",
+    );
+    setCardCounterForTest(state, brokerId, "power", 3);
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: brokerId,
+      setAside: {
+        visibility: "public",
+        reason: "v1914_rig_to_grip_counter_cleanup",
+        allowReturn: true,
+        returnZone: { side: "runner", zone: "grip" },
+      },
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "move_to_set_aside",
+    );
+    expect(state.cardInstances[brokerId]?.counters).toBeUndefined();
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "return_from_set_aside",
+    );
+    expect(state.runner.grip).toContain(brokerId);
+    expect(state.cardInstances[brokerId]?.counters).toBeUndefined();
+
+    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    setCardCounterForTest(state, programId, "power", 2);
+    state.specialZoneHarness = {
+      actor: "runner",
+      cardInstanceId: programId,
+      setAside: {
+        visibility: "public",
+        reason: "v1914_rig_to_stack_counter_cleanup",
+        allowReturn: true,
+        returnZone: { side: "runner", zone: "stack" },
+      },
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "move_to_set_aside",
+    );
+    expect(state.cardInstances[programId]?.counters).toBeUndefined();
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "return_from_set_aside",
+    );
+    expect(state.runner.stack).toContain(programId);
+    expect(state.cardInstances[programId]?.counters).toBeUndefined();
+  });
+
   it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
     let state = toRunnerTurn(
       v1914TraceTagResourceGame("v1914-power-grid-overload"),

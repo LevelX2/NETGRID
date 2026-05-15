@@ -17855,9 +17855,13 @@ function setCardCounter(
 
 function clearCardCounters(state: GameState, cardId: CardInstanceId): void {
   const instance = mustInstance(state.cardInstances, cardId);
+  state.cardInstances[cardId] = cardInstanceWithoutCounters(instance);
+}
+
+function cardInstanceWithoutCounters(instance: CardInstance): CardInstance {
   const { counters: _counters, ...withoutCounters } = instance;
   void _counters;
-  state.cardInstances[cardId] = withoutCounters;
+  return withoutCounters;
 }
 
 function addCardCounter(
@@ -18797,6 +18801,7 @@ function createInstance(
 }
 
 function removeFromAllZones(state: GameState, cardId: string): void {
+  const wasRunnerRigCard = runnerInstalledCardIds(state).includes(cardId);
   state.corp.hq = state.corp.hq.filter((id) => id !== cardId);
   state.corp.rd = state.corp.rd.filter((id) => id !== cardId);
   state.corp.archives = state.corp.archives.filter((id) => id !== cardId);
@@ -18823,6 +18828,7 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   specialZones.removedFromGame = specialZones.removedFromGame.filter(
     (id) => id !== cardId,
   );
+  if (wasRunnerRigCard) clearCardCounters(state, cardId);
 }
 
 function ensureSpecialZones(state: GameState): SpecialZoneState {
@@ -18918,6 +18924,9 @@ function moveToSpecialZone(
     CardInstance["zone"],
     { side: "special" }
   >;
+  const movedInstance = runnerInstalledCardIds(state).includes(cardId)
+    ? cardInstanceWithoutCounters(instance)
+    : instance;
   const visibility = specialZoneVisibilityPayload(
     legalAction,
     harnessConfig.visibility,
@@ -18933,7 +18942,7 @@ function moveToSpecialZone(
   target.push(cardId);
   target.sort();
   state.cardInstances[cardId] = {
-    ...instance,
+    ...movedInstance,
     zone: {
       side: "special",
       zone,
