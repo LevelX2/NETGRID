@@ -47,6 +47,7 @@ import {
   evaluateScoringWindow,
   evaluateServerThreat,
   evaluateCorpScoringThreat,
+  evaluateDoctrineQualityGate,
   evaluateRemoteThreat,
   evaluateRunnerRig,
   evaluateServerAccessValue,
@@ -57,6 +58,7 @@ import {
   runV143ExploitRegressionFixtures,
   runV143SimulationLeague,
   runDoctrineQualityBenchmark,
+  formatDoctrineQualityBenchmarkReport,
   generateCorpPlanCandidates,
   generateRunnerPlanCandidates,
   runnerPlanUsesOnlyAiSupportedCards,
@@ -2207,6 +2209,26 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(benchmark.delta.nakedAgendaInstalls).toBe(benchmark.candidate.nakedAgendaInstalls - benchmark.baseline.nakedAgendaInstalls);
     expect(benchmark.safety.illegalActionDelta).toBe(benchmark.candidateRun.illegalActions - benchmark.baselineRun.illegalActions);
     expect(JSON.stringify(benchmark)).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
+  }, 30_000);
+
+  it("formats doctrine quality benchmark reports with gate interpretation", () => {
+    const benchmark = runDoctrineQualityBenchmark({
+      includeHoldout: false,
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 20,
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate"
+    });
+    const gate = evaluateDoctrineQualityGate(benchmark);
+    const report = formatDoctrineQualityBenchmarkReport(benchmark, gate);
+
+    expect(report).toContain("# AI Deck Doctrine Quality Benchmark Report");
+    expect(report).toContain("| nakedAgendaInstalls |");
+    expect(report).toContain("## Safety Delta");
+    expect(report).toContain(`Gate: ${gate.accepted ? "PASS" : "FAIL"}`);
+    expect(gate.thresholds.maxCandidateIllegalActions).toBe(0);
+    expect(JSON.stringify({ gate, report })).not.toMatch(/cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i);
   }, 30_000);
 
   it("evaluates holdout tuning gate for regression and improvement", () => {

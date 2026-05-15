@@ -9,7 +9,7 @@ import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
-import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
   BeliefEntry,
@@ -152,6 +152,24 @@ export type AiDoctrineQualityBenchmarkResult = {
   };
   baselineRun: V143SimulationRunResult;
   candidateRun: V143SimulationRunResult;
+};
+
+export type AiDoctrineQualityGateThresholds = {
+  maxCandidateIllegalActions: number;
+  maxCandidateReplayFailures: number;
+  maxTimeoutRateDelta: number;
+  maxFallbackRateDelta: number;
+  maxNakedAgendaInstallDelta: number;
+  maxScoreWindowMissedDelta: number;
+  maxEconomyStallDelta: number;
+  maxRepeatedLowValueCentralRunDelta: number;
+};
+
+export type AiDoctrineQualityGateResult = {
+  accepted: boolean;
+  thresholds: AiDoctrineQualityGateThresholds;
+  hardFailures: string[];
+  warnings: string[];
 };
 
 export type AiSoakResult = {
@@ -448,6 +466,8 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
 
   const seed = config.seed ?? "ai-vs-ai-smoke";
   const simulationRng = createSimulationRng(config.simulationRngSeed ?? `${seed}:sim-rng`);
+  const runnerDeckDefinition = config.runnerDeck ?? DEMO_DECKS[config.runnerDeckId ?? "demo_runner_001"];
+  const corpDeckDefinition = config.corpDeck ?? DEMO_DECKS[config.corpDeckId ?? "demo_corp_001"];
   let state = createGame({
     seed,
     agendaPointsToWin: config.agendaPointsToWin ?? 7,
@@ -477,6 +497,10 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
     }
   });
   const initial = structuredClone(state);
+  const deckSnapshots: Record<Side, AiDeckDoctrineDeckSnapshot> = {
+    runner: deckSnapshotForSimulation(runnerDeckDefinition, state.deckMetadata?.runner ?? config.runnerDeckMetadata),
+    corp: deckSnapshotForSimulation(corpDeckDefinition, state.deckMetadata?.corp ?? config.corpDeckMetadata)
+  };
   const actionSequence: AiSimulationSummary["actionSequence"] = [];
   const errors: string[] = [];
   const maxActions = config.maxActions ?? 120;
@@ -490,7 +514,8 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
       profileId:
         side === "runner"
           ? config.runnerProfileId ?? `runner-ai-v0.9-${config.runnerDifficulty ?? "normal"}`
-          : config.corpProfileId ?? `corp-ai-v0.9-${config.corpDifficulty ?? "normal"}`
+          : config.corpProfileId ?? `corp-ai-v0.9-${config.corpDifficulty ?? "normal"}`,
+      ...(controllerModeForSide(side, config) === "current_candidate" ? { ownDeckSnapshot: deckSnapshots[side] } : {})
     });
     if (!assertAiInputIsSideSafe(input)) {
       errors.push(`Simulation input is not side-safe for ${side} at ${state.stateVersion}.`);
@@ -647,6 +672,98 @@ export function runDoctrineQualityBenchmark(config: AiDoctrineQualityBenchmarkCo
     baselineRun,
     candidateRun
   };
+}
+
+export function evaluateDoctrineQualityGate(
+  benchmark: AiDoctrineQualityBenchmarkResult,
+  thresholds: Partial<AiDoctrineQualityGateThresholds> = {}
+): AiDoctrineQualityGateResult {
+  const resolved: AiDoctrineQualityGateThresholds = {
+    maxCandidateIllegalActions: thresholds.maxCandidateIllegalActions ?? 0,
+    maxCandidateReplayFailures: thresholds.maxCandidateReplayFailures ?? 0,
+    maxTimeoutRateDelta: thresholds.maxTimeoutRateDelta ?? 0,
+    maxFallbackRateDelta: thresholds.maxFallbackRateDelta ?? 0.02,
+    maxNakedAgendaInstallDelta: thresholds.maxNakedAgendaInstallDelta ?? 0,
+    maxScoreWindowMissedDelta: thresholds.maxScoreWindowMissedDelta ?? 0,
+    maxEconomyStallDelta: thresholds.maxEconomyStallDelta ?? 2,
+    maxRepeatedLowValueCentralRunDelta: thresholds.maxRepeatedLowValueCentralRunDelta ?? 2
+  };
+  const hardFailures = [
+    ...(benchmark.candidateRun.illegalActions > resolved.maxCandidateIllegalActions ? [`candidate_illegal_actions:${benchmark.candidateRun.illegalActions}`] : []),
+    ...(benchmark.candidateRun.replayFailures > resolved.maxCandidateReplayFailures ? [`candidate_replay_failures:${benchmark.candidateRun.replayFailures}`] : []),
+    ...(benchmark.safety.timeoutRateDelta > resolved.maxTimeoutRateDelta ? [`timeout_rate_delta:${benchmark.safety.timeoutRateDelta}`] : []),
+    ...(benchmark.safety.fallbackRateDelta > resolved.maxFallbackRateDelta ? [`fallback_rate_delta:${benchmark.safety.fallbackRateDelta}`] : []),
+    ...(benchmark.delta.nakedAgendaInstalls > resolved.maxNakedAgendaInstallDelta ? [`naked_agenda_install_delta:${benchmark.delta.nakedAgendaInstalls}`] : []),
+    ...(benchmark.delta.scoreWindowMissed > resolved.maxScoreWindowMissedDelta ? [`score_window_missed_delta:${benchmark.delta.scoreWindowMissed}`] : []),
+    ...(benchmark.delta.economyStall > resolved.maxEconomyStallDelta ? [`economy_stall_delta:${benchmark.delta.economyStall}`] : []),
+    ...(benchmark.delta.repeatedLowValueCentralRun > resolved.maxRepeatedLowValueCentralRunDelta ? [`repeated_low_value_central_run_delta:${benchmark.delta.repeatedLowValueCentralRun}`] : [])
+  ];
+  const warnings = [
+    ...(benchmark.delta.remoteOverbuild > 0 ? [`remote_overbuild_delta:${benchmark.delta.remoteOverbuild}`] : []),
+    ...(benchmark.delta.rigStall > 0 ? [`rig_stall_delta:${benchmark.delta.rigStall}`] : []),
+    ...(benchmark.delta.assetTrashNeglect > 0 ? [`asset_trash_neglect_delta:${benchmark.delta.assetTrashNeglect}`] : [])
+  ];
+  return {
+    accepted: hardFailures.length === 0,
+    thresholds: resolved,
+    hardFailures,
+    warnings
+  };
+}
+
+export function formatDoctrineQualityBenchmarkReport(
+  benchmark: AiDoctrineQualityBenchmarkResult,
+  gate: AiDoctrineQualityGateResult = evaluateDoctrineQualityGate(benchmark)
+): string {
+  const doctrineRows = [
+    ["nakedAgendaInstalls", benchmark.baseline.nakedAgendaInstalls, benchmark.candidate.nakedAgendaInstalls, benchmark.delta.nakedAgendaInstalls],
+    ["agendaFloodExposure", benchmark.baseline.agendaFloodExposure, benchmark.candidate.agendaFloodExposure, benchmark.delta.agendaFloodExposure],
+    ["scoreWindowMissed", benchmark.baseline.scoreWindowMissed, benchmark.candidate.scoreWindowMissed, benchmark.delta.scoreWindowMissed],
+    ["remoteOverbuild", benchmark.baseline.remoteOverbuild, benchmark.candidate.remoteOverbuild, benchmark.delta.remoteOverbuild],
+    ["economyStall", benchmark.baseline.economyStall, benchmark.candidate.economyStall, benchmark.delta.economyStall],
+    ["repeatedLowValueCentralRun", benchmark.baseline.repeatedLowValueCentralRun, benchmark.candidate.repeatedLowValueCentralRun, benchmark.delta.repeatedLowValueCentralRun],
+    ["rigStall", benchmark.baseline.rigStall, benchmark.candidate.rigStall, benchmark.delta.rigStall],
+    ["assetTrashNeglect", benchmark.baseline.assetTrashNeglect, benchmark.candidate.assetTrashNeglect, benchmark.delta.assetTrashNeglect]
+  ];
+  const safetyRows = [
+    ["illegalActionDelta", benchmark.safety.illegalActionDelta],
+    ["replayFailureDelta", benchmark.safety.replayFailureDelta],
+    ["timeoutRateDelta", benchmark.safety.timeoutRateDelta],
+    ["fallbackRateDelta", benchmark.safety.fallbackRateDelta]
+  ];
+  return [
+    "# AI Deck Doctrine Quality Benchmark Report",
+    "",
+    `Version: ${benchmark.version}`,
+    `Baseline: ${benchmark.baselineProfile}`,
+    `Candidate: ${benchmark.candidateProfile}`,
+    `Seeds: ${benchmark.seeds.length}`,
+    `Gate: ${gate.accepted ? "PASS" : "FAIL"}`,
+    "",
+    "## Doctrine Delta",
+    "",
+    "| Metric | Baseline | Candidate | Delta |",
+    "| --- | ---: | ---: | ---: |",
+    ...doctrineRows.map(([metric, baseline, candidate, delta]) => `| ${metric} | ${baseline} | ${candidate} | ${delta} |`),
+    "",
+    "## Safety Delta",
+    "",
+    "| Metric | Delta |",
+    "| --- | ---: |",
+    ...safetyRows.map(([metric, value]) => `| ${metric} | ${value} |`),
+    "",
+    "## Gate",
+    "",
+    `Accepted: ${gate.accepted ? "yes" : "no"}`,
+    `Hard failures: ${gate.hardFailures.length > 0 ? gate.hardFailures.join(", ") : "none"}`,
+    `Warnings: ${gate.warnings.length > 0 ? gate.warnings.join(", ") : "none"}`,
+    "",
+    "## Interpretation",
+    "",
+    gate.accepted
+      ? "Der Kandidat verletzt keine harte Safety- oder Doctrine-Schwelle. Einzelne Warnungen bleiben Review-Material, bevor Gewichte angepasst werden."
+      : "Der Kandidat verletzt mindestens eine harte Schwelle. Gewichtungs- oder Planänderungen sollten vor weiterer Ausweitung geprüft werden."
+  ].join("\n");
 }
 
 export function evaluateV143TuningGate(candidate: V143SimulationRunResult, baseline: V143SimulationRunResult): V143TuningGateResult {
@@ -977,7 +1094,7 @@ function benchmarkProfileById(profileId: SimulationBenchmarkProfileId): Simulati
 }
 
 function chooseDecisionForSimulation(side: Side, input: AiDecisionInput, config: AiSimulationConfig, simulationRng: SimulationRng): AiDecision {
-  const mode = side === "runner" ? config.runnerControllerMode ?? "current_candidate" : config.corpControllerMode ?? "current_candidate";
+  const mode = controllerModeForSide(side, config);
   switch (mode) {
     case "random_legal_bot":
       return chooseRandomLegalDecision(input, simulationRng);
@@ -994,6 +1111,20 @@ function chooseDecisionForSimulation(side: Side, input: AiDecisionInput, config:
     case "current_candidate":
       return chooseAiAction(input);
   }
+}
+
+function controllerModeForSide(side: Side, config: AiSimulationConfig): SimulationControllerMode {
+  return side === "runner" ? config.runnerControllerMode ?? "current_candidate" : config.corpControllerMode ?? "current_candidate";
+}
+
+function deckSnapshotForSimulation(deck: DeckDefinition, publicMetadata?: DeckPublicMetadata): AiDeckDoctrineDeckSnapshot {
+  return {
+    deckSnapshotId: `${deck.id}:simulation`,
+    side: deck.side,
+    ...(publicMetadata?.formatProfileId ? { formatProfileId: publicMetadata.formatProfileId } : {}),
+    ...(publicMetadata ? { publicMetadata } : {}),
+    cards: deck.cards.map((card) => ({ cardId: card.id, quantity: card.quantity }))
+  };
 }
 
 function chooseRandomLegalDecision(input: AiDecisionInput, simulationRng: SimulationRng): AiDecision {
