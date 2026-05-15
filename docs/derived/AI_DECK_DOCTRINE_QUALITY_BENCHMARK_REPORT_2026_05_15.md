@@ -16,13 +16,13 @@ Stand: 2026-05-15
 
 | Metric | Baseline | Candidate | Delta |
 | --- | ---: | ---: | ---: |
-| nakedAgendaInstalls | 6 | 6 | 0 |
+| nakedAgendaInstalls | 0 | 0 | 0 |
 | agendaFloodExposure | 0 | 0 | 0 |
 | scoreWindowMissed | 0 | 0 | 0 |
 | remoteOverbuild | 0 | 0 | 0 |
-| economyStall | 30 | 30 | 0 |
-| repeatedLowValueCentralRun | 6 | 6 | 0 |
-| rigStall | 0 | 0 | 0 |
+| economyStall | 34 | 34 | 0 |
+| repeatedLowValueCentralRun | 8 | 8 | 0 |
+| rigStall | 8 | 8 | 0 |
 | assetTrashNeglect | 0 | 0 | 0 |
 
 ## Safety Delta
@@ -44,4 +44,4 @@ Stand: 2026-05-15
 
 Der aktuelle Kandidat verletzt in diesem engen Tuning-Lauf keine harte Safety- oder Doctrine-Schwelle. Die Deltas sind in dieser Matrix noch neutral; der Benchmark ist damit als Guard aktiv, aber noch kein Beleg für bessere Gewichtungen.
 
-Die auffälligsten absoluten Zähler bleiben `economyStall`, `repeatedLowValueCentralRun` und `nakedAgendaInstalls`. `rigStall` fällt nach der Präzisierung nicht mehr an. Der nächste Tuning-Schritt sollte nackte Agenda-Installs als echten KI-Fix-Kandidaten priorisieren und bei Economy-/Central-Run-Tags weiter prüfen, ob HQ-Druck bei niedrigen Credits tatsächlich schlecht oder situativ gerechtfertigt ist.
+Die nackten Agenda-Installationen fallen nach dem Scoring-Remote-Guard nicht mehr an. Die auffälligsten absoluten Zähler liegen jetzt auf Runner-Seite: `economyStall`, `repeatedLowValueCentralRun` und `rigStall`. Der nächste Tuning-Schritt sollte daher prüfen, ob zentrale Runs ohne Rig und mit niedrigen Credits zu aggressiv bewertet werden.

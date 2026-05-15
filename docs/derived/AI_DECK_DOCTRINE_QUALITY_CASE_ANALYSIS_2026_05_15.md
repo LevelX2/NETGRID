@@ -17,13 +17,13 @@ Stand: 2026-05-15
 
 | Metric | Count | Examples |
 | --- | ---: | ---: |
-| nakedAgendaInstalls | 6 | 3 |
+| nakedAgendaInstalls | 0 | 0 |
 | agendaFloodExposure | 0 | 0 |
 | scoreWindowMissed | 0 | 0 |
 | remoteOverbuild | 0 | 0 |
-| economyStall | 30 | 3 |
-| repeatedLowValueCentralRun | 6 | 3 |
-| rigStall | 0 | 0 |
+| economyStall | 34 | 3 |
+| repeatedLowValueCentralRun | 8 | 3 |
+| rigStall | 8 | 3 |
 | assetTrashNeglect | 0 | 0 |
 
 ## Examples
@@ -32,9 +32,7 @@ Stand: 2026-05-15
 
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
-| ai-v143-tuning-002 | 5 | corp | install_card | corp.plan.score_next_turn | new_remote | naked_agenda_install |
-| ai-v143-tuning-003 | 4 | corp | install_card | corp.plan.score_next_turn | new_remote | naked_agenda_install |
-| ai-v143-tuning-004 | 5 | corp | install_card | corp.plan.score_next_turn | new_remote | naked_agenda_install |
+Keine Beispiele im analysierten Lauf.
 
 ### agendaFloodExposure
 
@@ -61,14 +59,18 @@ Keine Beispiele im analysierten Lauf.
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
 | ai-v143-tuning-001 | 15 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
-| ai-v143-tuning-002 | 26 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
-| ai-v143-tuning-002 | 30 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall |
+| ai-v143-tuning-002 | 25 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
+| ai-v143-tuning-002 | 29 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
 
 ### rigStall
 
 | Seed | Action | Side | Type | Reason | Server | Tags |
 | --- | ---: | --- | --- | --- | --- | --- |
-Keine Beispiele im analysierten Lauf.
+| Seed | Action | Side | Type | Reason | Server | Tags |
+| --- | ---: | --- | --- | --- | --- | --- |
+| ai-v143-tuning-002 | 10 | runner | start_run | runner.plan.pressure_rnd | rd | rig_stall |
+| ai-v143-tuning-002 | 21 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
+| ai-v143-tuning-002 | 25 | runner | start_run | runner.plan.pressure_hq | hq | economy_stall, rig_stall |
 
 ### assetTrashNeglect
 
@@ -76,14 +78,14 @@ Keine Beispiele im analysierten Lauf.
 
 ## Interpretation
 
-- `nakedAgendaInstalls` ist ein echter Kandidat für den nächsten KI-Fix: Die Beispiele sind Corp-Installationen in `new_remote` mit `corp.plan.score_next_turn`.
+- `nakedAgendaInstalls` fällt nach dem Scoring-Remote-Guard nicht mehr an.
 - `economyStall` wurde präzisiert: reaktive `decline_rez`- und Fallback-Fenster werden nicht mehr als Stall gezählt. Übrig bleiben Runner-Aktionen mit niedrigem Creditstand.
 - `repeatedLowValueCentralRun` bündelt in den Beispielen HQ-Druck bei zugleich niedrigem Economy-Zustand; hier sollte zuerst geprüft werden, ob der Runner-Druck wirklich niedrigwertig ist oder ob die Metrik die Boardlage zu grob bewertet.
-- `rigStall` fällt nach Präzisierung nicht mehr an, weil sichtbarer Remote-Contest nicht pauschal als Rig-Stall gilt.
+- `rigStall` liegt jetzt auf zentralen Runs ohne sichtbares Rig, besonders HQ/R&D-Druck.
 
 ## Nächster Umsetzungsschritt
 
-Vor dem Gewichtungs-Tuning sollte jetzt ein enger KI-Fix für nackte Agenda-Installs folgen:
+Der nächste Tuning-Schritt sollte jetzt Runner-Zentraldruck ohne Rig enger bewerten:
 
-1. `corp.plan.score_next_turn` darf Agenden nicht in `new_remote` installieren, wenn kein vorhandener Schutzpfad besteht.
-2. Economy-/Central-Run-Tags sollten danach weiter beobachtet werden, aber nicht zuerst über Gewichte korrigiert werden.
+1. `pressure_hq` und `pressure_rnd` sollten bei 0 sichtbaren Breakern und niedrigen Credits stärker gegen `build_rig`, `recover_economy` oder `draw_for_answers` abgewogen werden.
+2. Die Metrik sollte anschließend prüfen, ob `rigStall` und `repeatedLowValueCentralRun` sinken, ohne Remote-Contest gegen echte Score-Drohungen zu schwächen.

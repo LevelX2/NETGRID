@@ -862,6 +862,9 @@ describe("V1.4.0 plan-based Corp AI", () => {
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 8;
     state.corp.clicks = 3;
+    ensureRemoteServer(state, "remote_1");
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    putCorpRootInRemote(state, "simple_agenda", 1);
     moveCorpCardToHq(state, "simple_agenda");
     moveCorpCardToHq(state, "simple_barrier_ice");
     moveCorpCardToHq(state, "simple_economy_operation");
@@ -870,7 +873,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     const candidates = generateCorpPlanCandidates(input);
     const legalIds = new Set(input.legalActions.map((action) => action.actionId));
 
-    expect(candidates.map((candidate) => candidate.kind)).toEqual(expect.arrayContaining(["score_next_turn", "build_scoring_remote", "protect_hq", "protect_rnd", "recover_economy", "bait_runner"]));
+    expect(candidates.map((candidate) => candidate.kind)).toEqual(expect.arrayContaining(["build_scoring_remote", "protect_hq", "protect_rnd", "recover_economy", "bait_runner"]));
     for (const candidate of candidates) {
       expect(candidate.legalActionIds.every((actionId) => legalIds.has(actionId))).toBe(true);
       expect(corpPlanUsesOnlyAiSupportedCards(input, candidate)).toBe(true);
@@ -1110,6 +1113,28 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(selected?.actionId).toBe(rdIceInstall.actionId);
     expect(decision.reasonCode).toBe("corp.plan.protect_rnd");
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|Simple Fracter/);
+  });
+
+  it("does not treat a new naked agenda remote as a score-next-turn plan", () => {
+    const input = corpActionPhaseInput("ai-v140-naked-agenda-no-score-next", (state) => {
+      state.corp.credits = 7;
+      moveCorpCardToHq(state, "simple_agenda");
+    });
+    const nakedAgendaInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement !== "ice" && action.payload?.serverId === "new_remote" && sourceDefinitionFromInput(input, action) === "simple_agenda"
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(nakedAgendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!nakedAgendaInstall || !gain) throw new Error("Missing naked-agenda no-score fixture actions");
+    expect(generateCorpPlanCandidates({ ...input, legalActions: [nakedAgendaInstall, gain] }).some((candidate) => candidate.kind === "score_next_turn")).toBe(false);
+    expect(generateCorpPlanCandidates({ ...input, legalActions: [nakedAgendaInstall, gain] }).some((candidate) => candidate.kind === "build_scoring_remote")).toBe(false);
+
+    const decision = chooseCorpAction({ ...input, legalActions: [nakedAgendaInstall, gain] });
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
   });
 
   it("uses an existing protected remote before a new naked agenda remote", () => {

@@ -283,12 +283,12 @@ export function generateCorpPlanCandidates(input: AiDecisionInput): CorpPlanCand
     buildCandidate(
       input,
       "score_next_turn",
-      actions.filter((action) => action.type === "advance_card" || (action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole)))
+      actions.filter((action) => action.type === "advance_card" || (action.type === "install_card" && action.payload?.placement !== "ice" && isSafeScoringRootAction(input, action)))
     ),
     buildCandidate(
       input,
       "build_scoring_remote",
-      actions.filter((action) => action.type === "install_card" && action.payload?.placement !== "ice" && isRemoteServerId(action.payload?.serverId))
+      actions.filter((action) => action.type === "install_card" && action.payload?.placement !== "ice" && isRemoteServerId(action.payload?.serverId) && (!rolesForAction(input, action).some(isAgendaRole) || isSafeScoringRootAction(input, action)))
     ),
     buildCandidate(input, "protect_hq", actions.filter((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "hq")),
     buildCandidate(input, "protect_rnd", actions.filter((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd")),
@@ -745,6 +745,10 @@ function remoteRootActionSecurityScore(input: AiDecisionInput, action: LegalActi
 function boundedRemotePriorityBonus(input: AiDecisionInput, action: LegalAction): number {
   const score = remoteRootActionSecurityScore(input, action);
   return Math.max(-45, Math.min(20, Math.round(score / 6)));
+}
+
+function isSafeScoringRootAction(input: AiDecisionInput, action: LegalAction): boolean {
+  return rolesForAction(input, action).some(isAgendaRole) && remoteRootActionSecurityScore(input, action) > 0;
 }
 
 function isAgendaRole(role: string): boolean {

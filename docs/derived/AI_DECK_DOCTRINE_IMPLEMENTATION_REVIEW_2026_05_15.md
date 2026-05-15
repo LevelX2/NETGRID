@@ -51,6 +51,7 @@ Teilweise grün:
 ## Offene Punkte
 
 - Doctrine-Fehlerklassen sind gegen eine Baseline auswertbar; eine dauerhaft eingefrorene Tuning-/Holdout-Schwelle ist noch nicht festgelegt.
-- `economyStall` und `rigStall` wurden als Metriken präzisiert; `rigStall` fällt im aktuellen engen Benchmark nicht mehr an, während `nakedAgendaInstalls` als klarer nächster KI-Fix-Kandidat bleibt.
+- Nackte Agenda-Installationen in `new_remote` werden nicht mehr als `score_next_turn`/`build_scoring_remote`-Schritt aufgenommen, wenn kein geschützter Zielserver besteht.
+- Nach dem Corp-Fix bleiben Runner-Zentralruns ohne Rig und mit niedrigen Credits als nächster Tuning-Kandidat.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
 - Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.
