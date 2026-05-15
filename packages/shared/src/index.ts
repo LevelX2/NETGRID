@@ -823,6 +823,7 @@ export type RunState = {
     Record<Exclude<ServerId, "new_remote">, CardInstanceId>
   >;
   breach?: BreachState;
+  successfulRunAbilityUsedSourceIds?: CardInstanceId[];
 };
 
 export type AccessQueueEntry = {
@@ -961,6 +962,7 @@ export type GameState = {
     shellTradersStartTurnResolvedSourceIds?: CardInstanceId[];
     bodyweightDataCrecheExtraRunPending?: boolean;
     bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
+    startupImmolatorUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -4708,7 +4710,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Roving Submarine",
     side: "corp",
     type: "upgrade",
-    subtypes: [],
+    subtypes: ["region"],
     implementationStatus: "playable_mvp",
     rezCost: 3,
     trashCost: 0,
@@ -4904,16 +4906,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 3,
-    memoryLimitBonus: 1,
+    installCost: 11,
+    memoryLimitBonus: 3,
+    recurringCredits: 3,
     rulesText:
-      "Deck. +1 MU. You may have only one deck installed. Once per turn, immediately after a successful run, make another run without spending an action.",
+      "Deck. +3 MU. Costs 1 agenda point to install. 3 recurring credits for using icebreakers during runs. You may have only one deck installed.",
     mechanics: [
       "install_hardware",
       "memory",
       "deck_unique",
-      "successful_run_trigger",
-      "bonus_run",
+      "agenda_point_cost",
+      "recurring_credit",
+      "icebreaker_recurring_credit",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -4947,12 +4951,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 6,
+    memoryLimitBonus: 2,
+    recurringCredits: 3,
     rulesText:
-      "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "Deck. +2 MU. 3 recurring credits for increasing link. You may have only one deck installed.",
     mechanics: [
       "install_hardware",
       "memory",
+      "deck_unique",
+      "recurring_credit",
+      "link_recurring_credit",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -4993,12 +5002,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 6,
+    memoryLimitBonus: 2,
+    recurringCredits: 3,
     rulesText:
-      "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "Deck. +2 MU. 3 recurring credits for increasing link. You may have only one deck installed.",
     mechanics: [
       "install_hardware",
       "memory",
+      "deck_unique",
+      "recurring_credit",
+      "link_recurring_credit",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],

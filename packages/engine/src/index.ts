@@ -369,6 +369,11 @@ const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
 const V1922_RABBIT_ID = "onr_v1_051_rabbit";
 const V1922_SCATTER_SHOT_ID = "onr_v1_057_scatter-shot";
 const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
+const V1922_FALSE_ECHO_ID = "onr_v1_026_false-echo";
+const V1922_NETSPACE_INVERTER_ID = "onr_v1_044_netspace-inverter";
+const V1922_ARASAKA_PORTABLE_PROTOTYPE_ID =
+  "onr_v1_119_arasaka-portable-prototype";
+const V1922_PANDORAS_DECK_ID = "onr_v1_136_pandoras-deck";
 const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
 const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
 const V1922_DATA_FORT_RECLAMATION_ID =
@@ -4152,6 +4157,38 @@ function runnerMainActions(state: GameState): LegalAction[] {
       !uniqueBlocked &&
       state.runner.credits >= (definition.installCost ?? 0)
     ) {
+      if (definition.id === V1922_ARASAKA_PORTABLE_PROTOTYPE_ID) {
+        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
+        if (!forfeitAgendaId) continue;
+        actions.push(
+          action(
+            state,
+            "runner",
+            "install_card",
+            `${definition.title} installieren`,
+            id,
+            [{ clicks: 1, credits: definition.installCost ?? 0 }],
+            {
+              cardId: id,
+              installAgendaPointCost: 1,
+              forfeitAgendaCardId: forfeitAgendaId,
+              installCostReason: "arasaka_portable_prototype",
+            },
+            {
+              targetRequirements: [
+                {
+                  id: "hardwareCard",
+                  kind: "card",
+                  side: "runner",
+                  zoneScope: ["runner.grip"],
+                  visibility: "known_to_actor",
+                },
+              ],
+            },
+          ),
+        );
+        continue;
+      }
       actions.push(
         action(
           state,
@@ -4592,6 +4629,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
   }
   for (const server of state.corp.servers) {
+    const rovingRunBlocked =
+      rovingSubmarineIdsForServer(state, server.id).length > 0 &&
+      !rovingSubmarineIdsForServer(state, server.id).some(
+        (rovingId) => cardCounter(state, rovingId, "mark") > 0,
+      );
     const v1918RunTax = v1918RunStartTaxForServer(state, server.id);
     const newsgroupRunTax = v1920NewsgroupTauntingRunStartTax(state);
     const runStartTaxCredits = v1918RunTax.amount + newsgroupRunTax.amount;
@@ -4632,7 +4674,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
     if (
       hasClicks &&
       runLockActionsPending <= 0 &&
-      fangRunLockCreditCost <= 0
+      fangRunLockCreditCost <= 0 &&
+      !rovingRunBlocked
     ) {
       if (
         runStartTaxCredits === 0 ||
@@ -4653,6 +4696,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     if (
       bonusRunPending &&
+      !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
         availableRunnerRunStartCredits(state) >= runStartTaxCredits)
     ) {
@@ -5911,8 +5955,67 @@ function availableRunnerRunStartCredits(state: GameState): number {
   return state.runner.credits + runnerRunRecurringCredits(state);
 }
 
+function successfulRunProgramActions(
+  state: GameState,
+  run: ActiveRun,
+): LegalAction[] {
+  if (!run.successful || run.phase !== "access") return [];
+  const used = new Set(run.successfulRunAbilityUsedSourceIds ?? []);
+  const actions: LegalAction[] = [];
+  for (const sourceCardId of state.runner.rig.programs.slice().sort()) {
+    if (used.has(sourceCardId)) continue;
+    const definition = definitionFor(state, sourceCardId);
+    if (definition.id === V1922_FALSE_ECHO_ID) {
+      const server = mustServer(state, run.attackedServerId);
+      const unrezzedCount = server.ice.filter(
+        (iceId) => !mustInstance(state.cardInstances, iceId).rezzed,
+      ).length;
+      if (unrezzedCount <= 0) continue;
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          `${definition.title}: ICE rezzen lassen`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            serverId: server.id,
+            v1922RunnerProgramAbility: "false_echo_force_rez",
+            unrezzedIceCount: unrezzedCount,
+          },
+        ),
+      );
+    }
+    if (definition.id === V1922_NETSPACE_INVERTER_ID) {
+      const server = mustServer(state, run.attackedServerId);
+      if (server.kind === "archives" || server.ice.length <= 1) continue;
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          `${definition.title}: ICE-Reihenfolge umkehren`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            serverId: server.id,
+            v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+            iceCount: server.ice.length,
+          },
+        ),
+      );
+    }
+  }
+  return actions;
+}
+
 function runnerAccessActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
+  const successfulRunActions = successfulRunProgramActions(state, run);
+  if (successfulRunActions.length > 0) return successfulRunActions;
   if (!run.accessedCardId) {
     if (hasPendingAccessCandidate(state, run))
       return [
@@ -7376,15 +7479,25 @@ function performAction(
     case "advance_card":
       spendClick(state, "corp");
       spendCredits(state, "corp", 1);
-      mustInstance(
-        state.cardInstances,
-        String(legalAction.payload?.cardId),
-      ).advancementCounters += 1;
+      {
+        const advancedCardId = String(legalAction.payload?.cardId);
+        mustInstance(state.cardInstances, advancedCardId).advancementCounters += 1;
+        const zone = mustInstance(state.cardInstances, advancedCardId).zone;
+        if (zone.side === "corp" && zone.zone === "serverRoot")
+          markRovingSubmarineActivityForServer(state, zone.serverId, legalAction);
+      }
       return;
     case "score_agenda":
       scoreAgenda(state, String(legalAction.payload?.cardId), legalAction);
       return;
     case "start_run":
+      validateRovingSubmarineRunGate(
+        state,
+        String(legalAction.payload?.serverId) as Exclude<
+          ServerId,
+          "new_remote"
+        >,
+      );
       if (legalAction.payload?.bonusRunNoClick === true) {
         ensureRunnerTurnFlags(state).allNighterBonusRunPending = false;
         ensureRunnerTurnFlags(state).bodyweightDataCrecheExtraRunPending = false;
@@ -7671,6 +7784,17 @@ function performAction(
       endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
+      if (legalAction.payload?.v1922RunnerProgramAbility === "false_echo_force_rez") {
+        resolveFalseEchoForceRez(state, legalAction);
+        return;
+      }
+      if (
+        legalAction.payload?.v1922RunnerProgramAbility ===
+        "netspace_inverter_reverse_ice"
+      ) {
+        resolveNetspaceInverterReverseIce(state, legalAction);
+        return;
+      }
       if (
         legalAction.payload?.resourceAbility ===
         "short_term_contract_take_credits"
@@ -7830,6 +7954,102 @@ function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void 
     gainedCredits: gainAmount,
     remainingCounters: cardCounter(state, sourceCardId, "power"),
     runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function resolveFalseEchoForceRez(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf False Echo nutzen.");
+  const run = mustRun(state);
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (
+    !run.successful ||
+    run.phase !== "access" ||
+    serverId !== run.attackedServerId
+  )
+    throw new Error("False Echo ist nur direkt nach erfolgreichem Run legal.");
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("False Echo ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== V1922_FALSE_ECHO_ID)
+    throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("False Echo wurde fuer diesen Run bereits genutzt.");
+  const server = mustServer(state, serverId);
+  const checkedIceIds = server.ice.slice();
+  let rezzedCount = 0;
+  let rezCostPaid = 0;
+  for (const iceId of checkedIceIds) {
+    const instance = mustInstance(state.cardInstances, iceId);
+    if (instance.rezzed) continue;
+    const cost = rezCostForCard(state, iceId);
+    if (state.corp.credits < cost) continue;
+    spendCredits(state, "corp", cost);
+    state.cardInstances[iceId] = {
+      ...instance,
+      rezzed: true,
+      faceup: true,
+    };
+    rezzedCount += 1;
+    rezCostPaid += cost;
+  }
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: V1922_FALSE_ECHO_ID,
+    serverLabel: publicServerLabel(state, server.id) ?? server.id,
+    checkedIceCount: checkedIceIds.length,
+    rezzedIceCount: rezzedCount,
+    rezCostPaid,
+    corpCreditsAfter: state.corp.credits,
+  };
+}
+
+function resolveNetspaceInverterReverseIce(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Netspace Inverter nutzen.");
+  const run = mustRun(state);
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (
+    !run.successful ||
+    run.phase !== "access" ||
+    serverId !== run.attackedServerId
+  )
+    throw new Error(
+      "Netspace Inverter ist nur direkt nach erfolgreichem Run legal.",
+    );
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Netspace Inverter ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== V1922_NETSPACE_INVERTER_ID)
+    throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Netspace Inverter wurde fuer diesen Run bereits genutzt.");
+  const server = mustServer(state, serverId);
+  if (server.kind === "archives" || server.ice.length <= 1)
+    throw new Error("Dieses Fort kann nicht umgekehrt werden.");
+  server.ice.reverse();
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: V1922_NETSPACE_INVERTER_ID,
+    serverLabel: publicServerLabel(state, server.id) ?? server.id,
+    iceCount: server.ice.length,
+    serverIceOrderReversed: true,
   };
 }
 
@@ -8060,6 +8280,27 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         specialZoneReason: "agenda_point_cost_corporate_ally",
       };
     }
+    if (definition.id === V1922_ARASAKA_PORTABLE_PROTOTYPE_ID) {
+      const agendaCost = Number(
+        legalAction.payload?.installAgendaPointCost ?? 0,
+      );
+      if (!Number.isInteger(agendaCost) || agendaCost !== 1)
+        throw new Error(
+          "Arasaka Portable Prototype benötigt exakt 1 Agenda-Punkt als Zusatzkosten.",
+        );
+      const forfeitAgendaCardId = String(
+        legalAction.payload?.forfeitAgendaCardId ?? "",
+      );
+      forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        agendaPointCostPaid: agendaCost,
+        forfeitedAgendaCardId: forfeitAgendaCardId,
+        specialZone: "removed_from_game",
+        specialZoneVisibility: "public",
+        specialZoneReason: "agenda_point_cost_arasaka_portable_prototype",
+      };
+    }
     spendRunnerInstallCredits(
       state,
       definition.installCost ?? 0,
@@ -8068,11 +8309,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     removeFromAllZones(state, cardId);
     if (definition.type === "hardware") {
       const trashedDeckDefinitionIds: string[] = [];
-      if (
-        (definition.id === BODYWEIGHT_DATA_CRECHE_ID ||
-          definition.id === V1922_ARTEMIS_2020_ID) &&
-        cardHasSubtype(definition, "deck")
-      ) {
+      if (cardHasSubtype(definition, "deck")) {
         for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
           if (!cardHasSubtype(definitionFor(state, oldDeckId), "deck"))
             continue;
@@ -8202,6 +8439,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       rezzed: false,
       zone: { side: "corp", zone: "serverIce", serverId: server.id },
     };
+    markRovingSubmarineActivityForServer(state, server.id, legalAction);
     consumeV1922EdgerunnerTempsInstallAction(state, legalAction);
     return;
   }
@@ -8233,6 +8471,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   if (regionInstall) {
     trashOlderRegionUpgradesInServer(state, server, cardId);
   }
+  markRovingSubmarineActivityForServer(state, server.id, legalAction);
   consumeV1922EdgerunnerTempsInstallAction(state, legalAction);
 }
 
@@ -10702,6 +10941,11 @@ function trashRunnerInstalledCardToHeap(
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
   void _hostedOn;
   removeFromAllZones(state, cardId);
+  if (definition.type === "hardware" && (definition.memoryLimitBonus ?? 0) > 0)
+    state.runner.memoryLimit = Math.max(
+      0,
+      state.runner.memoryLimit - (definition.memoryLimitBonus ?? 0),
+    );
   state.runner.heap.push(cardId);
   state.cardInstances[cardId] = {
     ...withoutHost,
@@ -10750,6 +10994,62 @@ function trashOlderRegionUpgradesInServer(
     .sort();
   for (const cardId of olderRegions)
     trashCorpInstalledCardToArchives(state, cardId);
+}
+
+function rovingSubmarineIdsForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): CardInstanceId[] {
+  return mustServer(state, serverId).root
+    .filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      return (
+        instance?.rezzed === true &&
+        definitionFor(state, cardId).id === V1919_ROVING_SUBMARINE_ID
+      );
+    })
+    .sort();
+}
+
+function clearRovingSubmarineActivityMarkers(state: GameState): void {
+  for (const server of state.corp.servers) {
+    for (const rovingId of rovingSubmarineIdsForServer(state, server.id)) {
+      setCardCounter(state, rovingId, "mark", 0);
+    }
+  }
+}
+
+function markRovingSubmarineActivityForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+  legalAction?: LegalAction,
+): void {
+  const rovingIds = rovingSubmarineIdsForServer(state, serverId);
+  if (rovingIds.length === 0) return;
+  for (const rovingId of rovingIds) setCardCounter(state, rovingId, "mark", 1);
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rovingSubmarineActivityMarked: true,
+      rovingSubmarineSourceCount: rovingIds.length,
+      targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
+    };
+  }
+}
+
+function validateRovingSubmarineRunGate(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): void {
+  const rovingIds = rovingSubmarineIdsForServer(state, serverId);
+  if (rovingIds.length === 0) return;
+  const hasActivity = rovingIds.some(
+    (rovingId) => cardCounter(state, rovingId, "mark") > 0,
+  );
+  if (!hasActivity)
+    throw new Error(
+      "Roving Submarine erlaubt Runs auf dieses Fort nur nach Korp-Aktivitaet im letzten Korpzug.",
+    );
 }
 
 function tokyoChibaUnsuccessfulRunBonus(
@@ -11196,6 +11496,7 @@ function startCorpTurn(state: GameState): void {
   state.corp.clicks = 3;
   state.runner.clicks = 0;
   clearV1922ValuPakRunnerFlags(state);
+  clearRovingSubmarineActivityMarkers(state);
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   applyCorpStartOfTurnEffects(state);
 }
@@ -11223,6 +11524,7 @@ function startRunnerTurn(state: GameState): void {
   flags.valuPakTemporaryProgramInstallCredits = 0;
   flags.bodyweightDataCrecheExtraRunPending = false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
+  flags.startupImmolatorUsedSourceIdsThisTurn = [];
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
   resolveBizarreEncryptionDelayedAgendas(state);
@@ -16773,6 +17075,9 @@ function publicContextForAction(
         context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
     }
     for (const key of [
+      "agendaPointCostPaid",
+      "deckUniqueReplacement",
+      "forfeitedAgendaCardId",
       "iceInstallBaseCost",
       "iceInstallAdditionalCost",
       "iceInstallReduction",
@@ -17225,6 +17530,12 @@ function publicContextForAction(
     "subroutineIndex",
     "targetIceDefinitionId",
     "breakSubroutineBaseCost",
+    "checkedIceCount",
+    "rezzedIceCount",
+    "rezCostPaid",
+    "iceCount",
+    "serverIceOrderReversed",
+    "serverLabel",
   ]) {
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
@@ -18316,6 +18627,19 @@ function runnerRunRecurringCreditSourceIds(
           state.runner.rig.programs.includes(breakerId),
       );
     }
+    if (definition.id === V1922_ARASAKA_PORTABLE_PROTOTYPE_ID) {
+      return Boolean(
+        state.run &&
+          breakerId &&
+          state.runner.rig.programs.includes(breakerId),
+      );
+    }
+    if (
+      definition.id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID ||
+      definition.id === V1922_PANDORAS_DECK_ID
+    ) {
+      return false;
+    }
     if (!noisyBreaker) return true;
     return !cardHasSubtype(definition, "stealth");
   });
@@ -19107,6 +19431,7 @@ function ensureRunnerTurnFlags(
     valuPakTemporaryProgramInstallCredits: 0,
     bodyweightDataCrecheExtraRunPending: false,
     bodyweightDataCrecheExtraRunUsedThisTurn: false,
+    startupImmolatorUsedSourceIdsThisTurn: [],
   });
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
@@ -19125,6 +19450,7 @@ function ensureRunnerTurnFlags(
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
   flags.bodyweightDataCrecheExtraRunPending ??= false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
+  flags.startupImmolatorUsedSourceIdsThisTurn ??= [];
   return flags;
 }
 

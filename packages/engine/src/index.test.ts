@@ -9928,7 +9928,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           id: "spotcheck_artemis_runner",
           name: "Spotcheck Artemis Runner",
           cards: [
-            { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
+            { id: "onr_v1_136_pandoras-deck", quantity: 1 },
             { id: "onr_v1_122_artemis-2020", quantity: 1 },
             ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
           ],
@@ -9939,20 +9939,19 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.runner.credits = 30;
     state.runner.clicks = 10;
-    moveRunnerCardToGrip(state, "onr_v1_119_arasaka-portable-prototype");
+    moveRunnerCardToGrip(state, "onr_v1_136_pandoras-deck");
     moveRunnerCardToGrip(state, "onr_v1_122_artemis-2020");
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "install_card" &&
-        sourceDefinition(state, action) ===
-          "onr_v1_119_arasaka-portable-prototype",
+        sourceDefinition(state, action) === "onr_v1_136_pandoras-deck",
     );
     const oldDeckId = state.runner.rig.hardware.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
-        "onr_v1_119_arasaka-portable-prototype",
+        "onr_v1_136_pandoras-deck",
     );
     const memoryBefore = state.runner.memoryLimit;
     state = apply(
@@ -9967,7 +9966,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(artemisId).toBeDefined();
     if (!artemisId) throw new Error("Missing Artemis");
-    expect(state.runner.memoryLimit).toBe(memoryBefore + 2);
+    expect(state.runner.memoryLimit).toBe(memoryBefore);
     expect(cardCounterAmount(state, artemisId, "recurring_credit")).toBe(2);
     if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
   });
@@ -14791,6 +14790,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
       state.runner.credits = 20;
       moveRunnerCardToGrip(state, definitionId);
+      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
+        scoreRunnerAgendaForTest(state, "simple_agenda");
 
       const legal = mustAction(
         state,
@@ -17427,6 +17428,242 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("resolves False Echo and Netspace Inverter after a successful run without hidden payload leaks", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-false-echo-netspace-inverter",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_false_echo_netspace_runner",
+          name: "Spotcheck False Echo Netspace Runner",
+          cards: [
+            { id: "onr_v1_026_false-echo", quantity: 1 },
+            { id: "onr_v1_044_netspace-inverter", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_false_echo_netspace_corp",
+          name: "Spotcheck False Echo Netspace Corp",
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+            { id: "simple_code_gate_ice", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    installRunnerProgramForTest(state, "onr_v1_026_false-echo");
+    installRunnerProgramForTest(state, "onr_v1_044_netspace-inverter");
+    putCorpRootInRemote(state, "simple_economy_asset");
+    const innerIce = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const outerIce = putCorpIceOnServer(state, "remote_1", "simple_code_gate_ice");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.run?.successful).toBe(true);
+    const accessState = structuredClone(state);
+    const falseEcho = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
+    );
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: falseEcho.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-false-echo-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === falseEcho.actionId);
+    expect(state.cardInstances[innerIce]?.rezzed).toBe(true);
+    expect(state.cardInstances[outerIce]?.rezzed).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v1922RunnerProgramAbility: "false_echo_force_rez",
+      checkedIceCount: 2,
+      rezzedIceCount: 2,
+      rezCostPaid: 5,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(accessState, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let reverseState = structuredClone(accessState);
+    const reverse = mustAction(
+      reverseState,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1922RunnerProgramAbility ===
+          "netspace_inverter_reverse_ice",
+    );
+    reverseState = apply(
+      reverseState,
+      "runner",
+      (action) => action.actionId === reverse.actionId,
+    );
+    expect(
+      reverseState.corp.servers.find((server) => server.id === "remote_1")?.ice,
+    ).toEqual([outerIce, innerIce]);
+    expect(reverseState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
+      iceCount: 2,
+      serverIceOrderReversed: true,
+    });
+    expect(
+      JSON.stringify(reverseState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/);
+  });
+
+  it("enforces generic hardware deck replacement and Arasaka agenda-point install cost", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-arasaka-pandora-deck-unique",
+        runnerDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          id: "spotcheck_arasaka_pandora_runner",
+          name: "Spotcheck Arasaka Pandora Runner",
+          cards: [
+            { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
+            { id: "onr_v1_136_pandoras-deck", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      }),
+    );
+    state.runner.credits = 20;
+    const pandoraId = moveRunnerCardToGrip(state, "onr_v1_136_pandoras-deck");
+    const arasakaId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_119_arasaka-portable-prototype",
+    );
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_119_arasaka-portable-prototype",
+      ),
+    ).toBe(false);
+    scoreRunnerAgendaForTest(state, "simple_agenda");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => sourceDefinition(state, action) === "onr_v1_136_pandoras-deck",
+    );
+    expect(state.runner.memoryLimit).toBe(6);
+    expect(cardCounterAmount(state, pandoraId, "recurring_credit")).toBe(3);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) ===
+        "onr_v1_119_arasaka-portable-prototype",
+    );
+    expect(state.runner.heap).toContain(pandoraId);
+    expect(state.runner.rig.hardware).toContain(arasakaId);
+    expect(state.runner.memoryLimit).toBe(7);
+    expect(cardCounterAmount(state, arasakaId, "recurring_credit")).toBe(3);
+    expect(state.runner.scoreArea.length).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_119_arasaka-portable-prototype",
+      deckUniqueReplacement: true,
+      agendaPointCostPaid: 1,
+      recurringCreditsLoaded: 3,
+    });
+  });
+
+  it("gates Roving Submarine runs by previous Corp activity and keeps region install public", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-roving-submarine-run-gate",
+        baseline: MVP_0_99_BASELINE,
+        corpDeck: {
+          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          id: "spotcheck_roving_submarine_corp",
+          name: "Spotcheck Roving Submarine Corp",
+          cards: [
+            { id: "simple_economy_asset", quantity: 1 },
+            { id: "onr_v1_368_roving-submarine", quantity: 1 },
+            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ],
+        },
+      }),
+    );
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    moveCorpCardToHq(state, "onr_v1_368_roving-submarine");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_368_roving-submarine" &&
+        action.payload?.serverId === "new_remote",
+    );
+    const rovingId = state.corp.servers
+      .flatMap((server) => server.root)
+      .find(
+        (id) =>
+          state.cardInstances[id]?.definitionId ===
+          "onr_v1_368_roving-submarine",
+      );
+    expect(rovingId).toBeDefined();
+    if (!rovingId) throw new Error("Missing Roving Submarine");
+    const rovingServerId = state.corp.servers.find((server) =>
+      server.root.includes(rovingId),
+    )?.id;
+    expect(rovingServerId).toBeDefined();
+    expect(state.cardInstances[rovingId]?.rezzed).toBe(true);
+    expect(cardCounterAmount(state, rovingId, "mark")).toBe(1);
+
+    state = toRunnerTurnFromCorpMain(state);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === rovingServerId,
+      ),
+    ).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    expect(cardCounterAmount(state, rovingId, "mark")).toBe(0);
+    state = toRunnerTurnFromCorpMain(state);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === rovingServerId,
+      ),
+    ).toBe(false);
   });
 
   it("installs Newsgroup Filter and uses its side-safe credit action", () => {

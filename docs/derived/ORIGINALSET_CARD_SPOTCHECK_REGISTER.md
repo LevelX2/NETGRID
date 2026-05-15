@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-reactive-decks-grid
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REACTIVE_DECKS_GRID_IMPLEMENTATION.md`
+
+Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, drei Vollresolver bleiben als Removal Condition offen.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| False Echo | `onr_v1_026_false-echo` | Teilfix umgesetzt: Successful-Run-Rezfähigkeit mit deterministischer ICE-Reihenfolge, Kostenprüfung, PublicPayload und Replay | Teilfix grün |
+| Netspace Inverter | `onr_v1_044_netspace-inverter` | Teilfix umgesetzt: Successful-Run-Reversal der Server-ICE-Liste ohne unrezzed Definition-Leak | Teilfix grün |
+| Speed Trap | `onr_v1_067_speed-trap` | Blockiert: Rez-Interrupt-/Runner-Choice-Fenster nach Upgrade-/Node-Rez fehlt | Eigenen Rez-Interrupt-Resolver umsetzen |
+| Startup Immolator | `onr_v1_068_startup-immolator` | Blockiert: Post-Encounter-Fenster nach vollständig gebrochenen Subroutinen fehlt | Eigenen Post-Encounter-Resolver umsetzen |
+| Zetatech Software Installer | `onr_v1_075_zetatech-software-installer` | Bestehender Overlay-/Programminstallationspfad blieb regressionsgrün | Host-Trash-Kaskade in eigenem Folgejob härten |
+| Arasaka Portable Prototype | `onr_v1_119_arasaka-portable-prototype` | Teilfix umgesetzt: Agenda-Punkt-Installkosten, +3 MU, Icebreaker-Recurring-Credits und generisches Deck-Replacement | Teilfix grün |
+| Microtech Backup Drive | `onr_v1_131_microtech-backup-drive` | Blockiert: Programtrash-Replacement, Hosted-Order und Top-Hosted-in-Grip-Aktion fehlen | Eigenen Replacement-/Hosted-Order-Resolver umsetzen |
+| Pandora's Deck | `onr_v1_136_pandoras-deck` | Teilfix umgesetzt: +2 MU, Link-Recurring-Credits und generisches Deck-Replacement mit korrektem MU-Rückbau | Teilfix grün |
+| Raven Microcyb Eagle | `onr_v1_140_raven-microcyb-eagle` | Bestehender Hardware-/Recurring-Pfad blieb regressionsgrün | Net-Damage-Prevention in eigenem Folgejob härten |
+| Roving Submarine | `onr_v1_368_roving-submarine` | Teilfix umgesetzt: Region-/Run-Gate über vorherige Corp-Aktivität im geschützten Fort | Teilfix grün |
+
 ## Runde 2026-05-15-reorder-counter-runlock
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
