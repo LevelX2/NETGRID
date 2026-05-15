@@ -68,6 +68,10 @@
   --card-hidden-art-bg: repeating-linear-gradient(135deg, #17212b 0, #17212b 8px, #24313d 8px, #24313d 16px);
   --tooltip-bg: #101820;
   --tooltip-shadow: 0 12px 28px rgb(0 0 0 / 0.38);
+  --z-run-overlay: 210;
+  --z-card-choice-overlay: 240;
+  --z-access-reveal-overlay: 320;
+  --z-card-tooltip-overlay: 1001;
   --accent-mix-bg: #0b1117;
   --accent-mix-text: #ffffff;
   --access-modal-bg: #101820;
@@ -2330,7 +2334,7 @@ select {
 .cardChoiceOverlay {
   position: fixed;
   inset: 0;
-  z-index: 240;
+  z-index: var(--z-card-choice-overlay);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -4584,7 +4588,7 @@ select {
   position: fixed;
   left: 16px;
   top: 16px;
-  z-index: 1001;
+  z-index: var(--z-card-tooltip-overlay);
   width: min(300px, calc(100vw - 32px));
   display: grid;
   gap: 5px;
@@ -5088,7 +5092,7 @@ select {
 .accessRevealOverlay {
   position: fixed;
   inset: 0;
-  z-index: 76;
+  z-index: var(--z-access-reveal-overlay);
   display: grid;
   place-items: center;
   padding: 20px;
@@ -6406,7 +6410,7 @@ select,
   position: fixed;
   top: 66px;
   left: 50%;
-  z-index: 69;
+  z-index: var(--z-run-overlay);
   width: min(360px, calc(100vw - 24px));
   max-width: calc(100vw - 24px);
   transform: translateX(-50%);

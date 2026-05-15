@@ -5887,7 +5887,7 @@ function RunTimelineOverlay({
   const breakerHint = runBreakerActionHint(view, legalActions);
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
 
-  return (
+  const overlay = (
     <div ref={overlayRef} className={`runTimelineOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} aria-live="polite" aria-atomic="true">
       <div className={`runTimeline active overlay ${highlighted ? "cueHighlight" : ""}`} data-testid="run-timeline" role="status">
         <div
@@ -5951,6 +5951,9 @@ function RunTimelineOverlay({
       </div>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(overlay, document.body);
 }
 
 function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string | null {
