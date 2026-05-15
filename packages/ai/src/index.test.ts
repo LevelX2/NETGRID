@@ -39,6 +39,7 @@ import {
   chooseRunnerPlanDecision,
   estimateRunCost,
   evaluateCorpOpeningHand,
+  evaluateRunnerOpeningHand,
   evaluateCorpPlan,
   evaluateRunnerPlan,
   evaluateAgendaRisk,
@@ -1135,6 +1136,84 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(chooseCorpAction(floodInput).selectedChoices).toEqual({ choiceId: "setup_mulligan_corp", selectedOptionIds: ["mulligan"] });
     expect(evaluateCorpOpeningHand(keepInput).decision).toBe("keep");
     expect(chooseCorpAction(keepInput).selectedChoices).toEqual({ choiceId: "setup_mulligan_corp", selectedOptionIds: ["keep"] });
+  });
+
+  it("evaluates Runner mulligan choices from opening hand and deck doctrine", () => {
+    const baseInput = runnerActionPhaseInput("ai-runner-doctrine-mulligan", (state) => {
+      state.runner.credits = 5;
+    });
+    const doctrine = buildDeckDoctrineProfile({
+      deckSnapshotId: "synthetic-rig-runner",
+      side: "runner",
+      cards: [
+        { cardId: "simple_fracter", quantity: 4 },
+        { cardId: "simple_decoder", quantity: 4 },
+        { cardId: "simple_economy_event", quantity: 6 },
+        { cardId: "simple_run_event", quantity: 4 }
+      ]
+    });
+    const choiceAction: LegalAction = { ...baseInput.legalActions[0]!, actionId: "runner.resolve_choice.setup_mulligan", type: "resolve_choice", source: "game_rule" };
+    const choice: ChoiceRequest = {
+      choiceId: "setup_mulligan_runner",
+      side: "runner",
+      source: "setup.mulligan",
+      prompt: "Mulligan?",
+      kind: "select_option",
+      options: [
+        { id: "keep", label: "Behalten", value: "keep" },
+        { id: "mulligan", label: "Mulligan", value: "mulligan" }
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: baseInput.actionNumber,
+      visibility: "private_to_side"
+    };
+    const pressureFloodInput = {
+      ...baseInput,
+      ownDeckDoctrine: doctrine,
+      legalActions: [choiceAction],
+      playerView: {
+        ...baseInput.playerView,
+        pendingChoice: choice,
+        own: {
+          ...baseInput.playerView.own,
+          gripOrHq: [
+            visibleCard("simple_run_event", "run_a"),
+            visibleCard("simple_run_event", "run_b"),
+            visibleCard("simple_run_event", "run_c"),
+            visibleCard("simple_run_event", "run_d"),
+            visibleCard("simple_run_event", "run_e")
+          ]
+        }
+      }
+    };
+    const keepInput = {
+      ...pressureFloodInput,
+      playerView: {
+        ...pressureFloodInput.playerView,
+        own: {
+          ...pressureFloodInput.playerView.own,
+          gripOrHq: [
+            visibleCard("simple_fracter", "fracter_a"),
+            visibleCard("simple_decoder", "decoder_a"),
+            visibleCard("simple_economy_event", "economy_a"),
+            visibleCard("simple_run_event", "run_f"),
+            visibleCard("simple_economy_event", "economy_b")
+          ]
+        }
+      }
+    };
+
+    const pressureDecision = chooseRunnerAction(pressureFloodInput);
+    const keepDecision = chooseRunnerAction(keepInput);
+
+    expect(evaluateRunnerOpeningHand(pressureFloodInput).decision).toBe("mulligan");
+    expect(pressureDecision.reasonCode).toBe("runner.setup.mulligan");
+    expect(pressureDecision.selectedChoices).toEqual({ choiceId: "setup_mulligan_runner", selectedOptionIds: ["mulligan"] });
+    expect(evaluateRunnerOpeningHand(keepInput).decision).toBe("keep");
+    expect(keepDecision.reasonCode).toBe("runner.setup.keep");
+    expect(keepDecision.selectedChoices).toEqual({ choiceId: "setup_mulligan_runner", selectedOptionIds: ["keep"] });
+    expect(JSON.stringify(keepDecision.evidence)).not.toMatch(/cardInstances|privatePayload|simple_fracter|simple_economy_event/);
   });
 
   it("prefers ICE protection over installing a naked agenda in a new remote", () => {

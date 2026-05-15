@@ -50,4 +50,6 @@ Nach dem Remote-Contest-Pacing fallen die schwachen `contest_remote`-Schleifen b
 
 Nach dem letzten Low-Reserve-Pacing fallen auch die verbleibenden Economy-Stall-Restfälle aus dem engen Tuning-Lauf heraus: Runner-Zentraldruck durch sichtbares ICE bei 1 Credit und redundante Corp-Zentral-ICE-Protection bei 1 Credit werden nun gegen Economy-Erholung abgewogen.
 
+Nach der Runner-Mulligan-Erweiterung bleibt der enge 6-Seed-/40-Action-Lauf stabil: der Runner beantwortet Setup-Mulligans anhand von Breaker-Zugang, Economy, Setup, Druckoptionen und Doktrin, ohne neue Doctrine-Fehlerklassen oder Safety-Deltas zu erzeugen.
+
 Alle Doctrine-Fehlerklassen stehen in diesem 6-Seed-/40-Action-Lauf bei 0. Das ist ein enger Tuning-Nachweis, kein Ersatz für Holdout-/Selfplay-Auswertung.

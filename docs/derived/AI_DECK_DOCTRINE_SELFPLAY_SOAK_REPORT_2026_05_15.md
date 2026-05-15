@@ -50,6 +50,6 @@ Stand: 2026-05-15
 
 ## Interpretation
 
-Der längere Selfplay-/Soak-Lauf bestätigt den Holdout-Stand für `current_candidate`: keine IllegalActions, keine Replay-Fehler, keine Timeouts und keine Doctrine-Fehlerklassen. Gegenüber `belief_ai_v1_4_2` bleibt die Doctrine-Seite stabil; das Fallback-Niveau ist minimal höher (`0.071` statt `0.067`) und sollte in späteren Läufen weiter beobachtet werden.
+Der längere Selfplay-/Soak-Lauf bestätigt den Holdout-Stand für `current_candidate` auch mit aktivem Runner-Mulligan: keine IllegalActions, keine Replay-Fehler, keine Timeouts und keine Doctrine-Fehlerklassen. Gegenüber `belief_ai_v1_4_2` bleibt die Doctrine-Seite stabil; das Fallback-Niveau ist minimal höher (`0.071` statt `0.067`) und sollte in späteren Läufen weiter beobachtet werden.
 
-Alle Spiele von `current_candidate` erreichen in diesem 80-Action-Lauf das Action-Limit. Das ist kein Safety-Fehler, zeigt aber, dass der nächste fachlich sinnvolle Ausbau nicht weitere Mikro-Gewichtung auf denselben Seeds ist, sondern Spielprogression: Runner-Mulligan, archetypspezifische Early-Turn-Planung und ggf. längere Matchabschluss-/Scoring-Dynamik.
+Alle Spiele von `current_candidate` erreichen in diesem 80-Action-Lauf das Action-Limit. Das ist kein Safety-Fehler, zeigt aber, dass der nächste fachlich sinnvolle Ausbau nicht weitere Mikro-Gewichtung auf denselben Seeds ist, sondern Spielprogression: archetypspezifische Early-Turn-Planung und ggf. längere Matchabschluss-/Scoring-Dynamik.

@@ -59,4 +59,6 @@ Der Holdout-Lauf bestätigt den engen Tuning-Stand auf zusätzlicher Seed-Abdeck
 
 Die Metrik wurde dabei präzisiert: `recover_economy` zählt nicht als `economyStall`, reaktive Corp-Fenster zählen nicht als `agendaFloodExposure`, und zentrale Schutzpläne `protect_hq`/`protect_rnd` gelten nicht als Agenda-Flood-Exposure, weil sie die HQ/R&D-Angriffsfläche mindern.
 
-Nächster sinnvoller Schritt ist ein längerer Selfplay-/Soak-Lauf statt weiterer Gewichtungsoptimierung auf derselben Seed-Menge.
+Der Runner-Mulligan ist in diesem Holdout-Lauf ebenfalls aktiv und bleibt neutral gegenüber den Gate-Schwellen: keine IllegalActions, Replay-Fehler, Timeouts oder neuen Doctrine-Zähler im Candidate-Lauf.
+
+Nächster sinnvoller Schritt ist nach dem längeren Selfplay-/Soak-Lauf die archetypspezifische Early-Turn-Planung statt weiterer Gewichtungsoptimierung auf derselben Seed-Menge.

@@ -49,12 +49,15 @@ export type AiDeckDoctrineDeckSnapshot = {
   cards: Array<{ cardId: string; quantity: number }>;
 };
 
-export type CorpOpeningHandEvaluation = {
+export type OpeningHandEvaluation = {
   decision: "keep" | "mulligan";
   score: number;
   reasons: string[];
   evidence: string[];
 };
+
+export type CorpOpeningHandEvaluation = OpeningHandEvaluation;
+export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 
 const CARD_ROLES = new Map((cardRoleManifestData.cards as CardRole[]).map((card) => [card.cardId, card]));
 const AI_HINTS = new Map(
@@ -113,6 +116,15 @@ const CORP_MULLIGAN_WEIGHTS: Record<string, number> = {
   doctrineFit: 10
 };
 
+const RUNNER_MULLIGAN_WEIGHTS: Record<string, number> = {
+  breakerAccess: 24,
+  economy: 22,
+  setup: 16,
+  pressure: 12,
+  handBalance: 14,
+  doctrineFit: 12
+};
+
 export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): AiDeckDoctrineProfile {
   const totalCards = snapshot.cards.reduce((sum, entry) => sum + Math.max(0, entry.quantity), 0) || 1;
   const roleCounts: Record<string, number> = {};
@@ -149,7 +161,7 @@ export function buildDeckDoctrineProfile(snapshot: AiDeckDoctrineDeckSnapshot): 
     roleCounts: Object.fromEntries(Object.entries(roleCounts).sort(([left], [right]) => left.localeCompare(right))),
     roleDensity: Object.fromEntries(Object.entries(roleDensity).sort(([left], [right]) => left.localeCompare(right))),
     planWeights,
-    mulliganWeights: snapshot.side === "corp" ? { ...CORP_MULLIGAN_WEIGHTS } : {},
+    mulliganWeights: snapshot.side === "corp" ? { ...CORP_MULLIGAN_WEIGHTS } : { ...RUNNER_MULLIGAN_WEIGHTS },
     riskFlags,
     evidence: doctrineEvidence(snapshot.side, roleCounts, totalCards, missingRoles.length)
   };
@@ -195,6 +207,50 @@ export function evaluateCorpOpeningHand(input: AiDecisionInput): CorpOpeningHand
   };
 }
 
+export function evaluateRunnerOpeningHand(input: AiDecisionInput): RunnerOpeningHandEvaluation {
+  const handRoles = input.playerView.own.gripOrHq.flatMap((card) => rolesForCard(card.definitionId ?? ""));
+  const breakerCount = handRoles.filter(isBreakerRole).length;
+  const economyCount = handRoles.filter((role) => role.includes("economy") || role.includes("draw")).length;
+  const setupCount = handRoles.filter((role) => role === "runner_program" || role === "setup_runner" || role === "setup_hardware" || role === "runner_resource" || role === "memory").length;
+  const pressureCount = handRoles.filter((role) => role === "run_pressure" || role === "pressure_rnd" || role === "pressure_hq" || role === "remote_contest" || role === "multiaccess").length;
+  const handSize = input.playerView.own.gripOrHq.length;
+  const doctrine = input.ownDeckDoctrine;
+  const tags = doctrine?.archetypeTags ?? [];
+  let score = 0;
+  const reasons: string[] = [];
+  const evidence = [
+    `opening_breakers:${breakerCount}`,
+    `opening_economy:${economyCount}`,
+    `opening_setup:${setupCount}`,
+    `opening_pressure:${pressureCount}`,
+    ...(doctrine ? [`doctrine:${tags.slice(0, 3).join(",")}`, `doctrine_confidence:${doctrine.confidence}`] : ["doctrine:neutral"])
+  ];
+
+  score += breakerCount >= 2 ? 24 : breakerCount === 1 ? 18 : 0;
+  if (breakerCount === 0) reasons.push("no_opening_breaker");
+  score += economyCount >= 2 ? 22 : economyCount === 1 ? 18 : input.playerView.own.credits >= 5 ? 8 : 0;
+  if (economyCount === 0) reasons.push("no_opening_economy");
+  score += setupCount >= 3 ? 16 : setupCount >= 1 ? 10 : 0;
+  score += pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : pressureCount > 0 ? 4 : 0;
+  score += handSize >= 4 && handSize <= 6 ? 14 : handSize >= 3 ? 8 : 0;
+
+  if (tags.includes("rig_builder")) score += breakerCount > 0 && setupCount > 0 ? 12 : setupCount > 0 ? 6 : 0;
+  else if (tags.includes("economy_dense")) score += economyCount > 0 ? 12 : 4;
+  else if (tags.some((tag) => tag === "rnd_pressure" || tag === "hq_pressure" || tag === "remote_contest")) score += pressureCount > 0 && (breakerCount > 0 || economyCount > 0) ? 12 : 4;
+  else score += 6;
+
+  if (breakerCount === 0 && economyCount === 0) score = Math.min(score, 30);
+  if (pressureCount >= 3 && breakerCount === 0) score = Math.min(score, economyCount > 0 ? 44 : 32);
+  if (breakerCount >= 1 && economyCount >= 1) reasons.push("opening_runner_plan_supported");
+  const threshold = input.difficulty === "hard" ? 50 : input.difficulty === "easy" ? 58 : 54;
+  return {
+    decision: score >= threshold ? "keep" : "mulligan",
+    score,
+    reasons: reasons.length > 0 ? reasons : ["opening_hand_acceptable"],
+    evidence
+  };
+}
+
 function rolesForCard(cardId: string): string[] {
   if (!cardId) return [];
   const runtimeCard = RUNTIME_CARDS[cardId];
@@ -227,6 +283,10 @@ function inferredRoles(card: { side?: Side; type?: string; subtypes?: string[]; 
     if (card.type === "event") roles.push("run_pressure");
   }
   return roles;
+}
+
+function isBreakerRole(role: string): boolean {
+  return role.startsWith("breaker_");
 }
 
 function corpArchetypes(roleCounts: Record<string, number>, totalCards: number): string[] {

@@ -1,7 +1,7 @@
 # AI Deck Doctrine Implementation Review
 
 Stand: 2026-05-15  
-Status: Corp-MVP und Runner-Plananbindung umgesetzt
+Status: Corp-MVP, Runner-Plananbindung und Runner-Setup-Mulligan umgesetzt
 
 ## Umgesetzter Scope
 
@@ -17,6 +17,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - Corp-Planbewertung nutzt Doktrin-Gewichte als bounded Bonus.
 - Bestehende Agenda-Schutzlogik bleibt stärker als die neue Rush-Doktrin.
 - Corp-Setup-Mulligan bewertet Start-Hände nach ICE, Economy, Agenda-Last, Remote-Plan und Doktrin-Passung.
+- Runner-Setup-Mulligan bewertet Start-Hände nach Breaker-Zugang, Economy, Setup-Dichte, Druckoptionen, Handbalance und Doktrin-Passung.
 - Simulationsreports zählen nun konkrete Doctrine-Fehlerklassen: nackte Agenda-Installs, Agenda-Flood-Exposure, verpasste Score-Fenster, Remote-Overbuild, Economy-Stalls, wiederholte Low-Value-Central-Runs, Rig-Stalls und Asset-Trash-Neglect.
 - Economy-Stall zählt neue Planstarts bei niedriger Creditreserve, nimmt laufende Runner-Run-Folgeaktionen aber aus, damit Pump, Break, Continue, Access und Steal nicht als neue Planungsfehler erscheinen.
 - Ein Doctrine-Quality-Benchmark vergleicht Baseline und aktuellen Kandidaten auf denselben Seeds und liefert Doctrine- sowie Safety-Deltas.
@@ -30,8 +31,8 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 
 ## Geänderte Hauptartefakte
 
-- `packages/ai/src/deck-doctrine.ts`: Profilgenerator und Corp-Mulligan-Bewertung.
-- `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Setup-Mulligan-Auswahl, Debug-Zusammenfassung, Doctrine-Metriken und Exports.
+- `packages/ai/src/deck-doctrine.ts`: Profilgenerator sowie Corp- und Runner-Mulligan-Bewertung.
+- `packages/ai/src/index.ts`: Doctrine-Erzeugung im KI-Input, Corp-/Runner-Setup-Mulligan-Auswahl, Debug-Zusammenfassung, Doctrine-Metriken und Exports.
 - `packages/ai/src/corp-plans.ts`: planbezogener Doctrine-Bonus und redigierte Plan-Debugdaten.
 - `packages/ai/src/runner-plans.ts`: planbezogener Runner-Doctrine-Bonus, Guards gegen unvorbereiteten zentralen Druck, Remote-Contest-Pacing und redigierte Plan-Debugdaten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
@@ -40,7 +41,7 @@ Status: Corp-MVP und Runner-Plananbindung umgesetzt
 - `docs/derived/AI_DECK_DOCTRINE_HOLDOUT_BENCHMARK_REPORT_2026_05_15.md`: Holdout-Nachweis für Doctrine-Fehlerklassen und Safety-Deltas.
 - `docs/derived/AI_DECK_DOCTRINE_SELFPLAY_SOAK_REPORT_2026_05_15.md`: längerer 9-Seed-/80-Action-Selfplay-Nachweis über alle Benchmark-Profile.
 - `docs/derived/AI_DECK_DOCTRINE_QUALITY_CASE_ANALYSIS_2026_05_15.md`: Beispiele pro Doctrine-Fehlerklasse.
-- `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz, Mulligan, Doctrine-Qualitätsmetriken und Benchmark-Deltas.
+- `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz, Corp-/Runner-Mulligan, Doctrine-Qualitätsmetriken und Benchmark-Deltas.
 
 ## Verifikation
 
@@ -63,4 +64,4 @@ Teilweise grün:
 - Im engen 6-Seed-/40-Action-Doctrine-Benchmark, im 9-Seed-Holdout-Lauf und im 9-Seed-/80-Action-Selfplay stehen alle Doctrine-Fehlerklassen für `current_candidate` bei 0.
 - Alle `current_candidate`-Spiele im 80-Action-Selfplay erreichen das Action-Limit; nächster Ausbaukandidat ist deshalb Spielprogression, nicht weiteres Micro-Tuning auf denselben Seeds.
 - Doctrine-Gewichte sind heuristisch und sollten erst nach Replay-/Selfplay-Auswertung weiter optimiert werden.
-- Runner-Mulligan und archetypspezifische Early-Turn-Planung sind noch nicht umgesetzt.
+- Runner-Mulligan ist als Setup-Choice umgesetzt; archetypspezifische Early-Turn-Planung ist noch offen.

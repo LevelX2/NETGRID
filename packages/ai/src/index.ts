@@ -8,7 +8,7 @@ import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regr
 import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
-import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
+import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
 import { DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
@@ -52,8 +52,8 @@ export {
   runnerPlanUsesOnlyAiSupportedCards
 } from "./runner-plans";
 export type { RunnerPlanCandidate, RunnerPlanDebug, RunnerPlanDecision, RunnerPlanEvaluatorResult, RunnerPlanKind, RunnerPlanScore, RunnerPlanStep } from "./runner-plans";
-export { buildDeckDoctrineProfile, evaluateCorpOpeningHand } from "./deck-doctrine";
-export type { AiDeckDoctrineDeckSnapshot, CorpOpeningHandEvaluation } from "./deck-doctrine";
+export { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand } from "./deck-doctrine";
+export type { AiDeckDoctrineDeckSnapshot, CorpOpeningHandEvaluation, OpeningHandEvaluation, RunnerOpeningHandEvaluation } from "./deck-doctrine";
 
 type RankedChoice = {
   action: LegalAction | undefined;
@@ -448,6 +448,8 @@ function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
 function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
   return (
     decision.reasonCode === "runner.choice.resolve" ||
+    decision.reasonCode === "runner.setup.keep" ||
+    decision.reasonCode === "runner.setup.mulligan" ||
     decision.reasonCode === "runner.trace.bid_visible_amount" ||
     decision.reasonCode === "runner.access.steal_agenda" ||
     decision.reasonCode === "runner.access.open_card" ||
@@ -1369,8 +1371,8 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
 function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
-  if (choice.source === "setup.mulligan" && input.side === "corp") {
-    const opening = evaluateCorpOpeningHand(input);
+  if (choice.source === "setup.mulligan") {
+    const opening = input.side === "corp" ? evaluateCorpOpeningHand(input) : evaluateRunnerOpeningHand(input);
     const selected = choice.options.find((option) => option.id === opening.decision) ?? choice.options[0];
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
@@ -1466,10 +1468,18 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
 
   switch (action.type) {
     case "resolve_choice":
-      score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
-      reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "runner.trace.bid_visible_amount" : "runner.choice.resolve";
-      explanation = "Der Runner beantwortet eine sichtbare legale Choice.";
-      evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+      if (input.playerView.pendingChoice?.source === "setup.mulligan") {
+        const opening = evaluateRunnerOpeningHand(input);
+        score = 920;
+        reasonCode = opening.decision === "mulligan" ? "runner.setup.mulligan" : "runner.setup.keep";
+        explanation = opening.decision === "mulligan" ? "Der Runner nimmt anhand von Start-Hand und Deckprofil einen Mulligan." : "Der Runner behält eine startfähige Hand anhand von Start-Hand und Deckprofil.";
+        evidence.push("choice_legal", "choice_source:setup.mulligan", ...opening.reasons, ...opening.evidence);
+      } else {
+        score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
+        reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "runner.trace.bid_visible_amount" : "runner.choice.resolve";
+        explanation = "Der Runner beantwortet eine sichtbare legale Choice.";
+        evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+      }
       break;
     case "steal_agenda":
       score = 1000;
