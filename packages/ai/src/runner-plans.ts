@@ -10,6 +10,18 @@ import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-
 import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
 import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v199.json";
+import deckLegalV1911AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1911.json";
+import deckLegalV1912AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1912.json";
+import deckLegalV1913AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1913.json";
+import deckLegalV1914AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1914.json";
+import deckLegalV1915AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1915.json";
+import deckLegalV1916AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1916.json";
+import deckLegalV1917AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1917.json";
+import deckLegalV1918AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1918.json";
+import deckLegalV1919AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1919.json";
+import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1920.json";
+import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
+import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import runtimeSupplementAiHintsData from "../../../data/ai/ai-card-hints-runtime-supplement.json";
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import { DEMO_CARDS_BY_ID, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
@@ -142,7 +154,19 @@ const AI_HINTS = new Map(
     ...(deckLegalV190AiHintsData.cards as AiCardHint[]),
     ...(deckLegalV191V194AiHintsData.cards as AiCardHint[]),
     ...(deckLegalV195V198AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV199AiHintsData.cards as AiCardHint[])
+    ...(deckLegalV199AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1911AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1912AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1913AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1914AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1915AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1916AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1917AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1918AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1919AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1920AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1921AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1922AiHintsData.cards as AiCardHint[])
   ].map((hint) => [hint.cardId, hint])
 );
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];

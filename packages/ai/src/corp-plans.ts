@@ -10,6 +10,18 @@ import deckLegalV190AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-
 import deckLegalV191V194AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v191-v194.json";
 import deckLegalV195V198AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v195-v198.json";
 import deckLegalV199AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v199.json";
+import deckLegalV1911AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1911.json";
+import deckLegalV1912AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1912.json";
+import deckLegalV1913AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1913.json";
+import deckLegalV1914AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1914.json";
+import deckLegalV1915AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1915.json";
+import deckLegalV1916AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1916.json";
+import deckLegalV1917AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1917.json";
+import deckLegalV1918AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1918.json";
+import deckLegalV1919AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1919.json";
+import deckLegalV1920AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1920.json";
+import deckLegalV1921AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1921.json";
+import deckLegalV1922AiHintsData from "../../../data/ai/ai-card-hints-deck-legal-v1922.json";
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
 import type { AiDecision, AiDecisionInput, AiDifficulty, LegalAction, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
@@ -145,7 +157,19 @@ const AI_HINTS = new Map(
     ...(deckLegalV190AiHintsData.cards as AiCardHint[]),
     ...(deckLegalV191V194AiHintsData.cards as AiCardHint[]),
     ...(deckLegalV195V198AiHintsData.cards as AiCardHint[]),
-    ...(deckLegalV199AiHintsData.cards as AiCardHint[])
+    ...(deckLegalV199AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1911AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1912AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1913AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1914AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1915AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1916AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1917AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1918AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1919AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1920AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1921AiHintsData.cards as AiCardHint[]),
+    ...(deckLegalV1922AiHintsData.cards as AiCardHint[])
   ].map(
     (hint) => [hint.cardId, hint]
   )
@@ -249,7 +273,7 @@ export function generateCorpPlanCandidates(input: AiDecisionInput): CorpPlanCand
     buildCandidate(
       input,
       "score_next_turn",
-      actions.filter((action) => action.type === "advance_card" || (action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some((role) => role.startsWith("agenda_"))))
+      actions.filter((action) => action.type === "advance_card" || (action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole)))
     ),
     buildCandidate(
       input,
@@ -289,6 +313,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     scoringWindow.score * profile.weights.scoringWindow +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
+    remoteRootExposurePenalty(input, candidate, profile.riskTolerance) -
     visibleRiskPenalty(candidate, profile.riskTolerance);
   const evidence = [
     `plan:${candidate.kind}`,
@@ -299,6 +324,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     ...economyReserve.evidence,
     ...iceRez.evidence,
     ...scoringWindow.evidence,
+    ...remoteRootExposureEvidence(input, candidate),
     ...remoteIntent.evidence,
     `belief_version:${beliefState.version}`,
     ...(beliefState.corpOpponentModel ? [`runner_contest_probability:${round(beliefState.corpOpponentModel.remoteContestProbability)}`] : [])
@@ -446,17 +472,18 @@ function selectPlanAction(input: AiDecisionInput, candidate: CorpPlanCandidate):
   const actions = candidate.legalActionIds
     .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
     .filter((action): action is LegalAction => Boolean(action))
-    .sort((left, right) => actionPriority(candidate.kind, right) - actionPriority(candidate.kind, left) || compareAction(left, right));
+    .sort((left, right) => actionPriority(input, candidate.kind, right) - actionPriority(input, candidate.kind, left) || compareAction(left, right));
   return actions[0];
 }
 
-function actionPriority(kind: CorpPlanKind, action: LegalAction): number {
+function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: LegalAction): number {
   if (kind === "score_now" && action.type === "score_agenda") return 100;
   if (kind === "score_next_turn" && action.type === "advance_card") return 90;
   if ((kind === "protect_hq" || kind === "protect_rnd") && action.type === "install_card" && action.payload?.placement === "ice") return 85;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
-  if ((kind === "build_scoring_remote" || kind === "bait_runner") && action.type === "install_card") return 75;
+  if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action);
+  if ((kind === "build_scoring_remote" || kind === "bait_runner") && action.type === "install_card" && action.payload?.placement !== "ice") return 75 + boundedRemotePriorityBonus(input, action);
   if (action.type === "draw_card") return 45;
   if (action.type === "end_turn") return 5;
   return 20;
@@ -637,6 +664,58 @@ function visibleRisksForPlan(kind: CorpPlanKind, roles: string[]): string[] {
   if (kind === "bait_runner") risks.push("risk:asset_access");
   if (roles.length === 0 && kind !== "recover_economy" && kind !== "score_now") risks.push("risk:no_ai_role");
   return risks;
+}
+
+function remoteRootExposurePenalty(input: AiDecisionInput, candidate: CorpPlanCandidate, riskTolerance: number): number {
+  if (candidate.kind !== "score_next_turn" && candidate.kind !== "build_scoring_remote") return 0;
+  const rootActions = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => Boolean(action && action.type === "install_card" && action.payload?.placement !== "ice"));
+  if (rootActions.length === 0) return 0;
+  const worstAgendaExposure = Math.min(
+    0,
+    ...rootActions
+      .filter((action) => rolesForAction(input, action).some(isAgendaRole))
+      .map((action) => remoteRootActionSecurityScore(input, action))
+  );
+  if (worstAgendaExposure >= 0) return 0;
+  const hasProtectedAgendaInstall = rootActions.some((action) => rolesForAction(input, action).some(isAgendaRole) && remoteRootActionSecurityScore(input, action) > 0);
+  const hasCentralOrRemoteIceInstall = input.legalActions.some((action) => action.side === "corp" && action.type === "install_card" && action.payload?.placement === "ice");
+  const cautionMultiplier = 1.25 - riskTolerance;
+  const avoidableExposure = hasProtectedAgendaInstall || hasCentralOrRemoteIceInstall ? 1.4 : 1;
+  return Math.round(Math.abs(worstAgendaExposure) * cautionMultiplier * avoidableExposure);
+}
+
+function remoteRootExposureEvidence(input: AiDecisionInput, candidate: CorpPlanCandidate): string[] {
+  const scores = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => Boolean(action && action.type === "install_card" && action.payload?.placement !== "ice"))
+    .map((action) => `remote_root_security:${String(action.payload?.serverId ?? "unknown")}:${remoteRootActionSecurityScore(input, action)}`);
+  return scores.slice(0, 4);
+}
+
+function remoteRootActionSecurityScore(input: AiDecisionInput, action: LegalAction): number {
+  if (action.type !== "install_card" || action.payload?.placement === "ice") return 0;
+  const roles = rolesForAction(input, action);
+  const isAgenda = roles.some(isAgendaRole);
+  const serverId = action.payload?.serverId;
+  if (!isAgenda) return serverId === "new_remote" ? 5 : 20;
+  if (serverId === "new_remote") return -120;
+  if (typeof serverId !== "string") return -90;
+  const server = input.playerView.servers.find((candidate) => candidate.id === serverId);
+  if (!server || !serverId.startsWith("remote_")) return -90;
+  if (server.ice.length <= 0) return -95;
+  const rezzedIceBonus = server.ice.some((ice) => ice.rezzed === true) ? 35 : 0;
+  return 90 + Math.min(server.ice.length, 3) * 20 + rezzedIceBonus;
+}
+
+function boundedRemotePriorityBonus(input: AiDecisionInput, action: LegalAction): number {
+  const score = remoteRootActionSecurityScore(input, action);
+  return Math.max(-45, Math.min(20, Math.round(score / 6)));
+}
+
+function isAgendaRole(role: string): boolean {
+  return role === "agenda" || role === "corp_score_agenda" || role === "score_agenda" || role.startsWith("agenda_");
 }
 
 function explanationForPlan(kind: CorpPlanDebug["planKind"]): string {

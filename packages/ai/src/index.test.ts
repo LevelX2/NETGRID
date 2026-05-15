@@ -896,6 +896,80 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(chooseCorpPlanDecision(economyInput).debug.planKind).toBe("recover_economy");
   });
 
+  it("prefers ICE protection over installing a naked agenda in a new remote", () => {
+    const input = corpActionPhaseInput("ai-v140-naked-agenda-guard", (state) => {
+      state.corp.credits = 7;
+      moveCorpCardToHq(state, "simple_agenda");
+      moveCorpCardToHq(state, "simple_barrier_ice");
+    });
+    const nakedAgendaInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement !== "ice" && action.payload?.serverId === "new_remote" && sourceDefinitionFromInput(input, action) === "simple_agenda"
+    );
+    const rdIceInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd" && sourceDefinitionFromInput(input, action) === "simple_barrier_ice"
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+
+    expect(nakedAgendaInstall).toBeDefined();
+    expect(rdIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!nakedAgendaInstall || !rdIceInstall || !gain) throw new Error("Missing naked-agenda guard fixture actions");
+    const decision = chooseCorpAction({ ...input, legalActions: [nakedAgendaInstall, rdIceInstall, gain] });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+
+    expect(selected?.actionId).toBe(rdIceInstall.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.protect_rnd");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(/cardInstances|privatePayload|Simple Fracter/);
+  });
+
+  it("uses an existing protected remote before a new naked agenda remote", () => {
+    const input = corpActionPhaseInput("ai-v140-protected-remote-before-new", (state) => {
+      state.corp.credits = 7;
+      ensureRemoteServer(state, "remote_1");
+      putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      moveCorpCardToHq(state, "simple_agenda");
+    });
+    const agendaInstalls = input.legalActions.filter(
+      (action) => action.type === "install_card" && action.payload?.placement !== "ice" && ["new_remote", "remote_1"].includes(String(action.payload?.serverId ?? "")) && sourceDefinitionFromInput(input, action) === "simple_agenda"
+    );
+
+    expect(agendaInstalls.some((action) => action.payload?.serverId === "new_remote")).toBe(true);
+    expect(agendaInstalls.some((action) => action.payload?.serverId === "remote_1")).toBe(true);
+    const decision = chooseCorpAction({ ...input, legalActions: agendaInstalls });
+    const selected = input.legalActions.find((action) => action.actionId === decision.actionId);
+
+    expect(selected?.payload?.serverId).toBe("remote_1");
+    expect(decision.reasonCode).toBe("corp.plan.score_next_turn");
+  });
+
+  it("loads post-V1.9.9 AI hints into Corp plan roles", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-v1922-hints-in-plan",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: V1911_RUNNER_DECK,
+      corpDeck: {
+        id: "ai_v1922_hint_corp",
+        name: "AI V1.9.22 Hint Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_247_haunting-inquisition", quantity: 1 },
+          { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+          { id: "onr_v1_220_tycho-extension", quantity: 1 },
+          { id: "simple_economy_operation", quantity: 4 }
+        ]
+      },
+      agendaPointsToWin: 7
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 12;
+    moveCorpCardToHq(state, "onr_v1_247_haunting-inquisition");
+    const input = buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.0-normal" });
+    const protectRnd = generateCorpPlanCandidates(input).find((candidate) => candidate.kind === "protect_rnd");
+
+    expect(protectRnd?.requiredRoles).toEqual(expect.arrayContaining(["corp_install_ice", "corp_rez_ice", "per_card_longtail"]));
+  });
+
   it("keeps DecisionDebug side-safe and falls back legally under zero budget", () => {
     const input = corpActionPhaseInput("ai-v140-debug", (state) => {
       state.corp.credits = 8;
