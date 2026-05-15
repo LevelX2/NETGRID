@@ -19448,6 +19448,397 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
   });
 });
 
+describe("Originalset spotcheck: reorder, counters and run-lock hardening", () => {
+  it("keeps Too Many Doors private, rejects invalid choices and no-ops short R&D", () => {
+    let state = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-too-many-doors"),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    installRunnerProgramForTest(state, "onr_v1_023_evil-twin");
+    putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
+    const bottomChoiceId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const topChoiceId = putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
+
+    state = encounterIce(state, "rd", "onr_v1_272_too-many-doors");
+    const opened = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(opened.pendingChoice?.source).toContain("v1911.corp_rd_arrange_top2");
+    expect(getPlayerView(opened, "runner").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(opened, "runner"))).not.toContain(
+      topChoiceId,
+    );
+    expect(JSON.stringify(opened.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "Hostile Takeover",
+    );
+
+    const runnerResolve = applyAction(opened, {
+      matchId: opened.matchId,
+      side: "runner",
+      actionId: mustAction(opened, "corp", (action) => action.type === "resolve_choice")
+        .actionId,
+      clientKnownStateVersion: opened.stateVersion,
+      selectedChoices: {
+        choiceId: opened.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${bottomChoiceId}`, `card_${topChoiceId}`],
+      },
+    });
+    expect(runnerResolve.ok).toBe(false);
+    if (!runnerResolve.ok)
+      expect(["ERR_UNKNOWN_ACTION", "ERR_WRONG_SIDE"]).toContain(
+        runnerResolve.error.code,
+      );
+
+    const duplicateResolve = applyAction(opened, {
+      matchId: opened.matchId,
+      side: "corp",
+      actionId: mustAction(opened, "corp", (action) => action.type === "resolve_choice")
+        .actionId,
+      clientKnownStateVersion: opened.stateVersion,
+      selectedChoices: {
+        choiceId: opened.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${bottomChoiceId}`, `card_${bottomChoiceId}`],
+      },
+    });
+    expect(duplicateResolve.ok).toBe(false);
+
+    const initial = structuredClone(opened);
+    const replayStart = opened.eventLog.length;
+    state = applyChoices(opened, "corp", [
+      `card_${bottomChoiceId}`,
+      `card_${topChoiceId}`,
+    ]);
+    expect(state.corp.rd.slice(0, 2)).toEqual([bottomChoiceId, topChoiceId]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let brokenState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-too-many-doors-broken"),
+    );
+    brokenState.runner.credits = 30;
+    brokenState.corp.credits = 30;
+    installRunnerProgramForTest(brokenState, "onr_v1_023_evil-twin");
+    putCorpIceOnServer(brokenState, "rd", "onr_v1_272_too-many-doors");
+    const rdBeforeBroken = brokenState.corp.rd.slice();
+    brokenState = encounterIce(brokenState, "rd", "onr_v1_272_too-many-doors");
+    brokenState = breakCurrentSubroutine(
+      brokenState,
+      "onr_v1_023_evil-twin",
+      0,
+    );
+    brokenState = apply(
+      brokenState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(brokenState.pendingChoice).toBeUndefined();
+    expect(brokenState.corp.rd).toEqual(rdBeforeBroken);
+
+    let shortRdState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-too-many-doors-short-rd"),
+    );
+    shortRdState.runner.credits = 30;
+    shortRdState.corp.credits = 30;
+    installRunnerProgramForTest(shortRdState, "onr_v1_023_evil-twin");
+    putCorpIceOnServer(shortRdState, "rd", "onr_v1_272_too-many-doors");
+    const onlyRdCard = putCorpCardOnTopOfRd(
+      shortRdState,
+      "simple_economy_operation",
+    );
+    for (const cardId of shortRdState.corp.rd.slice()) {
+      if (cardId === onlyRdCard) continue;
+      removeEverywhere(shortRdState, cardId);
+      shortRdState.corp.archives.push(cardId);
+      shortRdState.cardInstances[cardId] = {
+        ...shortRdState.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+        faceup: false,
+      };
+    }
+    shortRdState = encounterIce(shortRdState, "rd", "onr_v1_272_too-many-doors");
+    shortRdState = apply(
+      shortRdState,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(shortRdState.pendingChoice).toBeUndefined();
+    expect(shortRdState.corp.rd).toEqual([onlyRdCard]);
+    expect(shortRdState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+      arrangedCount: 1,
+    });
+  });
+
+  it("reveals only I Spy's top stack card and keeps source and empty-stack gates closed", () => {
+    let state = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-i-spy"),
+    );
+    state.runner.credits = 20;
+    const iSpyId = moveRunnerCardToGrip(state, "onr_v1_032_i-spy");
+    const hiddenBelowId = putRunnerCardOnTopOfStack(state, "simple_fracter");
+    const topId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.payload?.v1912CounterAbility === "reveal_stack_top",
+      ),
+    ).toBe(false);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" && String(action.payload?.cardId) === iSpyId,
+    );
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1912CounterAbility === "reveal_stack_top",
+    );
+    expect(state.runner.stack.slice(0, 2)).toEqual([topId, hiddenBelowId]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      revealKind: "reveal",
+      cardDefinitionId: "simple_decoder",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "simple_fracter",
+    );
+    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(hiddenBelowId);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    for (const cardId of state.runner.stack.slice()) {
+      removeEverywhere(state, cardId);
+      state.runner.heap.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "runner", zone: "heap" },
+        faceup: true,
+      };
+    }
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.payload?.v1912CounterAbility === "reveal_stack_top",
+      ),
+    ).toBe(false);
+  });
+
+  it("bounds Fatal Attractor and Shock.r next-encounter flags to one run", () => {
+    let fatalState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-fatal-attractor"),
+    );
+    fatalState.runner.credits = 30;
+    fatalState.corp.credits = 30;
+    installRunnerProgramForTest(fatalState, "onr_v1_023_evil-twin");
+    putCorpIceOnServer(fatalState, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(fatalState, "rd", "onr_v1_242_fatal-attractor");
+    fatalState = encounterIce(fatalState, "rd", "onr_v1_242_fatal-attractor");
+    fatalState = breakCurrentSubroutine(fatalState, "onr_v1_023_evil-twin", 0);
+    fatalState = apply(fatalState, "runner", (action) => action.type === "continue_run");
+    expect(fatalState.run?.nextEncounterFatalDamage ?? 0).toBe(0);
+
+    let clearedState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-fatal-run-end"),
+    );
+    clearedState.runner.credits = 30;
+    clearedState.corp.credits = 30;
+    putCorpIceOnServer(clearedState, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(clearedState, "rd", "onr_v1_242_fatal-attractor");
+    clearedState = encounterIce(clearedState, "rd", "onr_v1_242_fatal-attractor");
+    clearedState = apply(clearedState, "runner", (action) => action.type === "continue_run");
+    expect(clearedState.run?.nextEncounterFatalDamage).toBe(3);
+    clearedState = apply(clearedState, "runner", (action) => action.type === "jack_out");
+    expect(clearedState.run).toBeUndefined();
+
+    let shockState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-shock-r"),
+    );
+    shockState.runner.credits = 30;
+    shockState.corp.credits = 30;
+    installRunnerProgramForTest(shockState, "onr_v1_014_codecracker");
+    putCorpIceOnServer(shockState, "rd", "simple_code_gate_ice");
+    putCorpIceOnServer(shockState, "rd", "onr_v1_268_shock-r");
+    shockState = encounterIce(shockState, "rd", "onr_v1_268_shock-r");
+    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    shockState = apply(
+      shockState,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(shockState, action) === "simple_code_gate_ice",
+    );
+    expect(shockState.run?.noBreakSubroutinesActive).toBe(true);
+    expect(
+      getLegalActions(shockState, "runner").some(
+        (action) => action.type === "break_subroutine",
+      ),
+    ).toBe(false);
+    shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    expect(shockState.run?.noBreakSubroutinesActive ?? false).toBe(false);
+    expect(shockState.run?.jackOutLockedUntilEncounterEnds ?? false).toBe(false);
+  });
+
+  it("keeps D'Arc Knight, Razor Wire and Liche subroutines independently breakable and redacted", () => {
+    let dArcState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-darc-knight"),
+    );
+    dArcState.runner.credits = 50;
+    dArcState.corp.credits = 50;
+    const dArcTargetId = installRunnerProgramForTest(dArcState, "simple_decoder");
+    installRunnerProgramForTest(dArcState, "onr_v1_023_evil-twin");
+    putCorpIceOnServer(dArcState, "rd", "onr_v1_233_d-arc-knight");
+    dArcState = encounterIce(dArcState, "rd", "onr_v1_233_d-arc-knight");
+    dArcState = breakCurrentSubroutine(dArcState, "onr_v1_023_evil-twin", 0);
+    dArcState = apply(dArcState, "runner", (action) => action.type === "continue_run");
+    expect(dArcState.runner.heap).not.toContain(dArcTargetId);
+    expect(dArcState.run).toBeUndefined();
+
+    let razorState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-razor-wire"),
+    );
+    razorState.runner.credits = 50;
+    razorState.corp.credits = 50;
+    installRunnerProgramForTest(razorState, "onr_v1_021_dwarf");
+    putCorpIceOnServer(razorState, "rd", "onr_v1_262_razor-wire");
+    razorState = encounterIce(razorState, "rd", "onr_v1_262_razor-wire");
+    const gripBeforeRazor = razorState.runner.grip.length;
+    razorState = breakCurrentSubroutine(razorState, "onr_v1_021_dwarf", 1);
+    const initial = structuredClone(razorState);
+    const replayStart = razorState.eventLog.length;
+    razorState = apply(razorState, "runner", (action) => action.type === "continue_run");
+    expect(razorState.runner.grip.length).toBe(gripBeforeRazor - 2);
+    expect(razorState.run).toBeDefined();
+    expect(razorState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 2,
+    });
+    expect(JSON.stringify(razorState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"grip"|"privatePayload"|"cardInstances"/,
+    );
+    const replay = replayEvents(initial, razorState.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(razorState));
+
+    let licheState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-liche"),
+    );
+    licheState.runner.credits = 50;
+    licheState.corp.credits = 50;
+    installRunnerProgramForTest(licheState, "onr_v1_006_black-dahlia");
+    putCorpIceOnServer(licheState, "rd", "onr_v1_254_liche");
+    licheState = encounterIce(licheState, "rd", "onr_v1_254_liche");
+    licheState = breakCurrentSubroutine(licheState, "onr_v1_006_black-dahlia", 1);
+    licheState = breakCurrentSubroutine(licheState, "onr_v1_006_black-dahlia", 3);
+    const coreBefore = licheState.runner.coreDamage;
+    licheState = apply(licheState, "runner", (action) => action.type === "continue_run");
+    expect(licheState.runner.coreDamage).toBe(coreBefore + 2);
+    expect(licheState.run).toBeDefined();
+    expect(licheState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "core",
+      damageAmount: 2,
+    });
+  });
+
+  it("keeps Chicago Branch, Vapor Ops and Corporate Retreat source-bound", () => {
+    let state = apply(
+      originalsetReorderCounterRunlockGame("spotcheck-assets-agenda"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 50;
+    state.corp.clicks = 50;
+
+    const chicagoId = putCorpRootInRemote(state, "onr_v1_312_chicago-branch");
+    const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    expect(state.cardInstances[chicagoId]?.rezzed).toBe(false);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.payload?.v1919AssetAbility === "add_power_counter" &&
+          action.payload?.cardId === chicagoId,
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        String(action.payload?.cardId) === chicagoId,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1919AssetAbility === "add_power_counter" &&
+        action.payload?.cardId === chicagoId,
+    );
+    expect(cardCounterAmount(state, chicagoId, "power")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_312_chicago-branch",
+      addedCounterAmount: 1,
+      remainingCounters: 1,
+    });
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && String(action.payload?.cardId) === vaporId,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1919AssetAbility === "add_power_counter" &&
+        action.payload?.cardId === vaporId,
+    );
+    expect(cardCounterAmount(state, vaporId, "power")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_347_vapor-ops",
+      addedCounterAmount: 1,
+      remainingCounters: 1,
+    });
+
+    const retreatId = scoreCorpAgendaForTest(state, "onr_v1_195_corporate-retreat");
+    setCardCounterForTest(state, retreatId, "mark", 1);
+    const retreatAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.agendaAbility === "v1922_corporate_retreat",
+    );
+    const stolenState = structuredClone(state);
+    stolenState.corp.scoreArea = stolenState.corp.scoreArea.filter(
+      (cardId) => cardId !== retreatId,
+    );
+    stolenState.runner.scoreArea.push(retreatId);
+    stolenState.cardInstances[retreatId] = {
+      ...stolenState.cardInstances[retreatId]!,
+      zone: { side: "runner", zone: "scoreArea" },
+    };
+    const stolenResult = applyAction(stolenState, {
+      matchId: stolenState.matchId,
+      side: "corp",
+      actionId: retreatAction.actionId,
+      clientKnownStateVersion: stolenState.stateVersion,
+    });
+    expect(stolenResult.ok).toBe(false);
+  });
+});
+
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   it("adds all V1.9.18 WIP runtime definitions without release-promoting the next slice", () => {
     expect(ONR_V1_9_18_WIP_CARD_IDS).toHaveLength(15);
@@ -25999,6 +26390,119 @@ function installedResourceCorpTurn(seed: string): GameState {
   state.corp.credits = 5;
   state.runner.tags = 1;
   return state;
+}
+
+function originalsetReorderCounterRunlockGame(seed: string): GameState {
+  return createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: {
+      id: "originalset_spotcheck_reorder_counter_runlock_runner",
+      name: "Originalset Spotcheck Reorder Counter Runlock Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_014_codecracker", quantity: 2 },
+        { id: "onr_v1_006_black-dahlia", quantity: 1 },
+        { id: "onr_v1_021_dwarf", quantity: 2 },
+        { id: "onr_v1_023_evil-twin", quantity: 3 },
+        { id: "onr_v1_032_i-spy", quantity: 1 },
+        { id: "onr_v1_055_reflector", quantity: 1 },
+        { id: "simple_decoder", quantity: 3 },
+        { id: "simple_fracter", quantity: 3 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: "originalset_spotcheck_reorder_counter_runlock_corp",
+      name: "Originalset Spotcheck Reorder Counter Runlock Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_195_corporate-retreat", quantity: 1 },
+        { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+        { id: "onr_v1_233_d-arc-knight", quantity: 2 },
+        { id: "onr_v1_242_fatal-attractor", quantity: 2 },
+        { id: "onr_v1_254_liche", quantity: 1 },
+        { id: "onr_v1_262_razor-wire", quantity: 1 },
+        { id: "onr_v1_268_shock-r", quantity: 2 },
+        { id: "onr_v1_272_too-many-doors", quantity: 2 },
+        { id: "onr_v1_312_chicago-branch", quantity: 1 },
+        { id: "onr_v1_347_vapor-ops", quantity: 1 },
+        { id: "simple_agenda", quantity: 3 },
+        { id: "simple_barrier_ice", quantity: 3 },
+        { id: "simple_code_gate_ice", quantity: 3 },
+        { id: "simple_economy_operation", quantity: 6 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+}
+
+function encounterIce(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  definitionId: string,
+): GameState {
+  let next = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === serverId,
+  );
+  next = apply(
+    next,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" && sourceDefinition(next, action) === definitionId,
+  );
+  return next;
+}
+
+function breakCurrentSubroutine(
+  state: GameState,
+  breakerDefinitionId: string,
+  subroutineIndex: number,
+): GameState {
+  const breakerId = state.runner.rig.programs.find(
+    (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
+  );
+  expect(breakerId).toBeDefined();
+  if (!breakerId) throw new Error(`Missing breaker ${breakerDefinitionId}`);
+  let next = state;
+  for (let attempt = 0; attempt < 10; attempt += 1) {
+    const breakerAction = getLegalActions(next, "runner").find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === breakerId &&
+        action.payload?.subroutineIndex === subroutineIndex,
+    );
+    if (breakerAction) {
+      return apply(
+        next,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === breakerId &&
+          action.payload?.subroutineIndex === subroutineIndex,
+      );
+    }
+    const pumpAction = getLegalActions(next, "runner").find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === breakerId,
+    );
+    if (!pumpAction) break;
+    next = apply(
+      next,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === breakerId,
+    );
+  }
+  throw new Error(
+    `Missing break action for ${breakerDefinitionId} subroutine ${subroutineIndex}`,
+  );
 }
 
 function apply(

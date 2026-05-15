@@ -6589,6 +6589,7 @@ function performAction(
         addCardCounter(state, sourceCardId, "power", addAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
+          sourceDefinitionId: definition.id,
           addedCounterAmount: addAmount,
           remainingCounters: cardCounter(state, sourceCardId, "power"),
         };
@@ -6696,6 +6697,7 @@ function performAction(
         addCardCounter(state, sourceCardId, "power", addAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
+          sourceDefinitionId: definition.id,
           addedCounterAmount: addAmount,
           remainingCounters: cardCounter(state, sourceCardId, "power"),
         };
@@ -8815,6 +8817,20 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     if (subroutine.type === "reorder_corp_rd_top2") {
       if (definition.id !== TOO_MANY_DOORS_ID)
         throw new Error("Die R&D-Reorder-Subroutine passt nicht zum ICE.");
+      const arrangeCount = state.corp.rd.slice(0, 2).length;
+      if (arrangeCount < 2) {
+        if (legalAction) {
+          legalAction.payload = {
+            ...(legalAction.payload ?? {}),
+            hiddenZoneBarrier: true,
+            hiddenZoneAction: "v1911_corp_reorder_rd_top2",
+            arrangedCount: arrangeCount,
+          };
+        }
+        if (!run.resolvedSubroutineIndexes.includes(index))
+          run.resolvedSubroutineIndexes.push(index);
+        continue;
+      }
       startCorpRdArrangeChoice(state, run.encounteredIceId, index, legalAction);
       if (!run.resolvedSubroutineIndexes.includes(index))
         run.resolvedSubroutineIndexes.push(index);
@@ -16839,6 +16855,8 @@ function publicContextForAction(
     } else if (legalAction.payload?.traceStarted !== true) {
       context.amount = 1;
     }
+    if (typeof legalAction.payload?.sourceDefinitionId === "string")
+      context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
   }
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;

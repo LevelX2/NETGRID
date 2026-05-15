@@ -1,7 +1,9 @@
 ---
+startedAt: 2026-05-15T18:46:59.1203208+02:00
 jobId: spotcheck-2026-05-15-reorder-counter-runlock
-status: ready_for_implementation
+status: done
 createdAt: 2026-05-15T11:15:00+01:00
+completedAt: 2026-05-15T18:55:29+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -274,3 +276,28 @@ Akzeptanzkriterien:
 - corepack pnpm --filter @netgrid/web test -- chronicle.test.ts
 - corepack pnpm --filter @netgrid/catalog test
 - corepack pnpm typecheck
+
+## Umsetzungsergebnis
+
+Status: `done`
+
+Umgesetzt:
+- `Too Many Doors`: kurze R&D mit 0/1 Karte läuft jetzt als stabiler No-op mit `hiddenZoneBarrier`/`arrangedCount` weiter statt den Run durch einen Engine-Fehler zu blockieren.
+- `Chicago Branch` und `Vapor Ops`: V1.9.19-Counter-Aktionen schreiben `sourceDefinitionId` in den öffentlichen Payload; die Quelle bleibt rezzed-only und replayfähig.
+- Fokussierte Engine-Regressionen ergänzen Hidden-Zone-Leakscans, Choice-Revalidation, Broken-Subroutine- und Short-R&D-Fälle, I-Spy-Top-Stack-Reveal, Fatal-Attractor-/Shock.r-Flag-Lifetime, D'Arc-Knight-/Razor-Wire-/Liche-Subroutinegrenzen sowie Corporate-Retreat-ScoreArea-Drift.
+
+Geänderte Artefakte:
+- `packages/engine/src/index.ts`
+- `packages/engine/src/index.test.ts`
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REORDER_COUNTER_RUNLOCK_IMPLEMENTATION.md`
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md`
+- `data/reports/originalset-card-spotcheck-register.json`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
+
+Checks:
+- `corepack pnpm --filter @netgrid/engine test` - grün
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün
+- `corepack pnpm --filter @netgrid/catalog test` - grün
+- `corepack pnpm typecheck` - grün
+
+Commit: lokal abgeschlossen.

@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-reorder-counter-runlock
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REORDER_COUNTER_RUNLOCK_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Checks sind grün.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Too Many Doors | `onr_v1_272_too-many-doors` | Private R&D-Top-2-Choice gehärtet; kurze R&D ist stabiler No-op ohne Hidden-Info-Leak | Choice-Revalidation, Broken-Subroutine-, Short-R&D- und Replay-Test ergänzt |
+| Chicago Branch | `onr_v1_312_chicago-branch` | Rezzed-only Counter-Aktion bleibt source-bound und payloadfähig | SourceDefinition-Payload und Rezzed-Gate-Test ergänzt |
+| Fatal Attractor | `onr_v1_242_fatal-attractor` | Next-Encounter-Damage-Flag bleibt rungebunden und wird bei Break/Run-Ende sauber begrenzt | Broken-Subroutine- und Run-End-Cleanup-Test ergänzt |
+| I Spy | `onr_v1_032_i-spy` | Revealt nur die Stackspitze; darunterliegende Stackkarte bleibt aus PublicPayload und Korp-View heraus | Source-, Empty-Stack-, Leakscan- und Replay-Test ergänzt |
+| Shock.r | `onr_v1_268_shock-r` | No-Break-/Jack-out-Lock gilt nur für den nächsten Encounter und räumt danach auf | Lock-Projektion- und Cleanup-Test ergänzt |
+| D'Arc Knight | `onr_v1_233_d-arc-knight` | Program-Trash und End-the-run bleiben subroutinegenau getrennt | Teilbreak-Test ergänzt |
+| Corporate Retreat | `onr_v1_195_corporate-retreat` | Gescorte Korp-Quelle bleibt source-bound; Runner-ScoreArea-Drift scheitert | Source-Drift-Test ergänzt |
+| Liche | `onr_v1_254_liche` | Core-Damage-Subroutinen bleiben einzeln brechbar und redigiert aggregiert | Teilbreak-/DamageSummary-Test ergänzt |
+| Razor Wire | `onr_v1_262_razor-wire` | Net-Damage und End-the-run bleiben subroutinegenau getrennt und replay-stabil | Teilbreak-, Redaction- und Replay-Test ergänzt |
+| Vapor Ops | `onr_v1_347_vapor-ops` | Rezzed-only Counter-Aktion bleibt source-bound und payloadfähig | SourceDefinition-Payload und Rezzed-Gate-Test ergänzt |
+
 ## Runde 2026-05-15-trace-cache-ambush
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

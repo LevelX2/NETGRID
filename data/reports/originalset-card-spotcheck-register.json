@@ -13,6 +13,85 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-reorder-counter-runlock",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REORDER_COUNTER_RUNLOCK_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-15-reorder-counter-runlock.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_272_too-many-doors",
+          "title": "Too Many Doors",
+          "spotcheckStatus": "completed",
+          "result": "hardened_private_rd_reorder_choice_short_rd_noop_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_312_chicago-branch",
+          "title": "Chicago Branch",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_counter_action_source_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_242_fatal-attractor",
+          "title": "Fatal Attractor",
+          "spotcheckStatus": "completed",
+          "result": "hardened_next_encounter_damage_flag_lifetime",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_032_i-spy",
+          "title": "I Spy",
+          "spotcheckStatus": "completed",
+          "result": "hardened_top_stack_reveal_no_below_card_leak",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_268_shock-r",
+          "title": "Shock.r",
+          "spotcheckStatus": "completed",
+          "result": "hardened_next_encounter_no_break_jackout_lock_cleanup",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_233_d-arc-knight",
+          "title": "D'Arc Knight",
+          "spotcheckStatus": "completed",
+          "result": "hardened_program_trash_etr_subroutine_boundaries",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_195_corporate-retreat",
+          "title": "Corporate Retreat",
+          "spotcheckStatus": "completed",
+          "result": "hardened_scored_source_binding_scorearea_drift",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_254_liche",
+          "title": "Liche",
+          "spotcheckStatus": "completed",
+          "result": "hardened_core_damage_subroutine_partial_break_redaction",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_262_razor-wire",
+          "title": "Razor Wire",
+          "spotcheckStatus": "completed",
+          "result": "hardened_net_damage_etr_subroutine_redaction_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_347_vapor-ops",
+          "title": "Vapor Ops",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_counter_action_source_payload",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-trace-cache-ambush",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md",
