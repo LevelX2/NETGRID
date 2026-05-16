@@ -36,6 +36,12 @@ import {
   type ResolvedParticipantDeckPair,
   type ResolvedParticipantDeckSetup
 } from "./deck-setup";
+import {
+  projectEngineEventToServerRecord,
+  projectReplayEventsForPerspective,
+  type ReplayPerspective,
+  type ServerEventRecord
+} from "./event-projection";
 import { envValue, LOCAL_DEFAULT_SERVER_BASE_URL, LOCAL_DEFAULT_TOKEN_SALT, LOCAL_DEFAULT_WEB_BASE_URL } from "./internet-hardening";
 import type {
   BackupManifest,
@@ -282,16 +288,7 @@ export type StateSnapshot = {
   hiddenInfoBarrier: boolean;
 };
 
-export type EventRecord = {
-  eventId: string;
-  matchId: string;
-  stateVersionBefore: number;
-  stateVersionAfter: number;
-  stateHashAfter: string;
-  publicPayload: PublicGameEvent;
-  privatePayloadLocalOnly: boolean;
-  hiddenInfoBarrier: boolean;
-};
+export type EventRecord = ServerEventRecord;
 
 export type ActionReceipt = {
   idempotencyKey: string;
@@ -403,7 +400,7 @@ export type LobbyPayload = {
 
 export type ServicePayload = SidePayload | LobbyPayload;
 
-export type ReplayPerspective = Side | "local_analysis";
+export type { ReplayPerspective } from "./event-projection";
 
 export type ReplayIndexEntry = {
   replayId: string;
@@ -2464,25 +2461,7 @@ function connectionQualityFor(session: SessionRecord | undefined, now: string): 
 }
 
 function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): EventRecord {
-  const publicPayload: PublicGameEvent = {
-    eventId: event.eventId,
-    type: event.type,
-    stateVersionBefore: event.stateVersionBefore,
-    stateVersionAfter: event.stateVersionAfter,
-    stateHashAfter: event.stateHashAfter,
-    ...(event.visibilityClass ? { visibilityClass: event.visibilityClass } : {}),
-    publicPayload: event.publicPayload
-  };
-  return {
-    eventId: event.eventId,
-    matchId,
-    stateVersionBefore: event.stateVersionBefore,
-    stateVersionAfter: event.stateVersionAfter,
-    stateHashAfter: event.stateHashAfter,
-    publicPayload,
-    privatePayloadLocalOnly: Boolean(event.privatePayload),
-    hiddenInfoBarrier: barrier
-  };
+  return projectEngineEventToServerRecord(matchId, event, barrier);
 }
 
 function replayIndexEntryFor(record: StoredMatch): ReplayIndexEntry {
@@ -2514,8 +2493,7 @@ function participantNamesForReplay(record: StoredMatch): ReplayIndexEntry["parti
 }
 
 function replayEventsForPerspective(record: StoredMatch, perspective: ReplayPerspective): PublicGameEvent[] {
-  if (perspective === "local_analysis") return record.eventLog.map((event) => event.publicPayload);
-  return record.eventLog.map((event) => redactPublicEventForSide(event.publicPayload, perspective));
+  return projectReplayEventsForPerspective(record.eventLog, perspective);
 }
 
 function replayStateHashChecks(record: StoredMatch): {

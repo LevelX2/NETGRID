@@ -2600,6 +2600,11 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(entry.finalStateHash).toMatch(/^fnv1a:/);
     expect(typeof entry.replayOk).toBe("boolean");
     expect(JSON.stringify(entry)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
+    const stored = await match.service.loadForTest(match.matchId);
+    expect(stored?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
+    expect(stored?.eventLog.some((event) => "privatePayload" in event)).toBe(false);
+    expect(stored?.eventLog.every((event) => typeof event.privatePayloadLocalOnly === "boolean")).toBe(true);
+    expect(stored?.eventLog.map((event) => event.eventId)).toEqual(stored?.gameState.eventLog.map((event) => event.eventId));
 
     const runnerLoaded = await match.service.loadReplayView(match.matchId, "runner");
     expect(runnerLoaded.ok).toBe(true);
