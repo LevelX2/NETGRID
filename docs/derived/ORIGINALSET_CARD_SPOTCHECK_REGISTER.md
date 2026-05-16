@@ -4,6 +4,153 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-16-runner-hardware-link-resources
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_HARDWARE_LINK_RESOURCES_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Green Knight Surge Buffers | `onr_v1_128_green-knight-surge-buffers` | Net-Damage-Prevention bleibt source-bound und public-safe | Prevention-/Replay-Test ergänzt |
+| Militech MRAM Chip | `onr_v1_133_militech-mram-chip` | Hardware-Installation bleibt öffentlich ohne private Zonenleaks | Install-/Leak-/Replay-Test ergänzt |
+| Raven Microcyb Owl | `onr_v1_141_raven-microcyb-owl` | Link-Hardware-Installation bleibt payload- und replay-sicher | Install-/Leak-/Replay-Test ergänzt |
+| Techtronica Utility Suit | `onr_v1_143_techtronica-utility-suit` | Meat-Damage-Prevention bleibt source-bound und public-safe | Prevention-/Replay-Test ergänzt |
+| Tycho Mem Chip | `onr_v1_144_tycho-mem-chip` | Memory-Hardware-Installation bleibt payload- und replay-sicher | Install-/Leak-/Replay-Test ergänzt |
+| WuTech Mem Chip | `onr_v1_145_wutech-mem-chip` | Memory-Hardware-Installation bleibt payload- und replay-sicher | Install-/Leak-/Replay-Test ergänzt |
+| Zetatech Mem Chip | `onr_v1_146_zetatech-mem-chip` | Memory-Hardware-Installation bleibt payload- und replay-sicher | Install-/Leak-/Replay-Test ergänzt |
+| Back Door to Hilliard | `onr_v1_152_back-door-to-hilliard` | Resource-Installation bleibt öffentlich ohne private Zonenleaks | Install-/Leak-/Replay-Test ergänzt |
+| Back Door to Orbital Air | `onr_v1_153_back-door-to-orbital-air` | Resource-Installation bleibt öffentlich ohne private Zonenleaks | Install-/Leak-/Replay-Test ergänzt |
+| Broker | `onr_v1_154_broker` | Load-/Take-Credits-Aktionen bleiben source-bound und einmal pro Zug begrenzt | Removed-source-/Counter-/Replay-Test ergänzt |
+
+## Runde 2026-05-16-runner-event-run-access
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_EVENT_RUN_ACCESS_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| All-Nighter | `onr_v1_076_all-nighter` | Bonusrun-Markierung bleibt source-bound und replay-sicher | Wrong-Side-/Removed-source-/Replay-Test ergänzt |
+| Custodial Position | `onr_v1_081_custodial-position` | R&D-Multiaccess veröffentlicht nur Access-Anzahl | Run-Payload-/Replay-Test ergänzt |
+| Desperate Competitor | `onr_v1_083_desperate-competitor` | Same-turn-Gray-Ops-Gate score't nur die Eventkarte | Gate-/Payload-/Replay-Test ergänzt |
+| Executive Wiretaps | `onr_v1_085_executive-wiretaps` | HQ-Multiaccess veröffentlicht nur Access-Anzahl | Run-Payload-/Replay-Test ergänzt |
+| Gideon's Pawnshop | `onr_v1_089_gideons-pawnshop` | Stack-Suche bleibt Hidden-Zone-geschützt | Choice-/Replay-Test ergänzt |
+| Hot Tip for WNS | `onr_v1_090_hot-tip-for-wns` | Same-turn-Black-Ops-Gate score't nur die Eventkarte | Gate-/Payload-/Replay-Test ergänzt |
+| Inside Job | `onr_v1_094_inside-job` | First-ICE-Bypass bleibt payload- und replay-sicher | Run-Payload-/Replay-Test ergänzt |
+| Jack 'n' Joe | `onr_v1_095_jack-n-joe` | Draw-3-Ergebnis bleibt payloadfähig | Draw-/Replay-Test ergänzt |
+| Kilroy Was Here | `onr_v1_096_kilroy-was-here` | Access-Trash bleibt kostenlos und replay-sicher | Access-Trash-/Replay-Test ergänzt |
+| Lucidrine Booster Drug | `onr_v1_098_lucidrine-booster-drug` | Sonderlauf beendet stabil ohne offenen Run-State | Run-End-/Replay-Test ergänzt |
+
+## Runde 2026-05-16-runner-event-hardware-prevention
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_EVENT_HARDWARE_PREVENTION_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| MIT West Tier | `onr_v1_101_mit-west-tier` | Hidden-Zone-Shuffle und Removed-from-game-Bewegung bleiben source- und replay-sicher | Removed-source-/Replay-Test ergänzt |
+| Open-Ended Mileage Program | `onr_v1_102_open-ended-mileage-program` | Tag-Removal und optionale Return-Choice bleiben source-bound | Removed-source-/Choice-Replay-Test ergänzt |
+| Score! | `onr_v1_108_score` | Brutto-Creditgewinn und Runner-Creditstand sind payloadfähig | PublicPayload-Härtung ergänzt |
+| Social Engineering | `onr_v1_111_social-engineering` | Run-Event bleibt side-safe und nennt nur öffentliche Run-Daten | Wrong-Side-/Replay-Test ergänzt |
+| Temple Microcode Outlet | `onr_v1_114_temple-microcode-outlet` | Stack-Suche bleibt Hidden-Zone-geschützt und replay-sicher | Choice-/Replay-Test ergänzt |
+| Terrorist Reprisal | `onr_v1_115_terrorist-reprisal` | HQ-Random-Discard veröffentlicht nur die Anzahl | PublicPayload-Härtung und Replay-Test ergänzt |
+| Total Genetic Retrofit | `onr_v1_116_total-genetic-retrofit` | Tag-Removal-Ergebnis ist payloadfähig | PublicPayload-/Replay-Test ergänzt |
+| Armadillo Armored Road Home | `onr_v1_120_armadillo-armored-road-home` | Hardware-Installation bleibt öffentlich ohne private Leaks | Install-/Leak-Test ergänzt |
+| Dermatech Bodyplating | `onr_v1_125_dermatech-bodyplating` | Meat-Prevention-Choice bleibt source-bound und replay-sicher | Prevention-/Replay-Test ergänzt |
+| Drifter Mobile Environment | `onr_v1_126_drifter-mobile-environment` | Hardware-Installation bleibt öffentlich ohne private Leaks | Install-/Leak-Test ergänzt |
+
+## Runde 2026-05-16-resource-agenda-scorearea
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RESOURCE_AGENDA_SCOREAREA_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Short-Term Contract | `onr_v1_178_short-term-contract` | Resource-Counter-Aktion bleibt source-bound und replay-sicher | Wrong-Side/Stale-/Removed-source-Test ergänzt |
+| Silicon Saloon Franchise | `onr_v1_179_silicon-saloon-franchise` | Gain-1/Draw-1-Ergebnis ist payloadfähig und definitionsgebunden | Payload-Härtung und Drift-Test ergänzt |
+| Technician Lover | `onr_v1_183_technician-lover` | Sichtbare Resource-Installation bleibt ohne private Zonenleaks chronikfähig | Install-/Leak-Test ergänzt |
+| Top Runners' Conference | `onr_v1_184_top-runners-conference` | Start-of-turn-Credits und Run-Start-Trash bleiben replay-sicher | Turn-/Run-Replay-Test ergänzt |
+| Trauma Team | `onr_v1_185_trauma-team` | Meat-Prevention-Choice bleibt source-bound und public-safe | Prevention-/Replay-Test ergänzt |
+| Umbrella Policy | `onr_v1_186_umbrella-policy` | Damage-Prevention-Choice bleibt source-bound und public-safe | Prevention-/Replay-Test ergänzt |
+| Employee Empowerment | `onr_v1_199_employee-empowerment` | ScoreArea-Start-of-Corp-turn-Credit bleibt aktiv | ScoreArea-Turn-Test ergänzt |
+| Marine Arcology | `onr_v1_206_marine-arcology` | ScoreArea-Aktion bleibt source-bound und payloadfähig | Removed-source-/Replay-Test ergänzt |
+| Project Babylon | `onr_v1_214_project-babylon` | Overadvance-Bonuspunkte werden öffentlich payloadfähig | PublicPayload-Härtung ergänzt |
+| Tycho Extension | `onr_v1_220_tycho-extension` | Score-Pfad bleibt stateVersion- und replay-sicher | Score-/Replay-Test ergänzt |
+
+## Runde 2026-05-16-corp-operation-asset-node
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_OPERATION_ASSET_NODE_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Night Shift | `onr_v1_295_night-shift` | Gain-2/Draw-1-Ergebnis ist public payloadfähig ohne HQ-Leak | Operation-Payload-Test ergänzt |
+| Overtime Incentives | `onr_v1_297_overtime-incentives` | Aktionsgewinn bleibt LegalAction-only und payloadfähig | Replay-/Payload-Test ergänzt |
+| Trojan Horse | `onr_v1_306_trojan-horse` | Agenda-Theft-Gate bleibt stabil; Tag-Ergebnis ist payloadfähig | Gate-/Replay-Test ergänzt |
+| Blood Cat | `onr_v1_310_blood-cat` | Rezzed Asset startet Trace 5 source-bound | Trace-/Replay-Test ergänzt |
+| Braindance Campaign | `onr_v1_311_braindance-campaign` | Rezzed Economy-Asset-Aktion bleibt source- und replay-sicher | Asset-Action-Test ergänzt |
+| Cowboy Sysop | `onr_v1_316_cowboy-sysop` | Installed-card-Ziel wird beim Resolve erneut geprüft | Target-Drift-Test ergänzt |
+| Department of Truth Enhancement | `onr_v1_318_department-of-truth-enhancement` | Generischer Asset-Access/Trash bleibt payload- und replay-safe | Access-/Trash-Test ergänzt |
+| Encoder, Inc. | `onr_v1_320_encoder-inc` | Code-Gate-Rez-Kostenmodifier bleibt rezzed-source-bound | Rez-Kosten-Test ergänzt |
+| ESA Contract | `onr_v1_321_esa-contract` | Rezzed Economy-Asset-Aktion bleibt source- und replay-sicher | Asset-Action-Test ergänzt |
+| Remote Facility | `onr_v1_335_remote-facility` | Action-Asset-Aktion nennt sichtbare öffentliche Quelle | PublicPayload-Source-Test ergänzt |
+
+## Runde 2026-05-16-corp-ice-trace-barriers
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_TRACE_BARRIERS_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Asp | `onr_v1_221_asp` | Trace-5-Subroutine bleibt source-bound, taggt bei Erfolg und replayt stabil | Trace-/Rez-Test ergänzt |
+| Banpei | `onr_v1_223_banpei` | Programm-Trash veröffentlicht Definition statt Instanz-ID | Payload-Härtung und Replay-Test ergänzt |
+| Cortical Scrub | `onr_v1_231_cortical-scrub` | Core-Damage und Runende bleiben payload- und replay-safe | Damage-/Rez-Test ergänzt |
+| Crystal Wall | `onr_v1_232_crystal-wall` | ETR-Barriere bleibt hidden-until-rez und replay-safe | Rez-/Continue-Test ergänzt |
+| Fire Wall | `onr_v1_245_fire-wall` | ETR-Barriere bleibt hidden-until-rez und replay-safe | Rez-/Continue-Test ergänzt |
+| Hunter | `onr_v1_249_hunter` | Trace-5-Subroutine bleibt source-bound, taggt bei Erfolg und replayt stabil | Trace-/Rez-Test ergänzt |
+| Keeper | `onr_v1_252_keeper` | ETR-Code-Gate bleibt hidden-until-rez und replay-safe | Rez-/Continue-Test ergänzt |
+| Mazer | `onr_v1_256_mazer` | ETR-Code-Gate bleibt hidden-until-rez und replay-safe | Rez-/Continue-Test ergänzt |
+| Quandary | `onr_v1_261_quandary` | ETR-Code-Gate bleibt hidden-until-rez und replay-safe | Rez-/Continue-Test ergänzt |
+| Scramble | `onr_v1_266_scramble` | ETR-Code-Gate bleibt hidden-until-rez und replay-safe | Rez-/Continue-Test ergänzt |
+
+## Runde 2026-05-16-corp-ice-operation-economy
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_OPERATION_ECONOMY_IMPLEMENTATION.md`
+
+Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der fokussierte Engine-Test wurde im Abschlusslauf erneut bestätigt.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Sentinels Prime | `onr_v1_267_sentinels-prime` | Rez-/Encounter-Pfad und Programm-Trash bleiben sichtbarkeits- und replay-sicher | ICE-Visibility-/Unbroken-Test ergänzt |
+| Sleeper | `onr_v1_270_sleeper` | End-the-run-ICE bleibt rez-, side- und stateVersion-sicher | ICE-Visibility-/Replay-Test ergänzt |
+| Wall of Static | `onr_v1_279_wall-of-static` | End-the-run-ICE bleibt rez-, side- und stateVersion-sicher | ICE-Visibility-/Replay-Test ergänzt |
+| Accounts Receivable | `onr_v1_281_accounts-receivable` | Gain-9-Ergebnis ist public payloadfähig ohne HQ-Leak | Operation-Payload-Test ergänzt |
+| Annual Reviews | `onr_v1_282_annual-reviews` | Draw-3-Ergebnis ist public payloadfähig ohne HQ-Leak | Operation-Payload-Test ergänzt |
+| Audit of Call Records | `onr_v1_283_audit-of-call-records` | Trace 5 bleibt an zwei Runner-Run-Attempts des Vorzugs gebunden | Trace-/Replay-Test ergänzt |
+| Chance Observation | `onr_v1_284_chance-observation` | Trace 5 bleibt an mindestens einen Runner-Run-Attempt des Vorzugs gebunden | Trace-/Replay-Test ergänzt |
+| Corporate Detective Agency | `onr_v1_286_corporate-detective-agency` | Resource-Trash veröffentlicht Definitionen statt Instanz-IDs | Redaction-/Replay-Test ergänzt |
+| Day Shift | `onr_v1_288_day-shift` | Draw-2/Gain-1-Ergebnis ist public payloadfähig ohne HQ-Leak | Operation-Payload-Test ergänzt |
+| Falsified-Transactions Expert | `onr_v1_291_falsified-transactions-expert` | Power-Counter-Operation bleibt ziel- und payload-sicher | V1.9.19-Counter-Test ergänzt |
+
 ## Runde 2026-05-16-corp-asset-upgrade-rest
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

@@ -13,6 +13,559 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-16-runner-hardware-link-resources",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_HARDWARE_LINK_RESOURCES_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-hardware-link-resources.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_128_green-knight-surge-buffers",
+          "title": "Green Knight Surge Buffers",
+          "spotcheckStatus": "completed",
+          "result": "verified_net_damage_prevention_source_public_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_133_militech-mram-chip",
+          "title": "Militech MRAM Chip",
+          "spotcheckStatus": "completed",
+          "result": "verified_hardware_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_141_raven-microcyb-owl",
+          "title": "Raven Microcyb Owl",
+          "spotcheckStatus": "completed",
+          "result": "verified_link_hardware_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "title": "Techtronica Utility Suit",
+          "spotcheckStatus": "completed",
+          "result": "verified_meat_damage_prevention_source_public_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_144_tycho-mem-chip",
+          "title": "Tycho Mem Chip",
+          "spotcheckStatus": "completed",
+          "result": "verified_memory_hardware_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_145_wutech-mem-chip",
+          "title": "WuTech Mem Chip",
+          "spotcheckStatus": "completed",
+          "result": "verified_memory_hardware_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_146_zetatech-mem-chip",
+          "title": "Zetatech Mem Chip",
+          "spotcheckStatus": "completed",
+          "result": "verified_memory_hardware_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_152_back-door-to-hilliard",
+          "title": "Back Door to Hilliard",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_153_back-door-to-orbital-air",
+          "title": "Back Door to Orbital Air",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_payload_leakscan_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_154_broker",
+          "title": "Broker",
+          "spotcheckStatus": "completed",
+          "result": "verified_broker_source_turnlimit_counter_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-runner-event-run-access",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_EVENT_RUN_ACCESS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-event-run-access.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_076_all-nighter",
+          "title": "All-Nighter",
+          "spotcheckStatus": "completed",
+          "result": "verified_bonus_run_payload_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_081_custodial-position",
+          "title": "Custodial Position",
+          "spotcheckStatus": "completed",
+          "result": "verified_rd_multiaccess_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_083_desperate-competitor",
+          "title": "Desperate Competitor",
+          "spotcheckStatus": "completed",
+          "result": "verified_same_turn_gray_ops_gate_event_agenda_point",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_085_executive-wiretaps",
+          "title": "Executive Wiretaps",
+          "spotcheckStatus": "completed",
+          "result": "verified_hq_multiaccess_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "title": "Gideon's Pawnshop",
+          "spotcheckStatus": "completed",
+          "result": "verified_hidden_stack_search_choice_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_090_hot-tip-for-wns",
+          "title": "Hot Tip for WNS",
+          "spotcheckStatus": "completed",
+          "result": "verified_same_turn_black_ops_gate_event_agenda_point",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_094_inside-job",
+          "title": "Inside Job",
+          "spotcheckStatus": "completed",
+          "result": "verified_first_ice_bypass_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_095_jack-n-joe",
+          "title": "Jack 'n' Joe",
+          "spotcheckStatus": "completed",
+          "result": "verified_draw_three_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_096_kilroy-was-here",
+          "title": "Kilroy Was Here",
+          "spotcheckStatus": "completed",
+          "result": "verified_free_access_trash_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_098_lucidrine-booster-drug",
+          "title": "Lucidrine Booster Drug",
+          "spotcheckStatus": "completed",
+          "result": "verified_run_end_replay_without_open_run_state",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-runner-event-hardware-prevention",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_EVENT_HARDWARE_PREVENTION_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-event-hardware-prevention.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_101_mit-west-tier",
+          "title": "MIT West Tier",
+          "spotcheckStatus": "completed",
+          "result": "verified_hidden_zone_shuffle_removed_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_102_open-ended-mileage-program",
+          "title": "Open-Ended Mileage Program",
+          "spotcheckStatus": "completed",
+          "result": "verified_tag_removal_return_choice_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_108_score",
+          "title": "Score!",
+          "spotcheckStatus": "completed",
+          "result": "hardened_credit_gain_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_111_social-engineering",
+          "title": "Social Engineering",
+          "spotcheckStatus": "completed",
+          "result": "hardened_public_run_marker_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "title": "Temple Microcode Outlet",
+          "spotcheckStatus": "completed",
+          "result": "verified_hidden_stack_search_choice_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_115_terrorist-reprisal",
+          "title": "Terrorist Reprisal",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hq_random_discard_count_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_116_total-genetic-retrofit",
+          "title": "Total Genetic Retrofit",
+          "spotcheckStatus": "completed",
+          "result": "hardened_tag_removal_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "title": "Armadillo Armored Road Home",
+          "spotcheckStatus": "completed",
+          "result": "verified_public_hardware_install_no_leak",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_125_dermatech-bodyplating",
+          "title": "Dermatech Bodyplating",
+          "spotcheckStatus": "completed",
+          "result": "verified_meat_prevention_choice_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_126_drifter-mobile-environment",
+          "title": "Drifter Mobile Environment",
+          "spotcheckStatus": "completed",
+          "result": "verified_public_hardware_install_no_leak",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-resource-agenda-scorearea",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RESOURCE_AGENDA_SCOREAREA_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-resource-agenda-scorearea.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_178_short-term-contract",
+          "title": "Short-Term Contract",
+          "spotcheckStatus": "completed",
+          "result": "hardened_resource_counter_action_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_179_silicon-saloon-franchise",
+          "title": "Silicon Saloon Franchise",
+          "spotcheckStatus": "completed",
+          "result": "hardened_gain_draw_payload_definition_guard",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_183_technician-lover",
+          "title": "Technician Lover",
+          "spotcheckStatus": "completed",
+          "result": "verified_public_resource_install_no_leak",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_184_top-runners-conference",
+          "title": "Top Runners' Conference",
+          "spotcheckStatus": "completed",
+          "result": "verified_start_turn_credits_run_start_trash_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_185_trauma-team",
+          "title": "Trauma Team",
+          "spotcheckStatus": "completed",
+          "result": "verified_meat_prevention_choice_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_186_umbrella-policy",
+          "title": "Umbrella Policy",
+          "spotcheckStatus": "completed",
+          "result": "verified_damage_prevention_choice_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_199_employee-empowerment",
+          "title": "Employee Empowerment",
+          "spotcheckStatus": "completed",
+          "result": "verified_scorearea_start_corp_turn_credit",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_206_marine-arcology",
+          "title": "Marine Arcology",
+          "spotcheckStatus": "completed",
+          "result": "hardened_scorearea_action_source_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_214_project-babylon",
+          "title": "Project Babylon",
+          "spotcheckStatus": "completed",
+          "result": "hardened_overadvance_bonus_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_220_tycho-extension",
+          "title": "Tycho Extension",
+          "spotcheckStatus": "completed",
+          "result": "verified_score_path_stateversion_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-corp-operation-asset-node",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_OPERATION_ASSET_NODE_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-corp-operation-asset-node.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_295_night-shift",
+          "title": "Night Shift",
+          "spotcheckStatus": "completed",
+          "result": "hardened_gain_draw_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_297_overtime-incentives",
+          "title": "Overtime Incentives",
+          "spotcheckStatus": "completed",
+          "result": "hardened_action_gain_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_306_trojan-horse",
+          "title": "Trojan Horse",
+          "spotcheckStatus": "completed",
+          "result": "hardened_agenda_theft_gate_tag_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_310_blood-cat",
+          "title": "Blood Cat",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_asset_trace_source",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_311_braindance-campaign",
+          "title": "Braindance Campaign",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_economy_asset_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_316_cowboy-sysop",
+          "title": "Cowboy Sysop",
+          "spotcheckStatus": "completed",
+          "result": "hardened_installed_target_drift_revalidation",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_318_department-of-truth-enhancement",
+          "title": "Department of Truth Enhancement",
+          "spotcheckStatus": "completed",
+          "result": "hardened_generic_asset_access_trash_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_320_encoder-inc",
+          "title": "Encoder, Inc.",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_code_gate_rez_cost_modifier",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_321_esa-contract",
+          "title": "ESA Contract",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_economy_asset_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_335_remote-facility",
+          "title": "Remote Facility",
+          "spotcheckStatus": "completed",
+          "result": "hardened_action_asset_public_source_payload",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-corp-ice-trace-barriers",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_TRACE_BARRIERS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-corp-ice-trace-barriers.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_221_asp",
+          "title": "Asp",
+          "spotcheckStatus": "completed",
+          "result": "hardened_trace_subroutine_tag_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_223_banpei",
+          "title": "Banpei",
+          "spotcheckStatus": "completed",
+          "result": "hardened_program_trash_definition_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_231_cortical-scrub",
+          "title": "Cortical Scrub",
+          "spotcheckStatus": "completed",
+          "result": "hardened_core_damage_etr_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_232_crystal-wall",
+          "title": "Crystal Wall",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_etr_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_245_fire-wall",
+          "title": "Fire Wall",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_etr_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_249_hunter",
+          "title": "Hunter",
+          "spotcheckStatus": "completed",
+          "result": "hardened_trace_subroutine_tag_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_252_keeper",
+          "title": "Keeper",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_etr_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_256_mazer",
+          "title": "Mazer",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_etr_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_261_quandary",
+          "title": "Quandary",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_etr_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_266_scramble",
+          "title": "Scramble",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_etr_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-corp-ice-operation-economy",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_OPERATION_ECONOMY_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-corp-ice-operation-economy.md",
+      "jobStatus": "committed",
+      "cards": [
+        {
+          "cardId": "onr_v1_267_sentinels-prime",
+          "title": "Sentinels Prime",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rez_encounter_program_trash_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_270_sleeper",
+          "title": "Sleeper",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rez_end_the_run_visibility_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_279_wall-of-static",
+          "title": "Wall of Static",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rez_end_the_run_visibility_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_281_accounts-receivable",
+          "title": "Accounts Receivable",
+          "spotcheckStatus": "completed",
+          "result": "hardened_gain_credits_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_282_annual-reviews",
+          "title": "Annual Reviews",
+          "spotcheckStatus": "completed",
+          "result": "hardened_draw_count_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_283_audit-of-call-records",
+          "title": "Audit of Call Records",
+          "spotcheckStatus": "completed",
+          "result": "hardened_run_attempt_trace_gate_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_284_chance-observation",
+          "title": "Chance Observation",
+          "spotcheckStatus": "completed",
+          "result": "hardened_run_attempt_trace_gate_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_286_corporate-detective-agency",
+          "title": "Corporate Detective Agency",
+          "spotcheckStatus": "completed",
+          "result": "hardened_resource_trash_definition_redaction",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_288_day-shift",
+          "title": "Day Shift",
+          "spotcheckStatus": "completed",
+          "result": "hardened_draw_credit_public_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_291_falsified-transactions-expert",
+          "title": "Falsified-Transactions Expert",
+          "spotcheckStatus": "completed",
+          "result": "hardened_power_counter_operation_payload",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-16-corp-asset-upgrade-rest",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ASSET_UPGRADE_REST_IMPLEMENTATION.md",
@@ -58,16 +611,76 @@
       "jobStatus": "commit_pending",
       "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
       "cards": [
-        { "cardId": "onr_v1_052_raffles", "title": "Raffles", "spotcheckStatus": "completed", "result": "hardened_code_gate_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_054_raptor", "title": "Raptor", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_058_seeya", "title": "SeeYa", "spotcheckStatus": "completed", "result": "hardened_expose_target_drift_hidden_zone_payload", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_060_shaka", "title": "Shaka", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_065_smarteye", "title": "Smarteye", "spotcheckStatus": "completed", "result": "hardened_approach_ice_reveal_source_payload", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_066_snowball", "title": "Snowball", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_070_tinweasel", "title": "Tinweasel", "spotcheckStatus": "completed", "result": "hardened_code_gate_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_072_wild-card", "title": "Wild Card", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_073_wizards-book", "title": "Wizard's Book", "spotcheckStatus": "completed", "result": "hardened_code_gate_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
-        { "cardId": "onr_v1_074_worm", "title": "Worm", "spotcheckStatus": "completed", "result": "hardened_wall_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" }
+        {
+          "cardId": "onr_v1_052_raffles",
+          "title": "Raffles",
+          "spotcheckStatus": "completed",
+          "result": "hardened_code_gate_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_054_raptor",
+          "title": "Raptor",
+          "spotcheckStatus": "completed",
+          "result": "hardened_sentry_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_058_seeya",
+          "title": "SeeYa",
+          "spotcheckStatus": "completed",
+          "result": "hardened_expose_target_drift_hidden_zone_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_060_shaka",
+          "title": "Shaka",
+          "spotcheckStatus": "completed",
+          "result": "hardened_sentry_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_065_smarteye",
+          "title": "Smarteye",
+          "spotcheckStatus": "completed",
+          "result": "hardened_approach_ice_reveal_source_payload",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_066_snowball",
+          "title": "Snowball",
+          "spotcheckStatus": "completed",
+          "result": "hardened_sentry_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_070_tinweasel",
+          "title": "Tinweasel",
+          "spotcheckStatus": "completed",
+          "result": "hardened_code_gate_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_072_wild-card",
+          "title": "Wild Card",
+          "spotcheckStatus": "completed",
+          "result": "hardened_sentry_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_073_wizards-book",
+          "title": "Wizard's Book",
+          "spotcheckStatus": "completed",
+          "result": "hardened_code_gate_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_074_worm",
+          "title": "Worm",
+          "spotcheckStatus": "completed",
+          "result": "hardened_wall_breaker_run_subtype_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
       ]
     },
     {

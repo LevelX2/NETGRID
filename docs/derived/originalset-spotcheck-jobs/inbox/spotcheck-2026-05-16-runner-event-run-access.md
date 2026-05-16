@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-event-run-access
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:53:00+02:00
+completedAt: 2026-05-16T13:56:05+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Status: `committed`.
+
+Umgesetzt:
+
+- Run-Access-Events veröffentlichen sichere abstrakte Ergebnisfelder für Bonusrun, Multiaccess, First-ICE-Bypass und Event-Agenda-Punkte.
+- `All-Nighter`, `Custodial Position`, `Executive Wiretaps`, `Inside Job` und `Lucidrine Booster Drug` wurden gegen Wrong-Side, entfernte Quelle, PublicPayload-Leaks und Replay/StateHash geprüft.
+- `Desperate Competitor` und `Hot Tip for WNS` bleiben an Same-turn-Gray-/Black-Ops-Steals gebunden und score'n nur die Eventkarte als öffentlichen Agenda-Punkt.
+- `Gideon's Pawnshop` wurde als private Stack-Suche mit Hidden-Zone-Barriere und Replay/StateHash geprüft.
+- `Jack 'n' Joe` schreibt Draw-Ergebnisfelder und bleibt replay-sicher.
+- `Kilroy Was Here` wurde als kostenloser Access-Trash-Pfad mit Replay/StateHash geprüft.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` grün
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` grün
+- `corepack pnpm --filter @netgrid/catalog test` grün
+- `corepack pnpm typecheck` grün
+
+Commitstatus: Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.

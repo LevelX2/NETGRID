@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-corp-operation-asset-node
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:24:57+02:00
+completedAt: 2026-05-16T13:31:18+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,27 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Status: `committed`.
+
+Umgesetzt:
+
+- `Night Shift` und `Trojan Horse` schreiben sichere Ergebnisfelder fuer Draw/Credit bzw. Tags in den PublicPayload-Kontext.
+- `Overtime Incentives` wurde als LegalAction-only-Aktionsgewinn mit Payload und Replay nachgetestet.
+- `Blood Cat` wurde als rezzed Asset-Trace-Quelle mit Trace 5, Tag-Ergebnis und Replay/StateHash nachgetestet.
+- `Cowboy Sysop` revalidiert sichtbare installierte Runner-Ziele; entfernte Ziele werden abgelehnt.
+- `Braindance Campaign`, `ESA Contract` und `Remote Facility` wurden als rezzed Asset-Aktionen source- und replay-sicher nachgetestet.
+- `Remote Facility`/`v1920AssetAbility`-Aktionen erhalten eine öffentliche Source-Erkennung für sichtbare rezzed Quellen.
+- `Department of Truth Enhancement` wurde im generischen Access-/Trash-Pfad geprüft.
+- `Encoder, Inc.` wurde als rezzed Code-Gate-Rez-Kostenmodifier mit öffentlicher Modifikatorquelle geprüft.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen
+- `corepack pnpm --filter @netgrid/catalog test` gruen
+- `corepack pnpm typecheck` gruen
+
+Commitstatus: Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.

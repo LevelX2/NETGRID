@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-event-hardware-prevention
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:46:00+02:00
+completedAt: 2026-05-16T13:51:05+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,28 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Status: `committed`.
+
+Umgesetzt:
+
+- `Score!` schreibt seinen Brutto-Creditgewinn und den Runner-Creditstand in den PublicPayload-Kontext.
+- `Total Genetic Retrofit` schreibt entfernte Tags und den Runner-Tagstand nach Resolve payloadfähig.
+- `Social Engineering` nennt den öffentlichen Runmarker im Eventpayload, ohne interne Server-IDs zu veröffentlichen.
+- `Terrorist Reprisal` veröffentlicht nur die Anzahl der zufällig abgelegten HQ-Karten, keine Kartendefinitionen oder Instanz-IDs.
+- `MIT West Tier` wurde gegen entfernte Quelle, Special-Zone-Bewegung, Hidden-Zone-Payload und Replay/StateHash nachgetestet.
+- `Open-Ended Mileage Program` wurde gegen entfernte Quelle, Tag-Removal, öffentliche Return-Choice und Replay/StateHash geprüft.
+- `Temple Microcode Outlet` wurde als private Stack-Suche mit Hidden-Zone-Barriere und Replay/StateHash geprüft.
+- `Armadillo Armored Road Home` und `Drifter Mobile Environment` wurden als öffentliche Hardware-Installationen ohne private Payload-Leaks geprüft.
+- `Dermatech Bodyplating` wurde als source-bound Meat-Damage-Prevention-Choice mit Replay/StateHash geprüft.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` grün
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` grün
+- `corepack pnpm --filter @netgrid/catalog test` grün
+- `corepack pnpm typecheck` grün
+
+Commitstatus: Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.

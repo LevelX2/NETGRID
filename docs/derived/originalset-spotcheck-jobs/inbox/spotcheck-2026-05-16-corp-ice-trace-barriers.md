@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-corp-ice-trace-barriers
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:20:42+02:00
+completedAt: 2026-05-16T13:24:38+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,23 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Status: `committed`.
+
+Umgesetzt:
+
+- `Asp` und `Hunter` wurden als Trace-5-ICE mit Source-/Trace-Bid-/Tag-/Replay-Pruefung nachgetestet.
+- `Banpei` veroeffentlicht beim Programm-Trash keine Karteninstanz-ID mehr, sondern Definition, Typ und Count.
+- `Cortical Scrub` wurde fuer Core-Damage plus End-the-run mit PublicPayload-Leakscan und Replay/StateHash nachgetestet.
+- `Crystal Wall`, `Fire Wall`, `Keeper`, `Mazer`, `Quandary` und `Scramble` wurden als einfache ETR-ICE gegen Hidden-until-rez, Wrong-Side/Stale, PublicPayload-Leakscan und Replay/StateHash geprueft.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen
+- `corepack pnpm --filter @netgrid/catalog test` gruen
+- `corepack pnpm typecheck` gruen
+
+Commitstatus: Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.

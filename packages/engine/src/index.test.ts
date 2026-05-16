@@ -10917,14 +10917,28 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         String(action.payload?.cardId) === eventId,
     );
     expect(state.pendingChoice?.source).toContain("v098.search_stack");
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(
-      getPlayerView(state, "runner").pendingChoice?.options.some(
-        (option) => option.label === "Simple Decoder",
-      ),
+      runnerChoice?.options.some((option) => option.label === "Simple Decoder"),
     ).toBe(true);
+    expect(runnerChoice?.stackSearchResolution).toMatchObject({
+      reveal: "hidden",
+      destination: "grip",
+      shuffleAfter: true,
+    });
+    expect(
+      runnerChoice?.options.find((option) => option.value === targetProgramId)
+        ?.card,
+    ).toMatchObject({
+      instanceId: targetProgramId,
+      known: true,
+      title: "Simple Decoder",
+      definitionId: "simple_decoder",
+      type: "program",
+    });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
 
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+    const optionId = runnerChoice?.options.find(
       (option) => option.value === targetProgramId,
     )?.id;
     expect(optionId).toBeDefined();
@@ -17724,7 +17738,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         definitionId,
       ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
+      expect(replay.errors, definitionId).toEqual([]);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
   });
@@ -20096,7 +20110,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         definitionId,
       ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
+      expect(replay.errors, definitionId).toEqual([]);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
   });
@@ -29302,7 +29316,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         name: `Spotcheck ${definitionId} Runner`,
         cards: [
           { id: "simple_decoder", quantity: 1 },
-          ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards,
+          ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards.filter(
+            (card) => card.id !== "simple_decoder",
+          ),
         ],
       };
       const corpDeck: DeckDefinition = {
@@ -29311,7 +29327,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         name: `Spotcheck ${definitionId} Corp`,
         cards: [
           { id: definitionId, quantity: 1 },
-          ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards,
+          ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
+            (card) => card.id !== definitionId,
+          ),
         ],
       };
       let state = toRunnerTurn(
@@ -29390,7 +29408,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         privatePayloadMarkers,
       );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-      expect(replay.ok, definitionId).toBe(true);
+      expect(replay.errors, definitionId).toEqual([]);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
   });
@@ -29645,5 +29663,1718 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
     );
     expect(counterReplay.ok).toBe(true);
     expect(hashState(counterReplay.state)).toBe(hashState(counterState));
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps trace, trash, damage and barrier ICE source-bound and replay-safe", () => {
+    const cases = [
+      { definitionId: "onr_v1_221_asp", kind: "trace" },
+      { definitionId: "onr_v1_223_banpei", kind: "trash_program" },
+      { definitionId: "onr_v1_231_cortical-scrub", kind: "core_damage" },
+      { definitionId: "onr_v1_232_crystal-wall", kind: "etr" },
+      { definitionId: "onr_v1_245_fire-wall", kind: "etr" },
+      { definitionId: "onr_v1_249_hunter", kind: "trace" },
+      { definitionId: "onr_v1_252_keeper", kind: "etr" },
+      { definitionId: "onr_v1_256_mazer", kind: "etr" },
+      { definitionId: "onr_v1_261_quandary", kind: "etr" },
+      { definitionId: "onr_v1_266_scramble", kind: "etr" },
+    ] as const;
+
+    for (const { definitionId, kind } of cases) {
+      const runnerDeck: DeckDefinition = {
+        ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner,
+        id: `spotcheck_${definitionId}_runner`,
+        name: `Spotcheck ${definitionId} Runner`,
+        cards: [
+          { id: "simple_decoder", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards.filter(
+            (card) => card.id !== "simple_decoder",
+          ),
+        ],
+      };
+      const corpDeck: DeckDefinition = {
+        ...MECHANIC_SMOKE_DECKS.traceTags.corp,
+        id: `spotcheck_${definitionId}_corp`,
+        name: `Spotcheck ${definitionId} Corp`,
+        cards: [
+          { id: definitionId, quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
+            (card) => card.id !== definitionId,
+          ),
+        ],
+      };
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `spotcheck-${definitionId}-trace-barrier`,
+          baseline: MVP_0_99_BASELINE,
+          runnerDeck,
+          corpDeck,
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 20;
+      state.corp.credits = 30;
+      const programId =
+        kind === "trash_program"
+          ? installRunnerProgramForTest(state, "simple_decoder")
+          : undefined;
+      putCorpIceOnServer(state, "rd", definitionId);
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+        DEMO_CARDS_BY_ID[definitionId]?.title,
+      );
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rez = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: rez.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `spotcheck-${definitionId}-wrong-side`,
+      });
+      expect(wrongSide.ok, definitionId).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: rez.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${definitionId}-stale`,
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+      state = apply(state, "corp", (action) => action.actionId === rez.actionId);
+      expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
+        DEMO_CARDS_BY_ID[definitionId]?.title,
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+
+      if (kind === "trace") {
+        expect(state.trace).toMatchObject({
+          sourceDefinitionId: definitionId,
+          baseTraceStrength: 5,
+        });
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          actionType: "continue_run",
+          traceStarted: true,
+          sourceDefinitionId: definitionId,
+          baseTraceStrength: 5,
+        });
+        state = applyChoice(state, "corp", "bid_5");
+        state = applyChoice(state, "runner", "bid_0");
+        expect(state.runner.tags, definitionId).toBe(1);
+      } else {
+        expect(state.run, definitionId).toBeUndefined();
+      }
+
+      if (kind === "trash_program") {
+        expect(programId && state.runner.heap.includes(programId)).toBe(true);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          trashedCardDefinitionId: "simple_decoder",
+          trashedCardType: "program",
+          trashedCount: 1,
+        });
+      }
+      if (kind === "core_damage") {
+        expect(state.runner.coreDamage).toBe(1);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          damageResolved: true,
+          damageType: "core",
+          damageAmount: 1,
+        });
+      }
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps Night Shift, Overtime Incentives and Trojan Horse public-result safe", () => {
+    let state = apply(
+      v123CardReleaseGame("spotcheck-operation-asset-node-ops"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_295_night-shift");
+    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+
+    const night = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_295_night-shift",
+    );
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: night.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-night-shift-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const hqBeforeNight = state.corp.hq.length;
+    const creditsBeforeNight = state.corp.credits;
+    state = apply(state, "corp", (action) => action.actionId === night.actionId);
+    expect(state.corp.credits).toBe(creditsBeforeNight + 2);
+    expect(state.corp.hq.length).toBe(hqBeforeNight);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_295_night-shift",
+      gainedCredits: 2,
+      drawnCards: 1,
+      corpCreditsAfter: state.corp.credits,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+
+    const clicksBeforeOvertime = state.corp.clicks;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_297_overtime-incentives",
+    );
+    expect(state.corp.clicks).toBe(clicksBeforeOvertime + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_297_overtime-incentives",
+      gainedActions: 2,
+      corpClicksAfter: state.corp.clicks,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let trojan = apply(
+      v123CardReleaseGame("spotcheck-trojan-result-payload"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    const trojanId = moveCorpCardToHq(trojan, "onr_v1_306_trojan-horse");
+    keepOnlyCorpHqCard(trojan, trojanId);
+    trojan.corp.credits = 8;
+    trojan = apply(trojan, "corp", (action) => action.type === "end_turn");
+    moveCorpCardToArchives(trojan, "onr_v1_220_tycho-extension");
+    trojan = apply(
+      trojan,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    trojan = apply(trojan, "runner", (action) => action.type === "access_card");
+    trojan = apply(trojan, "runner", (action) => action.type === "steal_agenda");
+    trojan = apply(trojan, "runner", (action) => action.type === "end_turn");
+    trojan = apply(trojan, "corp", (action) => action.type === "mandatory_draw");
+    const activeTrojanId = moveCorpCardToHq(trojan, "onr_v1_306_trojan-horse");
+    keepOnlyCorpHqCard(trojan, activeTrojanId);
+    trojan.corp.credits = 8;
+    const trojanInitial = structuredClone(trojan);
+    const trojanReplayStart = trojan.eventLog.length;
+    const tagsBefore = trojan.runner.tags;
+    trojan = apply(
+      trojan,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(trojan, action) === "onr_v1_306_trojan-horse",
+    );
+    expect(trojan.runner.tags).toBe(tagsBefore + 1);
+    expect(trojan.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_306_trojan-horse",
+      tagsAdded: 1,
+      runnerTagsAfter: trojan.runner.tags,
+    });
+    expect(JSON.stringify(trojan.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const trojanReplay = replayEvents(
+      trojanInitial,
+      trojan.eventLog.slice(trojanReplayStart),
+    );
+    expect(trojanReplay.ok).toBe(true);
+    expect(hashState(trojanReplay.state)).toBe(hashState(trojan));
+  });
+
+  it("keeps Blood Cat, Cowboy Sysop and action/economy assets source-bound", () => {
+    let trace = apply(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-blood-cat-source"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    trace.corp.credits = 20;
+    trace.runner.credits = 10;
+    const bloodCatId = moveCorpCardToHq(trace, "onr_v1_310_blood-cat");
+    trace = apply(
+      trace,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === bloodCatId,
+    );
+    trace = apply(
+      trace,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(trace, action) === "onr_v1_310_blood-cat",
+    );
+    const traceInitial = structuredClone(trace);
+    const traceReplayStart = trace.eventLog.length;
+    trace = apply(
+      trace,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1917AssetAbility === "trace_3_tag" &&
+        action.payload?.cardId === bloodCatId,
+    );
+    expect(trace.trace).toMatchObject({
+      sourceDefinitionId: "onr_v1_310_blood-cat",
+      baseTraceStrength: 5,
+    });
+    trace = applyChoice(trace, "corp", "bid_0");
+    trace = applyChoice(trace, "runner", "bid_0");
+    expect(trace.runner.tags).toBe(1);
+    expect(replayEvents(traceInitial, trace.eventLog.slice(traceReplayStart)).ok).toBe(true);
+
+    let cowboy = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-cowboy-source",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+          id: "spotcheck_cowboy_runner",
+          name: "Spotcheck Cowboy Runner",
+          cards: [
+            { id: "onr_v1_158_danshis-second-id", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner.cards.filter(
+              (card) => card.id !== "onr_v1_158_danshis-second-id",
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    cowboy.corp.credits = 20;
+    cowboy.runner.credits = 20;
+    const resourceId = installRunnerResourceForTest(
+      cowboy,
+      "onr_v1_158_danshis-second-id",
+    );
+    const cowboyId = moveCorpCardToHq(cowboy, "onr_v1_316_cowboy-sysop");
+    cowboy = apply(
+      cowboy,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === cowboyId,
+    );
+    cowboy = apply(
+      cowboy,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(cowboy, action) === "onr_v1_316_cowboy-sysop",
+    );
+    const cowboyAction = mustAction(
+      cowboy,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1917AssetAbility === "trash_installed_runner_card" &&
+        action.payload?.targetCardId === resourceId,
+    );
+    const removedTarget = structuredClone(cowboy);
+    removeEverywhere(removedTarget, resourceId);
+    removedTarget.runner.heap.push(resourceId);
+    removedTarget.cardInstances[resourceId] = {
+      ...removedTarget.cardInstances[resourceId]!,
+      zone: { side: "runner", zone: "heap" },
+      faceup: true,
+      rezzed: true,
+    };
+    const drift = applyAction(removedTarget, {
+      matchId: removedTarget.matchId,
+      side: "corp",
+      actionId: cowboyAction.actionId,
+      clientKnownStateVersion: removedTarget.stateVersion,
+      idempotencyKey: "spotcheck-cowboy-removed-target",
+    });
+    expect(drift.ok).toBe(false);
+    cowboy = apply(cowboy, "corp", (action) => action.actionId === cowboyAction.actionId);
+    expect(cowboy.runner.heap).toContain(resourceId);
+    expect(cowboy.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1917_trash_installed_runner_card",
+      trashedCardDefinitionId: "onr_v1_158_danshis-second-id",
+    });
+
+    for (const definitionId of [
+      "onr_v1_311_braindance-campaign",
+      "onr_v1_321_esa-contract",
+      "onr_v1_335_remote-facility",
+    ] as const) {
+      let state = apply(
+        createGameAfterSetup({
+          seed: `spotcheck-${definitionId}`,
+          baseline: MVP_0_99_BASELINE,
+          runnerDeck:
+            definitionId === "onr_v1_335_remote-facility"
+              ? MECHANIC_SMOKE_DECKS.globalModifiers.runner
+              : MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+          corpDeck:
+            definitionId === "onr_v1_335_remote-facility"
+              ? MECHANIC_SMOKE_DECKS.globalModifiers.corp
+              : MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          agendaPointsToWin: 7,
+        }),
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      state.corp.credits = 20;
+      const assetId = moveCorpCardToHq(state, definitionId);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === assetId,
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const ability = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.cardId === assetId,
+      );
+      state = apply(state, "corp", (action) => action.actionId === ability.actionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps Department of Truth Enhancement and Encoder install/rez/trash/modifier safe", () => {
+    let department = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-department-access"),
+    );
+    department.runner.credits = 10;
+    const departmentId = putCorpRootInRemote(
+      department,
+      "onr_v1_318_department-of-truth-enhancement",
+    );
+    department.cardInstances[departmentId] = {
+      ...department.cardInstances[departmentId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const departmentInitial = structuredClone(department);
+    const departmentReplayStart = department.eventLog.length;
+    department = apply(
+      department,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    department = apply(department, "runner", (action) => action.type === "access_card");
+    department = apply(
+      department,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+    expect(department.corp.archives).toContain(departmentId);
+    expect(replayEvents(departmentInitial, department.eventLog.slice(departmentReplayStart)).ok).toBe(true);
+
+    let encoder = apply(
+      v162CardReleaseGame("spotcheck-encoder-rez-cost"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    encoder.corp.credits = 20;
+    putCorpRootInRemote(encoder, "onr_v1_320_encoder-inc");
+    encoder = apply(
+      encoder,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(encoder, action) === "onr_v1_320_encoder-inc",
+    );
+    const codeGateId = putCorpIceOnServer(
+      encoder,
+      "rd",
+      "onr_v1_230_cortical-scanner",
+    );
+    encoder = apply(encoder, "corp", (action) => action.type === "end_turn");
+    encoder = apply(
+      encoder,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezCodeGate = mustAction(
+      encoder,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === codeGateId,
+    );
+    expect(rezCodeGate.payload).toMatchObject({
+      rezCostReductionAmount: 2,
+      rezCostPaid: 5,
+    });
+    expect(String(rezCodeGate.payload?.rezCostReductionSourceDefinitionIds)).toContain(
+      "onr_v1_320_encoder-inc",
+    );
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps runner resources source-bound, public-source safe and replayable", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-resource-scorearea-resources"),
+    );
+    state.runner.credits = 80;
+    state.runner.clicks = 30;
+    for (const definitionId of [
+      "onr_v1_178_short-term-contract",
+      "onr_v1_183_technician-lover",
+    ] as const) {
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+    }
+
+    const shortTermId = state.runner.rig.resources.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_v1_178_short-term-contract",
+    );
+    expect(shortTermId).toBeDefined();
+    if (!shortTermId) throw new Error("Missing Short-Term Contract");
+    expect(cardCounterAmount(state, shortTermId, "power")).toBe(12);
+    const shortTermAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "short_term_contract_take_credits",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: shortTermAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "spotcheck-short-term-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: shortTermAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-short-term-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    const removedSource = structuredClone(state);
+    removeEverywhere(removedSource, shortTermId);
+    const drift = applyAction(removedSource, {
+      matchId: removedSource.matchId,
+      side: "runner",
+      actionId: shortTermAction.actionId,
+      clientKnownStateVersion: removedSource.stateVersion,
+      idempotencyKey: "spotcheck-short-term-removed-source",
+    });
+    expect(drift.ok).toBe(false);
+
+    const shortTermInitial = structuredClone(state);
+    const shortTermReplayStart = state.eventLog.length;
+    const creditsBeforeShortTerm = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === shortTermAction.actionId,
+    );
+    expect(state.runner.credits).toBe(creditsBeforeShortTerm + 2);
+    expect(cardCounterAmount(state, shortTermId, "power")).toBe(10);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      resourceAbility: "short_term_contract_take_credits",
+      gainedCredits: 2,
+      remainingCounters: 10,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const shortTermReplay = replayEvents(
+      shortTermInitial,
+      state.eventLog.slice(shortTermReplayStart),
+    );
+    expect(shortTermReplay.ok).toBe(true);
+    expect(hashState(shortTermReplay.state)).toBe(hashState(state));
+
+    let silicon = toRunnerTurn(v172CardReleaseGame("spotcheck-silicon-source"));
+    silicon.runner.credits = 30;
+    silicon.runner.clicks = 10;
+    moveRunnerCardToGrip(silicon, "onr_v1_179_silicon-saloon-franchise");
+    silicon = apply(
+      silicon,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(silicon, action) ===
+          "onr_v1_179_silicon-saloon-franchise",
+    );
+    const siliconId = silicon.runner.rig.resources.find(
+      (cardId) =>
+        silicon.cardInstances[cardId]?.definitionId ===
+        "onr_v1_179_silicon-saloon-franchise",
+    );
+    expect(siliconId).toBeDefined();
+    if (!siliconId) throw new Error("Missing Silicon Saloon Franchise");
+    const siliconAction = mustAction(
+      silicon,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.resourceAbility === "silicon_saloon_franchise",
+    );
+    const removedSilicon = structuredClone(silicon);
+    removeEverywhere(removedSilicon, siliconId);
+    const siliconDrift = applyAction(removedSilicon, {
+      matchId: removedSilicon.matchId,
+      side: "runner",
+      actionId: siliconAction.actionId,
+      clientKnownStateVersion: removedSilicon.stateVersion,
+      idempotencyKey: "spotcheck-silicon-removed-source",
+    });
+    expect(siliconDrift.ok).toBe(false);
+    const siliconInitial = structuredClone(silicon);
+    const siliconReplayStart = silicon.eventLog.length;
+    const siliconCreditsBefore = silicon.runner.credits;
+    const siliconGripBefore = silicon.runner.grip.length;
+    silicon = apply(silicon, "runner", (action) => action.actionId === siliconAction.actionId);
+    expect(silicon.runner.credits).toBe(siliconCreditsBefore + 1);
+    expect(silicon.runner.grip.length).toBe(siliconGripBefore + 1);
+    expect(silicon.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+      resourceAbility: "silicon_saloon_franchise",
+      gainedCredits: 1,
+      drawnCount: 1,
+    });
+    expect(JSON.stringify(silicon.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const siliconReplay = replayEvents(
+      siliconInitial,
+      silicon.eventLog.slice(siliconReplayStart),
+    );
+    expect(siliconReplay.ok).toBe(true);
+    expect(hashState(siliconReplay.state)).toBe(hashState(silicon));
+
+    let topRunners = toRunnerTurn(v192CardReleaseGame("spotcheck-top-runners"));
+    topRunners.runner.credits = 30;
+    topRunners.runner.clicks = 10;
+    moveRunnerCardToGrip(topRunners, "onr_v1_184_top-runners-conference");
+    topRunners = apply(
+      topRunners,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(topRunners, action) ===
+          "onr_v1_184_top-runners-conference",
+    );
+    const topRunnersId = topRunners.runner.rig.resources.find(
+      (cardId) =>
+        topRunners.cardInstances[cardId]?.definitionId ===
+        "onr_v1_184_top-runners-conference",
+    );
+    expect(topRunnersId).toBeDefined();
+    if (!topRunnersId) throw new Error("Missing Top Runners' Conference");
+    const topRunnersInitial = structuredClone(topRunners);
+    const topRunnersReplayStart = topRunners.eventLog.length;
+    const creditsBeforeTopRunners = topRunners.runner.credits;
+    topRunners = apply(topRunners, "runner", (action) => action.type === "end_turn");
+    topRunners = apply(topRunners, "corp", (action) => action.type === "mandatory_draw");
+    topRunners = toRunnerTurnFromCorpMain(topRunners);
+    expect(topRunners.runner.credits).toBe(creditsBeforeTopRunners + 3);
+    topRunners = apply(
+      topRunners,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(topRunners.runner.rig.resources).not.toContain(topRunnersId);
+    expect(topRunners.runner.heap).toContain(topRunnersId);
+    const topRunnersReplay = replayEvents(
+      topRunnersInitial,
+      topRunners.eventLog.slice(topRunnersReplayStart),
+    );
+    expect(topRunnersReplay.ok).toBe(true);
+    expect(hashState(topRunnersReplay.state)).toBe(hashState(topRunners));
+  });
+
+  it("keeps Trauma Team and Umbrella Policy prevention choices source-safe", () => {
+    for (const [definitionId, preventedAmount] of [
+      ["onr_v1_185_trauma-team", 2],
+      ["onr_v1_186_umbrella-policy", 1],
+    ] as const) {
+      let state = toRunnerTurn(
+        MECHANIC_SMOKE_GAMES.damagePrevention(
+          `spotcheck-resource-scorearea-${definitionId}`,
+        ),
+      );
+      state.runner.credits = 30;
+      state.runner.clicks = 10;
+      state.corp.credits = 30;
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.runner.tags = 1;
+      moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "play_operation" &&
+          sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+      );
+      expect(state.pendingChoice?.side).toBe("runner");
+      const optionId = state.pendingChoice?.options.find(
+        (option) => option.id !== "pass",
+      )?.id;
+      expect(optionId).toBeDefined();
+      if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
+      state = applyChoice(state, "runner", optionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        eventModificationDecision: "apply",
+        sourceDefinitionId: definitionId,
+        originalAmount: 2,
+        preventedAmount,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps scored agendas scoreArea-bound and replay-safe", () => {
+    let employee = apply(
+      MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-employee-empowerment"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    employee.corp.credits = 10;
+    employee.corp.maxHandSize = 100;
+    scoreCorpAgendaForTest(employee, "onr_v1_199_employee-empowerment");
+    employee = apply(employee, "corp", (action) => action.type === "end_turn");
+    const creditsBeforeEmployee = employee.corp.credits;
+    employee = apply(employee, "runner", (action) => action.type === "end_turn");
+    expect(employee.corp.credits).toBe(creditsBeforeEmployee + 1);
+
+    let marine = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-marine-arcology-scorearea",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "spotcheck_marine_arcology_corp",
+          cards: [
+            { id: "onr_v1_206_marine-arcology", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    marine.corp.credits = 30;
+    marine.corp.clicks = 10;
+    const marineId = scoreCorpAgendaForTest(marine, "onr_v1_206_marine-arcology");
+    const marineAction = mustAction(
+      marine,
+      "corp",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.agendaAbility === "v1922_marine_arcology",
+    );
+    const marineRemoved = structuredClone(marine);
+    removeEverywhere(marineRemoved, marineId);
+    const marineDrift = applyAction(marineRemoved, {
+      matchId: marineRemoved.matchId,
+      side: "corp",
+      actionId: marineAction.actionId,
+      clientKnownStateVersion: marineRemoved.stateVersion,
+      idempotencyKey: "spotcheck-marine-removed-source",
+    });
+    expect(marineDrift.ok).toBe(false);
+    const marineInitial = structuredClone(marine);
+    const marineReplayStart = marine.eventLog.length;
+    const marineCreditsBefore = marine.corp.credits;
+    marine = apply(marine, "corp", (action) => action.actionId === marineAction.actionId);
+    expect(marine.corp.credits).toBe(marineCreditsBefore + 3);
+    expect(marine.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_206_marine-arcology",
+      agendaAbility: "v1922_marine_arcology",
+      gainedCredits: 3,
+    });
+    expect(JSON.stringify(marine.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const marineReplay = replayEvents(
+      marineInitial,
+      marine.eventLog.slice(marineReplayStart),
+    );
+    expect(marineReplay.ok).toBe(true);
+    expect(hashState(marineReplay.state)).toBe(hashState(marine));
+
+    for (const [definitionId, advanceCount, expectedPoints] of [
+      ["onr_v1_214_project-babylon", 7, 3],
+      ["onr_v1_220_tycho-extension", 4, 4],
+    ] as const) {
+      let state = apply(
+        definitionId === "onr_v1_214_project-babylon"
+          ? v180CardReleaseGame(`spotcheck-${definitionId}`)
+          : createGameAfterSetup({
+              seed: `spotcheck-${definitionId}`,
+              runnerDeck: ONR_V1_RUNNER_DECK,
+              corpDeck: ONR_V1_CORP_DECK,
+              agendaPointsToWin: 7,
+            }),
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      state.corp.credits = 40;
+      state.corp.clicks = 20;
+      moveCorpCardToHq(state, definitionId);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      for (let index = 0; index < advanceCount; index += 1) {
+        state = apply(
+          state,
+          "corp",
+          (action) =>
+            action.type === "advance_card" &&
+            sourceDefinition(state, action) === definitionId,
+        );
+      }
+      const scoreAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "score_agenda" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: scoreAction.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${definitionId}-stale-score`,
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "corp", (action) => action.actionId === scoreAction.actionId);
+      if (definitionId === "onr_v1_214_project-babylon") {
+        const projectBabylonId = state.corp.scoreArea.find(
+          (cardId) => state.cardInstances[cardId]?.definitionId === definitionId,
+        );
+        expect(projectBabylonId).toBeDefined();
+        if (projectBabylonId)
+          expect(cardCounterAmount(state, projectBabylonId, "agenda")).toBe(2);
+      } else {
+        expect(agendaPoints(state, "corp")).toBe(expectedPoints);
+      }
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+        totalAgendaPoints: expectedPoints,
+      });
+      if (definitionId === "onr_v1_214_project-babylon") {
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          projectBabylonOveradvance: 4,
+          projectBabylonBonusAgendaPoints: 2,
+        });
+      }
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps runner events source-bound, hidden-zone safe and replayable", () => {
+    let mit = toRunnerTurn(v123CardReleaseGame("spotcheck-mit-west-tier"));
+    mit.runner.credits = 20;
+    emptyRunnerGripForTest(mit);
+    const mitId = moveRunnerCardToGrip(mit, "onr_v1_101_mit-west-tier");
+    const mitAction = mustAction(
+      mit,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === mitId,
+    );
+    const mitRemoved = structuredClone(mit);
+    removeEverywhere(mitRemoved, mitId);
+    const mitDrift = applyAction(mitRemoved, {
+      matchId: mitRemoved.matchId,
+      side: "runner",
+      actionId: mitAction.actionId,
+      clientKnownStateVersion: mitRemoved.stateVersion,
+      idempotencyKey: "spotcheck-mit-removed-source",
+    });
+    expect(mitDrift.ok).toBe(false);
+    const mitInitial = structuredClone(mit);
+    const mitReplayStart = mit.eventLog.length;
+    mit = apply(mit, "runner", (action) => action.actionId === mitAction.actionId);
+    expect(mit.specialZones?.removedFromGame).toContain(mitId);
+    expect(mit.runner.grip).toHaveLength(5);
+    expect(mit.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_101_mit-west-tier",
+      hiddenZoneAction: "mit_west_tier_shuffle_grip_heap_stack",
+      drawnCount: 5,
+    });
+    expect(JSON.stringify(mit.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const mitReplay = replayEvents(mitInitial, mit.eventLog.slice(mitReplayStart));
+    expect(mitReplay.ok).toBe(true);
+    expect(hashState(mitReplay.state)).toBe(hashState(mit));
+
+    let score = toRunnerTurn(onrV1Game("spotcheck-score-event"));
+    score.runner.credits = 20;
+    const scoreId = moveRunnerCardToGrip(score, "onr_v1_108_score");
+    const scoreLegal = mustAction(
+      score,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === scoreId,
+    );
+    const scoreStale = applyAction(score, {
+      matchId: score.matchId,
+      side: "runner",
+      actionId: scoreLegal.actionId,
+      clientKnownStateVersion: score.stateVersion - 1,
+      idempotencyKey: "spotcheck-score-stale",
+    });
+    expect(scoreStale.ok).toBe(false);
+    if (!scoreStale.ok) expect(scoreStale.error.code).toBe("ERR_STALE_STATE");
+    const scoreInitial = structuredClone(score);
+    const scoreReplayStart = score.eventLog.length;
+    const scoreCreditsBefore = score.runner.credits;
+    score = apply(score, "runner", (action) => action.actionId === scoreLegal.actionId);
+    expect(score.runner.credits).toBe(scoreCreditsBefore + 4);
+    expect(score.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_108_score",
+      gainedCredits: 9,
+      runnerCreditsAfter: score.runner.credits,
+    });
+    expect(replayEvents(scoreInitial, score.eventLog.slice(scoreReplayStart)).ok).toBe(true);
+
+    let total = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-total-genetic-retrofit"),
+    );
+    total.runner.credits = 20;
+    total.runner.tags = 3;
+    moveRunnerCardToGrip(total, "onr_v1_116_total-genetic-retrofit");
+    const totalInitial = structuredClone(total);
+    const totalReplayStart = total.eventLog.length;
+    total = apply(
+      total,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(total, action) === "onr_v1_116_total-genetic-retrofit",
+    );
+    expect(total.runner.tags).toBe(0);
+    expect(total.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_116_total-genetic-retrofit",
+      removedTags: 3,
+      runnerTagsAfter: 0,
+    });
+    expect(JSON.stringify(total.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    expect(replayEvents(totalInitial, total.eventLog.slice(totalReplayStart)).ok).toBe(true);
+  });
+
+  it("keeps run, stack-search and reprisal events side-safe and replayable", () => {
+    let social = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-social-engineering"),
+    );
+    social.runner.credits = 20;
+    moveRunnerCardToGrip(social, "onr_v1_111_social-engineering");
+    const socialAction = mustAction(
+      social,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(social, action) === "onr_v1_111_social-engineering" &&
+        action.payload?.serverId === "hq",
+    );
+    const socialWrongSide = applyAction(social, {
+      matchId: social.matchId,
+      side: "corp",
+      actionId: socialAction.actionId,
+      clientKnownStateVersion: social.stateVersion,
+      idempotencyKey: "spotcheck-social-wrong-side",
+    });
+    expect(socialWrongSide.ok).toBe(false);
+    const socialInitial = structuredClone(social);
+    const socialReplayStart = social.eventLog.length;
+    social = apply(social, "runner", (action) => action.actionId === socialAction.actionId);
+    expect(social.run?.attackedServerId).toBe("hq");
+    expect(social.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_111_social-engineering",
+      socialEngineeringRun: true,
+      serverLabel: "HQ",
+    });
+    expect(replayEvents(socialInitial, social.eventLog.slice(socialReplayStart)).ok).toBe(true);
+
+    let temple = toRunnerTurn(v171CardReleaseGame("spotcheck-temple-search"));
+    temple.runner.credits = 20;
+    const templeId = moveRunnerCardToGrip(
+      temple,
+      "onr_v1_114_temple-microcode-outlet",
+    );
+    const selectedProgram = putRunnerCardOnTopOfStack(temple, "onr_v1_036_jackhammer");
+    const templeLegal = mustAction(
+      temple,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === templeId,
+    );
+    const templeInitial = structuredClone(temple);
+    const templeReplayStart = temple.eventLog.length;
+    temple = apply(temple, "runner", (action) => action.actionId === templeLegal.actionId);
+    const selectedOption =
+      temple.pendingChoice?.options.find((option) => option.value === selectedProgram)?.id ??
+      "";
+    expect(selectedOption).not.toBe("");
+    temple = applyChoice(temple, "runner", selectedOption);
+    expect(temple.runner.grip).toContain(selectedProgram);
+    expect(temple.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "search_stack",
+    });
+    expect(JSON.stringify(temple.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    expect(replayEvents(templeInitial, temple.eventLog.slice(templeReplayStart)).ok).toBe(true);
+
+    let reprisal = toRunnerTurn(v190CardReleaseGame("spotcheck-terrorist-reprisal"));
+    reprisal.runner.maxHandSize = 100;
+    reprisal.runner.credits = 30;
+    reprisal.corp.maxHandSize = 100;
+    const reprisalId = moveRunnerCardToGrip(
+      reprisal,
+      "onr_v1_115_terrorist-reprisal",
+    );
+    expect(
+      getLegalActions(reprisal, "runner").some(
+        (action) => action.type === "play_event" && action.payload?.cardId === reprisalId,
+      ),
+    ).toBe(false);
+    reprisal = apply(reprisal, "runner", (action) => action.type === "end_turn");
+    reprisal = apply(reprisal, "corp", (action) => action.type === "mandatory_draw");
+    reprisal.corp.credits = 60;
+    reprisal.corp.clicks = 20;
+    moveCorpCardToHq(reprisal, "onr_v1_193_corporate-coup");
+    reprisal = apply(
+      reprisal,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(reprisal, action) === "onr_v1_193_corporate-coup",
+    );
+    for (let index = 0; index < 5; index += 1) {
+      reprisal = apply(
+        reprisal,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(reprisal, action) === "onr_v1_193_corporate-coup",
+      );
+    }
+    reprisal = apply(
+      reprisal,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(reprisal, action) === "onr_v1_193_corporate-coup",
+    );
+    reprisal = apply(reprisal, "corp", (action) => action.type === "end_turn");
+    const hqIds = [
+      moveCorpCardToHq(reprisal, "simple_economy_operation"),
+      moveCorpCardToHq(reprisal, "simple_barrier_ice"),
+      moveCorpCardToHq(reprisal, "onr_v1_275_vacuum-link"),
+      moveCorpCardToHq(reprisal, "onr_v1_223_banpei"),
+      moveCorpCardToHq(reprisal, "onr_v1_279_wall-of-static"),
+    ];
+    keepOnlyCorpHqCards(reprisal, hqIds);
+    const reprisalInitial = structuredClone(reprisal);
+    const reprisalReplayStart = reprisal.eventLog.length;
+    reprisal = apply(
+      reprisal,
+      "runner",
+      (action) => action.type === "play_event" && action.payload?.cardId === reprisalId,
+    );
+    expect(reprisal.corp.hq).toHaveLength(0);
+    expect(reprisal.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_115_terrorist-reprisal",
+      hiddenZoneAction: "hq_random_discard",
+      discardedCardsCount: 5,
+    });
+    expect(JSON.stringify(reprisal.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    expect(
+      replayEvents(reprisalInitial, reprisal.eventLog.slice(reprisalReplayStart)).ok,
+    ).toBe(true);
+  });
+
+  it("keeps hardware installs and Dermatech prevention public-safe", () => {
+    let hardware = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-hardware-installs"),
+    );
+    hardware.runner.credits = 30;
+    hardware.runner.clicks = 10;
+    for (const definitionId of [
+      "onr_v1_120_armadillo-armored-road-home",
+      "onr_v1_126_drifter-mobile-environment",
+    ] as const) {
+      moveRunnerCardToGrip(hardware, definitionId);
+      hardware = apply(
+        hardware,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(hardware, action) === definitionId,
+      );
+      expect(hardware.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(hardware.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+    }
+
+    let dermatech = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-dermatech-prevention",
+        runnerDeck: ONR_V1_6_1_RUNNER_DECK,
+        corpDeck: ONR_V1_6_1_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    dermatech.runner.credits = 20;
+    moveRunnerCardToGrip(dermatech, "onr_v1_125_dermatech-bodyplating");
+    dermatech = apply(
+      dermatech,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(dermatech, action) ===
+          "onr_v1_125_dermatech-bodyplating",
+    );
+    dermatech = apply(dermatech, "runner", (action) => action.type === "end_turn");
+    dermatech = apply(dermatech, "corp", (action) => action.type === "mandatory_draw");
+    dermatech.runner.tags = 1;
+    moveCorpCardToHq(dermatech, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(dermatech);
+    const replayStart = dermatech.eventLog.length;
+    dermatech = apply(
+      dermatech,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(dermatech, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    const optionId = dermatech.pendingChoice?.options.find(
+      (option) => option.id !== "pass",
+    )?.id;
+    expect(optionId).toBeDefined();
+    if (!optionId) throw new Error("Missing Dermatech prevention option");
+    dermatech = applyChoice(dermatech, "runner", optionId);
+    expect(dermatech.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationDecision: "apply",
+      sourceDefinitionId: "onr_v1_125_dermatech-bodyplating",
+      preventedAmount: 1,
+    });
+    expect(JSON.stringify(dermatech.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, dermatech.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(dermatech));
+  });
+
+  it("keeps Open-Ended Mileage Program optional return source-safe", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-open-ended-mileage-program",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_open_ended_mileage_runner",
+          name: "Spotcheck Open-Ended Mileage Runner",
+          cards: [
+            { id: "onr_v1_102_open-ended-mileage-program", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 2;
+    state.runner.tags = 1;
+    const eventId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_102_open-ended-mileage-program",
+    );
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "play_event" && action.payload?.cardId === eventId,
+    );
+    const removed = structuredClone(state);
+    removeEverywhere(removed, eventId);
+    const drift = applyAction(removed, {
+      matchId: removed.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: removed.stateVersion,
+      idempotencyKey: "spotcheck-open-ended-removed-source",
+    });
+    expect(drift.ok).toBe(false);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice?.source).toContain("v1922.open_ended_mileage_return");
+    state = applyChoice(state, "runner", "pay_1_return_to_grip");
+    expect(state.runner.grip).toContain(eventId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      v1922RunnerEventAbility: "remove_tag_optional_return",
+      returnedToGrip: true,
+      paidCredits: 1,
+    });
+    expect(replayEvents(initial, state.eventLog.slice(replayStart)).ok).toBe(true);
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps run-start events source-bound, side-safe and replayable", () => {
+    for (const [definitionId, game, serverId, expectedPayload] of [
+      [
+        "onr_v1_076_all-nighter",
+        v192CardReleaseGame("spotcheck-all-nighter"),
+        "rd",
+        { allNighterBonusRunOnFinish: true },
+      ],
+      [
+        "onr_v1_081_custodial-position",
+        v123CardReleaseGame("spotcheck-custodial-position"),
+        "rd",
+        { accessCount: 3 },
+      ],
+      [
+        "onr_v1_085_executive-wiretaps",
+        v123CardReleaseGame("spotcheck-executive-wiretaps"),
+        "hq",
+        { accessCount: 3 },
+      ],
+      [
+        "onr_v1_094_inside-job",
+        v181CardReleaseGame("spotcheck-inside-job"),
+        "rd",
+        { bypassFirstIce: true },
+      ],
+      [
+        "onr_v1_098_lucidrine-booster-drug",
+        MECHANIC_SMOKE_GAMES.runAccess("spotcheck-lucidrine"),
+        "archives",
+        {},
+      ],
+    ] as const) {
+      let state = toRunnerTurn(game);
+      state.runner.credits = 30;
+      const eventId = moveRunnerCardToGrip(state, definitionId);
+      if (serverId === "rd" || serverId === "archives")
+        putCorpCardOnTopOfRd(state, "simple_economy_operation");
+      const legal = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "play_event" &&
+          action.payload?.cardId === eventId &&
+          action.payload?.serverId === serverId,
+      );
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `spotcheck-${definitionId}-wrong-side`,
+      });
+      expect(wrongSide.ok, definitionId).toBe(false);
+      const removed = structuredClone(state);
+      removeEverywhere(removed, eventId);
+      const drift = applyAction(removed, {
+        matchId: removed.matchId,
+        side: "runner",
+        actionId: legal.actionId,
+        clientKnownStateVersion: removed.stateVersion,
+        idempotencyKey: `spotcheck-${definitionId}-removed-source`,
+      });
+      expect(drift.ok, definitionId).toBe(false);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+      if (definitionId === "onr_v1_098_lucidrine-booster-drug")
+        expect(state.run, definitionId).toBeUndefined();
+      else expect(state.run?.attackedServerId, definitionId).toBe(serverId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+        serverLabel:
+          serverId === "rd" ? "R&D" : serverId === "hq" ? "HQ" : "Archives",
+        ...expectedPayload,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps same-turn agenda-theft events gated and public-safe", () => {
+    for (const [definitionId, stolenAgendaId] of [
+      ["onr_v1_083_desperate-competitor", "onr_v1_203_hostile-takeover"],
+      ["onr_v1_090_hot-tip-for-wns", "onr_v1_214_project-babylon"],
+    ] as const) {
+      let state = toRunnerTurn(v180CardReleaseGame(`spotcheck-${definitionId}`));
+      state.runner.credits = 30;
+      const eventId = moveRunnerCardToGrip(state, definitionId);
+      expect(
+        getLegalActions(state, "runner").some(
+          (action) => action.type === "play_event" && action.payload?.cardId === eventId,
+        ),
+      ).toBe(false);
+      putCorpCardOnTopOfRd(state, stolenAgendaId);
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      state = apply(state, "runner", (action) => action.type === "steal_agenda");
+      const legal = mustAction(
+        state,
+        "runner",
+        (action) => action.type === "play_event" && action.payload?.cardId === eventId,
+      );
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === legal.actionId);
+      expect(state.runner.scoreArea).toContain(eventId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+        scoredAsAgenda: true,
+        gainedAgendaPoints: 1,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps draw, stack-search and free-trash events hidden-info safe", () => {
+    let gideon = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-gideon-search"),
+    );
+    gideon.runner.credits = 20;
+    const gideonId = moveRunnerCardToGrip(gideon, "onr_v1_089_gideons-pawnshop");
+    const programId = putRunnerCardOnTopOfStack(gideon, "simple_decoder");
+    const gideonInitial = structuredClone(gideon);
+    const gideonReplayStart = gideon.eventLog.length;
+    gideon = apply(
+      gideon,
+      "runner",
+      (action) => action.type === "play_event" && action.payload?.cardId === gideonId,
+    );
+    const optionId =
+      gideon.pendingChoice?.options.find((option) => option.value === programId)?.id ?? "";
+    expect(optionId).not.toBe("");
+    gideon = applyChoice(gideon, "runner", optionId);
+    expect(gideon.runner.grip).toContain(programId);
+    expect(gideon.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "search_stack",
+    });
+    expect(JSON.stringify(gideon.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    expect(replayEvents(gideonInitial, gideon.eventLog.slice(gideonReplayStart)).ok).toBe(true);
+
+    let jack = toRunnerTurn(onrV1Game("spotcheck-jack-n-joe"));
+    jack.runner.credits = 20;
+    const jackId = moveRunnerCardToGrip(jack, "onr_v1_095_jack-n-joe");
+    const jackInitial = structuredClone(jack);
+    const jackReplayStart = jack.eventLog.length;
+    const gripBefore = jack.runner.grip.length;
+    jack = apply(
+      jack,
+      "runner",
+      (action) => action.type === "play_event" && action.payload?.cardId === jackId,
+    );
+    expect(jack.runner.grip.length).toBe(gripBefore + 2);
+    expect(jack.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_095_jack-n-joe",
+      drawnCount: 3,
+    });
+    expect(replayEvents(jackInitial, jack.eventLog.slice(jackReplayStart)).ok).toBe(true);
+
+    let kilroy = toRunnerTurn(v192CardReleaseGame("spotcheck-kilroy"));
+    kilroy.runner.credits = 20;
+    moveRunnerCardToGrip(kilroy, "onr_v1_096_kilroy-was-here");
+    putCorpCardOnTopOfRd(kilroy, "simple_economy_operation");
+    const kilroyInitial = structuredClone(kilroy);
+    const kilroyReplayStart = kilroy.eventLog.length;
+    kilroy = apply(
+      kilroy,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(kilroy, action) === "onr_v1_096_kilroy-was-here",
+    );
+    kilroy = apply(kilroy, "runner", (action) => action.type === "access_card");
+    const creditsBeforeTrash = kilroy.runner.credits;
+    kilroy = apply(kilroy, "runner", (action) => action.type === "trash_accessed_card");
+    expect(kilroy.runner.credits).toBe(creditsBeforeTrash);
+    expect(kilroy.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "simple_economy_operation",
+    });
+    expect(replayEvents(kilroyInitial, kilroy.eventLog.slice(kilroyReplayStart)).ok).toBe(true);
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps hardware and link/resource installs public-safe and replayable", () => {
+    const runnerDeck: DeckDefinition = {
+      id: "spotcheck_runner_hardware_link_resources",
+      name: "Spotcheck Runner Hardware Link Resources",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_128_green-knight-surge-buffers", quantity: 1 },
+        { id: "onr_v1_133_militech-mram-chip", quantity: 1 },
+        { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
+        { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
+        { id: "onr_v1_144_tycho-mem-chip", quantity: 1 },
+        { id: "onr_v1_145_wutech-mem-chip", quantity: 1 },
+        { id: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
+        { id: "onr_v1_152_back-door-to-hilliard", quantity: 1 },
+        { id: "onr_v1_153_back-door-to-orbital-air", quantity: 1 },
+        { id: "onr_v1_154_broker", quantity: 1 },
+        { id: "simple_decoder", quantity: 2 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    };
+    const corpDeck: DeckDefinition = {
+      id: "spotcheck_runner_hardware_link_resources_corp",
+      name: "Spotcheck Runner Hardware Link Resources Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 2 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-runner-hardware-link-resources",
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 80;
+    state.runner.clicks = 30;
+    const initialMemory = state.runner.memoryLimit;
+    for (const definitionId of runnerDeck.cards
+      .map((card) => card.id)
+      .filter((id) => id.startsWith("onr_v1_")) as string[]) {
+      moveRunnerCardToGrip(state, definitionId);
+      const installInitial = structuredClone(state);
+      const installReplayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(
+        installInitial,
+        state.eventLog.slice(installReplayStart),
+      );
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+    expect(state.runner.memoryLimit).toBeGreaterThan(initialMemory);
+  });
+
+  it("keeps Green Knight and Techtronica prevention source-safe", () => {
+    for (const [definitionId, damageSetup] of [
+      ["onr_v1_128_green-knight-surge-buffers", "net"],
+      ["onr_v1_143_techtronica-utility-suit", "meat"],
+    ] as const) {
+      let state = toRunnerTurn(
+        MECHANIC_SMOKE_GAMES.damagePrevention(
+          `spotcheck-prevention-${definitionId}`,
+        ),
+      );
+      state.runner.credits = 30;
+      state.corp.credits = 30;
+      state.runner.maxHandSize = 100;
+      state.corp.maxHandSize = 100;
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      if (damageSetup === "meat") {
+        state.runner.tags = 1;
+        moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+      } else {
+        putCorpIceOnServer(state, "rd", "onr_v1_258_neural-blade");
+      }
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      if (damageSetup === "meat") {
+        state = apply(state, "runner", (action) => action.type === "end_turn");
+        state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+        state = apply(
+          state,
+          "corp",
+          (action) =>
+            action.type === "play_operation" &&
+            sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+        );
+      } else {
+        state = apply(
+          state,
+          "runner",
+          (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+        );
+        state = apply(
+          state,
+          "corp",
+          (action) =>
+            action.type === "rez_ice" &&
+            sourceDefinition(state, action) === "onr_v1_258_neural-blade",
+        );
+        state = apply(state, "runner", (action) => action.type === "continue_run");
+      }
+      const optionId = state.pendingChoice?.options.find(
+        (option) => option.id !== "pass",
+      )?.id;
+      expect(optionId, definitionId).toBeDefined();
+      if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
+      state = applyChoice(state, "runner", optionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        eventModificationDecision: "apply",
+        sourceDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.errors, definitionId).toEqual([]);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps Broker load/take actions source-bound and one-use-per-turn", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("spotcheck-broker-resource-action"),
+    );
+    state.runner.credits = 30;
+    state.runner.clicks = 10;
+    state.runner.maxHandSize = 100;
+    state.corp.maxHandSize = 100;
+    moveRunnerCardToGrip(state, "onr_v1_154_broker");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_154_broker",
+    );
+    const brokerId = state.runner.rig.resources.find(
+      (cardId) => state.cardInstances[cardId]?.definitionId === "onr_v1_154_broker",
+    );
+    expect(brokerId).toBeDefined();
+    if (!brokerId) throw new Error("Missing Broker");
+    const load = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits",
+    );
+    const removed = structuredClone(state);
+    removeEverywhere(removed, brokerId);
+    const drift = applyAction(removed, {
+      matchId: removed.matchId,
+      side: "runner",
+      actionId: load.actionId,
+      clientKnownStateVersion: removed.stateVersion,
+      idempotencyKey: "spotcheck-broker-removed-source",
+    });
+    expect(drift.ok).toBe(false);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === load.actionId);
+    expect(cardCounterAmount(state, brokerId, "power")).toBe(3);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.payload?.resourceAbility === "broker_take_credits",
+      ),
+    ).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    const creditsBefore = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.resourceAbility === "broker_take_credits",
+    );
+    expect(state.runner.credits).toBe(creditsBefore + 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_154_broker",
+      resourceAbility: "broker_take_credits",
+      gainedCredits: 3,
+      remainingCounters: 0,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });

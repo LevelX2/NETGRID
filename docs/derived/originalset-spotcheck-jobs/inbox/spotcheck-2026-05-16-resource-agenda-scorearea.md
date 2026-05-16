@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-resource-agenda-scorearea
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:32:00+02:00
+completedAt: 2026-05-16T13:44:15+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,30 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Status: `committed`.
+
+Umgesetzt:
+
+- Runner-Resource-Aktionen mit `resourceAbility` nennen ihre sichtbare installierte Quelle in öffentlichen Events.
+- `Silicon Saloon Franchise` revalidiert die installierte Quelle gegen die konkrete Kartendefinition und schreibt Credit-/Draw-Ergebnisse payloadfähig.
+- `Short-Term Contract` wurde gegen Wrong-Side, stale `stateVersion`, entfernte Quelle, Counter-Abzug, PublicPayload und Replay/StateHash nachgetestet.
+- `Technician Lover` wurde als sichtbare installierte Resource in der öffentlichen Install-Chronik geprüft.
+- `Top Runners' Conference` wurde für Start-of-turn-Credits, Run-Start-Trash und Replay/StateHash geprüft.
+- `Trauma Team` und `Umbrella Policy` wurden als source-bound Damage-Prevention-Choices mit öffentlichem Prevention-Ergebnis geprüft.
+- `Employee Empowerment` wurde als ScoreArea-Start-of-Corp-turn-Credit geprüft.
+- `Marine Arcology` wurde als ScoreArea-Aktion gegen entfernte Quelle, PublicPayload und Replay/StateHash geprüft.
+- `Project Babylon` veröffentlicht Overadvance- und Bonus-Agenda-Punkte explizit im PublicPayload-Kontext.
+- `Tycho Extension` wurde im Score-Pfad mit Stale-Abdeckung, PublicPayload und Replay/StateHash geprüft.
+- Der bestehende `Playful AI`-Regressionstest wurde auf eine deterministische Choice-Seed und die aktuellen Choice-Optionen korrigiert.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` grün
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` grün
+- `corepack pnpm --filter @netgrid/catalog test` grün
+- `corepack pnpm typecheck` grün
+
+Commitstatus: Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.

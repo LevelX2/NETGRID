@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-hardware-link-resources
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:58:00+02:00
+completedAt: 2026-05-16T14:05:07+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzungsabschluss 2026-05-16
+
+Status: `committed`. Der Job wurde fachlich umgesetzt und verifiziert.
+
+Umgesetzt:
+
+- Hardware- und Link-/Resource-Installationen fuer Green Knight Surge Buffers, Militech MRAM Chip, Raven Microcyb Owl, Techtronica Utility Suit, Tycho Mem Chip, WuTech Mem Chip, Zetatech Mem Chip, Back Door to Hilliard, Back Door to Orbital Air und Broker werden als oeffentliche Rig-Installationen ohne private Zonenleaks nachgetestet.
+- Green Knight Surge Buffers und Techtronica Utility Suit bleiben als Damage-Prevention-Quellen source-bound, public-safe und replaybar.
+- Broker wird gegen entfernte Quelle, Turnlimit, Countertransfer, PublicPayload-Ergebnisfelder und Replay/StateHash abgesichert.
+- Fuer diesen Block waren keine Resolver-Aenderungen erforderlich; die vorhandenen Engine-Pfade wurden durch fokussierte Regressionen gehaertet.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen mit 452 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen.
+- `corepack pnpm --filter @netgrid/catalog test` gruen.
+- `corepack pnpm typecheck` gruen.
+
+Commit-Hinweis:
+
+- Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.

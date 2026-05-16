@@ -501,7 +501,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     resolve: (state, legalAction) => {
       const removedTags = state.runner.tags;
       state.runner.tags = 0;
-      legalAction.payload = { ...(legalAction.payload ?? {}), removedTags };
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        removedTags,
+        runnerTagsAfter: state.runner.tags,
+      };
     },
   },
   [PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID]: {
@@ -869,8 +873,13 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   },
   onr_v1_108_score: {
     name: "onr_runner_event_gain_credits_9",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       state.runner.credits += 9;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gainedCredits: 9,
+        runnerCreditsAfter: state.runner.credits,
+      };
     },
   },
   [TERRORIST_REPRISAL_ID]: {
@@ -1448,9 +1457,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
   "onr_v1_295_night-shift": {
     name: "onr_corp_operation_gain_2_draw_1",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       state.corp.credits += 2;
       drawCorpCard(state);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gainedCredits: 2,
+        drawnCards: 1,
+        corpCreditsAfter: state.corp.credits,
+      };
     },
   },
   "onr_v1_301_punitive-counterstrike": {
@@ -1484,10 +1499,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   "onr_v1_306_trojan-horse": {
     name: "onr_corp_operation_trojan_horse_tag",
     canPlay: (state) => runnerStoleAgendaLastTurn(state),
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       if (!runnerStoleAgendaLastTurn(state))
         throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
       state.runner.tags += 1;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        tagsAdded: 1,
+        runnerTagsAfter: state.runner.tags,
+      };
     },
   },
   "onr_v1_307_urban-renewal": {
@@ -2176,7 +2196,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
     specialZones: visibleSpecialZones(state, side),
     ...(run ? { run } : {}),
     ...(state.pendingChoice?.side === side
-      ? { pendingChoice: visibleChoice(state.pendingChoice) }
+      ? { pendingChoice: visibleChoice(state, state.pendingChoice) }
       : {}),
     ...(state.deckMetadata
       ? {
@@ -7278,6 +7298,8 @@ function performAction(
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!state.runner.rig.resources.includes(sourceCardId))
           throw new Error("Silicon Saloon Franchise ist nicht installiert.");
+        if (definitionFor(state, sourceCardId).id !== "onr_v1_179_silicon-saloon-franchise")
+          throw new Error("Die Silicon-Saloon-Faehigkeit passt nicht zur Karte.");
       }
       if (
         legalAction.payload?.agendaAbility === "corporate_coup" ||
@@ -7583,6 +7605,13 @@ function performAction(
           legalAction,
           drawRunnerCard(state),
         );
+      }
+      if (legalAction.payload?.resourceAbility === "silicon_saloon_franchise") {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          gainedCredits: 1,
+          runnerCreditsAfter: state.runner.credits,
+        };
       }
       return;
     case "draw_card":
@@ -11492,8 +11521,9 @@ function resolveBanpeiProgramTrashSubroutine(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       banpeiProgramTrashed: true,
-      banpeiProgramId: targetProgramId,
-      banpeiProgramDefinitionId: definitionFor(state, targetProgramId).id,
+      trashedCardDefinitionId: definitionFor(state, targetProgramId).id,
+      trashedCardType: "program",
+      trashedCount: 1,
     };
   }
 }
@@ -14618,33 +14648,79 @@ function abilityMetadata(
 }
 
 function visibleChoice(
+  state: GameState,
   choice: ChoiceRequest,
 ): NonNullable<PlayerView["pendingChoice"]> {
+  const stackSearchResolution =
+    choice.stackSearchResolution ?? stackSearchResolutionForChoice(choice);
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
     prompt: choice.prompt,
     kind: choice.kind,
-    options: choice.options.map((option) => ({
-      id: option.id,
-      label: option.label,
-      ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
-      ...(option.value !== undefined &&
-      !(
-        choice.visibility === "public" &&
-        option.publicLabel &&
-        typeof option.value === "string" &&
-        option.id.startsWith("ice_")
-      )
-        ? { value: option.value }
-        : {}),
-    })),
+    options: choice.options.map((option) => {
+      const card = visibleChoiceCardForOption(state, choice, option);
+      return {
+        id: option.id,
+        label: option.label,
+        ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+        ...(option.value !== undefined &&
+        !(
+          choice.visibility === "public" &&
+          option.publicLabel &&
+          typeof option.value === "string" &&
+          option.id.startsWith("ice_")
+        )
+          ? { value: option.value }
+          : {}),
+        ...(card ? { card } : {}),
+      };
+    }),
     minSelections: choice.minSelections,
     maxSelections: choice.maxSelections,
     stateVersion: choice.stateVersion,
     visibility: choice.visibility,
+    ...(stackSearchResolution ? { stackSearchResolution } : {}),
   };
+}
+
+function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    (choice.source.startsWith("v098.search_stack") ||
+      choice.source.startsWith("v1911.search_stack") ||
+      choice.source.startsWith("v1912.search_stack") ||
+      choice.source.startsWith("v1911.short_circuit_search"))
+  );
+}
+
+function stackSearchResolutionForChoice(
+  choice: ChoiceRequest,
+): ChoiceRequest["stackSearchResolution"] | undefined {
+  if (!isRunnerStackSearchChoice(choice)) return undefined;
+  return {
+    reveal: choice.source.startsWith("v1911.short_circuit_search")
+      ? "public"
+      : "hidden",
+    destination: "grip",
+    shuffleAfter: true,
+  };
+}
+
+function visibleChoiceCardForOption(
+  state: GameState,
+  choice: ChoiceRequest,
+  option: ChoiceRequest["options"][number],
+): VisibleCard | undefined {
+  if (!isRunnerStackSearchChoice(choice)) return undefined;
+  if (typeof option.value !== "string") return undefined;
+  const cardId = option.value as CardInstanceId;
+  if (!state.runner.stack.includes(cardId)) return undefined;
+  const instance = state.cardInstances[cardId];
+  if (!instance || instance.owner !== "runner") return undefined;
+  if (definitionFor(state, cardId).type !== "program") return undefined;
+  return visibleOwnCard(state, cardId);
 }
 
 function validateChoiceAction(
@@ -18605,6 +18681,10 @@ function publicContextForAction(
       "gainedCredits",
       "drawnCards",
       "corpCreditsAfter",
+      "corpClicksAfter",
+      "gainedActions",
+      "tagsAdded",
+      "runnerTagsAfter",
       "trashedResourceCount",
       "trashedResourceDefinitionIds",
       "runnerRunAttemptsLastTurn",
@@ -18821,6 +18901,14 @@ function publicContextForAction(
   }
   if (typeof legalAction.payload?.badPublicityAfter === "number")
     context.badPublicityAfter = legalAction.payload.badPublicityAfter;
+  if (typeof legalAction.payload?.removedTags === "number")
+    context.removedTags = legalAction.payload.removedTags;
+  if (typeof legalAction.payload?.discardedCardsCount === "number")
+    context.discardedCardsCount = legalAction.payload.discardedCardsCount;
+  if (typeof legalAction.payload?.runnerTagsAfter === "number")
+    context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
+  if (legalAction.payload?.socialEngineeringRun === true)
+    context.socialEngineeringRun = true;
   for (const key of [
     "gainedCredits",
     "runnerCreditsAfter",
@@ -18856,10 +18944,18 @@ function publicContextForAction(
     "iceCount",
     "serverIceOrderReversed",
     "serverLabel",
+    "accessCount",
+    "gainedAgendaPoints",
   ]) {
     const value = legalAction.payload?.[key];
     if (value !== undefined) context[key] = value;
   }
+  if (legalAction.payload?.allNighterBonusRunOnFinish === true)
+    context.allNighterBonusRunOnFinish = true;
+  if (legalAction.payload?.bypassFirstIce === true)
+    context.bypassFirstIce = true;
+  if (legalAction.payload?.scoredAsAgenda === true)
+    context.scoredAsAgenda = true;
   if (typeof legalAction.payload?.sourceTrashed === "boolean")
     context.sourceTrashed = legalAction.payload.sourceTrashed;
   if (typeof legalAction.payload?.ambushDefinitionId === "string")
@@ -19429,6 +19525,12 @@ function publicContextForAction(
     context.v1919Overadvance = legalAction.payload.v1919Overadvance;
   if (typeof legalAction.payload?.v1919BonusAgendaPoints === "number")
     context.v1919BonusAgendaPoints = legalAction.payload.v1919BonusAgendaPoints;
+  if (typeof legalAction.payload?.projectBabylonOveradvance === "number")
+    context.projectBabylonOveradvance =
+      legalAction.payload.projectBabylonOveradvance;
+  if (typeof legalAction.payload?.projectBabylonBonusAgendaPoints === "number")
+    context.projectBabylonBonusAgendaPoints =
+      legalAction.payload.projectBabylonBonusAgendaPoints;
   if (state.winner && state.gameEndReason)
     context.gameEndReason = state.gameEndReason;
   if (state.run?.phase) context.runPhase = state.run.phase;
@@ -19518,11 +19620,18 @@ function revealForPublicEvent(
         legalAction.payload?.v1917AssetAbility === "trace_3_tag" ||
         legalAction.payload?.v1917AssetAbility === "spinn_load_pool")) ||
     (legalAction.type === "gain_credit" &&
+      typeof legalAction.payload?.v1920AssetAbility === "string") ||
+    (legalAction.type === "gain_credit" &&
       legalAction.payload?.traceStarted === true) ||
     (legalAction.type === "gain_credit" &&
       (legalAction.payload?.agendaAbility === "v1922_political_overthrow" ||
         legalAction.payload?.agendaAbility === "v1922_marine_arcology" ||
         legalAction.payload?.agendaAbility === "v1922_corporate_retreat")) ||
+    (legalAction.side === "runner" &&
+      (legalAction.type === "gain_credit" ||
+        legalAction.type === "trigger_ability" ||
+        legalAction.type === "remove_tag") &&
+      typeof legalAction.payload?.resourceAbility === "string") ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId =

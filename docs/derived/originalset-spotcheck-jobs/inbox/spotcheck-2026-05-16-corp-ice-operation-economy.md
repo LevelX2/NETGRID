@@ -1,8 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-corp-ice-operation-economy
-status: in_progress
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
 startedAt: 2026-05-16T13:15:29+02:00
+completedAt: 2026-05-16T13:20:23+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -162,3 +163,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Status: `committed`.
+
+Umgesetzt:
+
+- `Sentinels Prime`, `Sleeper` und `Wall of Static` wurden gegen Rez-Sichtbarkeit, Wrong-Side/Stale, Continue/Runende, PublicPayload-Leakscan und Replay/StateHash nachgetestet.
+- `Sentinels Prime` deckt zusätzlich den ungebrochenen Programm-Trash ab.
+- `Accounts Receivable`, `Annual Reviews` und `Day Shift` schreiben sichere Ergebnisfelder für Credits und Draw-Anzahl in den PublicPayload-Kontext.
+- `Audit of Call Records` und `Chance Observation` wurden als Run-Attempt-gated Trace-Operationen replay-sicher nachgetestet.
+- `Corporate Detective Agency` veröffentlicht Resource-Definitionen statt Karteninstanz-IDs.
+- `Falsified-Transactions Expert` wurde im V1.9.19-Power-Counter-Operation-Pfad mit Ziel-/Payload- und Replay-Prüfung nachgetestet.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen
+- `corepack pnpm --filter @netgrid/catalog test` gruen
+- `corepack pnpm typecheck` gruen
+
+Commitstatus: Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.
