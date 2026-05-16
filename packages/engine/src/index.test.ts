@@ -6498,6 +6498,149 @@ describe("V1.6.3 Mechanikpaket C", () => {
     }
   });
 
+  it("offers HQ and R&D root install targets for Antiquated Interface Routines", () => {
+    const centralRootCorpDeck: DeckDefinition = {
+      ...ONR_V1_6_3_CORP_DECK,
+      id: "onr_v1_corp_v163_central_root_install",
+      cards: [
+        ...ONR_V1_6_3_CORP_DECK.cards,
+        { id: "simple_agenda", quantity: 1 },
+        { id: "simple_economy_asset", quantity: 1 },
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v163-antiquated-central-root-install",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: ONR_V1_6_3_RUNNER_DECK,
+      corpDeck: centralRootCorpDeck,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 40;
+    state.corp.clicks = 3;
+    state.corp.maxHandSize = 100;
+    const upgradeId = moveCorpCardToHq(
+      state,
+      "onr_v1_350_antiquated-interface-routines",
+    );
+    const agendaId = moveCorpCardToHq(state, "simple_agenda");
+    const assetId = moveCorpCardToHq(state, "simple_economy_asset");
+    const upgradeTargets = getLegalActions(state, "corp")
+      .filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === upgradeId &&
+          action.payload?.placement === "root",
+      )
+      .map((action) => action.payload?.serverId)
+      .sort();
+    const agendaTargets = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === agendaId &&
+        (action.payload?.serverId === "hq" || action.payload?.serverId === "rd"),
+    );
+    const assetTargets = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === assetId &&
+        (action.payload?.serverId === "hq" || action.payload?.serverId === "rd"),
+    );
+
+    expect(upgradeTargets).toEqual(
+      expect.arrayContaining(["new_remote", "hq", "rd"]),
+    );
+    expect(upgradeTargets).not.toContain("archives");
+    expect(agendaTargets).toEqual([]);
+    expect(assetTargets).toEqual([]);
+
+    const hqInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === upgradeId &&
+        action.payload?.serverId === "hq" &&
+        action.payload?.placement === "root",
+    );
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: hqInstall.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "v163-antiquated-central-wrong-side",
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: hqInstall.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: "v163-antiquated-central-stale",
+      }).ok,
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === hqInstall.actionId,
+    );
+    expect(
+      state.corp.servers.find((server) => server.id === "hq")?.root,
+    ).toContain(upgradeId);
+    expect(
+      getPlayerView(state, "corp").servers.find((server) => server.id === "hq")
+        ?.root[0]?.definitionId,
+    ).toBe("onr_v1_350_antiquated-interface-routines");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Antiquated Interface Routines",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === upgradeId &&
+        action.payload?.rootRez === true,
+    );
+    expect(state.cardInstances[upgradeId]?.rezzed).toBe(true);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
+      "Antiquated Interface Routines",
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let rdState = v163CardReleaseGame("v163-antiquated-rd-root-install");
+    rdState = apply(
+      rdState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    rdState.corp.credits = 40;
+    rdState.corp.clicks = 3;
+    const rdUpgradeId = moveCorpCardToHq(
+      rdState,
+      "onr_v1_350_antiquated-interface-routines",
+    );
+    rdState = apply(
+      rdState,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === rdUpgradeId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "root",
+    );
+    expect(
+      rdState.corp.servers.find((server) => server.id === "rd")?.root,
+    ).toContain(rdUpgradeId);
+  });
+
   it("applies Antiquated Interface strength and Tokyo-Chiba unsuccessful-run credit on its fort", () => {
     let strengthState = v163CardReleaseGame("v163-antiquated-strength");
     strengthState = apply(

@@ -3101,9 +3101,7 @@ function corpMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      for (const server of state.corp.servers.filter(
-        (candidate) => candidate.kind === "remote",
-      )) {
+      for (const server of state.corp.servers) {
         if (
           canInstallCorpRootCardInServer(state, definition, server) &&
           state.corp.credits >= regionInstallCost
@@ -9402,7 +9400,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       : mustServer(state, String(legalAction.payload?.serverId));
   if (!canInstallCorpRootCardInServer(state, definition, server)) {
     throw new Error(
-      "In einem Außenserver darf nur eine Agenda oder ein Asset im Root installiert sein.",
+      "In diesem Server darf diese Karte nicht im Root installiert sein.",
     );
   }
   server.root.push(cardId);
@@ -9432,8 +9430,8 @@ function canInstallCorpRootCardInServer(
   definition: CardDefinition,
   server: CorpServer,
 ): boolean {
+  if (definition.type === "upgrade") return server.kind !== "archives";
   if (server.kind !== "remote") return false;
-  if (definition.type === "upgrade") return true;
   if (definition.type !== "agenda" && definition.type !== "asset") return false;
   return !server.root.some((id) => {
     const installedType = definitionFor(state, id).type;
