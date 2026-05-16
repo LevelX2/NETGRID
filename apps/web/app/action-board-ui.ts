@@ -210,6 +210,7 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
 }
 
 function resourceAbilityContextLabel(action: LegalAction): string | null {
+  if (action.payload?.runnerAbility === "remove_data_raven_counter") return "Raven-Counter entfernen";
   if (action.payload?.shellTradersAbility === "set_aside_from_grip") return "Karte vorbereiten";
   if (action.payload?.shellTradersAbility === "remove_shell_counter") return "Shell-Counter entfernen";
   switch (action.payload?.resourceAbility) {

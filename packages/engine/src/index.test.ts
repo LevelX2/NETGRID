@@ -24161,6 +24161,18 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       rezzed: true,
     };
     setCardCounterForTest(state, dataRavenId, "power", 2);
+    const runnerDataRaven = getPlayerView(state, "runner")
+      .servers.flatMap((server) => server.ice)
+      .find((card) => card.instanceId === dataRavenId);
+    expect(runnerDataRaven?.counters?.power).toBe(2);
+    expect(
+      getPlayerView(state, "runner").legalActions.some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.runnerAbility === "remove_data_raven_counter" &&
+          action.payload?.cardId === dataRavenId,
+      ),
+    ).toBe(true);
     state = apply(
       state,
       "runner",

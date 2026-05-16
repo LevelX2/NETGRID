@@ -10162,6 +10162,7 @@ function CardView({
   const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
   const recurringCredits = preview ? 0 : recurringCreditAmount(card);
   const shellCounters = preview ? 0 : shellCounterAmount(card);
+  const dataRavenCounters = preview ? 0 : dataRavenCounterAmount(card);
   const storedCreditSource = storedCreditSourceLabel(card);
   const brokerStoredCreditsAria =
     brokerStoredCredits > 0 && storedCreditSource
@@ -10169,12 +10170,15 @@ function CardView({
       : null;
   const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
   const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
+  const dataRavenCountersAria = dataRavenCounters > 0 ? `${dataRavenCounters} Data-Raven-Counter` : null;
+  const counterAriaSuffix = [brokerStoredCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria].filter(Boolean).join(", ");
+  const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${recurringCreditsAria ? `, ${recurringCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
+      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${brokerStoredCreditsAria ? `, ${brokerStoredCreditsAria}` : ""}${recurringCreditsAria ? `, ${recurringCreditsAria}` : ""}${shellCountersAria ? `, ${shellCountersAria}` : ""}`
+      ? `Karte ${card.title}${cardStateAria}`
       : "Verdeckte Karte";
 
   const estimatedTooltipHeight = (): number => {
@@ -10505,6 +10509,7 @@ function CardView({
         {brokerStoredCredits > 0 && storedCreditSource ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} sourceLabel={storedCreditSource} /> : null}
         {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
+        {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
       {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}
@@ -10768,6 +10773,14 @@ function ShellCounterBadge({ amount }: { amount: number }) {
   );
 }
 
+function DataRavenCounterBadge({ amount }: { amount: number }) {
+  return (
+    <span className="dataRavenCounterBadge" aria-label={`${amount} Data-Raven-Counter`} data-testid="data-raven-counter-badge">
+      {amount} Raven
+    </span>
+  );
+}
+
 function advancementGemStyle(instanceId: string, index: number): CSSProperties {
   const seed = hashString(`${instanceId}:${index}`);
   const x = 18 + (seed % 58);
@@ -10804,7 +10817,8 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Stärke", card.strength),
     brokerStoredCreditsLabel(card),
     recurringCreditLabel(card),
-    shellCounterLabel(card)
+    shellCounterLabel(card),
+    dataRavenCounterLabel(card)
   ]
     .filter(Boolean)
     .join(" · ");
@@ -10831,6 +10845,12 @@ function recurringCreditLabel(card: VisibleCard): string | null {
   return `${amount} wiederkehrende ${creditLabel(amount)}`;
 }
 
+function dataRavenCounterLabel(card: VisibleCard): string | null {
+  const amount = dataRavenCounterAmount(card);
+  if (amount <= 0) return null;
+  return `${amount} Data-Raven-Counter`;
+}
+
 function shellCounterAmount(card: VisibleCard): number {
   const amount = card.counters?.shell ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
@@ -10843,6 +10863,12 @@ function recurringCreditAmount(card: VisibleCard): number {
 
 function brokerStoredCreditsAmount(card: VisibleCard): number {
   if (!storedCreditSourceLabel(card)) return 0;
+  const amount = card.counters?.power ?? 0;
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+function dataRavenCounterAmount(card: VisibleCard): number {
+  if (card.definitionId !== "onr_v1_236_data-raven") return 0;
   const amount = card.counters?.power ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }

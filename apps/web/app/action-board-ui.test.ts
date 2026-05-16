@@ -379,6 +379,23 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(take)).toBe("6 Credits nehmen");
   });
 
+  it("labels Data Raven counter removal on the rezzed ice overlay", () => {
+    const remove = legalAction("runner", "trigger_ability", "data_raven_1", "Data-Raven-Counter entfernen", {
+      cardId: "data_raven_1",
+      runnerAbility: "remove_data_raven_counter",
+      counterType: "power",
+      removeCounterAmount: 1
+    });
+
+    const split = splitLegalActions([remove]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([remove]);
+    expect(actionMatchesContext(remove, { kind: "card", id: "data_raven_1", label: "Data Raven" })).toBe(true);
+    expect(actionButtonLabel(remove)).toBe("Raven-Counter entfernen");
+    expect(contextualCardActionLabel(remove)).toBe("Raven-Counter entfernen");
+  });
+
   it("labels The Shell Traders abilities on the installed resource overlay", () => {
     const prepare = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Karte vorbereiten", {
       cardId: "shell_traders_1",

@@ -4838,7 +4838,8 @@ select {
 }
 
 .lane .brokerStoredCreditsBadge,
-.lane .recurringCreditBadge {
+.lane .recurringCreditBadge,
+.lane .dataRavenCounterBadge {
   top: calc(5px * var(--lane-card-scale, 1));
   right: calc(5px * var(--lane-card-scale, 1));
   min-height: calc(19px * var(--lane-card-scale, 1));
@@ -5322,6 +5323,33 @@ select {
   box-shadow:
     0 4px 9px rgb(0 0 0 / 0.34),
     inset 0 1px 1px rgb(214 252 255 / 0.28);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
+.dataRavenCounterBadge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 46;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--corp), white 18%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
+    linear-gradient(135deg, color-mix(in srgb, var(--corp), #2a1119 34%), rgb(26 18 27 / 0.96));
+  color: color-mix(in srgb, var(--corp), white 72%);
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(255 218 214 / 0.22);
   font-size: 10px;
   font-weight: 900;
   line-height: 1;
