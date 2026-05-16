@@ -13802,6 +13802,15 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
           expect.arrayContaining(["access", "breach", "multiaccess"]),
         );
         expect(definition?.mechanics).not.toContain("damage_prevention");
+      } else if (definitionId === "onr_v1_155_code-viral-cache") {
+        expect(definition?.mechanics).toEqual(
+          expect.arrayContaining([
+            "successful_hq_run_condition",
+            "virus_counter_purge_replacement",
+            "corp_trash_action",
+          ]),
+        );
+        expect(definition?.mechanics).not.toContain("damage_prevention");
       } else {
         expect(definition?.mechanics.join(" "), definitionId).toMatch(
           /damage|prevention|event_modification|flatline/,
@@ -13827,6 +13836,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
           "onr_v1_224_bolter-cluster",
           "onr_v1_234_data-darts",
           "onr_v1_258_neural-blade",
+          "onr_v1_155_code-viral-cache",
         ].includes(id),
     )) {
       moveRunnerCardToGrip(state, definitionId);
@@ -13847,10 +13857,107 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(installedDefinitions).toEqual(
       expect.arrayContaining(
         MECHANIC_SMOKE_CARD_IDS.damagePrevention.filter(
-          (id) => !id.startsWith("onr_v1_2"),
+          (id) =>
+            !id.startsWith("onr_v1_2") &&
+            id !== "onr_v1_155_code-viral-cache",
         ),
       ),
     );
+  });
+
+  it("gates Code Viral Cache on HQ success, preserves two purge counters and lets Corp trash it", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.damagePrevention("v1913-code-viral-cache"),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    state.runner.clicks = 4;
+    const cacheGripId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_155_code-viral-cache",
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === cacheGripId,
+      ),
+    ).toBe(false);
+
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      successfulHqRunThisTurn: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_155_code-viral-cache",
+    );
+    const cacheId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_155_code-viral-cache",
+    );
+    expect(cacheId).toBeDefined();
+    if (!cacheId) throw new Error("Missing installed Code Viral Cache");
+    setCardCounterForTest(state, cacheId, "virus", 3);
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "purge_virus_counters",
+    );
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(state.pendingChoice?.maxSelections).toBe(2);
+    const preserveOptions = state.pendingChoice?.options
+      .map((option) => option.id)
+      .filter((id) => id.startsWith(`card:${cacheId}:`))
+      .slice(0, 2) ?? [];
+    state = applyChoices(state, "runner", preserveOptions);
+    expect(cardCounterAmount(state, cacheId, "virus")).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_155_code-viral-cache",
+      codeViralCachePreservedCounters: 2,
+      remainingVirusCounters: 2,
+    });
+
+    state.corp.clicks = 1;
+    state.corp.credits = 5;
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.corpAbility === "trash_code_viral_cache",
+    );
+    expect(
+      state.runner.rig.resources.some(
+        (id) =>
+          state.cardInstances[id]?.definitionId ===
+          "onr_v1_155_code-viral-cache",
+      ),
+    ).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_155_code-viral-cache",
+      amounts: {
+        trashCostPaid: 5,
+      },
+      targets: {
+        trashedCardDefinitionId: "onr_v1_155_code-viral-cache",
+      },
+    });
   });
 
   it("spends Armored Fridge counters for meat prevention and trashes the empty source", () => {
@@ -15410,7 +15517,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state.runner.credits = 10;
     state.corp.credits = 0;
     installRunnerProgramForTest(state, "onr_v1_065_smarteye");
-    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    putCorpIceCopyOnServer(state, "rd", "onr_v1_227_cerberus");
     putCorpIceOnServer(state, "rd", "onr_v1_255_mastiff");
 
     state = apply(
@@ -15519,7 +15626,11 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(state.runner.grip.length).toBe(gripBefore - 3);
     expect(state.trace).toMatchObject({
       sourceDefinitionId: "onr_v1_227_cerberus",
-      successEffect: { type: "none" },
+      successEffect: {
+        type: "add_counter",
+        counterType: "cerberus",
+        amount: 1,
+      },
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       damageResolved: true,
@@ -15535,7 +15646,53 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
       tagsAdded: 0,
+      counterType: "cerberus",
+      addedCounterAmount: 1,
+      remainingCounters: 1,
     });
+    expect(cardCounterAmount(state, state.runner.identity, "cerberus")).toBe(1);
+    state.runner.clicks = 1;
+    state.runner.credits = 4;
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.activeSide = "runner";
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.runnerAbility === "remove_cerberus_counter",
+    );
+    expect(cardCounterAmount(state, state.runner.identity, "cerberus")).toBe(0);
+  });
+
+  it("applies Cerberus counter damage at run start and replays it deterministically", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-cerberus-counter-run-start"),
+    );
+    drawRunnerCardsForTest(state, 6);
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
+    const initial = structuredClone(state);
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    expect(state.runner.grip.length).toBe(gripBefore - 4);
+    expect(cardCounterAmount(state, state.runner.identity, "cerberus")).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_227_cerberus",
+      cerberusCounterCount: 2,
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 4,
+      cardsTrashed: 4,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("allows New Blood only after a visible Runner run attempt last turn", () => {
@@ -23549,45 +23706,54 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     });
     state = apply(state, "runner", (action) => action.type === "decline_trash");
 
-    state.activeSide = "corp";
-    state.phase = "corp_action_phase";
-    state.timingPoint = "corp_action.main";
-    state.corp.clicks = 3;
-    const parisId = putCorpRootInRemote(state, "onr_v1_365_paris-city-grid");
-    state.cardInstances[parisId] = {
-      ...state.cardInstances[parisId]!,
+    let traceState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-crybaby-link-trace"),
+    );
+    traceState.corp.credits = 5;
+    traceState.runner.credits = 0;
+    setCardCounterForTest(traceState, traceState.runner.identity, "crying", 1);
+    const turbeauId = putCorpRootInRemote(
+      traceState,
+      "onr_v1_372_turbeau-delacroix",
+    );
+    traceState.cardInstances[turbeauId] = {
+      ...traceState.cardInstances[turbeauId]!,
       faceup: true,
       rezzed: true,
     };
-    state = apply(
-      state,
-      "corp",
+    traceState = apply(
+      traceState,
+      "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1918UpgradeAbility === "trace_2_tag" &&
-        action.payload?.cardId === parisId,
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    state = applyChoice(state, "corp", "bid_0");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    traceState = apply(
+      traceState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    traceState = applyChoice(traceState, "corp", "bid_0");
+    expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "corp_bid",
+      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
       runnerLink: 0,
       cryingCounterCount: 1,
       cryingLinkReduction: 2,
     });
 
-    state = applyChoice(state, "runner", "bid_0");
-    state.activeSide = "runner";
-    state.phase = "runner_action_phase";
-    state.timingPoint = "runner_action.main";
-    state.runner.clicks = 4;
-    state.runner.credits = 20;
-    state = apply(
-      state,
+    traceState = applyChoice(traceState, "runner", "bid_0");
+    traceState.activeSide = "runner";
+    traceState.phase = "runner_action_phase";
+    traceState.timingPoint = "runner_action.main";
+    traceState.runner.clicks = 4;
+    traceState.runner.credits = 20;
+    traceState = apply(
+      traceState,
       "runner",
       (action) => action.payload?.runnerAbility === "remove_crying_counter",
     );
-    expect(cardCounterAmount(state, state.runner.identity, "crying")).toBe(0);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    expect(cardCounterAmount(traceState, traceState.runner.identity, "crying")).toBe(0);
+    expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
       runnerAbility: "remove_crying_counter",
       removedCounterAmount: 1,
       remainingCounters: 0,
@@ -23921,15 +24087,12 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("covers V1.9.18 city-grid trace and run-start stealth tax paths", () => {
-    let traceState = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-paris-city-grid-trace");
-    traceState.corp.credits = 5;
-    traceState.runner.credits = 5;
-    traceState = apply(
-      traceState,
-      "corp",
-      (action) => action.type === "mandatory_draw",
+  it("covers V1.9.18 city-grid trace pool and run-start stealth tax paths", () => {
+    let traceState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-paris-city-grid-trace"),
     );
+    traceState.corp.credits = 5;
+    traceState.runner.credits = 0;
     const parisId = putCorpRootInRemote(
       traceState,
       "onr_v1_365_paris-city-grid",
@@ -23938,23 +24101,54 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       ...traceState.cardInstances[parisId]!,
       faceup: true,
       rezzed: true,
+      counters: { bit: 6 },
     };
+    const turbeauId = putCorpRootInRemote(
+      traceState,
+      "onr_v1_372_turbeau-delacroix",
+    );
+    traceState.cardInstances[turbeauId] = {
+      ...traceState.cardInstances[turbeauId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const traceServer = traceState.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
+    if (traceServer) traceServer.root = [turbeauId, parisId];
     const traceInitial = structuredClone(traceState);
     const traceReplayStart = traceState.eventLog.length;
 
     traceState = apply(
       traceState,
-      "corp",
+      "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1918UpgradeAbility === "trace_2_tag",
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    traceState = apply(
+      traceState,
+      "runner",
+      (action) => action.type === "access_card",
     );
     expect(traceState.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 2,
-      sourceDefinitionId: "onr_v1_365_paris-city-grid",
+      baseTraceStrength: 4,
+      corpBidMax: 11,
+      sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
+      parisCityGridPoolSourceCardInstanceId: parisId,
+      parisCityGridPoolServerId: "remote_1",
     });
-    traceState = applyChoice(traceState, "corp", "bid_0");
+    traceState = applyChoice(traceState, "corp", "bid_6");
+    expect(cardCounterAmount(traceState, parisId, "bit")).toBe(0);
+    expect(traceState.corp.credits).toBe(5);
+    expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "corp_bid",
+      corpBid: 6,
+      corpCreditBid: 0,
+      parisCityGridPoolSpent: 6,
+      parisCityGridPoolRemaining: 0,
+      parisCityGridPoolServerId: "remote_1",
+    });
     traceState = applyChoice(traceState, "runner", "bid_0");
     expect(traceState.runner.tags).toBe(1);
     expect(validateGameState(traceState).ok).toBe(true);

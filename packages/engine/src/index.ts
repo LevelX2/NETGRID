@@ -328,6 +328,7 @@ const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const BLACK_ICE_QUALITY_ASSURANCE_ID =
   "onr_v1_191_black-ice-quality-assurance";
 const BROKER_ID = "onr_v1_154_broker";
+const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
@@ -336,6 +337,7 @@ const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
 const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
+const CERBERUS_ID = "onr_v1_227_cerberus";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
 const FANG_ID = "onr_v1_240_fang";
 const FANG_2_0_ID = "onr_v1_241_fang-2-0";
@@ -374,6 +376,7 @@ const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
 const RUSTBELT_HQ_BRANCH_ID = "onr_v1_338_rustbelt-hq-branch";
+const PARIS_CITY_GRID_TRACE_POOL_BITS = 6;
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -2957,6 +2960,38 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
   }
+  if (state.corp.credits >= 5) {
+    for (const id of state.runner.rig.resources.slice().sort()) {
+      if (definitionFor(state, id).id !== CODE_VIRAL_CACHE_ID) continue;
+      actions.push(
+        action(
+          state,
+          "corp",
+          "trigger_ability",
+          "Code Viral Cache trashen",
+          id,
+          [{ clicks: 1, credits: 5 }],
+          {
+            cardId: id,
+            corpAbility: "trash_code_viral_cache",
+            sourceDefinitionId: CODE_VIRAL_CACHE_ID,
+            trashCostPaid: 5,
+          },
+          {
+            targetRequirements: [
+              {
+                id: "codeViralCache",
+                kind: "card",
+                side: "runner",
+                zoneScope: ["runner.rig.resources"],
+                visibility: "public",
+              },
+            ],
+          },
+        ),
+      );
+    }
+  }
   for (const id of state.corp.hq) {
     const definition = definitionFor(state, id);
     if (
@@ -3283,23 +3318,6 @@ function corpMainActions(state: GameState): LegalAction[] {
             v1918UpgradeAbility: "add_power_counter",
             counterType: "power",
             addCounterAmount: 1,
-          },
-        ),
-      );
-    }
-    if (definition.id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Trace 2 starten`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1918UpgradeAbility: "trace_2_tag",
-            traceStrength: 2,
           },
         ),
       );
@@ -3951,6 +3969,28 @@ function runnerMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
+    if (
+      cardCounter(state, state.runner.identity, "cerberus") > 0 &&
+      state.runner.credits >= 4
+    ) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "gain_credit",
+          "Cerberus-Counter entfernen",
+          state.runner.identity,
+          [{ clicks: 1, credits: 4 }],
+          {
+            runnerAbility: "remove_cerberus_counter",
+            cardId: state.runner.identity,
+            counterType: "cerberus",
+            removeCounterAmount: 1,
+            gainCreditsAmount: 0,
+          },
+        ),
+      );
+    }
     for (const dataRavenId of rezzedInstalledIceIds(state).sort()) {
       if (definitionFor(state, dataRavenId).id !== DATA_RAVEN_ID) continue;
       if (cardCounter(state, dataRavenId, "power") <= 0) continue;
@@ -4119,6 +4159,12 @@ function runnerMainActions(state: GameState): LegalAction[] {
       !uniqueBlocked &&
       state.runner.credits >= (definition.installCost ?? 0)
     ) {
+      if (
+        definition.id === CODE_VIRAL_CACHE_ID &&
+        ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true
+      ) {
+        continue;
+      }
       if (definition.id === "onr_v1_156_corporate-ally") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
@@ -6594,6 +6640,40 @@ function performAction(
         };
         return;
       }
+      if (legalAction.payload?.runnerAbility === "remove_cerberus_counter") {
+        if (legalAction.side !== "runner")
+          throw new Error("Nur der Runner darf Cerberus-Counter entfernen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (sourceCardId !== state.runner.identity)
+          throw new Error(
+            "Cerberus-Counter liegen auf dem Runner-Identitaetsstatus.",
+          );
+        if (cardCounter(state, state.runner.identity, "cerberus") <= 0)
+          throw new Error("Es ist kein Cerberus-Counter vorhanden.");
+        const removeAmount = Number(
+          legalAction.payload?.removeCounterAmount ?? 0,
+        );
+        if (!Number.isInteger(removeAmount) || removeAmount !== 1)
+          throw new Error("Es wird genau 1 Cerberus-Counter entfernt.");
+        spendCredits(state, "runner", 4);
+        spendCardCounter(
+          state,
+          state.runner.identity,
+          "cerberus",
+          removeAmount,
+        );
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          removedCounterAmount: removeAmount,
+          remainingCounters: cardCounter(
+            state,
+            state.runner.identity,
+            "cerberus",
+          ),
+          runnerCreditsAfter: state.runner.credits,
+        };
+        return;
+      }
       if (legalAction.payload?.v1917AssetAbility === "spinn_load_pool") {
         if (legalAction.side !== "corp")
           throw new Error("Nur die Korp darf Spinn Public Relations laden.");
@@ -7943,6 +8023,7 @@ function performAction(
       return;
     case "purge_virus_counters": {
       spendClicks(state, "corp", 3);
+      if (startCodeViralCachePurgeChoice(state, legalAction)) return;
       const purged = purgeVirusCounters(state);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -7970,6 +8051,24 @@ function performAction(
       endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
+      if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {
+        if (legalAction.side !== "corp")
+          throw new Error("Nur die Korp darf Code Viral Cache trashen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!state.runner.rig.resources.includes(sourceCardId))
+          throw new Error("Code Viral Cache ist nicht installiert.");
+        if (definitionFor(state, sourceCardId).id !== CODE_VIRAL_CACHE_ID)
+          throw new Error("Die Code-Viral-Cache-Faehigkeit passt nicht zur Karte.");
+        spendClick(state, "corp");
+        spendCredits(state, "corp", 5);
+        trashRunnerInstalledCardToHeap(state, sourceCardId);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          trashedCardDefinitionId: CODE_VIRAL_CACHE_ID,
+          corpCreditsAfter: state.corp.credits,
+        };
+        return;
+      }
       if (legalAction.payload?.v1922RunnerProgramAbility === "false_echo_force_rez") {
         resolveFalseEchoForceRez(state, legalAction);
         return;
@@ -8710,6 +8809,14 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         "Restrictive Net Zoning benötigt einen gültigen Zielserver.",
       );
     }
+    if (
+      definition.id === CODE_VIRAL_CACHE_ID &&
+      ensureRunnerTurnFlags(state).successfulHqRunThisTurn !== true
+    ) {
+      throw new Error(
+        "Code Viral Cache darf nur nach erfolgreichem HQ-Run in diesem Zug installiert werden.",
+      );
+    }
     const restrictiveTargetServerId =
       selectedServerId && selectedServerId !== "new_remote"
         ? (selectedServerId as Exclude<ServerId, "new_remote">)
@@ -9056,6 +9163,8 @@ function startRun(
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
+  applyCerberusRunStartDamage(state, legalAction);
+  if (state.winner) return;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -9083,6 +9192,33 @@ function startRun(
     approachOrEncounterIce(state, approachedIceId, legalAction);
   } else {
     enterAccess(state, legalAction);
+  }
+}
+
+function applyCerberusRunStartDamage(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const counterCount = cardCounter(state, state.runner.identity, "cerberus");
+  if (counterCount <= 0) return;
+  const damageAmount = counterCount * 2;
+  const summary = doDamage(state, {
+    damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.cerberus_counter_start_damage`,
+    damageType: "net",
+    amount: damageAmount,
+    source: `counter:${CERBERUS_ID}`,
+  });
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: CERBERUS_ID,
+      cerberusCounterCount: counterCount,
+      damageResolved: true,
+      damageType: summary.damageType,
+      damageAmount: summary.amount,
+      cardsTrashed: summary.cardsTrashed,
+      flatline: summary.flatline,
+    };
   }
 }
 
@@ -9224,6 +9360,23 @@ function rezCard(
   };
   if (definition.id === KRUMZ_TRACE_ASSET_CARD_ID) {
     setCardCounter(state, cardId as CardInstanceId, "bit", 1);
+  }
+  if (definition.id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID) {
+    setCardCounter(
+      state,
+      cardId as CardInstanceId,
+      "bit",
+      PARIS_CITY_GRID_TRACE_POOL_BITS,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
+        counterType: "bit",
+        addedCounterAmount: PARIS_CITY_GRID_TRACE_POOL_BITS,
+        remainingCounters: PARIS_CITY_GRID_TRACE_POOL_BITS,
+      };
+    }
   }
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
@@ -9920,10 +10073,12 @@ function startTraceFromSubroutine(
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = definitionFor(state, sourceCardInstanceId);
   const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
+  const parisPoolSource = parisCityGridTracePoolSource(state);
   const baseCorpBidMax =
     state.corp.credits +
     hackerTrackerCounterTotal(state) +
-    krumzTraceBitTotal(state);
+    krumzTraceBitTotal(state) +
+    (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0);
   const rabbitTraceLimitReduction = rabbitTraceLimitReductionForIceTrace(state);
   const corpBidMax = Math.max(0, baseCorpBidMax - rabbitTraceLimitReduction);
   state.trace = {
@@ -9934,6 +10089,12 @@ function startTraceFromSubroutine(
     baseTraceStrength,
     corpBidMax,
     ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
+    ...(parisPoolSource
+      ? {
+          parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
+          parisCityGridPoolServerId: parisPoolSource.serverId,
+        }
+      : {}),
     status: "corp_bid",
     successEffect,
   };
@@ -9956,6 +10117,17 @@ function startTraceFromSubroutine(
       baseTraceStrength,
       corpBidMax,
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
+      ...(parisPoolSource
+        ? {
+            parisCityGridPoolAvailable: cardCounter(
+              state,
+              parisPoolSource.cardId,
+              "bit",
+            ),
+            parisCityGridPoolServerId: parisPoolSource.serverId,
+            sourceDefinitionId: sourceDefinition.id,
+          }
+        : {}),
     };
   }
 }
@@ -9984,13 +10156,25 @@ function startTraceFromOperation(
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
   const traceId = `op_trace.${state.stateVersion + 1}.${sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
+  const parisPoolSource = parisCityGridTracePoolSource(state);
   state.trace = {
     traceId,
     sourceCardInstanceId,
     sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
     baseTraceStrength,
+    corpBidMax:
+      state.corp.credits +
+      hackerTrackerCounterTotal(state) +
+      krumzTraceBitTotal(state) +
+      (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0),
     status: "corp_bid",
     successEffect: { type: "add_tag", amount: 1 },
+    ...(parisPoolSource
+      ? {
+          parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
+          parisCityGridPoolServerId: parisPoolSource.serverId,
+        }
+      : {}),
     returnPhase: state.phase,
     returnTimingPoint: state.timingPoint,
     returnActiveSide: state.activeSide,
@@ -10002,7 +10186,8 @@ function startTraceFromOperation(
     `Korp Trace-Bid wählen (Base Trace ${baseTraceStrength})`,
     state.corp.credits +
       hackerTrackerCounterTotal(state) +
-      krumzTraceBitTotal(state),
+      krumzTraceBitTotal(state) +
+      (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0),
   );
   state.activeSide = "corp";
   legalAction.payload = {
@@ -10012,6 +10197,21 @@ function startTraceFromOperation(
     sourceCardId: sourceCardInstanceId,
     sourceDefinitionId,
     baseTraceStrength,
+    ...(parisPoolSource
+      ? {
+          corpBidMax:
+            state.corp.credits +
+            hackerTrackerCounterTotal(state) +
+            krumzTraceBitTotal(state) +
+            cardCounter(state, parisPoolSource.cardId, "bit"),
+          parisCityGridPoolAvailable: cardCounter(
+            state,
+            parisPoolSource.cardId,
+            "bit",
+          ),
+          parisCityGridPoolServerId: parisPoolSource.serverId,
+        }
+      : {}),
   };
 }
 
@@ -12354,6 +12554,12 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
       cardCounter(state, cardId, "bit") <= 0
     ) {
       setCardCounter(state, cardId, "bit", 1);
+    }
+    if (
+      definitionId === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID &&
+      cardCounter(state, cardId, "bit") < PARIS_CITY_GRID_TRACE_POOL_BITS
+    ) {
+      setCardCounter(state, cardId, "bit", PARIS_CITY_GRID_TRACE_POOL_BITS);
     }
     if (definitionId === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID) {
       if (cardCounter(state, cardId, "bit") > 0) {
@@ -15053,6 +15259,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v181.pattels_virus")) {
     resolvePattelsVirusCounterChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1913.code_viral_cache_purge")) {
+    resolveCodeViralCachePurgeChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v199.aardvark")) {
@@ -18116,6 +18326,56 @@ function spendKrumzTraceBits(state: GameState, amount: number): number {
   return spent;
 }
 
+function parisCityGridTracePoolSource(
+  state: GameState,
+): { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> } | undefined {
+  const run = state.run;
+  if (!run) return undefined;
+  const server = mustServer(state, run.attackedServerId);
+  const cardId = server.root
+    .slice()
+    .sort()
+    .find((rootId) => {
+      const instance = state.cardInstances[rootId];
+      return (
+        instance?.rezzed === true &&
+        definitionFor(state, rootId).id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID &&
+        cardCounter(state, rootId, "bit") > 0
+      );
+    });
+  return cardId ? { cardId, serverId: server.id } : undefined;
+}
+
+function parisCityGridTracePoolTotal(state: GameState): number {
+  const source = parisCityGridTracePoolSource(state);
+  return source ? cardCounter(state, source.cardId, "bit") : 0;
+}
+
+function spendParisCityGridTracePool(
+  state: GameState,
+  sourceCardId: CardInstanceId | undefined,
+  serverId: Exclude<ServerId, "new_remote"> | undefined,
+  amount: number,
+): number {
+  if (!Number.isInteger(amount) || amount < 0)
+    throw new Error("Paris-City-Grid-Bit-Ausgabe ist ungueltig.");
+  if (amount <= 0) return 0;
+  const current = parisCityGridTracePoolSource(state);
+  if (
+    !current ||
+    current.cardId !== sourceCardId ||
+    current.serverId !== serverId ||
+    !state.run ||
+    state.run.attackedServerId !== serverId
+  ) {
+    throw new Error("Paris City Grid ist fuer diesen Trace nicht verfuegbar.");
+  }
+  if (cardCounter(state, current.cardId, "bit") < amount)
+    throw new Error("Paris City Grid hat nicht genug Bits.");
+  spendCardCounter(state, current.cardId, "bit", amount);
+  return amount;
+}
+
 function runnerInstalledHardwareTrashTarget(
   state: GameState,
 ): CardInstanceId | undefined {
@@ -18172,11 +18432,30 @@ function resolveTraceCorpBid(
   if (!trace || trace.status !== "corp_bid")
     throw new Error("Es ist kein Korp-Trace-Bid offen.");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  const creditBid = Math.min(state.corp.credits, bid);
-  const krumzBitBid = Math.min(krumzTraceBitTotal(state), bid - creditBid);
-  const hackerTrackerBid = bid - creditBid - krumzBitBid;
+  const parisCityGridPoolAvailable =
+    trace.parisCityGridPoolSourceCardInstanceId &&
+    trace.parisCityGridPoolServerId
+      ? parisCityGridTracePoolTotal(state)
+      : 0;
+  const parisCityGridPoolBid = Math.min(parisCityGridPoolAvailable, bid);
+  const creditBid = Math.min(
+    state.corp.credits,
+    bid - parisCityGridPoolBid,
+  );
+  const krumzBitBid = Math.min(
+    krumzTraceBitTotal(state),
+    bid - parisCityGridPoolBid - creditBid,
+  );
+  const hackerTrackerBid =
+    bid - parisCityGridPoolBid - creditBid - krumzBitBid;
   if (hackerTrackerBid > hackerTrackerCounterTotal(state))
     throw new Error("Hacker Tracker Central hat nicht genug Counter.");
+  const parisCityGridPoolSpent = spendParisCityGridTracePool(
+    state,
+    trace.parisCityGridPoolSourceCardInstanceId,
+    trace.parisCityGridPoolServerId,
+    parisCityGridPoolBid,
+  );
   spendCredits(state, "corp", creditBid);
   const krumzBitsSpent = spendKrumzTraceBits(state, krumzBitBid);
   const hackerTrackerCountersSpent = spendHackerTrackerCounters(
@@ -18206,6 +18485,7 @@ function resolveTraceCorpBid(
     traceId: trace.traceId,
     traceStep: "corp_bid",
     baseTraceStrength: trace.baseTraceStrength,
+    sourceDefinitionId: trace.sourceDefinitionId,
     ...(typeof trace.corpBidMax === "number"
       ? { corpBidMax: trace.corpBidMax }
       : {}),
@@ -18214,6 +18494,19 @@ function resolveTraceCorpBid(
       : {}),
     corpBid: bid,
     corpCreditBid: creditBid,
+    ...(parisCityGridPoolSpent > 0
+      ? {
+          parisCityGridPoolSpent,
+          parisCityGridPoolRemaining: trace.parisCityGridPoolSourceCardInstanceId
+            ? cardCounter(
+                state,
+                trace.parisCityGridPoolSourceCardInstanceId,
+                "bit",
+              )
+            : 0,
+          parisCityGridPoolServerId: trace.parisCityGridPoolServerId,
+        }
+      : {}),
     ...(krumzBitsSpent > 0 ? { krumzBitsSpent } : {}),
     ...(hackerTrackerCountersSpent > 0
       ? { hackerTrackerCountersSpent }
@@ -18249,6 +18542,24 @@ function resolveTraceRunnerBid(
   let fangRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
+  let traceCounterPayload: Record<string, string | number> = {};
+  if (successful && trace.successEffect.type === "add_counter") {
+    addCardCounter(
+      state,
+      state.runner.identity,
+      trace.successEffect.counterType,
+      trace.successEffect.amount,
+    );
+    traceCounterPayload = {
+      addedCounterAmount: trace.successEffect.amount,
+      counterType: trace.successEffect.counterType,
+      remainingCounters: cardCounter(
+        state,
+        state.runner.identity,
+        trace.successEffect.counterType,
+      ),
+    };
+  }
   if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
     addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
     dataRavenCounterAdded = 1;
@@ -18317,6 +18628,7 @@ function resolveTraceRunnerBid(
     runnerStrength,
     traceSuccessful: successful,
     tagsAdded,
+    ...traceCounterPayload,
     ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
     ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
     ...(fangRunEnded
@@ -18331,6 +18643,13 @@ function resolveTraceRunnerBid(
 
 function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
   if (effect.type === "none") return true;
+  if (effect.type === "add_counter") {
+    return (
+      Number.isInteger(effect.amount) &&
+      effect.amount >= 0 &&
+      effect.counterType === "cerberus"
+    );
+  }
   return (
     effect.type === "add_tag" &&
     Number.isInteger(effect.amount) &&
@@ -18956,6 +19275,10 @@ function publicContextForAction(
       "originalAmount",
       "preventedAmount",
       "finalAmount",
+      "codeViralCachePreservedCounters",
+      "preservedCounterAmount",
+      "remainingVirusCounters",
+      "preservedCardDefinitionIds",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -18996,6 +19319,7 @@ function publicContextForAction(
       "baseTraceStrength",
       "corpBidMax",
       "rabbitTraceLimitReduction",
+      "sourceDefinitionId",
       "corpBid",
       "traceStrength",
       "runnerLink",
@@ -19009,6 +19333,9 @@ function publicContextForAction(
       "cryingCounterCount",
       "cryingLinkReduction",
       "corpCreditBid",
+      "parisCityGridPoolSpent",
+      "parisCityGridPoolRemaining",
+      "parisCityGridPoolServerId",
       "krumzBitsSpent",
       "hackerTrackerCountersSpent",
       "hackerTrackerCountersAdded",
@@ -19105,6 +19432,8 @@ function publicContextForAction(
     if (typeof legalAction.payload.runnerMaxHandSizeAfter === "number")
       context.runnerMaxHandSizeAfter =
         legalAction.payload.runnerMaxHandSizeAfter;
+    if (typeof legalAction.payload.cerberusCounterCount === "number")
+      context.cerberusCounterCount = legalAction.payload.cerberusCounterCount;
   }
   if (legalAction.payload?.eventModificationWindowOpened === true) {
     context.eventModificationWindowOpened = true;
@@ -20374,6 +20703,214 @@ function purgeVirusCounters(state: GameState): number {
   }
   if (state.poxCountersByServer) state.poxCountersByServer = {};
   return total;
+}
+
+type CodeViralCachePreserveTarget =
+  | { kind: "card"; cardId: CardInstanceId; index: number }
+  | { kind: "pox"; serverId: Exclude<ServerId, "new_remote">; index: number };
+
+function installedCodeViralCacheIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.resources
+    .filter((cardId) => definitionFor(state, cardId).id === CODE_VIRAL_CACHE_ID)
+    .sort();
+}
+
+function codeViralCachePurgePreserveTargets(
+  state: GameState,
+): Array<CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }> {
+  const targets: Array<
+    CodeViralCachePreserveTarget & { optionId: string; publicLabel: string }
+  > = [];
+  for (const cardId of visibleVirusCounterTargetIds(state).sort()) {
+    const amount = cardCounter(state, cardId, "virus");
+    const title = definitionFor(state, cardId).title;
+    for (let index = 1; index <= amount; index += 1) {
+      targets.push({
+        kind: "card",
+        cardId,
+        index,
+        optionId: `card:${cardId}:${index}`,
+        publicLabel: `${title} Virus-Counter ${index}`,
+      });
+    }
+  }
+  for (const [serverId, rawAmount] of Object.entries(
+    state.poxCountersByServer ?? {},
+  ).sort(([left], [right]) => left.localeCompare(right))) {
+    const amount = Math.max(0, Math.floor(Number(rawAmount ?? 0)));
+    if (amount <= 0) continue;
+    const typedServerId = serverId as Exclude<ServerId, "new_remote">;
+    const label = publicServerLabel(state, typedServerId) ?? typedServerId;
+    for (let index = 1; index <= amount; index += 1) {
+      targets.push({
+        kind: "pox",
+        serverId: typedServerId,
+        index,
+        optionId: `pox:${typedServerId}:${index}`,
+        publicLabel: `Pox auf ${label} ${index}`,
+      });
+    }
+  }
+  return targets;
+}
+
+function startCodeViralCachePurgeChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): boolean {
+  const sourceIds = installedCodeViralCacheIds(state);
+  if (sourceIds.length === 0) return false;
+  const targets = codeViralCachePurgePreserveTargets(state);
+  if (targets.length === 0) return false;
+  const sourceCardId = sourceIds[0];
+  state.pendingChoice = {
+    choiceId: `v1913_code_viral_cache_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1913.code_viral_cache_purge:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Code Viral Cache: bis zu zwei Virus-Counter behalten.",
+    kind: "select_cards",
+    options: targets.map((target) => ({
+      id: target.optionId,
+      label: target.publicLabel,
+      publicLabel: target.publicLabel,
+      value: target.optionId,
+    })),
+    minSelections: 0,
+    maxSelections: Math.min(2, targets.length),
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: CODE_VIRAL_CACHE_ID,
+    codeViralCachePurgeReplacementOpened: true,
+    codeViralCacheEligibleCounterCount: targets.length,
+    codeViralCacheMaxPreserveCounters: Math.min(2, targets.length),
+    purgedCounterType: "virus",
+  };
+  return true;
+}
+
+function parseCodeViralCachePreserveOption(
+  optionId: string,
+): CodeViralCachePreserveTarget | undefined {
+  const [kind, id, indexRaw] = optionId.split(":");
+  const index = Number(indexRaw);
+  if (!Number.isInteger(index) || index <= 0) return undefined;
+  if (kind === "card" && id)
+    return { kind: "card", cardId: id as CardInstanceId, index };
+  if (kind === "pox" && id && id !== "new_remote")
+    return {
+      kind: "pox",
+      serverId: id as Exclude<ServerId, "new_remote">,
+      index,
+    };
+  return undefined;
+}
+
+function restoreCodeViralCachePreservedCounters(
+  state: GameState,
+  selectedOptionIds: string[],
+): { preserved: number; preservedCardDefinitionIds: CardDefinitionId[] } {
+  const selectedTargets = selectedOptionIds
+    .map(parseCodeViralCachePreserveOption)
+    .filter((target): target is CodeViralCachePreserveTarget => Boolean(target));
+  if (selectedTargets.length !== selectedOptionIds.length)
+    throw new Error("Die Code-Viral-Cache-Auswahl ist ungueltig.");
+  if (selectedTargets.length > 2)
+    throw new Error("Code Viral Cache kann hoechstens 2 Counter behalten.");
+  const beforeCardCounts = new Map<CardInstanceId, number>();
+  const beforePoxCounts = new Map<Exclude<ServerId, "new_remote">, number>();
+  const preservedCardDefinitionIds: CardDefinitionId[] = [];
+  for (const target of selectedTargets) {
+    if (target.kind === "card") {
+      if (!visibleVirusCounterTargetIds(state).includes(target.cardId))
+        throw new Error("Ein Code-Viral-Cache-Counterziel ist nicht mehr legal.");
+      const count =
+        beforeCardCounts.get(target.cardId) ??
+        cardCounter(state, target.cardId, "virus");
+      if (target.index > count)
+        throw new Error("Ein Code-Viral-Cache-Counter existiert nicht mehr.");
+      beforeCardCounts.set(target.cardId, count);
+    } else {
+      mustServer(state, target.serverId);
+      const count =
+        beforePoxCounts.get(target.serverId) ??
+        Math.max(
+          0,
+          Math.floor(Number(state.poxCountersByServer?.[target.serverId] ?? 0)),
+        );
+      if (target.index > count)
+        throw new Error("Ein Code-Viral-Cache-Pox-Counter existiert nicht mehr.");
+      beforePoxCounts.set(target.serverId, count);
+    }
+  }
+
+  purgeVirusCounters(state);
+
+  const cardPreserveCounts = new Map<CardInstanceId, number>();
+  const poxPreserveCounts = new Map<Exclude<ServerId, "new_remote">, number>();
+  for (const target of selectedTargets) {
+    if (target.kind === "card") {
+      cardPreserveCounts.set(
+        target.cardId,
+        (cardPreserveCounts.get(target.cardId) ?? 0) + 1,
+      );
+    } else {
+      poxPreserveCounts.set(
+        target.serverId,
+        (poxPreserveCounts.get(target.serverId) ?? 0) + 1,
+      );
+    }
+  }
+  for (const [cardId, amount] of cardPreserveCounts) {
+    setCardCounter(state, cardId, "virus", amount);
+    preservedCardDefinitionIds.push(definitionFor(state, cardId).id);
+  }
+  for (const [serverId, amount] of poxPreserveCounts) {
+    state.poxCountersByServer = {
+      ...(state.poxCountersByServer ?? {}),
+      [serverId]: amount,
+    };
+  }
+  return {
+    preserved: selectedTargets.length,
+    preservedCardDefinitionIds: preservedCardDefinitionIds.sort(),
+  };
+}
+
+function resolveCodeViralCachePurgeChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1913.code_viral_cache_purge"))
+    throw new Error("Es ist keine Code-Viral-Cache-Choice offen.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (!sourceCardId || !installedCodeViralCacheIds(state).includes(sourceCardId))
+    throw new Error("Code Viral Cache ist nicht mehr installiert.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices);
+  const legalOptionIds = new Set(choice.options.map((option) => option.id));
+  if (selected.some((optionId) => !legalOptionIds.has(optionId)))
+    throw new Error("Die Code-Viral-Cache-Auswahl ist nicht legal.");
+  const result = restoreCodeViralCachePreservedCounters(state, selected);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: CODE_VIRAL_CACHE_ID,
+    purgedCounterType: "virus",
+    codeViralCachePreservedCounters: result.preserved,
+    preservedCounterAmount: result.preserved,
+    ...(result.preservedCardDefinitionIds.length > 0
+      ? {
+          preservedCardDefinitionIds:
+            result.preservedCardDefinitionIds.join(","),
+        }
+      : {}),
+    remainingVirusCounters: totalCounters(state, "virus"),
+  };
+  delete state.pendingChoice;
 }
 
 function hostedCardsOn(

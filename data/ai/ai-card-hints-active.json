@@ -1283,20 +1283,25 @@
         "ice",
         "trace",
         "damage",
-        "end_run"
+        "end_run",
+        "persistent_counter"
       ],
       "planRoles": [
         "defend_server",
-        "tag_pressure"
+        "trace_pressure",
+        "run_start_damage"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "trace",
-        "net_damage"
+        "net_damage",
+        "persistent_counter",
+        "counter_remove_action"
       ],
       "valueHints": {
-        "defense": 2
+        "defense": 2,
+        "damage": 2
       },
       "riskTags": [
         "trace_window",
@@ -5557,7 +5562,7 @@
         "region",
         "city_grid",
         "trace",
-        "tag"
+        "trace_pool"
       ],
       "planRoles": [
         "remote_upgrade_tax"
@@ -5567,7 +5572,8 @@
         "rez_card",
         "city_grid",
         "trace",
-        "tag_condition"
+        "trace_bid_credit_source",
+        "counter_refresh"
       ],
       "valueHints": {
         "trace": 2,
@@ -5575,12 +5581,12 @@
       },
       "riskTags": [
         "trace_window",
-        "tag_risk",
+        "trace_pool_server_bound",
         "region_unique_server"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_tag_condition"
+        "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_pool"
       ]
     },
     {
@@ -11079,26 +11085,30 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "virus_counter",
+        "purge_replacement"
       ],
       "planRoles": [
         "build_rig",
-        "survive_net_damage"
+        "protect_virus_counters",
+        "successful_hq_run_payoff"
       ],
       "requiredMechanics": [
         "install_resource",
-        "net_damage",
-        "damage_prevention"
+        "successful_hq_run_condition",
+        "virus_counter_purge_replacement",
+        "corp_trash_action"
       ],
       "valueHints": {
-        "survival": 1
+        "virus": 2
       },
       "riskTags": [
-        "damage_window"
+        "purge_window",
+        "corp_trash_action"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+        "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_virus_purge_replacement"
       ]
     },
     {

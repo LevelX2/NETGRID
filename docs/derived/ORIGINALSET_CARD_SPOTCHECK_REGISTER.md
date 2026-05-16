@@ -460,6 +460,22 @@ Jobstatus: `done`; Umsetzung und Checks sind grün.
 | Razor Wire | `onr_v1_262_razor-wire` | Net-Damage und End-the-run bleiben subroutinegenau getrennt und replay-stabil | Teilbreak-, Redaction- und Replay-Test ergänzt |
 | Vapor Ops | `onr_v1_347_vapor-ops` | Rezzed-only Counter-Aktion bleibt source-bound und payloadfähig | SourceDefinition-Payload und Rezzed-Gate-Test ergänzt |
 
+## Runde 2026-05-16-persistent-counter-pool-resolvers
+
+Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PERSISTENT_COUNTER_POOL_RESOLVERS_IMPLEMENTATION.md`
+
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-persistent-counter-pool-resolvers.md`
+
+Jobstatus: `done`; die drei persistenten Counter-/Purge-/Trace-Pool-Removal-Conditions aus dem blockierten Trace-Cache-Ambush-Sammeljob sind umgesetzt und grün geprüft.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Code Viral Cache | `onr_v1_155_code-viral-cache` | HQ-Run-Gate, Purge-Replacement-Choice und Korp-Trash-Aktion umgesetzt | Erledigt; Damage-Prevention-Stub entfernt |
+| Cerberus | `onr_v1_227_cerberus` | Trace-Erfolg legt Cerberus-Counter; Run-Start-Damage und Runner-Removal sind replaybar | Erledigt; falscher Trace-Tag bleibt entfernt |
+| Paris City Grid | `onr_v1_365_paris-city-grid` | Servergebundener 6-Bit-Trace-Pool mit Poolverbrauch und Corp-Turnstart-Refresh umgesetzt | Erledigt; Trace-2-Tag-Stub entfernt |
+
 ## Runde 2026-05-16-hidden-zone-temporary-install-resolvers
 
 Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
@@ -488,12 +504,12 @@ Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, mehrere Vollresolver bl
 | Deal with Militech | `onr_v1_082_deal-with-militech` | Folgejob umgesetzt: Research-Bedingung und Militech-Counter auf Icebreakern grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
 | Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Folgejob umgesetzt: Multi-Expose-Choice ohne Zielidentitäts-Leak grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
 | Sneak Preview | `onr_v1_110_sneak-preview` | Folgejob umgesetzt: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
-| Code Viral Cache | `onr_v1_155_code-viral-cache` | Blockiert: Purge-Replacement und Korp-Trash-Aktion fehlen | Eigenen Purge-Replacement-Resolver umsetzen |
+| Code Viral Cache | `onr_v1_155_code-viral-cache` | Folgejob umgesetzt: HQ-Run-Gate, Purge-Replacement und Korp-Trash-Aktion grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 | The Springboard | `onr_v1_181_the-springboard` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
-| Cerberus | `onr_v1_227_cerberus` | Teilfix umgesetzt: 3 Net Damage und kein falscher Trace-Tag; Counter-Loop bleibt offen | Cerberus-Counter-/Runstart-Damage-Resolver umsetzen |
+| Cerberus | `onr_v1_227_cerberus` | Folgejob umgesetzt: Trace-Counter, Runstart-Damage und Runner-Removal grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 | Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Teilfix umgesetzt: Program-Trash plus End-the-run statt R&D-Reveal | Teilfix grün |
 | TRAP! | `onr_v1_345_trap` | Teilfix umgesetzt: 3 Net Damage plus Tag aus legalem Access; Archives-No-op bleibt | Teilfix grün |
-| Paris City Grid | `onr_v1_365_paris-city-grid` | Blockiert: servergebundener Trace-Bit-Pool und Refresh fehlen | Eigenen Trace-Pool-Payment-Resolver umsetzen |
+| Paris City Grid | `onr_v1_365_paris-city-grid` | Folgejob umgesetzt: servergebundener Trace-Bit-Pool, Poolverbrauch und Refresh grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 
 ## Runde 2026-05-15-virus-link-archives
 

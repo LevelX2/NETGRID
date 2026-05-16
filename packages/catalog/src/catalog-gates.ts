@@ -1966,7 +1966,7 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_143_techtronica-utility-suit":
     "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
   "onr_v1_155_code-viral-cache":
-    "Installed prevention tool: once each turn, prevent 1 net damage.",
+    "Play only after a successful HQ run this turn. When the Corp purges Virus counters, choose up to two counters that are not removed. The Corp may take an action and pay 5 to trash Code Viral Cache.",
   "onr_v1_161_fall-guy":
     "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
   "onr_v1_170_nomad-allies":

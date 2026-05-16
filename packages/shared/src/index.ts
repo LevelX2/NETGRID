@@ -116,6 +116,7 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "cerberus"
   | "militech"
   | "power"
   | "agenda"
@@ -131,6 +132,7 @@ export type CounterType =
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
+  | { type: "add_counter"; counterType: CounterType; amount: number }
   | { type: "none" };
 
 export type SubroutineType =
@@ -791,6 +793,8 @@ export type TraceState = {
   baseTraceStrength: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
+  parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
+  parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
   status: "corp_bid" | "runner_bid";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
@@ -2430,12 +2434,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net damage.",
+      "Play only if you made a successful run on HQ this turn. If the Corp purges Virus counters, choose up to two Virus counters that are not removed. The Corp may take an action and pay 5 to trash Code Viral Cache.",
     mechanics: [
       "install_resource",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "net_damage",
+      "successful_hq_run_condition",
+      "virus_counter_purge_replacement",
+      "corp_trash_action",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4019,7 +4023,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     trashCost: 6,
     rulesText:
-      "Rezzed city-grid upgrade with trace and tag surfaces. Trace and tag decisions remain LegalAction-based.",
+      "When rezzed, put 6 bits from the bank on Paris City Grid. Use these bits only to pay for traces made during runs on this fort. If any are used, replace them at the start of the next Corp turn.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4027,7 +4031,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "generic_upgrade_root_server",
       "city_grid",
       "trace",
-      "tag",
+      "trace_bid_credit_source",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -8045,7 +8049,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
         id: "onr_v1_227_cerberus_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "none" },
+        traceSuccessEffect: {
+          type: "add_counter",
+          counterType: "cerberus",
+          amount: 1,
+        },
       },
       onrEtr("onr_v1_227_cerberus_etr"),
     ],
@@ -8054,6 +8062,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "link",
       "bid_amount",
       "damage",
+      "persistent_counter",
       "end_the_run",
       "run_flow",
       ONR_V1_LOCAL_PRIVATE,

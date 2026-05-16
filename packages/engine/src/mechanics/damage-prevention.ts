@@ -66,11 +66,6 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["net", "meat"],
     priority: 124,
   },
-  "onr_v1_155_code-viral-cache": {
-    maxPerTurn: 1,
-    damageTypes: ["net"],
-    priority: 125,
-  },
   "onr_v1_161_fall-guy": {
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],

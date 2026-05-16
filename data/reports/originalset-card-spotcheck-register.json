@@ -13,6 +13,36 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-16-persistent-counter-pool-resolvers",
+      "selectionMode": "sequential_follow_up_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PERSISTENT_COUNTER_POOL_RESOLVERS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-persistent-counter-pool-resolvers.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_155_code-viral-cache",
+          "title": "Code Viral Cache",
+          "spotcheckStatus": "completed",
+          "result": "fixed_hq_run_gate_purge_replacement_corp_trash_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_227_cerberus",
+          "title": "Cerberus",
+          "spotcheckStatus": "completed",
+          "result": "fixed_trace_counter_run_start_damage_runner_remove_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_365_paris-city-grid",
+          "title": "Paris City Grid",
+          "spotcheckStatus": "completed",
+          "result": "fixed_server_bound_trace_pool_payment_refresh",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-16-runner-resource-contacts",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_RESOURCE_CONTACTS_IMPLEMENTATION.md",
@@ -1754,7 +1784,7 @@
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md",
       "jobReport": "docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-trace-cache-ambush.md",
       "jobStatus": "blocked",
-      "blockerReason": "Multiple full resolver contracts remain: post-bid Trace-Link choices, Research/Militech counters, multi-expose, Sneak Preview temporary install, Code Viral Cache purge replacement, Cerberus counter loop and Paris City Grid trace pool.",
+      "blockerReason": "Multiple full resolver contracts were split into follow-up jobs. Research/Militech counters, multi-expose, Sneak Preview temporary install, Code Viral Cache purge replacement, Cerberus counter loop and Paris City Grid trace pool are fixed; post-bid Trace-Link choices remain for Signpost and The Springboard.",
       "cards": [
         {
           "cardId": "onr_v1_063_signpost",
@@ -1787,9 +1817,9 @@
         {
           "cardId": "onr_v1_155_code-viral-cache",
           "title": "Code Viral Cache",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_purge_replacement_corp_trash_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_hq_run_gate_purge_replacement_corp_trash_action",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_181_the-springboard",
@@ -1801,9 +1831,9 @@
         {
           "cardId": "onr_v1_227_cerberus",
           "title": "Cerberus",
-          "spotcheckStatus": "blocked",
-          "result": "partial_fix_three_net_damage_no_false_trace_tag_counter_loop_blocked",
-          "followUpStatus": "partial_fixed_and_tested"
+          "spotcheckStatus": "completed",
+          "result": "fixed_three_net_damage_trace_counter_run_start_damage_runner_remove_action",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_250_ice-pick-willie",
@@ -1822,9 +1852,9 @@
         {
           "cardId": "onr_v1_365_paris-city-grid",
           "title": "Paris City Grid",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_server_bound_trace_pool_payment_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_server_bound_trace_pool_payment_refresh",
+          "followUpStatus": "fixed_and_tested"
         }
       ]
     },
