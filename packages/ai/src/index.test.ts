@@ -1352,7 +1352,7 @@ describe("MVP 0.3 Runner AI", () => {
     const hiddenId = moveCorpCardToArchives(
       state,
       "onr_v1_208_on-call-solo-team",
-      false,
+      true,
     );
     keepOnlyCorpArchivesCards(state, [accountsId, hiddenId]);
 
@@ -1392,10 +1392,16 @@ describe("MVP 0.3 Runner AI", () => {
       ...input,
       legalActions: [archivesRun, gain],
     });
+    const baselineDecision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [archivesRun, gain],
+    });
 
     expect(safeProbeScore.reasons).toContain("known_archives_access_not_fresh");
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(baselineDecision.actionId).toBe(gain.actionId);
+    expect(baselineDecision.reasonCode).toBe("runner.economy.basic_credit");
   });
 
   it("does not pump or repeat a remote run when the visible breaker cannot break the rezzed ICE", () => {
@@ -4274,6 +4280,10 @@ describe("V1.4.2 belief state and opponent model", () => {
       ...input,
       legalActions: [hqRun, gainCredit],
     });
+    const baselineDecision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [hqRun, gainCredit],
+    });
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
@@ -4287,6 +4297,8 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(score.reasons).toContain("known_hq_hand_low_value");
     expect(selected?.type).toBe("gain_credit");
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(baselineDecision.actionId).toBe(gainCredit.actionId);
+    expect(baselineDecision.reasonCode).toBe("runner.economy.basic_credit");
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );

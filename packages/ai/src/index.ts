@@ -8,7 +8,7 @@ import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
-import { CARD_ROLES_BY_CARD } from "./ai-hints";
+import { CARD_ROLES_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, iceHasEndTheRun } from "./visible-run-analysis";
 import { DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
@@ -1668,8 +1668,8 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       }
       break;
     case "start_run":
-      const staleRndRepeatPenalty = staleKnownRndRepeatRunPenalty(input, action);
-      score = scoreRunTarget(action, features, profile, input.difficulty, staleRndRepeatPenalty);
+      const staleCentralRepeatPenalty = staleKnownRndRepeatRunPenalty(input, action) + staleKnownHqRepeatRunPenalty(input, action) + staleKnownArchivesRepeatRunPenalty(input, action);
+      score = scoreRunTarget(action, features, profile, input.difficulty, staleCentralRepeatPenalty);
       reasonCode = runnerRunReasonCode(action, features);
       explanation =
         reasonCode === "runner.run.blocked_by_rezzed_ice"
@@ -1681,7 +1681,7 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
         `server:${String(action.payload?.serverId ?? "unknown")}`,
         `known_pressure:${features.knownServerPressure}`,
         ...runTargetEvidence(action, features),
-        ...(staleRndRepeatPenalty > 0 ? [`known_stale_rnd_repeat_penalty:${staleRndRepeatPenalty}`] : [])
+        ...(staleCentralRepeatPenalty > 0 ? [`known_stale_central_repeat_penalty:${staleCentralRepeatPenalty}`] : [])
       );
       break;
     case "gain_credit":
@@ -1919,7 +1919,7 @@ function scoreRunnerEvent(roles: string[], features: AiFeatures, profile: Record
   return score;
 }
 
-function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Record<string, number>, difficulty: AiDifficulty, staleRndRepeatPenalty = 0): number {
+function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Record<string, number>, difficulty: AiDifficulty, staleCentralRepeatPenalty = 0): number {
   const serverId = String(action.payload?.serverId ?? "");
   const server = features.serverFeaturesById.get(serverId);
   let score = difficulty === "easy" ? 330 : 560 + (profile.run ?? 1) * 55;
@@ -1933,7 +1933,7 @@ function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Reco
   if (features.blockedRunServers.has(serverId)) score -= 430;
   if (features.credits < 3) score -= 140;
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
-  score -= staleRndRepeatPenalty;
+  score -= staleCentralRepeatPenalty;
   return score;
 }
 
@@ -1942,6 +1942,81 @@ function staleKnownRndRepeatRunPenalty(input: AiDecisionInput, action: LegalActi
   const freshness = reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
   // Public-event belief marks this only after Runner already accessed R&D and no visible draw, shuffle, reorder, swap, steal, or trash changed the top card.
   return freshness?.freshness === "stale_known_same_top" ? 420 : 0;
+}
+
+function staleKnownHqRepeatRunPenalty(input: AiDecisionInput, action: LegalAction): number {
+  if (input.side !== "runner" || action.type !== "start_run" || action.payload?.serverId !== "hq") return 0;
+  if (input.legalActions.some((candidate) => candidate.type === "trash_accessed_card" || candidate.type === "steal_agenda")) return 0;
+  const hqHandMemory = reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
+  if (!hqHandMemory?.allCardsKnown || hqHandMemory.knownDefinitions.length === 0) return 0;
+  return hqHandMemory.knownDefinitions.every((definitionId) => isLowValueKnownAccessCard(definitionId, input.playerView.own.credits)) ? 430 : 0;
+}
+
+function staleKnownArchivesRepeatRunPenalty(input: AiDecisionInput, action: LegalAction): number {
+  if (input.side !== "runner" || action.type !== "start_run" || action.payload?.serverId !== "archives") return 0;
+  if (input.legalActions.some((candidate) => candidate.type === "trash_accessed_card" || candidate.type === "steal_agenda")) return 0;
+  const archives = input.playerView.servers.find((server) => server.id === "archives");
+  const visibleArchivesCards = archives?.root ?? [];
+  if (visibleArchivesCards.length === 0 || visibleArchivesCards.some((card) => !card.known || !card.definitionId)) return 0;
+  const history = mergedAiPublicHistory(input);
+  const lastArchivesAccessIndex = findLastAiHistoryIndex(history, (event) => isAiArchivesAccessEvent(event));
+  if (lastArchivesAccessIndex < 0) return 0;
+  if (history.slice(lastArchivesAccessIndex + 1).some((event) => aiEventMayChangeArchives(event))) return 0;
+  return 520;
+}
+
+function isLowValueKnownAccessCard(definitionId: string, runnerCredits: number): boolean {
+  const runtimeDefinition = RUNTIME_CARDS[definitionId];
+  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const type = runtimeDefinition?.type ?? demoDefinition?.type;
+  if (!type) return false;
+  if (type === "agenda") return false;
+  const trashCost = runtimeDefinition?.numeric.trashCost ?? demoDefinition?.trashCost ?? 0;
+  if ((type === "asset" || type === "upgrade") && runnerCredits >= trashCost) return false;
+  return true;
+}
+
+function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  const byId = new Map<string, PublicGameEvent>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort((left, right) => aiEventVersion(left) - aiEventVersion(right));
+}
+
+function findLastAiHistoryIndex<T>(values: T[], predicate: (value: T) => boolean): number {
+  for (let index = values.length - 1; index >= 0; index -= 1) {
+    if (predicate(values[index]!)) return index;
+  }
+  return -1;
+}
+
+function isAiArchivesAccessEvent(event: PublicGameEvent): boolean {
+  return event.publicPayload.actionType === "access_card" && aiServerIdFromEvent(event) === "archives";
+}
+
+function aiEventMayChangeArchives(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  if (payload.discardZone === "archives" || payload.hiddenZoneAction === "discard_phase") return true;
+  const actionType = typeof payload.actionType === "string" ? payload.actionType : event.type;
+  return actionType === "trash_accessed_card" || actionType === "trash_card" || actionType === "play_operation";
+}
+
+function aiServerIdFromEvent(event: PublicGameEvent): string | undefined {
+  const payload = event.publicPayload;
+  if (typeof payload.serverId === "string") return payload.serverId;
+  if (typeof payload.server === "string") return payload.server;
+  const label = typeof payload.serverLabel === "string" ? payload.serverLabel : typeof payload.serverName === "string" ? payload.serverName : undefined;
+  if (!label) return undefined;
+  const normalized = label.toLowerCase();
+  if (normalized === "r&d" || normalized === "rd") return "rd";
+  if (normalized === "hq" || normalized === "headquarters") return "hq";
+  if (normalized === "archives" || normalized === "archive") return "archives";
+  return undefined;
+}
+
+function aiEventVersion(event: PublicGameEvent): number {
+  return typeof event.stateVersionAfter === "number" ? event.stateVersionAfter : 0;
 }
 
 function runnerRunReasonCode(action: LegalAction, features: AiFeatures): string {

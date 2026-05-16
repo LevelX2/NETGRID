@@ -526,15 +526,15 @@ function staleArchivesRepeatPenalty(input: AiDecisionInput, target: string | und
   const lastArchivesAccess = history[lastArchivesAccessIndex];
   if (!lastArchivesAccess) return 0;
   const accessedDefinitionId = stringPayloadValue(lastArchivesAccess, "cardDefinitionId");
+  const visibleArchivesCards =
+    input.playerView.servers.find((candidate) => candidate.id === "archives")?.root ?? [];
+  const visibleArchivesDefinitions = new Set(visibleArchivesCards.map((card) => card.definitionId).filter((definitionId): definitionId is string => Boolean(definitionId)));
+  if (accessedDefinitionId && !visibleArchivesDefinitions.has(accessedDefinitionId)) return 0;
+  if (visibleArchivesCards.length > 0 && visibleArchivesCards.every((card) => card.known && card.definitionId)) {
+    return visibleArchivesCards.every((card) => isLowValueKnownHqAccessCard(card.definitionId!, input.playerView.own.credits)) ? 520 : 420;
+  }
   if (!accessedDefinitionId) return 0;
-  const visibleArchivesDefinitions = new Set(
-    input.playerView.servers
-      .find((candidate) => candidate.id === "archives")
-      ?.root.map((card) => card.definitionId)
-      .filter((definitionId): definitionId is string => Boolean(definitionId)) ?? []
-  );
-  if (!visibleArchivesDefinitions.has(accessedDefinitionId)) return 0;
-  return isLowValueKnownHqAccessCard(accessedDefinitionId, input.playerView.own.credits) ? 280 : 180;
+  return isLowValueKnownHqAccessCard(accessedDefinitionId, input.playerView.own.credits) ? 360 : 240;
 }
 
 function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
