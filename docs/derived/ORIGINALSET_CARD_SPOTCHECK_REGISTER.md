@@ -220,7 +220,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_OPERATION_ECONOMY_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der fokussierte Engine-Test wurde im Abschlusslauf erneut bestätigt.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|

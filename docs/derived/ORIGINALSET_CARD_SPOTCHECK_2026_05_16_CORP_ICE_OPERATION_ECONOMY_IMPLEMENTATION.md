@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-corp-ice-operation-economy`
 
 Der Job wurde fachlich umgesetzt. Die ausgewählten Corp-ICE- und Operation-Karten wurden gegen Rez-/Encounter-Sichtbarkeit, Side-/StateVersion-Revalidation, Operation-Timing, sichere PublicPayload-Ergebnisse sowie Replay/StateHash geprüft.
 
-Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Commit-Status: `done`. Der lokale Commit wurde erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
