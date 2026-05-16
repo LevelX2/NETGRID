@@ -1,11 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-corp-asset-upgrade-rest
-status: commit_pending
+status: done
 createdAt: 2026-05-16T11:08:00+01:00
 startedAt: 2026-05-16T13:08:34+02:00
-completedAt: 2026-05-16T13:15:02+02:00
-commitPendingAt: 2026-05-16T13:15:02+02:00
-commitPendingReason: "Fachliche Engine-Haertung und Pflichtchecks gruen, aber git add/commit kann C:/Projekte/NETGRID/.git/index.lock wegen Permission denied durch die fremde direkte DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git nicht erstellen."
+completedAt: 2026-05-16T18:25:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -90,7 +88,7 @@ Akzeptanzkriterien
 
 ## Umsetzung 2026-05-16
 
-Status: `commit_pending`.
+Status: `done`.
 
 Umgesetzt:
 
