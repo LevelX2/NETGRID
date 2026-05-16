@@ -4,6 +4,27 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-hosting-damage-multiaccess
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HOSTING_DAMAGE_MULTIACCESS_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Pflichtchecks sind grün, lokaler Commit wurde erstellt.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Microtech AI Interface | `onr_v1_041_microtech-ai-interface` | Bestehende Multiaccess-Abdeckung bleibt leakfrei | Bestehende Tests/Verträge geprüft |
+| Poltergeist | `onr_v1_048_poltergeist` | Node-Trash-Recurring-Credits sind implementiert | Zahlungs-/Refresh-/Replay-Test ergänzt |
+| Succubus | `onr_v1_069_succubus` | Bestehende Hosting-Kaskade bleibt stabil | Bestehende Tests/Verträge geprüft |
+| Mantis, Fixer-at-Large | `onr_v1_099_mantis-fixer-at-large` | Hidden-Zone-Search bleibt public-safe | Bestehende Tests/Verträge geprüft |
+| Priority Wreck | `onr_v1_105_priority-wreck` | R&D-Multiaccess-Queue bleibt ohne Future-Leak | Bestehende Tests/Verträge geprüft |
+| Lifesaver Nanosurgeons | `onr_v1_130_lifesaver-nanosurgeons` | Damage-Prevention-Fenster bleibt source-bound | Bestehende Tests/Verträge geprüft |
+| PK-6089a | `onr_v1_138_pk-6089a` | Deck-MU und Trace-Link-Recurring-Credits sind implementiert | Install-/Trace-/Refresh-/Replay-Test ergänzt |
+| Data Darts | `onr_v1_234_data-darts` | Next-ICE-No-Break-Modifier ist implementiert | Modifier-/Damage-/Replay-Test ergänzt |
+| New Blood | `onr_v1_294_new-blood` | Vorzug-Run-History-Gate bleibt stabil | Bestehende Tests/Verträge geprüft |
+| Holovid Campaign | `onr_v1_326_holovid-campaign` | 12-Bit-Lifecycle mit Zugstart-Drain und Selftrash ist implementiert | Counter-/Selftrash-/Replay-Test ergänzt |
+
 ## Runde 2026-05-16-runner-resource-contacts
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

@@ -13,6 +13,85 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-15-hosting-damage-multiaccess",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HOSTING_DAMAGE_MULTIACCESS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-hosting-damage-multiaccess.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_041_microtech-ai-interface",
+          "title": "Microtech AI Interface",
+          "spotcheckStatus": "completed",
+          "result": "verified_multiaccess_public_payload_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_048_poltergeist",
+          "title": "Poltergeist",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_node_trash_recurring_credit_refresh",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_069_succubus",
+          "title": "Succubus",
+          "spotcheckStatus": "completed",
+          "result": "verified_hosting_cascade_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "title": "Mantis, Fixer-at-Large",
+          "spotcheckStatus": "completed",
+          "result": "verified_hidden_stack_search_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_105_priority-wreck",
+          "title": "Priority Wreck",
+          "spotcheckStatus": "completed",
+          "result": "verified_rd_multiaccess_queue_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_130_lifesaver-nanosurgeons",
+          "title": "Lifesaver Nanosurgeons",
+          "spotcheckStatus": "completed",
+          "result": "verified_damage_prevention_window_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_138_pk-6089a",
+          "title": "PK-6089a",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_deck_mu_trace_link_recurring_credit",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_234_data-darts",
+          "title": "Data Darts",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_next_ice_no_break_modifier",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_294_new-blood",
+          "title": "New Blood",
+          "spotcheckStatus": "completed",
+          "result": "verified_previous_turn_run_attempt_gate_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_326_holovid-campaign",
+          "title": "Holovid Campaign",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_bit_lifecycle_start_turn_selftrash",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-16-persistent-counter-pool-resolvers",
       "selectionMode": "sequential_follow_up_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PERSISTENT_COUNTER_POOL_RESOLVERS_IMPLEMENTATION.md",

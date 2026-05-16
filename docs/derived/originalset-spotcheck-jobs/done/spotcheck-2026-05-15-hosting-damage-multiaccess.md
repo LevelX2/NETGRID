@@ -1,8 +1,9 @@
 ---
 jobId: spotcheck-2026-05-15-hosting-damage-multiaccess
-status: in_progress
+status: done
 createdAt: 2026-05-15T16:20:00+01:00
 startedAt: 2026-05-16T06:08:42+02:00
+completedAt: 2026-05-16T17:03:30+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -251,3 +252,23 @@ Akzeptanzkriterien
 - fokussierte Engine-Smokes für die zehn Karten mit Wrong-Side-, Stale-State-, Hidden-Info- und Replay/StateHash-Fällen
 - Leakscan auf PublicEvents, PlayerViews, Reconnect-Payloads und KI-Inputs für alle Hidden-Zone-, Access-Queue- und Damage-Fenster
 - Manifest-/AI-Hint-Abgleich nach Umsetzung, aber erst im Implementierungsjob und nicht durch diesen Generatorlauf
+
+## Umsetzung 2026-05-16
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HOSTING_DAMAGE_MULTIACCESS_IMPLEMENTATION.md`
+
+Umgesetzt:
+
+- `Poltergeist`: 2 restricted Recurring-Credits für Access-Trashkosten von Nodes inklusive Runner-Zugstart-Refresh, PublicPayload und Replay/StateHash-Test.
+- `PK-6089a`: Installkosten 4, +1 MU, Deck-Unique und 3 restricted Trace-Link-Recurring-Credits inklusive Refresh und Replay/StateHash-Test.
+- `Data Darts`: Next-ICE-No-Break-Subroutine über bestehenden run-lokalen Modifier ergänzt und getestet.
+- `Holovid Campaign`: Rez lädt exakt 12 öffentliche Bits; Korp-Zugstart entfernt 1 Bit, gibt 1 Credit und selftrasht bei leerem Pool.
+- Shared-Kartentexte, Mechanics-Tags, V1.9.22-Manifest, Catalog-Gates, lokale V1.9.22-Fakten, Resolver-Verträge, AI-Hints, Detailbericht und Spotcheck-Register wurden synchronisiert.
+
+Geprüft:
+
+- `corepack pnpm --filter @netgrid/engine test -- --runInBand` - grün, 468 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 17 Dateien / 133 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 48 Tests.
+- `corepack pnpm --filter @netgrid/ai test` - grün, 119 Tests.
+- `corepack pnpm typecheck` - grün.

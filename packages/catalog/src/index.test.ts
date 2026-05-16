@@ -1034,6 +1034,7 @@ const V1922_LONGTAIL_COMPLETION_GROUPS: readonly V1922LongtailCompletionGroup[] 
         "v1922_runner_program_flak_ap_breaker",
         "v1922_runner_program_hammer_wall_breaker_stealth_loss_choice",
         "v1922_runner_program_japanese_water_torture_future_action_debt",
+        "v1922_runner_program_poltergeist_node_trash_recurring_credit",
         "v1922_runner_program_reflector_tagged_breaker",
         "v1922_runner_program_scatter_shot_upgrade_trash_recurring_credit",
         "v1922_runner_program_zetatech_software_installer_recurring_program_install_overlay",
@@ -1083,7 +1084,11 @@ const V1922_LONGTAIL_COMPLETION_GROUPS: readonly V1922LongtailCompletionGroup[] 
         ],
         "onr_v1_044_netspace-inverter": ["ability_contract_remains_gated"],
         "onr_v1_045_newsgroup-filter": ["gain_2_credit_action"],
-        onr_v1_048_poltergeist: ["ability_contract_remains_gated"],
+        onr_v1_048_poltergeist: [
+          "node_trash_recurring_credit",
+          "upgrade_trash_negative",
+          "runner_turn_start_recurring_refresh",
+        ],
         onr_v1_051_rabbit: ["ability_contract_remains_gated"],
         onr_v1_055_reflector: [
           "tagged_break_subroutine",

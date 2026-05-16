@@ -16349,7 +16349,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("refreshes all scoped V1.9.17 recurring assets together without hidden payloads", () => {
     const recurringAssets = [
       "onr_v1_311_braindance-campaign",
-      "onr_v1_326_holovid-campaign",
       "onr_v1_329_investment-firm",
     ] as const;
     let state = toRunnerTurn(
@@ -28021,6 +28020,295 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     assetState = apply(assetState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
     assetState = apply(assetState, "runner", (action) => action.type === "access_card");
     expect(getLegalActions(assetState, "runner").some((action) => action.type === "trash_accessed_card")).toBe(false);
+  });
+
+  it("spends Poltergeist recurring credits only for accessed node trash costs", () => {
+    const runnerDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      id: "spotcheck_poltergeist_runner",
+      name: "Spotcheck Poltergeist Runner",
+      cards: [
+        { id: "onr_v1_048_poltergeist", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+      ],
+    };
+    let state = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-poltergeist-node-trash",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        cards: [
+          { id: "simple_economy_asset", quantity: 1 },
+          { id: "simple_upgrade", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+            (card) =>
+              !["simple_economy_asset", "simple_upgrade"].includes(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    }));
+    state.runner.credits = 1;
+    moveRunnerCardToGrip(state, "onr_v1_048_poltergeist");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_048_poltergeist",
+    );
+    const poltergeistId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_048_poltergeist",
+    );
+    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "recurring_credit")).toBe(2);
+    putCorpRootInRemote(state, "simple_economy_asset");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const trash = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(trash.payload).toMatchObject({
+      v1922RunnerProgramAbility: "poltergeist_node_trash_recurring_credit",
+      poltergeistRecurringCreditsAvailable: 2,
+    });
+    state = apply(state, "runner", (action) => action.actionId === trash.actionId);
+    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "recurring_credit")).toBe(0);
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      poltergeistRecurringCreditsSpent: 2,
+      runnerCreditsSpent: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let upgradeState = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-poltergeist-upgrade-negative",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+        cards: [
+          { id: "simple_economy_asset", quantity: 1 },
+          { id: "simple_upgrade", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+            (card) =>
+              !["simple_economy_asset", "simple_upgrade"].includes(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    }));
+    upgradeState.runner.credits = 0;
+    moveRunnerCardToGrip(upgradeState, "onr_v1_048_poltergeist");
+    upgradeState = apply(
+      upgradeState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(upgradeState, action) === "onr_v1_048_poltergeist",
+    );
+    putCorpRootInRemote(upgradeState, "simple_upgrade");
+    upgradeState = apply(
+      upgradeState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    upgradeState = apply(upgradeState, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(upgradeState, "runner").some(
+        (action) => action.type === "trash_accessed_card",
+      ),
+    ).toBe(false);
+  });
+
+  it("uses PK-6089a recurring credits only for trace link bids and refreshes them", () => {
+    const runnerDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+      id: "spotcheck_pk_runner",
+      name: "Spotcheck PK Runner",
+      cards: [
+        { id: "onr_v1_138_pk-6089a", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards.filter(
+          (card) => card.id !== "onr_v1_138_pk-6089a",
+        ),
+      ],
+    };
+    let state = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-pk-trace-link",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.traceTags.corp,
+        cards: [
+          { id: "onr_v1_246_fragmentation-storm", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
+            (card) => card.id !== "onr_v1_246_fragmentation-storm",
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    }));
+    state.runner.credits = 4;
+    state.corp.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_138_pk-6089a");
+    const memoryBefore = state.runner.memoryLimit;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_138_pk-6089a",
+    );
+    const pkId = state.runner.rig.hardware.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_138_pk-6089a",
+    );
+    expect(state.runner.memoryLimit).toBe(memoryBefore + 1);
+    expect(pkId && cardCounterAmount(state, pkId, "recurring_credit")).toBe(3);
+    state.runner.credits = 0;
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = encounterIce(state, "rd", "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    expect(state.pendingChoice?.options.some((option) => option.id === "bid_3")).toBe(true);
+    state = applyChoice(state, "runner", "bid_3");
+    expect(pkId && cardCounterAmount(state, pkId, "recurring_credit")).toBe(0);
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceLinkCreditsSpent: 3,
+      runnerCreditsSpent: 0,
+      traceLinkCreditSourceDefinitionIds: "onr_v1_138_pk-6089a",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let refreshState = structuredClone(initial);
+    if (pkId) setCardCounterForTest(refreshState, pkId, "recurring_credit", 0);
+    refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
+    refreshState.corp.maxHandSize = 100;
+    refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
+    refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
+    expect(pkId && cardCounterAmount(refreshState, pkId, "recurring_credit")).toBe(3);
+  });
+
+  it("loads Holovid Campaign with 12 public bits and self-trashes on the last Corp turn drain", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-holovid-bits");
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const holovidId = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === holovidId &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_326_holovid-campaign",
+    );
+    expect(cardCounterAmount(state, holovidId, "bit")).toBe(12);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      addedCounterAmount: 12,
+      remainingCounters: 12,
+      sourceDefinitionId: "onr_v1_326_holovid-campaign",
+    });
+
+    setCardCounterForTest(state, holovidId, "bit", 1);
+    const creditsBeforeDrain = state.corp.credits;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(creditsBeforeDrain + 1);
+    expect(state.corp.archives).toContain(holovidId);
+    expect(state.cardInstances[holovidId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "archives",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("applies Data Darts damage and next-ICE no-break only to the next encounter", () => {
+    let state = toRunnerTurn(createGameAfterSetup({
+      seed: "spotcheck-data-darts-next-ice",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        cards: [
+          { id: "onr_v1_072_wild-card", quantity: 1 },
+          { id: "simple_decoder", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+            (card) =>
+              !["onr_v1_072_wild-card", "simple_decoder"].includes(card.id),
+          ),
+        ],
+      },
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        cards: [
+          { id: "onr_v1_234_data-darts", quantity: 1 },
+          { id: "simple_code_gate_ice", quantity: 1 },
+          { id: "simple_economy_operation", quantity: 3 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+            (card) =>
+              ![
+                "onr_v1_234_data-darts",
+                "simple_code_gate_ice",
+                "simple_economy_operation",
+              ].includes(card.id),
+          ),
+        ],
+      },
+      agendaPointsToWin: 7,
+    }));
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    installRunnerProgramForTest(state, "onr_v1_072_wild-card");
+    installRunnerProgramForTest(state, "simple_decoder");
+    const codeGateId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+    state.cardInstances[codeGateId] = {
+      ...state.cardInstances[codeGateId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_234_data-darts");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = encounterIce(state, "rd", "onr_v1_234_data-darts");
+    state = breakCurrentSubroutine(state, "onr_v1_072_wild-card", 2);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.nextEncounterNoBreakSubroutines).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run?.noBreakSubroutinesActive).toBe(true);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "break_subroutine",
+      ),
+    ).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("hardens Detroit Police Contract, Off-Site Backups and Urban Renewal revalidation", () => {

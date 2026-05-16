@@ -368,11 +368,15 @@ const POX_ID = "onr_v1_049_pox";
 const EXPERT_SCHEDULE_ANALYZER_ID = "onr_v1_024_expert-schedule-analyzer";
 const MICROTECH_AI_INTERFACE_ID = "onr_v1_041_microtech-ai-interface";
 const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
+const POLTERGEIST_ID = "onr_v1_048_poltergeist";
 const SHREDDER_UPLINK_PROTOCOL_ID = "onr_v1_062_shredder-uplink-protocol";
 const SMARTEYE_ID = "onr_v1_065_smarteye";
 const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
+const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
+const HOLOVID_CAMPAIGN_ID = "onr_v1_326_holovid-campaign";
+const HOLOVID_CAMPAIGN_STARTING_BITS = 12;
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
 const RUSTBELT_HQ_BRANCH_ID = "onr_v1_338_rustbelt-hq-branch";
@@ -6349,7 +6353,15 @@ function runnerAccessActions(state: GameState): LegalAction[] {
       trashCost.totalCost
     ) {
       const scatterShotRecurringCreditsAvailable =
-        runnerAccessTrashRecurringCredits(state, run.accessedCardId);
+        scatterShotRecurringCreditSourceIds(state, run.accessedCardId).reduce(
+          (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+          0,
+        );
+      const poltergeistRecurringCreditsAvailable =
+        poltergeistRecurringCreditSourceIds(state, run.accessedCardId).reduce(
+          (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+          0,
+        );
       actions.push(
         action(
           state,
@@ -6368,6 +6380,14 @@ function runnerAccessActions(state: GameState): LegalAction[] {
                   v1922RunnerProgramAbility:
                     "scatter_shot_upgrade_trash_recurring_credit",
                   scatterShotRecurringCreditsAvailable,
+                }
+              : {}),
+            ...(poltergeistRecurringCreditsAvailable > 0 &&
+            definition.type === "asset"
+              ? {
+                  v1922RunnerProgramAbility:
+                    "poltergeist_node_trash_recurring_credit",
+                  poltergeistRecurringCreditsAvailable,
                 }
               : {}),
           },
@@ -6522,11 +6542,34 @@ function scatterShotRecurringCreditSourceIds(
   );
 }
 
+function poltergeistRecurringCreditSourceIds(
+  state: GameState,
+  accessedCardId: CardInstanceId,
+): CardInstanceId[] {
+  const accessedDefinition = definitionFor(state, accessedCardId);
+  if (accessedDefinition.type !== "asset") return [];
+  return state.runner.rig.programs.filter(
+    (cardId) =>
+      definitionFor(state, cardId).id === POLTERGEIST_ID &&
+      cardCounter(state, cardId, "recurring_credit") > 0,
+  );
+}
+
+function runnerAccessTrashRecurringCreditSourceIds(
+  state: GameState,
+  accessedCardId: CardInstanceId,
+): CardInstanceId[] {
+  return [
+    ...scatterShotRecurringCreditSourceIds(state, accessedCardId),
+    ...poltergeistRecurringCreditSourceIds(state, accessedCardId),
+  ].sort();
+}
+
 function runnerAccessTrashRecurringCredits(
   state: GameState,
   accessedCardId: CardInstanceId,
 ): number {
-  return scatterShotRecurringCreditSourceIds(state, accessedCardId).reduce(
+  return runnerAccessTrashRecurringCreditSourceIds(state, accessedCardId).reduce(
     (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
     0,
   );
@@ -6552,7 +6595,7 @@ function spendRunnerAccessTrashCredits(
     throw new Error("Der Runner kann die Trashkosten nicht bezahlen.");
   let remaining = amount;
   let recurringSpent = 0;
-  for (const cardId of scatterShotRecurringCreditSourceIds(
+  for (const cardId of runnerAccessTrashRecurringCreditSourceIds(
     state,
     accessedCardId,
   )) {
@@ -9378,6 +9421,23 @@ function rezCard(
       };
     }
   }
+  if (definition.id === HOLOVID_CAMPAIGN_ID) {
+    setCardCounter(
+      state,
+      cardId as CardInstanceId,
+      "bit",
+      HOLOVID_CAMPAIGN_STARTING_BITS,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: HOLOVID_CAMPAIGN_ID,
+        counterType: "bit",
+        addedCounterAmount: HOLOVID_CAMPAIGN_STARTING_BITS,
+        remainingCounters: HOLOVID_CAMPAIGN_STARTING_BITS,
+      };
+    }
+  }
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
   if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
@@ -11563,16 +11623,28 @@ function trashAccessedCard(
     cardId as CardInstanceId,
   );
   if (legalAction && overrideCost === undefined) {
+    const scatterShotSpent =
+      definition.type === "upgrade" ? trashPayment.recurringSpent : 0;
+    const poltergeistSpent =
+      definition.type === "asset" ? trashPayment.recurringSpent : 0;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       accessTrashBaseCost: effectiveCost.baseCost,
       accessTrashCostModifier: effectiveCost.modifier,
       accessTrashTotalCost: trashCost,
-      ...(trashPayment.recurringSpent > 0
+      ...(scatterShotSpent > 0
         ? {
             v1922RunnerProgramAbility:
               "scatter_shot_upgrade_trash_recurring_credit",
-            scatterShotRecurringCreditsSpent: trashPayment.recurringSpent,
+            scatterShotRecurringCreditsSpent: scatterShotSpent,
+            runnerCreditsSpent: trashPayment.runnerCreditsSpent,
+          }
+        : {}),
+      ...(poltergeistSpent > 0
+        ? {
+            v1922RunnerProgramAbility:
+              "poltergeist_node_trash_recurring_credit",
+            poltergeistRecurringCreditsSpent: poltergeistSpent,
             runnerCreditsSpent: trashPayment.runnerCreditsSpent,
           }
         : {}),
@@ -12566,6 +12638,15 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
         spendCardCounter(state, cardId, "bit", 1);
         credits(state, "corp", 1);
       }
+      continue;
+    }
+    if (definitionId === HOLOVID_CAMPAIGN_ID) {
+      if (cardCounter(state, cardId, "bit") > 0) {
+        spendCardCounter(state, cardId, "bit", 1);
+        credits(state, "corp", 1);
+      }
+      if (cardCounter(state, cardId, "bit") <= 0)
+        trashCorpInstalledCardToArchives(state, cardId);
       continue;
     }
     if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId))
@@ -18618,11 +18699,15 @@ function resolveTraceRunnerBid(
     traceStrength,
     runnerLink,
     runnerBid: bid,
-    ...(tracePayment.hellsRunSpent > 0
+    ...(tracePayment.traceLinkCreditSpent > 0
       ? {
-          hellsRunTraceCreditsSpent: tracePayment.hellsRunSpent,
+          traceLinkCreditsSpent: tracePayment.traceLinkCreditSpent,
+          ...(tracePayment.hellsRunSpent > 0
+            ? { hellsRunTraceCreditsSpent: tracePayment.hellsRunSpent }
+            : {}),
           runnerCreditsSpent: tracePayment.runnerCreditsSpent,
-          traceLinkCreditSourceDefinitionIds: HELLS_RUN_ID,
+          traceLinkCreditSourceDefinitionIds:
+            tracePayment.sourceDefinitionIds.join(","),
         }
       : {}),
     runnerStrength,
@@ -18658,10 +18743,11 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
 }
 
 function runnerTraceLinkCreditSourceIds(state: GameState): CardInstanceId[] {
-  return state.runner.rig.resources
+  return [...state.runner.rig.hardware, ...state.runner.rig.resources]
     .filter(
       (cardId) =>
-        definitionFor(state, cardId).id === HELLS_RUN_ID &&
+        (definitionFor(state, cardId).id === HELLS_RUN_ID ||
+          definitionFor(state, cardId).id === PK_6089A_ID) &&
         cardCounter(state, cardId, "recurring_credit") > 0,
     )
     .sort();
@@ -18677,12 +18763,25 @@ function runnerTraceLinkCredits(state: GameState): number {
 function spendRunnerTraceLinkBidCredits(
   state: GameState,
   amount: number,
-): { hellsRunSpent: number; runnerCreditsSpent: number } {
-  if (amount <= 0) return { hellsRunSpent: 0, runnerCreditsSpent: 0 };
+): {
+  traceLinkCreditSpent: number;
+  hellsRunSpent: number;
+  runnerCreditsSpent: number;
+  sourceDefinitionIds: string[];
+} {
+  if (amount <= 0)
+    return {
+      traceLinkCreditSpent: 0,
+      hellsRunSpent: 0,
+      runnerCreditsSpent: 0,
+      sourceDefinitionIds: [],
+    };
   if (state.runner.credits + runnerTraceLinkCredits(state) < amount)
     throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
   let remaining = amount;
+  let traceLinkCreditSpent = 0;
   let hellsRunSpent = 0;
+  const sourceDefinitionIds = new Set<string>();
   for (const cardId of runnerTraceLinkCreditSourceIds(state)) {
     if (remaining <= 0) break;
     const spent = Math.min(
@@ -18692,10 +18791,18 @@ function spendRunnerTraceLinkBidCredits(
     if (spent <= 0) continue;
     spendCardCounter(state, cardId, "recurring_credit", spent);
     remaining -= spent;
-    hellsRunSpent += spent;
+    traceLinkCreditSpent += spent;
+    const definitionId = definitionFor(state, cardId).id;
+    if (definitionId === HELLS_RUN_ID) hellsRunSpent += spent;
+    sourceDefinitionIds.add(definitionId);
   }
   spendCredits(state, "runner", remaining);
-  return { hellsRunSpent, runnerCreditsSpent: remaining };
+  return {
+    traceLinkCreditSpent,
+    hellsRunSpent,
+    runnerCreditsSpent: remaining,
+    sourceDefinitionIds: [...sourceDefinitionIds].sort(),
+  };
 }
 
 function selectedBidAmount(
@@ -19195,6 +19302,9 @@ function publicContextForAction(
       "encounterTaxSource",
       "v1922RunnerProgramAbility",
       "sourceDefinitionId",
+      "counterType",
+      "addedCounterAmount",
+      "remainingCounters",
       "speedTrapSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",
@@ -19324,6 +19434,7 @@ function publicContextForAction(
       "traceStrength",
       "runnerLink",
       "runnerBid",
+      "traceLinkCreditsSpent",
       "hellsRunTraceCreditsSpent",
       "runnerCreditsSpent",
       "traceLinkCreditSourceDefinitionIds",
@@ -19595,6 +19706,8 @@ function publicContextForAction(
     "accessTrashTotalCost",
     "scatterShotRecurringCreditsAvailable",
     "scatterShotRecurringCreditsSpent",
+    "poltergeistRecurringCreditsAvailable",
+    "poltergeistRecurringCreditsSpent",
     "runnerCreditsSpent",
   ]) {
     const value = legalAction.payload?.[key];

@@ -10,7 +10,6 @@ export const CORP_ECONOMY_ASSET_CARD_IDS = new Set([
 
 export const CORP_RECURRING_ASSET_CARD_IDS = new Set([
   "onr_v1_311_braindance-campaign",
-  "onr_v1_326_holovid-campaign",
   "onr_v1_329_investment-firm",
   "onr_v1_344_spinn-public-relations",
 ]);

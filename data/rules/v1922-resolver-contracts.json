@@ -176,11 +176,11 @@
       "cluster": "runner_programs",
       "side": "runner",
       "type": "program",
-      "contractStatus": "prepared_errata_reviewed_recurring_node_trash_credits_no_promotion",
+      "contractStatus": "runtime_wip_no_promotion",
       "confirmedLocalFacts": ["install_cost_0", "memory_cost_1", "errata_put_2_from_bank", "recurring_credits_for_trashing_nodes", "refresh_from_bank_at_runner_turn_start"],
-      "safeCurrentCoverage": ["no_playable_runtime_guard", "no_install_pump_break_legalaction_guard"],
-      "missingInformation": ["node_trash_payment_window", "public_event_redaction", "replay_statehash_expectation", "ai_fallback"],
-      "removalCondition": "Use the errata-reviewed 2 recurring credits for node trash costs in a later non-promoting runtime slice."
+      "safeCurrentCoverage": ["install_program_legal_action", "node_trash_recurring_credit", "upgrade_trash_negative", "runner_turn_start_recurring_refresh", "public_payload_visibility", "replay_statehash"],
+      "missingInformation": ["final_release_matrix_review_after_spotcheck_followup"],
+      "removalCondition": "Spotcheck follow-up 2026-05-16 implemented and covered by focused engine test; keep the historical V1.9.22 contract matrix under no-new-promotion guard."
     },
     {
       "cardId": "onr_v1_051_rabbit",
@@ -392,11 +392,11 @@
       "cluster": "runner_hardware",
       "side": "runner",
       "type": "hardware-deck",
-      "contractStatus": "partial_install_contract_only",
-      "confirmedLocalFacts": ["install_hardware_legal_action", "install_cost_0_wip_definition", "hardware_deck_surface", "memory_mu_modifier_surface", "visibility_replay_statehash_install_covered"],
-      "safeCurrentCoverage": ["runtime_definition_guard", "install_hardware_legal_action", "wrong_side_revalidation", "stale_state_revalidation", "public_payload_visibility", "replay_statehash"],
-      "missingInformation": ["per_card_effect_contract", "deck_uniqueness_contract", "memory_bonus_amount_or_modifier_rule", "hosted_or_recurring_credit_details", "link_or_extra_run_trigger_if_any", "effect_public_event_redaction", "ai_fallback"],
-      "removalCondition": "Confirm the full hardware deck effect beyond base installation."
+      "contractStatus": "runtime_wip_no_promotion",
+      "confirmedLocalFacts": ["install_hardware_legal_action", "install_cost_4", "hardware_deck_surface", "memory_mu_bonus_1", "deck_unique_replacement", "trace_link_recurring_credit_refresh", "visibility_replay_statehash_install_covered"],
+      "safeCurrentCoverage": ["runtime_definition_guard", "install_hardware_legal_action", "deck_unique", "memory_bonus", "trace_link_recurring_credit", "runner_turn_start_recurring_refresh", "wrong_side_revalidation", "stale_state_revalidation", "public_payload_visibility", "replay_statehash"],
+      "missingInformation": ["final_release_matrix_review_after_spotcheck_followup"],
+      "removalCondition": "Spotcheck follow-up 2026-05-16 implemented and covered by focused engine test; keep the historical V1.9.22 contract matrix under no-new-promotion guard."
     },
     {
       "cardId": "onr_v1_122_artemis-2020",

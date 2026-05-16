@@ -1980,7 +1980,7 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_224_bolter-cluster":
     "[Subroutine] Do 4 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
   "onr_v1_234_data-darts":
-    "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+    "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.\n[Subroutine] End the run.",
   "onr_v1_258_neural-blade":
     "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
 };

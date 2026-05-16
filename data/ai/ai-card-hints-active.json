@@ -1515,7 +1515,8 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "damage"
+        "damage",
+        "run_modifier"
       ],
       "planRoles": [
         "defend_server"
@@ -1524,13 +1525,15 @@
         "install_ice",
         "rez_ice",
         "encounter_ice",
-        "net_damage"
+        "net_damage",
+        "next_encounter_no_break"
       ],
       "valueHints": {
         "defense": 1
       },
       "riskTags": [
-        "damage_window"
+        "damage_window",
+        "next_encounter_modifier"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4374,8 +4377,8 @@
       "roles": [
         "asset",
         "campaign",
-        "recurring",
-        "economy"
+        "economy",
+        "bit_counter"
       ],
       "planRoles": [
         "remote_asset_economy"
@@ -4383,14 +4386,16 @@
       "requiredMechanics": [
         "install_asset",
         "rez_card",
-        "recurring_credit",
-        "gain_credit"
+        "bit_counter",
+        "start_turn_counter_drain",
+        "gain_credit",
+        "self_trash"
       ],
       "valueHints": {
         "economy": 2
       },
       "riskTags": [
-        "recurring_refresh"
+        "public_counter_lifecycle"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7860,19 +7865,20 @@
       "roles": [
         "runner",
         "program",
-        "per_card_longtail"
+        "recurring_credit",
+        "trash_cost_payment"
       ],
       "planRoles": [
         "runner_install_program",
-        "runner_program_ability"
+        "runner_access_trash_economy"
       ],
       "requiredMechanics": [
-        "per_card_longtail_resolver_gate",
-        "v1922_runner_program_install_surface_ability_gated",
-        "runner_program_resolver"
+        "v1922_runner_program_poltergeist_node_trash_recurring_credit",
+        "node_trash_recurring_credit",
+        "recurring_start_turn"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "trashEconomy": 2
       },
       "riskTags": [
         "legal_actions_only",
@@ -10597,18 +10603,21 @@
       "roles": [
         "runner",
         "hardware",
-        "per_card_longtail"
+        "deck",
+        "link_recurring_credit"
       ],
       "planRoles": [
-        "runner_install_hardware"
+        "runner_install_hardware",
+        "runner_trace_bid_support"
       ],
       "requiredMechanics": [
-        "per_card_longtail_resolver_gate",
-        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
-        "install_hardware_memory_surface"
+        "install_hardware_memory_surface",
+        "deck_unique",
+        "trace_link_recurring_credit",
+        "recurring_start_turn"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "traceBidSupport": 2
       },
       "riskTags": [
         "legal_actions_only",
