@@ -8898,23 +8898,24 @@
       "roles": [
         "event",
         "counter",
-        "hidden_zone_tool"
+        "icebreaker_strength_modifier"
       ],
       "planRoles": [
-        "build_rig",
-        "recover_rig"
+        "agenda_reward",
+        "build_rig"
       ],
       "requiredMechanics": [
         "play_event",
-        "search_stack",
-        "reveal",
-        "shuffle"
+        "agenda_subtype_condition",
+        "counter",
+        "icebreaker_strength_modifier"
       ],
       "valueHints": {
-        "consistency": 2
+        "tempo": 2,
+        "runPressure": 2
       },
       "riskTags": [
-        "hidden_info_barrier"
+        "conditional"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9175,7 +9176,7 @@
       "cardType": "event",
       "roles": [
         "event",
-        "counter",
+        "expose",
         "hidden_zone_tool"
       ],
       "planRoles": [
@@ -9183,13 +9184,16 @@
       ],
       "requiredMechanics": [
         "play_event",
-        "reveal_stack_top"
+        "expose",
+        "target_choice",
+        "hidden_info_barrier"
       ],
       "valueHints": {
         "information": 2
       },
       "riskTags": [
-        "public_reveal"
+        "public_reveal",
+        "hidden_info_barrier"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

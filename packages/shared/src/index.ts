@@ -116,6 +116,7 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "militech"
   | "power"
   | "agenda"
   | "recurring_credit"
@@ -870,6 +871,7 @@ export type GameState = {
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
     stoleAgendaLastTurn: boolean;
+    stoleResearchAgendaThisTurn?: boolean;
     stoleGrayOpsAgendaThisTurn?: boolean;
     stoleBlackOpsAgendaThisTurn?: boolean;
     runAttemptsThisTurn?: number;
@@ -2306,7 +2308,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Reveal the top card of your stack.",
     mechanics: [
       "play_event",
+      "search_stack",
+      "search_trash",
+      "install_program",
+      "temporary_install",
+      "end_turn_return",
       "reveal",
+      "shuffle",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -2806,14 +2814,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 0,
     rulesText:
-      "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
+      "Play only if you liberated a Research agenda this turn. Put a Militech counter on each installed icebreaker; each Militech counter gives +1 strength.",
     mechanics: [
       "play_event",
-      "search_stack",
-      "reveal",
-      "shuffle",
+      "agenda_subtype_condition",
       "counter",
-      "hidden_zone_tool",
+      "icebreaker_strength_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2825,11 +2831,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["bbs"],
     implementationStatus: "playable_mvp",
     cost: 1,
-    rulesText: "Reveal the top card of the Runner stack.",
+    rulesText: "Expose up to three installed Corp cards.",
     mechanics: [
       "play_event",
+      "expose",
       "reveal",
-      "counter",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],

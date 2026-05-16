@@ -57,16 +57,19 @@ const AMOUNT_KEYS = [
   "randomRoll",
   "dieRoll",
   "randomCounterAfter",
+  "returnedCount",
 ] as const;
 
 const TARGET_KEYS = [
   "sourceDefinitionId",
   "cardDefinitionId",
   "targetCardDefinitionId",
+  "targetCardDefinitionIds",
   "targetIceDefinitionId",
   "trashedCardDefinitionId",
   "installedProgramDefinitionId",
   "returnedCardDefinitionId",
+  "returnedCardDefinitionIds",
   "hostDefinitionId",
   "serverLabel",
   "targetServerLabel",

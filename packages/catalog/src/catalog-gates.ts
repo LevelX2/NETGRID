@@ -1935,8 +1935,9 @@ const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   onr_v1_064_skivviss:
     "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
   "onr_v1_082_deal-with-militech":
-    "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
-  "onr_v1_091_hunt-club-bbs": "Reveal the top card of the Runner stack.",
+    "Play only if the Runner liberated a Research agenda this turn. Put a Militech counter on each installed icebreaker.",
+  "onr_v1_091_hunt-club-bbs":
+    "Expose up to three installed Corp cards through a side-safe target choice.",
   "onr_v1_174_rigged-investments":
     "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
   "onr_v1_176_the-shell-traders":

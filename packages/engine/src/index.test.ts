@@ -10955,11 +10955,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("reveals only the intended public definition id for V1.9.11 reveal events", () => {
+  it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
-    putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
 
     state = apply(
       state,
@@ -10968,14 +10970,81 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === eventId,
     );
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      revealKind: "reveal",
-      cardDefinitionId: "simple_decoder",
-      title: "Simple Decoder",
+    expect(state.pendingChoice?.source).toContain("sneak_preview_source");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    state = applyChoice(state, "runner", "source_stack");
+    expect(state.pendingChoice?.source).toContain("sneak_preview_stack_install");
+    expect(getPlayerView(state, "runner").pendingChoice?.stackSearchResolution).toMatchObject({
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
     });
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain(
-      "Forgotten Backup Chip",
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.grip).not.toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_program_install",
+      cardDefinitionId: "simple_decoder",
+      temporaryInstall: true,
+    });
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.runner.rig.programs).not.toContain(targetProgramId);
+    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_end_turn_return",
+      returnedCount: 1,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses Sneak Preview to choose Heap first, install for free without shuffling, and does not return if the program left play", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
+    const targetProgramId = moveRunnerCardToGrip(state, "simple_decoder");
+    removeEverywhere(state, targetProgramId);
+    state.runner.heap.push(targetProgramId);
+    state.cardInstances[targetProgramId] = {
+      ...state.cardInstances[targetProgramId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
     );
+    state = applyChoice(state, "runner", "source_heap");
+    expect(state.pendingChoice?.source).toContain("sneak_preview_heap_install");
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "sneak_preview_program_install",
+      searchShuffleAfter: false,
+      temporaryInstall: true,
+    });
+    removeEverywhere(state, targetProgramId);
+    state.runner.heap.push(targetProgramId);
+    state.cardInstances[targetProgramId] = {
+      ...state.cardInstances[targetProgramId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.runner.grip).not.toContain(targetProgramId);
+    expect(state.runner.heap).toContain(targetProgramId);
   });
 
   it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {
@@ -13567,19 +13636,20 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     }
   });
 
-  it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
+  it("uses V1.9.12 Militech and Hunt Club BBS paths without exposing choices to the Corp", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.counterRecurring("v1912-hidden-zone"));
     state.runner.credits = 20;
     const dealId = moveRunnerCardToGrip(state, "onr_v1_082_deal-with-militech");
-    const iSpyId = moveRunnerCardToGrip(state, "onr_v1_032_i-spy");
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "install_card" &&
-        String(action.payload?.cardId) === iSpyId,
-    );
+    const huntClubId = moveRunnerCardToGrip(state, "onr_v1_091_hunt-club-bbs");
+    const breakerId = installRunnerProgramForTest(state, "simple_decoder");
+    const exposedIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      stoleResearchAgendaThisTurn: true,
+    };
     state = apply(
       state,
       "runner",
@@ -13587,26 +13657,33 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === dealId,
     );
-    expect(state.pendingChoice?.source).toContain("v1912.search_stack");
-    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
-      (option) => option.value === targetProgramId,
-    )?.id;
-    expect(optionId).toBeDefined();
-    state = applyChoice(state, "runner", String(optionId));
-    expect(state.runner.grip).toContain(targetProgramId);
-
-    putRunnerCardOnTopOfStack(state, "simple_fracter");
+    expect(cardCounterAmount(state, breakerId, "militech")).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      counterType: "militech",
+      addedCounterAmount: 1,
+      targetCount: 1,
+    });
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1912CounterAbility === "reveal_stack_top",
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === huntClubId,
     );
+    expect(state.pendingChoice?.source).toContain("hunt_club_bbs_expose");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toContain(
+      "Simple Upgrade",
+    );
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === exposedIceId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      revealKind: "reveal",
-      cardDefinitionId: "simple_fracter",
+      revealKind: "expose",
+      revealedCount: 1,
+      publicRevealDefinitionIds: "simple_barrier_ice",
     });
   });
 

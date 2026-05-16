@@ -1719,6 +1719,36 @@
       ]
     },
     {
+      "roundId": "2026-05-16-hidden-zone-temporary-install-resolvers",
+      "selectionMode": "sequential_followup_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers.md",
+      "jobStatus": "done",
+      "cards": [
+        {
+          "cardId": "onr_v1_082_deal-with-militech",
+          "title": "Deal with Militech",
+          "spotcheckStatus": "completed",
+          "result": "hardened_research_agenda_condition_militech_icebreaker_counter_resolver",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_091_hunt-club-bbs",
+          "title": "Hunt Club BBS",
+          "spotcheckStatus": "completed",
+          "result": "hardened_private_multi_expose_choice_no_prechoice_identity_leak",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_110_sneak-preview",
+          "title": "Sneak Preview",
+          "spotcheckStatus": "completed",
+          "result": "hardened_heap_stack_temporary_program_install_end_turn_return",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-trace-cache-ambush",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md",
@@ -1736,23 +1766,23 @@
         {
           "cardId": "onr_v1_082_deal-with-militech",
           "title": "Deal with Militech",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_research_condition_militech_counter_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_research_condition_militech_counter_resolver",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_091_hunt-club-bbs",
           "title": "Hunt Club BBS",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_multi_expose_choice_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_multi_expose_choice_resolver",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_110_sneak-preview",
           "title": "Sneak Preview",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_temporary_heap_stack_program_install_resolver_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_temporary_heap_stack_program_install_resolver",
+          "followUpStatus": "fixed_and_tested"
         },
         {
           "cardId": "onr_v1_155_code-viral-cache",

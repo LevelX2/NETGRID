@@ -460,6 +460,20 @@ Jobstatus: `done`; Umsetzung und Checks sind grün.
 | Razor Wire | `onr_v1_262_razor-wire` | Net-Damage und End-the-run bleiben subroutinegenau getrennt und replay-stabil | Teilbreak-, Redaction- und Replay-Test ergänzt |
 | Vapor Ops | `onr_v1_347_vapor-ops` | Rezzed-only Counter-Aktion bleibt source-bound und payloadfähig | SourceDefinition-Payload und Rezzed-Gate-Test ergänzt |
 
+## Runde 2026-05-16-hidden-zone-temporary-install-resolvers
+
+Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
+
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers.md`
+
+Jobstatus: `done`; alle drei aus dem blockierten Trace-Cache-Ambush-Sammeljob herausgezogenen Resolver sind umgesetzt und grün geprüft.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Deal with Militech | `onr_v1_082_deal-with-militech` | Research-Agenda-Turn-Flag und Militech-Counter auf installierten Icebreakern umgesetzt | Erledigt; Stack-Search-Fehlpfad entfernt |
+| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Private Multi-Expose-Zielwahl für bis zu drei installierte verdeckte Korp-Karten umgesetzt | Erledigt; Zielidentitäten leaken vor der Choice nicht |
+| Sneak Preview | `onr_v1_110_sneak-preview` | Heap-/Stack-Programminstall mit Stack-Shuffle, Memory-Revalidation und End-of-turn-Return umgesetzt | Erledigt; vorzeitig verlassene Programme kehren nicht doppelt zurück |
+
 ## Runde 2026-05-15-trace-cache-ambush
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
@@ -471,9 +485,9 @@ Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, mehrere Vollresolver bl
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
 | Signpost | `onr_v1_063_signpost` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
-| Deal with Militech | `onr_v1_082_deal-with-militech` | Blockiert: Research-Bedingung und Militech-Counter auf Icebreakern fehlen | Eigenen Research-/Counter-Resolver umsetzen |
-| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Blockiert: Multi-Expose-Choice ohne Zielidentitäts-Leak fehlt | Eigenen Expose-Choice-Resolver umsetzen |
-| Sneak Preview | `onr_v1_110_sneak-preview` | Blockiert: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return fehlt | Eigenen Temporary-Install-Resolver umsetzen |
+| Deal with Militech | `onr_v1_082_deal-with-militech` | Folgejob umgesetzt: Research-Bedingung und Militech-Counter auf Icebreakern grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
+| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Folgejob umgesetzt: Multi-Expose-Choice ohne Zielidentitäts-Leak grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
+| Sneak Preview | `onr_v1_110_sneak-preview` | Folgejob umgesetzt: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
 | Code Viral Cache | `onr_v1_155_code-viral-cache` | Blockiert: Purge-Replacement und Korp-Trash-Aktion fehlen | Eigenen Purge-Replacement-Resolver umsetzen |
 | The Springboard | `onr_v1_181_the-springboard` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
 | Cerberus | `onr_v1_227_cerberus` | Teilfix umgesetzt: 3 Net Damage und kein falscher Trace-Tag; Counter-Loop bleibt offen | Cerberus-Counter-/Runstart-Damage-Resolver umsetzen |

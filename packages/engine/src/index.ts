@@ -318,7 +318,10 @@ const COCKROACH_ID = "onr_v1_013_cockroach";
 const GRUBB_ID = "onr_v1_030_grubb";
 const INCUBATOR_ID = "onr_v1_034_incubator";
 const ALL_NIGHTER_ID = "onr_v1_076_all-nighter";
+const DEAL_WITH_MILITECH_ID = "onr_v1_082_deal-with-militech";
+const HUNT_CLUB_BBS_ID = "onr_v1_091_hunt-club-bbs";
 const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
+const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
@@ -792,44 +795,34 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_110_sneak-preview": {
-    name: "onr_v1911_runner_event_reveal_stack_top",
-    canPlay: (state) => state.runner.stack.length > 0,
+  [SNEAK_PREVIEW_ID]: {
+    name: "onr_v1911_runner_event_sneak_preview_temporary_program_install",
+    canPlay: (state) => sneakPreviewSourceOptions(state).length > 0,
     resolve: (state, legalAction) => {
-      revealRunnerStackTop(state, legalAction);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneAction: "v1911_reveal_stack_top",
-      };
-    },
-  },
-  "onr_v1_082_deal-with-militech": {
-    name: "onr_v1912_runner_event_search_stack_program_to_hand",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
-    resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(
-        state,
-        "v1912.search_stack",
-        "v1912_search_stack",
-      );
+      startSneakPreviewSourceChoice(state, legalAction);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1912_search_stack",
+        hiddenZoneAction: "sneak_preview_source_choice",
       };
     },
   },
-  "onr_v1_091_hunt-club-bbs": {
-    name: "onr_v1912_runner_event_reveal_stack_top",
-    canPlay: (state) => state.runner.stack.length > 0,
+  [DEAL_WITH_MILITECH_ID]: {
+    name: "onr_v1912_runner_event_deal_with_militech_counters",
+    canPlay: (state) => runnerStoleAgendaSubtypeThisTurn(state, "research"),
     resolve: (state, legalAction) => {
-      revealRunnerStackTop(state, legalAction);
+      resolveDealWithMilitech(state, legalAction);
+    },
+  },
+  [HUNT_CLUB_BBS_ID]: {
+    name: "onr_v1912_runner_event_hunt_club_bbs_multi_expose",
+    canPlay: (state) => huntClubBbsExposeTargets(state).length > 0,
+    resolve: (state, legalAction) => {
+      startHuntClubBbsExposeChoice(state, legalAction);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        hiddenZoneAction: "v1912_reveal_stack_top",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "hunt_club_bbs_expose_choice",
       };
     },
   },
@@ -1877,6 +1870,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     runnerTurnFlags: {
       stoleAgendaThisTurn: false,
       stoleAgendaLastTurn: false,
+      stoleResearchAgendaThisTurn: false,
       stoleGrayOpsAgendaThisTurn: false,
       stoleBlackOpsAgendaThisTurn: false,
       runAttemptsThisTurn: 0,
@@ -5727,6 +5721,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breakerStrength =
       breakerBaseStrength +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
+      cardCounter(state, breakerId, "militech") +
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
     const pump = breaker.abilities?.find(
@@ -11250,6 +11245,8 @@ function stealAgenda(state: GameState, cardId: string, legalAction?: LegalAction
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = true;
   const definition = definitionFor(state, cardId);
+  if (cardHasSubtype(definition, "research"))
+    flags.stoleResearchAgendaThisTurn = true;
   if (cardHasSubtype(definition, "gray_ops"))
     flags.stoleGrayOpsAgendaThisTurn = true;
   if (cardHasSubtype(definition, "black_ops"))
@@ -12057,9 +12054,11 @@ function endTurn(
         }, 0)
       : 0;
   if (side === "runner") {
+    resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
     flags.stoleAgendaThisTurn = false;
+    flags.stoleResearchAgendaThisTurn = false;
     flags.stoleGrayOpsAgendaThisTurn = false;
     flags.stoleBlackOpsAgendaThisTurn = false;
     flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
@@ -12083,6 +12082,52 @@ function endTurn(
       ...(legalAction.payload ?? {}),
       polymerBreakthroughCreditsGained,
       corpCreditsAfter: state.corp.credits,
+    };
+  }
+}
+
+function resolveSneakPreviewTemporaryInstallReturns(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const pending = state.sneakPreviewTemporaryInstalls ?? [];
+  if (pending.length === 0) return;
+  const returnedDefinitionIds: string[] = [];
+  for (const entry of pending) {
+    const cardId = entry.cardId;
+    const instance = state.cardInstances[cardId];
+    if (
+      instance &&
+      state.runner.rig.programs.includes(cardId) &&
+      instance.zone.side === "runner" &&
+      instance.zone.zone === "rig"
+    ) {
+      const definition = definitionFor(state, cardId);
+      removeFromAllZones(state, cardId);
+      state.runner.grip.push(cardId);
+      if (runnerProgramUsesMemory(state, cardId)) {
+        state.runner.memoryUsed = Math.max(
+          0,
+          state.runner.memoryUsed - (definition.memoryCost ?? 0),
+        );
+      }
+      state.cardInstances[cardId] = {
+        ...cardInstanceWithoutCounters(instance),
+        faceup: true,
+        rezzed: true,
+        zone: { side: "runner", zone: "grip" },
+      };
+      returnedDefinitionIds.push(definition.id);
+    }
+  }
+  state.sneakPreviewTemporaryInstalls = [];
+  if (returnedDefinitionIds.length > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "sneak_preview_end_turn_return",
+      returnedCount: returnedDefinitionIds.length,
+      returnedCardDefinitionIds: returnedDefinitionIds.join(","),
     };
   }
 }
@@ -12227,6 +12272,7 @@ function startRunnerTurn(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = false;
   flags.stoleAgendaLastTurn = false;
+  flags.stoleResearchAgendaThisTurn = false;
   flags.stoleGrayOpsAgendaThisTurn = false;
   flags.stoleBlackOpsAgendaThisTurn = false;
   flags.runAttemptsThisTurn = 0;
@@ -13559,8 +13605,10 @@ function corpScoredBlackOpsAgendaLastTurn(state: GameState): boolean {
 
 function runnerStoleAgendaSubtypeThisTurn(
   state: GameState,
-  subtype: "gray_ops" | "black_ops",
+  subtype: "research" | "gray_ops" | "black_ops",
 ): boolean {
+  if (subtype === "research")
+    return state.runnerTurnFlags?.stoleResearchAgendaThisTurn === true;
   if (subtype === "gray_ops")
     return state.runnerTurnFlags?.stoleGrayOpsAgendaThisTurn === true;
   return state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true;
@@ -14696,7 +14744,8 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
     (choice.source.startsWith("v098.search_stack") ||
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1912.search_stack") ||
-      choice.source.startsWith("v1911.short_circuit_search"))
+      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.sneak_preview_stack_install"))
   );
 }
 
@@ -14705,11 +14754,18 @@ function stackSearchResolutionForChoice(
 ): ChoiceRequest["stackSearchResolution"] | undefined {
   if (!isRunnerStackSearchChoice(choice)) return undefined;
   return {
-    reveal: choice.source.startsWith("v1911.short_circuit_search")
+    reveal:
+      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.sneak_preview_stack_install")
       ? "public"
       : "hidden",
-    destination: "grip",
+    destination: choice.source.startsWith("v1911.sneak_preview_stack_install")
+      ? "install_program"
+      : "grip",
     shuffleAfter: true,
+    ...(choice.source.startsWith("v1911.sneak_preview_stack_install")
+      ? { publicRevealKind: "reveal" }
+      : {}),
   };
 }
 
@@ -14718,10 +14774,15 @@ function visibleChoiceCardForOption(
   choice: ChoiceRequest,
   option: ChoiceRequest["options"][number],
 ): VisibleCard | undefined {
-  if (!isRunnerStackSearchChoice(choice)) return undefined;
   if (typeof option.value !== "string") return undefined;
   const cardId = option.value as CardInstanceId;
-  if (!state.runner.stack.includes(cardId)) return undefined;
+  const isStackChoice = isRunnerStackSearchChoice(choice);
+  const isSneakHeapChoice = choice.source.startsWith(
+    "v1911.sneak_preview_heap_install",
+  );
+  if (!isStackChoice && !isSneakHeapChoice) return undefined;
+  if (isStackChoice && !state.runner.stack.includes(cardId)) return undefined;
+  if (isSneakHeapChoice && !state.runner.heap.includes(cardId)) return undefined;
   const instance = state.cardInstances[cardId];
   if (!instance || instance.owner !== "runner") return undefined;
   if (definitionFor(state, cardId).type !== "program") return undefined;
@@ -14810,6 +14871,21 @@ function resolvePendingChoice(
     state.pendingChoice.source.startsWith("v1911.short_circuit_search")
   ) {
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1911.sneak_preview_source")) {
+    resolveSneakPreviewSourceChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("v1911.sneak_preview_heap_install") ||
+    state.pendingChoice.source.startsWith("v1911.sneak_preview_stack_install")
+  ) {
+    resolveSneakPreviewProgramChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1912.hunt_club_bbs_expose")) {
+    resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -15336,6 +15412,195 @@ function resolveRunnerStackSearchChoice(
         }
       : {}),
   };
+}
+
+function sneakPreviewInstallableProgramIds(
+  state: GameState,
+  zone: "heap" | "stack",
+): CardInstanceId[] {
+  const source = zone === "heap" ? state.runner.heap : state.runner.stack;
+  return source.filter((cardId) => {
+    const definition = definitionFor(state, cardId);
+    const uniqueBlocked =
+      isUniqueCard(definition) &&
+      hasInstalledUniqueCardDefinition(state, "runner", definition.id);
+    return (
+      definition.type === "program" &&
+      !uniqueBlocked &&
+      state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
+        state.runner.memoryLimit
+    );
+  });
+}
+
+function sneakPreviewSourceOptions(
+  state: GameState,
+): ChoiceRequest["options"] {
+  const options: ChoiceRequest["options"] = [];
+  if (sneakPreviewInstallableProgramIds(state, "heap").length > 0)
+    options.push({ id: "source_heap", label: "Heap", value: "heap" });
+  if (sneakPreviewInstallableProgramIds(state, "stack").length > 0)
+    options.push({ id: "source_stack", label: "Stack", value: "stack" });
+  return options;
+}
+
+function startSneakPreviewSourceChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = sneakPreviewSourceOptions(state);
+  if (options.length === 0)
+    throw new Error("Sneak Preview findet kein legal installierbares Programm.");
+  state.pendingChoice = {
+    choiceId: `v1911_sneak_preview_source_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.sneak_preview_source:${state.stateVersion + 1}`,
+    prompt: "Sneak-Preview-Quelle wählen",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "sneak_preview_source_choice",
+    choiceVisibility: "runner_private",
+  };
+}
+
+function resolveSneakPreviewSourceChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1911.sneak_preview_source"))
+    throw new Error("Es ist keine Sneak-Preview-Quellenwahl offen.");
+  const optionId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find((candidate) => candidate.id === optionId);
+  const selectedSource = option?.value;
+  if (selectedSource !== "heap" && selectedSource !== "stack")
+    throw new Error("Die Sneak-Preview-Quelle ist ungueltig.");
+  startSneakPreviewProgramChoice(state, selectedSource);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "sneak_preview_source_selected",
+    choiceVisibility: "runner_private",
+  };
+}
+
+function startSneakPreviewProgramChoice(
+  state: GameState,
+  sourceZone: "heap" | "stack",
+): void {
+  const options = sneakPreviewInstallableProgramIds(state, sourceZone).map(
+    (cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    },
+  );
+  if (options.length === 0)
+    throw new Error("In dieser Sneak-Preview-Quelle liegt kein legales Programm.");
+  state.pendingChoice = {
+    choiceId: `v1911_sneak_preview_${sourceZone}_install_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.sneak_preview_${sourceZone}_install:${state.stateVersion + 1}`,
+    prompt:
+      sourceZone === "heap"
+        ? "Programm aus dem Heap installieren"
+        : "Programm aus dem Stack installieren",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function resolveSneakPreviewProgramChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Sneak-Preview-Programmauswahl offen.");
+  const sourceZone = choice.source.startsWith("v1911.sneak_preview_heap_install")
+    ? "heap"
+    : choice.source.startsWith("v1911.sneak_preview_stack_install")
+      ? "stack"
+      : undefined;
+  if (!sourceZone) throw new Error("Die Sneak-Preview-Choice ist ungueltig.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId) throw new Error("Es wurde kein Programm fuer Sneak Preview gewaehlt.");
+  if (!sneakPreviewInstallableProgramIds(state, sourceZone).includes(cardId))
+    throw new Error("Dieses Programm ist nicht mehr legal installierbar.");
+  installRunnerProgramForFree(state, cardId);
+  state.sneakPreviewTemporaryInstalls ??= [];
+  state.sneakPreviewTemporaryInstalls.push({
+    cardId,
+    sourceCardDefinitionId: SNEAK_PREVIEW_ID,
+  });
+  if (sourceZone === "stack")
+    shuffleRunnerStack(state, `v1911_sneak_preview:${choice.choiceId}:shuffle`);
+  delete state.pendingChoice;
+  const definition = definitionFor(state, cardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "sneak_preview_program_install",
+    searchReveal: sourceZone === "stack" ? "public" : "hidden",
+    searchDestination: "install_program",
+    searchShuffleAfter: sourceZone === "stack",
+    shuffled: sourceZone === "stack",
+    temporaryInstall: true,
+    selectedCount: 1,
+    installedProgramDefinitionId: definition.id,
+    ...(sourceZone === "stack"
+      ? { publicRevealKind: "reveal", publicRevealDefinitionId: definition.id }
+      : {}),
+  };
+}
+
+function installRunnerProgramForFree(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program")
+    throw new Error("Sneak Preview darf nur Programme installieren.");
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+  if (
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+    state.runner.memoryLimit
+  )
+    throw new Error("Nicht genug Memory fuer Sneak Preview.");
+  removeFromAllZones(state, cardId);
+  state.runner.rig.programs.push(cardId);
+  state.runner.memoryUsed += definition.memoryCost ?? 0;
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+  };
+  if ((definition.recurringCredits ?? 0) > 0)
+    setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+  if (
+    definition.mechanics.includes("virus") &&
+    definition.id !== BUTCHER_BOY_ID &&
+    definition.id !== SKIVVISS_ID
+  )
+    addCardCounter(state, cardId, "virus", 1);
 }
 
 function startRunnerStackArrangeChoice(
@@ -17650,6 +17915,124 @@ function exposeCorpCardInServer(
   };
 }
 
+function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.programs
+    .filter((cardId) => cardHasSubtype(definitionFor(state, cardId), "icebreaker"))
+    .sort();
+}
+
+function resolveDealWithMilitech(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (!runnerStoleAgendaSubtypeThisTurn(state, "research"))
+    throw new Error("Deal with Militech benoetigt eine befreite Research-Agenda in diesem Zug.");
+  const targetIds = installedRunnerIcebreakerIds(state);
+  for (const cardId of targetIds) addCardCounter(state, cardId, "militech", 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: DEAL_WITH_MILITECH_ID,
+    counterType: "militech",
+    addedCounterAmount: targetIds.length,
+    targetCount: targetIds.length,
+    targetCardDefinitionIds: targetIds
+      .map((cardId) => definitionFor(state, cardId).id)
+      .join(","),
+  };
+}
+
+function huntClubBbsExposeTargets(state: GameState): CardInstanceId[] {
+  const targets: CardInstanceId[] = [];
+  for (const server of state.corp.servers) {
+    for (const cardId of [...server.root, ...server.ice]) {
+      const instance = mustInstance(state.cardInstances, cardId);
+      if (!instance.rezzed) targets.push(cardId);
+    }
+  }
+  return targets.sort();
+}
+
+function huntClubBbsExposeOptionLabel(
+  state: GameState,
+  cardId: CardInstanceId,
+): string {
+  const zone = mustInstance(state.cardInstances, cardId).zone;
+  if (zone.side !== "corp") return "Installierte Korp-Karte";
+  if (zone.zone === "serverIce") {
+    const server = mustServer(state, zone.serverId);
+    const index = server.ice.indexOf(cardId);
+    return `${server.label} ICE ${index + 1}`;
+  }
+  if (zone.zone === "serverRoot") {
+    const server = mustServer(state, zone.serverId);
+    const index = server.root.indexOf(cardId);
+    return `${server.label} Root ${index + 1}`;
+  }
+  return "Installierte Korp-Karte";
+}
+
+function startHuntClubBbsExposeChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = huntClubBbsExposeTargets(state).map((cardId) => ({
+    id: `card_${cardId}`,
+    label: huntClubBbsExposeOptionLabel(state, cardId),
+    value: cardId,
+  }));
+  if (options.length === 0)
+    throw new Error("Hunt Club BBS findet keine installierte verdeckte Korp-Karte.");
+  state.pendingChoice = {
+    choiceId: `v1912_hunt_club_bbs_expose_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1912.hunt_club_bbs_expose:${state.stateVersion + 1}`,
+    prompt: "Bis zu drei installierte Korp-Karten exposen",
+    kind: "select_cards",
+    options,
+    minSelections: 0,
+    maxSelections: Math.min(3, options.length),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "hunt_club_bbs_expose_choice",
+    choiceVisibility: "runner_private",
+  };
+}
+
+function resolveHuntClubBbsExposeChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1912.hunt_club_bbs_expose"))
+    throw new Error("Es ist keine Hunt-Club-BBS-Expose-Choice offen.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const legalTargets = new Set(huntClubBbsExposeTargets(state));
+  for (const cardId of selectedIds) {
+    if (!legalTargets.has(cardId))
+      throw new Error("Hunt Club BBS darf dieses Ziel nicht exposen.");
+  }
+  const labels = selectedIds.map((cardId) =>
+    huntClubBbsExposeOptionLabel(state, cardId),
+  );
+  const definitionIds = selectedIds.map((cardId) => definitionFor(state, cardId).id);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "hunt_club_bbs_expose",
+    publicRevealKind: "expose",
+    revealedCount: selectedIds.length,
+    publicRevealDefinitionIds: definitionIds.join(","),
+    exposedServerLabels: labels.join(","),
+  };
+}
+
 function outermostIceExposures(
   state: GameState,
 ): Array<{ server: CorpServer; cardId: CardInstanceId }> {
@@ -18832,6 +19215,16 @@ function publicContextForAction(
       context.searchDestination = legalAction.payload.searchDestination;
     if (typeof legalAction.payload.searchShuffleAfter === "boolean")
       context.searchShuffleAfter = legalAction.payload.searchShuffleAfter;
+    if (typeof legalAction.payload.temporaryInstall === "boolean")
+      context.temporaryInstall = legalAction.payload.temporaryInstall;
+    if (typeof legalAction.payload.installedProgramDefinitionId === "string")
+      context.installedProgramDefinitionId =
+        legalAction.payload.installedProgramDefinitionId;
+    if (typeof legalAction.payload.returnedCount === "number")
+      context.returnedCount = legalAction.payload.returnedCount;
+    if (typeof legalAction.payload.returnedCardDefinitionIds === "string")
+      context.returnedCardDefinitionIds =
+        legalAction.payload.returnedCardDefinitionIds;
     if (typeof legalAction.payload.archivesRevealCount === "number")
       context.archivesRevealCount = legalAction.payload.archivesRevealCount;
     if (typeof legalAction.payload.revealedCount === "number")
@@ -18859,6 +19252,9 @@ function publicContextForAction(
       context.exposedServerIds = legalAction.payload.exposedServerIds;
     if (typeof legalAction.payload.exposedServerLabels === "string")
       context.exposedServerLabels = legalAction.payload.exposedServerLabels;
+    if (typeof legalAction.payload.targetCardDefinitionIds === "string")
+      context.targetCardDefinitionIds =
+        legalAction.payload.targetCardDefinitionIds;
     context.redactedKind = "hidden_zone";
   }
   if (typeof legalAction.payload?.archivesAutoAccessedCount === "number")
@@ -18914,6 +19310,10 @@ function publicContextForAction(
   }
   if (typeof legalAction.payload?.badPublicityAfter === "number")
     context.badPublicityAfter = legalAction.payload.badPublicityAfter;
+  if (typeof legalAction.payload?.targetCount === "number")
+    context.targetCount = legalAction.payload.targetCount;
+  if (typeof legalAction.payload?.targetCardDefinitionIds === "string")
+    context.targetCardDefinitionIds = legalAction.payload.targetCardDefinitionIds;
   if (typeof legalAction.payload?.removedTags === "number")
     context.removedTags = legalAction.payload.removedTags;
   if (typeof legalAction.payload?.discardedCardsCount === "number")
@@ -20832,6 +21232,7 @@ function ensureRunnerTurnFlags(
   const flags = (state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
     stoleAgendaLastTurn: false,
+    stoleResearchAgendaThisTurn: false,
     stoleGrayOpsAgendaThisTurn: false,
     stoleBlackOpsAgendaThisTurn: false,
     runAttemptsThisTurn: 0,
@@ -20850,6 +21251,7 @@ function ensureRunnerTurnFlags(
     bodyweightDataCrecheExtraRunUsedThisTurn: false,
     startupImmolatorUsedSourceIdsThisTurn: [],
   });
+  flags.stoleResearchAgendaThisTurn ??= false;
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
   flags.runAttemptsThisTurn ??= 0;
