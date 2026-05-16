@@ -1805,6 +1805,7 @@ export default function Page() {
   const [confirmationDialog, setConfirmationDialog] = useState<ConfirmationDialogRequest | null>(null);
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
+  const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] = useState(false);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
@@ -2093,8 +2094,9 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number };
+        const parsed = JSON.parse(stored) as { enabled?: boolean; autoDismissMs?: number; automaticEffectsEnabled?: boolean };
         if (typeof parsed.enabled === "boolean") setActionCuesEnabled(parsed.enabled);
+        if (typeof parsed.automaticEffectsEnabled === "boolean") setAutomaticEffectCuesEnabled(parsed.automaticEffectsEnabled);
         setActionCueAutoDismissMs(normalizeCueAutoDismissMs(parsed.autoDismissMs));
       } catch {
         removeLocalStorageKeys(ACTION_CUE_SETTINGS_STORAGE_KEY, LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY);
@@ -2105,8 +2107,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!actionCueSettingsLoaded) return;
-    window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs }));
-  }, [actionCueSettingsLoaded, actionCuesEnabled, actionCueAutoDismissMs]);
+    window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs, automaticEffectsEnabled: automaticEffectCuesEnabled }));
+  }, [actionCueSettingsLoaded, actionCuesEnabled, actionCueAutoDismissMs, automaticEffectCuesEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
@@ -2642,6 +2644,7 @@ export default function Page() {
           playerView: payload.playerView,
           events: payload.eventTail,
           lastPresentedEventId: lastSeen,
+          includeAutomaticEffectCues: automaticEffectCuesEnabled,
           contextByEventId
         })
       : [];
@@ -2658,7 +2661,7 @@ export default function Page() {
       const sound = actionSoundForActionType(actionType, item.visibility);
       if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
     }
-  }, [actionCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
+  }, [actionCuesEnabled, automaticEffectCuesEnabled, audioEnabled, audioVolume, payload?.eventTail, payload?.playerView.stateVersion, payload?.side, catalogDetailsById]);
 
   useEffect(() => {
     if (currentActionCue || actionCueQueue.length === 0) return;
@@ -4371,6 +4374,7 @@ export default function Page() {
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
+              automaticEffectCuesEnabled={automaticEffectCuesEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               audioEnabled={audioEnabled}
@@ -4389,6 +4393,7 @@ export default function Page() {
               aiPacingMode={localAiPacingMode}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
+              onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onAudioEnabled={updateAudioEnabled}
@@ -5013,6 +5018,7 @@ export default function Page() {
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
+              automaticEffectCuesEnabled={automaticEffectCuesEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               audioEnabled={audioEnabled}
@@ -5032,6 +5038,7 @@ export default function Page() {
               session={session}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
+              onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onAudioEnabled={updateAudioEnabled}
@@ -5083,6 +5090,7 @@ export default function Page() {
           <OptionsPanel
             actionCueAutoDismissMs={actionCueAutoDismissMs}
             actionCuesEnabled={actionCuesEnabled}
+            automaticEffectCuesEnabled={automaticEffectCuesEnabled}
             autoDiscardEnabled={autoDiscardEnabled}
             autoEndTurnEnabled={autoEndTurnEnabled}
             audioEnabled={audioEnabled}
@@ -5103,6 +5111,7 @@ export default function Page() {
             session={session}
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
+            onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
             onAutoDiscardEnabled={setAutoDiscardEnabled}
             onAutoEndTurnEnabled={setAutoEndTurnEnabled}
             onAudioEnabled={updateAudioEnabled}
@@ -5708,6 +5717,7 @@ function seriesStatusText(series: SeriesResultSummary): string {
 function OptionsPanel({
   actionCueAutoDismissMs,
   actionCuesEnabled,
+  automaticEffectCuesEnabled,
   autoDiscardEnabled,
   autoEndTurnEnabled,
   audioEnabled,
@@ -5728,6 +5738,7 @@ function OptionsPanel({
   session = null,
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
+  onAutomaticEffectCuesEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onAudioEnabled,
@@ -5749,6 +5760,7 @@ function OptionsPanel({
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
+  automaticEffectCuesEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   audioEnabled: boolean;
@@ -5769,6 +5781,7 @@ function OptionsPanel({
   session?: SessionInfo | null;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
+  onAutomaticEffectCuesEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
@@ -5820,7 +5833,16 @@ function OptionsPanel({
         />
         <GameplaySettings autoDiscardEnabled={autoDiscardEnabled} autoEndTurnEnabled={autoEndTurnEnabled} onAutoDiscardEnabled={onAutoDiscardEnabled} onAutoEndTurnEnabled={onAutoEndTurnEnabled} />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
-        <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
+        <ActionCueSettings
+          enabled={actionCuesEnabled}
+          automaticEffectsEnabled={automaticEffectCuesEnabled}
+          position={cuePosition}
+          autoDismissMs={actionCueAutoDismissMs}
+          onEnabled={onActionCuesEnabled}
+          onAutomaticEffectsEnabled={onAutomaticEffectCuesEnabled}
+          onPosition={onCuePosition}
+          onAutoDismissMs={onActionCueAutoDismissMs}
+        />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
         <SystemStatus />
       </div>
@@ -6122,16 +6144,20 @@ function AiPacingSettings({ mode, onMode }: { mode: AiPacingMode; onMode(value: 
 
 function ActionCueSettings({
   enabled,
+  automaticEffectsEnabled,
   position,
   autoDismissMs,
   onEnabled,
+  onAutomaticEffectsEnabled,
   onPosition,
   onAutoDismissMs
 }: {
   enabled: boolean;
+  automaticEffectsEnabled: boolean;
   position: CuePositionPreference;
   autoDismissMs: CueAutoDismissMs;
   onEnabled(value: boolean): void;
+  onAutomaticEffectsEnabled(value: boolean): void;
   onPosition(value: CuePositionPreference): void;
   onAutoDismissMs(value: CueAutoDismissMs): void;
 }) {
@@ -6146,6 +6172,10 @@ function ActionCueSettings({
         <label className={`settingsToggle ${enabled ? "checked" : ""}`}>
           <input type="checkbox" checked={enabled} onChange={(event) => onEnabled(event.target.checked)} />
           Anzeigen
+        </label>
+        <label className={`settingsToggle ${automaticEffectsEnabled ? "checked" : ""}`}>
+          <input type="checkbox" checked={automaticEffectsEnabled} onChange={(event) => onAutomaticEffectsEnabled(event.target.checked)} disabled={!enabled} />
+          Automatische Effekte anzeigen
         </label>
       </div>
       <div className="settingsControlGrid">
@@ -6335,6 +6365,7 @@ function cueActionUseLabel(cue: OpponentActionCue): string {
 }
 
 function cueVisualLabel(cue: OpponentActionCue): string {
+  if (cue.source === "system") return "Auto-Effekt";
   switch (cue.actionType) {
     case "install_card":
       return cue.visibility === "redacted" ? "verdeckt installiert" : "installiert";

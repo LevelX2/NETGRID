@@ -100,6 +100,31 @@ describe("deriveOpponentActionCues", () => {
     expect(cues).toHaveLength(0);
   });
 
+  it("keeps automatic system cues behind the local option", () => {
+    const systemEvent = event("evt_auto_credit", "gain_credit", { amount: 2 });
+
+    expect(
+      deriveOpponentActionCues({
+        viewerSide: "runner",
+        playerView: view("runner"),
+        events: [systemEvent]
+      })
+    ).toHaveLength(0);
+
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [systemEvent],
+      includeAutomaticEffectCues: true
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.source).toBe("system");
+    expect(cues[0]?.actorLabel).toBe("Spiel");
+    expect(cues[0]?.opponent).toBe(false);
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("skips old reconnect events and does not show a pure turn-handoff cue", () => {
     const playerView = view("runner", { activeSide: "runner", legalActions: [legalAction("runner", "start_run")] });
     const cues = deriveOpponentActionCues({

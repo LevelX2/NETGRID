@@ -62,6 +62,7 @@ export type CueDerivationInput = {
   events: PublicGameEvent[];
   lastPresentedEventId?: string | null;
   includeOwnActions?: boolean;
+  includeAutomaticEffectCues?: boolean;
   contextByEventId?: Record<string, Omit<ChronicleContext, "side">>;
 };
 
@@ -77,7 +78,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     if (actionType === "access_card" && stringValue(payload.cardDefinitionId) && stringValue(payload.title)) return [];
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
-    const systemCue = !actor && actionType !== "game_created";
+    const systemCue = !actor && actionType !== "game_created" && (input.includeAutomaticEffectCues || actionType === "game_end");
     if (!input.includeOwnActions && !opponent && !systemCue) return [];
     if (actionType === "end_turn" && opponent && localAttention && !input.playerView.pendingChoice) return [];
 

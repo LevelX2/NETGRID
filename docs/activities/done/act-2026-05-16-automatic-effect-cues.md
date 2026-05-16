@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-05-16-automatic-effect-cues
-status: inbox
+status: done
 kind: concept
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-16
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-cues.ts
+  - apps/web/app/action-cues.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/web test -- action-cues.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
 ---
 
 # Automatische Effekte als optionale Aktionshinweise
@@ -60,4 +67,15 @@ Automatische, side-sichere Effekte sollen optional im Aktionshinweis-Fenster sic
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-17.
+
+- `deriveOpponentActionCues` kennt jetzt `includeAutomaticEffectCues`; automatische Systemevents bleiben ohne lokale Option aus der Overlay-Queue.
+- Die lokale Infofenster-Einstellung speichert `automaticEffectsEnabled` in `netgrid.actionCueSettings.v1`.
+- Das Optionspanel bietet `Automatische Effekte anzeigen` als eigene Checkbox.
+- System-/Auto-Cues bekommen ein eigenes `Auto-Effekt`-Label und eine neutrale Systemoptik.
+- Hidden-Info-Grenze bleibt unverändert: Cues entstehen nur aus `PublicGameEvent`, `PlayerView` und Chronicle-Formatierung; keine Engine-, Replay- oder StateHash-Änderung.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/web test -- action-cues.test.ts`: grün, 17 Dateien / 141 Tests.
+- `corepack pnpm --filter @netgrid/web typecheck`: grün.

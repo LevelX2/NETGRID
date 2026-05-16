@@ -2829,6 +2829,11 @@ select {
   --opponent-cue-side: var(--runner-zone-accent);
 }
 
+.opponentCueOverlay.actor-system {
+  --opponent-cue-side: var(--chronicle-system);
+  background: color-mix(in srgb, var(--panel), var(--chronicle-system) 10%);
+}
+
 .cuePosition-top-right {
   top: 66px;
   right: 18px;
