@@ -1,7 +1,8 @@
 ---
 jobId: spotcheck-2026-05-16-corp-ice-operation-economy
-status: ready_for_implementation
+status: in_progress
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:15:29+02:00
 requiresImplementation: true
 priority: normal
 cards:
