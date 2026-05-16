@@ -22,7 +22,7 @@
       "label": "Trace, Link und Bidding",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.14",
-      "currentScopeNote": "V1.9.14 routes target Trace ICE through the existing side-safe Corp and Runner bid windows and includes installed link contribution.",
+      "currentScopeNote": "V1.9.14 routes target Trace ICE through the existing side-safe open sequence: Corp bids publicly first, Runner bids afterwards with visible trace strength, installed link contribution and post-bid link choices where applicable.",
       "coverage": ["unit", "legal_action", "visibility", "state_hash"]
     },
     {

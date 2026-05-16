@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-16-trace-open-bidding-alignment
-status: inbox
+status: done
 kind: concept
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-16
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md
+  - docs/derived/V1_9_14_TRACE_TAG_RESOURCE_SPEC.md
+  - docs/derived/DEVIATION_REGISTRY.md
+  - data/rules/mechanics-coverage-1.9.14.json
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - node JSON.parse data/rules/mechanics-coverage-1.9.14.json
+  - rg blind/simultan/verdeckt Trace documentation scan
 ---
 
 # Trace Open Bidding Alignment
@@ -80,4 +88,15 @@ Ausgangsbefund: Die Engine nutzt bereits eine offene sequenzielle Trace-Logik. D
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-17.
+
+- Die moderne offene NETGRID-Trace-Sequenz ist als Policy-Abgleich dokumentiert.
+- Der Kernvertrag ist festgehalten: `traceStrength = baseTraceStrength + corpBid`, `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`, Erfolg nur bei `traceStrength > runnerStrength`.
+- Öffentlich sichtbare Korp-Gebote sind ausdrücklich erlaubte PublicEvents; private Runner-Choice-Daten bleiben runner-privat.
+- Signpost und The Springboard sind nicht mehr offen, sondern durch `spotcheck-2026-05-16-trace-link-post-bid-resolvers` als moderne post-bid Link-Choices abgeschlossen.
+- Offene Folgepunkte bleiben Base-Link-Zielmodell, wiederkehrende Link-Credit-Quellen und UI-Erklärung.
+
+Checks:
+
+- `node -e "JSON.parse(require('fs').readFileSync('data/rules/mechanics-coverage-1.9.14.json','utf8')); console.log('ok')"`: grün.
+- `rg -n -i "blind.*trace|trace.*blind|simultan.*trace|trace.*simultan|simultaneous.*trace|trace.*simultaneous|verdeckt.*trace|trace.*verdeckt" docs KI-Wissen-NETGRID data`: keine aktive NETGRID-Umsetzungsstelle gefunden, die blindes oder simultan verdecktes Trace-Bieten fordert.

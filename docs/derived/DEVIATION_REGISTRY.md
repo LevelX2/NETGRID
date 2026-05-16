@@ -4,6 +4,18 @@ Status: Phase 1 freeze candidate
 Stand: 2026-05-03  
 Maschinenlesbar: `data/deviations/rule-deviations.json`
 
+## Aktueller Trace-Nachtrag
+
+Stand: 2026-05-17
+
+DEV-007 ist für den historischen MVP-0.1-Demo-Scope weiterhin korrekt: Tags, Trace, Damage und Viren waren dort nicht implementiert. Für den aktuellen NETGRID-Stand ist Trace/Link jedoch normalisiert:
+
+- V0.96 implementiert Trace/Link/Bidding als offene sequenzielle Bid-Sequenz.
+- V1.9.14 führt Trace-/Link-Karten über das bestehende side-sichere Bid-Fenster fort.
+- Die verbindliche NETGRID-Regel ist offen: Korp-Gebot zuerst, danach Runner-Gebot mit sichtbarer Trace-Stärke.
+- Öffentlich sichtbare Korp-Gebote sind kein Hidden-Info-Leak; private Runner-Choice-Daten bleiben runner-privat.
+- `docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md` dokumentiert den aktuellen Policy-Abgleich.
+
 ## Abweichungen
 
 | ID | Bereich | Offizielle Referenz | MVP-Verhalten | Grund | Tests |
@@ -27,4 +39,3 @@ Maschinenlesbar: `data/deviations/rule-deviations.json`
 ## Rückbauprinzip
 
 Jede Abweichung bleibt nur erlaubt, solange sie für den aktiven Kartenpool unschädlich ist. Sobald eine Karte, ein Modus oder ein Gate die offizielle Mechanik benötigt, muss die Abweichung entfernt oder enger gefasst und getestet werden.
-

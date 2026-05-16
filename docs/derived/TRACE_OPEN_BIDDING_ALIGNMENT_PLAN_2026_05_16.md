@@ -1,7 +1,7 @@
 # Trace Open Bidding Alignment Plan
 
-Status: Planung, keine Umsetzung
-Stand: 2026-05-16
+Status: Policy-Abgleich umgesetzt
+Stand: 2026-05-17
 Primärer Agent: card-enablement-ai-knowledge-agent
 
 ## Zielbild
@@ -17,7 +17,16 @@ NETGRID bleibt bei der modernen, offenen Trace-Logik:
 
 Damit weicht NETGRID bewusst vom ursprünglichen blinden beziehungsweise gleichzeitig verdeckten Netrunner-Auktionsgefühl ab. Diese Abweichung ist gewollt, weil die offene Android-Netrunner-nahe Sequenz für digitale Bedienung, KI-Entscheidungen, Chronik und Debugging praktikabler ist.
 
-Dieses Dokument beschreibt ausschließlich den noch nötigen Abgleich. Es setzt nichts um.
+Dieses Dokument war ursprünglich ein Planungsartefakt. Der P0-Regel- und Dokumentationsabgleich ist am 2026-05-17 umgesetzt worden; verbleibende P1/P2-Punkte bleiben als Folgearbeit beschrieben.
+
+## Umsetzungsergebnis 2026-05-17
+
+- Die offene sequenzielle Trace-Regel ist als verbindliche NETGRID-Regel bestätigt: Korp-Gebot zuerst, danach Runner-Gebot mit sichtbarer Trace-Stärke.
+- Der Kernvertrag bleibt `traceStrength = baseTraceStrength + corpBid` und `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`; erfolgreich ist nur `traceStrength > runnerStrength`.
+- Öffentlich sichtbare Korp-Gebote sind ein erlaubter Trace-Schritt und kein Hidden-Info-Leak.
+- Runner-`PendingChoice`-Daten bleiben runner-privat; Reconnect, KI, PublicEvents, Undo-Preview und Chronik dürfen keine privaten Choice-Rohdaten der falschen Seite enthalten.
+- Signpost und The Springboard sind nicht mehr offen: `spotcheck-2026-05-16-trace-link-post-bid-resolvers` hat beide Karten auf moderne post-bid Trace-Link-Choices gebracht.
+- DEV-007 bleibt als historische MVP-0.1-Abweichung erhalten, ist für Trace/Link aber durch V0.96 und V1.9.14 normalisiert.
 
 ## Führende Quellen
 
@@ -50,7 +59,7 @@ Dieses Dokument beschreibt ausschließlich den noch nötigen Abgleich. Es setzt 
 
 ### Engine
 
-Die Engine startet Trace-Fenster derzeit offen und sequenziell. Bei ICE-Subroutinen wird die Basis-Trace-Stärke aus der Subroutine gelesen, dann ein Korp-Bid-Fenster geöffnet. Die Korp kann innerhalb der zahlbaren Obergrenze bieten. Danach wird die sichtbare Trace-Stärke berechnet und ein Runner-Bid-Fenster geöffnet.
+Die Engine startet Trace-Fenster offen und sequenziell. Bei ICE-Subroutinen wird die Basis-Trace-Stärke aus der Subroutine gelesen, dann ein Korp-Bid-Fenster geöffnet. Die Korp kann innerhalb der zahlbaren Obergrenze bieten. Danach wird die sichtbare Trace-Stärke berechnet und ein Runner-Bid-Fenster geöffnet.
 
 Der Kernvergleich ist aktuell:
 
@@ -72,7 +81,7 @@ Die Korp-KI bietet aktuell sehr einfach abhängig vom Schwierigkeitsgrad. Die Ru
 
 ### Regeln und Kartentexte
 
-Die größte Drift liegt nicht im Trace-Kern, sondern in Kartentexten und Spezialkarten, die aus dem Originalspiel ein "nach dem Aufdecken der Gebote"-Fenster oder besondere Trace-/Link-Budgetquellen mitbringen.
+Die größte verbleibende Drift liegt nicht im Trace-Kern, sondern in Kartentexten und Spezialkarten, die besondere Trace-/Link-Budgetquellen mitbringen. Die frühere Signpost-/Springboard-Drift aus "nach dem Aufdecken der Gebote" ist durch moderne post-bid Link-Choices geschlossen.
 
 ## Nicht-Ziele
 
@@ -95,9 +104,7 @@ Die größte Drift liegt nicht im Trace-Kern, sondern in Kartentexten und Spezia
 
 ### Was noch abzugleichen ist
 
-- Die moderne Trace-Regel sollte als bewusste NETGRID-Regelabweichung dokumentiert werden.
-- Kartentexte mit Originalformulierungen wie "after both players reveal their bids" müssen in NETGRID-Begriffe übersetzt werden.
-- Signpost und The Springboard brauchen eine moderne Regellösung für das Runner-Link-Bid-Fenster.
+- Kartentexte mit Originalformulierungen wie "after both players reveal their bids" müssen weiter in NETGRID-Begriffe übersetzt werden, wenn sie in aktiven Anzeige- oder Katalogtexten auftauchen.
 - Base-Link-Karten sind aktuell teils vereinfacht oder inkonsistent gegenüber den Originalwerten.
 - Wiederkehrende Link-Bid-Credits sind noch nicht vollständig quellenübergreifend modelliert.
 - UI, Chronik und Entscheidungsflächen sollten das offene Modell deutlicher erklären, ohne technische Interna sichtbar zu machen.
@@ -158,8 +165,8 @@ Abnahmekriterien:
 | Karte | Aktueller Befund | Planbedarf | Priorität |
 | --- | --- | --- | --- |
 | Data Raven | Trace 5 nutzt den offenen Trace-Kern. | Kein Logikwechsel. UI soll klarer zeigen, dass 5 die Basis ist und Korp-Gebot addiert wird. | P2 |
-| Signpost | Original spricht von Link-Erhöhung nach aufgedeckten Geboten. Aktueller Text ist generisch. | Als Runner-Option im offenen Runner-Link-Bid-Fenster modellieren: `1 Credit: +2 Link für diesen Trace`, einmal pro Trace. | P1 |
-| The Springboard | Original spricht von Link-Erhöhung nach aufgedeckten Geboten. Aktuell mit `baseLink: 1` vereinfacht. | Entscheiden, ob statischer Base-Link entfällt oder als bewusste NETGRID-Abweichung bleibt. Moderne Option: `1 Credit: +1 Link für diesen Trace`, einmal pro Trace. | P1 |
+| Signpost | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`. | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +2 Link für diesen Trace`, einmal pro Trace. | abgeschlossen |
+| The Springboard | Umgesetzt im Folgejob `spotcheck-2026-05-16-trace-link-post-bid-resolvers`; statischer Base-Link wurde entfernt. | Runner-Option im offenen post-bid Link-Fenster: `1 Credit: +1 Link für diesen Trace`, einmal pro Trace. | abgeschlossen |
 | Rabbit | Original reduziert Trace Limit bei ICE. Engine berücksichtigt eine Korp-Bid-Obergrenzenreduktion für ICE-Traces. | Text auf moderne Begriffe bringen: reduziert die Korp-Bid-Obergrenze bei ICE-Traces, nicht die Basis-Trace-Stärke. | P1 |
 | Hacker Tracker Central | Original: Counter nach jedem Trace; Counter können Trace-Stärke und Trace Limit erhöhen. Engine nutzt Counter als Korp-Bid-Quelle. | Text und Tests auf moderne Gebotsquelle abstimmen. Quelle in Payload/Chronik nachvollziehbar machen. | P1 |
 | Krumz | Engine unterstützt Krumz-Bits als Korp-Trace-Bid-Quelle. | Quellenanzeige, Tests und Katalogtext prüfen. | P1 |
@@ -306,16 +313,11 @@ Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann pla
 
 ## Dokumentationsbedarf
 
-1. Aktuelle Trace-Policy ergänzen oder neues Policy-Dokument anlegen.
-2. `TRACE_LINK_BIDDING_0.96_SPEC.md` nicht ersetzen, sondern mit aktuellem v1.x-Status verknüpfen.
-3. Deviation Registry aktualisieren oder eine neue aktuelle Trace-Deviation anlegen:
-   - Original: verdeckteres beziehungsweise simultanes Auktionsmodell.
-   - NETGRID: offene sequenzielle Trace-Entscheidung.
-   - Grund: digitale Bedienbarkeit, KI, Chronik, Debugging, geringere Timing-Komplexität.
-4. Spotcheck-Job `trace-link-post-bid-resolvers` umformulieren:
-   - Nicht mehr "nach Reveal-Fenster implementieren".
-   - Stattdessen "moderne Runner-Link-Booster im offenen Runner-Bid-Fenster".
-5. Kartenkatalogtexte für freigeschaltete Trace-/Link-Karten normalisieren.
+1. Erledigt: Die aktuelle Trace-Policy ist in diesem Artefakt und in `docs/derived/V1_9_14_TRACE_TAG_RESOURCE_SPEC.md` festgehalten.
+2. Erledigt: `TRACE_LINK_BIDDING_0.96_SPEC.md` bleibt führendes Grundmodell und wird durch den V1.9.14-Status ergänzt.
+3. Erledigt: `docs/derived/DEVIATION_REGISTRY.md` ordnet DEV-007 als historische MVP-Abweichung ein und benennt die Trace-Normalisierung.
+4. Erledigt: Der Spotcheck-Job `trace-link-post-bid-resolvers` ist abgeschlossen und beschreibt moderne post-bid Trace-Link-Choices.
+5. Offen als Folgearbeit: Kartenkatalogtexte für weitere freigeschaltete Trace-/Link-Karten normalisieren.
 
 ## Umsetzungsschnitt
 
@@ -325,6 +327,7 @@ Ergebnis:
 
 - Detaillierter Plan liegt vor.
 - Keine Engine-, UI-, KI- oder Kartendefinitionsänderung.
+- P0-Policy-Abgleich wurde am 2026-05-17 dokumentarisch abgeschlossen.
 
 ### Phase 1 - Regel- und Dokumentationsabgleich
 
@@ -337,8 +340,9 @@ Betroffene Artefakte:
 
 Ergebnis:
 
+- Abgeschlossen am 2026-05-17.
 - Offenes Bieten ist projektweit eindeutig.
-- Blindes Bieten taucht nur noch als Originalreferenz oder bewusst verworfene Alternative auf.
+- Blindes oder gleichzeitig verdecktes Bieten taucht nur noch als Originalreferenz oder bewusst verworfene Alternative auf.
 
 ### Phase 2 - Signpost und The Springboard
 
@@ -352,7 +356,8 @@ Betroffene Bereiche:
 
 Ergebnis:
 
-- Beide Karten arbeiten im modernen Runner-Bid-Fenster.
+- Abgeschlossen durch `spotcheck-2026-05-16-trace-link-post-bid-resolvers`.
+- Beide Karten arbeiten im modernen post-bid Runner-Link-Fenster.
 - Keine Karte erzeugt ein verdecktes Reveal- oder Nach-Reveal-Fenster.
 
 ### Phase 3 - Wiederkehrende Link-Credit-Quellen
@@ -407,12 +412,9 @@ Ergebnis:
 ## Offene Entscheidungen
 
 1. Soll Option A für Base-Link-Karten verbindlich werden, also automatische statische NETGRID-Vereinfachung?
-2. Soll The Springboard seinen aktuellen statischen `baseLink: 1` behalten oder in eine rein bezahlte moderne Link-Booster-Fähigkeit umgebaut werden?
-3. Welche wiederkehrenden Link-Credit-Quellen sind im aktuellen Release wirklich freigeschaltet?
-4. Soll die bestehende alte Deviation Registry aktualisiert werden oder soll es eine neue v1.x-Regelabweichungsdatei geben?
-5. Wie ausführlich soll die UI die offene Trace-Regel erklären: nur konkrete Zahlen oder zusätzlich ein kurzer Tooltip?
+2. Welche wiederkehrenden Link-Credit-Quellen sind im aktuellen Release wirklich freigeschaltet?
+3. Wie ausführlich soll die UI die offene Trace-Regel erklären: nur konkrete Zahlen oder zusätzlich ein kurzer Tooltip?
 
 ## Empfohlene nächste Entscheidung
 
 Als nächstes sollte zuerst Phase 1 umgesetzt werden. Danach ist die Projektregel eindeutig genug, um Signpost, The Springboard, wiederkehrende Link-Credits und Base-Link-Karten ohne erneutes Grundsatzrütteln umzusetzen.
-

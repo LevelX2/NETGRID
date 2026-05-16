@@ -6,9 +6,13 @@ Status: draft-implementing
 ## Trace und Link
 
 - Trace-Fenster werden als eng typisierte Pending-Choice-Fenster modelliert.
+- NETGRID nutzt verbindlich die moderne offene Trace-Sequenz: Die Korp wählt zuerst ein sichtbares Gebot, danach wählt der Runner sein Gebot mit Kenntnis von Basis-Trace, Korp-Gebot, aktueller Trace-Stärke und eigenem Link.
+- Der Kernvertrag lautet `traceStrength = baseTraceStrength + corpBid` und `runnerStrength = runnerLink + runnerBid + temporaryLinkBoosts`; ein Trace ist nur erfolgreich, wenn `traceStrength > runnerStrength`.
 - Corp- und Runner-Bids muessen ueber LegalActions laufen und Creditkosten in `applyAction` erneut validieren.
 - Base-Link, sichtbare Modifier und Trace-Ergebnis duerfen keine verdeckten Karteninformationen enthalten.
 - ICE-Subroutinen mit Trace duerfen nur nach erfolgreicher Rez-/Encounter-Validierung ausloesen.
+- Oeffentlich sichtbare Korp-Gebote sind ein erlaubter Trace-Schritt und kein Hidden-Info-Leak; Runner-PendingChoices und private Choice-Rohdaten bleiben ausschliesslich fuer den Runner sichtbar.
+- Signpost und The Springboard nutzen moderne post-bid Trace-Link-Choices im offenen Runner-Link-Fenster; sie erzeugen kein verdecktes oder simultanes Reveal-Fenster.
 
 ## Tags
 
