@@ -1,9 +1,9 @@
 ---
 jobId: spotcheck-2026-05-15-ambush-hidden-trace
-status: blocked
+status: done
 createdAt: 2026-05-15T06:35:00+01:00
 startedAt: 2026-05-15T06:37:09.1548566Z
-completedAt: 2026-05-15T06:49:39.7409523Z
+completedAt: 2026-05-16T18:55:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -358,7 +358,7 @@ Akzeptanzkriterien:
 
 ## Umsetzungsstand 2026-05-15
 
-Finaler Status: `blocked`
+Historischer Zwischenstatus: `blocked`
 
 BlockerReason:
 - Der Bericht enthält neben konkreten Ambush-/Payload-Fixes mehrere größere Kartenverträge, die nicht als kleiner sequenzieller Spotcheck sicher abschließbar waren: `Self-Modifying Code` verlangt echten Stack-Programm-Install während eines Runs mit Trash-Kosten, Kosten-/MU-Prüfung und Folgechoices; `Fait Accompli` verlangt fortgebundene Fait-Counter und Agenda-Difficulty-Modifikation in diesem Fort; `Emergency Self-Construct` verlangt ein Flatline-/Damage-Replacement mit persistenten Rest-of-game-Modifikatoren; `Crystal Palace Station Grid` verlangt einen finalisierten Counter-Wirkungsvertrag. Diese vier Verträge brauchen einen eigenen Resolver-Scope, damit keine Scheinfunktionalität promotet wird.
@@ -392,3 +392,27 @@ AttemptedFixes:
 
 Nächste Removal Condition:
 - Eigenen Resolver-Scope für `Self-Modifying Code`, `Fait Accompli`, `Emergency Self-Construct` und `Crystal Palace Station Grid` planen und umsetzen; danach diesen Job oder einen Nachfolgejob erneut auf `done` bringen, wenn die vier Vollverträge grün getestet sind.
+
+## Umsetzungsstand 2026-05-16
+
+Finaler Status: `done`
+
+Nachgezogene Vollresolver:
+- `Self-Modifying Code`: Eigener Encounter-/Run-Pfad mit Source-Trash, privater Stack-Programmauswahl, öffentlichem Reveal der gewählten Programmdefinition, Installkosten, MU-Folgechoice, Install aus dem Stack und Shuffle.
+- `Fait Accompli`: Nach erfolgreichem Run auf ein subsidiary data fort lädt das installierte Programm fortgebundene Power-Counter; Agenden in genau diesem Fort erhalten die zusätzliche Difficulty, andere Server nicht.
+- `Crystal Palace Station Grid`: Power-Counter wirken als servergebundene Agenda-Difficulty-Reduktion nur im eigenen Fort; andere Server bleiben unberührt.
+- `Emergency Self-Construct`: Flatline-Replacement verhindert den tödlichen Damage, trasht Grip und Quelle, entfernt Core Damage, reduziert die Basis-Handgröße um 1 und setzt 3 künftige Runner-Aktionen als Schuld; zusätzlich verhindert die Karte einmal pro Zug 1 Meat Damage side-sicher.
+
+Zusätzliche Härtungen:
+- PublicPayload-Kontext für `v1920RunnerProgramAbility`, Gripverlust, künftige Aktionsschuld und effektive Handgröße ergänzt.
+- `ReplacementCandidate.replacementEventType` typisiert jetzt auch `prevent_damage`.
+- Öffentliche Payloads bleiben ohne Grip-, Stack-, `cardInstances`- oder `privatePayload`-Leaks.
+
+Ausgeführte Checks:
+- `corepack pnpm --filter @netgrid/engine test -- --runInBand` grün, 479 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` grün, 17 Testdateien / 133 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` grün, 2 Testdateien / 48 Tests.
+- `corepack pnpm typecheck` grün.
+
+Commit-Status:
+- Kein lokaler Commit in diesem Lauf, weil der Nutzer ausdrücklich angekündigt hat, später gesammelt zu committen.

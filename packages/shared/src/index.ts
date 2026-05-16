@@ -256,6 +256,7 @@ export type EffectSource =
 
 export type ImminentEventType = "damage" | "add_tag" | "test_interrupt";
 export type EventModificationKind = "prevent" | "avoid" | "interrupt";
+export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
 export type ImminentEvent = {
   eventId: string;
@@ -314,7 +315,7 @@ export type ReplacementCandidate = {
     label: string;
   };
   replacesEventType: ImminentEventType;
-  replacementEventType: ImminentEventType;
+  replacementEventType: ReplacementEventType;
   priority: number;
   visibility: EventVisibilityClass;
   optional: boolean;
@@ -911,6 +912,9 @@ export type GameState = {
     triggerDefinitionId?: CardDefinitionId;
   };
   poxCountersByServer?: Partial<
+    Record<Exclude<ServerId, "new_remote">, number>
+  >;
+  faitAccompliCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   runnerAgendaPointsToForfeit?: number;
@@ -2009,7 +2013,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 2,
     memoryCost: 2,
     rulesText:
-      "Installed Hidden-Zone helper: search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+      "Trash Self-Modifying Code: search your stack for a program, reveal it, pay its install cost and install it. Use during an ICE encounter. Shuffle your stack afterwards; if memory is short, choose installed programs to trash first.",
     mechanics: [
       "install_program",
       "memory",

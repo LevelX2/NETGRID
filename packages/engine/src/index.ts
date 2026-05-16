@@ -92,6 +92,7 @@ import {
   ABLATIVE_COUNTER_HARDWARE_CARD_ID,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
   DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
+  EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
   FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "./mechanics/damage-prevention";
@@ -105,6 +106,7 @@ import {
   HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
   RUNNER_GRIP_TRASH_EVENT_CARD_ID,
   RUNNER_STACK_TOP5_EVENT_CARD_ID,
+  SELF_MODIFYING_CODE_PROGRAM_ID,
   SERVER_EXPOSE_PROGRAM_CARD_IDS,
   SERVER_ICE_SWAP_UPGRADE_CARD_ID,
   STACK_SEARCH_PROGRAM_CARD_IDS,
@@ -183,6 +185,7 @@ import {
   TRACE_AWARE_RUN_EVENT_CARD_ID,
 } from "./mechanics/run-access";
 import {
+  CRYSTAL_PALACE_COUNTER_UPGRADE_ID,
   CRYBABY_ACCESS_COST_UPGRADE_ID,
   DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
   DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
@@ -4300,6 +4303,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       }
     }
   }
+  actions.push(...selfModifyingCodeActions(state));
   if (hasClicks) {
     for (const cardId of [
       ...state.runner.rig.programs,
@@ -4311,6 +4315,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, cardId);
       if (
         STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
+        definition.id !== SELF_MODIFYING_CODE_PROGRAM_ID &&
         state.runner.stack.some(
           (id) => definitionFor(state, id).type === "program",
         )
@@ -4777,6 +4782,74 @@ function runnerInstalledCardIds(state: GameState): CardInstanceId[] {
     ...state.runner.rig.hardware,
     ...state.runner.rig.resources,
   ];
+}
+
+function selfModifyingCodeInstalledIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.programs
+    .filter(
+      (cardId) => definitionFor(state, cardId).id === SELF_MODIFYING_CODE_PROGRAM_ID,
+    )
+    .sort();
+}
+
+function selfModifyingCodeStackProgramIds(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): CardInstanceId[] {
+  const sourceMemory =
+    state.runner.rig.programs.includes(sourceCardId) &&
+    runnerProgramUsesMemory(state, sourceCardId)
+    ? definitionFor(state, sourceCardId).memoryCost ?? 0
+    : 0;
+  const availableAfterSourceTrash = Math.max(
+    0,
+    state.runner.memoryLimit - Math.max(0, state.runner.memoryUsed - sourceMemory),
+  );
+  const additionalTrashableMemory = state.runner.rig.programs
+    .filter((cardId) => cardId !== sourceCardId)
+    .reduce((sum, cardId) => {
+      if (!runnerProgramUsesMemory(state, cardId)) return sum;
+      return sum + (definitionFor(state, cardId).memoryCost ?? 0);
+    }, 0);
+  return state.runner.stack
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const uniqueBlocked =
+        isUniqueCard(definition) &&
+        hasInstalledUniqueCardDefinition(state, "runner", definition.id);
+      return (
+        definition.type === "program" &&
+        !uniqueBlocked &&
+        state.runner.credits >= (definition.installCost ?? 0) &&
+        (definition.memoryCost ?? 0) <=
+          availableAfterSourceTrash + additionalTrashableMemory
+      );
+    })
+    .sort();
+}
+
+function selfModifyingCodeActions(state: GameState): LegalAction[] {
+  return selfModifyingCodeInstalledIds(state)
+    .filter(
+      (sourceCardId) =>
+        selfModifyingCodeStackProgramIds(state, sourceCardId).length > 0,
+    )
+    .map((sourceCardId) => {
+      const definition = definitionFor(state, sourceCardId);
+      return action(
+        state,
+        "runner",
+        "trigger_ability",
+        `${definition.title}: Programm aus dem Stack installieren`,
+        sourceCardId,
+        [],
+        {
+          cardId: sourceCardId,
+          v1911HiddenZoneAbility: "self_modifying_code_install",
+          hiddenZoneAction: "v1911_self_modifying_code_search",
+        },
+      );
+    });
 }
 
 function corpInstalledCardIds(state: GameState): CardInstanceId[] {
@@ -5887,6 +5960,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       });
     }
   }
+  actions.push(...selfModifyingCodeActions(state));
   const nextSubroutines = encounterSubroutinesForNextContinue(
     run,
     encounterSubroutines,
@@ -6393,6 +6467,27 @@ function successfulRunProgramActions(
             serverId: server.id,
             v1922RunnerProgramAbility: "netspace_inverter_reverse_ice",
             iceCount: server.ice.length,
+          },
+        ),
+      );
+    }
+    if (definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID) {
+      const server = mustServer(state, run.attackedServerId);
+      if (server.kind !== "remote") continue;
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          `${definition.title}: Fort mit Power-Counter markieren`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            serverId: server.id,
+            v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
+            counterType: "power",
+            addCounterAmount: 1,
           },
         ),
       );
@@ -7171,9 +7266,11 @@ function performAction(
             "V1.9.18-Counter-Upgrades laden in diesem WIP genau 1 Power-Counter.",
           );
         addCardCounter(state, sourceCardId, "power", addAmount);
+        const serverLabel = publicServerLabelForCard(state, sourceCardId);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           sourceDefinitionId: definition.id,
+          ...(serverLabel ? { serverLabel } : {}),
           addedCounterAmount: addAmount,
           remainingCounters: cardCounter(state, sourceCardId, "power"),
         };
@@ -8296,6 +8393,13 @@ function performAction(
       endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
+      if (
+        legalAction.payload?.v1911HiddenZoneAbility ===
+        "self_modifying_code_install"
+      ) {
+        startSelfModifyingCodeChoice(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.corpAbility === "trash_code_viral_cache") {
         if (legalAction.side !== "corp")
           throw new Error("Nur die Korp darf Code Viral Cache trashen.");
@@ -8323,6 +8427,13 @@ function performAction(
         "netspace_inverter_reverse_ice"
       ) {
         resolveNetspaceInverterReverseIce(state, legalAction);
+        return;
+      }
+      if (
+        legalAction.payload?.v1919RunnerProgramAbility ===
+        "fait_accompli_successful_run_counter"
+      ) {
+        resolveFaitAccompliSuccessfulRunCounter(state, legalAction);
         return;
       }
       if (
@@ -8608,6 +8719,51 @@ function resolveNetspaceInverterReverseIce(
     serverLabel: publicServerLabel(state, server.id) ?? server.id,
     iceCount: server.ice.length,
     serverIceOrderReversed: true,
+  };
+}
+
+function resolveFaitAccompliSuccessfulRunCounter(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Fait Accompli nutzen.");
+  const run = mustRun(state);
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (
+    !run.successful ||
+    run.phase !== "access" ||
+    serverId !== run.attackedServerId
+  )
+    throw new Error("Fait Accompli ist nur direkt nach erfolgreichem Run legal.");
+  const server = mustServer(state, serverId);
+  if (server.kind !== "remote")
+    throw new Error("Fait Accompli markiert nur subsidiary data forts.");
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Fait Accompli ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== FAIT_ACCOMPLI_COUNTER_PROGRAM_ID)
+    throw new Error("Die Fait-Accompli-Faehigkeit passt nicht zur Karte.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Fait Accompli wurde fuer diesen Run bereits genutzt.");
+  addCardCounter(state, sourceCardId, "power", 1);
+  state.faitAccompliCountersByServer ??= {};
+  state.faitAccompliCountersByServer[serverId] =
+    Math.max(0, Math.floor(state.faitAccompliCountersByServer[serverId] ?? 0)) +
+    1;
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+    serverLabel: publicServerLabel(state, server.id) ?? server.id,
+    addedCounterAmount: 1,
+    remainingCounters: cardCounter(state, sourceCardId, "power"),
+    faitAccompliServerCounters:
+      state.faitAccompliCountersByServer[serverId] ?? 0,
   };
 }
 
@@ -13565,6 +13721,27 @@ function collectReplacementCandidates(
         optional: true,
       });
     }
+    const emergencySelfConstructId = state.runner.rig.programs.find(
+      (cardId) =>
+        definitionFor(state, cardId).id === EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+    );
+    if (emergencySelfConstructId) {
+      candidates.push({
+        candidateId: `v1920_emergency_self_construct_${emergencySelfConstructId}`,
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: emergencySelfConstructId,
+          definitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+          label: "Emergency Self-Construct",
+        },
+        replacesEventType: "damage",
+        replacementEventType: "prevent_damage",
+        priority: 82,
+        visibility: "hidden_info_barrier",
+        optional: true,
+      });
+    }
   }
   const harness = state.eventModificationHarness?.damageReplacement;
   const amount = numberPayload(event, "amount");
@@ -13620,7 +13797,10 @@ function replacementChoice(
           candidate.sourceRef.definitionId ===
           ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
             ? "Arasaka Owns You spielen"
-            : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
+            : candidate.sourceRef.definitionId ===
+                EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID
+              ? "Emergency Self-Construct ausloesen"
+              : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
         publicLabel: "Replacement",
       },
     ],
@@ -13924,6 +14104,16 @@ function resolveReplacementChoice(
     clearReplacementState(state);
     return;
   }
+  if (candidate.sourceRef.definitionId === EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID) {
+    resolveEmergencySelfConstructReplacement(
+      state,
+      legalAction,
+      event,
+      candidate,
+    );
+    clearReplacementState(state);
+    return;
+  }
   if (
     candidate.replacesEventType !== event.eventType ||
     candidate.replacementEventType !== "add_tag"
@@ -14004,6 +14194,57 @@ function resolveArasakaOwnsYouReplacement(
     futureActionDebtAdded: 4,
     futureAgendaPointForfeitAdded: 3,
     futureAgendaPointForfeitPending: state.runnerAgendaPointsToForfeit,
+    sourceKind: "card",
+  };
+}
+
+function resolveEmergencySelfConstructReplacement(
+  state: GameState,
+  legalAction: LegalAction,
+  event: ImminentEvent,
+  candidate: ReplacementCandidate,
+): void {
+  const cardId = candidate.sourceRef.instanceId;
+  if (!cardId || !state.runner.rig.programs.includes(cardId))
+    throw new Error("Emergency Self-Construct ist nicht installiert.");
+  if (definitionFor(state, cardId).id !== EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID)
+    throw new Error("Die Emergency-Self-Construct-Quelle passt nicht.");
+  windowConsumeReplacementCandidate(state, candidate.candidateId);
+  const originalAmount = numberPayload(event, "amount");
+  const coreDamageRemoved = state.runner.coreDamage;
+  const gripCardsLost = state.runner.grip.length;
+  for (const gripCardId of state.runner.grip.slice()) {
+    removeFromAllZones(state, gripCardId);
+    state.runner.heap.push(gripCardId);
+    state.cardInstances[gripCardId] = {
+      ...mustInstance(state.cardInstances, gripCardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "heap" },
+    };
+  }
+  state.runner.coreDamage = 0;
+  state.runner.maxHandSize = Math.max(0, state.runner.maxHandSize - 1);
+  trashRunnerInstalledCardToHeap(state, cardId);
+  addRunnerFutureActionDebt(state, 3);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    replacementDecision: "apply",
+    replacementOutcome: "replaced",
+    candidateId: candidate.candidateId,
+    replacementEventId: `replacement_${event.eventId}`,
+    replacementEventType: "prevent_damage",
+    originalAmount,
+    preventedAmount: originalAmount,
+    v1920RunnerProgramAbility: "emergency_self_construct_flatline_replacement",
+    sourceDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+    cardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+    trashedCardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+    coreDamageRemoved,
+    gripCardsLost,
+    runnerMaxHandSizeAfter: maxHandSize(state, "runner"),
+    futureActionDebtAdded: 3,
+    futureActionDebtPending: state.runnerTurnFlags?.forgoNextActionsPending ?? 0,
     sourceKind: "card",
   };
 }
@@ -14272,8 +14513,22 @@ function effectiveAgendaDifficulty(
     cardHasSubtype(definition, "gray_ops")
   )
     difficulty -= 1;
+  difficulty += serverDifficultyIncreaseFromFaitAccompli(state, agendaId);
   difficulty -= serverDifficultyReductionFromUpgrades(state, agendaId);
   return Math.max(0, difficulty);
+}
+
+function serverDifficultyIncreaseFromFaitAccompli(
+  state: GameState,
+  agendaId: CardInstanceId,
+): number {
+  const zone = mustInstance(state.cardInstances, agendaId).zone;
+  if (zone.side !== "corp" || zone.zone !== "serverRoot" || !zone.serverId)
+    return 0;
+  return Math.max(
+    0,
+    Math.floor(state.faitAccompliCountersByServer?.[zone.serverId] ?? 0),
+  );
 }
 
 function serverDifficultyReductionFromUpgrades(
@@ -14288,11 +14543,10 @@ function serverDifficultyReductionFromUpgrades(
     if (rootCardId === agendaId) return sum;
     const instance = mustInstance(state.cardInstances, rootCardId);
     if (!instance.rezzed) return sum;
-    return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(
-      definitionFor(state, rootCardId).id,
-    )
-      ? sum + 1
-      : sum;
+    const definitionId = definitionFor(state, rootCardId).id;
+    if (definitionId === CRYSTAL_PALACE_COUNTER_UPGRADE_ID)
+      return sum + cardCounter(state, rootCardId, "power");
+    return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(definitionId) ? sum + 1 : sum;
   }, 0);
 }
 
@@ -15347,6 +15601,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.self_modifying_code_install") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install"))
   );
 }
@@ -15358,14 +15613,18 @@ function stackSearchResolutionForChoice(
   return {
     reveal:
       choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.self_modifying_code_install") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install")
       ? "public"
       : "hidden",
-    destination: choice.source.startsWith("v1911.sneak_preview_stack_install")
+    destination:
+      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("v1911.self_modifying_code_install")
       ? "install_program"
       : "grip",
     shuffleAfter: true,
-    ...(choice.source.startsWith("v1911.sneak_preview_stack_install")
+    ...(choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+    choice.source.startsWith("v1911.self_modifying_code_install")
       ? { publicRevealKind: "reveal" }
       : {}),
   };
@@ -15468,6 +15727,13 @@ function resolvePendingChoice(
       return;
     }
     resolveTraceRunnerBid(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("v1911.self_modifying_code_install") ||
+    state.pendingChoice.source.startsWith("v1911.self_modifying_code_mu")
+  ) {
+    resolveSelfModifyingCodeChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -16022,6 +16288,190 @@ function resolveRunnerStackSearchChoice(
         }
       : {}),
   };
+}
+
+function startSelfModifyingCodeChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Self-Modifying Code nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Self-Modifying Code ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== SELF_MODIFYING_CODE_PROGRAM_ID)
+    throw new Error("Die Self-Modifying-Code-Faehigkeit passt nicht zur Karte.");
+  const options = selfModifyingCodeStackProgramIds(state, sourceCardId).map(
+    (cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    },
+  );
+  if (options.length === 0)
+    throw new Error("Self-Modifying Code findet kein installierbares Programm.");
+  trashRunnerInstalledCardToHeap(state, sourceCardId);
+  state.pendingChoice = {
+    choiceId: `v1911_self_modifying_code_install_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.self_modifying_code_install:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Self-Modifying Code: Programm aus dem Stack installieren",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_self_modifying_code_search",
+    sourceDefinitionId: SELF_MODIFYING_CODE_PROGRAM_ID,
+    sourceTrashed: true,
+    trashedCardDefinitionId: SELF_MODIFYING_CODE_PROGRAM_ID,
+    searchDestination: "install_program",
+    searchReveal: "public",
+    searchShuffleAfter: true,
+  };
+}
+
+function selfModifyingCodeMemoryShortfall(
+  state: GameState,
+  programId: CardInstanceId,
+): number {
+  const definition = definitionFor(state, programId);
+  return Math.max(
+    0,
+    state.runner.memoryUsed +
+      (definition.memoryCost ?? 0) -
+      state.runner.memoryLimit,
+  );
+}
+
+function selfModifyingCodeMemoryTrashOptions(
+  state: GameState,
+): ChoiceRequest["options"] {
+  return state.runner.rig.programs
+    .filter((cardId) => runnerProgramUsesMemory(state, cardId))
+    .sort()
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+}
+
+function completeSelfModifyingCodeInstall(
+  state: GameState,
+  programId: CardInstanceId,
+  legalAction: LegalAction,
+  trashedForMemoryDefinitionIds: CardDefinitionId[] = [],
+): void {
+  if (!state.runner.stack.includes(programId))
+    throw new Error("Das Self-Modifying-Code-Programm liegt nicht mehr im Stack.");
+  const definition = definitionFor(state, programId);
+  if (definition.type !== "program")
+    throw new Error("Self-Modifying Code darf nur Programme installieren.");
+  const installCost = definition.installCost ?? 0;
+  if (state.runner.credits < installCost)
+    throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+  if (selfModifyingCodeMemoryShortfall(state, programId) > 0)
+    throw new Error("Self-Modifying Code hat nicht genug Memory freigemacht.");
+  spendCredits(state, "runner", installCost);
+  installRunnerProgramForFree(state, programId);
+  shuffleRunnerStack(state, `v1911_self_modifying_code:${programId}:shuffle`);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_self_modifying_code_install",
+    searchDestination: "install_program",
+    searchReveal: "public",
+    searchShuffleAfter: true,
+    shuffled: true,
+    selectedCount: 1,
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: definition.id,
+    installedProgramDefinitionId: definition.id,
+    installCostPaid: installCost,
+    runnerCreditsAfter: state.runner.credits,
+    runnerMemoryUsedAfter: state.runner.memoryUsed,
+    ...(trashedForMemoryDefinitionIds.length > 0
+      ? {
+          muTrashChoiceResolved: true,
+          trashedForMemoryDefinitionIds:
+            trashedForMemoryDefinitionIds.join(","),
+          trashedForMemoryCount: trashedForMemoryDefinitionIds.length,
+        }
+      : {}),
+  };
+}
+
+function resolveSelfModifyingCodeChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine Self-Modifying-Code-Choice offen.");
+  if (choice.source.startsWith("v1911.self_modifying_code_install")) {
+    const programId = selectedChoiceCardIds(choice, playerAction)[0];
+    if (!programId) throw new Error("Es wurde kein Programm gewaehlt.");
+    if (selfModifyingCodeMemoryShortfall(state, programId) <= 0) {
+      completeSelfModifyingCodeInstall(state, programId, legalAction);
+      return;
+    }
+    const options = selfModifyingCodeMemoryTrashOptions(state);
+    if (options.length === 0)
+      throw new Error("Self-Modifying Code hat keine MU-Trash-Optionen.");
+    state.pendingChoice = {
+      choiceId: `v1911_self_modifying_code_mu_${state.stateVersion + 1}`,
+      side: "runner",
+      source: `v1911.self_modifying_code_mu:${programId}:${state.stateVersion + 1}`,
+      prompt: "Self-Modifying Code: Programme fuer Memory trashen",
+      kind: "select_cards",
+      options,
+      minSelections: 1,
+      maxSelections: options.length,
+      stateVersion: state.stateVersion + 1,
+      visibility: "hidden_info_barrier",
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_self_modifying_code_mu_choice",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: definitionFor(state, programId).id,
+      selectedCount: 1,
+      muShortfall: selfModifyingCodeMemoryShortfall(state, programId),
+      muTrashChoiceOpened: true,
+    };
+    return;
+  }
+  if (choice.source.startsWith("v1911.self_modifying_code_mu")) {
+    const [, programIdRaw] = choice.source.split(":");
+    const programId = programIdRaw as CardInstanceId | undefined;
+    if (!programId)
+      throw new Error("Die Self-Modifying-Code-MU-Choice ist ungueltig.");
+    const selectedProgramIds = selectedChoiceCardIds(choice, playerAction);
+    const selectedSet = new Set(selectedProgramIds);
+    if (selectedSet.size !== selectedProgramIds.length)
+      throw new Error("Eine MU-Trash-Option wurde doppelt gewaehlt.");
+    const trashedDefinitions: CardDefinitionId[] = [];
+    for (const cardId of selectedProgramIds.sort()) {
+      if (!state.runner.rig.programs.includes(cardId))
+        throw new Error("Ein MU-Trash-Ziel ist nicht mehr installiert.");
+      trashedDefinitions.push(definitionFor(state, cardId).id);
+      trashRunnerInstalledCardToHeap(state, cardId);
+    }
+    completeSelfModifyingCodeInstall(
+      state,
+      programId,
+      legalAction,
+      trashedDefinitions,
+    );
+    return;
+  }
+  throw new Error("Die Self-Modifying-Code-Choice ist ungueltig.");
 }
 
 function sneakPreviewInstallableProgramIds(
@@ -20018,12 +20468,16 @@ function publicContextForAction(
       "tagsAdded",
       "preventedAmount",
       "v1919RunnerEventAbility",
+      "v1920RunnerProgramAbility",
       "coreDamageRemoved",
+      "gripCardsLost",
       "drawnCards",
       "gainedCredits",
       "removedTags",
+      "runnerMaxHandSizeAfter",
       "agendaPointCostPaid",
       "futureActionDebtAdded",
+      "futureActionDebtPending",
       "futureAgendaPointForfeitAdded",
       "futureAgendaPointForfeitPending",
       "sourceDefinitionId",
@@ -20279,6 +20733,27 @@ function publicContextForAction(
     if (typeof legalAction.payload.installedProgramDefinitionId === "string")
       context.installedProgramDefinitionId =
         legalAction.payload.installedProgramDefinitionId;
+    for (const key of [
+      "sourceTrashed",
+      "shuffled",
+      "muTrashChoiceOpened",
+      "muTrashChoiceResolved",
+    ]) {
+      const value = legalAction.payload[key];
+      if (typeof value === "boolean") context[key] = value;
+    }
+    for (const key of [
+      "installCostPaid",
+      "runnerMemoryUsedAfter",
+      "muShortfall",
+      "trashedForMemoryCount",
+    ]) {
+      const value = legalAction.payload[key];
+      if (typeof value === "number") context[key] = value;
+    }
+    if (typeof legalAction.payload.trashedForMemoryDefinitionIds === "string")
+      context.trashedForMemoryDefinitionIds =
+        legalAction.payload.trashedForMemoryDefinitionIds;
     if (typeof legalAction.payload.returnedCount === "number")
       context.returnedCount = legalAction.payload.returnedCount;
     if (typeof legalAction.payload.returnedCardDefinitionIds === "string")
@@ -20717,10 +21192,17 @@ function publicContextForAction(
   if (typeof legalAction.payload?.v1919RunnerProgramAbility === "string") {
     context.v1919RunnerProgramAbility =
       legalAction.payload.v1919RunnerProgramAbility;
+    if (typeof legalAction.payload.sourceDefinitionId === "string")
+      context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
+    if (typeof legalAction.payload.serverLabel === "string")
+      context.serverLabel = legalAction.payload.serverLabel;
     if (typeof legalAction.payload.addedCounterAmount === "number")
       context.addedCounterAmount = legalAction.payload.addedCounterAmount;
     if (typeof legalAction.payload.remainingCounters === "number")
       context.remainingCounters = legalAction.payload.remainingCounters;
+    if (typeof legalAction.payload.faitAccompliServerCounters === "number")
+      context.faitAccompliServerCounters =
+        legalAction.payload.faitAccompliServerCounters;
   }
   if (typeof legalAction.payload?.v1919RunnerEventAbility === "string") {
     context.v1919RunnerEventAbility =

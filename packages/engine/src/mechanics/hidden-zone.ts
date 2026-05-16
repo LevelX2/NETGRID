@@ -33,6 +33,9 @@ export const STACK_SEARCH_PROGRAM_CARD_IDS = new Set([
   "onr_v1_177_the-short-circuit",
 ]);
 
+export const SELF_MODIFYING_CODE_PROGRAM_ID =
+  "onr_v1_059_self-modifying-code";
+
 export const STACK_TOP_REVEAL_PROGRAM_CARD_IDS = new Set([
   "onr_v1_151_aujourdoui",
 ]);

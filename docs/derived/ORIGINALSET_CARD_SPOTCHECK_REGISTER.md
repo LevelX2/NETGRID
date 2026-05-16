@@ -632,7 +632,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AMBUSH_HIDDEN_TRACE_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, vier größere Vollresolver bleiben als Removal Condition offen.
+Jobstatus: `done`; grüne Teilfixes und die vier größeren Vollresolver wurden umgesetzt.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -642,12 +642,12 @@ Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, vier größere Vollreso
 | Deep Thought | `onr_v1_017_deep-thought` | Bestehender Recurring-/Virus-/Purge-Pfad blieb unverändert grün | Kein blockierender Codefix in diesem Lauf |
 | Information Laundering | `onr_v1_328_information-laundering` | Teilfix umgesetzt: Advancement-skalierter Creditgewinn mit Selftrash und Payload | Volljob bleibt blockiert durch andere Kartenverträge |
 | Edited Shipping Manifests | `onr_v1_084_edited-shipping-manifests` | Teilfix umgesetzt: redigierter `corpDrawnCount` im Access-Replacement | Kein offener Punkt aus diesem Teilpfad |
-| Self-Modifying Code | `onr_v1_059_self-modifying-code` | Blockiert: Vollresolver für Run-gebundenen Stack-Programminstall fehlt | Eigenen Resolver-Scope umsetzen |
+| Self-Modifying Code | `onr_v1_059_self-modifying-code` | Umsetzung abgeschlossen: Run-/Encounter-Stack-Programminstall mit Trash-Kosten, Reveal, Installkosten, MU-Folgechoice und Shuffle | Vollresolver grün getestet |
 | Aujourd'Oui | `onr_v1_151_aujourdoui` | Bestehender Hidden-Zone-Search/Reveal-Pfad blieb unverändert | Fokussierte Einzelabdeckung in Folgejob empfohlen |
 | N.E.T.O. | `onr_v1_169_n-e-t-o` | Bestehender Search-only-Pfad blieb unverändert | Fokussierte Einzelabdeckung in Folgejob empfohlen |
-| Crystal Palace Station Grid | `onr_v1_355_crystal-palace-station-grid` | Blockiert: Counter-Wirkungsvertrag nicht finalisiert; Rez-Kostenpayload für Skälderviken separat umgesetzt | Lokalen Countervertrag finalisieren |
-| Emergency Self-Construct | `onr_v1_022_emergency-self-construct` | Blockiert: Flatline-/Damage-Replacement und persistente Restzustände fehlen als enger Resolver | Eigenen Resolver-Scope umsetzen |
-| Fait Accompli | `onr_v1_025_fait-accompli` | Blockiert: fortgebundene Fait-Counter und Agenda-Difficulty fehlen | Eigenen Resolver-Scope umsetzen |
+| Crystal Palace Station Grid | `onr_v1_355_crystal-palace-station-grid` | Umsetzung abgeschlossen: servergebundene Counter-Wirkung auf Agenda-Difficulty | Vollresolver grün getestet |
+| Emergency Self-Construct | `onr_v1_022_emergency-self-construct` | Umsetzung abgeschlossen: Flatline-Replacement und Meat-Damage-Prevention side-sicher | Vollresolver grün getestet |
+| Fait Accompli | `onr_v1_025_fait-accompli` | Umsetzung abgeschlossen: fortgebundene Fait-Counter und Agenda-Difficulty | Vollresolver grün getestet |
 | Pocket Virtual Reality | `onr_v1_260_pocket-virtual-reality` | Bestehender Trace-6/Tag-Pfad blieb unverändert | Kein Codefix in diesem Lauf |
 | Romp through HQ | `onr_v1_107_romp-through-hq` | Bestehender HQ-Free-Trash-Pfad blieb unverändert | Kein Codefix in diesem Lauf |
 | Skälderviken SA Beta Test Site | `onr_v1_341_skalderviken-sa-beta-test-site` | Teilfix umgesetzt: Black-ICE-only Rez-Kostenquelle und Zahlung payloadfähig | Kein offener Punkt aus diesem Teilpfad |

@@ -1551,7 +1551,12 @@ describe("Originalset Spotcheck 2026-05-15 Tagged/Wall/Breaker hardening", () =>
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    if (
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "continue_run",
+      )
+    )
+      state = apply(state, "runner", (action) => action.type === "continue_run");
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -11076,7 +11081,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-installed-helpers"));
     state.runner.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
     const searchAction = mustAction(
@@ -11125,6 +11130,106 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("uses Self-Modifying Code during an ICE encounter to install a revealed Stack program", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-smc-encounter"));
+    state.runner.credits = 20;
+    const smcId = installRunnerProgramForTest(
+      state,
+      "onr_v1_059_self-modifying-code",
+    );
+    state.runner.memoryUsed += 1;
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = encounterIce(state, "rd", "simple_barrier_ice");
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "self_modifying_code_install",
+    );
+    expect(state.runner.heap).toContain(smcId);
+    expect(state.pendingChoice?.source).toContain(
+      "v1911.self_modifying_code_install",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "runner").pendingChoice?.stackSearchResolution).toMatchObject({
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+    });
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    const creditsBefore = state.runner.credits;
+
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.runner.credits).toBe(creditsBefore - 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_self_modifying_code_install",
+      cardDefinitionId: "simple_decoder",
+      publicRevealDefinitionId: "simple_decoder",
+      installedProgramDefinitionId: "simple_decoder",
+      installCostPaid: 3,
+      shuffled: true,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("opens a Self-Modifying Code MU trash choice when the chosen program no longer fits", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-smc-mu"));
+    state.runner.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    state.runner.memoryUsed += 1;
+    const trashTargetId = installRunnerProgramForTest(state, "simple_fracter");
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "self_modifying_code_install",
+    );
+    state.runner.memoryLimit = state.runner.memoryUsed;
+    const installOptionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    )?.id;
+    state = applyChoice(state, "runner", String(installOptionId));
+    expect(state.pendingChoice?.source).toContain("v1911.self_modifying_code_mu");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1911_self_modifying_code_mu_choice",
+      publicRevealDefinitionId: "simple_decoder",
+      muTrashChoiceOpened: true,
+    });
+
+    const trashOptionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === trashTargetId,
+    )?.id;
+    state = applyChoice(state, "runner", String(trashOptionId));
+    expect(state.runner.heap).toContain(trashTargetId);
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1911_self_modifying_code_install",
+      muTrashChoiceResolved: true,
+      trashedForMemoryDefinitionIds: "simple_fracter",
+      installedProgramDefinitionId: "simple_decoder",
+    });
   });
 
   it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
@@ -11895,6 +12000,94 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       specialZoneReason: "v1919_olivia_salazar",
     });
   });
+
+  it("binds Fait Accompli counters to the successful remote fort and raises only that agenda difficulty", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-remote-counter"),
+    );
+    state.runner.credits = 20;
+    const faitId = installRunnerProgramForTest(
+      state,
+      "onr_v1_025_fait-accompli",
+    );
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    const otherAgendaId = putCorpRootInRemote(
+      state,
+      "onr_v1_189_artificial-security-directors",
+    );
+    state.corp.servers.push({
+      id: "remote_2",
+      kind: "remote",
+      label: "Remote 2",
+      ice: [],
+      root: [],
+    });
+    const otherRemote = state.corp.servers.find((server) => server.id === "remote_2");
+    if (!otherRemote) throw new Error("remote_2 missing");
+    const remoteOne = state.corp.servers.find((server) => server.id === "remote_1");
+    if (!remoteOne) throw new Error("remote_1 missing");
+    remoteOne.root = remoteOne.root.filter((id) => id !== otherAgendaId);
+    otherRemote.root.push(otherAgendaId);
+    state.cardInstances[otherAgendaId] = {
+      ...state.cardInstances[otherAgendaId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    if (
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "continue_run",
+      )
+    )
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+    if (state.run && !state.run.successful) {
+      state.run = { ...state.run, phase: "access", successful: true };
+      state.timingPoint = "access.resolve_card";
+      state.activeSide = "runner";
+    }
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" && action.source === faitId,
+    );
+    expect(cardCounterAmount(state, faitId, "power")).toBe(1);
+    expect(state.faitAccompliCountersByServer?.remote_1).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
+      sourceDefinitionId: "onr_v1_025_fait-accompli",
+      faitAccompliServerCounters: 1,
+    });
+
+    delete state.run;
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      advancementCounters: 3,
+    };
+    state.cardInstances[otherAgendaId] = {
+      ...state.cardInstances[otherAgendaId]!,
+      advancementCounters: 3,
+    };
+    const scoreActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "score_agenda",
+    );
+    expect(scoreActions.some((action) => action.payload?.cardId === agendaId)).toBe(
+      false,
+    );
+    expect(
+      scoreActions.some((action) => action.payload?.cardId === otherAgendaId),
+    ).toBe(true);
+  });
 });
 
 describe("V1.9.20 Global Modifier/Special-State WIP", () => {
@@ -12031,6 +12224,151 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"grip"|cardInstances|privatePayload/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses Emergency Self-Construct as a flatline replacement without leaking grip cards", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1920-emergency-self-construct-flatline",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "onr_v1_corp_v1920_emergency_self_construct_flatline",
+          cards: [
+            { id: "onr_v1_302_scorched-earth", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    state.runner.tags = 1;
+    state.runner.coreDamage = 1;
+    const emergencyId = installRunnerProgramForTest(
+      state,
+      "onr_v1_022_emergency-self-construct",
+    );
+    emptyRunnerGripForTest(state);
+    drawRunnerCardsForTest(state, 2);
+    const gripCardsLost = state.runner.grip.slice();
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
+    );
+    expect(state.pendingChoice?.source).toContain("replacement");
+    const replacementOption = getPlayerView(
+      state,
+      "runner",
+    ).pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    expect(replacementOption).toBeDefined();
+
+    state = applyChoice(state, "runner", String(replacementOption));
+
+    expect(state.winner).toBeNull();
+    expect(state.runner.coreDamage).toBe(0);
+    expect(state.runner.maxHandSize).toBe(4);
+    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(3);
+    expect(state.runner.heap).toContain(emergencyId);
+    for (const gripCardId of gripCardsLost) {
+      expect(state.runner.heap).toContain(gripCardId);
+    }
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      replacementDecision: "apply",
+      replacementOutcome: "replaced",
+      v1920RunnerProgramAbility: "emergency_self_construct_flatline_replacement",
+      sourceDefinitionId: "onr_v1_022_emergency-self-construct",
+      preventedAmount: 4,
+      coreDamageRemoved: 1,
+      gripCardsLost: 2,
+      runnerMaxHandSizeAfter: 4,
+      futureActionDebtPending: 3,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"|"grip"|"stack"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("uses Emergency Self-Construct as side-safe meat-damage prevention", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1920-emergency-self-construct-prevention",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "onr_v1_corp_v1920_emergency_self_construct_prevention",
+          cards: [
+            { id: "onr_v1_302_scorched-earth", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    state.runner.tags = 1;
+    installRunnerProgramForTest(state, "onr_v1_022_emergency-self-construct");
+    emptyRunnerGripForTest(state);
+    drawRunnerCardsForTest(state, 5);
+    moveCorpCardToHq(state, "onr_v1_302_scorched-earth");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_302_scorched-earth",
+    );
+    expect(state.pendingChoice?.source).toBe("v120.event_modification.prevent");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    const preventionOption = getPlayerView(
+      state,
+      "runner",
+    ).pendingChoice?.options.find((option) => option.id !== "pass")?.id;
+    expect(preventionOption).toBeDefined();
+
+    state = applyChoice(state, "runner", String(preventionOption));
+
+    expect(state.winner).toBeNull();
+    expect(state.runner.grip).toHaveLength(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "partially_prevented",
+      sourceDefinitionId: "onr_v1_022_emergency-self-construct",
+      originalAmount: 4,
+      preventedAmount: 1,
+      finalAmount: 3,
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 3,
+      flatline: false,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"|"grip"|"stack"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -24205,6 +24543,53 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("applies Crystal Palace Station Grid counters only to agendas in its server", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-crystal-counter-difficulty");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const crystalId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    const remoteOne = state.corp.servers.find((server) => server.id === "remote_1");
+    if (!remoteOne) throw new Error("remote_1 missing");
+    state.cardInstances[crystalId] = {
+      ...state.cardInstances[crystalId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    setCardCounterForTest(state, crystalId, "power", 1);
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      advancementCounters: 2,
+    };
+
+    let scoreActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "score_agenda",
+    );
+    expect(
+      scoreActions.some((action) => action.payload?.cardId === agendaId),
+    ).toBe(true);
+    state.corp.servers.push({
+      id: "remote_2",
+      kind: "remote",
+      label: "Remote 2",
+      ice: [],
+      root: [agendaId],
+    });
+    remoteOne.root = remoteOne.root.filter((id) => id !== agendaId);
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+    };
+    scoreActions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "score_agenda",
+    );
+    expect(
+      scoreActions.some((action) => action.payload?.cardId === agendaId),
+    ).toBe(false);
   });
 
   it("covers V1.9.18 city-grid trace pool and run-start stealth tax paths", () => {

@@ -16,6 +16,9 @@ export const ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS = 7;
 export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID =
   "onr_v1_127_full-body-conversion";
 
+export const EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID =
+  "onr_v1_022_emergency-self-construct";
+
 export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
   Record<string, RuntimeDamagePreventionProfile>
 > = {
@@ -48,6 +51,11 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     maxPerTurn: 2,
     damageTypes: ["net"],
     priority: 121,
+  },
+  [EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID]: {
+    maxPerTurn: 1,
+    damageTypes: ["meat"],
+    priority: 118,
   },
   "onr_v1_130_lifesaver-nanosurgeons": {
     maxPerTurn: 1,
