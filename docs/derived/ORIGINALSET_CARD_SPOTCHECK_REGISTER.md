@@ -412,7 +412,7 @@ Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HAMMER_RIO_IM
 | Hammer | `onr_v1_031_hammer` | Nacharbeit umgesetzt: Stealth-Verteilungschoice revalidiert installierte Quellen, eindeutige Optionen und verfügbare Counter | Race-Härtung und bestehende Breaker-/Replay-Abdeckung grün |
 | misc.for-sale | `onr_v1_100_misc-for-sale` | Engine-Pfad funktioniert mit privater Installed-Trash-Choice und Creditgain 3 pro gewähltem Top-Level-Ziel | Bestehende Dedupe-/Zone-Revalidation bleibt grün |
 | Organ Donor | `onr_v1_103_organ-donor` | Engine-Pfad funktioniert mit privater Grip-Trash-Choice, Max-5-Grenze und count-basiertem Payload | Bestehende Hidden-Info-/Replay-Abdeckung bleibt grün |
-| Playful AI | `onr_v1_104_playful-ai` | Nacharbeit umgesetzt: echter Playful-AI-Dice-Loop mit Runner-Choice statt einmaliger Probe | Engine- und Chroniktest ergänzt |
+| Playful AI | `onr_v1_104_playful-ai` | Nacharbeit nach Playtest erneut gehärtet: Choice nur bei Wurf 1-3, echte Credit/Würfel-Splits, 4-6 als No-Op-Verbrauch offener Würfel | Engine-, AI- und Chroniktests ergänzt |
 | Record Reconstructor | `onr_v1_142_record-reconstructor` | Engine-Pfad funktioniert als installierter Archives-Access-Helfer mit source-bound Helper-Liste | Bestehende Archives-/Visibility-Abdeckung bleibt grün |
 | Haunting Inquisition | `onr_v1_247_haunting-inquisition` | Engine-Pfad funktioniert mit sechs Aktionen Run-Sperre aus ungebrochener Subroutine | Bestehende Run-Lock-/Replay-Abdeckung bleibt grün |
 | Viral 15 | `onr_v1_276_viral-15` | Engine-Pfad funktioniert mit runweitem Jack-out-Tax und Runner-privater Program-Trash-Choice | Bestehende Jack-out-/Choice-/Replay-Abdeckung bleibt grün |

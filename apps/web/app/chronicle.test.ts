@@ -264,8 +264,8 @@ describe("formatChronicleEvent", () => {
         abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 5,
         playfulAiDieRolls: [4, 5],
-        playfulAiGainedCredits: 2,
-        playfulAiSetAsideDice: 1,
+        playfulAiGainedCredits: 1,
+        playfulAiSetAsideDice: 2,
         playfulAiRolledDice: 2,
         playfulAiDiceQueuedBeforeRolls: 2,
         playfulAiDiceQueuedAfterRolls: 0,
@@ -277,9 +277,51 @@ describe("formatChronicleEvent", () => {
     expect(played.title).toBe("Du hast Playful AI gespielt und eine 3 gewürfelt.");
     expect(played.description).toBe("Der Wurf öffnet eine Entscheidung: Credits nehmen oder Würfel beiseitelegen.");
     expect(played.chips).toEqual(expect.arrayContaining(["Playful AI", "Wurf 3", "Choice"]));
-    expect(resolved.title).toBe("Du hast Playful AI aufgelöst: 2 Credits genommen und 1 Würfel beiseitegelegt.");
+    expect(resolved.title).toBe("Du hast Playful AI aufgelöst: 1 Credit genommen und 2 Würfel beiseitegelegt.");
     expect(resolved.description).toBe("Danach wurden 2 beiseitegelegte Würfel geworfen: 4, 5. Die Playful-AI-Schleife ist abgeschlossen.");
-    expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+2 Credits", "1 beiseite", "Würfe 4, 5"]));
+    expect(resolved.chips).toEqual(expect.arrayContaining(["Playful AI", "+1 Credit", "2 beiseite", "Würfe 4, 5"]));
+  });
+
+  it("shows partial Playful AI queued dice without treating the roll history as newly rolled dice", () => {
+    const partial = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        title: "Playful AI",
+        sourceDefinitionId: "onr_v1_104_playful-ai",
+        abilityId: "playful_ai_dice_loop",
+        v1921DieRoll: 1,
+        playfulAiDieRolls: [1],
+        playfulAiGainedCredits: 0,
+        playfulAiSetAsideDice: 2,
+        playfulAiRolledDice: 1,
+        playfulAiDiceQueuedBeforeRolls: 2,
+        playfulAiDiceQueuedAfterRolls: 1,
+        playfulAiRemainingDice: 1,
+        playfulAiChoiceOpened: true
+      }),
+      "runner"
+    );
+    const gainAll = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        title: "Playful AI",
+        sourceDefinitionId: "onr_v1_104_playful-ai",
+        abilityId: "playful_ai_dice_loop",
+        playfulAiDieRolls: [],
+        playfulAiGainedCredits: 3,
+        playfulAiSetAsideDice: 0,
+        playfulAiRolledDice: 0,
+        playfulAiDiceQueuedBeforeRolls: 0,
+        playfulAiDiceQueuedAfterRolls: 0,
+        playfulAiComplete: true
+      }),
+      "runner"
+    );
+
+    expect(partial.description).toBe("Danach wurde 1 von 2 beiseitegelegten Würfeln geworfen: 1. Der letzte Wurf öffnet eine weitere Entscheidung; ein Würfel bleibt danach noch offen.");
+    expect(partial.chips).toEqual(expect.arrayContaining(["2 beiseite", "Wurf 1", "1 offen"]));
+    expect(gainAll.description).toBe("Die Playful-AI-Schleife ist abgeschlossen.");
+    expect(gainAll.chips).not.toEqual(expect.arrayContaining(["Wurf 3"]));
   });
 
   it("describes Edited Shipping Manifests access replacement without hidden card identities", () => {

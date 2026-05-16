@@ -335,8 +335,7 @@ describe("MVP 0.3 AI controller contract", () => {
     state.pendingChoice = {
       choiceId: `v1921_playful_ai_${state.stateVersion}`,
       side: "runner",
-      source:
-        "v1921.playful_ai:sourceCardId=playful:remainingDice=0:rollIndex=0:lastRoll=3",
+      source: `v1921.playful_ai:playful:3:0:1:${state.stateVersion}`,
       prompt: "Playful AI: 3 Credits nehmen und/oder 3 Würfel beiseitelegen.",
       kind: "select_option",
       options: [

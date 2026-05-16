@@ -1521,7 +1521,7 @@
           "cardId": "onr_v1_104_playful-ai",
           "title": "Playful AI",
           "spotcheckStatus": "completed",
-          "result": "implementation_fixed_dice_loop_choice_replaced_manual_probe",
+          "result": "implementation_hardened_dice_loop_splits_and_high_roll_noop",
           "followUpStatus": "fixed_and_tested"
         },
         {

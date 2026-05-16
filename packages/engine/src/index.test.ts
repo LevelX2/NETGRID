@@ -13154,14 +13154,14 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(withoutAiBoon.run?.aiBoonRunStrength).toBeUndefined();
   });
 
-  it("plays Playful AI as a public dice-loop choice and resolves credits through replay", () => {
+  it("ends Playful AI without a choice or credits on a high roll", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v1921-playful-ai-dice-loop",
+        seed: "playful-ai-probe-0",
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          id: "onr_v1_runner_v1921_playful_ai_loop",
-          name: "O:NR V1.9.21 Playful AI Loop Runner",
+          id: "onr_v1_runner_v1921_playful_ai_high_roll",
+          name: "O:NR V1.9.21 Playful AI High Roll Runner",
           cards: [
             { id: "onr_v1_104_playful-ai", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
@@ -13192,6 +13192,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(wrongSide.ok).toBe(false);
     if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
 
+    const creditsBeforePlay = state.runner.credits;
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const randomBefore = state.randomDrawRecords.length;
@@ -13209,30 +13210,135 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       v1921RunnerEventAbility: "playful_ai_dice_loop",
-      playfulAiChoiceOpened: true,
-      playfulAiRemainingDice: 1,
+      v1921DieRoll: 4,
+      playfulAiChoiceOpened: false,
+      playfulAiComplete: true,
+      playfulAiRemainingDice: 0,
       randomCounterAfter: randomBefore + 1,
     });
-    const publicRoll = Number(
-      state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0,
-    );
-    expect(Number.isInteger(publicRoll)).toBe(true);
-    expect(publicRoll).toBeGreaterThanOrEqual(1);
-    expect(publicRoll).toBeLessThanOrEqual(6);
+    expect(state.runner.credits).toBe(creditsBeforePlay - 1);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "resolve_choice",
+      ),
+    ).toBe(false);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
     );
-    expect(state.pendingChoice?.source).toContain("v1921.playful_ai");
-    const creditsBeforeChoice = state.runner.credits;
-    state = applyChoice(state, "runner", "take_credits");
-    expect(state.pendingChoice).toBeUndefined();
-    expect(state.runner.credits).toBeGreaterThan(creditsBeforeChoice);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+  });
+
+  it("resolves Playful AI split choices and queued dice through replay", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "playful-ai-probe-3",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "onr_v1_runner_v1921_playful_ai_split_loop",
+          name: "O:NR V1.9.21 Playful AI Split Loop Runner",
+          cards: [
+            { id: "onr_v1_104_playful-ai", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.runner.clicks = 3;
+
+    const optionGain = (option: { id: string; value?: unknown }) =>
+      typeof option.value === "number"
+        ? option.value
+        : Number(/^gain_(\d+)_set_aside_\d+$/.exec(option.id)?.[1] ?? 0);
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_104_playful-ai");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
+    );
+
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      v1921RunnerEventAbility: "playful_ai_dice_loop",
+      v1921DieRoll: 3,
+      playfulAiChoiceOpened: true,
+      playfulAiComplete: false,
+      playfulAiRemainingDice: 0,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "gain_0_set_aside_3",
+      "gain_1_set_aside_2",
+      "gain_2_set_aside_1",
+      "gain_3_set_aside_0",
+    ]);
+
+    const creditsBeforeChoice = state.runner.credits;
+    state = applyChoice(state, "runner", "gain_1_set_aside_2");
+    const firstResolvePayload = state.eventLog.at(-1)?.publicPayload;
+    const firstFollowupRolls = String(
+      firstResolvePayload?.playfulAiDieRolls ?? "",
+    )
+      .split(",")
+      .filter(Boolean)
+      .map((value) => Number(value));
+    expect(state.runner.credits).toBe(creditsBeforeChoice + 1);
+    expect(firstResolvePayload).toMatchObject({
       actionType: "resolve_choice",
       v1921RunnerEventAbility: "playful_ai_dice_loop",
-      playfulAiGainedCredits: publicRoll,
-      playfulAiComplete: true,
+      playfulAiGainedCredits: 1,
+      playfulAiSetAsideDice: 2,
+      playfulAiDiceQueuedBeforeRolls: 2,
     });
+    expect(firstFollowupRolls.length).toBeGreaterThan(0);
+    expect(firstFollowupRolls.length).toBeLessThanOrEqual(2);
+    expect(firstFollowupRolls.every((roll) => roll >= 1 && roll <= 6)).toBe(
+      true,
+    );
+    if (firstResolvePayload?.playfulAiChoiceOpened === true) {
+      expect(firstResolvePayload.playfulAiRemainingDice).toBe(
+        2 - firstFollowupRolls.length,
+      );
+      expect(state.pendingChoice?.source).toContain("v1921.playful_ai");
+    } else {
+      expect(firstResolvePayload?.playfulAiRemainingDice).toBe(0);
+    }
+
+    let guard = 0;
+    while (state.pendingChoice) {
+      guard += 1;
+      expect(guard).toBeLessThanOrEqual(10);
+      const selected = state.pendingChoice.options
+        .slice()
+        .sort(
+          (left, right) =>
+            optionGain(right) - optionGain(left) ||
+            left.id.localeCompare(right.id),
+        )[0];
+      expect(selected).toBeDefined();
+      state = applyChoice(state, "runner", selected!.id);
+    }
+
+    expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore + 1);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(
+      state.eventLog
+        .slice(replayStart)
+        .map((event) => JSON.stringify(event.publicPayload))
+        .join("\n"),
+    ).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));

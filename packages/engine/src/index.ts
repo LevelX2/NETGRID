@@ -511,19 +511,26 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         state,
         `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.initial`,
       );
-      startV1921PlayfulAiChoice(
-        state,
-        String(legalAction.payload?.cardId ?? ""),
-        dieRoll,
-        [dieRoll],
-      );
+      const choiceOpened = dieRoll <= 3;
+      if (choiceOpened) {
+        startV1921PlayfulAiChoice(
+          state,
+          String(legalAction.payload?.cardId ?? ""),
+          dieRoll,
+          0,
+          1,
+        );
+      }
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1921RunnerEventAbility: "playful_ai_dice_loop",
         v1921DieRoll: dieRoll,
         playfulAiDieRolls: String(dieRoll),
-        playfulAiChoiceOpened: true,
-        playfulAiRemainingDice: 1,
+        playfulAiRolledDice: 1,
+        playfulAiDiceQueuedAfterRolls: 0,
+        playfulAiRemainingDice: 0,
+        playfulAiChoiceOpened: choiceOpened,
+        playfulAiComplete: !choiceOpened,
         randomCounterAfter: state.randomCounter,
       };
     },
@@ -17152,35 +17159,182 @@ function startV1921PlayfulAiChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
   dieRoll: number,
-  dieRolls: number[],
+  remainingDice: number,
+  rollIndex: number,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   if (!sourceCardId || !state.cardInstances[sourceCardId])
-    throw new Error("Playful AI hat keine gueltige Quelle.");
+    throw new Error("Playful AI hat keine gültige Quelle.");
+  if (!Number.isInteger(dieRoll) || dieRoll < 1 || dieRoll > 3)
+    throw new Error(
+      "Playful AI darf nur bei Wurf 1, 2 oder 3 eine Choice öffnen.",
+    );
+  if (!Number.isInteger(remainingDice) || remainingDice < 0)
+    throw new Error("Die offenen Playful-AI-Würfel sind ungültig.");
+  if (!Number.isInteger(rollIndex) || rollIndex < 1)
+    throw new Error("Der Playful-AI-Wurfindex ist ungültig.");
+  const choiceStateVersion = state.stateVersion + 1;
   state.pendingChoice = {
-    choiceId: `v1921_playful_ai_${state.stateVersion + 1}`,
+    choiceId: `v1921_playful_ai_${choiceStateVersion}`,
     side: "runner",
-    source: `v1921.playful_ai:${sourceCardId}:${dieRoll}:${dieRolls.join(",")}:${state.stateVersion + 1}`,
-    prompt: "Playful AI: Credits nehmen oder Wuerfel beiseitelegen?",
+    source: [
+      "v1921.playful_ai",
+      sourceCardId,
+      String(dieRoll),
+      String(remainingDice),
+      String(rollIndex),
+      String(choiceStateVersion),
+    ].join(":"),
+    prompt:
+      `Playful AI: ${dieRoll} ${creditTextForPrompt(dieRoll)} nehmen ` +
+      `und/oder ${dieRoll} ${diePromptText(dieRoll)} beiseitelegen.`,
     kind: "select_option",
-    options: [
-      {
-        id: "take_credits",
-        label: `${dieRoll} Credits nehmen`,
-        publicLabel: "Credits genommen",
-        value: "take_credits",
-      },
-      {
-        id: "set_aside",
-        label: "Wuerfel beiseitelegen",
-        publicLabel: "Wuerfel beiseitegelegt",
-        value: "set_aside",
-      },
-    ],
+    options: playfulAiSplitOptions(dieRoll),
     minSelections: 1,
     maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
+    stateVersion: choiceStateVersion,
     visibility: "public",
+  };
+}
+
+function creditTextForPrompt(amount: number): string {
+  return amount === 1 ? "Credit" : "Credits";
+}
+
+function diePromptText(amount: number): string {
+  return amount === 1 ? "Würfel" : "Würfel";
+}
+
+function playfulAiSplitOptions(dieRoll: number): ChoiceRequest["options"] {
+  return Array.from({ length: dieRoll + 1 }, (_, gainedCredits) => {
+    const setAsideDice = dieRoll - gainedCredits;
+    const creditText = creditTextForPrompt(gainedCredits);
+    const diceText = diePromptText(setAsideDice);
+    return {
+      id: `gain_${gainedCredits}_set_aside_${setAsideDice}`,
+      label: `${gainedCredits} ${creditText} nehmen, ${setAsideDice} ${diceText} beiseitelegen`,
+      publicLabel: "Playful-AI-Aufteilung",
+      value: gainedCredits,
+    };
+  });
+}
+
+function parsePlayfulAiChoiceSource(source: string): {
+  sourceCardId: CardInstanceId;
+  dieRoll: number;
+  remainingDice: number;
+  rollIndex: number;
+} {
+  const [, sourceCardId = "", dieRollRaw = "", fourth = "", fifth = ""] =
+    source.split(":");
+  const dieRoll = Number(dieRollRaw);
+  if (!Number.isInteger(dieRoll) || dieRoll < 1 || dieRoll > 6)
+    throw new Error("Playful-AI-Wurf ist ungültig.");
+  const remainingDice = Number(fourth);
+  const rollIndex = Number(fifth);
+  if (
+    Number.isInteger(remainingDice) &&
+    remainingDice >= 0 &&
+    Number.isInteger(rollIndex) &&
+    rollIndex >= 1
+  ) {
+    return { sourceCardId, dieRoll, remainingDice, rollIndex };
+  }
+  const oldRolls = fourth
+    .split(",")
+    .filter(Boolean)
+    .map((value) => Number(value));
+  if (
+    oldRolls.length === 0 ||
+    oldRolls.some((roll) => !Number.isInteger(roll) || roll < 1 || roll > 6)
+  )
+    throw new Error("Playful-AI-Wurfserie ist ungültig.");
+  return {
+    sourceCardId,
+    dieRoll,
+    remainingDice: 0,
+    rollIndex: oldRolls.length,
+  };
+}
+
+function parsePlayfulAiSplit(
+  choice: ChoiceRequest,
+  selectedOptionId: string | undefined,
+  dieRoll: number,
+): { gainedCredits: number; setAsideDice: number } {
+  const option = choice.options.find(
+    (candidate) => candidate.id === selectedOptionId,
+  );
+  if (!option) throw new Error("Playful-AI-Auswahl ist ungültig.");
+  if (option.id === "take_credits")
+    return { gainedCredits: dieRoll, setAsideDice: 0 };
+  if (option.id === "set_aside")
+    return { gainedCredits: 0, setAsideDice: dieRoll };
+  const match = /^gain_(\d+)_set_aside_(\d+)$/.exec(option.id);
+  if (!match) throw new Error("Playful-AI-Auswahl ist ungültig.");
+  const gainedCredits = Number(match[1]);
+  const setAsideDice = Number(match[2]);
+  if (
+    !Number.isInteger(gainedCredits) ||
+    !Number.isInteger(setAsideDice) ||
+    gainedCredits < 0 ||
+    setAsideDice < 0 ||
+    gainedCredits + setAsideDice !== dieRoll
+  )
+    throw new Error("Playful-AI-Aufteilung ist ungültig.");
+  return { gainedCredits, setAsideDice };
+}
+
+function continueV1921PlayfulAiLoop(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  queuedDice: number,
+  rollIndex: number,
+): {
+  rolledDice: number[];
+  remainingDice: number;
+  rollIndex: number;
+  choiceOpened: boolean;
+  complete: boolean;
+} {
+  if (!Number.isInteger(queuedDice) || queuedDice < 0)
+    throw new Error("Die offenen Playful-AI-Würfel sind ungültig.");
+  if (!Number.isInteger(rollIndex) || rollIndex < 1)
+    throw new Error("Der Playful-AI-Wurfindex ist ungültig.");
+  let remainingDice = queuedDice;
+  let nextRollIndex = rollIndex;
+  const rolledDice: number[] = [];
+  while (remainingDice > 0) {
+    remainingDice -= 1;
+    const nextRoll = rollDeterministicDie(
+      state,
+      `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.followup.${state.stateVersion + 1}.${nextRollIndex}`,
+    );
+    nextRollIndex += 1;
+    rolledDice.push(nextRoll);
+    if (nextRoll <= 3) {
+      startV1921PlayfulAiChoice(
+        state,
+        sourceCardId,
+        nextRoll,
+        remainingDice,
+        nextRollIndex,
+      );
+      return {
+        rolledDice,
+        remainingDice,
+        rollIndex: nextRollIndex,
+        choiceOpened: true,
+        complete: false,
+      };
+    }
+  }
+  return {
+    rolledDice,
+    remainingDice: 0,
+    rollIndex: nextRollIndex,
+    choiceOpened: false,
+    complete: true,
   };
 }
 
@@ -17192,7 +17346,8 @@ function resolveV1921PlayfulAiChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("v1921.playful_ai"))
     throw new Error("Es ist keine Playful-AI-Choice offen.");
-  const [, sourceCardId, dieRollRaw, dieRollsRaw] = choice.source.split(":");
+  const choiceState = parsePlayfulAiChoiceSource(choice.source);
+  const { sourceCardId, dieRoll, remainingDice, rollIndex } = choiceState;
   if (
     !sourceCardId ||
     !state.runner.heap.includes(sourceCardId) ||
@@ -17200,59 +17355,51 @@ function resolveV1921PlayfulAiChoice(
   )
     throw new Error("Die Playful-AI-Choice gehoert nicht zur gespielten Karte.");
   const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
-  const dieRoll = Number(dieRollRaw);
-  if (!Number.isInteger(dieRoll) || dieRoll < 1 || dieRoll > 6)
-    throw new Error("Playful-AI-Wurf ist ungueltig.");
-  const priorRolls = (dieRollsRaw ?? "")
-    .split(",")
-    .filter(Boolean)
-    .map((value) => Number(value));
-  if (
-    priorRolls.length === 0 ||
-    priorRolls.some((roll) => !Number.isInteger(roll) || roll < 1 || roll > 6)
-  )
-    throw new Error("Playful-AI-Wurfserie ist ungueltig.");
 
   delete state.pendingChoice;
   let gainedCredits = 0;
   let setAsideDice = 0;
-  let complete = true;
-  let choiceOpened = false;
-  const dieRolls = priorRolls.slice();
-  if (selectedOptionId === "take_credits") {
-    gainedCredits = dieRoll;
-    credits(state, "runner", gainedCredits);
-  } else if (selectedOptionId === "set_aside") {
-    setAsideDice = 1;
-    const nextRoll = rollDeterministicDie(
+  let queuedDiceBeforeRolls = remainingDice;
+  let progress: ReturnType<typeof continueV1921PlayfulAiLoop> = {
+    rolledDice: [],
+    remainingDice,
+    rollIndex,
+    choiceOpened: false,
+    complete: true,
+  };
+  if (dieRoll <= 3) {
+    const split = parsePlayfulAiSplit(choice, selectedOptionId, dieRoll);
+    gainedCredits = split.gainedCredits;
+    setAsideDice = split.setAsideDice;
+    if (gainedCredits > 0) credits(state, "runner", gainedCredits);
+    queuedDiceBeforeRolls = remainingDice + setAsideDice;
+    progress = continueV1921PlayfulAiLoop(
       state,
-      `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.followup.${state.stateVersion + 1}.${dieRolls.length}`,
+      sourceCardId,
+      queuedDiceBeforeRolls,
+      rollIndex,
     );
-    dieRolls.push(nextRoll);
-    complete = false;
-    choiceOpened = true;
-    startV1921PlayfulAiChoice(state, sourceCardId, nextRoll, dieRolls);
-  } else {
-    throw new Error("Playful-AI-Auswahl ist ungueltig.");
   }
 
-  legalAction.payload = {
+  const payload: NonNullable<LegalAction["payload"]> = {
     ...(legalAction.payload ?? {}),
     v1921RunnerEventAbility: "playful_ai_dice_loop",
     sourceDefinitionId: PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID,
-    v1921DieRoll: dieRolls[dieRolls.length - 1] ?? dieRoll,
-    playfulAiDieRolls: dieRolls.join(","),
+    playfulAiDieRolls: progress.rolledDice.join(","),
     playfulAiGainedCredits: gainedCredits,
     playfulAiSetAsideDice: setAsideDice,
-    playfulAiRolledDice: dieRolls.length,
-    playfulAiDiceQueuedBeforeRolls: priorRolls.length,
-    playfulAiDiceQueuedAfterRolls: choiceOpened ? 1 : 0,
-    playfulAiRemainingDice: choiceOpened ? 1 : 0,
-    playfulAiChoiceOpened: choiceOpened,
-    playfulAiComplete: complete,
+    playfulAiRolledDice: progress.rolledDice.length,
+    playfulAiDiceQueuedBeforeRolls: queuedDiceBeforeRolls,
+    playfulAiDiceQueuedAfterRolls: progress.remainingDice,
+    playfulAiRemainingDice: progress.remainingDice,
+    playfulAiChoiceOpened: progress.choiceOpened,
+    playfulAiComplete: progress.complete,
     randomCounterAfter: state.randomCounter,
     runnerCreditsAfter: state.runner.credits,
   };
+  const lastRoll = progress.rolledDice.at(-1);
+  if (lastRoll !== undefined) payload.v1921DieRoll = lastRoll;
+  legalAction.payload = payload;
 }
 
 function shuffleRunnerStack(state: GameState, purpose: string): void {

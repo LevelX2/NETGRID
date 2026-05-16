@@ -1366,6 +1366,21 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
   };
 }
 
+function playfulAiGainValue(option: {
+  id: string;
+  value?: string | number | boolean;
+  label: string;
+}): number {
+  if (typeof option.value === "number") return option.value;
+  const splitMatch = /^gain_(\d+)_set_aside_\d+$/.exec(option.id);
+  if (splitMatch) return Number(splitMatch[1]);
+  if (option.id === "take_credits") {
+    const labelMatch = /^(\d+)\s+Credits? nehmen/.exec(option.label);
+    return labelMatch ? Number(labelMatch[1]) : 0;
+  }
+  return 0;
+}
+
 function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
@@ -1409,8 +1424,8 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
       choice.options
         .slice()
         .sort((left, right) => {
-          const leftValue = typeof left.value === "number" ? left.value : -1;
-          const rightValue = typeof right.value === "number" ? right.value : -1;
+          const leftValue = playfulAiGainValue(left);
+          const rightValue = playfulAiGainValue(right);
           return rightValue - leftValue || left.id.localeCompare(right.id);
         })[0] ?? choice.options[0];
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };

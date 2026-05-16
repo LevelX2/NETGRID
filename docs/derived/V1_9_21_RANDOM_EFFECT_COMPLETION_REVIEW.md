@@ -48,3 +48,11 @@ Die Completion bleibt im V1.9.21-Scope. Es wurden keine V1.9.22-Karten oder exte
 ## Nachprüfung 2026-05-14
 
 Eine Playtest-Nachprüfung zu `Playful AI` bestätigte, dass die Engine weiterhin normale W6-Würfe nutzt und den abstrakten Set-aside-Zähler korrekt weiterführt. Die öffentliche Chronik war jedoch irreführend, weil Resolve-Choice-Einträge nur den zuletzt relevanten Folgewurf und die neu beiseitegelegten Würfel zeigten. Die PublicEvent-Metadaten führen nun die pro Aktion gewürfelte Serie (`playfulAiDieRolls`) sowie den Würfelzähler vor und nach den Folgewürfen. Die Web-Chronik zeigt dadurch auch 4/5/6-Folgewürfe und offene Restwürfel nachvollziehbar an.
+
+## Nachprüfung 2026-05-16
+
+Ein weiterer Playtest zeigte, dass die Reparatur vom 2026-05-14 noch nicht regelkonform war: Die Engine öffnete auch nach Würfen `4`, `5` oder `6` eine Playful-AI-Choice und erlaubte dadurch z. B. bei Wurf 4 unzulässig `4 Credits` zu nehmen. Außerdem war `Würfel beiseitelegen` nur binär modelliert und legte unabhängig vom Wurf immer genau einen Würfel beiseite.
+
+Die Engine bildet die gedruckte Auswahl jetzt als echte Split-Optionen ab: Bei Wurf `1`, `2` oder `3` kann der Runner Credits und neu beiseitegelegte Würfel so aufteilen, dass die Summe dem Wurf entspricht. Würfe `4`, `5` und `6` verbrauchen nur den aktuellen offenen Würfel, erzeugen keine Credits und keine neue Choice. Bereits offene beiseitegelegte Würfel werden mit neu beiseitegelegten Würfeln addiert und deterministisch weitergewürfelt. Die Chronik-Payloads melden pro Resolve-Schritt nur die in diesem Schritt tatsächlich geworfenen beiseitegelegten Würfel.
+
+Nachweis: Playful-AI-Tests in Engine, AI und Web sind grün; Typecheck für Engine, AI und Web ist grün. Ein lokaler Engine-Probelauf bei Seed `playful-ai-probe-0` bestätigt Wurf 4 ohne PendingChoice und ohne Creditgewinn.
