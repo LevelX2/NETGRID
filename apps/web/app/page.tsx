@@ -149,6 +149,7 @@ import {
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
+import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
@@ -2535,6 +2536,16 @@ export default function Page() {
     if (!selectedActionContext) return;
     if (!activeView || payload?.winner || !actionContextStillVisible(selectedActionContext, activeView)) setSelectedActionContext(null);
   }, [activeView, payload?.winner, selectedActionContext]);
+
+  useEffect(() => {
+    if (selectedActionContext?.kind !== "card") return;
+    const closeCardActionMenu = (event: PointerEvent) => {
+      if (isCardActionSurfaceTarget(event.target)) return;
+      setSelectedActionContext(null);
+    };
+    window.addEventListener("pointerdown", closeCardActionMenu, { capture: true });
+    return () => window.removeEventListener("pointerdown", closeCardActionMenu, { capture: true });
+  }, [selectedActionContext]);
 
   useEffect(() => {
     if (!activeDiscardChoice) {
@@ -10984,6 +10995,7 @@ function CardView({
         <button
           className={`cardActionMarker${showCardActions ? " active" : ""}`}
           type="button"
+          data-card-action-surface="true"
           aria-label={showCardActions ? "Kartenoptionen einklappen" : "Kartenoptionen anzeigen"}
           aria-expanded={showCardActions}
           aria-haspopup="menu"
@@ -11137,7 +11149,7 @@ function CardActionsPopover({
   onAction(action: LegalAction): void;
 }) {
   return (
-    <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style}>
+    <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style} data-card-action-surface="true">
       {actions.map((action) => {
         const label = compactCardActionMenuLabel(action, actionLabelForAction(action));
         return (
