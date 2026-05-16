@@ -1,9 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-program-prevention-tools
-status: committed
+status: done
 createdAt: 2026-05-16T11:08:00+01:00
 startedAt: 2026-05-16T14:13:52+02:00
-completedAt: 2026-05-16T14:19:04+02:00
+completedAt: 2026-05-16T18:57:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -166,7 +166,7 @@ Akzeptanzkriterien
 
 ## Umsetzungsabschluss 2026-05-16
 
-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Status: `done`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
 
 Umgesetzt:
 
