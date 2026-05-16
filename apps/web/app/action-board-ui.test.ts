@@ -186,6 +186,18 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionMatchesContext(pump, { kind: "card", id: "ice_1", label: "Fetch 4.0.1" })).toBe(false);
   });
 
+  it("places main-phase rez actions for installed upgrades on the card context", () => {
+    const upgradeRez = legalAction("corp", "rez_ice", "game_rule", "Karte in Fort 1 rezzen", { cardId: "upgrade_1", serverId: "remote_1" });
+    const runIceRez = legalAction("corp", "rez_ice", "game_rule", "ICE rezzen", { cardId: "ice_1", serverId: "remote_1" }, "run.approach_ice");
+
+    const split = splitLegalActions([upgradeRez, runIceRez]);
+
+    expect(split.contextualActions).toEqual([upgradeRez]);
+    expect(split.primaryActions).toEqual([runIceRez]);
+    expect(actionMatchesContext(upgradeRez, { kind: "card", id: "upgrade_1", label: "Tesseract Fort Construction" })).toBe(true);
+    expect(contextualCardActionLabel(upgradeRez)).toBe("Rezzen");
+  });
+
   it("shows access progress only from PlayerView breach data", () => {
     const running = view("runner", {
       run: {
