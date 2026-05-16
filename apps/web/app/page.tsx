@@ -1609,6 +1609,42 @@ function turnSideForView(view: PlayerView): Side | null {
   return null;
 }
 
+function turnActionHeaderLabel(view: PlayerView, side: Side, activeAiSide?: Side): string {
+  const actorLabel = `${sideLabel(side)}${activeAiSide === side ? "-KI" : ""}`;
+  return `Zug: ${currentTurnNumberForView(view)}  ${actorLabel} Aktionen`;
+}
+
+function currentTurnNumberForView(view: PlayerView): number {
+  let activeSide: Side = "corp";
+  let activeTurnNumber = 1;
+
+  for (const event of view.publicEvents) {
+    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+    const actor = sideFromPublicPayload(event.publicPayload.actor);
+    if (!actor) continue;
+
+    if (actionType === "mandatory_draw" && actor === "corp") {
+      if (activeSide !== "corp") {
+        activeSide = "corp";
+        activeTurnNumber += 1;
+      }
+      continue;
+    }
+
+    if (actionType === "end_turn") {
+      if (activeSide !== actor) activeSide = actor;
+      activeSide = actor === "corp" ? "runner" : "corp";
+      activeTurnNumber += 1;
+    }
+  }
+
+  return activeTurnNumber;
+}
+
+function sideFromPublicPayload(value: unknown): Side | null {
+  return value === "corp" || value === "runner" ? value : null;
+}
+
 function updateActionSlotCapacity(capacities: Record<Side, number>, side: Side, currentClicks: number, active: boolean, resetActiveSide: boolean, events: PublicGameEvent[]): void {
   const baseCapacity = baseActionSlotCapacity(side);
   const safeClicks = Math.max(0, Math.floor(currentClicks));
@@ -4432,7 +4468,6 @@ export default function Page() {
             scoreAreaHighlighted={zoneHighlighted(activeCueHighlight, opponentSide(activeView.side), "scoreArea")}
             onToggleScoreArea={() => toggleScoreAreaOverlay(opponentSide(activeView.side))}
             connected={payload.opponentStatus.connected}
-            actionCapacity={actionSlotCapacities[opponentSide(activeView.side)]}
             {...(payload.opponentStatus.displayName ? { displayName: payload.opponentStatus.displayName } : {})}
           />
           {showAiPacingFallbackControls ? (
@@ -4451,7 +4486,8 @@ export default function Page() {
             hasHiddenContextActions={legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card"}
             cardContextActive={selectedActionContext?.kind === "card"}
             hiddenContextHint={hiddenContextHint}
-            actionCapacity={actionSlotCapacities[activeView.side]}
+            actionCapacities={actionSlotCapacities}
+            {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
                         onAction={submitAction}
@@ -6509,7 +6545,8 @@ function LegalActionsPanel({
   hasHiddenContextActions,
   cardContextActive = false,
   hiddenContextHint = null,
-  actionCapacity,
+  actionCapacities,
+  activeAiSide,
   disabled,
   highlighted = false,
   onAction,
@@ -6526,7 +6563,8 @@ function LegalActionsPanel({
   hasHiddenContextActions: boolean;
   cardContextActive?: boolean;
   hiddenContextHint?: string | null;
-  actionCapacity: number;
+  actionCapacities: Record<Side, number>;
+  activeAiSide?: Side;
   disabled: boolean;
   highlighted?: boolean;
   onAction(action: LegalAction): void;
@@ -6606,16 +6644,18 @@ function LegalActionsPanel({
       </section>
     );
   }
-  const ownTurn = turnSideForView(view) === view.side;
-  const ownActionDisplay = actionSlotDisplay(view.side, view.own.clicks, actionCapacity, ownTurn);
+  const currentTurnSide = turnSideForView(view) ?? view.activeSide;
+  const currentTurnClicks = currentTurnSide === view.side ? view.own.clicks : view.opponent.clicks;
+  const currentTurnCapacity = actionCapacities[currentTurnSide];
+  const currentTurnDisplay = actionSlotDisplay(currentTurnSide, currentTurnClicks, currentTurnCapacity, true);
   return (
     <section className={`section ${highlighted ? "cueHighlight" : ""}`} data-testid="legal-actions">
-      <div className="legalActionsHeader">
-        <h2>Mögliche Aktionen</h2>
-      </div>
-      <div className={`actionAvailability side-${view.side}`} data-testid="action-availability">
-        <span className="actionAvailabilityCount">{`Noch ${ownActionDisplay.available}`}</span>
-        <ActionSlotMeter side={view.side} currentClicks={view.own.clicks} displayCapacity={actionCapacity} active={ownTurn} compact slotsOnly />
+      <div className="turnActionHeader">
+        <h2>{turnActionHeaderLabel(view, currentTurnSide, activeAiSide)}</h2>
+        <div className={`actionAvailability side-${currentTurnSide}`} data-testid="action-availability">
+          <span className="actionAvailabilityCount">{`noch ${currentTurnDisplay.available}`}</span>
+          <ActionSlotMeter side={currentTurnSide} currentClicks={currentTurnClicks} displayCapacity={currentTurnCapacity} active compact slotsOnly />
+        </div>
       </div>
       <div className="actions">
         {primaryActions.map((action) => (
@@ -9627,7 +9667,6 @@ function OpponentPanel({
   view,
   connected,
   displayName,
-  actionCapacity,
   agendaPointsToWin,
   scoreAreaCards,
   scoreAreaOpen,
@@ -9637,7 +9676,6 @@ function OpponentPanel({
   view: PlayerView;
   connected: boolean;
   displayName?: string;
-  actionCapacity: number;
   agendaPointsToWin: number;
   scoreAreaCards: VisibleCard[];
   scoreAreaOpen: boolean;
@@ -9663,7 +9701,6 @@ function OpponentPanel({
         {side === "runner" ? <Stat value={view.opponent.tags} icon={<TagIcon size={14} />} helpText="Tags markieren den Runner. Viele Tags erlauben der Korp stärkere Folgeaktionen gegen den Runner oder seine Ressourcen." /> : null}
         {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
-      <ActionSlotMeter side={side} currentClicks={view.opponent.clicks} displayCapacity={actionCapacity} active={isTurn} compact />
       <p className="meta statusLine">{connected ? "Verbunden" : "Offline"} · {isTurn ? "Am Zug" : "Wartet"}</p>
     </section>
   );
