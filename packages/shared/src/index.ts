@@ -471,6 +471,7 @@ export type AbilityDefinition = {
   cost: { credits: number };
   amount?: number;
   iceSubtype?: string;
+  subroutineTypes?: SubroutineType[];
   subroutineBreakTags?: string[];
   postBreakStealthLoss?: number;
   count?: number;
