@@ -1,7 +1,10 @@
 ---
 jobId: spotcheck-2026-05-15-modifier-agenda-risk
-status: ready_for_implementation
+status: commit_pending
 createdAt: 2026-05-15T19:10:16+01:00
+startedAt: 2026-05-16T12:20:00+02:00
+commitPendingAt: 2026-05-16T12:28:00+02:00
+commitPendingReason: "Fachliche Engine-Härtung ist umgesetzt und gezielter Engine-Lauf ist grün, aber lokaler Git-Commit ist weiterhin durch Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock und die fremde DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git blockiert."
 requiresImplementation: true
 priority: normal
 cards:
@@ -250,3 +253,41 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test -- --runInBand`
 - Gezielter Leakscan in neuen Tests mit `JSON.stringify(publicPayload)` und `getPlayerView(...).opponent`.
 - Replay-Paar pro Karte: Ausgangszustand klonen, Eventlog ab Aktionsbeginn replayen, `hashState` vergleichen.
+
+## Umsetzungsergebnis 2026-05-16
+
+Status: `commit_pending`
+
+Umgesetzt wurde ein fokussierter Engine-Härtungsblock für die Modifier-/Agenda-Risk-Auswahl:
+
+- `Gremlins`, `Preying Mantis`, `Corporate Boon`, `Subsidiary Branch` und `Euromarket Consortium`: Shell-/Oberflächenverträge bleiben legal-action-gated; installierte, gescorte oder gerezzte Quellen erzeugen keine nicht implementierten verdeckten Zusatzaktionen.
+- `MRAM Chip`: Handlimit wird aus aktiver Rig-Hardware recomputed; stale Install-Aktionen werden abgelehnt; Trash-/Zonewechsel entfernt die Projektion aus beiden PlayerViews.
+- `Corporate Coup`: Counter-Aktion wird gegen 0-Counter und Runner-ScoreArea-Drift revalidiert; Erfolg verbraucht genau 1 Power-Counter und gibt 1 Credit.
+- `On-Call Solo Team`: Tag-Drift zwischen LegalAction und `applyAction` wird abgelehnt; Meat-Damage-Payload bleibt redigiert und replay-stabil.
+- `Executive Extraction`: ScoreArea-Bindung auf Korp-ScoreArea ist im Test abgesichert; Runner-ScoreArea-Kopien zählen nicht als Korp-Quelle.
+- `Canis Major`: Future-Encounter-Strength-Bonus wirkt auf das nächste ICE und wird beim Run-Ende sauber abgeräumt.
+
+Aktualisierte Artefakte:
+
+- `packages/engine/src/index.test.ts`
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_MODIFIER_AGENDA_RISK_IMPLEMENTATION.md`
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md`
+- `data/reports/originalset-card-spotcheck-register.json`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
+
+Gezielter Check:
+
+- `corepack pnpm --filter @netgrid/engine test -- --runInBand "Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening"` - grün, 416 Tests.
+
+Pflichtchecks:
+
+- `corepack pnpm --filter @netgrid/engine test` - grün, 416 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 131 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 48 Tests.
+- `corepack pnpm typecheck` - grün.
+
+Commit-Pending-Grund:
+
+- Der lokale Commit ist weiterhin durch `.git/index.lock: Permission denied` blockiert.
+- `.git/index.lock` liegt nicht aktiv vor; Ursache ist die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git`.
+- Removal Condition: fremde DENY-ACL mit administrativer Berechtigung entfernen oder `.git`-ACL geschützt ohne DENY wiederherstellen, danach gestagte Spotcheck-Pakete lokal committen.

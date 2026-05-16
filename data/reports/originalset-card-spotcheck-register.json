@@ -1,6 +1,6 @@
 {
   "schemaVersion": "netgrid.originalset-card-spotcheck-register.v1",
-  "updatedAt": "2026-05-15",
+  "updatedAt": "2026-05-16",
   "selectionPolicy": {
     "defaultExcludeStatuses": [
       "completed"
@@ -12,6 +12,246 @@
     ]
   },
   "rounds": [
+    {
+      "roundId": "2026-05-15-tagged-wall-breaker",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TAGGED_WALL_BREAKER_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-15-tagged-wall-breaker.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und gezielter Engine-Lauf gruen, aber lokaler Git-Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_014_codecracker",
+          "title": "Codecracker",
+          "spotcheckStatus": "completed",
+          "result": "hardened_zero_credit_code_gate_break_filter_wall_negative",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_244_filter",
+          "title": "Filter",
+          "spotcheckStatus": "completed",
+          "result": "hardened_hidden_until_rez_zero_rez_codecracker_break",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_293_netwatch-credit-voucher",
+          "title": "Netwatch Credit Voucher",
+          "spotcheckStatus": "completed",
+          "result": "hardened_tagged_only_gain_one_contract_tag_drift",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_253_laser-wire",
+          "title": "Laser Wire",
+          "spotcheckStatus": "completed",
+          "result": "hardened_damage_etr_wall_path_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_265_rock-is-strong",
+          "title": "Rock Is Strong",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rez_cost_strength_hidden_until_rez",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_302_scorched-earth",
+          "title": "Scorched Earth",
+          "spotcheckStatus": "completed",
+          "result": "hardened_tagged_only_meat_damage_redaction_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_238_data-wall-2-0",
+          "title": "Data Wall 2.0",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rez_cost_strength_source_separation",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_278_wall-of-ice",
+          "title": "Wall of Ice",
+          "spotcheckStatus": "completed",
+          "result": "hardened_multi_net_damage_etr_replay_redaction",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_263_reinforced-wall",
+          "title": "Reinforced Wall",
+          "spotcheckStatus": "completed",
+          "result": "existing_double_etr_index_regression_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_237_data-wall",
+          "title": "Data Wall",
+          "spotcheckStatus": "completed",
+          "result": "hardened_strength_zero_rez_cost_source_separation",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-15-modifier-agenda-risk",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_MODIFIER_AGENDA_RISK_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-15-modifier-agenda-risk.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und gezielter Engine-Lauf gruen, aber lokaler Git-Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_029_gremlins",
+          "title": "Gremlins",
+          "spotcheckStatus": "completed",
+          "result": "hardened_shell_counter_surface_no_unimplemented_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_134_mram-chip",
+          "title": "MRAM Chip",
+          "spotcheckStatus": "completed",
+          "result": "hardened_handlimit_active_rig_recompute_stale_install_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_171_preying-mantis",
+          "title": "Preying Mantis",
+          "spotcheckStatus": "completed",
+          "result": "hardened_shell_prevention_surface_no_unimplemented_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_192_corporate-boon",
+          "title": "Corporate Boon",
+          "spotcheckStatus": "completed",
+          "result": "hardened_scored_shell_agenda_no_unimplemented_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_193_corporate-coup",
+          "title": "Corporate Coup",
+          "spotcheckStatus": "completed",
+          "result": "hardened_counter_action_scorearea_drift_revalidation",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_201_executive-extraction",
+          "title": "Executive Extraction",
+          "spotcheckStatus": "completed",
+          "result": "hardened_corp_scorearea_modifier_source_binding",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "title": "On-Call Solo Team",
+          "spotcheckStatus": "completed",
+          "result": "hardened_tag_drift_damage_redaction_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_218_subsidiary-branch",
+          "title": "Subsidiary Branch",
+          "spotcheckStatus": "completed",
+          "result": "hardened_scored_shell_agenda_no_unimplemented_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_225_canis-major",
+          "title": "Canis Major",
+          "spotcheckStatus": "completed",
+          "result": "hardened_future_encounter_strength_bonus_lifetime_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_322_euromarket-consortium",
+          "title": "Euromarket Consortium",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_shell_asset_removed_source_guard",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-15-trace-prevention-assets",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_PREVENTION_ASSETS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-trace-prevention-assets.md",
+      "jobStatus": "commit_pending",
+      "cards": [
+        {
+          "cardId": "onr_v1_023_evil-twin",
+          "title": "Evil Twin",
+          "spotcheckStatus": "completed",
+          "result": "hardened_core_damage_prevention_turn_limit_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_086_forged-activation-orders",
+          "title": "Forged Activation Orders",
+          "spotcheckStatus": "completed",
+          "result": "hardened_public_ice_choice_stale_target_drift_redaction",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_137_parraline-5750",
+          "title": "Parraline 5750",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_install_cost_mu_recurring_deck_unique",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_149_access-to-arasaka",
+          "title": "Access to Arasaka",
+          "spotcheckStatus": "completed",
+          "result": "hardened_single_base_link_trace_source_removal",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "title": "Wilson, Weeflerunner Apprentice",
+          "spotcheckStatus": "completed",
+          "result": "hardened_meat_prevention_once_per_turn_stale_choice",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "title": "Black Ice Quality Assurance",
+          "spotcheckStatus": "completed",
+          "result": "implementation_fixed_scored_only_black_ice_modifier",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_243_fetch-4-0-1",
+          "title": "Fetch 4.0.1",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezcost_zero_trace_three_tag_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_264_rex",
+          "title": "Rex",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezcost_four_trace_three_tag_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_309_bbs-whispering-campaign",
+          "title": "BBS Whispering Campaign",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_only_economy_removed_source_redaction",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_333_omniscience-foundation",
+          "title": "Omniscience Foundation",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_shell_asset_no_hidden_ability",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ],
+      "commitPendingReason": "Pflichtchecks gruen, aber lokaler Git-Commit scheitert an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock; fremde direkte DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git konnte ohne erhoehte Berechtigung nicht entfernt werden."
+    },
     {
       "roundId": "2026-05-15-agenda-run-recurring",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",

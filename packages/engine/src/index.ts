@@ -322,6 +322,8 @@ const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
+const BLACK_ICE_QUALITY_ASSURANCE_ID =
+  "onr_v1_191_black-ice-quality-assurance";
 const BROKER_ID = "onr_v1_154_broker";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -4867,6 +4869,11 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
     if (
       agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
       cardHasSubtype(iceDefinition, "wall")
+    )
+      bonus += 1;
+    if (
+      agendaDefinition.id === BLACK_ICE_QUALITY_ASSURANCE_ID &&
+      cardHasSubtype(iceDefinition, "black_ice")
     )
       bonus += 1;
   }

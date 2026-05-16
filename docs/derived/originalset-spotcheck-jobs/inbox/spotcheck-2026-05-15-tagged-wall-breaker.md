@@ -1,7 +1,10 @@
 ---
 jobId: spotcheck-2026-05-15-tagged-wall-breaker
-status: ready_for_implementation
+status: commit_pending
 createdAt: 2026-05-15T20:10:00+01:00
+startedAt: 2026-05-16T12:31:00+02:00
+commitPendingAt: 2026-05-16T12:42:00+02:00
+commitPendingReason: "Fachliche Engine-Härtung ist umgesetzt und gezielter Engine-Lauf ist grün, aber lokaler Git-Commit ist weiterhin durch Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock und die fremde DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git blockiert."
 requiresImplementation: true
 priority: normal
 cards:
@@ -384,3 +387,40 @@ Akzeptanzkriterien
 - Fokus-Grep vor Registerupdate: `rg "onr_v1_(014_codecracker|244_filter|293_netwatch-credit-voucher|253_laser-wire|265_rock-is-strong|302_scorched-earth|238_data-wall-2-0|278_wall-of-ice|263_reinforced-wall|237_data-wall)" docs/derived/originalset-spotcheck-jobs data/reports docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md`
 - Hidden-Info-Leakscan in den neuen Tests: Runner-View vor Rez, Korp-HQ bei Operationen, PublicEvents, Reconnect-Payload und Replay-Eventlog.
 - Replay-/StateHash-Prüfung für Codecracker-Pump/Break, Laser Wire Damage+ETR, Wall of Ice Mehrfachdamage und Scorched Earth Short-Grip-Flatline.
+
+## Umsetzungsergebnis 2026-05-16
+
+Status: `commit_pending`
+
+Umgesetzt wurde ein fokussierter Engine-Härtungsblock für Tagged-/Wall-/Breaker-Risiken:
+
+- `Codecracker` und `Filter`: Filter bleibt vor Rez in Server-Views verdeckt; Rez kostet 0 Credits; Codecracker bricht Filter-ETR mit expliziter 0-Credit-LegalAction ohne Credit-Drift; Codecracker erhält keine Break-Aktion gegen `Data Wall`.
+- `Netwatch Credit Voucher`: Der aktuelle führende Engine-/Shared-/Catalog-Vertrag bleibt `Give Runner 1 tag and gain 1 credit`; der Snapshot-Konflikt mit `gain 4` ist dokumentiert, aber nicht still korrigiert.
+- `Netwatch Credit Voucher` und `Scorched Earth`: Tagged-only LegalActions werden gegen No-tag und Tag-Drift revalidiert; Scorched-Earth-Damage bleibt in PublicPayloads redigiert und replay-stabil.
+- `Data Wall`, `Data Wall 2.0` und `Rock Is Strong`: Rez-Kosten und Stärke bleiben nach Rez getrennt korrekt; vor Rez bleiben Titel und Werte in Runner-Server-Views verborgen.
+- `Wall of Ice`: Mehrfachdamage-Reihenfolge und ETR-Run-Ende bleiben replay-/StateHash-stabil und ohne private Grip-Leaks.
+
+Aktualisierte Artefakte:
+
+- `packages/engine/src/index.test.ts`
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TAGGED_WALL_BREAKER_IMPLEMENTATION.md`
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md`
+- `data/reports/originalset-card-spotcheck-register.json`
+- `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
+
+Gezielter Check:
+
+- `corepack pnpm --filter @netgrid/engine test -- --runInBand "Originalset Spotcheck 2026-05-15 Tagged/Wall/Breaker hardening"` - grün, 419 Tests.
+
+Pflichtchecks:
+
+- `corepack pnpm --filter @netgrid/engine test` - grün, 419 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 131 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 48 Tests.
+- `corepack pnpm typecheck` - grün.
+
+Commit-Pending-Grund:
+
+- Der lokale Commit ist weiterhin durch `.git/index.lock: Permission denied` blockiert.
+- `.git/index.lock` liegt nicht aktiv vor; Ursache ist die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git`.
+- Removal Condition: fremde DENY-ACL mit administrativer Berechtigung entfernen oder `.git`-ACL geschützt ohne DENY wiederherstellen, danach gestagte Spotcheck-Pakete lokal committen.

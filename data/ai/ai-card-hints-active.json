@@ -10119,18 +10119,26 @@
       "roles": [
         "runner",
         "hardware",
+        "deck",
+        "recurring_credit",
         "per_card_longtail"
       ],
       "planRoles": [
+        "runner_deck_memory_recurring_credit",
         "runner_install_hardware"
       ],
       "requiredMechanics": [
+        "deck_unique",
+        "memory_mu_modifier",
+        "recurring_icebreaker_credit",
         "per_card_longtail_resolver_gate",
         "per_card_longtail_resolver_gate; install_hardware_memory_surface",
         "install_hardware_memory_surface"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "memoryLimitBonus": 1,
+        "perCardLongtailPriority": 2,
+        "recurringCredits": 1
       },
       "riskTags": [
         "legal_actions_only",

@@ -4,6 +4,69 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-tagged-wall-breaker
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TAGGED_WALL_BREAKER_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und gezielter Engine-Lauf sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Codecracker | `onr_v1_014_codecracker` | 0-Credit-Break bleibt encounter- und subtype-gebunden; Wall-Negativfall scheitert | Filter-/Wall-Break-Test ergänzt |
+| Filter | `onr_v1_244_filter` | Hidden-until-rez und RezCost 0 bleiben payload- und replay-stabil | 0-Rez-/Codecracker-Test ergänzt |
+| Netwatch Credit Voucher | `onr_v1_293_netwatch-credit-voucher` | Führender Vertrag bleibt `gain 1`; Tag-Drift wird revalidiert | Quellenentscheidung und Tagged-Test ergänzt |
+| Laser Wire | `onr_v1_253_laser-wire` | Damage/ETR-Wall-Pfad bleibt getrennt und redigiert | Durch Wall-/Damage-Regression abgesichert |
+| Rock Is Strong | `onr_v1_265_rock-is-strong` | RezCost 6, Stärke 5 und Hidden-until-rez bleiben stabil | Rez-/Stärke-Test ergänzt |
+| Scorched Earth | `onr_v1_302_scorched-earth` | Tagged-only Meat-Damage bleibt redigiert und replay-stabil | Tag-Drift-/Damage-Test ergänzt |
+| Data Wall 2.0 | `onr_v1_238_data-wall-2-0` | RezCost 2, Stärke 1 und Source-Trennung bleiben stabil | Data-Wall-Paartest ergänzt |
+| Wall of Ice | `onr_v1_278_wall-of-ice` | Zwei Net-Damage-Subroutinen plus ETR bleiben deterministic und redigiert | Mehrfachdamage-/Replay-Test ergänzt |
+| Reinforced Wall | `onr_v1_263_reinforced-wall` | Doppel-ETR-Pfad bleibt indexstabil | Bestehende V1.1.2K-Abdeckung bestätigt |
+| Data Wall | `onr_v1_237_data-wall` | RezCost 1 und Stärke 0 bleiben gültige öffentliche Werte nach Rez | Data-Wall-Paartest ergänzt |
+
+## Runde 2026-05-15-modifier-agenda-risk
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_MODIFIER_AGENDA_RISK_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und gezielter Engine-Lauf sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Gremlins | `onr_v1_029_gremlins` | Shell-/Counter-Oberfläche bleibt legal-action-gated und leakt keine privaten Zonen | No-unimplemented-action-Guard ergänzt |
+| MRAM Chip | `onr_v1_134_mram-chip` | Handlimit-Projektion wird aus aktiver Rig-Hardware recomputed und nach Zonewechsel entfernt | Stale-Install-, PlayerView- und Replay-Test ergänzt |
+| Preying Mantis | `onr_v1_171_preying-mantis` | Shell-/Prevention-Oberfläche bleibt legal-action-gated ohne ungeprüfte Zusatzaktion | No-unimplemented-action-Guard ergänzt |
+| Corporate Boon | `onr_v1_192_corporate-boon` | Gescorte Shell-Agenda erzeugt keine nicht implementierte Action-Economy-Aktion | ScoreArea-Shell-Guard ergänzt |
+| Corporate Coup | `onr_v1_193_corporate-coup` | Counter-Aktion bleibt source-bound und scheitert bei 0-Counter oder Runner-ScoreArea-Drift | Counter-/Drift-Revalidation ergänzt |
+| Executive Extraction | `onr_v1_201_executive-extraction` | Modifierquelle bleibt an Korp-ScoreArea gebunden | ScoreArea-Drift-Test ergänzt |
+| On-Call Solo Team | `onr_v1_208_on-call-solo-team` | Tagged-only Meat-Damage-Aktion revalidiert Tag-Drift und bleibt redigiert | Tag-Drift-, Payload- und Replay-Test ergänzt |
+| Subsidiary Branch | `onr_v1_218_subsidiary-branch` | Gescorte Shell-Agenda erzeugt keine nicht implementierte Action-Economy-Aktion | ScoreArea-Shell-Guard ergänzt |
+| Canis Major | `onr_v1_225_canis-major` | Future-Encounter-Strength-Bonus wirkt runlokal auf das nächste ICE und wird am Run-Ende abgeräumt | Lifetime-/Replay-Test ergänzt |
+| Euromarket Consortium | `onr_v1_322_euromarket-consortium` | Rezzed Shell-Asset erzeugt keine nicht implementierte globale Aktion | Rezzed-/Removed-source-Guard ergänzt |
+
+## Runde 2026-05-15-trace-prevention-assets
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_PREVENTION_ASSETS_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung, Härtungen und Pflichtchecks sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Evil Twin | `onr_v1_023_evil-twin` | Prevention-Pfad verhindert Core-Damage instanz- und turnbegrenzt ohne Hidden-Info-Leak | Damage-Prevention-, PublicPayload- und Replay-Härtung ergänzt |
+| Forged Activation Orders | `onr_v1_086_forged-activation-orders` | Öffentliche ICE-Zielwahl bleibt redigiert; stale Ziel-Drift vor der Korp-Choice wird abgelehnt | Multi-ICE-, Drift- und Trash-Branch-Test ergänzt |
+| Parraline 5750 | `onr_v1_137_parraline-5750` | Nacharbeit umgesetzt: Installkosten 5, +1 MU, 1 Icebreaker-Run-Credit und Deck-Einzigartigkeit | Shared-Vertrag, AI-Hint, Contract-Matrix und Engine-Test korrigiert |
+| Access to Arasaka | `onr_v1_149_access-to-arasaka` | Installierter Base-Link wirkt genau im Trace und fällt nach Entfernen sofort weg | Fetch/Rex-Trace-Regression ergänzt |
+| Wilson, Weeflerunner Apprentice | `onr_v1_187_wilson-weeflerunner-apprentice` | Meat-Prevention bleibt auf 1 pro Turn und installierte Quelle begrenzt | Stale-Choice-, Turn-Limit- und PublicPayload-Test ergänzt |
+| Black Ice Quality Assurance | `onr_v1_191_black-ice-quality-assurance` | Nacharbeit umgesetzt: gescorte Agenda bufft nur Black ICE; Runner-ScoreArea aktiviert keinen Corp-Modifier | Scored-only-Modifier-Test ergänzt |
+| Fetch 4.0.1 | `onr_v1_243_fetch-4-0-1` | RezCost 0 und Trace-3-Tag-Pfad bleiben LegalAction- und replay-stabil | Trace-/Payload-Test mit Access to Arasaka ergänzt |
+| Rex | `onr_v1_264_rex` | RezCost 4 und Trace-3-Tag-Pfad bleiben cardId-spezifisch stabil | Vergleichs-Trace zu Fetch ergänzt |
+| BBS Whispering Campaign | `onr_v1_309_bbs-whispering-campaign` | Rezzed-only Economy-Aktion bleibt source-bound; entfernte Quelle wird abgelehnt | Removed-source- und Redaction-Test ergänzt |
+| Omniscience Foundation | `onr_v1_333_omniscience-foundation` | Rezzed Shell-Asset erzeugt keine nicht implementierte verdeckte Fähigkeit | No-op-/LegalAction-Guard ergänzt |
+
 ## Runde 2026-05-15-agenda-run-recurring
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

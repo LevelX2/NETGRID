@@ -4845,12 +4845,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 5,
+    memoryLimitBonus: 1,
+    recurringCredits: 1,
     rulesText:
-      "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "Deck. +1 MU. 1 recurring credit for using icebreakers during runs. You may have only one deck installed.",
     mechanics: [
       "install_hardware",
       "memory",
+      "recurring_credit",
+      "deck_unique",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],

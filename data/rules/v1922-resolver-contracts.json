@@ -464,11 +464,11 @@
       "cluster": "runner_hardware",
       "side": "runner",
       "type": "hardware-deck",
-      "contractStatus": "partial_install_contract_only",
-      "confirmedLocalFacts": ["install_hardware_legal_action", "install_cost_0_wip_definition", "hardware_deck_surface", "memory_mu_modifier_surface", "visibility_replay_statehash_install_covered"],
-      "safeCurrentCoverage": ["runtime_definition_guard", "install_hardware_legal_action", "wrong_side_revalidation", "stale_state_revalidation", "public_payload_visibility", "replay_statehash"],
-      "missingInformation": ["per_card_effect_contract", "deck_uniqueness_contract", "memory_bonus_amount_or_modifier_rule", "hosted_or_recurring_credit_details", "link_or_extra_run_trigger_if_any", "effect_public_event_redaction", "ai_fallback"],
-      "removalCondition": "Confirm the full hardware deck effect beyond base installation."
+      "contractStatus": "implemented_spotcheck_followup",
+      "confirmedLocalFacts": ["install_hardware_legal_action", "install_cost_5", "hardware_deck_surface", "memory_limit_bonus_1", "recurring_icebreaker_credit_1", "deck_uniqueness_replaces_old_deck", "visibility_replay_statehash_install_covered"],
+      "safeCurrentCoverage": ["runtime_definition_guard", "install_hardware_legal_action", "wrong_side_revalidation", "stale_state_revalidation", "public_payload_visibility", "replay_statehash", "deck_replacement", "runner_run_icebreaker_recurring_credit"],
+      "missingInformation": ["final_release_matrix_review_after_spotcheck_followup"],
+      "removalCondition": "Spotcheck follow-up 2026-05-15 implemented and covered by focused engine test; keep the historical V1.9.22 contract matrix under no-new-promotion guard."
     },
     {
       "cardId": "onr_v1_138_pk-6089a",
