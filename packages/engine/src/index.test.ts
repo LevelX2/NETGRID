@@ -1224,7 +1224,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     state.corp.clicks = 10;
     state.corp.maxHandSize = 100;
     const coupId = scoreCorpAgendaForTest(state, "onr_v1_193_corporate-coup");
-    setCardCounterForTest(state, coupId, "power", 1);
+    setCardCounterForTest(state, coupId, "power", 3);
     const coupAction = mustAction(
       state,
       "corp",
@@ -1233,7 +1233,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         action.payload?.cardId === coupId,
     );
     const noCounter = structuredClone(state);
-    setCardCounterForTest(noCounter, coupId, "power", 0);
+    setCardCounterForTest(noCounter, coupId, "power", 2);
     const noCounterResult = applyAction(noCounter, {
       matchId: noCounter.matchId,
       side: "corp",
@@ -1261,12 +1261,12 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     expect(stolenResult.ok).toBe(false);
     const creditsBefore = state.corp.credits;
     state = apply(state, "corp", (action) => action.actionId === coupAction.actionId);
-    expect(state.corp.credits).toBe(creditsBefore + 1);
+    expect(state.corp.credits).toBe(creditsBefore + 3);
     expect(cardCounterAmount(state, coupId, "power")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       agendaAbility: "corporate_coup",
-      spentPowerCounters: 1,
-      gainedCredits: 1,
+      spentPowerCounters: 3,
+      gainedCredits: 3,
     });
 
     const onCallId = scoreCorpAgendaForTest(
@@ -8422,7 +8422,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     );
     expect(corporateCoupId).toBeDefined();
     if (corporateCoupId)
-      expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(5);
+      expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(15);
 
     moveCorpCardToHq(state, "onr_v1_209_political-coup");
     state = apply(
@@ -8466,9 +8466,9 @@ describe("V1.8.1 Mechanikpaket H", () => {
         action.type === "gain_credit" &&
         action.payload?.agendaAbility === "corporate_coup",
     );
-    expect(state.corp.credits).toBe(creditsBefore + 1);
+    expect(state.corp.credits).toBe(creditsBefore + 3);
     if (corporateCoupId)
-      expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(4);
+      expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(12);
     state = apply(
       state,
       "corp",
@@ -8476,7 +8476,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
         action.type === "gain_credit" &&
         action.payload?.agendaAbility === "political_coup",
     );
-    expect(state.corp.credits).toBe(creditsBefore + 4);
+    expect(state.corp.credits).toBe(creditsBefore + 6);
     if (politicalCoupId)
       expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(9);
   });

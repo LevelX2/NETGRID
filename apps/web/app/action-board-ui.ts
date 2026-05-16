@@ -184,7 +184,7 @@ export function actionButtonLabel(action: LegalAction): string {
 export function contextualCardActionLabel(action: LegalAction): string {
   switch (action.type) {
     case "gain_credit":
-      return installedCardAbilityContextLabel(action) ?? actionButtonLabel(action);
+      return scoredAgendaAbilityContextLabel(action) ?? installedCardAbilityContextLabel(action) ?? actionButtonLabel(action);
     case "install_card":
       return installContextLabel(action);
     case "play_event":
@@ -249,6 +249,12 @@ function installedCardAbilityContextLabel(action: LegalAction): string | null {
     default:
       return stripActionSourcePrefix(action.label);
   }
+}
+
+function scoredAgendaAbilityContextLabel(action: LegalAction): string | null {
+  if (action.payload?.agendaAbility !== "corporate_coup" && action.payload?.agendaAbility !== "political_coup") return null;
+  const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 3);
+  return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
 }
 
 function stripActionSourcePrefix(label: string): string {

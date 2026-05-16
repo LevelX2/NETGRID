@@ -1816,7 +1816,7 @@ const ONR_V1_8_1_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_173_restrictive-net-zoning":
     "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
   "onr_v1_193_corporate-coup":
-    "Put 5 from the bank on Corporate Coup when you score it.\n[A]: Take 1 from Corporate Coup, if it has any bits.",
+    "Put 15 from the bank on Corporate Coup when you score it.\n[A]: Take 3 from Corporate Coup, if it has any bits.",
   "onr_v1_209_political-coup":
     "Put 12 from the bank on Political Coup when you score it.\n[A]: Take 3 from Political Coup, if it has any bits.",
   "onr_v1_222_ball-and-chain":

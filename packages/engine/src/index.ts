@@ -3714,12 +3714,12 @@ function corpMainActions(state: GameState): LegalAction[] {
       definition.id !== "onr_v1_209_political-coup"
     )
       continue;
-    if (cardCounter(state, agendaId, "power") <= 0) continue;
     const agendaAbility =
       definition.id === "onr_v1_193_corporate-coup"
         ? "corporate_coup"
         : "political_coup";
-    const removePowerCounterAmount = agendaAbility === "political_coup" ? 3 : 1;
+    const removePowerCounterAmount = 3;
+    if (cardCounter(state, agendaId, "power") < removePowerCounterAmount) continue;
     actions.push(
       action(
         state,
@@ -7707,8 +7707,7 @@ function performAction(
         const removeAmount = Number(
           legalAction.payload?.removePowerCounterAmount ?? 0,
         );
-        const expectedRemoveAmount =
-          definition.id === "onr_v1_193_corporate-coup" ? 1 : 3;
+        const expectedRemoveAmount = 3;
         if (
           !Number.isInteger(removeAmount) ||
           removeAmount !== expectedRemoveAmount
@@ -7720,8 +7719,7 @@ function performAction(
           throw new Error("Auf der Coup-Agenda sind nicht genug Counter.");
         spendCardCounter(state, sourceCardId, "power", removeAmount);
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        const expectedGainAmount =
-          definition.id === "onr_v1_193_corporate-coup" ? 1 : 3;
+        const expectedGainAmount = 3;
         if (!Number.isInteger(gainAmount) || gainAmount !== expectedGainAmount)
           throw new Error(
             "Coup-Agenda gewaehrt in diesem Scope die falsche Anzahl Credits.",
@@ -15154,7 +15152,7 @@ function scoreAgenda(
   ) {
     const counterAmount =
       definition.id === "onr_v1_193_corporate-coup"
-        ? 5
+        ? 15
         : definition.id === "onr_v1_209_political-coup"
           ? 12
           : 4;

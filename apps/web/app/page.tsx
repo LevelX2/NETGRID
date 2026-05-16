@@ -150,7 +150,7 @@ import {
   type CatalogTypeFilterState
 } from "./catalog-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
-import { scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
+import { scoredAgendaCreditCounterSource, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
   loadRecentSession,
@@ -4570,6 +4570,7 @@ export default function Page() {
         position={scoreAreaOverlayPositions.corp}
         cardDisplayMode={cardDisplayMode}
         enrichCard={enrichCard}
+        cardActionsFor={cardActionsFor}
         actionDisabled={Boolean(payload.winner) || connection !== "online"}
         selectedContext={selectedActionContext}
         onAction={submitAction}
@@ -4589,6 +4590,7 @@ export default function Page() {
         position={scoreAreaOverlayPositions.runner}
         cardDisplayMode={cardDisplayMode}
         enrichCard={enrichCard}
+        cardActionsFor={cardActionsFor}
         actionDisabled={Boolean(payload.winner) || connection !== "online"}
         selectedContext={selectedActionContext}
         onAction={submitAction}
@@ -6727,6 +6729,7 @@ function ScoredAgendaOverlay({
   position,
   cardDisplayMode,
   enrichCard,
+  cardActionsFor,
   actionDisabled,
   selectedContext,
   onAction,
@@ -6743,6 +6746,7 @@ function ScoredAgendaOverlay({
   position: RunOverlayPositionPreference;
   cardDisplayMode: CardDisplayMode;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
+  cardActionsFor(card: VisibleCard): LegalAction[];
   actionDisabled: boolean;
   selectedContext: ActionContext | null;
   onAction(action: LegalAction): void;
@@ -6846,7 +6850,7 @@ function ScoredAgendaOverlay({
                 displayMode={cardDisplayMode}
                 showAdvancementCounters={false}
                 showScoreStateBadges
-                actions={[]}
+                actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
                 selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
                 onAction={onAction}
@@ -10618,6 +10622,8 @@ function CardView({
   const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
+  const scoredAgendaCreditSource = showScoreStateBadges ? scoredAgendaCreditCounterSource(card.definitionId) : null;
+  const scoredAgendaCredits = scoredAgendaCreditSource ? counterAmount(card, "power") : 0;
   const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
   const recurringCredits = preview ? 0 : recurringCreditAmount(card);
   const shellCounters = preview ? 0 : shellCounterAmount(card);
@@ -10967,6 +10973,7 @@ function CardView({
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {brokerStoredCredits > 0 && storedCreditSource ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} sourceLabel={storedCreditSource} /> : null}
         {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
+        {scoredAgendaCredits > 0 && scoredAgendaCreditSource ? <ScoredAgendaCreditsBadge amount={scoredAgendaCredits} sourceLabel={scoredAgendaCreditSource} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
         {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
@@ -11052,17 +11059,6 @@ function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side
 
 function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
-  const coupCreditAmount = coupAgendaCreditAmount(card.definitionId);
-  if (coupCreditAmount !== null) {
-    const creditsOnCard = counterAmount(card, "power");
-    lines.push({
-      key: "coup-credits",
-      value: `${creditsOnCard} ${creditLabel(creditsOnCard)}`,
-      label: creditsOnCard > 0 ? `1 Aktion: ${coupCreditAmount} ${creditLabel(coupCreditAmount)} nehmen` : "Coup-Credits erschöpft",
-      tone: creditsOnCard > 0 ? "credit" : "depleted"
-    });
-  }
-
   const bonusAgendaPoints = counterAmount(card, "agenda");
   if (bonusAgendaPoints > 0) {
     const totalAgendaPoints = (card.agendaPoints ?? 0) + bonusAgendaPoints;
@@ -11081,15 +11077,6 @@ function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAge
 
 function scoreCardStateBadges(card: DisplayVisibleCard): ScoredAgendaStateLine[] {
   const badges: ScoredAgendaStateLine[] = [];
-  if (coupAgendaCreditAmount(card.definitionId) !== null) {
-    const creditsOnCard = counterAmount(card, "power");
-    badges.push({
-      key: "coup-credits-badge",
-      value: `${creditsOnCard} ${creditLabel(creditsOnCard)}`,
-      label: "Credits auf der Agenda",
-      tone: creditsOnCard > 0 ? "credit" : "depleted"
-    });
-  }
   const bonusAgendaPoints = counterAmount(card, "agenda");
   if (bonusAgendaPoints > 0) {
     badges.push({
@@ -11112,12 +11099,6 @@ function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
       ))}
     </span>
   );
-}
-
-function coupAgendaCreditAmount(definitionId: string | undefined): number | null {
-  if (definitionId === "onr_v1_193_corporate-coup") return 1;
-  if (definitionId === "onr_v1_209_political-coup") return 3;
-  return null;
 }
 
 function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power" | "shell" | "recurring_credit"): number {
@@ -11216,6 +11197,17 @@ function RecurringCreditBadge({ amount }: { amount: number }) {
       ariaLabel={`${amount} wiederkehrende ${creditLabel(amount)}`}
       className="recurringCreditBadge"
       testId="recurring-credit-badge"
+    />
+  );
+}
+
+function ScoredAgendaCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
+  return (
+    <CardCreditCounter
+      amount={amount}
+      ariaLabel={`${amount} ${creditLabel(amount)} auf ${sourceLabel}`}
+      className="scoredAgendaCreditsBadge"
+      testId="scored-agenda-credits-badge"
     />
   );
 }

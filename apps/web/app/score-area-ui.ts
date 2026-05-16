@@ -32,3 +32,9 @@ export function scoredAgendaEffectLineForScoreArea(definitionId: string | undefi
       return null;
   }
 }
+
+export function scoredAgendaCreditCounterSource(definitionId: string | undefined): string | null {
+  if (definitionId === "onr_v1_193_corporate-coup") return "Corporate Coup";
+  if (definitionId === "onr_v1_209_political-coup") return "Political Coup";
+  return null;
+}

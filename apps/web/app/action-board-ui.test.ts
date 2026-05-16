@@ -157,6 +157,18 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(contextualCardActionLabel(bloodCat)).toBe("Trace 5 starten");
   });
 
+  it("uses compact labels for scored agenda credit actions in card context", () => {
+    const corporateCoup = legalAction("corp", "gain_credit", "coup_1", "Corporate Coup: 3 Credits aus Coup-Counter", {
+      cardId: "coup_1",
+      agendaAbility: "corporate_coup",
+      gainCreditsAmount: 3,
+      removePowerCounterAmount: 3
+    });
+
+    expect(actionButtonLabel(corporateCoup)).toBe("Corporate Coup: 3 Credits aus Coup-Counter");
+    expect(contextualCardActionLabel(corporateCoup)).toBe("3 Credits nehmen");
+  });
+
   it("labels encounter breaker actions against the current ICE", () => {
     const encounteredIce = card("ice_2", "Data Wall", "ice");
     const running = view("runner", {
