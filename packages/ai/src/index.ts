@@ -1668,7 +1668,8 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       }
       break;
     case "start_run":
-      score = scoreRunTarget(action, features, profile, input.difficulty);
+      const staleRndRepeatPenalty = staleKnownRndRepeatRunPenalty(input, action);
+      score = scoreRunTarget(action, features, profile, input.difficulty, staleRndRepeatPenalty);
       reasonCode = runnerRunReasonCode(action, features);
       explanation =
         reasonCode === "runner.run.blocked_by_rezzed_ice"
@@ -1676,7 +1677,12 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
           : reasonCode === "runner.run.empty_remote_low_value"
             ? "Der Außenserver hat kein sichtbares Root-Ziel; ein Run ist derzeit wenig wertvoll."
           : "Der Serverdruck ist anhand sichtbarer Lage vertretbar.";
-      evidence.push(`server:${String(action.payload?.serverId ?? "unknown")}`, `known_pressure:${features.knownServerPressure}`, ...runTargetEvidence(action, features));
+      evidence.push(
+        `server:${String(action.payload?.serverId ?? "unknown")}`,
+        `known_pressure:${features.knownServerPressure}`,
+        ...runTargetEvidence(action, features),
+        ...(staleRndRepeatPenalty > 0 ? [`known_stale_rnd_repeat_penalty:${staleRndRepeatPenalty}`] : [])
+      );
       break;
     case "gain_credit":
       score = input.difficulty === "easy" ? 560 : features.credits < 4 ? 540 : 380;
@@ -1913,7 +1919,7 @@ function scoreRunnerEvent(roles: string[], features: AiFeatures, profile: Record
   return score;
 }
 
-function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Record<string, number>, difficulty: AiDifficulty): number {
+function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Record<string, number>, difficulty: AiDifficulty, staleRndRepeatPenalty = 0): number {
   const serverId = String(action.payload?.serverId ?? "");
   const server = features.serverFeaturesById.get(serverId);
   let score = difficulty === "easy" ? 330 : 560 + (profile.run ?? 1) * 55;
@@ -1927,7 +1933,15 @@ function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Reco
   if (features.blockedRunServers.has(serverId)) score -= 430;
   if (features.credits < 3) score -= 140;
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
+  score -= staleRndRepeatPenalty;
   return score;
+}
+
+function staleKnownRndRepeatRunPenalty(input: AiDecisionInput, action: LegalAction): number {
+  if (input.side !== "runner" || action.type !== "start_run" || action.payload?.serverId !== "rd") return 0;
+  const freshness = reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
+  // Public-event belief marks this only after Runner already accessed R&D and no visible draw, shuffle, reorder, swap, steal, or trash changed the top card.
+  return freshness?.freshness === "stale_known_same_top" ? 420 : 0;
 }
 
 function runnerRunReasonCode(action: LegalAction, features: AiFeatures): string {

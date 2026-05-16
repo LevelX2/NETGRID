@@ -1,7 +1,7 @@
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
 import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
-import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory } from "./belief-state";
+import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory, type RndTopFreshnessMemory } from "./belief-state";
 import { assessKnownRezzedIcePath, serverIdFromEvent } from "./visible-run-analysis";
 
 export type RunnerPlanKind =
@@ -462,12 +462,7 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
       evidence
     };
   }
-  const staleRndPenalty =
-    target === "rd" && (candidate.kind === "pressure_rnd" || candidate.kind === "safe_probe_run") && freshness?.freshness === "stale_known_same_top"
-      ? candidate.kind === "pressure_rnd"
-        ? 420
-        : 220
-      : 0;
+  const staleRndPenalty = staleKnownRndPlanPenalty(candidate, target, freshness);
   const lowValueKnownHq = isKnownLowValueHqHand(input, target, hqHandMemory);
   const staleHqPenalty =
     target === "hq" && (candidate.kind === "pressure_hq" || candidate.kind === "safe_probe_run") && lowValueKnownHq ? (candidate.kind === "pressure_hq" ? 430 : 230) : 0;
@@ -497,6 +492,13 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
     reasons,
     evidence
   };
+}
+
+function staleKnownRndPlanPenalty(candidate: RunnerPlanCandidate, target: string | undefined, freshness: RndTopFreshnessMemory | undefined): number {
+  if (target !== "rd" || (candidate.kind !== "pressure_rnd" && candidate.kind !== "safe_probe_run") || freshness?.freshness !== "stale_known_same_top") return 0;
+  // This is a preference penalty, not a legality gate: the Runner has side-safe public evidence that the same R&D top card is still known,
+  // so ordinary economy/draw plans should beat another identical access unless another evaluator contributes a concrete advantage.
+  return candidate.kind === "pressure_rnd" ? 540 : 260;
 }
 
 function recentCentralPressurePenalty(input: AiDecisionInput, candidate: RunnerPlanCandidate, target: string | undefined): number {

@@ -4205,15 +4205,22 @@ describe("V1.4.2 belief state and opponent model", () => {
     if (!rdRun || !gainCredit)
       throw new Error("Missing stale R&D or gain_credit action");
 
-    const decision = chooseRunnerAction({
+    const staleDecisionInput = {
       ...input,
       legalActions: [rdRun, gainCredit],
-    });
+    };
+    const decision = chooseRunnerAction(staleDecisionInput);
     const selected = input.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
+    const baselineDecision = chooseRunnerBaselineAction(staleDecisionInput);
+    const baselineSelected = input.legalActions.find(
+      (action) => action.actionId === baselineDecision.actionId,
+    );
     expect(selected?.type).toBe("gain_credit");
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(baselineSelected?.type).toBe("gain_credit");
+    expect(baselineDecision.reasonCode).toBe("runner.economy.basic_credit");
   });
 
   it("prefers economy over repeat HQ runs when the full HQ hand is known low-value", () => {
