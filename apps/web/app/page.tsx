@@ -7060,9 +7060,12 @@ function CardChoicePanel({
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
   const [selected, setSelected] = useState<string[]>([]);
+  const [showOnlySelectable, setShowOnlySelectable] = useState(false);
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
-  const rows = cardChoiceRows(choice.options);
+  const hasDisplayOnlyOptions = choice.options.some((option) => option.selectable === false);
+  const visibleOptions = showOnlySelectable ? choice.options.filter(cardChoiceOptionSelectable) : choice.options;
+  const rows = cardChoiceRows(visibleOptions);
   const selectedOptions = selected
     .map((optionId) => choice.options.find((option) => option.id === optionId))
     .filter((option): option is VisibleChoiceOption => Boolean(option));
@@ -7074,9 +7077,12 @@ function CardChoicePanel({
 
   useEffect(() => {
     setSelected([]);
+    setShowOnlySelectable(false);
   }, [choice.choiceId]);
 
   const toggleOption = (optionId: string) => {
+    const option = choice.options.find((candidate) => candidate.id === optionId);
+    if (!option || !cardChoiceOptionSelectable(option)) return;
     setSelected((current) => {
       if (current.includes(optionId)) return current.filter((id) => id !== optionId);
       if (current.length >= maxSelections) return singleSelection ? [optionId] : current;
@@ -7095,33 +7101,46 @@ function CardChoicePanel({
             </h2>
             {prompt && prompt !== title ? <p className="meta">{prompt}</p> : null}
           </div>
-          <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>
+          <div className="cardChoiceHeaderControls">
+            {hasDisplayOnlyOptions ? (
+              <div className="cardChoiceViewToggle" aria-label="Kartenanzeige">
+                <button className={!showOnlySelectable ? "active" : ""} onClick={() => setShowOnlySelectable(false)} type="button" aria-pressed={!showOnlySelectable}>
+                  Alle
+                </button>
+                <button className={showOnlySelectable ? "active" : ""} onClick={() => setShowOnlySelectable(true)} type="button" aria-pressed={showOnlySelectable}>
+                  Auswählbar
+                </button>
+              </div>
+            ) : null}
+            <span className="cardChoiceCounter">{choiceSelectionRangeLabel(minSelections, maxSelections)}</span>
+          </div>
         </header>
         <div className="cardChoiceRows">
           {rows.map((row, rowIndex) => (
             <div className="cardChoiceOverlapRow" key={`choice-row-${rowIndex}`}>
               {row.map((option) => {
                 const active = selected.includes(option.id);
+                const selectable = cardChoiceOptionSelectable(option);
                 const card = option.card ? enrichCard(option.card) : null;
                 const cardChoiceDisplayMode: CardDisplayMode = card?.imageUrl ? "placeholder" : "text-card";
                 return (
-                  <div className={`cardChoiceOptionSlot ${active ? "selected" : ""}`} key={option.id}>
+                  <div className={`cardChoiceOptionSlot ${active ? "selected" : ""}${selectable ? "" : " displayOnly"}`} key={option.id}>
                     {card ? (
                       <CardView
                         card={card}
                         displayMode={cardChoiceDisplayMode}
                         choiceSelected={active}
-                        onSelect={() => toggleOption(option.id)}
+                        {...(selectable ? { onSelect: () => toggleOption(option.id) } : {})}
                       />
                     ) : (
-                      <button className={`button actionButton cardChoiceFallback ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled} type="button">
+                      <button className={`button actionButton cardChoiceFallback ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled || !selectable} type="button">
                         {active ? <Check size={15} /> : <Clipboard size={15} />}
                         <span className="actionButtonLabel">{option.label}</span>
                       </button>
                     )}
-                    <button className={`button cardChoiceSelectButton ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled} type="button" aria-pressed={active} data-testid="card-choice-option">
+                    <button className={`button cardChoiceSelectButton ${active ? "primary" : ""}`} onClick={() => toggleOption(option.id)} disabled={disabled || !selectable} type="button" aria-pressed={active} data-testid="card-choice-option">
                       {active ? <Check size={14} /> : <Plus size={14} />}
-                      <span>{active ? "Gewählt" : "Wählen"}</span>
+                      <span>{selectable ? active ? "Gewählt" : "Wählen" : "Nur ansehen"}</span>
                     </button>
                   </div>
                 );
@@ -7145,6 +7164,10 @@ function CardChoicePanel({
 
   if (typeof document === "undefined") return null;
   return createPortal(dialog, document.body);
+}
+
+function cardChoiceOptionSelectable(option: VisibleChoiceOption): boolean {
+  return option.selectable !== false;
 }
 
 function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][] {

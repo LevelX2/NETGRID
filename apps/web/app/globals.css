@@ -3272,6 +3272,38 @@ select {
   margin: 0;
 }
 
+.cardChoiceHeaderControls {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardChoiceViewToggle {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--section-bg);
+}
+
+.cardChoiceViewToggle button {
+  min-height: 26px;
+  padding: 4px 9px;
+  border: 0;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.cardChoiceViewToggle button.active {
+  color: var(--text);
+  background: color-mix(in srgb, var(--runner), var(--section-bg) 78%);
+}
+
 .cardChoiceHeader .meta {
   margin: 4px 0 0;
 }
@@ -3329,6 +3361,14 @@ select {
 
 .cardChoiceOptionSlot.selected {
   z-index: 82;
+}
+
+.cardChoiceOptionSlot.displayOnly {
+  opacity: 0.66;
+}
+
+.cardChoiceOptionSlot.displayOnly .card {
+  cursor: default;
 }
 
 .card.choiceSelected {
@@ -3448,6 +3488,11 @@ select {
   .cardChoiceCounter,
   .cardChoiceSubmit {
     width: fit-content;
+  }
+
+  .cardChoiceHeaderControls {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .cardChoiceOverlapRow {

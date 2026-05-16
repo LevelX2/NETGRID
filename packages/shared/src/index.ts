@@ -415,6 +415,7 @@ export type ChoiceOption = {
   label: string;
   publicLabel?: string;
   value?: string | number | boolean;
+  selectable?: boolean;
 };
 
 export type StackSearchResolution = {

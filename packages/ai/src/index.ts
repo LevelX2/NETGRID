@@ -994,6 +994,10 @@ function applyFixtureAction(
   return { ok: true, state: result.state };
 }
 
+function selectableChoiceOptions<T extends { selectable?: boolean }>(options: T[]): T[] {
+  return options.filter((option) => option.selectable !== false);
+}
+
 function applyFixtureChoiceFirstOption(
   state: GameState,
   side: Side,
@@ -1001,7 +1005,7 @@ function applyFixtureChoiceFirstOption(
 ): { ok: true; state: GameState } | { ok: false; message: string } {
   const pendingChoice = state.pendingChoice;
   if (!pendingChoice || pendingChoice.side !== side) return { ok: false, message: `missing_pending_choice:${label}` };
-  const optionId = pendingChoice.options[0]?.id;
+  const optionId = selectableChoiceOptions(pendingChoice.options)[0]?.id;
   if (optionId === undefined || optionId === null) return { ok: false, message: `missing_choice_option:${label}` };
   const choiceAction = getLegalActions(state, side).find((action) => action.type === "resolve_choice");
   if (!choiceAction) return { ok: false, message: `missing_resolve_choice_action:${label}` };
@@ -1385,6 +1389,7 @@ function playfulAiGainValue(option: {
 function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction): AiDecision["selectedChoices"] | undefined {
   const choice = input.playerView.pendingChoice;
   if (action.type !== "resolve_choice" || !choice) return undefined;
+  const selectableOptions = selectableChoiceOptions(choice.options);
   if (choice.source === "setup.mulligan") {
     const opening = input.side === "corp" ? evaluateCorpOpeningHand(input) : evaluateRunnerOpeningHand(input);
     const selected = choice.options.find((option) => option.id === opening.decision) ?? choice.options[0];
@@ -1417,7 +1422,7 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
   }
   if (choice.kind === "select_cards") {
     const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
-    const selected = choice.options.slice(0, count).map((option) => option.id);
+    const selected = selectableOptions.slice(0, count).map((option) => option.id);
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
   if (choice.source.startsWith("v1921.playful_ai")) {
@@ -1443,7 +1448,7 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind !== "bid_amount") {
-    const firstOption = choice.options[0];
+    const firstOption = selectableOptions[0];
     return firstOption ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
 

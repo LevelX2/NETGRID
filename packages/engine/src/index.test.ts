@@ -10998,6 +10998,51 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("shows the full Runner stack during program search while only programs are selectable", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-search"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_087_forgotten-backup-chip",
+    );
+    const displayOnlyHardwareId = putRunnerCardOnTopOfStack(
+      state,
+      "simple_economy_event",
+    );
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
+    );
+
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    const programOption = runnerChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    );
+    const hardwareOption = runnerChoice?.options.find(
+      (option) => option.value === displayOnlyHardwareId,
+    );
+
+    expect(programOption).toMatchObject({
+      label: "Simple Decoder",
+      card: { definitionId: "simple_decoder", type: "program" },
+    });
+    expect(programOption?.selectable).toBeUndefined();
+    expect(hardwareOption).toMatchObject({
+      label: "Simple Economy Event",
+      selectable: false,
+      card: { definitionId: "simple_economy_event", type: "event" },
+    });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(() => applyChoice(state, "runner", String(hardwareOption?.id))).toThrow(
+      "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.",
+    );
+  });
+
   it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
     state.runner.credits = 20;

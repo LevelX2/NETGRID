@@ -15832,6 +15832,7 @@ function visibleChoice(
         id: option.id,
         label: option.label,
         ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+        ...(option.selectable === false ? { selectable: false } : {}),
         ...(option.value !== undefined &&
         !(
           choice.visibility === "public" &&
@@ -15904,7 +15905,8 @@ function visibleChoiceCardForOption(
   if (isSneakHeapChoice && !state.runner.heap.includes(cardId)) return undefined;
   const instance = state.cardInstances[cardId];
   if (!instance || instance.owner !== "runner") return undefined;
-  if (definitionFor(state, cardId).type !== "program") return undefined;
+  if (!isStackChoice && definitionFor(state, cardId).type !== "program")
+    return undefined;
   return visibleOwnCard(state, cardId);
 }
 
@@ -15934,6 +15936,13 @@ function validateChoiceAction(
   const optionIds = new Set(choice.options.map((option) => option.id));
   if (selectedOptionIds.some((id) => !optionIds.has(id)))
     return "Eine gewaehlte Option ist nicht legal.";
+  if (
+    selectedOptionIds.some(
+      (id) =>
+        choice.options.find((option) => option.id === id)?.selectable === false,
+    )
+  )
+    return "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.";
   if (new Set(selectedOptionIds).size !== selectedOptionIds.length)
     return "Eine Option wurde doppelt gewaehlt.";
   return undefined;
@@ -16480,14 +16489,20 @@ function startRunnerStackSearchChoice(
   choiceIdPrefix = "v098_search_stack",
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const options = state.runner.stack
-    .filter((cardId) => definitionFor(state, cardId).type === "program")
-    .map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return { id: `card_${cardId}`, label: definition.title, value: cardId };
-    });
-  if (options.length === 0)
+  const hasSearchableProgram = state.runner.stack.some(
+    (cardId) => definitionFor(state, cardId).type === "program",
+  );
+  if (!hasSearchableProgram)
     throw new Error("Keine suchbare Programmkarte im Stack.");
+  const options = state.runner.stack.map((cardId) => {
+    const definition = definitionFor(state, cardId);
+    return {
+      id: `card_${cardId}`,
+      label: definition.title,
+      value: cardId,
+      ...(definition.type !== "program" ? { selectable: false } : {}),
+    };
+  });
   state.pendingChoice = {
     choiceId: `${choiceIdPrefix}_${state.stateVersion + 1}`,
     side: "runner",
