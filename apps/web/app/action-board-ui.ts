@@ -425,6 +425,7 @@ export function hasLegalAction(actions: LegalAction[], type: LegalAction["type"]
 
 export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
   if (choice.kind !== "select_cards") return false;
+  if (choice.stackSearchResolution || choice.source.includes("search_stack")) return true;
   if (choice.options.some((option) => option.card)) return true;
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));

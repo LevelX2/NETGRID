@@ -246,9 +246,16 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1
     };
+    const forgottenBackupChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "v1911_search_stack_7",
+      source: "v1911.search_stack:7",
+      prompt: "Stack durchsuchen"
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
+    expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
   });
 });
 
