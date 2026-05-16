@@ -32923,6 +32923,182 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
   });
 });
 
+describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("uses Signpost and The Springboard only after both trace bids are revealed", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-trace-post-bid-link",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_trace_post_bid_runner",
+          name: "Spotcheck Trace Post-Bid Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_063_signpost", quantity: 1 },
+            { id: "onr_v1_181_the-springboard", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_trace_post_bid_corp",
+          name: "Spotcheck Trace Post-Bid Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    const signpostId = installRunnerProgramForTest(state, "onr_v1_063_signpost");
+    const springboardId = installRunnerResourceForTest(
+      state,
+      "onr_v1_181_the-springboard",
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace?.status).toBe("corp_bid");
+    state = applyChoice(state, "corp", "bid_0");
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      traceStrength: 3,
+      runnerLink: 0,
+    });
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.trace?.status).toBe("post_bid_link");
+    expect(state.pendingChoice?.source).toContain("trace_post_bid_link:");
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
+      expect.arrayContaining([
+        "pass",
+        `trace_link_${signpostId}`,
+        `trace_link_${springboardId}`,
+      ]),
+    );
+
+    const choiceAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`trace_link_${signpostId}`],
+      },
+      idempotencyKey: "spotcheck-trace-post-bid-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`trace_link_${signpostId}`],
+      },
+      idempotencyKey: "spotcheck-trace-post-bid-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const removedSpringboard = structuredClone(state);
+    removeEverywhere(removedSpringboard, springboardId);
+    const removedHash = hashState(removedSpringboard);
+    const removedResult = applyAction(removedSpringboard, {
+      matchId: removedSpringboard.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: removedSpringboard.stateVersion,
+      selectedChoices: {
+        choiceId: removedSpringboard.pendingChoice?.choiceId,
+        selectedOptionIds: [`trace_link_${springboardId}`],
+      },
+      idempotencyKey: "spotcheck-trace-post-bid-removed-source",
+    });
+    expect(removedResult.ok).toBe(false);
+    expect(hashState(removedSpringboard)).toBe(removedHash);
+
+    state = applyChoice(state, "runner", `trace_link_${signpostId}`);
+    expect(state.runner.credits).toBe(9);
+    expect(state.trace).toMatchObject({
+      status: "post_bid_link",
+      runnerLink: 2,
+      runnerStrength: 2,
+      postBidLinkBonus: 2,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
+      expect.arrayContaining(["pass", `trace_link_${springboardId}`]),
+    );
+    expect(
+      state.pendingChoice?.options.some(
+        (option) => option.id === `trace_link_${signpostId}`,
+      ),
+    ).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      traceStep: "post_bid_link",
+      sourceDefinitionId: "onr_v1_063_signpost",
+      postBidTraceLinkCostPaid: 1,
+      postBidTraceLinkDelta: 2,
+      postBidTraceLinkBonus: 2,
+      postBidTraceLinkChoiceOpened: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+
+    state = applyChoice(state, "runner", `trace_link_${springboardId}`);
+    expect(state.trace).toBeUndefined();
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.credits).toBe(8);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      traceStep: "post_bid_link",
+      sourceDefinitionId: "onr_v1_181_the-springboard",
+      postBidTraceLinkDelta: 1,
+      postBidTraceLinkBonus: 3,
+      runnerLink: 3,
+      runnerStrength: 3,
+      traceSuccessful: false,
+      tagsAdded: 0,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

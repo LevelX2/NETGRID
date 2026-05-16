@@ -511,22 +511,37 @@ Jobstatus: `done`; alle drei aus dem blockierten Trace-Cache-Ambush-Sammeljob he
 | Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Private Multi-Expose-Zielwahl für bis zu drei installierte verdeckte Korp-Karten umgesetzt | Erledigt; Zielidentitäten leaken vor der Choice nicht |
 | Sneak Preview | `onr_v1_110_sneak-preview` | Heap-/Stack-Programminstall mit Stack-Shuffle, Memory-Revalidation und End-of-turn-Return umgesetzt | Erledigt; vorzeitig verlassene Programme kehren nicht doppelt zurück |
 
+## Runde 2026-05-16-trace-link-post-bid-resolvers
+
+Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_TRACE_LINK_POST_BID_RESOLVERS_IMPLEMENTATION.md`
+
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-trace-link-post-bid-resolvers.md`
+
+Jobstatus: `done`; beide aus dem blockierten Trace-Cache-Ambush-Sammeljob herausgezogenen post-bid Trace-Link-Resolver sind umgesetzt und grün geprüft.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Signpost | `onr_v1_063_signpost` | Post-bid Trace-Link-Choice nach offengelegten Bids umgesetzt: 1 Credit für +2 Link, einmal pro Trace | Erledigt; Side, StateVersion, Quelle, Kosten und Trace-Kontext werden erneut validiert |
+| The Springboard | `onr_v1_181_the-springboard` | Statischer Base-Link entfernt und post-bid Trace-Link-Choice umgesetzt: 1 Credit für +1 Link, einmal pro Trace | Erledigt; Side, StateVersion, Quelle, Kosten und Trace-Kontext werden erneut validiert |
+
 ## Runde 2026-05-15-trace-cache-ambush
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, mehrere Vollresolver bleiben als Removal Condition offen.
+Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, ausgelagerte Vollresolver sind inzwischen durch Folgejobs erledigt.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
-| Signpost | `onr_v1_063_signpost` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
+| Signpost | `onr_v1_063_signpost` | Folgejob umgesetzt: post-bid Trace-Link-Fenster nach offengelegten Bids grün | Erledigt in `spotcheck-2026-05-16-trace-link-post-bid-resolvers` |
 | Deal with Militech | `onr_v1_082_deal-with-militech` | Folgejob umgesetzt: Research-Bedingung und Militech-Counter auf Icebreakern grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
 | Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Folgejob umgesetzt: Multi-Expose-Choice ohne Zielidentitäts-Leak grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
 | Sneak Preview | `onr_v1_110_sneak-preview` | Folgejob umgesetzt: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
 | Code Viral Cache | `onr_v1_155_code-viral-cache` | Folgejob umgesetzt: HQ-Run-Gate, Purge-Replacement und Korp-Trash-Aktion grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
-| The Springboard | `onr_v1_181_the-springboard` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
+| The Springboard | `onr_v1_181_the-springboard` | Folgejob umgesetzt: post-bid Trace-Link-Fenster nach offengelegten Bids grün | Erledigt in `spotcheck-2026-05-16-trace-link-post-bid-resolvers` |
 | Cerberus | `onr_v1_227_cerberus` | Folgejob umgesetzt: Trace-Counter, Runstart-Damage und Runner-Removal grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 | Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Teilfix umgesetzt: Program-Trash plus End-the-run statt R&D-Reveal | Teilfix grün |
 | TRAP! | `onr_v1_345_trap` | Teilfix umgesetzt: 3 Net Damage plus Tag aus legalem Access; Archives-No-op bleibt | Teilfix grün |

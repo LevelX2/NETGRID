@@ -34,7 +34,7 @@
     "Runtime definitions exist for all V1.9.14 target cards.",
     "Runner programs, hardware, resources and the tag-removal event use legal install or play actions.",
     "All V1.9.14 Trace ICE open side-safe Corp and Runner bid windows; Ramming Piston is the Wall-breaker exception with pump, wall-subroutine break and exact Stealth follow-up loss, not a trace/link card.",
-    "Installed link cards modify Runner link during trace resolution.",
+    "Signpost and The Springboard modify Runner link only through the post-bid Trace Link choice after both bids are revealed.",
     "Corp resource trash and Power Grid Overload require visible Runner tags and public installed targets.",
     "Replay reconstructs trace, tag and resource outcomes with stable StateHash."
   ],

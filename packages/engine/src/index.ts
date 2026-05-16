@@ -331,6 +331,7 @@ const BLACK_ICE_QUALITY_ASSURANCE_ID =
 const BROKER_ID = "onr_v1_154_broker";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
+const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
 const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
@@ -372,6 +373,7 @@ const MICROTECH_AI_INTERFACE_ID = "onr_v1_041_microtech-ai-interface";
 const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
 const POLTERGEIST_ID = "onr_v1_048_poltergeist";
 const SHREDDER_UPLINK_PROTOCOL_ID = "onr_v1_062_shredder-uplink-protocol";
+const SIGNPOST_ID = "onr_v1_063_signpost";
 const SMARTEYE_ID = "onr_v1_065_smarteye";
 const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
@@ -2445,15 +2447,18 @@ export function validateGameState(state: GameState): ValidationResult {
       state.pendingChoice?.side !== "corp"
     )
       errors.push("Corp trace bid requires Corp choice.");
-    if (state.trace.status === "runner_bid") {
+    if (
+      state.trace.status === "runner_bid" ||
+      state.trace.status === "post_bid_link"
+    ) {
       if (state.pendingChoice?.side !== "runner")
-        errors.push("Runner trace bid requires Runner choice.");
+        errors.push("Runner trace step requires Runner choice.");
       if (
         state.trace.corpBid === undefined ||
         state.trace.traceStrength === undefined ||
         state.trace.runnerLink === undefined
       )
-        errors.push("Runner trace bid is missing Corp bid context.");
+        errors.push("Runner trace step is missing Corp bid context.");
     }
   }
   if (state.identityAbilityUsage) {
@@ -15458,6 +15463,10 @@ function resolvePendingChoice(
       resolveTraceCorpBid(state, legalAction, playerAction);
       return;
     }
+    if (state.trace.status === "post_bid_link") {
+      resolveTracePostBidLinkChoice(state, legalAction, playerAction);
+      return;
+    }
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
@@ -18922,6 +18931,41 @@ function resolveTraceRunnerBid(
   const traceStrength =
     trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
   const runnerStrength = runnerLink + bid;
+  const postBidTrace = {
+    ...trace,
+    status: "post_bid_link" as const,
+    runnerBid: bid,
+    runnerStrength,
+    postBidLinkBonus: 0,
+    postBidLinkSourceIds: [],
+  };
+  if (startTracePostBidLinkChoice(state, postBidTrace)) {
+    state.trace = postBidTrace;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceId: trace.traceId,
+      traceStep: "runner_bid",
+      baseTraceStrength: trace.baseTraceStrength,
+      corpBid: trace.corpBid ?? 0,
+      traceStrength,
+      runnerLink,
+      runnerBid: bid,
+      ...(tracePayment.traceLinkCreditSpent > 0
+        ? {
+            traceLinkCreditsSpent: tracePayment.traceLinkCreditSpent,
+            ...(tracePayment.hellsRunSpent > 0
+              ? { hellsRunTraceCreditsSpent: tracePayment.hellsRunSpent }
+              : {}),
+            runnerCreditsSpent: tracePayment.runnerCreditsSpent,
+            traceLinkCreditSourceDefinitionIds:
+              tracePayment.sourceDefinitionIds.join(","),
+          }
+        : {}),
+      runnerStrength,
+      postBidTraceLinkChoiceOpened: true,
+    };
+    return;
+  }
   const successful = traceStrength > runnerStrength;
   const tagsAdded =
     successful && trace.successEffect.type === "add_tag"
@@ -19021,6 +19065,250 @@ function resolveTraceRunnerBid(
         }
       : {}),
     runnerStrength,
+    traceSuccessful: successful,
+    tagsAdded,
+    ...traceCounterPayload,
+    ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
+    ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
+    ...(fangRunEnded
+      ? {
+          fangRunEnded: true,
+          fangRunLockCreditCost,
+        }
+      : {}),
+    ...traceHardwareWreckerPayload,
+  };
+}
+
+function postBidTraceLinkCandidates(
+  state: GameState,
+  trace: NonNullable<GameState["trace"]>,
+): Array<{
+  cardId: CardInstanceId;
+  definitionId: CardDefinitionId;
+  label: string;
+  linkDelta: number;
+}> {
+  const used = new Set(trace.postBidLinkSourceIds ?? []);
+  if (state.runner.credits < 1) return [];
+  const candidates: Array<{
+    cardId: CardInstanceId;
+    definitionId: CardDefinitionId;
+    label: string;
+    linkDelta: number;
+  }> = [];
+  for (const cardId of state.runner.rig.programs) {
+    if (used.has(cardId)) continue;
+    const definition = definitionFor(state, cardId);
+    if (definition.id !== SIGNPOST_ID) continue;
+    candidates.push({
+      cardId,
+      definitionId: definition.id,
+      label: definition.title,
+      linkDelta: 2,
+    });
+  }
+  for (const cardId of state.runner.rig.resources) {
+    if (used.has(cardId)) continue;
+    const definition = definitionFor(state, cardId);
+    if (definition.id !== THE_SPRINGBOARD_ID) continue;
+    candidates.push({
+      cardId,
+      definitionId: definition.id,
+      label: definition.title,
+      linkDelta: 1,
+    });
+  }
+  return candidates;
+}
+
+function startTracePostBidLinkChoice(
+  state: GameState,
+  trace: NonNullable<GameState["trace"]>,
+): boolean {
+  const candidates = postBidTraceLinkCandidates(state, trace);
+  if (candidates.length === 0) return false;
+  state.pendingChoice = {
+    choiceId: `${trace.traceId}.post_bid_link.${state.stateVersion + 1}`,
+    side: "runner",
+    source: `trace_post_bid_link:${trace.traceId}`,
+    prompt: "Post-bid Link-Faehigkeit nutzen",
+    kind: "select_option",
+    options: [
+      { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
+      ...candidates.map((candidate) => ({
+        id: `trace_link_${candidate.cardId}`,
+        label: `${candidate.label}: +${candidate.linkDelta} Link`,
+        publicLabel: "Trace Link",
+        value: candidate.cardId,
+      })),
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "runner";
+  return true;
+}
+
+function resolveTracePostBidLinkChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const trace = state.trace;
+  if (!trace || trace.status !== "post_bid_link")
+    throw new Error("Es ist kein Post-Bid-Link-Fenster offen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  if (selected !== "pass") {
+    const option = state.pendingChoice?.options.find(
+      (candidate) => candidate.id === selected,
+    );
+    const cardId =
+      typeof option?.value === "string"
+        ? (option.value as CardInstanceId)
+        : undefined;
+    const candidate = postBidTraceLinkCandidates(state, trace).find(
+      (item) => item.cardId === cardId,
+    );
+    if (!candidate)
+      throw new Error("Diese Post-Bid-Link-Quelle ist nicht legal.");
+    spendCredits(state, "runner", 1);
+    const nextTrace = {
+      ...trace,
+      runnerLink: (trace.runnerLink ?? 0) + candidate.linkDelta,
+      runnerStrength: (trace.runnerStrength ?? 0) + candidate.linkDelta,
+      postBidLinkBonus:
+        (trace.postBidLinkBonus ?? 0) + candidate.linkDelta,
+      postBidLinkSourceIds: [
+        ...(trace.postBidLinkSourceIds ?? []),
+        candidate.cardId,
+      ],
+    };
+    delete state.pendingChoice;
+    state.trace = nextTrace;
+    const opensNext = startTracePostBidLinkChoice(state, nextTrace);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      traceId: trace.traceId,
+      traceStep: "post_bid_link",
+      eventModificationDecision: "apply",
+      sourceDefinitionId: candidate.definitionId,
+      postBidTraceLinkSourceDefinitionId: candidate.definitionId,
+      postBidTraceLinkCostPaid: 1,
+      postBidTraceLinkDelta: candidate.linkDelta,
+      postBidTraceLinkBonus: nextTrace.postBidLinkBonus ?? 0,
+      runnerLink: nextTrace.runnerLink ?? 0,
+      runnerStrength: nextTrace.runnerStrength ?? 0,
+      postBidTraceLinkChoiceOpened: opensNext,
+    };
+    if (opensNext) return;
+    completeTraceAfterPostBidLink(state, nextTrace, legalAction);
+    return;
+  }
+  delete state.pendingChoice;
+  completeTraceAfterPostBidLink(state, trace, legalAction);
+}
+
+function completeTraceAfterPostBidLink(
+  state: GameState,
+  trace: NonNullable<GameState["trace"]>,
+  legalAction: LegalAction,
+): void {
+  const traceStrength =
+    trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
+  const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
+  const runnerBid = trace.runnerBid ?? 0;
+  const runnerStrength = trace.runnerStrength ?? runnerLink + runnerBid;
+  const successful = traceStrength > runnerStrength;
+  const tagsAdded =
+    successful && trace.successEffect.type === "add_tag"
+      ? trace.successEffect.amount
+      : 0;
+  let dataRavenCounterAdded = 0;
+  const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
+  let fangRunLockCreditCost = 0;
+  let fangRunEnded = false;
+  let traceHardwareWreckerPayload: Record<string, unknown> = {};
+  if (successful) state.runner.tags += tagsAdded;
+  let traceCounterPayload: Record<string, string | number> = {};
+  if (successful && trace.successEffect.type === "add_counter") {
+    addCardCounter(
+      state,
+      state.runner.identity,
+      trace.successEffect.counterType,
+      trace.successEffect.amount,
+    );
+    traceCounterPayload = {
+      addedCounterAmount: trace.successEffect.amount,
+      counterType: trace.successEffect.counterType,
+      remainingCounters: cardCounter(
+        state,
+        state.runner.identity,
+        trace.successEffect.counterType,
+      ),
+    };
+  }
+  if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
+    addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
+    dataRavenCounterAdded = 1;
+  }
+  if (
+    successful &&
+    (trace.sourceDefinitionId === FANG_ID ||
+      trace.sourceDefinitionId === FANG_2_0_ID)
+  ) {
+    fangRunLockCreditCost = 2;
+    ensureRunnerTurnFlags(state).fangRunLockCreditCost = fangRunLockCreditCost;
+    fangRunEnded = true;
+  }
+  delete state.trace;
+  if (state.run) {
+    if (trace.subroutineIndex !== undefined) {
+      state.run.traceSuccessBySubroutineIndex = {
+        ...(state.run.traceSuccessBySubroutineIndex ?? {}),
+        [trace.subroutineIndex]: successful,
+      };
+    }
+    if (
+      successful &&
+      (trace.sourceDefinitionId === CINDERELLA_ID ||
+        trace.sourceDefinitionId === HOMEWRECKER_ID)
+    ) {
+      traceHardwareWreckerPayload = resolveTraceHardwareWreckerSuccess(
+        state,
+        trace.sourceDefinitionId,
+        trace.sourceCardInstanceId,
+        trace.traceId,
+      );
+      if (!state.winner && state.run) finishRun(state, false);
+    } else if (fangRunEnded) {
+      finishRun(state, false);
+    } else {
+      state.timingPoint = "run.encounter_ice";
+      state.activeSide = "runner";
+    }
+  } else if (
+    trace.returnTimingPoint &&
+    trace.returnActiveSide &&
+    trace.returnPhase
+  ) {
+    state.timingPoint = trace.returnTimingPoint;
+    state.activeSide = trace.returnActiveSide;
+    state.phase = trace.returnPhase;
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep: "post_bid_link",
+    baseTraceStrength: trace.baseTraceStrength,
+    corpBid: trace.corpBid ?? 0,
+    traceStrength,
+    runnerLink,
+    runnerBid,
+    runnerStrength,
+    postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0,
     traceSuccessful: successful,
     tagsAdded,
     ...traceCounterPayload,
@@ -19765,6 +20053,11 @@ function publicContextForAction(
       "runnerCreditsSpent",
       "traceLinkCreditSourceDefinitionIds",
       "runnerStrength",
+      "postBidTraceLinkChoiceOpened",
+      "postBidTraceLinkSourceDefinitionId",
+      "postBidTraceLinkCostPaid",
+      "postBidTraceLinkDelta",
+      "postBidTraceLinkBonus",
       "traceSuccessful",
       "tagsAdded",
       "cryingCounterCount",

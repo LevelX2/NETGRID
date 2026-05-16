@@ -8329,23 +8329,24 @@
       "roles": [
         "program",
         "trace",
-        "reveal"
+        "post_bid_link"
       ],
       "planRoles": [
         "build_rig",
-        "trace_bid_support"
+        "trace_bid_support",
+        "post_bid_trace_link"
       ],
       "requiredMechanics": [
         "install_program",
         "trace",
-        "hidden_zone_tool"
+        "link",
+        "post_bid_link"
       ],
       "valueHints": {
-        "trace": 1
+        "trace": 1,
+        "postBidLink": 2
       },
-      "riskTags": [
-        "hidden_zone_projection"
-      ],
+      "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
@@ -11883,20 +11884,22 @@
       "roles": [
         "resource",
         "link",
-        "reveal"
+        "post_bid_link"
       ],
       "planRoles": [
         "build_rig",
-        "trace_bid_support"
+        "trace_bid_support",
+        "post_bid_trace_link"
       ],
       "requiredMechanics": [
         "install_resource",
         "trace",
         "link",
-        "hidden_zone_tool"
+        "post_bid_link"
       ],
       "valueHints": {
-        "link": 1
+        "link": 1,
+        "postBidLink": 1
       },
       "riskTags": [
         "resource_trash_if_tagged"

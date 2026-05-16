@@ -797,7 +797,7 @@ export type TraceState = {
   rabbitTraceLimitReduction?: number;
   parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
   parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
-  status: "corp_bid" | "runner_bid";
+  status: "corp_bid" | "runner_bid" | "post_bid_link";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;
@@ -807,6 +807,8 @@ export type TraceState = {
   runnerLink?: number;
   runnerBid?: number;
   runnerStrength?: number;
+  postBidLinkSourceIds?: CardInstanceId[];
+  postBidLinkBonus?: number;
   successful?: boolean;
 };
 
@@ -7403,15 +7405,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     memoryCost: 1,
-    rulesText: "Installed trace helper with side-safe reveal support.",
+    rulesText:
+      "1 credit: +2 link. Use this ability only once during each trace attempt, and only after both players have revealed how much they spent.",
     mechanics: [
       "install_program",
       "memory",
       "trace",
       "link",
       "bid_amount",
-      "reveal",
-      "hidden_zone_tool",
+      "post_bid_link",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -7629,15 +7631,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    baseLink: 1,
-    rulesText: "Installed resource with +1 link and side-safe reveal support.",
+    rulesText:
+      "1 credit: +1 link. Use this ability only once during each trace attempt, and only after both players have revealed how much they spent.",
     mechanics: [
       "install_resource",
       "trace",
       "link",
       "bid_amount",
-      "reveal",
-      "hidden_zone_tool",
+      "post_bid_link",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

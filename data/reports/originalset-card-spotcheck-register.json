@@ -1863,14 +1863,14 @@
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md",
       "jobReport": "docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-trace-cache-ambush.md",
       "jobStatus": "blocked",
-      "blockerReason": "Multiple full resolver contracts were split into follow-up jobs. Research/Militech counters, multi-expose, Sneak Preview temporary install, Code Viral Cache purge replacement, Cerberus counter loop and Paris City Grid trace pool are fixed; post-bid Trace-Link choices remain for Signpost and The Springboard.",
+      "blockerReason": "Multiple full resolver contracts were split into follow-up jobs. Research/Militech counters, multi-expose, Sneak Preview temporary install, Code Viral Cache purge replacement, Cerberus counter loop, Paris City Grid trace pool, and post-bid Trace-Link choices for Signpost and The Springboard are fixed. The original aggregate job remains historically blocked because Ice Pick Willie and TRAP! were committed as green partial fixes.",
       "cards": [
         {
           "cardId": "onr_v1_063_signpost",
           "title": "Signpost",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_post_bid_trace_link_choice_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_by_followup_post_bid_trace_link_choice",
+          "followUpStatus": "completed_in_spotcheck-2026-05-16-trace-link-post-bid-resolvers"
         },
         {
           "cardId": "onr_v1_082_deal-with-militech",
@@ -1903,9 +1903,9 @@
         {
           "cardId": "onr_v1_181_the-springboard",
           "title": "The Springboard",
-          "spotcheckStatus": "blocked",
-          "result": "blocked_post_bid_trace_link_choice_missing",
-          "followUpStatus": "blocked"
+          "spotcheckStatus": "completed",
+          "result": "fixed_by_followup_post_bid_trace_link_choice_static_base_link_removed",
+          "followUpStatus": "completed_in_spotcheck-2026-05-16-trace-link-post-bid-resolvers"
         },
         {
           "cardId": "onr_v1_227_cerberus",
@@ -1933,6 +1933,39 @@
           "title": "Paris City Grid",
           "spotcheckStatus": "completed",
           "result": "fixed_server_bound_trace_pool_payment_refresh",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-trace-link-post-bid-resolvers",
+      "selectionMode": "sequential_follow_up_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_TRACE_LINK_POST_BID_RESOLVERS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-trace-link-post-bid-resolvers.md",
+      "jobStatus": "done",
+      "sourceBlockedJobs": [
+        "spotcheck-2026-05-15-trace-cache-ambush"
+      ],
+      "checks": [
+        "corepack pnpm --filter @netgrid/engine test -- --runInBand",
+        "corepack pnpm --filter @netgrid/web test -- chronicle.test.ts",
+        "corepack pnpm --filter @netgrid/catalog test",
+        "corepack pnpm --filter @netgrid/ai test",
+        "corepack pnpm typecheck"
+      ],
+      "cards": [
+        {
+          "cardId": "onr_v1_063_signpost",
+          "title": "Signpost",
+          "spotcheckStatus": "completed",
+          "result": "fixed_post_bid_trace_link_choice_plus_two_once_per_trace",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_181_the-springboard",
+          "title": "The Springboard",
+          "spotcheckStatus": "completed",
+          "result": "fixed_post_bid_trace_link_choice_plus_one_static_base_link_removed",
           "followUpStatus": "fixed_and_tested"
         }
       ]
