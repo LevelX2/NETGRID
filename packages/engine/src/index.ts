@@ -92,6 +92,7 @@ import {
   ABLATIVE_COUNTER_HARDWARE_CARD_ID,
   ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
   DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
+  FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
   RUNTIME_DAMAGE_PREVENTION_PROFILES,
 } from "./mechanics/damage-prevention";
 import {
@@ -345,6 +346,7 @@ const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 const CINDERELLA_ID = "onr_v1_228_cinderella";
 const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
+const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
 const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
 const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
@@ -5808,7 +5810,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       breakerStrength >= encounteredIceStrength &&
       availableRunnerRunCredits(state, breakerId) >=
         breakAbility.cost.credits + additionalBreakCost &&
-      (breaker.id !== RAMMING_PISTON_ID ||
+      (![RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(breaker.id) ||
         runnerStealthRecurringCredits(state) >=
           (breakAbility.postBreakStealthLoss ?? 0))
     ) {
@@ -5816,6 +5818,21 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = encounterSubroutines;
+      if (breaker.id === PILE_DRIVER_ID) {
+        actions.push(
+          ...pileDriverBreakActions(
+            state,
+            breakerId,
+            encounteredIceId,
+            iceDefinition,
+            subroutines,
+            breakAbility,
+            totalBreakCost,
+            additionalBreakCost,
+          ),
+        );
+        continue;
+      }
       subroutines.forEach((subroutine, index) => {
         if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index))
           return;
@@ -5889,6 +5906,84 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   return actions;
 }
 
+function pileDriverBreakActions(
+  state: GameState,
+  breakerId: CardInstanceId,
+  encounteredIceId: CardInstanceId,
+  iceDefinition: CardDefinition,
+  subroutines: NonNullable<CardDefinition["subroutines"]>,
+  breakAbility: NonNullable<CardDefinition["abilities"]>[number],
+  totalBreakCost: number,
+  additionalBreakCost: number,
+): LegalAction[] {
+  const run = mustRun(state);
+  const eligibleIndexes = subroutines
+    .map((subroutine, index) => ({ subroutine, index }))
+    .filter(
+      ({ subroutine, index }) =>
+        breakAbilityMatchesSubroutine(breakAbility, subroutine) &&
+        !run.brokenSubroutineIndexes.includes(index) &&
+        !run.resolvedSubroutineIndexes.includes(index),
+    )
+    .map(({ index }) => index);
+  const maxCount = Math.min(4, breakAbility.count ?? 4, eligibleIndexes.length);
+  const actions: LegalAction[] = [];
+  const selected: number[] = [];
+  const visit = (start: number): void => {
+    if (selected.length > 0) {
+      const subroutineIndexes = [...selected];
+      const firstIndex = subroutineIndexes[0] ?? 0;
+      const label =
+        subroutineIndexes.length === 1
+          ? `Pile Driver: Subroutine ${firstIndex + 1} brechen`
+          : `Pile Driver: ${subroutineIndexes.length} Subroutinen brechen`;
+      actions.push(
+        action(
+          state,
+          "runner",
+          "break_subroutine",
+          label,
+          breakerId,
+          [{ credits: totalBreakCost }],
+          {
+            breakerId,
+            iceId: encounteredIceId,
+            subroutineIndexes: subroutineIndexes.join(","),
+            breakSubroutineCount: subroutineIndexes.length,
+            pileDriverMultiBreak: true,
+            targetIceDefinitionId: iceDefinition.id,
+            breakSubroutineBaseCost: breakAbility.cost.credits,
+            ...(additionalBreakCost > 0
+              ? {
+                  breakSubroutineAdditionalCost: additionalBreakCost,
+                  breakSubroutineTotalCost: totalBreakCost,
+                  ...(runBreakSubroutineAdditionalCost(run) > 0
+                    ? { v1922CorpIceAbility: "virizz_break_cost_modifier" }
+                    : {}),
+                  ...(microtechTrodeSetBreakAdditionalCost(state) > 0
+                    ? {
+                        runnerHardwareAbility:
+                          "microtech_trode_set_break_cost_modifier",
+                      }
+                    : {}),
+                }
+              : {}),
+          },
+          abilityMetadata(breakerId, breakAbility.id, encounteredIceId),
+        ),
+      );
+    }
+    if (selected.length >= maxCount) return;
+    for (let index = start; index < eligibleIndexes.length; index += 1) {
+      selected.push(eligibleIndexes[index]!);
+      visit(index + 1);
+      selected.pop();
+    }
+  };
+  visit(0);
+  return actions;
+}
+
 function breakAbilityMatchesIce(
   ability: NonNullable<CardDefinition["abilities"]>[number],
   iceDefinition: CardDefinition,
@@ -5945,6 +6040,98 @@ function breakAbilityMatchesSubroutine(
   if (tags.includes("trace") && subroutine.type === "initiate_trace") return true;
   const subroutineTags = subroutine.breakTags ?? [];
   return tags.some((tag) => subroutineTags.includes(tag));
+}
+
+function resolvePileDriverBreakSubroutinesAction(
+  state: GameState,
+  breakerId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const run = mustRun(state);
+  const iceId = String(legalAction.payload?.iceId ?? "");
+  if (run.phase !== "encounter_ice" || !run.encounteredIceId)
+    throw new Error("Pile Driver kann nur im ICE-Encounter genutzt werden.");
+  if (run.encounteredIceId !== iceId)
+    throw new Error("Pile Driver zielt nicht auf das encountered ICE.");
+  if (run.noBreakSubroutinesActive)
+    throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
+  if (!state.runner.rig.programs.includes(breakerId))
+    throw new Error("Pile Driver ist nicht installiert.");
+  const breakerDefinition = definitionFor(state, breakerId);
+  if (breakerDefinition.id !== PILE_DRIVER_ID)
+    throw new Error("Die Breaker-Quelle ist nicht Pile Driver.");
+  const iceDefinition = definitionFor(state, iceId);
+  if (legalAction.payload?.targetIceDefinitionId !== iceDefinition.id)
+    throw new Error("Pile Driver zielt auf die falsche ICE-Definition.");
+  if (!cardHasSubtype(iceDefinition, "wall"))
+    throw new Error("Pile Driver kann nur Wall-Subroutinen brechen.");
+  const ability = breakerDefinition.abilities?.find(
+    (candidate) =>
+      candidate.id === legalAction.abilityRef?.abilityId &&
+      candidate.type === "break_subroutine",
+  );
+  if (!ability || !breakAbilityMatchesIce(ability, iceDefinition))
+    throw new Error("Pile Driver hat keine gueltige Break-Faehigkeit.");
+  const breakerStrength =
+    (breakerDefinition.strength ?? 0) +
+    mustInstance(state.cardInstances, breakerId).strengthModifier +
+    cardCounter(state, breakerId, "militech") +
+    dupreStrengthCounterBonus(state, breakerId) +
+    runRemainderStrengthBonusForBreaker(run, breakerId);
+  if (breakerStrength < iceStrengthFor(state, iceId))
+    throw new Error("Pile Driver ist nicht stark genug fuer dieses ICE.");
+  const rawIndexes =
+    typeof legalAction.payload?.subroutineIndexes === "string"
+      ? legalAction.payload.subroutineIndexes
+      : "";
+  if (!rawIndexes) throw new Error("Pile Driver braucht Subroutine-Ziele.");
+  const subroutineIndexes = rawIndexes.split(",").map((value) => Number(value));
+  if (
+    subroutineIndexes.length < 1 ||
+    subroutineIndexes.length > Math.min(4, ability.count ?? 4) ||
+    new Set(subroutineIndexes).size !== subroutineIndexes.length ||
+    subroutineIndexes.some((index) => !Number.isInteger(index) || index < 0)
+  ) {
+    throw new Error("Pile Driver hat ungueltige Subroutine-Ziele.");
+  }
+  const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
+  for (const subroutineIndex of subroutineIndexes) {
+    const subroutine = subroutines[subroutineIndex];
+    if (!subroutine)
+      throw new Error("Pile Driver zielt auf eine fehlende Subroutine.");
+    if (!breakAbilityMatchesSubroutine(ability, subroutine))
+      throw new Error("Pile Driver kann diese Subroutine nicht brechen.");
+    if (
+      run.brokenSubroutineIndexes.includes(subroutineIndex) ||
+      run.resolvedSubroutineIndexes.includes(subroutineIndex)
+    ) {
+      throw new Error("Pile Driver zielt auf eine bereits erledigte Subroutine.");
+    }
+  }
+  const stealthLoss = ability.postBreakStealthLoss ?? 0;
+  if (runnerStealthRecurringCredits(state) < stealthLoss)
+    throw new Error("Nicht genug Stealth-Credits fuer Pile Driver.");
+  const expectedCost =
+    ability.cost.credits +
+    runBreakSubroutineAdditionalCost(run) +
+    microtechTrodeSetBreakAdditionalCost(state);
+  if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+    throw new Error("Pile Driver-Kosten sind nicht mehr gueltig.");
+  spendRunnerRunCredits(state, expectedCost, breakerId);
+  executeEffectCommands(
+    state,
+    subroutineIndexes.map((subroutineIndex) => ({
+      type: "break_subroutine",
+      subroutineIndex,
+    })),
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    breakSubroutineCount: subroutineIndexes.length,
+    pileDriverMultiBreak: true,
+    sourceDefinitionId: PILE_DRIVER_ID,
+  };
+  applyPostBreakStealthLoss(state, breakerId, legalAction);
 }
 
 function subroutinesForCurrentEncounter(
@@ -7941,6 +8128,16 @@ function performAction(
         typeof legalAction.payload?.breakerId === "string"
           ? (String(legalAction.payload.breakerId) as CardInstanceId)
           : undefined;
+      if (
+        breakerId &&
+        definitionFor(state, breakerId).id === PILE_DRIVER_ID &&
+        typeof legalAction.payload?.subroutineIndexes === "string"
+      ) {
+        resolvePileDriverBreakSubroutinesAction(state, breakerId, legalAction);
+        recordBartmossEncounterUsage(state, breakerId);
+        recordDupreBreakUsage(state, breakerId);
+        return;
+      }
       spendRunnerRunCredits(
         state,
         legalAction.costs[0]?.credits ?? 1,
@@ -13121,6 +13318,7 @@ function openEventModificationWindow(
   state.imminentEvent = { ...event, modificationWindowId: windowId };
   state.eventModificationWindow = window;
   state.pendingChoice = eventModificationChoice(
+    state,
     window,
     state.imminentEvent,
     state.stateVersion + 1,
@@ -13205,6 +13403,30 @@ function collectRuntimeDamagePreventionCandidates(
         visibility: "hidden_info_barrier",
         optional: true,
         preventAmount: 1,
+      });
+      continue;
+    }
+    if (
+      definition.id === FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID &&
+      damageType === "meat"
+    ) {
+      candidates.push({
+        candidateId: `v1922_full_body_conversion_prevent_${sanitizeId(cardId)}_${amount}`,
+        eventId: event.eventId,
+        kind: "prevent",
+        controller: "corp",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: definition.id,
+          label: definition.title,
+        },
+        priority: 119,
+        visibility: "hidden_info_barrier",
+        optional: true,
+        preventAmount: amount,
+        bypassCostPerDamage: 1,
+        bypassPaymentSide: "corp",
       });
       continue;
     }
@@ -13405,6 +13627,7 @@ function replacementChoice(
 }
 
 function eventModificationChoice(
+  state: GameState,
   window: EventModificationWindow,
   event: ImminentEvent,
   stateVersion: number,
@@ -13419,6 +13642,38 @@ function eventModificationChoice(
     candidate.sourceRef.definitionId ===
       DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
     candidate.controller === "corp";
+  if (
+    candidate.sourceRef.definitionId ===
+      FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID &&
+    candidate.bypassPaymentSide === "corp" &&
+    candidate.bypassCostPerDamage === 1
+  ) {
+    const maxBypass = Math.min(amount, state.corp.credits);
+    const options: ChoiceRequest["options"] = [];
+    for (let paid = 0; paid <= maxBypass; paid += 1) {
+      options.push({
+        id: `full_body_conversion_pay_${paid}`,
+        label:
+          paid === 0
+            ? "0 Credits zahlen: gesamten Meat Damage verhindern"
+            : `${paid} Credits zahlen: ${paid} Meat Damage durchlassen`,
+        publicLabel: "Event Modification",
+        value: paid,
+      });
+    }
+    return {
+      choiceId: `v120_choice_${window.windowId}`,
+      side: window.side,
+      source: `v120.event_modification.${window.kind}`,
+      prompt: "Full Body Conversion",
+      kind: "select_option",
+      options,
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion,
+      visibility: candidate.visibility,
+    };
+  }
   const options = [
     {
       id: "pass",
@@ -13511,6 +13766,61 @@ function resolveEventModificationChoice(
             specialZoneReason: "diplomatic_immunity_cancel",
           }
         : {}),
+    };
+    setDamagePayload(legalAction, summary);
+    clearEventModificationState(state);
+    return;
+  }
+  if (selected.startsWith("full_body_conversion_pay_")) {
+    const candidate = window.candidates[0];
+    if (
+      !candidate ||
+      candidate.sourceRef.definitionId !==
+        FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID ||
+      candidate.bypassPaymentSide !== "corp" ||
+      candidate.bypassCostPerDamage !== 1 ||
+      window.side !== "corp" ||
+      event.eventType !== "damage" ||
+      event.affectedSide !== "runner" ||
+      damageTypePayload(event) !== "meat"
+    ) {
+      throw new Error("Full Body Conversion passt nicht zum Fenster.");
+    }
+    const bypassPaid = Number(selected.replace("full_body_conversion_pay_", ""));
+    const originalAmount = numberPayload(event, "amount");
+    if (
+      !Number.isInteger(bypassPaid) ||
+      bypassPaid < 0 ||
+      bypassPaid > originalAmount ||
+      bypassPaid > state.corp.credits
+    ) {
+      throw new Error("Full Body Conversion-Bypass ist nicht bezahlbar.");
+    }
+    revalidateDamagePreventionCandidateSource(state, candidate);
+    spendCredits(state, "corp", bypassPaid);
+    const preventedAmount = Math.max(0, originalAmount - bypassPaid);
+    const finalAmount = bypassPaid;
+    const summary = resolveDamageImminentEvent(state, {
+      ...event,
+      payload: { ...event.payload, amount: finalAmount },
+    });
+    legalAction.payload = {
+      ...basePayload,
+      eventModificationDecision: "apply",
+      eventModificationOutcome:
+        finalAmount === 0
+          ? "prevented"
+          : finalAmount === originalAmount
+            ? "original_resolved"
+            : "partially_prevented",
+      candidateId: candidate.candidateId,
+      originalAmount,
+      preventedAmount,
+      finalAmount,
+      sourceKind: candidate.sourceRef.kind,
+      sourceDefinitionId: FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID,
+      fullBodyConversionCorpBypassPaid: bypassPaid,
+      fullBodyConversionBypassCostPerDamage: 1,
     };
     setDamagePayload(legalAction, summary);
     clearEventModificationState(state);
@@ -19021,6 +19331,8 @@ function makeActionId(
   if (payload?.iceId) parts.push(String(payload.iceId));
   if (payload?.subroutineIndex !== undefined)
     parts.push(String(payload.subroutineIndex));
+  if (payload?.subroutineIndexes !== undefined)
+    parts.push(String(payload.subroutineIndexes));
   if (payload?.removeTagAmount !== undefined)
     parts.push(String(payload.removeTagAmount));
   if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
@@ -19321,6 +19633,18 @@ function publicContextForAction(
     context.postBreakStealthLoss = legalAction.payload.postBreakStealthLoss;
   }
   if (
+    legalAction.type === "break_subroutine" &&
+    typeof legalAction.payload?.breakSubroutineCount === "number"
+  ) {
+    context.breakSubroutineCount = legalAction.payload.breakSubroutineCount;
+  }
+  if (
+    legalAction.type === "break_subroutine" &&
+    legalAction.payload?.pileDriverMultiBreak === true
+  ) {
+    context.pileDriverMultiBreak = true;
+  }
+  if (
     legalAction.type === "resolve_choice" &&
     typeof legalAction.payload?.postBreakStealthLoss === "number"
   ) {
@@ -19385,6 +19709,8 @@ function publicContextForAction(
       "originalAmount",
       "preventedAmount",
       "finalAmount",
+      "fullBodyConversionCorpBypassPaid",
+      "fullBodyConversionBypassCostPerDamage",
       "codeViralCachePreservedCounters",
       "preservedCounterAmount",
       "remainingVirusCounters",
@@ -21291,12 +21617,14 @@ function applyPostBreakStealthLoss(
     (sum, source) => sum + source.available,
     0,
   );
-  if (breakerDefinition.id === RAMMING_PISTON_ID && availableStealth < lossAmount)
+  const exactStealthLoss = [RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(
+    breakerDefinition.id,
+  );
+  if (exactStealthLoss && availableStealth < lossAmount)
     throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
-  const requiredLoss =
-    breakerDefinition.id === RAMMING_PISTON_ID
-      ? lossAmount
-      : Math.min(lossAmount, availableStealth);
+  const requiredLoss = exactStealthLoss
+    ? lossAmount
+    : Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return;
   if (stealthSources.length > 1) {
     startHammerStealthLossChoice(
@@ -21328,6 +21656,9 @@ function applyPostBreakStealthLoss(
     postBreakStealthLoss: spent,
     ...(breakerDefinition.id === RAMMING_PISTON_ID
       ? { v1922RunnerProgramAbility: "ramming_piston_stealth_loss" }
+      : {}),
+    ...(breakerDefinition.id === PILE_DRIVER_ID
+      ? { v1922RunnerProgramAbility: "pile_driver_stealth_loss" }
       : {}),
   };
 }

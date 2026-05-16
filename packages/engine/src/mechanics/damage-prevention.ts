@@ -13,6 +13,9 @@ export const ABLATIVE_COUNTER_HARDWARE_CARD_ID = "onr_v1_121_armored-fridge";
 
 export const ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS = 7;
 
+export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID =
+  "onr_v1_127_full-body-conversion";
+
 export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
   Record<string, RuntimeDamagePreventionProfile>
 > = {
@@ -40,11 +43,6 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     maxPerTurn: 1,
     damageTypes: ["meat"],
     priority: 110,
-  },
-  "onr_v1_127_full-body-conversion": {
-    maxPerTurn: 1,
-    damageTypes: ["meat"],
-    priority: 121,
   },
   "onr_v1_128_green-knight-surge-buffers": {
     maxPerTurn: 2,

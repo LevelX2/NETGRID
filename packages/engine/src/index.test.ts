@@ -32659,6 +32659,270 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
   });
 });
 
+describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("uses Pile Driver as a source-bound multi-wall breaker with exact Stealth loss", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-pile-driver-multi-break",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_pile_driver_runner",
+          name: "Spotcheck Pile Driver Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_047_pile-driver", quantity: 1 },
+            { id: "onr_v1_011_cloak", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_pile_driver_corp",
+          name: "Spotcheck Pile Driver Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const pileDriverId = installRunnerProgramForTest(
+      state,
+      "onr_v1_047_pile-driver",
+    );
+    const cloakId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
+    setCardCounterForTest(state, cloakId, "recurring_credit", 3);
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_278_wall-of-ice");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === pileDriverId &&
+        action.payload?.subroutineIndexes === "0,1,2,3",
+    );
+    expect(breakAction.costs).toEqual([{ credits: 3 }]);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-pile-driver-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "spotcheck-pile-driver-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const removedSource = structuredClone(state);
+    removeEverywhere(removedSource, pileDriverId);
+    const beforeHash = hashState(removedSource);
+    const removedResult = applyAction(removedSource, {
+      matchId: removedSource.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: removedSource.stateVersion,
+      idempotencyKey: "spotcheck-pile-driver-removed-source",
+    });
+    expect(removedResult.ok).toBe(false);
+    expect(hashState(removedSource)).toBe(beforeHash);
+
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0, 1, 2, 3]);
+    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_047_pile-driver",
+      breakSubroutineCount: 4,
+      pileDriverMultiBreak: true,
+      postBreakStealthLoss: 3,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("routes Full Body Conversion through a Corp bypass-payment prevention window", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-full-body-conversion",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_full_body_runner",
+          name: "Spotcheck Full Body Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_127_full-body-conversion", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_full_body_corp",
+          name: "Spotcheck Full Body Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.runner.tags = 1;
+    state.runner.credits = 10;
+    state.corp.credits = 2;
+    installRunnerHardwareForTest(state, "onr_v1_127_full-body-conversion");
+    moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const gripBefore = state.runner.grip.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_301_punitive-counterstrike",
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: "v120.event_modification.prevent",
+      prompt: "Full Body Conversion",
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "full_body_conversion_pay_0",
+      "full_body_conversion_pay_1",
+      "full_body_conversion_pay_2",
+    ]);
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: mustAction(state, "corp", (action) => action.type === "resolve_choice").actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: ["full_body_conversion_pay_1"],
+      },
+      idempotencyKey: "spotcheck-full-body-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    state = applyChoice(state, "corp", "full_body_conversion_pay_1");
+    expect(state.corp.credits).toBe(1);
+    expect(state.runner.grip.length).toBe(gripBefore - 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "partially_prevented",
+      sourceDefinitionId: "onr_v1_127_full-body-conversion",
+      originalAmount: 2,
+      preventedAmount: 1,
+      finalAmount: 1,
+      fullBodyConversionCorpBypassPaid: 1,
+      fullBodyConversionBypassCostPerDamage: 1,
+      damageType: "meat",
+      damageAmount: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let preventAll = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-full-body-conversion-prevent-all",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_full_body_runner_all",
+          name: "Spotcheck Full Body Runner All",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_127_full-body-conversion", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "spotcheck_full_body_corp_all",
+          name: "Spotcheck Full Body Corp All",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    preventAll.runner.tags = 1;
+    preventAll.corp.credits = 0;
+    installRunnerHardwareForTest(preventAll, "onr_v1_127_full-body-conversion");
+    moveCorpCardToHq(preventAll, "onr_v1_301_punitive-counterstrike");
+    const preventAllGrip = preventAll.runner.grip.length;
+    preventAll = apply(
+      preventAll,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(preventAll, action) ===
+          "onr_v1_301_punitive-counterstrike",
+    );
+    expect(preventAll.pendingChoice?.options.map((option) => option.id)).toEqual([
+      "full_body_conversion_pay_0",
+    ]);
+    preventAll = applyChoice(preventAll, "corp", "full_body_conversion_pay_0");
+    expect(preventAll.runner.grip.length).toBe(preventAllGrip);
+    expect(preventAll.eventLog.at(-1)?.publicPayload).toMatchObject({
+      eventModificationOutcome: "prevented",
+      preventedAmount: 2,
+      finalAmount: 0,
+      damageAmount: 0,
+    });
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;

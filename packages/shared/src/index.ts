@@ -288,6 +288,8 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  bypassCostPerDamage?: number;
+  bypassPaymentSide?: Side;
 };
 
 export type EventModificationWindow = {
@@ -2918,11 +2920,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 meat damage.",
+      "Prevents all meat damage. For each 1 credit the Corp pays when meat damage is done, 1 meat damage is not prevented.",
     mechanics: [
       "install_hardware",
       "damage_prevention",
-      "damage_prevention_turn_limit",
+      "damage_prevention_full_meat",
+      "corp_bypass_payment",
       "meat_damage",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -8220,19 +8223,41 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Pile Driver",
     side: "runner",
     type: "program",
-    subtypes: ["icebreaker", "fracter", "stealth"],
+    subtypes: ["icebreaker", "fracter", "stealth", "noisy"],
     implementationStatus: "playable_mvp",
     installCost: 1,
     memoryCost: 1,
     strength: 7,
     recurringCredits: 1,
-    rulesText: "Stealth wall breaker with recurring run credits.",
+    rulesText:
+      "3 credits: Break up to four wall subroutines on a single piece of ice. 1 credit: +1 strength. Whenever you use Pile Driver's break-walls ability, lose a total of 3 credits from Stealth cards.",
+    abilities: [
+      {
+        id: "onr_v1_047_pile_driver_pump",
+        type: "pump_strength",
+        cost: { credits: 1 },
+        amount: 1,
+        timingPoint: "run.encounter_ice",
+      },
+      {
+        id: "onr_v1_047_pile_driver_break",
+        type: "break_subroutine",
+        cost: { credits: 3 },
+        iceSubtype: "wall",
+        postBreakStealthLoss: 3,
+        count: 4,
+        timingPoint: "run.encounter_ice",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",
       "pump_breaker",
       "break_subroutine",
+      "multi_subroutine_break",
       "subtype_stealth",
+      "subtype_noisy",
+      "stealth_loss",
       "recurring_credit",
       ONR_V1_LOCAL_PRIVATE,
     ],

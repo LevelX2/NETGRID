@@ -44,4 +44,4 @@ Die vollständigen Pflichtchecks werden im Jobbericht und Abschlussbericht dokum
 
 ## Removal Condition
 
-Ein Folgejob muss `Pile Driver` und `Full Body Conversion` mit eigenen Resolververträgen umsetzen. Erst danach kann diese Runde von `blocked` nach `done` gehoben werden.
+Follow-up 2026-05-16: `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` hat `Pile Driver` und `Full Body Conversion` mit eigenen Resolververträgen umgesetzt und grün geprüft.

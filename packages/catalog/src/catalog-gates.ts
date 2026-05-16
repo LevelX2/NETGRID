@@ -1954,7 +1954,7 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_121_armored-fridge":
     "Installed prevention tool: once each turn, prevent 2 meat damage.",
   "onr_v1_127_full-body-conversion":
-    "Installed prevention tool: once each turn, prevent 1 meat damage.",
+    "Prevents all meat damage. For each 1 credit the Corp pays when meat damage is done, 1 meat damage is not prevented.",
   "onr_v1_128_green-knight-surge-buffers":
     "Installed prevention tool: once each turn, prevent 2 net damage.",
   "onr_v1_130_lifesaver-nanosurgeons":

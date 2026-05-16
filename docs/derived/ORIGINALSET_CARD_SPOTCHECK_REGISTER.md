@@ -538,20 +538,33 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_VIRUS_LINK_ARCHIVES_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, `Pile Driver` und `Full Body Conversion` brauchen eigene Resolver-Verträge.
+Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt. Die offenen Resolver-Verträge für `Pile Driver` und `Full Body Conversion` wurden im Folgejob `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` erledigt.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
 | Cockroach | `onr_v1_013_cockroach` | Counter-Schwelle, Multi-Copy und Discard-Choice-Revalidation gehärtet | Teilfix grün |
-| Pile Driver | `onr_v1_047_pile-driver` | Blockiert: Multi-Wall-Break plus exakt 3 Stealth-Verlust braucht eigenen Resolver | Eigenen Resolver-Scope umsetzen |
+| Pile Driver | `onr_v1_047_pile-driver` | Folgejob umgesetzt: Multi-Wall-Break bis vier Subroutinen plus exakt 3 Stealth-Verlust grün | Erledigt in `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` |
 | Replicator | `onr_v1_056_replicator` | Nacharbeit umgesetzt: Trace-Subroutine-Breaker mit Pump und Nicht-Trace-Negativfall | Teilfix grün |
 | Scatter Shot | `onr_v1_057_scatter-shot` | Nacharbeit umgesetzt: restricted Recurring Credits für accessed Upgrade-Trashkosten plus Refresh | Teilfix grün |
-| Full Body Conversion | `onr_v1_127_full-body-conversion` | Blockiert: Meat-Damage-Prevention und Korp-Bypass driften vom Runtime-Stub | Eigenen Resolver-Scope umsetzen |
+| Full Body Conversion | `onr_v1_127_full-body-conversion` | Folgejob umgesetzt: vollständige Meat-Prevention mit Korp-Bypass-Zahlung grün | Erledigt in `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` |
 | Access through Alpha | `onr_v1_148_access-through-alpha` | Nacharbeit umgesetzt: Base Link 9 und genau eine Base-Link-Quelle pro Trace | Teilfix grün |
 | Detroit Police Contract | `onr_v1_198_detroit-police-contract` | Bestehender Counterpfad durch wrong-side/stale/0-Counter-Revalidation gehärtet | Teilfix grün |
 | Off-Site Backups | `onr_v1_296_off-site-backups` | Bestehender Archives-Choice-Pfad durch No-target-Fall gehärtet | Teilfix grün |
 | Urban Renewal | `onr_v1_307_urban-renewal` | Bestehender tagged-only Damage-Pfad durch Tag-Drift-Revalidation gehärtet | Teilfix grün |
 | Red Herrings | `onr_v1_366_red-herrings` | Nacharbeit umgesetzt: Tax bleibt nach Trash im selben Run aktiv | Teilfix grün |
+
+## Runde 2026-05-16-runner-breaker-prevention-resolvers
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` als Folgejob für offene Resolver-Verträge aus `2026-05-15-virus-link-archives`.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_BREAKER_PREVENTION_RESOLVERS_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Checks sind grün.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Pile Driver | `onr_v1_047_pile-driver` | Multi-Wall-Break mit bis zu vier Subroutinen, Source-/Target-Revalidation, Zusatzkosten und exakt 3 Stealth-Verlust umgesetzt | Abgeschlossen |
+| Full Body Conversion | `onr_v1_127_full-body-conversion` | Vollständige Meat-Damage-Prevention mit Korp-Bypass-Choice und side-/credit-validierter Zahlung umgesetzt | Abgeschlossen |
 
 ## Runde 2026-05-15-hidden-access-trace
 

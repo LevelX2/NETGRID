@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-breaker-prevention-resolvers
-status: inbox
+status: done
 createdAt: 2026-05-16T12:30:00+02:00
+startedAt: 2026-05-16T17:05:15+02:00
+completedAt: 2026-05-16T17:19:30+02:00
 requiresImplementation: true
 priority: high
 sourceBlockedJobs:
@@ -25,16 +27,16 @@ Der alte Sammeljob bleibt `blocked`, weil sichere Teilfixes bereits umgesetzt wu
 
 ### onr_v1_047_pile-driver - Pile Driver
 
-Status: offen.
+Status: umgesetzt.
 
 Aktueller Runtime-Stand: installierbares Stealth-/Fracter-Programm mit Pump-/Break-Grundfläche und Recurring-Credit-Oberfläche. Der bestätigte lokale Kartentext verlangt zusätzlich einen eigenen Break-Vertrag: `3: Break up to four wall subroutines on a single piece of ice` und beim Nutzen dieser Break-Walls-Fähigkeit exakt 3 Verlust von Stealth-Karten.
 
 Umsetzung:
 
-- Multi-Subroutine-Break-LegalAction für bis zu vier Wall-Subroutinen auf einem einzelnen encountered ICE modellieren.
-- Stealth-Verlust von exakt 3 als Kosten-/Choice-Vertrag abbilden; verfügbare Stealth-Quellen, Kostenverteilung und Sourcebindung in `applyAction` erneut validieren.
-- Nicht-Wall, falsches ICE, falscher Encounter, manipulierte Subroutine-Indizes, wrong-side und stale `stateVersion` ablehnen.
-- PublicPayload auf Break-Anzahl, Quelle und Stealth-Delta beschränken.
+- Multi-Subroutine-Break-LegalAction für bis zu vier Wall-Subroutinen auf einem einzelnen encountered ICE modelliert.
+- Stealth-Verlust von exakt 3 als Resolververtrag abgebildet; verfügbare Stealth-Quellen, Kosten und Sourcebindung werden in `applyAction` erneut validiert.
+- Falsches ICE, falscher Encounter, erledigte/manipulierte Subroutine-Indizes, wrong-side und stale `stateVersion` werden abgelehnt.
+- PublicPayload bleibt auf Quelle, Break-Anzahl und Stealth-Delta beschränkt.
 
 Akzeptanz:
 
@@ -44,16 +46,16 @@ Akzeptanz:
 
 ### onr_v1_127_full-body-conversion - Full Body Conversion
 
-Status: offen.
+Status: umgesetzt.
 
 Aktueller Runtime-Stand: generisches Damage-Prevention-Profil mit `maxPerTurn: 1` für Meat Damage. Der lokale Vertrag verlangt vollständige Meat-Damage-Prevention mit Korp-Zahlungs-/Bypass-Modell.
 
 Umsetzung:
 
-- Führenden Vertrag finalisieren und Runtime, Shared-Text, Katalog und AI-Hint synchronisieren.
-- Falls der lokale Vertrag gilt: Event-Modification-/Prevention-Fenster für vollständige Meat-Damage-Prevention ergänzen.
-- Korp-Bypass-Zahlung als LegalAction-/Choice-Fenster modellieren und in `applyAction` gegen Credits, Seite, Timing, Quelle, Schadensereignis und StateVersion revalidieren.
-- Damage-/Flatline-Payloads auf Beträge, Schadensart, Quelle und Ergebnis beschränken; keine Gripkarten leaken.
+- Führender lokaler Vertrag finalisiert und Runtime, Shared-Text und Katalog synchronisiert.
+- Event-Modification-/Prevention-Fenster verhindert Meat Damage vollständig, sofern die Korp keine Bypass-Credits zahlt.
+- Korp-Bypass-Zahlung wird als Korp-Choice modelliert und gegen Credits, Seite, Timing, Quelle, Schadensereignis und StateVersion revalidiert.
+- Damage-/Flatline-Payloads bleiben auf Beträge, Schadensart, Quelle und Ergebnis beschränkt; keine Gripkarten werden geleakt.
 
 Akzeptanz:
 
@@ -68,3 +70,13 @@ Akzeptanz:
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
+## Abschluss
+
+Umgesetzt in `packages/engine/src/index.ts`, `packages/engine/src/mechanics/damage-prevention.ts`, `packages/shared/src/index.ts`, `packages/catalog/src/catalog-gates.ts` und `packages/engine/src/index.test.ts`.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test -- --runInBand` - grün, 470 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 17 Dateien / 133 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 2 Dateien / 48 Tests.
+- `corepack pnpm typecheck` - grün.
