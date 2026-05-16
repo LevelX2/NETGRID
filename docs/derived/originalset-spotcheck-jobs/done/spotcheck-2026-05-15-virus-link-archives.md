@@ -1,10 +1,11 @@
 ---
 jobId: spotcheck-2026-05-15-virus-link-archives
-status: blocked
+status: done
 createdAt: 2026-05-15T10:18:00+01:00
 startedAt: 2026-05-15T16:47:29.6092039+02:00
 blockedAt: 2026-05-15T17:05:01.5901869+02:00
-blockerReason: Pile Driver und Full Body Conversion brauchen eigene Resolver-Vertraege; alle sicheren Teilfixes wurden umgesetzt und werden committed.
+completedAt: 2026-05-16T16:16:30.095Z
+completedReason: Follow-up spotcheck-2026-05-16-runner-breaker-prevention-resolvers completed Pile Driver and Full Body Conversion resolver contracts.
 requiresImplementation: true
 priority: normal
 cards:
@@ -268,7 +269,11 @@ Akzeptanzkriterien:
 
 ## Umsetzungsergebnis
 
-Finaler Status: `blocked`
+Finaler Status: `done`
+
+Abschluss 2026-05-16:
+- Der Folgejob `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` hat die beiden Removal-Conditions `Pile Driver` und `Full Body Conversion` umgesetzt und grün geprüft.
+- Der ursprüngliche Sammeljob ist damit fachlich abgeschlossen.
 
 Umgesetzte sichere Teilfixes:
 
@@ -279,10 +284,10 @@ Umgesetzte sichere Teilfixes:
 - `Detroit Police Contract`, `Off-Site Backups` und `Urban Renewal`: Revalidation-/No-target-/Tag-Drift-Fälle ergänzt.
 - `Red Herrings`: runweiter Tax-Marker ergänzt, damit die Agenda-Steal-Tax auch nach Trash von Red Herrings im selben Run erhalten bleibt.
 
-Nicht im Lauf lösbar:
+Nachträglich erledigte Removal-Conditions:
 
-- `Pile Driver`: Der lokale Text verlangt einen Bündel-Break von bis zu vier Wall-Subroutinen mit exakt 3 Stealth-Verlust. Die bestehende Breaker-Engine ist auf einzelne Subroutine-Aktionen und Hammer/Ramming-spezifische Stealth-Folgekosten zugeschnitten. Ein sauberer Resolver braucht einen eigenen Multi-Subroutine-Target-Vertrag inklusive Choice-/Revalidation-/Payload-Modell.
-- `Full Body Conversion`: Lokaler Text und aktuelle Runtime driften stärker auseinander. Der lokale Vertrag verlangt vollständige Meat-Damage-Prevention mit Korp-Zahlungs-/Bypass-Modell; die Runtime hat nur `prevent 1 meat once per turn`. Das braucht ein eigenes Event-Modification-/Kostenfenster statt einer Zahlenkorrektur.
+- `Pile Driver`: Folgejob umgesetzt mit Multi-Wall-Break bis zu vier Subroutinen und exakt 3 Stealth-Verlust.
+- `Full Body Conversion`: Folgejob umgesetzt mit vollständiger Meat-Damage-Prevention und Korp-Bypass-Zahlung.
 
 Geänderte Dateien:
 
@@ -305,7 +310,7 @@ Geänderte Dateien:
 - `docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md`
 - `data/reports/originalset-card-spotcheck-register.json`
 - `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
-- `docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-virus-link-archives.md`
+- `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-virus-link-archives.md`
 
 Checks:
 
@@ -316,4 +321,4 @@ Checks:
 
 Removal Condition:
 
-- Einen eigenen Folgejob für `Pile Driver` Multi-Wall-Break mit Stealth-Verlust und `Full Body Conversion` Meat-Damage-Prevention/Corp-Bypass schreiben, implementieren und mit Engine-/Chronik-/Replay-/Hidden-Info-Tests abschließen.
+- Erfüllt durch `spotcheck-2026-05-16-runner-breaker-prevention-resolvers`.

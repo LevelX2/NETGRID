@@ -1,13 +1,13 @@
 # Originalset-Spotcheck Umsetzung 2026-05-15 Virus/Link/Archives
 
-Quelle: `docs/derived/originalset-spotcheck-jobs/blocked/spotcheck-2026-05-15-virus-link-archives.md`
+Quelle: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-virus-link-archives.md`
 
 ## Ergebnis
 
-Der Job wurde mit grünen Teilfixes umgesetzt, bleibt aber fachlich `blocked`, weil zwei Karten eigene Resolververträge benötigen:
+Der Job ist fachlich `done`. Die ursprünglich offenen Resolververträge wurden durch den Folgejob `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` abgeschlossen:
 
-- `Pile Driver`: benötigt einen Multi-Subroutine-Wall-Breaker für bis zu vier Subroutinen plus exakt 3 Stealth-Verlust.
-- `Full Body Conversion`: benötigt ein Meat-Damage-Prevention-Fenster mit vollständiger Prevention und Korp-Zahlungs-/Bypass-Modell.
+- `Pile Driver`: Multi-Subroutine-Wall-Breaker für bis zu vier Subroutinen plus exakt 3 Stealth-Verlust.
+- `Full Body Conversion`: Meat-Damage-Prevention-Fenster mit vollständiger Prevention und Korp-Zahlungs-/Bypass-Modell.
 
 Umgesetzt wurden die sicheren, eng begrenzten Härtungen:
 
@@ -42,6 +42,6 @@ Umgesetzt wurden die sicheren, eng begrenzten Härtungen:
 
 Die vollständigen Pflichtchecks werden im Jobbericht und Abschlussbericht dokumentiert.
 
-## Removal Condition
+## Abschluss
 
-Follow-up 2026-05-16: `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` hat `Pile Driver` und `Full Body Conversion` mit eigenen Resolververträgen umgesetzt und grün geprüft.
+Follow-up 2026-05-16: `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` hat `Pile Driver` und `Full Body Conversion` mit eigenen Resolververträgen umgesetzt und grün geprüft. Der Sammeljob wird deshalb als `done` geführt.
