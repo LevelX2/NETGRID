@@ -41,4 +41,4 @@ Der Job wurde fachlich umgesetzt. Die zehn bereits decklegalen Originalset-Karte
 
 Keine fachlichen Blocker aus diesem Spotcheck. Weitere Vollresolver bleiben in ihren bereits blockierten Spotcheck-Jobs dokumentiert und wurden in diesem Lauf nicht berührt.
 
-Commit-Status: `commit_pending`. Der lokale Commit ist durch `Permission denied` beim Erstellen von `.git/index.lock` blockiert; die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git` konnte ohne erhöhte Berechtigung nicht entfernt werden.
+Commit-Status: `done`. Der lokale Commit wurde nach erneutem Worktree-Gitdir-Schreibtest erfolgreich erstellt.
