@@ -182,6 +182,8 @@ export function actionButtonLabel(action: LegalAction): string {
 
 export function contextualCardActionLabel(action: LegalAction): string {
   switch (action.type) {
+    case "gain_credit":
+      return installedCardAbilityContextLabel(action) ?? actionButtonLabel(action);
     case "install_card":
       return installContextLabel(action);
     case "play_event":
@@ -215,6 +217,42 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
   return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
+}
+
+function installedCardAbilityContextLabel(action: LegalAction): string | null {
+  if (typeof action.payload?.v1917AssetAbility !== "string") return null;
+  switch (action.payload.v1917AssetAbility) {
+    case "gain_credits": {
+      const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 0);
+      return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : stripActionSourcePrefix(action.label);
+    }
+    case "trace_3_tag": {
+      const strength = Number(action.payload.traceStrength ?? 3);
+      return Number.isFinite(strength) && strength > 0 ? `Trace ${strength} starten` : stripActionSourcePrefix(action.label);
+    }
+    case "reveal_rd_top":
+      return "R&D-Spitze revealn";
+    case "reorder_rd_top2":
+      return "R&D-Spitze anordnen";
+    case "rescheduler_hq_shuffle_draw":
+      return "HQ in R&D mischen und ziehen";
+    case "meat_damage_1":
+      return "1 Meat Damage";
+    case "spinn_load_pool": {
+      const amount = Number(action.payload.addCounterAmount ?? 6);
+      return Number.isFinite(amount) && amount > 0 ? `${amount} Bits laden` : "Bits laden";
+    }
+    case "trash_installed_runner_card":
+    case "remove_virus_counter":
+      return stripActionSourcePrefix(action.label);
+    default:
+      return stripActionSourcePrefix(action.label);
+  }
+}
+
+function stripActionSourcePrefix(label: string): string {
+  const stripped = /^[^:]+:\s*(.+)$/.exec(label.trim())?.[1] ?? label;
+  return normalizeVisibleTerms(stripped);
 }
 
 function resourceAbilityContextLabel(action: LegalAction): string | null {

@@ -140,6 +140,23 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(contextualCardActionLabel(seeya)).toBe("SeeYa: Karte in HQ expose");
   });
 
+  it("removes redundant installed asset names from card-context action labels", () => {
+    const bbs = legalAction("corp", "gain_credit", "bbs_1", "BBS Whispering Campaign: 2 Credits", {
+      cardId: "bbs_1",
+      v1917AssetAbility: "gain_credits",
+      gainCreditsAmount: 2
+    });
+    const bloodCat = legalAction("corp", "gain_credit", "blood_cat_1", "Blood Cat: Trace 5 starten", {
+      cardId: "blood_cat_1",
+      v1917AssetAbility: "trace_3_tag",
+      traceStrength: 5
+    });
+
+    expect(actionButtonLabel(bbs)).toBe("BBS Whispering Campaign: 2 Credits");
+    expect(contextualCardActionLabel(bbs)).toBe("2 Credits");
+    expect(contextualCardActionLabel(bloodCat)).toBe("Trace 5 starten");
+  });
+
   it("labels encounter breaker actions against the current ICE", () => {
     const encounteredIce = card("ice_2", "Data Wall", "ice");
     const running = view("runner", {
