@@ -180,6 +180,81 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(input)).not.toContain("cardInstances");
   });
 
+  it("chooses search-card programs by visible value and ignores display-only options", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-search-choice-program-selection" }),
+    );
+    state.pendingChoice = {
+      choiceId: "choice_search_program",
+      side: "runner",
+      source: "v1911.self_modifying_code_install_program:smc",
+      prompt: "Programm aus dem Stack installieren",
+      kind: "select_cards",
+      options: [
+        { id: "display_event", label: "Simple Economy Event", value: "event_1", selectable: false },
+        { id: "expensive_program", label: "Expensive Program", value: "expensive_1" },
+        { id: "simple_decoder", label: "Simple Decoder", value: "decoder_1" },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: state.stateVersion,
+      visibility: "private_to_side",
+      stackSearchResolution: {
+        reveal: "public",
+        destination: "install_program",
+        shuffleAfter: true,
+      },
+    };
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const searchInput = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        own: {
+          ...input.playerView.own,
+          credits: 3,
+          memoryUsed: 0,
+          memoryLimit: 4,
+        },
+        pendingChoice: {
+          ...input.playerView.pendingChoice!,
+          options: [
+            {
+              id: "display_event",
+              label: "Simple Economy Event",
+              value: "event_1",
+              selectable: false,
+              card: { instanceId: "event_1", known: true, title: "Simple Economy Event", definitionId: "simple_economy_event", type: "event" as const, cost: 0 },
+            },
+            {
+              id: "expensive_program",
+              label: "Expensive Program",
+              value: "expensive_1",
+              card: { instanceId: "expensive_1", known: true, title: "Expensive Program", definitionId: "expensive_program", type: "program" as const, installCost: 8, memoryCost: 6 },
+            },
+            {
+              id: "simple_decoder",
+              label: "Simple Decoder",
+              value: "decoder_1",
+              card: { instanceId: "decoder_1", known: true, title: "Simple Decoder", definitionId: "simple_decoder", type: "program" as const, subtypes: ["Icebreaker", "Decoder"], installCost: 2, memoryCost: 1 },
+            },
+          ],
+        },
+      },
+    };
+
+    const decision = chooseRunnerAction(searchInput);
+
+    expect(decision.reasonCode).toBe("runner.choice.resolve");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: "choice_search_program",
+      selectedOptionIds: ["simple_decoder"],
+    });
+    expect(JSON.stringify(decision)).not.toContain("display_event");
+  });
+
   it("uses The Shell Traders LegalActions and mandatory Shell-counter choices", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-shell-traders" }),

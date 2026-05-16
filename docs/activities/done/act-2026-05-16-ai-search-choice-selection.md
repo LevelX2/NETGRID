@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-16-ai-search-choice-selection
-status: inbox
+status: done
 kind: improvement
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-16
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/ai test -- index.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
 ---
 
 # KI-Auswahl bei Search-Choices verbessern
@@ -61,4 +66,14 @@ Die KI soll bei Search-Effekten nicht nur die erste auswählbare Karte nehmen, s
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-05-17.
+
+- `select_cards`-Search-Choices nutzen jetzt vor dem generischen Fallback eine deterministische Bewertungsfunktion.
+- Display-only Optionen mit `selectable: false` bleiben aus KI-Auswahlen ausgeschlossen.
+- Programmsuchen, insbesondere `install_program`-Stack-Suchen, bevorzugen sichtbare Programme nach Installierbarkeit, Kosten, MU, fehlenden Breaker-/Rig-Rollen und stabilen Tie-Breakern.
+- Die Heuristik nutzt nur `PlayerView`, LegalActions und sichtbare Choice-/Card-Felder; keine Hidden-Info-, Replay- oder StateHash-Änderung.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/ai test -- index.test.ts`: grün, 1 Datei / 121 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck`: grün.
