@@ -365,8 +365,8 @@
       "roundId": "2026-05-16-runner-hardware-link-resources",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_HARDWARE_LINK_RESOURCES_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-hardware-link-resources.md",
-      "jobStatus": "committed",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-runner-hardware-link-resources.md",
+      "jobStatus": "done",
       "cards": [
         {
           "cardId": "onr_v1_128_green-knight-surge-buffers",
