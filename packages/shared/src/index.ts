@@ -7410,9 +7410,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 2,
-    rulesText: "Installed hardware for tag-risk and meat-damage protection.",
+    recurringCredits: 2,
+    rulesText:
+      "Put 2 bits on Armored Road Home when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them at the start of your next turn. [T]: Prevent up to 3 meat damage.",
     mechanics: [
       "install_hardware",
+      "recurring_credit",
+      "recurring_start_turn",
       "tag_avoid",
       "damage_prevention",
       ONR_V1_LOCAL_PRIVATE,
@@ -7426,10 +7430,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
+    recurringCredits: 2,
     rulesText:
-      "Installed hardware for tag interaction and tag removal planning.",
+      "Put 2 bits on Mobile Environment when it is installed. Use these bits only to pay for removing tags. If you use any of these bits, replace them at the start of your next turn.",
     mechanics: [
       "install_hardware",
+      "recurring_credit",
+      "recurring_start_turn",
       "tag_avoid",
       "remove_tag",
       ONR_V1_LOCAL_PRIVATE,
@@ -8272,8 +8279,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["stealth"],
     implementationStatus: "playable_mvp",
     installCost: 11,
-    recurringCredits: 1,
-    rulesText: "Hardware that supplies recurring stealth credits for runs.",
+    recurringCredits: 3,
+    rulesText:
+      "Put 3 bits on Microcyb Owl when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn.",
     mechanics: [
       "install_hardware",
       "subtype_stealth",

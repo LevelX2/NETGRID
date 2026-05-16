@@ -11045,7 +11045,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-installed-helpers"));
     state.runner.credits = 20;
-    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
     const searchAction = mustAction(
@@ -11094,6 +11094,121 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("limits Self-Modifying Code to ICE encounters and removes the option after the run", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-smc-encounter-window"),
+    );
+    state.runner.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
+    putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.v1911HiddenZoneAbility ===
+          "self_modifying_code_install_program",
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.v1911HiddenZoneAbility ===
+            "self_modifying_code_install_program",
+      ),
+    ).toBe(true);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toBeUndefined();
+    expect(state.timingPoint).toBe("runner_action.main");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.payload?.v1911HiddenZoneAbility ===
+          "self_modifying_code_install_program",
+      ),
+    ).toBe(false);
+  });
+
+  it("resolves Self-Modifying Code as a public reveal, source trash, paid install and deterministic shuffle", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-smc-install"),
+    );
+    state.runner.credits = 20;
+    const smcId = installRunnerProgramForTest(
+      state,
+      "onr_v1_059_self-modifying-code",
+    );
+    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "self_modifying_code_install_program",
+    );
+    expect(state.runner.heap).toContain(smcId);
+    expect(state.pendingChoice?.source).toContain(
+      "v1911.self_modifying_code_install_program",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(
+      getPlayerView(state, "runner").pendingChoice?.stackSearchResolution,
+    ).toMatchObject({
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+    });
+
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetProgramId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.rig.programs).toContain(targetProgramId);
+    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "self_modifying_code_install_program",
+      publicRevealDefinitionId: "simple_decoder",
+      searchDestination: "runner_rig",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
@@ -14993,6 +15108,162 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       actionType: "play_operation",
     });
   });
+
+  it("loads Armadillo bits for tag removal and refreshes them at Runner turn start", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-armadillo-tag-bits"),
+    );
+    state.runner.credits = 2;
+    state.runner.clicks = 5;
+    moveRunnerCardToGrip(state, "onr_v1_120_armadillo-armored-road-home");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_120_armadillo-armored-road-home",
+    );
+    const armadilloId = state.runner.rig.hardware.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_v1_120_armadillo-armored-road-home",
+    );
+    expect(armadilloId).toBeDefined();
+    if (!armadilloId) throw new Error("Missing Armadillo");
+    expect(cardCounterAmount(state, armadilloId, "recurring_credit")).toBe(2);
+    expect(
+      getPlayerView(state, "corp").opponent.rig?.find(
+        (card) =>
+          card.definitionId ===
+          "onr_v1_120_armadillo-armored-road-home",
+      )?.counters?.recurring_credit,
+    ).toBe(2);
+
+    state.runner.tags = 1;
+    state.runner.credits = 0;
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "remove_tag",
+      ),
+    ).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "remove_tag");
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.credits).toBe(0);
+    expect(cardCounterAmount(state, armadilloId, "recurring_credit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "remove_tag",
+      amount: 1,
+      armadilloRecurringCreditsSpent: 2,
+      tagRemovalRecurringCreditsSpent: 2,
+      runnerCreditsSpent: 0,
+      tagRemovalCreditSourceDefinitionIds:
+        "onr_v1_120_armadillo-armored-road-home",
+    });
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "runner"
+    ) {
+      state = applyChoice(
+        state,
+        "runner",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "corp"
+    ) {
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
+    expect(cardCounterAmount(state, armadilloId, "recurring_credit")).toBe(2);
+  });
+
+  it("loads Drifter bits for tag removal and refreshes them at Runner turn start", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-drifter-tag-bits"),
+    );
+    state.runner.credits = 0;
+    state.runner.clicks = 5;
+    moveRunnerCardToGrip(state, "onr_v1_126_drifter-mobile-environment");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_126_drifter-mobile-environment",
+    );
+    const drifterId = state.runner.rig.hardware.find(
+      (cardId) =>
+        state.cardInstances[cardId]?.definitionId ===
+        "onr_v1_126_drifter-mobile-environment",
+    );
+    expect(drifterId).toBeDefined();
+    if (!drifterId) throw new Error("Missing Drifter");
+    expect(cardCounterAmount(state, drifterId, "recurring_credit")).toBe(2);
+    expect(
+      getPlayerView(state, "corp").opponent.rig?.find(
+        (card) =>
+          card.definitionId === "onr_v1_126_drifter-mobile-environment",
+      )?.counters?.recurring_credit,
+    ).toBe(2);
+
+    state.runner.tags = 1;
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "remove_tag",
+      ),
+    ).toBe(true);
+    state = apply(state, "runner", (action) => action.type === "remove_tag");
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.credits).toBe(0);
+    expect(cardCounterAmount(state, drifterId, "recurring_credit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "remove_tag",
+      amount: 1,
+      tagRemovalRecurringCreditsSpent: 2,
+      runnerCreditsSpent: 0,
+      tagRemovalCreditSourceDefinitionIds:
+        "onr_v1_126_drifter-mobile-environment",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "armadilloRecurringCreditsSpent",
+    );
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "runner"
+    ) {
+      state = applyChoice(
+        state,
+        "runner",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    if (
+      state.pendingChoice?.source === "discard_phase" &&
+      state.pendingChoice.side === "corp"
+    ) {
+      state = applyChoice(
+        state,
+        "corp",
+        String(state.pendingChoice.options[0]?.id),
+      );
+    }
+    expect(cardCounterAmount(state, drifterId, "recurring_credit")).toBe(2);
+  });
 });
 
 describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
@@ -15629,9 +15900,10 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-stealth-recurring"),
     );
-    state.runner.credits = 12;
+    state.runner.credits = 30;
     moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
     moveRunnerCardToGrip(state, "onr_v1_140_raven-microcyb-eagle");
+    moveRunnerCardToGrip(state, "onr_v1_141_raven-microcyb-owl");
     state = apply(
       state,
       "runner",
@@ -15646,6 +15918,13 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_140_raven-microcyb-eagle",
     );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_141_raven-microcyb-owl",
+    );
 
     const invisibilityId = state.runner.rig.programs.find(
       (id) =>
@@ -15656,14 +15935,21 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
         state.cardInstances[id]?.definitionId ===
         "onr_v1_140_raven-microcyb-eagle",
     );
+    const owlId = state.runner.rig.hardware.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_141_raven-microcyb-owl",
+    );
     expect(invisibilityId).toBeDefined();
     expect(eagleId).toBeDefined();
-    if (!invisibilityId || !eagleId)
+    expect(owlId).toBeDefined();
+    if (!invisibilityId || !eagleId || !owlId)
       throw new Error("Missing installed V1.9.16 recurring cards");
     expect(
       state.cardInstances[invisibilityId]?.counters?.recurring_credit,
     ).toBe(1);
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+    expect(state.cardInstances[owlId]?.counters?.recurring_credit).toBe(3);
 
     state.cardInstances[invisibilityId] = {
       ...state.cardInstances[invisibilityId]!,
@@ -15679,6 +15965,13 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
         recurring_credit: 0,
       },
     };
+    state.cardInstances[owlId] = {
+      ...state.cardInstances[owlId]!,
+      counters: {
+        ...state.cardInstances[owlId]!.counters,
+        recurring_credit: 0,
+      },
+    };
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.maxHandSize = 100;
@@ -15688,6 +15981,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       state.cardInstances[invisibilityId]?.counters?.recurring_credit,
     ).toBe(1);
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+    expect(state.cardInstances[owlId]?.counters?.recurring_credit).toBe(3);
   });
 
   it("hosts V1.9.16 programs on Imp and keeps hosted-card trash deterministic", () => {

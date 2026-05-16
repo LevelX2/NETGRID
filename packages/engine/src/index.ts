@@ -327,6 +327,11 @@ const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const BLACK_ICE_QUALITY_ASSURANCE_ID =
   "onr_v1_191_black-ice-quality-assurance";
+const ARMADILLO_ARMORED_ROAD_HOME_ID =
+  "onr_v1_120_armadillo-armored-road-home";
+const DRIFTER_MOBILE_ENVIRONMENT_ID =
+  "onr_v1_126_drifter-mobile-environment";
+const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
 const BROKER_ID = "onr_v1_154_broker";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -335,6 +340,10 @@ const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
 const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
 const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
+const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
+  ARMADILLO_ARMORED_ROAD_HOME_ID,
+  DRIFTER_MOBILE_ENVIRONMENT_ID,
+]);
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
 const FANG_ID = "onr_v1_240_fang";
@@ -3934,7 +3943,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           { clicks: 1 },
         ]),
       );
-    if (state.runner.tags > 0 && state.runner.credits >= 2) {
+    if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
       actions.push(
         action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [
           { clicks: 1, credits: 2 },
@@ -4263,6 +4272,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, cardId);
       if (
         STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
+        definition.id !== SELF_MODIFYING_CODE_ID &&
         state.runner.stack.some(
           (id) => definitionFor(state, id).type === "program",
         )
@@ -5708,6 +5718,42 @@ function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
   ];
 }
 
+function selfModifyingCodeEncounterActions(state: GameState): LegalAction[] {
+  if (
+    state.timingPoint !== "run.encounter_ice" ||
+    state.activeSide !== "runner" ||
+    !state.run?.encounteredIceId ||
+    !state.runner.stack.some((cardId) => definitionFor(state, cardId).type === "program")
+  )
+    return [];
+  return state.runner.rig.programs
+    .slice()
+    .sort()
+    .filter((cardId) => definitionFor(state, cardId).id === SELF_MODIFYING_CODE_ID)
+    .map((cardId) =>
+      action(
+        state,
+        "runner",
+        "trigger_ability",
+        "Self-Modifying Code trashen: Programm aus Stack installieren",
+        cardId,
+        [],
+        {
+          cardId,
+          v1911HiddenZoneAbility: "self_modifying_code_install_program",
+          hiddenZoneBarrier: true,
+        },
+        {
+          abilityRef: {
+            sourceCardInstanceId: cardId,
+            abilityId: "self_modifying_code_install_program",
+          },
+          effectRef: "effect.self_modifying_code_install_program",
+        },
+      ),
+    );
+}
+
 function runnerEncounterActions(state: GameState): LegalAction[] {
   const run = mustRun(state);
   if (!run.encounteredIceId) return [];
@@ -5719,6 +5765,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
   );
   const encounteredIceStrength = iceStrengthFor(state, encounteredIceId);
   const actions: LegalAction[] = [];
+  actions.push(...selfModifyingCodeEncounterActions(state));
   for (const breakerId of state.runner.rig.programs) {
     const breaker = definitionFor(state, breakerId);
     if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
@@ -7946,7 +7993,7 @@ function performAction(
         };
         return;
       }
-      spendCredits(state, "runner", 2);
+      spendRunnerTagRemovalCredits(state, 2, legalAction);
       state.runner.tags = Math.max(0, state.runner.tags - 1);
       return;
     case "purge_virus_counters": {
@@ -7978,6 +8025,13 @@ function performAction(
       endTurn(state, legalAction.side, legalAction);
       return;
     case "trigger_ability":
+      if (
+        legalAction.payload?.v1911HiddenZoneAbility ===
+        "self_modifying_code_install_program"
+      ) {
+        resolveSelfModifyingCodeAbility(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.v1922RunnerProgramAbility === "false_echo_force_rez") {
         resolveFalseEchoForceRez(state, legalAction);
         return;
@@ -14969,6 +15023,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
   return (
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v098.search_stack") ||
+      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("v1911.short_circuit_search"))
@@ -14980,11 +15035,20 @@ function stackSearchResolutionForChoice(
 ): ChoiceRequest["stackSearchResolution"] | undefined {
   if (!isRunnerStackSearchChoice(choice)) return undefined;
   return {
-    reveal: choice.source.startsWith("v1911.short_circuit_search")
-      ? "public"
-      : "hidden",
-    destination: "grip",
+    reveal:
+      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.self_modifying_code_install_program")
+        ? "public"
+        : "hidden",
+    destination: choice.source.startsWith(
+      "v1911.self_modifying_code_install_program",
+    )
+      ? "install_program"
+      : "grip",
     shuffleAfter: true,
+    ...(choice.source.startsWith("v1911.self_modifying_code_install_program")
+      ? { publicRevealKind: "reveal" }
+      : {}),
   };
 }
 
@@ -15079,12 +15143,27 @@ function resolvePendingChoice(
     return;
   }
   if (
+    state.pendingChoice.source.startsWith(
+      "v1911.self_modifying_code_install_program",
+    ) ||
     state.pendingChoice.source.startsWith("v098.search_stack") ||
     state.pendingChoice.source.startsWith("v1911.search_stack") ||
     state.pendingChoice.source.startsWith("v1912.search_stack") ||
     state.pendingChoice.source.startsWith("v1911.short_circuit_search")
   ) {
+    if (
+      state.pendingChoice.source.startsWith(
+        "v1911.self_modifying_code_install_program",
+      )
+    ) {
+      resolveSelfModifyingCodeStackChoice(state, legalAction, playerAction);
+      return;
+    }
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1911.self_modifying_code_free_mu")) {
+    resolveSelfModifyingCodeFreeMuChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -15556,6 +15635,237 @@ function startRunnerStackSearchChoice(
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
+  };
+}
+
+function startSelfModifyingCodeStackChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): void {
+  startRunnerStackSearchChoice(
+    state,
+    `v1911.self_modifying_code_install_program:${sourceCardId}`,
+    "v1911_self_modifying_code_install_program",
+  );
+  if (state.pendingChoice) {
+    state.pendingChoice.stackSearchResolution = {
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+    };
+  }
+}
+
+function resolveSelfModifyingCodeAbility(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Self-Modifying Code nutzen.");
+  if (state.timingPoint !== "run.encounter_ice" || !state.run?.encounteredIceId)
+    throw new Error("Self-Modifying Code ist nur während eines ICE-Encounters legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("Self-Modifying Code ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== SELF_MODIFYING_CODE_ID)
+    throw new Error("Die Self-Modifying-Code-Fähigkeit passt nicht zur Karte.");
+  if (!state.runner.stack.some((cardId) => definitionFor(state, cardId).type === "program"))
+    throw new Error("Keine suchbare Programmkarte im Stack.");
+
+  trashRunnerInstalledCardToHeap(state, sourceCardId);
+  startSelfModifyingCodeStackChoice(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
+    hiddenZoneAction: "self_modifying_code_install_program",
+    trashOnUse: true,
+    trashedCardDefinitionId: SELF_MODIFYING_CODE_ID,
+  };
+}
+
+function installRunnerProgramFromStackWithoutClick(
+  state: GameState,
+  cardId: CardInstanceId,
+  legalAction: LegalAction,
+): boolean {
+  if (!state.runner.stack.includes(cardId)) return false;
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program") return false;
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    return false;
+  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
+    return false;
+  if (state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit)
+    return false;
+
+  spendRunnerInstallCredits(state, definition.installCost ?? 0, "program");
+  removeFromAllZones(state, cardId);
+  state.runner.rig.programs.push(cardId);
+  state.runner.memoryUsed += definition.memoryCost ?? 0;
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+  };
+  if ((definition.recurringCredits ?? 0) > 0)
+    setCardCounter(
+      state,
+      cardId,
+      "recurring_credit",
+      definition.recurringCredits ?? 0,
+    );
+  if (
+    definition.mechanics.includes("virus") &&
+    definition.id !== BUTCHER_BOY_ID &&
+    definition.id !== SKIVVISS_ID
+  )
+    addCardCounter(state, cardId, "virus", 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    installedProgramDefinitionId: definition.id,
+    installCostPaid: definition.installCost ?? 0,
+    runnerCreditsAfter: state.runner.credits,
+  };
+  return true;
+}
+
+function startSelfModifyingCodeFreeMuChoice(
+  state: GameState,
+  selectedProgramId: CardInstanceId,
+): boolean {
+  const options = state.runner.rig.programs
+    .filter((cardId) => runnerProgramUsesMemory(state, cardId))
+    .sort()
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (options.length === 0) return false;
+  state.pendingChoice = {
+    choiceId: `v1911_self_modifying_code_free_mu_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.self_modifying_code_free_mu:${selectedProgramId}:${state.stateVersion + 1}`,
+    prompt: "MU freimachen",
+    kind: "select_cards",
+    options,
+    minSelections: 1,
+    maxSelections: options.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  return true;
+}
+
+function resolveSelfModifyingCodeStackChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1911.self_modifying_code_install_program"))
+    throw new Error("Es ist keine Self-Modifying-Code-Choice offen.");
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !state.runner.stack.includes(cardId))
+    throw new Error("Die gewählte Karte liegt nicht im Stack.");
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program")
+    throw new Error("Self-Modifying Code kann nur Programme installieren.");
+
+  const canPay =
+    availableRunnerProgramInstallCredits(state) >= (definition.installCost ?? 0);
+  const uniqueBlocked =
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id);
+  const needsMemory =
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit;
+  if (canPay && !uniqueBlocked && needsMemory) {
+    shuffleRunnerStack(state, `v1911_self_modifying_code:${choice.choiceId}:shuffle`);
+    const opened = startSelfModifyingCodeFreeMuChoice(state, cardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "self_modifying_code_install_program",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionId: definition.id,
+      selectedCount: 1,
+      searchDestination: "install_program",
+      shuffled: true,
+      installDeferredForMemory: opened,
+    };
+    if (!opened) delete state.pendingChoice;
+    return;
+  }
+
+  const installed =
+    canPay && !uniqueBlocked
+      ? installRunnerProgramFromStackWithoutClick(state, cardId, legalAction)
+      : false;
+  shuffleRunnerStack(state, `v1911_self_modifying_code:${choice.choiceId}:shuffle`);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "self_modifying_code_install_program",
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: definition.id,
+    selectedCount: 1,
+    searchDestination: installed ? "runner_rig" : "runner_stack",
+    shuffled: true,
+    installed,
+    ...(uniqueBlocked ? { installBlockedReason: "unique_already_installed" } : {}),
+    ...(!canPay ? { installBlockedReason: "insufficient_credits" } : {}),
+  };
+}
+
+function resolveSelfModifyingCodeFreeMuChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1911.self_modifying_code_free_mu"))
+    throw new Error("Es ist keine Self-Modifying-Code-MU-Choice offen.");
+  const selectedProgramId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (!selectedProgramId || !state.runner.stack.includes(selectedProgramId))
+    throw new Error("Das Self-Modifying-Code-Programm liegt nicht mehr im Stack.");
+  const trashIds = selectedChoiceCardIds(choice, playerAction);
+  if (trashIds.length === 0) throw new Error("Es wurde kein Programm gewählt.");
+  const uniqueTrashIds = [...new Set(trashIds)];
+  if (uniqueTrashIds.length !== trashIds.length)
+    throw new Error("Die MU-Auswahl enthält doppelte Karten.");
+  for (const cardId of uniqueTrashIds) {
+    if (!state.runner.rig.programs.includes(cardId))
+      throw new Error("Die MU-Auswahl enthält kein installiertes Programm.");
+    if (!runnerProgramUsesMemory(state, cardId))
+      throw new Error("Dieses Programm macht keine MU frei.");
+  }
+  const trashedDefinitionIds = uniqueTrashIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+  for (const cardId of uniqueTrashIds) trashRunnerInstalledCardToHeap(state, cardId);
+  const installed = installRunnerProgramFromStackWithoutClick(
+    state,
+    selectedProgramId,
+    legalAction,
+  );
+  if (!installed)
+    throw new Error("Nach der MU-Auswahl kann das Programm nicht installiert werden.");
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "self_modifying_code_free_mu",
+    trashedCount: uniqueTrashIds.length,
+    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+    installed: true,
   };
 }
 
@@ -18797,6 +19107,15 @@ function publicContextForAction(
   }
   if (legalAction.type === "remove_tag") {
     context.amount = Number(legalAction.payload?.removeTagAmount ?? 1);
+    for (const key of [
+      "armadilloRecurringCreditsSpent",
+      "tagRemovalRecurringCreditsSpent",
+      "runnerCreditsSpent",
+      "tagRemovalCreditSourceDefinitionIds",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
   } else if (legalAction.type === "draw_card") {
     context.amount = 1;
   } else if (legalAction.type === "gain_credit") {
@@ -20442,7 +20761,8 @@ function runnerRunRecurringCreditSourceIds(
     }
     if (
       definition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID ||
-      definition.id === PANDORAS_DECK_LINK_HARDWARE_ID
+      definition.id === PANDORAS_DECK_LINK_HARDWARE_ID ||
+      TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(definition.id)
     ) {
       return false;
     }
@@ -20498,6 +20818,76 @@ function spendRunnerRunCredits(
     }
   }
   spendCredits(state, "runner", remaining);
+}
+
+function runnerTagRemovalRecurringCreditSourceIds(
+  state: GameState,
+): CardInstanceId[] {
+  return state.runner.rig.hardware
+    .filter(
+      (cardId) =>
+        TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(
+          definitionFor(state, cardId).id,
+        ) &&
+        cardCounter(state, cardId, "recurring_credit") > 0,
+    )
+    .sort();
+}
+
+function runnerTagRemovalRecurringCredits(state: GameState): number {
+  return runnerTagRemovalRecurringCreditSourceIds(state).reduce(
+    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    0,
+  );
+}
+
+function availableRunnerTagRemovalCredits(state: GameState): number {
+  return state.runner.credits + runnerTagRemovalRecurringCredits(state);
+}
+
+function spendRunnerTagRemovalCredits(
+  state: GameState,
+  amount: number,
+  legalAction: LegalAction,
+): void {
+  if (amount <= 0) return;
+  if (availableRunnerTagRemovalCredits(state) < amount)
+    throw new Error("Der Runner kann die Tag-Entfernung nicht bezahlen.");
+  let remaining = amount;
+  let recurringSpent = 0;
+  let armadilloRecurringSpent = 0;
+  const recurringSourceDefinitionIds: string[] = [];
+  for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
+    if (remaining <= 0) break;
+    const spent = Math.min(
+      cardCounter(state, cardId, "recurring_credit"),
+      remaining,
+    );
+    if (spent <= 0) continue;
+    spendCardCounter(state, cardId, "recurring_credit", spent);
+    const sourceDefinitionId = definitionFor(state, cardId).id;
+    if (sourceDefinitionId === ARMADILLO_ARMORED_ROAD_HOME_ID)
+      armadilloRecurringSpent += spent;
+    recurringSourceDefinitionIds.push(sourceDefinitionId);
+    recurringSpent += spent;
+    remaining -= spent;
+  }
+  spendCredits(state, "runner", remaining);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    removeTagAmount: 1,
+    ...(recurringSpent > 0
+      ? {
+          ...(armadilloRecurringSpent > 0
+            ? { armadilloRecurringCreditsSpent: armadilloRecurringSpent }
+            : {}),
+          tagRemovalRecurringCreditsSpent: recurringSpent,
+          runnerCreditsSpent: remaining,
+          tagRemovalCreditSourceDefinitionIds:
+            recurringSourceDefinitionIds.join(","),
+        }
+      : {}),
+  };
 }
 
 function applyPostBreakStealthLoss(
