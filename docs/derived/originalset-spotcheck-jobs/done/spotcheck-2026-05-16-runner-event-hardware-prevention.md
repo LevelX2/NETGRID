@@ -1,9 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-event-hardware-prevention
-status: committed
+status: done
 createdAt: 2026-05-16T11:08:00+01:00
 startedAt: 2026-05-16T13:46:00+02:00
-completedAt: 2026-05-16T13:51:05+02:00
+completedAt: 2026-05-16T18:49:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -166,7 +166,7 @@ Akzeptanzkriterien
 
 ## Umsetzung 2026-05-16
 
-Status: `committed`.
+Status: `done`.
 
 Umgesetzt:
 

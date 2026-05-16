@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-runner-event-hardware-prevention`
 
 Der Job wurde fachlich umgesetzt. Die ausgewählten Runner-Events sowie Hardware-/Prevention-Karten wurden gegen Event-Source-Drift, Side-/StateVersion-Revalidation, Hidden-Zone-Payloads, Damage-Prevention-Choices, PublicPayload-Leaks und Replay/StateHash geprüft.
 
-Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Commit-Status: `done`. Der lokale Commit wurde erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
@@ -27,4 +27,4 @@ Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen v
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Alle genannten Checks sind grün. Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Alle genannten Checks sind grün.
