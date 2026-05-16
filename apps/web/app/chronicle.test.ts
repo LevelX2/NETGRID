@@ -250,7 +250,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Playful AI",
         cardDefinitionId: "onr_v1_104_playful-ai",
-        v1921RunnerEventAbility: "playful_ai_dice_loop",
+        abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 3,
         playfulAiChoiceOpened: true
       }),
@@ -261,7 +261,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         title: "Playful AI",
         sourceDefinitionId: "onr_v1_104_playful-ai",
-        v1921RunnerEventAbility: "playful_ai_dice_loop",
+        abilityId: "playful_ai_dice_loop",
         v1921DieRoll: 5,
         playfulAiDieRolls: [4, 5],
         playfulAiGainedCredits: 2,

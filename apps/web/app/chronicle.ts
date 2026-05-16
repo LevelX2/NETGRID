@@ -1,4 +1,13 @@
 import type { PublicGameEvent, ResolvedGameEffect, Side } from "@netgrid/shared";
+import {
+  isDataFortReclamationInstallPayload,
+  isDataFortReclamationRezPayload,
+  isExposeOutermostIceEachDataFortPayload,
+  isExposeServerCardPayload,
+  isSecurityPurgePayload,
+  payloadAbilityId,
+  payloadRandomRoll,
+} from "./action-payload";
 
 export type ChronicleCategory = "turn" | "economy" | "card" | "run" | "agenda" | "danger" | "system" | "hidden";
 export type ChronicleImportance = "normal" | "important" | "critical";
@@ -85,6 +94,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const mergedPlayEffect = simpleMergedPlayEffect(event);
   const agendaAbility = stringValue(payload.agendaAbility);
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
+  const abilityId = payloadAbilityId(payload);
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
   const shellTradersAbility = stringValue(payload.shellTradersAbility);
@@ -113,10 +123,10 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("The Shell Traders", "Installiert", "0 Kosten");
         break;
       }
-      if (stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
+      if (abilityId === "playful_ai_dice_loop") {
         const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
         const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;
-        const lastRoll = numberValue(payload.v1921DieRoll);
+        const lastRoll = payloadRandomRoll(payload);
         const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
         const queuedBeforeRolls = numberValue(payload.playfulAiDiceQueuedBeforeRolls);
         const remainingDice = numberValue(payload.playfulAiRemainingDice) ?? numberValue(payload.playfulAiDiceQueuedAfterRolls);
@@ -191,7 +201,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         );
         break;
       }
-      if (stringValue(payload.v1919RunnerEventAbility) === "arasaka_owns_you_flatline_replacement") {
+      if (abilityId === "arasaka_owns_you_flatline_replacement") {
         const preventedAmount = numberValue(payload.preventedAmount) ?? numberValue(payload.originalAmount) ?? 0;
         const drawnCards = numberValue(payload.drawnCards) ?? 0;
         const removedTags = numberValue(payload.removedTags) ?? 0;
@@ -218,7 +228,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Prävention", `${preventedAmount} verhindert`, ...(damageAmount !== undefined ? [`${damageAmount} übrig`] : []));
         break;
       }
-      if (hiddenZoneAction === "v1922_data_fort_reclamation_install_sequence") {
+      if (isDataFortReclamationInstallPayload(payload)) {
         const installedCount = numberValue(payload.installedCount) ?? 0;
         const installedIceCount = numberValue(payload.installedIceCount) ?? 0;
         const installedRootCount = numberValue(payload.installedRootCount) ?? 0;
@@ -232,7 +242,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Data Fort", `${installedCount} Install`, `${installedIceCount} ICE`, `${temporaryCreditsProvided} Temp-Credits`);
         break;
       }
-      if (hiddenZoneAction === "v1922_data_fort_reclamation_rez_sequence") {
+      if (isDataFortReclamationRezPayload(payload)) {
         const rezzedCount = numberValue(payload.rezzedCount) ?? 0;
         const rezzedIceCount = numberValue(payload.rezzedIceCount) ?? 0;
         const rezzedRootCount = numberValue(payload.rezzedRootCount) ?? 0;
@@ -262,7 +272,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Aardvark", "Kein Rez", "Worm");
         break;
       }
-      if (stringValue(payload.v1922RunnerEventAbility) === "successful_hq_run_pay_rez_cost_trash_rezzed_ice") {
+      if (abilityId === "successful_hq_run_pay_rez_cost_trash_rezzed_ice") {
         const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
         const targetServerLabel = displayServerLabel(stringValue(payload.targetServerLabel));
         const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
@@ -324,7 +334,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
     case "gain_credit":
-      if (stringValue(payload.v1920RunnerRunLockAbility) === "fang_2_0_pay_to_run") {
+      if (abilityId === "fang_2_0_pay_to_run") {
         const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
         category = "run";
         importance = "important";
@@ -332,7 +342,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Fang 2.0", "Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
         break;
       }
-      if (hiddenZoneAction === "v1911_expose_server_card" || payload.revealKind === "expose") {
+      if (isExposeServerCardPayload(payload) || payload.revealKind === "expose") {
         const sourceTitle = sourceTitleFromActionLabel(label);
         category = "card";
         importance = "important";
@@ -369,11 +379,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       if (
-        stringValue(payload.v1921RunnerProgramAbility) === "deterministic_die_probe" ||
-        stringValue(payload.v1921RunnerResourceAbility) === "deterministic_die_probe" ||
-        stringValue(payload.v1921AssetAbility) === "deterministic_die_probe"
+        abilityId === "deterministic_die_probe"
       ) {
-        const dieRoll = numberValue(payload.v1921DieRoll);
+        const dieRoll = payloadRandomRoll(payload);
         category = "card";
         importance = "important";
         title = phrase(subject, `${cardTitle ?? "eine Kartenfähigkeit"} aktiviert${dieRoll !== undefined ? ` und eine ${dieRoll} gewürfelt` : ""}`);
@@ -381,8 +389,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Würfel", ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []));
         break;
       }
-      if (stringValue(payload.v1921AssetAbility) === "schlaghund_tag_damage") {
-        const dieRoll = numberValue(payload.v1921DieRoll);
+      if (abilityId === "schlaghund_tag_damage") {
+        const dieRoll = payloadRandomRoll(payload);
         const runnerTags = numberValue(payload.runnerTags);
         const thresholdMet = payload.tagThresholdMet === true;
         const damageAmount = numberValue(payload.damageAmount) ?? 0;
@@ -419,7 +427,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "play_event":
     case "play_operation":
-      if (actionType === "play_event" && stringValue(payload.v1922RunnerEventAbility) === "program_install_action_bundle") {
+      if (actionType === "play_event" && abilityId === "program_install_action_bundle") {
         const gainedActions = numberValue(payload.gainedActions) ?? 0;
         const temporaryCredits = numberValue(payload.temporaryProgramInstallCredits) ?? 0;
         const remaining = numberValue(payload.valuPakProgramInstallActionsRemaining);
@@ -430,7 +438,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Event", `+${gainedActions} Aktionen`, ...(temporaryCredits > 0 ? [`+${temporaryCredits} Install-Credit`] : []), ...(remaining !== undefined ? [`${remaining} offen`] : []));
         break;
       }
-      if (actionType === "play_operation" && stringValue(payload.v1922CorpOperationAbility) === "install_action_bundle") {
+      if (actionType === "play_operation" && abilityId === "install_action_bundle") {
         const gainedActions = numberValue(payload.gainedActions) ?? 0;
         const remaining = numberValue(payload.edgerunnerTempsInstallActionsRemaining);
         category = "turn";
@@ -439,8 +447,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Operation", `+${gainedActions} Installaktionen`, ...(remaining !== undefined ? [`${remaining} offen`] : []));
         break;
       }
-      if (actionType === "play_event" && stringValue(payload.v1921RunnerEventAbility) === "playful_ai_dice_loop") {
-        const dieRoll = numberValue(payload.v1921DieRoll);
+      if (actionType === "play_event" && abilityId === "playful_ai_dice_loop") {
+        const dieRoll = payloadRandomRoll(payload);
         const dieRolls = numberArrayValue(payload.playfulAiDieRolls);
         const choiceOpened = payload.playfulAiChoiceOpened === true;
         const complete = payload.playfulAiComplete === true;
@@ -485,7 +493,10 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         );
         break;
       }
-      if (actionType === "play_event" && hiddenZoneAction === "v1911_expose_outermost_ice_each_data_fort") {
+      if (
+        actionType === "play_event" &&
+        isExposeOutermostIceEachDataFortPayload(payload)
+      ) {
         const exposedCount = numberValue(payload.revealedCount) ?? 0;
         const serverLabels = (stringValue(payload.exposedServerLabels) ?? "")
           .split(",")
@@ -514,7 +525,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "score_agenda": {
       category = "agenda";
       importance = "important";
-      if (agendaAbility === "v1922_security_purge") {
+      if (isSecurityPurgePayload(payload)) {
         const revealedCount = numberValue(payload.revealedCount) ?? 0;
         const installedIceCount = numberValue(payload.installedIceCount) ?? 0;
         const trashedCount = numberValue(payload.trashedCount) ?? 0;
@@ -558,8 +569,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Subroutine", "Gebrochen", ...(cardTitle ? [cardTitle] : []));
       break;
     case "continue_run":
-      if (stringValue(payload.v1921UpgradeAbility) === "rio_de_janeiro_passed_ice") {
-        const dieRoll = numberValue(payload.v1921DieRoll);
+      if (abilityId === "rio_de_janeiro_passed_ice") {
+        const dieRoll = payloadRandomRoll(payload);
         const runEnded = payload.rioRunEnded === true;
         const passedIce = stringValue(payload.passedIceDefinitionId) ?? "ein gerezztes ICE";
         category = "run";
@@ -648,7 +659,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "trigger_ability": {
       const resourceAbility = stringValue(payload.resourceAbility);
-      if (stringValue(payload.v1920RunnerRunLockAbility) === "fang_2_0_pay_to_run") {
+      if (abilityId === "fang_2_0_pay_to_run") {
         const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
         category = "run";
         importance = "important";

@@ -1,7 +1,8 @@
 ---
 jobId: spotcheck-2026-05-15-hosting-damage-multiaccess
-status: ready_for_implementation
+status: in_progress
 createdAt: 2026-05-15T16:20:00+01:00
+startedAt: 2026-05-16T06:08:42+02:00
 requiresImplementation: true
 priority: normal
 cards:

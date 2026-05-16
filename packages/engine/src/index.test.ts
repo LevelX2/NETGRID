@@ -16,6 +16,153 @@ import {
   validateDeckDefinition,
   validateGameState,
 } from "./index";
+import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
+import {
+  MECHANIC_SMOKE_CARD_IDS,
+  MECHANIC_SMOKE_DECKS,
+  MECHANIC_SMOKE_GAMES,
+  ONR_V1_0_5K_FINAL_CARD_IDS,
+  ONR_V1_0_6K_FINAL_CARD_IDS,
+  ONR_V1_1_2K_FINAL_CARD_IDS,
+  ONR_V1_2_3_FINAL_CARD_IDS,
+  ONR_V1_6_1_FINAL_CARD_IDS,
+  ONR_V1_6_2_FINAL_CARD_IDS,
+  ONR_V1_6_3_FINAL_CARD_IDS,
+  ONR_V1_7_0_FINAL_CARD_IDS,
+  ONR_V1_7_1_FINAL_CARD_IDS,
+  ONR_V1_7_2_FINAL_CARD_IDS,
+  ONR_V1_8_0_FINAL_CARD_IDS,
+  ONR_V1_8_1_FINAL_CARD_IDS,
+  ONR_V1_9_0_FINAL_CARD_IDS,
+  ONR_V1_9_1_FINAL_CARD_IDS,
+  ONR_V1_9_2_FINAL_CARD_IDS,
+  ONR_V1_9_3_FINAL_CARD_IDS,
+  ONR_V1_9_4_FINAL_CARD_IDS,
+  ONR_V1_9_5_FINAL_CARD_IDS,
+  ONR_V1_9_6_FINAL_CARD_IDS,
+  ONR_V1_9_7_FINAL_CARD_IDS,
+  ONR_V1_9_8_FINAL_CARD_IDS,
+  ONR_V1_9_9_FINAL_CARD_IDS,
+  ONR_V1_0_5K_RUNNER_DECK,
+  ONR_V1_0_5K_CORP_DECK,
+  ONR_V1_0_6K_RUNNER_DECK,
+  ONR_V1_0_6K_CORP_DECK,
+  ONR_V1_1_2K_RUNNER_DECK,
+  ONR_V1_1_2K_CORP_DECK,
+  ONR_V1_2_3_RUNNER_DECK,
+  ONR_V1_2_3_CORP_DECK,
+  ONR_V1_6_1_RUNNER_DECK,
+  ONR_V1_6_1_CORP_DECK,
+  ONR_V1_6_2_RUNNER_DECK,
+  ONR_V1_6_2_CORP_DECK,
+  ONR_V1_6_3_RUNNER_DECK,
+  ONR_V1_6_3_CORP_DECK,
+  ONR_V1_7_0_RUNNER_DECK,
+  ONR_V1_7_0_CORP_DECK,
+  ONR_V1_7_1_RUNNER_DECK,
+  ONR_V1_7_1_CORP_DECK,
+  ONR_V1_7_2_RUNNER_DECK,
+  ONR_V1_7_2_CORP_DECK,
+  ONR_V1_8_0_RUNNER_DECK,
+  ONR_V1_8_0_CORP_DECK,
+  ONR_V1_8_1_RUNNER_DECK,
+  ONR_V1_8_1_CORP_DECK,
+  ONR_V1_9_0_RUNNER_DECK,
+  ONR_V1_9_0_CORP_DECK,
+  ONR_V1_9_1_RUNNER_DECK,
+  ONR_V1_9_1_CORP_DECK,
+  ONR_V1_9_2_RUNNER_DECK,
+  ONR_V1_9_2_CORP_DECK,
+  ONR_V1_9_3_RUNNER_DECK,
+  ONR_V1_9_3_CORP_DECK,
+  ONR_V1_9_4_RUNNER_DECK,
+  ONR_V1_9_4_CORP_DECK,
+  ONR_V1_9_5_RUNNER_DECK,
+  ONR_V1_9_5_CORP_DECK,
+  ONR_V1_9_6_RUNNER_DECK,
+  ONR_V1_9_6_CORP_DECK,
+  ONR_V1_9_7_RUNNER_DECK,
+  ONR_V1_9_7_CORP_DECK,
+  ONR_V1_9_8_RUNNER_DECK,
+  ONR_V1_9_8_CORP_DECK,
+  ONR_V1_9_9_RUNNER_DECK,
+  ONR_V1_9_9_CORP_DECK,
+  ONR_V1_RUNNER_DECK,
+  ONR_V1_CORP_DECK,
+  V094_RUNNER_DECK,
+  V094_CORP_DECK,
+  V111_CORP_DECK,
+  V095_RUNNER_DECK,
+  V095_CORP_DECK,
+  v094DamageGame,
+  onrV1Game,
+  v105kCardReleaseGame,
+  v106kCardReleaseGame,
+  v112kCardReleaseGame,
+  v123CardReleaseGame,
+  v161CardReleaseGame,
+  v162CardReleaseGame,
+  v163CardReleaseGame,
+  v170CardReleaseGame,
+  v171CardReleaseGame,
+  v172CardReleaseGame,
+  v180CardReleaseGame,
+  v181CardReleaseGame,
+  v190CardReleaseGame,
+  v191CardReleaseGame,
+  v192CardReleaseGame,
+  v193CardReleaseGame,
+  v194CardReleaseGame,
+  v195CardReleaseGame,
+  v196CardReleaseGame,
+  v197CardReleaseGame,
+  v198CardReleaseGame,
+  v199CardReleaseGame,
+  v095ResourceGame,
+  v096TraceGame,
+  v097RunGame,
+  v098IdentityGame,
+  v099CounterHostingGame,
+  installedResourceCorpTurn,
+  originalsetReorderCounterRunlockGame,
+  encounterIce,
+  breakCurrentSubroutine,
+  apply,
+  applyChoice,
+  applyChoices,
+  mustAction,
+  toRunnerTurn,
+  toRunnerTurnFromCorpMain,
+  sourceDefinition,
+  agendaPoints,
+  cardCounterAmount,
+  setCardCounterForTest,
+  choiceRequest,
+  moveRunnerCardToGrip,
+  scoreRunnerAgendaForTest,
+  scoreCorpAgendaForTest,
+  moveRunnerCardCopyToGrip,
+  putRunnerCardOnTopOfStack,
+  drawRunnerCardsForTest,
+  moveCorpCardToHq,
+  moveCorpCardCopyToHq,
+  moveCorpCardToArchives,
+  keepOnlyCorpHqCard,
+  keepOnlyCorpHqCards,
+  keepOnlyCorpArchivesCards,
+  putCorpCardOnTopOfRd,
+  putCorpIceOnServer,
+  putCorpIceCopyOnServer,
+  putCorpRootInRemote,
+  installRunnerProgramForTest,
+  installRunnerHardwareForTest,
+  installRunnerResourceForTest,
+  installRunnerProgramCopyForTest,
+  emptyRunnerGripForTest,
+  scoreTwoAgendasForTest,
+  findCard,
+  removeEverywhere,
+} from "./test-fixtures/mechanic-smoke-fixtures";
 import {
   MVP_0_99_BASELINE,
   type CardInstanceId,
@@ -28,6 +175,41 @@ import {
 } from "@netgrid/shared";
 
 describe("MVP 0.1 engine foundation", () => {
+  it("normalizes legacy ability payloads into side-safe public ability schema", () => {
+    const context = buildPublicAbilitySchemaContext(
+      "resolve_choice",
+      {
+        v1922RunnerEventAbility: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+        targetCardDefinitionId: "onr_v1_232_crystal-wall",
+        cardId: "corp_hidden_card_instance_1",
+        paidCredits: 3,
+        v1921DieRoll: 4,
+      },
+      { redactedKind: "hidden_zone", hiddenZoneBarrier: true },
+      "hidden_info_barrier",
+    );
+
+    expect(context).toMatchObject({
+      abilityFamily: "hidden-zone",
+      abilityId: "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+      effectKind: "hidden_zone",
+      sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+      amounts: { paidCredits: 3, randomRoll: 4 },
+      targets: {
+        sourceDefinitionId: "onr_v1_080_core-command-jettison-ice",
+        targetCardDefinitionId: "onr_v1_232_crystal-wall",
+        redactedKind: "hidden_zone",
+      },
+      visibility: {
+        class: "hidden_info_barrier",
+        hiddenZoneBarrier: true,
+        redactedKind: "hidden_zone",
+      },
+    });
+    expect(context.targets).not.toHaveProperty("cardId");
+  });
+
   it("creates deterministic games for the same seed", () => {
     const first = createGameAfterSetup({ seed: "deterministic" });
     const second = createGameAfterSetup({ seed: "deterministic" });
@@ -8294,7 +8476,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-search"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-search"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(
       state,
@@ -8337,7 +8519,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("reveals only the intended public definition id for V1.9.11 reveal events", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-reveal"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(state, "onr_v1_110_sneak-preview");
     putRunnerCardOnTopOfStack(state, "simple_decoder");
@@ -8360,7 +8542,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-expose"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-expose"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(
       state,
@@ -8386,11 +8568,24 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-installed-helpers"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-installed-helpers"));
     state.runner.credits = 20;
     installRunnerProgramForTest(state, "onr_v1_059_self-modifying-code");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const searchAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "search_stack_program_to_grip",
+    );
+    expect(searchAction.payload).toMatchObject({
+      abilityFamily: "hidden-zone",
+      abilityId: "search_stack_program_to_grip",
+      effectKind: "hidden_zone",
+    });
 
     state = apply(
       state,
@@ -8428,7 +8623,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
 
   it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
     let state = apply(
-      v1911HiddenZoneGame("v1911-corporate-downsizing"),
+      MECHANIC_SMOKE_GAMES.hiddenZone("v1911-corporate-downsizing"),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -8464,7 +8659,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("resolves Ice Pick Willie as program trash plus end-the-run without R&D reveal", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-ice-pick-willie"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-ice-pick-willie"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_250_ice-pick-willie");
@@ -8513,7 +8708,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
   });
 
   it("opens Too Many Doors R&D reorder only to the Corp and resolves replay-safe", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("v1911-too-many-doors"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
@@ -8576,8 +8771,8 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
 
 describe("V1.9.19 Agenda/Overadvance WIP", () => {
   it("adds all V1.9.19 WIP runtime definitions without release-promoting the next slice", () => {
-    expect(ONR_V1_9_19_WIP_CARD_IDS).toHaveLength(20);
-    for (const definitionId of ONR_V1_9_19_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.agendaScoring).toHaveLength(20);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.agendaScoring) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -8595,7 +8790,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
   it("scores V1.9.19 overadvanced agendas with server-bound difficulty modifiers and replay-stable payloads", () => {
     let state = apply(
-      v1919AgendaOveradvanceGame("v1919-overadvance-score"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-overadvance-score"),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -8660,7 +8855,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
   it("uses V1.9.19 scored agenda reveal actions without leaking hidden R&D to the Runner before reveal", () => {
     let state = apply(
-      v1919AgendaOveradvanceGame("v1919-scored-reveal"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-scored-reveal"),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -8712,7 +8907,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
   it("uses V1.9.19 asset counter, economy and access-ambush paths through explicit actions", () => {
     let corpState = apply(
-      v1919AgendaOveradvanceGame("v1919-asset-actions"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-asset-actions"),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -8765,7 +8960,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let accessState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-asset-ambush"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-bug-out-bag-access-ambush"),
     );
     accessState.runner.credits = 20;
     const programId = installRunnerProgramForTest(
@@ -8806,7 +9001,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
   it("uses V1.9.19 operation advance, counter and forfeit-cost paths through play-operation actions", () => {
     let state = apply(
-      v1919AgendaOveradvanceGame("v1919-operation-paths"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-operation-paths"),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -8872,7 +9067,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
   });
 
   it("opens a Systematic Layoffs target choice when multiple Corp agendas are scored", () => {
-    let state = v1919AgendaOveradvanceGame("v1919-systematic-layoffs-choice");
+    let state = MECHANIC_SMOKE_GAMES.agendaScoring("v1919-systematic-layoffs-choice");
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const firstAgendaId = scoreCorpAgendaForTest(state, "simple_agenda");
@@ -8912,7 +9107,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
   it("resolves remaining V1.9.19 access ambush damage and installed-hardware paths", () => {
     let hardwareState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-corprunner-ambush"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-corprunner-ambush"),
     );
     hardwareState.runner.credits = 20;
     const hardwareId = installRunnerHardwareForTest(
@@ -8954,7 +9149,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let coreDamageState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-vacant-soulkiller"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-vacant-soulkiller"),
     );
     coreDamageState.runner.credits = 20;
     const coreBefore = coreDamageState.runner.coreDamage;
@@ -8986,7 +9181,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let netDamageState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-virus-test-site"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-virus-test-site"),
     );
     netDamageState.runner.credits = 20;
     const gripBefore = netDamageState.runner.grip.length;
@@ -9013,7 +9208,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
   it("uses V1.9.19 Runner agenda-cost paths for Fait Accompli, Arasaka Owns You and Olivia Salazar", () => {
     let faitState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-fait-accompli"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-accompli"),
     );
     faitState.runner.credits = 20;
     const faitId = installRunnerProgramForTest(
@@ -9037,7 +9232,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let arasakaState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-arasaka-owns-you"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-arasaka-owns-you"),
     );
     arasakaState.runner.credits = 20;
     arasakaState.corp.credits = 20;
@@ -9097,7 +9292,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
 
     let oliviaState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("v1919-olivia-salazar"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-olivia-salazar"),
     );
     oliviaState.runner.credits = 20;
     const oliviaCostAgendaId = scoreRunnerAgendaForTest(
@@ -9151,8 +9346,8 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
 describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   it("adds all V1.9.20 WIP runtime definitions without release-promoting V1.9.21", () => {
-    expect(ONR_V1_9_20_WIP_CARD_IDS).toHaveLength(26);
-    for (const definitionId of ONR_V1_9_20_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.globalModifiers).toHaveLength(26);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.globalModifiers) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -9172,12 +9367,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-encryption-breakthrough-code-gates",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1920_encryption_breakthrough_code_gate",
           cards: [
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
             { id: "onr_v1_230_cortical-scanner", quantity: 1 },
           ],
         },
@@ -9238,8 +9433,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-i-got-a-rock-tagged-finisher",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -9293,8 +9488,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-ice-transmutation-target",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -9346,8 +9541,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-mram-memory",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -9411,8 +9606,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       let state = apply(
         createGameAfterSetup({
           seed: `v1920-asset-actions-${definitionId}`,
-          runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           agendaPointsToWin: 7,
         }),
         "corp",
@@ -9471,8 +9666,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-newsgroup-taunting-run-tax",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -9522,8 +9717,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let poorRunner = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-newsgroup-taunting-run-tax-insufficient",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -9549,8 +9744,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-asset-actions-revalidation",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -9599,8 +9794,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-global-ice-cost",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -9653,8 +9848,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-main-office-handlimit",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -9708,18 +9903,18 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
   it("applies Bioweapons Engineering to meat-damage sources before resolution", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1920_bioweapons_meat_damage",
       name: "O:NR V1.9.20 Bioweapons Meat Damage",
       cards: [
         { id: "onr_v1_302_scorched-earth", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = apply(
       createGameAfterSetup({
         seed: "v1920-bioweapons-meat-damage",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck,
         agendaPointsToWin: 7,
       }),
@@ -9799,8 +9994,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       createGameAfterSetup({
         seed: "v1920-loan-persistent",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -9869,12 +10064,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
   it("applies Rabbit only to Corp ICE trace bid limits", () => {
     const runnerDeck: DeckDefinition = {
-      ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+      ...MECHANIC_SMOKE_DECKS.traceTags.runner,
       id: "spotcheck_rabbit_trace_runner",
       name: "Spotcheck Rabbit Trace Runner",
       cards: [
         { id: "onr_v1_051_rabbit", quantity: 1 },
-        ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
       ],
     };
     let state = toRunnerTurn(
@@ -9882,7 +10077,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         seed: "spotcheck-rabbit-trace",
         baseline: MVP_0_99_BASELINE,
         runnerDeck,
-        corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -9941,16 +10136,16 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         seed: "spotcheck-artemis-recurring",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_artemis_runner",
           name: "Spotcheck Artemis Runner",
           cards: [
             { id: "onr_v1_136_pandoras-deck", quantity: 1 },
             { id: "onr_v1_122_artemis-2020", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -9992,8 +10187,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "spotcheck-south-african-mining",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -10048,8 +10243,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       let state = apply(
         createGameAfterSetup({
           seed,
-          runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           agendaPointsToWin: 7,
         }),
         "corp",
@@ -10106,8 +10301,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       createGameAfterSetup({
         seed: "spotcheck-city-surveillance-draw-tax",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -10157,8 +10352,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
 describe("V1.9.21 Deterministic Random WIP", () => {
   it("adds all V1.9.21 WIP runtime definitions without release-promoting V1.9.22", () => {
-    expect(ONR_V1_9_21_WIP_CARD_IDS).toHaveLength(6);
-    for (const definitionId of ONR_V1_9_21_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.randomEffects).toHaveLength(6);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.randomEffects) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -10178,14 +10373,14 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1921-schlaghund-tag-damage",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1921_random_probe",
           name: "O:NR V1.9.21 Schlaghund Corp",
           cards: [
             { id: "onr_v1_339_schlaghund", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -10285,15 +10480,15 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       createGameAfterSetup({
         seed: "v1921-rio-after-pass-ice",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1921_rio_after_pass",
           name: "O:NR V1.9.21 Rio After Pass Corp",
           cards: [
             { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 1 },
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -10371,15 +10566,15 @@ describe("V1.9.21 Deterministic Random WIP", () => {
         createGameAfterSetup({
           seed: `v1921-${definitionId}-program-die-probe`,
           runnerDeck: {
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
             id: `onr_v1_runner_v1921_${definitionId}_random_probe`,
             name: "O:NR V1.9.21 Program Random Probe Runner",
             cards: [
               { id: definitionId, quantity: 1 },
-              ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
             ],
           },
-          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           agendaPointsToWin: 7,
         }),
       );
@@ -10456,15 +10651,15 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       createGameAfterSetup({
         seed: "v1921-ai-boon-run-start-strength",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1921_ai_boon_run_start",
           name: "O:NR V1.9.21 AI Boon Run Start Runner",
           cards: [
             { id: "onr_v1_002_ai-boon", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -10519,8 +10714,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     let withoutAiBoon = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1921-ai-boon-run-start-no-source",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -10541,15 +10736,15 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       createGameAfterSetup({
         seed: "v1921-playful-ai-dice-loop",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1921_playful_ai_loop",
           name: "O:NR V1.9.21 Playful AI Loop Runner",
           cards: [
             { id: "onr_v1_104_playful-ai", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -10626,15 +10821,15 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       createGameAfterSetup({
         seed: "v1921-quest-for-cattekin-resource-die-probe",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1921_quest_random_probe",
           name: "O:NR V1.9.21 Quest Random Probe Runner",
           cards: [
             { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -10701,8 +10896,8 @@ describe("V1.9.21 Deterministic Random WIP", () => {
 
 describe("V1.9.12 Counter/Virus/Recurring", () => {
   it("adds scoped V1.9.12 definitions without pulling in later cursor cards", () => {
-    expect(ONR_V1_9_12_RELEASE_CARD_IDS).toHaveLength(11);
-    for (const definitionId of ONR_V1_9_12_RELEASE_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.counterRecurring).toHaveLength(11);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.counterRecurring) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -10719,7 +10914,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
 
   it("installs V1.9.12 virus cards and Rigged Investments bit depot, then purges only virus counters", () => {
     let state = toRunnerTurn(
-      v1912CounterRecurringGame("v1912-virus-recurring"),
+      MECHANIC_SMOKE_GAMES.counterRecurring("v1912-virus-recurring"),
     );
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_009_butcher-boy");
@@ -10830,7 +11025,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
   });
 
   it("uses V1.9.12 Hidden-Zone event and installed helper paths without exposing choices to the Corp", () => {
-    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-hidden-zone"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.counterRecurring("v1912-hidden-zone"));
     state.runner.credits = 20;
     const dealId = moveRunnerCardToGrip(state, "onr_v1_082_deal-with-militech");
     const iSpyId = moveRunnerCardToGrip(state, "onr_v1_032_i-spy");
@@ -10873,7 +11068,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
   });
 
   it("adds Butcher Boy counters from successful HQ runs and pays start-turn credits from pairs", () => {
-    let state = toRunnerTurn(v1912CounterRecurringGame("v1912-butcher-boy"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.counterRecurring("v1912-butcher-boy"));
     state.runner.credits = 20;
     const butcherId = installRunnerProgramForTest(
       state,
@@ -10916,7 +11111,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
 
   it("scores V1.9.12 Corp agendas with typed counter and start-of-turn economy paths", () => {
     let state = apply(
-      v1912CounterRecurringGame("v1912-corp-agendas"),
+      MECHANIC_SMOKE_GAMES.counterRecurring("v1912-corp-agendas"),
       "corp",
       (action) => action.type === "mandatory_draw",
     );
@@ -10976,8 +11171,8 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
 
 describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
   it("adds scoped V1.9.13 runtime definitions without pulling in V1.9.15 cards", () => {
-    expect(ONR_V1_9_13_RELEASE_CARD_IDS).toHaveLength(17);
-    for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.damagePrevention).toHaveLength(17);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.damagePrevention) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -10994,12 +11189,12 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
     let state = toRunnerTurn(
-      v1913DamagePreventionGame("v1913-install-prevention"),
+      MECHANIC_SMOKE_GAMES.damagePrevention("v1913-install-prevention"),
     );
     state.runner.credits = 80;
     state.runner.clicks = 30;
 
-    for (const definitionId of ONR_V1_9_13_RELEASE_CARD_IDS.filter(
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.damagePrevention.filter(
       (id) =>
         ![
           "onr_v1_224_bolter-cluster",
@@ -11024,13 +11219,15 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     ].map((id) => state.cardInstances[id]?.definitionId);
     expect(installedDefinitions).toEqual(
       expect.arrayContaining(
-        ONR_V1_9_13_RELEASE_CARD_IDS.filter((id) => !id.startsWith("onr_v1_2")),
+        MECHANIC_SMOKE_CARD_IDS.damagePrevention.filter(
+          (id) => !id.startsWith("onr_v1_2"),
+        ),
       ),
     );
   });
 
   it("spends Armored Fridge counters for meat prevention and trashes the empty source", () => {
-    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-armored-fridge"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.damagePrevention("v1913-armored-fridge"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_121_armored-fridge");
@@ -11116,7 +11313,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
   });
 
   it("opens side-safe prevention choices for Corp ICE net damage and replays the resolved StateHash", () => {
-    let state = toRunnerTurn(v1913DamagePreventionGame("v1913-ice-prevention"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.damagePrevention("v1913-ice-prevention"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_128_green-knight-surge-buffers");
@@ -11571,8 +11768,8 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
 
 describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   it("adds all V1.9.14 WIP runtime definitions without pulling in V1.9.15 cards", () => {
-    expect(ONR_V1_9_14_WIP_CARD_IDS).toHaveLength(25);
-    for (const definitionId of ONR_V1_9_14_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.traceTags).toHaveLength(25);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.traceTags) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -11669,7 +11866,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
 
     for (const [definitionId, baseTraceStrength] of traceIce) {
       let state = toRunnerTurn(
-        v1914TraceTagResourceGame(`v1914-trace-${definitionId}`),
+        MECHANIC_SMOKE_GAMES.traceTags(`v1914-trace-${definitionId}`),
       );
       putCorpIceOnServer(state, "rd", definitionId);
       state.corp.credits = 9;
@@ -11708,7 +11905,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   });
 
   it("uses Hacker Tracker counters in traces and applies Fang 2.0's pay-to-run lock", () => {
-    let state = toRunnerTurn(v1914TraceTagResourceGame("v1914-fang-htc-lock"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("v1914-fang-htc-lock"));
     const hackerTrackerId = putCorpRootInRemote(
       state,
       "onr_v1_325_hacker-tracker-central",
@@ -11785,9 +11982,9 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
   });
 
   it("installs V1.9.14 Runner cards, counts installed link, and keeps Resource trash legal-action gated", () => {
-    for (const definitionId of ONR_V1_9_14_RUNNER_CARD_IDS) {
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.traceTagRunner) {
       let state = toRunnerTurn(
-        v1914TraceTagResourceGame(`v1914-install-${definitionId}`),
+        MECHANIC_SMOKE_GAMES.traceTags(`v1914-install-${definitionId}`),
       );
       state.runner.credits = 12;
       state.runner.memoryLimit = 8;
@@ -11827,7 +12024,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     }
 
     let shortTermState = toRunnerTurn(
-      v1914TraceTagResourceGame("v1914-short-term-contract"),
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-short-term-contract"),
     );
     shortTermState.runner.credits = 20;
     shortTermState.runner.clicks = 10;
@@ -11884,7 +12081,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(hashState(shortTermReplay.state)).toBe(hashState(shortTermState));
 
     let linkState = toRunnerTurn(
-      v1914TraceTagResourceGame("v1914-installed-link"),
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-installed-link"),
     );
     linkState.runner.credits = 12;
     linkState.runner.memoryLimit = 8;
@@ -11924,7 +12121,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     });
 
     let resourceState = toRunnerTurn(
-      v1914TraceTagResourceGame("v1914-resource-trash"),
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-resource-trash"),
     );
     resourceState.runner.credits = 12;
     resourceState.runner.memoryLimit = 8;
@@ -11978,7 +12175,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
 
   it("restores Broker load and take-credit resource actions with one use per Broker each Runner turn", () => {
     let state = toRunnerTurn(
-      v1914TraceTagResourceGame("v1914-broker-resource-actions"),
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-broker-resource-actions"),
     );
     state.runner.credits = 12;
     moveRunnerCardToGrip(state, "onr_v1_154_broker");
@@ -12081,7 +12278,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
 
   it("clears counters when installed Runner cards leave the rig for grip or stack", () => {
     let state = toRunnerTurn(
-      v1914TraceTagResourceGame("v1914-rig-exit-clears-counters"),
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-rig-exit-clears-counters"),
     );
     state.runner.credits = 12;
     const brokerId = installRunnerResourceForTest(
@@ -12143,7 +12340,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
 
   it("gates Power Grid Overload on visible tags and installed Runner hardware", () => {
     let state = toRunnerTurn(
-      v1914TraceTagResourceGame("v1914-power-grid-overload"),
+      MECHANIC_SMOKE_GAMES.traceTags("v1914-power-grid-overload"),
     );
     state.runner.credits = 12;
     state.runner.memoryLimit = 8;
@@ -12212,8 +12409,8 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
 
 describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   it("adds all V1.9.15 WIP runtime definitions without pulling in V1.9.16 cards", () => {
-    expect(ONR_V1_9_15_WIP_CARD_IDS).toHaveLength(14);
-    for (const definitionId of ONR_V1_9_15_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.runAccess).toHaveLength(14);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.runAccess) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -12255,7 +12452,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
     for (const expectation of eventExpectations) {
       let state = toRunnerTurn(
-        v1915RunAccessGame(`v1915-event-${expectation.definitionId}`),
+        MECHANIC_SMOKE_GAMES.runAccess(
+          `v1915-event-${expectation.definitionId}`,
+        ),
       );
       state.runner.credits = 8;
       moveRunnerCardToGrip(state, expectation.definitionId);
@@ -12284,7 +12483,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
   it("breaches R&D with Priority Wreck multiaccess without leaking future queued cards", () => {
     let state = toRunnerTurn(
-      v1915RunAccessGame("v1915-priority-wreck-rd-multiaccess"),
+      MECHANIC_SMOKE_GAMES.runAccess("v1915-priority-wreck-rd-multiaccess"),
     );
     state.runner.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
@@ -12343,7 +12542,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
   it("applies installed V1.9.15 run and access helpers through existing breach paths", () => {
     let state = toRunnerTurn(
-      v1915RunAccessGame("v1915-installed-access-helpers"),
+      MECHANIC_SMOKE_GAMES.runAccess("v1915-installed-access-helpers"),
     );
     state.runner.credits = 20;
     state.runner.memoryLimit = 12;
@@ -12402,11 +12601,11 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       createGameAfterSetup({
         seed: "v1915-dupre-breaker",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.runAccess.runner,
         corpDeck: {
-          ...ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.runAccess.corp,
           cards: [
-            ...ONR_V1_9_15_RUN_ACCESS_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards,
             { id: "simple_code_gate_ice", quantity: 2 },
           ],
         },
@@ -12508,7 +12707,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("opens Smarteye before the Corp can rez approached unrezzed ICE", () => {
-    let state = toRunnerTurn(v1915RunAccessGame("v1915-smarteye-before-rez"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-smarteye-before-rez"));
     state.runner.credits = 10;
     state.corp.credits = 100;
     installRunnerProgramForTest(state, "onr_v1_065_smarteye");
@@ -12580,7 +12779,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("does not spend Smarteye when declined and does not reopen it for the same ICE", () => {
-    let state = toRunnerTurn(v1915RunAccessGame("v1915-smarteye-decline"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-smarteye-decline"));
     state.runner.credits = 10;
     state.corp.credits = 0;
     installRunnerProgramForTest(state, "onr_v1_065_smarteye");
@@ -12630,7 +12829,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       ["onr_v1_227_cerberus", 5],
       ["onr_v1_255_mastiff", 5],
     ] as const) {
-      let state = toRunnerTurn(v1915RunAccessGame(`v1915-ice-${definitionId}`));
+      let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess(`v1915-ice-${definitionId}`));
       putCorpIceOnServer(state, "rd", definitionId);
       state.corp.credits = 12;
       state.runner.credits = 5;
@@ -12668,7 +12867,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("applies Cerberus 3 net damage and does not give a false tag on trace success", () => {
-    let state = toRunnerTurn(v1915RunAccessGame("spotcheck-cerberus-damage"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-cerberus-damage"));
     drawRunnerCardsForTest(state, 5);
     putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
     state.corp.credits = 12;
@@ -12713,7 +12912,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
   });
 
   it("allows New Blood only after a visible Runner run attempt last turn", () => {
-    let noRun = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-no-run"));
+    let noRun = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-new-blood-no-run"));
     const noRunOperationId = moveCorpCardToHq(noRun, "onr_v1_294_new-blood");
     noRun = apply(noRun, "runner", (action) => action.type === "end_turn");
     noRun = apply(noRun, "corp", (action) => action.type === "mandatory_draw");
@@ -12726,7 +12925,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       ),
     ).toBe(false);
 
-    let state = toRunnerTurn(v1915RunAccessGame("v1915-new-blood-after-run"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-new-blood-after-run"));
     moveCorpCardToHq(state, "onr_v1_294_new-blood");
     state.corp.servers.push({
       id: "remote_1",
@@ -12763,8 +12962,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
 
 describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
   it("adds all V1.9.16 WIP runtime definitions without release-promoting the next slice", () => {
-    expect(ONR_V1_9_16_WIP_CARD_IDS).toHaveLength(16);
-    for (const definitionId of ONR_V1_9_16_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting).toHaveLength(16);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.programSubtypeHosting) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.implementationStatus, definitionId).toBe(
         "playable_mvp",
@@ -12781,7 +12980,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
   });
 
   it("uses installed V1.9.16 link cards in side-safe trace windows", () => {
-    let state = toRunnerTurn(v1916ProgramSubtypeGame("v1916-link-trace"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-link-trace"));
     state.runner.credits = 12;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
@@ -12840,7 +13039,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
 
   it("refreshes V1.9.16 stealth and recurring counters without accumulation", () => {
     let state = toRunnerTurn(
-      v1916ProgramSubtypeGame("v1916-stealth-recurring"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-stealth-recurring"),
     );
     state.runner.credits = 12;
     moveRunnerCardToGrip(state, "onr_v1_035_invisibility");
@@ -12905,7 +13104,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
 
   it("hosts V1.9.16 programs on Imp and keeps hosted-card trash deterministic", () => {
     let state = toRunnerTurn(
-      v1916ProgramSubtypeGame("v1916-imp-hosting-lifecycle"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-imp-hosting-lifecycle"),
     );
     state.runner.credits = 12;
     state.corp.credits = 8;
@@ -13001,7 +13200,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
 
   it("gates Fragmentation Storm program trash and net damage on trace success", () => {
     let state = toRunnerTurn(
-      v1916ProgramSubtypeGame("v1916-fragmentation-storm-success"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-fragmentation-storm-success"),
     );
     state.runner.credits = 10;
     state.corp.credits = 8;
@@ -13098,8 +13297,8 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
 
 describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("adds all V1.9.17 WIP runtime definitions without release-promoting the next slice", () => {
-    expect(ONR_V1_9_17_WIP_CARD_IDS).toHaveLength(18);
-    for (const definitionId of ONR_V1_9_17_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.assetNodeEffects).toHaveLength(18);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.assetNodeEffects) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("corp");
       expect(definition?.type, definitionId).toBe("asset");
@@ -13118,7 +13317,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
-    let state = v1917GenericAssetGame("v1917-generic-asset-install-rez-access");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-generic-asset-install-rez-access");
     state.corp.credits = 10;
     state.runner.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -13169,7 +13368,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     });
 
     let accessState = toRunnerTurn(
-      v1917GenericAssetGame("v1917-generic-asset-access-trash"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-generic-asset-access-trash"),
     );
     accessState.runner.credits = 10;
     const accessedAssetId = putCorpRootInRemote(
@@ -13216,7 +13415,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("applies rezzed V1.9.17 recurring campaign credits at Corp turn start", () => {
-    let state = v1917GenericAssetGame("v1917-recurring-campaign-start-turn");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-recurring-campaign-start-turn");
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const campaignId = moveCorpCardToHq(state, "onr_v1_326_holovid-campaign");
@@ -13257,7 +13456,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_337_rockerboy-promotion",
     ] as const;
     for (const definitionId of economyAssets) {
-      let state = v1917GenericAssetGame(`v1917-economy-asset-${definitionId}`);
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(`v1917-economy-asset-${definitionId}`);
       state.corp.credits = 10;
       state = apply(
         state,
@@ -13302,7 +13501,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("loads and spends Spinn Public Relations bits instead of generic economy credits", () => {
-    let state = v1917GenericAssetGame("v1917-spinn-public-relations-pool");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-spinn-public-relations-pool");
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const spinnId = moveCorpCardToHq(
@@ -13370,7 +13569,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_329_investment-firm",
     ] as const;
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1917-recurring-all-assets"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-recurring-all-assets"),
     );
     for (const definitionId of recurringAssets) {
       const assetId = putCorpRootInRemote(state, definitionId);
@@ -13398,7 +13597,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
   it("cascades hosted V1.9.17 Corp cards to Archives when the host is trashed on access", () => {
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1917-hosted-corp-asset-trash"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-hosted-corp-asset-trash"),
     );
     state.runner.credits = 10;
     const hostId = putCorpRootInRemote(
@@ -13458,7 +13657,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       ["onr_v1_310_blood-cat", 5],
     ] as const;
     for (const [definitionId, baseTraceStrength] of traceAssets) {
-      let state = v1917GenericAssetGame(
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
         `v1917-trace-asset-window-${definitionId}`,
       );
       state.corp.credits = 10;
@@ -13512,7 +13711,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("uses Krumz as a trace-only bit source and refreshes it at Corp turn start", () => {
-    let state = v1917GenericAssetGame("v1917-krumz-trace-bit-source");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-krumz-trace-bit-source");
     state.corp.credits = 10;
     state.runner.credits = 0;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -13580,7 +13779,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
   it("resolves Corporate Negotiating Center as start-of-turn HQ agenda reveal", () => {
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1917-corporate-negotiating-center-hq"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        "v1917-corporate-negotiating-center-hq",
+      ),
     );
     state.corp.credits = 10;
     const negotiatingCenterId = putCorpRootInRemote(
@@ -13629,7 +13830,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("resolves Rescheduler as deterministic HQ shuffle into R&D and draw", () => {
-    let reorderState = v1917GenericAssetGame("v1917-rescheduler-hq-shuffle");
+    let reorderState = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-rescheduler-hq-shuffle");
     reorderState.corp.credits = 10;
     reorderState = apply(
       reorderState,
@@ -13691,7 +13892,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("resolves V1.9.17 Solo Squad damage through a typed rezzed asset LegalAction", () => {
-    let state = v1917GenericAssetGame("v1917-solo-squad-damage");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-solo-squad-damage");
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const soloSquadId = moveCorpCardToHq(state, "onr_v1_342_solo-squad");
@@ -13760,7 +13961,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   });
 
   it("uses Cowboy Sysop and Disinfectant, Inc. through visible installed-card targets", () => {
-    let cowboyState = v1917GenericAssetGame("v1917-cowboy-installed-target");
+    let cowboyState = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-cowboy-installed-target");
     cowboyState.corp.credits = 10;
     cowboyState = apply(
       cowboyState,
@@ -13815,7 +14016,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(cowboyReplay.ok).toBe(true);
     expect(hashState(cowboyReplay.state)).toBe(hashState(cowboyState));
 
-    let disinfectantState = v1917GenericAssetGame(
+    let disinfectantState = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1917-disinfectant-virus-counter",
     );
     disinfectantState.corp.credits = 10;
@@ -13901,7 +14102,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     ] as const;
     for (const { definitionId, expectedTagsAdded, damageAmount } of ambushes) {
       let state = toRunnerTurn(
-        v1917GenericAssetGame(`v1917-access-ambush-${definitionId}`),
+        MECHANIC_SMOKE_GAMES.assetNodeEffects(
+          `v1917-access-ambush-${definitionId}`,
+        ),
       );
       state.runner.credits = 10;
       const ambushId = putCorpRootInRemote(state, definitionId);
@@ -13943,7 +14146,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => {
   it("scales Virus Test Site access damage, reveals R&D access and skips Archives", () => {
     let remoteState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("spotcheck-virus-test-site-remote"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-virus-test-site-remote"),
     );
     remoteState.runner.credits = 10;
     drawRunnerCardsForTest(remoteState, 4);
@@ -13983,7 +14186,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(hashState(replay.state)).toBe(hashState(remoteState));
 
     let rdState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("spotcheck-virus-test-site-rd"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-virus-test-site-rd"),
     );
     rdState.runner.credits = 10;
     const rdVirusTestSiteId = putCorpCardOnTopOfRd(
@@ -14008,7 +14211,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     );
 
     let archivesState = toRunnerTurn(
-      v1919AgendaOveradvanceGame("spotcheck-virus-test-site-archives"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-virus-test-site-archives"),
     );
     archivesState.runner.credits = 10;
     const archivedVirusTestSiteId = moveCorpCardToArchives(
@@ -14038,7 +14241,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
   });
 
   it("keeps Setup! at two net damage and skips its Archives access", () => {
-    let state = toRunnerTurn(v1917GenericAssetGame("spotcheck-setup-archives"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-setup-archives"));
     state.runner.credits = 10;
     const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
     keepOnlyCorpArchivesCards(state, [setupId]);
@@ -14063,7 +14266,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
   it("uses Information Laundering advancement scaling and trashes the source", () => {
     for (const advancementCounters of [0, 4]) {
       let state = apply(
-        v1919AgendaOveradvanceGame(
+        MECHANIC_SMOKE_GAMES.agendaScoring(
           `spotcheck-information-laundering-${advancementCounters}`,
         ),
         "corp",
@@ -14156,7 +14359,9 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
 
   it("publishes Fragmentation Storm program-trash summary after successful trace", () => {
     let state = toRunnerTurn(
-      v1916ProgramSubtypeGame("spotcheck-fragmentation-storm-payload"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting(
+        "spotcheck-fragmentation-storm-payload",
+      ),
     );
     state.runner.credits = 10;
     state.corp.credits = 8;
@@ -14281,7 +14486,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     /"privatePayload"|"cardInstances"|"hq"|"rd"|"grip"|"stack"/;
 
   it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone expose payloads", () => {
-    let exposeState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-fortress"));
+    let exposeState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-fortress"));
     exposeState.runner.credits = 20;
     moveRunnerCardToGrip(exposeState, "onr_v1_088_fortress-respecification");
     putCorpRootInRemote(exposeState, "simple_upgrade");
@@ -14337,7 +14542,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     expect(exposeReplay.ok).toBe(true);
     expect(hashState(exposeReplay.state)).toBe(hashState(exposeState));
 
-    let revealState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-ice-data"));
+    let revealState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-data"));
     revealState.runner.credits = 20;
     moveRunnerCardToGrip(
       revealState,
@@ -14404,7 +14609,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     expect(revealReplay.ok).toBe(true);
     expect(hashState(revealReplay.state)).toBe(hashState(revealState));
 
-    let noIceState = toRunnerTurn(v1911HiddenZoneGame("spotcheck-ice-data-no-ice"));
+    let noIceState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-data-no-ice"));
     noIceState.runner.credits = 20;
     moveRunnerCardToGrip(
       noIceState,
@@ -14794,8 +14999,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     let pacificaState = apply(
       createGameAfterSetup({
         seed: "spotcheck-pacifica",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -14867,7 +15072,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "onr_v1_138_pk-6089a",
       "onr_v1_147_zz22-speed-chip",
     ] as const;
-    expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
+    expect(MECHANIC_SMOKE_CARD_IDS.longtailEffects).toHaveLength(47);
     for (const definitionId of runnerHardwareIds) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("runner");
@@ -14904,15 +15109,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         createGameAfterSetup({
           seed: `v1922-${definitionId}-hardware-install`,
           runnerDeck: {
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
             id: `onr_v1_runner_v1922_${definitionId}_hardware_install`,
             name: `O:NR V1.9.22 ${definitionId} Install`,
             cards: [
               { id: definitionId, quantity: 1 },
-              ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
             ],
           },
-          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           agendaPointsToWin: 7,
         }),
       );
@@ -14993,22 +15198,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-zz22-killer-recurring",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_zz22_killer",
           name: "O:NR V1.9.22 ZZ22 Killer Runner",
           cards: [
             { id: "onr_v1_147_zz22-speed-chip", quantity: 1 },
             { id: "simple_killer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_zz22_killer",
           name: "O:NR V1.9.22 ZZ22 Killer Corp",
           cards: [
             { id: "simple_sentry_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -15098,21 +15303,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-zz22-non-killer-recurring",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_zz22_decoder",
           name: "O:NR V1.9.22 ZZ22 Decoder Runner",
           cards: [
             { id: "onr_v1_147_zz22-speed-chip", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_zz22_decoder",
           name: "O:NR V1.9.22 ZZ22 Decoder Corp",
           cards: [
             { id: "simple_code_gate_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -15190,15 +15395,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-if-you-want-it-done-right",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_if_you_want_it_done_right",
           name: "O:NR V1.9.22 If You Want It Done Right",
           cards: [
             { id: "onr_v1_093_if-you-want-it-done-right", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -15306,15 +15511,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-organ-donor",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_organ_donor",
           name: "O:NR V1.9.22 Organ Donor",
           cards: [
             { id: "onr_v1_103_organ-donor", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -15424,17 +15629,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-misc-for-sale",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_misc_for_sale",
           name: "O:NR V1.9.22 misc.for-sale",
           cards: [
             { id: "onr_v1_100_misc-for-sale", quantity: 1 },
             { id: "simple_setup_hardware", quantity: 1 },
             { id: "onr_v1_122_artemis-2020", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -15554,15 +15759,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-open-ended-mileage-program",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_open_ended_mileage_program",
           name: "O:NR V1.9.22 Open-Ended Mileage Program",
           cards: [
             { id: "onr_v1_102_open-ended-mileage-program", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -15652,12 +15857,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-anonymous-tip",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_anonymous_tip",
           name: "O:NR V1.9.22 Anonymous Tip",
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_anonymous_tip",
           name: "O:NR V1.9.22 Anonymous Tip Corp",
         },
@@ -15775,21 +15980,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-forged-activation-orders",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_forged_activation_orders",
           name: "O:NR V1.9.22 Forged Activation Orders",
           cards: [
             { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_forged_activation_orders",
           name: "O:NR V1.9.22 Forged Activation Orders Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -15907,21 +16112,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-forged-activation-orders-trash",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_forged_activation_orders_trash",
           name: "O:NR V1.9.22 Forged Activation Orders Trash",
           cards: [
             { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_forged_activation_orders_trash",
           name: "O:NR V1.9.22 Forged Activation Orders Trash Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -15970,21 +16175,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-core-command-jettison-ice",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_core_command_jettison_ice",
           name: "O:NR V1.9.22 Core Command Jettison Ice",
           cards: [
             { id: "onr_v1_080_core-command-jettison-ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_core_command_jettison_ice",
           name: "O:NR V1.9.22 Core Command Jettison Ice Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -16101,21 +16306,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-security-code-worm-chip",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_security_code_worm_chip",
           name: "O:NR V1.9.22 Security Code WORM Chip",
           cards: [
             { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_security_code_worm_chip",
           name: "O:NR V1.9.22 Security Code WORM Chip Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -16233,12 +16438,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-security-code-worm-chip-no-target",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_security_code_worm_chip_no_target",
           name: "O:NR V1.9.22 Security Code WORM Chip No Target",
           cards: [
             { id: "onr_v1_109_security-code-worm-chip", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: ONR_V1_CORP_DECK,
@@ -16276,15 +16481,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-synchronized-attack-on-hq",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_synchronized_attack_on_hq",
           name: "O:NR V1.9.22 Synchronized Attack on HQ",
           cards: [
             { id: "onr_v1_113_synchronized-attack-on-hq", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -16418,15 +16623,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-valu-pak-software-bundle",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_valu_pak_software_bundle",
           name: "O:NR V1.9.22 Valu-Pak Software Bundle",
           cards: [
             { id: "onr_v1_117_valu-pak-software-bundle", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -16544,16 +16749,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-japanese-water-torture-wall-debt",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_japanese_water_torture",
           name: "O:NR V1.9.22 Japanese Water Torture",
           cards: [
             { id: "onr_v1_037_japanese-water-torture", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_japanese_water_torture_wall",
           name: "O:NR V1.9.22 Japanese Water Torture Wall Corp",
         },
@@ -16708,17 +16913,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-hammer-wall-breaker",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_hammer",
           name: "O:NR V1.9.22 Hammer",
           cards: [
             { id: "onr_v1_011_cloak", quantity: 1 },
             { id: "onr_v1_031_hammer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_hammer_wall",
           name: "O:NR V1.9.22 Hammer Wall Corp",
         },
@@ -16834,18 +17039,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-hammer-stealth-choice",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_hammer_choice",
           name: "O:NR V1.9.22 Hammer Choice",
           cards: [
             { id: "onr_v1_011_cloak", quantity: 1 },
             { id: "onr_v1_031_hammer", quantity: 1 },
             { id: "onr_v1_035_invisibility", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_hammer_choice",
           name: "O:NR V1.9.22 Hammer Choice Corp",
         },
@@ -16978,21 +17183,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-flak-ap-breaker",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_flak",
           name: "O:NR V1.9.22 Flak",
           cards: [
             { id: "onr_v1_027_flak", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_flak_ap",
           name: "O:NR V1.9.22 Flak AP ICE Corp",
           cards: [
             { id: "onr_v1_280_zombie", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -17111,21 +17316,21 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-reflector-tagged-breaker",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_reflector",
           name: "O:NR V1.9.22 Reflector",
           cards: [
             { id: "onr_v1_055_reflector", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_reflector",
           name: "O:NR V1.9.22 Reflector Tagged ICE Corp",
           cards: [
             { id: "onr_v1_271_tko-2-0", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -17269,15 +17474,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         createGameAfterSetup({
           seed: `v1922-${definitionId}-install-only`,
           runnerDeck: {
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
             id: `onr_v1_runner_v1922_${definitionId}_install`,
             name: `O:NR V1.9.22 ${definitionId} Install`,
             cards: [
               { id: definitionId, quantity: 1 },
-              ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
             ],
           },
-          corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           agendaPointsToWin: 7,
         }),
       );
@@ -17366,16 +17571,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-zetatech-software-installer-recurring-program-install",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_zetatech_software_installer_recurring",
           name: "O:NR V1.9.22 Zetatech Software Installer Recurring",
           cards: [
             { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
             { id: "onr_v1_031_hammer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -17469,16 +17674,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-zetatech-overlay-install",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_zetatech_overlay",
           name: "O:NR V1.9.22 Zetatech Overlay",
           cards: [
             { id: "onr_v1_075_zetatech-software-installer", quantity: 1 },
             { id: "onr_v1_031_hammer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -17564,24 +17769,24 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "spotcheck-false-echo-netspace-inverter",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_false_echo_netspace_runner",
           name: "Spotcheck False Echo Netspace Runner",
           cards: [
             { id: "onr_v1_026_false-echo", quantity: 1 },
             { id: "onr_v1_044_netspace-inverter", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_false_echo_netspace_corp",
           name: "Spotcheck False Echo Netspace Corp",
           cards: [
             { id: "simple_economy_asset", quantity: 1 },
             { id: "simple_barrier_ice", quantity: 1 },
             { id: "simple_code_gate_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -17672,16 +17877,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "spotcheck-arasaka-pandora-deck-unique",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_arasaka_pandora_runner",
           name: "Spotcheck Arasaka Pandora Runner",
           cards: [
             { id: "onr_v1_119_arasaka-portable-prototype", quantity: 1 },
             { id: "onr_v1_136_pandoras-deck", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       }),
     );
     state.runner.credits = 20;
@@ -17734,13 +17939,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "spotcheck-roving-submarine-run-gate",
         baseline: MVP_0_99_BASELINE,
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_roving_submarine_corp",
           name: "Spotcheck Roving Submarine Corp",
           cards: [
             { id: "simple_economy_asset", quantity: 1 },
             { id: "onr_v1_368_roving-submarine", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -17800,22 +18005,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "spotcheck-speed-trap-rez-interrupt",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_speed_trap_runner",
           name: "Spotcheck Speed Trap Runner",
           cards: [
             { id: "onr_v1_067_speed-trap", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_speed_trap_corp",
           name: "Spotcheck Speed Trap Corp",
           cards: [
             { id: "simple_upgrade", quantity: 1 },
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -17877,22 +18082,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "spotcheck-speed-trap-pass",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_speed_trap_pass_runner",
           name: "Spotcheck Speed Trap Pass Runner",
           cards: [
             { id: "onr_v1_067_speed-trap", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_speed_trap_pass_corp",
           name: "Spotcheck Speed Trap Pass Corp",
           cards: [
             { id: "simple_upgrade", quantity: 1 },
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -17940,22 +18145,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "spotcheck-startup-immolator-trash-ice",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_startup_immolator_runner",
           name: "Spotcheck Startup Immolator Runner",
           cards: [
             { id: "onr_v1_068_startup-immolator", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_startup_immolator_corp",
           name: "Spotcheck Startup Immolator Corp",
           cards: [
             { id: "simple_economy_asset", quantity: 1 },
             { id: "simple_barrier_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -18047,23 +18252,23 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "spotcheck-microtech-backup-drive",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_microtech_backup_runner",
           name: "Spotcheck Microtech Backup Runner",
           cards: [
             { id: "onr_v1_069_succubus", quantity: 1 },
             { id: "onr_v1_036_jackhammer", quantity: 1 },
             { id: "onr_v1_131_microtech-backup-drive", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_microtech_backup_corp",
           name: "Spotcheck Microtech Backup Corp",
           cards: [
             { id: "onr_v1_233_d-arc-knight", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -18176,15 +18381,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-newsgroup-filter-credit-action",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_newsgroup_filter",
           name: "O:NR V1.9.22 Newsgroup Filter",
           cards: [
             { id: "onr_v1_045_newsgroup-filter", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -18270,15 +18475,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         seed: "v1922-shield-prevention",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.damagePrevention.runner,
           id: "onr_v1_runner_v1922_shield_prevention",
           name: "O:NR V1.9.22 Shield Prevention",
           cards: [
             { id: "onr_v1_061_shield", quantity: 1 },
-            ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.damagePrevention.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -18368,18 +18573,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("uses Corporate Retreat until Corp installs or rezzes another card", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_corporate_retreat",
       name: "O:NR V1.9.22 Corporate Retreat",
       cards: [
         { id: "onr_v1_195_corporate-retreat", quantity: 1 },
         { id: "simple_barrier_ice", quantity: 2 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-corporate-retreat",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -18482,7 +18687,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
     let rezState = createGameAfterSetup({
       seed: "v1922-corporate-retreat-rez-lock",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -18549,19 +18754,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("scores Data Fort Reclamation as a private HQ install sequence", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_data_fort_reclamation",
       name: "O:NR V1.9.22 Data Fort Reclamation",
       cards: [
         { id: "onr_v1_197_data-fort-reclamation", quantity: 1 },
         { id: "simple_barrier_ice", quantity: 1 },
         { id: "onr_v1_308_acme-savings-and-loan", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-data-fort-reclamation",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -18725,17 +18930,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("scores Corporate War through a deterministic on-score credit threshold resolver", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_corporate_war",
       name: "O:NR V1.9.22 Corporate War",
       cards: [
         { id: "onr_v1_196_corporate-war", quantity: 2 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-corporate-war-threshold",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -18817,7 +19022,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
     let missState = createGameAfterSetup({
       seed: "v1922-corporate-war-threshold-miss",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -18862,19 +19067,19 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("scores Security Purge as a side-safe R&D top-three install and trash resolver", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_security_purge",
       name: "O:NR V1.9.22 Security Purge",
       cards: [
         { id: "onr_v1_216_security-purge", quantity: 1 },
         { id: "simple_barrier_ice", quantity: 1 },
         { id: "simple_code_gate_ice", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-security-purge",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -18998,17 +19203,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("uses Political Overthrow as a side-safe scored-agenda action for Gain 3", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_political_overthrow",
       name: "O:NR V1.9.22 Political Overthrow",
       cards: [
         { id: "onr_v1_210_political-overthrow", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-political-overthrow",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -19101,17 +19306,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("uses Marine Arcology as a side-safe scored-agenda action for Gain 3", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_marine_arcology",
       name: "O:NR V1.9.22 Marine Arcology",
       cards: [
         { id: "onr_v1_206_marine-arcology", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-marine-arcology",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -19204,17 +19409,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("plays Off-Site Backups as a private Archives-to-HQ choice", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_off_site_backups",
       name: "O:NR V1.9.22 Off-Site Backups",
       cards: [
         { id: "onr_v1_296_off-site-backups", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-off-site-backups",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -19313,17 +19518,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("plays Planning Consultants as a private R&D top-five reorder choice", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_planning_consultants",
       name: "O:NR V1.9.22 Planning Consultants",
       cards: [
         { id: "onr_v1_298_planning-consultants", quantity: 1 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-planning-consultants",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -19419,18 +19624,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
   it("plays Edgerunner, Inc., Temps as a consecutive Corp install-only action bundle", () => {
     const corpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "onr_v1_corp_v1922_edgerunner_temps",
       name: "O:NR V1.9.22 Edgerunner Temps",
       cards: [
         { id: "onr_v1_289_edgerunner-inc-temps", quantity: 1 },
         { id: "simple_barrier_ice", quantity: 2 },
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
       ],
     };
     let state = createGameAfterSetup({
       seed: "v1922-edgerunner-temps",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck,
       agendaPointsToWin: 7,
     });
@@ -19544,14 +19749,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-zombie",
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_zombie",
           name: "O:NR V1.9.22 Zombie Corp",
           cards: [
             { id: "onr_v1_280_zombie", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -19622,22 +19827,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-tutor-future-etr",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_tutor_hammer",
           name: "O:NR V1.9.22 Tutor Hammer Runner",
           cards: [
             { id: "onr_v1_031_hammer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_tutor",
           name: "O:NR V1.9.22 Tutor Corp",
           cards: [
             { id: "onr_v1_274_tutor", quantity: 1 },
             { id: "onr_v1_279_wall-of-static", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -19752,22 +19957,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-virizz-break-cost-modifier",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_virizz_hammer",
           name: "O:NR V1.9.22 Virizz Hammer Runner",
           cards: [
             { id: "onr_v1_031_hammer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_virizz",
           name: "O:NR V1.9.22 Virizz Corp",
           cards: [
             { id: "onr_v1_277_virizz", quantity: 1 },
             { id: "onr_v1_279_wall-of-static", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -19891,17 +20096,17 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-haunting-inquisition-run-lock",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_haunting",
           name: "O:NR V1.9.22 Haunting Runner",
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_haunting",
           name: "O:NR V1.9.22 Haunting Corp",
           cards: [
             { id: "onr_v1_247_haunting-inquisition", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -20010,14 +20215,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       createGameAfterSetup({
         seed: "v1922-viral-15-program-trash",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "onr_v1_corp_v1922_viral_15",
           name: "O:NR V1.9.22 Viral 15 Corp",
           cards: [
             { id: "onr_v1_276_viral-15", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -20583,8 +20788,8 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
 
 describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   it("adds all V1.9.18 WIP runtime definitions without release-promoting the next slice", () => {
-    expect(ONR_V1_9_18_WIP_CARD_IDS).toHaveLength(15);
-    for (const definitionId of ONR_V1_9_18_WIP_CARD_IDS) {
+    expect(MECHANIC_SMOKE_CARD_IDS.serverUpgrades).toHaveLength(15);
+    for (const definitionId of MECHANIC_SMOKE_CARD_IDS.serverUpgrades) {
       const definition = DEMO_CARDS_BY_ID[definitionId];
       expect(definition?.side, definitionId).toBe("corp");
       expect(definition?.type, definitionId).toBe("upgrade");
@@ -20603,7 +20808,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   });
 
   it("keeps generic V1.9.18 upgrade install, rez, access and trash side-safe", () => {
-    let state = v1917GenericAssetGame(
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1918-generic-upgrade-install-rez-access",
     );
     state.corp.credits = 10;
@@ -20639,7 +20844,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     ).toBe("onr_v1_354_crybaby");
 
     let accessState = toRunnerTurn(
-      v1917GenericAssetGame("v1918-generic-upgrade-access-trash"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        "v1918-generic-upgrade-access-trash",
+      ),
     );
     accessState.runner.credits = 10;
     const accessedUpgradeId = putCorpRootInRemote(
@@ -20687,7 +20894,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
   it("applies Crybaby access counters, trace link reduction and runner removal", () => {
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1918-crybaby-counter-link-removal"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        "v1918-crybaby-counter-link-removal",
+      ),
     );
     state.runner.credits = 20;
     state.corp.credits = 20;
@@ -20776,7 +20985,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     for (const { definitionId, damageType, damageAmount, startingTags } of cases) {
       let state = toRunnerTurn(
-        v1917GenericAssetGame(`v1918-upgrade-access-ambush-${definitionId}`),
+        MECHANIC_SMOKE_GAMES.assetNodeEffects(
+          `v1918-upgrade-access-ambush-${definitionId}`,
+        ),
       );
       state.runner.credits = 10;
       state.runner.tags = startingTags;
@@ -20825,7 +21036,9 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
   it("skips Dedicated Response Team damage for an untagged Runner without adding tags", () => {
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1918-dedicated-response-untagged"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        "v1918-dedicated-response-untagged",
+      ),
     );
     state.runner.credits = 10;
     state.runner.tags = 0;
@@ -20864,7 +21077,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
   it("starts Turbeau Delacroix through the side-safe access trace window", () => {
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1918-turbeau-access-trace"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-turbeau-access-trace"),
     );
     state.corp.credits = 5;
     state.runner.credits = 5;
@@ -20920,7 +21133,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
   it("applies Red Herrings as a server-bound agenda steal tax", () => {
     let state = toRunnerTurn(
-      v1917GenericAssetGame("v1918-red-herrings-steal-tax"),
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-red-herrings-steal-tax"),
     );
     state.runner.credits = 7;
     const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
@@ -20969,7 +21182,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   });
 
   it("keeps V1.9.18 city-grid region replacement server-bound and visible", () => {
-    let state = v1917GenericAssetGame("v1918-city-grid-region-install");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-city-grid-region-install");
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const firstGridId = moveCorpCardToHq(
@@ -21012,7 +21225,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   });
 
   it("covers V1.9.18 counter, tag-condition and hidden-zone upgrade actions", () => {
-    let state = v1917GenericAssetGame("v1918-counter-tag-hidden-actions");
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-counter-tag-hidden-actions");
     state.corp.credits = 10;
     state.runner.tags = 1;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -21082,7 +21295,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
   });
 
   it("covers V1.9.18 city-grid trace and run-start stealth tax paths", () => {
-    let traceState = v1917GenericAssetGame("v1918-paris-city-grid-trace");
+    let traceState = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-paris-city-grid-trace");
     traceState.corp.credits = 5;
     traceState.runner.credits = 5;
     traceState = apply(
@@ -21125,7 +21338,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(traceReplay.ok).toBe(true);
     expect(hashState(traceReplay.state)).toBe(hashState(traceState));
 
-    let runState = toRunnerTurn(v1917GenericAssetGame("v1918-stealth-run-tax"));
+    let runState = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-run-tax"));
     runState.runner.credits = 0;
     const surveillanceId = putCorpRootInRemote(
       runState,
@@ -21183,16 +21396,16 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       createGameAfterSetup({
         seed: "spotcheck-ramming-piston",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_ramming_runner",
           name: "Spotcheck Ramming Runner",
           cards: [
             { id: "onr_v1_053_ramming-piston", quantity: 1 },
             { id: "onr_v1_011_cloak", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       }),
     );
     state.runner.credits = 20;
@@ -21254,7 +21467,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 
   it("adds Skivviss counters on successful R&D runs and converts them into Corp start-turn draws", () => {
     let state = toRunnerTurn(
-      v1912CounterRecurringGame("spotcheck-skivviss-rd"),
+      MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-skivviss-rd"),
     );
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_064_skivviss");
@@ -21286,7 +21499,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
   });
 
   it("uses The Short Circuit as a trash-on-use private stack tutor", () => {
-    let state = toRunnerTurn(v1911HiddenZoneGame("spotcheck-short-circuit"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-short-circuit"));
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_177_the-short-circuit");
     const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
@@ -21331,13 +21544,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       createGameAfterSetup({
         seed: "spotcheck-bodyweight-creche",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_bodyweight_runner",
           name: "Spotcheck Bodyweight Runner",
           cards: [
             { id: "onr_v1_122_artemis-2020", quantity: 1 },
             { id: "onr_v1_123_bodyweight-data-creche", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
       }),
@@ -21417,7 +21630,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 
   it("uses Experimental AI advancement counters as the installed-program trash count", () => {
     let state = toRunnerTurn(
-      v1919AgendaOveradvanceGame("spotcheck-experimental-ai"),
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-experimental-ai"),
     );
     installRunnerProgramForTest(state, "simple_decoder");
     installRunnerProgramForTest(state, "simple_fracter");
@@ -21451,13 +21664,13 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       createGameAfterSetup({
         seed: "spotcheck-new-galveston",
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_new_galveston_corp",
           name: "Spotcheck New Galveston Corp",
           cards: [
             { id: "simple_economy_asset", quantity: 1 },
             { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
       }),
@@ -21861,7 +22074,7 @@ describe("V1.1.2 Full Archives Access", () => {
   });
 
   it("does not offer the basic trash ability for a card accessed from Archives", () => {
-    let state = toRunnerTurn(v1917GenericAssetGame("v112-archives-no-trash"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v112-archives-no-trash"));
     state.runner.credits = 10;
     const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
     keepOnlyCorpArchivesCards(state, [setupId]);
@@ -24349,11 +24562,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
   it("routes Diplomatic Immunity through a Corp cancel window and replay-safe prevention", () => {
     let state = createGameAfterSetup({
       seed: "spotcheck-diplomatic-immunity-prevent",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck: {
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         cards: [
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
         ],
       },
@@ -24411,11 +24624,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
 
     let cancelState = createGameAfterSetup({
       seed: "spotcheck-diplomatic-immunity-cancel",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck: {
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         cards: [
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
         ],
       },
@@ -24522,12 +24735,12 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
   it("keeps Corporate War and Political Coup source-bound and replay-stable", () => {
     let warState = createGameAfterSetup({
       seed: "spotcheck-corporate-war-exact-12",
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck: {
-        ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         cards: [
           { id: "onr_v1_196_corporate-war", quantity: 2 },
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
         ],
       },
       agendaPointsToWin: 7,
@@ -24592,7 +24805,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       ["onr_v1_228_cinderella", 6],
       ["onr_v1_248_homewrecker", 5],
     ] as const) {
-      let state = toRunnerTurn(v1914TraceTagResourceGame(`spotcheck-${definitionId}`));
+      let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags(`spotcheck-${definitionId}`));
       state.runner.credits = 20;
       state.corp.credits = 20;
       installRunnerHardwareForTest(state, "onr_v1_120_armadillo-armored-road-home");
@@ -24639,7 +24852,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
 
-      let miss = toRunnerTurn(v1914TraceTagResourceGame(`spotcheck-${definitionId}-miss`));
+      let miss = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags(`spotcheck-${definitionId}-miss`));
       miss.runner.credits = 20;
       miss.corp.credits = 20;
       installRunnerHardwareForTest(miss, "onr_v1_132_microtech-trode-set");
@@ -24655,7 +24868,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
   });
 
   it("places Management Shake-Up advancement counters and scales Shattered Remains hardware trash", () => {
-    let state = v1919AgendaOveradvanceGame("spotcheck-management-shake-up");
+    let state = MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-management-shake-up");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 50;
     state.corp.clicks = 10;
@@ -24692,15 +24905,15 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         seed: "spotcheck-shattered-remains",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.runner,
           cards: [
             { id: "simple_setup_hardware", quantity: 2 },
-            ...ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK.cards.filter(
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.runner.cards.filter(
               (card) => card.id !== "simple_setup_hardware",
             ),
           ],
         },
-        corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.agendaScoring.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -24849,7 +25062,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("uses Access through Alpha as the single base-link source for trace bidding", () => {
-    let state = toRunnerTurn(v1916ProgramSubtypeGame("spotcheck-access-alpha-link"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.programSubtypeHosting("spotcheck-access-alpha-link"));
     state.runner.credits = 12;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
@@ -24870,7 +25083,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("lets Replicator break only trace subroutines and revalidates the current encounter", () => {
-    let state = toRunnerTurn(v1914TraceTagResourceGame("spotcheck-replicator-trace-break"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-replicator-trace-break"));
     state.runner.credits = 10;
     state.corp.credits = 8;
     moveRunnerCardToGrip(state, "onr_v1_056_replicator");
@@ -24901,7 +25114,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let wallState = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-replicator-wall-negative",
       baseline: MVP_0_99_BASELINE,
-      runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.traceTags.runner,
       corpDeck: ONR_V1_0_6K_CORP_DECK,
       agendaPointsToWin: 7,
     }));
@@ -24916,16 +25129,16 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
   it("spends Scatter Shot recurring credits only for accessed upgrade trash costs", () => {
     const runnerDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       id: "spotcheck_scatter_runner",
       name: "Spotcheck Scatter Runner",
-      cards: [{ id: "onr_v1_057_scatter-shot", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards],
+      cards: [{ id: "onr_v1_057_scatter-shot", quantity: 1 }, ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards],
     };
     let state = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-scatter-shot",
       baseline: MVP_0_99_BASELINE,
       runnerDeck,
-      corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+      corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
       agendaPointsToWin: 7,
     }));
     state.runner.credits = 0;
@@ -24963,7 +25176,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       seed: "spotcheck-scatter-asset-negative",
       baseline: MVP_0_99_BASELINE,
       runnerDeck,
-      corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+      corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
       agendaPointsToWin: 7,
     }));
     assetState.runner.credits = 0;
@@ -24978,7 +25191,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("hardens Detroit Police Contract, Off-Site Backups and Urban Renewal revalidation", () => {
-    let detroit = apply(v1912CounterRecurringGame("spotcheck-detroit-negative"), "corp", (action) => action.type === "mandatory_draw");
+    let detroit = apply(MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-detroit-negative"), "corp", (action) => action.type === "mandatory_draw");
     detroit.corp.clicks = 5;
     const detroitId = scoreCorpAgendaForTest(detroit, "onr_v1_198_detroit-police-contract");
     detroit.cardInstances[detroitId] = { ...detroit.cardInstances[detroitId]!, counters: { power: 1 } };
@@ -24996,15 +25209,15 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(getLegalActions(detroit, "corp").some((action) => action.actionId === detroitAction.actionId)).toBe(false);
 
     const offsiteCorpDeck: DeckDefinition = {
-      ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
       id: "spotcheck_offsite_empty_corp",
       name: "Spotcheck Offsite Empty Corp",
-      cards: [{ id: "onr_v1_296_off-site-backups", quantity: 1 }, ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards],
+      cards: [{ id: "onr_v1_296_off-site-backups", quantity: 1 }, ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards],
     };
     let offsite = apply(createGameAfterSetup({
       seed: "spotcheck-offsite-empty",
       baseline: MVP_0_99_BASELINE,
-      runnerDeck: ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck: offsiteCorpDeck,
       agendaPointsToWin: 7,
     }), "corp", (action) => action.type === "mandatory_draw");
@@ -25030,7 +25243,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("keeps Red Herrings steal tax active after Runner trashes it during the same run", () => {
-    let state = toRunnerTurn(v1917GenericAssetGame("spotcheck-red-herrings-trash-run"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-red-herrings-trash-run"));
     state.runner.credits = 6;
     const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
     const agendaId = putCorpRootInRemote(state, "simple_agenda");
@@ -25066,8 +25279,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       createGameAfterSetup({
         seed: "spotcheck-vewy-vewy-quiet",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
-        corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.programSubtypeHosting.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -25102,15 +25315,15 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         createGameAfterSetup({
           seed: `spotcheck-${definitionId}`,
           baseline: MVP_0_99_BASELINE,
-          runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
+          runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
           corpDeck: {
-            ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+            ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
             id: `spotcheck_${definitionId}_corp`,
             name: `Spotcheck ${definitionId} Corp`,
             cards: [
               { id: definitionId, quantity: 1 },
               { id: "simple_code_gate_ice", quantity: 1 },
-              ...ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK.cards.filter(
+              ...MECHANIC_SMOKE_DECKS.damagePrevention.corp.cards.filter(
                 (card) => card.id !== definitionId,
               ),
             ],
@@ -25151,7 +25364,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   });
 
   it("applies Fang trace success as a pay-to-run lock instead of a tag", () => {
-    let state = toRunnerTurn(v1914TraceTagResourceGame("spotcheck-fang-run-lock"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-fang-run-lock"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_240_fang");
@@ -25186,7 +25399,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   it("scales Vacant Soulkiller core damage from advancement counters including zero", () => {
     for (const advancementCounters of [0, 3]) {
       let state = toRunnerTurn(
-        v1919AgendaOveradvanceGame(`spotcheck-vacant-soulkiller-${advancementCounters}`),
+        MECHANIC_SMOKE_GAMES.agendaScoring(
+          `spotcheck-vacant-soulkiller-${advancementCounters}`,
+        ),
       );
       state.runner.credits = 20;
       const vacantId = putCorpRootInRemote(state, "onr_v1_346_vacant-soulkiller");
@@ -25225,13 +25440,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
   it("charges Microtech Trode Set for breaks and reduces unbroken AP net damage to one", () => {
     const microtechRunnerDeck: DeckDefinition = {
-      ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
+      ...MECHANIC_SMOKE_DECKS.traceTags.runner,
       id: "spotcheck_microtech_break_runner",
       name: "Spotcheck Microtech Break Runner",
       cards: [
         { id: "onr_v1_132_microtech-trode-set", quantity: 1 },
         { id: "simple_killer", quantity: 1 },
-        ...ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK.cards.filter(
+        ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards.filter(
           (card) =>
             card.id !== "onr_v1_132_microtech-trode-set" &&
             card.id !== "simple_killer",
@@ -25243,7 +25458,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         seed: "spotcheck-microtech-trode-set",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: microtechRunnerDeck,
-        corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.damagePrevention.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -25272,8 +25487,8 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       createGameAfterSetup({
         seed: "spotcheck-microtech-ap-reduction",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
-        corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.traceTags.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.damagePrevention.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -25524,14 +25739,14 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
   it("resolves Singapore City Grid as a hidden-info-safe once-per-run HQ ICE swap", () => {
     const singaporeCorpDeck: DeckDefinition = {
-      ...ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
+      ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
       id: "spotcheck_singapore_city_grid_corp",
       name: "Spotcheck Singapore City Grid Corp",
       cards: [
         { id: "onr_v1_369_singapore-city-grid", quantity: 1 },
         { id: "simple_barrier_ice", quantity: 1 },
         { id: "simple_code_gate_ice", quantity: 1 },
-        ...ONR_V1_9_17_GENERIC_ASSET_CORP_DECK.cards.filter(
+        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
           (card) =>
             card.id !== "onr_v1_369_singapore-city-grid" &&
             card.id !== "simple_barrier_ice" &&
@@ -25543,7 +25758,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       createGameAfterSetup({
         seed: "spotcheck-singapore-city-grid",
         baseline: MVP_0_99_BASELINE,
-        runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
+        runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
         corpDeck: singaporeCorpDeck,
         agendaPointsToWin: 7,
       }),
@@ -25685,7 +25900,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
 describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () => {
   it("keeps V1.9.19 agenda and operation targets deterministic and leak-safe", () => {
-    let state = v1919AgendaOveradvanceGame("spotcheck-agenda-run-recurring-v1919");
+    let state = MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-agenda-run-recurring-v1919");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 80;
     state.corp.clicks = 30;
@@ -25789,7 +26004,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
 
   it("identifies Shredder Uplink access bonus and keeps Submarine Uplink as a single base-link source", () => {
     let accessState = toRunnerTurn(
-      v1915RunAccessGame("spotcheck-shredder-uplink-access-source"),
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-shredder-uplink-access-source"),
     );
     accessState.runner.credits = 20;
     accessState.runner.memoryLimit = 8;
@@ -25836,7 +26051,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(replayEvents(accessInitial, accessState.eventLog.slice(accessReplayStart)).ok).toBe(true);
 
     let traceState = toRunnerTurn(
-      v1916ProgramSubtypeGame("spotcheck-submarine-uplink-base-link"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting(
+        "spotcheck-submarine-uplink-base-link",
+      ),
     );
     traceState.runner.credits = 12;
     traceState.corp.credits = 8;
@@ -25871,7 +26088,9 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     });
 
     let maxLinkState = toRunnerTurn(
-      v1916ProgramSubtypeGame("spotcheck-submarine-uplink-max-link"),
+      MECHANIC_SMOKE_GAMES.programSubtypeHosting(
+        "spotcheck-submarine-uplink-max-link",
+      ),
     );
     maxLinkState.runner.credits = 20;
     maxLinkState.corp.credits = 8;
@@ -25911,7 +26130,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
   });
 
   it("uses Mystery Box once per run with public top-five reveal, free program install and deterministic shuffle", () => {
-    let state = toRunnerTurn(v1915RunAccessGame("spotcheck-mystery-box-install"));
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-install"));
     state.runner.credits = 20;
     state.runner.memoryLimit = 8;
     const mysteryId = installRunnerProgramForTest(state, "onr_v1_043_mystery-box");
@@ -25980,7 +26199,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    let noProgram = toRunnerTurn(v1915RunAccessGame("spotcheck-mystery-box-no-program"));
+    let noProgram = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mystery-box-no-program"));
     noProgram.runner.credits = 20;
     noProgram.runner.memoryLimit = 8;
     installRunnerProgramForTest(noProgram, "onr_v1_043_mystery-box");
@@ -26025,23 +26244,23 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         seed: "spotcheck-corolla-speed-chip",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_corolla_runner",
           name: "Spotcheck Corolla Runner",
           cards: [
             { id: "onr_v1_124_corolla-speed-chip", quantity: 1 },
             { id: "simple_killer", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_corolla_corp",
           name: "Spotcheck Corolla Corp",
           cards: [
             { id: "simple_sentry_ice", quantity: 1 },
             { id: "simple_code_gate_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -26112,24 +26331,24 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         seed: "spotcheck-corolla-non-killer-negative",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_corolla_decoder_runner",
           name: "Spotcheck Corolla Decoder Runner",
           cards: [
             { id: "onr_v1_124_corolla-speed-chip", quantity: 1 },
             { id: "simple_decoder", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards.filter(
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
               (card) => card.id !== "simple_decoder",
             ),
           ],
         },
         corpDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_corolla_decoder_corp",
           name: "Spotcheck Corolla Decoder Corp",
           cards: [
             { id: "simple_code_gate_ice", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
         agendaPointsToWin: 7,
@@ -26179,15 +26398,15 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       createGameAfterSetup({
         seed: "spotcheck-newsgroup-filter-hardening",
         runnerDeck: {
-          ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK,
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_newsgroup_filter_runner",
           name: "Spotcheck Newsgroup Filter Runner",
           cards: [
             { id: "onr_v1_045_newsgroup-filter", quantity: 1 },
-            ...ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK.cards,
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
           ],
         },
-        corpDeck: ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
       }),
     );
@@ -26247,2820 +26466,3 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     ).toBe(false);
   });
 });
-
-const ONR_V1_0_5K_FINAL_CARD_IDS = [
-  "onr_v1_015_codeslinger",
-  "onr_v1_052_raffles",
-  "onr_v1_054_raptor",
-  "onr_v1_070_tinweasel",
-  "onr_v1_144_tycho-mem-chip",
-  "onr_v1_146_zetatech-mem-chip",
-  "onr_v1_203_hostile-takeover",
-  "onr_v1_230_cortical-scanner",
-  "onr_v1_232_crystal-wall",
-  "onr_v1_237_data-wall",
-  "onr_v1_238_data-wall-2-0",
-  "onr_v1_239_endless-corridor",
-] as const;
-
-const ONR_V1_0_6K_FINAL_CARD_IDS = [
-  "onr_v1_079_bodyweight-synthetic-blood",
-  "onr_v1_095_jack-n-joe",
-  "onr_v1_097_livewires-contacts",
-  "onr_v1_108_score",
-  "onr_v1_072_wild-card",
-  "onr_v1_145_wutech-mem-chip",
-  "onr_v1_220_tycho-extension",
-  "onr_v1_281_accounts-receivable",
-  "onr_v1_282_annual-reviews",
-  "onr_v1_285_closed-accounts",
-  "onr_v1_287_datapool-by-zetatech",
-  "onr_v1_288_day-shift",
-  "onr_v1_290_efficiency-experts",
-  "onr_v1_301_punitive-counterstrike",
-  "onr_v1_302_scorched-earth",
-  "onr_v1_307_urban-renewal",
-  "onr_v1_244_filter",
-  "onr_v1_245_fire-wall",
-  "onr_v1_252_keeper",
-  "onr_v1_256_mazer",
-] as const;
-
-const ONR_V1_1_2K_FINAL_CARD_IDS = [
-  "onr_v1_006_black-dahlia",
-  "onr_v1_014_codecracker",
-  "onr_v1_016_cyfermaster",
-  "onr_v1_040_loony-goon",
-  "onr_v1_060_shaka",
-  "onr_v1_073_wizards-book",
-  "onr_v1_253_laser-wire",
-  "onr_v1_257_nerve-labyrinth",
-  "onr_v1_259_in-the-face",
-  "onr_v1_261_quandary",
-  "onr_v1_262_razor-wire",
-  "onr_v1_263_reinforced-wall",
-  "onr_v1_265_rock-is-strong",
-  "onr_v1_266_scramble",
-  "onr_v1_269_shotgun-wire",
-  "onr_v1_270_sleeper",
-  "onr_v1_278_wall-of-ice",
-  "onr_v1_279_wall-of-static",
-  "onr_v1_293_netwatch-credit-voucher",
-  "onr_v1_295_night-shift",
-] as const;
-
-const ONR_V1_2_3_FINAL_CARD_IDS = [
-  "onr_v1_021_dwarf",
-  "onr_v1_039_krash",
-  "onr_v1_066_snowball",
-  "onr_v1_074_worm",
-  "onr_v1_081_custodial-position",
-  "onr_v1_085_executive-wiretaps",
-  "onr_v1_101_mit-west-tier",
-  "onr_v1_243_fetch-4-0-1",
-  "onr_v1_249_hunter",
-  "onr_v1_297_overtime-incentives",
-  "onr_v1_306_trojan-horse",
-] as const;
-
-const ONR_V1_6_1_FINAL_CARD_IDS = [
-  "onr_v1_023_evil-twin",
-  "onr_v1_028_force-shield",
-  "onr_v1_125_dermatech-bodyplating",
-  "onr_v1_229_code-corpse",
-  "onr_v1_231_cortical-scrub",
-  "onr_v1_254_liche",
-] as const;
-
-const ONR_V1_6_2_FINAL_CARD_IDS = [
-  "onr_v1_212_priority-requisition",
-  "onr_v1_215_security-net-optimization",
-  "onr_v1_317_data-masons",
-  "onr_v1_320_encoder-inc",
-  "onr_v1_341_skalderviken-sa-beta-test-site",
-] as const;
-
-const ONR_V1_6_3_FINAL_CARD_IDS = [
-  "onr_v1_233_d-arc-knight",
-  "onr_v1_267_sentinels-prime",
-  "onr_v1_273_triggerman",
-  "onr_v1_350_antiquated-interface-routines",
-  "onr_v1_371_tokyo-chiba-infighting",
-] as const;
-
-const ONR_V1_7_0_FINAL_CARD_IDS = [
-  "onr_v1_011_cloak",
-  "onr_v1_036_jackhammer",
-  "onr_v1_069_succubus",
-  "onr_v1_163_floating-runner-bbs",
-  "onr_v1_180_smiths-pawnshop",
-] as const;
-
-const ONR_V1_7_1_FINAL_CARD_IDS = [
-  "onr_v1_114_temple-microcode-outlet",
-  "onr_v1_106_private-ldl-access",
-  "onr_v1_118_weather-to-finance-pipe",
-  "onr_v1_084_edited-shipping-manifests",
-  "onr_v1_129_hq-interface",
-] as const;
-
-const ONR_V1_7_2_FINAL_CARD_IDS = [
-  "onr_v1_283_audit-of-call-records",
-  "onr_v1_284_chance-observation",
-  "onr_v1_286_corporate-detective-agency",
-  "onr_v1_158_danshis-second-id",
-  "onr_v1_179_silicon-saloon-franchise",
-] as const;
-
-const ONR_V1_8_0_FINAL_CARD_IDS = [
-  "onr_v1_083_desperate-competitor",
-  "onr_v1_090_hot-tip-for-wns",
-  "onr_v1_156_corporate-ally",
-  "onr_v1_159_databroker",
-  "onr_v1_201_executive-extraction",
-  "onr_v1_214_project-babylon",
-] as const;
-
-const ONR_V1_8_1_FINAL_CARD_IDS = [
-  "onr_v1_012_clown",
-  "onr_v1_046_pattels-virus",
-  "onr_v1_049_pox",
-  "onr_v1_094_inside-job",
-  "onr_v1_173_restrictive-net-zoning",
-  "onr_v1_193_corporate-coup",
-  "onr_v1_209_political-coup",
-  "onr_v1_222_ball-and-chain",
-  "onr_v1_225_canis-major",
-  "onr_v1_226_canis-minor",
-  "onr_v1_242_fatal-attractor",
-  "onr_v1_268_shock-r",
-] as const;
-
-const ONR_V1_9_0_FINAL_CARD_IDS = [
-  "onr_v1_005_bartmoss-memorial-icebreaker",
-  "onr_v1_007_blink",
-  "onr_v1_115_terrorist-reprisal",
-  "onr_v1_223_banpei",
-  "onr_v1_275_vacuum-link",
-] as const;
-
-const ONR_V1_9_1_FINAL_CARD_IDS = [
-  "onr_v1_013_cockroach",
-  "onr_v1_034_incubator",
-  "onr_v1_030_grubb",
-] as const;
-
-const ONR_V1_9_2_FINAL_CARD_IDS = [
-  "onr_v1_076_all-nighter",
-  "onr_v1_096_kilroy-was-here",
-  "onr_v1_107_romp-through-hq",
-  "onr_v1_184_top-runners-conference",
-  "onr_v1_188_ai-chief-financial-officer",
-  "onr_v1_211_polymer-breakthrough",
-  "onr_v1_235_data-naga",
-] as const;
-
-const ONR_V1_9_3_FINAL_CARD_IDS = [
-  "onr_v1_207_netwatch-operations-office",
-  "onr_v1_213_private-cybernet-police",
-  "onr_v1_251_jack-attack",
-  "onr_v1_271_tko-2-0",
-] as const;
-
-const ONR_V1_9_4_FINAL_CARD_IDS = [
-  "onr_v1_208_on-call-solo-team",
-  "onr_v1_217_strike-force-kali",
-] as const;
-const ONR_V1_9_5_FINAL_CARD_IDS = [
-  "onr_v1_219_superior-net-barriers",
-  "onr_v1_308_acme-savings-and-loan",
-] as const;
-const ONR_V1_9_6_FINAL_CARD_IDS = ["onr_v1_236_data-raven"] as const;
-const ONR_V1_9_7_FINAL_CARD_IDS = ["onr_v1_001_afreet"] as const;
-const ONR_V1_9_8_FINAL_CARD_IDS = [
-  "onr_v1_018_dogcatcher",
-  "onr_v1_019_dropp",
-] as const;
-const ONR_V1_9_9_FINAL_CARD_IDS = [
-  "onr_v1_349_aardvark",
-  "onr_v1_351_bizarre-encryption-scheme",
-  "onr_v1_352_chester-mix",
-  "onr_v1_353_chimera",
-] as const;
-const ONR_V1_9_12_RELEASE_CARD_IDS = [
-  "onr_v1_009_butcher-boy",
-  "onr_v1_010_cascade",
-  "onr_v1_017_deep-thought",
-  "onr_v1_032_i-spy",
-  "onr_v1_064_skivviss",
-  "onr_v1_082_deal-with-militech",
-  "onr_v1_091_hunt-club-bbs",
-  "onr_v1_174_rigged-investments",
-  "onr_v1_176_the-shell-traders",
-  "onr_v1_198_detroit-police-contract",
-  "onr_v1_199_employee-empowerment",
-] as const;
-const ONR_V1_9_13_RELEASE_CARD_IDS = [
-  "onr_v1_038_joan-of-arc",
-  "onr_v1_121_armored-fridge",
-  "onr_v1_127_full-body-conversion",
-  "onr_v1_128_green-knight-surge-buffers",
-  "onr_v1_130_lifesaver-nanosurgeons",
-  "onr_v1_135_nasuko-cycle",
-  "onr_v1_139_r-and-d-interface",
-  "onr_v1_143_techtronica-utility-suit",
-  "onr_v1_155_code-viral-cache",
-  "onr_v1_161_fall-guy",
-  "onr_v1_170_nomad-allies",
-  "onr_v1_185_trauma-team",
-  "onr_v1_186_umbrella-policy",
-  "onr_v1_187_wilson-weeflerunner-apprentice",
-  "onr_v1_224_bolter-cluster",
-  "onr_v1_234_data-darts",
-  "onr_v1_258_neural-blade",
-] as const;
-const ONR_V1_9_14_WIP_CARD_IDS = [
-  "onr_v1_053_ramming-piston",
-  "onr_v1_056_replicator",
-  "onr_v1_063_signpost",
-  "onr_v1_116_total-genetic-retrofit",
-  "onr_v1_120_armadillo-armored-road-home",
-  "onr_v1_126_drifter-mobile-environment",
-  "onr_v1_132_microtech-trode-set",
-  "onr_v1_154_broker",
-  "onr_v1_157_crash-everett-inventive-fixer",
-  "onr_v1_162_field-reporter-for-ice-and-data",
-  "onr_v1_164_hells-run",
-  "onr_v1_165_junkyard-bbs",
-  "onr_v1_166_karl-de-veres-corporate-stooge",
-  "onr_v1_167_leland-corporate-bodyguard",
-  "onr_v1_178_short-term-contract",
-  "onr_v1_181_the-springboard",
-  "onr_v1_183_technician-lover",
-  "onr_v1_221_asp",
-  "onr_v1_228_cinderella",
-  "onr_v1_240_fang",
-  "onr_v1_241_fang-2-0",
-  "onr_v1_248_homewrecker",
-  "onr_v1_260_pocket-virtual-reality",
-  "onr_v1_264_rex",
-  "onr_v1_299_power-grid-overload",
-] as const;
-
-const ONR_V1_9_14_RUNNER_CARD_IDS = ONR_V1_9_14_WIP_CARD_IDS.filter(
-  (cardId) => DEMO_CARDS_BY_ID[cardId]?.side === "runner",
-);
-
-const ONR_V1_9_15_WIP_CARD_IDS = [
-  "onr_v1_020_dupre",
-  "onr_v1_024_expert-schedule-analyzer",
-  "onr_v1_041_microtech-ai-interface",
-  "onr_v1_043_mystery-box",
-  "onr_v1_062_shredder-uplink-protocol",
-  "onr_v1_065_smarteye",
-  "onr_v1_098_lucidrine-booster-drug",
-  "onr_v1_105_priority-wreck",
-  "onr_v1_111_social-engineering",
-  "onr_v1_112_stumble-through-wilderspace",
-  "onr_v1_142_record-reconstructor",
-  "onr_v1_227_cerberus",
-  "onr_v1_255_mastiff",
-  "onr_v1_294_new-blood",
-] as const;
-
-const ONR_V1_9_16_WIP_CARD_IDS = [
-  "onr_v1_003_baedekers-net-map",
-  "onr_v1_004_bakdoor",
-  "onr_v1_033_imp",
-  "onr_v1_035_invisibility",
-  "onr_v1_047_pile-driver",
-  "onr_v1_050_r-and-d-protocol-files",
-  "onr_v1_071_vewy-vewy-quiet",
-  "onr_v1_140_raven-microcyb-eagle",
-  "onr_v1_141_raven-microcyb-owl",
-  "onr_v1_148_access-through-alpha",
-  "onr_v1_149_access-to-arasaka",
-  "onr_v1_150_access-to-kiribati",
-  "onr_v1_152_back-door-to-hilliard",
-  "onr_v1_153_back-door-to-orbital-air",
-  "onr_v1_182_submarine-uplink",
-  "onr_v1_246_fragmentation-storm",
-] as const;
-
-const ONR_V1_9_17_WIP_CARD_IDS = [
-  "onr_v1_309_bbs-whispering-campaign",
-  "onr_v1_310_blood-cat",
-  "onr_v1_311_braindance-campaign",
-  "onr_v1_314_corporate-negotiating-center",
-  "onr_v1_316_cowboy-sysop",
-  "onr_v1_318_department-of-truth-enhancement",
-  "onr_v1_319_disinfectant-inc",
-  "onr_v1_321_esa-contract",
-  "onr_v1_326_holovid-campaign",
-  "onr_v1_329_investment-firm",
-  "onr_v1_330_krumz",
-  "onr_v1_333_omniscience-foundation",
-  "onr_v1_336_rescheduler",
-  "onr_v1_337_rockerboy-promotion",
-  "onr_v1_340_setup",
-  "onr_v1_342_solo-squad",
-  "onr_v1_344_spinn-public-relations",
-  "onr_v1_345_trap",
-] as const;
-
-const ONR_V1_9_18_WIP_CARD_IDS = [
-  "onr_v1_354_crybaby",
-  "onr_v1_355_crystal-palace-station-grid",
-  "onr_v1_356_dedicated-response-team",
-  "onr_v1_357_dieter-esslin",
-  "onr_v1_358_dr-dreff",
-  "onr_v1_359_jenny-jett",
-  "onr_v1_361_namatoki-plaza",
-  "onr_v1_362_new-galveston-city-grid",
-  "onr_v1_364_omni-kismet-ph-d",
-  "onr_v1_365_paris-city-grid",
-  "onr_v1_366_red-herrings",
-  "onr_v1_369_singapore-city-grid",
-  "onr_v1_370_tesseract-fort-construction",
-  "onr_v1_372_turbeau-delacroix",
-  "onr_v1_373_twenty-four-hour-surveillance",
-] as const;
-
-const ONR_V1_9_19_WIP_CARD_IDS = [
-  "onr_v1_025_fait-accompli",
-  "onr_v1_078_arasaka-owns-you",
-  "onr_v1_189_artificial-security-directors",
-  "onr_v1_202_genetics-visionary-acquisition",
-  "onr_v1_291_falsified-transactions-expert",
-  "onr_v1_292_management-shake-up",
-  "onr_v1_300_project-consultants",
-  "onr_v1_303_silver-lining-recovery-protocol",
-  "onr_v1_304_systematic-layoffs",
-  "onr_v1_305_team-restructuring",
-  "onr_v1_312_chicago-branch",
-  "onr_v1_315_corprunners-shattered-remains",
-  "onr_v1_323_experimental-ai",
-  "onr_v1_328_information-laundering",
-  "onr_v1_346_vacant-soulkiller",
-  "onr_v1_347_vapor-ops",
-  "onr_v1_348_virus-test-site",
-  "onr_v1_363_olivia-salazar",
-  "onr_v1_368_roving-submarine",
-  "onr_v1_374_washington-d-c-city-grid",
-] as const;
-
-const ONR_V1_9_20_WIP_CARD_IDS = [
-  "onr_v1_022_emergency-self-construct",
-  "onr_v1_029_gremlins",
-  "onr_v1_133_militech-mram-chip",
-  "onr_v1_134_mram-chip",
-  "onr_v1_160_diplomatic-immunity",
-  "onr_v1_168_loan-from-chiba",
-  "onr_v1_171_preying-mantis",
-  "onr_v1_190_bioweapons-engineering",
-  "onr_v1_191_black-ice-quality-assurance",
-  "onr_v1_192_corporate-boon",
-  "onr_v1_200_encryption-breakthrough",
-  "onr_v1_204_ice-transmutation",
-  "onr_v1_205_main-office-relocation",
-  "onr_v1_218_subsidiary-branch",
-  "onr_v1_313_city-surveillance",
-  "onr_v1_322_euromarket-consortium",
-  "onr_v1_324_fortress-architects",
-  "onr_v1_325_hacker-tracker-central",
-  "onr_v1_327_i-got-a-rock",
-  "onr_v1_331_nevinyrral",
-  "onr_v1_332_newsgroup-taunting",
-  "onr_v1_334_pacifica-regional-ai",
-  "onr_v1_335_remote-facility",
-  "onr_v1_338_rustbelt-hq-branch",
-  "onr_v1_343_south-african-mining-corp",
-  "onr_v1_360_jerusalem-city-grid",
-] as const;
-
-const ONR_V1_9_21_WIP_CARD_IDS = [
-  "onr_v1_002_ai-boon",
-  "onr_v1_008_boardwalk",
-  "onr_v1_104_playful-ai",
-  "onr_v1_172_quest-for-cattekin",
-  "onr_v1_339_schlaghund",
-  "onr_v1_367_rio-de-janeiro-city-grid",
-] as const;
-
-const ONR_V1_9_22_WIP_CARD_IDS = [
-  "onr_v1_026_false-echo",
-  "onr_v1_027_flak",
-  "onr_v1_031_hammer",
-  "onr_v1_037_japanese-water-torture",
-  "onr_v1_044_netspace-inverter",
-  "onr_v1_045_newsgroup-filter",
-  "onr_v1_048_poltergeist",
-  "onr_v1_051_rabbit",
-  "onr_v1_055_reflector",
-  "onr_v1_057_scatter-shot",
-  "onr_v1_061_shield",
-  "onr_v1_067_speed-trap",
-  "onr_v1_068_startup-immolator",
-  "onr_v1_075_zetatech-software-installer",
-  "onr_v1_077_anonymous-tip",
-  "onr_v1_080_core-command-jettison-ice",
-  "onr_v1_086_forged-activation-orders",
-  "onr_v1_093_if-you-want-it-done-right",
-  "onr_v1_100_misc-for-sale",
-  "onr_v1_102_open-ended-mileage-program",
-  "onr_v1_103_organ-donor",
-  "onr_v1_109_security-code-worm-chip",
-  "onr_v1_113_synchronized-attack-on-hq",
-  "onr_v1_117_valu-pak-software-bundle",
-  "onr_v1_119_arasaka-portable-prototype",
-  "onr_v1_122_artemis-2020",
-  "onr_v1_123_bodyweight-data-creche",
-  "onr_v1_124_corolla-speed-chip",
-  "onr_v1_131_microtech-backup-drive",
-  "onr_v1_136_pandoras-deck",
-  "onr_v1_137_parraline-5750",
-  "onr_v1_138_pk-6089a",
-  "onr_v1_147_zz22-speed-chip",
-  "onr_v1_195_corporate-retreat",
-  "onr_v1_196_corporate-war",
-  "onr_v1_197_data-fort-reclamation",
-  "onr_v1_206_marine-arcology",
-  "onr_v1_210_political-overthrow",
-  "onr_v1_216_security-purge",
-  "onr_v1_247_haunting-inquisition",
-  "onr_v1_274_tutor",
-  "onr_v1_276_viral-15",
-  "onr_v1_277_virizz",
-  "onr_v1_280_zombie",
-  "onr_v1_289_edgerunner-inc-temps",
-  "onr_v1_296_off-site-backups",
-  "onr_v1_298_planning-consultants",
-] as const;
-
-const ONR_V1_0_5K_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v105k_smoke_094",
-  name: "O:NR V1.0.5K Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_015_codeslinger", quantity: 2 },
-    { id: "onr_v1_052_raffles", quantity: 2 },
-    { id: "onr_v1_054_raptor", quantity: 2 },
-    { id: "onr_v1_070_tinweasel", quantity: 2 },
-    { id: "onr_v1_144_tycho-mem-chip", quantity: 1 },
-    { id: "onr_v1_146_zetatech-mem-chip", quantity: 1 },
-    { id: "simple_economy_event", quantity: 2 },
-  ],
-};
-
-const ONR_V1_0_5K_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v105k_smoke_094",
-  name: "O:NR V1.0.5K Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "onr_v1_230_cortical-scanner", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "onr_v1_237_data-wall", quantity: 2 },
-    { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
-    { id: "onr_v1_239_endless-corridor", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 2 },
-  ],
-};
-
-const ONR_V1_0_6K_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v106k_smoke_094",
-  name: "O:NR V1.0.6K Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_079_bodyweight-synthetic-blood", quantity: 2 },
-    { id: "onr_v1_095_jack-n-joe", quantity: 2 },
-    { id: "onr_v1_097_livewires-contacts", quantity: 2 },
-    { id: "onr_v1_108_score", quantity: 2 },
-    { id: "onr_v1_072_wild-card", quantity: 2 },
-    { id: "onr_v1_145_wutech-mem-chip", quantity: 2 },
-    { id: "onr_v1_015_codeslinger", quantity: 1 },
-    { id: "onr_v1_070_tinweasel", quantity: 1 },
-    { id: "simple_economy_event", quantity: 8 },
-  ],
-};
-
-const ONR_V1_0_6K_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v106k_smoke_094",
-  name: "O:NR V1.0.6K Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_281_accounts-receivable", quantity: 1 },
-    { id: "onr_v1_282_annual-reviews", quantity: 1 },
-    { id: "onr_v1_285_closed-accounts", quantity: 1 },
-    { id: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
-    { id: "onr_v1_288_day-shift", quantity: 1 },
-    { id: "onr_v1_290_efficiency-experts", quantity: 1 },
-    { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-    { id: "onr_v1_302_scorched-earth", quantity: 1 },
-    { id: "onr_v1_307_urban-renewal", quantity: 1 },
-    { id: "onr_v1_244_filter", quantity: 1 },
-    { id: "onr_v1_245_fire-wall", quantity: 1 },
-    { id: "onr_v1_252_keeper", quantity: 1 },
-    { id: "onr_v1_256_mazer", quantity: 1 },
-    { id: "onr_v1_230_cortical-scanner", quantity: 1 },
-    { id: "onr_v1_232_crystal-wall", quantity: 1 },
-    { id: "simple_sentry_ice", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 1 },
-  ],
-};
-
-const ONR_V1_1_2K_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v112k_smoke_094",
-  name: "O:NR V1.1.2K Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_006_black-dahlia", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_016_cyfermaster", quantity: 2 },
-    { id: "onr_v1_040_loony-goon", quantity: 2 },
-    { id: "onr_v1_060_shaka", quantity: 2 },
-    { id: "onr_v1_073_wizards-book", quantity: 2 },
-    { id: "onr_v1_145_wutech-mem-chip", quantity: 2 },
-    { id: "simple_economy_event", quantity: 8 },
-  ],
-};
-
-const ONR_V1_1_2K_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v112k_smoke_094",
-  name: "O:NR V1.1.2K Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
-    { id: "onr_v1_295_night-shift", quantity: 1 },
-    { id: "onr_v1_253_laser-wire", quantity: 1 },
-    { id: "onr_v1_257_nerve-labyrinth", quantity: 1 },
-    { id: "onr_v1_259_in-the-face", quantity: 1 },
-    { id: "onr_v1_261_quandary", quantity: 1 },
-    { id: "onr_v1_262_razor-wire", quantity: 1 },
-    { id: "onr_v1_263_reinforced-wall", quantity: 1 },
-    { id: "onr_v1_265_rock-is-strong", quantity: 1 },
-    { id: "onr_v1_266_scramble", quantity: 1 },
-    { id: "onr_v1_269_shotgun-wire", quantity: 1 },
-    { id: "onr_v1_270_sleeper", quantity: 1 },
-    { id: "onr_v1_278_wall-of-ice", quantity: 1 },
-    { id: "onr_v1_279_wall-of-static", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 2 },
-  ],
-};
-
-const ONR_V1_2_3_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v123_smoke_094",
-  name: "O:NR V1.2.3 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "onr_v1_039_krash", quantity: 2 },
-    { id: "onr_v1_066_snowball", quantity: 2 },
-    { id: "onr_v1_074_worm", quantity: 2 },
-    { id: "onr_v1_081_custodial-position", quantity: 1 },
-    { id: "onr_v1_085_executive-wiretaps", quantity: 1 },
-    { id: "onr_v1_101_mit-west-tier", quantity: 2 },
-  ],
-};
-
-const ONR_V1_2_3_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v123_smoke_094",
-  name: "O:NR V1.2.3 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_243_fetch-4-0-1", quantity: 2 },
-    { id: "onr_v1_249_hunter", quantity: 2 },
-    { id: "onr_v1_297_overtime-incentives", quantity: 3 },
-    { id: "onr_v1_306_trojan-horse", quantity: 1 },
-    { id: "onr_v1_237_data-wall", quantity: 2 },
-    { id: "onr_v1_261_quandary", quantity: 2 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "onr_v1_259_in-the-face", quantity: 2 },
-    { id: "onr_v1_295_night-shift", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_6_1_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v161_smoke_094",
-  name: "O:NR V1.6.1 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_023_evil-twin", quantity: 2 },
-    { id: "onr_v1_028_force-shield", quantity: 2 },
-    { id: "onr_v1_125_dermatech-bodyplating", quantity: 2 },
-    { id: "simple_economy_event", quantity: 8 },
-  ],
-};
-
-const ONR_V1_6_1_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v161_smoke_094",
-  name: "O:NR V1.6.1 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_229_code-corpse", quantity: 1 },
-    { id: "onr_v1_231_cortical-scrub", quantity: 1 },
-    { id: "onr_v1_254_liche", quantity: 1 },
-    { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
-    { id: "onr_v1_302_scorched-earth", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_6_2_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v162_smoke_094",
-  name: "O:NR V1.6.2 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_023_evil-twin", quantity: 2 },
-    { id: "onr_v1_028_force-shield", quantity: 2 },
-    { id: "onr_v1_125_dermatech-bodyplating", quantity: 2 },
-    { id: "simple_economy_event", quantity: 8 },
-  ],
-};
-
-const ONR_V1_6_2_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v162_smoke_094",
-  name: "O:NR V1.6.2 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_212_priority-requisition", quantity: 1 },
-    { id: "onr_v1_215_security-net-optimization", quantity: 1 },
-    { id: "onr_v1_317_data-masons", quantity: 2 },
-    { id: "onr_v1_320_encoder-inc", quantity: 2 },
-    { id: "onr_v1_341_skalderviken-sa-beta-test-site", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "onr_v1_230_cortical-scanner", quantity: 2 },
-    { id: "onr_v1_231_cortical-scrub", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 2 },
-  ],
-};
-
-const ONR_V1_6_3_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v163_smoke_094",
-  name: "O:NR V1.6.3 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_023_evil-twin", quantity: 2 },
-    { id: "onr_v1_028_force-shield", quantity: 2 },
-    { id: "simple_economy_event", quantity: 8 },
-  ],
-};
-
-const ONR_V1_6_3_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v163_smoke_094",
-  name: "O:NR V1.6.3 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_233_d-arc-knight", quantity: 1 },
-    { id: "onr_v1_267_sentinels-prime", quantity: 1 },
-    { id: "onr_v1_273_triggerman", quantity: 1 },
-    { id: "onr_v1_350_antiquated-interface-routines", quantity: 2 },
-    { id: "onr_v1_371_tokyo-chiba-infighting", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_7_0_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v170_smoke_094",
-  name: "O:NR V1.7.0 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_011_cloak", quantity: 2 },
-    { id: "onr_v1_036_jackhammer", quantity: 2 },
-    { id: "onr_v1_069_succubus", quantity: 2 },
-    { id: "onr_v1_163_floating-runner-bbs", quantity: 2 },
-    { id: "onr_v1_180_smiths-pawnshop", quantity: 1 },
-    { id: "onr_v1_021_dwarf", quantity: 1 },
-    { id: "onr_v1_028_force-shield", quantity: 1 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "simple_economy_event", quantity: 3 },
-  ],
-};
-
-const ONR_V1_7_0_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v170_smoke_094",
-  name: "O:NR V1.7.0 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_233_d-arc-knight", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "onr_v1_295_night-shift", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_7_1_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v171_smoke_094",
-  name: "O:NR V1.7.1 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_114_temple-microcode-outlet", quantity: 2 },
-    { id: "onr_v1_106_private-ldl-access", quantity: 2 },
-    { id: "onr_v1_118_weather-to-finance-pipe", quantity: 2 },
-    { id: "onr_v1_084_edited-shipping-manifests", quantity: 2 },
-    { id: "onr_v1_129_hq-interface", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_036_jackhammer", quantity: 2 },
-    { id: "simple_economy_event", quantity: 4 },
-  ],
-};
-
-const ONR_V1_7_1_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v171_smoke_094",
-  name: "O:NR V1.7.1 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_233_d-arc-knight", quantity: 1 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "onr_v1_295_night-shift", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-  ],
-};
-
-const ONR_V1_7_2_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v172_smoke_094",
-  name: "O:NR V1.7.2 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_158_danshis-second-id", quantity: 2 },
-    { id: "onr_v1_179_silicon-saloon-franchise", quantity: 2 },
-    { id: "onr_v1_163_floating-runner-bbs", quantity: 2 },
-    { id: "onr_v1_129_hq-interface", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "simple_economy_event", quantity: 4 },
-  ],
-};
-
-const ONR_V1_7_2_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v172_smoke_094",
-  name: "O:NR V1.7.2 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_283_audit-of-call-records", quantity: 2 },
-    { id: "onr_v1_284_chance-observation", quantity: 2 },
-    { id: "onr_v1_286_corporate-detective-agency", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-  ],
-};
-
-const ONR_V1_8_0_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v180_smoke_094",
-  name: "O:NR V1.8.0 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_083_desperate-competitor", quantity: 2 },
-    { id: "onr_v1_090_hot-tip-for-wns", quantity: 2 },
-    { id: "onr_v1_156_corporate-ally", quantity: 1 },
-    { id: "onr_v1_159_databroker", quantity: 1 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_036_jackhammer", quantity: 2 },
-    { id: "simple_economy_event", quantity: 4 },
-  ],
-};
-
-const ONR_V1_8_0_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v180_smoke_094",
-  name: "O:NR V1.8.0 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_201_executive-extraction", quantity: 2 },
-    { id: "onr_v1_214_project-babylon", quantity: 2 },
-    { id: "simple_agenda", quantity: 2 },
-    { id: "onr_v1_232_crystal-wall", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_8_1_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v181_smoke_094",
-  name: "O:NR V1.8.1 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_012_clown", quantity: 2 },
-    { id: "onr_v1_046_pattels-virus", quantity: 2 },
-    { id: "onr_v1_049_pox", quantity: 2 },
-    { id: "onr_v1_094_inside-job", quantity: 2 },
-    { id: "onr_v1_173_restrictive-net-zoning", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "simple_economy_event", quantity: 4 },
-  ],
-};
-
-const ONR_V1_8_1_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v181_smoke_094",
-  name: "O:NR V1.8.1 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_193_corporate-coup", quantity: 2 },
-    { id: "onr_v1_209_political-coup", quantity: 2 },
-    { id: "onr_v1_222_ball-and-chain", quantity: 2 },
-    { id: "onr_v1_225_canis-major", quantity: 2 },
-    { id: "onr_v1_226_canis-minor", quantity: 2 },
-    { id: "onr_v1_242_fatal-attractor", quantity: 2 },
-    { id: "onr_v1_268_shock-r", quantity: 2 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_0_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v190_smoke_094",
-  name: "O:NR V1.9.0 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_005_bartmoss-memorial-icebreaker", quantity: 2 },
-    { id: "onr_v1_007_blink", quantity: 2 },
-    { id: "onr_v1_115_terrorist-reprisal", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "simple_economy_event", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_0_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v190_smoke_094",
-  name: "O:NR V1.9.0 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_193_corporate-coup", quantity: 2 },
-    { id: "onr_v1_209_political-coup", quantity: 2 },
-    { id: "onr_v1_223_banpei", quantity: 2 },
-    { id: "onr_v1_275_vacuum-link", quantity: 2 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_1_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v191_smoke_094",
-  name: "O:NR V1.9.1 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_013_cockroach", quantity: 2 },
-    { id: "onr_v1_034_incubator", quantity: 2 },
-    { id: "onr_v1_030_grubb", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_1_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v191_smoke_094",
-  name: "O:NR V1.9.1 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "onr_v1_279_wall-of-static", quantity: 3 },
-    { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_2_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v192_smoke_094",
-  name: "O:NR V1.9.2 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_076_all-nighter", quantity: 2 },
-    { id: "onr_v1_096_kilroy-was-here", quantity: 2 },
-    { id: "onr_v1_107_romp-through-hq", quantity: 2 },
-    { id: "onr_v1_184_top-runners-conference", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "simple_economy_event", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_2_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v192_smoke_094",
-  name: "O:NR V1.9.2 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_188_ai-chief-financial-officer", quantity: 2 },
-    { id: "onr_v1_211_polymer-breakthrough", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_agenda", quantity: 2 },
-    { id: "onr_v1_235_data-naga", quantity: 2 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "onr_v1_238_data-wall-2-0", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_3_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v193_smoke_094",
-  name: "O:NR V1.9.3 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "onr_v1_129_hq-interface", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_3_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v193_smoke_094",
-  name: "O:NR V1.9.3 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_207_netwatch-operations-office", quantity: 2 },
-    { id: "onr_v1_213_private-cybernet-police", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_agenda", quantity: 2 },
-    { id: "onr_v1_251_jack-attack", quantity: 2 },
-    { id: "onr_v1_271_tko-2-0", quantity: 2 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_4_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v194_smoke_094",
-  name: "O:NR V1.9.4 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "onr_v1_028_force-shield", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_4_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v194_smoke_094",
-  name: "O:NR V1.9.4 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_208_on-call-solo-team", quantity: 2 },
-    { id: "onr_v1_217_strike-force-kali", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
-    { id: "onr_v1_302_scorched-earth", quantity: 2 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_5_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v195_smoke_094",
-  name: "O:NR V1.9.5 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_5_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v195_smoke_094",
-  name: "O:NR V1.9.5 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_219_superior-net-barriers", quantity: 2 },
-    { id: "onr_v1_308_acme-savings-and-loan", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_6_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v196_smoke_094",
-  name: "O:NR V1.9.6 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_6_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v196_smoke_094",
-  name: "O:NR V1.9.6 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_236_data-raven", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_7_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v197_smoke_094",
-  name: "O:NR V1.9.7 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_001_afreet", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_7_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v197_smoke_094",
-  name: "O:NR V1.9.7 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_8_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v198_smoke_094",
-  name: "O:NR V1.9.8 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_018_dogcatcher", quantity: 2 },
-    { id: "onr_v1_019_dropp", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_8_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v198_smoke_094",
-  name: "O:NR V1.9.8 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "onr_v1_220_tycho-extension", quantity: 1 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_9_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v199_smoke_094",
-  name: "O:NR V1.9.9 Runner Smoke",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_001_afreet", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "onr_v1_074_worm", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_9_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v199_smoke_094",
-  name: "O:NR V1.9.9 Corp Smoke",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_349_aardvark", quantity: 2 },
-    { id: "onr_v1_351_bizarre-encryption-scheme", quantity: 2 },
-    { id: "onr_v1_352_chester-mix", quantity: 2 },
-    { id: "onr_v1_353_chimera", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "onr_v1_279_wall-of-static", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 3 },
-  ],
-};
-
-const ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1911_hidden_zone_wip",
-  name: "O:NR V1.9.11 Hidden-Zone WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_042_mouse", quantity: 1 },
-    { id: "onr_v1_058_seeya", quantity: 1 },
-    { id: "onr_v1_059_self-modifying-code", quantity: 1 },
-    { id: "onr_v1_087_forgotten-backup-chip", quantity: 1 },
-    { id: "onr_v1_088_fortress-respecification", quantity: 1 },
-    { id: "onr_v1_089_gideons-pawnshop", quantity: 1 },
-    { id: "onr_v1_092_ice-and-datas-guide-to-the-net", quantity: 1 },
-    { id: "onr_v1_099_mantis-fixer-at-large", quantity: 1 },
-    { id: "onr_v1_110_sneak-preview", quantity: 1 },
-    { id: "onr_v1_151_aujourdoui", quantity: 1 },
-    { id: "onr_v1_169_n-e-t-o", quantity: 1 },
-    { id: "onr_v1_175_ronin-around", quantity: 1 },
-    { id: "onr_v1_177_the-short-circuit", quantity: 1 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1911_hidden_zone_wip",
-  name: "O:NR V1.9.11 Hidden-Zone WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_194_corporate-downsizing", quantity: 1 },
-    { id: "onr_v1_250_ice-pick-willie", quantity: 1 },
-    { id: "onr_v1_272_too-many-doors", quantity: 1 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_upgrade", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-    { id: "simple_sentry_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1912_counter_recurring_wip",
-  name: "O:NR V1.9.12 Counter Recurring WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_009_butcher-boy", quantity: 1 },
-    { id: "onr_v1_010_cascade", quantity: 1 },
-    { id: "onr_v1_017_deep-thought", quantity: 1 },
-    { id: "onr_v1_032_i-spy", quantity: 1 },
-    { id: "onr_v1_064_skivviss", quantity: 1 },
-    { id: "onr_v1_082_deal-with-militech", quantity: 1 },
-    { id: "onr_v1_091_hunt-club-bbs", quantity: 1 },
-    { id: "onr_v1_174_rigged-investments", quantity: 1 },
-    { id: "onr_v1_176_the-shell-traders", quantity: 1 },
-    { id: "onr_v1_021_dwarf", quantity: 2 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1912_counter_recurring_wip",
-  name: "O:NR V1.9.12 Counter Recurring WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_198_detroit-police-contract", quantity: 2 },
-    { id: "onr_v1_199_employee-empowerment", quantity: 2 },
-    { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1913_damage_prevention_wip",
-  name: "O:NR V1.9.13 Damage Prevention WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_038_joan-of-arc", quantity: 1 },
-    { id: "onr_v1_121_armored-fridge", quantity: 1 },
-    { id: "onr_v1_127_full-body-conversion", quantity: 1 },
-    { id: "onr_v1_128_green-knight-surge-buffers", quantity: 1 },
-    { id: "onr_v1_130_lifesaver-nanosurgeons", quantity: 1 },
-    { id: "onr_v1_135_nasuko-cycle", quantity: 1 },
-    { id: "onr_v1_139_r-and-d-interface", quantity: 1 },
-    { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
-    { id: "onr_v1_155_code-viral-cache", quantity: 1 },
-    { id: "onr_v1_161_fall-guy", quantity: 1 },
-    { id: "onr_v1_170_nomad-allies", quantity: 1 },
-    { id: "onr_v1_185_trauma-team", quantity: 1 },
-    { id: "onr_v1_186_umbrella-policy", quantity: 1 },
-    { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_economy_event", quantity: 8 },
-  ],
-};
-
-const ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1913_damage_prevention_wip",
-  name: "O:NR V1.9.13 Damage Prevention WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_224_bolter-cluster", quantity: 2 },
-    { id: "onr_v1_234_data-darts", quantity: 2 },
-    { id: "onr_v1_258_neural-blade", quantity: 2 },
-    { id: "onr_v1_301_punitive-counterstrike", quantity: 2 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1914_trace_tag_resource",
-  name: "O:NR V1.9.14 Trace Tag Resource Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_053_ramming-piston", quantity: 1 },
-    { id: "onr_v1_056_replicator", quantity: 1 },
-    { id: "onr_v1_063_signpost", quantity: 1 },
-    { id: "onr_v1_116_total-genetic-retrofit", quantity: 1 },
-    { id: "onr_v1_120_armadillo-armored-road-home", quantity: 1 },
-    { id: "onr_v1_126_drifter-mobile-environment", quantity: 1 },
-    { id: "onr_v1_132_microtech-trode-set", quantity: 1 },
-    { id: "onr_v1_154_broker", quantity: 1 },
-    { id: "onr_v1_157_crash-everett-inventive-fixer", quantity: 1 },
-    { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
-    { id: "onr_v1_164_hells-run", quantity: 1 },
-    { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
-    { id: "onr_v1_166_karl-de-veres-corporate-stooge", quantity: 1 },
-    { id: "onr_v1_167_leland-corporate-bodyguard", quantity: 1 },
-    { id: "onr_v1_178_short-term-contract", quantity: 1 },
-    { id: "onr_v1_181_the-springboard", quantity: 1 },
-    { id: "onr_v1_183_technician-lover", quantity: 1 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1914_trace_tag_resource",
-  name: "O:NR V1.9.14 Trace Tag Resource Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_221_asp", quantity: 2 },
-    { id: "onr_v1_228_cinderella", quantity: 2 },
-    { id: "onr_v1_240_fang", quantity: 2 },
-    { id: "onr_v1_241_fang-2-0", quantity: 2 },
-    { id: "onr_v1_248_homewrecker", quantity: 2 },
-    { id: "onr_v1_260_pocket-virtual-reality", quantity: 2 },
-    { id: "onr_v1_264_rex", quantity: 2 },
-    { id: "onr_v1_325_hacker-tracker-central", quantity: 1 },
-    { id: "onr_v1_299_power-grid-overload", quantity: 2 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1915_run_access",
-  name: "O:NR V1.9.15 Run Access WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_020_dupre", quantity: 1 },
-    { id: "onr_v1_024_expert-schedule-analyzer", quantity: 1 },
-    { id: "onr_v1_041_microtech-ai-interface", quantity: 1 },
-    { id: "onr_v1_043_mystery-box", quantity: 1 },
-    { id: "onr_v1_062_shredder-uplink-protocol", quantity: 1 },
-    { id: "onr_v1_065_smarteye", quantity: 1 },
-    { id: "onr_v1_098_lucidrine-booster-drug", quantity: 1 },
-    { id: "onr_v1_105_priority-wreck", quantity: 2 },
-    { id: "onr_v1_111_social-engineering", quantity: 1 },
-    { id: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
-    { id: "onr_v1_142_record-reconstructor", quantity: 1 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_15_RUN_ACCESS_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1915_run_access",
-  name: "O:NR V1.9.15 Run Access WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_227_cerberus", quantity: 2 },
-    { id: "onr_v1_255_mastiff", quantity: 2 },
-    { id: "onr_v1_294_new-blood", quantity: 2 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 4 },
-    { id: "simple_economy_asset", quantity: 2 },
-  ],
-};
-
-const ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1916_program_subtype",
-  name: "O:NR V1.9.16 Program Subtype WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_003_baedekers-net-map", quantity: 1 },
-    { id: "onr_v1_004_bakdoor", quantity: 1 },
-    { id: "onr_v1_033_imp", quantity: 1 },
-    { id: "onr_v1_035_invisibility", quantity: 1 },
-    { id: "onr_v1_047_pile-driver", quantity: 1 },
-    { id: "onr_v1_050_r-and-d-protocol-files", quantity: 1 },
-    { id: "onr_v1_071_vewy-vewy-quiet", quantity: 1 },
-    { id: "onr_v1_140_raven-microcyb-eagle", quantity: 1 },
-    { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
-    { id: "onr_v1_148_access-through-alpha", quantity: 1 },
-    { id: "onr_v1_149_access-to-arasaka", quantity: 1 },
-    { id: "onr_v1_150_access-to-kiribati", quantity: 1 },
-    { id: "onr_v1_152_back-door-to-hilliard", quantity: 1 },
-    { id: "onr_v1_153_back-door-to-orbital-air", quantity: 1 },
-    { id: "onr_v1_182_submarine-uplink", quantity: 1 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1916_program_subtype",
-  name: "O:NR V1.9.16 Program Subtype WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_246_fragmentation-storm", quantity: 2 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 4 },
-    { id: "simple_economy_asset", quantity: 2 },
-  ],
-};
-
-const ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1917_generic_asset",
-  name: "O:NR V1.9.17 Generic Asset WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_killer", quantity: 2 },
-    { id: "onr_v1_035_invisibility", quantity: 1 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_17_GENERIC_ASSET_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1917_generic_asset",
-  name: "O:NR V1.9.17 Generic Asset WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
-    { id: "onr_v1_310_blood-cat", quantity: 1 },
-    { id: "onr_v1_311_braindance-campaign", quantity: 1 },
-    { id: "onr_v1_314_corporate-negotiating-center", quantity: 1 },
-    { id: "onr_v1_316_cowboy-sysop", quantity: 1 },
-    { id: "onr_v1_318_department-of-truth-enhancement", quantity: 1 },
-    { id: "onr_v1_319_disinfectant-inc", quantity: 1 },
-    { id: "onr_v1_321_esa-contract", quantity: 1 },
-    { id: "onr_v1_326_holovid-campaign", quantity: 1 },
-    { id: "onr_v1_329_investment-firm", quantity: 1 },
-    { id: "onr_v1_330_krumz", quantity: 1 },
-    { id: "onr_v1_333_omniscience-foundation", quantity: 1 },
-    { id: "onr_v1_336_rescheduler", quantity: 1 },
-    { id: "onr_v1_337_rockerboy-promotion", quantity: 1 },
-    { id: "onr_v1_340_setup", quantity: 1 },
-    { id: "onr_v1_342_solo-squad", quantity: 1 },
-    { id: "onr_v1_344_spinn-public-relations", quantity: 1 },
-    { id: "onr_v1_345_trap", quantity: 1 },
-    { id: "onr_v1_354_crybaby", quantity: 1 },
-    { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
-    { id: "onr_v1_356_dedicated-response-team", quantity: 1 },
-    { id: "onr_v1_357_dieter-esslin", quantity: 1 },
-    { id: "onr_v1_358_dr-dreff", quantity: 1 },
-    { id: "onr_v1_359_jenny-jett", quantity: 1 },
-    { id: "onr_v1_361_namatoki-plaza", quantity: 1 },
-    { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
-    { id: "onr_v1_364_omni-kismet-ph-d", quantity: 1 },
-    { id: "onr_v1_365_paris-city-grid", quantity: 1 },
-    { id: "onr_v1_366_red-herrings", quantity: 1 },
-    { id: "onr_v1_369_singapore-city-grid", quantity: 1 },
-    { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
-    { id: "onr_v1_372_turbeau-delacroix", quantity: 1 },
-    { id: "onr_v1_373_twenty-four-hour-surveillance", quantity: 1 },
-    { id: "simple_agenda", quantity: 3 },
-    { id: "simple_economy_operation", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1919_agenda_overadvance",
-  name: "O:NR V1.9.19 Agenda/Overadvance WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_025_fait-accompli", quantity: 1 },
-    { id: "onr_v1_078_arasaka-owns-you", quantity: 1 },
-    { id: "simple_setup_hardware", quantity: 1 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_killer", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1919_agenda_overadvance",
-  name: "O:NR V1.9.19 Agenda/Overadvance WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_189_artificial-security-directors", quantity: 1 },
-    { id: "onr_v1_202_genetics-visionary-acquisition", quantity: 1 },
-    { id: "onr_v1_291_falsified-transactions-expert", quantity: 1 },
-    { id: "onr_v1_292_management-shake-up", quantity: 1 },
-    { id: "onr_v1_300_project-consultants", quantity: 1 },
-    { id: "onr_v1_303_silver-lining-recovery-protocol", quantity: 1 },
-    { id: "onr_v1_304_systematic-layoffs", quantity: 1 },
-    { id: "onr_v1_305_team-restructuring", quantity: 1 },
-    { id: "onr_v1_312_chicago-branch", quantity: 1 },
-    { id: "onr_v1_315_corprunners-shattered-remains", quantity: 1 },
-    { id: "onr_v1_323_experimental-ai", quantity: 1 },
-    { id: "onr_v1_328_information-laundering", quantity: 1 },
-    { id: "onr_v1_346_vacant-soulkiller", quantity: 1 },
-    { id: "onr_v1_347_vapor-ops", quantity: 1 },
-    { id: "onr_v1_348_virus-test-site", quantity: 1 },
-    { id: "onr_v1_363_olivia-salazar", quantity: 1 },
-    { id: "onr_v1_368_roving-submarine", quantity: 1 },
-    { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
-    { id: "onr_v1_302_scorched-earth", quantity: 1 },
-    { id: "simple_agenda", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 4 },
-  ],
-};
-
-const ONR_V1_9_20_GLOBAL_MODIFIER_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_v1920_global_modifier",
-  name: "O:NR V1.9.20 Global Modifier WIP Runner",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_022_emergency-self-construct", quantity: 1 },
-    { id: "onr_v1_029_gremlins", quantity: 1 },
-    { id: "onr_v1_133_militech-mram-chip", quantity: 1 },
-    { id: "onr_v1_134_mram-chip", quantity: 1 },
-    { id: "onr_v1_160_diplomatic-immunity", quantity: 1 },
-    { id: "onr_v1_168_loan-from-chiba", quantity: 1 },
-    { id: "onr_v1_171_preying-mantis", quantity: 1 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_economy_event", quantity: 6 },
-  ],
-};
-
-const ONR_V1_9_20_GLOBAL_MODIFIER_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_v1920_global_modifier",
-  name: "O:NR V1.9.20 Global Modifier WIP Corp",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_190_bioweapons-engineering", quantity: 1 },
-    { id: "onr_v1_191_black-ice-quality-assurance", quantity: 1 },
-    { id: "onr_v1_192_corporate-boon", quantity: 1 },
-    { id: "onr_v1_200_encryption-breakthrough", quantity: 1 },
-    { id: "onr_v1_204_ice-transmutation", quantity: 1 },
-    { id: "onr_v1_205_main-office-relocation", quantity: 1 },
-    { id: "onr_v1_218_subsidiary-branch", quantity: 1 },
-    { id: "onr_v1_313_city-surveillance", quantity: 1 },
-    { id: "onr_v1_322_euromarket-consortium", quantity: 1 },
-    { id: "onr_v1_324_fortress-architects", quantity: 1 },
-    { id: "onr_v1_325_hacker-tracker-central", quantity: 1 },
-    { id: "onr_v1_327_i-got-a-rock", quantity: 1 },
-    { id: "onr_v1_331_nevinyrral", quantity: 1 },
-    { id: "onr_v1_332_newsgroup-taunting", quantity: 1 },
-    { id: "onr_v1_334_pacifica-regional-ai", quantity: 1 },
-    { id: "onr_v1_335_remote-facility", quantity: 1 },
-    { id: "onr_v1_338_rustbelt-hq-branch", quantity: 1 },
-    { id: "onr_v1_343_south-african-mining-corp", quantity: 1 },
-    { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
-    { id: "onr_v1_232_crystal-wall", quantity: 1 },
-    { id: "simple_agenda", quantity: 2 },
-    { id: "simple_economy_operation", quantity: 4 },
-  ],
-};
-
-const ONR_V1_RUNNER_DECK: DeckDefinition = {
-  id: "onr_v1_runner_test_harness_094",
-  name: "O:NR v1 Limited Runner Test Harness",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "onr_v1_079_bodyweight-synthetic-blood", quantity: 2 },
-    { id: "onr_v1_095_jack-n-joe", quantity: 2 },
-    { id: "onr_v1_097_livewires-contacts", quantity: 2 },
-    { id: "onr_v1_108_score", quantity: 2 },
-    { id: "onr_v1_006_black-dahlia", quantity: 2 },
-    { id: "onr_v1_014_codecracker", quantity: 2 },
-    { id: "onr_v1_016_cyfermaster", quantity: 2 },
-    { id: "onr_v1_040_loony-goon", quantity: 2 },
-    { id: "onr_v1_060_shaka", quantity: 2 },
-    { id: "onr_v1_072_wild-card", quantity: 2 },
-    { id: "onr_v1_073_wizards-book", quantity: 2 },
-    { id: "onr_v1_145_wutech-mem-chip", quantity: 2 },
-  ],
-};
-
-const ONR_V1_CORP_DECK: DeckDefinition = {
-  id: "onr_v1_corp_test_harness_094",
-  name: "O:NR v1 Limited Corp Test Harness",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "onr_v1_220_tycho-extension", quantity: 2 },
-    { id: "onr_v1_281_accounts-receivable", quantity: 1 },
-    { id: "onr_v1_282_annual-reviews", quantity: 1 },
-    { id: "onr_v1_285_closed-accounts", quantity: 1 },
-    { id: "onr_v1_287_datapool-by-zetatech", quantity: 1 },
-    { id: "onr_v1_288_day-shift", quantity: 1 },
-    { id: "onr_v1_290_efficiency-experts", quantity: 1 },
-    { id: "onr_v1_293_netwatch-credit-voucher", quantity: 1 },
-    { id: "onr_v1_295_night-shift", quantity: 1 },
-    { id: "onr_v1_301_punitive-counterstrike", quantity: 1 },
-    { id: "onr_v1_302_scorched-earth", quantity: 1 },
-    { id: "onr_v1_307_urban-renewal", quantity: 1 },
-    { id: "onr_v1_230_cortical-scanner", quantity: 1 },
-    { id: "onr_v1_232_crystal-wall", quantity: 1 },
-    { id: "onr_v1_237_data-wall", quantity: 1 },
-    { id: "onr_v1_238_data-wall-2-0", quantity: 1 },
-    { id: "onr_v1_239_endless-corridor", quantity: 1 },
-    { id: "onr_v1_244_filter", quantity: 1 },
-    { id: "onr_v1_245_fire-wall", quantity: 1 },
-    { id: "onr_v1_252_keeper", quantity: 1 },
-    { id: "onr_v1_253_laser-wire", quantity: 1 },
-    { id: "onr_v1_256_mazer", quantity: 1 },
-    { id: "onr_v1_257_nerve-labyrinth", quantity: 1 },
-    { id: "onr_v1_259_in-the-face", quantity: 1 },
-    { id: "onr_v1_261_quandary", quantity: 1 },
-    { id: "onr_v1_262_razor-wire", quantity: 1 },
-    { id: "onr_v1_263_reinforced-wall", quantity: 1 },
-    { id: "onr_v1_265_rock-is-strong", quantity: 1 },
-    { id: "onr_v1_266_scramble", quantity: 1 },
-    { id: "onr_v1_269_shotgun-wire", quantity: 1 },
-    { id: "onr_v1_270_sleeper", quantity: 1 },
-    { id: "onr_v1_278_wall-of-ice", quantity: 1 },
-    { id: "onr_v1_279_wall-of-static", quantity: 1 },
-  ],
-};
-
-const V094_RUNNER_DECK: DeckDefinition = {
-  id: "demo_runner_094",
-  name: "Runner Demo Deck 0.94 - Damage Harness",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "simple_economy_event", quantity: 3 },
-    { id: "simple_run_event", quantity: 3 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_killer", quantity: 2 },
-  ],
-};
-
-const V094_CORP_DECK: DeckDefinition = {
-  id: "demo_corp_094",
-  name: "Corp Demo Deck 0.94 - Damage Harness",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "simple_agenda", quantity: 2 },
-    { id: "simple_priority_agenda", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "v094_neural_sentry_ice", quantity: 3 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-  ],
-};
-
-const V111_CORP_DECK: DeckDefinition = {
-  ...V094_CORP_DECK,
-  id: "demo_corp_111",
-  name: "Corp Demo Deck 1.1.1 - Core Damage Harness",
-  cards: [
-    ...V094_CORP_DECK.cards,
-    { id: "v111_core_damage_operation", quantity: 2 },
-  ],
-};
-
-const V095_RUNNER_DECK: DeckDefinition = {
-  id: "demo_runner_095",
-  name: "Runner Demo Deck 0.95 - Resource Harness",
-  side: "runner",
-  identity: "runner_identity_001",
-  cards: [
-    { id: "simple_economy_event", quantity: 3 },
-    { id: "simple_run_event", quantity: 2 },
-    { id: "simple_fracter", quantity: 2 },
-    { id: "simple_decoder", quantity: 2 },
-    { id: "simple_killer", quantity: 2 },
-    { id: "v095_safehouse_resource", quantity: 2 },
-  ],
-};
-
-const V095_CORP_DECK: DeckDefinition = {
-  id: "demo_corp_095",
-  name: "Corp Demo Deck 0.95 - Resource Trash Harness",
-  side: "corp",
-  identity: "corp_identity_001",
-  cards: [
-    { id: "simple_agenda", quantity: 2 },
-    { id: "simple_priority_agenda", quantity: 1 },
-    { id: "simple_economy_operation", quantity: 3 },
-    { id: "simple_economy_asset", quantity: 2 },
-    { id: "simple_tag_ice", quantity: 2 },
-    { id: "simple_barrier_ice", quantity: 2 },
-    { id: "simple_code_gate_ice", quantity: 2 },
-  ],
-};
-
-function v094DamageGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: V094_RUNNER_DECK,
-    corpDeck: V094_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function onrV1Game(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: ONR_V1_RUNNER_DECK,
-    corpDeck: ONR_V1_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v105kCardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: ONR_V1_0_5K_RUNNER_DECK,
-    corpDeck: ONR_V1_0_5K_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v106kCardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
-    corpDeck: ONR_V1_0_6K_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v112kCardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
-    corpDeck: ONR_V1_1_2K_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v123CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_2_3_RUNNER_DECK,
-    corpDeck: ONR_V1_2_3_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v161CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_6_1_RUNNER_DECK,
-    corpDeck: ONR_V1_6_1_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v162CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_6_2_RUNNER_DECK,
-    corpDeck: ONR_V1_6_2_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v163CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_6_3_RUNNER_DECK,
-    corpDeck: ONR_V1_6_3_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v170CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_7_0_RUNNER_DECK,
-    corpDeck: ONR_V1_7_0_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v171CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_7_1_RUNNER_DECK,
-    corpDeck: ONR_V1_7_1_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v172CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_7_2_RUNNER_DECK,
-    corpDeck: ONR_V1_7_2_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v180CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_8_0_RUNNER_DECK,
-    corpDeck: ONR_V1_8_0_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v181CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_8_1_RUNNER_DECK,
-    corpDeck: ONR_V1_8_1_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v190CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_0_RUNNER_DECK,
-    corpDeck: ONR_V1_9_0_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v191CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_1_RUNNER_DECK,
-    corpDeck: ONR_V1_9_1_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v192CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_2_RUNNER_DECK,
-    corpDeck: ONR_V1_9_2_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v193CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_3_RUNNER_DECK,
-    corpDeck: ONR_V1_9_3_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v194CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_4_RUNNER_DECK,
-    corpDeck: ONR_V1_9_4_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v195CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_5_RUNNER_DECK,
-    corpDeck: ONR_V1_9_5_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v196CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_6_RUNNER_DECK,
-    corpDeck: ONR_V1_9_6_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v197CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_7_RUNNER_DECK,
-    corpDeck: ONR_V1_9_7_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v198CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_8_RUNNER_DECK,
-    corpDeck: ONR_V1_9_8_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v199CardReleaseGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_9_RUNNER_DECK,
-    corpDeck: ONR_V1_9_9_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1911HiddenZoneGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK,
-    corpDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1912CounterRecurringGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK,
-    corpDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1913DamagePreventionGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
-    corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1914TraceTagResourceGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
-    corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1915RunAccessGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
-    corpDeck: ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1916ProgramSubtypeGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
-    corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1917GenericAssetGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
-    corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v1919AgendaOveradvanceGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
-    corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v095ResourceGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeck: V095_RUNNER_DECK,
-    corpDeck: V095_CORP_DECK,
-    agendaPointsToWin: 7,
-  });
-}
-
-function v096TraceGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_096",
-    corpDeckId: "demo_corp_096",
-    agendaPointsToWin: 7,
-  });
-}
-
-function v097RunGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_097",
-    corpDeckId: "demo_corp_097",
-    agendaPointsToWin: 7,
-  });
-}
-
-function v098IdentityGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_098",
-    corpDeckId: "demo_corp_098",
-    agendaPointsToWin: 7,
-  });
-}
-
-function v099CounterHostingGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    runnerDeckId: "demo_runner_099",
-    corpDeckId: "demo_corp_099",
-    agendaPointsToWin: 7,
-  });
-}
-
-function installedResourceCorpTurn(seed: string): GameState {
-  let state = toRunnerTurn(v095ResourceGame(seed));
-  state.runner.credits = 6;
-  moveRunnerCardToGrip(state, "v095_safehouse_resource");
-  state = apply(
-    state,
-    "runner",
-    (action) =>
-      action.type === "install_card" &&
-      sourceDefinition(state, action) === "v095_safehouse_resource",
-  );
-  state.activeSide = "corp";
-  state.phase = "corp_action_phase";
-  state.timingPoint = "corp_action.main";
-  state.corp.clicks = 3;
-  state.corp.credits = 5;
-  state.runner.tags = 1;
-  return state;
-}
-
-function originalsetReorderCounterRunlockGame(seed: string): GameState {
-  return createGameAfterSetup({
-    seed,
-    baseline: MVP_0_99_BASELINE,
-    runnerDeck: {
-      id: "originalset_spotcheck_reorder_counter_runlock_runner",
-      name: "Originalset Spotcheck Reorder Counter Runlock Runner",
-      side: "runner",
-      identity: "runner_identity_001",
-      cards: [
-        { id: "onr_v1_014_codecracker", quantity: 2 },
-        { id: "onr_v1_006_black-dahlia", quantity: 1 },
-        { id: "onr_v1_021_dwarf", quantity: 2 },
-        { id: "onr_v1_023_evil-twin", quantity: 3 },
-        { id: "onr_v1_032_i-spy", quantity: 1 },
-        { id: "onr_v1_055_reflector", quantity: 1 },
-        { id: "simple_decoder", quantity: 3 },
-        { id: "simple_fracter", quantity: 3 },
-        { id: "simple_economy_event", quantity: 8 },
-      ],
-    },
-    corpDeck: {
-      id: "originalset_spotcheck_reorder_counter_runlock_corp",
-      name: "Originalset Spotcheck Reorder Counter Runlock Corp",
-      side: "corp",
-      identity: "corp_identity_001",
-      cards: [
-        { id: "onr_v1_195_corporate-retreat", quantity: 1 },
-        { id: "onr_v1_203_hostile-takeover", quantity: 3 },
-        { id: "onr_v1_233_d-arc-knight", quantity: 2 },
-        { id: "onr_v1_242_fatal-attractor", quantity: 2 },
-        { id: "onr_v1_254_liche", quantity: 1 },
-        { id: "onr_v1_262_razor-wire", quantity: 1 },
-        { id: "onr_v1_268_shock-r", quantity: 2 },
-        { id: "onr_v1_272_too-many-doors", quantity: 2 },
-        { id: "onr_v1_312_chicago-branch", quantity: 1 },
-        { id: "onr_v1_347_vapor-ops", quantity: 1 },
-        { id: "simple_agenda", quantity: 3 },
-        { id: "simple_barrier_ice", quantity: 3 },
-        { id: "simple_code_gate_ice", quantity: 3 },
-        { id: "simple_economy_operation", quantity: 6 },
-      ],
-    },
-    agendaPointsToWin: 7,
-  });
-}
-
-function encounterIce(
-  state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
-  definitionId: string,
-): GameState {
-  let next = apply(
-    state,
-    "runner",
-    (action) => action.type === "start_run" && action.payload?.serverId === serverId,
-  );
-  next = apply(
-    next,
-    "corp",
-    (action) =>
-      action.type === "rez_ice" && sourceDefinition(next, action) === definitionId,
-  );
-  return next;
-}
-
-function breakCurrentSubroutine(
-  state: GameState,
-  breakerDefinitionId: string,
-  subroutineIndex: number,
-): GameState {
-  const breakerId = state.runner.rig.programs.find(
-    (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
-  );
-  expect(breakerId).toBeDefined();
-  if (!breakerId) throw new Error(`Missing breaker ${breakerDefinitionId}`);
-  let next = state;
-  for (let attempt = 0; attempt < 10; attempt += 1) {
-    const breakerAction = getLegalActions(next, "runner").find(
-      (action) =>
-        action.type === "break_subroutine" &&
-        String(action.payload?.breakerId) === breakerId &&
-        action.payload?.subroutineIndex === subroutineIndex,
-    );
-    if (breakerAction) {
-      return apply(
-        next,
-        "runner",
-        (action) =>
-          action.type === "break_subroutine" &&
-          String(action.payload?.breakerId) === breakerId &&
-          action.payload?.subroutineIndex === subroutineIndex,
-      );
-    }
-    const pumpAction = getLegalActions(next, "runner").find(
-      (action) =>
-        action.type === "pump_breaker" &&
-        String(action.payload?.breakerId) === breakerId,
-    );
-    if (!pumpAction) break;
-    next = apply(
-      next,
-      "runner",
-      (action) =>
-        action.type === "pump_breaker" &&
-        String(action.payload?.breakerId) === breakerId,
-    );
-  }
-  throw new Error(
-    `Missing break action for ${breakerDefinitionId} subroutine ${subroutineIndex}`,
-  );
-}
-
-function apply(
-  state: GameState,
-  side: Side,
-  predicate: (action: LegalAction) => boolean,
-): GameState {
-  const selected = mustAction(state, side, predicate);
-  const result = applyAction(state, {
-    matchId: state.matchId,
-    side,
-    actionId: selected.actionId,
-    clientKnownStateVersion: state.stateVersion,
-    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}`,
-  });
-  expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
-  if (!result.ok) throw new Error(result.error.message);
-  return result.state;
-}
-
-function applyChoice(
-  state: GameState,
-  side: Side,
-  selectedOptionId: string,
-): GameState {
-  return applyChoices(state, side, [selectedOptionId]);
-}
-
-function applyChoices(
-  state: GameState,
-  side: Side,
-  selectedOptionIds: string[],
-): GameState {
-  const selected = mustAction(
-    state,
-    side,
-    (action) => action.type === "resolve_choice",
-  );
-  const result = applyAction(state, {
-    matchId: state.matchId,
-    side,
-    actionId: selected.actionId,
-    clientKnownStateVersion: state.stateVersion,
-    selectedChoices: {
-      choiceId: state.pendingChoice?.choiceId,
-      selectedOptionIds,
-    },
-    idempotencyKey: `${side}-${state.stateVersion}-${selected.actionId}-${selectedOptionIds.join(".")}`,
-  });
-  expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
-  if (!result.ok) throw new Error(result.error.message);
-  return result.state;
-}
-
-function mustAction(
-  state: GameState,
-  side: Side,
-  predicate: (action: LegalAction) => boolean,
-): LegalAction {
-  const legalActions = getLegalActions(state, side);
-  const selected = legalActions.find(predicate);
-  expect(
-    selected,
-    `Missing action for ${side}. Legal: ${legalActions.map((action) => `${action.type}:${action.label}`).join(", ")}`,
-  ).toBeDefined();
-  if (!selected) throw new Error("Missing legal action");
-  return selected;
-}
-
-function toRunnerTurn(state: GameState): GameState {
-  let next = apply(state, "corp", (action) => action.type === "mandatory_draw");
-  next = apply(next, "corp", (action) => action.type === "end_turn");
-  if (
-    next.pendingChoice?.source === "discard_phase" &&
-    next.pendingChoice.side === "corp"
-  ) {
-    next = applyChoice(next, "corp", String(next.pendingChoice.options[0]?.id));
-  }
-  return next;
-}
-
-function toRunnerTurnFromCorpMain(state: GameState): GameState {
-  let next = apply(state, "corp", (action) => action.type === "end_turn");
-  if (
-    next.pendingChoice?.source === "discard_phase" &&
-    next.pendingChoice.side === "corp"
-  ) {
-    next = applyChoice(next, "corp", String(next.pendingChoice.options[0]?.id));
-  }
-  return next;
-}
-
-function sourceDefinition(
-  state: GameState,
-  action: LegalAction,
-): string | undefined {
-  if (
-    typeof action.source !== "string" ||
-    action.source === "basic_action" ||
-    action.source === "game_rule"
-  )
-    return undefined;
-  return state.cardInstances[action.source]?.definitionId;
-}
-
-function agendaPoints(state: GameState, side: Side): number {
-  const ids = side === "corp" ? state.corp.scoreArea : state.runner.scoreArea;
-  const scoredPoints = ids.reduce(
-    (sum, id) =>
-      sum +
-      (DEMO_CARDS_BY_ID[state.cardInstances[id]?.definitionId ?? ""]
-        ?.agendaPoints ?? 0),
-    0,
-  );
-  return side === "corp"
-    ? scoredPoints + Math.max(0, Math.floor(state.corpBonusAgendaPoints ?? 0))
-    : scoredPoints;
-}
-
-function cardCounterAmount(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-): number {
-  return state.cardInstances[cardId]?.counters?.[counterType] ?? 0;
-}
-
-function setCardCounterForTest(
-  state: GameState,
-  cardId: CardInstanceId,
-  counterType: CounterType,
-  amount: number,
-): void {
-  state.cardInstances[cardId] = {
-    ...state.cardInstances[cardId]!,
-    counters: {
-      ...(state.cardInstances[cardId]?.counters ?? {}),
-      [counterType]: amount,
-    },
-  };
-}
-
-function choiceRequest(state: GameState, side: Side): ChoiceRequest {
-  return {
-    choiceId: `choice_v093_${side}`,
-    side,
-    source: "v093_test_choice",
-    prompt: "private prompt",
-    kind: "select_option",
-    options: [
-      { id: "keep", label: "Keep private option" },
-      { id: "ship", label: "Ship private option" },
-    ],
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion,
-    visibility: "private_to_side",
-  };
-}
-
-function moveRunnerCardToGrip(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.runner.grip.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "grip" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function scoreRunnerAgendaForTest(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const entry = Object.entries(state.cardInstances).find(
-    ([id, card]) =>
-      card.definitionId === definitionId &&
-      !state.runner.scoreArea.includes(id) &&
-      !state.corp.scoreArea.includes(id),
-  );
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing unscored ${definitionId}`);
-  const id = entry[0];
-  removeEverywhere(state, id);
-  state.runner.scoreArea.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "scoreArea" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function scoreCorpAgendaForTest(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const entry = Object.entries(state.cardInstances).find(
-    ([id, card]) =>
-      card.definitionId === definitionId &&
-      !state.runner.scoreArea.includes(id) &&
-      !state.corp.scoreArea.includes(id),
-  );
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing unscored ${definitionId}`);
-  const id = entry[0];
-  removeEverywhere(state, id);
-  state.corp.scoreArea.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "scoreArea" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function moveRunnerCardCopyToGrip(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const entry = Object.entries(state.cardInstances).find(
-    ([id, card]) =>
-      card.definitionId === definitionId &&
-      !state.runner.rig.programs.includes(id) &&
-      !state.runner.rig.hardware.includes(id) &&
-      !state.runner.rig.resources.includes(id) &&
-      !state.runner.scoreArea.includes(id),
-  );
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing uninstalled ${definitionId}`);
-  const id = entry[0];
-  removeEverywhere(state, id);
-  state.runner.grip.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "grip" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function putRunnerCardOnTopOfStack(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.runner.stack.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "stack" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function drawRunnerCardsForTest(state: GameState, amount: number): void {
-  for (let index = 0; index < amount; index += 1) {
-    const id = state.runner.stack.shift();
-    expect(id).toBeDefined();
-    if (!id) throw new Error("Missing runner stack card");
-    state.runner.grip.push(id);
-    state.cardInstances[id] = {
-      ...state.cardInstances[id]!,
-      zone: { side: "runner", zone: "grip" },
-      faceup: true,
-      rezzed: true,
-    };
-  }
-}
-
-function moveCorpCardToHq(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.corp.hq.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "hq" },
-    faceup: false,
-    rezzed: false,
-  };
-  return id;
-}
-
-function moveCorpCardCopyToHq(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const entry = Object.entries(state.cardInstances).find(
-    ([id, card]) =>
-      card.definitionId === definitionId && !state.corp.hq.includes(id),
-  );
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing HQ copy ${definitionId}`);
-  const id = entry[0];
-  removeEverywhere(state, id);
-  state.corp.hq.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "hq" },
-    faceup: false,
-    rezzed: false,
-  };
-  return id;
-}
-
-function moveCorpCardToArchives(
-  state: GameState,
-  definitionId: string,
-  faceup = true,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.corp.archives.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "archives" },
-    faceup,
-    rezzed: faceup,
-  };
-  return id;
-}
-
-function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
-  const movedToRd = state.corp.hq.filter((cardId) => cardId !== id);
-  state.corp.hq = [id];
-  for (const cardId of movedToRd) {
-    state.corp.rd.push(cardId);
-    state.cardInstances[cardId] = {
-      ...state.cardInstances[cardId]!,
-      zone: { side: "corp", zone: "rd" },
-      faceup: false,
-      rezzed: false,
-    };
-  }
-}
-
-function keepOnlyCorpHqCards(state: GameState, ids: CardInstanceId[]): void {
-  const keep = new Set(ids);
-  const movedToRd = state.corp.hq.filter((cardId) => !keep.has(cardId));
-  state.corp.hq = ids.slice();
-  for (const cardId of movedToRd) {
-    state.corp.rd.push(cardId);
-    state.cardInstances[cardId] = {
-      ...state.cardInstances[cardId]!,
-      zone: { side: "corp", zone: "rd" },
-      faceup: false,
-      rezzed: false,
-    };
-  }
-}
-
-function keepOnlyCorpArchivesCards(
-  state: GameState,
-  ids: CardInstanceId[],
-): void {
-  const keep = new Set(ids);
-  const movedToRd = state.corp.archives.filter((cardId) => !keep.has(cardId));
-  state.corp.archives = ids.slice();
-  for (const cardId of movedToRd) {
-    state.corp.rd.push(cardId);
-    state.cardInstances[cardId] = {
-      ...state.cardInstances[cardId]!,
-      zone: { side: "corp", zone: "rd" },
-      faceup: false,
-      rezzed: false,
-    };
-  }
-}
-
-function putCorpCardOnTopOfRd(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.corp.rd.unshift(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "rd" },
-    faceup: false,
-    rezzed: false,
-  };
-  return id;
-}
-
-function putCorpIceOnServer(
-  state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  const server = state.corp.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  expect(server).toBeDefined();
-  if (!server) throw new Error("Missing server");
-  removeEverywhere(state, id);
-  server.ice.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "serverIce", serverId },
-    faceup: false,
-    rezzed: false,
-  };
-  return id;
-}
-
-function putCorpIceCopyOnServer(
-  state: GameState,
-  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
-  definitionId: string,
-): CardInstanceId {
-  const server = state.corp.servers.find(
-    (candidate) => candidate.id === serverId,
-  );
-  expect(server).toBeDefined();
-  if (!server) throw new Error("Missing server");
-  const entry = Object.entries(state.cardInstances).find(
-    ([id, card]) =>
-      card.definitionId === definitionId &&
-      !server.ice.includes(id as CardInstanceId),
-  );
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing ICE copy ${definitionId}`);
-  const id = entry[0] as CardInstanceId;
-  removeEverywhere(state, id);
-  server.ice.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "serverIce", serverId },
-    faceup: false,
-    rezzed: false,
-  };
-  return id;
-}
-
-function putCorpRootInRemote(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  let server = state.corp.servers.find(
-    (candidate) => candidate.id === "remote_1",
-  );
-  if (!server) {
-    server = {
-      id: "remote_1",
-      kind: "remote",
-      label: "Remote 1",
-      ice: [],
-      root: [],
-    };
-    state.corp.servers.push(server);
-  }
-  removeEverywhere(state, id);
-  server.root.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
-    faceup: false,
-    rezzed: false,
-  };
-  return id;
-}
-
-function installRunnerProgramForTest(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.runner.rig.programs.push(id);
-  state.runner.memoryUsed += 1;
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "rig" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function installRunnerHardwareForTest(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.runner.rig.hardware.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "rig" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function installRunnerResourceForTest(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const id = findCard(state, definitionId);
-  removeEverywhere(state, id);
-  state.runner.rig.resources.push(id);
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "rig" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function installRunnerProgramCopyForTest(
-  state: GameState,
-  definitionId: string,
-): CardInstanceId {
-  const entry = Object.entries(state.cardInstances).find(
-    ([id, card]) =>
-      card.definitionId === definitionId &&
-      !state.runner.rig.programs.includes(id),
-  );
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing uninstalled ${definitionId}`);
-  const id = entry[0];
-  removeEverywhere(state, id);
-  state.runner.rig.programs.push(id);
-  state.runner.memoryUsed += 1;
-  state.cardInstances[id] = {
-    ...state.cardInstances[id]!,
-    zone: { side: "runner", zone: "rig" },
-    faceup: true,
-    rezzed: true,
-  };
-  return id;
-}
-
-function emptyRunnerGripForTest(state: GameState): void {
-  for (const id of state.runner.grip.slice()) {
-    removeEverywhere(state, id);
-    state.runner.heap.push(id);
-    state.cardInstances[id] = {
-      ...state.cardInstances[id]!,
-      zone: { side: "runner", zone: "heap" },
-      faceup: true,
-      rezzed: true,
-    };
-  }
-}
-
-function scoreTwoAgendasForTest(state: GameState): void {
-  for (let index = 0; index < 2; index += 1) {
-    const entry = Object.entries(state.cardInstances).find(
-      ([id, card]) =>
-        card.definitionId === "simple_agenda" &&
-        !state.corp.scoreArea.includes(id),
-    );
-    expect(entry).toBeDefined();
-    if (!entry) throw new Error("Missing agenda");
-    const id = entry[0];
-    removeEverywhere(state, id);
-    state.corp.scoreArea.push(id);
-    state.cardInstances[id] = {
-      ...state.cardInstances[id]!,
-      zone: { side: "corp", zone: "scoreArea" },
-      faceup: true,
-      rezzed: true,
-    };
-  }
-}
-
-function findCard(state: GameState, definitionId: string): CardInstanceId {
-  const entries = Object.entries(state.cardInstances).filter(
-    ([, card]) => card.definitionId === definitionId,
-  );
-  const entry =
-    entries.find(
-      ([id]) =>
-        !state.corp.scoreArea.includes(id) &&
-        !state.runner.scoreArea.includes(id),
-    ) ?? entries[0];
-  expect(entry).toBeDefined();
-  if (!entry) throw new Error(`Missing ${definitionId}`);
-  return entry[0];
-}
-
-function removeEverywhere(state: GameState, id: string): void {
-  state.corp.hq = state.corp.hq.filter((cardId) => cardId !== id);
-  state.corp.rd = state.corp.rd.filter((cardId) => cardId !== id);
-  state.corp.archives = state.corp.archives.filter((cardId) => cardId !== id);
-  state.corp.scoreArea = state.corp.scoreArea.filter((cardId) => cardId !== id);
-  for (const server of state.corp.servers) {
-    server.ice = server.ice.filter((cardId) => cardId !== id);
-    server.root = server.root.filter((cardId) => cardId !== id);
-  }
-  state.runner.grip = state.runner.grip.filter((cardId) => cardId !== id);
-  state.runner.stack = state.runner.stack.filter((cardId) => cardId !== id);
-  state.runner.heap = state.runner.heap.filter((cardId) => cardId !== id);
-  state.runner.scoreArea = state.runner.scoreArea.filter(
-    (cardId) => cardId !== id,
-  );
-  state.runner.rig.programs = state.runner.rig.programs.filter(
-    (cardId) => cardId !== id,
-  );
-  state.runner.rig.hardware = state.runner.rig.hardware.filter(
-    (cardId) => cardId !== id,
-  );
-  state.runner.rig.resources = state.runner.rig.resources.filter(
-    (cardId) => cardId !== id,
-  );
-  if (state.specialZones) {
-    state.specialZones.setAside = state.specialZones.setAside.filter(
-      (cardId) => cardId !== id,
-    );
-    state.specialZones.removedFromGame =
-      state.specialZones.removedFromGame.filter((cardId) => cardId !== id);
-  }
-}

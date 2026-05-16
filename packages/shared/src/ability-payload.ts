@@ -1,0 +1,31 @@
+export const LEGACY_ABILITY_PAYLOAD_FIELDS = [
+  "v1911HiddenZoneAbility",
+  "v1912CounterAbility",
+  "v1915RunnerProgramAbility",
+  "v1917AssetAbility",
+  "v1918UpgradeAbility",
+  "v1919AssetAbility",
+  "v1919OperationAbility",
+  "v1919RunnerEventAbility",
+  "v1919RunnerProgramAbility",
+  "v1919UpgradeAbility",
+  "v1920AssetAbility",
+  "v1920RunnerRunLockAbility",
+  "v1921AssetAbility",
+  "v1921RunnerEventAbility",
+  "v1921RunnerProgramAbility",
+  "v1921RunnerResourceAbility",
+  "v1921UpgradeAbility",
+  "v1922CorpIceAbility",
+  "v1922CorpOperationAbility",
+  "v1922RunnerEventAbility",
+  "v1922RunnerHardwareAbility",
+  "v1922RunnerProgramAbility",
+  "agendaAbility",
+  "resourceAbility",
+  "runnerAbility",
+  "acmeSavingsAndLoanAbility",
+] as const;
+
+export type LegacyAbilityPayloadField =
+  (typeof LEGACY_ABILITY_PAYLOAD_FIELDS)[number];

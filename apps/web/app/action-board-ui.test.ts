@@ -416,7 +416,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("labels Self-Modifying Code activation without credit costs", () => {
     const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
       cardId: "smc_1",
-      v1911HiddenZoneAbility: "self_modifying_code_install_program",
+      abilityId: "self_modifying_code_install_program",
       trashOnUse: true
     }, "run.encounter_ice");
     const split = splitLegalActions([searchInstall]);

@@ -1,4 +1,5 @@
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import { actionHasAbility } from "./action-payload";
 
 export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
 export const LEGACY_ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
@@ -202,7 +203,7 @@ export function contextualCardActionLabel(action: LegalAction): string {
 }
 
 function triggerAbilityActionLabel(action: LegalAction, compact = false): string {
-  if (action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program") {
+  if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
   return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
@@ -626,7 +627,7 @@ function objectBoundAction(action: LegalAction): boolean {
 }
 
 function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return action.type === "trigger_ability" && action.payload?.v1911HiddenZoneAbility === "self_modifying_code_install_program";
+  return action.type === "trigger_ability" && actionHasAbility(action, "self_modifying_code_install_program");
 }
 
 function sourceCardTitleForAction(view: PlayerView, action: LegalAction): string | null {

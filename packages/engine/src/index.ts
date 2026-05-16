@@ -1,15 +1,6 @@
 import {
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
-  MVP_0_1_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_8_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_95_BASELINE,
-  MVP_0_96_BASELINE,
-  MVP_0_97_BASELINE,
-  MVP_0_98_BASELINE,
-  MVP_0_99_BASELINE,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -20,7 +11,6 @@ import {
   type CorpServer,
   type CreateGameConfig,
   type DeckDefinition,
-  type DeckPublicMetadata,
   type DemoDeckId,
   type DamageType,
   type EngineError,
@@ -42,7 +32,6 @@ import {
   type ReplacementWindow,
   type ReplayResult,
   type RunState,
-  type RulesBaseline,
   type SpecialZoneKind,
   type SpecialZoneState,
   type SpecialZoneVisibility,
@@ -56,6 +45,156 @@ import {
   type VisibleCard,
   type Winner,
 } from "@netgrid/shared";
+import {
+  baselineForCardPoolVersion,
+  cardPoolVersionForDecks,
+  metadataForDeck,
+} from "./card-pool";
+import {
+  ACTION_ASSET_CARD_IDS,
+  COUNTER_ASSET_CARD_IDS,
+  COUNTER_OPERATION_CARD_IDS,
+  OVERADVANCE_AGENDA_CARD_IDS,
+  SCORED_REVEAL_AGENDA_CARD_IDS,
+  SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+} from "./mechanics/agenda-scoring";
+import {
+  ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+  ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
+  CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
+  EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
+  FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
+  FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
+  GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
+  INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
+  MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
+  OLIVIA_SALAZAR_STEAL_COST_UPGRADE_ID,
+  PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
+  ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID,
+  SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
+  SYSTEMATIC_LAYOFFS_FORFEIT_AGENDA_OPERATION_ID,
+  TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
+  VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
+  VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
+  WASHINGTON_DC_AGENDA_DIFFICULTY_UPGRADE_ID,
+} from "./mechanics/agenda-operation-effects";
+import {
+  COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
+  DATA_MASONS_HOSTING_ASSET_CARD_ID,
+  DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
+  KRUMZ_TRACE_ASSET_CARD_ID,
+  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
+  SOLO_SQUAD_DAMAGE_ASSET_CARD_ID,
+  SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID,
+  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
+} from "./mechanics/asset-node-effects";
+import {
+  ABLATIVE_COUNTER_HARDWARE_CARD_ID,
+  ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
+  DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
+  RUNTIME_DAMAGE_PREVENTION_PROFILES,
+} from "./mechanics/damage-prevention";
+import {
+  CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID,
+  CORP_HQ_AGENDA_REVEAL_CARD_ID,
+  CORP_HQ_SHUFFLE_DRAW_CARD_ID,
+  CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
+  COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
+  HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
+  HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
+  RUNNER_GRIP_TRASH_EVENT_CARD_ID,
+  RUNNER_STACK_TOP5_EVENT_CARD_ID,
+  SERVER_EXPOSE_PROGRAM_CARD_IDS,
+  SERVER_ICE_SWAP_UPGRADE_CARD_ID,
+  STACK_SEARCH_PROGRAM_CARD_IDS,
+  STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID,
+  STACK_TOP_REORDER_RESOURCE_CARD_ID,
+  STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
+} from "./mechanics/hidden-zone";
+import {
+  BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID,
+  CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
+  FORTRESS_ARCHITECTS_REZ_COST_ASSET_ID,
+  HACKER_TRACKER_CENTRAL_RUN_LOCK_ASSET_ID,
+  ICE_TRANSMUTATION_AGENDA_ID,
+  I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
+  JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID,
+  MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
+  NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
+  SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID,
+} from "./mechanics/global-modifiers";
+import { COUNTER_UPGRADE_CARD_IDS } from "./mechanics/hosting-counters";
+import {
+  ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
+  ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID,
+  ARTEMIS_2020_STRENGTH_HARDWARE_ID,
+  CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
+  CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID,
+  CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID,
+  COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID,
+  DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID,
+  EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
+  FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
+  FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
+  JAPANESE_WATER_TORTURE_BREAKER_ID,
+  MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID,
+  MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+  MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
+  NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
+  NEWSGROUP_FILTER_CREDIT_PROGRAM_ID,
+  OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
+  PANDORAS_DECK_LINK_HARDWARE_ID,
+  POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID,
+  RABBIT_HQ_INTERFACE_PROGRAM_ID,
+  SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID,
+  SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
+  SECURITY_PURGE_PURGE_AGENDA_ID,
+  SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
+  STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
+  SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
+  VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID,
+  VIRAL_15_PROGRAM_TRASH_ICE_ID,
+  ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
+} from "./mechanics/longtail-card-effects";
+import {
+  CORP_ECONOMY_ASSET_CARD_IDS,
+  CORP_RECURRING_ASSET_CARD_IDS,
+} from "./mechanics/payment-costs";
+import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
+import {
+  AI_BOON_RANDOM_BREAKER_CARD_ID,
+  BOARDWALK_RANDOM_PROGRAM_CARD_ID,
+  PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID,
+  QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
+  RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID,
+  RUNNER_RANDOM_PROGRAM_CARD_IDS,
+  SCHLAGHUND_RANDOM_ASSET_CARD_ID,
+} from "./mechanics/random-effects";
+import {
+  HQ_ACCESS_REPLACEMENT_CREDIT_LOSS_EVENT_CARD_ID,
+  HQ_ACCESS_REPLACEMENT_DRAW_EVENT_CARD_ID,
+  HQ_MULTIACCESS_EVENT_CARD_ID,
+  HQ_RUN_ACCESS_RD_EVENT_CARD_ID,
+  RD_MULTIACCESS_EVENT_CARD_ID,
+  RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
+  RUN_MULTIACCESS_EVENT_CARD_ID,
+  RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
+  TRACE_AWARE_RUN_EVENT_CARD_ID,
+} from "./mechanics/run-access";
+import {
+  CRYBABY_ACCESS_COST_UPGRADE_ID,
+  DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
+  DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
+  NEW_GALVESTON_TRASH_COST_UPGRADE_ID,
+  PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
+  RED_HERRINGS_STEAL_TAX_UPGRADE_ID,
+  TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
+} from "./mechanics/server-upgrades";
+import {
+  RUN_TAX_UPGRADE_CARD_IDS,
+  TAG_CONDITION_UPGRADE_CARD_IDS,
+  TRACE_ASSET_CARD_IDS,
+} from "./mechanics/trace-tags";
 
 export {
   DEMO_CARDS,
@@ -134,17 +273,6 @@ const DEFAULT_CONTROLLERS: {
   },
 };
 
-type CardPoolVersion =
-  | "0.1.0"
-  | "0.4.0"
-  | "0.8.0"
-  | "0.94.0"
-  | "0.95.0"
-  | "0.96.0"
-  | "0.97.0"
-  | "0.98.0"
-  | "0.99.0";
-
 type RunnerEventResolver = {
   name: string;
   requiresServer?: boolean;
@@ -176,12 +304,6 @@ type DamageSummary = {
   runnerMaxHandSizeAfter?: number;
 };
 
-type RuntimeDamagePreventionProfile = {
-  maxPerTurn: number;
-  damageTypes: DamageType[];
-  priority: number;
-};
-
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
@@ -200,7 +322,6 @@ const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
-const DIPLOMATIC_IMMUNITY_ID = "onr_v1_160_diplomatic-immunity";
 const BROKER_ID = "onr_v1_154_broker";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -217,195 +338,14 @@ const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 const CINDERELLA_ID = "onr_v1_228_cinderella";
 const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
-const V1917_ECONOMY_ASSET_IDS = new Set([
-  "onr_v1_309_bbs-whispering-campaign",
-  "onr_v1_311_braindance-campaign",
-  "onr_v1_321_esa-contract",
-  "onr_v1_326_holovid-campaign",
-  "onr_v1_329_investment-firm",
-  "onr_v1_337_rockerboy-promotion",
-  "onr_v1_344_spinn-public-relations",
-]);
-const V1917_RECURRING_ASSET_IDS = new Set([
-  "onr_v1_311_braindance-campaign",
-  "onr_v1_326_holovid-campaign",
-  "onr_v1_329_investment-firm",
-  "onr_v1_344_spinn-public-relations",
-]);
-const V1917_CORPORATE_NEGOTIATING_CENTER_ID =
-  "onr_v1_314_corporate-negotiating-center";
-const V1917_KRUMZ_ID = "onr_v1_330_krumz";
-const V1917_TRACE_ASSET_IDS = new Set(["onr_v1_310_blood-cat"]);
-const V1917_HIDDEN_REVEAL_ASSET_IDS = new Set<string>([]);
-const V1917_RESCHEDULER_ID = "onr_v1_336_rescheduler";
-const V1917_HIDDEN_REORDER_ASSET_IDS = new Set<string>([]);
-const V1917_COWBOY_SYSOP_ID = "onr_v1_316_cowboy-sysop";
-const V1917_DATA_MASONS_ID = "onr_v1_317_data-masons";
-const V1917_DISINFECTANT_ID = "onr_v1_319_disinfectant-inc";
-const V1917_SOLO_SQUAD_ID = "onr_v1_342_solo-squad";
-const V1913_ARMORED_FRIDGE_ID = "onr_v1_121_armored-fridge";
-const V1913_ARMORED_FRIDGE_STARTING_COUNTERS = 7;
-const V1917_SETUP_ID = "onr_v1_340_setup";
-const V1917_TRAP_ID = "onr_v1_345_trap";
-const V1917_SPINN_PUBLIC_RELATIONS_ID = "onr_v1_344_spinn-public-relations";
-const V1918_DEDICATED_RESPONSE_TEAM_ID = "onr_v1_356_dedicated-response-team";
-const V1918_DIETER_ESSLIN_ID = "onr_v1_357_dieter-esslin";
-const V1918_CRYSTAL_PALACE_STATION_GRID_ID =
-  "onr_v1_355_crystal-palace-station-grid";
-const V1918_CRYBABY_ID = "onr_v1_354_crybaby";
-const V1918_DR_DREFF_ID = "onr_v1_358_dr-dreff";
-const V1918_NEW_GALVESTON_CITY_GRID_ID = "onr_v1_362_new-galveston-city-grid";
-const V1918_OMNI_KISMET_ID = "onr_v1_364_omni-kismet-ph-d";
-const V1918_PARIS_CITY_GRID_ID = "onr_v1_365_paris-city-grid";
-const V1918_RED_HERRINGS_ID = "onr_v1_366_red-herrings";
-const V1918_SINGAPORE_CITY_GRID_ID = "onr_v1_369_singapore-city-grid";
-const V1918_TURBEAU_DELACROIX_ID = "onr_v1_372_turbeau-delacroix";
-const V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID =
-  "onr_v1_373_twenty-four-hour-surveillance";
-const V1918_COUNTER_UPGRADE_IDS = new Set([
-  V1918_CRYSTAL_PALACE_STATION_GRID_ID,
-  V1918_DR_DREFF_ID,
-]);
-const V1918_RUN_TAX_UPGRADE_IDS = new Set([
-  V1918_DR_DREFF_ID,
-  V1918_TWENTY_FOUR_HOUR_SURVEILLANCE_ID,
-]);
-const V1918_TAG_CONDITION_UPGRADE_IDS = new Set([
-  V1918_OMNI_KISMET_ID,
-  V1918_PARIS_CITY_GRID_ID,
-]);
-const V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID =
-  "onr_v1_189_artificial-security-directors";
-const V1919_FAIT_ACCOMPLI_ID = "onr_v1_025_fait-accompli";
-const V1919_ARASAKA_OWNS_YOU_ID = "onr_v1_078_arasaka-owns-you";
-const V1919_GENETICS_VISIONARY_ACQUISITION_ID =
-  "onr_v1_202_genetics-visionary-acquisition";
-const V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID =
-  "onr_v1_291_falsified-transactions-expert";
-const V1919_MANAGEMENT_SHAKE_UP_ID = "onr_v1_292_management-shake-up";
-const V1919_PROJECT_CONSULTANTS_ID = "onr_v1_300_project-consultants";
-const V1919_SILVER_LINING_RECOVERY_PROTOCOL_ID =
-  "onr_v1_303_silver-lining-recovery-protocol";
-const V1919_SYSTEMATIC_LAYOFFS_ID = "onr_v1_304_systematic-layoffs";
-const V1919_TEAM_RESTRUCTURING_ID = "onr_v1_305_team-restructuring";
-const V1919_CHICAGO_BRANCH_ID = "onr_v1_312_chicago-branch";
-const V1919_CORPRUNNERS_SHATTERED_REMAINS_ID =
-  "onr_v1_315_corprunners-shattered-remains";
-const V1919_EXPERIMENTAL_AI_ID = "onr_v1_323_experimental-ai";
-const V1919_INFORMATION_LAUNDERING_ID = "onr_v1_328_information-laundering";
-const V1919_VACANT_SOULKILLER_ID = "onr_v1_346_vacant-soulkiller";
-const V1919_VAPOR_OPS_ID = "onr_v1_347_vapor-ops";
-const V1919_VIRUS_TEST_SITE_ID = "onr_v1_348_virus-test-site";
-const V1919_OLIVIA_SALAZAR_ID = "onr_v1_363_olivia-salazar";
-const V1919_ROVING_SUBMARINE_ID = "onr_v1_368_roving-submarine";
-const V1919_WASHINGTON_DC_CITY_GRID_ID = "onr_v1_374_washington-d-c-city-grid";
-const V1919_OVERADVANCE_AGENDA_IDS = new Set([
-  V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID,
-  V1919_GENETICS_VISIONARY_ACQUISITION_ID,
-]);
-const V1919_SCORED_REVEAL_AGENDA_IDS = new Set([
-  V1919_ARTIFICIAL_SECURITY_DIRECTORS_ID,
-  V1919_GENETICS_VISIONARY_ACQUISITION_ID,
-]);
-const V1919_SERVER_DIFFICULTY_UPGRADE_IDS = new Set([
-  V1919_ROVING_SUBMARINE_ID,
-  V1919_WASHINGTON_DC_CITY_GRID_ID,
-]);
-const V1919_COUNTER_ASSET_IDS = new Set([
-  V1919_CHICAGO_BRANCH_ID,
-  V1919_VAPOR_OPS_ID,
-]);
-const V1919_COUNTER_OPERATION_IDS = new Set([
-  V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID,
-  V1919_MANAGEMENT_SHAKE_UP_ID,
-  V1919_TEAM_RESTRUCTURING_ID,
-]);
-const V1920_MAIN_OFFICE_RELOCATION_ID = "onr_v1_205_main-office-relocation";
-const V1920_ICE_TRANSMUTATION_ID = "onr_v1_204_ice-transmutation";
-const V1920_BIOWEAPONS_ENGINEERING_ID =
-  "onr_v1_190_bioweapons-engineering";
-const V1920_FORTRESS_ARCHITECTS_ID = "onr_v1_324_fortress-architects";
-const V1920_HACKER_TRACKER_CENTRAL_ID =
-  "onr_v1_325_hacker-tracker-central";
-const V1920_I_GOT_A_ROCK_ID = "onr_v1_327_i-got-a-rock";
-const V1920_NEWSGROUP_TAUNTING_ID = "onr_v1_332_newsgroup-taunting";
-const V1920_CITY_SURVEILLANCE_ID = "onr_v1_313_city-surveillance";
-const V1920_SOUTH_AFRICAN_MINING_CORP_ID =
-  "onr_v1_343_south-african-mining-corp";
-const V1920_JERUSALEM_CITY_GRID_ID = "onr_v1_360_jerusalem-city-grid";
-const V1920_ACTION_ASSET_IDS = new Set([
-  "onr_v1_331_nevinyrral",
-  "onr_v1_334_pacifica-regional-ai",
-  "onr_v1_335_remote-facility",
-]);
-const V1921_AI_BOON_ID = "onr_v1_002_ai-boon";
-const V1921_BOARDWALK_ID = "onr_v1_008_boardwalk";
-const V1921_PLAYFUL_AI_ID = "onr_v1_104_playful-ai";
-const V1921_QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
-const V1921_RUNNER_RANDOM_PROGRAM_IDS = new Set([
-  V1921_AI_BOON_ID,
-  V1921_BOARDWALK_ID,
-]);
-const V1921_SCHLAGHUND_ID = "onr_v1_339_schlaghund";
-const V1921_RIO_DE_JANEIRO_CITY_GRID_ID = "onr_v1_367_rio-de-janeiro-city-grid";
-const V1922_ANONYMOUS_TIP_ID = "onr_v1_077_anonymous-tip";
-const V1922_CORE_COMMAND_JETTISON_ICE_ID =
-  "onr_v1_080_core-command-jettison-ice";
-const V1922_FORGED_ACTIVATION_ORDERS_ID = "onr_v1_086_forged-activation-orders";
-const V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID =
-  "onr_v1_093_if-you-want-it-done-right";
-const V1922_MISC_FOR_SALE_ID = "onr_v1_100_misc-for-sale";
-const V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID =
-  "onr_v1_102_open-ended-mileage-program";
-const V1922_ORGAN_DONOR_ID = "onr_v1_103_organ-donor";
-const V1922_SECURITY_CODE_WORM_CHIP_ID = "onr_v1_109_security-code-worm-chip";
-const V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID =
-  "onr_v1_113_synchronized-attack-on-hq";
-const V1922_VALU_PAK_SOFTWARE_BUNDLE_ID = "onr_v1_117_valu-pak-software-bundle";
 const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
 const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
 const RIGGED_INVESTMENTS_ID = "onr_v1_174_rigged-investments";
-const V1922_NEWSGROUP_FILTER_ID = "onr_v1_045_newsgroup-filter";
-const V1922_SHIELD_ID = "onr_v1_061_shield";
-const V1922_JAPANESE_WATER_TORTURE_ID = "onr_v1_037_japanese-water-torture";
-const V1922_ZETATECH_SOFTWARE_INSTALLER_ID =
-  "onr_v1_075_zetatech-software-installer";
-const V1922_RABBIT_ID = "onr_v1_051_rabbit";
-const V1922_SCATTER_SHOT_ID = "onr_v1_057_scatter-shot";
-const V1922_ARTEMIS_2020_ID = "onr_v1_122_artemis-2020";
-const V1922_COROLLA_SPEED_CHIP_ID = "onr_v1_124_corolla-speed-chip";
-const V1922_FALSE_ECHO_ID = "onr_v1_026_false-echo";
-const V1922_NETSPACE_INVERTER_ID = "onr_v1_044_netspace-inverter";
-const V1922_SPEED_TRAP_ID = "onr_v1_067_speed-trap";
-const V1922_STARTUP_IMMOLATOR_ID = "onr_v1_068_startup-immolator";
-const V1922_ARASAKA_PORTABLE_PROTOTYPE_ID =
-  "onr_v1_119_arasaka-portable-prototype";
-const V1922_MICROTECH_BACKUP_DRIVE_ID = "onr_v1_131_microtech-backup-drive";
-const V1922_PANDORAS_DECK_ID = "onr_v1_136_pandoras-deck";
-const V1922_CORPORATE_RETREAT_ID = "onr_v1_195_corporate-retreat";
-const V1922_CORPORATE_WAR_ID = "onr_v1_196_corporate-war";
-const V1922_DATA_FORT_RECLAMATION_ID =
-  "onr_v1_197_data-fort-reclamation";
-const V1922_MARINE_ARCOLOGY_ID = "onr_v1_206_marine-arcology";
-const V1922_POLITICAL_OVERTHROW_ID = "onr_v1_210_political-overthrow";
-const V1922_SECURITY_PURGE_ID = "onr_v1_216_security-purge";
-const V1922_EDGERUNNER_TEMPS_ID = "onr_v1_289_edgerunner-inc-temps";
-const V1922_OFF_SITE_BACKUPS_ID = "onr_v1_296_off-site-backups";
-const V1922_PLANNING_CONSULTANTS_ID = "onr_v1_298_planning-consultants";
-const V1922_VIRAL_15_ID = "onr_v1_276_viral-15";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
 const CHIMERA_ID = "onr_v1_353_chimera";
-const MOUSE_ID = "onr_v1_042_mouse";
-const SEEYA_ID = "onr_v1_058_seeya";
-const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
-const I_SPY_ID = "onr_v1_032_i-spy";
-const AUJOURD_OUI_ID = "onr_v1_151_aujourdoui";
-const NETO_ID = "onr_v1_169_n-e-t-o";
-const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
-const THE_SHORT_CIRCUIT_ID = "onr_v1_177_the-short-circuit";
 const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
@@ -424,98 +364,6 @@ const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
 const SHREDDER_UPLINK_PROTOCOL_ID = "onr_v1_062_shredder-uplink-protocol";
 const SMARTEYE_ID = "onr_v1_065_smarteye";
 const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
-
-const RUNTIME_DAMAGE_PREVENTION_PROFILES: Record<
-  string,
-  RuntimeDamagePreventionProfile
-> = {
-  "onr_v1_023_evil-twin": {
-    maxPerTurn: 2,
-    damageTypes: ["net", "core"],
-    priority: 90,
-  },
-  "onr_v1_028_force-shield": {
-    maxPerTurn: 2,
-    damageTypes: ["net", "core"],
-    priority: 100,
-  },
-  "onr_v1_038_joan-of-arc": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "core"],
-    priority: 120,
-  },
-  [V1913_ARMORED_FRIDGE_ID]: {
-    maxPerTurn: V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
-    damageTypes: ["meat"],
-    priority: 120,
-  },
-  "onr_v1_125_dermatech-bodyplating": {
-    maxPerTurn: 1,
-    damageTypes: ["meat"],
-    priority: 110,
-  },
-  "onr_v1_127_full-body-conversion": {
-    maxPerTurn: 1,
-    damageTypes: ["meat"],
-    priority: 121,
-  },
-  "onr_v1_128_green-knight-surge-buffers": {
-    maxPerTurn: 2,
-    damageTypes: ["net"],
-    priority: 121,
-  },
-  "onr_v1_130_lifesaver-nanosurgeons": {
-    maxPerTurn: 1,
-    damageTypes: ["core"],
-    priority: 121,
-  },
-  "onr_v1_135_nasuko-cycle": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat"],
-    priority: 122,
-  },
-  "onr_v1_139_r-and-d-interface": {
-    maxPerTurn: 1,
-    damageTypes: ["net"],
-    priority: 123,
-  },
-  "onr_v1_143_techtronica-utility-suit": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat"],
-    priority: 124,
-  },
-  "onr_v1_155_code-viral-cache": {
-    maxPerTurn: 1,
-    damageTypes: ["net"],
-    priority: 125,
-  },
-  "onr_v1_161_fall-guy": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat"],
-    priority: 126,
-  },
-  "onr_v1_170_nomad-allies": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat"],
-    priority: 127,
-  },
-  "onr_v1_185_trauma-team": {
-    maxPerTurn: 2,
-    damageTypes: ["meat"],
-    priority: 128,
-  },
-  "onr_v1_186_umbrella-policy": {
-    maxPerTurn: 1,
-    damageTypes: ["net", "meat", "core"],
-    priority: 129,
-  },
-  "onr_v1_187_wilson-weeflerunner-apprentice": {
-    maxPerTurn: 1,
-    damageTypes: ["meat"],
-    priority: 130,
-  },
-  [V1922_SHIELD_ID]: { maxPerTurn: 2, damageTypes: ["net"], priority: 131 },
-};
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -649,12 +497,12 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       legalAction.payload = { ...(legalAction.payload ?? {}), removedTags };
     },
   },
-  [V1921_PLAYFUL_AI_ID]: {
+  [PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID]: {
     name: "onr_v1921_runner_event_playful_ai_dice_loop",
     resolve: (state, legalAction) => {
       const dieRoll = rollDeterministicDie(
         state,
-        `v1921.die.${V1921_PLAYFUL_AI_ID}.dice_loop.initial`,
+        `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.initial`,
       );
       startV1921PlayfulAiChoice(
         state,
@@ -673,11 +521,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_ANONYMOUS_TIP_ID]: {
+  [ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID]: {
     name: "onr_v1922_runner_event_derez_black_ice",
     canPlay: (state) => rezzedBlackIceIds(state).length > 0,
     resolve: (state, legalAction) => {
-      startV1922AnonymousTipChoice(
+      startAnonymousTipDerezBlackIceChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -687,7 +535,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_CORE_COMMAND_JETTISON_ICE_ID]: {
+  [CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID]: {
     name: "onr_v1922_runner_event_successful_hq_run_pay_rez_cost_trash_rezzed_ice",
     canPlay: (state) =>
       hasSuccessfulHqRunThisTurn(state) &&
@@ -697,7 +545,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         throw new Error(
           "Core Command: Jettison Ice benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
-      startV1922CoreCommandJettisonIceChoice(
+      startCoreCommandJettisonIceChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -708,11 +556,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_FORGED_ACTIVATION_ORDERS_ID]: {
+  [FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID]: {
     name: "onr_v1922_runner_event_force_rez_or_trash_ice",
     canPlay: (state) => unrezzedInstalledIceIds(state).length > 0,
     resolve: (state, legalAction) => {
-      startV1922ForgedActivationOrdersTargetChoice(
+      startForgedActivationOrdersTargetChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -722,11 +570,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_IF_YOU_WANT_IT_DONE_RIGHT_ID]: {
+  [RUNNER_STACK_TOP5_EVENT_CARD_ID]: {
     name: "onr_v1922_runner_event_stack_top5_choose_one_arrange_rest",
     canPlay: (state) => state.runner.stack.length > 0,
     resolve: (state, legalAction) => {
-      startV1922RunnerStackTop5Choice(
+      startRunnerStackTop5Choice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -737,11 +585,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_ORGAN_DONOR_ID]: {
+  [RUNNER_GRIP_TRASH_EVENT_CARD_ID]: {
     name: "onr_v1922_runner_event_trash_grip_gain_credits",
     canPlay: (state) => state.runner.grip.length > 1,
     resolve: (state, legalAction) => {
-      startV1922RunnerGripTrashChoice(
+      startRunnerGripTrashForCreditsChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -752,11 +600,11 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_MISC_FOR_SALE_ID]: {
+  [MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID]: {
     name: "onr_v1922_runner_event_trash_installed_gain_credits",
     canPlay: (state) => runnerInstalledCardIds(state).length > 0,
     resolve: (state, legalAction) => {
-      startV1922RunnerInstalledTrashChoice(
+      startRunnerInstalledTrashForCreditsChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -767,7 +615,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_OPEN_ENDED_MILEAGE_PROGRAM_ID]: {
+  [OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID]: {
     name: "onr_v1922_runner_event_remove_tag_optional_return",
     canPlay: (state) => state.runner.tags > 0,
     resolve: (state, legalAction) => {
@@ -780,13 +628,13 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         runnerTagsAfter: state.runner.tags,
       };
       if (state.runner.credits > 0)
-        startV1922OpenEndedMileageReturnChoice(
+        startOpenEndedMileageProgramReturnChoice(
           state,
           String(legalAction.payload?.cardId ?? ""),
         );
     },
   },
-  [V1922_SECURITY_CODE_WORM_CHIP_ID]: {
+  [SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID]: {
     name: "onr_v1922_runner_event_successful_hq_run_trash_unrezzed_ice",
     canPlay: (state) =>
       hasSuccessfulHqRunThisTurn(state) &&
@@ -796,7 +644,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         throw new Error(
           "Security Code WORM Chip benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
-      startV1922SecurityCodeWormChipChoice(
+      startSecurityCodeWormChipTrashIceChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -806,7 +654,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_SYNCHRONIZED_ATTACK_ON_HQ_ID]: {
+  [SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID]: {
     name: "onr_v1922_runner_event_successful_hq_run_corp_pay_to_retain_hq",
     canPlay: (state) =>
       hasSuccessfulHqRunThisTurn(state) &&
@@ -816,7 +664,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         throw new Error(
           "Synchronized Attack on HQ benoetigt einen erfolgreichen HQ-Run in diesem Zug.",
         );
-      startV1922SynchronizedAttackOnHqChoice(
+      startSynchronizedAttackOnHqRetainChoice(
         state,
         String(legalAction.payload?.cardId ?? ""),
       );
@@ -828,7 +676,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1922_VALU_PAK_SOFTWARE_BUNDLE_ID]: {
+  [VALU_PAK_SOFTWARE_BUNDLE_INSTALL_EVENT_ID]: {
     name: "onr_v1922_runner_event_program_install_action_bundle",
     canPlay: (state) => runnerInstallableProgramIdsForValuPak(state).length > 0,
     resolve: (state, legalAction) => {
@@ -1051,8 +899,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_081_custodial-position": {
-    name: "onr_runner_event_run_rd_multiaccess_3",
+  [RD_MULTIACCESS_EVENT_CARD_ID]: {
+    name: "runner_event_rd_multiaccess_3",
     requiresServer: true,
     canPlayForServer: (_state, serverId) => serverId === "rd",
     resolve: (state, legalAction) => {
@@ -1080,8 +928,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       );
     },
   },
-  "onr_v1_085_executive-wiretaps": {
-    name: "onr_runner_event_run_hq_multiaccess_3",
+  [HQ_MULTIACCESS_EVENT_CARD_ID]: {
+    name: "runner_event_hq_multiaccess_3",
     requiresServer: true,
     canPlayForServer: (_state, serverId) => serverId === "hq",
     resolve: (state, legalAction) => {
@@ -1140,8 +988,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_084_edited-shipping-manifests": {
-    name: "onr_runner_event_hq_access_replace_corp_lose1_tag_draw",
+  [HQ_ACCESS_REPLACEMENT_DRAW_EVENT_CARD_ID]: {
+    name: "runner_event_hq_access_replace_corp_lose1_tag_draw",
     requiresServer: true,
     canPlayForServer: (_state, serverId) => serverId === "hq",
     resolve: (state, legalAction) => {
@@ -1166,8 +1014,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_106_private-ldl-access": {
-    name: "onr_runner_event_hq_run_access_rd",
+  [HQ_RUN_ACCESS_RD_EVENT_CARD_ID]: {
+    name: "runner_event_hq_run_access_rd",
     requiresServer: true,
     canPlayForServer: (_state, serverId) => serverId === "hq",
     resolve: (state, legalAction) => {
@@ -1195,8 +1043,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_118_weather-to-finance-pipe": {
-    name: "onr_runner_event_hq_access_replace_corp_lose4",
+  [HQ_ACCESS_REPLACEMENT_CREDIT_LOSS_EVENT_CARD_ID]: {
+    name: "runner_event_hq_access_replace_corp_lose4",
     requiresServer: true,
     canPlayForServer: (_state, serverId) => serverId === "hq",
     resolve: (state, legalAction) => {
@@ -1231,8 +1079,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_098_lucidrine-booster-drug": {
-    name: "onr_v1915_runner_event_run_with_replacement_overlap",
+  [RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID]: {
+    name: "runner_event_run_with_replacement_overlap",
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1247,8 +1095,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_105_priority-wreck": {
-    name: "onr_v1915_runner_event_run_multiaccess_2",
+  [RUN_MULTIACCESS_EVENT_CARD_ID]: {
+    name: "runner_event_multiaccess_2",
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1263,8 +1111,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_111_social-engineering": {
-    name: "onr_v1915_runner_event_run_access_pressure",
+  [RUN_ACCESS_PRESSURE_EVENT_CARD_ID]: {
+    name: "runner_event_run_access_pressure",
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1279,8 +1127,8 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_112_stumble-through-wilderspace": {
-    name: "onr_v1915_runner_event_trace_aware_run_access",
+  [TRACE_AWARE_RUN_EVENT_CARD_ID]: {
+    name: "runner_event_trace_aware_run_access",
     requiresServer: true,
     resolve: (state, legalAction) => {
       const serverId = String(legalAction.payload?.serverId) as Exclude<
@@ -1295,7 +1143,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [V1919_ARASAKA_OWNS_YOU_ID]: {
+  [ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID]: {
     name: "onr_v1919_runner_event_flatline_replacement",
     canPlay: () => false,
     resolve: (state, legalAction) => {
@@ -1502,33 +1350,33 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [V1922_OFF_SITE_BACKUPS_ID]: {
+  [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
     name: "onr_v1922_corp_operation_private_archives_to_hq",
     canPlay: (state) => state.corp.archives.length > 0,
     resolve: (state, legalAction) => {
       const sourceCardId = String(legalAction.payload?.cardId ?? "");
       if (
         !sourceCardId ||
-        definitionFor(state, sourceCardId).id !== V1922_OFF_SITE_BACKUPS_ID
+        definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
       )
         throw new Error("Off-Site Backups fehlt als Quelle.");
-      startV1922CorpArchivesToHqChoice(state, sourceCardId, legalAction);
+      startCorpArchivesToHqChoice(state, sourceCardId, legalAction);
     },
   },
-  [V1922_PLANNING_CONSULTANTS_ID]: {
+  [CORP_RD_TOP5_REORDER_OPERATION_CARD_ID]: {
     name: "onr_v1922_corp_operation_private_rd_top5_reorder",
     canPlay: (state) => state.corp.rd.length >= 2,
     resolve: (state, legalAction) => {
       const sourceCardId = String(legalAction.payload?.cardId ?? "");
       if (
         !sourceCardId ||
-        definitionFor(state, sourceCardId).id !== V1922_PLANNING_CONSULTANTS_ID
+        definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
       )
         throw new Error("Planning Consultants fehlt als Quelle.");
-      startV1922CorpRdTopReorderChoice(state, sourceCardId, legalAction);
+      startCorpRdTopReorderChoice(state, sourceCardId, legalAction);
     },
   },
-  [V1922_EDGERUNNER_TEMPS_ID]: {
+  [EDGERUNNER_TEMPS_INSTALL_OPERATION_ID]: {
     name: "onr_v1922_corp_operation_install_action_bundle",
     canPlay: (state) =>
       state.corp.hq.some((cardId) =>
@@ -1649,27 +1497,27 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID]: {
+  [FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (state) => v1919CorpAgendaCounterTarget(state) !== undefined,
+    canPlay: (state) => corpAgendaCounterOperationTarget(state) !== undefined,
     resolve: (state, legalAction) =>
-      resolveV1919CounterOperation(
+      resolveAgendaCounterOperation(
         state,
         legalAction,
-        V1919_FALSIFIED_TRANSACTIONS_EXPERT_ID,
+        FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
       ),
   },
-  [V1919_MANAGEMENT_SHAKE_UP_ID]: {
+  [MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_three_advancement_counters",
-    canPlay: (state) => v1919AdvanceableInstalledTargets(state).length > 0,
+    canPlay: (state) => advanceableInstalledCardTargets(state).length > 0,
     resolve: (state, legalAction) =>
       resolveManagementShakeUpOperation(state, legalAction),
   },
-  [V1919_PROJECT_CONSULTANTS_ID]: {
+  [PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_advance_installed_agenda",
-    canPlay: (state) => v1919InstalledAgendaTarget(state) !== undefined,
+    canPlay: (state) => installedAgendaOperationTarget(state) !== undefined,
     resolve: (state, legalAction) => {
-      const targetAgendaId = v1919InstalledAgendaTarget(state);
+      const targetAgendaId = installedAgendaOperationTarget(state);
       if (!targetAgendaId)
         throw new Error(
           "Project Consultants findet keine installierte Agenda.",
@@ -1689,7 +1537,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [V1919_SILVER_LINING_RECOVERY_PROTOCOL_ID]: {
+  [SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_gain_credits_3",
     resolve: (state, legalAction) => {
       credits(state, "corp", 3);
@@ -1701,11 +1549,11 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [V1919_SYSTEMATIC_LAYOFFS_ID]: {
+  [SYSTEMATIC_LAYOFFS_FORFEIT_AGENDA_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_forfeit_scored_agenda",
-    canPlay: (state) => v1919CorpScoredAgendaForfeitTarget(state) !== undefined,
+    canPlay: (state) => corpScoredAgendaForfeitTarget(state) !== undefined,
     resolve: (state, legalAction) => {
-      const targets = v1919CorpScoredAgendaForfeitTargets(state);
+      const targets = corpScoredAgendaForfeitTargets(state);
       if (targets.length === 0)
         throw new Error(
           "Systematic Layoffs findet keine gescorte Korp-Agenda.",
@@ -1721,14 +1569,14 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       );
     },
   },
-  [V1919_TEAM_RESTRUCTURING_ID]: {
+  [TEAM_RESTRUCTURING_COUNTER_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_power_counter",
-    canPlay: (state) => v1919CorpAgendaCounterTarget(state) !== undefined,
+    canPlay: (state) => corpAgendaCounterOperationTarget(state) !== undefined,
     resolve: (state, legalAction) =>
-      resolveV1919CounterOperation(
+      resolveAgendaCounterOperation(
         state,
         legalAction,
-        V1919_TEAM_RESTRUCTURING_ID,
+        TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
       ),
   },
 };
@@ -3186,9 +3034,9 @@ function corpMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, id);
       if (
         definition.type === "agenda" ||
-        definition.id === V1919_EXPERIMENTAL_AI_ID ||
-        definition.id === V1919_INFORMATION_LAUNDERING_ID ||
-        definition.id === V1919_VIRUS_TEST_SITE_ID
+        definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
+        definition.id === INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID ||
+        definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
       ) {
         if (state.corp.credits >= 1)
           actions.push(
@@ -3249,7 +3097,7 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   for (const assetId of rezzedCorpRootCardIds(state).sort()) {
     const definition = definitionFor(state, assetId);
-    if (V1917_TRACE_ASSET_IDS.has(definition.id)) {
+    if (TRACE_ASSET_CARD_IDS.has(definition.id)) {
       actions.push(
         action(
           state,
@@ -3267,7 +3115,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (
-      V1917_HIDDEN_REVEAL_ASSET_IDS.has(definition.id) &&
+      HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
       state.corp.rd.length > 0
     ) {
       actions.push(
@@ -3283,7 +3131,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (
-      V1917_HIDDEN_REORDER_ASSET_IDS.has(definition.id) &&
+      HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id) &&
       state.corp.rd.length >= 2
     ) {
       actions.push(
@@ -3298,7 +3146,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1917_RESCHEDULER_ID) {
+    if (definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID) {
       actions.push(
         action(
           state,
@@ -3312,7 +3160,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (
-      definition.id === V1917_SOLO_SQUAD_ID &&
+      definition.id === SOLO_SQUAD_DAMAGE_ASSET_CARD_ID &&
       state.runner.tags > 0 &&
       state.runner.grip.length > 0
     ) {
@@ -3333,7 +3181,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1917_COWBOY_SYSOP_ID) {
+    if (definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID) {
       for (const targetCardId of runnerInstalledCardIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
         actions.push(
@@ -3353,7 +3201,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         );
       }
     }
-    if (definition.id === V1917_DISINFECTANT_ID) {
+    if (definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID) {
       for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
         actions.push(
@@ -3375,7 +3223,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         );
       }
     }
-    if (V1918_COUNTER_UPGRADE_IDS.has(definition.id)) {
+    if (COUNTER_UPGRADE_CARD_IDS.has(definition.id)) {
       actions.push(
         action(
           state,
@@ -3393,7 +3241,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1918_PARIS_CITY_GRID_ID) {
+    if (definition.id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID) {
       actions.push(
         action(
           state,
@@ -3411,7 +3259,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (
-      V1918_TAG_CONDITION_UPGRADE_IDS.has(definition.id) &&
+      TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) &&
       state.runner.tags > 0
     ) {
       actions.push(
@@ -3430,7 +3278,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (V1919_COUNTER_ASSET_IDS.has(definition.id)) {
+    if (COUNTER_ASSET_CARD_IDS.has(definition.id)) {
       actions.push(
         action(
           state,
@@ -3448,7 +3296,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1919_INFORMATION_LAUNDERING_ID) {
+    if (definition.id === INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID) {
       const advancementCounterCount = Math.max(
         0,
         Math.floor(mustInstance(state.cardInstances, assetId).advancementCounters),
@@ -3472,7 +3320,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (V1920_ACTION_ASSET_IDS.has(definition.id)) {
+    if (ACTION_ASSET_CARD_IDS.has(definition.id)) {
       actions.push(
         action(
           state,
@@ -3489,7 +3337,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1920_SOUTH_AFRICAN_MINING_CORP_ID) {
+    if (definition.id === SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID) {
       actions.push(
         action(
           state,
@@ -3508,7 +3356,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (
-      definition.id === V1920_I_GOT_A_ROCK_ID &&
+      definition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
       state.runner.tags >= 2 &&
       corpAgendaPointTotal(state) >= 3
     ) {
@@ -3530,7 +3378,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1921_SCHLAGHUND_ID) {
+    if (definition.id === SCHLAGHUND_RANDOM_ASSET_CARD_ID) {
       actions.push(
         action(
           state,
@@ -3543,7 +3391,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === V1917_SPINN_PUBLIC_RELATIONS_ID) {
+    if (definition.id === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID) {
       actions.push(
         action(
           state,
@@ -3563,7 +3411,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (!V1917_ECONOMY_ASSET_IDS.has(definition.id)) continue;
+    if (!CORP_ECONOMY_ASSET_CARD_IDS.has(definition.id)) continue;
     actions.push(
       action(
         state,
@@ -3695,7 +3543,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       continue;
     }
     if (
-      V1919_SCORED_REVEAL_AGENDA_IDS.has(definition.id) &&
+      SCORED_REVEAL_AGENDA_CARD_IDS.has(definition.id) &&
       state.corp.rd.length > 0
     ) {
       actions.push(
@@ -3716,8 +3564,8 @@ function corpMainActions(state: GameState): LegalAction[] {
       continue;
     }
     if (
-      definition.id === V1922_CORPORATE_RETREAT_ID &&
-      isV1922CorporateRetreatAbilityAvailable(state, agendaId)
+      definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID &&
+      isCorporateRetreatInstallCreditAbilityAvailable(state, agendaId)
     ) {
       actions.push(
         action(
@@ -3736,7 +3584,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (definition.id === V1922_POLITICAL_OVERTHROW_ID) {
+    if (definition.id === POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID) {
       actions.push(
         action(
           state,
@@ -3754,7 +3602,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (definition.id === V1922_MARINE_ARCOLOGY_ID) {
+    if (definition.id === MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID) {
       actions.push(
         action(
           state,
@@ -3832,20 +3680,20 @@ function corpMainActions(state: GameState): LegalAction[] {
   return actions;
 }
 
-function isV1922CorporateRetreatAbilityAvailable(
+function isCorporateRetreatInstallCreditAbilityAvailable(
   state: GameState,
   agendaId: CardInstanceId,
 ): boolean {
   return (
     state.corp.scoreArea.includes(agendaId) &&
-    definitionFor(state, agendaId).id === V1922_CORPORATE_RETREAT_ID &&
+    definitionFor(state, agendaId).id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID &&
     cardCounter(state, agendaId, "mark") > 0
   );
 }
 
-function expireV1922CorporateRetreatAbilities(state: GameState): void {
+function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
   for (const agendaId of state.corp.scoreArea) {
-    if (definitionFor(state, agendaId).id === V1922_CORPORATE_RETREAT_ID)
+    if (definitionFor(state, agendaId).id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
       setCardCounter(state, agendaId, "mark", 0);
   }
 }
@@ -3869,11 +3717,11 @@ function edgerunnerTempsInstallActionsRemaining(state: GameState): number {
   );
 }
 
-function clearV1922EdgerunnerTempsFlags(state: GameState): void {
+function clearEdgerunnerTempsInstallFlags(state: GameState): void {
   ensureCorpTurnFlags(state).edgerunnerTempsInstallActionsRemaining = 0;
 }
 
-function consumeV1922EdgerunnerTempsInstallAction(
+function consumeEdgerunnerTempsInstallAction(
   state: GameState,
   legalAction: LegalAction,
 ): void {
@@ -3939,13 +3787,13 @@ function runnerInstallableProgramIdsForValuPak(
   });
 }
 
-function clearV1922ValuPakRunnerFlags(state: GameState): void {
+function clearValuPakProgramInstallFlags(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);
   flags.valuPakProgramInstallActionsRemaining = 0;
   flags.valuPakTemporaryProgramInstallCredits = 0;
 }
 
-function consumeV1922ValuPakInstallAction(
+function consumeValuPakProgramInstallAction(
   state: GameState,
   legalAction: LegalAction,
 ): void {
@@ -4175,7 +4023,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       !uniqueBlocked &&
       state.runner.credits >= (definition.installCost ?? 0)
     ) {
-      if (definition.id === V1922_ARASAKA_PORTABLE_PROTOTYPE_ID) {
+      if (definition.id === ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID) {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
         actions.push(
@@ -4359,10 +4207,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       .sort()) {
       const definition = definitionFor(state, cardId);
       if (
-        (definition.id === SELF_MODIFYING_CODE_ID ||
-          definition.id === AUJOURD_OUI_ID ||
-          definition.id === NETO_ID ||
-          definition.id === THE_SHORT_CIRCUIT_ID) &&
+        STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
         state.runner.stack.some(
           (id) => definitionFor(state, id).type === "program",
         )
@@ -4380,7 +4225,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
       if (
-        (definition.id === MOUSE_ID || definition.id === SEEYA_ID) &&
+        SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
         state.corp.servers.some(
           (server) => exposedCorpCardInServer(state, server.id) !== undefined,
         )
@@ -4405,7 +4250,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         }
       }
       if (
-        definition.id === AUJOURD_OUI_ID &&
+        STACK_TOP_REVEAL_PROGRAM_CARD_IDS.has(definition.id) &&
         state.runner.stack.length > 0
       ) {
         actions.push(
@@ -4420,7 +4265,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (definition.id === I_SPY_ID && state.runner.stack.length > 0) {
+      if (
+        definition.id === COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID &&
+        state.runner.stack.length > 0
+      ) {
         actions.push(
           action(
             state,
@@ -4438,7 +4286,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
       if (
-        definition.id === V1919_FAIT_ACCOMPLI_ID &&
+        definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID &&
         state.runner.scoreArea.length > 0
       ) {
         actions.push(
@@ -4458,7 +4306,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (definition.id === V1921_BOARDWALK_ID) {
+      if (definition.id === BOARDWALK_RANDOM_PROGRAM_CARD_ID) {
         actions.push(
           action(
             state,
@@ -4471,7 +4319,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (definition.id === V1922_NEWSGROUP_FILTER_ID) {
+      if (definition.id === NEWSGROUP_FILTER_CREDIT_PROGRAM_ID) {
         actions.push(
           action(
             state,
@@ -4489,7 +4337,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
       if (
-        definition.id === V1922_MICROTECH_BACKUP_DRIVE_ID &&
+        definition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID &&
         topHostedProgramOnMicrotech(state, cardId)
       ) {
         const topHostedId = topHostedProgramOnMicrotech(state, cardId);
@@ -4513,7 +4361,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (definition.id === V1921_QUEST_FOR_CATTEKIN_ID) {
+      if (definition.id === QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID) {
         actions.push(
           action(
             state,
@@ -4526,7 +4374,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (definition.id === RONIN_AROUND_ID && state.runner.stack.length >= 2) {
+      if (
+        definition.id === STACK_TOP_REORDER_RESOURCE_CARD_ID &&
+        state.runner.stack.length >= 2
+      ) {
         actions.push(
           action(
             state,
@@ -4678,9 +4529,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
       !rovingSubmarineIdsForServer(state, server.id).some(
         (rovingId) => cardCounter(state, rovingId, "mark") > 0,
       );
-    const v1918RunTax = v1918RunStartTaxForServer(state, server.id);
-    const newsgroupRunTax = v1920NewsgroupTauntingRunStartTax(state);
-    const runStartTaxCredits = v1918RunTax.amount + newsgroupRunTax.amount;
+    const upgradeRunStartTax = runStartTaxForServerUpgrades(state, server.id);
+    const newsgroupRunTax = newsgroupTauntingRunStartTax(state);
+    const runStartTaxCredits =
+      upgradeRunStartTax.amount + newsgroupRunTax.amount;
     const runLockActionsPending = Math.max(
       0,
       Math.floor(state.runnerTurnFlags?.runLockActionsPending ?? 0),
@@ -4697,12 +4549,12 @@ function runnerMainActions(state: GameState): LegalAction[] {
     ];
     const runPayload = {
       serverId: server.id,
-      ...(v1918RunTax.amount > 0
+      ...(upgradeRunStartTax.amount > 0
         ? {
             v1918UpgradeAbility: "run_start_tax",
-            runStartTaxCredits: v1918RunTax.amount,
+            runStartTaxCredits: upgradeRunStartTax.amount,
             runStartTaxSourceDefinitionIds:
-              v1918RunTax.sourceDefinitionIds.join(","),
+              upgradeRunStartTax.sourceDefinitionIds.join(","),
           }
         : {}),
       ...(newsgroupRunTax.amount > 0
@@ -4926,7 +4778,7 @@ function canOverlayProgramOnZetatechSoftwareInstaller(
   const hostInstance = mustInstance(state.cardInstances, hostId);
   const hostDefinition = definitionFor(state, hostId);
   return (
-    hostDefinition.id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID &&
+    hostDefinition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID &&
     hostDefinition.type === "program" &&
     state.runner.rig.programs.includes(hostId) &&
     !hostInstance.hostedOn &&
@@ -4981,7 +4833,7 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (
-      sourceDefinition.id === V1917_DATA_MASONS_ID &&
+      sourceDefinition.id === DATA_MASONS_HOSTING_ASSET_CARD_ID &&
       cardHasSubtype(iceDefinition, "wall")
     )
       bonus += 1;
@@ -4992,7 +4844,7 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
     )
       bonus += 1;
     if (
-      sourceDefinition.id === V1920_JERUSALEM_CITY_GRID_ID &&
+      sourceDefinition.id === JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID &&
       iceServerId &&
       corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
       cardHasSubtype(iceDefinition, "wall")
@@ -5085,7 +4937,7 @@ function iceRezCostReductionFor(
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (
-      sourceDefinition.id === V1917_DATA_MASONS_ID &&
+      sourceDefinition.id === DATA_MASONS_HOSTING_ASSET_CARD_ID &&
       cardHasSubtype(iceDefinition, "wall")
     )
       reduction += 2;
@@ -5099,9 +4951,10 @@ function iceRezCostReductionFor(
       cardHasSubtype(iceDefinition, "black_ice")
     )
       reduction += 2;
-    if (sourceDefinition.id === V1920_FORTRESS_ARCHITECTS_ID) reduction += 1;
+    if (sourceDefinition.id === FORTRESS_ARCHITECTS_REZ_COST_ASSET_ID)
+      reduction += 1;
     if (
-      sourceDefinition.id === V1920_JERUSALEM_CITY_GRID_ID &&
+      sourceDefinition.id === JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID &&
       iceServerId &&
       corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
       cardHasSubtype(iceDefinition, "wall")
@@ -5121,7 +4974,7 @@ function rezCostReductionSourceDefinitionIdsFor(
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (
-      sourceDefinition.id === V1917_DATA_MASONS_ID &&
+      sourceDefinition.id === DATA_MASONS_HOSTING_ASSET_CARD_ID &&
       cardHasSubtype(iceDefinition, "wall")
     )
       sourceIds.push(sourceDefinition.id);
@@ -5135,10 +4988,10 @@ function rezCostReductionSourceDefinitionIdsFor(
       cardHasSubtype(iceDefinition, "black_ice")
     )
       sourceIds.push(sourceDefinition.id);
-    if (sourceDefinition.id === V1920_FORTRESS_ARCHITECTS_ID)
+    if (sourceDefinition.id === FORTRESS_ARCHITECTS_REZ_COST_ASSET_ID)
       sourceIds.push(sourceDefinition.id);
     if (
-      sourceDefinition.id === V1920_JERUSALEM_CITY_GRID_ID &&
+      sourceDefinition.id === JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID &&
       iceServerId &&
       corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
       cardHasSubtype(iceDefinition, "wall")
@@ -5664,7 +5517,7 @@ function singaporeCityGridRunActions(
       const instance = mustInstance(state.cardInstances, cardId);
       return (
         instance.rezzed &&
-        definitionFor(state, cardId).id === V1918_SINGAPORE_CITY_GRID_ID
+        definitionFor(state, cardId).id === SERVER_ICE_SWAP_UPGRADE_CARD_ID
       );
     })
     .flatMap((sourceCardId) => {
@@ -5810,7 +5663,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breaker = definitionFor(state, breakerId);
     if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
     const breakerBaseStrength =
-      breaker.id === V1921_AI_BOON_ID &&
+      breaker.id === AI_BOON_RANDOM_BREAKER_CARD_ID &&
       typeof run.aiBoonRunStrength === "number"
         ? run.aiBoonRunStrength
         : (breaker.strength ?? 0);
@@ -6072,7 +5925,7 @@ function runnerMovementActions(state: GameState): LegalAction[] {
           ? {
               v1922CorpIceAbility: "viral_15_jack_out_tax",
               jackOutAdditionalCost,
-              sourceDefinitionId: V1922_VIRAL_15_ID,
+              sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
             }
           : undefined,
       ),
@@ -6137,7 +5990,7 @@ function startupImmolatorPostPassActions(
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
-    .filter((cardId) => definitionFor(state, cardId).id === V1922_STARTUP_IMMOLATOR_ID)
+    .filter((cardId) => definitionFor(state, cardId).id === STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID)
     .filter((cardId) => !used.has(cardId))
     .sort()
     .map((sourceCardId) =>
@@ -6163,7 +6016,7 @@ function runJackOutAdditionalCost(run: ActiveRun): number {
   return run.viral15ActiveSourceIceId ? 1 : 0;
 }
 
-function v1918RunStartTaxForServer(
+function runStartTaxForServerUpgrades(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
 ): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
@@ -6171,19 +6024,22 @@ function v1918RunStartTaxForServer(
   const sourceDefinitionIds = server.root
     .filter((cardId) => mustInstance(state.cardInstances, cardId).rezzed)
     .map((cardId) => definitionFor(state, cardId).id)
-    .filter((definitionId) => V1918_RUN_TAX_UPGRADE_IDS.has(definitionId));
+    .filter((definitionId) => RUN_TAX_UPGRADE_CARD_IDS.has(definitionId));
   return {
     amount: sourceDefinitionIds.length,
     sourceDefinitionIds,
   };
 }
 
-function v1920NewsgroupTauntingRunStartTax(
+function newsgroupTauntingRunStartTax(
   state: GameState,
 ): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
   const sourceDefinitionIds = rezzedCorpRootCardIds(state)
     .map((cardId) => definitionFor(state, cardId).id)
-    .filter((definitionId) => definitionId === V1920_NEWSGROUP_TAUNTING_ID);
+    .filter(
+      (definitionId) =>
+        definitionId === NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
+    );
   return {
     amount: sourceDefinitionIds.length,
     sourceDefinitionIds,
@@ -6204,7 +6060,7 @@ function successfulRunProgramActions(
   for (const sourceCardId of state.runner.rig.programs.slice().sort()) {
     if (used.has(sourceCardId)) continue;
     const definition = definitionFor(state, sourceCardId);
-    if (definition.id === V1922_FALSE_ECHO_ID) {
+    if (definition.id === FALSE_ECHO_FORCE_REZ_PROGRAM_ID) {
       const server = mustServer(state, run.attackedServerId);
       const unrezzedCount = server.ice.filter(
         (iceId) => !mustInstance(state.cardInstances, iceId).rezzed,
@@ -6227,7 +6083,7 @@ function successfulRunProgramActions(
         ),
       );
     }
-    if (definition.id === V1922_NETSPACE_INVERTER_ID) {
+    if (definition.id === NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID) {
       const server = mustServer(state, run.attackedServerId);
       if (server.kind === "archives" || server.ice.length <= 1) continue;
       actions.push(
@@ -6466,7 +6322,11 @@ function redHerringsCardIdForCurrentAccess(
   const serverId =
     run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
   return (
-    rezzedRootCardIdOnServer(state, serverId, V1918_RED_HERRINGS_ID) ??
+    rezzedRootCardIdOnServer(
+      state,
+      serverId,
+      RED_HERRINGS_STEAL_TAX_UPGRADE_ID,
+    ) ??
     run.redHerringsTaxSourceByServer?.[serverId]
   );
 }
@@ -6477,7 +6337,11 @@ function oliviaSalazarCardIdForCurrentAccess(
 ): CardInstanceId | undefined {
   const serverId =
     run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
-  return rezzedRootCardIdOnServer(state, serverId, V1919_OLIVIA_SALAZAR_ID);
+  return rezzedRootCardIdOnServer(
+    state,
+    serverId,
+    OLIVIA_SALAZAR_STEAL_COST_UPGRADE_ID,
+  );
 }
 
 function hasPendingAccessCandidate(state: GameState, run: ActiveRun): boolean {
@@ -6530,7 +6394,7 @@ function effectiveAccessTrashCost(
     zone.side === "corp" &&
     zone.zone === "serverRoot" &&
     (definition.type === "asset" || definition.type === "upgrade") &&
-    definition.id !== V1918_NEW_GALVESTON_CITY_GRID_ID
+    definition.id !== NEW_GALVESTON_TRASH_COST_UPGRADE_ID
   ) {
     const server = mustServer(state, zone.serverId);
     const hasRezzedNewGalveston = server.root.some((rootId) => {
@@ -6538,7 +6402,8 @@ function effectiveAccessTrashCost(
       const rootInstance = state.cardInstances[rootId];
       return (
         rootInstance?.rezzed === true &&
-        definitionFor(state, rootId).id === V1918_NEW_GALVESTON_CITY_GRID_ID
+        definitionFor(state, rootId).id ===
+        NEW_GALVESTON_TRASH_COST_UPGRADE_ID
       );
     });
     if (hasRezzedNewGalveston) modifier += 2;
@@ -6554,7 +6419,7 @@ function scatterShotRecurringCreditSourceIds(
   if (accessedDefinition.type !== "upgrade") return [];
   return state.runner.rig.programs.filter(
     (cardId) =>
-      definitionFor(state, cardId).id === V1922_SCATTER_SHOT_ID &&
+      definitionFor(state, cardId).id === SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID &&
       cardCounter(state, cardId, "recurring_credit") > 0,
   );
 }
@@ -6642,7 +6507,10 @@ function performAction(
           throw new Error(
             "Die V1.9.12 Counter-Faehigkeit ist nicht installiert.",
           );
-        if (definitionFor(state, sourceCardId).id !== I_SPY_ID)
+        if (
+          definitionFor(state, sourceCardId).id !==
+          COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID
+        )
           throw new Error(
             "Die V1.9.12 Counter-Faehigkeit passt nicht zur Karte.",
           );
@@ -6680,7 +6548,10 @@ function performAction(
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
           throw new Error("Spinn Public Relations ist nicht rezzed installiert.");
-        if (definitionFor(state, sourceCardId).id !== V1917_SPINN_PUBLIC_RELATIONS_ID)
+        if (
+          definitionFor(state, sourceCardId).id !==
+          SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID
+        )
           throw new Error("Die Spinn-Faehigkeit passt nicht zur Karte.");
         const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
         if (!Number.isInteger(addAmount) || addAmount !== 6)
@@ -6710,8 +6581,8 @@ function performAction(
           );
         const definition = definitionFor(state, sourceCardId);
         if (
-          !V1917_ECONOMY_ASSET_IDS.has(definition.id) ||
-          definition.id === V1917_SPINN_PUBLIC_RELATIONS_ID
+          !CORP_ECONOMY_ASSET_CARD_IDS.has(definition.id) ||
+          definition.id === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID
         )
           throw new Error(
             "Die V1.9.17-Asset-Faehigkeit passt nicht zur Karte.",
@@ -6738,7 +6609,7 @@ function performAction(
             "Die V1.9.17-Trace-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1917_TRACE_ASSET_IDS.has(definition.id))
+        if (!TRACE_ASSET_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.17-Trace-Asset-Faehigkeit passt nicht zur Karte.",
           );
@@ -6770,7 +6641,7 @@ function performAction(
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
           throw new Error("Rescheduler ist nicht rezzed installiert.");
-        if (definitionFor(state, sourceCardId).id !== V1917_RESCHEDULER_ID)
+        if (definitionFor(state, sourceCardId).id !== CORP_HQ_SHUFFLE_DRAW_CARD_ID)
           throw new Error("Die Rescheduler-Faehigkeit passt nicht zur Karte.");
         resolveReschedulerHqShuffleDraw(state, sourceCardId, legalAction);
         return;
@@ -6786,7 +6657,7 @@ function performAction(
             "Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1917_HIDDEN_REVEAL_ASSET_IDS.has(definition.id))
+        if (!HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.17-Hidden-Zone-Reveal-Faehigkeit passt nicht zur Karte.",
           );
@@ -6808,11 +6679,11 @@ function performAction(
             "Die V1.9.17-Hidden-Zone-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1917_HIDDEN_REORDER_ASSET_IDS.has(definition.id))
+        if (!HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.17-Hidden-Zone-Reorder-Faehigkeit passt nicht zur Karte.",
           );
-        startV1917CorpRdArrangeChoice(state, sourceCardId, legalAction);
+        startCorpAssetRdTopReorderChoice(state, sourceCardId, legalAction);
         return;
       }
       if (legalAction.payload?.v1917AssetAbility === "meat_damage_1") {
@@ -6824,7 +6695,7 @@ function performAction(
             "Die V1.9.17-Damage-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1917_SOLO_SQUAD_ID)
+        if (definition.id !== SOLO_SQUAD_DAMAGE_ASSET_CARD_ID)
           throw new Error(
             "Die V1.9.17-Damage-Faehigkeit passt nicht zur Karte.",
           );
@@ -6856,7 +6727,7 @@ function performAction(
             "Die V1.9.17-installed-card-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1917_COWBOY_SYSOP_ID)
+        if (definition.id !== COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID)
           throw new Error(
             "Die V1.9.17-installed-card-Faehigkeit passt nicht zur Karte.",
           );
@@ -6886,7 +6757,7 @@ function performAction(
             "Die V1.9.17-Virus-Counter-Asset-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1917_DISINFECTANT_ID)
+        if (definition.id !== DISINFECTANT_VIRUS_COUNTER_ASSET_ID)
           throw new Error(
             "Die V1.9.17-Virus-Counter-Faehigkeit passt nicht zur Karte.",
           );
@@ -6923,7 +6794,7 @@ function performAction(
             "Die V1.9.18-Upgrade-Counter-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1918_COUNTER_UPGRADE_IDS.has(definition.id))
+        if (!COUNTER_UPGRADE_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.18-Counter-Faehigkeit passt nicht zur Karte.",
           );
@@ -6953,7 +6824,7 @@ function performAction(
           );
         if (
           definitionFor(state, sourceCardId).id !==
-          V1918_NEW_GALVESTON_CITY_GRID_ID
+          NEW_GALVESTON_TRASH_COST_UPGRADE_ID
         )
           throw new Error(
             "Die V1.9.18-City-Grid-Reveal-Faehigkeit passt nicht zur Karte.",
@@ -6974,7 +6845,7 @@ function performAction(
             "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1918_PARIS_CITY_GRID_ID)
+        if (definition.id !== PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID)
           throw new Error(
             "Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.",
           );
@@ -7002,7 +6873,7 @@ function performAction(
             "Die V1.9.18-Tag-Condition-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1918_TAG_CONDITION_UPGRADE_IDS.has(definition.id))
+        if (!TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.18-Tag-Condition-Faehigkeit passt nicht zur Karte.",
           );
@@ -7031,7 +6902,7 @@ function performAction(
             "Die V1.9.19-Asset-Counter-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1919_COUNTER_ASSET_IDS.has(definition.id))
+        if (!COUNTER_ASSET_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.19-Asset-Counter-Faehigkeit passt nicht zur Karte.",
           );
@@ -7058,7 +6929,10 @@ function performAction(
             "Die V1.9.19-Asset-Economy-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1919_INFORMATION_LAUNDERING_ID)
+        if (
+          definition.id !==
+          INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID
+        )
           throw new Error(
             "Die V1.9.19-Asset-Economy-Faehigkeit passt nicht zur Karte.",
           );
@@ -7094,7 +6968,7 @@ function performAction(
             "Die V1.9.20-Asset-Action-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1920_ACTION_ASSET_IDS.has(definition.id))
+        if (!ACTION_ASSET_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.20-Asset-Action-Faehigkeit passt nicht zur Karte.",
           );
@@ -7124,7 +6998,7 @@ function performAction(
           );
         if (
           definitionFor(state, sourceCardId).id !==
-          V1920_SOUTH_AFRICAN_MINING_CORP_ID
+          SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID
         )
           throw new Error(
             "Die South-African-Mining-Corp-Faehigkeit passt nicht zur Karte.",
@@ -7151,7 +7025,10 @@ function performAction(
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
           throw new Error("I Got a Rock ist nicht rezzed installiert.");
-        if (definitionFor(state, sourceCardId).id !== V1920_I_GOT_A_ROCK_ID)
+        if (
+          definitionFor(state, sourceCardId).id !==
+          I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID
+        )
           throw new Error("Die I-Got-a-Rock-Faehigkeit passt nicht zur Karte.");
         if (state.runner.tags < 2)
           throw new Error("I Got a Rock verlangt mindestens zwei Runner-Tags.");
@@ -7174,7 +7051,7 @@ function performAction(
             "Die V1.9.21-Asset-Zufallsfaehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1921_SCHLAGHUND_ID)
+        if (definition.id !== SCHLAGHUND_RANDOM_ASSET_CARD_ID)
           throw new Error(
             "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
           );
@@ -7196,7 +7073,7 @@ function performAction(
           legalAction,
           "meat",
           10,
-          V1921_SCHLAGHUND_ID,
+          SCHLAGHUND_RANDOM_ASSET_CARD_ID,
         );
         if (!state.pendingChoice) {
           trashCorpInstalledCardToArchives(state, sourceCardId);
@@ -7227,7 +7104,7 @@ function performAction(
             "Die V1.9.21-Programm-Zufallsfaehigkeit ist nicht installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!V1921_RUNNER_RANDOM_PROGRAM_IDS.has(definition.id))
+        if (!RUNNER_RANDOM_PROGRAM_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.21-Programm-Zufallsfaehigkeit passt nicht zur Karte.",
           );
@@ -7251,7 +7128,7 @@ function performAction(
         if (!state.runner.rig.programs.includes(sourceCardId))
           throw new Error("Newsgroup Filter ist nicht installiert.");
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1922_NEWSGROUP_FILTER_ID)
+        if (definition.id !== NEWSGROUP_FILTER_CREDIT_PROGRAM_ID)
           throw new Error(
             "Die V1.9.22-Programm-Faehigkeit passt nicht zu Newsgroup Filter.",
           );
@@ -7282,7 +7159,7 @@ function performAction(
             "Die V1.9.21-Ressourcen-Zufallsfaehigkeit ist nicht installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1921_QUEST_FOR_CATTEKIN_ID)
+        if (definition.id !== QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID)
           throw new Error(
             "Die V1.9.21-Ressourcen-Zufallsfaehigkeit passt nicht zur Karte.",
           );
@@ -7309,7 +7186,7 @@ function performAction(
             "Die V1.9.19-Programm-Counter-Faehigkeit ist nicht installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1919_FAIT_ACCOMPLI_ID)
+        if (definition.id !== FAIT_ACCOMPLI_COUNTER_PROGRAM_ID)
           throw new Error(
             "Die V1.9.19-Programm-Counter-Faehigkeit passt nicht zur Karte.",
           );
@@ -7421,7 +7298,7 @@ function performAction(
         if (!state.corp.scoreArea.includes(sourceCardId))
           throw new Error("Political Overthrow ist nicht gescort.");
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1922_POLITICAL_OVERTHROW_ID)
+        if (definition.id !== POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID)
           throw new Error(
             "Die Agenda-Aktion passt nicht zu Political Overthrow.",
           );
@@ -7445,7 +7322,7 @@ function performAction(
         if (!state.corp.scoreArea.includes(sourceCardId))
           throw new Error("Marine Arcology ist nicht gescort.");
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1922_MARINE_ARCOLOGY_ID)
+        if (definition.id !== MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID)
           throw new Error("Die Agenda-Aktion passt nicht zu Marine Arcology.");
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
         if (!Number.isInteger(gainAmount) || gainAmount !== 3)
@@ -7468,11 +7345,11 @@ function performAction(
         if (!state.corp.scoreArea.includes(sourceCardId))
           throw new Error("Corporate Retreat ist nicht gescort.");
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== V1922_CORPORATE_RETREAT_ID)
+        if (definition.id !== CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
           throw new Error(
             "Die Agenda-Aktion passt nicht zu Corporate Retreat.",
           );
-        if (!isV1922CorporateRetreatAbilityAvailable(state, sourceCardId))
+        if (!isCorporateRetreatInstallCreditAbilityAvailable(state, sourceCardId))
           throw new Error(
             "Corporate Retreat ist nach Install oder Rez nicht mehr verfuegbar.",
           );
@@ -7540,7 +7417,7 @@ function performAction(
         if (!state.corp.scoreArea.includes(sourceCardId))
           throw new Error("Die V1.9.19-Scored-Agenda ist nicht gescort.");
         const definition = definitionFor(state, sourceCardId);
-        if (!V1919_SCORED_REVEAL_AGENDA_IDS.has(definition.id))
+        if (!SCORED_REVEAL_AGENDA_CARD_IDS.has(definition.id))
           throw new Error(
             "Die V1.9.19-Scored-Agenda-Faehigkeit passt nicht zur Karte.",
           );
@@ -7797,7 +7674,7 @@ function performAction(
           legalAction.payload?.assetRez === true,
         legalAction,
       );
-      expireV1922CorporateRetreatAbilities(state);
+      expireCorporateRetreatInstallCreditAbilities(state);
       return;
     case "decline_rez":
       passApproachedIce(state);
@@ -7842,7 +7719,7 @@ function performAction(
         }
         if (
           breakerId &&
-          definitionFor(state, breakerId).id === V1922_JAPANESE_WATER_TORTURE_ID
+          definitionFor(state, breakerId).id === JAPANESE_WATER_TORTURE_BREAKER_ID
         ) {
           executeEffectCommands(state, [
             { type: "change_breaker_strength", breakerId, amount: 1 },
@@ -8248,7 +8125,7 @@ function resolveFalseEchoForceRez(
     throw new Error("False Echo ist nur direkt nach erfolgreichem Run legal.");
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("False Echo ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== V1922_FALSE_ECHO_ID)
+  if (definitionFor(state, sourceCardId).id !== FALSE_ECHO_FORCE_REZ_PROGRAM_ID)
     throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
@@ -8274,7 +8151,7 @@ function resolveFalseEchoForceRez(
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: V1922_FALSE_ECHO_ID,
+    sourceDefinitionId: FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
     serverLabel: publicServerLabel(state, server.id) ?? server.id,
     checkedIceCount: checkedIceIds.length,
     rezzedIceCount: rezzedCount,
@@ -8305,7 +8182,7 @@ function resolveNetspaceInverterReverseIce(
     );
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Netspace Inverter ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== V1922_NETSPACE_INVERTER_ID)
+  if (definitionFor(state, sourceCardId).id !== NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID)
     throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
@@ -8317,7 +8194,7 @@ function resolveNetspaceInverterReverseIce(
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: V1922_NETSPACE_INVERTER_ID,
+    sourceDefinitionId: NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
     serverLabel: publicServerLabel(state, server.id) ?? server.id,
     iceCount: server.ice.length,
     serverIceOrderReversed: true,
@@ -8337,7 +8214,7 @@ function resolveStartupImmolatorTrashIce(
   const targetIceId = String(legalAction.payload?.targetIceId ?? "");
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Startup Immolator ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== V1922_STARTUP_IMMOLATOR_ID)
+  if (definitionFor(state, sourceCardId).id !== STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID)
     throw new Error("Die Startup-Immolator-Faehigkeit passt nicht zur Karte.");
   const flags = ensureRunnerTurnFlags(state);
   const used = flags.startupImmolatorUsedSourceIdsThisTurn ?? [];
@@ -8367,7 +8244,7 @@ function resolveStartupImmolatorTrashIce(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerProgramAbility: "startup_immolator_trash_ice",
-    sourceDefinitionId: V1922_STARTUP_IMMOLATOR_ID,
+    sourceDefinitionId: STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
     targetIceDefinitionId: targetDefinitionId,
     rezCostPaid: rezCost,
     trashedCount: 1,
@@ -8539,7 +8416,7 @@ function resolveMicrotechBackupDriveReturnTopHosted(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.runner.rig.hardware.includes(sourceCardId))
     throw new Error("Microtech Backup Drive ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== V1922_MICROTECH_BACKUP_DRIVE_ID)
+  if (definitionFor(state, sourceCardId).id !== MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID)
     throw new Error("Die Microtech-Backup-Drive-Faehigkeit passt nicht zur Karte.");
   const targetProgramId = String(legalAction.payload?.targetProgramId ?? "");
   const topHostedId = topHostedProgramOnMicrotech(state, sourceCardId);
@@ -8561,7 +8438,7 @@ function resolveMicrotechBackupDriveReturnTopHosted(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerHardwareAbility: "microtech_backup_drive_return_top_hosted",
-    sourceDefinitionId: V1922_MICROTECH_BACKUP_DRIVE_ID,
+    sourceDefinitionId: MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     returnedCardDefinitionId: targetDefinitionId,
     returnedToGrip: true,
     hostedProgramCountAfter: microtechHostedProgramIds(state, sourceCardId)
@@ -8722,7 +8599,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     );
   }
   spendClick(state, legalAction.side);
-  if (legalAction.side === "corp") expireV1922CorporateRetreatAbilities(state);
+  if (legalAction.side === "corp") expireCorporateRetreatInstallCreditAbilities(state);
   if (legalAction.side === "runner") {
     const hostOnCardId =
       typeof legalAction.payload?.hostOnCardId === "string"
@@ -8796,7 +8673,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         specialZoneReason: "agenda_point_cost_corporate_ally",
       };
     }
-    if (definition.id === V1922_ARASAKA_PORTABLE_PROTOTYPE_ID) {
+    if (definition.id === ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID) {
       const agendaCost = Number(
         legalAction.payload?.installAgendaPointCost ?? 0,
       );
@@ -8845,18 +8722,18 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
-      if (definition.id === V1913_ARMORED_FRIDGE_ID) {
+      if (definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID) {
         setCardCounter(
           state,
           cardId,
           "power",
-          V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
+          ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
         );
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           counterType: "power",
-          addedCounterAmount: V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
-          remainingCounters: V1913_ARMORED_FRIDGE_STARTING_COUNTERS,
+          addedCounterAmount: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
+          remainingCounters: ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS,
         };
       }
       if (trashedDeckDefinitionIds.length > 0) {
@@ -8930,7 +8807,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         ...(legalAction.payload ?? {}),
         v1922RunnerProgramAbility: "zetatech_overlay_install",
         zetatechOverlayInstall: true,
-        hostDefinitionId: V1922_ZETATECH_SOFTWARE_INSTALLER_ID,
+        hostDefinitionId: ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
         zetatechRecurringCreditsSpent:
           zetatechOverlayInstall && hostOnCardId
             ? Math.max(
@@ -8942,7 +8819,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         runnerCreditsAfter: state.runner.credits,
       };
     }
-    consumeV1922ValuPakInstallAction(state, legalAction);
+    consumeValuPakProgramInstallAction(state, legalAction);
     if ((definition.recurringCredits ?? 0) > 0) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -8970,7 +8847,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       zone: { side: "corp", zone: "serverIce", serverId: server.id },
     };
     markRovingSubmarineActivityForServer(state, server.id, legalAction);
-    consumeV1922EdgerunnerTempsInstallAction(state, legalAction);
+    consumeEdgerunnerTempsInstallAction(state, legalAction);
     return;
   }
 
@@ -9002,7 +8879,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     trashOlderRegionUpgradesInServer(state, server, cardId);
   }
   markRovingSubmarineActivityForServer(state, server.id, legalAction);
-  consumeV1922EdgerunnerTempsInstallAction(state, legalAction);
+  consumeEdgerunnerTempsInstallAction(state, legalAction);
 }
 
 function canInstallCorpRootCardInServer(
@@ -9150,9 +9027,12 @@ function applyAiBoonRunStart(
   const sourceCardId = state.runner.rig.programs
     .slice()
     .sort()
-    .find((cardId) => definitionFor(state, cardId).id === V1921_AI_BOON_ID);
+    .find(
+      (cardId) =>
+        definitionFor(state, cardId).id === AI_BOON_RANDOM_BREAKER_CARD_ID,
+    );
   if (!sourceCardId || !state.run) return;
-  const randomPurpose = `v1921.die.${V1921_AI_BOON_ID}.run_start_strength`;
+  const randomPurpose = `v1921.die.${AI_BOON_RANDOM_BREAKER_CARD_ID}.run_start_strength`;
   const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
   const baseStrength = definitionFor(state, sourceCardId).strength ?? 0;
   const runStrength = baseStrength + dieRoll;
@@ -9162,7 +9042,7 @@ function applyAiBoonRunStart(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1921RunnerProgramAbility: "ai_boon_run_start_strength",
-      sourceDefinitionId: V1921_AI_BOON_ID,
+      sourceDefinitionId: AI_BOON_RANDOM_BREAKER_CARD_ID,
       aiBoonSourceCardId: sourceCardId,
       randomPurpose,
       v1921DieRoll: dieRoll,
@@ -9276,7 +9156,7 @@ function rezCard(
     rezzed: true,
     faceup: true,
   };
-  if (definition.id === V1917_KRUMZ_ID) {
+  if (definition.id === KRUMZ_TRACE_ASSET_CARD_ID) {
     setCardCounter(state, cardId as CardInstanceId, "bit", 1);
   }
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
@@ -9313,7 +9193,7 @@ function resolveCorpRootRezEffect(
 
 function installedSpeedTrapIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.programs
-    .filter((cardId) => definitionFor(state, cardId).id === V1922_SPEED_TRAP_ID)
+    .filter((cardId) => definitionFor(state, cardId).id === SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
     .sort();
 }
 
@@ -9366,7 +9246,7 @@ function startSpeedTrapRezInterruptChoice(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      sourceDefinitionId: V1922_SPEED_TRAP_ID,
+      sourceDefinitionId: SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
       speedTrapSourceCardId: speedTrapId,
       rezzedCardDefinitionId: definition.id,
       ...(serverLabel ? { serverLabel } : {}),
@@ -9912,7 +9792,7 @@ function hackerTrackerCardIds(state: GameState): CardInstanceId[] {
       const instance = state.cardInstances[cardId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, cardId).id === V1920_HACKER_TRACKER_CENTRAL_ID
+        definitionFor(state, cardId).id === HACKER_TRACKER_CENTRAL_RUN_LOCK_ASSET_ID
       );
     })
     .sort();
@@ -10017,7 +9897,7 @@ function startTraceFromSubroutine(
 function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
   return state.runner.rig.programs.some(
     (cardId) =>
-      definitionFor(state, cardId).id === V1922_RABBIT_ID &&
+      definitionFor(state, cardId).id === RABBIT_HQ_INTERFACE_PROGRAM_ID &&
       mustInstance(state.cardInstances, cardId).rezzed,
   )
     ? 1
@@ -10200,14 +10080,14 @@ function applyRioDeJaneiroCityGridPassedIceTrigger(
       const instance = state.cardInstances[cardId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, cardId).id === V1921_RIO_DE_JANEIRO_CITY_GRID_ID
+        definitionFor(state, cardId).id === RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID
       );
     })
     .sort();
   if (rioIds.length === 0) return false;
 
   for (const rioId of rioIds) {
-    const randomPurpose = `v1921.die.${V1921_RIO_DE_JANEIRO_CITY_GRID_ID}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
+    const randomPurpose = `v1921.die.${RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
     const dieRoll = rollDeterministicDie(state, randomPurpose);
     const runEnded = dieRoll === 1;
     if (legalAction) {
@@ -10215,7 +10095,7 @@ function applyRioDeJaneiroCityGridPassedIceTrigger(
         ...(legalAction.payload ?? {}),
         v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
         sourceCardId: rioId,
-        sourceDefinitionId: V1921_RIO_DE_JANEIRO_CITY_GRID_ID,
+        sourceDefinitionId: RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID,
         passedIceId,
         passedIceDefinitionId: definitionFor(state, passedIceId).id,
         serverLabel: server.label,
@@ -10326,7 +10206,7 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
     void _pending;
     state.run = runWithoutPending;
     if (
-      startV1922Viral15ProgramTrashChoice(
+      startViral15ProgramTrashChoice(
         state,
         pendingPassedIceId,
         legalAction,
@@ -10518,15 +10398,15 @@ function archivesAccessRequiresDecisionOrEffect(
   )
     return true;
   if (
-    definition.id === V1917_SETUP_ID ||
-    definition.id === V1917_TRAP_ID ||
-    definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ||
-    definition.id === V1918_DIETER_ESSLIN_ID ||
-    definition.id === V1918_TURBEAU_DELACROIX_ID ||
-    definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID ||
-    definition.id === V1919_EXPERIMENTAL_AI_ID ||
-    definition.id === V1919_VACANT_SOULKILLER_ID ||
-    definition.id === V1919_VIRUS_TEST_SITE_ID ||
+    definition.id === SETUP_ACCESS_AMBUSH_ASSET_CARD_ID ||
+    definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID ||
+    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID ||
+    definition.id === DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID ||
+    definition.id === TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID ||
+    definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID ||
+    definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
+    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID ||
+    definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID ||
     definition.id === BIZARRE_ENCRYPTION_SCHEME_ID ||
     definition.id === CHIMERA_ID
   ) {
@@ -10783,9 +10663,9 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
     const instance = mustInstance(state.cardInstances, cardId);
     state.cardInstances[cardId] = { ...instance, faceup: true };
     resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-    resolveV1917AmbushOnAccess(state, cardId, legalAction);
-    resolveV1918UpgradeOnAccess(state, cardId, legalAction);
-    resolveV1919AssetOnAccess(state, cardId, legalAction);
+    resolveAccessAmbushAssetEffect(state, cardId, legalAction);
+    resolveUpgradeAccessEffect(state, cardId, legalAction);
+    resolveAssetAccessEffect(state, cardId, legalAction);
     resolveV199UpgradeOnAccess(state, cardId, legalAction);
     const definition = definitionFor(state, cardId);
     const freeTrashAccess = canFreeTrashCurrentAccessCard(
@@ -10830,9 +10710,9 @@ function accessCurrentCard(state: GameState, legalAction: LegalAction): void {
   const instance = mustInstance(state.cardInstances, cardId);
   state.cardInstances[cardId] = { ...instance, faceup: true };
   resolveAmbushOnAccessFoundation(state, cardId, legalAction);
-  resolveV1917AmbushOnAccess(state, cardId, legalAction);
-  resolveV1918UpgradeOnAccess(state, cardId, legalAction);
-  resolveV1919AssetOnAccess(state, cardId, legalAction);
+  resolveAccessAmbushAssetEffect(state, cardId, legalAction);
+  resolveUpgradeAccessEffect(state, cardId, legalAction);
+  resolveAssetAccessEffect(state, cardId, legalAction);
   resolveV199UpgradeOnAccess(state, cardId, legalAction);
   const definition = definitionFor(state, cardId);
   const freeTrashAccess = canFreeTrashCurrentAccessCard(state, run, definition);
@@ -10884,13 +10764,16 @@ function resolveAmbushOnAccessFoundation(
   };
 }
 
-function resolveV1917AmbushOnAccess(
+function resolveAccessAmbushAssetEffect(
   state: GameState,
   cardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
   const definition = definitionFor(state, cardId);
-  if (definition.id !== V1917_SETUP_ID && definition.id !== V1917_TRAP_ID)
+  if (
+    definition.id !== SETUP_ACCESS_AMBUSH_ASSET_CARD_ID &&
+    definition.id !== TRAP_ACCESS_AMBUSH_ASSET_CARD_ID
+  )
     return;
   if (
     legalAction.side !== "runner" ||
@@ -10915,8 +10798,10 @@ function resolveV1917AmbushOnAccess(
     };
     return;
   }
-  if (definition.id === V1917_TRAP_ID) state.runner.tags += 1;
-  const damageAmount = definition.id === V1917_SETUP_ID ? 2 : 3;
+  if (definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID)
+    state.runner.tags += 1;
+  const damageAmount =
+    definition.id === SETUP_ACCESS_AMBUSH_ASSET_CARD_ID ? 2 : 3;
   const summary = doDamage(state, {
     damageId: `v1917.ambush.${state.run.runId}.${cardId}.${state.stateVersion + 1}`,
     damageType: "net",
@@ -10936,23 +10821,23 @@ function resolveV1917AmbushOnAccess(
           publicRevealDefinitionId: definition.id,
         }
       : {}),
-    ...(definition.id === V1917_TRAP_ID
+    ...(definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID
       ? { tagsAdded: 1, runnerTagsAfter: state.runner.tags }
       : {}),
   };
 }
 
-function resolveV1918UpgradeOnAccess(
+function resolveUpgradeAccessEffect(
   state: GameState,
   cardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
   const definition = definitionFor(state, cardId);
   if (
-    definition.id !== V1918_CRYBABY_ID &&
-    definition.id !== V1918_DEDICATED_RESPONSE_TEAM_ID &&
-    definition.id !== V1918_DIETER_ESSLIN_ID &&
-    definition.id !== V1918_TURBEAU_DELACROIX_ID
+    definition.id !== CRYBABY_ACCESS_COST_UPGRADE_ID &&
+    definition.id !== DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID &&
+    definition.id !== DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID &&
+    definition.id !== TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID
   )
     return;
   if (
@@ -10966,7 +10851,7 @@ function resolveV1918UpgradeOnAccess(
   }
   if (!mustInstance(state.cardInstances, cardId).rezzed) return;
 
-  if (definition.id === V1918_CRYBABY_ID) {
+  if (definition.id === CRYBABY_ACCESS_COST_UPGRADE_ID) {
     addCardCounter(state, state.runner.identity, "crying", 1);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -10980,7 +10865,7 @@ function resolveV1918UpgradeOnAccess(
     return;
   }
 
-  if (definition.id === V1918_TURBEAU_DELACROIX_ID) {
+  if (definition.id === TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID) {
     const serverId = state.run.attackedServerId;
     const consumed = state.run.turbeauAccessTraceConsumedByServer?.[serverId] ?? [];
     if (consumed.includes(cardId)) {
@@ -11013,20 +10898,25 @@ function resolveV1918UpgradeOnAccess(
   }
 
   const damageType =
-    definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ? "meat" : "net";
+    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID
+      ? "meat"
+      : "net";
   const damageAmount =
-    definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID ? 3 : 1;
+    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID ? 3 : 1;
   const runnerTagsBefore = state.runner.tags;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ambushDefinitionId: definition.id,
     damageType,
     damageAmount,
-    ...(definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID
+    ...(definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID
       ? { runnerTagsBefore, tagConditionMet: runnerTagsBefore >= 1 }
       : {}),
   };
-  if (definition.id === V1918_DEDICATED_RESPONSE_TEAM_ID && runnerTagsBefore < 1) {
+  if (
+    definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID &&
+    runnerTagsBefore < 1
+  ) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       damageSkippedReason: "runner_not_tagged",
@@ -11050,17 +10940,17 @@ function resolveV1918UpgradeOnAccess(
   };
 }
 
-function resolveV1919AssetOnAccess(
+function resolveAssetAccessEffect(
   state: GameState,
   cardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
   const definition = definitionFor(state, cardId);
   if (
-    definition.id !== V1919_CORPRUNNERS_SHATTERED_REMAINS_ID &&
-    definition.id !== V1919_EXPERIMENTAL_AI_ID &&
-    definition.id !== V1919_VACANT_SOULKILLER_ID &&
-    definition.id !== V1919_VIRUS_TEST_SITE_ID
+    definition.id !== CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID &&
+    definition.id !== EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID &&
+    definition.id !== VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID &&
+    definition.id !== VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
   ) {
     return;
   }
@@ -11077,7 +10967,10 @@ function resolveV1919AssetOnAccess(
   const accessedFromArchives =
     accessServerId === "archives" ||
     mustInstance(state.cardInstances, cardId).zone.zone === "archives";
-  if (accessedFromArchives && definition.id === V1919_VIRUS_TEST_SITE_ID) {
+  if (
+    accessedFromArchives &&
+    definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
+  ) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
@@ -11089,11 +10982,11 @@ function resolveV1919AssetOnAccess(
   }
 
   if (
-    definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID ||
-    definition.id === V1919_EXPERIMENTAL_AI_ID
+    definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID ||
+    definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID
   ) {
     const candidates =
-      definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
+      definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
         ? state.runner.rig.hardware
         : state.runner.rig.programs;
     const targetCardIds = candidates.slice().sort((left, right) => {
@@ -11104,8 +10997,8 @@ function resolveV1919AssetOnAccess(
       return byInstallCost !== 0 ? byInstallCost : left.localeCompare(right);
     });
     const trashLimit =
-      definition.id === V1919_EXPERIMENTAL_AI_ID ||
-      definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
+      definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
+      definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
         ? Math.max(0, mustInstance(state.cardInstances, cardId).advancementCounters)
         : 1;
     const selectedTargetIds = targetCardIds.slice(0, trashLimit);
@@ -11120,15 +11013,15 @@ function resolveV1919AssetOnAccess(
         hiddenZoneBarrier: true,
         hiddenZoneAction: "v1919_access_ambush_trash_installed",
         ambushDefinitionId: definition.id,
-        ...(definition.id === V1919_EXPERIMENTAL_AI_ID ||
-        definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
+        ...(definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
+        definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
           ? { advancementCounterCount: trashLimit }
           : {}),
         trashedCount: selectedTargetIds.length,
         trashedCardDefinitionId: targetDefinitionIds[0] ?? "",
         trashedCardDefinitionIds: targetDefinitionIds.join(","),
         trashedCardType:
-          definition.id === V1919_CORPRUNNERS_SHATTERED_REMAINS_ID
+          definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID
             ? "hardware"
             : "program",
       };
@@ -11144,15 +11037,17 @@ function resolveV1919AssetOnAccess(
   }
 
   const damageType: DamageType =
-    definition.id === V1919_VACANT_SOULKILLER_ID ? "core" : "net";
+    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID
+      ? "core"
+      : "net";
   const advancementCounterCount = Math.max(
     0,
     Math.floor(mustInstance(state.cardInstances, cardId).advancementCounters),
   );
   const damageAmount =
-    definition.id === V1919_VACANT_SOULKILLER_ID
+    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID
       ? advancementCounterCount
-      : definition.id === V1919_VIRUS_TEST_SITE_ID
+      : definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
         ? Math.max(1, advancementCounterCount * 2)
         : 2;
   if (damageAmount <= 0) {
@@ -11184,8 +11079,8 @@ function resolveV1919AssetOnAccess(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1919_access_ambush_damage",
     ambushDefinitionId: definition.id,
-    ...(definition.id === V1919_VIRUS_TEST_SITE_ID ||
-    definition.id === V1919_VACANT_SOULKILLER_ID
+    ...(definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID ||
+    definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID
       ? { advancementCounterCount, damageAmount }
       : {}),
     ...(accessServerId === "rd"
@@ -11411,7 +11306,7 @@ function trashAccessedCard(
   const run = state.run;
   if (
     run &&
-    definition.id === V1918_RED_HERRINGS_ID &&
+    definition.id === RED_HERRINGS_STEAL_TAX_UPGRADE_ID &&
     sourceZone.side === "corp" &&
     sourceZone.zone === "serverRoot" &&
     sourceZone.serverId === (run.breach?.serverId ?? run.attackedServerId)
@@ -11634,7 +11529,7 @@ function runnerProgramUsesMemory(
   if (
     (hostDefinition.type === "program" &&
       cardHasSubtype(hostDefinition, "daemon")) ||
-    hostDefinition.id === V1922_MICROTECH_BACKUP_DRIVE_ID
+    hostDefinition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID
   )
     return false;
   return true;
@@ -11728,7 +11623,8 @@ function rovingSubmarineIdsForServer(
       const instance = state.cardInstances[cardId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, cardId).id === V1919_ROVING_SUBMARINE_ID
+        definitionFor(state, cardId).id ===
+        ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID
       );
     })
     .sort();
@@ -12218,7 +12114,7 @@ function startCorpTurn(state: GameState): void {
   state.timingPoint = "corp_draw.mandatory_draw";
   state.corp.clicks = 3;
   state.runner.clicks = 0;
-  clearV1922ValuPakRunnerFlags(state);
+  clearValuPakProgramInstallFlags(state);
   clearRovingSubmarineActivityMarkers(state);
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   applyCorpStartOfTurnEffects(state);
@@ -12230,7 +12126,7 @@ function startRunnerTurn(state: GameState): void {
   state.timingPoint = "runner_action.main";
   state.runner.clicks = 4;
   state.corp.clicks = 0;
-  clearV1922EdgerunnerTempsFlags(state);
+  clearEdgerunnerTempsInstallFlags(state);
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = false;
   flags.stoleAgendaLastTurn = false;
@@ -12307,23 +12203,27 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   if (polymerCount > 0) {
     credits(state, "corp", polymerCount);
   }
-  let v1917RecurringAssetCount = 0;
+  let recurringAssetCreditCount = 0;
   for (const cardId of rezzedCorpRootCardIds(state)) {
     const definitionId = definitionFor(state, cardId).id;
-    if (definitionId === V1917_KRUMZ_ID && cardCounter(state, cardId, "bit") <= 0) {
+    if (
+      definitionId === KRUMZ_TRACE_ASSET_CARD_ID &&
+      cardCounter(state, cardId, "bit") <= 0
+    ) {
       setCardCounter(state, cardId, "bit", 1);
     }
-    if (definitionId === V1917_SPINN_PUBLIC_RELATIONS_ID) {
+    if (definitionId === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID) {
       if (cardCounter(state, cardId, "bit") > 0) {
         spendCardCounter(state, cardId, "bit", 1);
         credits(state, "corp", 1);
       }
       continue;
     }
-    if (V1917_RECURRING_ASSET_IDS.has(definitionId))
-      v1917RecurringAssetCount += 1;
+    if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId))
+      recurringAssetCreditCount += 1;
   }
-  if (v1917RecurringAssetCount > 0) credits(state, "corp", v1917RecurringAssetCount);
+  if (recurringAssetCreditCount > 0)
+    credits(state, "corp", recurringAssetCreditCount);
   if (!state.pendingChoice) startCorporateNegotiatingCenterChoice(state);
   const employeeEmpowermentCount = state.corp.scoreArea.reduce(
     (sum, cardId) => {
@@ -12496,7 +12396,7 @@ function handForSide(state: GameState, side: Side): CardInstanceId[] {
 
 function maxHandSize(state: GameState, side: Side): number {
   if (side === "corp")
-    return state.corp.maxHandSize + v1920CorpMaxHandSizeModifier(state);
+    return state.corp.maxHandSize + corpAgendaMaxHandSizeModifier(state);
   return (
     state.runner.maxHandSize +
     runnerInstalledMaxHandSizeModifier(state) -
@@ -12504,10 +12404,11 @@ function maxHandSize(state: GameState, side: Side): number {
   );
 }
 
-function v1920CorpMaxHandSizeModifier(state: GameState): number {
+function corpAgendaMaxHandSizeModifier(state: GameState): number {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
-      definitionFor(state, cardId).id === V1920_MAIN_OFFICE_RELOCATION_ID,
+      definitionFor(state, cardId).id ===
+      MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
   )
     ? 1
     : 0;
@@ -12554,7 +12455,7 @@ function drawRunnerCard(state: GameState): RunnerDrawSummary {
   summary.drawnCount = 1;
   const citySurveillanceIds = rezzedCorpRootCardIds(state).filter(
     (sourceId) =>
-      definitionFor(state, sourceId).id === V1920_CITY_SURVEILLANCE_ID,
+      definitionFor(state, sourceId).id === CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
   );
   summary.citySurveillanceSourceCount = citySurveillanceIds.length;
   for (const _sourceId of citySurveillanceIds) {
@@ -12826,7 +12727,10 @@ function collectRuntimeDamagePreventionCandidates(
   const candidates: EventModificationCandidate[] = [];
   for (const cardId of installed) {
     const definition = definitionFor(state, cardId);
-    if (definition.id === DIPLOMATIC_IMMUNITY_ID && damageType === "meat") {
+    if (
+      definition.id === DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
+      damageType === "meat"
+    ) {
       candidates.push({
         candidateId: `v1920_diplomatic_immunity_prevent_${sanitizeId(cardId)}_${amount}`,
         eventId: event.eventId,
@@ -12845,7 +12749,7 @@ function collectRuntimeDamagePreventionCandidates(
       });
       continue;
     }
-    if (definition.id === V1913_ARMORED_FRIDGE_ID) {
+    if (definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID) {
       const remainingCounters = cardCounter(state, cardId, "power");
       if (remainingCounters <= 0) continue;
       candidates.push({
@@ -12975,7 +12879,9 @@ function collectReplacementCandidates(
     damageAmount > state.runner.grip.length
   ) {
     const arasakaId = state.runner.grip.find(
-      (cardId) => definitionFor(state, cardId).id === V1919_ARASAKA_OWNS_YOU_ID,
+      (cardId) =>
+        definitionFor(state, cardId).id ===
+        ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
     );
     if (arasakaId) {
       candidates.push({
@@ -12984,7 +12890,7 @@ function collectReplacementCandidates(
         sourceRef: {
           kind: "card",
           instanceId: arasakaId,
-          definitionId: V1919_ARASAKA_OWNS_YOU_ID,
+          definitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
           label: "Arasaka Owns You",
         },
         replacesEventType: "damage",
@@ -13046,7 +12952,8 @@ function replacementChoice(
       {
         id: candidate.candidateId,
         label:
-          candidate.sourceRef.definitionId === V1919_ARASAKA_OWNS_YOU_ID
+          candidate.sourceRef.definitionId ===
+          ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
             ? "Arasaka Owns You spielen"
             : `Damage durch ${candidate.tagAmount ?? 1} Tag ersetzen`,
         publicLabel: "Replacement",
@@ -13071,7 +12978,8 @@ function eventModificationChoice(
   );
   const amount = numberPayload(event, "amount");
   const diplomaticImmunityCancel =
-    candidate.sourceRef.definitionId === DIPLOMATIC_IMMUNITY_ID &&
+    candidate.sourceRef.definitionId ===
+      DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
     candidate.controller === "corp";
   const options = [
     {
@@ -13130,7 +13038,8 @@ function resolveEventModificationChoice(
   if (selected === "pass") {
     const diplomaticImmunityCancel =
       window.candidates[0]?.sourceRef.definitionId ===
-        DIPLOMATIC_IMMUNITY_ID && window.side === "corp";
+        DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
+      window.side === "corp";
     let agendaPointCostPaid = 0;
     let forfeitedAgendaDefinitionIds = "";
     if (diplomaticImmunityCancel) {
@@ -13155,7 +13064,7 @@ function resolveEventModificationChoice(
       originalAmount: numberPayload(event, "amount"),
       ...(diplomaticImmunityCancel
         ? {
-            sourceDefinitionId: DIPLOMATIC_IMMUNITY_ID,
+            sourceDefinitionId: DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID,
             agendaPointCost: 1,
             agendaPointCostPaid,
             forfeitedAgendaDefinitionIds,
@@ -13253,7 +13162,10 @@ function resolveReplacementChoice(
     throw new Error(
       "Dieser Replacement-Kandidat wurde in diesem Fenster bereits genutzt.",
     );
-  if (candidate.sourceRef.definitionId === V1919_ARASAKA_OWNS_YOU_ID) {
+  if (
+    candidate.sourceRef.definitionId ===
+    ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID
+  ) {
     resolveArasakaOwnsYouReplacement(state, legalAction, event, candidate);
     clearReplacementState(state);
     return;
@@ -13327,9 +13239,9 @@ function resolveArasakaOwnsYouReplacement(
     originalAmount,
     preventedAmount: originalAmount,
     v1919RunnerEventAbility: "arasaka_owns_you_flatline_replacement",
-    sourceDefinitionId: V1919_ARASAKA_OWNS_YOU_ID,
-    cardDefinitionId: V1919_ARASAKA_OWNS_YOU_ID,
-    trashedCardDefinitionId: V1919_ARASAKA_OWNS_YOU_ID,
+    sourceDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+    cardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+    trashedCardDefinitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
     coreDamageRemoved,
     drawnCards,
     gainedCredits: 10,
@@ -13477,7 +13389,7 @@ function applyRuntimeDamagePreventionCost(
     preventedAmount <= 0 ||
     candidate.sourceRef.kind !== "card" ||
     !candidate.sourceRef.instanceId ||
-    candidate.sourceRef.definitionId !== V1913_ARMORED_FRIDGE_ID
+    candidate.sourceRef.definitionId !== ABLATIVE_COUNTER_HARDWARE_CARD_ID
   ) {
     return {};
   }
@@ -13567,7 +13479,8 @@ function corpHasScoredExecutiveExtraction(state: GameState): boolean {
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
-      definitionFor(state, cardId).id === V1920_BIOWEAPONS_ENGINEERING_ID,
+      definitionFor(state, cardId).id ===
+      BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID,
   );
 }
 
@@ -13585,11 +13498,11 @@ function effectiveAgendaDifficulty(
     cardHasSubtype(definition, "gray_ops")
   )
     difficulty -= 1;
-  difficulty -= v1919ServerDifficultyReduction(state, agendaId);
+  difficulty -= serverDifficultyReductionFromUpgrades(state, agendaId);
   return Math.max(0, difficulty);
 }
 
-function v1919ServerDifficultyReduction(
+function serverDifficultyReductionFromUpgrades(
   state: GameState,
   agendaId: CardInstanceId,
 ): number {
@@ -13601,7 +13514,7 @@ function v1919ServerDifficultyReduction(
     if (rootCardId === agendaId) return sum;
     const instance = mustInstance(state.cardInstances, rootCardId);
     if (!instance.rezzed) return sum;
-    return V1919_SERVER_DIFFICULTY_UPGRADE_IDS.has(
+    return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(
       definitionFor(state, rootCardId).id,
     )
       ? sum + 1
@@ -13727,7 +13640,7 @@ function spendCorpAgendaPointCost(
   const forfeitedAgendaIds: CardInstanceId[] = [];
   const forfeitedAgendaDefinitionIds: CardDefinitionId[] = [];
   if (remaining > 0) {
-    for (const agendaId of v1919CorpScoredAgendaForfeitTargets(state)) {
+    for (const agendaId of corpScoredAgendaForfeitTargets(state)) {
       const points = agendaPointsForScoredCard(state, agendaId);
       forfeitedAgendaIds.push(agendaId);
       forfeitedAgendaDefinitionIds.push(definitionFor(state, agendaId).id);
@@ -13747,7 +13660,7 @@ function spendCorpAgendaPointCost(
   };
 }
 
-function v1919InstalledAgendaTarget(
+function installedAgendaOperationTarget(
   state: GameState,
 ): CardInstanceId | undefined {
   return state.corp.servers
@@ -13768,21 +13681,21 @@ function v1919InstalledAgendaTarget(
     })[0];
 }
 
-function v1919CorpAgendaCounterTarget(
+function corpAgendaCounterOperationTarget(
   state: GameState,
 ): CardInstanceId | undefined {
   const scored = state.corp.scoreArea.slice().sort()[0];
   if (scored) return scored;
-  return v1919InstalledAgendaTarget(state);
+  return installedAgendaOperationTarget(state);
 }
 
-function v1919CorpScoredAgendaForfeitTarget(
+function corpScoredAgendaForfeitTarget(
   state: GameState,
 ): CardInstanceId | undefined {
-  return v1919CorpScoredAgendaForfeitTargets(state)[0];
+  return corpScoredAgendaForfeitTargets(state)[0];
 }
 
-function v1919CorpScoredAgendaForfeitTargets(
+function corpScoredAgendaForfeitTargets(
   state: GameState,
 ): CardInstanceId[] {
   return state.corp.scoreArea
@@ -13796,15 +13709,15 @@ function v1919CorpScoredAgendaForfeitTargets(
     .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
 }
 
-function resolveV1919CounterOperation(
+function resolveAgendaCounterOperation(
   state: GameState,
   legalAction: LegalAction,
   sourceDefinitionId: CardDefinitionId,
 ): void {
-  const targetAgendaId = v1919CorpAgendaCounterTarget(state);
+  const targetAgendaId = corpAgendaCounterOperationTarget(state);
   if (!targetAgendaId)
     throw new Error("Die V1.9.19-Counter-Operation findet kein Agenda-Ziel.");
-  if (!V1919_COUNTER_OPERATION_IDS.has(sourceDefinitionId))
+  if (!COUNTER_OPERATION_CARD_IDS.has(sourceDefinitionId))
     throw new Error("Die V1.9.19-Counter-Operation passt nicht zur Quelle.");
   addCardCounter(state, targetAgendaId, "power", 1);
   legalAction.payload = {
@@ -13817,7 +13730,7 @@ function resolveV1919CounterOperation(
   };
 }
 
-function v1919AdvanceableInstalledTargets(state: GameState): CardInstanceId[] {
+function advanceableInstalledCardTargets(state: GameState): CardInstanceId[] {
   return state.corp.servers
     .slice()
     .sort((left, right) => left.id.localeCompare(right.id))
@@ -13829,9 +13742,10 @@ function v1919AdvanceableInstalledTargets(state: GameState): CardInstanceId[] {
           const definition = definitionFor(state, cardId);
           return (
             definition.type === "agenda" ||
-            definition.id === V1919_EXPERIMENTAL_AI_ID ||
-            definition.id === V1919_INFORMATION_LAUNDERING_ID ||
-            definition.id === V1919_VIRUS_TEST_SITE_ID
+            definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
+            definition.id ===
+              INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID ||
+            definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID
           );
         }),
     );
@@ -13841,7 +13755,7 @@ function resolveManagementShakeUpOperation(
   state: GameState,
   legalAction: LegalAction,
 ): void {
-  const targets = v1919AdvanceableInstalledTargets(state);
+  const targets = advanceableInstalledCardTargets(state);
   if (targets.length === 0)
     throw new Error("Management Shake-Up findet keine advancebare Karte.");
   const placements: Record<CardInstanceId, number> = {};
@@ -13931,7 +13845,7 @@ function scoreAgenda(
       };
     }
   }
-  if (V1919_OVERADVANCE_AGENDA_IDS.has(definition.id)) {
+  if (OVERADVANCE_AGENDA_CARD_IDS.has(definition.id)) {
     const overadvance = Math.max(
       0,
       instanceBefore.advancementCounters - requiredDifficulty,
@@ -13972,7 +13886,7 @@ function scoreAgenda(
       };
     }
   }
-  if (definition.id === V1922_CORPORATE_RETREAT_ID) {
+  if (definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID) {
     setCardCounter(state, cardId, "mark", 1);
     if (legalAction)
       legalAction.payload = {
@@ -13990,7 +13904,7 @@ function scoreAgenda(
         corpCreditsAfter: state.corp.credits,
       };
   }
-  if (definition.id === V1922_CORPORATE_WAR_ID) {
+  if (definition.id === CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID) {
     const corpCreditsBefore = state.corp.credits;
     const thresholdMet = corpCreditsBefore >= 12;
     if (thresholdMet) {
@@ -14010,10 +13924,10 @@ function scoreAgenda(
       };
     }
   }
-  if (definition.id === V1922_DATA_FORT_RECLAMATION_ID && legalAction) {
-    startV1922DataFortReclamationChoice(state, cardId, legalAction);
+  if (definition.id === DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID && legalAction) {
+    startDataFortReclamationChoice(state, cardId, legalAction);
   }
-  if (definition.id === V1920_ICE_TRANSMUTATION_ID && legalAction) {
+  if (definition.id === ICE_TRANSMUTATION_AGENDA_ID && legalAction) {
     startIceTransmutationChoice(state, cardId, legalAction);
   }
   if (definition.id === "onr_v1_212_priority-requisition") {
@@ -14103,13 +14017,13 @@ function scoreAgenda(
       securityNetOptimizationServerId: selectedServerId,
     };
   }
-  if (definition.id === V1922_SECURITY_PURGE_ID && legalAction) {
-    resolveV1922SecurityPurge(state, legalAction);
+  if (definition.id === SECURITY_PURGE_PURGE_AGENDA_ID && legalAction) {
+    resolveSecurityPurgeAgendaPurge(state, legalAction);
   }
   cleanupEmptyRemotes(state);
 }
 
-function resolveV1922SecurityPurge(
+function resolveSecurityPurgeAgendaPurge(
   state: GameState,
   legalAction: LegalAction,
 ): void {
@@ -14163,7 +14077,7 @@ function resolveV1922SecurityPurge(
   };
 }
 
-function startV1922DataFortReclamationChoice(
+function startDataFortReclamationChoice(
   state: GameState,
   agendaId: CardInstanceId,
   legalAction: LegalAction,
@@ -14208,7 +14122,7 @@ function startV1922DataFortReclamationChoice(
   };
 }
 
-function resolveV1922DataFortReclamationChoice(
+function resolveDataFortReclamationChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -14221,7 +14135,7 @@ function resolveV1922DataFortReclamationChoice(
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
     definitionFor(state, agendaId as CardInstanceId).id !==
-      V1922_DATA_FORT_RECLAMATION_ID
+      DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -14268,7 +14182,7 @@ function resolveV1922DataFortReclamationChoice(
     installedIds.push(cardId);
   }
   const rezCandidates = installedIds.filter((cardId) =>
-    isV1922DataFortReclamationRezCandidate(state, cardId, server.id),
+    isDataFortReclamationRezCandidate(state, cardId, server.id),
   );
   delete state.pendingChoice;
   legalAction.payload = {
@@ -14305,7 +14219,7 @@ function resolveV1922DataFortReclamationChoice(
   };
 }
 
-function isV1922DataFortReclamationRezCandidate(
+function isDataFortReclamationRezCandidate(
   state: GameState,
   cardId: CardInstanceId,
   serverId: string,
@@ -14327,7 +14241,7 @@ function isV1922DataFortReclamationRezCandidate(
   );
 }
 
-function resolveV1922DataFortReclamationRezChoice(
+function resolveDataFortReclamationRezChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -14344,7 +14258,7 @@ function resolveV1922DataFortReclamationRezChoice(
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
     definitionFor(state, agendaId as CardInstanceId).id !==
-      V1922_DATA_FORT_RECLAMATION_ID
+      DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
   mustServer(state, serverId);
@@ -14359,7 +14273,7 @@ function resolveV1922DataFortReclamationRezChoice(
   if (
     selectedIds.some(
       (cardId) =>
-        !isV1922DataFortReclamationRezCandidate(state, cardId, serverId),
+        !isDataFortReclamationRezCandidate(state, cardId, serverId),
     )
   )
     throw new Error("Eine gewaehlte Karte kann nicht gerezzed werden.");
@@ -14428,6 +14342,21 @@ function action(
     >
   > = {},
 ): LegalAction {
+  const visibility =
+    type.startsWith("rez") ||
+    type === "score_agenda" ||
+    type === "trash_resource" ||
+    payload?.v1917AssetAbility ||
+    payload?.resourceAbility ||
+    payload?.runnerAbility ||
+    payload?.acmeSavingsAndLoanAbility ||
+    (side === "runner" && type === "install_card")
+      ? "public"
+      : "private_to_actor";
+  const payloadFields: Pick<LegalAction, "payload"> | Record<string, never> =
+    payload
+      ? { payload: stableLegalActionPayload(type, payload, visibility) }
+      : {};
   return {
     actionId: makeActionId(type, side, payload, source),
     side,
@@ -14437,25 +14366,35 @@ function action(
     timingPoint: state.timingPoint,
     costs,
     targetRequirements: metadata.targetRequirements ?? [],
-    visibility:
-      type.startsWith("rez") ||
-      type === "score_agenda" ||
-      type === "trash_resource" ||
-      payload?.v1917AssetAbility ||
-      payload?.resourceAbility ||
-      payload?.runnerAbility ||
-      payload?.acmeSavingsAndLoanAbility ||
-      (side === "runner" && type === "install_card")
-        ? "public"
-        : "private_to_actor",
+    visibility,
     expiresAtStateVersion: state.stateVersion,
     ...(metadata.choiceRequirements
       ? { choiceRequirements: metadata.choiceRequirements }
       : {}),
     ...(metadata.abilityRef ? { abilityRef: metadata.abilityRef } : {}),
     ...(metadata.effectRef ? { effectRef: metadata.effectRef } : {}),
-    ...(payload ? { payload } : {}),
+    ...payloadFields,
   };
+}
+
+function stableLegalActionPayload(
+  actionType: ActionType,
+  payload: NonNullable<LegalAction["payload"]>,
+  visibility: LegalAction["visibility"],
+): NonNullable<LegalAction["payload"]> {
+  const schema = buildPublicAbilitySchemaContext(
+    actionType,
+    payload,
+    {},
+    visibility === "public" ? "public" : "private_to_side",
+  );
+  const stableFields: Record<string, string | number | boolean> = {};
+  if (schema.abilityFamily) stableFields.abilityFamily = schema.abilityFamily;
+  if (schema.abilityId) stableFields.abilityId = schema.abilityId;
+  if (schema.effectKind) stableFields.effectKind = schema.effectKind;
+  return Object.keys(stableFields).length > 0
+    ? { ...payload, ...stableFields }
+    : payload;
 }
 
 function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
@@ -14629,7 +14568,7 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_rd_arrange_top2")) {
-    resolveV1917CorpRdArrangeChoice(state, legalAction, playerAction);
+    resolveCorpAssetRdTopReorderChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_negotiating_center")) {
@@ -14653,23 +14592,23 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.corp_rd_arrange_top5")) {
-    resolveV1922CorpRdTopReorderChoice(state, legalAction, playerAction);
+    resolveCorpRdTopReorderChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.corp_archives_to_hq")) {
-    resolveV1922CorpArchivesToHqChoice(state, legalAction, playerAction);
+    resolveCorpArchivesToHqChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.anonymous_tip_derez_black_ice")
   ) {
-    resolveV1922AnonymousTipChoice(state, legalAction, playerAction);
+    resolveAnonymousTipDerezBlackIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.core_command_jettison_ice")
   ) {
-    resolveV1922CoreCommandJettisonIceChoice(state, legalAction, playerAction);
+    resolveCoreCommandJettisonIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -14677,7 +14616,7 @@ function resolvePendingChoice(
       "v1922.forged_activation_orders_target",
     )
   ) {
-    resolveV1922ForgedActivationOrdersTargetChoice(
+    resolveForgedActivationOrdersTargetChoice(
       state,
       legalAction,
       playerAction,
@@ -14687,7 +14626,7 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith("v1922.forged_activation_orders_corp")
   ) {
-    resolveV1922ForgedActivationOrdersCorpChoice(
+    resolveForgedActivationOrdersCorpChoice(
       state,
       legalAction,
       playerAction,
@@ -14695,13 +14634,13 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.security_code_worm_chip")) {
-    resolveV1922SecurityCodeWormChipChoice(state, legalAction, playerAction);
+    resolveSecurityCodeWormChipTrashIceChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.synchronized_attack_on_hq")
   ) {
-    resolveV1922SynchronizedAttackOnHqChoice(state, legalAction, playerAction);
+    resolveSynchronizedAttackOnHqRetainChoice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -14709,7 +14648,7 @@ function resolvePendingChoice(
       "v1922.runner_stack_top5_choose_one_arrange_rest",
     )
   ) {
-    resolveV1922RunnerStackTop5Choice(state, legalAction, playerAction);
+    resolveRunnerStackTop5Choice(state, legalAction, playerAction);
     return;
   }
   if (
@@ -14717,7 +14656,7 @@ function resolvePendingChoice(
       "v1922.runner_grip_trash_gain_credits",
     )
   ) {
-    resolveV1922RunnerGripTrashChoice(state, legalAction, playerAction);
+    resolveRunnerGripTrashForCreditsChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1921.playful_ai")) {
@@ -14729,35 +14668,35 @@ function resolvePendingChoice(
       "v1922.runner_installed_trash_gain_credits",
     )
   ) {
-    resolveV1922RunnerInstalledTrashChoice(state, legalAction, playerAction);
+    resolveRunnerInstalledTrashForCreditsChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.open_ended_mileage_return")
   ) {
-    resolveV1922OpenEndedMileageReturnChoice(state, legalAction, playerAction);
+    resolveOpenEndedMileageProgramReturnChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.hammer_stealth_loss")
   ) {
-    resolveV1922HammerStealthLossChoice(state, legalAction, playerAction);
+    resolveHammerStealthLossChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
   ) {
-    resolveV1922Viral15ProgramTrashChoice(state, legalAction, playerAction);
+    resolveViral15ProgramTrashChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
-    resolveV1922SpeedTrapChoice(state, legalAction, playerAction);
+    resolveSpeedTrapRezInterruptChoice(state, legalAction, playerAction);
     return;
   }
   if (
     state.pendingChoice.source.startsWith("v1922.data_fort_reclamation_rez")
   ) {
-    resolveV1922DataFortReclamationRezChoice(
+    resolveDataFortReclamationRezChoice(
       state,
       legalAction,
       playerAction,
@@ -14765,7 +14704,7 @@ function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.data_fort_reclamation")) {
-    resolveV1922DataFortReclamationChoice(state, legalAction, playerAction);
+    resolveDataFortReclamationChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v099.host_program")) {
@@ -15111,7 +15050,8 @@ function resolveRunnerStackSearchChoice(
     if (
       !shortCircuitSourceId ||
       !state.runner.rig.resources.includes(shortCircuitSourceId) ||
-      definitionFor(state, shortCircuitSourceId).id !== THE_SHORT_CIRCUIT_ID
+      definitionFor(state, shortCircuitSourceId).id !==
+        STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
     )
       throw new Error("The Short Circuit ist nicht mehr installiert.");
     trashRunnerInstalledCardToHeap(state, shortCircuitSourceId);
@@ -15132,7 +15072,7 @@ function resolveRunnerStackSearchChoice(
           publicRevealDefinitionId: definitionFor(state, cardId).id,
           publicRevealKind: "reveal",
           trashOnUse: true,
-          trashedCardDefinitionId: THE_SHORT_CIRCUIT_ID,
+          trashedCardDefinitionId: STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID,
         }
       : {}),
   };
@@ -15199,7 +15139,7 @@ function resolveRunnerStackArrangeChoice(
   };
 }
 
-function startV1922RunnerStackTop5Choice(
+function startRunnerStackTop5Choice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15223,7 +15163,7 @@ function startV1922RunnerStackTop5Choice(
   };
 }
 
-function startV1922AnonymousTipChoice(
+function startAnonymousTipDerezBlackIceChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15254,7 +15194,7 @@ function startV1922AnonymousTipChoice(
   };
 }
 
-function resolveV1922AnonymousTipChoice(
+function resolveAnonymousTipDerezBlackIceChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15283,7 +15223,7 @@ function resolveV1922AnonymousTipChoice(
   };
 }
 
-function startV1922CoreCommandJettisonIceChoice(
+function startCoreCommandJettisonIceChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15316,7 +15256,7 @@ function startV1922CoreCommandJettisonIceChoice(
   };
 }
 
-function resolveV1922CoreCommandJettisonIceChoice(
+function resolveCoreCommandJettisonIceChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15354,7 +15294,7 @@ function resolveV1922CoreCommandJettisonIceChoice(
   };
 }
 
-function startV1922ForgedActivationOrdersTargetChoice(
+function startForgedActivationOrdersTargetChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15386,7 +15326,7 @@ function startV1922ForgedActivationOrdersTargetChoice(
   };
 }
 
-function resolveV1922ForgedActivationOrdersTargetChoice(
+function resolveForgedActivationOrdersTargetChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15442,7 +15382,7 @@ function resolveV1922ForgedActivationOrdersTargetChoice(
   };
 }
 
-function resolveV1922ForgedActivationOrdersCorpChoice(
+function resolveForgedActivationOrdersCorpChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15498,7 +15438,7 @@ function resolveV1922ForgedActivationOrdersCorpChoice(
   };
 }
 
-function startV1922SecurityCodeWormChipChoice(
+function startSecurityCodeWormChipTrashIceChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15530,7 +15470,7 @@ function startV1922SecurityCodeWormChipChoice(
   };
 }
 
-function resolveV1922SecurityCodeWormChipChoice(
+function resolveSecurityCodeWormChipTrashIceChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15563,7 +15503,7 @@ function resolveV1922SecurityCodeWormChipChoice(
   };
 }
 
-function startV1922SynchronizedAttackOnHqChoice(
+function startSynchronizedAttackOnHqRetainChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15590,7 +15530,7 @@ function startV1922SynchronizedAttackOnHqChoice(
   };
 }
 
-function resolveV1922SynchronizedAttackOnHqChoice(
+function resolveSynchronizedAttackOnHqRetainChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15641,7 +15581,7 @@ function resolveV1922SynchronizedAttackOnHqChoice(
   };
 }
 
-function resolveV1922RunnerStackTop5Choice(
+function resolveRunnerStackTop5Choice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15687,7 +15627,7 @@ function resolveV1922RunnerStackTop5Choice(
   };
 }
 
-function startV1922RunnerGripTrashChoice(
+function startRunnerGripTrashForCreditsChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15711,7 +15651,7 @@ function startV1922RunnerGripTrashChoice(
   };
 }
 
-function resolveV1922RunnerGripTrashChoice(
+function resolveRunnerGripTrashForCreditsChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15749,7 +15689,7 @@ function resolveV1922RunnerGripTrashChoice(
   };
 }
 
-function startV1922RunnerInstalledTrashChoice(
+function startRunnerInstalledTrashForCreditsChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15774,7 +15714,7 @@ function startV1922RunnerInstalledTrashChoice(
   };
 }
 
-function resolveV1922RunnerInstalledTrashChoice(
+function resolveRunnerInstalledTrashForCreditsChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15812,7 +15752,7 @@ function resolveV1922RunnerInstalledTrashChoice(
   };
 }
 
-function startV1922OpenEndedMileageReturnChoice(
+function startOpenEndedMileageProgramReturnChoice(
   state: GameState,
   sourceCardId: string,
 ): void {
@@ -15844,7 +15784,7 @@ function startV1922OpenEndedMileageReturnChoice(
   };
 }
 
-function resolveV1922OpenEndedMileageReturnChoice(
+function resolveOpenEndedMileageProgramReturnChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -15971,14 +15911,14 @@ function resolveCorpRdArrangeChoice(
   };
 }
 
-function startV1917CorpRdArrangeChoice(
+function startCorpAssetRdTopReorderChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const sourceDefinition = definitionFor(state, sourceCardId);
-  if (!V1917_HIDDEN_REORDER_ASSET_IDS.has(sourceDefinition.id))
+  if (!HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(sourceDefinition.id))
     throw new Error(
       "Diese Karte darf keine V1.9.17-R&D-Reorder-Choice oeffnen.",
     );
@@ -16008,7 +15948,7 @@ function startV1917CorpRdArrangeChoice(
   };
 }
 
-function resolveV1917CorpRdArrangeChoice(
+function resolveCorpAssetRdTopReorderChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -16022,7 +15962,7 @@ function resolveV1917CorpRdArrangeChoice(
       "Die V1.9.17-R&D-Reorder-Quelle ist nicht mehr rezzed installiert.",
     );
   if (
-    !V1917_HIDDEN_REORDER_ASSET_IDS.has(definitionFor(state, sourceCardId).id)
+    !HIDDEN_ZONE_REORDER_ASSET_CARD_IDS.has(definitionFor(state, sourceCardId).id)
   )
     throw new Error(
       "Die V1.9.17-R&D-Reorder-Choice gehoert nicht zur passenden Karte.",
@@ -16060,7 +16000,7 @@ function startCorporateNegotiatingCenterChoice(state: GameState): void {
     .filter(
       (cardId) =>
         definitionFor(state, cardId).id ===
-        V1917_CORPORATE_NEGOTIATING_CENTER_ID,
+        CORP_HQ_AGENDA_REVEAL_CARD_ID,
     )
     .sort();
   if (sourceIds.length === 0) return;
@@ -16106,7 +16046,7 @@ function resolveCorporateNegotiatingCenterChoice(
       (sourceId) =>
         !rezzedCorpRootCardIds(state).includes(sourceId) ||
         definitionFor(state, sourceId).id !==
-          V1917_CORPORATE_NEGOTIATING_CENTER_ID,
+          CORP_HQ_AGENDA_REVEAL_CARD_ID,
     )
   )
     throw new Error("Corporate Negotiating Center ist nicht mehr aktiv.");
@@ -16220,7 +16160,7 @@ function resolveSystematicLayoffsForfeit(
   targetAgendaId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
-  if (!v1919CorpScoredAgendaForfeitTargets(state).includes(targetAgendaId))
+  if (!corpScoredAgendaForfeitTargets(state).includes(targetAgendaId))
     throw new Error("Systematic Layoffs darf diese Agenda nicht forfeiten.");
   const agendaPointValue = agendaPointsForScoredCard(state, targetAgendaId);
   forfeitCorpAgendaForPointCost(state, targetAgendaId);
@@ -16253,7 +16193,7 @@ function chooseCorpAgendasForPointCost(
 ): CardInstanceId[] {
   let total = 0;
   const selected: CardInstanceId[] = [];
-  for (const cardId of v1919CorpScoredAgendaForfeitTargets(state)) {
+  for (const cardId of corpScoredAgendaForfeitTargets(state)) {
     selected.push(cardId);
     total += agendaPointsForScoredCard(state, cardId);
     if (total >= requiredPoints) return selected;
@@ -16283,7 +16223,7 @@ function resolveIGotARockDamage(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
-    sourceDefinitionId: V1920_I_GOT_A_ROCK_ID,
+    sourceDefinitionId: I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
     sourceCardId,
     runnerTagsBefore: state.runner.tags,
     agendaPointCost: requiredPoints,
@@ -16298,7 +16238,7 @@ function resolveIGotARockDamage(
     legalAction,
     "meat",
     15,
-    V1920_I_GOT_A_ROCK_ID,
+    I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
   );
 }
 
@@ -16369,7 +16309,7 @@ function resolveIceTransmutationChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId) ||
-    definitionFor(state, agendaId).id !== V1920_ICE_TRANSMUTATION_ID
+    definitionFor(state, agendaId).id !== ICE_TRANSMUTATION_AGENDA_ID
   )
     throw new Error("Ice Transmutation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -16420,7 +16360,7 @@ function startSingaporeCityGridSwapChoice(
   const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
   if (
     !sourceInstance.rezzed ||
-    definitionFor(state, sourceCardId).id !== V1918_SINGAPORE_CITY_GRID_ID
+    definitionFor(state, sourceCardId).id !== SERVER_ICE_SWAP_UPGRADE_CARD_ID
   )
     throw new Error("Singapore City Grid ist nicht rezzed installiert.");
   if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
@@ -16491,7 +16431,7 @@ function resolveSingaporeCityGridSwapChoice(
   if (!server.root.includes(sourceCardId))
     throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Fort.");
   if (
-    definitionFor(state, sourceCardId).id !== V1918_SINGAPORE_CITY_GRID_ID ||
+    definitionFor(state, sourceCardId).id !== SERVER_ICE_SWAP_UPGRADE_CARD_ID ||
     !mustInstance(state.cardInstances, sourceCardId).rezzed
   )
     throw new Error("Singapore City Grid ist nicht mehr rezzed installiert.");
@@ -16535,7 +16475,7 @@ function resolveSingaporeCityGridSwapChoice(
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1918_singapore_city_grid_swap",
-    sourceDefinitionId: V1918_SINGAPORE_CITY_GRID_ID,
+    sourceDefinitionId: SERVER_ICE_SWAP_UPGRADE_CARD_ID,
     serverLabel: server.label,
     iceIndex,
     swappedIceCount: 1,
@@ -16543,13 +16483,13 @@ function resolveSingaporeCityGridSwapChoice(
   };
 }
 
-function startV1922CorpRdTopReorderChoice(
+function startCorpRdTopReorderChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (definitionFor(state, sourceCardId).id !== V1922_PLANNING_CONSULTANTS_ID)
+  if (definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID)
     throw new Error("Die R&D-Reorder-Quelle ist nicht Planning Consultants.");
   const topCards = state.corp.rd.slice(0, 5);
   if (topCards.length < 2)
@@ -16577,7 +16517,7 @@ function startV1922CorpRdTopReorderChoice(
   };
 }
 
-function resolveV1922CorpRdTopReorderChoice(
+function resolveCorpRdTopReorderChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -16588,7 +16528,7 @@ function resolveV1922CorpRdTopReorderChoice(
   const [, sourceCardId] = choice.source.split(":");
   if (
     !sourceCardId ||
-    definitionFor(state, sourceCardId).id !== V1922_PLANNING_CONSULTANTS_ID
+    definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
   )
     throw new Error(
       "Die V1.9.22-R&D-Reorder-Choice gehoert nicht zu Planning Consultants.",
@@ -16621,13 +16561,13 @@ function resolveV1922CorpRdTopReorderChoice(
   };
 }
 
-function startV1922CorpArchivesToHqChoice(
+function startCorpArchivesToHqChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (definitionFor(state, sourceCardId).id !== V1922_OFF_SITE_BACKUPS_ID)
+  if (definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID)
     throw new Error("Die Archives-Quelle ist nicht Off-Site Backups.");
   const archiveCards = state.corp.archives.filter(
     (cardId) => cardId !== sourceCardId,
@@ -16656,7 +16596,7 @@ function startV1922CorpArchivesToHqChoice(
   };
 }
 
-function resolveV1922CorpArchivesToHqChoice(
+function resolveCorpArchivesToHqChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -16667,7 +16607,7 @@ function resolveV1922CorpArchivesToHqChoice(
   const [, sourceCardId] = choice.source.split(":");
   if (
     !sourceCardId ||
-    definitionFor(state, sourceCardId).id !== V1922_OFF_SITE_BACKUPS_ID
+    definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
   )
     throw new Error(
       "Die V1.9.22-Archives-Choice gehoert nicht zu Off-Site Backups.",
@@ -17062,7 +17002,7 @@ function resolveV1921PlayfulAiChoice(
   if (
     !sourceCardId ||
     !state.runner.heap.includes(sourceCardId) ||
-    definitionFor(state, sourceCardId).id !== V1921_PLAYFUL_AI_ID
+    definitionFor(state, sourceCardId).id !== PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID
   )
     throw new Error("Die Playful-AI-Choice gehoert nicht zur gespielten Karte.");
   const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
@@ -17092,7 +17032,7 @@ function resolveV1921PlayfulAiChoice(
     setAsideDice = 1;
     const nextRoll = rollDeterministicDie(
       state,
-      `v1921.die.${V1921_PLAYFUL_AI_ID}.dice_loop.followup.${state.stateVersion + 1}.${dieRolls.length}`,
+      `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.followup.${state.stateVersion + 1}.${dieRolls.length}`,
     );
     dieRolls.push(nextRoll);
     complete = false;
@@ -17105,7 +17045,7 @@ function resolveV1921PlayfulAiChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1921RunnerEventAbility: "playful_ai_dice_loop",
-    sourceDefinitionId: V1921_PLAYFUL_AI_ID,
+    sourceDefinitionId: PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID,
     v1921DieRoll: dieRolls[dieRolls.length - 1] ?? dieRoll,
     playfulAiDieRolls: dieRolls.join(","),
     playfulAiGainedCredits: gainedCredits,
@@ -17174,23 +17114,15 @@ function resolveV1911RunnerHiddenZoneAbility(
     throw new Error("Der V1.9.11-Hidden-Zone-Helfer ist nicht installiert.");
   const sourceDefinition = definitionFor(state, sourceCardId);
   const ability = String(legalAction.payload?.v1911HiddenZoneAbility ?? "");
-  const allowedSearchIds = new Set([
-    SELF_MODIFYING_CODE_ID,
-    AUJOURD_OUI_ID,
-    NETO_ID,
-    THE_SHORT_CIRCUIT_ID,
-  ]);
-  const allowedExposeIds = new Set([MOUSE_ID, SEEYA_ID]);
-  const allowedRevealIds = new Set([AUJOURD_OUI_ID]);
   if (ability === "search_stack_program_to_grip") {
-    if (!allowedSearchIds.has(sourceDefinition.id))
+    if (!STACK_SEARCH_PROGRAM_CARD_IDS.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
     startRunnerStackSearchChoice(
       state,
-      sourceDefinition.id === THE_SHORT_CIRCUIT_ID
+      sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
         ? `v1911.short_circuit_search:${sourceCardId}`
         : "v1911.search_stack",
-      sourceDefinition.id === THE_SHORT_CIRCUIT_ID
+      sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
         ? "v1911_short_circuit_search"
         : "v1911_search_stack",
     );
@@ -17198,14 +17130,14 @@ function resolveV1911RunnerHiddenZoneAbility(
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
       hiddenZoneAction:
-        sourceDefinition.id === THE_SHORT_CIRCUIT_ID
+        sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
           ? "v1911_short_circuit_search"
           : "v1911_search_stack",
     };
     return;
   }
   if (ability === "expose_server_card") {
-    if (!allowedExposeIds.has(sourceDefinition.id))
+    if (!SERVER_EXPOSE_PROGRAM_CARD_IDS.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
     exposeCorpCardInServer(
       state,
@@ -17221,7 +17153,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     return;
   }
   if (ability === "reveal_stack_top") {
-    if (!allowedRevealIds.has(sourceDefinition.id))
+    if (!STACK_TOP_REVEAL_PROGRAM_CARD_IDS.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Stack-Reveal-Ability nutzen.");
     revealRunnerStackTop(state, legalAction);
     legalAction.payload = {
@@ -17232,7 +17164,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     return;
   }
   if (ability === "arrange_stack_top2") {
-    if (sourceDefinition.id !== RONIN_AROUND_ID)
+    if (sourceDefinition.id !== STACK_TOP_REORDER_RESOURCE_CARD_ID)
       throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
     startRunnerStackArrangeChoice(
       state,
@@ -17345,7 +17277,7 @@ function krumzTraceBitCardIds(state: GameState): CardInstanceId[] {
   return rezzedCorpRootCardIds(state)
     .filter(
       (cardId) =>
-        definitionFor(state, cardId).id === V1917_KRUMZ_ID &&
+        definitionFor(state, cardId).id === KRUMZ_TRACE_ASSET_CARD_ID &&
         cardCounter(state, cardId, "bit") > 0,
     )
     .sort();
@@ -17854,12 +17786,20 @@ function buildEvent(
   const actor = legalAction.side;
   const reveal = revealForPublicEvent(state, legalAction);
   const visibilityClass = eventVisibilityForAction(legalAction);
+  const actionUseContext = publicActionUseContext(previousState, legalAction);
+  const actionContext = publicContextForAction(state, legalAction);
   const publicPayload: Record<string, unknown> = {
     actor,
     actionType: legalAction.type,
     label: publicLabel(legalAction),
-    ...publicActionUseContext(previousState, legalAction),
-    ...publicContextForAction(state, legalAction),
+    ...actionUseContext,
+    ...actionContext,
+    ...buildPublicAbilitySchemaContext(
+      legalAction.type,
+      legalAction.payload,
+      actionContext,
+      visibilityClass,
+    ),
     ...reveal,
   };
   return {
@@ -19511,7 +19451,7 @@ function hostedCardsOn(
 function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.hardware
     .filter(
-      (cardId) => definitionFor(state, cardId).id === V1922_MICROTECH_BACKUP_DRIVE_ID,
+      (cardId) => definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     )
     .sort();
 }
@@ -19600,7 +19540,7 @@ function runnerProgramInstallRecurringCreditSourceIds(
     ),
     ...state.runner.rig.programs.filter(
       (cardId) =>
-        definitionFor(state, cardId).id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID,
+        definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
     ),
   ];
 }
@@ -19662,7 +19602,7 @@ function runnerRunRecurringCreditSourceIds(
     const definition = definitionFor(state, cardId);
     if (
       definition.id === "onr_v1_147_zz22-speed-chip" ||
-      definition.id === V1922_COROLLA_SPEED_CHIP_ID
+      definition.id === COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID
     ) {
       return Boolean(
         state.run &&
@@ -19671,14 +19611,14 @@ function runnerRunRecurringCreditSourceIds(
           cardHasSubtype(definitionFor(state, breakerId), "killer"),
       );
     }
-    if (definition.id === V1922_ARTEMIS_2020_ID) {
+    if (definition.id === ARTEMIS_2020_STRENGTH_HARDWARE_ID) {
       return Boolean(
         state.run &&
           breakerId &&
           state.runner.rig.programs.includes(breakerId),
       );
     }
-    if (definition.id === V1922_ARASAKA_PORTABLE_PROTOTYPE_ID) {
+    if (definition.id === ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID) {
       return Boolean(
         state.run &&
           breakerId &&
@@ -19686,8 +19626,8 @@ function runnerRunRecurringCreditSourceIds(
       );
     }
     if (
-      definition.id === V1922_ZETATECH_SOFTWARE_INSTALLER_ID ||
-      definition.id === V1922_PANDORAS_DECK_ID
+      definition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID ||
+      definition.id === PANDORAS_DECK_LINK_HARDWARE_ID
     ) {
       return false;
     }
@@ -19770,7 +19710,7 @@ function applyPostBreakStealthLoss(
       : Math.min(lossAmount, availableStealth);
   if (requiredLoss <= 0) return;
   if (stealthSources.length > 1) {
-    startV1922HammerStealthLossChoice(
+    startHammerStealthLossChoice(
       state,
       breakerId,
       requiredLoss,
@@ -19827,7 +19767,7 @@ function runnerStealthRecurringCredits(state: GameState): number {
   );
 }
 
-function startV1922HammerStealthLossChoice(
+function startHammerStealthLossChoice(
   state: GameState,
   breakerId: CardInstanceId,
   requiredLoss: number,
@@ -19863,7 +19803,7 @@ function startV1922HammerStealthLossChoice(
   };
 }
 
-function resolveV1922HammerStealthLossChoice(
+function resolveHammerStealthLossChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -19904,7 +19844,7 @@ function resolveV1922HammerStealthLossChoice(
   };
 }
 
-function startV1922Viral15ProgramTrashChoice(
+function startViral15ProgramTrashChoice(
   state: GameState,
   passedIceId: CardInstanceId,
   legalAction?: LegalAction,
@@ -19913,7 +19853,7 @@ function startV1922Viral15ProgramTrashChoice(
   const run = mustRun(state);
   const sourceIceId = run.viral15ActiveSourceIceId;
   if (!sourceIceId) return false;
-  if (definitionFor(state, sourceIceId).id !== V1922_VIRAL_15_ID)
+  if (definitionFor(state, sourceIceId).id !== VIRAL_15_PROGRAM_TRASH_ICE_ID)
     throw new Error("Viral-15-Quelle ist ungueltig.");
   const programOptions = state.runner.rig.programs
     .filter((cardId) => state.cardInstances[cardId])
@@ -19927,7 +19867,7 @@ function startV1922Viral15ProgramTrashChoice(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         v1922CorpIceAbility: "viral_15_program_trash",
-        sourceDefinitionId: V1922_VIRAL_15_ID,
+        sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
         viral15ProgramTrashChoiceOpened: false,
         trashedCount: 0,
       };
@@ -19950,7 +19890,7 @@ function startV1922Viral15ProgramTrashChoice(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922CorpIceAbility: "viral_15_program_trash",
-      sourceDefinitionId: V1922_VIRAL_15_ID,
+      sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
       viral15ProgramTrashChoiceOpened: true,
       viral15ProgramTrashCandidateCount: programOptions.length,
       hiddenZoneBarrier: true,
@@ -19960,7 +19900,7 @@ function startV1922Viral15ProgramTrashChoice(
   return true;
 }
 
-function resolveV1922Viral15ProgramTrashChoice(
+function resolveViral15ProgramTrashChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -19972,7 +19912,7 @@ function resolveV1922Viral15ProgramTrashChoice(
   if (
     !sourceIceId ||
     !state.cardInstances[sourceIceId] ||
-    definitionFor(state, sourceIceId).id !== V1922_VIRAL_15_ID
+    definitionFor(state, sourceIceId).id !== VIRAL_15_PROGRAM_TRASH_ICE_ID
   )
     throw new Error("Viral-15-Quelle ist nicht mehr gueltig.");
   if (!passedIceId || !state.cardInstances[passedIceId])
@@ -19989,7 +19929,7 @@ function resolveV1922Viral15ProgramTrashChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922CorpIceAbility: "viral_15_program_trash",
-    sourceDefinitionId: V1922_VIRAL_15_ID,
+    sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_viral_15_program_trash",
     trashedCount: 1,
@@ -19997,7 +19937,7 @@ function resolveV1922Viral15ProgramTrashChoice(
   };
 }
 
-function resolveV1922SpeedTrapChoice(
+function resolveSpeedTrapRezInterruptChoice(
   state: GameState,
   legalAction: LegalAction,
   playerAction: PlayerAction,
@@ -20009,7 +19949,7 @@ function resolveV1922SpeedTrapChoice(
   if (
     !speedTrapId ||
     !state.runner.rig.programs.includes(speedTrapId) ||
-    definitionFor(state, speedTrapId).id !== V1922_SPEED_TRAP_ID
+    definitionFor(state, speedTrapId).id !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID
   )
     throw new Error("Speed Trap ist nicht mehr installiert.");
   const run = mustRun(state);
@@ -20042,7 +19982,7 @@ function resolveV1922SpeedTrapChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-    sourceDefinitionId: V1922_SPEED_TRAP_ID,
+    sourceDefinitionId: SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
     speedTrapSourceCardId: speedTrapId,
     rezzedCardDefinitionId: rezzedDefinition.id,
     ...(serverLabel ? { serverLabel } : {}),
@@ -20249,186 +20189,6 @@ function expandDeck(
     }
   }
   return ids;
-}
-
-function cardPoolVersionForDecks(
-  runnerDeck: DeckDefinition,
-  corpDeck: DeckDefinition,
-): CardPoolVersion {
-  if (usesMvp099CardPool(runnerDeck) || usesMvp099CardPool(corpDeck))
-    return "0.99.0";
-  if (usesMvp098CardPool(runnerDeck) || usesMvp098CardPool(corpDeck))
-    return "0.98.0";
-  if (usesMvp097CardPool(runnerDeck) || usesMvp097CardPool(corpDeck))
-    return "0.97.0";
-  if (usesMvp096CardPool(runnerDeck) || usesMvp096CardPool(corpDeck))
-    return "0.96.0";
-  if (usesMvp095CardPool(runnerDeck) || usesMvp095CardPool(corpDeck))
-    return "0.95.0";
-  if (usesMvp094CardPool(runnerDeck) || usesMvp094CardPool(corpDeck))
-    return "0.94.0";
-  if (usesMvp08CardPool(runnerDeck) || usesMvp08CardPool(corpDeck))
-    return "0.8.0";
-  if (usesExpandedCardPool(runnerDeck) || usesExpandedCardPool(corpDeck))
-    return "0.4.0";
-  return "0.1.0";
-}
-
-function baselineForCardPoolVersion(version: CardPoolVersion): RulesBaseline {
-  if (version === "0.99.0") return MVP_0_99_BASELINE;
-  if (version === "0.98.0") return MVP_0_98_BASELINE;
-  if (version === "0.97.0") return MVP_0_97_BASELINE;
-  if (version === "0.96.0") return MVP_0_96_BASELINE;
-  if (version === "0.95.0") return MVP_0_95_BASELINE;
-  if (version === "0.94.0") return MVP_0_94_BASELINE;
-  if (version === "0.8.0") return MVP_0_8_BASELINE;
-  if (version === "0.4.0") return MVP_0_4_BASELINE;
-  return MVP_0_1_BASELINE;
-}
-
-function usesMvp099CardPool(deck: DeckDefinition): boolean {
-  if (
-    deck.id.endsWith("_099") ||
-    deck.id.includes("_0_99") ||
-    deck.id.includes("_v0_99")
-  )
-    return true;
-  if (deck.identity.startsWith("v099_")) return true;
-  return deck.cards.some((card) => card.id.startsWith("v099_"));
-}
-
-function usesMvp098CardPool(deck: DeckDefinition): boolean {
-  if (usesMvp099CardPool(deck)) return true;
-  if (
-    deck.id.endsWith("_098") ||
-    deck.id.includes("_0_98") ||
-    deck.id.includes("_v0_98")
-  )
-    return true;
-  if (deck.identity.startsWith("v098_")) return true;
-  return deck.cards.some((card) => card.id.startsWith("v098_"));
-}
-
-function usesMvp097CardPool(deck: DeckDefinition): boolean {
-  if (usesMvp098CardPool(deck)) return true;
-  if (
-    deck.id.endsWith("_097") ||
-    deck.id.includes("_0_97") ||
-    deck.id.includes("_v0_97")
-  )
-    return true;
-  return deck.cards.some((card) => card.id.startsWith("v097_"));
-}
-
-function usesMvp096CardPool(deck: DeckDefinition): boolean {
-  if (
-    deck.id.endsWith("_096") ||
-    deck.id.includes("_0_96") ||
-    deck.id.includes("_v0_96")
-  )
-    return true;
-  return deck.cards.some((card) => card.id.startsWith("v096_"));
-}
-
-function usesMvp095CardPool(deck: DeckDefinition): boolean {
-  if (usesMvp096CardPool(deck)) return true;
-  if (
-    deck.id.endsWith("_095") ||
-    deck.id.includes("_0_95") ||
-    deck.id.includes("_v0_95")
-  )
-    return true;
-  return deck.cards.some((card) => card.id.startsWith("v095_"));
-}
-
-function usesMvp094CardPool(deck: DeckDefinition): boolean {
-  if (
-    deck.id.endsWith("_094") ||
-    deck.id.includes("_0_94") ||
-    deck.id.includes("_v0_94")
-  )
-    return true;
-  return deck.cards.some(
-    (card) => card.id.startsWith("v094_") || card.id.startsWith("onr_v1_"),
-  );
-}
-
-function usesMvp08CardPool(deck: DeckDefinition): boolean {
-  if (usesMvp094CardPool(deck)) return true;
-  if (
-    deck.id.endsWith("_008") ||
-    deck.id.includes("_0_8") ||
-    deck.id.includes("_v0_8")
-  )
-    return true;
-  return deck.cards.some((card) => card.id.startsWith("v08_"));
-}
-
-function usesExpandedCardPool(deck: DeckDefinition): boolean {
-  if (usesMvp08CardPool(deck)) return true;
-  if (deck.id.endsWith("_004") || deck.id.includes("_0_6")) return true;
-  return deck.cards.some((card) =>
-    [
-      "simple_draw_event",
-      "simple_setup_hardware",
-      "efficient_fracter",
-      "simple_priority_agenda",
-      "simple_draw_operation",
-      "simple_taxing_barrier_ice",
-      "simple_upgrade",
-      "simple_tag_ice",
-      "simple_tag_punishment_operation",
-    ].includes(card.id),
-  );
-}
-
-function metadataForDeck(
-  deck: DeckDefinition,
-  cardPoolVersion: CardPoolVersion,
-): DeckPublicMetadata {
-  const expandedCardPool = cardPoolVersion !== "0.1.0";
-  return {
-    side: deck.side,
-    identityCardId: deck.identity,
-    deckName: deck.name,
-    cardPoolSnapshotId:
-      cardPoolVersion === "0.99.0"
-        ? "card-snapshot-0.99"
-        : cardPoolVersion === "0.98.0"
-          ? "card-snapshot-0.98"
-          : cardPoolVersion === "0.97.0"
-            ? "card-snapshot-0.97"
-            : cardPoolVersion === "0.96.0"
-              ? "card-snapshot-0.96"
-              : cardPoolVersion === "0.95.0"
-                ? "card-snapshot-0.95"
-                : cardPoolVersion === "0.94.0"
-                  ? "card-snapshot-0.94"
-                  : cardPoolVersion === "0.8.0"
-                    ? "card-snapshot-0.8"
-                    : expandedCardPool
-                      ? "card-snapshot-0.5"
-                      : "mvp-0.1-demo",
-    formatProfileId:
-      cardPoolVersion === "0.99.0"
-        ? "local-demo-v0.99"
-        : cardPoolVersion === "0.98.0"
-          ? "local-demo-v0.98"
-          : cardPoolVersion === "0.97.0"
-            ? "local-demo-v0.97"
-            : cardPoolVersion === "0.96.0"
-              ? "local-demo-v0.96"
-              : cardPoolVersion === "0.95.0"
-                ? "local-demo-v0.95"
-                : cardPoolVersion === "0.94.0"
-                  ? "local-demo-v0.94"
-                  : cardPoolVersion === "0.8.0"
-                    ? "local-demo-v0.8"
-                    : expandedCardPool
-                      ? "local-demo-v0.6"
-                      : "legacy-demo",
-    deckHash: `legacy:${deck.id}`,
-  };
 }
 
 function isV097OrLater(state: GameState): boolean {

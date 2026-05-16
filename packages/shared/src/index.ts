@@ -1,3 +1,29 @@
+export {
+  LEGACY_ABILITY_PAYLOAD_FIELDS,
+  type LegacyAbilityPayloadField,
+} from "./ability-payload";
+export {
+  CORE_DEMO_DECK_IDS,
+  DEMO_DECK_IDS,
+  LEGACY_FIXTURE_DECK_IDS,
+  type DemoDeckId,
+} from "./demo-fixtures";
+export { DEMO_DECKS } from "./demo-decks";
+export {
+  MVP_0_1_BASELINE,
+  MVP_0_2_BASELINE,
+  MVP_0_3_BASELINE,
+  MVP_0_4_BASELINE,
+  MVP_0_8_BASELINE,
+  MVP_0_94_BASELINE,
+  MVP_0_95_BASELINE,
+  MVP_0_96_BASELINE,
+  MVP_0_97_BASELINE,
+  MVP_0_98_BASELINE,
+  MVP_0_99_BASELINE,
+  type RulesBaseline,
+} from "./baselines";
+import type { RulesBaseline } from "./baselines";
 export type Side = "corp" | "runner";
 
 export type Phase =
@@ -85,22 +111,6 @@ export type GameEndReason =
   | "corp_deck_empty"
   | "flatline"
   | "unknown";
-export type DemoDeckId =
-  | "demo_runner_001"
-  | "demo_corp_001"
-  | "demo_runner_004"
-  | "demo_corp_004"
-  | "demo_runner_008"
-  | "demo_corp_008"
-  | "demo_runner_096"
-  | "demo_corp_096"
-  | "demo_runner_097"
-  | "demo_corp_097"
-  | "demo_runner_098"
-  | "demo_corp_098"
-  | "demo_runner_099"
-  | "demo_corp_099";
-
 export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
@@ -535,98 +545,6 @@ export type AiDeckDoctrineProfile = {
     label: string;
     value: number | string;
   }>;
-};
-
-export type RulesBaseline = {
-  rulesVersion: "26.03";
-  cardTextSource: "manual";
-  cardTextSnapshotId:
-    | "mvp-0.1-demo"
-    | "mvp-0.4-demo"
-    | "mvp-0.8-demo"
-    | "mvp-0.94-demo"
-    | "mvp-0.95-demo"
-    | "mvp-0.96-demo"
-    | "mvp-0.97-demo"
-    | "mvp-0.98-demo"
-    | "mvp-0.99-demo";
-  engineSchemaVersion:
-    | "0.1.0"
-    | "0.2.0"
-    | "0.3.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
-  cardImplementationVersion:
-    | "0.1.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
-  deviationRegistryVersion:
-    | "0.1.0"
-    | "0.2.0"
-    | "0.3.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
-  playerViewSchemaVersion?:
-    | "0.1.0"
-    | "0.2.0"
-    | "0.3.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
-  multiplayerSchemaVersion?:
-    | "0.2.0"
-    | "0.3.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
-  aiControllerSchemaVersion?:
-    | "0.3.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
-  simulationSchemaVersion?:
-    | "0.3.0"
-    | "0.4.0"
-    | "0.8.0"
-    | "0.94.0"
-    | "0.95.0"
-    | "0.96.0"
-    | "0.97.0"
-    | "0.98.0"
-    | "0.99.0";
 };
 
 export type PlayerController = {
@@ -1198,129 +1116,6 @@ export type AiDecision = {
   profileId?: string;
   difficulty?: AiDifficulty;
   reason?: string;
-};
-
-export const MVP_0_1_BASELINE: RulesBaseline = {
-  rulesVersion: "26.03",
-  cardTextSource: "manual",
-  cardTextSnapshotId: "mvp-0.1-demo",
-  engineSchemaVersion: "0.1.0",
-  cardImplementationVersion: "0.1.0",
-  deviationRegistryVersion: "0.1.0",
-};
-
-export const MVP_0_2_BASELINE: RulesBaseline = {
-  ...MVP_0_1_BASELINE,
-  engineSchemaVersion: "0.2.0",
-  deviationRegistryVersion: "0.2.0",
-  playerViewSchemaVersion: "0.2.0",
-  multiplayerSchemaVersion: "0.2.0",
-};
-
-export const MVP_0_3_BASELINE: RulesBaseline = {
-  ...MVP_0_2_BASELINE,
-  engineSchemaVersion: "0.3.0",
-  deviationRegistryVersion: "0.3.0",
-  playerViewSchemaVersion: "0.3.0",
-  multiplayerSchemaVersion: "0.3.0",
-  aiControllerSchemaVersion: "0.3.0",
-  simulationSchemaVersion: "0.3.0",
-};
-
-export const MVP_0_4_BASELINE: RulesBaseline = {
-  ...MVP_0_3_BASELINE,
-  cardTextSnapshotId: "mvp-0.4-demo",
-  engineSchemaVersion: "0.4.0",
-  cardImplementationVersion: "0.4.0",
-  deviationRegistryVersion: "0.4.0",
-  playerViewSchemaVersion: "0.4.0",
-  multiplayerSchemaVersion: "0.4.0",
-  aiControllerSchemaVersion: "0.4.0",
-  simulationSchemaVersion: "0.4.0",
-};
-
-export const MVP_0_8_BASELINE: RulesBaseline = {
-  ...MVP_0_4_BASELINE,
-  cardTextSnapshotId: "mvp-0.8-demo",
-  engineSchemaVersion: "0.8.0",
-  cardImplementationVersion: "0.8.0",
-  deviationRegistryVersion: "0.8.0",
-  playerViewSchemaVersion: "0.8.0",
-  multiplayerSchemaVersion: "0.8.0",
-  aiControllerSchemaVersion: "0.8.0",
-  simulationSchemaVersion: "0.8.0",
-};
-
-export const MVP_0_94_BASELINE: RulesBaseline = {
-  ...MVP_0_8_BASELINE,
-  cardTextSnapshotId: "mvp-0.94-demo",
-  engineSchemaVersion: "0.94.0",
-  cardImplementationVersion: "0.94.0",
-  deviationRegistryVersion: "0.94.0",
-  playerViewSchemaVersion: "0.94.0",
-  multiplayerSchemaVersion: "0.94.0",
-  aiControllerSchemaVersion: "0.94.0",
-  simulationSchemaVersion: "0.94.0",
-};
-
-export const MVP_0_95_BASELINE: RulesBaseline = {
-  ...MVP_0_94_BASELINE,
-  cardTextSnapshotId: "mvp-0.95-demo",
-  engineSchemaVersion: "0.95.0",
-  cardImplementationVersion: "0.95.0",
-  deviationRegistryVersion: "0.95.0",
-  playerViewSchemaVersion: "0.95.0",
-  multiplayerSchemaVersion: "0.95.0",
-  aiControllerSchemaVersion: "0.95.0",
-  simulationSchemaVersion: "0.95.0",
-};
-
-export const MVP_0_96_BASELINE: RulesBaseline = {
-  ...MVP_0_95_BASELINE,
-  cardTextSnapshotId: "mvp-0.96-demo",
-  engineSchemaVersion: "0.96.0",
-  cardImplementationVersion: "0.96.0",
-  deviationRegistryVersion: "0.96.0",
-  playerViewSchemaVersion: "0.96.0",
-  multiplayerSchemaVersion: "0.96.0",
-  aiControllerSchemaVersion: "0.96.0",
-  simulationSchemaVersion: "0.96.0",
-};
-
-export const MVP_0_97_BASELINE: RulesBaseline = {
-  ...MVP_0_96_BASELINE,
-  cardTextSnapshotId: "mvp-0.97-demo",
-  engineSchemaVersion: "0.97.0",
-  cardImplementationVersion: "0.97.0",
-  deviationRegistryVersion: "0.97.0",
-  playerViewSchemaVersion: "0.97.0",
-  multiplayerSchemaVersion: "0.97.0",
-  aiControllerSchemaVersion: "0.97.0",
-  simulationSchemaVersion: "0.97.0",
-};
-
-export const MVP_0_98_BASELINE: RulesBaseline = {
-  ...MVP_0_97_BASELINE,
-  cardTextSnapshotId: "mvp-0.98-demo",
-  engineSchemaVersion: "0.98.0",
-  cardImplementationVersion: "0.98.0",
-  deviationRegistryVersion: "0.98.0",
-  playerViewSchemaVersion: "0.98.0",
-  multiplayerSchemaVersion: "0.98.0",
-  aiControllerSchemaVersion: "0.98.0",
-  simulationSchemaVersion: "0.98.0",
-};
-
-export const MVP_0_99_BASELINE: RulesBaseline = {
-  ...MVP_0_98_BASELINE,
-  cardTextSnapshotId: "mvp-0.99-demo",
-  engineSchemaVersion: "0.99.0",
-  cardImplementationVersion: "0.99.0",
-  deviationRegistryVersion: "0.99.0",
-  playerViewSchemaVersion: "0.99.0",
-  multiplayerSchemaVersion: "0.99.0",
-  aiControllerSchemaVersion: "0.99.0",
-  simulationSchemaVersion: "0.99.0",
 };
 
 const ONR_V1_LOCAL_PRIVATE = "onr_v1_limited_private_local";
@@ -9637,264 +9432,3 @@ export const DEMO_CARDS: CardDefinition[] = [
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =
   Object.fromEntries(DEMO_CARDS.map((card) => [card.id, card]));
-
-export const DEMO_DECKS: Record<DemoDeckId, DeckDefinition> = {
-  demo_runner_001: {
-    id: "demo_runner_001",
-    name: "Runner Demo Deck 01 - Run & Steal",
-    side: "runner",
-    identity: "runner_identity_001",
-    cards: [
-      { id: "simple_economy_event", quantity: 3 },
-      { id: "simple_run_event", quantity: 3 },
-      { id: "simple_fracter", quantity: 2 },
-      { id: "simple_decoder", quantity: 2 },
-      { id: "simple_killer", quantity: 2 },
-    ],
-  },
-  demo_corp_001: {
-    id: "demo_corp_001",
-    name: "Corp Demo Deck 01 - Build & Score",
-    side: "corp",
-    identity: "corp_identity_001",
-    cards: [
-      { id: "simple_agenda", quantity: 3 },
-      { id: "simple_economy_operation", quantity: 3 },
-      { id: "simple_economy_asset", quantity: 3 },
-      { id: "simple_barrier_ice", quantity: 3 },
-      { id: "simple_code_gate_ice", quantity: 3 },
-      { id: "simple_sentry_ice", quantity: 3 },
-    ],
-  },
-  demo_runner_004: {
-    id: "demo_runner_004",
-    name: "Runner Demo Deck 04 - Setup & Pressure",
-    side: "runner",
-    identity: "runner_identity_001",
-    cards: [
-      { id: "simple_economy_event", quantity: 3 },
-      { id: "simple_run_event", quantity: 3 },
-      { id: "simple_draw_event", quantity: 3 },
-      { id: "simple_setup_hardware", quantity: 2 },
-      { id: "simple_fracter", quantity: 2 },
-      { id: "efficient_fracter", quantity: 2 },
-      { id: "simple_decoder", quantity: 2 },
-      { id: "simple_killer", quantity: 2 },
-    ],
-  },
-  demo_corp_004: {
-    id: "demo_corp_004",
-    name: "Corp Demo Deck 04 - Build, Tax & Tag",
-    side: "corp",
-    identity: "corp_identity_001",
-    cards: [
-      { id: "simple_agenda", quantity: 2 },
-      { id: "simple_priority_agenda", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 3 },
-      { id: "simple_draw_operation", quantity: 2 },
-      { id: "simple_economy_asset", quantity: 2 },
-      { id: "simple_upgrade", quantity: 2 },
-      { id: "simple_barrier_ice", quantity: 2 },
-      { id: "simple_taxing_barrier_ice", quantity: 2 },
-      { id: "simple_code_gate_ice", quantity: 2 },
-      { id: "simple_sentry_ice", quantity: 2 },
-      { id: "simple_tag_ice", quantity: 2 },
-      { id: "simple_tag_punishment_operation", quantity: 2 },
-    ],
-  },
-  demo_runner_008: {
-    id: "demo_runner_008",
-    name: "Runner Demo Deck 08 - Starter Pressure",
-    side: "runner",
-    identity: "runner_identity_001",
-    cards: [
-      { id: "simple_economy_event", quantity: 3 },
-      { id: "simple_run_event", quantity: 2 },
-      { id: "simple_draw_event", quantity: 2 },
-      { id: "simple_setup_hardware", quantity: 1 },
-      { id: "simple_fracter", quantity: 2 },
-      { id: "efficient_fracter", quantity: 2 },
-      { id: "simple_decoder", quantity: 1 },
-      { id: "simple_killer", quantity: 1 },
-      { id: "v08_burst_credit_event", quantity: 3 },
-      { id: "v08_deep_draw_event", quantity: 3 },
-      { id: "v08_overclock_run_event", quantity: 2 },
-      { id: "v08_memory_chip", quantity: 2 },
-      { id: "v08_steady_fracter", quantity: 2 },
-      { id: "v08_precise_decoder", quantity: 1 },
-      { id: "v08_adaptive_killer", quantity: 1 },
-    ],
-  },
-  demo_corp_008: {
-    id: "demo_corp_008",
-    name: "Corp Demo Deck 08 - Starter Score Grid",
-    side: "corp",
-    identity: "corp_identity_001",
-    cards: [
-      { id: "simple_agenda", quantity: 1 },
-      { id: "simple_priority_agenda", quantity: 1 },
-      { id: "v08_project_agenda", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 2 },
-      { id: "simple_draw_operation", quantity: 1 },
-      { id: "simple_economy_asset", quantity: 1 },
-      { id: "simple_upgrade", quantity: 1 },
-      { id: "simple_barrier_ice", quantity: 1 },
-      { id: "simple_code_gate_ice", quantity: 1 },
-      { id: "simple_sentry_ice", quantity: 1 },
-      { id: "simple_tag_ice", quantity: 1 },
-      { id: "simple_taxing_barrier_ice", quantity: 1 },
-      { id: "v08_credit_surge_operation", quantity: 3 },
-      { id: "v08_archive_planning_operation", quantity: 2 },
-      { id: "v08_cashout_asset", quantity: 2 },
-      { id: "v08_wall_ice", quantity: 2 },
-      { id: "v08_gate_ice", quantity: 2 },
-      { id: "v08_watchdog_ice", quantity: 2 },
-    ],
-  },
-  demo_runner_096: {
-    id: "demo_runner_096",
-    name: "Runner Demo Deck 0.96 - Trace Bidding Harness",
-    side: "runner",
-    identity: "runner_identity_001",
-    cards: [
-      { id: "simple_economy_event", quantity: 3 },
-      { id: "simple_run_event", quantity: 2 },
-      { id: "simple_draw_event", quantity: 2 },
-      { id: "simple_fracter", quantity: 1 },
-      { id: "simple_decoder", quantity: 1 },
-      { id: "simple_killer", quantity: 2 },
-      { id: "v08_burst_credit_event", quantity: 2 },
-      { id: "v095_safehouse_resource", quantity: 1 },
-    ],
-  },
-  demo_corp_096: {
-    id: "demo_corp_096",
-    name: "Corp Demo Deck 0.96 - Trace Probe Harness",
-    side: "corp",
-    identity: "corp_identity_001",
-    cards: [
-      { id: "simple_agenda", quantity: 1 },
-      { id: "simple_priority_agenda", quantity: 1 },
-      { id: "v08_project_agenda", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 2 },
-      { id: "simple_economy_asset", quantity: 1 },
-      { id: "simple_barrier_ice", quantity: 1 },
-      { id: "simple_tag_ice", quantity: 1 },
-      { id: "v096_trace_probe_ice", quantity: 3 },
-      { id: "v08_credit_surge_operation", quantity: 2 },
-    ],
-  },
-  demo_runner_097: {
-    id: "demo_runner_097",
-    name: "Runner Demo Deck 0.97 - Breach Multiaccess Harness",
-    side: "runner",
-    identity: "runner_identity_001",
-    cards: [
-      { id: "simple_economy_event", quantity: 3 },
-      { id: "simple_run_event", quantity: 2 },
-      { id: "simple_draw_event", quantity: 2 },
-      { id: "simple_fracter", quantity: 1 },
-      { id: "simple_decoder", quantity: 1 },
-      { id: "simple_killer", quantity: 2 },
-      { id: "v08_burst_credit_event", quantity: 2 },
-      { id: "v095_safehouse_resource", quantity: 1 },
-      { id: "v097_deep_dive_event", quantity: 2 },
-    ],
-  },
-  demo_corp_097: {
-    id: "demo_corp_097",
-    name: "Corp Demo Deck 0.97 - Breach Queue Harness",
-    side: "corp",
-    identity: "corp_identity_001",
-    cards: [
-      { id: "simple_agenda", quantity: 1 },
-      { id: "simple_priority_agenda", quantity: 1 },
-      { id: "v08_project_agenda", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 2 },
-      { id: "simple_economy_asset", quantity: 1 },
-      { id: "simple_upgrade", quantity: 1 },
-      { id: "simple_barrier_ice", quantity: 1 },
-      { id: "simple_tag_ice", quantity: 1 },
-      { id: "v096_trace_probe_ice", quantity: 1 },
-      { id: "v08_credit_surge_operation", quantity: 2 },
-    ],
-  },
-  demo_runner_098: {
-    id: "demo_runner_098",
-    name: "Runner Demo Deck 0.98 - Identity Modifier Harness",
-    side: "runner",
-    identity: "v098_runner_identity",
-    cards: [
-      { id: "simple_economy_event", quantity: 3 },
-      { id: "simple_run_event", quantity: 2 },
-      { id: "simple_draw_event", quantity: 2 },
-      { id: "simple_fracter", quantity: 2 },
-      { id: "simple_decoder", quantity: 1 },
-      { id: "simple_killer", quantity: 2 },
-      { id: "v08_burst_credit_event", quantity: 2 },
-      { id: "v095_safehouse_resource", quantity: 1 },
-      { id: "v097_deep_dive_event", quantity: 2 },
-      { id: "v098_stack_search_event", quantity: 1 },
-      { id: "v098_stack_arrange_event", quantity: 1 },
-      { id: "v098_reveal_top_event", quantity: 1 },
-      { id: "v098_expose_event", quantity: 1 },
-    ],
-  },
-  demo_corp_098: {
-    id: "demo_corp_098",
-    name: "Corp Demo Deck 0.98 - Identity Modifier Harness",
-    side: "corp",
-    identity: "v098_corp_identity",
-    cards: [
-      { id: "simple_agenda", quantity: 1 },
-      { id: "simple_priority_agenda", quantity: 1 },
-      { id: "v08_project_agenda", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 2 },
-      { id: "simple_economy_asset", quantity: 1 },
-      { id: "simple_upgrade", quantity: 1 },
-      { id: "simple_barrier_ice", quantity: 1 },
-      { id: "simple_tag_ice", quantity: 1 },
-      { id: "v096_trace_probe_ice", quantity: 1 },
-      { id: "v08_credit_surge_operation", quantity: 2 },
-      { id: "v098_hq_rd_swap_operation", quantity: 1 },
-    ],
-  },
-  demo_runner_099: {
-    id: "demo_runner_099",
-    name: "Runner Demo Deck 0.99 - Hosting Counter Harness",
-    side: "runner",
-    identity: "v098_runner_identity",
-    cards: [
-      { id: "simple_economy_event", quantity: 2 },
-      { id: "simple_run_event", quantity: 2 },
-      { id: "simple_fracter", quantity: 2 },
-      { id: "simple_decoder", quantity: 2 },
-      { id: "simple_killer", quantity: 1 },
-      { id: "v08_burst_credit_event", quantity: 2 },
-      { id: "v095_safehouse_resource", quantity: 1 },
-      { id: "v097_deep_dive_event", quantity: 1 },
-      { id: "v099_host_resource", quantity: 2 },
-      { id: "v099_virus_program", quantity: 2 },
-      { id: "v099_recurring_chip", quantity: 2 },
-    ],
-  },
-  demo_corp_099: {
-    id: "demo_corp_099",
-    name: "Corp Demo Deck 0.99 - Purge Bad Publicity Harness",
-    side: "corp",
-    identity: "v098_corp_identity",
-    cards: [
-      { id: "simple_agenda", quantity: 1 },
-      { id: "simple_priority_agenda", quantity: 1 },
-      { id: "v08_project_agenda", quantity: 1 },
-      { id: "simple_economy_operation", quantity: 1 },
-      { id: "simple_economy_asset", quantity: 1 },
-      { id: "simple_upgrade", quantity: 1 },
-      { id: "simple_barrier_ice", quantity: 2 },
-      { id: "simple_tag_ice", quantity: 1 },
-      { id: "v096_trace_probe_ice", quantity: 1 },
-      { id: "v08_credit_surge_operation", quantity: 1 },
-      { id: "v099_bad_publicity_operation", quantity: 2 },
-    ],
-  },
-};
