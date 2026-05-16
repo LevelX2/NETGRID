@@ -1276,8 +1276,8 @@
       "roundId": "2026-05-15-modifier-agenda-risk",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_MODIFIER_AGENDA_RISK_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-15-modifier-agenda-risk.md",
-      "jobStatus": "commit_pending",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-modifier-agenda-risk.md",
+      "jobStatus": "done",
       "commitPendingReason": "Fachliche Engine-Haertung und gezielter Engine-Lauf gruen, aber lokaler Git-Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
       "cards": [
         {
