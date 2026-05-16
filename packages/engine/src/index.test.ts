@@ -29179,3 +29179,365 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
+
+describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("keeps Sentinels Prime, Sleeper and Wall of Static rez/encounter paths replay-safe", () => {
+    for (const definitionId of [
+      "onr_v1_267_sentinels-prime",
+      "onr_v1_270_sleeper",
+      "onr_v1_279_wall-of-static",
+    ] as const) {
+      const runnerDeck: DeckDefinition = {
+        ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner,
+        id: `spotcheck_${definitionId}_runner`,
+        name: `Spotcheck ${definitionId} Runner`,
+        cards: [
+          { id: "simple_decoder", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner.cards,
+        ],
+      };
+      const corpDeck: DeckDefinition = {
+        ...MECHANIC_SMOKE_DECKS.traceTags.corp,
+        id: `spotcheck_${definitionId}_corp`,
+        name: `Spotcheck ${definitionId} Corp`,
+        cards: [
+          { id: definitionId, quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards,
+        ],
+      };
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `spotcheck-${definitionId}`,
+          baseline: MVP_0_99_BASELINE,
+          runnerDeck,
+          corpDeck,
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 20;
+      state.corp.credits = 30;
+      const programId =
+        definitionId === "onr_v1_267_sentinels-prime"
+          ? installRunnerProgramForTest(state, "simple_decoder")
+          : undefined;
+      putCorpIceOnServer(state, "rd", definitionId);
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+        DEMO_CARDS_BY_ID[definitionId]?.title,
+      );
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rez = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: rez.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `spotcheck-${definitionId}-wrong-side`,
+      });
+      expect(wrongSide.ok).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: rez.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${definitionId}-stale`,
+      });
+      expect(stale.ok).toBe(false);
+      if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+      state = apply(state, "corp", (action) => action.actionId === rez.actionId);
+      expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
+        DEMO_CARDS_BY_ID[definitionId]?.title,
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      expect(state.run).toBeUndefined();
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "continue_run",
+        result: "ended",
+      });
+      if (programId) {
+        expect(state.runner.heap).toContain(programId);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          trashedCardDefinitionId: "simple_decoder",
+          trashedCardType: "program",
+          trashedCount: 1,
+        });
+      }
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("publishes safe results for Accounts Receivable, Annual Reviews and Day Shift", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "spotcheck-operation-economy-results",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
+        corpDeck: ONR_V1_0_6K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_281_accounts-receivable");
+    moveCorpCardToHq(state, "onr_v1_282_annual-reviews");
+    moveCorpCardToHq(state, "onr_v1_288_day-shift");
+
+    const accounts = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_281_accounts-receivable",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: accounts.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "spotcheck-accounts-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: accounts.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "spotcheck-accounts-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBeforeAccounts = state.corp.credits;
+    state = apply(state, "corp", (action) => action.actionId === accounts.actionId);
+    expect(state.corp.credits).toBe(creditsBeforeAccounts + 4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      cardDefinitionId: "onr_v1_281_accounts-receivable",
+      gainedCredits: 9,
+      corpCreditsAfter: state.corp.credits,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+
+    const hqBeforeAnnual = state.corp.hq.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_282_annual-reviews",
+    );
+    expect(state.corp.hq.length).toBe(hqBeforeAnnual + 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_282_annual-reviews",
+      drawnCards: 3,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+
+    const hqBeforeDayShift = state.corp.hq.length;
+    const creditsBeforeDayShift = state.corp.credits;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_288_day-shift",
+    );
+    expect(state.corp.hq.length).toBe(hqBeforeDayShift + 1);
+    expect(state.corp.credits).toBe(creditsBeforeDayShift + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_288_day-shift",
+      drawnCards: 2,
+      gainedCredits: 1,
+      corpCreditsAfter: state.corp.credits,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps trace and targeted Corp operations gated, redacted and replayable", () => {
+    let traceState = toRunnerTurn(v172CardReleaseGame("spotcheck-operation-traces"));
+    traceState.runner.credits = 30;
+    traceState.corp.credits = 30;
+    moveCorpCardToHq(traceState, "onr_v1_283_audit-of-call-records");
+    moveCorpCardToHq(traceState, "onr_v1_284_chance-observation");
+    putCorpIceOnServer(traceState, "rd", "onr_v1_232_crystal-wall");
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      traceState = apply(
+        traceState,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      if (attempt === 0) {
+        traceState = apply(
+          traceState,
+          "corp",
+          (action) =>
+            action.type === "rez_ice" &&
+            sourceDefinition(traceState, action) === "onr_v1_232_crystal-wall",
+        );
+      }
+      traceState = apply(traceState, "runner", (action) => action.type === "continue_run");
+    }
+    traceState = apply(traceState, "runner", (action) => action.type === "end_turn");
+    traceState = apply(traceState, "corp", (action) => action.type === "mandatory_draw");
+
+    const traceInitial = structuredClone(traceState);
+    const traceReplayStart = traceState.eventLog.length;
+    for (const definitionId of [
+      "onr_v1_283_audit-of-call-records",
+      "onr_v1_284_chance-observation",
+    ] as const) {
+      traceState = apply(
+        traceState,
+        "corp",
+        (action) =>
+          action.type === "play_operation" &&
+          sourceDefinition(traceState, action) === definitionId,
+      );
+      expect(traceState.trace).toMatchObject({
+        baseTraceStrength: 5,
+        sourceDefinitionId: definitionId,
+      });
+      expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_operation",
+        cardDefinitionId: definitionId,
+        traceStarted: true,
+        baseTraceStrength: 5,
+      });
+      expect(JSON.stringify(traceState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      traceState = applyChoice(traceState, "corp", "bid_0");
+      traceState = applyChoice(traceState, "runner", "bid_0");
+    }
+    const traceReplay = replayEvents(
+      traceInitial,
+      traceState.eventLog.slice(traceReplayStart),
+    );
+    expect(traceReplay.ok).toBe(true);
+    expect(hashState(traceReplay.state)).toBe(hashState(traceState));
+
+    let detectiveState = toRunnerTurn(v172CardReleaseGame("spotcheck-detective-redaction"));
+    detectiveState.runner.credits = 30;
+    detectiveState.corp.credits = 30;
+    for (const definitionId of [
+      "onr_v1_158_danshis-second-id",
+      "onr_v1_179_silicon-saloon-franchise",
+      "onr_v1_163_floating-runner-bbs",
+    ] as const) {
+      moveRunnerCardToGrip(detectiveState, definitionId);
+      detectiveState = apply(
+        detectiveState,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(detectiveState, action) === definitionId,
+      );
+    }
+    detectiveState.runner.tags = 1;
+    detectiveState = apply(detectiveState, "runner", (action) => action.type === "end_turn");
+    detectiveState = apply(detectiveState, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(detectiveState, "onr_v1_286_corporate-detective-agency");
+    const detectiveInitial = structuredClone(detectiveState);
+    const detectiveReplayStart = detectiveState.eventLog.length;
+    detectiveState = apply(
+      detectiveState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(detectiveState, action) ===
+          "onr_v1_286_corporate-detective-agency",
+    );
+    expect(detectiveState.runner.rig.resources).toHaveLength(1);
+    expect(detectiveState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_286_corporate-detective-agency",
+      trashedResourceCount: 2,
+    });
+    expect(
+      String(detectiveState.eventLog.at(-1)?.publicPayload.trashedResourceDefinitionIds),
+    ).toContain("onr_v1_158_danshis-second-id");
+    expect(JSON.stringify(detectiveState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const detectiveReplay = replayEvents(
+      detectiveInitial,
+      detectiveState.eventLog.slice(detectiveReplayStart),
+    );
+    expect(detectiveReplay.ok).toBe(true);
+    expect(hashState(detectiveReplay.state)).toBe(hashState(detectiveState));
+
+    let counterState = apply(
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-falsified-counter"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    counterState.corp.credits = 20;
+    const agendaId = putCorpRootInRemote(counterState, "simple_agenda");
+    moveCorpCardToHq(counterState, "onr_v1_291_falsified-transactions-expert");
+    const counterInitial = structuredClone(counterState);
+    const counterReplayStart = counterState.eventLog.length;
+    counterState = apply(
+      counterState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(counterState, action) ===
+          "onr_v1_291_falsified-transactions-expert",
+    );
+    expect(cardCounterAmount(counterState, agendaId, "power")).toBe(1);
+    expect(counterState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_291_falsified-transactions-expert",
+      v1919OperationAbility: "add_power_counter",
+      targetCardDefinitionId: "simple_agenda",
+      addedCounterAmount: 1,
+      remainingCounters: 1,
+    });
+    expect(JSON.stringify(counterState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const counterReplay = replayEvents(
+      counterInitial,
+      counterState.eventLog.slice(counterReplayStart),
+    );
+    expect(counterReplay.ok).toBe(true);
+    expect(hashState(counterReplay.state)).toBe(hashState(counterState));
+  });
+});
