@@ -199,6 +199,7 @@ import {
   TAG_CONDITION_UPGRADE_CARD_IDS,
   TRACE_ASSET_CARD_IDS,
 } from "./mechanics/trace-tags";
+import { hashStateSnapshot } from "./state-hash";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
 
@@ -2784,13 +2785,7 @@ export function replayEvents(
 }
 
 export function hashState(state: GameState): StateHash {
-  const canonical = stableStringify(stripForHash(state));
-  let hash = 0x811c9dc5;
-  for (let index = 0; index < canonical.length; index += 1) {
-    hash ^= canonical.charCodeAt(index);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return `fnv1a:${(hash >>> 0).toString(16).padStart(8, "0")}`;
+  return hashStateSnapshot(state);
 }
 
 export function applyEffectCommands(
@@ -23756,22 +23751,6 @@ function fail(
 
 function cloneState<T>(state: T): T {
   return structuredClone(state) as T;
-}
-
-function stripForHash(state: GameState): unknown {
-  const copy = cloneState(state);
-  copy.eventLog = [];
-  return copy;
-}
-
-function stableStringify(value: unknown): string {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
-  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
-  const record = value as Record<string, unknown>;
-  return `{${Object.keys(record)
-    .sort()
-    .map((key) => `${JSON.stringify(key)}:${stableStringify(record[key])}`)
-    .join(",")}}`;
 }
 
 function isReplayAction(value: unknown): value is PlayerAction {
