@@ -236,6 +236,7 @@ type AiPacingMode = "fast" | "paced" | "manual";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
+type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "options";
 type DeckSideFilter = Side | "all";
 type CueAutoDismissMs = 0 | 1500 | 2500 | 4000 | 6000;
 type CardTooltipHoverDelayMs = (typeof CARD_TOOLTIP_HOVER_DELAY_OPTIONS)[number];
@@ -1714,6 +1715,7 @@ function formatHandLimitCount(count: number, limit: number): string {
 
 export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
+  const [activeMatchWorkspace, setActiveMatchWorkspace] = useState<ActiveMatchWorkspace>("game");
   const [mode, setMode] = useState<"host" | "join">("host");
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
   const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
@@ -2433,6 +2435,7 @@ export default function Page() {
   const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
   const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
   const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
+  const activeMatchIsGame = activeMatchWorkspace === "game";
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
   const legalActionSplit = useMemo(() => splitLegalActions(payload?.legalActions ?? []), [payload?.legalActions]);
@@ -3502,6 +3505,20 @@ export default function Page() {
     setNotice("Deck-Snapshot für Match Setup gesetzt.");
   };
 
+  const useValidatedDeckForNextMatch = () => {
+    if (!validatedSnapshot) return;
+    if (validatedSnapshot.side === "runner") {
+      setRunnerLocalSnapshot(validatedSnapshot);
+      setRunnerDeckSource("local");
+      if (selectedLocalDeck) setSelectedRunnerLocalDeckId(selectedLocalDeck.deckId);
+    } else {
+      setCorpLocalSnapshot(validatedSnapshot);
+      setCorpDeckSource("local");
+      if (selectedLocalDeck) setSelectedCorpLocalDeckId(selectedLocalDeck.deckId);
+    }
+    setNotice("Deck-Snapshot für den nächsten Matchstart vorgemerkt.");
+  };
+
   const exportSelectedDeck = () => {
     if (!selectedLocalDeck) return;
     setDeckExportText(`${JSON.stringify({ schemaVersion: "editable-deck-v0.6", deck: selectedLocalDeck }, null, 2)}\n`);
@@ -4320,6 +4337,8 @@ export default function Page() {
             <ConnectionBadge text={statusText} state={connection} />
           </div>
         </div>
+        <ActiveMatchWorkspaceNav workspace={activeMatchWorkspace} onWorkspace={setActiveMatchWorkspace} />
+        {activeMatchIsGame ? (
         <div className="toolbar">
           <button
             className={`button iconOnly topbarUndoToggle ${undoPanelOpen ? "active" : ""} ${payload.pendingUndo ? "attention" : ""}`}
@@ -4341,16 +4360,13 @@ export default function Page() {
           <button
             className={`button iconOnly matchDetailsToggle ${matchDetailsOpen ? "active" : ""}`}
             onClick={() => setMatchDetailsOpen((open) => !open)}
-            title={matchDetailsOpen ? "Matchdetails ausblenden" : "Matchdetails einblenden"}
-            aria-label={matchDetailsOpen ? "Matchdetails ausblenden" : "Matchdetails einblenden"}
+            title={matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden"}
+            aria-label={matchDetailsOpen ? "Aktives Spiel: Status ausblenden" : "Aktives Spiel: Status einblenden"}
             aria-expanded={matchDetailsOpen}
             aria-controls="match-details-strip"
             type="button"
           >
             {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-          <button className="button iconOnly" onClick={() => setOptionsDialogOpen(true)} title="Optionen öffnen" aria-label="Optionen öffnen" type="button">
-            <SlidersHorizontal size={16} />
           </button>
           {canReturnToStart ? (
             <button className="button primary" onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
@@ -4375,10 +4391,11 @@ export default function Page() {
             {rightRailCollapsed ? <PanelRightOpen size={16} /> : <PanelRightClose size={16} />}
           </button>
         </div>
+        ) : null}
       </header>
 
       {matchDetailsOpen ? (
-        <div className="matchStrip" id="match-details-strip" aria-label="Matchdetails">
+        <div className="matchStrip" id="match-details-strip" aria-label="Status zum aktiven Spiel">
           <span title={payload.matchStatus}><strong>Status</strong> {payload.matchStatus}</span>
           <span title={payload.matchId}><strong>Match</strong> {shortDiagnosticsHash(payload.matchId)}</span>
           <span><strong>Gegenüber</strong> {opponentDisplayName ?? sideLabel(payload.opponentStatus.side)}</span>
@@ -4400,6 +4417,7 @@ export default function Page() {
         onRequest={requestUndo}
         onResolve={resolveUndo}
       />
+      {activeMatchIsGame ? (
       <OpponentActionOverlay
         cue={currentActionCue}
         queued={actionCueQueue.length}
@@ -4414,7 +4432,8 @@ export default function Page() {
           advanceAi(localAiPacingMode === "fast" ? "until_human" : "single_step");
         }}
       />
-      {activeView?.run ? (
+      ) : null}
+      {activeMatchIsGame && activeView?.run ? (
         <RunTimelineOverlay
           view={activeView}
           legalActions={payload.legalActions}
@@ -4425,6 +4444,7 @@ export default function Page() {
           onAction={submitAction}
         />
       ) : null}
+      {activeMatchIsGame ? (
       <ScoredAgendaOverlay
         side="corp"
         cards={scoreAreaCardsBySide("corp")}
@@ -4442,6 +4462,8 @@ export default function Page() {
         onClose={() => setScoreAreaOverlays((value) => ({ ...value, corp: false }))}
         onPosition={(position) => setScoreAreaOverlayPositions((value) => ({ ...value, corp: position }))}
       />
+      ) : null}
+      {activeMatchIsGame ? (
       <ScoredAgendaOverlay
         side="runner"
         cards={scoreAreaCardsBySide("runner")}
@@ -4459,7 +4481,9 @@ export default function Page() {
         onClose={() => setScoreAreaOverlays((value) => ({ ...value, runner: false }))}
         onPosition={(position) => setScoreAreaOverlayPositions((value) => ({ ...value, runner: position }))}
       />
+      ) : null}
 
+      {activeMatchIsGame ? (
       <div className={`main${rightRailCollapsed ? " rightRailCollapsed" : ""}`} data-testid="active-game">
         <aside className="column panel sidePanel">
           <OpponentPanel
@@ -4811,7 +4835,100 @@ export default function Page() {
           ) : null}
         </aside>
       </div>
-      {showResultModal && resultSummary ? (
+      ) : (
+        <div className={`activeMatchWorkspace ${activeMatchWorkspace === "decks" ? "deckWorkspaceView" : ""}`} data-testid={`active-match-${activeMatchWorkspace}`}>
+          {activeMatchWorkspace === "catalog" ? (
+            <CatalogPanel
+              cards={filteredCatalogCards}
+              detail={catalogDetail}
+              filters={catalogFilters}
+              search={catalogSearch}
+              side={catalogSide}
+              status={catalogStatus}
+              summary={catalogSummary}
+              selectedId={selectedCatalogId}
+              showExpertStatuses={catalogExpertStatuses}
+              typeCounts={catalogTypeCounts}
+              typeFilters={catalogTypeFilters}
+              onSearch={setCatalogSearch}
+              onSide={setCatalogSide}
+              onStatus={setCatalogStatus}
+              onSelect={setSelectedCatalogId}
+              onToggleExpertStatuses={setCatalogExpertStatuses}
+              onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
+              onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
+              onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
+            />
+          ) : null}
+          {activeMatchWorkspace === "decks" ? (
+            <DeckEditorPanel
+              localDecks={localDecks}
+              selectedDeck={selectedLocalDeck}
+              selectedDeckDirty={selectedDeckDirty}
+              storagePath={deckLibraryStoragePath}
+              validation={deckValidation}
+              validatedSnapshot={validatedSnapshot}
+              playableCards={playableCatalogCards}
+              cardDetailsById={catalogDetailsById}
+              importText={deckImportText}
+              exportText={deckExportText}
+              onCreateEmpty={createEmptyDeck}
+              onSelectDeck={setSelectedLocalDeckId}
+              onUpdateDeck={updateSelectedDeck}
+              onSave={saveSelectedDeck}
+              onUpdateQuantity={updateDeckCardQuantity}
+              onDuplicate={duplicateSelectedDeck}
+              onDelete={deleteSelectedDeck}
+              onValidate={validateSelectedDeck}
+              onUseForMatch={useValidatedDeckForNextMatch}
+              useForMatchLabel="Für nächsten Start vormerken"
+              onExport={exportSelectedDeck}
+              onImportText={setDeckImportText}
+              onImport={importLocalDeck}
+            />
+          ) : null}
+          {activeMatchWorkspace === "options" ? (
+            <OptionsPanel
+              actionCueAutoDismissMs={actionCueAutoDismissMs}
+              actionCuesEnabled={actionCuesEnabled}
+              audioEnabled={audioEnabled}
+              audioVolume={audioVolume}
+              cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
+              cardTooltipMode={cardTooltipMode}
+              cardTooltipScalePercent={cardTooltipScalePercent}
+              cardHandScalePercent={cardHandScalePercent}
+              cardArchiveScalePercent={cardArchiveScalePercent}
+              cardZoneScalePercent={cardZoneScalePercent}
+              cardBoardScalePercent={cardBoardScalePercent}
+              cardRigScalePercent={cardRigScalePercent}
+              cardDisplayMode={cardDisplayMode}
+              colorScheme={colorScheme}
+              cuePosition={cuePosition}
+              aiPacingMode={localAiPacingMode}
+              session={session}
+              onActionCueAutoDismissMs={setActionCueAutoDismissMs}
+              onActionCuesEnabled={setActionCuesEnabled}
+              onAudioEnabled={updateAudioEnabled}
+              onAudioVolume={setAudioVolume}
+              onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
+              onCardTooltipMode={setCardTooltipMode}
+              onCardTooltipScalePercent={setCardTooltipScalePercent}
+              onCardHandScalePercent={setCardHandScalePercent}
+              onCardArchiveScalePercent={setCardArchiveScalePercent}
+              onCardZoneScalePercent={setCardZoneScalePercent}
+              onCardBoardScalePercent={setCardBoardScalePercent}
+              onCardRigScalePercent={setCardRigScalePercent}
+              onCardDisplayMode={setCardDisplayMode}
+              onColorScheme={setColorScheme}
+              onCuePosition={setCuePosition}
+              onAiPacingMode={updateLocalAiPacingMode}
+              onCopyReconnectLink={copyReconnectLink}
+              onDiscardLocalSession={discardLocalActiveSession}
+            />
+          ) : null}
+        </div>
+      )}
+      {activeMatchIsGame && showResultModal && resultSummary ? (
         <GameOverModal
           result={resultSummary}
           side={session.side}
@@ -4826,7 +4943,7 @@ export default function Page() {
           {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
         />
       ) : null}
-      {showAccessReveal && accessReveal ? (
+      {activeMatchIsGame && showAccessReveal && accessReveal ? (
         <AccessRevealModal
           reveal={accessReveal}
           displayMode={cardDisplayMode}
@@ -4915,6 +5032,47 @@ function Brand() {
         <h1 className="srOnly">{APP_NAME}</h1>
       </div>
     </div>
+  );
+}
+
+function ActiveMatchWorkspaceNav({
+  workspace,
+  onWorkspace
+}: {
+  workspace: ActiveMatchWorkspace;
+  onWorkspace(workspace: ActiveMatchWorkspace): void;
+}) {
+  const items: Array<{ id: ActiveMatchWorkspace; label: string; title: string; icon: ReactNode }> =
+    workspace === "game"
+      ? [
+          { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
+          { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
+          { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
+        ]
+      : [
+          { id: "game", label: "Aktives Spiel", title: "Zurück zum aktiven Spiel", icon: <Play size={16} /> },
+          { id: "catalog", label: "Katalog", title: "Katalog öffnen", icon: <ListFilter size={16} /> },
+          { id: "decks", label: "Decks", title: "Decks öffnen", icon: <Layers3 size={16} /> },
+          { id: "options", label: "Optionen", title: "Optionen öffnen", icon: <SlidersHorizontal size={16} /> }
+        ];
+
+  return (
+    <nav className={`activeWorkspaceNav ${workspace === "game" ? "compact" : ""}`} aria-label="Aktives Spiel und Werkzeuge">
+      {items.map((item) => (
+        <button
+          className={`button activeWorkspaceButton ${workspace === item.id ? "active" : ""} ${item.id === "game" && workspace !== "game" ? "runningGame" : ""}`}
+          key={item.id}
+          onClick={() => onWorkspace(item.id)}
+          type="button"
+          title={item.title}
+          aria-label={item.title}
+          aria-current={workspace === item.id ? "page" : undefined}
+        >
+          {item.icon}
+          <span className="workspaceLabel">{item.label}</span>
+        </button>
+      ))}
+    </nav>
   );
 }
 
@@ -7878,6 +8036,7 @@ function DeckEditorPanel({
   onDelete,
   onValidate,
   onUseForMatch,
+  useForMatchLabel = "Im Matchstart auswählen",
   onExport,
   onImportText,
   onImport
@@ -7901,6 +8060,7 @@ function DeckEditorPanel({
   onDelete(): void;
   onValidate(): void;
   onUseForMatch(): void;
+  useForMatchLabel?: string;
   onExport(): void;
   onImportText(value: string): void;
   onImport(): void;
@@ -8714,7 +8874,7 @@ function DeckEditorPanel({
                       </button>
                       <button className="button" onClick={onUseForMatch} disabled={!validatedSnapshot}>
                         <Play size={15} />
-                        Im Matchstart auswählen
+                        {useForMatchLabel}
                       </button>
                       <button className="button" onClick={onExport}>
                         <Download size={15} />
