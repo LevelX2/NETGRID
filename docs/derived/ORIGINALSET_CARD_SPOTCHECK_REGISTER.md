@@ -256,7 +256,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_BREAKER_ICE_SUBTYPE_MIX_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
