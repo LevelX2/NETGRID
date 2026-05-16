@@ -1,11 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-asset-upgrade-trace-modifiers
-status: commit_pending
+status: done
 createdAt: 2026-05-16T10:59:00+01:00
 startedAt: 2026-05-16T12:56:00+02:00
-completedAt: 2026-05-16T13:00:55+02:00
-commitPendingAt: 2026-05-16T13:00:55+02:00
-commitPendingReason: ".git ACL/index.lock creation is blocked by foreign direct DENY SID S-1-5-21-2893003870-2010802999-161870138-128397290; git add/commit cannot create .git/index.lock. User instructed to continue package processing and resolve git locks after packages."
+completedAt: 2026-05-16T18:18:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -309,4 +307,6 @@ Grüne Checks:
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Commit-Pending-Grund: `.git` ist durch die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` weiterhin so gesperrt, dass `git add`/`git commit` keine `.git/index.lock` erstellen kann. Staging und Commit werden nach ACL-Reparatur nachzuziehen sein.
+Commit-Status:
+
+- Lokaler Commit wurde nach Worktree-Gitdir-Entsperrung erfolgreich erstellt.
