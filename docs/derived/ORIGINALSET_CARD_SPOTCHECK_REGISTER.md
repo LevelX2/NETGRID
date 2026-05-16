@@ -298,7 +298,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PREVENTION_INTERFACE_AGENDA_ACTIONS_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
