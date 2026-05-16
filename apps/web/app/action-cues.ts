@@ -8,6 +8,7 @@ export type OpponentActionCue = {
   viewerSide: Side;
   actor?: Side;
   actorLabel: string;
+  actionUse?: CueActionUse;
   opponent: boolean;
   source: "human" | "ai" | "system";
   actionType: string;
@@ -21,6 +22,14 @@ export type OpponentActionCue = {
   soundCount?: number;
   requiresLocalAttention: boolean;
   aiExplanation?: string;
+};
+
+export type CueActionUse = {
+  label: string;
+  title: string;
+  clicks: number;
+  start: number;
+  end: number;
 };
 
 export type BoardHighlight =
@@ -57,6 +66,7 @@ export type CueDerivationInput = {
 };
 
 export function deriveOpponentActionCues(input: CueDerivationInput): OpponentActionCue[] {
+  const actionUsesByEventId = deriveTurnActionUses(input.events);
   const relevantEvents = eventsAfter(input.events, input.lastPresentedEventId);
   const localAttention = hasLocalAttention(input.playerView, input.viewerSide);
   const visibleCards = visibleCardsByDefinition(input.playerView);
@@ -86,6 +96,7 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       viewerSide: input.viewerSide,
       ...(actor ? { actor } : {}),
       actorLabel: actorLabel(actor, source),
+      ...(actionUsesByEventId[event.eventId] ? { actionUse: actionUsesByEventId[event.eventId] } : {}),
       opponent,
       source,
       actionType,
@@ -116,6 +127,37 @@ function eventsAfter(events: PublicGameEvent[], lastPresentedEventId?: string | 
   if (!lastPresentedEventId) return events;
   const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
   return index >= 0 ? events.slice(index + 1) : events;
+}
+
+function deriveTurnActionUses(events: PublicGameEvent[]): Record<string, CueActionUse> {
+  const spentBySide: Partial<Record<Side, number>> = {};
+  const result: Record<string, CueActionUse> = {};
+  for (const event of events) {
+    const payload = event.publicPayload ?? {};
+    const actionType = stringValue(payload.actionType) ?? event.type;
+    const actor = sideValue(payload.actor);
+    if (!actor) continue;
+
+    const clicks = positiveIntegerValue(payload.actionCostClicks);
+    if (clicks !== undefined) {
+      const runningStart = (spentBySide[actor] ?? 0) + 1;
+      const payloadStart = positiveIntegerValue(payload.turnActionOrdinalStart);
+      const start = Math.max(runningStart, payloadStart ?? 0);
+      const payloadEnd = positiveIntegerValue(payload.turnActionOrdinalEnd);
+      const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
+      result[event.eventId] = {
+        label: start === end ? String(start) : `${start}-${end}`,
+        title: start === end ? `${start}. Aktion in diesem Zug` : `Aktionen ${start} bis ${end} in diesem Zug`,
+        clicks,
+        start,
+        end
+      };
+      spentBySide[actor] = end;
+    }
+
+    if (actionType === "end_turn") spentBySide[actor] = 0;
+  }
+  return result;
 }
 
 function deriveHighlight(
@@ -255,4 +297,8 @@ function stringValue(value: unknown): string | undefined {
 
 function sideValue(value: unknown): Side | undefined {
   return value === "corp" || value === "runner" ? value : undefined;
+}
+
+function positiveIntegerValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
 }

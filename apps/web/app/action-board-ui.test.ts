@@ -11,6 +11,7 @@ import {
   activeRunIceInstanceId,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  automaticEndTurnAction,
   breachProgressLabel,
   clampCuePosition,
   contextualCardActionLabel,
@@ -52,6 +53,37 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(split.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: iceA.instanceId, label: iceA.title! }))).toHaveLength(1);
     expect(split.contextualActions.filter((action) => actionMatchesContext(action, { kind: "server", id: "rd", label: "F&E (R&D)" }))).toHaveLength(1);
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf F&E (R&D)");
+  });
+
+  it("only offers automatic end turn when end turn is the sole remaining own action", () => {
+    const board = view("corp", { activeSide: "corp", own: { ...view("corp").own, clicks: 0 } });
+    const endTurn = legalAction("corp", "end_turn", "game_rule", "Zug beenden");
+    const scoreAgenda = legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" });
+
+    expect(automaticEndTurnAction(board, [endTurn], "corp")).toBe(endTurn);
+    expect(automaticEndTurnAction(board, [endTurn, scoreAgenda], "corp")).toBeUndefined();
+    expect(
+      automaticEndTurnAction(
+        {
+          ...board,
+          pendingChoice: {
+            choiceId: "choice_1",
+            side: "corp",
+            source: "test",
+            prompt: "Wählen",
+            kind: "confirm",
+            minSelections: 1,
+            maxSelections: 1,
+            stateVersion: 1,
+            visibility: "public",
+            options: []
+          }
+        },
+        [endTurn],
+        "corp"
+      )
+    ).toBeUndefined();
+    expect(automaticEndTurnAction({ ...board, activeSide: "runner" }, [endTurn], "corp")).toBeUndefined();
   });
 
   it("maps RunTimeline state, active target and server labels without raw V1.0.5 labels", () => {

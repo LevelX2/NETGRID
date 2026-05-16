@@ -143,6 +143,23 @@ describe("deriveOpponentActionCues", () => {
     expect(actionSoundCountForAction("mandatory_draw", {})).toBe(1);
     expect(actionSoundCountForAction("gain_credit", { amount: 3 })).toBe(1);
   });
+
+  it("numbers opponent paid actions from the public turn sequence, including extra actions", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_1", "gain_credit", { actor: "corp", actionCostClicks: 1, turnActionOrdinalStart: 1, turnActionOrdinalEnd: 1 }),
+        event("evt_2", "play_operation", { actor: "corp", actionCostClicks: 1, turnActionOrdinalStart: 2, turnActionOrdinalEnd: 2 }),
+        event("evt_3", "install_card", { actor: "corp", actionCostClicks: 1, turnActionOrdinalStart: 3, turnActionOrdinalEnd: 3, serverId: "remote_1", serverLabel: "Remote 1", zoneLabel: "Root" }),
+        event("evt_4", "gain_credit", { actor: "corp", actionCostClicks: 1, turnActionOrdinalStart: 1, turnActionOrdinalEnd: 1 }),
+        event("evt_5", "gain_credit", { actor: "corp", actionCostClicks: 1, turnActionOrdinalStart: 1, turnActionOrdinalEnd: 1 })
+      ]
+    });
+
+    expect(cues.map((cue) => cue.actionUse?.label)).toEqual(["1", "2", "3", "4", "5"]);
+    expect(cues[4]?.actionUse?.title).toBe("5. Aktion in diesem Zug");
+  });
 });
 
 function event(eventId: string, actionType: string, payload: Record<string, unknown>): PublicGameEvent {

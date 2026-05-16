@@ -114,6 +114,14 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
   return { primaryActions, contextualActions };
 }
 
+export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side): LegalAction | undefined {
+  if (view.winner || view.pendingChoice || view.activeSide !== side) return undefined;
+  const ownActions = actions.filter((action) => action.side === side);
+  const endTurn = ownActions.find((action) => action.type === "end_turn");
+  if (!endTurn) return undefined;
+  return ownActions.every((action) => action.type === "end_turn") ? endTurn : undefined;
+}
+
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
   if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;

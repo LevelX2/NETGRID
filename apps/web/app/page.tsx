@@ -89,6 +89,7 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  automaticEndTurnAction,
   baseActionSlotCapacity,
   breachProgressLabel,
   clampCuePosition,
@@ -166,6 +167,8 @@ const AUDIO_STORAGE_KEY = "netgrid-s01-audio";
 const LEGACY_AUDIO_STORAGE_KEY = "netgrid-s01-audio";
 const ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
 const LEGACY_ACTION_CUE_SETTINGS_STORAGE_KEY = "netgrid.actionCueSettings.v1";
+const GAMEPLAY_SETTINGS_STORAGE_KEY = "netgrid.gameplaySettings.v1";
+const LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY = "netgrid.gameplaySettings.v1";
 const CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
 const LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY = "netgrid.cardTooltipSettings.v1";
 const CARD_SIZE_SETTINGS_STORAGE_KEY = "netgrid.cardSizeSettings.v1";
@@ -1813,6 +1816,8 @@ export default function Page() {
   const [actionCuesEnabled, setActionCuesEnabled] = useState(true);
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
+  const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
+  const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
@@ -1837,6 +1842,7 @@ export default function Page() {
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
+  const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
@@ -2107,6 +2113,24 @@ export default function Page() {
     if (!actionCueSettingsLoaded) return;
     window.localStorage.setItem(ACTION_CUE_SETTINGS_STORAGE_KEY, JSON.stringify({ enabled: actionCuesEnabled, autoDismissMs: actionCueAutoDismissMs }));
   }, [actionCueSettingsLoaded, actionCuesEnabled, actionCueAutoDismissMs]);
+
+  useEffect(() => {
+    const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as { autoEndTurnEnabled?: unknown };
+        if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
+      } catch {
+        removeLocalStorageKeys(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
+      }
+    }
+    setGameplaySettingsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!gameplaySettingsLoaded) return;
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoEndTurnEnabled }));
+  }, [gameplaySettingsLoaded, autoEndTurnEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -3085,8 +3109,8 @@ export default function Page() {
     setNotice("Lokaler Sitzungseintrag verworfen.");
   };
 
-  const submitAction = (action: LegalAction) => {
-    if (!session || !payload || !ensureSocketConnected()) return;
+  const submitAction = (action: LegalAction): boolean => {
+    if (!session || !payload || !ensureSocketConnected()) return false;
     if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);
     socketRef.current?.send(
       JSON.stringify({
@@ -3100,7 +3124,17 @@ export default function Page() {
         }
       })
     );
+    return true;
   };
+
+  useEffect(() => {
+    if (!autoEndTurnEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
+    const action = automaticEndTurnAction(payload.playerView, payload.legalActions, session.side);
+    if (!action) return;
+    const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
+    if (autoEndTurnSubmittedKeyRef.current === key) return;
+    if (submitAction(action)) autoEndTurnSubmittedKeyRef.current = key;
+  }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
 
   const submitChoiceOption = (action: LegalAction, choiceId: string, selectedOptionId: string) => {
     if (!session || !payload || !ensureSocketConnected()) return;
@@ -4276,6 +4310,7 @@ export default function Page() {
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
+              autoEndTurnEnabled={autoEndTurnEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -4292,6 +4327,7 @@ export default function Page() {
               aiPacingMode={localAiPacingMode}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
+              onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -4891,6 +4927,7 @@ export default function Page() {
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
+              autoEndTurnEnabled={autoEndTurnEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -4908,6 +4945,7 @@ export default function Page() {
               session={session}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
+              onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -4957,6 +4995,7 @@ export default function Page() {
           <OptionsPanel
             actionCueAutoDismissMs={actionCueAutoDismissMs}
             actionCuesEnabled={actionCuesEnabled}
+            autoEndTurnEnabled={autoEndTurnEnabled}
             audioEnabled={audioEnabled}
             audioVolume={audioVolume}
             cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -4975,6 +5014,7 @@ export default function Page() {
             session={session}
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
+            onAutoEndTurnEnabled={setAutoEndTurnEnabled}
             onAudioEnabled={updateAudioEnabled}
             onAudioVolume={setAudioVolume}
             onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -5569,6 +5609,7 @@ function seriesStatusText(series: SeriesResultSummary): string {
 function OptionsPanel({
   actionCueAutoDismissMs,
   actionCuesEnabled,
+  autoEndTurnEnabled,
   audioEnabled,
   audioVolume,
   cardTooltipHoverDelayMs,
@@ -5587,6 +5628,7 @@ function OptionsPanel({
   session = null,
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
+  onAutoEndTurnEnabled,
   onAudioEnabled,
   onAudioVolume,
   onCardTooltipHoverDelayMs,
@@ -5606,6 +5648,7 @@ function OptionsPanel({
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
+  autoEndTurnEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
@@ -5624,6 +5667,7 @@ function OptionsPanel({
   session?: SessionInfo | null;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
+  onAutoEndTurnEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
@@ -5671,6 +5715,7 @@ function OptionsPanel({
           onBoardPercent={onCardBoardScalePercent}
           onRigPercent={onCardRigScalePercent}
         />
+        <GameplaySettings autoEndTurnEnabled={autoEndTurnEnabled} onAutoEndTurnEnabled={onAutoEndTurnEnabled} />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
@@ -5919,6 +5964,24 @@ function CardSizeSliderRow({
   );
 }
 
+function GameplaySettings({ autoEndTurnEnabled, onAutoEndTurnEnabled }: { autoEndTurnEnabled: boolean; onAutoEndTurnEnabled(value: boolean): void }) {
+  return (
+    <div className="gameplaySettings">
+      <div className="settingsHeaderLine">
+        <div>
+          <span className="settingsTitle">Spielablauf</span>
+          <span className="meta">Lokale Komfortoption, kein Match-State</span>
+        </div>
+        <label className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}>
+          <input type="checkbox" checked={autoEndTurnEnabled} onChange={(event) => onAutoEndTurnEnabled(event.target.checked)} />
+          Auto-Zugende
+        </label>
+      </div>
+      <p className="settingsHelp">Beendet Deinen Zug automatisch nur dann, wenn als einzige eigene legale Aktion noch Zug beenden offen ist.</p>
+    </div>
+  );
+}
+
 function AiPacingSettings({ mode, onMode }: { mode: AiPacingMode; onMode(value: AiPacingMode): void }) {
   return (
     <div className="aiPacingSettings">
@@ -6089,7 +6152,7 @@ function OpponentActionOverlay({
   return (
     <aside
       ref={overlayRef}
-      className={`opponentCueOverlay ${cuePositionClassName(position)} importance-${cue.importance} visibility-${cue.visibility}`}
+      className={`opponentCueOverlay ${cuePositionClassName(position)} actor-${cue.actor ?? "system"} importance-${cue.importance} visibility-${cue.visibility}`}
       style={cuePositionStyle(position)}
       aria-live="polite"
       data-testid="opponent-cue"
@@ -6100,6 +6163,7 @@ function OpponentActionOverlay({
             {cue.source === "ai" ? <Bot size={18} /> : cue.source === "human" ? <User size={18} /> : cue.requiresLocalAttention ? <Sparkles size={18} /> : <Activity size={18} />}
           </span>
           <span>{cue.actorLabel}</span>
+          {cue.actionUse ? <span className="opponentCueActionUse" title={cue.actionUse.title}>{cueActionUseLabel(cue)}</span> : null}
         </div>
         <button
           className="button iconOnly cueDragHandle"
@@ -6143,6 +6207,12 @@ function OpponentActionOverlay({
       </div>
     </aside>
   );
+}
+
+function cueActionUseLabel(cue: OpponentActionCue): string {
+  const actor = cue.actor === "corp" ? "Korp" : cue.actor === "runner" ? "Runner" : "Spiel";
+  if (!cue.actionUse) return actor;
+  return cue.actionUse.start === cue.actionUse.end ? `${cue.actionUse.start}. ${actor}-Aktion` : `${actor}-Aktionen ${cue.actionUse.start}-${cue.actionUse.end}`;
 }
 
 function cueVisualLabel(cue: OpponentActionCue): string {
