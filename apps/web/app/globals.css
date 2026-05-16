@@ -4190,6 +4190,33 @@ select {
   overflow: visible;
 }
 
+.iceLane {
+  flex-wrap: nowrap;
+  gap: 0;
+  align-items: flex-start;
+  overflow-x: auto;
+  overflow-y: visible;
+}
+
+.iceLane .iceCardSlot {
+  z-index: 1;
+}
+
+.iceLane .iceCardSlot + .iceCardSlot.unrezzedIceStackSlot {
+  margin-left: calc(-77px * var(--lane-card-scale, 1));
+}
+
+.iceLane .iceCardSlot + .iceCardSlot.rezzedIceStackSlot {
+  margin-left: calc(-58px * var(--lane-card-scale, 1));
+}
+
+.iceLane .iceCardSlot:hover,
+.iceLane .iceCardSlot:focus-within,
+.iceLane .iceCardSlot.actionMenuOpen,
+.iceLane .iceCardSlot.runPositionActiveSlot {
+  z-index: 38;
+}
+
 .laneLabel {
   display: flex;
   align-items: center;

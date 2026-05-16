@@ -1586,6 +1586,11 @@ function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]):
   return [rootLane, iceLane];
 }
 
+function iceStackSlotClass(card: VisibleCard): string {
+  const installedState = corpInstalledCardState(card);
+  return installedState === "rezzed" ? "iceCardSlot rezzedIceStackSlot" : "iceCardSlot unrezzedIceStackSlot";
+}
+
 function opponentSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
 }
@@ -4697,6 +4702,7 @@ export default function Page() {
                             selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                             actions={cardActionsFor(card)}
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                            {...(lane.kind === "ice" ? { slotClassName: iceStackSlotClass(card) } : {})}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
                             runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
@@ -4751,7 +4757,7 @@ export default function Page() {
                                   <div className="laneLabel">
                                     <span>{lane.label}</span>
                                   </div>
-                                  <div className="lane" style={boardLaneStyle}>
+                                  <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
                                     {renderLaneCards(lane)}
                                   </div>
                                 </div>
@@ -10447,6 +10453,7 @@ function CardView({
   actions = [],
   actionDisabled = false,
   actionLabelForAction = contextualCardActionLabel,
+  slotClassName,
   positionBadge,
   runPositionActive = false,
   runPositionLabel,
@@ -10469,6 +10476,7 @@ function CardView({
   actions?: LegalAction[];
   actionDisabled?: boolean;
   actionLabelForAction?: (action: LegalAction) => string;
+  slotClassName?: string;
   positionBadge?: string;
   runPositionActive?: boolean;
   runPositionLabel?: string | undefined;
@@ -10804,7 +10812,7 @@ function CardView({
   ) : null;
 
   return (
-    <div className={`cardSlot${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}`}>
+    <div className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}`}>
       {positionBadge ? (
         <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: Installationsreihenfolge von innen nach außen`}>
           {positionBadge}
