@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
 import {
   DEFAULT_CUE_POSITION,
+  accessRevealStatusLabel,
   actionButtonLabel,
   actionConsumesClick,
   actionCostChips,
@@ -251,8 +252,8 @@ describe("V1.0.5 action board UI helpers", () => {
 
   it("debounces the AI fallback controls during automatic pacing", () => {
     expect(aiPacingFallbackDelayMs("manual", false)).toBe(0);
-    expect(aiPacingFallbackDelayMs("paced", false)).toBe(1400);
-    expect(aiPacingFallbackDelayMs("fast", false)).toBe(1400);
+    expect(aiPacingFallbackDelayMs("paced", false)).toBe(4000);
+    expect(aiPacingFallbackDelayMs("fast", false)).toBe(4000);
     expect(aiPacingFallbackDelayMs("paced", true)).toBeNull();
   });
 
@@ -539,6 +540,23 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(access)).toBe("Zugriff auf Karte");
     expect(mirrored).toEqual([access]);
     expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
+  });
+
+  it("describes accessed Archive assets as already trashed instead of blocked by credits", () => {
+    const accessedUpgrade = card("upgrade_1", "Dedicated Response Team", "upgrade");
+    accessedUpgrade.trashCost = 2;
+    const continueAccess = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
+
+    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).toContain("bereits im Archiv");
+    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).not.toContain("nicht genug Credits");
+  });
+
+  it("keeps the insufficient-credit access hint for installed assets and upgrades", () => {
+    const accessedUpgrade = card("upgrade_1", "Dedicated Response Team", "upgrade");
+    accessedUpgrade.trashCost = 2;
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Nicht trashen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
+
+    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Fort 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
   });
 });
 

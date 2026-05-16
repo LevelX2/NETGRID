@@ -369,7 +369,7 @@ export function aiPacingDelayMs(mode: AiPacingTriggerMode, hasPendingCue: boolea
 export function aiPacingFallbackDelayMs(mode: AiPacingTriggerMode, hasPendingAiCue: boolean): number | null {
   if (hasPendingAiCue) return null;
   if (mode === "manual") return 0;
-  return 1400;
+  return 4000;
 }
 
 export function serverBoardRows<T extends { id: string }>(servers: T[], viewerSide: Side): Array<{ kind: "remotes" | "centrals"; servers: T[] }> {
@@ -410,6 +410,28 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
   if (remote?.[1]) return `Fort ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
+}
+
+export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actions: LegalAction[], actorSide: Side, viewerSide: Side, serverLabel: string): string {
+  const fromArchives = serverDisplayLabel(serverLabel) === "Archive";
+  if (actorSide !== viewerSide) return observedAccessStatusLabel(card, actorSide, fromArchives);
+  if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
+  if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
+    return "Diese Karte liegt bereits im Archiv. Sie kann beim Archivzugriff nicht noch einmal getrasht werden. Du kannst weiter zugreifen oder den Zugriff abschließen.";
+  }
+  if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
+  if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
+  if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
+  if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
+  return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
+}
+
+function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
+  const subject = actorSide === "corp" ? "Die Korp" : "Der Runner";
+  if (card.type === "agenda") return `${subject} kann diese Agenda jetzt stehlen.`;
+  if (fromArchives && (card.type === "asset" || card.type === "upgrade")) return `${subject} hat diese Karte im Archiv gesehen; sie kann dort nicht erneut getrasht werden.`;
+  if ((card.type === "asset" || card.type === "upgrade") && typeof card.trashCost === "number") return `${subject} entscheidet jetzt, ob diese Karte getrasht oder liegen gelassen wird.`;
+  return `${subject} hat diese Karte gesehen; der Zugriff ist abgeschlossen.`;
 }
 
 export function currentRunTimelineStep(view: PlayerView, actions: LegalAction[]): RunTimelineStepId | null {

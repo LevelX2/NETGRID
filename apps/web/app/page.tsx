@@ -78,6 +78,7 @@ import {
   DEFAULT_CUE_POSITION,
   LEGACY_ACTION_CUE_POSITION_STORAGE_KEY,
   RUN_TIMELINE_STEPS,
+  accessRevealStatusLabel,
   actionButtonLabel,
   actionConsumesClick,
   actionContextStillVisible,
@@ -100,6 +101,7 @@ import {
   groupRunnerRigCards,
   hasLegalAction,
   parseCuePositionPreference,
+  normalizeVisibleTerms,
   runTargetServerIds,
   runAwareActionButtonLabel,
   runWindowActionButtonLabel,
@@ -1175,7 +1177,7 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
     description: accessRevealDescription(actorSide, viewerSide, serverLabel),
     card,
     actions,
-    trashStatus: accessTrashStatus(card, actions, actorSide, viewerSide)
+    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
   };
 }
 
@@ -1209,23 +1211,6 @@ function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel:
 
 function accessActorSubject(side: Side): string {
   return side === "corp" ? "Die Korp" : "Der Runner";
-}
-
-function accessTrashStatus(card: DisplayVisibleCard, actions: LegalAction[], actorSide: Side, viewerSide: Side): string {
-  if (actorSide !== viewerSide) return observedAccessStatus(card, actorSide);
-  if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
-  if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
-  if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
-  if (card.type === "asset" || card.type === "upgrade") return "Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.";
-  if (actions.some((action) => action.type === "decline_trash")) return "Diese Karte hat keine Trash-Kosten. Du kannst den Zugriff abschließen.";
-  return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
-}
-
-function observedAccessStatus(card: DisplayVisibleCard, actorSide: Side): string {
-  const subject = accessActorSubject(actorSide);
-  if (card.type === "agenda") return `${subject} kann diese Agenda jetzt stehlen.`;
-  if ((card.type === "asset" || card.type === "upgrade") && typeof card.trashCost === "number") return `${subject} entscheidet jetzt, ob diese Karte getrasht oder liegen gelassen wird.`;
-  return `${subject} hat diese Karte gesehen; der Zugriff ist abgeschlossen.`;
 }
 
 function accessServerTitleLabel(serverLabel: string): string {
@@ -1844,6 +1829,7 @@ export default function Page() {
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
+  const locallyPlayedActionSoundKeysRef = useRef<Set<string>>(new Set());
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
@@ -2662,6 +2648,8 @@ export default function Page() {
       if (overlayEventIds.has(event.eventId)) continue;
       const item = formatChronicleEvent(event, payload.side, contextByEventId[event.eventId] ?? {});
       const actionType = eventActionType(event);
+      const actor = sideFromPublicPayload(event.publicPayload.actor);
+      if (actor === payload.side && locallyPlayedActionSoundKeysRef.current.delete(localActionSoundKey(actor, event.stateVersionBefore, actionType))) continue;
       const sound = actionSoundForActionType(actionType, item.visibility);
       if (sound) playActionCueSound(sound, audioVolume, actionSoundCountForAction(actionType, event.publicPayload));
     }
@@ -3151,8 +3139,19 @@ export default function Page() {
     setNotice("Lokaler Sitzungseintrag verworfen.");
   };
 
-  const submitAction = (action: LegalAction): boolean => {
+  const playImmediateActionAudio = (action: LegalAction, stateVersion: number) => {
+    if (!audioEnabled) return;
+    playActionCueSound(localActionSoundKind(action), audioVolume);
+    const keys = locallyPlayedActionSoundKeysRef.current;
+    keys.add(localActionSoundKey(action.side, stateVersion, action.type));
+    const oldestKey = keys.values().next().value;
+    if (keys.size > 20 && oldestKey) keys.delete(oldestKey);
+  };
+
+  const submitAction = (action: LegalAction, options: { immediateAudio?: boolean } = {}): boolean => {
     if (!session || !payload || !ensureSocketConnected()) return false;
+    const stateVersion = payload.playerView.stateVersion;
+    if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
     if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);
     socketRef.current?.send(
       JSON.stringify({
@@ -3161,8 +3160,8 @@ export default function Page() {
           matchId: session.matchId,
           side: session.side,
           actionId: action.actionId,
-          clientKnownStateVersion: payload.playerView.stateVersion,
-          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${runtimeRandomId()}`
+          clientKnownStateVersion: stateVersion,
+          idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${runtimeRandomId()}`
         }
       })
     );
@@ -3175,11 +3174,13 @@ export default function Page() {
     if (!action) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
     if (autoEndTurnSubmittedKeyRef.current === key) return;
-    if (submitAction(action)) autoEndTurnSubmittedKeyRef.current = key;
+    if (submitAction(action, { immediateAudio: false })) autoEndTurnSubmittedKeyRef.current = key;
   }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
 
   const submitChoiceOption = (action: LegalAction, choiceId: string, selectedOptionId: string) => {
     if (!session || !payload || !ensureSocketConnected()) return;
+    const stateVersion = payload.playerView.stateVersion;
+    playImmediateActionAudio(action, stateVersion);
     socketRef.current?.send(
       JSON.stringify({
         type: "submit_action",
@@ -3187,16 +3188,18 @@ export default function Page() {
           matchId: session.matchId,
           side: session.side,
           actionId: action.actionId,
-          clientKnownStateVersion: payload.playerView.stateVersion,
+          clientKnownStateVersion: stateVersion,
           selectedChoices: { choiceId, selectedOptionIds: [selectedOptionId] },
-          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`
+          idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionId}-${runtimeRandomId()}`
         }
       })
     );
   };
 
-  const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[]): boolean => {
+  const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[], options: { immediateAudio?: boolean } = {}): boolean => {
     if (!session || !payload || !ensureSocketConnected()) return false;
+    const stateVersion = payload.playerView.stateVersion;
+    if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
     socketRef.current?.send(
       JSON.stringify({
         type: "submit_action",
@@ -3204,9 +3207,9 @@ export default function Page() {
           matchId: session.matchId,
           side: session.side,
           actionId: action.actionId,
-          clientKnownStateVersion: payload.playerView.stateVersion,
+          clientKnownStateVersion: stateVersion,
           selectedChoices: { choiceId, selectedOptionIds },
-          idempotencyKey: `${session.side}-${payload.playerView.stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`
+          idempotencyKey: `${session.side}-${stateVersion}-${action.actionId}-${selectedOptionIds.join(".")}-${runtimeRandomId()}`
         }
       })
     );
@@ -3220,7 +3223,7 @@ export default function Page() {
     if (!discardAction || required <= 0 || selectedDiscardOptionIds.length !== required) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${discardAction.actionId}:${selectedDiscardOptionIds.join(".")}`;
     if (autoDiscardSubmittedKeyRef.current === key) return;
-    if (submitChoiceOptions(discardAction, activeDiscardChoice.choiceId, selectedDiscardOptionIds)) autoDiscardSubmittedKeyRef.current = key;
+    if (submitChoiceOptions(discardAction, activeDiscardChoice.choiceId, selectedDiscardOptionIds, { immediateAudio: false })) autoDiscardSubmittedKeyRef.current = key;
   }, [autoDiscardEnabled, gameplaySettingsLoaded, session, payload, connection, activeDiscardChoice, selectedDiscardOptionIds, submitChoiceOptions]);
 
   const setReady = (ready: boolean) => {
@@ -5142,6 +5145,15 @@ function eventActionType(event: PublicGameEvent): string {
   return payloadString(event.publicPayload, "actionType") ?? event.type;
 }
 
+function localActionSoundKey(side: Side, stateVersion: number, actionType: string): string {
+  return `${side}:${stateVersion}:${actionType}`;
+}
+
+function localActionSoundKind(action: LegalAction): ActionSoundKind {
+  const visibility = action.side === "corp" && (action.type === "install_card" || action.type === "advance_card") ? "redacted" : "public";
+  return actionSoundForActionType(action.type, visibility) ?? "choice";
+}
+
 function Brand() {
   return (
     <div className="brand">
@@ -5490,8 +5502,8 @@ function accessDecisionLabel(action: LegalAction): string {
   if (action.type === "steal_agenda") return "Agenda stehlen";
   if (action.type === "trash_accessed_card") return "Trashen";
   if (action.type === "trash_resource") return "Resource trashen";
-  if (action.type === "decline_trash") return action.label;
-  return action.label;
+  if (action.type === "decline_trash") return normalizeVisibleTerms(action.label);
+  return normalizeVisibleTerms(action.label);
 }
 
 function GameOverModal({
@@ -11138,19 +11150,45 @@ function StrengthBoostBadge({ amount }: { amount: number }) {
 
 function BrokerStoredCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
   return (
-    <span className="brokerStoredCreditsBadge" aria-label={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf ${sourceLabel}`} data-testid="broker-stored-credits-badge">
-      {amount} {amount === 1 ? "Credit" : "Credits"}
-    </span>
+    <CardCreditCounter
+      amount={amount}
+      ariaLabel={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf ${sourceLabel}`}
+      className="brokerStoredCreditsBadge"
+      testId="broker-stored-credits-badge"
+    />
   );
 }
 
 function RecurringCreditBadge({ amount }: { amount: number }) {
-  const pipCount = Math.min(3, Math.max(1, Math.floor(amount)));
   return (
-    <span className="recurringCreditBadge" aria-label={`${amount} wiederkehrende ${creditLabel(amount)}`} data-testid="recurring-credit-badge">
-      <span className="recurringCreditPips" aria-hidden="true">
-        {Array.from({ length: pipCount }, (_, index) => (
-          <span className="recurringCreditPip" key={`recurring-credit-pip-${index}`} />
+    <CardCreditCounter
+      amount={amount}
+      ariaLabel={`${amount} wiederkehrende ${creditLabel(amount)}`}
+      className="recurringCreditBadge"
+      testId="recurring-credit-badge"
+    />
+  );
+}
+
+function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {
+  const safeAmount = Math.max(0, Math.floor(amount));
+  const showCount = safeAmount >= 10;
+  const iconCount = showCount ? 1 : Math.min(9, safeAmount);
+  const iconColumns = Math.max(1, Math.min(3, iconCount));
+  return (
+    <span
+      className={`${className} cardCreditCounterBadge ${showCount ? "counted" : "iconsOnly"}`}
+      aria-label={ariaLabel}
+      data-testid={testId}
+    >
+      {showCount ? <span className="cardCreditCounterAmount">{safeAmount}</span> : null}
+      <span
+        className="cardCreditCounterIcons"
+        style={{ "--card-credit-columns": iconColumns } as CSSProperties}
+        aria-hidden="true"
+      >
+        {Array.from({ length: iconCount }, (_, index) => (
+          <span className="cardCreditCounterIcon" key={`card-credit-counter-icon-${index}`} />
         ))}
       </span>
     </span>

@@ -125,6 +125,12 @@ select {
   flex-direction: column;
 }
 
+.app.activeMatch > .topbar {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+}
+
 .app.activeMatch .main {
   flex: 1 1 auto;
 }
@@ -4953,7 +4959,11 @@ select {
 }
 
 .lane .brokerStoredCreditsBadge,
-.lane .recurringCreditBadge,
+.lane .recurringCreditBadge {
+  top: calc(5px * var(--lane-card-scale, 1));
+  right: calc(5px * var(--lane-card-scale, 1));
+}
+
 .lane .dataRavenCounterBadge {
   top: calc(5px * var(--lane-card-scale, 1));
   right: calc(5px * var(--lane-card-scale, 1));
@@ -4964,6 +4974,24 @@ select {
 
 .lane .recurringCreditBadge {
   top: calc(29px * var(--lane-card-scale, 1));
+}
+
+.lane .cardCreditCounterBadge.counted {
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+}
+
+.lane .cardCreditCounterIcons {
+  grid-template-columns: repeat(var(--card-credit-columns, 3), calc(8px * var(--lane-card-scale, 1)));
+  gap: calc(2px * var(--lane-card-scale, 1));
+}
+
+.lane .cardCreditCounterIcon {
+  width: calc(8px * var(--lane-card-scale, 1));
+  height: calc(8px * var(--lane-card-scale, 1));
+}
+
+.lane .cardCreditCounterAmount {
+  font-size: calc(10px * var(--lane-card-scale, 1));
 }
 
 .card.selectedActionSource {
@@ -5386,46 +5414,33 @@ select {
   pointer-events: none;
 }
 
-.brokerStoredCreditsBadge {
+.cardCreditCounterBadge {
   position: absolute;
   right: 6px;
-  top: 6px;
   z-index: 45;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 3px;
   max-width: calc(100% - 12px);
   min-height: 20px;
-  padding: 2px 7px;
-  border: 1px solid rgb(232 191 79 / 0.8);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.34), transparent 32%),
-    linear-gradient(135deg, rgb(118 84 22 / 0.94), rgb(43 31 12 / 0.95));
-  color: #ffe7a4;
-  box-shadow:
-    0 4px 9px rgb(0 0 0 / 0.34),
-    inset 0 1px 1px rgb(255 247 204 / 0.28);
-  font-size: 10px;
-  font-weight: 900;
-  line-height: 1;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  padding: 1px;
   pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.48));
+}
+
+.brokerStoredCreditsBadge {
+  top: 6px;
 }
 
 .recurringCreditBadge {
-  position: absolute;
-  right: 6px;
   top: 30px;
-  z-index: 45;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+}
+
+.cardCreditCounterBadge.counted {
   gap: 4px;
-  max-width: calc(100% - 12px);
-  min-height: 20px;
-  padding: 2px 6px;
-  border: 1px solid rgb(232 191 79 / 0.84);
+  padding: 2px 5px 2px 6px;
+  border: 1px solid rgb(232 191 79 / 0.82);
   border-radius: 999px;
   background:
     radial-gradient(circle at 26% 20%, rgb(255 250 215 / 0.34), transparent 32%),
@@ -5438,16 +5453,15 @@ select {
   font-weight: 900;
   line-height: 1;
   text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
-  pointer-events: none;
 }
 
-.recurringCreditPips {
-  display: inline-flex;
-  align-items: center;
+.cardCreditCounterIcons {
+  display: grid;
+  grid-template-columns: repeat(var(--card-credit-columns, 3), 8px);
   gap: 2px;
 }
 
-.recurringCreditPip {
+.cardCreditCounterIcon {
   width: 8px;
   height: 8px;
   border: 1px solid rgb(255 230 154 / 0.9);
@@ -5459,6 +5473,14 @@ select {
   box-shadow:
     inset 0 0 0 1px rgb(106 68 14 / 0.36),
     0 1px 2px rgb(0 0 0 / 0.36);
+}
+
+.cardCreditCounterAmount {
+  color: #ffe7a4;
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.58);
 }
 
 .shellCounterBadge {
