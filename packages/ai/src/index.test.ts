@@ -20,9 +20,11 @@ import {
   replayEvents,
 } from "@netgrid/engine";
 import {
+  AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   assertAiInputIsSideSafe,
   analyzeDoctrineQualityCases,
   beliefStateInvariantSignature,
+  buildAiDecisionInputDto,
   buildDeckDoctrineProfile,
   buildObservedFacts,
   buildAiDecisionInput,
@@ -96,12 +98,75 @@ describe("MVP 0.3 AI controller contract", () => {
 
     expect(corpInput.side).toBe("corp");
     expect(runnerInput.side).toBe("runner");
+    expect(Object.keys(corpInput).sort()).toEqual(
+      AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
+        (field) => field !== "ownDeckDoctrine",
+      ).sort(),
+    );
+    expect(Object.keys(runnerInput).sort()).toEqual(
+      AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
+        (field) => field !== "ownDeckDoctrine",
+      ).sort(),
+    );
     expect(corpInput.legalActions).toEqual(getLegalActions(state, "corp"));
     expect(runnerInput.playerView).toEqual(getPlayerView(state, "runner"));
     expect(JSON.stringify(corpInput)).not.toContain("cardInstances");
     expect(JSON.stringify(corpInput)).not.toContain("sessionToken");
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("constructs AI inputs from positive DTO fields for both perspectives", () => {
+    const state = createGameAfterSetup({ seed: "ai-positive-dto" });
+    const runnerPlayerView = structuredClone(getPlayerView(state, "runner")) as ReturnType<
+      typeof getPlayerView
+    > & { secretRunnerHandIds?: string[] };
+    runnerPlayerView.secretRunnerHandIds = ["hidden-runner-card-id"];
+    (runnerPlayerView.own as typeof runnerPlayerView.own & { secretGripIds?: string[] }).secretGripIds = [
+      "hidden-grip-id",
+    ];
+    (runnerPlayerView.own.identity as VisibleCard & { secretIdentityToken?: string }).secretIdentityToken =
+      "hidden-identity-token";
+    const runnerEvents = runnerPlayerView.publicEvents.map((event) => ({
+      ...event,
+      secretEventIds: ["hidden-event-id"],
+      privatePayload: { runner: { secretRunnerHandIds: ["hidden-event-card-id"] } },
+    }));
+    const runnerLegalActions = getLegalActions(state, "runner").map((action) => ({
+      ...action,
+      secretPaymentToken: "hidden-action-token",
+    }));
+
+    const runnerInput = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: runnerPlayerView,
+      eventTail: runnerEvents,
+      legalActions: runnerLegalActions,
+      difficulty: "normal",
+      seed: state.seed,
+      decisionId: "ai-positive-dto:runner",
+      actionNumber: state.stateVersion,
+      profileId: "runner-ai-v0.9-normal",
+    });
+    const corpInput = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+    });
+    const serializedRunner = JSON.stringify(runnerInput);
+
+    expect(serializedRunner).not.toContain("secretRunnerHandIds");
+    expect(serializedRunner).not.toContain("hidden-grip-id");
+    expect(serializedRunner).not.toContain("hidden-identity-token");
+    expect(serializedRunner).not.toContain("hidden-event-id");
+    expect(serializedRunner).not.toContain("hidden-action-token");
+    expect(runnerInput.eventTail.some((event) => "privatePayload" in event)).toBe(false);
+    expect(runnerInput.legalActions.some((action) => "secretPaymentToken" in action)).toBe(false);
+    expect(Object.keys(corpInput).sort()).toEqual(
+      AI_DECISION_INPUT_TOP_LEVEL_FIELDS.filter(
+        (field) => field !== "ownDeckDoctrine",
+      ).sort(),
+    );
+    expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
   });
 
   it("marks longtail completion cards AI-supported after every promotion gate", () => {

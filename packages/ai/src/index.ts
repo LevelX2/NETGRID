@@ -10,6 +10,7 @@ import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, iceHasEndTheRun } from "./visible-run-analysis";
+import { buildAiDecisionInputDto } from "./input-dto";
 import { DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
@@ -24,6 +25,11 @@ export type {
   RndTopFreshnessMemory,
   RunnerOpponentModel
 } from "./belief-state";
+export {
+  AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
+  buildAiDecisionInputDto,
+} from "./input-dto";
+
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
@@ -393,7 +399,7 @@ export function buildAiDecisionInput(
 ): AiDecisionInput {
   const playerView = getPlayerView(state, side);
   const ownDeckDoctrine = options.ownDeckDoctrine ?? (options.ownDeckSnapshot ? buildDeckDoctrineProfile(options.ownDeckSnapshot) : undefined);
-  return {
+  return buildAiDecisionInputDto({
     side,
     playerView,
     eventTail: options.eventTail ?? playerView.publicEvents,
@@ -404,7 +410,7 @@ export function buildAiDecisionInput(
     actionNumber: options.actionNumber ?? state.stateVersion,
     profileId: options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
     ...(ownDeckDoctrine ? { ownDeckDoctrine } : {})
-  };
+  });
 }
 
 export function chooseAiAction(input: AiDecisionInput): AiDecision {
