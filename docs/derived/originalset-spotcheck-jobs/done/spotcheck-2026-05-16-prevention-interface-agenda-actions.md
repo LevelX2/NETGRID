@@ -1,11 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-prevention-interface-agenda-actions
-status: commit_pending
+status: done
 createdAt: 2026-05-16T06:13:12+01:00
 startedAt: 2026-05-16T12:53:00+02:00
 completedAt: 2026-05-16T12:55:05+02:00
-commitPendingAt: 2026-05-16T12:55:05+02:00
-commitPendingReason: ".git ACL/index.lock creation is blocked by foreign direct DENY SID S-1-5-21-2893003870-2010802999-161870138-128397290; git add/commit cannot create .git/index.lock. User instructed to continue package processing and resolve git locks after packages."
 requiresImplementation: true
 priority: normal
 cards:

@@ -226,19 +226,22 @@
       "title": "Cerberus",
       "releaseStatus": "human_playable",
       "aiSupported": true,
-      "resolverFamily": "trace_link_bid_window_resolver; damage_event_prevention_resolver",
+      "resolverFamily": "trace_link_bid_window_resolver; damage_event_prevention_resolver; persistent_counter_run_start_damage_resolver",
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "trace",
         "damage",
+        "persistent_counter",
+        "counter_remove_action",
         "end_the_run",
         "legal_action_only"
       ],
       "roleTags": [
         "corp",
         "ice",
-        "trace"
+        "trace",
+        "persistent_counter"
       ]
     },
     {

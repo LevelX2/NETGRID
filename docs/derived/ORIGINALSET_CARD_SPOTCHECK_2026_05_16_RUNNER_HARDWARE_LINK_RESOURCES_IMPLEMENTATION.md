@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-runner-hardware-link-resources`
 
 Der Job wurde fachlich umgesetzt. Die ausgewaehlten Runner-Hardware-, Link- und Resource-Karten wurden gegen Install-Payloads, sichtbare Rig-Quellen, Damage-Prevention-Source-Bindung, Broker-Counteraktionen, PublicPayload-Leaks sowie Replay/StateHash geprueft.
 
-Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Commit-Status: `done`. Der lokale Commit wurde erfolgreich erstellt.
 
 ## Umgesetzte Haertungen
 

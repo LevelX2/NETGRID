@@ -445,6 +445,7 @@ function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {
 function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
   return (
     decision.reasonCode === "runner.choice.resolve" ||
+    decision.reasonCode === "runner.trace.post_bid_link" ||
     decision.reasonCode === "runner.setup.keep" ||
     decision.reasonCode === "runner.setup.mulligan" ||
     decision.reasonCode === "runner.trace.bid_visible_amount" ||
@@ -1430,6 +1431,17 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
         })[0] ?? choice.options[0];
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
+  if (choice.source.startsWith("trace_post_bid_link")) {
+    const selected =
+      choice.options
+        .filter((option) => option.id.startsWith("trace_link_"))
+        .sort((left, right) => {
+          const leftDelta = Number(/\+(\d+)\s+Link/.exec(left.label)?.[1] ?? 0);
+          const rightDelta = Number(/\+(\d+)\s+Link/.exec(right.label)?.[1] ?? 0);
+          return rightDelta - leftDelta || left.label.localeCompare(right.label, "de");
+        })[0] ?? choice.options.find((option) => option.id === "pass") ?? choice.options[0];
+    return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+  }
   if (choice.kind !== "bid_amount") {
     const firstOption = choice.options[0];
     return firstOption ? { choiceId: choice.choiceId, selectedOptionIds: [firstOption.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
@@ -1488,9 +1500,15 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
         explanation = opening.decision === "mulligan" ? "Der Runner nimmt anhand von Start-Hand und Deckprofil einen Mulligan." : "Der Runner behält eine startfähige Hand anhand von Start-Hand und Deckprofil.";
         evidence.push("choice_legal", "choice_source:setup.mulligan", ...opening.reasons, ...opening.evidence);
       } else {
-        score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : 620;
-        reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "runner.trace.bid_visible_amount" : "runner.choice.resolve";
-        explanation = "Der Runner beantwortet eine sichtbare legale Choice.";
+        const postBidTraceLink =
+          input.playerView.pendingChoice?.source.startsWith(
+            "trace_post_bid_link",
+          ) === true;
+        score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : postBidTraceLink ? 880 : 620;
+        reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "runner.trace.bid_visible_amount" : postBidTraceLink ? "runner.trace.post_bid_link" : "runner.choice.resolve";
+        explanation = postBidTraceLink
+          ? "Der Runner nutzt nach offen gelegten Trace-Bids eine legale Link-Faehigkeit."
+          : "Der Runner beantwortet eine sichtbare legale Choice.";
         evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
       }
       break;

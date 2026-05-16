@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-runner-resource-contacts`
 
 Der Job wurde fachlich umgesetzt. Die ausgewaehlten Runner-Resources wurden gegen Install-Revalidation, Tag-Removal, Agenda-Punkt-Kosten, Credit-/Recurring-Refresh, PublicPayload-Leaks sowie Replay/StateHash geprueft.
 
-Commit-Status: `commit_pending`. Staging und lokaler Commit sind durch `Permission denied` beim Erstellen von `.git/index.lock` blockiert; Ursache ist weiterhin die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git`.
+Commit-Status: `done`. Der lokale Commit wurde erfolgreich erstellt.
 
 ## Umgesetzte Haertungen
 

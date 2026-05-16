@@ -1,10 +1,9 @@
 ---
 jobId: spotcheck-2026-05-15-modifier-agenda-risk
-status: commit_pending
+status: done
 createdAt: 2026-05-15T19:10:16+01:00
 startedAt: 2026-05-16T12:20:00+02:00
-commitPendingAt: 2026-05-16T12:28:00+02:00
-commitPendingReason: "Fachliche Engine-Härtung ist umgesetzt und gezielter Engine-Lauf ist grün, aber lokaler Git-Commit ist weiterhin durch Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock und die fremde DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git blockiert."
+completedAt: 2026-05-16T18:08:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -256,7 +255,7 @@ Akzeptanzkriterien
 
 ## Umsetzungsergebnis 2026-05-16
 
-Status: `commit_pending`
+Status: `done`
 
 Umgesetzt wurde ein fokussierter Engine-Härtungsblock für die Modifier-/Agenda-Risk-Auswahl:
 
@@ -286,8 +285,6 @@ Pflichtchecks:
 - `corepack pnpm --filter @netgrid/catalog test` - grün, 48 Tests.
 - `corepack pnpm typecheck` - grün.
 
-Commit-Pending-Grund:
+Commit-Status:
 
-- Der lokale Commit ist weiterhin durch `.git/index.lock: Permission denied` blockiert.
-- `.git/index.lock` liegt nicht aktiv vor; Ursache ist die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git`.
-- Removal Condition: fremde DENY-ACL mit administrativer Berechtigung entfernen oder `.git`-ACL geschützt ohne DENY wiederherstellen, danach gestagte Spotcheck-Pakete lokal committen.
+- Lokaler Commit wurde nach Worktree-Gitdir-Entsperrung erfolgreich erstellt.

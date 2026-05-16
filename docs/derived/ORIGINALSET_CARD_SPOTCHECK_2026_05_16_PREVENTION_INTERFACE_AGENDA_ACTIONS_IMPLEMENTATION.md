@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-prevention-interface-agenda-actions`
 
 Der Job wurde fachlich umgesetzt. Die Prevention-, R&D-Multiaccess-, Trace-Link-, Hidden-Zone-, Agenda- und rezzed-Asset-Pfade wurden gegen Source-Drift, PublicPayload-Leaks und Replay/StateHash-Regressionen nachgehärtet.
 
-Commit-Status: `commit_pending`. Staging und lokaler Commit sind durch `Permission denied` beim Erstellen von `.git/index.lock` blockiert; die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git` konnte ohne erhöhte Berechtigung nicht entfernt werden.
+Commit-Status: `done`. Der lokale Commit wurde nach Worktree-Gitdir-Entsperrung erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
@@ -41,4 +41,4 @@ Commit-Status: `commit_pending`. Staging und lokaler Commit sind durch `Permissi
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Alle genannten Checks sind grün. Staging und lokaler Commit bleiben bis zur `.git`-ACL-Reparatur blockiert.
+Alle genannten Checks sind grün.

@@ -1,9 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-hardware-link-resources
-status: committed
+status: done
 createdAt: 2026-05-16T11:08:00+01:00
 startedAt: 2026-05-16T13:58:00+02:00
-completedAt: 2026-05-16T14:05:07+02:00
+completedAt: 2026-05-16T18:53:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -166,7 +166,7 @@ Akzeptanzkriterien
 
 ## Umsetzungsabschluss 2026-05-16
 
-Status: `committed`. Der Job wurde fachlich umgesetzt und verifiziert.
+Status: `done`. Der Job wurde fachlich umgesetzt und verifiziert.
 
 Umgesetzt:
 

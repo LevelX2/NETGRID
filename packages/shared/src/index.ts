@@ -116,6 +116,8 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "cerberus"
+  | "militech"
   | "power"
   | "agenda"
   | "recurring_credit"
@@ -130,6 +132,7 @@ export type CounterType =
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
+  | { type: "add_counter"; counterType: CounterType; amount: number }
   | { type: "none" };
 
 export type SubroutineType =
@@ -255,6 +258,7 @@ export type EffectSource =
 
 export type ImminentEventType = "damage" | "add_tag" | "test_interrupt";
 export type EventModificationKind = "prevent" | "avoid" | "interrupt";
+export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
 export type ImminentEvent = {
   eventId: string;
@@ -287,6 +291,8 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  bypassCostPerDamage?: number;
+  bypassPaymentSide?: Side;
 };
 
 export type EventModificationWindow = {
@@ -311,7 +317,7 @@ export type ReplacementCandidate = {
     label: string;
   };
   replacesEventType: ImminentEventType;
-  replacementEventType: ImminentEventType;
+  replacementEventType: ReplacementEventType;
   priority: number;
   visibility: EventVisibilityClass;
   optional: boolean;
@@ -792,7 +798,9 @@ export type TraceState = {
   baseTraceStrength: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
-  status: "corp_bid" | "runner_bid";
+  parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
+  parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
+  status: "corp_bid" | "runner_bid" | "post_bid_link";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;
@@ -802,6 +810,8 @@ export type TraceState = {
   runnerLink?: number;
   runnerBid?: number;
   runnerStrength?: number;
+  postBidLinkSourceIds?: CardInstanceId[];
+  postBidLinkBonus?: number;
   successful?: boolean;
 };
 
@@ -872,6 +882,7 @@ export type GameState = {
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
     stoleAgendaLastTurn: boolean;
+    stoleResearchAgendaThisTurn?: boolean;
     stoleGrayOpsAgendaThisTurn?: boolean;
     stoleBlackOpsAgendaThisTurn?: boolean;
     runAttemptsThisTurn?: number;
@@ -903,6 +914,9 @@ export type GameState = {
     triggerDefinitionId?: CardDefinitionId;
   };
   poxCountersByServer?: Partial<
+    Record<Exclude<ServerId, "new_remote">, number>
+  >;
+  faitAccompliCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   runnerAgendaPointsToForfeit?: number;
@@ -2002,7 +2016,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 2,
     memoryCost: 2,
     rulesText:
-      "Installed Hidden-Zone helper: search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+      "Trash Self-Modifying Code: search your stack for a program, reveal it, pay its install cost and install it. Use during an ICE encounter. Shuffle your stack afterwards; if memory is short, choose installed programs to trash first.",
     mechanics: [
       "install_program",
       "memory",
@@ -2309,7 +2323,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rulesText: "Reveal the top card of your stack.",
     mechanics: [
       "play_event",
+      "search_stack",
+      "search_trash",
+      "install_program",
+      "temporary_install",
+      "end_turn_return",
       "reveal",
+      "shuffle",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -2425,12 +2445,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net damage.",
+      "Play only if you made a successful run on HQ this turn. If the Corp purges Virus counters, choose up to two Virus counters that are not removed. The Corp may take an action and pay 5 to trash Code Viral Cache.",
     mechanics: [
       "install_resource",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "net_damage",
+      "successful_hq_run_condition",
+      "virus_counter_purge_replacement",
+      "corp_trash_action",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2809,14 +2829,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 0,
     rulesText:
-      "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
+      "Play only if you liberated a Research agenda this turn. Put a Militech counter on each installed icebreaker; each Militech counter gives +1 strength.",
     mechanics: [
       "play_event",
-      "search_stack",
-      "reveal",
-      "shuffle",
+      "agenda_subtype_condition",
       "counter",
-      "hidden_zone_tool",
+      "icebreaker_strength_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2828,11 +2846,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["bbs"],
     implementationStatus: "playable_mvp",
     cost: 1,
-    rulesText: "Reveal the top card of the Runner stack.",
+    rulesText: "Expose up to three installed Corp cards.",
     mechanics: [
       "play_event",
+      "expose",
       "reveal",
-      "counter",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -2911,11 +2929,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 meat damage.",
+      "Prevents all meat damage. For each 1 credit the Corp pays when meat damage is done, 1 meat damage is not prevented.",
     mechanics: [
       "install_hardware",
       "damage_prevention",
-      "damage_prevention_turn_limit",
+      "damage_prevention_full_meat",
+      "corp_bypass_payment",
       "meat_damage",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -3601,7 +3620,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 4,
     trashCost: 7,
     rulesText:
-      "Rezzed campaign asset for recurring Corp economy. Hosted and recurring state is represented explicitly on installed cards.",
+      "When Holovid Campaign is rezzed, put 12 bits from the bank on it. At the start of each Corp turn, remove 1 bit and gain 1 credit. Trash Holovid Campaign when it has no bits.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -3609,8 +3628,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "generic_asset_node",
       "campaign_economy",
       "hosting",
-      "recurring_credit",
-      "recurring_start_turn",
+      "bit_counter",
+      "start_turn_counter_drain",
+      "self_trash",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4016,7 +4036,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     trashCost: 6,
     rulesText:
-      "Rezzed city-grid upgrade with trace and tag surfaces. Trace and tag decisions remain LegalAction-based.",
+      "When rezzed, put 6 bits from the bank on Paris City Grid. Use these bits only to pay for traces made during runs on this fort. If any are used, replace them at the start of the next Corp turn.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4024,7 +4044,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "generic_upgrade_root_server",
       "city_grid",
       "trace",
-      "tag",
+      "trace_bid_credit_source",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -4871,12 +4891,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 4,
+    memoryLimitBonus: 1,
+    recurringCredits: 3,
     rulesText:
-      "Installed hardware deck with memory/MU surface. V1.9.22 per-card effects remain LegalAction-gated.",
+      "Deck. +1 MU. 3 recurring credits for increasing link. You may have only one deck installed.",
     mechanics: [
       "install_hardware",
       "memory",
+      "deck_unique",
+      "recurring_credit",
+      "link_recurring_credit",
       "per_card_longtail",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -5385,13 +5410,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     memoryCost: 1,
+    recurringCredits: 2,
     rulesText:
-      "Install as a program. Its restricted recurring-credit trash-cost ability remains gated until the payment window is confirmed.",
+      "Put 2 recurring credits from the bank on Poltergeist when it is installed. Use these credits only to pay for trashing nodes. If you use any of these credits, replace them at the start of your next turn.",
     mechanics: [
       "install_program",
       "memory",
       "per_card_longtail",
-      "ability_contract_pending",
+      "recurring_credit",
+      "node_trash_recurring_credit",
+      "recurring_start_turn",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -6774,12 +6802,23 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "ap", "hellbolt"],
     rezCost: 5,
     strength: 3,
-    rulesText: "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+    rulesText:
+      "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.\n[Subroutine] End the run.",
     subroutines: [
       onrNetDamage("onr_v1_234_data_darts_net_damage", 1),
+      onrSetNextEncounterNoBreakSubroutines(
+        "onr_v1_234_data_darts_next_ice_no_break",
+      ),
       onrEtr("onr_v1_234_data_darts_etr"),
     ],
-    mechanics: ["damage", "flatline", "end_the_run", "event_modification"],
+    mechanics: [
+      "damage",
+      "flatline",
+      "next_encounter_penalty",
+      "run_modifier",
+      "end_the_run",
+      "event_modification",
+    ],
   }),
   onrIce({
     id: "onr_v1_235_data-naga",
@@ -7373,15 +7412,15 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     memoryCost: 1,
-    rulesText: "Installed trace helper with side-safe reveal support.",
+    rulesText:
+      "1 credit: +2 link. Use this ability only once during each trace attempt, and only after both players have revealed how much they spent.",
     mechanics: [
       "install_program",
       "memory",
       "trace",
       "link",
       "bid_amount",
-      "reveal",
-      "hidden_zone_tool",
+      "post_bid_link",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -7606,15 +7645,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    baseLink: 1,
-    rulesText: "Installed resource with +1 link and side-safe reveal support.",
+    rulesText:
+      "1 credit: +1 link. Use this ability only once during each trace attempt, and only after both players have revealed how much they spent.",
     mechanics: [
       "install_resource",
       "trace",
       "link",
       "bid_amount",
-      "reveal",
-      "hidden_zone_tool",
+      "post_bid_link",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -8049,7 +8087,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
         id: "onr_v1_227_cerberus_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "none" },
+        traceSuccessEffect: {
+          type: "add_counter",
+          counterType: "cerberus",
+          amount: 1,
+        },
       },
       onrEtr("onr_v1_227_cerberus_etr"),
     ],
@@ -8058,6 +8100,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "link",
       "bid_amount",
       "damage",
+      "persistent_counter",
       "end_the_run",
       "run_flow",
       ONR_V1_LOCAL_PRIVATE,
@@ -8195,19 +8238,41 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Pile Driver",
     side: "runner",
     type: "program",
-    subtypes: ["icebreaker", "fracter", "stealth"],
+    subtypes: ["icebreaker", "fracter", "stealth", "noisy"],
     implementationStatus: "playable_mvp",
     installCost: 1,
     memoryCost: 1,
     strength: 7,
     recurringCredits: 1,
-    rulesText: "Stealth wall breaker with recurring run credits.",
+    rulesText:
+      "3 credits: Break up to four wall subroutines on a single piece of ice. 1 credit: +1 strength. Whenever you use Pile Driver's break-walls ability, lose a total of 3 credits from Stealth cards.",
+    abilities: [
+      {
+        id: "onr_v1_047_pile_driver_pump",
+        type: "pump_strength",
+        cost: { credits: 1 },
+        amount: 1,
+        timingPoint: "run.encounter_ice",
+      },
+      {
+        id: "onr_v1_047_pile_driver_break",
+        type: "break_subroutine",
+        cost: { credits: 3 },
+        iceSubtype: "wall",
+        postBreakStealthLoss: 3,
+        count: 4,
+        timingPoint: "run.encounter_ice",
+      },
+    ],
     mechanics: [
       "install_program",
       "memory",
       "pump_breaker",
       "break_subroutine",
+      "multi_subroutine_break",
       "subtype_stealth",
+      "subtype_noisy",
+      "stealth_loss",
       "recurring_credit",
       ONR_V1_LOCAL_PRIVATE,
     ],

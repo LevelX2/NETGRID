@@ -13,6 +13,12 @@ export const ABLATIVE_COUNTER_HARDWARE_CARD_ID = "onr_v1_121_armored-fridge";
 
 export const ABLATIVE_COUNTER_HARDWARE_STARTING_COUNTERS = 7;
 
+export const FULL_BODY_CONVERSION_DAMAGE_PREVENTION_CARD_ID =
+  "onr_v1_127_full-body-conversion";
+
+export const EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID =
+  "onr_v1_022_emergency-self-construct";
+
 export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
   Record<string, RuntimeDamagePreventionProfile>
 > = {
@@ -41,15 +47,15 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["meat"],
     priority: 110,
   },
-  "onr_v1_127_full-body-conversion": {
-    maxPerTurn: 1,
-    damageTypes: ["meat"],
-    priority: 121,
-  },
   "onr_v1_128_green-knight-surge-buffers": {
     maxPerTurn: 2,
     damageTypes: ["net"],
     priority: 121,
+  },
+  [EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID]: {
+    maxPerTurn: 1,
+    damageTypes: ["meat"],
+    priority: 118,
   },
   "onr_v1_130_lifesaver-nanosurgeons": {
     maxPerTurn: 1,
@@ -65,11 +71,6 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],
     priority: 124,
-  },
-  "onr_v1_155_code-viral-cache": {
-    maxPerTurn: 1,
-    damageTypes: ["net"],
-    priority: 125,
   },
   "onr_v1_161_fall-guy": {
     maxPerTurn: 1,

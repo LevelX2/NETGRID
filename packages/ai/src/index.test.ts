@@ -502,6 +502,80 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(runnerInput)).not.toContain("Simple Agenda");
   });
 
+  it("chooses post-bid Trace Link sources after both bids are visible", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-post-bid-trace-link",
+        runnerDeck: {
+          id: "ai_post_bid_trace_runner",
+          name: "AI Post-Bid Trace Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_063_signpost", quantity: 1 },
+            { id: "onr_v1_181_the-springboard", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_post_bid_trace_corp",
+          name: "AI Post-Bid Trace Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 5;
+    state.corp.credits = 5;
+    const signpostId = moveRunnerProgramToRig(state, "onr_v1_063_signpost");
+    const springboardId = moveRunnerResourceToRig(
+      state,
+      "onr_v1_181_the-springboard",
+    );
+    const iceId = putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", ["bid_0"]);
+    state = applyChoice(state, "runner", ["bid_0"]);
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
+      expect.arrayContaining([
+        "pass",
+        `trace_link_${signpostId}`,
+        `trace_link_${springboardId}`,
+      ]),
+    );
+    expect(decision.reasonCode).toBe("runner.trace.post_bid_link");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: state.pendingChoice?.choiceId,
+      selectedOptionIds: [`trace_link_${signpostId}`],
+    });
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(JSON.stringify(input)).not.toContain("cardInstances");
+  });
+
   it("keeps V0.97 breach queues hidden and chooses access from LegalActions", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -5907,6 +5981,22 @@ function moveRunnerProgramToRig(
   const id = findCard(state, definitionId);
   removeEverywhere(state, id);
   state.runner.rig.programs.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
+function moveRunnerResourceToRig(
+  state: GameState,
+  definitionId: string,
+): CardInstanceId {
+  const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.rig.resources.unshift(id);
   state.cardInstances[id] = {
     ...state.cardInstances[id]!,
     zone: { side: "runner", zone: "rig" },

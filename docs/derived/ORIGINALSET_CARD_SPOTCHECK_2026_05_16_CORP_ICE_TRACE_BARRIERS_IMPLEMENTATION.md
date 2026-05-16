@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-corp-ice-trace-barriers`
 
 Der Job wurde fachlich umgesetzt. Die ausgewählten Corp-ICE wurden gegen Rez-Sichtbarkeit, Wrong-Side-/Stale-Revalidation, Trace-Bids, Programm-Trash, Core-Damage, End-the-run, PublicPayload-Leaks und Replay/StateHash geprüft.
 
-Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Commit-Status: `done`. Der lokale Commit wurde erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
@@ -22,4 +22,4 @@ Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen v
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Alle genannten Checks sind grün. Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Alle genannten Checks sind grün.

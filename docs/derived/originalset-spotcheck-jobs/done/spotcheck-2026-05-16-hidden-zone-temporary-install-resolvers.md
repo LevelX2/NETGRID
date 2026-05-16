@@ -1,6 +1,8 @@
 ---
 jobId: spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers
-status: inbox
+status: done
+startedAt: 2026-05-16T13:45:00Z
+completedAt: 2026-05-16T14:00:00Z
 createdAt: 2026-05-16T12:30:00+02:00
 requiresImplementation: true
 priority: high
@@ -86,3 +88,41 @@ Akzeptanz:
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
+## Umsetzung 2026-05-16
+
+Status: umgesetzt und bereit für lokalen Commit.
+
+### Deal with Militech
+
+- Der alte Stack-Search-/Reveal-/Shuffle-Resolver wurde durch den lokalen Vertrag ersetzt.
+- `stealAgenda` setzt ein Runner-Turn-Flag für in diesem Zug befreite Research-Agendas.
+- `Deal with Militech` ist nur mit diesem Research-Flag legal und legt einen `militech`-Counter auf jeden installierten Runner-Icebreaker.
+- Icebreaker-Stärke berücksichtigt Militech-Counter zusätzlich zu temporären Strength-Modifikatoren und bestehenden Run-Boni.
+- PublicPayload enthält Countertyp, Zielanzahl und Definitionen, aber keine privaten Zoneninformationen.
+
+### Hunt Club BBS
+
+- Der alte Stack-Top-Reveal wurde durch eine private Runner-Choice ersetzt.
+- Legale Ziele sind ausschließlich installierte, unrezzed Korp-Karten; `minSelections: 0`, `maxSelections: 3`.
+- Vor der Runner-Auswahl sieht die Korp keine Choice und die Runner-Choice zeigt Positionslabels statt Zielidentitäten.
+- Bei Resolution werden alle Ziele erneut gegen aktuellen Installations-/Rez-Zustand revalidiert; PublicPayload enthält nur die tatsächlich exponierten Definitionen und öffentliche Serverlabels.
+
+### Sneak Preview
+
+- Der alte einfache Stack-Top-Reveal wurde durch den zweistufigen Heap-/Stack-Programminstall ersetzt.
+- Die Quelle wird zuerst runner-privat gewählt; Stack-Programmwahl erhält `stackSearchResolution` mit `install_program`, öffentlichem Reveal und Shuffle.
+- Heap-Installationen shufflen nicht und bleiben runner-privat bis zum Install-Ergebnis.
+- Das gewählte Programm wird kostenlos, aber mit Unique- und Memory-Revalidation installiert und als temporär getrackt.
+- Am Runner-Zugende kehrt dieselbe Instanz in die Grip zurück, falls sie noch installiert ist; bei vorzeitigem Zonenwechsel wird nichts doppelt bewegt.
+
+### Begleitdaten
+
+- Shared-Kartentexte/Mechanics, Catalog-Text-Gates, AI-Hints und V1.9.12-Manifest wurden auf die finalen Resolververträge synchronisiert.
+- PublicPayload-Schema und Chronik-Kontext erlauben die neuen Ziel-/Return-/Temporary-Felder ohne Hidden-Info-Leak.
+
+## Checks 2026-05-16
+
+- `corepack pnpm --filter @netgrid/engine test` - grün, 462 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 17 Testdateien / 133 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 2 Testdateien / 48 Tests.
+- `corepack pnpm typecheck` - grün.

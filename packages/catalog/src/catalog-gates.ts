@@ -1935,8 +1935,9 @@ const ONR_V1_9_12_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   onr_v1_064_skivviss:
     "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
   "onr_v1_082_deal-with-militech":
-    "Search the stack for a program, reveal it, add it to the grip, then shuffle the stack.",
-  "onr_v1_091_hunt-club-bbs": "Reveal the top card of the Runner stack.",
+    "Play only if the Runner liberated a Research agenda this turn. Put a Militech counter on each installed icebreaker.",
+  "onr_v1_091_hunt-club-bbs":
+    "Expose up to three installed Corp cards through a side-safe target choice.",
   "onr_v1_174_rigged-investments":
     "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
   "onr_v1_176_the-shell-traders":
@@ -1953,7 +1954,7 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_121_armored-fridge":
     "Installed prevention tool: once each turn, prevent 2 meat damage.",
   "onr_v1_127_full-body-conversion":
-    "Installed prevention tool: once each turn, prevent 1 meat damage.",
+    "Prevents all meat damage. For each 1 credit the Corp pays when meat damage is done, 1 meat damage is not prevented.",
   "onr_v1_128_green-knight-surge-buffers":
     "Installed prevention tool: once each turn, prevent 2 net damage.",
   "onr_v1_130_lifesaver-nanosurgeons":
@@ -1965,7 +1966,7 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_143_techtronica-utility-suit":
     "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
   "onr_v1_155_code-viral-cache":
-    "Installed prevention tool: once each turn, prevent 1 net damage.",
+    "Play only after a successful HQ run this turn. When the Corp purges Virus counters, choose up to two counters that are not removed. The Corp may take an action and pay 5 to trash Code Viral Cache.",
   "onr_v1_161_fall-guy":
     "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
   "onr_v1_170_nomad-allies":
@@ -1979,7 +1980,7 @@ const ONR_V1_9_13_TEXT_OVERRIDES: Partial<Record<string, string>> = {
   "onr_v1_224_bolter-cluster":
     "[Subroutine] Do 4 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
   "onr_v1_234_data-darts":
-    "[Subroutine] Do 1 net damage.\n[Subroutine] End the run.",
+    "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.\n[Subroutine] End the run.",
   "onr_v1_258_neural-blade":
     "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
 };

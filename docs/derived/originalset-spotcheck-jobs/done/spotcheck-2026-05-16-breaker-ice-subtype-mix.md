@@ -1,35 +1,35 @@
 ---
-jobId: spotcheck-2026-05-16-runner-program-prevention-tools
-status: committed
+jobId: spotcheck-2026-05-16-breaker-ice-subtype-mix
+status: done
 createdAt: 2026-05-16T11:08:00+01:00
-startedAt: 2026-05-16T14:13:52+02:00
-completedAt: 2026-05-16T14:19:04+02:00
+startedAt: 2026-05-16T13:02:30+02:00
+completedAt: 2026-05-16T18:22:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
-  - cardId: onr_v1_021_dwarf
-    title: Dwarf
-  - cardId: onr_v1_024_expert-schedule-analyzer
-    title: Expert Schedule Analyzer
-  - cardId: onr_v1_028_force-shield
-    title: Force Shield
-  - cardId: onr_v1_033_imp
-    title: Imp
-  - cardId: onr_v1_036_jackhammer
-    title: Jackhammer
-  - cardId: onr_v1_038_joan-of-arc
-    title: Joan of Arc
-  - cardId: onr_v1_039_krash
-    title: Krash
-  - cardId: onr_v1_040_loony-goon
-    title: Loony Goon
-  - cardId: onr_v1_042_mouse
-    title: Mouse
-  - cardId: onr_v1_050_r-and-d-protocol-files
-    title: R&D-Protocol Files
+  - cardId: onr_v1_052_raffles
+    title: Raffles
+  - cardId: onr_v1_054_raptor
+    title: Raptor
+  - cardId: onr_v1_058_seeya
+    title: SeeYa
+  - cardId: onr_v1_060_shaka
+    title: Shaka
+  - cardId: onr_v1_065_smarteye
+    title: Smarteye
+  - cardId: onr_v1_066_snowball
+    title: Snowball
+  - cardId: onr_v1_070_tinweasel
+    title: Tinweasel
+  - cardId: onr_v1_072_wild-card
+    title: Wild Card
+  - cardId: onr_v1_073_wizards-book
+    title: Wizard's Book
+  - cardId: onr_v1_074_worm
+    title: Worm
 ---
 
-# Originalset-Spotcheck Job spotcheck-2026-05-16-runner-program-prevention-tools
+# Originalset-Spotcheck Job spotcheck-2026-05-16-breaker-ice-subtype-mix
 
 ## Auswahlprüfung
 
@@ -39,7 +39,7 @@ Blockgröße: 10 Karten. Auswahlbasis sind die decklegalen Runtime-Releasekarten
 
 ## Kartenbefunde
 
-### onr_v1_021_dwarf - Dwarf
+### onr_v1_052_raffles - Raffles
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -50,7 +50,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_024_expert-schedule-analyzer - Expert Schedule Analyzer
+### onr_v1_054_raptor - Raptor
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -61,7 +61,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_028_force-shield - Force Shield
+### onr_v1_058_seeya - SeeYa
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -72,7 +72,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_033_imp - Imp
+### onr_v1_060_shaka - Shaka
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -83,7 +83,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_036_jackhammer - Jackhammer
+### onr_v1_065_smarteye - Smarteye
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -94,7 +94,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_038_joan-of-arc - Joan of Arc
+### onr_v1_066_snowball - Snowball
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -105,7 +105,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_039_krash - Krash
+### onr_v1_070_tinweasel - Tinweasel
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -116,18 +116,7 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_040_loony-goon - Loony Goon
-
-Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
-: ICE-Pfade muessen Install, Rez, Encounter, Subroutinen, Breakbarkeit, Trace/Damage/End-the-run und Modifier-Layer source-bound abbilden. Chronik braucht Rez, Encounter, gebrochene/ungebrochene Subroutinen, Trace-/Damage-Ergebnis und Runende mit Quelle. Mindestens Rez, falsche Seite, stale, Teilbreak, unbroken Effekt, PublicPayload und Replay/StateHash pruefen. Unrezzed ICE-Identitaet bleibt bis zur Rez verborgen; danach sind Subroutinen und oeffentliche Effekte sichtbar. Haerte private Rez-Choice, Subroutine-Indizes, Trace-Bids, Damage-Redaction und Run-Cleanup.
-
-Notwendige Umsetzung
-: Erstelle einen fokussierten Nachtest fuer den bestehenden Resolververtrag, ergaenze fehlende Guards nur falls der Nachtest eine Luecke zeigt, und halte die Karte source-, side- und stateVersion-sicher.
-
-Akzeptanzkriterien
-: Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
-
-### onr_v1_042_mouse - Mouse
+### onr_v1_072_wild-card - Wild Card
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -138,7 +127,18 @@ Notwendige Umsetzung
 Akzeptanzkriterien
 : Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
 
-### onr_v1_050_r-and-d-protocol-files - R&D-Protocol Files
+### onr_v1_073_wizards-book - Wizard's Book
+
+Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
+: Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
+
+Notwendige Umsetzung
+: Erstelle einen fokussierten Nachtest fuer den bestehenden Resolververtrag, ergaenze fehlende Guards nur falls der Nachtest eine Luecke zeigt, und halte die Karte source-, side- und stateVersion-sicher.
+
+Akzeptanzkriterien
+: Positivpfad, wrong-side, stale `stateVersion`, entfernte Quelle/Ziel-Drift, PublicPayload-Leakscan, Chroniknachweis und Replay/StateHash sind fuer diese Karte gruen.
+
+### onr_v1_074_worm - Worm
 
 Bewertung: Engine, Chronik, Tests, Hidden-Info/Replay/StateHash, Fehlende Haertungen
 : Install-/Rig-, MU-, Hosting-, Counter- oder Icebreaker-Pfade muessen source-bound und im Run-Timing revalidiert werden. Chronik braucht Quelle, Kosten, Counter-/Strength-Delta und Run-Fenster ohne private Stack-/Grip-Leaks. Mindestens Install, falsche Seite, stale stateVersion, entfernte Quelle, Payment-/Counter-Grenze und Replay/StateHash pruefen. Runner-private Zonen duerfen nur als Counts oder private Choices erscheinen; PublicPayload darf keine verdeckten Karten nennen. Haerte LegalAction/applyAction fuer Timingpunkt, Source-Zone, Side, Kosten, Ziel/Choice und Cleanup nach Runende.
@@ -164,26 +164,25 @@ Akzeptanzkriterien
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
 
-## Umsetzungsabschluss 2026-05-16
+## Umsetzung 2026-05-16
 
-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Der Job wurde fachlich umgesetzt und geprüft, bleibt aber wegen der bekannten lokalen `.git`-ACL-Sperre auf `commit_pending`.
 
-Umgesetzt:
+Umgesetzte Punkte:
 
-- Installationen fuer Dwarf, Expert Schedule Analyzer, Force Shield, Imp, Jackhammer, Joan of Arc, Krash, Loony Goon, Mouse und R&D-Protocol Files werden gegen Wrong-Side, stale `stateVersion`, entfernte Source, PublicPayload-Leaks und Replay/StateHash geprueft.
-- V1.9.11-Hidden-Zone-Programmabilities veroeffentlichen nun die sichere installierte `sourceDefinitionId`.
-- Imp-Hosting revalidiert die Host-Quelle; Jackhammer kann gehostet replaybar installiert werden.
-- Force Shield und Joan of Arc bleiben als Core-/Net-Damage-Prevention-Quellen source-bound und public-safe.
-- Dwarf, Jackhammer, Krash und Loony Goon bleiben als installierte Breaker-Quellen in Run-Fenstern source-sicher.
-- Mouse expose't nur mit installierter Quelle und hidden-info-barrier Payload; Expert Schedule Analyzer bleibt im Access-Pfad hidden-info-sicher.
+- Raffles, Raptor, Shaka, Snowball, Tinweasel, Wild Card, Wizard's Book und Worm in matching ICE-Subtype-Encountern geprüft.
+- Install-Aktionen der Breaker gegen wrong-side und stale `stateVersion` geprüft.
+- SeeYa gegen Expose-Ziel-Drift und Hidden-Zone-Payload-Leaks geprüft.
+- Smarteye als source-bound Approach-ICE-Reveal geprüft.
+- Detailbericht, Register, JSON-Register und Wissenslog aktualisiert.
 
-Verifikation:
+Grüne Checks:
 
-- `corepack pnpm --filter @netgrid/engine test` gruen mit 458 Tests.
-- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen.
-- `corepack pnpm --filter @netgrid/catalog test` gruen.
-- `corepack pnpm typecheck` gruen.
+- `corepack pnpm --filter @netgrid/engine test`
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts`
+- `corepack pnpm --filter @netgrid/catalog test`
+- `corepack pnpm typecheck`
 
-Commit-Hinweis:
+Commit-Status:
 
-- Die Änderung wird im Abschlusscommit dieses Spotcheck-Pakets lokal festgeschrieben.
+- Lokaler Commit wurde nach Worktree-Gitdir-Entsperrung erfolgreich erstellt.

@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-trace-link-post-bid-resolvers
-status: inbox
+status: done
 createdAt: 2026-05-16T12:30:00+02:00
+startedAt: 2026-05-16T17:22:15+02:00
+completedAt: 2026-05-16T17:58:00+02:00
 requiresImplementation: true
 priority: high
 sourceBlockedJobs:
@@ -23,16 +25,16 @@ Dieser Folgejob zieht die post-bid Trace-Link-Removal-Condition aus `blocked/spo
 
 ### onr_v1_063_signpost - Signpost
 
-Status: offen.
+Status: umgesetzt.
 
 Aktueller Runtime-Stand: installierbares Trace-/Link-Programm mit generischem Hidden-Zone-/Reveal-Support, aber ohne kartenkonkretes post-bid +2-Link-Fenster.
 
 Umsetzung:
 
-- Lokalen Vertrag finalisieren: echte nach Bid-Reveal nutzbare +2-Link-Ability oder bewusst reduzierter Vertrag.
-- Falls Ability gilt: Trace-Subfenster nach offengelegten Corp-/Runner-Bids modellieren.
-- Kosten, installierte Quelle, Trace-ID, Nutzungslimit pro Trace, Side und StateVersion in `applyAction` erneut validieren.
-- AI-Hint und Trace-Bid-Policy an den finalen Vertrag anpassen.
+- Lokalen Vertrag finalisiert: echte nach Bid-Reveal nutzbare +2-Link-Ability.
+- Trace-Subfenster nach offengelegten Corp-/Runner-Bids modelliert.
+- Kosten, installierte Quelle, Trace-ID, Nutzungslimit pro Trace, Side und StateVersion werden in `applyAction` erneut validiert.
+- AI-Hint und Trace-Bid-Policy wurden an den finalen Vertrag angepasst.
 
 Akzeptanz:
 
@@ -42,16 +44,16 @@ Akzeptanz:
 
 ### onr_v1_181_the-springboard - The Springboard
 
-Status: offen.
+Status: umgesetzt.
 
 Aktueller Runtime-Stand: installierte Resource mit statischem `baseLink: 1`. Der lokale Vertrag beschreibt eine nach Bid-Reveal nutzbare +1-Link-Fähigkeit, nicht einfach dauerhaftes Base-Link.
 
 Umsetzung:
 
-- Finalen Vertrag gegen lokale Faktenbasis entscheiden und nicht gleichzeitig statischen Base-Link plus post-bid Ability führen.
-- Falls post-bid Ability gilt: Trace-Subfenster mit Source-Auswahl, Kosten und Nutzungslimit modellieren.
-- Resource-Trash-/Tag-Drift, nicht installierte Quelle, wrong-side und stale StateVersion absichern.
-- AI-Hint auf Timing und Linkwert aktualisieren.
+- Finaler Vertrag gegen lokale Faktenbasis entschieden: kein statischer Base-Link, sondern post-bid +1-Link-Ability.
+- Trace-Subfenster mit Source-Auswahl, Kosten und Nutzungslimit modelliert.
+- Nicht installierte Quelle, wrong-side und stale StateVersion abgesichert.
+- AI-Hint auf Timing und Linkwert aktualisiert.
 
 Akzeptanz:
 
@@ -66,3 +68,14 @@ Akzeptanz:
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm typecheck`
 
+## Abschluss
+
+Umgesetzt in `packages/engine/src/index.ts`, `packages/shared/src/index.ts`, `packages/ai/src/index.ts`, `packages/engine/src/index.test.ts`, `packages/ai/src/index.test.ts`, `data/ai/ai-card-hints-active.json`, `data/manifests/card-implementation-manifest-1.9.14.json` und `data/scenarios/v1914-trace-tag-resource-smoke.json`.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test -- --runInBand` - grün, 471 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 17 Dateien / 133 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 2 Dateien / 48 Tests.
+- `corepack pnpm --filter @netgrid/ai test` - grün, 1 Datei / 120 Tests.
+- `corepack pnpm typecheck` - grün.

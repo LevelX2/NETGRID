@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-resource-agenda-scorearea`
 
 Der Job wurde fachlich umgesetzt. Die ausgewählten Runner-Resources und Corp-Agendas wurden gegen Side-/StateVersion-Revalidation, Source-Drift, ScoreArea-Bindung, Damage-Prevention-Choices, PublicPayload-Leaks sowie Replay/StateHash geprüft.
 
-Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Commit-Status: `done`. Der lokale Commit wurde erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
@@ -29,4 +29,4 @@ Commit-Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen v
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Alle genannten Checks sind grün. Der lokale Commit-Blocker ist in diesem Abschlusslauf nicht mehr aufgetreten.
+Alle genannten Checks sind grün.

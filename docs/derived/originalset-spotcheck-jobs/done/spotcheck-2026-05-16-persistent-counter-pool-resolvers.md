@@ -1,6 +1,8 @@
 ---
 jobId: spotcheck-2026-05-16-persistent-counter-pool-resolvers
-status: inbox
+status: done
+startedAt: 2026-05-16T14:02:00Z
+doneAt: 2026-05-16T16:31:50+02:00
 createdAt: 2026-05-16T12:30:00+02:00
 requiresImplementation: true
 priority: high
@@ -87,3 +89,25 @@ Akzeptanz:
 - `corepack pnpm --filter @netgrid/ai test`
 - `corepack pnpm typecheck`
 
+## Umsetzungsergebnis
+
+Status: erledigt.
+
+Geänderte Hauptpfade:
+
+- `packages/engine/src/index.ts`: Code-Viral-Cache-Purge-Replacement, Korp-Trash-Aktion, Cerberus-Counter-/Runstart-Damage-/Removal-Pfad und Paris-City-Grid-Trace-Pool umgesetzt.
+- `packages/engine/src/index.test.ts`: fokussierte Regressionen für Code Viral Cache, Cerberus und Paris City Grid ergänzt.
+- `packages/shared/src/index.ts` und `packages/engine/src/mechanics/public-payload-schema.ts`: TraceState, CounterType und PublicPayload-Felder für Counter-/Pool-Zustände erweitert.
+- `packages/engine/src/mechanics/damage-prevention.ts`: falsches generisches Code-Viral-Cache-Damage-Prevention-Profil entfernt.
+- `packages/catalog/src/catalog-gates.ts`, `data/ai/ai-card-hints-active.json` und V1.9.13/15/18-Manifeste: finale Verträge und AI-Hints synchronisiert.
+- `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PERSISTENT_COUNTER_POOL_RESOLVERS_IMPLEMENTATION.md`, Register, JSON-Register und Projektlog dokumentieren den Abschluss.
+
+Checks:
+
+- `corepack pnpm --filter @netgrid/engine test` - grün, 464 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` - grün, 17 Dateien / 133 Tests.
+- `corepack pnpm --filter @netgrid/catalog test` - grün, 48 Tests.
+- `corepack pnpm --filter @netgrid/ai test` - grün, 119 Tests.
+- `corepack pnpm typecheck` - grün.
+
+Removal Conditions aus diesem Job sind erfüllt. Der ursprüngliche Sammeljob `spotcheck-2026-05-15-trace-cache-ambush` bleibt nur noch wegen `Signpost` und `The Springboard` blockiert.

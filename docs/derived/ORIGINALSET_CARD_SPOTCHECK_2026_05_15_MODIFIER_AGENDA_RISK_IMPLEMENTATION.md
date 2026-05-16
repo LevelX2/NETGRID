@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-15-modifier-agenda-risk`
 
 Der Job wurde fachlich umgesetzt. Die zehn Karten wurden als Engine-Härtung gegen LegalAction-/`applyAction`-Revalidation, PlayerView-/PublicPayload-Redaktion, ScoreArea-/Zone-Drift und Replay/StateHash geprüft.
 
-Commit-Status: `commit_pending`. Der lokale Commit ist durch `Permission denied` beim Erstellen von `.git/index.lock` blockiert; die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git` konnte ohne erhöhte Berechtigung nicht entfernt werden.
+Commit-Status: `done`. Der lokale Commit wurde nach Worktree-Gitdir-Entsperrung erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
@@ -40,4 +40,4 @@ Commit-Status: `commit_pending`. Der lokale Commit ist durch `Permission denied`
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Alle genannten Checks sind grün. Der lokale Commit bleibt bis zur `.git`-ACL-Reparatur blockiert.
+Alle genannten Checks sind grün.

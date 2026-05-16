@@ -50,7 +50,7 @@
     { "cardId": "onr_v1_361_namatoki-plaza", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_361_namatoki-plaza", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },
     { "cardId": "onr_v1_362_new-galveston-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_362_new-galveston-city-grid", "scenarioRefs": ["corp_v1918_upgrade_city_grid_counter"] },
     { "cardId": "onr_v1_364_omni-kismet-ph-d", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_364_omni-kismet-ph-d", "scenarioRefs": ["corp_v1918_upgrade_trace_tag_condition"] },
-    { "cardId": "onr_v1_365_paris-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_365_paris-city-grid", "scenarioRefs": ["corp_v1918_upgrade_city_grid_counter", "corp_v1918_upgrade_trace_tag_condition"] },
+    { "cardId": "onr_v1_365_paris-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_365_paris-city-grid", "scenarioRefs": ["corp_v1918_upgrade_city_grid_counter", "corp_v1918_upgrade_trace_pool"] },
     { "cardId": "onr_v1_366_red-herrings", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_366_red-herrings", "scenarioRefs": ["corp_v1918_upgrade_access_ambush"] },
     { "cardId": "onr_v1_369_singapore-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_369_singapore-city-grid", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },
     { "cardId": "onr_v1_370_tesseract-fort-construction", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_370_tesseract-fort-construction", "scenarioRefs": ["corp_v1918_upgrade_runtime_definition"] },

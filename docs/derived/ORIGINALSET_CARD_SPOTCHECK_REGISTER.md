@@ -4,13 +4,34 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-15-hosting-damage-multiaccess
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_HOSTING_DAMAGE_MULTIACCESS_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Pflichtchecks sind grün, lokaler Commit wurde erstellt.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Microtech AI Interface | `onr_v1_041_microtech-ai-interface` | Bestehende Multiaccess-Abdeckung bleibt leakfrei | Bestehende Tests/Verträge geprüft |
+| Poltergeist | `onr_v1_048_poltergeist` | Node-Trash-Recurring-Credits sind implementiert | Zahlungs-/Refresh-/Replay-Test ergänzt |
+| Succubus | `onr_v1_069_succubus` | Bestehende Hosting-Kaskade bleibt stabil | Bestehende Tests/Verträge geprüft |
+| Mantis, Fixer-at-Large | `onr_v1_099_mantis-fixer-at-large` | Hidden-Zone-Search bleibt public-safe | Bestehende Tests/Verträge geprüft |
+| Priority Wreck | `onr_v1_105_priority-wreck` | R&D-Multiaccess-Queue bleibt ohne Future-Leak | Bestehende Tests/Verträge geprüft |
+| Lifesaver Nanosurgeons | `onr_v1_130_lifesaver-nanosurgeons` | Damage-Prevention-Fenster bleibt source-bound | Bestehende Tests/Verträge geprüft |
+| PK-6089a | `onr_v1_138_pk-6089a` | Deck-MU und Trace-Link-Recurring-Credits sind implementiert | Install-/Trace-/Refresh-/Replay-Test ergänzt |
+| Data Darts | `onr_v1_234_data-darts` | Next-ICE-No-Break-Modifier ist implementiert | Modifier-/Damage-/Replay-Test ergänzt |
+| New Blood | `onr_v1_294_new-blood` | Vorzug-Run-History-Gate bleibt stabil | Bestehende Tests/Verträge geprüft |
+| Holovid Campaign | `onr_v1_326_holovid-campaign` | 12-Bit-Lifecycle mit Zugstart-Drain und Selftrash ist implementiert | Counter-/Selftrash-/Replay-Test ergänzt |
+
 ## Runde 2026-05-16-runner-resource-contacts
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_RESOURCE_CONTACTS_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -31,7 +52,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_PROGRAM_PREVENTION_TOOLS_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -52,7 +73,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_PROGRAM_CORE_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -73,7 +94,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_HARDWARE_LINK_RESOURCES_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -94,7 +115,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_EVENT_RUN_ACCESS_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -115,7 +136,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_EVENT_HARDWARE_PREVENTION_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -136,7 +157,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RESOURCE_AGENDA_SCOREAREA_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -157,7 +178,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_OPERATION_ASSET_NODE_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -178,7 +199,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_TRACE_BARRIERS_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -199,7 +220,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_OPERATION_ECONOMY_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der fokussierte Engine-Test wurde im Abschlusslauf erneut bestätigt.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -220,7 +241,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ASSET_UPGRADE_REST_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -235,7 +256,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_BREAKER_ICE_SUBTYPE_MIX_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -256,7 +277,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_ASSET_UPGRADE_TRACE_MODIFIERS_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -277,7 +298,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PREVENTION_INTERFACE_AGENDA_ACTIONS_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -298,7 +319,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TAGGED_WALL_BREAKER_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und gezielter Engine-Lauf sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, gezielter Engine-Lauf und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -319,7 +340,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_MODIFIER_AGENDA_RISK_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung und gezielter Engine-Lauf sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, gezielter Engine-Lauf und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -340,7 +361,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_PREVENTION_ASSETS_IMPLEMENTATION.md`
 
-Jobstatus: `commit_pending`; Umsetzung, Härtungen und Pflichtchecks sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+Jobstatus: `done`; Umsetzung, Härtungen, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -460,26 +481,71 @@ Jobstatus: `done`; Umsetzung und Checks sind grün.
 | Razor Wire | `onr_v1_262_razor-wire` | Net-Damage und End-the-run bleiben subroutinegenau getrennt und replay-stabil | Teilbreak-, Redaction- und Replay-Test ergänzt |
 | Vapor Ops | `onr_v1_347_vapor-ops` | Rezzed-only Counter-Aktion bleibt source-bound und payloadfähig | SourceDefinition-Payload und Rezzed-Gate-Test ergänzt |
 
+## Runde 2026-05-16-persistent-counter-pool-resolvers
+
+Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PERSISTENT_COUNTER_POOL_RESOLVERS_IMPLEMENTATION.md`
+
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-persistent-counter-pool-resolvers.md`
+
+Jobstatus: `done`; die drei persistenten Counter-/Purge-/Trace-Pool-Removal-Conditions aus dem blockierten Trace-Cache-Ambush-Sammeljob sind umgesetzt und grün geprüft.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Code Viral Cache | `onr_v1_155_code-viral-cache` | HQ-Run-Gate, Purge-Replacement-Choice und Korp-Trash-Aktion umgesetzt | Erledigt; Damage-Prevention-Stub entfernt |
+| Cerberus | `onr_v1_227_cerberus` | Trace-Erfolg legt Cerberus-Counter; Run-Start-Damage und Runner-Removal sind replaybar | Erledigt; falscher Trace-Tag bleibt entfernt |
+| Paris City Grid | `onr_v1_365_paris-city-grid` | Servergebundener 6-Bit-Trace-Pool mit Poolverbrauch und Corp-Turnstart-Refresh umgesetzt | Erledigt; Trace-2-Tag-Stub entfernt |
+
+## Runde 2026-05-16-hidden-zone-temporary-install-resolvers
+
+Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
+
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers.md`
+
+Jobstatus: `done`; alle drei aus dem blockierten Trace-Cache-Ambush-Sammeljob herausgezogenen Resolver sind umgesetzt und grün geprüft.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Deal with Militech | `onr_v1_082_deal-with-militech` | Research-Agenda-Turn-Flag und Militech-Counter auf installierten Icebreakern umgesetzt | Erledigt; Stack-Search-Fehlpfad entfernt |
+| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Private Multi-Expose-Zielwahl für bis zu drei installierte verdeckte Korp-Karten umgesetzt | Erledigt; Zielidentitäten leaken vor der Choice nicht |
+| Sneak Preview | `onr_v1_110_sneak-preview` | Heap-/Stack-Programminstall mit Stack-Shuffle, Memory-Revalidation und End-of-turn-Return umgesetzt | Erledigt; vorzeitig verlassene Programme kehren nicht doppelt zurück |
+
+## Runde 2026-05-16-trace-link-post-bid-resolvers
+
+Auswahlart: sequenzieller Follow-up-Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/`.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_TRACE_LINK_POST_BID_RESOLVERS_IMPLEMENTATION.md`
+
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-trace-link-post-bid-resolvers.md`
+
+Jobstatus: `done`; beide aus dem blockierten Trace-Cache-Ambush-Sammeljob herausgezogenen post-bid Trace-Link-Resolver sind umgesetzt und grün geprüft.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Signpost | `onr_v1_063_signpost` | Post-bid Trace-Link-Choice nach offengelegten Bids umgesetzt: 1 Credit für +2 Link, einmal pro Trace | Erledigt; Side, StateVersion, Quelle, Kosten und Trace-Kontext werden erneut validiert |
+| The Springboard | `onr_v1_181_the-springboard` | Statischer Base-Link entfernt und post-bid Trace-Link-Choice umgesetzt: 1 Credit für +1 Link, einmal pro Trace | Erledigt; Side, StateVersion, Quelle, Kosten und Trace-Kontext werden erneut validiert |
+
 ## Runde 2026-05-15-trace-cache-ambush
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, mehrere Vollresolver bleiben als Removal Condition offen.
+Jobstatus: `done`; grüne Teilfixes wurden umgesetzt, ausgelagerte Vollresolver sind inzwischen durch Folgejobs erledigt, und die verbliebenen `Ice Pick Willie`-/`TRAP!`-Nachtests sind grün.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
-| Signpost | `onr_v1_063_signpost` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
-| Deal with Militech | `onr_v1_082_deal-with-militech` | Blockiert: Research-Bedingung und Militech-Counter auf Icebreakern fehlen | Eigenen Research-/Counter-Resolver umsetzen |
-| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Blockiert: Multi-Expose-Choice ohne Zielidentitäts-Leak fehlt | Eigenen Expose-Choice-Resolver umsetzen |
-| Sneak Preview | `onr_v1_110_sneak-preview` | Blockiert: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return fehlt | Eigenen Temporary-Install-Resolver umsetzen |
-| Code Viral Cache | `onr_v1_155_code-viral-cache` | Blockiert: Purge-Replacement und Korp-Trash-Aktion fehlen | Eigenen Purge-Replacement-Resolver umsetzen |
-| The Springboard | `onr_v1_181_the-springboard` | Blockiert: post-bid Trace-Link-Fenster nach offengelegten Bids fehlt | Eigenen Trace-Link-Choice-Scope umsetzen |
-| Cerberus | `onr_v1_227_cerberus` | Teilfix umgesetzt: 3 Net Damage und kein falscher Trace-Tag; Counter-Loop bleibt offen | Cerberus-Counter-/Runstart-Damage-Resolver umsetzen |
-| Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Teilfix umgesetzt: Program-Trash plus End-the-run statt R&D-Reveal | Teilfix grün |
-| TRAP! | `onr_v1_345_trap` | Teilfix umgesetzt: 3 Net Damage plus Tag aus legalem Access; Archives-No-op bleibt | Teilfix grün |
-| Paris City Grid | `onr_v1_365_paris-city-grid` | Blockiert: servergebundener Trace-Bit-Pool und Refresh fehlen | Eigenen Trace-Pool-Payment-Resolver umsetzen |
+| Signpost | `onr_v1_063_signpost` | Folgejob umgesetzt: post-bid Trace-Link-Fenster nach offengelegten Bids grün | Erledigt in `spotcheck-2026-05-16-trace-link-post-bid-resolvers` |
+| Deal with Militech | `onr_v1_082_deal-with-militech` | Folgejob umgesetzt: Research-Bedingung und Militech-Counter auf Icebreakern grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
+| Hunt Club BBS | `onr_v1_091_hunt-club-bbs` | Folgejob umgesetzt: Multi-Expose-Choice ohne Zielidentitäts-Leak grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
+| Sneak Preview | `onr_v1_110_sneak-preview` | Folgejob umgesetzt: temporärer Heap-/Stack-Programminstall mit End-of-turn-Return grün | Erledigt in `spotcheck-2026-05-16-hidden-zone-temporary-install-resolvers` |
+| Code Viral Cache | `onr_v1_155_code-viral-cache` | Folgejob umgesetzt: HQ-Run-Gate, Purge-Replacement und Korp-Trash-Aktion grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
+| The Springboard | `onr_v1_181_the-springboard` | Folgejob umgesetzt: post-bid Trace-Link-Fenster nach offengelegten Bids grün | Erledigt in `spotcheck-2026-05-16-trace-link-post-bid-resolvers` |
+| Cerberus | `onr_v1_227_cerberus` | Folgejob umgesetzt: Trace-Counter, Runstart-Damage und Runner-Removal grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
+| Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Program-Trash plus End-the-run statt R&D-Reveal; No-Program-Fall replay-stabil abgesichert | Abgeschlossen |
+| TRAP! | `onr_v1_345_trap` | 3 Net Damage plus Tag aus legalem Access; R&D-Reveal und Archives-No-op final abgesichert | Abgeschlossen |
+| Paris City Grid | `onr_v1_365_paris-city-grid` | Folgejob umgesetzt: servergebundener Trace-Bit-Pool, Poolverbrauch und Refresh grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 
 ## Runde 2026-05-15-virus-link-archives
 
@@ -487,20 +553,33 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_VIRUS_LINK_ARCHIVES_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, `Pile Driver` und `Full Body Conversion` brauchen eigene Resolver-Verträge.
+Jobstatus: `done`; grüne Teilfixes wurden umgesetzt, und die offenen Resolver-Verträge für `Pile Driver` und `Full Body Conversion` wurden im Folgejob `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` erledigt.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
-| Cockroach | `onr_v1_013_cockroach` | Counter-Schwelle, Multi-Copy und Discard-Choice-Revalidation gehärtet | Teilfix grün |
-| Pile Driver | `onr_v1_047_pile-driver` | Blockiert: Multi-Wall-Break plus exakt 3 Stealth-Verlust braucht eigenen Resolver | Eigenen Resolver-Scope umsetzen |
-| Replicator | `onr_v1_056_replicator` | Nacharbeit umgesetzt: Trace-Subroutine-Breaker mit Pump und Nicht-Trace-Negativfall | Teilfix grün |
-| Scatter Shot | `onr_v1_057_scatter-shot` | Nacharbeit umgesetzt: restricted Recurring Credits für accessed Upgrade-Trashkosten plus Refresh | Teilfix grün |
-| Full Body Conversion | `onr_v1_127_full-body-conversion` | Blockiert: Meat-Damage-Prevention und Korp-Bypass driften vom Runtime-Stub | Eigenen Resolver-Scope umsetzen |
-| Access through Alpha | `onr_v1_148_access-through-alpha` | Nacharbeit umgesetzt: Base Link 9 und genau eine Base-Link-Quelle pro Trace | Teilfix grün |
-| Detroit Police Contract | `onr_v1_198_detroit-police-contract` | Bestehender Counterpfad durch wrong-side/stale/0-Counter-Revalidation gehärtet | Teilfix grün |
-| Off-Site Backups | `onr_v1_296_off-site-backups` | Bestehender Archives-Choice-Pfad durch No-target-Fall gehärtet | Teilfix grün |
-| Urban Renewal | `onr_v1_307_urban-renewal` | Bestehender tagged-only Damage-Pfad durch Tag-Drift-Revalidation gehärtet | Teilfix grün |
-| Red Herrings | `onr_v1_366_red-herrings` | Nacharbeit umgesetzt: Tax bleibt nach Trash im selben Run aktiv | Teilfix grün |
+| Cockroach | `onr_v1_013_cockroach` | Counter-Schwelle, Multi-Copy und Discard-Choice-Revalidation gehärtet | Abgeschlossen |
+| Pile Driver | `onr_v1_047_pile-driver` | Folgejob umgesetzt: Multi-Wall-Break bis vier Subroutinen plus exakt 3 Stealth-Verlust grün | Erledigt in `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` |
+| Replicator | `onr_v1_056_replicator` | Nacharbeit umgesetzt: Trace-Subroutine-Breaker mit Pump und Nicht-Trace-Negativfall | Abgeschlossen |
+| Scatter Shot | `onr_v1_057_scatter-shot` | Nacharbeit umgesetzt: restricted Recurring Credits für accessed Upgrade-Trashkosten plus Refresh | Abgeschlossen |
+| Full Body Conversion | `onr_v1_127_full-body-conversion` | Folgejob umgesetzt: vollständige Meat-Prevention mit Korp-Bypass-Zahlung grün | Erledigt in `spotcheck-2026-05-16-runner-breaker-prevention-resolvers` |
+| Access through Alpha | `onr_v1_148_access-through-alpha` | Nacharbeit umgesetzt: Base Link 9 und genau eine Base-Link-Quelle pro Trace | Abgeschlossen |
+| Detroit Police Contract | `onr_v1_198_detroit-police-contract` | Bestehender Counterpfad durch wrong-side/stale/0-Counter-Revalidation gehärtet | Abgeschlossen |
+| Off-Site Backups | `onr_v1_296_off-site-backups` | Bestehender Archives-Choice-Pfad durch No-target-Fall gehärtet | Abgeschlossen |
+| Urban Renewal | `onr_v1_307_urban-renewal` | Bestehender tagged-only Damage-Pfad durch Tag-Drift-Revalidation gehärtet | Abgeschlossen |
+| Red Herrings | `onr_v1_366_red-herrings` | Nacharbeit umgesetzt: Tax bleibt nach Trash im selben Run aktiv | Abgeschlossen |
+
+## Runde 2026-05-16-runner-breaker-prevention-resolvers
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` als Folgejob für offene Resolver-Verträge aus `2026-05-15-virus-link-archives`.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_BREAKER_PREVENTION_RESOLVERS_IMPLEMENTATION.md`
+
+Jobstatus: `done`; Umsetzung und Checks sind grün.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Pile Driver | `onr_v1_047_pile-driver` | Multi-Wall-Break mit bis zu vier Subroutinen, Source-/Target-Revalidation, Zusatzkosten und exakt 3 Stealth-Verlust umgesetzt | Abgeschlossen |
+| Full Body Conversion | `onr_v1_127_full-body-conversion` | Vollständige Meat-Damage-Prevention mit Korp-Bypass-Choice und side-/credit-validierter Zahlung umgesetzt | Abgeschlossen |
 
 ## Runde 2026-05-15-hidden-access-trace
 
@@ -553,7 +632,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_AMBUSH_HIDDEN_TRACE_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, vier größere Vollresolver bleiben als Removal Condition offen.
+Jobstatus: `done`; grüne Teilfixes und die vier größeren Vollresolver wurden umgesetzt.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -563,12 +642,12 @@ Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, vier größere Vollreso
 | Deep Thought | `onr_v1_017_deep-thought` | Bestehender Recurring-/Virus-/Purge-Pfad blieb unverändert grün | Kein blockierender Codefix in diesem Lauf |
 | Information Laundering | `onr_v1_328_information-laundering` | Teilfix umgesetzt: Advancement-skalierter Creditgewinn mit Selftrash und Payload | Volljob bleibt blockiert durch andere Kartenverträge |
 | Edited Shipping Manifests | `onr_v1_084_edited-shipping-manifests` | Teilfix umgesetzt: redigierter `corpDrawnCount` im Access-Replacement | Kein offener Punkt aus diesem Teilpfad |
-| Self-Modifying Code | `onr_v1_059_self-modifying-code` | Blockiert: Vollresolver für Run-gebundenen Stack-Programminstall fehlt | Eigenen Resolver-Scope umsetzen |
+| Self-Modifying Code | `onr_v1_059_self-modifying-code` | Umsetzung abgeschlossen: Run-/Encounter-Stack-Programminstall mit Trash-Kosten, Reveal, Installkosten, MU-Folgechoice und Shuffle | Vollresolver grün getestet |
 | Aujourd'Oui | `onr_v1_151_aujourdoui` | Bestehender Hidden-Zone-Search/Reveal-Pfad blieb unverändert | Fokussierte Einzelabdeckung in Folgejob empfohlen |
 | N.E.T.O. | `onr_v1_169_n-e-t-o` | Bestehender Search-only-Pfad blieb unverändert | Fokussierte Einzelabdeckung in Folgejob empfohlen |
-| Crystal Palace Station Grid | `onr_v1_355_crystal-palace-station-grid` | Blockiert: Counter-Wirkungsvertrag nicht finalisiert; Rez-Kostenpayload für Skälderviken separat umgesetzt | Lokalen Countervertrag finalisieren |
-| Emergency Self-Construct | `onr_v1_022_emergency-self-construct` | Blockiert: Flatline-/Damage-Replacement und persistente Restzustände fehlen als enger Resolver | Eigenen Resolver-Scope umsetzen |
-| Fait Accompli | `onr_v1_025_fait-accompli` | Blockiert: fortgebundene Fait-Counter und Agenda-Difficulty fehlen | Eigenen Resolver-Scope umsetzen |
+| Crystal Palace Station Grid | `onr_v1_355_crystal-palace-station-grid` | Umsetzung abgeschlossen: servergebundene Counter-Wirkung auf Agenda-Difficulty | Vollresolver grün getestet |
+| Emergency Self-Construct | `onr_v1_022_emergency-self-construct` | Umsetzung abgeschlossen: Flatline-Replacement und Meat-Damage-Prevention side-sicher | Vollresolver grün getestet |
+| Fait Accompli | `onr_v1_025_fait-accompli` | Umsetzung abgeschlossen: fortgebundene Fait-Counter und Agenda-Difficulty | Vollresolver grün getestet |
 | Pocket Virtual Reality | `onr_v1_260_pocket-virtual-reality` | Bestehender Trace-6/Tag-Pfad blieb unverändert | Kein Codefix in diesem Lauf |
 | Romp through HQ | `onr_v1_107_romp-through-hq` | Bestehender HQ-Free-Trash-Pfad blieb unverändert | Kein Codefix in diesem Lauf |
 | Skälderviken SA Beta Test Site | `onr_v1_341_skalderviken-sa-beta-test-site` | Teilfix umgesetzt: Black-ICE-only Rez-Kostenquelle und Zahlung payloadfähig | Kein offener Punkt aus diesem Teilpfad |

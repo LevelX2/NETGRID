@@ -1283,20 +1283,25 @@
         "ice",
         "trace",
         "damage",
-        "end_run"
+        "end_run",
+        "persistent_counter"
       ],
       "planRoles": [
         "defend_server",
-        "tag_pressure"
+        "trace_pressure",
+        "run_start_damage"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "trace",
-        "net_damage"
+        "net_damage",
+        "persistent_counter",
+        "counter_remove_action"
       ],
       "valueHints": {
-        "defense": 2
+        "defense": 2,
+        "damage": 2
       },
       "riskTags": [
         "trace_window",
@@ -1510,7 +1515,8 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "damage"
+        "damage",
+        "run_modifier"
       ],
       "planRoles": [
         "defend_server"
@@ -1519,13 +1525,15 @@
         "install_ice",
         "rez_ice",
         "encounter_ice",
-        "net_damage"
+        "net_damage",
+        "next_encounter_no_break"
       ],
       "valueHints": {
         "defense": 1
       },
       "riskTags": [
-        "damage_window"
+        "damage_window",
+        "next_encounter_modifier"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4369,8 +4377,8 @@
       "roles": [
         "asset",
         "campaign",
-        "recurring",
-        "economy"
+        "economy",
+        "bit_counter"
       ],
       "planRoles": [
         "remote_asset_economy"
@@ -4378,14 +4386,16 @@
       "requiredMechanics": [
         "install_asset",
         "rez_card",
-        "recurring_credit",
-        "gain_credit"
+        "bit_counter",
+        "start_turn_counter_drain",
+        "gain_credit",
+        "self_trash"
       ],
       "valueHints": {
         "economy": 2
       },
       "riskTags": [
-        "recurring_refresh"
+        "public_counter_lifecycle"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5557,7 +5567,7 @@
         "region",
         "city_grid",
         "trace",
-        "tag"
+        "trace_pool"
       ],
       "planRoles": [
         "remote_upgrade_tax"
@@ -5567,7 +5577,8 @@
         "rez_card",
         "city_grid",
         "trace",
-        "tag_condition"
+        "trace_bid_credit_source",
+        "counter_refresh"
       ],
       "valueHints": {
         "trace": 2,
@@ -5575,12 +5586,12 @@
       },
       "riskTags": [
         "trace_window",
-        "tag_risk",
+        "trace_pool_server_bound",
         "region_unique_server"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_tag_condition"
+        "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_pool"
       ]
     },
     {
@@ -7854,19 +7865,20 @@
       "roles": [
         "runner",
         "program",
-        "per_card_longtail"
+        "recurring_credit",
+        "trash_cost_payment"
       ],
       "planRoles": [
         "runner_install_program",
-        "runner_program_ability"
+        "runner_access_trash_economy"
       ],
       "requiredMechanics": [
-        "per_card_longtail_resolver_gate",
-        "v1922_runner_program_install_surface_ability_gated",
-        "runner_program_resolver"
+        "v1922_runner_program_poltergeist_node_trash_recurring_credit",
+        "node_trash_recurring_credit",
+        "recurring_start_turn"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "trashEconomy": 2
       },
       "riskTags": [
         "legal_actions_only",
@@ -8317,23 +8329,24 @@
       "roles": [
         "program",
         "trace",
-        "reveal"
+        "post_bid_link"
       ],
       "planRoles": [
         "build_rig",
-        "trace_bid_support"
+        "trace_bid_support",
+        "post_bid_trace_link"
       ],
       "requiredMechanics": [
         "install_program",
         "trace",
-        "hidden_zone_tool"
+        "link",
+        "post_bid_link"
       ],
       "valueHints": {
-        "trace": 1
+        "trace": 1,
+        "postBidLink": 2
       },
-      "riskTags": [
-        "hidden_zone_projection"
-      ],
+      "riskTags": [],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
@@ -8898,23 +8911,24 @@
       "roles": [
         "event",
         "counter",
-        "hidden_zone_tool"
+        "icebreaker_strength_modifier"
       ],
       "planRoles": [
-        "build_rig",
-        "recover_rig"
+        "agenda_reward",
+        "build_rig"
       ],
       "requiredMechanics": [
         "play_event",
-        "search_stack",
-        "reveal",
-        "shuffle"
+        "agenda_subtype_condition",
+        "counter",
+        "icebreaker_strength_modifier"
       ],
       "valueHints": {
-        "consistency": 2
+        "tempo": 2,
+        "runPressure": 2
       },
       "riskTags": [
-        "hidden_info_barrier"
+        "conditional"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -9175,7 +9189,7 @@
       "cardType": "event",
       "roles": [
         "event",
-        "counter",
+        "expose",
         "hidden_zone_tool"
       ],
       "planRoles": [
@@ -9183,13 +9197,16 @@
       ],
       "requiredMechanics": [
         "play_event",
-        "reveal_stack_top"
+        "expose",
+        "target_choice",
+        "hidden_info_barrier"
       ],
       "valueHints": {
         "information": 2
       },
       "riskTags": [
-        "public_reveal"
+        "public_reveal",
+        "hidden_info_barrier"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10587,18 +10604,21 @@
       "roles": [
         "runner",
         "hardware",
-        "per_card_longtail"
+        "deck",
+        "link_recurring_credit"
       ],
       "planRoles": [
-        "runner_install_hardware"
+        "runner_install_hardware",
+        "runner_trace_bid_support"
       ],
       "requiredMechanics": [
-        "per_card_longtail_resolver_gate",
-        "per_card_longtail_resolver_gate; install_hardware_memory_surface",
-        "install_hardware_memory_surface"
+        "install_hardware_memory_surface",
+        "deck_unique",
+        "trace_link_recurring_credit",
+        "recurring_start_turn"
       ],
       "valueHints": {
-        "perCardLongtailPriority": 2
+        "traceBidSupport": 2
       },
       "riskTags": [
         "legal_actions_only",
@@ -11075,26 +11095,30 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "virus_counter",
+        "purge_replacement"
       ],
       "planRoles": [
         "build_rig",
-        "survive_net_damage"
+        "protect_virus_counters",
+        "successful_hq_run_payoff"
       ],
       "requiredMechanics": [
         "install_resource",
-        "net_damage",
-        "damage_prevention"
+        "successful_hq_run_condition",
+        "virus_counter_purge_replacement",
+        "corp_trash_action"
       ],
       "valueHints": {
-        "survival": 1
+        "virus": 2
       },
       "riskTags": [
-        "damage_window"
+        "purge_window",
+        "corp_trash_action"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+        "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_virus_purge_replacement"
       ]
     },
     {
@@ -11860,20 +11884,22 @@
       "roles": [
         "resource",
         "link",
-        "reveal"
+        "post_bid_link"
       ],
       "planRoles": [
         "build_rig",
-        "trace_bid_support"
+        "trace_bid_support",
+        "post_bid_trace_link"
       ],
       "requiredMechanics": [
         "install_resource",
         "trace",
         "link",
-        "hidden_zone_tool"
+        "post_bid_link"
       ],
       "valueHints": {
-        "link": 1
+        "link": 1,
+        "postBidLink": 1
       },
       "riskTags": [
         "resource_trash_if_tagged"

@@ -6,7 +6,7 @@ Job: `spotcheck-2026-05-16-corp-asset-upgrade-rest`
 
 Der Job wurde fachlich umgesetzt. Die ausgewählten Corp-Asset-/Upgrade-Karten wurden gegen Rezzed-Gates, Serverbindung, Source- und Target-Drift, Side-/StateVersion-Revalidation, PublicPayload-Leaks sowie Replay/StateHash geprüft.
 
-Commit-Status: `commit_pending`. Staging und lokaler Commit sind durch `Permission denied` beim Erstellen von `.git/index.lock` blockiert; Ursache ist weiterhin die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` auf `.git`.
+Commit-Status: `done`. Der lokale Commit wurde nach Worktree-Gitdir-Entsperrung erfolgreich erstellt.
 
 ## Umgesetzte Härtungen
 
@@ -22,4 +22,4 @@ Commit-Status: `commit_pending`. Staging und lokaler Commit sind durch `Permissi
 - `corepack pnpm --filter @netgrid/catalog test`
 - `corepack pnpm typecheck`
 
-Alle genannten Checks sind grün. Staging und lokaler Commit bleiben bis zur `.git`-ACL-Reparatur blockiert.
+Alle genannten Checks sind grün.
