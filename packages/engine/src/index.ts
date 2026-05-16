@@ -162,6 +162,7 @@ import {
 import {
   CORP_ECONOMY_ASSET_CARD_IDS,
   CORP_RECURRING_ASSET_CARD_IDS,
+  INVESTMENT_FIRM_ASSET_CARD_ID,
 } from "./mechanics/payment-costs";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import {
@@ -6885,6 +6886,10 @@ function performAction(
       return;
     case "gain_credit":
       spendClick(state, legalAction.side);
+      if (shouldOpenInvestmentFirmCreditChoice(state, legalAction)) {
+        startInvestmentFirmCreditChoice(state, legalAction);
+        return;
+      }
       if (legalAction.payload?.v1911HiddenZoneAbility) {
         resolveV1911RunnerHiddenZoneAbility(state, legalAction);
         return;
@@ -15951,6 +15956,115 @@ function selectedChoiceIds(
   return raw.filter((value): value is string => typeof value === "string");
 }
 
+function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {
+  return rezzedCorpRootCardIds(state)
+    .filter(
+      (cardId) =>
+        definitionFor(state, cardId).id === INVESTMENT_FIRM_ASSET_CARD_ID,
+    )
+    .sort();
+}
+
+function shouldOpenInvestmentFirmCreditChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): boolean {
+  return (
+    legalAction.side === "corp" &&
+    legalAction.source === "basic_action" &&
+    legalAction.type === "gain_credit" &&
+    Object.keys(legalAction.payload ?? {}).length === 0 &&
+    rezzedInvestmentFirmIds(state).length > 0
+  );
+}
+
+function startInvestmentFirmCreditChoice(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const investmentFirmIds = rezzedInvestmentFirmIds(state);
+  if (investmentFirmIds.length === 0)
+    throw new Error("Investment Firm ist nicht rezzed installiert.");
+  state.pendingChoice = {
+    choiceId: `v1917_investment_firm_credit_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1917.investment_firm_credit:${state.stateVersion + 1}`,
+    prompt: "Investment Firm: Credit nehmen oder 2 Credits auf die Karte legen?",
+    kind: "select_option",
+    options: [
+      {
+        id: "take_credit",
+        label: "1 Credit nehmen",
+        publicLabel: "1 Credit genommen",
+        value: "take_credit",
+      },
+      ...investmentFirmIds.map((cardId, index) => ({
+        id: `investment_firm_${cardId}`,
+        label:
+          investmentFirmIds.length === 1
+            ? "2 Credits auf Investment Firm legen"
+            : `2 Credits auf Investment Firm ${index + 1} legen`,
+        publicLabel: "2 Credits auf Investment Firm gelegt",
+        value: cardId,
+      })),
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  legalAction.payload = {
+    investmentFirmChoiceOpened: true,
+    gainCreditsAmount: 0,
+    sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+  };
+}
+
+function resolveInvestmentFirmCreditChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1917.investment_firm_credit"))
+    throw new Error("Es ist keine Investment-Firm-Choice offen.");
+  if (choice.side !== "corp" || legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Investment Firm nutzen.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  if (selected === "take_credit") {
+    credits(state, "corp", 1);
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      choiceVisibility: "public",
+      sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+      gainCreditsAmount: 1,
+      gainedCredits: 1,
+      corpCreditsAfter: state.corp.credits,
+    };
+    return;
+  }
+  const selectedOption = choice.options.find((option) => option.id === selected);
+  const sourceCardId = String(selectedOption?.value ?? "");
+  if (!rezzedInvestmentFirmIds(state).includes(sourceCardId))
+    throw new Error("Die gewaehlte Investment Firm ist nicht mehr legal.");
+  addCardCounter(state, sourceCardId, "recurring_credit", 2);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    choiceVisibility: "public",
+    cardDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+    sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+    counterType: "recurring_credit",
+    addedCounterAmount: 2,
+    remainingCounters: cardCounter(state, sourceCardId, "recurring_credit"),
+    gainCreditsAmount: 0,
+    gainedCredits: 0,
+    corpCreditsAfter: state.corp.credits,
+  };
+}
+
 function resolvePendingChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -16047,6 +16161,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_negotiating_center")) {
     resolveCorporateNegotiatingCenterChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
+    resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1919.systematic_layoffs")) {

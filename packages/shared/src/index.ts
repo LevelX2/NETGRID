@@ -3645,7 +3645,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 2,
     rulesText:
-      "Rezzed transaction asset for stored or recurring Corp credits. Credit state is handled by counters and start-of-turn refresh where applicable.",
+      "Rezzed transaction asset with a Corp basic-credit replacement: take the normal credit or place 2 recurring credits on Investment Firm instead.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -3653,6 +3653,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "generic_asset_node",
       "transactions",
       "economy",
+      "basic_credit_replacement",
       "recurring_credit",
       "recurring_start_turn",
       ONR_V1_LOCAL_PRIVATE,

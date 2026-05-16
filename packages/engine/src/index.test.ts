@@ -17041,7 +17041,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "onr_v1_311_braindance-campaign",
       "onr_v1_321_esa-contract",
       "onr_v1_326_holovid-campaign",
-      "onr_v1_329_investment-firm",
       "onr_v1_337_rockerboy-promotion",
     ] as const;
     for (const definitionId of economyAssets) {
@@ -17087,6 +17086,197 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       });
       expect(validateGameState(state).ok, definitionId).toBe(true);
     }
+  });
+
+  it("replaces the basic Corp credit action with an optional Investment Firm credit choice", () => {
+    let noFirm = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-investment-firm-no-source",
+    );
+    noFirm = apply(noFirm, "corp", (action) => action.type === "mandatory_draw");
+    const noFirmCreditsBefore = noFirm.corp.credits;
+    noFirm = apply(
+      noFirm,
+      "corp",
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    expect(noFirm.corp.credits).toBe(noFirmCreditsBefore + 1);
+    expect(noFirm.pendingChoice).toBeUndefined();
+
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-investment-firm-credit-choice",
+    );
+    state.corp.credits = 10;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const firmId = moveCorpCardToHq(state, "onr_v1_329_investment-firm");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === firmId &&
+        action.payload?.serverId === "new_remote",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_329_investment-firm",
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1917AssetAbility === "gain_credits" &&
+          action.payload?.cardId === firmId,
+      ),
+    ).toBe(false);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const creditsBefore = state.corp.credits;
+    const clicksBefore = state.corp.clicks;
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(state.corp.credits).toBe(creditsBefore);
+    expect(state.corp.clicks).toBe(clicksBefore - 1);
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("v1917.investment_firm_credit"),
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(getPlayerView(state, "corp").pendingChoice?.options.map((option) => option.id)).toEqual(
+      expect.arrayContaining(["take_credit", `investment_firm_${firmId}`]),
+    );
+    const resolve = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: resolve.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        selectedChoices: {
+          choiceId: state.pendingChoice?.choiceId,
+          selectedOptionIds: [`investment_firm_${firmId}`],
+        },
+      }).ok,
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: resolve.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        selectedChoices: {
+          choiceId: state.pendingChoice?.choiceId,
+          selectedOptionIds: [`investment_firm_${firmId}`],
+        },
+      }),
+    ).toMatchObject({ ok: false, error: { code: "ERR_STALE_STATE" } });
+
+    let normalState = structuredClone(state);
+    const normalResult = applyAction(normalState, {
+      matchId: normalState.matchId,
+      side: "corp",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: normalState.stateVersion,
+      selectedChoices: {
+        choiceId: normalState.pendingChoice?.choiceId,
+        selectedOptionIds: ["take_credit"],
+      },
+      idempotencyKey: "v1917-investment-firm-normal-credit",
+    });
+    expect(normalResult.ok).toBe(true);
+    if (!normalResult.ok) throw new Error(normalResult.error.message);
+    normalState = normalResult.state;
+    expect(normalState.corp.credits).toBe(creditsBefore + 1);
+    expect(cardCounterAmount(normalState, firmId, "recurring_credit")).toBe(0);
+    expect(normalState.pendingChoice).toBeUndefined();
+
+    const storeResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: resolve.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`investment_firm_${firmId}`],
+      },
+      idempotencyKey: "v1917-investment-firm-store-credit",
+    });
+    expect(storeResult.ok).toBe(true);
+    if (!storeResult.ok) throw new Error(storeResult.error.message);
+    state = storeResult.state;
+    expect(state.corp.credits).toBe(creditsBefore);
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(2);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(
+      getPlayerView(state, "runner")
+        .servers.find((server) => server.id === "remote_1")
+        ?.root.find((card) => card.instanceId === firmId)?.counters
+        ?.recurring_credit,
+    ).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      cardDefinitionId: "onr_v1_329_investment-firm",
+      counterType: "recurring_credit",
+      addedCounterAmount: 2,
+      remainingCounters: 2,
+      gainedCredits: 0,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let multi = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "v1917-investment-firm-multiple",
+    );
+    multi = apply(multi, "corp", (action) => action.type === "mandatory_draw");
+    const firstFirm = putCorpRootInRemote(multi, "onr_v1_329_investment-firm");
+    const secondFirm = `${firstFirm}_copy` as typeof firstFirm;
+    const firstFirmZone = multi.cardInstances[firstFirm]?.zone;
+    const firstFirmServerId =
+      firstFirmZone?.zone === "serverRoot" ? firstFirmZone.serverId : "remote_1";
+    multi.cardInstances[secondFirm] = {
+      ...multi.cardInstances[firstFirm]!,
+      instanceId: secondFirm,
+      zone: { side: "corp", zone: "serverRoot", serverId: firstFirmServerId },
+    };
+    multi.corp.servers
+      .find((server) => server.id === firstFirmServerId)
+      ?.root.push(secondFirm);
+    for (const cardId of [firstFirm, secondFirm]) {
+      multi.cardInstances[cardId] = {
+        ...multi.cardInstances[cardId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    multi = apply(
+      multi,
+      "corp",
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+    const multiOptions = multi.pendingChoice?.options.map((option) => option.id);
+    expect(multiOptions).toHaveLength(3);
+    expect(multiOptions).toEqual(
+      expect.arrayContaining([
+        "take_credit",
+        `investment_firm_${firstFirm}`,
+        `investment_firm_${secondFirm}`,
+      ]),
+    );
+    expect(validateGameState(state).ok).toBe(true);
+    expect(validateGameState(multi).ok).toBe(true);
   });
 
   it("loads and spends Spinn Public Relations bits instead of generic economy credits", () => {
