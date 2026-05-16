@@ -1,9 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-event-run-access
-status: committed
+status: done
 createdAt: 2026-05-16T11:08:00+01:00
 startedAt: 2026-05-16T13:53:00+02:00
-completedAt: 2026-05-16T13:56:05+02:00
+completedAt: 2026-05-16T18:51:00+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -166,7 +166,7 @@ Akzeptanzkriterien
 
 ## Umsetzung 2026-05-16
 
-Status: `committed`.
+Status: `done`.
 
 Umgesetzt:
 
