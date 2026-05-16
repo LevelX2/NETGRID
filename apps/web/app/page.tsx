@@ -1817,7 +1817,9 @@ export default function Page() {
   const [actionCueAutoDismissMs, setActionCueAutoDismissMs] = useState<CueAutoDismissMs>(2500);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
+  const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
+  const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
@@ -1843,6 +1845,7 @@ export default function Page() {
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
+  const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
@@ -2118,8 +2121,9 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoEndTurnEnabled?: unknown };
+        const parsed = JSON.parse(stored) as { autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown };
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
+        if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
       } catch {
         removeLocalStorageKeys(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
       }
@@ -2129,8 +2133,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoEndTurnEnabled }));
-  }, [gameplaySettingsLoaded, autoEndTurnEnabled]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoDiscardEnabled, autoEndTurnEnabled }));
+  }, [gameplaySettingsLoaded, autoDiscardEnabled, autoEndTurnEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -2364,6 +2368,14 @@ export default function Page() {
   }, []);
 
   const activeView = payload?.playerView;
+  const activeDiscardChoice = activeView?.pendingChoice?.source === "discard_phase" ? activeView.pendingChoice : null;
+  const activeDiscardOptionIds = useMemo(() => new Set(activeDiscardChoice?.options.map((option) => option.id) ?? []), [activeDiscardChoice]);
+  const currentDiscardChoiceSelection = discardChoiceSelection;
+  const selectedDiscardOptionIds =
+    currentDiscardChoiceSelection && currentDiscardChoiceSelection.choiceId === activeDiscardChoice?.choiceId
+      ? currentDiscardChoiceSelection.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId))
+      : [];
+  const selectedDiscardOptionIdSet = useMemo(() => new Set(selectedDiscardOptionIds), [selectedDiscardOptionIds.join("|")]);
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
   const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok);
@@ -2451,6 +2463,23 @@ export default function Page() {
       setSelectedActionContext((current) => (current?.kind === "card" && current.id === card.instanceId ? null : { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
     }
   };
+  const discardOptionForCard = (card: VisibleCard): VisibleChoiceOption | null => {
+    if (!activeDiscardChoice) return null;
+    return activeDiscardChoice.options.find((option) => option.value === card.instanceId) ?? null;
+  };
+  const toggleDiscardOption = (optionId: string) => {
+    if (!activeDiscardChoice) return;
+    const required = activeDiscardChoice.maxSelections;
+    setDiscardChoiceSelection((current) => {
+      const currentSelected = current?.choiceId === activeDiscardChoice.choiceId ? current.selectedOptionIds.filter((id) => activeDiscardOptionIds.has(id)) : [];
+      const nextSelected = currentSelected.includes(optionId)
+        ? currentSelected.filter((id) => id !== optionId)
+        : currentSelected.length >= required
+          ? currentSelected
+          : [...currentSelected, optionId];
+      return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
+    });
+  };
   const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions, payload.side) : null;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
@@ -2512,6 +2541,19 @@ export default function Page() {
     if (!selectedActionContext) return;
     if (!activeView || payload?.winner || !actionContextStillVisible(selectedActionContext, activeView)) setSelectedActionContext(null);
   }, [activeView, payload?.winner, selectedActionContext]);
+
+  useEffect(() => {
+    if (!activeDiscardChoice) {
+      setDiscardChoiceSelection(null);
+      autoDiscardSubmittedKeyRef.current = null;
+      return;
+    }
+    setDiscardChoiceSelection((current) => {
+      if (!current || current.choiceId !== activeDiscardChoice.choiceId) return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: [] };
+      const nextSelected = current.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId));
+      return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
+    });
+  }, [activeDiscardChoice?.choiceId, activeDiscardOptionIds]);
 
   useEffect(() => {
     if (!payload || !activeView) return;
@@ -3153,8 +3195,8 @@ export default function Page() {
     );
   };
 
-  const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[]) => {
-    if (!session || !payload || !ensureSocketConnected()) return;
+  const submitChoiceOptions = (action: LegalAction, choiceId: string, selectedOptionIds: string[]): boolean => {
+    if (!session || !payload || !ensureSocketConnected()) return false;
     socketRef.current?.send(
       JSON.stringify({
         type: "submit_action",
@@ -3168,7 +3210,18 @@ export default function Page() {
         }
       })
     );
+    return true;
   };
+
+  useEffect(() => {
+    if (!autoDiscardEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online" || !activeDiscardChoice) return;
+    const discardAction = payload.legalActions.find((action) => action.type === "resolve_choice" && action.payload?.choiceId === activeDiscardChoice.choiceId);
+    const required = activeDiscardChoice.maxSelections;
+    if (!discardAction || required <= 0 || selectedDiscardOptionIds.length !== required) return;
+    const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${discardAction.actionId}:${selectedDiscardOptionIds.join(".")}`;
+    if (autoDiscardSubmittedKeyRef.current === key) return;
+    if (submitChoiceOptions(discardAction, activeDiscardChoice.choiceId, selectedDiscardOptionIds)) autoDiscardSubmittedKeyRef.current = key;
+  }, [autoDiscardEnabled, gameplaySettingsLoaded, session, payload, connection, activeDiscardChoice, selectedDiscardOptionIds, submitChoiceOptions]);
 
   const setReady = (ready: boolean) => {
     if (!session || !ensureSocketConnected()) return;
@@ -4310,6 +4363,7 @@ export default function Page() {
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
+              autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
@@ -4327,6 +4381,7 @@ export default function Page() {
               aiPacingMode={localAiPacingMode}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
+              onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
@@ -4552,13 +4607,15 @@ export default function Page() {
             {...(aiTurnPresentation?.activeAiSide ? { activeAiSide: aiTurnPresentation.activeAiSide } : {})}
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
-                        onAction={submitAction}
-                        onChoiceOption={submitChoiceOption}
-                        onChoiceOptions={submitChoiceOptions}
-                        enrichCard={enrichCard}
-                        connection={connection}
-                        onClearContext={() => setSelectedActionContext(null)}
-                      />
+            selectedDiscardOptionIds={selectedDiscardOptionIds}
+            onAction={submitAction}
+            onChoiceOption={submitChoiceOption}
+            onChoiceOptions={submitChoiceOptions}
+            onDiscardChoiceToggle={toggleDiscardOption}
+            enrichCard={enrichCard}
+            connection={connection}
+            onClearContext={() => setSelectedActionContext(null)}
+          />
           <PlayerPanel
             view={activeView}
             title={`Du · ${sideLabel(activeView.side)}`}
@@ -4760,6 +4817,7 @@ export default function Page() {
                   <div className="cards fixedZoneCards" style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
+                      const discardOption = discardOptionForCard(card);
                       return (
                         <CardView
                           key={card.instanceId}
@@ -4769,6 +4827,15 @@ export default function Page() {
                           selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                           actions={cardActionsFor(card)}
                           actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                          {...(discardOption
+                            ? {
+                                discardShortcut: {
+                                  selected: selectedDiscardOptionIdSet.has(discardOption.id),
+                                  disabled: Boolean(payload.winner) || connection !== "online",
+                                  onToggle: () => toggleDiscardOption(discardOption.id)
+                                }
+                              }
+                            : {})}
                           onAction={submitAction}
                           onFocus={focusCard}
                           onActionContextSelect={selectActionCard}
@@ -4820,6 +4887,7 @@ export default function Page() {
                 <div className="cards fixedZoneCards" style={handCardsStyle}>
                   {activeView.own.gripOrHq.map((card) => {
                     const displayCard = enrichCard(card);
+                    const discardOption = discardOptionForCard(card);
                     return (
                       <CardView
                         key={card.instanceId}
@@ -4829,6 +4897,15 @@ export default function Page() {
                         selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                         actions={cardActionsFor(card)}
                         actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                        {...(discardOption
+                          ? {
+                              discardShortcut: {
+                                selected: selectedDiscardOptionIdSet.has(discardOption.id),
+                                disabled: Boolean(payload.winner) || connection !== "online",
+                                onToggle: () => toggleDiscardOption(discardOption.id)
+                              }
+                            }
+                          : {})}
                         onAction={submitAction}
                         onFocus={focusCard}
                         onActionContextSelect={selectActionCard}
@@ -4927,6 +5004,7 @@ export default function Page() {
             <OptionsPanel
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
+              autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
@@ -4945,6 +5023,7 @@ export default function Page() {
               session={session}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
+              onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
@@ -4995,6 +5074,7 @@ export default function Page() {
           <OptionsPanel
             actionCueAutoDismissMs={actionCueAutoDismissMs}
             actionCuesEnabled={actionCuesEnabled}
+            autoDiscardEnabled={autoDiscardEnabled}
             autoEndTurnEnabled={autoEndTurnEnabled}
             audioEnabled={audioEnabled}
             audioVolume={audioVolume}
@@ -5014,6 +5094,7 @@ export default function Page() {
             session={session}
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
+            onAutoDiscardEnabled={setAutoDiscardEnabled}
             onAutoEndTurnEnabled={setAutoEndTurnEnabled}
             onAudioEnabled={updateAudioEnabled}
             onAudioVolume={setAudioVolume}
@@ -5609,6 +5690,7 @@ function seriesStatusText(series: SeriesResultSummary): string {
 function OptionsPanel({
   actionCueAutoDismissMs,
   actionCuesEnabled,
+  autoDiscardEnabled,
   autoEndTurnEnabled,
   audioEnabled,
   audioVolume,
@@ -5628,6 +5710,7 @@ function OptionsPanel({
   session = null,
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
+  onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onAudioEnabled,
   onAudioVolume,
@@ -5648,6 +5731,7 @@ function OptionsPanel({
 }: {
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
+  autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
@@ -5667,6 +5751,7 @@ function OptionsPanel({
   session?: SessionInfo | null;
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
+  onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
@@ -5715,7 +5800,7 @@ function OptionsPanel({
           onBoardPercent={onCardBoardScalePercent}
           onRigPercent={onCardRigScalePercent}
         />
-        <GameplaySettings autoEndTurnEnabled={autoEndTurnEnabled} onAutoEndTurnEnabled={onAutoEndTurnEnabled} />
+        <GameplaySettings autoDiscardEnabled={autoDiscardEnabled} autoEndTurnEnabled={autoEndTurnEnabled} onAutoDiscardEnabled={onAutoDiscardEnabled} onAutoEndTurnEnabled={onAutoEndTurnEnabled} />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings enabled={actionCuesEnabled} position={cuePosition} autoDismissMs={actionCueAutoDismissMs} onEnabled={onActionCuesEnabled} onPosition={onCuePosition} onAutoDismissMs={onActionCueAutoDismissMs} />
         <AudioSettings enabled={audioEnabled} volume={audioVolume} onEnabled={onAudioEnabled} onVolume={onAudioVolume} />
@@ -5964,7 +6049,17 @@ function CardSizeSliderRow({
   );
 }
 
-function GameplaySettings({ autoEndTurnEnabled, onAutoEndTurnEnabled }: { autoEndTurnEnabled: boolean; onAutoEndTurnEnabled(value: boolean): void }) {
+function GameplaySettings({
+  autoDiscardEnabled,
+  autoEndTurnEnabled,
+  onAutoDiscardEnabled,
+  onAutoEndTurnEnabled
+}: {
+  autoDiscardEnabled: boolean;
+  autoEndTurnEnabled: boolean;
+  onAutoDiscardEnabled(value: boolean): void;
+  onAutoEndTurnEnabled(value: boolean): void;
+}) {
   return (
     <div className="gameplaySettings">
       <div className="settingsHeaderLine">
@@ -5972,12 +6067,18 @@ function GameplaySettings({ autoEndTurnEnabled, onAutoEndTurnEnabled }: { autoEn
           <span className="settingsTitle">Spielablauf</span>
           <span className="meta">Lokale Komfortoption, kein Match-State</span>
         </div>
-        <label className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}>
-          <input type="checkbox" checked={autoEndTurnEnabled} onChange={(event) => onAutoEndTurnEnabled(event.target.checked)} />
-          Auto-Zugende
-        </label>
+        <div className="settingsToggleGroup">
+          <label className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}>
+            <input type="checkbox" checked={autoEndTurnEnabled} onChange={(event) => onAutoEndTurnEnabled(event.target.checked)} />
+            Auto-Zugende
+          </label>
+          <label className={`settingsToggle ${autoDiscardEnabled ? "checked" : ""}`}>
+            <input type="checkbox" checked={autoDiscardEnabled} onChange={(event) => onAutoDiscardEnabled(event.target.checked)} />
+            Auto-Abwerfen
+          </label>
+        </div>
       </div>
-      <p className="settingsHelp">Beendet Deinen Zug automatisch nur dann, wenn als einzige eigene legale Aktion noch Zug beenden offen ist.</p>
+      <p className="settingsHelp">Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist.</p>
     </div>
   );
 }
@@ -6779,9 +6880,11 @@ function LegalActionsPanel({
   activeAiSide,
   disabled,
   highlighted = false,
+  selectedDiscardOptionIds,
   onAction,
   onChoiceOption,
   onChoiceOptions,
+  onDiscardChoiceToggle,
   enrichCard,
   connection,
   onClearContext
@@ -6797,9 +6900,11 @@ function LegalActionsPanel({
   activeAiSide?: Side;
   disabled: boolean;
   highlighted?: boolean;
+  selectedDiscardOptionIds: string[];
   onAction(action: LegalAction): void;
   onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+  onDiscardChoiceToggle(optionId: string): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
@@ -6828,7 +6933,7 @@ function LegalActionsPanel({
   const discardChoice = view.pendingChoice?.source === "discard_phase" ? view.pendingChoice : undefined;
   const discardAction = discardChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (discardChoice && discardAction) {
-    return <DiscardChoicePanel choice={discardChoice} action={discardAction} disabled={disabled} highlighted={highlighted} onChoiceOptions={onChoiceOptions} />;
+    return <DiscardChoicePanel choice={discardChoice} action={discardAction} selected={selectedDiscardOptionIds} disabled={disabled} highlighted={highlighted} onToggle={onDiscardChoiceToggle} onChoiceOptions={onChoiceOptions} />;
   }
   const genericChoice = view.pendingChoice;
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
@@ -7085,44 +7190,41 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
 function DiscardChoicePanel({
   choice,
   action,
+  selected,
   disabled,
   highlighted,
+  onToggle,
   onChoiceOptions
 }: {
   choice: NonNullable<PlayerView["pendingChoice"]>;
   action: LegalAction;
+  selected: string[];
   disabled: boolean;
   highlighted: boolean;
+  onToggle(optionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
 }) {
-  const [selected, setSelected] = useState<string[]>([]);
   const required = choice.maxSelections;
-  const toggle = (optionId: string) => {
-    setSelected((current) => {
-      if (current.includes(optionId)) return current.filter((id) => id !== optionId);
-      if (current.length >= required) return current;
-      return [...current, optionId];
-    });
-  };
+  const selectedOptionIds = selected.filter((optionId) => choice.options.some((option) => option.id === optionId));
   return (
     <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="discard-choice-panel">
       <h2>
         <Trash2 size={16} />
         Discard
       </h2>
-      <p className="meta">{choice.prompt} · {selected.length}/{required}</p>
+      <p className="meta">{choice.prompt} · {selectedOptionIds.length}/{required}</p>
       <div className="choiceCards">
         {choice.options.map((option) => {
-          const active = selected.includes(option.id);
+          const active = selectedOptionIds.includes(option.id);
           return (
-            <button className={`button actionButton ${active ? "primary" : ""}`} key={option.id} onClick={() => toggle(option.id)} disabled={disabled} type="button" data-testid="discard-choice-option" aria-pressed={active}>
+            <button className={`button actionButton ${active ? "primary" : ""}`} key={option.id} onClick={() => onToggle(option.id)} disabled={disabled} type="button" data-testid="discard-choice-option" aria-pressed={active}>
               {active ? <Check size={15} /> : <Clipboard size={15} />}
               <span className="actionButtonLabel">{option.label}</span>
             </button>
           );
         })}
       </div>
-      <button className="button primary wide" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || selected.length !== required} type="button" data-testid="discard-choice-submit">
+      <button className="button primary wide" onClick={() => onChoiceOptions(action, choice.choiceId, selectedOptionIds)} disabled={disabled || selectedOptionIds.length !== required} type="button" data-testid="discard-choice-submit">
         <Trash2 size={15} />
         Abwerfen
       </button>
@@ -10339,6 +10441,7 @@ function CardView({
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   choiceSelected = false,
+  discardShortcut,
   onFocus,
   onSelect,
   onActionContextSelect,
@@ -10360,6 +10463,7 @@ function CardView({
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   choiceSelected?: boolean;
+  discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContextSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
@@ -10702,7 +10806,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -10781,6 +10885,25 @@ function CardView({
         {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
+      {discardShortcut ? (
+        <button
+          className={`cardDiscardShortcut${discardShortcut.selected ? " active" : ""}`}
+          type="button"
+          aria-label={discardShortcut.selected ? "Diese Handkarte nicht abwerfen" : "Diese Handkarte abwerfen"}
+          aria-pressed={discardShortcut.selected}
+          title={discardShortcut.selected ? "Discard-Auswahl aufheben" : "Für Discard auswählen"}
+          data-testid="hand-discard-shortcut"
+          disabled={discardShortcut.disabled}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setSuppressCardTooltip(true);
+            discardShortcut.onToggle();
+          }}
+        >
+          {discardShortcut.selected ? <Check size={11} strokeWidth={2.5} /> : <Trash2 size={11} strokeWidth={2.35} />}
+        </button>
+      ) : null}
       {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}
       {hasCardActions ? (
         <button

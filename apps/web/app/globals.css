@@ -4971,6 +4971,11 @@ select {
   outline-offset: 2px;
 }
 
+.card.discardSelected {
+  outline: 2px solid color-mix(in srgb, var(--danger), white 12%);
+  outline-offset: 2px;
+}
+
 .installedStateMark {
   position: absolute;
   right: -7px;
@@ -5100,6 +5105,44 @@ select {
 
 .card.hasActions .cardMeta {
   padding-right: 25px;
+}
+
+.cardDiscardShortcut {
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  z-index: 96;
+  width: 22px;
+  height: 20px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid color-mix(in srgb, var(--danger), var(--line) 34%);
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--panel), var(--danger) 16%);
+  color: color-mix(in srgb, var(--danger), white 18%);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.06);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  transform: translateX(-50%);
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.cardDiscardShortcut:hover,
+.cardDiscardShortcut:focus-visible,
+.cardDiscardShortcut.active {
+  border-color: color-mix(in srgb, var(--danger), white 20%);
+  background: color-mix(in srgb, var(--danger), var(--panel) 54%);
+  color: var(--text);
+}
+
+.cardDiscardShortcut:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .cardActionsPopover {
@@ -7006,6 +7049,13 @@ select,
   align-items: center;
   justify-content: space-between;
   gap: 10px;
+}
+
+.settingsToggleGroup {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 6px;
 }
 
 .settingsControlGrid {
