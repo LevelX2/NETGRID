@@ -29,6 +29,8 @@ import {
   Moon,
   PanelRightClose,
   PanelRightOpen,
+  PanelTopClose,
+  PanelTopOpen,
   Play,
   Plus,
   Route,
@@ -9966,7 +9968,7 @@ function ScoreAreaToggleButton({
       <strong className="scoreAreaToggleGlyphs">
         <span className="statIcon"><AgendaIcon size={14} /></span>
         <span className="scoreAreaOpenButtonIcon" aria-hidden="true">
-          {open ? <EyeOff size={12} /> : <Eye size={12} />}
+          {open ? <PanelTopClose size={12} /> : <PanelTopOpen size={12} />}
         </span>
       </strong>
       {showHelp ? createPortal(<span className="statHelpTooltip statHelpTooltipFloating" style={tooltipStyle}>{helpText}</span>, document.body) : null}

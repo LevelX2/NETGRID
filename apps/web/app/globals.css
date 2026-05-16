@@ -4345,7 +4345,7 @@ select {
   background: color-mix(in srgb, var(--panel), white 4%);
   border: 1px solid var(--line);
   color: var(--muted);
-  z-index: 1;
+  z-index: 45;
   line-height: 1;
 }
 
