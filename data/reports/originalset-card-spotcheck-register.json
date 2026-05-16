@@ -602,8 +602,8 @@
       "roundId": "2026-05-16-resource-agenda-scorearea",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RESOURCE_AGENDA_SCOREAREA_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-resource-agenda-scorearea.md",
-      "jobStatus": "committed",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-resource-agenda-scorearea.md",
+      "jobStatus": "done",
       "cards": [
         {
           "cardId": "onr_v1_178_short-term-contract",

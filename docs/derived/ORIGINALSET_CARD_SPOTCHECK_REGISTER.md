@@ -157,7 +157,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RESOURCE_AGENDA_SCOREAREA_IMPLEMENTATION.md`
 
-Jobstatus: `committed`; Umsetzung und Pflichtchecks sind grün, der lokale Commit-Blocker ist im Abschlusslauf nicht mehr aufgetreten.
+Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlossen.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
