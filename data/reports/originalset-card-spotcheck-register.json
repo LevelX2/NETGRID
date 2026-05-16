@@ -760,8 +760,8 @@
       "roundId": "2026-05-16-corp-ice-trace-barriers",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ICE_TRACE_BARRIERS_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-corp-ice-trace-barriers.md",
-      "jobStatus": "committed",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-16-corp-ice-trace-barriers.md",
+      "jobStatus": "done",
       "cards": [
         {
           "cardId": "onr_v1_221_asp",
