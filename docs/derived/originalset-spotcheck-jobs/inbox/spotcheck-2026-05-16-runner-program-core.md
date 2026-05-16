@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-program-core
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T14:07:22+02:00
+completedAt: 2026-05-16T14:10:27+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzungsabschluss 2026-05-16
+
+Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+
+Umgesetzt:
+
+- Core-Program-Installationen fuer Afreet, Baedeker's Net Map, Bakdoor, Black Dahlia, Cascade, Clown, Codeslinger, Cyfermaster, Dogcatcher und Dropp werden gegen Wrong-Side, stale `stateVersion`, entfernte Source, PublicPayload-Leaks und Replay/StateHash geprueft.
+- Afreet hostet Bakdoor source-bound; entfernte Host-Quelle wird revalidiert und der gehostete Programmpfad bleibt replaybar.
+- Clown reduziert Encounter-ICE-Staerke im Run-Fenster stabil und replaybar.
+- Black Dahlia, Codeslinger, Cyfermaster, Dogcatcher und Dropp bleiben als installierte Breaker-Quellen in Run-Fenstern side-, stateVersion- und source-sicher.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen mit 455 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen.
+- `corepack pnpm --filter @netgrid/catalog test` gruen.
+- `corepack pnpm typecheck` gruen.
+
+Commit-Hinweis:
+
+- Die Änderung wird im Abschlusscommit dieses Spotcheck-Pakets lokal festgeschrieben.

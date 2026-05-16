@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-resource-contacts
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T14:21:23+02:00
+completedAt: 2026-05-16T14:25:30+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzungsabschluss 2026-05-16
+
+Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+
+Umgesetzt:
+
+- Installationen fuer Crash Everett, Danshi's Second ID, Databroker, Field Reporter for Ice and Data, Floating Runner BBS, Junkyard BBS, Karl de Veres, Leland, Loan from Chiba und The Shell Traders werden gegen Wrong-Side, stale `stateVersion`, entfernte Source, PublicPayload-Leaks und Replay/StateHash geprueft.
+- Danshi's Second ID veroeffentlicht entfernte Tags und den verbleibenden Runner-Tagstand.
+- Databroker bleibt an installierte Quelle und Runner-Agenda-Kosten gebunden; PublicPayload nennt Creditgewinn und bezahlten Agenda-Punkt.
+- Floating Runner BBS, Loan from Chiba und The Shell Traders bleiben ueber Turnwechsel und Recurring-Refresh replaybar.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen mit 461 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen.
+- `corepack pnpm --filter @netgrid/catalog test` gruen.
+- `corepack pnpm typecheck` gruen.
+
+Commit-Hinweis:
+
+- Die Änderung wird im Abschlusscommit dieses Spotcheck-Pakets lokal festgeschrieben.

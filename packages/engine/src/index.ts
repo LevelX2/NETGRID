@@ -7936,6 +7936,11 @@ function performAction(
         if (legalAction.payload?.trashOnUse === true) {
           trashRunnerInstalledCardToHeap(state, sourceCardId);
         }
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          removedTags: requested,
+          runnerTagsAfter: state.runner.tags,
+        };
         return;
       }
       spendCredits(state, "runner", 2);
@@ -17546,6 +17551,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
+      sourceDefinitionId: sourceDefinition.id,
       hiddenZoneAction:
         sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
           ? "v1911_short_circuit_search"
@@ -17564,6 +17570,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
+      sourceDefinitionId: sourceDefinition.id,
       exposedServerId: String(legalAction.payload?.serverId ?? ""),
       hiddenZoneAction: "v1911_expose_server_card",
     };
@@ -17576,6 +17583,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
+      sourceDefinitionId: sourceDefinition.id,
       hiddenZoneAction: "v1911_reveal_stack_top",
     };
     return;
@@ -17591,6 +17599,7 @@ function resolveV1911RunnerHiddenZoneAbility(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
+      sourceDefinitionId: sourceDefinition.id,
       hiddenZoneAction: "v1911_arrange_stack",
     };
     return;
@@ -18521,6 +18530,9 @@ function publicContextForAction(
     }
     if (typeof legalAction.payload?.sourceDefinitionId === "string")
       context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
+    const agendaPointCostPaid = legalAction.payload?.agendaPointCostPaid;
+    if (Number.isInteger(agendaPointCostPaid))
+      context.agendaPointCostPaid = Number(agendaPointCostPaid);
   }
   if (legalAction.type === "resolve_choice") {
     context.choiceKind = legalAction.payload?.choiceKind;
@@ -18580,6 +18592,7 @@ function publicContextForAction(
       "drawnCards",
       "gainedCredits",
       "removedTags",
+      "agendaPointCostPaid",
       "futureActionDebtAdded",
       "futureAgendaPointForfeitAdded",
       "futureAgendaPointForfeitPending",

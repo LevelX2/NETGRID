@@ -13,6 +13,246 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-16-runner-resource-contacts",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_RESOURCE_CONTACTS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-resource-contacts.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "title": "Crash Everett, Inventive Fixer",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_158_danshis-second-id",
+          "title": "Danshi's Second ID",
+          "spotcheckStatus": "completed",
+          "result": "verified_tag_removal_payload_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_159_databroker",
+          "title": "Databroker",
+          "spotcheckStatus": "completed",
+          "result": "verified_agenda_point_cost_credit_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_162_field-reporter-for-ice-and-data",
+          "title": "Field Reporter for Ice and Data",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_163_floating-runner-bbs",
+          "title": "Floating Runner BBS",
+          "spotcheckStatus": "completed",
+          "result": "verified_start_of_turn_credit_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_165_junkyard-bbs",
+          "title": "Junkyard BBS",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
+          "title": "Karl de Veres, Corporate Stooge",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_167_leland-corporate-bodyguard",
+          "title": "Leland, Corporate Bodyguard",
+          "spotcheckStatus": "completed",
+          "result": "verified_resource_install_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_168_loan-from-chiba",
+          "title": "Loan from Chiba",
+          "spotcheckStatus": "completed",
+          "result": "verified_recurring_credit_turn_refresh_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_176_the-shell-traders",
+          "title": "The Shell Traders",
+          "spotcheckStatus": "completed",
+          "result": "verified_recurring_credit_turn_refresh_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-runner-program-prevention-tools",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_PROGRAM_PREVENTION_TOOLS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-program-prevention-tools.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_021_dwarf",
+          "title": "Dwarf",
+          "spotcheckStatus": "completed",
+          "result": "verified_wall_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_024_expert-schedule-analyzer",
+          "title": "Expert Schedule Analyzer",
+          "spotcheckStatus": "completed",
+          "result": "verified_access_hidden_info_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_028_force-shield",
+          "title": "Force Shield",
+          "spotcheckStatus": "completed",
+          "result": "verified_core_net_prevention_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_033_imp",
+          "title": "Imp",
+          "spotcheckStatus": "completed",
+          "result": "verified_daemon_host_revalidation_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_036_jackhammer",
+          "title": "Jackhammer",
+          "spotcheckStatus": "completed",
+          "result": "verified_hosted_wall_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_038_joan-of-arc",
+          "title": "Joan of Arc",
+          "spotcheckStatus": "completed",
+          "result": "verified_core_net_prevention_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_039_krash",
+          "title": "Krash",
+          "spotcheckStatus": "completed",
+          "result": "verified_universal_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_040_loony-goon",
+          "title": "Loony Goon",
+          "spotcheckStatus": "completed",
+          "result": "verified_sentry_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_042_mouse",
+          "title": "Mouse",
+          "spotcheckStatus": "completed",
+          "result": "verified_expose_tool_source_hidden_info_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_050_r-and-d-protocol-files",
+          "title": "R&D-Protocol Files",
+          "spotcheckStatus": "completed",
+          "result": "verified_recurring_stealth_install_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-runner-program-core",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_PROGRAM_CORE_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-runner-program-core.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_001_afreet",
+          "title": "Afreet",
+          "spotcheckStatus": "completed",
+          "result": "verified_daemon_install_hosting_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_003_baedekers-net-map",
+          "title": "Baedeker's Net Map",
+          "spotcheckStatus": "completed",
+          "result": "verified_link_program_install_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_004_bakdoor",
+          "title": "Bakdoor",
+          "spotcheckStatus": "completed",
+          "result": "verified_program_install_hosting_public_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_006_black-dahlia",
+          "title": "Black Dahlia",
+          "spotcheckStatus": "completed",
+          "result": "verified_killer_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_010_cascade",
+          "title": "Cascade",
+          "spotcheckStatus": "completed",
+          "result": "verified_virus_recurring_install_counter_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_012_clown",
+          "title": "Clown",
+          "spotcheckStatus": "completed",
+          "result": "verified_encounter_strength_modifier_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_015_codeslinger",
+          "title": "Codeslinger",
+          "spotcheckStatus": "completed",
+          "result": "verified_sentry_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_016_cyfermaster",
+          "title": "Cyfermaster",
+          "spotcheckStatus": "completed",
+          "result": "verified_code_gate_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_018_dogcatcher",
+          "title": "Dogcatcher",
+          "spotcheckStatus": "completed",
+          "result": "verified_universal_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_019_dropp",
+          "title": "Dropp",
+          "spotcheckStatus": "completed",
+          "result": "verified_universal_breaker_source_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-16-runner-hardware-link-resources",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_HARDWARE_LINK_RESOURCES_IMPLEMENTATION.md",

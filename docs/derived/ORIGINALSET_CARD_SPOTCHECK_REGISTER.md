@@ -4,6 +4,69 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-16-runner-resource-contacts
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_RESOURCE_CONTACTS_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Crash Everett, Inventive Fixer | `onr_v1_157_crash-everett-inventive-fixer` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
+| Danshi's Second ID | `onr_v1_158_danshis-second-id` | Tag-Removal veröffentlicht entfernte Tags und Resttags | Payload-/Removed-source-/Replay-Test ergänzt |
+| Databroker | `onr_v1_159_databroker` | Agenda-Punkt-Kosten und Creditgewinn bleiben source-bound | Cost-/Payload-/Replay-Test ergänzt |
+| Field Reporter for Ice and Data | `onr_v1_162_field-reporter-for-ice-and-data` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
+| Floating Runner BBS | `onr_v1_163_floating-runner-bbs` | Start-of-turn-Credit bleibt replaybar | Turn-/Replay-Test ergänzt |
+| Junkyard BBS | `onr_v1_165_junkyard-bbs` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
+| Karl de Veres, Corporate Stooge | `onr_v1_166_karl-de-veres-corporate-stooge` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
+| Leland, Corporate Bodyguard | `onr_v1_167_leland-corporate-bodyguard` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
+| Loan from Chiba | `onr_v1_168_loan-from-chiba` | Recurring-Credits refreshen turn-sicher | Counter-/Turn-/Replay-Test ergänzt |
+| The Shell Traders | `onr_v1_176_the-shell-traders` | Recurring-Credit refresh't turn-sicher | Counter-/Turn-/Replay-Test ergänzt |
+
+## Runde 2026-05-16-runner-program-prevention-tools
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_PROGRAM_PREVENTION_TOOLS_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Dwarf | `onr_v1_021_dwarf` | Wall-Breaker-Aktion bleibt an installierte Quelle gebunden | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Expert Schedule Analyzer | `onr_v1_024_expert-schedule-analyzer` | Access-Pfad bleibt hidden-info-sicher | Install-/Access-/Replay-Test ergänzt |
+| Force Shield | `onr_v1_028_force-shield` | Core-/Net-Damage-Prevention bleibt source-bound | Prevention-/Replay-Test ergänzt |
+| Imp | `onr_v1_033_imp` | Daemon-Hosting revalidiert die Host-Quelle | Host-/Removed-source-/Replay-Test ergänzt |
+| Jackhammer | `onr_v1_036_jackhammer` | Wall-Breaker und gehostete Installation bleiben source-bound | Host-/Breaker-/Replay-Test ergänzt |
+| Joan of Arc | `onr_v1_038_joan-of-arc` | Core-/Net-Damage-Prevention bleibt source-bound | Prevention-/Replay-Test ergänzt |
+| Krash | `onr_v1_039_krash` | Universeller Breaker bleibt source-bound und stateVersion-sicher | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Loony Goon | `onr_v1_040_loony-goon` | Sentry-Breaker bleibt an installierte Quelle gebunden | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Mouse | `onr_v1_042_mouse` | Expose-Tool nennt sichere Source und bleibt hidden-info-sicher | Hidden-Zone-/Removed-source-/Replay-Test ergänzt |
+| R&D-Protocol Files | `onr_v1_050_r-and-d-protocol-files` | Recurring-Stealth-Installation bleibt payload- und replay-sicher | Counter-/Install-/Replay-Test ergänzt |
+
+## Runde 2026-05-16-runner-program-core
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_RUNNER_PROGRAM_CORE_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Afreet | `onr_v1_001_afreet` | Daemon-Install und Bakdoor-Hosting bleiben source-bound und replaybar | Install-/Host-/Replay-Test ergänzt |
+| Baedeker's Net Map | `onr_v1_003_baedekers-net-map` | Link-Programm-Installation bleibt side-, stateVersion- und source-sicher | Install-/Leak-/Replay-Test ergänzt |
+| Bakdoor | `onr_v1_004_bakdoor` | Installation und Afreet-Hosting bleiben öffentlich und replay-sicher | Install-/Host-/Replay-Test ergänzt |
+| Black Dahlia | `onr_v1_006_black-dahlia` | Killer-Breaker-Aktion bleibt an installierte Quelle gebunden | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Cascade | `onr_v1_010_cascade` | Virus-/Recurring-Counter werden beim Install stabil gesetzt | Counter-/Install-/Replay-Test ergänzt |
+| Clown | `onr_v1_012_clown` | Encounter-Stärkemodifier bleibt im Run-Fenster replaybar | Modifier-/Run-Replay-Test ergänzt |
+| Codeslinger | `onr_v1_015_codeslinger` | Sentry-Break bleibt an installierte Quelle gebunden | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Cyfermaster | `onr_v1_016_cyfermaster` | Code-Gate-Break bleibt an installierte Quelle gebunden | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Dogcatcher | `onr_v1_018_dogcatcher` | Universeller Breaker bleibt source-bound und stateVersion-sicher | Breaker-/Removed-source-/Replay-Test ergänzt |
+| Dropp | `onr_v1_019_dropp` | Universeller Breaker bleibt source-bound und stateVersion-sicher | Breaker-/Removed-source-/Replay-Test ergänzt |
+
 ## Runde 2026-05-16-runner-hardware-link-resources
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.

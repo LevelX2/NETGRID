@@ -1,7 +1,9 @@
 ---
 jobId: spotcheck-2026-05-16-runner-program-prevention-tools
-status: ready_for_implementation
+status: committed
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T14:13:52+02:00
+completedAt: 2026-05-16T14:19:04+02:00
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +163,27 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzungsabschluss 2026-05-16
+
+Status: `committed`. Der vorherige lokale Commit-Blocker beim Erstellen von `.git/index.lock` ist in diesem Abschlusslauf nicht mehr aufgetreten.
+
+Umgesetzt:
+
+- Installationen fuer Dwarf, Expert Schedule Analyzer, Force Shield, Imp, Jackhammer, Joan of Arc, Krash, Loony Goon, Mouse und R&D-Protocol Files werden gegen Wrong-Side, stale `stateVersion`, entfernte Source, PublicPayload-Leaks und Replay/StateHash geprueft.
+- V1.9.11-Hidden-Zone-Programmabilities veroeffentlichen nun die sichere installierte `sourceDefinitionId`.
+- Imp-Hosting revalidiert die Host-Quelle; Jackhammer kann gehostet replaybar installiert werden.
+- Force Shield und Joan of Arc bleiben als Core-/Net-Damage-Prevention-Quellen source-bound und public-safe.
+- Dwarf, Jackhammer, Krash und Loony Goon bleiben als installierte Breaker-Quellen in Run-Fenstern source-sicher.
+- Mouse expose't nur mit installierter Quelle und hidden-info-barrier Payload; Expert Schedule Analyzer bleibt im Access-Pfad hidden-info-sicher.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/engine test` gruen mit 458 Tests.
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts` gruen.
+- `corepack pnpm --filter @netgrid/catalog test` gruen.
+- `corepack pnpm typecheck` gruen.
+
+Commit-Hinweis:
+
+- Die Änderung wird im Abschlusscommit dieses Spotcheck-Pakets lokal festgeschrieben.

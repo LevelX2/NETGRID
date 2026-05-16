@@ -4,6 +4,16 @@
 
 Dieser Workflow beschreibt, wie Codex im Projekt NETGRID arbeiten soll: erst vorhandenes Wissen lesen, dann Quellen gezielt prüfen, danach Erkenntnisse in Wissensseiten oder Codex-Status zurückführen. NETGRID bleibt dabei fachliche Spiel- und Regelreferenz, nicht der aktive App-Name.
 
+## Aktivitäten-Pipeline
+
+Offene Konzepte, kleine Umsetzungspakete, Fixes, Nacharbeiten, Testlücken und Cleanup-Ideen werden in `docs/activities/` gepflegt.
+
+- `docs/activities/inbox/`: noch nicht beanspruchte Pakete.
+- `docs/activities/in-progress/`: aktuell gegriffene Pakete; beim Start werden `status`, `startedAt`, `primaryAgent` und bei Bedarf `branch` aktualisiert.
+- `docs/activities/done/`: abgeschlossene Pakete mit Ergebnisnotiz, Checks und Links auf entstandene Artefakte.
+
+Formale dauerhafte Artefakte wie Releasepläne, Requirements, Spezifikationen, Testmatrizen, Implementation Reviews und Final Reviews bleiben unter `docs/derived/`. Wenn der Nutzer sinngemäß sagt "such dir ein Paket aus", wählt Codex ein geeignetes Paket aus `docs/activities/inbox/` nach Rolle, Priorität, Klarheit und begrenztem Scope.
+
 ## Fall 1: Projektfrage beantworten
 
 1. [[../00 Uebersichten/Index]] lesen.

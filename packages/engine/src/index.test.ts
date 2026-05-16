@@ -31378,3 +31378,997 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
+
+describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  const programDefinitions = [
+    "onr_v1_001_afreet",
+    "onr_v1_003_baedekers-net-map",
+    "onr_v1_004_bakdoor",
+    "onr_v1_006_black-dahlia",
+    "onr_v1_010_cascade",
+    "onr_v1_012_clown",
+    "onr_v1_015_codeslinger",
+    "onr_v1_016_cyfermaster",
+    "onr_v1_018_dogcatcher",
+    "onr_v1_019_dropp",
+  ] as const;
+
+  const runnerProgramDeck: DeckDefinition = {
+    id: "spotcheck_runner_program_core",
+    name: "Spotcheck Runner Program Core",
+    side: "runner",
+    identity: "runner_identity_001",
+    cards: [
+      ...programDefinitions.map((id) => ({ id, quantity: 1 })),
+      { id: "simple_economy_event", quantity: 12 },
+    ],
+  };
+
+  const corpProgramDeck: DeckDefinition = {
+    id: "spotcheck_runner_program_core_corp",
+    name: "Spotcheck Runner Program Core Corp",
+    side: "corp",
+    identity: "corp_identity_001",
+    cards: [
+      { id: "simple_agenda", quantity: 6 },
+      { id: "simple_barrier_ice", quantity: 2 },
+      { id: "simple_code_gate_ice", quantity: 2 },
+      { id: "simple_sentry_ice", quantity: 2 },
+      { id: "simple_economy_operation", quantity: 8 },
+    ],
+  };
+
+  function programCoreGame(seed: string): GameState {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: runnerProgramDeck,
+        corpDeck: corpProgramDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 100;
+    state.runner.clicks = 30;
+    state.runner.memoryLimit = 30;
+    state.corp.credits = 30;
+    state.corp.maxHandSize = 100;
+    return state;
+  }
+
+  it("keeps all core runner program installs source-bound, public-safe and replayable", () => {
+    let state = programCoreGame("spotcheck-runner-program-core-installs");
+
+    for (const definitionId of programDefinitions) {
+      const cardId = moveRunnerCardToGrip(state, definitionId);
+      const install = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === cardId,
+      );
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: install.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `spotcheck-${definitionId}-install-wrong-side`,
+      });
+      expect(wrongSide.ok, definitionId).toBe(false);
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: install.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${definitionId}-install-stale`,
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+      const removed = structuredClone(state);
+      removeEverywhere(removed, cardId);
+      const removedSource = applyAction(removed, {
+        matchId: removed.matchId,
+        side: "runner",
+        actionId: install.actionId,
+        clientKnownStateVersion: removed.stateVersion,
+        idempotencyKey: `spotcheck-${definitionId}-install-removed-source`,
+      });
+      expect(removedSource.ok, definitionId).toBe(false);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === install.actionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      if (definitionId === "onr_v1_010_cascade") {
+        const cascadeId = state.runner.rig.programs.find(
+          (id) => state.cardInstances[id]?.definitionId === definitionId,
+        );
+        expect(cascadeId).toBeDefined();
+        if (!cascadeId) throw new Error("Missing Cascade");
+        expect(state.cardInstances[cascadeId]?.counters?.virus).toBe(1);
+        expect(state.cardInstances[cascadeId]?.counters?.recurring_credit).toBe(1);
+      }
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps Afreet hosting and Clown encounter modification source-safe and replayable", () => {
+    let state = programCoreGame("spotcheck-runner-program-core-hosting-clown");
+    moveRunnerCardToGrip(state, "onr_v1_001_afreet");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_001_afreet",
+    );
+    const afreetId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_001_afreet",
+    );
+    expect(afreetId).toBeDefined();
+    if (!afreetId) throw new Error("Missing Afreet");
+
+    const bakdoorId = moveRunnerCardToGrip(state, "onr_v1_004_bakdoor");
+    const hostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === bakdoorId &&
+        action.payload?.hostOnCardId === afreetId,
+    );
+    const removedHost = structuredClone(state);
+    removeEverywhere(removedHost, afreetId);
+    const hostDrift = applyAction(removedHost, {
+      matchId: removedHost.matchId,
+      side: "runner",
+      actionId: hostedInstall.actionId,
+      clientKnownStateVersion: removedHost.stateVersion,
+      idempotencyKey: "spotcheck-afreet-host-removed",
+    });
+    expect(hostDrift.ok).toBe(false);
+    const hostInitial = structuredClone(state);
+    const hostReplayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+    expect(state.cardInstances[bakdoorId]?.hostedOn).toBe(afreetId);
+    expect(state.runner.memoryUsed).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_004_bakdoor",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const hostReplay = replayEvents(
+      hostInitial,
+      state.eventLog.slice(hostReplayStart),
+    );
+    expect(hostReplay.ok).toBe(true);
+    expect(hashState(hostReplay.state)).toBe(hashState(state));
+
+    moveRunnerCardToGrip(state, "onr_v1_012_clown");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_012_clown",
+    );
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const runInitial = structuredClone(state);
+    const runReplayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(2);
+    const runReplay = replayEvents(runInitial, state.eventLog.slice(runReplayStart));
+    expect(runReplay.ok).toBe(true);
+    expect(hashState(runReplay.state)).toBe(hashState(state));
+  });
+
+  it("keeps core runner breakers installed-source-bound in run windows", () => {
+    const specs = [
+      ["onr_v1_006_black-dahlia", "simple_sentry_ice"],
+      ["onr_v1_015_codeslinger", "simple_sentry_ice"],
+      ["onr_v1_016_cyfermaster", "simple_code_gate_ice"],
+      ["onr_v1_018_dogcatcher", "simple_barrier_ice"],
+      ["onr_v1_019_dropp", "simple_code_gate_ice"],
+    ] as const;
+
+    for (const [breakerDefinitionId, iceDefinitionId] of specs) {
+      let state = programCoreGame(`spotcheck-runner-program-core-${breakerDefinitionId}`);
+      const gripId = moveRunnerCardToGrip(state, breakerDefinitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === gripId,
+      );
+      const breakerId = state.runner.rig.programs.find(
+        (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
+      );
+      expect(breakerId, breakerDefinitionId).toBeDefined();
+      if (!breakerId) throw new Error(`Missing ${breakerDefinitionId}`);
+      putCorpIceOnServer(state, "rd", iceDefinitionId);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === iceDefinitionId,
+      );
+      let breakAction: LegalAction | undefined;
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        breakAction = getLegalActions(state, "runner").find(
+          (action) =>
+            action.type === "break_subroutine" &&
+            String(action.payload?.breakerId) === breakerId &&
+            action.payload?.subroutineIndex === 0,
+        );
+        if (breakAction) break;
+        const pumpAction = getLegalActions(state, "runner").find(
+          (action) =>
+            action.type === "pump_breaker" &&
+            String(action.payload?.breakerId) === breakerId,
+        );
+        expect(pumpAction, breakerDefinitionId).toBeDefined();
+        if (!pumpAction) break;
+        state = apply(state, "runner", (action) => action.actionId === pumpAction.actionId);
+      }
+      expect(breakAction, breakerDefinitionId).toBeDefined();
+      if (!breakAction) throw new Error(`Missing break action for ${breakerDefinitionId}`);
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: breakAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: `spotcheck-${breakerDefinitionId}-break-wrong-side`,
+      });
+      expect(wrongSide.ok, breakerDefinitionId).toBe(false);
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: breakAction.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${breakerDefinitionId}-break-stale`,
+      });
+      expect(stale.ok, breakerDefinitionId).toBe(false);
+      const removed = structuredClone(state);
+      removeEverywhere(removed, breakerId);
+      const removedSource = applyAction(removed, {
+        matchId: removed.matchId,
+        side: "runner",
+        actionId: breakAction.actionId,
+        clientKnownStateVersion: removed.stateVersion,
+        idempotencyKey: `spotcheck-${breakerDefinitionId}-break-removed-source`,
+      });
+      expect(removedSource.ok, breakerDefinitionId).toBe(false);
+
+      state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+      expect(state.run?.brokenSubroutineIndexes).toContain(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "break_subroutine",
+        cardDefinitionId: breakerDefinitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, breakerDefinitionId).toBe(true);
+      expect(hashState(replay.state), breakerDefinitionId).toBe(hashState(state));
+    }
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+  const programDefinitions = [
+    "onr_v1_021_dwarf",
+    "onr_v1_024_expert-schedule-analyzer",
+    "onr_v1_028_force-shield",
+    "onr_v1_033_imp",
+    "onr_v1_036_jackhammer",
+    "onr_v1_038_joan-of-arc",
+    "onr_v1_039_krash",
+    "onr_v1_040_loony-goon",
+    "onr_v1_042_mouse",
+    "onr_v1_050_r-and-d-protocol-files",
+  ] as const;
+
+  function preventionToolState(seed: string): GameState {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: `spotcheck_runner_prevention_tools_${seed}`,
+          name: "Spotcheck Runner Prevention Tools",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            ...programDefinitions.map((id) => ({ id, quantity: 1 })),
+            { id: "simple_economy_event", quantity: 12 },
+          ],
+        },
+        corpDeck: {
+          id: `spotcheck_runner_prevention_tools_corp_${seed}`,
+          name: "Spotcheck Runner Prevention Tools Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_barrier_ice", quantity: 2 },
+            { id: "simple_code_gate_ice", quantity: 2 },
+            { id: "simple_sentry_ice", quantity: 2 },
+            { id: "onr_v1_232_crystal-wall", quantity: 2 },
+            { id: "simple_upgrade", quantity: 2 },
+            { id: "simple_economy_asset", quantity: 2 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 100;
+    state.runner.clicks = 30;
+    state.runner.memoryLimit = 30;
+    state.corp.credits = 30;
+    state.corp.maxHandSize = 100;
+    return state;
+  }
+
+  it("keeps prevention-tool program installs source-bound, public-safe and replayable", () => {
+    let state = preventionToolState("installs");
+    for (const definitionId of programDefinitions) {
+      const cardId = moveRunnerCardToGrip(state, definitionId);
+      const install = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === cardId,
+      );
+      expect(
+        applyAction(state, {
+          matchId: state.matchId,
+          side: "corp",
+          actionId: install.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          idempotencyKey: `spotcheck-${definitionId}-install-wrong-side`,
+        }).ok,
+        definitionId,
+      ).toBe(false);
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: install.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${definitionId}-install-stale`,
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+      const removed = structuredClone(state);
+      removeEverywhere(removed, cardId);
+      expect(
+        applyAction(removed, {
+          matchId: removed.matchId,
+          side: "runner",
+          actionId: install.actionId,
+          clientKnownStateVersion: removed.stateVersion,
+          idempotencyKey: `spotcheck-${definitionId}-install-removed-source`,
+        }).ok,
+        definitionId,
+      ).toBe(false);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === install.actionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      if (definitionId === "onr_v1_050_r-and-d-protocol-files") {
+        const protocolId = state.runner.rig.programs.find(
+          (id) => state.cardInstances[id]?.definitionId === definitionId,
+        );
+        expect(protocolId).toBeDefined();
+        if (!protocolId) throw new Error("Missing R&D-Protocol Files");
+        expect(cardCounterAmount(state, protocolId, "recurring_credit")).toBe(1);
+      }
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps Imp hosting and Force Shield/Joan prevention source-safe", () => {
+    let hostState = preventionToolState("imp-hosting");
+    moveRunnerCardToGrip(hostState, "onr_v1_033_imp");
+    hostState = apply(
+      hostState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(hostState, action) === "onr_v1_033_imp",
+    );
+    const impId = hostState.runner.rig.programs.find(
+      (id) => hostState.cardInstances[id]?.definitionId === "onr_v1_033_imp",
+    );
+    expect(impId).toBeDefined();
+    if (!impId) throw new Error("Missing Imp");
+    const jackhammerId = moveRunnerCardToGrip(hostState, "onr_v1_036_jackhammer");
+    const hostedInstall = mustAction(
+      hostState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === jackhammerId &&
+        action.payload?.hostOnCardId === impId,
+    );
+    const removedHost = structuredClone(hostState);
+    removeEverywhere(removedHost, impId);
+    expect(
+      applyAction(removedHost, {
+        matchId: removedHost.matchId,
+        side: "runner",
+        actionId: hostedInstall.actionId,
+        clientKnownStateVersion: removedHost.stateVersion,
+        idempotencyKey: "spotcheck-imp-host-removed",
+      }).ok,
+    ).toBe(false);
+    const hostInitial = structuredClone(hostState);
+    const hostReplayStart = hostState.eventLog.length;
+    hostState = apply(
+      hostState,
+      "runner",
+      (action) => action.actionId === hostedInstall.actionId,
+    );
+    expect(hostState.cardInstances[jackhammerId]?.hostedOn).toBe(impId);
+    expect(hostState.runner.memoryUsed).toBe(1);
+    const hostReplay = replayEvents(
+      hostInitial,
+      hostState.eventLog.slice(hostReplayStart),
+    );
+    expect(hostReplay.ok).toBe(true);
+    expect(hashState(hostReplay.state)).toBe(hashState(hostState));
+
+    for (const definitionId of [
+      "onr_v1_028_force-shield",
+      "onr_v1_038_joan-of-arc",
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `spotcheck-prevention-tools-${definitionId}`,
+          runnerDeck: {
+            id: `spotcheck_prevention_tools_${definitionId}`,
+            name: "Spotcheck Prevention Tools",
+            side: "runner",
+            identity: "runner_identity_001",
+            cards: [
+              { id: definitionId, quantity: 1 },
+              { id: "simple_economy_event", quantity: 12 },
+            ],
+          },
+          corpDeck: V111_CORP_DECK,
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 20;
+      state.runner.maxHandSize = 100;
+      state.corp.maxHandSize = 100;
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      moveCorpCardToHq(state, "v111_core_damage_operation");
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "play_operation" &&
+          sourceDefinition(state, action) === "v111_core_damage_operation",
+      );
+      const optionId = state.pendingChoice?.options.find(
+        (option) => option.id !== "pass",
+      )?.id;
+      expect(optionId, definitionId).toBeDefined();
+      if (!optionId) throw new Error(`Missing prevention option for ${definitionId}`);
+      state = applyChoice(state, "runner", optionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        eventModificationDecision: "apply",
+        sourceDefinitionId: definitionId,
+        damageAmount: 0,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps prevention-tool breakers and Mouse/Expert tools revalidated", () => {
+    const specs = [
+      ["onr_v1_021_dwarf", "onr_v1_232_crystal-wall"],
+      ["onr_v1_036_jackhammer", "onr_v1_232_crystal-wall"],
+      ["onr_v1_039_krash", "simple_code_gate_ice"],
+      ["onr_v1_040_loony-goon", "simple_sentry_ice"],
+    ] as const;
+    for (const [breakerDefinitionId, iceDefinitionId] of specs) {
+      let state = preventionToolState(breakerDefinitionId);
+      const gripId = moveRunnerCardToGrip(state, breakerDefinitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === gripId,
+      );
+      const breakerId = state.runner.rig.programs.find(
+        (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
+      );
+      expect(breakerId, breakerDefinitionId).toBeDefined();
+      if (!breakerId) throw new Error(`Missing ${breakerDefinitionId}`);
+      putCorpIceOnServer(state, "rd", iceDefinitionId);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === iceDefinitionId,
+      );
+      let breakAction: LegalAction | undefined;
+      for (let attempt = 0; attempt < 10; attempt += 1) {
+        breakAction = getLegalActions(state, "runner").find(
+          (action) =>
+            action.type === "break_subroutine" &&
+            String(action.payload?.breakerId) === breakerId &&
+            action.payload?.subroutineIndex === 0,
+        );
+        if (breakAction) break;
+        const pumpAction = getLegalActions(state, "runner").find(
+          (action) =>
+            action.type === "pump_breaker" &&
+            String(action.payload?.breakerId) === breakerId,
+        );
+        expect(pumpAction, breakerDefinitionId).toBeDefined();
+        if (!pumpAction) break;
+        state = apply(state, "runner", (action) => action.actionId === pumpAction.actionId);
+      }
+      expect(breakAction, breakerDefinitionId).toBeDefined();
+      if (!breakAction) throw new Error(`Missing break action for ${breakerDefinitionId}`);
+      const removed = structuredClone(state);
+      removeEverywhere(removed, breakerId);
+      expect(
+        applyAction(removed, {
+          matchId: removed.matchId,
+          side: "runner",
+          actionId: breakAction.actionId,
+          clientKnownStateVersion: removed.stateVersion,
+          idempotencyKey: `spotcheck-${breakerDefinitionId}-break-removed-source`,
+        }).ok,
+        breakerDefinitionId,
+      ).toBe(false);
+      state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "break_subroutine",
+        cardDefinitionId: breakerDefinitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, breakerDefinitionId).toBe(true);
+      expect(hashState(replay.state), breakerDefinitionId).toBe(hashState(state));
+    }
+
+    let toolState = preventionToolState("mouse-expert");
+    for (const definitionId of [
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_042_mouse",
+    ] as const) {
+      moveRunnerCardToGrip(toolState, definitionId);
+      toolState = apply(
+        toolState,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(toolState, action) === definitionId,
+      );
+    }
+    putCorpRootInRemote(toolState, "simple_upgrade");
+    const expose = mustAction(
+      toolState,
+      "runner",
+      (action) =>
+        action.payload?.v1911HiddenZoneAbility === "expose_server_card" &&
+        sourceDefinition(toolState, action) === "onr_v1_042_mouse",
+    );
+    const removedMouse = structuredClone(toolState);
+    const mouseId = toolState.runner.rig.programs.find(
+      (id) => toolState.cardInstances[id]?.definitionId === "onr_v1_042_mouse",
+    );
+    expect(mouseId).toBeDefined();
+    if (!mouseId) throw new Error("Missing Mouse");
+    removeEverywhere(removedMouse, mouseId);
+    expect(
+      applyAction(removedMouse, {
+        matchId: removedMouse.matchId,
+        side: "runner",
+        actionId: expose.actionId,
+        clientKnownStateVersion: removedMouse.stateVersion,
+        idempotencyKey: "spotcheck-mouse-removed-source",
+      }).ok,
+    ).toBe(false);
+    const exposeInitial = structuredClone(toolState);
+    const exposeReplayStart = toolState.eventLog.length;
+    toolState = apply(toolState, "runner", (action) => action.actionId === expose.actionId);
+    expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_expose_server_card",
+      sourceDefinitionId: "onr_v1_042_mouse",
+    });
+    expect(JSON.stringify(toolState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const exposeReplay = replayEvents(
+      exposeInitial,
+      toolState.eventLog.slice(exposeReplayStart),
+    );
+    expect(exposeReplay.ok).toBe(true);
+    expect(hashState(exposeReplay.state)).toBe(hashState(toolState));
+
+    putCorpCardOnTopOfRd(toolState, "simple_agenda");
+    putCorpCardOnTopOfRd(toolState, "simple_economy_operation");
+    putCorpCardOnTopOfRd(toolState, "simple_economy_asset");
+    const accessInitial = structuredClone(toolState);
+    const accessReplayStart = toolState.eventLog.length;
+    toolState = apply(
+      toolState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    toolState = apply(toolState, "runner", (action) => action.type === "access_card");
+    expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      visibility: { class: "hidden_info_barrier" },
+    });
+    expect(JSON.stringify(toolState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"/,
+    );
+    const accessReplay = replayEvents(
+      accessInitial,
+      toolState.eventLog.slice(accessReplayStart),
+    );
+    expect(accessReplay.ok).toBe(true);
+    expect(hashState(accessReplay.state)).toBe(hashState(toolState));
+  });
+});
+
+describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", () => {
+  const privatePayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+  const resourceDefinitions = [
+    "onr_v1_157_crash-everett-inventive-fixer",
+    "onr_v1_158_danshis-second-id",
+    "onr_v1_159_databroker",
+    "onr_v1_162_field-reporter-for-ice-and-data",
+    "onr_v1_163_floating-runner-bbs",
+    "onr_v1_165_junkyard-bbs",
+    "onr_v1_166_karl-de-veres-corporate-stooge",
+    "onr_v1_167_leland-corporate-bodyguard",
+    "onr_v1_168_loan-from-chiba",
+    "onr_v1_176_the-shell-traders",
+  ] as const;
+
+  function resourceContactState(seed: string): GameState {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: `spotcheck_runner_resource_contacts_${seed}`,
+          name: "Spotcheck Runner Resource Contacts",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            ...resourceDefinitions.map((id) => ({ id, quantity: 1 })),
+            { id: "simple_agenda", quantity: 2 },
+            { id: "simple_economy_event", quantity: 12 },
+          ],
+        },
+        corpDeck: {
+          id: `spotcheck_runner_resource_contacts_corp_${seed}`,
+          name: "Spotcheck Runner Resource Contacts Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_barrier_ice", quantity: 2 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 100;
+    state.runner.clicks = 30;
+    state.runner.maxHandSize = 100;
+    state.corp.credits = 30;
+    state.corp.maxHandSize = 100;
+    return state;
+  }
+
+  it("keeps runner resource contact installs source-bound, public-safe and replayable", () => {
+    let state = resourceContactState("installs");
+    for (const definitionId of resourceDefinitions) {
+      const cardId = moveRunnerCardToGrip(state, definitionId);
+      const install = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          String(action.payload?.cardId) === cardId,
+      );
+      expect(
+        applyAction(state, {
+          matchId: state.matchId,
+          side: "corp",
+          actionId: install.actionId,
+          clientKnownStateVersion: state.stateVersion,
+          idempotencyKey: `spotcheck-${definitionId}-install-wrong-side`,
+        }).ok,
+        definitionId,
+      ).toBe(false);
+      const stale = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: install.actionId,
+        clientKnownStateVersion: state.stateVersion - 1,
+        idempotencyKey: `spotcheck-${definitionId}-install-stale`,
+      });
+      expect(stale.ok, definitionId).toBe(false);
+      if (!stale.ok) expect(stale.error.code, definitionId).toBe("ERR_STALE_STATE");
+      const removed = structuredClone(state);
+      removeEverywhere(removed, cardId);
+      expect(
+        applyAction(removed, {
+          matchId: removed.matchId,
+          side: "runner",
+          actionId: install.actionId,
+          clientKnownStateVersion: removed.stateVersion,
+          idempotencyKey: `spotcheck-${definitionId}-install-removed-source`,
+        }).ok,
+        definitionId,
+      ).toBe(false);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === install.actionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      if (
+        definitionId === "onr_v1_168_loan-from-chiba" ||
+        definitionId === "onr_v1_176_the-shell-traders"
+      ) {
+        const resourceId = state.runner.rig.resources.find(
+          (id) => state.cardInstances[id]?.definitionId === definitionId,
+        );
+        expect(resourceId).toBeDefined();
+        if (!resourceId) throw new Error(`Missing ${definitionId}`);
+        expect(cardCounterAmount(state, resourceId, "recurring_credit")).toBe(
+          definitionId === "onr_v1_168_loan-from-chiba" ? 2 : 1,
+        );
+      }
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+    }
+  });
+
+  it("keeps Danshi and Databroker active resource actions source-bound", () => {
+    let danshi = resourceContactState("danshi");
+    danshi.runner.tags = 3;
+    moveRunnerCardToGrip(danshi, "onr_v1_158_danshis-second-id");
+    danshi = apply(
+      danshi,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(danshi, action) === "onr_v1_158_danshis-second-id",
+    );
+    const danshiId = danshi.runner.rig.resources.find(
+      (id) => danshi.cardInstances[id]?.definitionId === "onr_v1_158_danshis-second-id",
+    );
+    expect(danshiId).toBeDefined();
+    if (!danshiId) throw new Error("Missing Danshi's Second ID");
+    const removeTags = mustAction(
+      danshi,
+      "runner",
+      (action) =>
+        action.type === "remove_tag" &&
+        action.payload?.resourceAbility === "danshis_second_id" &&
+        action.payload?.removeTagAmount === 3,
+    );
+    const removedDanshi = structuredClone(danshi);
+    removeEverywhere(removedDanshi, danshiId);
+    expect(
+      applyAction(removedDanshi, {
+        matchId: removedDanshi.matchId,
+        side: "runner",
+        actionId: removeTags.actionId,
+        clientKnownStateVersion: removedDanshi.stateVersion,
+        idempotencyKey: "spotcheck-danshi-removed-source",
+      }).ok,
+    ).toBe(false);
+    const danshiInitial = structuredClone(danshi);
+    const danshiReplayStart = danshi.eventLog.length;
+    danshi = apply(danshi, "runner", (action) => action.actionId === removeTags.actionId);
+    expect(danshi.runner.tags).toBe(0);
+    expect(danshi.runner.heap).toContain(danshiId);
+    expect(danshi.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_158_danshis-second-id",
+      resourceAbility: "danshis_second_id",
+      removedTags: 3,
+      runnerTagsAfter: 0,
+    });
+    const danshiReplay = replayEvents(
+      danshiInitial,
+      danshi.eventLog.slice(danshiReplayStart),
+    );
+    expect(danshiReplay.ok).toBe(true);
+    expect(hashState(danshiReplay.state)).toBe(hashState(danshi));
+
+    let databroker = resourceContactState("databroker");
+    moveRunnerCardToGrip(databroker, "onr_v1_159_databroker");
+    databroker = apply(
+      databroker,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(databroker, action) === "onr_v1_159_databroker",
+    );
+    const brokerId = databroker.runner.rig.resources.find(
+      (id) => databroker.cardInstances[id]?.definitionId === "onr_v1_159_databroker",
+    );
+    expect(brokerId).toBeDefined();
+    if (!brokerId) throw new Error("Missing Databroker");
+    const agendaId = scoreRunnerAgendaForTest(databroker, "simple_agenda");
+    const databrokerAction = mustAction(
+      databroker,
+      "runner",
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.resourceAbility === "databroker",
+    );
+    const stale = applyAction(databroker, {
+      matchId: databroker.matchId,
+      side: "runner",
+      actionId: databrokerAction.actionId,
+      clientKnownStateVersion: databroker.stateVersion - 1,
+      idempotencyKey: "spotcheck-databroker-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    const removedBroker = structuredClone(databroker);
+    removeEverywhere(removedBroker, brokerId);
+    expect(
+      applyAction(removedBroker, {
+        matchId: removedBroker.matchId,
+        side: "runner",
+        actionId: databrokerAction.actionId,
+        clientKnownStateVersion: removedBroker.stateVersion,
+        idempotencyKey: "spotcheck-databroker-removed-source",
+      }).ok,
+    ).toBe(false);
+    const creditsBefore = databroker.runner.credits;
+    const dataInitial = structuredClone(databroker);
+    const dataReplayStart = databroker.eventLog.length;
+    databroker = apply(
+      databroker,
+      "runner",
+      (action) => action.actionId === databrokerAction.actionId,
+    );
+    expect(databroker.runner.credits).toBe(creditsBefore + 10);
+    expect(databroker.specialZones?.removedFromGame).toContain(agendaId);
+    expect(databroker.runner.heap).toContain(brokerId);
+    expect(databroker.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_159_databroker",
+      resourceAbility: "databroker",
+      agendaPointCostPaid: 1,
+      gainedCredits: 10,
+    });
+    const dataReplay = replayEvents(
+      dataInitial,
+      databroker.eventLog.slice(dataReplayStart),
+    );
+    expect(dataReplay.ok).toBe(true);
+    expect(hashState(dataReplay.state)).toBe(hashState(databroker));
+  });
+
+  it("keeps Floating Runner BBS and recurring contact credits turn-safe", () => {
+    let state = resourceContactState("turn-credits");
+    for (const definitionId of [
+      "onr_v1_163_floating-runner-bbs",
+      "onr_v1_168_loan-from-chiba",
+      "onr_v1_176_the-shell-traders",
+    ] as const) {
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+    }
+    const loanId = state.runner.rig.resources.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
+    );
+    const shellId = state.runner.rig.resources.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_176_the-shell-traders",
+    );
+    expect(loanId).toBeDefined();
+    expect(shellId).toBeDefined();
+    if (!loanId || !shellId) throw new Error("Missing recurring contacts");
+    setCardCounterForTest(state, loanId, "recurring_credit", 0);
+    setCardCounterForTest(state, shellId, "recurring_credit", 0);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, shellId, "recurring_credit")).toBe(1);
+    expect(state.runner.credits).toBeGreaterThan(initial.runner.credits);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
