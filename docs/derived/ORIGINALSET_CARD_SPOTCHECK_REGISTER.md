@@ -532,7 +532,7 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TRACE_CACHE_AMBUSH_IMPLEMENTATION.md`
 
-Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, ausgelagerte Vollresolver sind inzwischen durch Folgejobs erledigt.
+Jobstatus: `done`; grüne Teilfixes wurden umgesetzt, ausgelagerte Vollresolver sind inzwischen durch Folgejobs erledigt, und die verbliebenen `Ice Pick Willie`-/`TRAP!`-Nachtests sind grün.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
@@ -543,8 +543,8 @@ Jobstatus: `blocked`; grüne Teilfixes wurden umgesetzt, ausgelagerte Vollresolv
 | Code Viral Cache | `onr_v1_155_code-viral-cache` | Folgejob umgesetzt: HQ-Run-Gate, Purge-Replacement und Korp-Trash-Aktion grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 | The Springboard | `onr_v1_181_the-springboard` | Folgejob umgesetzt: post-bid Trace-Link-Fenster nach offengelegten Bids grün | Erledigt in `spotcheck-2026-05-16-trace-link-post-bid-resolvers` |
 | Cerberus | `onr_v1_227_cerberus` | Folgejob umgesetzt: Trace-Counter, Runstart-Damage und Runner-Removal grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
-| Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Teilfix umgesetzt: Program-Trash plus End-the-run statt R&D-Reveal | Teilfix grün |
-| TRAP! | `onr_v1_345_trap` | Teilfix umgesetzt: 3 Net Damage plus Tag aus legalem Access; Archives-No-op bleibt | Teilfix grün |
+| Ice Pick Willie | `onr_v1_250_ice-pick-willie` | Program-Trash plus End-the-run statt R&D-Reveal; No-Program-Fall replay-stabil abgesichert | Abgeschlossen |
+| TRAP! | `onr_v1_345_trap` | 3 Net Damage plus Tag aus legalem Access; R&D-Reveal und Archives-No-op final abgesichert | Abgeschlossen |
 | Paris City Grid | `onr_v1_365_paris-city-grid` | Folgejob umgesetzt: servergebundener Trace-Bit-Pool, Poolverbrauch und Refresh grün | Erledigt in `spotcheck-2026-05-16-persistent-counter-pool-resolvers` |
 
 ## Runde 2026-05-15-virus-link-archives

@@ -11213,6 +11213,53 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
   });
 
+  it("keeps Ice Pick Willie end-the-run stable when no runner program is installed", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ice-pick-willie-no-program"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    for (const programId of state.runner.rig.programs.slice())
+      removeEverywhere(state, programId);
+    state.runner.memoryUsed = 0;
+    putCorpIceOnServer(state, "rd", "onr_v1_250_ice-pick-willie");
+    const rdTopId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_250_ice-pick-willie",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+
+    expect(state.run).toBeUndefined();
+    expect(state.cardInstances[rdTopId]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_250_ice-pick-willie",
+      encounterWillEndRun: true,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "trashedCardDefinitionId",
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("opens Too Many Doors R&D reorder only to the Corp and resolves replay-safe", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"));
     state.runner.credits = 20;
@@ -17042,6 +17089,80 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1917_access_ambush",
       ambushDefinitionId: "onr_v1_340_setup",
+      ambushSkippedReason: "archives",
+    });
+  });
+
+  it("handles TRAP! R&D reveal and Archives skip without pre-access leaks", () => {
+    let rdState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-trap-rd"),
+    );
+    rdState.runner.credits = 10;
+    drawRunnerCardsForTest(rdState, 4);
+    const rdTrapId = putCorpCardOnTopOfRd(rdState, "onr_v1_345_trap");
+    const rdGripBefore = rdState.runner.grip.length;
+    const rdTagsBefore = rdState.runner.tags;
+    const initial = structuredClone(rdState);
+    const replayStart = rdState.eventLog.length;
+
+    expect(JSON.stringify(getPlayerView(rdState, "runner"))).not.toContain(
+      "onr_v1_345_trap",
+    );
+    rdState = apply(
+      rdState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    rdState = apply(rdState, "runner", (action) => action.type === "access_card");
+
+    expect(rdState.run?.accessedCardId).toBe(rdTrapId);
+    expect(rdState.runner.tags).toBe(rdTagsBefore + 1);
+    expect(rdState.runner.grip.length).toBe(rdGripBefore - 3);
+    expect(rdState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1917_access_ambush",
+      ambushDefinitionId: "onr_v1_345_trap",
+      cardDefinitionId: "onr_v1_345_trap",
+      revealKind: "reveal",
+      damageAmount: 3,
+      tagsAdded: 1,
+    });
+    expect(JSON.stringify(rdState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, rdState.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(rdState));
+
+    let archivesState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-trap-archives"),
+    );
+    archivesState.runner.credits = 10;
+    const archivedTrapId = moveCorpCardToArchives(
+      archivesState,
+      "onr_v1_345_trap",
+      false,
+    );
+    keepOnlyCorpArchivesCards(archivesState, [archivedTrapId]);
+    const archivesGripBefore = archivesState.runner.grip.length;
+    const archivesTagsBefore = archivesState.runner.tags;
+
+    archivesState = apply(
+      archivesState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    archivesState = apply(
+      archivesState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+
+    expect(archivesState.runner.grip.length).toBe(archivesGripBefore);
+    expect(archivesState.runner.tags).toBe(archivesTagsBefore);
+    expect(archivesState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "v1917_access_ambush",
+      ambushDefinitionId: "onr_v1_345_trap",
       ambushSkippedReason: "archives",
     });
   });

@@ -1,14 +1,14 @@
 ---
 jobId: spotcheck-2026-05-15-trace-cache-ambush
-status: blocked
+status: done
 startedAt: 2026-05-15T17:48:47.1523396+02:00
 finishedAt: 2026-05-15T17:54:44.5643799+02:00
 createdAt: 2026-05-15T11:11:00+01:00
 requiresImplementation: true
 priority: normal
-blockerReason: "Gruppenjob enthaelt mehrere Vollresolver, die nicht sicher als Nebenpatch umgesetzt werden koennen: post-bid Trace-Link-Choices, Research-/Militech-Counter, Multi-Expose, Sneak-Preview-Temporary-Install, Code-Viral-Cache-Purge-Replacement und Paris-City-Grid-Trace-Pool."
-attemptedFixes: "Teilfixes umgesetzt fuer Ice Pick Willie, TRAP! und Cerberus-Damage-/No-Tag-Drift; Engine-Test gruen."
-removalCondition: "Eigenen Resolver-Scope fuer die blockierenden Vollmechaniken planen und umsetzen; danach diesen Job oder dedizierte Folgejobs erneut aufnehmen."
+completedReason: Follow-up jobs completed the split resolver contracts; final focused tests cover Ice Pick Willie no-program and TRAP R&D/Archives branches.
+completedAt: 2026-05-16T16:26:23.838Z
+removalCondition: fulfilled
 cards:
   - cardId: onr_v1_063_signpost
     title: Signpost
@@ -295,3 +295,12 @@ Ausgeführte Checks:
 - `corepack pnpm --filter @netgrid/catalog test` - grün, 44 Tests.
 - `corepack pnpm typecheck` - grün.
 
+
+
+## Abschluss 2026-05-16
+
+Status: done
+
+- Folgejobs haben die ausgelagerten Resolver für post-bid Trace-Link, Hidden-Zone-/Temporary-Install sowie persistente Counter-/Pool-Pfade abgeschlossen.
+- Dieser Lauf ergänzt final die verbliebenen Teilfix-Nachweise: Ice Pick Willie bleibt replay-stabil ohne installiertes Runner-Programm und leakt keine R&D-Identität; TRAP! ist für R&D-Reveal und Archives-No-op abgesichert.
+- Fokussierter Engine-Check: corepack pnpm --filter @netgrid/engine test -- --runInBand grün, 473 Tests.
