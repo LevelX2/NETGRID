@@ -61,11 +61,6 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["net", "meat"],
     priority: 122,
   },
-  "onr_v1_139_r-and-d-interface": {
-    maxPerTurn: 1,
-    damageTypes: ["net"],
-    priority: 123,
-  },
   "onr_v1_143_techtronica-utility-suit": {
     maxPerTurn: 1,
     damageTypes: ["net", "meat"],

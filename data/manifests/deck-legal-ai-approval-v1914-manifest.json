@@ -15,7 +15,7 @@
     { "cardId": "onr_v1_154_broker", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_154_broker", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
     { "cardId": "onr_v1_157_crash-everett-inventive-fixer", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_157_crash-everett-inventive-fixer", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
     { "cardId": "onr_v1_162_field-reporter-for-ice-and-data", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_162_field-reporter-for-ice-and-data", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
-    { "cardId": "onr_v1_164_hells-run", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_164_hells-run", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
+    { "cardId": "onr_v1_164_hells-run", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_164_hells-run", "scenarioRefs": ["runner_v1914_trace_link_tools"] },
     { "cardId": "onr_v1_165_junkyard-bbs", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_165_junkyard-bbs", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
     { "cardId": "onr_v1_166_karl-de-veres-corporate-stooge", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_166_karl-de-veres-corporate-stooge", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },
     { "cardId": "onr_v1_167_leland-corporate-bodyguard", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_167_leland-corporate-bodyguard", "scenarioRefs": ["runner_v1914_tag_resource_tools"] },

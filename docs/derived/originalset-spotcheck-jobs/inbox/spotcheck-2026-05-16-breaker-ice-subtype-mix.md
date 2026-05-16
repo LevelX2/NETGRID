@@ -1,7 +1,11 @@
 ---
 jobId: spotcheck-2026-05-16-breaker-ice-subtype-mix
-status: ready_for_implementation
+status: commit_pending
 createdAt: 2026-05-16T11:08:00+01:00
+startedAt: 2026-05-16T13:02:30+02:00
+completedAt: 2026-05-16T13:05:55+02:00
+commitPendingAt: 2026-05-16T13:05:55+02:00
+commitPendingReason: ".git ACL/index.lock creation is blocked by foreign direct DENY SID S-1-5-21-2893003870-2010802999-161870138-128397290; git add/commit cannot create .git/index.lock. User instructed to continue package processing and resolve git locks after packages."
 requiresImplementation: true
 priority: normal
 cards:
@@ -161,3 +165,24 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Fokussierte Tests in `packages/engine/src/index.test.ts` fuer die im Block genannten Card IDs.
 - Leakscan fuer PublicPayload, PlayerViews, Reconnect-Payloads, Chronik und Replay/StateHash.
+
+## Umsetzung 2026-05-16
+
+Der Job wurde fachlich umgesetzt und geprüft, bleibt aber wegen der bekannten lokalen `.git`-ACL-Sperre auf `commit_pending`.
+
+Umgesetzte Punkte:
+
+- Raffles, Raptor, Shaka, Snowball, Tinweasel, Wild Card, Wizard's Book und Worm in matching ICE-Subtype-Encountern geprüft.
+- Install-Aktionen der Breaker gegen wrong-side und stale `stateVersion` geprüft.
+- SeeYa gegen Expose-Ziel-Drift und Hidden-Zone-Payload-Leaks geprüft.
+- Smarteye als source-bound Approach-ICE-Reveal geprüft.
+- Detailbericht, Register, JSON-Register und Wissenslog aktualisiert.
+
+Grüne Checks:
+
+- `corepack pnpm --filter @netgrid/engine test`
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts`
+- `corepack pnpm --filter @netgrid/catalog test`
+- `corepack pnpm typecheck`
+
+Commit-Pending-Grund: `.git` ist durch die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` weiterhin so gesperrt, dass `git add`/`git commit` keine `.git/index.lock` erstellen kann. Staging und Commit werden nach ACL-Reparatur nachzuziehen sein.

@@ -13,6 +13,224 @@
   },
   "rounds": [
     {
+      "roundId": "2026-05-16-corp-asset-upgrade-rest",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ASSET_UPGRADE_REST_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-corp-asset-upgrade-rest.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_337_rockerboy-promotion",
+          "title": "Rockerboy Promotion",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_economy_asset_source_revalidation",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_352_chester-mix",
+          "title": "Chester Mix",
+          "spotcheckStatus": "completed",
+          "result": "hardened_server_scoped_ice_install_reduction",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_353_chimera",
+          "title": "Chimera",
+          "spotcheckStatus": "completed",
+          "result": "hardened_daemon_choice_accessed_source_revalidation",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_361_namatoki-plaza",
+          "title": "Namatoki Plaza",
+          "spotcheckStatus": "completed",
+          "result": "hardened_generic_upgrade_access_trash_payload_replay",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-breaker-ice-subtype-mix",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_BREAKER_ICE_SUBTYPE_MIX_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-breaker-ice-subtype-mix.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        { "cardId": "onr_v1_052_raffles", "title": "Raffles", "spotcheckStatus": "completed", "result": "hardened_code_gate_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_054_raptor", "title": "Raptor", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_058_seeya", "title": "SeeYa", "spotcheckStatus": "completed", "result": "hardened_expose_target_drift_hidden_zone_payload", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_060_shaka", "title": "Shaka", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_065_smarteye", "title": "Smarteye", "spotcheckStatus": "completed", "result": "hardened_approach_ice_reveal_source_payload", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_066_snowball", "title": "Snowball", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_070_tinweasel", "title": "Tinweasel", "spotcheckStatus": "completed", "result": "hardened_code_gate_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_072_wild-card", "title": "Wild Card", "spotcheckStatus": "completed", "result": "hardened_sentry_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_073_wizards-book", "title": "Wizard's Book", "spotcheckStatus": "completed", "result": "hardened_code_gate_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" },
+        { "cardId": "onr_v1_074_worm", "title": "Worm", "spotcheckStatus": "completed", "result": "hardened_wall_breaker_run_subtype_replay", "followUpStatus": "fixed_and_tested" }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-asset-upgrade-trace-modifiers",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_ASSET_UPGRADE_TRACE_MODIFIERS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-asset-upgrade-trace-modifiers.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_308_acme-savings-and-loan",
+          "title": "ACME Savings and Loan",
+          "spotcheckStatus": "completed",
+          "result": "existing_acme_lifecycle_regressions_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_329_investment-firm",
+          "title": "Investment Firm",
+          "spotcheckStatus": "completed",
+          "result": "existing_recurring_corp_start_credit_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_324_fortress-architects",
+          "title": "Fortress Architects",
+          "spotcheckStatus": "completed",
+          "result": "existing_public_rez_cost_modifier_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_319_disinfectant-inc",
+          "title": "Disinfectant, Inc.",
+          "spotcheckStatus": "completed",
+          "result": "hardened_virus_counter_target_drift",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_364_omni-kismet-ph-d",
+          "title": "Omni Kismet, Ph.D.",
+          "spotcheckStatus": "completed",
+          "result": "hardened_tag_condition_drift",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "title": "Tesseract Fort Construction",
+          "spotcheckStatus": "completed",
+          "result": "existing_server_upgrade_runtime_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_011_cloak",
+          "title": "Cloak",
+          "spotcheckStatus": "completed",
+          "result": "existing_stealth_noisy_payment_filter_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_205_main-office-relocation",
+          "title": "Main-Office Relocation",
+          "spotcheckStatus": "completed",
+          "result": "existing_scorearea_handlimit_projection_retained",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_150_access-to-kiribati",
+          "title": "Access to Kiribati",
+          "spotcheckStatus": "completed",
+          "result": "hardened_trace_base_link_recompute",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_212_priority-requisition",
+          "title": "Priority Requisition",
+          "spotcheckStatus": "completed",
+          "result": "fixed_private_free_rez_choice_target_revalidation",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
+      "roundId": "2026-05-16-prevention-interface-agenda-actions",
+      "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PREVENTION_INTERFACE_AGENDA_ACTIONS_IMPLEMENTATION.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-16-prevention-interface-agenda-actions.md",
+      "jobStatus": "commit_pending",
+      "commitPendingReason": "Fachliche Engine-Haertung und Pflichtchecks gruen, aber lokales Git-Staging/Commit scheitert weiterhin an Permission denied beim Erstellen von C:/Projekte/NETGRID/.git/index.lock wegen fremder DENY-ACL S-1-5-21-2893003870-2010802999-161870138-128397290 auf .git.",
+      "cards": [
+        {
+          "cardId": "onr_v1_135_nasuko-cycle",
+          "title": "Nasuko Cycle",
+          "spotcheckStatus": "completed",
+          "result": "hardened_prevention_source_removal_drift",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "title": "R&D Interface",
+          "spotcheckStatus": "completed",
+          "result": "fixed_cumulative_rd_multiaccess_contract",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_161_fall-guy",
+          "title": "Fall Guy",
+          "spotcheckStatus": "completed",
+          "result": "hardened_resource_prevention_source_identity",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_164_hells-run",
+          "title": "Hell's Run",
+          "spotcheckStatus": "completed",
+          "result": "fixed_trace_link_restricted_recurring_credit",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_170_nomad-allies",
+          "title": "Nomad Allies",
+          "spotcheckStatus": "completed",
+          "result": "hardened_resource_prevention_source_identity",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_175_ronin-around",
+          "title": "Ronin Around",
+          "spotcheckStatus": "completed",
+          "result": "hardened_top_two_stack_reorder_source_drift",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_203_hostile-takeover",
+          "title": "Hostile Takeover",
+          "spotcheckStatus": "completed",
+          "result": "hardened_gain_five_score_revalidation",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_210_political-overthrow",
+          "title": "Political Overthrow",
+          "spotcheckStatus": "completed",
+          "result": "hardened_scorearea_gain_three_action",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_331_nevinyrral",
+          "title": "Nevinyrral",
+          "spotcheckStatus": "completed",
+          "result": "fixed_rezzed_leave_play_corp_loss",
+          "followUpStatus": "fixed_and_tested"
+        },
+        {
+          "cardId": "onr_v1_338_rustbelt-hq-branch",
+          "title": "Rustbelt HQ Branch",
+          "spotcheckStatus": "completed",
+          "result": "hardened_rezzed_handlimit_lifecycle",
+          "followUpStatus": "fixed_and_tested"
+        }
+      ]
+    },
+    {
       "roundId": "2026-05-15-tagged-wall-breaker",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_TAGGED_WALL_BREAKER_IMPLEMENTATION.md",

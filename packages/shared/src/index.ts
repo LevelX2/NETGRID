@@ -110,6 +110,7 @@ export type GameEndReason =
   | "acme_savings_and_loan_unpaid"
   | "corp_deck_empty"
   | "flatline"
+  | "nevinyrral_left_play"
   | "unknown";
 export type DamageType = "net" | "meat" | "core";
 export type CounterType =
@@ -2979,12 +2980,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net damage.",
+      "Installed access tool: access 1 additional card whenever you access R&D.",
     mechanics: [
       "install_hardware",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "net_damage",
+      "access",
+      "breach",
+      "multiaccess",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -7506,11 +7507,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    rulesText: "Installed resource for run-risk and tag-risk planning.",
+    recurringCredits: 1,
+    rulesText:
+      "Put 1 bit on Hell's Run when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it at the start of your next turn.",
     mechanics: [
       "install_resource",
-      "resource_action",
-      "resource_tag_interaction",
+      "counter",
+      "recurring_credit",
+      "trace",
+      "link",
+      "recurring_start_turn",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

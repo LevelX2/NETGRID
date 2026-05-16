@@ -366,6 +366,11 @@ const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
 const SHREDDER_UPLINK_PROTOCOL_ID = "onr_v1_062_shredder-uplink-protocol";
 const SMARTEYE_ID = "onr_v1_065_smarteye";
 const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
+const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
+const HELLS_RUN_ID = "onr_v1_164_hells-run";
+const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
+const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
+const RUSTBELT_HQ_BRANCH_ID = "onr_v1_338_rustbelt-hq-branch";
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -1223,14 +1228,23 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
   "onr_v1_281_accounts-receivable": {
     name: "onr_corp_operation_gain_credits_9",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       state.corp.credits += 9;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gainedCredits: 9,
+        corpCreditsAfter: state.corp.credits,
+      };
     },
   },
   "onr_v1_282_annual-reviews": {
     name: "onr_corp_operation_draw_3",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       drawCorpCards(state, 3);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        drawnCards: 3,
+      };
     },
   },
   "onr_v1_283_audit-of-call-records": {
@@ -1283,6 +1297,9 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (state, legalAction) => {
       requireRunnerTagged(state);
       const targetIds = state.runner.rig.resources.slice().sort().slice(0, 2);
+      const targetDefinitionIds = targetIds.map(
+        (cardId) => definitionFor(state, cardId).id,
+      );
       for (const cardId of targetIds) {
         if (!state.runner.rig.resources.includes(cardId)) continue;
         trashRunnerInstalledCardToHeap(state, cardId);
@@ -1290,7 +1307,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         trashedResourceCount: targetIds.length,
-        trashedResourceIds: targetIds.join(","),
+        trashedResourceDefinitionIds: targetDefinitionIds.join(","),
       };
     },
   },
@@ -1336,9 +1353,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
   },
   "onr_v1_288_day-shift": {
     name: "onr_corp_operation_draw_2_gain_1",
-    resolve: (state) => {
+    resolve: (state, legalAction) => {
       drawCorpCards(state, 2);
       state.corp.credits += 1;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        drawnCards: 2,
+        gainedCredits: 1,
+        corpCreditsAfter: state.corp.credits,
+      };
     },
   },
   "onr_v1_290_efficiency-experts": {
@@ -10531,6 +10554,13 @@ function v1915InstalledAccessBonusSourceDefinitionIds(
     pushIfInstalled(EXPERT_SCHEDULE_ANALYZER_ID);
   if (serverId === "rd")
     pushIfInstalled(MICROTECH_AI_INTERFACE_ID);
+  if (serverId === "rd") {
+    const rdInterfaceCount = runnerInstalledCardIds(state).filter(
+      (cardId) => definitionFor(state, cardId).id === R_AND_D_INTERFACE_ID,
+    ).length;
+    for (let index = 0; index < rdInterfaceCount; index += 1)
+      sources.push(R_AND_D_INTERFACE_ID);
+  }
   if (serverId === "hq" || serverId === "rd")
     pushIfInstalled(SHREDDER_UPLINK_PROTOCOL_ID);
   if (serverId === "archives")
@@ -11331,7 +11361,7 @@ function trashAccessedCard(
       };
     }
   }
-  trashCorpInstalledCardToArchives(state, cardId);
+  trashCorpInstalledCardToArchives(state, cardId, legalAction);
   if (state.run?.breach) {
     completeCurrentBreachAccess(state, "trashed", legalAction);
     return;
@@ -11584,13 +11614,17 @@ function trashRunnerInstalledCardToHeap(
 function trashCorpInstalledCardToArchives(
   state: GameState,
   cardId: CardInstanceId,
+  legalAction?: LegalAction,
 ): void {
   for (const hostedId of hostedCardsOn(state, cardId)) {
     const hostedInstance = mustInstance(state.cardInstances, hostedId);
     if (hostedInstance.owner === "corp")
-      trashCorpInstalledCardToArchives(state, hostedId);
+      trashCorpInstalledCardToArchives(state, hostedId, legalAction);
   }
   const instance = mustInstance(state.cardInstances, cardId);
+  const definition = definitionFor(state, cardId);
+  const rezzedNevinyrralLeftPlay =
+    definition.id === NEVINYRRAL_ID && instance.rezzed === true;
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
   void _hostedOn;
   removeFromAllZones(state, cardId);
@@ -11601,6 +11635,20 @@ function trashCorpInstalledCardToArchives(
     rezzed: true,
     zone: { side: "corp", zone: "archives" },
   };
+  if (rezzedNevinyrralLeftPlay) {
+    state.winner = "runner";
+    state.gameEndReason = "nevinyrral_left_play";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    state.activeSide = "runner";
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        gameEndReason: "nevinyrral_left_play",
+        sourceDefinitionId: NEVINYRRAL_ID,
+      };
+    }
+  }
 }
 
 function trashOlderRegionUpgradesInServer(
@@ -12412,13 +12460,21 @@ function maxHandSize(state: GameState, side: Side): number {
 }
 
 function corpAgendaMaxHandSizeModifier(state: GameState): number {
-  return scoredCorpAgendaIds(state).some(
+  const agendaModifier = scoredCorpAgendaIds(state).some(
     (cardId) =>
       definitionFor(state, cardId).id ===
       MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
   )
     ? 1
     : 0;
+  const rustbeltModifier = rezzedCorpRootCardIds(state).reduce(
+    (sum, cardId) =>
+      definitionFor(state, cardId).id === RUSTBELT_HQ_BRANCH_ID
+        ? sum + 2
+        : sum,
+    0,
+  );
+  return agendaModifier + rustbeltModifier;
 }
 
 function runnerInstalledMaxHandSizeModifier(state: GameState): number {
@@ -13094,6 +13150,7 @@ function resolveEventModificationChoice(
     throw new Error(
       "Dieser Event-Modification-Kandidat passt nicht zum Fenster.",
     );
+  revalidateDamagePreventionCandidateSource(state, candidate);
   const originalAmount = numberPayload(event, "amount");
   const preventedAmount = Math.min(
     candidate.preventAmount ?? 0,
@@ -13415,6 +13472,24 @@ function applyRuntimeDamagePreventionCost(
     remainingCounters,
     sourceTrashed,
   };
+}
+
+function revalidateDamagePreventionCandidateSource(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): void {
+  if (candidate.sourceRef.kind !== "card" || !candidate.sourceRef.instanceId)
+    return;
+  const sourceCardId = candidate.sourceRef.instanceId;
+  const expectedDefinitionId = candidate.sourceRef.definitionId;
+  if (!runnerInstalledCardIds(state).includes(sourceCardId))
+    throw new Error("Die Prevention-Quelle ist nicht mehr installiert.");
+  if (
+    expectedDefinitionId &&
+    definitionFor(state, sourceCardId).id !== expectedDefinitionId
+  ) {
+    throw new Error("Die Prevention-Quelle passt nicht mehr zur Karte.");
+  }
 }
 
 function sanitizeId(value: string): string {
@@ -13937,39 +14012,8 @@ function scoreAgenda(
   if (definition.id === ICE_TRANSMUTATION_AGENDA_ID && legalAction) {
     startIceTransmutationChoice(state, cardId, legalAction);
   }
-  if (definition.id === "onr_v1_212_priority-requisition") {
-    const candidates = Object.entries(state.cardInstances)
-      .filter(
-        ([, instance]) =>
-          instance.zone.side === "corp" &&
-          instance.zone.zone === "serverIce" &&
-          !instance.rezzed,
-      )
-      .map(([instanceId]) => instanceId as CardInstanceId)
-      .sort((left, right) => {
-        const leftCost = definitionFor(state, left).rezCost ?? 0;
-        const rightCost = definitionFor(state, right).rezCost ?? 0;
-        return rightCost - leftCost || left.localeCompare(right);
-      });
-    const freeRezTarget = candidates[0];
-    if (freeRezTarget) {
-      state.cardInstances[freeRezTarget] = {
-        ...mustInstance(state.cardInstances, freeRezTarget),
-        faceup: true,
-        rezzed: true,
-      };
-      if (legalAction) {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          priorityRequisitionFreeRez: true,
-          priorityRequisitionTarget: freeRezTarget,
-          priorityRequisitionTargetDefinitionId: definitionFor(
-            state,
-            freeRezTarget,
-          ).id,
-        };
-      }
-    }
+  if (definition.id === "onr_v1_212_priority-requisition" && legalAction) {
+    startPriorityRequisitionChoice(state, cardId, legalAction);
   }
   if (definition.id === ENCRYPTION_BREAKTHROUGH_ID && legalAction) {
     const codeGateIds = corpInstalledCardIds(state)
@@ -14028,6 +14072,123 @@ function scoreAgenda(
     resolveSecurityPurgeAgendaPurge(state, legalAction);
   }
   cleanupEmptyRemotes(state);
+}
+
+function priorityRequisitionCandidates(state: GameState): CardInstanceId[] {
+  return Object.entries(state.cardInstances)
+    .filter(
+      ([, instance]) =>
+        instance.zone.side === "corp" &&
+        instance.zone.zone === "serverIce" &&
+        !instance.rezzed,
+    )
+    .map(([instanceId]) => instanceId as CardInstanceId)
+    .sort((left, right) => {
+      const leftCost = definitionFor(state, left).rezCost ?? 0;
+      const rightCost = definitionFor(state, right).rezCost ?? 0;
+      return rightCost - leftCost || left.localeCompare(right);
+    });
+}
+
+function startPriorityRequisitionChoice(
+  state: GameState,
+  agendaId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const candidates = priorityRequisitionCandidates(state);
+  if (candidates.length === 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      priorityRequisitionChoiceOpened: false,
+      priorityRequisitionCandidateCount: 0,
+    };
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `v162_priority_requisition_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v162.priority_requisition:${agendaId}:${state.stateVersion + 1}`,
+    prompt: "Priority Requisition: ICE kostenlos rezzen",
+    kind: "select_cards",
+    options: candidates.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      publicLabel: "Installiertes ICE",
+      value: cardId,
+    })),
+    minSelections: 0,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    priorityRequisitionChoiceOpened: true,
+    priorityRequisitionCandidateCount: candidates.length,
+  };
+}
+
+function resolvePriorityRequisitionChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v162.priority_requisition"))
+    throw new Error("Es ist keine Priority-Requisition-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Priority Requisition resolven.");
+  const [, agendaId] = choice.source.split(":");
+  if (
+    !agendaId ||
+    !state.corp.scoreArea.includes(agendaId) ||
+    definitionFor(state, agendaId).id !== "onr_v1_212_priority-requisition"
+  ) {
+    throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
+  }
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  if (selectedIds.length > 1)
+    throw new Error("Priority Requisition darf hoechstens ein ICE rezzen.");
+  const targetId = selectedIds[0];
+  if (!targetId) {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      priorityRequisitionFreeRez: false,
+      priorityRequisitionDeclined: true,
+    };
+    return;
+  }
+  const optionValues = new Set(
+    choice.options
+      .map((option) => option.value)
+      .filter((value): value is string => typeof value === "string"),
+  );
+  const instance = state.cardInstances[targetId];
+  if (
+    !optionValues.has(targetId) ||
+    !instance ||
+    instance.zone.side !== "corp" ||
+    instance.zone.zone !== "serverIce" ||
+    instance.rezzed
+  ) {
+    throw new Error("Das Priority-Requisition-Ziel ist nicht mehr gueltig.");
+  }
+  state.cardInstances[targetId] = {
+    ...instance,
+    faceup: true,
+    rezzed: true,
+  };
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v162_priority_requisition_free_rez",
+    priorityRequisitionFreeRez: true,
+    priorityRequisitionTarget: targetId,
+    priorityRequisitionTargetDefinitionId: definitionFor(state, targetId).id,
+    rezCostPaid: 0,
+  };
 }
 
 function resolveSecurityPurgeAgendaPurge(
@@ -14574,6 +14735,10 @@ function resolvePendingChoice(
     resolveCorpRdArrangeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("v162.priority_requisition")) {
+    resolvePriorityRequisitionChoice(state, legalAction, playerAction);
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1917.corp_rd_arrange_top2")) {
     resolveCorpAssetRdTopReorderChoice(state, legalAction, playerAction);
     return;
@@ -15117,6 +15282,18 @@ function resolveRunnerStackArrangeChoice(
 ): void {
   const choice = state.pendingChoice;
   if (!choice) throw new Error("Es ist keine Arrange-Choice offen.");
+  if (choice.source.startsWith("v1911.arrange_stack_top2:")) {
+    const sourceCardId = choice.source.split(":")[1] as
+      | CardInstanceId
+      | undefined;
+    if (
+      !sourceCardId ||
+      !state.runner.rig.resources.includes(sourceCardId) ||
+      definitionFor(state, sourceCardId).id !== RONIN_AROUND_ID
+    ) {
+      throw new Error("Die Ronin-Around-Reorder-Quelle ist nicht mehr installiert.");
+    }
+  }
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   const topCards = state.runner.stack.slice(0, choice.options.length);
   if (selectedIds.length !== topCards.length)
@@ -16928,6 +17105,16 @@ function resolveChimeraDaemonTrashChoice(
   const choice = state.pendingChoice;
   if (!choice || !choice.source.startsWith("v199.chimera_daemon_trash"))
     throw new Error("Es ist keine Chimera-Choice offen.");
+  const [, sourceCardId = ""] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    state.run?.accessedCardId !== sourceCardId ||
+    !state.cardInstances[sourceCardId] ||
+    state.cardInstances[sourceCardId]?.zone.zone === "archives" ||
+    definitionFor(state, sourceCardId).id !== CHIMERA_ID
+  ) {
+    throw new Error("Chimera ist nicht mehr die gueltige Access-Quelle.");
+  }
   const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const option = choice.options.find(
     (candidate) => candidate.id === selectedId,
@@ -17175,7 +17362,7 @@ function resolveV1911RunnerHiddenZoneAbility(
       throw new Error("Diese Karte darf keine Stack-Reorder-Ability nutzen.");
     startRunnerStackArrangeChoice(
       state,
-      "v1911.arrange_stack_top2",
+      `v1911.arrange_stack_top2:${sourceCardId}`,
       "v1911_arrange_stack_top2",
     );
     legalAction.payload = {
@@ -17396,7 +17583,7 @@ function resolveTraceCorpBid(
     "runner",
     trace.traceId,
     `Runner Link-Bid wählen (Trace ${traceStrength}, Link ${runnerLink})`,
-    state.runner.credits,
+    state.runner.credits + runnerTraceLinkCredits(state),
   );
   state.activeSide = "runner";
   legalAction.payload = {
@@ -17431,7 +17618,7 @@ function resolveTraceRunnerBid(
   if (!trace || trace.status !== "runner_bid")
     throw new Error("Es ist kein Runner-Trace-Bid offen.");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  spendCredits(state, "runner", bid);
+  const tracePayment = spendRunnerTraceLinkBidCredits(state, bid);
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
   const traceStrength =
     trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
@@ -17505,6 +17692,13 @@ function resolveTraceRunnerBid(
     traceStrength,
     runnerLink,
     runnerBid: bid,
+    ...(tracePayment.hellsRunSpent > 0
+      ? {
+          hellsRunTraceCreditsSpent: tracePayment.hellsRunSpent,
+          runnerCreditsSpent: tracePayment.runnerCreditsSpent,
+          traceLinkCreditSourceDefinitionIds: HELLS_RUN_ID,
+        }
+      : {}),
     runnerStrength,
     traceSuccessful: successful,
     tagsAdded,
@@ -17527,6 +17721,47 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
     Number.isInteger(effect.amount) &&
     effect.amount >= 0
   );
+}
+
+function runnerTraceLinkCreditSourceIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.resources
+    .filter(
+      (cardId) =>
+        definitionFor(state, cardId).id === HELLS_RUN_ID &&
+        cardCounter(state, cardId, "recurring_credit") > 0,
+    )
+    .sort();
+}
+
+function runnerTraceLinkCredits(state: GameState): number {
+  return runnerTraceLinkCreditSourceIds(state).reduce(
+    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    0,
+  );
+}
+
+function spendRunnerTraceLinkBidCredits(
+  state: GameState,
+  amount: number,
+): { hellsRunSpent: number; runnerCreditsSpent: number } {
+  if (amount <= 0) return { hellsRunSpent: 0, runnerCreditsSpent: 0 };
+  if (state.runner.credits + runnerTraceLinkCredits(state) < amount)
+    throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
+  let remaining = amount;
+  let hellsRunSpent = 0;
+  for (const cardId of runnerTraceLinkCreditSourceIds(state)) {
+    if (remaining <= 0) break;
+    const spent = Math.min(
+      cardCounter(state, cardId, "recurring_credit"),
+      remaining,
+    );
+    if (spent <= 0) continue;
+    spendCardCounter(state, cardId, "recurring_credit", spent);
+    remaining -= spent;
+    hellsRunSpent += spent;
+  }
+  spendCredits(state, "runner", remaining);
+  return { hellsRunSpent, runnerCreditsSpent: remaining };
 }
 
 function selectedBidAmount(
@@ -18146,6 +18381,9 @@ function publicContextForAction(
       "traceStrength",
       "runnerLink",
       "runnerBid",
+      "hellsRunTraceCreditsSpent",
+      "runnerCreditsSpent",
+      "traceLinkCreditSourceDefinitionIds",
       "runnerStrength",
       "traceSuccessful",
       "tagsAdded",
@@ -18214,6 +18452,19 @@ function publicContextForAction(
         legalAction.payload.rabbitTraceLimitReduction;
     if (legalAction.payload.oncePerRunConsumed === true)
       context.oncePerRunConsumed = true;
+  }
+  if (legalAction.type === "play_operation") {
+    for (const key of [
+      "gainedCredits",
+      "drawnCards",
+      "corpCreditsAfter",
+      "trashedResourceCount",
+      "trashedResourceDefinitionIds",
+      "runnerRunAttemptsLastTurn",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
   }
   if (legalAction.payload?.damageResolved === true) {
     context.damageResolved = true;
@@ -18450,6 +18701,11 @@ function publicContextForAction(
     "checkedIceCount",
     "rezzedIceCount",
     "rezCostPaid",
+    "priorityRequisitionChoiceOpened",
+    "priorityRequisitionCandidateCount",
+    "priorityRequisitionFreeRez",
+    "priorityRequisitionDeclined",
+    "priorityRequisitionTargetDefinitionId",
     "iceCount",
     "serverIceOrderReversed",
     "serverLabel",
@@ -18556,6 +18812,12 @@ function publicContextForAction(
       const value = legalAction.payload[key];
       if (value !== undefined) context[key] = value;
     }
+  }
+  if (legalAction.payload?.chimeraDaemonTrashed === true) {
+    context.chimeraDaemonTrashed = true;
+    if (typeof legalAction.payload.chimeraDaemonDefinitionId === "string")
+      context.chimeraDaemonDefinitionId =
+        legalAction.payload.chimeraDaemonDefinitionId;
   }
   if (typeof legalAction.payload?.acmeSavingsAndLoanAbility === "string") {
     context.acmeSavingsAndLoanAbility =
@@ -19638,6 +19900,7 @@ function runnerRunRecurringCreditSourceIds(
     ) {
       return false;
     }
+    if (definition.id === HELLS_RUN_ID) return false;
     if (!noisyBreaker) return true;
     return !cardHasSubtype(definition, "stealth");
   });

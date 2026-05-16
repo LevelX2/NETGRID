@@ -11,7 +11,7 @@
     { "cardId": "onr_v1_128_green-knight-surge-buffers", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_128_green-knight-surge-buffers", "scenarioRefs": ["runner_v1913_damage_prevention"] },
     { "cardId": "onr_v1_130_lifesaver-nanosurgeons", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_130_lifesaver-nanosurgeons", "scenarioRefs": ["runner_v1913_damage_prevention"] },
     { "cardId": "onr_v1_135_nasuko-cycle", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_135_nasuko-cycle", "scenarioRefs": ["runner_v1913_damage_prevention"] },
-    { "cardId": "onr_v1_139_r-and-d-interface", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_139_r-and-d-interface", "scenarioRefs": ["runner_v1913_damage_prevention"] },
+    { "cardId": "onr_v1_139_r-and-d-interface", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_139_r-and-d-interface", "scenarioRefs": ["runner_v1915_run_access_tools"] },
     { "cardId": "onr_v1_143_techtronica-utility-suit", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_143_techtronica-utility-suit", "scenarioRefs": ["runner_v1913_damage_prevention"] },
     { "cardId": "onr_v1_155_code-viral-cache", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_155_code-viral-cache", "scenarioRefs": ["runner_v1913_damage_prevention"] },
     { "cardId": "onr_v1_161_fall-guy", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_161_fall-guy", "scenarioRefs": ["runner_v1913_damage_prevention"] },

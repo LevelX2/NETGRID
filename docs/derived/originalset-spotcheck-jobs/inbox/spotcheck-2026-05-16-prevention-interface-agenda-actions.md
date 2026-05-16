@@ -1,7 +1,11 @@
 ---
 jobId: spotcheck-2026-05-16-prevention-interface-agenda-actions
-status: ready_for_implementation
+status: commit_pending
 createdAt: 2026-05-16T06:13:12+01:00
+startedAt: 2026-05-16T12:53:00+02:00
+completedAt: 2026-05-16T12:55:05+02:00
+commitPendingAt: 2026-05-16T12:55:05+02:00
+commitPendingReason: ".git ACL/index.lock creation is blocked by foreign direct DENY SID S-1-5-21-2893003870-2010802999-161870138-128397290; git add/commit cannot create .git/index.lock. User instructed to continue package processing and resolve git locks after packages."
 requiresImplementation: true
 priority: normal
 cards:
@@ -227,3 +231,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test -- --runInBand`
 - Szenario-/Manifest-Check für V1.9.11, V1.9.13, V1.9.14, V1.9.20 und V1.9.22 nach den geänderten Kartenverträgen.
 - Leakscan auf `publicPayload`, `PlayerView`, Reconnect- und AI-Input-Pfade für R&D/HQ/Stack/Grip-Inhalte.
+
+## Umsetzung 2026-05-16
+
+Der Job wurde fachlich umgesetzt und geprüft, bleibt aber wegen der bekannten lokalen `.git`-ACL-Sperre auf `commit_pending`.
+
+Umgesetzte Punkte:
+
+- R&D Interface aus Damage-Prevention entfernt und als kumulativer R&D-Multiaccess-Hardware-Pfad umgesetzt.
+- Hell's Run als restricted Recurring Credit für Runner-Trace-Link-Bids umgesetzt, inklusive Refresh zum Runner-Zugstart und PublicPayload-Feldern.
+- Ronin Around beim bestätigten Top-2-Stack-Reorder-Vertrag belassen und die offene Choice an die installierte Source gebunden.
+- Nasuko Cycle, Fall Guy und Nomad Allies gegen Prevention-Source-Removal-Drift geprüft.
+- Hostile Takeover, Political Overthrow, Nevinyrral und Rustbelt HQ Branch gegen ScoreArea-/rezzed-Source-Drift, GameEnd und Handlimit-Lifecycle gehärtet.
+- AI-Hints, Manifeste, Catalog-Gate, Register, JSON-Register, Detailbericht und Wissenslog aktualisiert.
+
+Grüne Checks:
+
+- `corepack pnpm --filter @netgrid/engine test`
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts`
+- `corepack pnpm --filter @netgrid/catalog test`
+- `corepack pnpm typecheck`
+
+Commit-Pending-Grund: `.git` ist durch die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` weiterhin so gesperrt, dass `git add`/`git commit` keine `.git/index.lock` erstellen kann. Staging und Commit werden nach ACL-Reparatur nachzuziehen sein.

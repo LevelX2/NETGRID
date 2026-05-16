@@ -1,7 +1,11 @@
 ---
 jobId: spotcheck-2026-05-16-asset-upgrade-trace-modifiers
-status: ready_for_implementation
+status: commit_pending
 createdAt: 2026-05-16T10:59:00+01:00
+startedAt: 2026-05-16T12:56:00+02:00
+completedAt: 2026-05-16T13:00:55+02:00
+commitPendingAt: 2026-05-16T13:00:55+02:00
+commitPendingReason: ".git ACL/index.lock creation is blocked by foreign direct DENY SID S-1-5-21-2893003870-2010802999-161870138-128397290; git add/commit cannot create .git/index.lock. User instructed to continue package processing and resolve git locks after packages."
 requiresImplementation: true
 priority: normal
 cards:
@@ -284,3 +288,25 @@ Akzeptanzkriterien
 - `pnpm --filter @netgrid/ai test`
 - Gezielt: `packages/engine/src/index.test.ts` für ACME, Cloak, Priority Requisition, Base-Link/Trace und V1.9.17/V1.9.18/V1.9.20 Modifier-Smokes.
 - Leakscan: PublicPayload, PlayerView, Reconnect-Payload und Chronicle-Einträge dürfen keine privaten HQ-/R&D-/Grip-/Stack- oder unrezzed ICE-Definitionen vor öffentlicher Auflösung enthalten.
+
+## Umsetzung 2026-05-16
+
+Der Job wurde fachlich umgesetzt und geprüft, bleibt aber wegen der bekannten lokalen `.git`-ACL-Sperre auf `commit_pending`.
+
+Umgesetzte Punkte:
+
+- Priority Requisition öffnet nun eine private Korp-Choice für Free-Rez statt automatisch das teuerste ICE zu rezzen.
+- Priority-Requisition-Choice revalidiert ScoreArea-Source, Zielstatus und already-rezzed-/Zone-Drift.
+- Omni Kismet, Ph.D. und Disinfectant, Inc. wurden mit Tag-/Counter-Drift-Regressionen nachgehärtet.
+- Access to Kiribati wurde im Trace-Fenster als aktuelle Base-Link-Quelle geprüft.
+- Bestehende ACME-, Investment-Firm-, Fortress-Architects-, Cloak-, Main-Office- und Tesseract-Regressionen bleiben in der vollen Engine-Suite grün.
+- Detailbericht, Register, JSON-Register und Wissenslog aktualisiert.
+
+Grüne Checks:
+
+- `corepack pnpm --filter @netgrid/engine test`
+- `corepack pnpm --filter @netgrid/web test -- chronicle.test.ts`
+- `corepack pnpm --filter @netgrid/catalog test`
+- `corepack pnpm typecheck`
+
+Commit-Pending-Grund: `.git` ist durch die fremde direkte DENY-ACL `S-1-5-21-2893003870-2010802999-161870138-128397290` weiterhin so gesperrt, dass `git add`/`git commit` keine `.git/index.lock` erstellen kann. Staging und Commit werden nach ACL-Reparatur nachzuziehen sein.

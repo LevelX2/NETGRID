@@ -4,6 +4,84 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+## Runde 2026-05-16-corp-asset-upgrade-rest
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_CORP_ASSET_UPGRADE_REST_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Rockerboy Promotion | `onr_v1_337_rockerboy-promotion` | Rezzed Economy-Asset bleibt side-, stateVersion- und source-sicher | Source-Removal-, PublicPayload- und Replay-Test ergänzt |
+| Chester Mix | `onr_v1_352_chester-mix` | ICE-Installkostenreduktion bleibt auf den eigenen Server begrenzt | Server-Scope-Test ergänzt |
+| Chimera | `onr_v1_353_chimera` | Daemon-Trash-Choice revalidiert die accessed Source beim Resolve | Source-Removal-Guard und PublicPayload-Kontext ergänzt |
+| Namatoki Plaza | `onr_v1_361_namatoki-plaza` | Generischer rezzed Upgrade-Access/Trash bleibt payload- und replay-safe | Access-/Trash-Test ergänzt |
+
+## Runde 2026-05-16-breaker-ice-subtype-mix
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_BREAKER_ICE_SUBTYPE_MIX_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Raffles | `onr_v1_052_raffles` | Code-Gate-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| Raptor | `onr_v1_054_raptor` | Sentry-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| SeeYa | `onr_v1_058_seeya` | Expose-Ziel wird revalidiert und hidden-zone-redigiert | Ziel-Drift-Test ergänzt |
+| Shaka | `onr_v1_060_shaka` | Sentry-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| Smarteye | `onr_v1_065_smarteye` | Approach-Reveal bleibt source-bound und payload-safe | Trigger-Test ergänzt |
+| Snowball | `onr_v1_066_snowball` | Sentry-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| Tinweasel | `onr_v1_070_tinweasel` | Code-Gate-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| Wild Card | `onr_v1_072_wild-card` | Sentry-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| Wizard's Book | `onr_v1_073_wizards-book` | Code-Gate-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+| Worm | `onr_v1_074_worm` | Wall-Breaker bleibt run- und subtype-gebunden | Breaker-Mix-Test ergänzt |
+
+## Runde 2026-05-16-asset-upgrade-trace-modifiers
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_ASSET_UPGRADE_TRACE_MODIFIERS_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, lokales Staging/Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| ACME Savings and Loan | `onr_v1_308_acme-savings-and-loan` | Lifecycle aus Rez, Self-Trash, Verpflichtung, Payment und Loss bleibt stabil | Bestehende ACME-Regressionen bestätigt |
+| Investment Firm | `onr_v1_329_investment-firm` | Corp-Start-Recurring-Credit bleibt sourcegebunden | Bestehende V1.9.17-Regression bestätigt |
+| Fortress Architects | `onr_v1_324_fortress-architects` | Rezzed ICE-Rez-Kostenmodifier bleibt public-source-bound | Bestehende Modifier-Regression bestätigt |
+| Disinfectant, Inc. | `onr_v1_319_disinfectant-inc` | Virus-Counter-Ziele werden beim Resolve erneut geprüft | Target-Drift-Test ergänzt |
+| Omni Kismet, Ph.D. | `onr_v1_364_omni-kismet-ph-d` | Tag-Condition wird beim Resolve erneut geprüft | Tag-Drift-Test ergänzt |
+| Tesseract Fort Construction | `onr_v1_370_tesseract-fort-construction` | Servergebundene Upgrade-Runtime bleibt gate-stabil | Bestehende V1.9.18-Abdeckung bestätigt |
+| Cloak | `onr_v1_011_cloak` | Stealth-/Noisy-Payment-Filter bleibt stabil | Bestehende Payment-Regression bestätigt |
+| Main-Office Relocation | `onr_v1_205_main-office-relocation` | ScoreArea-Handlimit-Projektion bleibt stabil | Bestehende Handlimit-Regression bestätigt |
+| Access to Kiribati | `onr_v1_150_access-to-kiribati` | Base-Link wird im Trace-Fenster aus aktueller Resource berechnet | Trace-Link-Test ergänzt |
+| Priority Requisition | `onr_v1_212_priority-requisition` | Free-Rez ist private Korp-Choice mit Ziel-Revalidation | Automatik-Rez durch Choice ersetzt |
+
+## Runde 2026-05-16-prevention-interface-agenda-actions
+
+Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_16_PREVENTION_INTERFACE_AGENDA_ACTIONS_IMPLEMENTATION.md`
+
+Jobstatus: `commit_pending`; Umsetzung und Pflichtchecks sind grün, der lokale Commit ist durch eine `.git`-ACL-Sperre blockiert.
+
+| Karte | Card ID | Ergebnis | Nacharbeit |
+|---|---|---|---|
+| Nasuko Cycle | `onr_v1_135_nasuko-cycle` | Prevention-Choice bleibt source-bound und lehnt entfernte Sources ab | Source-Removal-Drift-, PublicPayload- und Replay-Test ergänzt |
+| R&D Interface | `onr_v1_139_r-and-d-interface` | Kumulativer R&D-Multiaccess ersetzt den falschen Damage-Prevention-Vertrag | Shared, Engine, AI-Hint, Manifest und Catalog-Gate korrigiert |
+| Fall Guy | `onr_v1_161_fall-guy` | Resource-Prevention bleibt als installierte Source eindeutig | Multi-Source-Prevention-Test ergänzt |
+| Hell's Run | `onr_v1_164_hells-run` | Restricted Recurring Credit zahlt nur Runner-Trace-Link-Bids und refreshed am Runner-Zugstart | Payment-Filter, PublicPayload und Manifest/AI-Hint ergänzt |
+| Nomad Allies | `onr_v1_170_nomad-allies` | Resource-Prevention bleibt source-stabil und hidden-info-sicher | Multi-Source-Prevention-Test ergänzt |
+| Ronin Around | `onr_v1_175_ronin-around` | Top-2-Stack-Reorder-Vertrag bestätigt; offene Choice hängt an installierter Source | Source-Removal-Drift-Test ergänzt |
+| Hostile Takeover | `onr_v1_203_hostile-takeover` | Score-Pfad bleibt bei Gain 5 und ausreichenden Advancements | Score-Revalidation und Payload-Test ergänzt |
+| Political Overthrow | `onr_v1_210_political-overthrow` | Gain-3-Aktion entsteht nur aus Korp-ScoreArea-Sources | ScoreArea-Drift-Test ergänzt |
+| Nevinyrral | `onr_v1_331_nevinyrral` | Rezzed Leave-play setzt den Runner-Sieg | Trash-on-access-/GameEnd-Test ergänzt |
+| Rustbelt HQ Branch | `onr_v1_338_rustbelt-hq-branch` | Rezzed Handlimit-Modifier fällt beim Trash sofort weg, ohne Sofortdiscard | Handlimit-Lifecycle-Test ergänzt |
+
 ## Runde 2026-05-15-tagged-wall-breaker
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
