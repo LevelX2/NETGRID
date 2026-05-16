@@ -30,6 +30,7 @@ import {
   type PublicGameEvent,
   type ReplacementCandidate,
   type ReplacementWindow,
+  type ResolvedGameEffect,
   type ReplayResult,
   type RunState,
   type SpecialZoneKind,
@@ -195,6 +196,8 @@ import {
   TAG_CONDITION_UPGRADE_CARD_IDS,
   TRACE_ASSET_CARD_IDS,
 } from "./mechanics/trace-tags";
+
+type AutomaticEffectCollector = ResolvedGameEffect[];
 
 export {
   DEMO_CARDS,
@@ -12073,7 +12076,7 @@ function endTurn(
     resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
     if (state.winner) return;
   }
-  startDiscardPhase(state, side);
+  startDiscardPhase(state, side, legalAction);
   if (
     side === "runner" &&
     polymerBreakthroughCreditsGained > 0 &&
@@ -12125,7 +12128,11 @@ function resolveAcmeSavingsAndLoanEndOfCorpTurn(
   };
 }
 
-function startDiscardPhase(state: GameState, side: Side): void {
+function startDiscardPhase(
+  state: GameState,
+  side: Side,
+  legalAction?: LegalAction,
+): void {
   state.activeSide = side;
   if (side === "runner") {
     state.phase = "runner_discard_phase";
@@ -12139,20 +12146,24 @@ function startDiscardPhase(state: GameState, side: Side): void {
       delete state.run;
       return;
     }
-    processDiscardStep(state, "runner");
+    processDiscardStep(state, "runner", legalAction);
     return;
   }
 
   state.phase = "corp_discard_phase";
   state.timingPoint = "corp_discard.select_cards";
-  processDiscardStep(state, "corp");
+  processDiscardStep(state, "corp", legalAction);
 }
 
-function processDiscardStep(state: GameState, side: Side): void {
+function processDiscardStep(
+  state: GameState,
+  side: Side,
+  legalAction?: LegalAction,
+): void {
   const hand = handForSide(state, side);
   const requiredDiscardCount = hand.length - maxHandSize(state, side);
   if (requiredDiscardCount <= 0) {
-    completeDiscardPhase(state, side);
+    completeDiscardPhase(state, side, legalAction);
     return;
   }
   state.timingPoint =
@@ -12167,12 +12178,149 @@ function processDiscardStep(state: GameState, side: Side): void {
   );
 }
 
-function completeDiscardPhase(state: GameState, side: Side): void {
+function completeDiscardPhase(
+  state: GameState,
+  side: Side,
+  legalAction?: LegalAction,
+): void {
+  const effects: AutomaticEffectCollector = [];
   if (side === "runner") {
-    startCorpTurn(state);
+    startCorpTurn(state, effects);
+    appendResolvedEffectsToPayload(legalAction, effects);
     return;
   }
-  startRunnerTurn(state);
+  startRunnerTurn(state, effects);
+  appendResolvedEffectsToPayload(legalAction, effects);
+}
+
+function appendResolvedEffectsToPayload(
+  legalAction: LegalAction | undefined,
+  effects: AutomaticEffectCollector,
+): void {
+  if (!legalAction || effects.length === 0) return;
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    ...effects,
+  ];
+}
+
+function automaticGainCreditsEffect(
+  effectId: string,
+  side: Side,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "gain_credits",
+    visibility: "public",
+    side,
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticDrawCardsEffect(
+  effectId: string,
+  side: Side,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "draw_cards",
+    visibility: "public",
+    side,
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticTagEffect(
+  effectId: string,
+  amount: number,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "add_tags",
+    visibility: "public",
+    side: "runner",
+    amount,
+    reason: "start_of_turn",
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticTrashCardEffect(
+  effectId: string,
+  side: Side,
+  cardDefinitionId: CardDefinitionId,
+  sourceDefinitionId: CardDefinitionId,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "trash_card",
+    visibility: "public",
+    side,
+    reason: "start_of_turn",
+    cardDefinitionId,
+    cardTitle: publicCardTitle(cardDefinitionId),
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticCounterChangeEffect(
+  effectId: string,
+  side: Side,
+  sourceDefinitionId: CardDefinitionId,
+  counterType: CounterType,
+  remainingCounters: number,
+  addedCounterAmount: number,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "counter_change",
+    visibility: "public",
+    side,
+    amount: remainingCounters,
+    reason: "start_of_turn",
+    counterType,
+    remainingCounters,
+    addedCounterAmount,
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function automaticStealAgendaEffect(
+  effectId: string,
+  cardDefinitionId: CardDefinitionId,
+  sourceDefinitionId: CardDefinitionId,
+  amount: number,
+): ResolvedGameEffect {
+  return {
+    effectId,
+    kind: "steal_agenda",
+    visibility: "public",
+    side: "runner",
+    amount,
+    reason: "start_of_turn",
+    cardDefinitionId,
+    cardTitle: publicCardTitle(cardDefinitionId),
+    sourceDefinitionId,
+    sourceTitle: publicCardTitle(sourceDefinitionId),
+  };
+}
+
+function publicCardTitle(definitionId: CardDefinitionId): string {
+  return DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId;
 }
 
 function applyRunnerForgoNextAction(state: GameState): void {
@@ -12205,7 +12353,10 @@ function consumeRunnerFutureActionDebt(state: GameState): number {
   return consumed;
 }
 
-function startCorpTurn(state: GameState): void {
+function startCorpTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
   state.activeSide = "corp";
   state.phase = "corp_draw_phase";
   state.timingPoint = "corp_draw.mandatory_draw";
@@ -12214,10 +12365,13 @@ function startCorpTurn(state: GameState): void {
   clearValuPakProgramInstallFlags(state);
   clearRovingSubmarineActivityMarkers(state);
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
-  applyCorpStartOfTurnEffects(state);
+  applyCorpStartOfTurnEffects(state, effects);
 }
 
-function startRunnerTurn(state: GameState): void {
+function startRunnerTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
@@ -12243,12 +12397,15 @@ function startRunnerTurn(state: GameState): void {
   flags.startupImmolatorUsedSourceIdsThisTurn = [];
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
-  resolveBizarreEncryptionDelayedAgendas(state);
-  refreshRecurringCredits(state, "runner");
-  applyRunnerStartOfTurnEffects(state);
+  resolveBizarreEncryptionDelayedAgendas(state, effects);
+  refreshRecurringCredits(state, "runner", effects);
+  applyRunnerStartOfTurnEffects(state, effects);
 }
 
-function resolveBizarreEncryptionDelayedAgendas(state: GameState): void {
+function resolveBizarreEncryptionDelayedAgendas(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
   const delayed = state.bizarreEncryptionDelayedAgendas ?? [];
   if (delayed.length === 0) return;
   const remaining: NonNullable<GameState["bizarreEncryptionDelayedAgendas"]> =
@@ -12280,18 +12437,39 @@ function resolveBizarreEncryptionDelayedAgendas(state: GameState): void {
       rezzed: true,
       zone: { side: "runner", zone: "scoreArea" },
     };
+    effects?.push(
+      automaticStealAgendaEffect(
+        `runner.start.bizarre_encryption.${entry.agendaId}`,
+        definition.id,
+        BIZARRE_ENCRYPTION_SCHEME_ID,
+        agendaPointsForScoredCard(state, entry.agendaId),
+      ),
+    );
   }
   if (remaining.length > 0) state.bizarreEncryptionDelayedAgendas = remaining;
   else delete state.bizarreEncryptionDelayedAgendas;
 }
 
-function applyCorpStartOfTurnEffects(state: GameState): void {
+function applyCorpStartOfTurnEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
   const skivvissDraws = state.runner.rig.programs.reduce((sum, cardId) => {
     return definitionFor(state, cardId).id === SKIVVISS_ID
       ? sum + cardCounter(state, cardId, "virus")
       : sum;
   }, 0);
-  if (skivvissDraws > 0) drawCorpCards(state, skivvissDraws);
+  if (skivvissDraws > 0) {
+    drawCorpCards(state, skivvissDraws);
+    effects?.push(
+      automaticDrawCardsEffect(
+        "corp.start.skivviss",
+        "corp",
+        skivvissDraws,
+        SKIVVISS_ID,
+      ),
+    );
+  }
   const polymerCount = state.corp.scoreArea.reduce((sum, cardId) => {
     return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID
       ? sum + 1
@@ -12299,8 +12477,15 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   }, 0);
   if (polymerCount > 0) {
     credits(state, "corp", polymerCount);
+    effects?.push(
+      automaticGainCreditsEffect(
+        "corp.start.polymer_breakthrough",
+        "corp",
+        polymerCount,
+        POLYMER_BREAKTHROUGH_ID,
+      ),
+    );
   }
-  let recurringAssetCreditCount = 0;
   for (const cardId of rezzedCorpRootCardIds(state)) {
     const definitionId = definitionFor(state, cardId).id;
     if (
@@ -12308,19 +12493,44 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
       cardCounter(state, cardId, "bit") <= 0
     ) {
       setCardCounter(state, cardId, "bit", 1);
+      effects?.push(
+        automaticCounterChangeEffect(
+          `corp.start.krumz.${cardId}`,
+          "corp",
+          definitionId,
+          "bit",
+          1,
+          1,
+        ),
+      );
     }
     if (definitionId === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID) {
       if (cardCounter(state, cardId, "bit") > 0) {
         spendCardCounter(state, cardId, "bit", 1);
         credits(state, "corp", 1);
+        effects?.push(
+          automaticGainCreditsEffect(
+            `corp.start.spinn_public_relations.${cardId}`,
+            "corp",
+            1,
+            definitionId,
+          ),
+        );
       }
       continue;
     }
-    if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId))
-      recurringAssetCreditCount += 1;
+    if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId)) {
+      credits(state, "corp", 1);
+      effects?.push(
+        automaticGainCreditsEffect(
+          `corp.start.recurring_asset.${cardId}`,
+          "corp",
+          1,
+          definitionId,
+        ),
+      );
+    }
   }
-  if (recurringAssetCreditCount > 0)
-    credits(state, "corp", recurringAssetCreditCount);
   if (!state.pendingChoice) startCorporateNegotiatingCenterChoice(state);
   const employeeEmpowermentCount = state.corp.scoreArea.reduce(
     (sum, cardId) => {
@@ -12332,10 +12542,21 @@ function applyCorpStartOfTurnEffects(state: GameState): void {
   );
   if (employeeEmpowermentCount > 0) {
     credits(state, "corp", employeeEmpowermentCount);
+    effects?.push(
+      automaticGainCreditsEffect(
+        "corp.start.employee_empowerment",
+        "corp",
+        employeeEmpowermentCount,
+        EMPLOYEE_EMPOWERMENT_ID,
+      ),
+    );
   }
 }
 
-function applyRunnerStartOfTurnEffects(state: GameState): void {
+function applyRunnerStartOfTurnEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
   const flags = ensureRunnerTurnFlags(state);
   const dataRavenCounters = Object.entries(state.cardInstances).reduce(
     (sum, [cardId, instance]) => {
@@ -12345,14 +12566,40 @@ function applyRunnerStartOfTurnEffects(state: GameState): void {
     },
     0,
   );
-  if (dataRavenCounters > 0) state.runner.tags += dataRavenCounters;
+  if (dataRavenCounters > 0) {
+    state.runner.tags += dataRavenCounters;
+    effects?.push(
+      automaticTagEffect(
+        "runner.start.data_raven",
+        dataRavenCounters,
+        DATA_RAVEN_ID,
+      ),
+    );
+  }
   for (const cardId of state.runner.rig.resources.slice().sort()) {
     if (definitionFor(state, cardId).id !== RIGGED_INVESTMENTS_ID) continue;
     if (cardCounter(state, cardId, "bit") <= 0) continue;
     spendCardCounter(state, cardId, "bit", 1);
     credits(state, "runner", 1);
-    if (cardCounter(state, cardId, "bit") <= 0)
+    effects?.push(
+      automaticGainCreditsEffect(
+        `runner.start.rigged_investments.${cardId}`,
+        "runner",
+        1,
+        RIGGED_INVESTMENTS_ID,
+      ),
+    );
+    if (cardCounter(state, cardId, "bit") <= 0) {
       trashRunnerInstalledCardToHeap(state, cardId);
+      effects?.push(
+        automaticTrashCardEffect(
+          `runner.start.rigged_investments.trash.${cardId}`,
+          "runner",
+          RIGGED_INVESTMENTS_ID,
+          RIGGED_INVESTMENTS_ID,
+        ),
+      );
+    }
   }
   if (!flags.startOfTurnFloatingCreditsApplied) {
     const butcherBoyCounterTotal = installedVirusCounterTotalForDefinition(
@@ -12360,13 +12607,41 @@ function applyRunnerStartOfTurnEffects(state: GameState): void {
       BUTCHER_BOY_ID,
     );
     const butcherBoyCredits = Math.floor(butcherBoyCounterTotal / 2);
-    if (butcherBoyCredits > 0) credits(state, "runner", butcherBoyCredits);
+    if (butcherBoyCredits > 0) {
+      credits(state, "runner", butcherBoyCredits);
+      effects?.push(
+        automaticGainCreditsEffect(
+          "runner.start.butcher_boy",
+          "runner",
+          butcherBoyCredits,
+          BUTCHER_BOY_ID,
+        ),
+      );
+    }
     for (const cardId of state.runner.rig.resources) {
       const definition = definitionFor(state, cardId);
-      if (definition.id === "onr_v1_163_floating-runner-bbs")
+      if (definition.id === "onr_v1_163_floating-runner-bbs") {
         credits(state, "runner", 1);
-      if (definition.id === TOP_RUNNERS_CONFERENCE_ID)
+        effects?.push(
+          automaticGainCreditsEffect(
+            `runner.start.floating_runner_bbs.${cardId}`,
+            "runner",
+            1,
+            definition.id,
+          ),
+        );
+      }
+      if (definition.id === TOP_RUNNERS_CONFERENCE_ID) {
         credits(state, "runner", 3);
+        effects?.push(
+          automaticGainCreditsEffect(
+            `runner.start.top_runners_conference.${cardId}`,
+            "runner",
+            3,
+            definition.id,
+          ),
+        );
+      }
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }
@@ -15137,7 +15412,7 @@ function resolveDiscardChoice(
     hiddenZoneAction: "discard_phase",
   };
   delete state.pendingChoice;
-  completeDiscardPhase(state, side);
+  completeDiscardPhase(state, side, legalAction);
 }
 
 function resolveSetupMulliganChoice(
@@ -18385,7 +18660,9 @@ function publicContextForAction(
     publicServerLabelForCard(state, cardId) ??
     publicServerLabel(state, legalAction.payload?.serverId);
   const agendaId = cardId ?? sourceCardId;
+  const resolvedEffects = legalAction.resolvedEffects;
 
+  if (Array.isArray(resolvedEffects)) context.resolvedEffects = resolvedEffects;
   if (serverLabel) context.serverLabel = serverLabel;
   if (legalAction.type === "start_run" && state.run) {
     const runAccessCount = Math.max(1, Math.floor(state.run.accessCount ?? 1));
@@ -20543,17 +20820,36 @@ function resolveSpeedTrapRezInterruptChoice(
   }
 }
 
-function refreshRecurringCredits(state: GameState, side: Side): void {
+function refreshRecurringCredits(
+  state: GameState,
+  side: Side,
+  effects?: AutomaticEffectCollector,
+): void {
   if (side !== "runner" || !isV099OrLater(state)) return;
   for (const cardId of runnerInstalledCardIds(state)) {
     const definition = definitionFor(state, cardId);
-    if ((definition.recurringCredits ?? 0) > 0)
+    const recurringCredits = definition.recurringCredits ?? 0;
+    if (recurringCredits > 0) {
+      const previous = cardCounter(state, cardId, "recurring_credit");
       setCardCounter(
         state,
         cardId,
         "recurring_credit",
-        definition.recurringCredits ?? 0,
+        recurringCredits,
       );
+      if (previous !== recurringCredits) {
+        effects?.push(
+          automaticCounterChangeEffect(
+            `runner.start.recurring_credit.${cardId}`,
+            "runner",
+            definition.id,
+            "recurring_credit",
+            recurringCredits,
+            Math.max(0, recurringCredits - previous),
+          ),
+        );
+      }
+    }
   }
 }
 

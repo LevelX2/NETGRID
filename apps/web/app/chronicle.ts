@@ -876,6 +876,12 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       title = `${cardTitle ?? sourceTitle ?? "Eine Karte"} wurde${effect.reason === "region_install" ? " sofort" : ""} gerezzt`;
       chips.push("Rez", "Automatisch");
       break;
+    case "steal_agenda":
+      category = "agenda";
+      importance = "critical";
+      title = phrase(subject, `${cardTitle ?? "eine Agenda"}${through} gestohlen`);
+      chips.push("Agenda", ...(amount > 0 ? [`+${amount} Agenda`] : []), "Automatisch");
+      break;
     case "trash_card":
       category = "card";
       importance = "important";
@@ -888,6 +894,14 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       title = phrase(subject, `${amount} ${counterLabel(effect.counterType)} entfernt`);
       chips.push("Purge", counterLabel(effect.counterType));
       break;
+    case "counter_change": {
+      const counterText = counterLabel(effect.counterType);
+      const added = numberValue(effect.addedCounterAmount) ?? 0;
+      category = "card";
+      title = phrase(subject, `${counterText} auf ${sourceTitle ?? cardTitle ?? "einer Karte"} aufgefrischt`);
+      chips.push(counterText, `${amount} bereit`, ...(added > 0 ? [`+${added}`] : []), "Automatisch");
+      break;
+    }
     case "gain_actions":
       category = "turn";
       title = phrase(subject, `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`);
@@ -1248,6 +1262,8 @@ function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
 }
 
 function counterLabel(counterType: unknown): string {
+  if (counterType === "recurring_credit") return "Recurring Credits";
+  if (counterType === "bit") return "Bit";
   return counterType === "virus" ? "Virus-Counter" : "Counter";
 }
 

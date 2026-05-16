@@ -176,8 +176,10 @@ export type ResolvedGameEffectKind =
   | "gain_credits"
   | "draw_cards"
   | "rez_card"
+  | "steal_agenda"
   | "trash_card"
   | "purge_counters"
+  | "counter_change"
   | "gain_actions"
   | "add_tags"
   | "remove_tags"
@@ -934,6 +936,7 @@ export type LegalAction = {
   choiceRequirements?: ChoiceRequirement[];
   abilityRef?: AbilityRef;
   effectRef?: string;
+  resolvedEffects?: ResolvedGameEffect[];
   visibility: "public" | "private_to_actor";
   expiresAtStateVersion: number;
   payload?: Record<string, string | number | boolean>;

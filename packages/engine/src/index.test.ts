@@ -9796,6 +9796,19 @@ describe("V1.9.2 Mechanikpaket K", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = toRunnerTurnFromCorpMain(state);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "runner",
+          amount: 3,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_184_top-runners-conference",
+          sourceTitle: "Top Runners' Conference",
+          visibility: "public",
+        }),
+      ]),
+    );
     expect(state.runner.credits).toBe(creditsAfterInstall + 3);
     const conferenceId = state.runner.rig.resources.find(
       (id) =>
@@ -9846,6 +9859,19 @@ describe("V1.9.2 Mechanikpaket K", () => {
     const corpCreditsBeforeRunnerEndTurn = state.corp.credits;
     state = apply(state, "runner", (action) => action.type === "end_turn");
     expect(state.corp.credits).toBe(corpCreditsBeforeRunnerEndTurn + 1);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_211_polymer-breakthrough",
+          sourceTitle: "Polymer Breakthrough",
+          visibility: "public",
+        }),
+      ]),
+    );
     const corpCreditsBeforeMandatory = state.corp.credits;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     expect(state.corp.credits).toBe(corpCreditsBeforeMandatory);
@@ -10801,6 +10827,18 @@ describe("V1.9.9 Mechanikpaket R", () => {
     }
     expect(state.runner.scoreArea).toContain(agendaId);
     expect(state.bizarreEncryptionDelayedAgendas).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "steal_agenda",
+          side: "runner",
+          cardDefinitionId: "onr_v1_203_hostile-takeover",
+          sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+          reason: "start_of_turn",
+          visibility: "public",
+        }),
+      ]),
+    );
   });
 
   it("reduces ICE install costs on Chester Mix forts only", () => {
@@ -32376,6 +32414,26 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "counter_change",
+          side: "runner",
+          counterType: "recurring_credit",
+          remainingCounters: 2,
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          reason: "start_of_turn",
+        }),
+        expect.objectContaining({
+          kind: "counter_change",
+          side: "runner",
+          counterType: "recurring_credit",
+          remainingCounters: 1,
+          sourceDefinitionId: "onr_v1_176_the-shell-traders",
+          reason: "start_of_turn",
+        }),
+      ]),
+    );
     expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
     expect(cardCounterAmount(state, shellId, "recurring_credit")).toBe(1);
     expect(state.runner.credits).toBeGreaterThan(initial.runner.credits);

@@ -1084,6 +1084,88 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.title).toBe("Top Runners' Conference wurde getrasht.");
     expect(items[0]?.chips).toContain("Automatisch");
   });
+
+  it("shows Top Runners' Conference start-of-turn credits from automatic effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.top_runners_conference.card_123",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "runner",
+            amount: 3,
+            sourceDefinitionId: "onr_v1_184_top-runners-conference",
+            sourceTitle: "Top Runners' Conference",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toBe("Du hast 3 Credits durch Top Runners' Conference erhalten.");
+    expect(items[0]?.category).toBe("economy");
+    expect(items[0]?.cardDefinitionId).toBe("onr_v1_184_top-runners-conference");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+3 Credits", "Automatisch"]));
+  });
+
+  it("shows recurring-credit refreshes from automatic start-of-turn effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.recurring_credit.card_456",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 2,
+            counterType: "recurring_credit",
+            remainingCounters: 2,
+            addedCounterAmount: 2,
+            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceTitle: "Loan from Chiba",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Du hast Recurring Credits auf Loan from Chiba aufgefrischt.");
+    expect(items[0]?.category).toBe("card");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "2 bereit", "+2", "Automatisch"]));
+  });
+
+  it("shows delayed agenda steals from automatic start-of-turn effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.bizarre_encryption.card_789",
+            kind: "steal_agenda",
+            visibility: "public",
+            side: "runner",
+            amount: 2,
+            cardDefinitionId: "onr_v1_203_hostile-takeover",
+            cardTitle: "Hostile Takeover",
+            sourceDefinitionId: "onr_v1_351_bizarre-encryption-scheme",
+            sourceTitle: "Bizarre Encryption Scheme",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Du hast Hostile Takeover durch Bizarre Encryption Scheme gestohlen.");
+    expect(items[0]?.category).toBe("agenda");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Agenda", "+2 Agenda", "Automatisch"]));
+  });
 });
 
 function makeEvent(actionType: string, payload: Record<string, unknown> = {}): PublicGameEvent {
