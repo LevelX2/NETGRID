@@ -378,6 +378,7 @@ const DRIFTER_MOBILE_ENVIRONMENT_ID =
 const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
 const BROKER_ID = "onr_v1_154_broker";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
+const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -4634,6 +4635,43 @@ function runnerMainActions(state: GameState): LegalAction[] {
           );
         }
       }
+      if (definition.id === JUNKYARD_BBS_ID && state.runner.credits >= 1) {
+        const targetCardId = topRunnerHeapCardId(state);
+        if (targetCardId) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: oberste Heap-Karte in die Grip nehmen`,
+              resourceId,
+              [{ clicks: 1, credits: 1 }],
+              {
+                cardId: resourceId,
+                resourceAbility: "junkyard_bbs_return_top_heap",
+                targetCardId,
+                targetCardDefinitionId: definitionFor(state, targetCardId).id,
+                sourceDefinitionId: JUNKYARD_BBS_ID,
+                sourceZone: "heap",
+                destinationZone: "grip",
+                abilityFamily: "hidden-zone",
+                effectKind: "hidden_zone",
+              },
+              {
+                targetRequirements: [
+                  {
+                    id: "heapTopCard",
+                    kind: "card",
+                    side: "runner",
+                    zoneScope: ["runner.heap"],
+                    visibility: "public",
+                  },
+                ],
+              },
+            ),
+          );
+        }
+      }
       if (
         definition.id === "onr_v1_158_danshis-second-id" &&
         state.runner.tags > 0
@@ -8358,6 +8396,13 @@ function performAction(
         return;
       }
       if (
+        legalAction.payload?.resourceAbility ===
+        "junkyard_bbs_return_top_heap"
+      ) {
+        resolveJunkyardBbsAbility(state, legalAction);
+        return;
+      }
+      if (
         legalAction.payload?.resourceAbility === "broker_load_credits" ||
         legalAction.payload?.resourceAbility === "broker_take_credits"
       ) {
@@ -8463,6 +8508,63 @@ function performAction(
         "Generische Abilities sind vorbereitet, aber in V0.93 nicht sichtbar freigeschaltet.",
       );
   }
+}
+
+function topRunnerHeapCardId(state: GameState): CardInstanceId | undefined {
+  return state.runner.heap.at(-1);
+}
+
+function resolveJunkyardBbsAbility(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Junkyard BBS nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("Junkyard BBS ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== JUNKYARD_BBS_ID)
+    throw new Error("Die Junkyard-BBS-Faehigkeit passt nicht zur Karte.");
+  if (
+    clickCostForAction(legalAction) !== 1 ||
+    creditCostForAction(legalAction) !== 1
+  )
+    throw new Error("Junkyard BBS verlangt genau 1 Klick und 1 Credit.");
+
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+  const currentTopCardId = topRunnerHeapCardId(state);
+  if (!targetCardId || !currentTopCardId || targetCardId !== currentTopCardId)
+    throw new Error("Die Zielkarte ist nicht die oberste Karte im Heap.");
+  if (!state.runner.heap.includes(targetCardId))
+    throw new Error("Die Junkyard-BBS-Zielkarte liegt nicht im Heap.");
+  const targetDefinition = definitionFor(state, targetCardId);
+  if (
+    typeof legalAction.payload?.targetCardDefinitionId === "string" &&
+    legalAction.payload.targetCardDefinitionId !== targetDefinition.id
+  )
+    throw new Error("Die Junkyard-BBS-Zielkarte hat sich geaendert.");
+
+  spendClick(state, "runner");
+  spendCredits(state, "runner", 1);
+  state.runner.heap = state.runner.heap.filter((id) => id !== targetCardId);
+  state.runner.grip.unshift(targetCardId);
+  state.cardInstances[targetCardId] = {
+    ...mustInstance(state.cardInstances, targetCardId),
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: JUNKYARD_BBS_ID,
+    targetCardDefinitionId: targetDefinition.id,
+    returnedCardDefinitionId: targetDefinition.id,
+    returnedCount: 1,
+    sourceZone: "heap",
+    destinationZone: "grip",
+    returnedToGrip: true,
+    runnerCreditsAfter: state.runner.credits,
+  };
 }
 
 function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void {
@@ -21537,7 +21639,13 @@ function publicContextForAction(
     "tagsAdded",
     "runnerTagsAfter",
     "sourceDefinitionId",
+    "sourceZone",
+    "destinationZone",
+    "returnedCardDefinitionId",
+    "returnedCount",
+    "returnedToGrip",
     "subroutineIndex",
+    "targetCardDefinitionId",
     "targetIceDefinitionId",
     "breakSubroutineBaseCost",
     "checkedIceCount",
