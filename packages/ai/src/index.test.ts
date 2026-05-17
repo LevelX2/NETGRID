@@ -9,6 +9,7 @@ import {
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS,
   ONR_V1_9_22_WIP_CARD_IDS,
+  type CatalogCard,
 } from "@netgrid/catalog";
 import {
   applyAction,
@@ -75,6 +76,13 @@ import {
   simulateAiSoak,
   summarizeDoctrineQualityMetrics,
 } from "./index";
+import {
+  assessKnownRezzedIcePath,
+  canBreakerDefinitionBreakIce,
+  cardDefinitionStrength,
+  endTheRunSubroutineCount,
+  minimumCreditsToBreakEndTheRunSubroutines,
+} from "./visible-run-analysis";
 import type {
   AiDeckDoctrineProfile,
   CardInstanceId,
@@ -86,7 +94,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { MVP_0_99_BASELINE } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, MVP_0_99_BASELINE } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -400,6 +408,114 @@ describe("MVP 0.3 AI controller contract", () => {
       expect(runtimeCard?.statuses.human_playable ?? false, cardId).toBe(true);
       expect(runtimeCard?.statuses.deck_legal ?? false, cardId).toBe(true);
     }
+  });
+
+  it("resolves active AI-supported visible ICE and breakers for run analysis", () => {
+    const cardsById = createRuntimeCardsById();
+    const activeVisibleRunCards = Object.values(cardsById).filter(
+      (card) =>
+        card.statuses.ai_supported &&
+        (card.type === "ice" || isRuntimeBreakerCard(card)),
+    );
+    const coverageRows = activeVisibleRunCards
+      .map((card) => ({
+        cardId: card.catalogCardId,
+        engineCardId: card.engineCardId ?? card.catalogCardId,
+        role: card.type === "ice" ? "ice" : "breaker",
+        resolved: Boolean(DEMO_CARDS_BY_ID[card.engineCardId ?? card.catalogCardId]),
+        etrSubroutines:
+          card.type === "ice" ? endTheRunSubroutineCount(card.catalogCardId) : 0,
+        strength: cardDefinitionStrength(card.catalogCardId),
+      }))
+      .sort((left, right) => left.role.localeCompare(right.role) || left.cardId.localeCompare(right.cardId));
+    const iceRows = coverageRows.filter((row) => row.role === "ice");
+    const breakerRows = coverageRows.filter((row) => row.role === "breaker");
+
+    expect(iceRows.length).toBeGreaterThan(0);
+    expect(breakerRows.length).toBeGreaterThan(0);
+    expect(iceRows.some((row) => row.etrSubroutines > 0)).toBe(true);
+    expect(coverageRows.filter((row) => !row.resolved)).toEqual([]);
+    expect(
+      representativeVisibleRunPairs.map((pair) => ({
+        role: pair.role,
+        breakerId: pair.breakerId,
+        iceId: pair.iceId,
+        canBreak: canBreakerDefinitionBreakIce(pair.breakerId, pair.iceId),
+      })),
+    ).toEqual([
+      {
+        role: "barrier-wall with fracter",
+        breakerId: "onr_v1_021_dwarf",
+        iceId: "onr_v1_279_wall-of-static",
+        canBreak: true,
+      },
+      {
+        role: "code gate with decoder",
+        breakerId: "onr_v1_014_codecracker",
+        iceId: "onr_v1_261_quandary",
+        canBreak: true,
+      },
+      {
+        role: "sentry with killer",
+        breakerId: "onr_v1_023_evil-twin",
+        iceId: "onr_v1_259_in-the-face",
+        canBreak: true,
+      },
+    ]);
+  });
+
+  it("assesses representative O:NR visible ICE and breakers from runtime card shapes", () => {
+    const cardsById = createRuntimeCardsById();
+
+    for (const pair of representativeVisibleRunPairs) {
+      const ice = runtimeVisibleIce(cardsById[pair.iceId]);
+      const breaker = runtimeVisibleBreaker(cardsById[pair.breakerId]);
+      const endTheRunCount = endTheRunSubroutineCount(pair.iceId);
+      const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
+        ice,
+        [breaker],
+        endTheRunCount,
+        new Map(),
+      );
+      const affordable = assessKnownRezzedIcePath([ice], [breaker], pair.expectedCost);
+      const unaffordable = assessKnownRezzedIcePath(
+        [ice],
+        [breaker],
+        pair.expectedCost - 1,
+      );
+
+      expect(endTheRunCount, pair.role).toBeGreaterThan(0);
+      expect(breakAssessment, pair.role).toMatchObject({
+        cost: pair.expectedCost,
+        breakerInstanceId: breaker.instanceId,
+        endingStrength: pair.expectedEndingStrength,
+      });
+      expect(affordable, pair.role).toEqual({
+        blocked: false,
+        visibleBreakCost: pair.expectedCost,
+      });
+      expect(unaffordable.blocked, pair.role).toBe(true);
+      expect(unaffordable.visibleBreakCost, pair.role).toBe(pair.expectedCost);
+    }
+  });
+
+  it("keeps visible run analysis invariant across hidden-info variants", () => {
+    const cardsById = createRuntimeCardsById();
+    const ice = runtimeVisibleIce(cardsById["onr_v1_261_quandary"]);
+    const breaker = runtimeVisibleBreaker(cardsById["onr_v1_014_codecracker"]);
+    const hiddenIceVariant = {
+      ...ice,
+      hiddenDefinitionId: "simple_agenda",
+      privatePayload: { corp: ["hidden-hq-card"] },
+    } as typeof ice;
+    const hiddenBreakerVariant = {
+      ...breaker,
+      privatePayload: { runner: ["hidden-stack-card"] },
+    } as VisibleCard;
+
+    expect(assessKnownRezzedIcePath([hiddenIceVariant], [hiddenBreakerVariant], 2)).toEqual(
+      assessKnownRezzedIcePath([ice], [breaker], 2),
+    );
   });
 
   it("keeps decisions deterministic and always chooses legal action ids", () => {
@@ -6822,6 +6938,73 @@ function moveCorpHqAgendasToRd(state: GameState): void {
       rezzed: false,
     };
   }
+}
+
+const representativeVisibleRunPairs = [
+  {
+    role: "barrier-wall with fracter",
+    breakerId: "onr_v1_021_dwarf",
+    iceId: "onr_v1_279_wall-of-static",
+    expectedCost: 1,
+    expectedEndingStrength: 3,
+  },
+  {
+    role: "code gate with decoder",
+    breakerId: "onr_v1_014_codecracker",
+    iceId: "onr_v1_261_quandary",
+    expectedCost: 2,
+    expectedEndingStrength: 2,
+  },
+  {
+    role: "sentry with killer",
+    breakerId: "onr_v1_023_evil-twin",
+    iceId: "onr_v1_259_in-the-face",
+    expectedCost: 3,
+    expectedEndingStrength: 3,
+  },
+] as const;
+
+function isRuntimeBreakerCard(card: CatalogCard): boolean {
+  return (
+    card.side === "runner" &&
+    card.type === "program" &&
+    card.subtypes.some((subtype) => subtypeKeyForTest(subtype) === "icebreaker")
+  );
+}
+
+function runtimeVisibleIce(card: CatalogCard | undefined): {
+  definitionId: string;
+  known: true;
+  rezzed: true;
+  subtypes: string[];
+  strength?: number;
+} {
+  expect(card).toBeDefined();
+  if (!card) throw new Error("Missing runtime ICE card");
+  return {
+    definitionId: card.catalogCardId,
+    known: true,
+    rezzed: true,
+    subtypes: card.subtypes,
+    ...(card.numeric.strength !== null ? { strength: card.numeric.strength } : {}),
+  };
+}
+
+function runtimeVisibleBreaker(card: CatalogCard | undefined): VisibleCard {
+  expect(card).toBeDefined();
+  if (!card) throw new Error("Missing runtime breaker card");
+  return {
+    instanceId: `${card.catalogCardId}:visible`,
+    definitionId: card.catalogCardId,
+    known: true,
+    type: "program",
+    subtypes: card.subtypes,
+    strength: card.numeric.strength ?? cardDefinitionStrength(card.catalogCardId),
+  };
+}
+
+function subtypeKeyForTest(subtype: string): string {
+  return subtype.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }
 
 function visibleCard(definitionId: string, instanceId: string): VisibleCard {

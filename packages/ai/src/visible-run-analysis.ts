@@ -1,4 +1,10 @@
-import { DEMO_CARDS_BY_ID, type PublicGameEvent, type VisibleCard } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type CardDefinition,
+  type PublicGameEvent,
+  type VisibleCard,
+} from "@netgrid/shared";
+import { RUNTIME_CARDS } from "./ai-hints";
 
 type IceCardLike = { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[]; strength?: number };
 type BreakAssessment = { cost: number; breakerInstanceId: string; endingStrength: number };
@@ -55,10 +61,15 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   currentBreakerStrength = breakerCard.strength ?? cardDefinitionStrength(breakerCard.definitionId)
 ): BreakAssessment | undefined {
   if (!breakerCard.known || !breakerCard.definitionId || !ice.definitionId) return undefined;
-  const breakerDefinition = DEMO_CARDS_BY_ID[breakerCard.definitionId];
-  const iceDefinition = DEMO_CARDS_BY_ID[ice.definitionId];
+  const breakerDefinition = visibleRunCardDefinition(breakerCard.definitionId);
+  const iceDefinition = visibleRunCardDefinition(ice.definitionId);
   if (!breakerDefinition || !iceDefinition || !breakerDefinition.subtypes.includes("icebreaker")) return undefined;
-  const breakAbility = breakerDefinition.abilities?.find((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || (ice.subtypes ?? iceDefinition.subtypes).includes(ability.iceSubtype)));
+  const iceSubtypes = ice.subtypes ?? iceDefinition.subtypes;
+  const breakAbility = breakerDefinition.abilities?.find(
+    (ability) =>
+      ability.type === "break_subroutine" &&
+      (!ability.iceSubtype || hasSubtype(iceSubtypes, ability.iceSubtype))
+  );
   if (!breakAbility) return undefined;
   const iceStrength = ice.strength ?? iceDefinition.strength ?? 0;
   const pumpAbility = breakerDefinition.abilities?.find((ability) => ability.type === "pump_strength");
@@ -80,14 +91,20 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
 }
 
 export function endTheRunSubroutineCount(iceDefinitionId: string): number {
-  return DEMO_CARDS_BY_ID[iceDefinitionId]?.subroutines?.filter((subroutine) => subroutine.type === "end_the_run").length ?? 0;
+  return visibleRunCardDefinition(iceDefinitionId)?.subroutines?.filter((subroutine) => subroutine.type === "end_the_run").length ?? 0;
 }
 
 export function canBreakerDefinitionBreakIce(breakerDefinitionId: string, iceDefinitionId: string): boolean {
-  const breakerDefinition = DEMO_CARDS_BY_ID[breakerDefinitionId];
-  const iceDefinition = DEMO_CARDS_BY_ID[iceDefinitionId];
+  const breakerDefinition = visibleRunCardDefinition(breakerDefinitionId);
+  const iceDefinition = visibleRunCardDefinition(iceDefinitionId);
   if (!breakerDefinition || !iceDefinition) return false;
-  return Boolean(breakerDefinition.abilities?.some((ability) => ability.type === "break_subroutine" && (!ability.iceSubtype || iceDefinition.subtypes.includes(ability.iceSubtype))));
+  return Boolean(
+    breakerDefinition.abilities?.some(
+      (ability) =>
+        ability.type === "break_subroutine" &&
+        (!ability.iceSubtype || hasSubtype(iceDefinition.subtypes, ability.iceSubtype))
+    )
+  );
 }
 
 export function iceHasEndTheRun(iceDefinitionId: string): boolean {
@@ -95,5 +112,27 @@ export function iceHasEndTheRun(iceDefinitionId: string): boolean {
 }
 
 export function cardDefinitionStrength(definitionId: string | undefined): number {
-  return definitionId ? (DEMO_CARDS_BY_ID[definitionId]?.strength ?? 0) : 0;
+  if (!definitionId) return 0;
+  return (
+    visibleRunCardDefinition(definitionId)?.strength ??
+    RUNTIME_CARDS[definitionId]?.numeric.strength ??
+    0
+  );
+}
+
+function visibleRunCardDefinition(definitionId: string | undefined): CardDefinition | undefined {
+  if (!definitionId) return undefined;
+  const directDefinition = DEMO_CARDS_BY_ID[definitionId];
+  if (directDefinition) return directDefinition;
+  const runtimeEngineId = RUNTIME_CARDS[definitionId]?.engineCardId;
+  return runtimeEngineId ? DEMO_CARDS_BY_ID[runtimeEngineId] : undefined;
+}
+
+function hasSubtype(subtypes: string[], expectedSubtype: string): boolean {
+  const expected = subtypeKey(expectedSubtype);
+  return subtypes.some((subtype) => subtypeKey(subtype) === expected);
+}
+
+function subtypeKey(subtype: string): string {
+  return subtype.trim().toLowerCase().replace(/[\s-]+/g, "_");
 }

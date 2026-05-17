@@ -2686,3 +2686,16 @@ Führende Artefakte:
 - `docs/derived/V1_9_5_TO_V1_9_8_DEFERRED_REGISTER.md`
 - `data/manifests/onr-v1-9-5-to-v1-9-8-core-implementation-manifest.json`
 - `data/scenarios/onr-v1-9-5-to-v1-9-8-core-smokes.json`
+
+## 2026-05-17 - Sichtbare Runanalyse gegen Runtime-Karten geprüft
+
+Status: Activity `act-2026-05-17-ai-visible-run-runtime-card-audit` abgeschlossen.
+
+Umgesetzt:
+- `packages/ai/src/visible-run-analysis.ts` löst sichtbare ICE-/Breaker-Definitionen weiter über geprüfte Shared-Mechanikdaten auf, kann aber Runtime-Katalog-IDs über `engineCardId` auf die Engine-Definition abbilden.
+- Die Breaker-/ICE-Subtypprüfung normalisiert Runtime-Subtypen wie `code gate` gegen Engine-Subtypen wie `code_gate`.
+- `packages/ai/src/index.test.ts` enthält eine aktive AI-supported ICE-/Breaker-Coverage-Tabelle, drei repräsentative O:NR-Paare (`Dwarf`/`Wall of Static`, `Codecracker`/`Quandary`, `Evil Twin`/`Pi in the 'Face`) sowie eine Hidden-Info-Invarianzprüfung.
+
+Verifikation:
+- `corepack pnpm --filter @netgrid/ai test -- index.test.ts`
+- `corepack pnpm --filter @netgrid/ai typecheck`
