@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-junkyard-bbs-installed-resource-action
-status: inbox
+status: in_progress
 kind: fix
 area: cards
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
+parallelWorker: worker-2
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

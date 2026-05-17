@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-loan-from-chiba-install-credit-effect
-status: inbox
+status: in_progress
 kind: fix
 area: cards
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-3
+parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
