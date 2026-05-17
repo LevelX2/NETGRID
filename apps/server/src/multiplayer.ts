@@ -2813,6 +2813,7 @@ function participantDeckInputsForRecord(record: StoredMatch): Record<SeriesPlaye
 
 function resultReason(state: GameState, winner: Side | "draw", runnerAgendaPoints: number, corpAgendaPoints: number, agendaPointsToWin: number): GameResultReason {
   if (winner === "draw") return "draw";
+  if (state.gameEndReason === "bad_publicity_7") return "bad_publicity_7";
   if (state.gameEndReason === "agenda_points") return "agenda_points";
   if (state.gameEndReason === "corp_deck_empty") return "corp_deck_empty";
   if (state.gameEndReason === "flatline") return "flatline";

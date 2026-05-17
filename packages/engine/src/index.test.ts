@@ -27298,6 +27298,128 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
   });
 });
 
+describe("Proteus Bad-Publicity-7+ engine harness", () => {
+  function playBadPublicityHarnessOperation(seed: string, badPublicityBefore: number) {
+    let state = v099CounterHostingGame(seed);
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    moveCorpCardToHq(state, "v099_bad_publicity_operation");
+    keepOnlyCorpHqCards(state, state.corp.hq.slice(0, 1));
+    state.corp.credits = 0;
+    state.corp.badPublicity = badPublicityBefore;
+    const initial = structuredClone(state);
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "v099_bad_publicity_operation",
+    );
+    return { initial, state, event: state.eventLog.at(-1) };
+  }
+
+  it("P-BP-T001/T002 gates 7+ Bad Publicity and leaves 6 below game over", () => {
+    const terminal = playBadPublicityHarnessOperation("proteus-bp-t001", 6);
+    expect(terminal.state.corp.badPublicity).toBe(7);
+    expect(terminal.state.phase).toBe("game_over");
+    expect(terminal.state.winner).toBe("runner");
+    expect(terminal.state.gameEndReason).toBe("bad_publicity_7");
+    expect(getLegalActions(terminal.state, "corp")).toHaveLength(0);
+    expect(getLegalActions(terminal.state, "runner")).toHaveLength(0);
+    expect(terminal.event?.publicPayload).toMatchObject({
+      gameEndReason: "bad_publicity_7",
+      badPublicityThreshold: 7,
+      corpBadPublicityBefore: 6,
+      corpBadPublicityAfter: 7,
+      sourceVisibility: "public",
+    });
+
+    const nonTerminal = playBadPublicityHarnessOperation("proteus-bp-t002", 5);
+    expect(nonTerminal.state.corp.badPublicity).toBe(6);
+    expect(nonTerminal.state.winner).toBeNull();
+    expect(nonTerminal.state.phase).not.toBe("game_over");
+    expect(getLegalActions(nonTerminal.state, "corp").length).toBeGreaterThan(0);
+  });
+
+  it("P-BP-T003/T004 prioritizes Bad Publicity over simultaneous agenda outcomes", () => {
+    const corpAgendaState = createGameAfterSetup({
+      seed: "proteus-bp-t003",
+      agendaPointsToWin: 1,
+    });
+    scoreCorpAgendaForTest(corpAgendaState, "simple_agenda");
+    corpAgendaState.corp.badPublicity = 7;
+    checkWinConditions(corpAgendaState);
+    expect(agendaPoints(corpAgendaState, "corp")).toBeGreaterThanOrEqual(1);
+    expect(corpAgendaState.winner).toBe("runner");
+    expect(corpAgendaState.gameEndReason).toBe("bad_publicity_7");
+
+    const runnerAgendaState = createGameAfterSetup({
+      seed: "proteus-bp-t004",
+      agendaPointsToWin: 1,
+    });
+    scoreRunnerAgendaForTest(runnerAgendaState, "simple_agenda");
+    runnerAgendaState.corp.badPublicity = 7;
+    checkWinConditions(runnerAgendaState);
+    expect(agendaPoints(runnerAgendaState, "runner")).toBeGreaterThanOrEqual(1);
+    expect(runnerAgendaState.winner).toBe("runner");
+    expect(runnerAgendaState.gameEndReason).toBe("bad_publicity_7");
+  });
+
+  it("P-BP-T005/T006 keeps Bad Publicity primary against flatline and Corp deckout", () => {
+    const flatlineState = createGameAfterSetup({ seed: "proteus-bp-t005" });
+    flatlineState.winner = "corp";
+    flatlineState.gameEndReason = "flatline";
+    flatlineState.phase = "game_over";
+    flatlineState.corp.badPublicity = 7;
+    checkWinConditions(flatlineState);
+    expect(flatlineState.winner).toBe("runner");
+    expect(flatlineState.gameEndReason).toBe("bad_publicity_7");
+
+    const deckoutState = createGameAfterSetup({ seed: "proteus-bp-t006" });
+    deckoutState.winner = "runner";
+    deckoutState.gameEndReason = "corp_deck_empty";
+    deckoutState.phase = "game_over";
+    deckoutState.corp.badPublicity = 7;
+    checkWinConditions(deckoutState);
+    expect(deckoutState.winner).toBe("runner");
+    expect(deckoutState.gameEndReason).toBe("bad_publicity_7");
+  });
+
+  it("P-BP-T007/T010 keeps public payloads and PlayerViews free of hidden or Proteus-only data", () => {
+    const { state, event } = playBadPublicityHarnessOperation("proteus-bp-t007-t010", 6);
+    const publicPayloadJson = JSON.stringify(event?.publicPayload);
+    expect(publicPayloadJson).toContain("bad_publicity_7");
+    expect(publicPayloadJson).not.toContain("onr_proteus_");
+    expect(publicPayloadJson).not.toContain("cardInstances");
+    expect(publicPayloadJson).not.toContain("privatePayload");
+
+    for (const side of ["runner", "corp"] as const) {
+      const view = getPlayerView(state, side);
+      expect(view.winner).toBe("runner");
+      expect(view.gameEndReason).toBe("bad_publicity_7");
+      expect(view.legalActions).toHaveLength(0);
+      const viewJson = JSON.stringify(view);
+      expect(viewJson).not.toContain("onr_proteus_");
+      expect(viewJson).not.toContain("cardInstances");
+      expect(viewJson).not.toContain("privatePayload");
+    }
+  });
+
+  it("P-BP-T008/T009 is deterministic, replayable and StateHash-stable", () => {
+    const { initial, state } = playBadPublicityHarnessOperation("proteus-bp-t008-t009", 6);
+    expect(state.randomCounter).toBe(initial.randomCounter);
+    expect(state.randomDrawRecords).toEqual(initial.randomDrawRecords);
+    expect(hashState(state)).toMatch(/^fnv1a:/);
+
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+    expect(replay.state.gameEndReason).toBe("bad_publicity_7");
+  });
+});
+
 describe("MVP 0.93 M1 effect, ability and choice foundation", () => {
   it("exposes pendingChoice only to the owning side and resolves it through LegalActions", () => {
     const state = toRunnerTurn(createGameAfterSetup({ seed: "v093-choice" }));
