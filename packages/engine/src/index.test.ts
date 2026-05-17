@@ -13351,14 +13351,32 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       faceup: true,
       rezzed: true,
     };
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    state = apply(
+    const legal = mustAction(
       state,
       "corp",
       (action) =>
         action.payload?.v1920AssetAbility ===
         "south_african_mining_corp_gain_8_trash",
+    );
+    const unrezzed = structuredClone(state);
+    unrezzed.cardInstances[assetId] = {
+      ...unrezzed.cardInstances[assetId]!,
+      rezzed: false,
+    };
+    const rejected = applyAction(unrezzed, {
+      matchId: unrezzed.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: unrezzed.stateVersion,
+      idempotencyKey: "south-african-unrezzed-source",
+    });
+    expect(rejected.ok).toBe(false);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === legal.actionId,
     );
 
     expect(state.corp.credits).toBe(13);

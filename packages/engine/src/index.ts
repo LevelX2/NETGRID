@@ -124,7 +124,6 @@ import {
   JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID,
   MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
   NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
-  SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID,
 } from "./mechanics/global-modifiers";
 import { COUNTER_UPGRADE_CARD_IDS } from "./mechanics/hosting-counters";
 import {
@@ -160,9 +159,12 @@ import {
   ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
 } from "./mechanics/longtail-card-effects";
 import {
-  CORP_ECONOMY_ASSET_CARD_IDS,
+  corpInstalledEconomyActionPayload,
+  corpInstalledEconomyActionProfileForDefinition,
+  corpInstalledEconomyActionProfileForPayload,
   CORP_RECURRING_ASSET_CARD_IDS,
   INVESTMENT_FIRM_ASSET_CARD_ID,
+  type EconomyActionProfile,
 } from "./mechanics/payment-costs";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import {
@@ -3423,24 +3425,6 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 8 Credits und trashen`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1920AssetAbility: "south_african_mining_corp_gain_8_trash",
-            gainCreditsAmount: 8,
-            trashOnUse: true,
-          },
-        ),
-      );
-    }
     if (
       definition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
       state.runner.tags >= 2 &&
@@ -3497,20 +3481,29 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (!CORP_ECONOMY_ASSET_CARD_IDS.has(definition.id)) continue;
+    const economyProfile = corpInstalledEconomyActionProfileForDefinition(
+      definition.id,
+    );
+    if (!economyProfile) continue;
+    const gainLabel =
+      `${definition.title}: ${economyProfile.creditGain} Credits` +
+      (economyProfile.trashSource ? " und trashen" : "");
     actions.push(
       action(
         state,
         "corp",
         "gain_credit",
-        `${definition.title}: 2 Credits`,
+        gainLabel,
         assetId,
-        [{ clicks: 1 }],
-        {
-          cardId: assetId,
-          v1917AssetAbility: "gain_credits",
-          gainCreditsAmount: 2,
-        },
+        [
+          {
+            clicks: economyProfile.clickCost,
+            ...(economyProfile.creditCost > 0
+              ? { credits: economyProfile.creditCost }
+              : {}),
+          },
+        ],
+        corpInstalledEconomyActionPayload(economyProfile, assetId),
       ),
     );
   }
@@ -7010,35 +7003,7 @@ function performAction(
         };
         return;
       }
-      if (legalAction.payload?.v1917AssetAbility === "gain_credits") {
-        if (legalAction.side !== "corp")
-          throw new Error(
-            "Nur die Korp darf V1.9.17-Asset-Faehigkeiten nutzen.",
-          );
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.17-Asset-Faehigkeit ist nicht rezzed installiert.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        if (
-          !CORP_ECONOMY_ASSET_CARD_IDS.has(definition.id) ||
-          definition.id === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID
-        )
-          throw new Error(
-            "Die V1.9.17-Asset-Faehigkeit passt nicht zur Karte.",
-          );
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 2)
-          throw new Error(
-            "V1.9.17-Economy-Assets gewaehrt in diesem WIP genau 2 Credits.",
-          );
-        credits(state, "corp", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: gainAmount,
-          corpCreditsAfter: state.corp.credits,
-        };
+      if (resolveCorpInstalledEconomyAction(state, legalAction)) {
         return;
       }
       if (legalAction.payload?.v1917AssetAbility === "trace_3_tag") {
@@ -7425,37 +7390,6 @@ function performAction(
           ...(legalAction.payload ?? {}),
           gainedActions,
           corpClicksAfter: state.corp.clicks,
-        };
-        return;
-      }
-      if (
-        legalAction.payload?.v1920AssetAbility ===
-        "south_african_mining_corp_gain_8_trash"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf South African Mining Corp nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "South African Mining Corp ist nicht rezzed installiert.",
-          );
-        if (
-          definitionFor(state, sourceCardId).id !==
-          SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID
-        )
-          throw new Error(
-            "Die South-African-Mining-Corp-Faehigkeit passt nicht zur Karte.",
-          );
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 8)
-          throw new Error("South African Mining Corp gewaehrt genau 8 Credits.");
-        credits(state, "corp", gainAmount);
-        trashCorpInstalledCardToArchives(state, sourceCardId);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: gainAmount,
-          selfTrashed: true,
-          corpCreditsAfter: state.corp.credits,
         };
         return;
       }
@@ -15957,6 +15891,61 @@ function selectedChoiceIds(
     selectedChoices?.selectedOptions;
   if (!Array.isArray(raw)) return [];
   return raw.filter((value): value is string => typeof value === "string");
+}
+
+function resolveCorpInstalledEconomyAction(
+  state: GameState,
+  legalAction: LegalAction,
+): boolean {
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!sourceCardId) return false;
+  const definition = state.cardInstances[sourceCardId]
+    ? definitionFor(state, sourceCardId)
+    : undefined;
+  if (!definition) return false;
+  const profile = corpInstalledEconomyActionProfileForPayload(
+    definition.id,
+    legalAction.payload,
+  );
+  if (!profile) return false;
+  validateCorpInstalledEconomyAction(state, legalAction, sourceCardId, profile);
+  if (profile.creditCost > 0) spendCredits(state, "corp", profile.creditCost);
+  credits(state, "corp", profile.creditGain);
+  if (profile.trashSource) trashCorpInstalledCardToArchives(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: profile.sourceDefinitionId,
+    gainedCredits: profile.creditGain,
+    ...(profile.trashSource ? { selfTrashed: true } : {}),
+    corpCreditsAfter: state.corp.credits,
+  };
+  return true;
+}
+
+function validateCorpInstalledEconomyAction(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: string,
+  profile: EconomyActionProfile,
+): void {
+  if (legalAction.side !== profile.side)
+    throw new Error("Nur die Korp darf diese Economy-Faehigkeit nutzen.");
+  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+    throw new Error("Diese Economy-Faehigkeit ist nur in der Korp-Aktionsphase nutzbar.");
+  if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
+    throw new Error("Die Economy-Faehigkeit ist nicht rezzed installiert.");
+  if (definitionFor(state, sourceCardId).id !== profile.sourceDefinitionId)
+    throw new Error("Die Economy-Faehigkeit passt nicht zur Karte.");
+  if (
+    legalAction.payload?.[profile.abilityPayloadKey] !==
+    profile.abilityPayloadValue
+  )
+    throw new Error("Die Economy-Faehigkeit passt nicht zum Profil.");
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (!Number.isInteger(gainAmount) || gainAmount !== profile.creditGain)
+    throw new Error("Die Economy-Faehigkeit hat einen ungueltigen Creditbetrag.");
+  if (Boolean(legalAction.payload?.trashOnUse) !== Boolean(profile.trashSource))
+    throw new Error("Die Economy-Faehigkeit hat einen ungueltigen Trash-Parameter.");
 }
 
 function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {

@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-17-generic-economy-action-resolver
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-17-card-effect-generic-resolver-analysis
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/mechanics/payment-costs.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine test -- -t "omniscience-source|South African Mining Corp"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Generischen Economy-Action-Resolver schneiden
@@ -54,4 +60,4 @@ Einfache Kartenfähigkeiten, die Aktionen/Klicks gegen Credits oder Credit-Repla
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `EconomyActionProfile` liegt jetzt im Payment-/Economy-Mechanics-Modul und beschreibt einfache installierte Korp-Economy-Aktionen deklarativ. Die LegalAction-Erzeugung und `gain_credit`-Auflösung nutzen denselben Profilvertrag für die bisherigen 2-Credit-Economy-Assets und South African Mining Corp. Die Revalidation prüft Side, Korp-Aktionsphase, rezzed installierte Quelle, Profil-/Payload-Zuordnung, Creditbetrag und Trash-Parameter. Bestehende PublicPayload-/Replay-Semantik bleibt erhalten; der South-African-Test ergänzt einen Ablehnungsfall für nicht mehr rezzed installierte Quellen.
