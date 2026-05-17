@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-codex-status-chronicle-split
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,19 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-5
 parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/codex/CODEX_STATUS.md
+  - docs/codex/CODEX_STATUS_CHRONICLE.md
+checks:
+  - "historical block preservation check for Latest rollup and ## Status history against HEAD: pass"
+  - "checked key link targets for CODEX_STATUS_CHRONICLE.md, GOAL_HISTORY.md, NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md and Aktueller Projektstatus.md: pass"
+  - "rg for CODEX_STATUS_CHRONICLE, legacy Status/Goal headings and former Current selected next scope placement: pass"
+  - "git diff --check: pass"
 ---
 
 # CODEX_STATUS in aktuellen Status und Chronik trennen
@@ -54,10 +60,10 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Der aktuelle Projektstand ist nach dem Schnitt schneller auffindbar.
-- [ ] Ältere Statusblöcke bleiben über Chronik oder Archiv erreichbar.
-- [ ] Führende Wissensbasis und `CODEX_STATUS` widersprechen sich nicht.
-- [ ] Linkziele aus bestehenden docs-Dateien sind geprüft oder als Risiko benannt.
+- [x] Der aktuelle Projektstand ist nach dem Schnitt schneller auffindbar.
+- [x] Ältere Statusblöcke bleiben über Chronik oder Archiv erreichbar.
+- [x] Führende Wissensbasis und `CODEX_STATUS` widersprechen sich nicht.
+- [x] Linkziele aus bestehenden docs-Dateien sind geprüft oder als Risiko benannt.
 
 ## Umsetzungshinweise
 
@@ -66,4 +72,6 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/codex/CODEX_STATUS.md` ist jetzt ein schnellerer Einstieg mit Entry-Point-Hinweisen auf aktuellen Projektstatus, Roadmap/Gate-Autorität, `GOAL_HISTORY.md` und die neue Chronik. Der alte Block ab `## Status` sowie der alte `Latest`-/`Current selected next scope`-Rollup wurden ohne Löschung nach `docs/codex/CODEX_STATUS_CHRONICLE.md` ausgelagert. Ein Vergleich gegen `HEAD:docs/codex/CODEX_STATUS.md` bestätigt, dass beide historischen Blöcke in der Chronik erhalten blieben. Die veraltete Next-Scope-Zeile zu V1.9.5 bis V1.9.8 steht nicht mehr im aktuellen Schnellstatus, sondern nur noch in der Chronik.
+
+Offen bleibt als bewusst nicht erweiterter Scope: Eine spätere zweite Verdichtung kann den noch langen `Current phase`-Block nach Datum oder Releasefamilie weiter schneiden.
