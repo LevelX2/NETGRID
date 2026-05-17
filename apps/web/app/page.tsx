@@ -1721,6 +1721,7 @@ export default function Page() {
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
+  const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
@@ -2033,9 +2034,10 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown };
+        const parsed = JSON.parse(stored) as { autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; topbarStickyEnabled?: unknown };
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
         if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
+        if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
       } catch {
         removeLocalStorageKeys(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
       }
@@ -2045,8 +2047,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoDiscardEnabled, autoEndTurnEnabled }));
-  }, [gameplaySettingsLoaded, autoDiscardEnabled, autoEndTurnEnabled]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled }));
+  }, [gameplaySettingsLoaded, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -4265,6 +4267,7 @@ export default function Page() {
               automaticEffectCuesEnabled={automaticEffectCuesEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
+              topbarStickyEnabled={topbarStickyEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -4284,6 +4287,7 @@ export default function Page() {
               onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+              onTopbarStickyEnabled={setTopbarStickyEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -4320,7 +4324,7 @@ export default function Page() {
       }}
     >
     <CardTooltipSettingsContext.Provider value={{ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }}>
-    <main className="app activeMatch" data-theme={colorScheme}>
+    <main className={`app activeMatch${topbarStickyEnabled ? "" : " topbarStickyDisabled"}`} data-theme={colorScheme}>
       <header className="topbar">
         <div className="topbarStatusGroup">
           <Brand />
@@ -4983,6 +4987,7 @@ export default function Page() {
               automaticEffectCuesEnabled={automaticEffectCuesEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
+              topbarStickyEnabled={topbarStickyEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5003,6 +5008,7 @@ export default function Page() {
               onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+              onTopbarStickyEnabled={setTopbarStickyEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -5055,6 +5061,7 @@ export default function Page() {
             automaticEffectCuesEnabled={automaticEffectCuesEnabled}
             autoDiscardEnabled={autoDiscardEnabled}
             autoEndTurnEnabled={autoEndTurnEnabled}
+            topbarStickyEnabled={topbarStickyEnabled}
             audioEnabled={audioEnabled}
             audioVolume={audioVolume}
             cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5076,6 +5083,7 @@ export default function Page() {
             onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
             onAutoDiscardEnabled={setAutoDiscardEnabled}
             onAutoEndTurnEnabled={setAutoEndTurnEnabled}
+            onTopbarStickyEnabled={setTopbarStickyEnabled}
             onAudioEnabled={updateAudioEnabled}
             onAudioVolume={setAudioVolume}
             onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -5684,6 +5692,7 @@ function OptionsPanel({
   automaticEffectCuesEnabled,
   autoDiscardEnabled,
   autoEndTurnEnabled,
+  topbarStickyEnabled,
   audioEnabled,
   audioVolume,
   cardTooltipHoverDelayMs,
@@ -5705,6 +5714,7 @@ function OptionsPanel({
   onAutomaticEffectCuesEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
+  onTopbarStickyEnabled,
   onAudioEnabled,
   onAudioVolume,
   onCardTooltipHoverDelayMs,
@@ -5727,6 +5737,7 @@ function OptionsPanel({
   automaticEffectCuesEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
+  topbarStickyEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
@@ -5748,6 +5759,7 @@ function OptionsPanel({
   onAutomaticEffectCuesEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
+  onTopbarStickyEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
@@ -5795,7 +5807,14 @@ function OptionsPanel({
           onBoardPercent={onCardBoardScalePercent}
           onRigPercent={onCardRigScalePercent}
         />
-        <GameplaySettings autoDiscardEnabled={autoDiscardEnabled} autoEndTurnEnabled={autoEndTurnEnabled} onAutoDiscardEnabled={onAutoDiscardEnabled} onAutoEndTurnEnabled={onAutoEndTurnEnabled} />
+        <GameplaySettings
+          autoDiscardEnabled={autoDiscardEnabled}
+          autoEndTurnEnabled={autoEndTurnEnabled}
+          topbarStickyEnabled={topbarStickyEnabled}
+          onAutoDiscardEnabled={onAutoDiscardEnabled}
+          onAutoEndTurnEnabled={onAutoEndTurnEnabled}
+          onTopbarStickyEnabled={onTopbarStickyEnabled}
+        />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings
           enabled={actionCuesEnabled}
@@ -6056,13 +6075,17 @@ function CardSizeSliderRow({
 function GameplaySettings({
   autoDiscardEnabled,
   autoEndTurnEnabled,
+  topbarStickyEnabled,
   onAutoDiscardEnabled,
-  onAutoEndTurnEnabled
+  onAutoEndTurnEnabled,
+  onTopbarStickyEnabled
 }: {
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
+  topbarStickyEnabled: boolean;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
+  onTopbarStickyEnabled(value: boolean): void;
 }) {
   return (
     <div className="gameplaySettings">
@@ -6080,9 +6103,13 @@ function GameplaySettings({
             <input type="checkbox" checked={autoDiscardEnabled} onChange={(event) => onAutoDiscardEnabled(event.target.checked)} />
             Auto-Abwerfen
           </label>
+          <label className={`settingsToggle ${topbarStickyEnabled ? "checked" : ""}`}>
+            <input data-testid="sticky-topbar-toggle" type="checkbox" checked={topbarStickyEnabled} onChange={(event) => onTopbarStickyEnabled(event.target.checked)} />
+            Kopfzeile fixieren
+          </label>
         </div>
       </div>
-      <p className="settingsHelp">Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist.</p>
+      <p className="settingsHelp">Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar.</p>
     </div>
   );
 }

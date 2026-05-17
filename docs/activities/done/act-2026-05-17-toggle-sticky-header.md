@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-05-17-toggle-sticky-header
-status: inbox
+status: done
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+checks:
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web test
+  - git diff --check
+  - Playwright-Smoke schmal 390x844 und Desktop 1280x720 fuer Kopfzeile-fixieren-Toggle, Reload-Persistenz und Sticky/Relative-CSS
 ---
 
 # Fixierte Kopfzeile optional machen
@@ -47,12 +53,12 @@ Die fixierte Kopfzeile soll auf kleinen Bildschirmen nicht dauerhaft Platz block
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt eine sichtbare lokale Option, mit der die Kopfzeilen-Fixierung ein- und ausgeschaltet werden kann.
-- [ ] Die gewählte Einstellung bleibt nach Reload/Reconnect im Browser erhalten, soweit lokale UI-Einstellungen im Projekt bereits persistiert werden.
-- [ ] Bei ausgeschalteter Fixierung nimmt die Kopfzeile im Mobile-/Tablet-Viewport keinen dauerhaft fixierten Screenbereich mehr ein.
-- [ ] Bei eingeschalteter Fixierung bleibt das bisherige Verhalten auf Desktop und breiteren Viewports erhalten.
-- [ ] Die Umsetzung verändert keine Engine-, Action-, Replay-, StateHash- oder Hidden-Info-Verträge.
-- [ ] Ein fokussierter UI-Check oder Browser-Smoke deckt mindestens einen schmalen Mobile-Viewport und einen breiteren Desktop-Viewport ab.
+- [x] Es gibt eine sichtbare lokale Option, mit der die Kopfzeilen-Fixierung ein- und ausgeschaltet werden kann.
+- [x] Die gewählte Einstellung bleibt nach Reload/Reconnect im Browser erhalten, soweit lokale UI-Einstellungen im Projekt bereits persistiert werden.
+- [x] Bei ausgeschalteter Fixierung nimmt die Kopfzeile im Mobile-/Tablet-Viewport keinen dauerhaft fixierten Screenbereich mehr ein.
+- [x] Bei eingeschalteter Fixierung bleibt das bisherige Verhalten auf Desktop und breiteren Viewports erhalten.
+- [x] Die Umsetzung verändert keine Engine-, Action-, Replay-, StateHash- oder Hidden-Info-Verträge.
+- [x] Ein fokussierter UI-Check oder Browser-Smoke deckt mindestens einen schmalen Mobile-Viewport und einen breiteren Desktop-Viewport ab.
 
 ## Umsetzungshinweise
 
@@ -63,4 +69,4 @@ Die fixierte Kopfzeile soll auf kleinen Bildschirmen nicht dauerhaft Platz block
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen: Die aktive Spieloberfläche hat in den lokalen Spielablauf-Optionen den Toggle `Kopfzeile fixieren`. Die Einstellung wird im bestehenden lokalen Gameplay-Settings-Key gespeichert, standardmäßig bleibt die Kopfzeile fixiert. Bei deaktivierter Option erhält die aktive Match-App `topbarStickyDisabled`, wodurch die Topbar wieder normal mitscrollt. Engine, Server, Actions, Replay, StateHash und Hidden-Info-Verträge bleiben unverändert.

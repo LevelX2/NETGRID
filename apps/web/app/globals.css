@@ -131,6 +131,11 @@ select {
   z-index: 80;
 }
 
+.app.activeMatch.topbarStickyDisabled > .topbar {
+  position: relative;
+  top: auto;
+}
+
 .app.activeMatch .main {
   flex: 1 1 auto;
 }
