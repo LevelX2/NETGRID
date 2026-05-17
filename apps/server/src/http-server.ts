@@ -1029,7 +1029,15 @@ function sendBootstrap(socket: WebSocket | undefined, payload: ServicePayload): 
     send(socket, { type: "lobby_update", payload });
     return;
   }
-  send(socket, { type: "state_update", payload: { matchStatus: payload.matchStatus, matchVersion: payload.matchVersion, playerView: payload.playerView } });
+  send(socket, {
+    type: "state_update",
+    payload: {
+      matchStatus: payload.matchStatus,
+      matchVersion: payload.matchVersion,
+      playerView: payload.playerView,
+      pendingUndo: payload.pendingUndo ?? null
+    }
+  });
   send(socket, { type: "legal_actions", payload: { stateVersion: payload.playerView.stateVersion, legalActions: payload.legalActions } });
   send(socket, { type: "choice_request", payload: { choice: payload.pendingChoice ?? null } });
   send(socket, { type: "event_log_update", payload: { events: payload.eventTail } });

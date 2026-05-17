@@ -189,6 +189,7 @@ export type ApiServerMessage =
         matchStatus: ApiMatchStatus;
         matchVersion: number;
         playerView: PlayerView;
+        pendingUndo?: NonNullable<ApiSidePayload["pendingUndo"]> | null;
       };
     }
   | { type: "lobby_update"; payload: ApiLobbyPayload }
@@ -264,6 +265,7 @@ export type ApiJoinMatchResponse = {
   matchStatus?: ApiMatchStatus;
   lobby?: ApiMatchStartLobbyPayload;
   eventTail?: PublicGameEvent[];
+  pendingUndo?: ApiPendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: ApiAiTurnPresentationState;
   winner?: Winner;
   finalStateHash?: string;
