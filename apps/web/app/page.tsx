@@ -703,6 +703,72 @@ function normalizeCardScalePercent(value: unknown, min = CARD_SCALE_PERCENT_MIN,
   return Math.max(min, Math.min(max, snapped));
 }
 
+function usePersistentCardScaleSettings() {
+  const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardArchiveScalePercent, setCardArchiveScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardZoneScalePercent, setCardZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardRigScalePercent, setCardRigScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
+  const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
+
+  useEffect(() => {
+    const stored = readLocalStorageWithLegacy(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+    if (stored) {
+      try {
+        const parsed = JSON.parse(stored) as {
+          tooltipPercent?: unknown;
+          handPercent?: unknown;
+          archivePercent?: unknown;
+          zonePercent?: unknown;
+          boardPercent?: unknown;
+          rigPercent?: unknown;
+          opponentPercent?: unknown;
+        };
+        setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
+        setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent));
+        setCardArchiveScalePercent(normalizeCardScalePercent(parsed.archivePercent ?? parsed.zonePercent));
+        setCardZoneScalePercent(normalizeCardScalePercent(parsed.zonePercent));
+        setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
+        setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
+      } catch {
+        removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
+      }
+    }
+    setCardSizeSettingsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!cardSizeSettingsLoaded) return;
+    window.localStorage.setItem(
+      CARD_SIZE_SETTINGS_STORAGE_KEY,
+      JSON.stringify({
+        tooltipPercent: cardTooltipScalePercent,
+        handPercent: cardHandScalePercent,
+        archivePercent: cardArchiveScalePercent,
+        zonePercent: cardZoneScalePercent,
+        boardPercent: cardBoardScalePercent,
+        rigPercent: cardRigScalePercent
+      })
+    );
+  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent]);
+
+  return {
+    cardTooltipScalePercent,
+    cardHandScalePercent,
+    cardArchiveScalePercent,
+    cardZoneScalePercent,
+    cardBoardScalePercent,
+    cardRigScalePercent,
+    setCardTooltipScalePercent,
+    setCardHandScalePercent,
+    setCardArchiveScalePercent,
+    setCardZoneScalePercent,
+    setCardBoardScalePercent,
+    setCardRigScalePercent
+  };
+}
+
 function normalizeSteppedNumber(value: unknown, fallback: number, min: number, max: number, step: number): number {
   const numeric = Number(value);
   if (!Number.isFinite(numeric)) return fallback;
@@ -1657,13 +1723,20 @@ export default function Page() {
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
   const [cardTooltipMode, setCardTooltipMode] = useState<CardTooltipMode>("enhanced");
   const [cardTooltipSettingsLoaded, setCardTooltipSettingsLoaded] = useState(false);
-  const [cardTooltipScalePercent, setCardTooltipScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardHandScalePercent, setCardHandScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardArchiveScalePercent, setCardArchiveScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardZoneScalePercent, setCardZoneScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardBoardScalePercent, setCardBoardScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardRigScalePercent, setCardRigScalePercent] = useState(CARD_SCALE_DEFAULT_PERCENT);
-  const [cardSizeSettingsLoaded, setCardSizeSettingsLoaded] = useState(false);
+  const {
+    cardTooltipScalePercent,
+    cardHandScalePercent,
+    cardArchiveScalePercent,
+    cardZoneScalePercent,
+    cardBoardScalePercent,
+    cardRigScalePercent,
+    setCardTooltipScalePercent,
+    setCardHandScalePercent,
+    setCardArchiveScalePercent,
+    setCardZoneScalePercent,
+    setCardBoardScalePercent,
+    setCardRigScalePercent
+  } = usePersistentCardScaleSettings();
   const [selectedActionContext, setSelectedActionContext] = useState<ActionContext | null>(null);
   const [actionSlotCapacities, setActionSlotCapacities] = useState<Record<Side, number>>({
     runner: baseActionSlotCapacity("runner"),
@@ -1988,47 +2061,6 @@ export default function Page() {
     if (!cardTooltipSettingsLoaded) return;
     window.localStorage.setItem(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, JSON.stringify({ hoverOpenDelayMs: cardTooltipHoverDelayMs, mode: cardTooltipMode }));
   }, [cardTooltipSettingsLoaded, cardTooltipHoverDelayMs, cardTooltipMode]);
-
-  useEffect(() => {
-    const stored = readLocalStorageWithLegacy(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as {
-          tooltipPercent?: unknown;
-          handPercent?: unknown;
-          archivePercent?: unknown;
-          zonePercent?: unknown;
-          boardPercent?: unknown;
-          rigPercent?: unknown;
-          opponentPercent?: unknown;
-        };
-        setCardTooltipScalePercent(normalizeCardScalePercent(parsed.tooltipPercent));
-        setCardHandScalePercent(normalizeCardScalePercent(parsed.handPercent));
-        setCardArchiveScalePercent(normalizeCardScalePercent(parsed.archivePercent ?? parsed.zonePercent));
-        setCardZoneScalePercent(normalizeCardScalePercent(parsed.zonePercent));
-        setCardBoardScalePercent(normalizeCardScalePercent(parsed.boardPercent));
-        setCardRigScalePercent(normalizeCardScalePercent(parsed.rigPercent ?? parsed.opponentPercent));
-      } catch {
-        removeLocalStorageKeys(CARD_SIZE_SETTINGS_STORAGE_KEY, LEGACY_CARD_SIZE_SETTINGS_STORAGE_KEY);
-      }
-    }
-    setCardSizeSettingsLoaded(true);
-  }, []);
-
-  useEffect(() => {
-    if (!cardSizeSettingsLoaded) return;
-    window.localStorage.setItem(
-      CARD_SIZE_SETTINGS_STORAGE_KEY,
-      JSON.stringify({
-        tooltipPercent: cardTooltipScalePercent,
-        handPercent: cardHandScalePercent,
-        archivePercent: cardArchiveScalePercent,
-        zonePercent: cardZoneScalePercent,
-        boardPercent: cardBoardScalePercent,
-        rigPercent: cardRigScalePercent
-      })
-    );
-  }, [cardSizeSettingsLoaded, cardTooltipScalePercent, cardHandScalePercent, cardArchiveScalePercent, cardZoneScalePercent, cardBoardScalePercent, cardRigScalePercent]);
 
   useEffect(() => {
     setCuePosition(parseCuePositionPreference(readLocalStorageWithLegacy(ACTION_CUE_POSITION_STORAGE_KEY, LEGACY_ACTION_CUE_POSITION_STORAGE_KEY)));
