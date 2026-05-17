@@ -1,20 +1,21 @@
 ---
 activityId: act-2026-05-17-v2-privacy-export-delete-contract
-status: inbox
+status: done
 kind: architecture
 area: docs
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget: V2.0
-blockedBy:
-  - act-2026-05-17-v2-auth-privacy-decision-spike
-resultArtifacts: []
-checks: []
+blockedBy: []
+resultArtifacts:
+  - docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md
+checks:
+  - git diff --check
 ---
 
 # V2.0 Datenschutz-Export-/Löschvertrag spezifizieren
@@ -46,11 +47,11 @@ Für V2.0 soll ein konkreter Export-, Lösch- und Retention-Vertrag entstehen, b
 
 ## Akzeptanzkriterien
 
-- [ ] Exportinhalt und Exportverbote sind tabellarisch dokumentiert.
-- [ ] Löschung und Anonymisierung sind für Accountprofil, Cloud-Decks, Sessions und Match-Metadaten getrennt.
-- [ ] Backup-/Log-Retention ist ehrlich als Retention statt Sofortlöschung beschrieben.
-- [ ] Side-sichere Replay-Exports bleiben von `local_analysis`, FullState und Hidden-Info getrennt.
-- [ ] KI-Debug und AIInput bleiben ausdrücklich nicht exportierbar.
+- [x] Exportinhalt und Exportverbote sind tabellarisch dokumentiert.
+- [x] Löschung und Anonymisierung sind für Accountprofil, Cloud-Decks, Sessions und Match-Metadaten getrennt.
+- [x] Backup-/Log-Retention ist ehrlich als Retention statt Sofortlöschung beschrieben.
+- [x] Side-sichere Replay-Exports bleiben von `local_analysis`, FullState und Hidden-Info getrennt.
+- [x] KI-Debug und AIInput bleiben ausdrücklich nicht exportierbar.
 
 ## Umsetzungshinweise
 
@@ -59,4 +60,4 @@ Für V2.0 soll ein konkreter Export-, Lösch- und Retention-Vertrag entstehen, b
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md` definiert Exportmatrix, Exportverbote, Lösch-/Anonymisierungssemantik, Retention-Vorschläge und Review-/Testchecks. Der Vertrag bestätigt, dass Account-Löschung Account- und Metadaten behandelt, aber historische Engine-Events, Replay-StateHash, `AIInput` und `DecisionDebug` nicht verändert oder exportiert.
