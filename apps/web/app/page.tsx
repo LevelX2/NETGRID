@@ -127,6 +127,7 @@ import {
   hasLegalAction,
   parseCuePositionPreference,
   normalizeVisibleTerms,
+  retainedAccessRevealEvent,
   runTargetServerIds,
   runAwareActionButtonLabel,
   runWindowActionButtonLabel,
@@ -2358,7 +2359,8 @@ export default function Page() {
       return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
     });
   };
-  const accessReveal = payload ? accessRevealFromLatestEvent(payload.eventTail.at(-1), catalogDetailsById, payload.legalActions, payload.side) : null;
+  const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
+  const accessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;

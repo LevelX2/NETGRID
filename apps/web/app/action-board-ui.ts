@@ -536,6 +536,18 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   return "Diese Karte hat keine Trash-Kosten. Der Zugriff ist abgeschlossen.";
 }
 
+export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event || event.eventId === dismissedEventId) return null;
+    if (event.publicPayload.actionType !== "access_card") continue;
+    if (typeof event.publicPayload.cardDefinitionId !== "string") continue;
+    if (typeof event.publicPayload.title !== "string") continue;
+    return event;
+  }
+  return null;
+}
+
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
   const subject = actorSide === "corp" ? "Die Korp" : "Der Runner";
   if (card.type === "agenda") return `${subject} kann diese Agenda jetzt stehlen.`;

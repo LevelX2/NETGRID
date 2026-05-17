@@ -24,6 +24,7 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   parseCuePositionPreference,
+  retainedAccessRevealEvent,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
   runPositionStatusLabel,
@@ -707,6 +708,34 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const decline = legalAction("runner", "decline_trash", "game_rule", "Nicht trashen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
 
     expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Fort 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
+  });
+
+  it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
+    const hqReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "HQ",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
+    const runCleanup = publicEvent("evt_cleanup", "action", {
+      actionType: "continue_run",
+      actor: "runner"
+    });
+
+    expect(retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId).toBe("evt_access");
+    expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
+  });
+
+  it("does not retain redacted central-access events without the accessed card identity", () => {
+    const redactedRdAccess = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "F&E (R&D)",
+      redactedKind: "accessed_card"
+    });
+
+    expect(retainedAccessRevealEvent([redactedRdAccess], null)).toBeNull();
   });
 });
 
