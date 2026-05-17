@@ -4527,17 +4527,45 @@ export default function Page() {
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
-          <RunnerRigStrip
-            view={activeView}
-            cardDetailsById={catalogDetailsById}
-            displayMode={cardDisplayMode}
-            selectedContext={selectedActionContext}
-            contextualActions={legalActionSplit.contextualActions}
-            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-            onFocus={focusCard}
-            onActionContext={selectActionCard}
-            onAction={submitAction}
-          />
+          {activeView.side === "corp" ? (
+            <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
+              <RunnerRigStrip
+                view={activeView}
+                cardDetailsById={catalogDetailsById}
+                displayMode={cardDisplayMode}
+                selectedContext={selectedActionContext}
+                contextualActions={legalActionSplit.contextualActions}
+                actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                onFocus={focusCard}
+                onActionContext={selectActionCard}
+                onAction={submitAction}
+              />
+              <RunnerOpponentZonesStrip
+                view={activeView}
+                cardDetailsById={catalogDetailsById}
+                displayMode={cardDisplayMode}
+                selectedContext={selectedActionContext}
+                contextualActions={legalActionSplit.contextualActions}
+                actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                highlightedZone={activeCueHighlight}
+                onFocus={focusCard}
+                onActionContext={selectActionCard}
+                onAction={submitAction}
+              />
+            </section>
+          ) : (
+            <RunnerRigStrip
+              view={activeView}
+              cardDetailsById={catalogDetailsById}
+              displayMode={cardDisplayMode}
+              selectedContext={selectedActionContext}
+              contextualActions={legalActionSplit.contextualActions}
+              actionDisabled={Boolean(payload.winner) || connection !== "online"}
+              onFocus={focusCard}
+              onActionContext={selectActionCard}
+              onAction={submitAction}
+            />
+          )}
           {payload.winner ? (
             <div className="runBar">
               <Sparkles size={18} />
@@ -4782,7 +4810,7 @@ export default function Page() {
                 </SideZoneFrame>
               </div>
             ) : (
-              <div className="runnerGripHeapLayout">
+              <div className="runnerGripHeapLayout corpZoneLayout">
                 <SideZoneFrame side="corp" label="HQ" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "hq")}>
                   <div className="cards fixedZoneCards" style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
@@ -4813,48 +4841,6 @@ export default function Page() {
                       );
                     })}
                   </div>
-                </SideZoneFrame>
-                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, "runner", "grip")} className="runnerGripZone">
-                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Grip ${formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)}`}>
-                    <p className="archivesPileEmpty">{activeView.opponent.handCount > 0 ? "Grip-Inhalte verborgen." : "Keine Karten im Grip."}</p>
-                  </div>
-                </SideZoneFrame>
-                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.opponent.deckCount)} highlighted={zoneHighlighted(activeCueHighlight, "runner", "stack")} className="runnerStackZone">
-                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.opponent.deckCount)}`}>
-                    {activeView.opponent.deckCount > 0 ? (
-                      <div className="runnerStackBack" aria-hidden="true">
-                        <span />
-                      </div>
-                    ) : (
-                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
-                    )}
-                  </div>
-                </SideZoneFrame>
-                <SideZoneFrame side="runner" label="Heap" countLabel={formatCardCount(activeView.opponent.discardCount)} highlighted={zoneHighlighted(activeCueHighlight, "runner", "heap")} className="runnerHeapZone">
-                  {(activeView.opponent.discardCards ?? []).length > 0 ? (
-                    <div className="runnerHeapOverlapRow" style={zoneCardsStyle}>
-                      {(activeView.opponent.discardCards ?? []).slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
-                        const displayCard = enrichCard(card);
-                        return (
-                          <CardView
-                            key={card.instanceId}
-                            card={displayCard}
-                            compact
-                            displayMode={cardDisplayMode}
-                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                            actions={cardActionsFor(card)}
-                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                            onAction={submitAction}
-                            onFocus={focusCard}
-                            onActionContextSelect={selectActionCard}
-                          />
-                        );
-                      })}
-                      {activeView.opponent.discardCount > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{activeView.opponent.discardCount - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
-                    </div>
-                  ) : (
-                    <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
-                  )}
                 </SideZoneFrame>
               </div>
             )}
@@ -6352,6 +6338,102 @@ function aiPacingModeHelp(mode: AiPacingMode): string {
   if (mode === "manual") return "Einzelschritt: Die KI macht nur dann genau einen Schritt, wenn Du KI-Schritt klickst.";
   if (mode === "fast") return "Schnell: Die KI läuft ohne Präsentationspausen bis zum nächsten menschlichen Fenster.";
   return "Getaktet: Die KI macht ihre Schritte automatisch, aber mit kurzen Pausen, damit Du sie verfolgen kannst.";
+}
+
+function RunnerOpponentZonesStrip({
+  view,
+  cardDetailsById,
+  displayMode,
+  selectedContext,
+  contextualActions,
+  actionDisabled,
+  highlightedZone,
+  onFocus,
+  onActionContext,
+  onAction
+}: {
+  view: PlayerView;
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+  selectedContext: ActionContext | null;
+  contextualActions: LegalAction[];
+  actionDisabled: boolean;
+  highlightedZone: BoardHighlight | null;
+  onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
+  onAction(action: LegalAction): void;
+}) {
+  const { zonePercent } = useCardScaleSettings();
+  const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
+  const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
+  if (view.side !== "corp") return null;
+  const heapCards = view.opponent.discardCards ?? [];
+  const heapCount = view.opponent.discardCount ?? heapCards.length;
+  const gripCountLabel = formatHandLimitCount(view.opponent.handCount, view.opponent.maxHandSize);
+  const stackCountLabel = formatCardCount(view.opponent.deckCount);
+  const heapCountLabel = formatCardCount(heapCount);
+  const cardActionsForHeap = (card: VisibleCard): LegalAction[] => {
+    if (!card.known) return [];
+    return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+  };
+
+  return (
+    <section className="runnerOpponentZonesStrip" aria-label="Runner-Zonen" data-testid="runner-opponent-zones">
+      <div
+        className={`runnerOpponentZoneChip ${zoneHighlighted(highlightedZone, "runner", "grip") ? "cueHighlightSoft" : ""}`}
+        title="Grip: Runner-Hand. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
+        aria-label={`Runner-Grip ${gripCountLabel}. Inhalte verborgen.`}
+      >
+        <span>Grip</span>
+        <strong>{gripCountLabel}</strong>
+        <small>Hand</small>
+      </div>
+      <div
+        className={`runnerOpponentZoneChip ${zoneHighlighted(highlightedZone, "runner", "stack") ? "cueHighlightSoft" : ""}`}
+        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
+        aria-label={`Runner-Stack ${stackCountLabel}. Inhalte verborgen.`}
+      >
+        <span>Stack</span>
+        <strong>{stackCountLabel}</strong>
+        <small>Deck</small>
+      </div>
+      <details
+        className={`runnerOpponentZoneChip runnerOpponentHeapCompact ${zoneHighlighted(highlightedZone, "runner", "heap") ? "cueHighlightSoft" : ""}`}
+        title="Heap: öffentliche Runner-Ablage."
+        aria-label={`Runner-Heap ${heapCountLabel}`}
+      >
+        <summary>
+          <span>Heap</span>
+          <strong>{heapCountLabel}</strong>
+          <small>Ablage</small>
+        </summary>
+        {heapCards.length > 0 ? (
+          <div className="runnerHeapCompactPreview runnerHeapOverlapRow" style={zoneCardsStyle}>
+            {heapCards.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+              const displayCard = enrichVisibleCard(card, cardDetailsById);
+              return (
+                <CardView
+                  key={card.instanceId}
+                  card={displayCard}
+                  compact
+                  displayMode={displayMode}
+                  selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                  actions={cardActionsForHeap(card)}
+                  actionDisabled={actionDisabled}
+                  onAction={onAction}
+                  onFocus={onFocus}
+                  onActionContextSelect={onActionContext}
+                />
+              );
+            })}
+            {heapCount > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{heapCount - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
+          </div>
+        ) : (
+          <p className="archivesPileEmpty">Keine Karten im Heap.</p>
+        )}
+      </details>
+    </section>
+  );
 }
 
 function RunnerRigStrip({
