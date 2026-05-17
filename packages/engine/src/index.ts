@@ -5023,7 +5023,7 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       agendaDefinition.id === BLACK_ICE_QUALITY_ASSURANCE_ID &&
       cardHasSubtype(iceDefinition, "black_ice")
     )
-      bonus += 1;
+      bonus += 2;
   }
   bonus += cardCounter(state, iceId, "mark");
   return bonus;

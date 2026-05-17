@@ -28,6 +28,8 @@ export function scoredAgendaEffectLineForScoreArea(definitionId: string | undefi
       return { key: "effect-kali", value: "Aktion", label: "2 Meat Damage, wenn Runner getaggt ist", tone: "action" };
     case "onr_v1_219_superior-net-barriers":
       return { key: "effect-superior-barriers", value: "Aktiv", label: "Wall-ICE hat +1 Stärke", tone: "effect" };
+    case "onr_v1_191_black-ice-quality-assurance":
+      return { key: "effect-black-ice-quality", value: "Aktiv", label: "Black ICE hat +2 Stärke", tone: "effect" };
     default:
       return null;
   }

@@ -5779,7 +5779,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     advancementRequirement: 5,
     agendaPoints: 2,
     rulesText:
-      "Agenda with global black-ice modifier and hidden-zone support surfaces. Modifier sources remain public after scoring.",
+      "All Black ICE has +2 strength. Modifier sources remain public after scoring.",
     mechanics: [
       "install_remote",
       "advance",
