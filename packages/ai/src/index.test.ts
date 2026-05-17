@@ -3342,6 +3342,127 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("installs a visible matching breaker before repeating low-value Archives or blocked remote runs", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-visible-breaker-plan",
+      (state) => {
+        state.runner.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_fracter");
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const archivesRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    const installFracter = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_fracter",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(remoteRun).toBeDefined();
+    expect(archivesRun).toBeDefined();
+    expect(installFracter).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !archivesRun || !installFracter || !gainCredit)
+      throw new Error("Missing visible breaker planning fixture actions");
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, archivesRun, installFracter, gainCredit],
+    });
+
+    expect(decision.actionId).toBe(installFracter.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|Simple Agenda|simple_agenda/,
+    );
+  });
+
+  it("builds credits or draws when a visible blocker lacks an installable breaker answer", () => {
+    const creditInput = runnerActionPhaseInput(
+      "ai-runner-breaker-needs-credits",
+      (state) => {
+        state.runner.credits = 1;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerCardToGrip(state, "simple_fracter");
+      },
+    );
+    const creditRun = creditInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = creditInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(creditRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!creditRun || !gainCredit)
+      throw new Error("Missing breaker-credit fixture actions");
+    const creditDecision = chooseRunnerAction({
+      ...creditInput,
+      legalActions: [creditRun, gainCredit],
+    });
+
+    const drawInput = runnerActionPhaseInput(
+      "ai-runner-breaker-needs-draw",
+      (state) => {
+        state.runner.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+    );
+    const drawRun = drawInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const drawCard = drawInput.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+
+    expect(drawRun).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!drawRun || !drawCard)
+      throw new Error("Missing breaker-draw fixture actions");
+    const drawDecision = chooseRunnerAction({
+      ...drawInput,
+      legalActions: [drawRun, drawCard],
+    });
+
+    expect(creditDecision.actionId).toBe(gainCredit.actionId);
+    expect(creditDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(drawDecision.actionId).toBe(drawCard.actionId);
+    expect(drawDecision.reasonCode).toBe("runner.plan.draw_for_answers");
+  });
+
   it("handles access trash, jack-out and legal fallback without hidden-info claims", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v141-trash-jackout" }),

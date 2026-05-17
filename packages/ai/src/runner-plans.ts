@@ -2,7 +2,7 @@ import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.
 import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory, type RndTopFreshnessMemory } from "./belief-state";
-import { assessKnownRezzedIcePath, serverIdFromEvent } from "./visible-run-analysis";
+import { assessKnownRezzedIcePath, canBreakerDefinitionBreakIce, iceHasEndTheRun, serverIdFromEvent } from "./visible-run-analysis";
 
 export type RunnerPlanKind =
   | "pressure_rnd"
@@ -111,6 +111,12 @@ type RunnerFeatures = {
   visibleRunBreakCosts: Map<string, number>;
 };
 type RunnerServerFeatures = RunnerFeatures["serverFeatures"] extends Map<string, infer Server> ? Server : never;
+type VisibleBreakerPressure = {
+  blockedServerIds: Set<string>;
+  matchingGripBreakerCount: number;
+  matchingInstallActionIds: Set<string>;
+  missingAnswerCount: number;
+};
 
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
@@ -251,6 +257,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const remote = evaluateRemoteThreat(input, candidate, beliefState);
   const corpThreat = evaluateCorpScoringThreat(input, candidate, beliefState);
   const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
+  const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
@@ -261,14 +268,15 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     runCost.score * profile.weights.runCost +
     access.score * profile.weights.serverAccessValue +
     remote.score * profile.weights.remoteThreat +
-    corpThreat.score * profile.weights.corpScoringThreat -
+    corpThreat.score * profile.weights.corpScoringThreat +
+    breakerPlan.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
     easyRunPenalty;
   return {
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -281,9 +289,53 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...remote.evidence,
       ...corpThreat.evidence,
       ...earlyTurn.evidence,
+      ...breakerPlan.evidence,
       `belief_version:${beliefState.version}`,
       ...(beliefState.runnerOpponentModel ? [`belief_credit_reserve:${beliefState.runnerOpponentModel.corpCreditReserveInterpretation}`] : [])
     ])
+  };
+}
+
+function evaluateVisibleBreakerPlan(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+  const pressure = assessVisibleBreakerPressure(input);
+  const target = targetServerId(input, candidate);
+  if (pressure.blockedServerIds.size === 0) {
+    return { score: 0, reasons: [], evidence: ["visible_breaker_pressure:false"] };
+  }
+  let score = 0;
+  const reasons: string[] = [];
+  if (candidate.kind === "build_rig") {
+    if (candidate.legalActionIds.some((actionId) => pressure.matchingInstallActionIds.has(actionId))) {
+      score += 320;
+      reasons.push("visible_matching_breaker_install_available");
+    } else if (pressure.matchingGripBreakerCount > 0) {
+      score += 120;
+      reasons.push("visible_matching_breaker_in_grip");
+    }
+  }
+  if (candidate.kind === "recover_economy" && pressure.matchingGripBreakerCount > 0 && pressure.matchingInstallActionIds.size === 0 && input.playerView.own.credits < 4) {
+    score += 190;
+    reasons.push("visible_matching_breaker_needs_credits");
+  }
+  if (candidate.kind === "draw_for_answers" && pressure.matchingGripBreakerCount === 0 && pressure.missingAnswerCount > 0) {
+    score += 210;
+    reasons.push("visible_blocker_needs_draw_or_search");
+  }
+  if (target && pressure.blockedServerIds.has(target) && isRunPlan(candidate.kind)) {
+    score -= 180;
+    reasons.push("visible_blocker_requires_intermediate_plan");
+  }
+  return {
+    score,
+    reasons,
+    evidence: [
+      `visible_breaker_pressure:true`,
+      `visible_blocked_servers:${pressure.blockedServerIds.size}`,
+      `matching_grip_breakers:${pressure.matchingGripBreakerCount}`,
+      `matching_install_actions:${pressure.matchingInstallActionIds.size}`,
+      `missing_breaker_answers:${pressure.missingAnswerCount}`,
+      `visible_breaker_target:${target ?? "none"}`
+    ]
   };
 }
 
@@ -521,13 +573,17 @@ function staleArchivesRepeatPenalty(input: AiDecisionInput, target: string | und
   if (target !== "archives" || !server) return 0;
   const history = mergedPublicHistory(input);
   const lastArchivesAccessIndex = findLastIndex(history, (event) => isArchivesAccessEvent(event));
-  if (lastArchivesAccessIndex < 0) return 0;
+  const visibleArchivesCards =
+    input.playerView.servers.find((candidate) => candidate.id === "archives")?.root ?? [];
+  if (lastArchivesAccessIndex < 0) {
+    if (visibleArchivesCards.length === 0) return 260;
+    if (visibleArchivesCards.every((card) => card.known && card.definitionId && isLowValueKnownHqAccessCard(card.definitionId, input.playerView.own.credits))) return 320;
+    return 0;
+  }
   if (history.slice(lastArchivesAccessIndex + 1).some((event) => eventMayChangeArchives(event))) return 0;
   const lastArchivesAccess = history[lastArchivesAccessIndex];
   if (!lastArchivesAccess) return 0;
   const accessedDefinitionId = stringPayloadValue(lastArchivesAccess, "cardDefinitionId");
-  const visibleArchivesCards =
-    input.playerView.servers.find((candidate) => candidate.id === "archives")?.root ?? [];
   const visibleArchivesDefinitions = new Set(visibleArchivesCards.map((card) => card.definitionId).filter((definitionId): definitionId is string => Boolean(definitionId)));
   if (accessedDefinitionId && !visibleArchivesDefinitions.has(accessedDefinitionId)) return 0;
   if (visibleArchivesCards.length > 0 && visibleArchivesCards.every((card) => card.known && card.definitionId)) {
@@ -793,9 +849,11 @@ function lowReserveInstallPenalty(input: AiDecisionInput, candidate: RunnerPlanC
 
 function runnerInstallPriority(input: AiDecisionInput, action: LegalAction): number {
   const features = extractRunnerFeatures(input);
+  const breakerPressure = assessVisibleBreakerPressure(input);
   const roles = rolesForAction(input, action);
   const remainingCredits = features.credits - actionCreditCost(action);
   let priority = 85;
+  if (breakerPressure.matchingInstallActionIds.has(action.actionId)) priority += 120;
   if (roles.some((role) => role.startsWith("breaker_") && !features.rigRoles.has(role))) priority += 45;
   if (roles.includes("memory") || roles.includes("memory_support")) priority += features.memoryRemaining <= 1 ? 70 : 20;
   if (roles.includes("efficient_breaker")) priority += 12;
@@ -804,6 +862,45 @@ function runnerInstallPriority(input: AiDecisionInput, action: LegalAction): num
   if (remainingCredits < 2) priority -= 55;
   if (roles.some((role) => role.startsWith("breaker_") && features.rigRoles.has(role))) priority -= 18;
   return priority;
+}
+
+function assessVisibleBreakerPressure(input: AiDecisionInput): VisibleBreakerPressure {
+  const rigCards = input.playerView.own.rig ?? [];
+  const gripCards = input.playerView.own.gripOrHq.filter((card) => card.known && card.definitionId);
+  const missingIceDefinitionIds = new Set<string>();
+  const blockedServerIds = new Set<string>();
+  for (const server of input.playerView.servers) {
+    if (!isStrategicBreakerTarget(server)) continue;
+    const assessment = assessKnownRezzedIcePath(server.ice, rigCards, input.playerView.own.credits);
+    if (!assessment.blocked) continue;
+    const missingDefinitions = server.ice
+      .filter((ice) => ice.known && ice.rezzed === true && ice.definitionId && iceHasEndTheRun(ice.definitionId))
+      .map((ice) => ice.definitionId!)
+      .filter((definitionId) => !rigCards.some((card) => card.definitionId && canBreakerDefinitionBreakIce(card.definitionId, definitionId)));
+    if (missingDefinitions.length === 0) continue;
+    blockedServerIds.add(server.id);
+    for (const definitionId of missingDefinitions) missingIceDefinitionIds.add(definitionId);
+  }
+  const matchingGripBreakers = gripCards.filter((card) =>
+    [...missingIceDefinitionIds].some((iceDefinitionId) => canBreakerDefinitionBreakIce(card.definitionId!, iceDefinitionId))
+  );
+  const matchingGripIds = new Set(matchingGripBreakers.map((card) => card.instanceId));
+  const matchingInstallActionIds = new Set(
+    input.legalActions
+      .filter((action) => action.type === "install_card" && typeof action.source === "string" && matchingGripIds.has(action.source))
+      .map((action) => action.actionId)
+  );
+  return {
+    blockedServerIds,
+    matchingGripBreakerCount: matchingGripBreakers.length,
+    matchingInstallActionIds,
+    missingAnswerCount: matchingGripBreakers.length === 0 ? missingIceDefinitionIds.size : 0
+  };
+}
+
+function isStrategicBreakerTarget(server: AiDecisionInput["playerView"]["servers"][number]): boolean {
+  if (server.id === "rd" || server.id === "hq") return true;
+  return server.id.startsWith("remote_") && server.root.length > 0;
 }
 
 function actionCreditCost(action: LegalAction): number {
