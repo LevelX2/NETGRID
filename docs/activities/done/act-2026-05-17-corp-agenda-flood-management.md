@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-corp-agenda-flood-management
-status: in_progress
+status: done
 kind: fix
 area: ai
 priority: normal
@@ -8,14 +8,19 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-1
 parallelWorker: worker-1
 releaseTarget:
-blockedBy:
-  - act-2026-05-17-corp-remote-rez-reserve-plan
-resultArtifacts: []
-checks: []
+blockedBy: []
+resultArtifacts:
+  - packages/ai/src/corp-plans.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm typecheck
+  - git diff --check
 ---
 
 # Korp-Agenda-Flood-Management side-sicher verbessern
@@ -49,11 +54,11 @@ Die Korp-KI soll auf eine hohe eigene HQ-Agenda-Last besser reagieren, ohne vers
 
 ## Akzeptanzkriterien
 
-- [ ] In Agenda-Flood-Fixtures reduziert die Korp-KI Zentralserver-Exposure oder bereitet eine geschützte Score-Linie vor.
-- [ ] Die Änderung erhöht nicht die Fälle, in denen Agendas ohne Schutz in neue Remotes installiert werden.
-- [ ] Eigene HQ-Agenda-Information bleibt ausschließlich Korp-privat und gelangt nicht in PublicEvents, Runner-Views, Debug oder Replay-Views.
-- [ ] Tests trennen mindestens die Fälle `geschützter Remote vorhanden`, `Remote ungeschützt`, `keine Credits für Rezreserve`.
-- [ ] Bestehende Corp-Plan- und AI-Contract-Tests bleiben grün.
+- [x] In Agenda-Flood-Fixtures reduziert die Korp-KI Zentralserver-Exposure oder bereitet eine geschützte Score-Linie vor.
+- [x] Die Änderung erhöht nicht die Fälle, in denen Agendas ohne Schutz in neue Remotes installiert werden.
+- [x] Eigene HQ-Agenda-Information bleibt ausschließlich Korp-privat und gelangt nicht in PublicEvents, Runner-Views, Debug oder Replay-Views.
+- [x] Tests trennen mindestens die Fälle `geschützter Remote vorhanden`, `Remote ungeschützt`, `keine Credits für Rezreserve`.
+- [x] Bestehende Corp-Plan- und AI-Contract-Tests bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -63,4 +68,4 @@ Die Korp-KI soll auf eine hohe eigene HQ-Agenda-Last besser reagieren, ohne vers
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. `evaluateAgendaRisk` berücksichtigt jetzt `ownAgendaPressure` aus der eigenen Korp-HQ-PlayerView und gibt nur side-sichere Zähl-/Boolean-Evidence aus. Bei Agenda-Flood bevorzugt die Planbewertung geschützte Remote-Score-Linien, vorbereitetes Remote-ICE oder Economy für fehlende Rezreserve, ohne nackte Agenda-Installationen als Score-Plan zu promoten. Neue AI-Regressionen decken geschützte Remote, ungeschützte Remote und fehlende Rezreserve ab; bestehende nackte-Agenda-Regressionen bleiben im gleichen Testblock erhalten.
