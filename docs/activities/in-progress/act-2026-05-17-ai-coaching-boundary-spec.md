@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-ai-coaching-boundary-spec
-status: inbox
+status: in_progress
 kind: concept
 area: ai
 priority: low
 primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
+parallelWorker: worker-2
 releaseTarget:
 blockedBy:
   - act-2026-05-17-ai-input-nested-payload-allowlist
