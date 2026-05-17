@@ -251,9 +251,14 @@ export function actionSoundForActionType(actionType: string, visibility: Chronic
       return "agenda";
     case "trash_accessed_card":
     case "trash_resource":
+    case "purge_virus_counters":
       return "trash";
     case "remove_tag":
       return "tag_or_damage";
+    case "resolve_choice":
+      return "choice";
+    case "game_end":
+      return "game_end";
     case "end_turn":
       return "turn";
     default:

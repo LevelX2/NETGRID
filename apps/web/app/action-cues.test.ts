@@ -169,6 +169,13 @@ describe("deriveOpponentActionCues", () => {
     expect(actionSoundCountForAction("gain_credit", { amount: 3 })).toBe(1);
   });
 
+  it("covers non-card system sounds without leaking hidden details", () => {
+    expect(actionSoundForActionType("resolve_choice", "public")).toBe("choice");
+    expect(actionSoundForActionType("purge_virus_counters", "public")).toBe("trash");
+    expect(actionSoundForActionType("game_end", "public")).toBe("game_end");
+    expect(actionSoundForActionType("install_card", "redacted")).toBe("install_hidden");
+  });
+
   it("numbers opponent paid actions from the public turn sequence, including extra actions", () => {
     const cues = deriveOpponentActionCues({
       viewerSide: "runner",

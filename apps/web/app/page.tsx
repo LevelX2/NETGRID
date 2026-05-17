@@ -11648,11 +11648,17 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
     case "draw":
       return [{ frequency: 660, duration: 0.11, gain: 0.07, type: "sine" }];
     case "credit":
-      return [{ frequency: 784, duration: 0.09, gain: 0.08, type: "triangle" }];
+      return [
+        { frequency: 988, duration: 0.035, gain: 0.055, type: "triangle" },
+        { frequency: 1480, duration: 0.05, gain: 0.035, type: "triangle" }
+      ];
     case "install_hidden":
-      return [{ frequency: 220, duration: 0.13, gain: 0.07, type: "triangle" }];
+      return [{ frequency: 185, duration: 0.12, gain: 0.05, type: "triangle" }];
     case "install_known":
-      return [{ frequency: 392, duration: 0.11, gain: 0.07, type: "sine" }];
+      return [
+        { frequency: 262, duration: 0.05, gain: 0.045, type: "triangle" },
+        { frequency: 392, duration: 0.08, gain: 0.04, type: "triangle" }
+      ];
     case "play":
       return [
         { frequency: 440, duration: 0.09, gain: 0.06, type: "sine" },
@@ -11660,30 +11666,33 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
       ];
     case "rez":
       return [
-        { frequency: 196, duration: 0.09, gain: 0.07, type: "sawtooth" },
-        { frequency: 392, duration: 0.12, gain: 0.05, type: "sawtooth" }
+        { frequency: 110, duration: 0.08, gain: 0.055, type: "sawtooth" },
+        { frequency: 330, duration: 0.14, gain: 0.04, type: "triangle" }
       ];
     case "run":
       return [
-        { frequency: 330, duration: 0.07, gain: 0.06, type: "square" },
-        { frequency: 494, duration: 0.08, gain: 0.05, type: "square" }
+        { frequency: 294, duration: 0.045, gain: 0.05, type: "triangle" },
+        { frequency: 587, duration: 0.065, gain: 0.035, type: "square" }
       ];
     case "access":
-      return [{ frequency: 587, duration: 0.14, gain: 0.07, type: "triangle" }];
+      return [{ frequency: 740, duration: 0.11, gain: 0.055, type: "triangle" }];
     case "agenda":
       return [
         { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
         { frequency: 784, duration: 0.14, gain: 0.06, type: "sine" }
       ];
     case "trash":
-      return [{ frequency: 174, duration: 0.15, gain: 0.08, type: "triangle" }];
+      return [
+        { frequency: 196, duration: 0.055, gain: 0.055, type: "sawtooth" },
+        { frequency: 98, duration: 0.12, gain: 0.035, type: "triangle" }
+      ];
     case "tag_or_damage":
       return [
         { frequency: 247, duration: 0.08, gain: 0.08, type: "square" },
         { frequency: 220, duration: 0.1, gain: 0.06, type: "square" }
       ];
     case "choice":
-      return [{ frequency: 880, duration: 0.12, gain: 0.07, type: "sine" }];
+      return [{ frequency: 660, duration: 0.075, gain: 0.045, type: "triangle" }];
     case "game_end":
       return [
         { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
@@ -11691,6 +11700,6 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
       ];
     case "turn":
     default:
-      return [{ frequency: 330, duration: 0.1, gain: 0.05, type: "sine" }];
+      return [{ frequency: 247, duration: 0.09, gain: 0.04, type: "triangle" }];
   }
 }
