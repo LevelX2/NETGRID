@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 import { startNetgridServer } from "./http-server";
 
 export * from "./http-server";
+export * from "./account-session";
 export * from "./connection-audit";
 export * from "./internet-hardening";
 export * from "./multiplayer";
