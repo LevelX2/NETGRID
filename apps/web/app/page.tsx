@@ -4587,6 +4587,7 @@ export default function Page() {
                     const countLabel = centralServerCountLabel(activeView, server.id);
                     const runAction = runActionForServer(server.id);
                     const lanes = serverLanesForSide(activeView.side, server);
+                    const isOwnCorpHq = activeView.side === "corp" && server.id === "hq";
                     const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
                       if (server.id === "archives" && lane.kind === "root") {
                         return (
@@ -4641,7 +4642,7 @@ export default function Page() {
                     };
                     return (
                       <article
-                        className={`server ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
+                        className={`server ${isOwnCorpHq ? "corpHqServer" : ""} ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
                         key={server.id}
                         data-testid="server"
                         data-server-id={server.id}
@@ -4683,17 +4684,69 @@ export default function Page() {
                             ) : null}
                           </div>
                           <div className="serverBody">
-                            <div className="pairedServerLanes">
-                              {lanes.map((lane) => (
-                                <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                  <div className="laneLabel">
-                                    <span>{lane.label}</span>
+                            <div className={isOwnCorpHq ? "corpHqComposite" : "pairedServerLanes"}>
+                              {isOwnCorpHq ? (
+                                <>
+                                  <div className={`corpHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
+                                    <div className="corpHqHandHead">
+                                      <span>Handkarten</span>
+                                    </div>
+                                    <div className="cards fixedZoneCards corpHqHandCards" style={handCardsStyle}>
+                                      {activeView.own.gripOrHq.map((card) => {
+                                        const displayCard = enrichCard(card);
+                                        const discardOption = discardOptionForCard(card);
+                                        return (
+                                          <CardView
+                                            key={card.instanceId}
+                                            card={displayCard}
+                                            displayMode={cardDisplayMode}
+                                            hiddenSide={activeView.side}
+                                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                            actions={cardActionsFor(card)}
+                                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                            {...(discardOption
+                                              ? {
+                                                  discardShortcut: {
+                                                    selected: selectedDiscardOptionIdSet.has(discardOption.id),
+                                                    disabled: Boolean(payload.winner) || connection !== "online",
+                                                    onToggle: () => toggleDiscardOption(discardOption.id)
+                                                  }
+                                                }
+                                              : {})}
+                                            onAction={submitAction}
+                                            onFocus={focusCard}
+                                            onActionContextSelect={selectActionCard}
+                                          />
+                                        );
+                                      })}
+                                    </div>
                                   </div>
-                                  <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
-                                    {renderLaneCards(lane)}
+                                  <span className="corpHqConnector" aria-hidden="true" />
+                                  <div className="pairedServerLanes corpHqServerLanes">
+                                    {lanes.map((lane) => (
+                                      <div className="serverLaneGroup pairedServerLane" key={lane.label}>
+                                        <div className="laneLabel">
+                                          <span>{lane.label}</span>
+                                        </div>
+                                        <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                          {renderLaneCards(lane)}
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
-                                </div>
-                              ))}
+                                </>
+                              ) : (
+                                lanes.map((lane) => (
+                                  <div className="serverLaneGroup pairedServerLane" key={lane.label}>
+                                    <div className="laneLabel">
+                                      <span>{lane.label}</span>
+                                    </div>
+                                    <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                      {renderLaneCards(lane)}
+                                    </div>
+                                  </div>
+                                ))
+                              )}
                             </div>
                           </div>
                         </div>
@@ -4833,39 +4886,7 @@ export default function Page() {
                 </SideZoneFrame>
               </div>
             ) : (
-              <div className="runnerGripHeapLayout corpZoneLayout">
-                <SideZoneFrame side="corp" label="HQ" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "hq")}>
-                  <div className="cards fixedZoneCards" style={handCardsStyle}>
-                    {activeView.own.gripOrHq.map((card) => {
-                      const displayCard = enrichCard(card);
-                      const discardOption = discardOptionForCard(card);
-                      return (
-                        <CardView
-                          key={card.instanceId}
-                          card={displayCard}
-                          displayMode={cardDisplayMode}
-                          hiddenSide={activeView.side}
-                          selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                          actions={cardActionsFor(card)}
-                          actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                          {...(discardOption
-                            ? {
-                                discardShortcut: {
-                                  selected: selectedDiscardOptionIdSet.has(discardOption.id),
-                                  disabled: Boolean(payload.winner) || connection !== "online",
-                                  onToggle: () => toggleDiscardOption(discardOption.id)
-                                }
-                              }
-                            : {})}
-                          onAction={submitAction}
-                          onFocus={focusCard}
-                          onActionContextSelect={selectActionCard}
-                        />
-                      );
-                    })}
-                  </div>
-                </SideZoneFrame>
-              </div>
+              null
             )}
           </section>
         </section>

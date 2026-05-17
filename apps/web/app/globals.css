@@ -3985,6 +3985,75 @@ select {
   max-width: 100%;
 }
 
+.corpHqServer {
+  flex: 1 0 720px;
+  width: 720px;
+  max-width: 100%;
+}
+
+.corpHqServer .serverLayout,
+.corpHqServer .serverBody {
+  width: 100%;
+}
+
+.corpHqComposite {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.corpHqHandPanel {
+  flex: 1 1 320px;
+  min-width: 0;
+  max-width: min(48vw, 410px);
+}
+
+.corpHqHandHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 4px 0 3px;
+}
+
+.corpHqHandHead span {
+  text-transform: uppercase;
+}
+
+.fixedZoneCards.corpHqHandCards {
+  width: 100%;
+  max-width: 100%;
+  min-height: calc(var(--cards-min-width, 108px) * 1.4);
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
+.corpHqConnector {
+  position: relative;
+  flex: 0 0 18px;
+  align-self: stretch;
+  min-height: calc(185px * var(--lane-card-scale, 1));
+}
+
+.corpHqConnector::before {
+  content: "";
+  position: absolute;
+  top: calc(34px + 76px * var(--lane-card-scale, 1));
+  left: 2px;
+  right: 2px;
+  border-top: 2px solid color-mix(in srgb, var(--corp-zone-accent), var(--line) 36%);
+}
+
+.corpHqServerLanes {
+  flex: 0 0 auto;
+}
+
 .server.activeRunTarget {
   border-color: color-mix(in srgb, var(--cue), var(--runner) 25%);
   box-shadow:
@@ -8863,6 +8932,24 @@ select,
 
   .pairedServerLanes {
     grid-template-columns: 1fr;
+  }
+
+  .corpHqComposite {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .corpHqHandPanel {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .corpHqHandCards {
+    max-width: 100%;
+  }
+
+  .corpHqConnector {
+    display: none;
   }
 
   .runnerHeapOverlapRow .cardSlot {
