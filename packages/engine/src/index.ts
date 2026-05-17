@@ -24,6 +24,7 @@ import {
   type GameState,
   type ImminentEvent,
   type LegalAction,
+  type LegacyAbilityPayloadField,
   type PlayerAction,
   type PlayerController,
   type PlayerView,
@@ -170,7 +171,10 @@ import {
   INVESTMENT_FIRM_ASSET_CARD_ID,
   type EconomyActionProfile,
 } from "./mechanics/payment-costs";
-import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
+import {
+  buildPublicAbilitySchemaContext,
+  legacyAbilityPayloadEntries,
+} from "./mechanics/public-payload-schema";
 import {
   AI_BOON_RANDOM_BREAKER_CARD_ID,
   BOARDWALK_RANDOM_PROGRAM_CARD_ID,
@@ -215,6 +219,25 @@ type VisibleCounterPayload = {
   removedCounterAmount?: number;
   remainingCounters: number;
 };
+
+const ACTION_ID_ABILITY_PAYLOAD_FIELDS = [
+  "v1917AssetAbility",
+  "v1918UpgradeAbility",
+  "v1919AssetAbility",
+  "v1919OperationAbility",
+  "v1919UpgradeAbility",
+  "v1919RunnerProgramAbility",
+  "v1919RunnerEventAbility",
+  "v1920AssetAbility",
+  "v1921AssetAbility",
+  "v1921UpgradeAbility",
+  "v1921RunnerProgramAbility",
+  "v1921RunnerResourceAbility",
+  "resourceAbility",
+  "runnerAbility",
+  "acmeSavingsAndLoanAbility",
+  "agendaAbility",
+] as const satisfies readonly LegacyAbilityPayloadField[];
 
 export {
   DEMO_CARDS,
@@ -20450,6 +20473,16 @@ function assertPositiveIntegerAmount(amount: number): void {
     throw new Error("Damage amount ist ungueltig.");
 }
 
+function hasLegacyAbilityPayload(
+  payload: LegalAction["payload"] | undefined,
+  field: LegacyAbilityPayloadField,
+  abilityIds?: readonly string[],
+): boolean {
+  return legacyAbilityPayloadEntries(payload, [field]).some(
+    (entry) => !abilityIds || abilityIds.includes(entry.abilityId),
+  );
+}
+
 function makeActionId(
   type: ActionType,
   side: Side,
@@ -20473,31 +20506,12 @@ function makeActionId(
     parts.push(String(payload.subroutineIndexes));
   if (payload?.removeTagAmount !== undefined)
     parts.push(String(payload.removeTagAmount));
-  if (payload?.v1917AssetAbility) parts.push(String(payload.v1917AssetAbility));
-  if (payload?.v1918UpgradeAbility)
-    parts.push(String(payload.v1918UpgradeAbility));
-  if (payload?.v1919AssetAbility) parts.push(String(payload.v1919AssetAbility));
-  if (payload?.v1919OperationAbility)
-    parts.push(String(payload.v1919OperationAbility));
-  if (payload?.v1919UpgradeAbility)
-    parts.push(String(payload.v1919UpgradeAbility));
-  if (payload?.v1919RunnerProgramAbility)
-    parts.push(String(payload.v1919RunnerProgramAbility));
-  if (payload?.v1919RunnerEventAbility)
-    parts.push(String(payload.v1919RunnerEventAbility));
-  if (payload?.v1920AssetAbility) parts.push(String(payload.v1920AssetAbility));
-  if (payload?.v1921AssetAbility) parts.push(String(payload.v1921AssetAbility));
-  if (payload?.v1921UpgradeAbility)
-    parts.push(String(payload.v1921UpgradeAbility));
-  if (payload?.v1921RunnerProgramAbility)
-    parts.push(String(payload.v1921RunnerProgramAbility));
-  if (payload?.v1921RunnerResourceAbility)
-    parts.push(String(payload.v1921RunnerResourceAbility));
-  if (payload?.resourceAbility) parts.push(String(payload.resourceAbility));
-  if (payload?.runnerAbility) parts.push(String(payload.runnerAbility));
-  if (payload?.acmeSavingsAndLoanAbility)
-    parts.push(String(payload.acmeSavingsAndLoanAbility));
-  if (payload?.agendaAbility) parts.push(String(payload.agendaAbility));
+  for (const entry of legacyAbilityPayloadEntries(
+    payload,
+    ACTION_ID_ABILITY_PAYLOAD_FIELDS,
+  )) {
+    parts.push(entry.abilityId);
+  }
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
   if (payload?.oliviaSalazarCardId)
     parts.push(String(payload.oliviaSalazarCardId));
@@ -21983,22 +21997,26 @@ function revealForPublicEvent(
       "break_subroutine",
     ].includes(legalAction.type) ||
     (legalAction.type === "gain_credit" &&
-      (legalAction.payload?.v1917AssetAbility === "gain_credits" ||
-        legalAction.payload?.v1917AssetAbility === "trace_3_tag" ||
-        legalAction.payload?.v1917AssetAbility === "spinn_load_pool")) ||
+      hasLegacyAbilityPayload(legalAction.payload, "v1917AssetAbility", [
+        "gain_credits",
+        "trace_3_tag",
+        "spinn_load_pool",
+      ])) ||
     (legalAction.type === "gain_credit" &&
-      typeof legalAction.payload?.v1920AssetAbility === "string") ||
+      hasLegacyAbilityPayload(legalAction.payload, "v1920AssetAbility")) ||
     (legalAction.type === "gain_credit" &&
       legalAction.payload?.traceStarted === true) ||
     (legalAction.type === "gain_credit" &&
-      (legalAction.payload?.agendaAbility === "v1922_political_overthrow" ||
-        legalAction.payload?.agendaAbility === "v1922_marine_arcology" ||
-        legalAction.payload?.agendaAbility === "v1922_corporate_retreat")) ||
+      hasLegacyAbilityPayload(legalAction.payload, "agendaAbility", [
+        "v1922_political_overthrow",
+        "v1922_marine_arcology",
+        "v1922_corporate_retreat",
+      ])) ||
     (legalAction.side === "runner" &&
       (legalAction.type === "gain_credit" ||
         legalAction.type === "trigger_ability" ||
         legalAction.type === "remove_tag") &&
-      typeof legalAction.payload?.resourceAbility === "string") ||
+      hasLegacyAbilityPayload(legalAction.payload, "resourceAbility")) ||
     (legalAction.side === "runner" && legalAction.type === "install_card");
   if (revealsCard && typeof legalAction.source === "string") {
     const cardId =

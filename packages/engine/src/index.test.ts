@@ -30793,6 +30793,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
         action.payload?.v1917AssetAbility === "gain_credits" &&
         action.payload?.cardId === rockerboyId,
     );
+    expect(ability.actionId.endsWith(".gain_credits")).toBe(true);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -30839,6 +30840,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       actionType: "gain_credit",
       cardDefinitionId: "onr_v1_337_rockerboy-promotion",
       v1917AssetAbility: "gain_credits",
+      abilityFamily: "payment-costs",
+      abilityId: "gain_credits",
+      effectKind: "gain_credits",
       gainedCredits: 2,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(

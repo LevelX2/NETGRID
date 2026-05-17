@@ -2,6 +2,7 @@ import {
   LEGACY_ABILITY_PAYLOAD_FIELDS,
   type ActionType,
   type EventVisibilityClass,
+  type LegacyAbilityPayloadField,
 } from "@netgrid/shared";
 
 export type AbilityFamily =
@@ -26,6 +27,18 @@ export type PublicAbilitySchemaContext = {
     hiddenZoneBarrier?: boolean;
     redactedKind?: string;
   };
+};
+
+export type LegacyAbilityPayloadEntry = {
+  field: LegacyAbilityPayloadField;
+  abilityId: string;
+};
+
+export type PublicAbilityMetadata = {
+  abilityField?: LegacyAbilityPayloadField;
+  abilityFamily?: AbilityFamily;
+  abilityId?: string;
+  effectKind?: string;
 };
 
 const AMOUNT_KEYS = [
@@ -87,6 +100,45 @@ const TARGET_KEYS = [
   "redactedKind",
 ] as const;
 
+export function legacyAbilityPayloadEntries(
+  payload: Record<string, unknown> | undefined,
+  fields: readonly LegacyAbilityPayloadField[] = LEGACY_ABILITY_PAYLOAD_FIELDS,
+): LegacyAbilityPayloadEntry[] {
+  if (!payload) return [];
+  const entries: LegacyAbilityPayloadEntry[] = [];
+  for (const field of fields) {
+    const abilityId = stringValue(payload[field]);
+    if (abilityId) entries.push({ field, abilityId });
+  }
+  return entries;
+}
+
+export function publicAbilityMetadata(
+  actionType: ActionType,
+  payload: Record<string, unknown> | undefined,
+  context: Record<string, unknown> = {},
+): PublicAbilityMetadata {
+  const combined = { ...(payload ?? {}), ...context };
+  const legacyAbility = legacyAbilityPayloadEntries(combined)[0];
+  const abilityId = stringValue(combined.abilityId) ?? legacyAbility?.abilityId;
+  const hiddenZoneAction = stringValue(combined.hiddenZoneAction);
+  const inferredAbilityId = abilityId ?? hiddenZoneAction;
+  const family = stringValue(combined.abilityFamily) as AbilityFamily | undefined;
+  const abilityFamily = isAbilityFamily(family)
+    ? family
+    : inferAbilityFamily(inferredAbilityId, combined);
+  const effectKind =
+    stringValue(combined.effectKind) ??
+    inferEffectKind(actionType, inferredAbilityId, combined);
+
+  return {
+    ...(legacyAbility ? { abilityField: legacyAbility.field } : {}),
+    ...(abilityFamily ? { abilityFamily } : {}),
+    ...(inferredAbilityId ? { abilityId: inferredAbilityId } : {}),
+    ...(effectKind ? { effectKind } : {}),
+  };
+}
+
 export function buildPublicAbilitySchemaContext(
   actionType: ActionType,
   payload: Record<string, unknown> | undefined,
@@ -94,15 +146,7 @@ export function buildPublicAbilitySchemaContext(
   visibilityClass: EventVisibilityClass,
 ): PublicAbilitySchemaContext {
   const combined = { ...(payload ?? {}), ...context };
-  const abilityId = stringValue(combined.abilityId) ?? legacyAbilityId(combined);
-  const hiddenZoneAction = stringValue(combined.hiddenZoneAction);
-  const inferredAbilityId = abilityId ?? hiddenZoneAction;
-  const family = stringValue(combined.abilityFamily) as AbilityFamily | undefined;
-  const abilityFamily =
-    isAbilityFamily(family) ? family : inferAbilityFamily(inferredAbilityId, combined);
-  const effectKind =
-    stringValue(combined.effectKind) ??
-    inferEffectKind(actionType, inferredAbilityId, combined);
+  const metadata = publicAbilityMetadata(actionType, payload, context);
   const sourceDefinitionId = stringValue(combined.sourceDefinitionId);
   const amounts = publicAmounts(combined);
   const targets = publicTargets(combined);
@@ -110,9 +154,9 @@ export function buildPublicAbilitySchemaContext(
   const hiddenZoneBarrier = combined.hiddenZoneBarrier === true;
 
   const result: PublicAbilitySchemaContext = {};
-  if (abilityFamily) result.abilityFamily = abilityFamily;
-  if (inferredAbilityId) result.abilityId = inferredAbilityId;
-  if (effectKind) result.effectKind = effectKind;
+  if (metadata.abilityFamily) result.abilityFamily = metadata.abilityFamily;
+  if (metadata.abilityId) result.abilityId = metadata.abilityId;
+  if (metadata.effectKind) result.effectKind = metadata.effectKind;
   if (sourceDefinitionId) result.sourceDefinitionId = sourceDefinitionId;
   if (Object.keys(amounts).length > 0) result.amounts = amounts;
   if (Object.keys(targets).length > 0) result.targets = targets;
@@ -122,14 +166,6 @@ export function buildPublicAbilitySchemaContext(
     ...(redactedKind ? { redactedKind } : {}),
   };
   return result;
-}
-
-function legacyAbilityId(payload: Record<string, unknown>): string | undefined {
-  for (const field of LEGACY_ABILITY_PAYLOAD_FIELDS) {
-    const value = stringValue(payload[field]);
-    if (value) return value;
-  }
-  return undefined;
 }
 
 function inferAbilityFamily(

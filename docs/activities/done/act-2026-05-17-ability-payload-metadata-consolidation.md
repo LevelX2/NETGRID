@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-17-ability-payload-metadata-consolidation
-status: inbox
+status: done
 kind: cleanup
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-17-card-effect-generic-resolver-analysis
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/mechanics/public-payload-schema.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine test -- -t "Rockerboy"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Ability-Payload-Metadaten konsolidieren
@@ -50,4 +56,4 @@ Ability-Payload-Schlüssel und PublicPayload-Metadaten sollen weniger pro Releas
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Ability-Payload-Metadaten werden zentral ueber `legacyAbilityPayloadEntries` und `publicAbilityMetadata` gelesen; `makeActionId` nutzt die alte ActionId-Reihenfolge weiter und Public-Reveal-Pruefungen greifen auf denselben Helper zu. Bestehende PublicPayload-Felder bleiben erhalten; der Rockerboy-Test prueft zusaetzlich Ability-ID, Family, Effect-Kind und ActionId-Suffix.
