@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-v2-moderator-runbook-draft
-status: inbox
+status: in-progress
 kind: docs
 area: docs
 priority: normal
 primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
 releaseTarget: V2.6
 blockedBy: []
 resultArtifacts: []

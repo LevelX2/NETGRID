@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-proteus-bad-publicity-loss-gate
-status: inbox
+status: in-progress
 kind: concept
 area: cards
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-1
 releaseTarget: Proteus planning
 blockedBy: []
 resultArtifacts: []

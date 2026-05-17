@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-v2-moderation-evidence-export-contract
-status: inbox
+status: in-progress
 kind: architecture
 area: docs
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-3
 releaseTarget: V2.6
 blockedBy: []
 resultArtifacts: []
