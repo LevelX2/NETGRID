@@ -73,6 +73,41 @@ describe("deriveOpponentActionCues", () => {
     expect(cues[0]?.highlight).toEqual({ kind: "zone", side: "runner", zone: "rig" });
   });
 
+  it("keeps Rio de Janeiro City Grid roll cues visible for both players", () => {
+    const rioEvent = event("evt_rio", "continue_run", {
+      actor: "runner",
+      v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+      sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+      passedIceDefinitionId: "simple_barrier_ice",
+      serverLabel: "Remote 1",
+      v1921DieRoll: 1,
+      rioRunEnded: true
+    });
+
+    const runnerCues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [rioEvent]
+    });
+    const corpCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [rioEvent]
+    });
+
+    expect(runnerCues).toHaveLength(1);
+    expect(corpCues).toHaveLength(1);
+    expect(runnerCues[0]?.source).toBe("system");
+    expect(runnerCues[0]?.actorLabel).toBe("Spiel");
+    expect(runnerCues[0]?.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(corpCues[0]?.title).toBe("Der Runner hat simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
+    expect(runnerCues[0]?.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
+    expect(runnerCues[0]?.highlight).toEqual({ kind: "run", serverLabel: "Fort 1" });
+    expect(runnerCues[0]?.sound).toBe("run");
+    expect(cueHasHiddenLeak(runnerCues[0]!)).toBe(false);
+    expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);
+  });
+
   it("adds related cards only when the card is visible to the viewer", () => {
     const visibleIce = { instanceId: "ice_1", known: true, title: "Gate ICE", definitionId: "gate_ice", type: "ice" as const };
     const playerView = view("runner", {

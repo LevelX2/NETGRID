@@ -13916,90 +13916,103 @@ describe("V1.9.21 Deterministic Random WIP", () => {
     expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
   });
 
-  it("rolls Rio de Janeiro City Grid automatically after passing rezzed ICE on its fort", () => {
-    let state = toRunnerTurn(
-      createGameAfterSetup({
-        seed: "v1921-rio-after-pass-ice",
-        baseline: MVP_0_99_BASELINE,
-        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-        corpDeck: {
-          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
-          id: "onr_v1_corp_v1921_rio_after_pass",
-          name: "O:NR V1.9.21 Rio After Pass Corp",
-          cards: [
-            { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 1 },
-            { id: "simple_barrier_ice", quantity: 1 },
-            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
-          ],
-        },
-        agendaPointsToWin: 7,
-      }),
-    );
-    state.runner.credits = 20;
-    state.runner.clicks = 4;
-    state.corp.credits = 20;
-    state.corp.clicks = 3;
+  it.each([
+    { seed: "rio-visible-5", expectedRoll: 1, expectedRunEnded: true },
+    { seed: "rio-visible-0", expectedRoll: 4, expectedRunEnded: false },
+  ])(
+    "rolls Rio de Janeiro City Grid visibly after passed ICE on roll $expectedRoll",
+    ({ seed, expectedRoll, expectedRunEnded }) => {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: MVP_0_99_BASELINE,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: "onr_v1_corp_v1921_rio_after_pass",
+            name: "O:NR V1.9.21 Rio After Pass Corp",
+            cards: [
+              { id: "onr_v1_367_rio-de-janeiro-city-grid", quantity: 1 },
+              { id: "simple_barrier_ice", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 20;
+      state.runner.clicks = 4;
+      state.corp.credits = 20;
+      state.corp.clicks = 3;
 
-    const upgradeId = putCorpRootInRemote(
-      state,
-      "onr_v1_367_rio-de-janeiro-city-grid",
-    );
-    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
-    state.cardInstances[upgradeId] = {
-      ...state.cardInstances[upgradeId]!,
-      faceup: true,
-      rezzed: true,
-    };
-    state.cardInstances[iceId] = {
-      ...state.cardInstances[iceId]!,
-      faceup: true,
-      rezzed: true,
-    };
+      const upgradeId = putCorpRootInRemote(
+        state,
+        "onr_v1_367_rio-de-janeiro-city-grid",
+      );
+      const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+      state.cardInstances[upgradeId] = {
+        ...state.cardInstances[upgradeId]!,
+        faceup: true,
+        rezzed: true,
+      };
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
 
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
-    );
-    expect(state.run?.encounteredIceId).toBe(iceId);
-    state.run = {
-      ...state.run!,
-      brokenSubroutineIndexes: [0],
-    };
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    const randomBefore = state.randomDrawRecords.length;
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "remote_1",
+      );
+      expect(state.run?.encounteredIceId).toBe(iceId);
+      state.run = {
+        ...state.run!,
+        brokenSubroutineIndexes: [0],
+      };
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const randomBefore = state.randomDrawRecords.length;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
 
-    expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
-    const rioPurpose = String(state.randomDrawRecords.at(-1)?.purpose ?? "");
-    expect(rioPurpose).toContain(
-      "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.passed_ice.",
-    );
-    expect(rioPurpose).toContain(`.${iceId}.${upgradeId}`);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "continue_run",
-      v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
-      sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
-      passedIceDefinitionId: "simple_barrier_ice",
-      serverLabel: "Remote 1",
-      randomCounterAfter: randomBefore + 1,
-    });
-    const publicRoll = Number(
-      state.eventLog.at(-1)?.publicPayload.v1921DieRoll ?? 0,
-    );
-    expect(Number.isInteger(publicRoll)).toBe(true);
-    expect(publicRoll).toBeGreaterThanOrEqual(1);
-    expect(publicRoll).toBeLessThanOrEqual(6);
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
-    );
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(replay.actualFinalStateHash).toBe(hashState(state));
-    expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
-  });
+      expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+      const rioPurpose = String(state.randomDrawRecords.at(-1)?.purpose ?? "");
+      expect(rioPurpose).toContain(
+        "v1921.die.onr_v1_367_rio-de-janeiro-city-grid.passed_ice.",
+      );
+      expect(rioPurpose).toContain(`.${iceId}.${upgradeId}`);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "continue_run",
+        v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+        sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+        passedIceDefinitionId: "simple_barrier_ice",
+        serverLabel: "Remote 1",
+        randomCounterAfter: randomBefore + 1,
+        v1921DieRoll: expectedRoll,
+        rioRunEnded: expectedRunEnded,
+      });
+      expect(Boolean(state.run)).toBe(!expectedRunEnded);
+      for (const side of ["runner", "corp"] as const) {
+        expect(getPlayerView(state, side).publicEvents.at(-1)?.publicPayload).toMatchObject({
+          v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
+          sourceDefinitionId: "onr_v1_367_rio-de-janeiro-city-grid",
+          passedIceDefinitionId: "simple_barrier_ice",
+          serverLabel: "Remote 1",
+          v1921DieRoll: expectedRoll,
+          rioRunEnded: expectedRunEnded,
+        });
+      }
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(replay.actualFinalStateHash).toBe(hashState(state));
+      expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+    },
+  );
 
   it("records V1.9.21 Boardwalk die probes through installed program actions", () => {
     for (const definitionId of ["onr_v1_008_boardwalk"]) {

@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-rio-city-grid-visible-die-roll
-status: in_progress
+status: done
 kind: fix
 area: cards
 priority: hotfix
@@ -8,13 +8,21 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-5
 parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-cues.ts
+  - apps/web/app/action-cues.test.ts
+  - packages/engine/src/index.test.ts
+  - docs/activities/done/act-2026-05-17-rio-city-grid-visible-die-roll.md
+checks:
+  - "corepack pnpm --filter @netgrid/web exec vitest run app/action-cues.test.ts app/chronicle.test.ts"
+  - "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Rio de Janeiro City Grid\""
+  - "corepack pnpm --filter @netgrid/web typecheck"
+  - "corepack pnpm --filter @netgrid/engine typecheck"
 ---
 
 # Rio de Janeiro City Grid: Würfelwurf für beide Spieler sichtbar machen
@@ -42,11 +50,11 @@ Der Würfelwurf von `Rio de Janeiro City Grid` muss für Runner und Korp als sic
 
 ## Akzeptanzkriterien
 
-- [ ] Beide Spieler sehen, dass Rio de Janeiro City Grid ausgelöst wurde.
-- [ ] Wurfwert und Konsequenz sind sichtbar und bleiben ausreichend lange stehen.
-- [ ] Chronik nennt Karte, Wurf, Ergebnis und Run-Folge.
-- [ ] Replay/StateHash und RandomDrawRecords bleiben deterministisch.
-- [ ] Regression deckt Wurf `1` und einen Nicht-1-Wurf ab.
+- [x] Beide Spieler sehen, dass Rio de Janeiro City Grid ausgelöst wurde.
+- [x] Wurfwert und Konsequenz sind sichtbar und bleiben ausreichend lange stehen.
+- [x] Chronik nennt Karte, Wurf, Ergebnis und Run-Folge.
+- [x] Replay/StateHash und RandomDrawRecords bleiben deterministisch.
+- [x] Regression deckt Wurf `1` und einen Nicht-1-Wurf ab.
 
 ## Umsetzungshinweise
 
@@ -54,4 +62,4 @@ Der Würfelwurf von `Rio de Janeiro City Grid` muss für Runner und Korp als sic
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen: Rio de Janeiro City Grid erzeugt weiterhin denselben deterministischen Engine-Wurf und dieselben RandomDrawRecords, wird aber im Web-Cue-Layer als erzwungener öffentlicher Karteneffekt behandelt. Dadurch sehen Runner und Korp den Wurfwert sowie die Konsequenz als bestätigbare Meldung; die Chronik nutzt weiterhin Karte, Wurf, Fort/ICE und Run-Folge. Die Engine-Regression deckt deterministisch `Wurf: 1` mit Run-Ende und einen Nicht-1-Wurf mit weiterlaufendem Run ab.
