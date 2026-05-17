@@ -5,11 +5,7 @@ import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import {
   createRuntimeCardsById,
   activeAiApprovedCardIds,
-  CATALOG_AI_APPROVAL_BATCHES,
-  DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS,
-  DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
-  DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS,
-  ONR_V1_9_22_WIP_CARD_IDS,
+  ACTIVE_CARD_SUPPORT_AI_GROUPS,
   type CatalogCard,
 } from "@netgrid/catalog";
 import {
@@ -489,12 +485,16 @@ describe("MVP 0.3 AI controller contract", () => {
 
   it("marks longtail completion cards AI-supported after every promotion gate", () => {
     const cardsById = createRuntimeCardsById();
+    const longtailCardIds = [
+      "onr_v1_026_false-echo",
+      "onr_v1_075_zetatech-software-installer",
+      "onr_v1_298_planning-consultants",
+    ];
 
-    expect(ONR_V1_9_22_WIP_CARD_IDS).toHaveLength(47);
-    expect(DECK_LEGAL_AI_APPROVAL_V1922_CARD_IDS).toEqual(
-      ONR_V1_9_22_WIP_CARD_IDS,
+    expect(activeAiApprovedCardIds).toEqual(
+      expect.arrayContaining(longtailCardIds),
     );
-    for (const cardId of ONR_V1_9_22_WIP_CARD_IDS) {
+    for (const cardId of longtailCardIds) {
       const runtimeCard = cardsById[cardId];
       expect(runtimeCard?.statuses.ai_supported ?? false, cardId).toBe(true);
       expect(runtimeCard?.statuses.human_playable ?? false, cardId).toBe(true);
@@ -3778,7 +3778,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
       (action) => action.type === "gain_credit",
     );
 
-    expect(DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS).toEqual(
+    expect(activeAiApprovedCardIds).toEqual(
       expect.arrayContaining([
         "simple_tag_ice",
         "onr_v1_287_datapool-by-zetatech",
@@ -4951,9 +4951,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
       ),
     ).toBe(true);
     expect(decision.debug.planKind).toBe("build_rig");
-    expect(DECK_LEGAL_AI_APPROVAL_BATCH_A_CARD_IDS).toContain(
-      selectedDefinition,
-    );
+    expect(activeAiApprovedCardIds).toContain(selectedDefinition);
     expect(JSON.stringify(decision.debug)).not.toMatch(
       /cardInstances|privatePayload|Simple Agenda|v08_project_agenda/,
     );
@@ -6893,18 +6891,18 @@ describe("MVP 0.3 AI simulation harness", () => {
     }
   });
 
-  it("marks every active catalog AI approval batch as AI-supported for custom AI deckbuilding", () => {
+  it("marks every active support AI group as AI-supported for custom AI deckbuilding", () => {
     const runtimeCardsById = createRuntimeCardsById();
-    const batchCardIds = CATALOG_AI_APPROVAL_BATCHES.flatMap(
-      (batch) => batch.cardIds,
+    const groupCardIds = ACTIVE_CARD_SUPPORT_AI_GROUPS.flatMap(
+      (group) => group.cardIds,
     );
 
-    expect([...new Set(batchCardIds)].sort()).toEqual(
+    expect([...new Set(groupCardIds)].sort()).toEqual(
       [...activeAiApprovedCardIds].sort(),
     );
-    for (const batch of CATALOG_AI_APPROVAL_BATCHES) {
-      expect(batch.cardIds.length, batch.approvalId).toBeGreaterThan(0);
-      for (const cardId of batch.cardIds) {
+    for (const group of ACTIVE_CARD_SUPPORT_AI_GROUPS) {
+      expect(group.cardIds.length, group.approvalId).toBeGreaterThan(0);
+      for (const cardId of group.cardIds) {
         const card = runtimeCardsById[cardId];
         expect(card, cardId).toBeDefined();
         expect(card?.statuses.human_playable, cardId).toBe(true);

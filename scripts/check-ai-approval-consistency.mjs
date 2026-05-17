@@ -1,180 +1,112 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, normalize } from "node:path";
 
 function readJson(path) {
   return JSON.parse(readFileSync(path, "utf8"));
 }
 
-function collectScenarioCardSets(scenarioDir) {
-  const scenarios = new Map();
-  const duplicates = new Map();
-  const files = readdirSync(scenarioDir).filter((file) => file.endsWith(".json"));
-
-  for (const file of files) {
+function collectScenarioCoverage(scenarioDir) {
+  const coverageByRef = new Map();
+  for (const file of readdirSync(scenarioDir).filter((item) => item.endsWith(".json"))) {
     const fullPath = join(scenarioDir, file);
-    let payload;
-    try {
-      payload = readJson(fullPath);
-    } catch (error) {
-      console.error(`SCENARIO_PARSE_ERROR ${fullPath}: ${error.message}`);
-      continue;
-    }
-
-    const scenarioId = typeof payload?.id === "string" ? payload.id.trim() : "";
-    if (!scenarioId) {
-      continue;
-    }
-
-    const cardIds = new Set();
-
-    for (const card of Array.isArray(payload.cards) ? payload.cards : []) {
-      if (typeof card === "string" && card.trim()) {
-        cardIds.add(card.trim());
-      }
-    }
-
-    for (const item of Array.isArray(payload.scenarios) ? payload.scenarios : []) {
-      if (Array.isArray(item?.cards)) {
-        for (const card of item.cards) {
-          if (typeof card === "string" && card.trim()) {
-            cardIds.add(card.trim());
-          }
+    const payload = readJson(fullPath);
+    const scenarios = Array.isArray(payload.scenarios)
+      ? payload.scenarios
+      : payload.id
+        ? [payload]
+        : [];
+    for (const scenario of scenarios) {
+      const id = typeof scenario.id === "string" ? scenario.id : payload.id;
+      if (!id) continue;
+      const cards = new Set();
+      for (const key of ["cards", "coversCards"]) {
+        for (const cardId of Array.isArray(scenario[key]) ? scenario[key] : []) {
+          if (typeof cardId === "string" && cardId.trim()) cards.add(cardId.trim());
         }
       }
-    }
-
-    if (scenarios.has(scenarioId)) {
-      const existing = duplicates.get(scenarioId) ?? [scenarios.get(scenarioId).path];
-      existing.push(fullPath);
-      duplicates.set(scenarioId, existing);
-      continue;
-    }
-
-    scenarios.set(scenarioId, { path: fullPath, cards: cardIds });
-  }
-
-  if (duplicates.size > 0) {
-    for (const [scenarioId, paths] of duplicates) {
-      console.error(`SCENARIO_ID_DUPLICATE ${scenarioId}: ${paths.join(" | ")}`);
+      coverageByRef.set(`data/scenarios/${file}#${id}`, cards);
     }
   }
-
-  return scenarios;
+  return coverageByRef;
 }
 
-const ACTIVE_AI_HINTS_PATH = join("data", "ai", "ai-card-hints-active.json");
+function collectActiveSupportEntries(manifestDir) {
+  return readdirSync(manifestDir)
+    .filter((file) => file.endsWith("-card-support.json"))
+    .sort()
+    .flatMap((file) => {
+      const payload = readJson(join(manifestDir, file));
+      return (Array.isArray(payload.cards) ? payload.cards : []).map((entry) => ({
+        ...entry,
+        sourceFile: `data/manifests/${file}`,
+      }));
+    });
+}
 
-function collectManifestConsistencyFailures(manifestPath, scenarioIndex, activeHintsById) {
-  const manifest = readJson(manifestPath);
-  const manifestName = manifest.id || manifestPath;
-  const manifestCards = Array.isArray(manifest.cards) ? manifest.cards : [];
-  const failures = [];
-  const manifestCardIds = new Set();
-
-  for (const card of manifestCards) {
-    if (typeof card?.cardId !== "string" || !card.cardId.trim()) {
-      failures.push(`missing cardId in manifest card entry`);
-      continue;
-    }
-    manifestCardIds.add(card.cardId);
-  }
-
-  for (const card of manifestCards) {
-    const cardId = card?.cardId;
-    const hint = activeHintsById.get(cardId);
-    if (!hint) {
-      failures.push(`hint missing for manifest card ${cardId}`);
-      continue;
-    }
-    if (card.status !== "ai_supported") {
-      failures.push(`manifest status not ai_supported for ${cardId}`);
-    }
-    const scenarioRefs = Array.isArray(card.scenarioRefs) && card.scenarioRefs.length > 0
-      ? card.scenarioRefs
-      : typeof manifest.scenarioId === "string"
-        ? [manifest.scenarioId]
-        : [];
-    if (scenarioRefs.length === 0) {
-      failures.push(`manifest scenarioRefs empty for ${cardId}`);
-    }
-    if (hint.aiSupportStatus !== "ai_supported") {
-      failures.push(`hint aiSupportStatus != ai_supported for ${cardId}`);
-    }
-    if (!Array.isArray(hint.scenarioRefs) || hint.scenarioRefs.length === 0) {
-      failures.push(`hint scenarioRefs empty for ${cardId}`);
-    }
-    const scenarioIdsToCheck = typeof manifest.scenarioId === "string" ? [manifest.scenarioId] : [];
-    for (const scenarioRef of scenarioIdsToCheck) {
-      const scenarioEntry = scenarioIndex.get(scenarioRef);
-      if (!scenarioEntry) {
-        failures.push(`scenario not found for scenarioRef ${scenarioRef}`);
-        continue;
-      }
-      if (!scenarioEntry.cards.has(cardId)) {
-        failures.push(`scenario ${scenarioRef} missing card ${cardId}`);
-      }
-    }
-  }
-
-  return { manifestName, ok: failures.length === 0, failures };
+function normalizeScenarioRef(ref) {
+  return normalize(ref).replaceAll("\\", "/");
 }
 
 function main() {
-  const scenarioIndex = collectScenarioCardSets(join("data", "scenarios"));
-  if (!existsSync(ACTIVE_AI_HINTS_PATH)) {
-    console.error(`ACTIVE_AI_HINTS_NOT_FOUND ${ACTIVE_AI_HINTS_PATH}`);
+  const hintsPath = join("data", "ai", "ai-card-hints-active.json");
+  if (!existsSync(hintsPath)) {
+    console.error(`ACTIVE_AI_HINTS_NOT_FOUND ${hintsPath}`);
     process.exit(1);
   }
-  const activeHintData = readJson(ACTIVE_AI_HINTS_PATH);
+
+  const activeHints = readJson(hintsPath);
   const activeHintsById = new Map(
-    (Array.isArray(activeHintData.cards) ? activeHintData.cards : [])
+    (Array.isArray(activeHints.cards) ? activeHints.cards : [])
       .filter((hint) => typeof hint?.cardId === "string" && hint.cardId.trim())
-      .map((hint) => [hint.cardId, hint])
+      .map((hint) => [hint.cardId, hint]),
   );
-  const manifestFiles = readdirSync(join("data", "manifests"))
-    .filter((file) => file.startsWith("deck-legal-ai-approval-") && file.endsWith(".json"))
-    .sort();
+  const scenarioCoverage = collectScenarioCoverage(join("data", "scenarios"));
+  const supportEntries = collectActiveSupportEntries(join("data", "manifests"));
+  const failures = [];
 
-  if (manifestFiles.length === 0) {
-    console.error("NO_MATCHING_MANIFEST");
-    process.exit(1);
-  }
+  for (const entry of supportEntries) {
+    if (entry?.statuses?.ai_supported !== true) continue;
+    const cardId = entry.cardId;
+    if (entry.statuses.human_playable !== true)
+      failures.push(`${cardId}: ai_supported without human_playable`);
+    if (entry.statuses.deck_legal !== true)
+      failures.push(`${cardId}: ai_supported without deck_legal`);
 
-  let hasFailures = false;
-  const report = [];
-
-  for (const file of manifestFiles) {
-    const manifestPath = join("data", "manifests", file);
-    let check;
-    try {
-      check = collectManifestConsistencyFailures(manifestPath, scenarioIndex, activeHintsById);
-    } catch (error) {
-      hasFailures = true;
-      check = { manifestName: file, ok: false, failures: [`${error.name}: ${error.message}`] };
+    const hint = activeHintsById.get(cardId);
+    if (!hint) {
+      failures.push(`${cardId}: active AI hint missing`);
+      continue;
     }
+    if (hint.aiSupportStatus !== "ai_supported")
+      failures.push(`${cardId}: active AI hint is not ai_supported`);
 
-    report.push(check);
-    if (!check.ok) {
-      hasFailures = true;
-    }
-  }
+    const supportRef = entry.support?.aiHintRef;
+    if (supportRef !== `ai-card-hints-active:${cardId}`)
+      failures.push(`${cardId}: support aiHintRef mismatch`);
 
-  for (const item of report) {
-    const status = item.ok ? "[OK]" : "[FAIL]";
-    console.log(`${status} ${item.manifestName}`);
-    if (!item.ok) {
-      for (const failure of item.failures) {
-        console.log(`  - ${failure}`);
+    const scenarioRefs = Array.isArray(entry.support?.scenarioRefs)
+      ? entry.support.scenarioRefs
+      : [];
+    if (scenarioRefs.length === 0) failures.push(`${cardId}: scenarioRefs empty`);
+    for (const ref of scenarioRefs) {
+      const normalizedRef = normalizeScenarioRef(ref);
+      const coveredCards = scenarioCoverage.get(normalizedRef);
+      if (!coveredCards) {
+        failures.push(`${cardId}: scenarioRef not found ${ref}`);
+        continue;
       }
+      if (!coveredCards.has(cardId))
+        failures.push(`${cardId}: scenarioRef does not cover card ${ref}`);
     }
   }
 
-  if (hasFailures) {
+  if (failures.length > 0) {
+    for (const failure of failures) console.log(`[FAIL] ${failure}`);
     console.error("CONSISTENCY_CHECK_FAIL");
     process.exit(1);
   }
 
-  console.log("CONSISTENCY_OK");
+  console.log(`CONSISTENCY_OK ${supportEntries.filter((entry) => entry.statuses?.ai_supported === true).length} ai_supported cards`);
 }
 
 main();

@@ -1,0 +1,1217 @@
+{
+  "schemaVersion": "card-support-v1",
+  "setId": "testset",
+  "cards": [
+    {
+      "cardId": "catalog_preview_operation_001",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      }
+    },
+    {
+      "cardId": "catalog_preview_resource_001",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Card type resource is catalog-only in V0.5 and has no engine resolver."
+      ]
+    },
+    {
+      "cardId": "corp_identity_001",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:corp_identity_001",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:corp_identity_001",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "efficient_fracter",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:efficient_fracter",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:efficient_fracter",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "runner_identity_001",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:runner_identity_001",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:runner_identity_001",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_agenda",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_agenda",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_agenda",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_barrier_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_barrier_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_barrier_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_code_gate_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_code_gate_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_code_gate_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_decoder",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_decoder",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_decoder",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_draw_event",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_draw_event",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_draw_event",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_draw_operation",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_draw_operation",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_draw_operation",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_economy_asset",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_economy_asset",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_economy_asset",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_economy_event",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_economy_event",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_economy_event",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_economy_operation",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_economy_operation",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_economy_operation",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_fracter",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_fracter",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_fracter",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_killer",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_killer",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_killer",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_priority_agenda",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_priority_agenda",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_priority_agenda",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_run_event",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_run_event",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_run_event",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_sentry_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_sentry_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "scenario",
+          "unit_test",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_sentry_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_setup_hardware",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_setup_hardware",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_setup_hardware",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_tag_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_tag_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_tag_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_tag_punishment_operation",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_tag_punishment_operation",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_taxing_barrier_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_taxing_barrier_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_taxing_barrier_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "simple_upgrade",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:simple_upgrade",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:simple_upgrade",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_adaptive_killer",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_adaptive_killer",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_adaptive_killer",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_archive_planning_operation",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_archive_planning_operation",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_burst_credit_event",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_burst_credit_event",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_burst_credit_event",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_cashout_asset",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_cashout_asset",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_cashout_asset",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_credit_surge_operation",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_credit_surge_operation",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_credit_surge_operation",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_deep_draw_event",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_deep_draw_event",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_deep_draw_event",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_gate_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_gate_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_gate_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_memory_chip",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_memory_chip",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_memory_chip",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_overclock_run_event",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_overclock_run_event",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_overclock_run_event",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_precise_decoder",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_precise_decoder",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_precise_decoder",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_project_agenda",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_project_agenda",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_project_agenda",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_steady_fracter",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_steady_fracter",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_steady_fracter",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_wall_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_wall_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_wall_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    },
+    {
+      "cardId": "v08_watchdog_ice",
+      "setId": "testset",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": true,
+        "deck_legal": true,
+        "format_legal": true,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:v08_watchdog_ice",
+        "coverage": [
+          "deck_validation",
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": "ai-card-hints-active:v08_watchdog_ice",
+        "scenarioRefs": [
+          "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+        ]
+      }
+    }
+  ]
+}

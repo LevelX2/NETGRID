@@ -1,0 +1,918 @@
+{
+  "schemaVersion": "card-set-v1",
+  "setId": "testset",
+  "setName": "NETGRID Testset",
+  "cards": [
+    {
+      "cardId": "catalog_preview_operation_001",
+      "setId": "testset",
+      "title": "Catalog Preview Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Fiktive Katalogkarte für Importtests. Nicht implementiert und nicht decklegal.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "001"
+    },
+    {
+      "cardId": "catalog_preview_resource_001",
+      "setId": "testset",
+      "title": "Catalog Preview Resource",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Fiktive Katalogkarte mit absichtlich nicht unterstütztem Typ für Blocked-Status.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "002"
+    },
+    {
+      "cardId": "corp_identity_001",
+      "setId": "testset",
+      "title": "Corp Identity",
+      "side": "corp",
+      "type": "identity",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Testidentität ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "003"
+    },
+    {
+      "cardId": "efficient_fracter",
+      "setId": "testset",
+      "title": "Efficient Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "fracter",
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "004"
+    },
+    {
+      "cardId": "runner_identity_001",
+      "setId": "testset",
+      "title": "Runner Identity",
+      "side": "runner",
+      "type": "identity",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Testidentität ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "005"
+    },
+    {
+      "cardId": "simple_agenda",
+      "setId": "testset",
+      "title": "Simple Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "006"
+    },
+    {
+      "cardId": "simple_barrier_ice",
+      "setId": "testset",
+      "title": "Simple Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "007"
+    },
+    {
+      "cardId": "simple_code_gate_ice",
+      "setId": "testset",
+      "title": "Simple Code Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Die Corp erhält 1 Credit. End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "008"
+    },
+    {
+      "cardId": "simple_decoder",
+      "setId": "testset",
+      "title": "Simple Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "decoder",
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "009"
+    },
+    {
+      "cardId": "simple_draw_event",
+      "setId": "testset",
+      "title": "Simple Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Ziehe 2 Karten.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "010"
+    },
+    {
+      "cardId": "simple_draw_operation",
+      "setId": "testset",
+      "title": "Simple Draw Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Ziehe 2 Karten.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "011"
+    },
+    {
+      "cardId": "simple_economy_asset",
+      "setId": "testset",
+      "title": "Simple Economy Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "012"
+    },
+    {
+      "cardId": "simple_economy_event",
+      "setId": "testset",
+      "title": "Simple Economy Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Erhalte 4 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "013"
+    },
+    {
+      "cardId": "simple_economy_operation",
+      "setId": "testset",
+      "title": "Simple Economy Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Erhalte 4 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "014"
+    },
+    {
+      "cardId": "simple_fracter",
+      "setId": "testset",
+      "title": "Simple Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "fracter",
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "015"
+    },
+    {
+      "cardId": "simple_killer",
+      "setId": "testset",
+      "title": "Simple Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 1,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "016"
+    },
+    {
+      "cardId": "simple_priority_agenda",
+      "setId": "testset",
+      "title": "Simple Priority Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 3
+      },
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "017"
+    },
+    {
+      "cardId": "simple_run_event",
+      "setId": "testset",
+      "title": "Simple Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 2 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "018"
+    },
+    {
+      "cardId": "simple_sentry_ice",
+      "setId": "testset",
+      "title": "Simple Sentry ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Der Runner verliert 2 Credits, falls möglich. End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "019"
+    },
+    {
+      "cardId": "simple_setup_hardware",
+      "setId": "testset",
+      "title": "Simple Setup Hardware",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "+1 Memory Limit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "020"
+    },
+    {
+      "cardId": "simple_tag_ice",
+      "setId": "testset",
+      "title": "Simple Tag ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gib dem Runner 1 Tag. End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "021"
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "setId": "testset",
+      "title": "Simple Tag Punishment Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Spiele nur, wenn der Runner getaggt ist. Der Runner verliert 2 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "022"
+    },
+    {
+      "cardId": "simple_taxing_barrier_ice",
+      "setId": "testset",
+      "title": "Simple Taxing Barrier ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Der Runner verliert 1 Credit. End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "023"
+    },
+    {
+      "cardId": "simple_upgrade",
+      "setId": "testset",
+      "title": "Simple Upgrade",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Einfache Root-Karte ohne aktive Fähigkeit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "024"
+    },
+    {
+      "cardId": "v08_adaptive_killer",
+      "setId": "testset",
+      "title": "Adaptive Killer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Sentry-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-007"
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "setId": "testset",
+      "title": "Archive Planning Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Ziehe 3 Karten.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-009"
+    },
+    {
+      "cardId": "v08_burst_credit_event",
+      "setId": "testset",
+      "title": "Burst Credit Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Erhalte 6 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-001"
+    },
+    {
+      "cardId": "v08_cashout_asset",
+      "setId": "testset",
+      "title": "Cashout Asset",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Wenn diese Karte gerezzt wird, erhält die Corp 4 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-011"
+    },
+    {
+      "cardId": "v08_credit_surge_operation",
+      "setId": "testset",
+      "title": "Credit Surge Operation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Erhalte 7 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-008"
+    },
+    {
+      "cardId": "v08_deep_draw_event",
+      "setId": "testset",
+      "title": "Deep Draw Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Ziehe 3 Karten.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-002"
+    },
+    {
+      "cardId": "v08_gate_ice",
+      "setId": "testset",
+      "title": "Gate ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Die Corp erhält 2 Credits. End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-013"
+    },
+    {
+      "cardId": "v08_memory_chip",
+      "setId": "testset",
+      "title": "Memory Chip",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "+1 Memory Limit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-004"
+    },
+    {
+      "cardId": "v08_overclock_run_event",
+      "setId": "testset",
+      "title": "Overclock Run Event",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Mache einen Run auf einen Server deiner Wahl. Wenn der Run erfolgreich ist, erhältst du 3 Credits.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-003"
+    },
+    {
+      "cardId": "v08_precise_decoder",
+      "setId": "testset",
+      "title": "Precise Decoder",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "decoder",
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Code-Gate-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-006"
+    },
+    {
+      "cardId": "v08_project_agenda",
+      "setId": "testset",
+      "title": "Project Agenda",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "text": "Keine zusätzliche Fähigkeit.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-010"
+    },
+    {
+      "cardId": "v08_steady_fracter",
+      "setId": "testset",
+      "title": "Steady Fracter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "fracter",
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 4,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "1 Credit: +1 Stärke. 1 Credit: Brich 1 Barrier-Subroutine.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-005"
+    },
+    {
+      "cardId": "v08_wall_ice",
+      "setId": "testset",
+      "title": "Wall ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "barrier"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-012"
+    },
+    {
+      "cardId": "v08_watchdog_ice",
+      "setId": "testset",
+      "title": "Watchdog ICE",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gib dem Runner 1 Tag. End the run.",
+      "displayOnlyText": true,
+      "faction": "neutral_demo",
+      "setName": "NETGRID Testset",
+      "collectorNumber": "V08-014"
+    }
+  ]
+}

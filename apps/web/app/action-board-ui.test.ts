@@ -222,7 +222,9 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(runPositionStatusLabel(running)).toBe("Aktuell: Begegnung mit ICE 2 (1 von 2)");
     expect(runWindowStatusLabel(running)).toBe("ICE 2 (1 von 2)");
-    expect(runAwareActionButtonLabel(running, pump)).toBe("Stärke +1 (Replicator) gegen ICE 2");
+    expect(runAwareActionButtonLabel(running, pump)).toBe(
+      "Stärke +1 (Replicator) gegen Data Wall (ICE 2)",
+    );
     expect(runAwareActionButtonLabel(running, passIce)).toBe("ICE 2 passieren");
   });
 

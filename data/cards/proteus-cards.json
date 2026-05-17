@@ -1,0 +1,4952 @@
+{
+  "schemaVersion": "card-set-v1",
+  "setId": "proteus",
+  "setName": "Proteus",
+  "cards": [
+    {
+      "cardId": "onr_proteus_001_ai-board-member",
+      "setId": "proteus",
+      "title": "AI Board Member",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "ai",
+        "random",
+        "research"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 5,
+        "agendaPoints": 3
+      },
+      "text": "You may gain an action during each of your turns. At the start of each of your turns, roll a die to see what the action will be for that turn, and then decide whether to take it. On a 1, you may use the action only to install a card; on a 2 or 3, only to gain 1; on a 4, 5, or 6, only to draw a card.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P001",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_002_charity-takeover",
+      "setId": "proteus",
+      "title": "Charity Takeover",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "bad_publicity",
+        "black_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 1
+      },
+      "text": "Gain [9] and 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P002",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "setId": "proteus",
+      "title": "Corporate Headhunters",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 5,
+        "agendaPoints": 3
+      },
+      "text": "Whenever Corporate Headhunters successfully does damage, Runner 's hand size is reduced by 1. A: Do 1 meat damage. Use this ability only if Runner is tagged.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P003",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "setId": "proteus",
+      "title": "Fetal AI",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "ai",
+        "ambush",
+        "asset"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 5,
+        "agendaPoints": 3
+      },
+      "text": "When Runner accesses Fetal AI, do 2 Net damage, even if it is not installed. Ignore this effect if Runner accesses Fetal AI from the Archives. If Fetal AI is accessed from R&D, Runner must show it to you. Runner must pay 2 to steal Fetal AI, in addition to any other costs.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P004",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "setId": "proteus",
+      "title": "Marked Accounts",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "ambush",
+        "gray_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 2
+      },
+      "text": "When Runner accesses Marked Accounts, give Runner a tag, even if it is not installed. If Marked Accounts is accessed from R&D, Runner must show it to you.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P005",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "setId": "proteus",
+      "title": "Please Don't Choke Anyone",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 2
+      },
+      "text": "For each 1 damage you successfully do, you may choose instead to prevent that damage and put a PDCA counter on Please Don't Choke Anyone. PDCA counter: Gain an action. Use this ability only once per turn and only during your turn.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P006",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "setId": "proteus",
+      "title": "Project Venice",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 2
+      },
+      "text": "For every three advancement counters over Project Venice 's difficulty that are on Project Venice when you score it, gain an action during each of your turns.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P007",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "setId": "proteus",
+      "title": "Project Zurich",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "text": "For every two advancement counters over Project Zurich 's difficulty that are on Project Zurich when you score it, gain 1 at the start of each of your turns.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P008",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "setId": "proteus",
+      "title": "Viral Breeding Ground",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "ambush",
+        "research",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 2
+      },
+      "text": "When you score Breeding Ground, trash all cards installed in or on the fort Breeding Ground was installed in. When Runner accesses Breeding Ground, choose up to two programs for each advancement counter on Breeding Ground; Runner brings those programs into his or her hand.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P009",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "setId": "proteus",
+      "title": "World Domination",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "black_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 12,
+        "agendaPoints": 3
+      },
+      "text": "Score an additional 4 agenda points when you score World Domination.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P010",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "setId": "proteus",
+      "title": "Brain Wash",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 1 brain damage.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P011",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_012_bug-zapper",
+      "setId": "proteus",
+      "title": "Bug Zapper",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 2 Net damage for each rezzed piece of ice installed outside Bug Zapper. *End the run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P012",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "setId": "proteus",
+      "title": "Caryatid",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 7,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When you rez Caryatid, you may pay [1], above the rez cost, to make it a code gate instead of a wall.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P013",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "setId": "proteus",
+      "title": "Chihuahua",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "hellhound",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trace 1-If trace is successful, do 1 Net damage. Gain [2] when you rez Chihuahua.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P014",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "setId": "proteus",
+      "title": "Colonel Failure",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 6,
+        "rezCost": 17,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trash a program. *Trash a program. *Trash a program. *End the run. *End the run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P015",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "setId": "proteus",
+      "title": "Coyote",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*For the remainder of the run, all further ice is encountered at +1 strength, unless Runner pays [2] while passing Coyote. Gain [3] when you rez Coyote.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P016",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "setId": "proteus",
+      "title": "Credit Blocks",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When you rez Credit Blocks, you may pay [1], above the rez cost, to make it a wall instead of a sentry.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P017",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "setId": "proteus",
+      "title": "Datacomb",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. If Runner passes Datacomb, pay [1], or uninstall it and store it in HQ.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P018",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "setId": "proteus",
+      "title": "Death Yo-Yo",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 7,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 1 brain damage. *End the run. If Runner passes Death Yo-Yo, you may choose to uninstall it, store it in HQ, and gain [1].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P019",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "setId": "proteus",
+      "title": "Digiconda",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "sword"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 2 Net damage. *End the run. Pay [X], above the rez cost, when you rez Digiconda. X is Digiconda 's strength, and X cannot be greater than 6.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P020",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "setId": "proteus",
+      "title": "Dog Pile",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 1 Net damage for each rezzed piece of ice installed outside Dog Pile. *End the run. Dog Pile has +1 strength for each rezzed piece of ice installed outside it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P021",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "setId": "proteus",
+      "title": "Food Fight",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "deckrash",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Food Fight has one \"*End the run\" subroutine for every [2] you pay, above the rez cost, when you rez it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P022",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_023_galatea",
+      "setId": "proteus",
+      "title": "Galatea",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When you rez Galatea, you may pay [1], above the rez cost, to make it a code gate instead of a wall.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P023",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "setId": "proteus",
+      "title": "Gatekeeper",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gatekeeper has one \"*End the run\" subroutine for every [2] you pay, above the rez cost, when you rez it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P024",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "setId": "proteus",
+      "title": "Homing Missile",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trace x-If trace is successful, end the run, and Runner cannot make another run until Runner takes an action to pay [2]. Pay X, above the rez cost, when you rez Homing Missile. X is Homing Missile 's strength and trace limit, and X cannot be greater than 8.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P025",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "setId": "proteus",
+      "title": "Hunting Pack",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 1,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one subroutine as follows: \"*Trace 5-If trace is successful, give Runner a tag.\"",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P026",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "setId": "proteus",
+      "title": "Iceberg",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 1 Net damage. *[2]: Iceberg has one \"*End the run\" subroutine for the present encounter. Use this ability only when Runner encounters Iceberg.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P027",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "setId": "proteus",
+      "title": "Lesser Arcana",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 7,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When you rez Lesser Arcana, you may pay 1, above the rez cost, to make it a wall instead of a sentry.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P028",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "setId": "proteus",
+      "title": "Marionette",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trash a program. *End the run. If Runner passes Marionette, pay [1], or uninstall it and store it in HQ.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P029",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "setId": "proteus",
+      "title": "Mastermind",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "sentry",
+        "zombie"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 7,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 1 brain damage for each rezzed piece of ice installed outside Mastermind. *End the run. Mastermind has +1 strength for each rezzed piece of ice installed outside it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P030",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "setId": "proteus",
+      "title": "Minotaur",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "For each rezzed code gate or wall installed outside Minotaur, Minotaur has one \"*End the run\" subroutine.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P031",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "setId": "proteus",
+      "title": "Misleading Access Menus",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 1,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run unless Runner pays [1]. Gain [3] when you rez Misleading Access Menus.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P032",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "setId": "proteus",
+      "title": "Mobile Barricade",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 1 Net damage. *End the run. [1]: Move Mobile Barricade and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Mobile Barricade is unrezzed, in which case, you reveal it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P033",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "setId": "proteus",
+      "title": "Riddler",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2]: Riddler has one \"*End the run\" subroutine for the present encounter. Use this ability only when Runner encounters Riddler.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P034",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "setId": "proteus",
+      "title": "Roadblock",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate",
+        "random"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When Runner encounters Roadblock, roll a die. On a 6, derez Roadblock, and Runner automatically passes it; otherwise, add the result to Roadblock's strength for that encounter.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P035",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "setId": "proteus",
+      "title": "Sandstorm",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 4,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Sandstorm has one \"*End the run\" subroutine for every [2] you pay, above the rez cost, when you rez it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P036",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "setId": "proteus",
+      "title": "Scaffolding",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. If Runner passes Scaffolding, you may choose to uninstall it, store it in HQ, and gain [1].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P037",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "setId": "proteus",
+      "title": "Snowbank",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run unless Runner pays [1]. Gain [3] when you rez Snowbank.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P038",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "setId": "proteus",
+      "title": "Sphinx 2006",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 6,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When you rez Sphinx 2006, you may pay [4], above the rez cost, to make it a sentry instead of a code gate.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P039",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_040_sumo-2008",
+      "setId": "proteus",
+      "title": "Sumo 2008",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 8,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. When you rez Sumo 2008, you may pay [1], above the rez cost, to make it a wall instead of a sentry.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P040",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "setId": "proteus",
+      "title": "Toughonium™ Wall",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 7,
+        "rezCost": 13,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P041",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "setId": "proteus",
+      "title": "Tumblers",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. If Runner passes Tumblers, you may choose to uninstall it, store it in HQ, and gain [1].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P042",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "setId": "proteus",
+      "title": "Twisty Passages",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. If Runner passes Twisty Passages, pay [1], or uninstall it and store it in HQ.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P043",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "setId": "proteus",
+      "title": "Walking Wall",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run. [1]: Move Walking Wall and insert it in a different position on this data fort. Use this ability only at the start of a run on this data fort. You may use this ability even if Walking Wall is unrezzed, in which case, you reveal it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P044",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "setId": "proteus",
+      "title": "Washed-Up Solo Construct",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trash a program unless Runner pays [1]. Gain [3] when you rez Washed-Up Solo Construct.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P045",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "setId": "proteus",
+      "title": "Corporate Guard(R) Temps",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Pay two times [X] when you play Corporate Guard(R) Temps, to gain an action during each of your next X turns. Forfeit the next [X] you gain.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P046",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "setId": "proteus",
+      "title": "Credit Consolidation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "numeric": {
+        "cost": 10,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [15].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P047",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "setId": "proteus",
+      "title": "Data Sifters",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if Runner trashed any nodes during his or her last turn. Give Runner a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P048",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "setId": "proteus",
+      "title": "Emergency Rig",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Rez a piece of ice, at no cost. Put X Kludge counters on that piece of ice; X cannot be 0. At the start of each of your turns, remove a Kludge counter. Trash that piece of ice when the last Kludge counter is removed from it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P049",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_050_manhunt",
+      "setId": "proteus",
+      "title": "Manhunt",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if Runner attempted a run during his or her last turn. Trace 6-If trace is successful, give Runner one tag for each point by which your trace exceeded his or her link.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P050",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "setId": "proteus",
+      "title": "Rent-to-Own Contract",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Rez a piece of ice, at no cost. Put on that ice a number of Term counters equal to its rez cost. At the start of each of your turns, if you have at least [2], lose [2] and remove one of these Term counters; otherwise, put a Term counter on that piece of ice.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P051",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "setId": "proteus",
+      "title": "Schlaghund Pointers",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "numeric": {
+        "cost": 6,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if Runner has attempted a run this game. Trace 3-If trace is successful, give Runner a tag. Pay [1], in addition to the normal cost, for each point of trace above 0.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P052",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "setId": "proteus",
+      "title": "Underworld Mole",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "numeric": {
+        "cost": 6,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if Runner installed any resources during his or her last turn. Trace 4-If trace is successful, trash a resource Runner installed during his or her last turn and give Runner a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P053",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "setId": "proteus",
+      "title": "Bel-Digmo Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Shuffle Bel-Digmo Antibody into R&D when it is rezzed. When Runner accesses Bel-Digmo Antibody from R&D, do 1 Net damage, and Runner must show it to you.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P054",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_055_cybertech-think-tank",
+      "setId": "proteus",
+      "title": "Cybertech Think Tank",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "You may advance Cybertech Think Tank before and after you rez it. Cybertech Think Tank advancement counter: Increase by 1 the meat damage dealt by another source.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P055",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_056_department-of-misinformation",
+      "setId": "proteus",
+      "title": "Department of Misinformation",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "You may rez Department of Misinformation when Runner attempts to expose a card. [1]: Prevent a card from being exposed.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P056",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "setId": "proteus",
+      "title": "Doppelganger Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "When Runner accesses Doppelganger Antibody, you may pay [2] to give Runner a Doppelganger counter, even if Doppelganger is not installed. Ignore this effect if Runner accesses Doppelganger from the Archives. Each Doppelganger counter causes Runner to lose [1] at the start of each of his or her turns. Runner may take an action to pay [4] to remove a Doppelganger counter. If Doppelganger is accessed from R&D, Runner must show it to you.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P057",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_058_executive-boot-camp",
+      "setId": "proteus",
+      "title": "Executive Boot Camp",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Discard a card at random: Gain [2]. Use this ability only during a run. At the end of the run, return to the bank any of the [2] you did not spend.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P058",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_059_government-contract",
+      "setId": "proteus",
+      "title": "Government Contract",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "You may advance Government Contract before and after you rez it. Government Contract advancement counter: Gain [3]. Use these bits only to pay for installing or rezzing cards. When the turn ends, return to the bank any of the [3] you did not spend.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P059",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_060_herman-revista",
+      "setId": "proteus",
+      "title": "Herman Revista",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Rearrange the ice installed on this fort. Use this ability only at the start of a run on this data fort.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P060",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+      "setId": "proteus",
+      "title": "LDL Traffic Analyzers",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "You may advance LDL Traffic Analyzers before and after you rez it. You may rez LDL Traffic Analyzers during a trace attempt. LDL Traffic Analyzers advancement counter: Gain [5]. Use this ability only during a trace attempt. When the trace attempt ends, return to the bank any of the [5] you did not spend.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P061",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_062_lesley-major",
+      "setId": "proteus",
+      "title": "Lesley Major",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Lesley Major only in a subsidiary data fort. [5]: Add two advancement counters, at no cost, to a card installed in this data fort. Use this ability only when Runner passes the last piece of ice on this fort, and only once per run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P062",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_063_lisa-blight",
+      "setId": "proteus",
+      "title": "Lisa Blight",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1], Discard a card at random: Repeat one subroutine on a piece of ice on this fort, until the end of the run. Treat the copy of the subroutine as if it appeared immediately after the original subroutine. Use this ability only during a run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P063",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_064_marcel-desoleil",
+      "setId": "proteus",
+      "title": "Marcel DeSoleil",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2], Trash the top two cards stored in R&D: Repeat one subroutine on a piece of ice on this fort, until the end of the run. Treat the copy of the subroutine as if it appeared immediately after the original subroutine. Use this ability only during a run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P064",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_065_networked-center",
+      "setId": "proteus",
+      "title": "Networked Center",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "asset",
+        "region"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 4,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "The difficulty of Gray Ops agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P065",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_066_obfuscated-fortress",
+      "setId": "proteus",
+      "title": "Obfuscated Fortress",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 4,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "At the start of a run on this fort, Runner must announce the number of bits he or she will spend during the run. Runner cannot spend more than this during that run. If Runner does not spend that many bits during that run, the Runner loses the remainder once the run is complete. You may rez Obfuscated Fortress at the start of a run on this fort.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P066",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_067_panic-button",
+      "setId": "proteus",
+      "title": "Panic Button",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Panic Button only in HQ. [1]: Draw a card. Use this ability only during a run on HQ.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P067",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_068_pattel-antibody",
+      "setId": "proteus",
+      "title": "Pattel Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "When Runner accesses Pattel Antibody, you may pay [3] to put a Pattel counter on all installed icebreakers, even if Pattel Antibody is not installed. Ignore this effect if Runner accesses Pattel Antibody from the Archives. Each Pattel counter on an icebreaker reduces its strength by 1. If Pattel Antibody is accessed from R&D, Runner must show it to you.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P068",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_069_pavit-bharat",
+      "setId": "proteus",
+      "title": "Pavit Bharat",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Pavit only in a subsidiary data fort. When you rez Pavit, uninstall all cards installed in this fort and store them in HQ. Install an equal number of cards from HQ in this fort. Rez Pavit only when Runner has passed the last piece of ice on this fort.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P069",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_070_rasmin-bridger",
+      "setId": "proteus",
+      "title": "Rasmin Bridger",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 4,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After Runner passes each piece of ice on this fort, Runner must pay [1] or end the run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P070",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_071_raymond-ellison",
+      "setId": "proteus",
+      "title": "Raymond Ellison",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Raymond Ellison only in a subsidiary data fort. [T]: Remove any number of advancement counters from cards installed in this data fort. Gain [3] for each advancement counter removed. Use this ability only during a run. At the end of the run, return to the bank any of the bits gained that you did not spend.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P071",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_072_research-bunker",
+      "setId": "proteus",
+      "title": "Research Bunker",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "asset",
+        "region"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 4,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "The difficulty of research agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P072",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_073_simon-francisco",
+      "setId": "proteus",
+      "title": "Simon Francisco",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 3,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Simon Francisco only in R&D or HQ. During a run in which Simon is accessed, Runner accesses one less card stored in this fort.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P073",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_074_siren",
+      "setId": "proteus",
+      "title": "Siren",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 3,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Rez Siren when you install it. Install Siren only if you can pay to rez it. [1]: Runner must make a run on the fort Siren is installed in, if possible, instead of on the fort he or she was originally going to make a run on. Use this ability only at the start of a run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P074",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "setId": "proteus",
+      "title": "Stereogram Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "ambush",
+        "node",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "When Runner accesses Stereogram Antibody from the Archives, do 1 Net damage and shuffle Stereogram Antibody into R&D.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P075",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "setId": "proteus",
+      "title": "Syd Meyer Superstores",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "asset",
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "A: Trash a rezzed piece of ice. Gain [4].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P076",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_077_weapons-depot",
+      "setId": "proteus",
+      "title": "Weapons Depot",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "asset",
+        "region"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 4,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "The difficulty of Black Ops agendas installed in this fort is reduced by 1. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P077",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_078_armageddon",
+      "setId": "proteus",
+      "title": "Armageddon",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "random",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 1,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on R&D, you may choose to give the Corp a Doom counter instead of accessing cards from R&D. Each Doom counter forces the Corp to roll a die whenever it installs a card. On a 6, the card is trashed after it is installed, and the Corp removes a Doom counter. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P078",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_079_big-frackin-gun",
+      "setId": "proteus",
+      "title": "Big Frackin' Gun",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": 7,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[6]: Break up to five sentry subroutines on a single piece of ice. [1]: +1 strength",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P079",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_080_black-widow",
+      "setId": "proteus",
+      "title": "Black Widow",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 9,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break sentry subroutine. [2]: +1 strength. Choose an installed piece of ice when you install Black Widow. Black Widow gets +5 strength during each encounter with that piece of ice.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P080",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_081_boring-bit",
+      "setId": "proteus",
+      "title": "Boring Bit",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "worm"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 6,
+        "memoryCost": 1,
+        "strength": 5,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2]: Break wall subroutine. [1]: +1 strength",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P081",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_082_bulldozer",
+      "setId": "proteus",
+      "title": "Bulldozer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "noisy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 7,
+        "memoryCost": 1,
+        "strength": 4,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break wall subroutine. [2]: +1 strength. If Bulldozer breaks all the subroutines of a wall, and the next piece of ice encountered during this run is a sentry, break one of the subroutines of that sentry, at no cost. Whenever you break a wall subroutine with Bulldozer, lose a total of [2] from stealth cards.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P082",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_083_corrosion",
+      "setId": "proteus",
+      "title": "Corrosion",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "worm"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 0,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Break wall subroutine. [1]: +1 strength",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P083",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_084_crumble",
+      "setId": "proteus",
+      "title": "Crumble",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on HQ, give the Corp a Crumble counter. Two or more Crumble counters allow you trash, at no cost, any cards accessed from HQ, even if the cards cannot normally be trashed. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P084",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_085_disintegrator",
+      "setId": "proteus",
+      "title": "Disintegrator",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 6,
+        "memoryCost": 2,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2]: Derez a piece of ice and end your run. Use this ability only when you have just broken all the subroutines of that piece of ice and have successfully passed it.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P085",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "setId": "proteus",
+      "title": "Enterprise, Inc., Shields",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Prevent up to 2 Net damage. [1]: Prevent 1 brain damage.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P086",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_087_forwards-legacy",
+      "setId": "proteus",
+      "title": "Forward's Legacy",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 9,
+        "memoryCost": 1,
+        "strength": 0,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Break sentry subroutine. At the start of each run, roll a die and add the result to Legacy's strength for that run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P087",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_088_fubar",
+      "setId": "proteus",
+      "title": "Fubar",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "noisy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 10,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break a subroutine of the type chosen for Fubar. [2]: +1 strength. [0]: Choose whether Fubar breaks code gates, sentries, or walls. Use this ability only once. Whenever you break an ice subroutine with Fubar, lose [1] from a stealth card.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P088",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_089_garbage-in",
+      "setId": "proteus",
+      "title": "Garbage In",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on R&D, give the Corp a Garbage counter. Two or more Garbage counters allow you to trash, at no cost, any cards accessed from R&D, even if the cards cannot normally be trashed. The Corp loses two Garbage counters after any run during which this ability is used. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P089",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_090_highlighter",
+      "setId": "proteus",
+      "title": "Highlighter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on R&D, give the Corp a Highlighter counter. Each Highlighter counter after the first allows you to access an additional card from R&D whenever you access cards from R&D. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P090",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "setId": "proteus",
+      "title": "Lockjaw",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: Give one of your icebreakers +2 strength for the remainder of this run. Use this ability only during an encounter with a piece of ice.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P091",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_092_morphing-tool",
+      "setId": "proteus",
+      "title": "Morphing Tool",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 10,
+        "memoryCost": 1,
+        "strength": 4,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2]: Break a subroutine of the type last chosen for Morphing Tool. [1]: +1 strength. [1], A: Choose whether Morphing Tool breaks code gates, sentries, or walls. When you install Morphing Tool, choose whether it breaks code gates, sentries, or walls.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P092",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_093_redecorator",
+      "setId": "proteus",
+      "title": "Redecorator",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 9,
+        "memoryCost": 1,
+        "strength": 3,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break up to two sentry subroutines on a single piece of ice. [3]: +1 strength",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P093",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_094_scaldan",
+      "setId": "proteus",
+      "title": "Scaldan",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "bad_publicity",
+        "random",
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on HQ, give the Corp a Scaldan counter. Each Scaldan counter forces the Corp to roll a die at the start of each of its turns. On a 5 or a 6, the Corp gains 1 Bad Publicity point. The Corp may remove all Virus counters at any time, but must then forgo its next three actions. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P094",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_095_skeleton-passkeys",
+      "setId": "proteus",
+      "title": "Skeleton Passkeys",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": 1,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Break code gate subroutine. [3]: +4 strength",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P095",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_096_skullcap",
+      "setId": "proteus",
+      "title": "Skullcap",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "T: Prevent any amount of Net or brain damage.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P096",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_097_taxman",
+      "setId": "proteus",
+      "title": "Taxman",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on HQ, give the Corp a Tax counter. Every two Tax counters cause the Corp to lose [1] at the start of each of its turns. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P097",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_098_vienna-22",
+      "setId": "proteus",
+      "title": "Vienna 22",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on HQ, give the Corp a Vienna counter. Each Vienna counter allows you to access an additional card from HQ whenever you access cards from HQ. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P098",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_099_viral-pipeline",
+      "setId": "proteus",
+      "title": "Viral Pipeline",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After each successful run on Archives, HQ, or R&D, put a Socket counter in that data fort. Socket counter from Archives, Socket counter from HQ, and Socket counter from R&D: Give the Corp a Pipe counter. Each Pipe counter causes the Corp to forgo an action at the start of each of its turns. The Corp may remove all Virus counters at any time, but must then forgo its next three actions.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P099",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_100_wrecking-ball",
+      "setId": "proteus",
+      "title": "Wrecking Ball",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "noisy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Break wall subroutine. [2]: +1 strength. Whenever you break a wall subroutine with Wrecking Ball, lose [1] from a stealth card.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P100",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_101_all-hands",
+      "setId": "proteus",
+      "title": "All-Hands",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 3,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run on HQ. If run is successful, access three additional cards from HQ. You cannot use noisy icebreakers during the run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P101",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_102_blackmail",
+      "setId": "proteus",
+      "title": "Blackmail",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 12,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run on HQ. If run is successful, do not access cards from HQ; instead, score 1 agenda point.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P102",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_103_cruising-for-netwatch",
+      "setId": "proteus",
+      "title": "Cruising for Netwatch",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [1] and draw two cards.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P103",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_104_decoy-signal",
+      "setId": "proteus",
+      "title": "Decoy Signal",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. Whenever you approach an unrezzed piece of ice during that run, expose it. You may jack out before the Corp decides whether to rez the ice.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P104",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_105_demolition-run",
+      "setId": "proteus",
+      "title": "Demolition Run",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "sabotage"
+      ],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. If run is successful, do not access cards; instead, trash all rezzed ice on the fort on which you just made a run, and the Corp gives you three tags.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P105",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_106_disgruntled-ice-technician",
+      "setId": "proteus",
+      "title": "Disgruntled Ice Technician",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "sabotage"
+      ],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. After passing a piece of ice during this run, you may derez that ice and end your run if you broke all the subroutines of that ice.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P106",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_107_drone-for-a-day",
+      "setId": "proteus",
+      "title": "Drone for a Day",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [9] and the Corp gives you a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P107",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_108_faked-hit",
+      "setId": "proteus",
+      "title": "Faked Hit",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 5,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Give the Corp 1 Bad Publicity point. Take 2 brain damage. This damage cannot be prevented. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P108",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_109_frame-up",
+      "setId": "proteus",
+      "title": "Frame-Up",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if you made a successful run on both HQ and R&D this turn. Give the Corp 1 Bad Publicity point. Give the Corp 1 additional Bad Publicity point if you liberated or trashed any Black Ops cards during those runs. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P109",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_110_hijack",
+      "setId": "proteus",
+      "title": "Hijack",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install a program or a piece of hardware. Gain [3], which you may use only to pay for its installation cost. Return to the bank any of the [3] you did not spend.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P110",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_111_ice-and-data-special-report",
+      "setId": "proteus",
+      "title": "Ice and Data Special Report",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Expose up to five cards installed in or on a single data fort.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P111",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_112_identity-donor",
+      "setId": "proteus",
+      "title": "Identity Donor",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Do not play Identity Donor as an action; instead, play it during the Corp's turn when you would suffer meat damage. Prevent that meat damage and give the Corp 2 Bad Publicity points. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P112",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_113_live-news-feed",
+      "setId": "proteus",
+      "title": "Live News Feed",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. If run is successful, the Corp gives you two tags, and you give the Corp 1 Bad Publicity point for each black ice you encountered during the run, 1 for each Black Ops card the Corp rezzed during the run, and 1 for each Black Ops agenda you liberated during the run. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P113",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_114_on-the-fast-track",
+      "setId": "proteus",
+      "title": "On the Fast Track",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [8] if you trashed an advertisement card this turn, or gain [6] if you trashed a transactions card this turn.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P114",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_115_personal-touch-the",
+      "setId": "proteus",
+      "title": "Personal Touch, The",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Put a +1 strength counter on an icebreaker.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P115",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_116_pirate-broadcast",
+      "setId": "proteus",
+      "title": "Pirate Broadcast",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run on each data fort. Score 1 agenda point if all the runs are successful. Forgo your next action if any of the runs are not successful.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P116",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_117_poisoned-water-supply",
+      "setId": "proteus",
+      "title": "Poisoned Water Supply",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if you have at least two connections in play. Trash two connections. Give the Corp 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P117",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_118_prearranged-drop",
+      "setId": "proteus",
+      "title": "Prearranged Drop",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "The next time you access an agenda this turn, gain [6].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P118",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_119_promises-promises",
+      "setId": "proteus",
+      "title": "Promises, Promises",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "The next time you access an agenda this turn, score 1 additional agenda point.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P119",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_120_reconnaissance",
+      "setId": "proteus",
+      "title": "Reconnaissance",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. Whenever the Corp rezzes a card during that run, gain [1].",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P120",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_121_remote-detonator",
+      "setId": "proteus",
+      "title": "Remote Detonator",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "sabotage"
+      ],
+      "numeric": {
+        "cost": 7,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if you made a successful run on a data fort this turn. Trash all rezzed ice on that fort, and the Corp gives you three tags.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P121",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_122_rush-hour",
+      "setId": "proteus",
+      "title": "Rush Hour",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 3,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run on R&D. If run is successful, access three additional cards from R&D. You cannot use noisy icebreakers during the run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P122",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_123_senatorial-field-trip",
+      "setId": "proteus",
+      "title": "Senatorial Field Trip",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if the Corp rezzed a piece of Black Ice this turn. The Corp either derezzes that piece of ice or receives 2 Bad Publicity points. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P123",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_124_stakeout",
+      "setId": "proteus",
+      "title": "Stakeout",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [2] and draw one card.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P124",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_125_subliminal-corruption",
+      "setId": "proteus",
+      "title": "Subliminal Corruption",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. Give the Corp 1 Bad Publicity point for each advertisement you trash during the run. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P125",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_126_test-spin",
+      "setId": "proteus",
+      "title": "Test Spin",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Search your stack for a program, and install it, at no cost. Shuffle your stack. If you install a program in this way, make a run. After the run, shuffle the program into your stack, unless it is no longer in play, in which case, lose [4] plus its installation cost. If this is more than the number of bits in your pool, suffer the difference in meat damage.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P126",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_127_weefle-initiation",
+      "setId": "proteus",
+      "title": "Weefle Initiation",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. Prevent up to 7 damage during that run.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P127",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "setId": "proteus",
+      "title": "Airport Locker",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[5], [T]: Search your stack for a program, and install that program, if you can. Shuffle your stack afterwards. You may use this ability during an encounter with a piece of ice. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P128",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_129_back-door-to-netwatch",
+      "setId": "proteus",
+      "title": "Back Door to Netwatch",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "bad_publicity",
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[3], [T]: Cancel the effect of a successful trace. Give the Corp 1 Bad Publicity point if the trace would have had an effect other than or in addition to giving you any tags. Hidden resources are installed face down, but are put into the trash face up. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P129",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_130_back-door-to-rivals",
+      "setId": "proteus",
+      "title": "Back Door to Rivals",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "base_link"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Base link 2. [3]: +1 link. Gain [1] whenever you successfully use Back Door to Rivals to avoid a trace. Use only one base link card for each trace attempt made against you.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P130",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_131_bargain-with-viacox",
+      "setId": "proteus",
+      "title": "Bargain with Viacox",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "random"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After the turn in which you install Viacox, you gain an action during each of your turns, which you must take if possible. Roll a die at the start of each of your turns to find out what the action is. On a 1, draw a card. On a 2, gain [1]. On a 3, make a run on R&D. On a 4, make a run on HQ. On a 5, make a run on a subsidiary data fort. On a 6, reveal a card to the Corp at random from your hand, and play or install that card.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P131",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_132_bolt-hole",
+      "setId": "proteus",
+      "title": "Bolt-Hole",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: Prevent 2 meat damage. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P132",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_133_chiba-bank-account",
+      "setId": "proteus",
+      "title": "Chiba Bank Account",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1], [T]: Gain [4]. You may use this ability whenever you pay any cost or penalty. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P133",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "setId": "proteus",
+      "title": "Cortical Cybermodem",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "cybernetics",
+        "deck"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 11,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Provides +2 MU and +2 hand size. Put [2] from the bank on Cortical Cybermodem when it is installed. Use these bits only to pay for using icebreakers during runs. If you use any of these bits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P134",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_135_cortical-stimulators",
+      "setId": "proteus",
+      "title": "Cortical Stimulators",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 1,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Prevents 1 Net or brain damage each turn.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P135",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_136_credit-subversion",
+      "setId": "proteus",
+      "title": "Credit Subversion",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "sabotage"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: The Corp loses [3]. Use this ability immediately after a successful run on HQ. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P136",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_137_death-from-above",
+      "setId": "proteus",
+      "title": "Death from Above",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "sabotage"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: Trash, at no cost, all cards installed in a subsidiary data fort, even if they cannot normally be trashed. Use this ability only when you have just successfully made a run on that fort, and before accessing cards from that fort. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P137",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_138_deck-the",
+      "setId": "proteus",
+      "title": "Deck, The",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "base_link",
+        "deck"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 11,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[0]: Base link 5. [1]: +1 link. Provides +1 MU. Use only one base link card for each trace attempt made against you. Only one deck can be in play at a time. Trash any older decks.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P138",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "setId": "proteus",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "chip"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 6,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Put [2] from the bank on Spin Chip when it is installed. Spin Chip can have an icebreaker installed in it whose MU cost is no greater than 1. Use the bits on Spin Chip only to pay for using this icebreaker during runs. If you use any of these bits, replace them from the bank at the start of your next turn.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P139",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_140_expendable-family-member",
+      "setId": "proteus",
+      "title": "Expendable Family Member",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1], [T]: Avoid receiving a tag. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P140",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_141_get-ready-to-rumble",
+      "setId": "proteus",
+      "title": "Get Ready to Rumble",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection",
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: The Corp discards two cards at random from HQ. Use this ability only when the Corp successfully does meat damage. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P141",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_142_hq-mole",
+      "setId": "proteus",
+      "title": "HQ Mole",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[4], [T]: Access two additional cards from HQ. Use this ability only when accessing cards from HQ. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P142",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_143_liberated-savings-account",
+      "setId": "proteus",
+      "title": "Liberated Savings Account",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[7], [T]: Gain [11]. You may use this ability whenever you pay any cost or penalty. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P143",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "setId": "proteus",
+      "title": "Lucidrine™ Drip Feed",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 8,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "At the start of each of your turns, if there are two Drip counters on Drip Feed, remove all Drip counters from it and take 1 brain damage, which cannot be prevented; otherwise, put a Drip counter on Drip Feed and gain an action.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P144",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_145_mercenary-subcontract",
+      "setId": "proteus",
+      "title": "Mercenary Subcontract",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "sabotage"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[4], [T]: Trash, at no cost, one or more cards that you are currently accessing, even if those cards cannot normally be trashed. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P145",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_146_precision-bribery",
+      "setId": "proteus",
+      "title": "Precision Bribery",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "unique"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "The Corp cannot create any new data forts. The Corp may trash Precision Bribery by taking an action to pay [4]. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P146",
+      "rarity": {
+        "code": "uncommon",
+        "labelDe": "Ungewöhnlich",
+        "labelEn": "Uncommon",
+        "sourceValue": "Uncommon",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_147_r-and-d-mole",
+      "setId": "proteus",
+      "title": "R&D Mole",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[4], [T]: Access two additional cards from R&D. Use this ability only when accessing cards from R&D. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P147",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_148_runner-sensei",
+      "setId": "proteus",
+      "title": "Runner Sensei",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "base_link",
+        "position"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2]: Base link 4. [2]: +1 link. Gain [1] whenever you successfully use Runner Sensei to avoid a trace. Use only one base link card for each trace attempt made against you.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P148",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_149_simulacrum",
+      "setId": "proteus",
+      "title": "Simulacrum",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection",
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: Pass a piece of AP ice. You may use this ability during an encounter with a piece of ice. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P149",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_150_streetware-distributor",
+      "setId": "proteus",
+      "title": "Streetware Distributor",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "bbs",
+        "position"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 1,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Take [1] from Streetware Distributor, if it has any bits, at the start of each of your turns. A: Put [3] from the bank on Streetware Distributor.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P150",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "setId": "proteus",
+      "title": "Sunburst Cranial Interface",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "cybernetics",
+        "deck",
+        "stealth"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 5,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Provides +1 MU and +1 hand size. Put [1] from the bank on Cranial Interface when it is installed. Use this bit only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use the bit, replace it from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P151",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_152_swiss-bank-account",
+      "setId": "proteus",
+      "title": "Swiss Bank Account",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "You may use the following abilities whenever you pay any cost or penalty. [T]: Gain [2]. [3], [T]: Gain [6]. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P152",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_153_time-to-collect",
+      "setId": "proteus",
+      "title": "Time to Collect",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: Prevent one or more of your other installed resources from being trashed. Use this ability only during the Corp 's turn. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P153",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_proteus_154_wired-switchboard",
+      "setId": "proteus",
+      "title": "Wired Switchboard",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: +3 link. Use this ability only after you and the Corp have revealed how much each of you spent on the trace attempt. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_proteus",
+      "setName": "Proteus",
+      "collectorNumber": "P154",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-proteus-spoiler"
+      }
+    }
+  ]
+}

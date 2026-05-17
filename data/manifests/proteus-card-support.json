@@ -1,0 +1,4014 @@
+{
+  "schemaVersion": "card-support-v1",
+  "setId": "proteus",
+  "cards": [
+    {
+      "cardId": "onr_proteus_001_ai-board-member",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_002_charity-takeover",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_012_bug-zapper",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_023_galatea",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_040_sumo-2008",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": true,
+        "engine_supported": true,
+        "playable": true,
+        "human_playable": true,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": false
+      },
+      "support": {
+        "resolverRef": "engine:onr_proteus_041_toughoniumtm-wall",
+        "coverage": [
+          "legal_action",
+          "replay_statehash",
+          "scenario",
+          "unit_test",
+          "visibility",
+          "wrong_side_revalidation"
+        ],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_050_manhunt",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_055_cybertech-think-tank",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_056_department-of-misinformation",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_058_executive-boot-camp",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_059_government-contract",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_060_herman-revista",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_062_lesley-major",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_063_lisa-blight",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_064_marcel-desoleil",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_065_networked-center",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_066_obfuscated-fortress",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_067_panic-button",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_068_pattel-antibody",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_069_pavit-bharat",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_070_rasmin-bridger",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_071_raymond-ellison",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_072_research-bunker",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_073_simon-francisco",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_074_siren",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_077_weapons-depot",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_078_armageddon",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_079_big-frackin-gun",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_080_black-widow",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_081_boring-bit",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_082_bulldozer",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_083_corrosion",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_084_crumble",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_085_disintegrator",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_087_forwards-legacy",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_088_fubar",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_089_garbage-in",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_090_highlighter",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_092_morphing-tool",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_093_redecorator",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_094_scaldan",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_095_skeleton-passkeys",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_096_skullcap",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_097_taxman",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_098_vienna-22",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_099_viral-pipeline",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_100_wrecking-ball",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_101_all-hands",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_102_blackmail",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_103_cruising-for-netwatch",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_104_decoy-signal",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_105_demolition-run",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_106_disgruntled-ice-technician",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_107_drone-for-a-day",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_108_faked-hit",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_109_frame-up",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_110_hijack",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_111_ice-and-data-special-report",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_112_identity-donor",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_113_live-news-feed",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_114_on-the-fast-track",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_115_personal-touch-the",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_116_pirate-broadcast",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_117_poisoned-water-supply",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_118_prearranged-drop",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_119_promises-promises",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_120_reconnaissance",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_121_remote-detonator",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_122_rush-hour",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_123_senatorial-field-trip",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_124_stakeout",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_125_subliminal-corruption",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_126_test-spin",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_127_weefle-initiation",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_129_back-door-to-netwatch",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_130_back-door-to-rivals",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_131_bargain-with-viacox",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_132_bolt-hole",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_133_chiba-bank-account",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_135_cortical-stimulators",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_136_credit-subversion",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_137_death-from-above",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_138_deck-the",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_140_expendable-family-member",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_141_get-ready-to-rumble",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_142_hq-mole",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_143_liberated-savings-account",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_145_mercenary-subcontract",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_146_precision-bribery",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_147_r-and-d-mole",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_148_runner-sensei",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_149_simulacrum",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_150_streetware-distributor",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_152_swiss-bank-account",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_153_time-to-collect",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_154_wired-switchboard",
+      "setId": "proteus",
+      "statuses": {
+        "imported": true,
+        "validated": true,
+        "catalog_ready": true,
+        "implemented": false,
+        "engine_supported": false,
+        "playable": false,
+        "human_playable": false,
+        "ai_supported": false,
+        "deck_legal": false,
+        "format_legal": false,
+        "blocked": true
+      },
+      "support": {
+        "resolverRef": null,
+        "coverage": [],
+        "aiHintRef": null,
+        "scenarioRefs": []
+      },
+      "blockReasons": [
+        "Proteus planning import only: no runtime resolver, release gate, deck legality, or AI support."
+      ]
+    }
+  ]
+}

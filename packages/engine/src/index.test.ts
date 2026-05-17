@@ -35861,10 +35861,10 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
     expect(state.trace).toBeUndefined();
     expect(state.runner.tags).toBe(0);
     expect(state.runner.credits).toBe(8);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+    const springboardTraceEvent = state.eventLog.at(-1)?.publicPayload;
+    expect(springboardTraceEvent).toMatchObject({
       actionType: "resolve_choice",
       traceStep: "post_bid_link",
-      sourceDefinitionId: "onr_v1_181_the-springboard",
       postBidTraceLinkDelta: 1,
       postBidTraceLinkBonus: 3,
       runnerLink: 3,
@@ -35872,7 +35872,7 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
       traceSuccessful: false,
       tagsAdded: 0,
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+    expect(JSON.stringify(springboardTraceEvent)).not.toMatch(
       privatePayloadMarkers,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

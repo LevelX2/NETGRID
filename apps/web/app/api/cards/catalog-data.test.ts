@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   activeAiApprovedCardIds,
-  ONR_V1_9_22_WIP_CARD_IDS,
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
@@ -169,7 +168,10 @@ describe("catalog API filters", () => {
         .sort(),
     ).toEqual([...new Set(expectedOnrAiApproved)].sort());
     expect(body.cards.map((card) => card.catalogCardId)).toEqual(
-      expect.arrayContaining([...ONR_V1_9_22_WIP_CARD_IDS]),
+      expect.arrayContaining([
+        "onr_v1_026_false-echo",
+        "onr_v1_075_zetatech-software-installer",
+      ]),
     );
     expect(body.cards.map((card) => card.catalogCardId)).not.toEqual(
       expect.arrayContaining([...PROTEUS_VISIBLE_BASELINE_CARD_IDS]),
@@ -178,6 +180,8 @@ describe("catalog API filters", () => {
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
     const [candidateId] = PROTEUS_VISIBLE_BASELINE_CARD_IDS;
+    expect(candidateId).toBeDefined();
+    if (!candidateId) throw new Error("Missing Proteus visible baseline card");
     const candidateResponse = catalogDetailResponse(candidateId);
     expect(candidateResponse.status).toBe(200);
     const candidateBody = candidateResponse.body as {
@@ -284,7 +288,11 @@ describe("catalog API filters", () => {
   });
 
   it("shows promoted longtail card details in the web catalog API", () => {
-    for (const cardId of ONR_V1_9_22_WIP_CARD_IDS) {
+    for (const cardId of [
+      "onr_v1_026_false-echo",
+      "onr_v1_075_zetatech-software-installer",
+      "onr_v1_298_planning-consultants",
+    ]) {
       const response = catalogDetailResponse(cardId);
 
       expect([200, 404], cardId).toContain(response.status);
