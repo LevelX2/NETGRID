@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-rarity-catalog-deck-filters
-status: in-progress
+status: done
 kind: fix
 area: ui
 priority: normal
@@ -8,12 +8,18 @@ primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-3
 releaseTarget: catalog UX
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/catalog-ui.ts
+  - apps/web/app/catalog-ui.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm install --frozen-lockfile
+  - corepack pnpm --filter @netgrid/web exec vitest run app/catalog-ui.test.ts app/api/cards/catalog-data.test.ts --passWithNoTests
+  - corepack pnpm --filter @netgrid/web typecheck
 ---
 
 # Rarität in Katalogdetails anzeigen und in Katalog/Deckeditor filtern
@@ -49,13 +55,13 @@ Die bereits vorhandene Kartenrarität soll in der Oberfläche nutzbar werden: Im
 
 ## Akzeptanzkriterien
 
-- [ ] Katalog kann Karten nach Rarität filtern.
-- [ ] Deckeditor kann verfügbare Karten nach Rarität filtern.
-- [ ] Katalog-Detailinformationen zeigen die Rarität mit deutschem Label an.
-- [ ] Filteroptionen verwenden die zentralen deutschen Labels `Häufig`, `Ungewöhnlich`, `Selten`, `Vital`.
-- [ ] Karten ohne Raritätswert werden robust behandelt.
-- [ ] Bestehende Typ-, Status- und Quellenfilter bleiben regressionsfrei.
-- [ ] Es gibt Regressionstests oder einen vergleichbaren UI/API-Testnachweis für Raritätsfilter und Detailanzeige.
+- [x] Katalog kann Karten nach Rarität filtern.
+- [x] Deckeditor kann verfügbare Karten nach Rarität filtern.
+- [x] Katalog-Detailinformationen zeigen die Rarität mit deutschem Label an.
+- [x] Filteroptionen verwenden die zentralen deutschen Labels `Häufig`, `Ungewöhnlich`, `Selten`, `Vital`.
+- [x] Karten ohne Raritätswert werden robust behandelt.
+- [x] Bestehende Typ-, Status- und Quellenfilter bleiben regressionsfrei.
+- [x] Es gibt Regressionstests oder einen vergleichbaren UI/API-Testnachweis für Raritätsfilter und Detailanzeige.
 
 ## Umsetzungshinweise
 
@@ -66,4 +72,12 @@ Die bereits vorhandene Kartenrarität soll in der Oberfläche nutzbar werden: Im
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt: Katalog und Deckeditor nutzen die vorhandenen `rarity`-Metadaten für Raritätsfilter mit deutschen Labels. Katalogdetails zeigen die Rarität als kompaktes Metadatum; fehlende oder unbekannte Raritätswerte bleiben robust und brechen Filterzählungen nicht.
+
+Checks:
+
+- `corepack pnpm install --frozen-lockfile`
+- `corepack pnpm --filter @netgrid/web exec vitest run app/catalog-ui.test.ts app/api/cards/catalog-data.test.ts --passWithNoTests`
+- `corepack pnpm --filter @netgrid/web typecheck`
+
+Offene Folgepunkte: keine im Scope dieses Pakets.

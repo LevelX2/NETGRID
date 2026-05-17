@@ -167,13 +167,18 @@ import {
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
+  CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
-  filterCatalogCardsBySet,
+  catalogRarityLabel,
+  filterCatalogCardsByRarity,
   catalogTypeKeysForCard,
+  filterCatalogCardsBySet,
   filterCatalogCardsByType,
   nextCatalogSelection,
+  summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
   summarizeCatalogTypeFilters,
+  type CatalogRarityFilterKey,
   type CatalogSetFilterKey,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
@@ -383,6 +388,13 @@ type CatalogCardSummary = {
   subtypes: string[];
   faction: string;
   setId: string;
+  rarity?: {
+    code: string;
+    labelDe: string;
+    labelEn?: string;
+    sourceValue?: string;
+    sourceId?: string;
+  };
   statuses: CatalogStatuses;
   blockReasons: string[];
 };
@@ -1676,6 +1688,7 @@ export default function Page() {
   const [catalogStatus, setCatalogStatus] = useState<CatalogStatusKey | "all">("all");
   const [catalogExpertStatuses, setCatalogExpertStatuses] = useState(false);
   const [catalogTypeFilters, setCatalogTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
+  const [catalogRarityFilter, setCatalogRarityFilter] = useState<CatalogRarityFilterKey>("all");
   const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
   const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
   const [catalogSummary, setCatalogSummary] = useState<Partial<Record<CatalogStatusKey, number>>>({});
@@ -2168,8 +2181,10 @@ export default function Page() {
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
 
-  const filteredCatalogCards = useMemo(() => filterCatalogCardsByType(catalogCards, catalogTypeFilters), [catalogCards, catalogTypeFilters]);
-  const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(catalogCards), [catalogCards]);
+  const rarityFilteredCatalogCards = useMemo(() => filterCatalogCardsByRarity(catalogCards, catalogRarityFilter), [catalogCards, catalogRarityFilter]);
+  const filteredCatalogCards = useMemo(() => filterCatalogCardsByType(rarityFilteredCatalogCards, catalogTypeFilters), [catalogTypeFilters, rarityFilteredCatalogCards]);
+  const catalogRarityCounts = useMemo(() => summarizeCatalogRarityFilters(catalogCards), [catalogCards]);
+  const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(rarityFilteredCatalogCards), [rarityFilteredCatalogCards]);
 
   useEffect(() => {
     const params = new URLSearchParams();
@@ -4282,6 +4297,8 @@ export default function Page() {
             summary={catalogSummary}
             selectedId={selectedCatalogId}
             showExpertStatuses={catalogExpertStatuses}
+            rarityCounts={catalogRarityCounts}
+            rarityFilter={catalogRarityFilter}
             typeCounts={catalogTypeCounts}
             typeFilters={catalogTypeFilters}
             onSearch={setCatalogSearch}
@@ -4289,6 +4306,7 @@ export default function Page() {
             onStatus={setCatalogStatus}
             onSelect={setSelectedCatalogId}
             onToggleExpertStatuses={setCatalogExpertStatuses}
+            onRarity={setCatalogRarityFilter}
             onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
             onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
             onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
@@ -5001,6 +5019,8 @@ export default function Page() {
               summary={catalogSummary}
               selectedId={selectedCatalogId}
               showExpertStatuses={catalogExpertStatuses}
+              rarityCounts={catalogRarityCounts}
+              rarityFilter={catalogRarityFilter}
               typeCounts={catalogTypeCounts}
               typeFilters={catalogTypeFilters}
               onSearch={setCatalogSearch}
@@ -5008,6 +5028,7 @@ export default function Page() {
               onStatus={setCatalogStatus}
               onSelect={setSelectedCatalogId}
               onToggleExpertStatuses={setCatalogExpertStatuses}
+              onRarity={setCatalogRarityFilter}
               onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
               onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
               onClearTypeFilters={() => setCatalogTypeFilters({ ...NO_CATALOG_TYPE_FILTERS })}
@@ -8130,6 +8151,8 @@ function CatalogPanel({
   summary,
   selectedId,
   showExpertStatuses,
+  rarityCounts,
+  rarityFilter,
   typeCounts,
   typeFilters,
   onSearch,
@@ -8137,6 +8160,7 @@ function CatalogPanel({
   onStatus,
   onSelect,
   onToggleExpertStatuses,
+  onRarity,
   onTypeFilter,
   onSelectAllTypes,
   onClearTypeFilters
@@ -8150,6 +8174,8 @@ function CatalogPanel({
   summary: Partial<Record<CatalogStatusKey, number>>;
   selectedId: string | null;
   showExpertStatuses: boolean;
+  rarityCounts: Record<CatalogRarityFilterKey, number>;
+  rarityFilter: CatalogRarityFilterKey;
   typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
   typeFilters: CatalogTypeFilterState;
   onSearch(value: string): void;
@@ -8157,6 +8183,7 @@ function CatalogPanel({
   onStatus(value: CatalogStatusKey | "all"): void;
   onSelect(value: string): void;
   onToggleExpertStatuses(value: boolean): void;
+  onRarity(value: CatalogRarityFilterKey): void;
   onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
   onSelectAllTypes(): void;
   onClearTypeFilters(): void;
@@ -8169,6 +8196,7 @@ function CatalogPanel({
   const visibleStatusKeys = showExpertStatuses ? CATALOG_STATUS_FILTER_KEYS : PRIMARY_CATALOG_STATUS_KEYS;
   const availableStatusKeys = new Set(filters?.statuses ?? CATALOG_STATUS_FILTER_KEYS);
   const statusOptions = visibleStatusKeys.filter((value) => availableStatusKeys.has(value));
+  const detailRarityLabel = detail ? catalogRarityLabel(detail) : null;
   const detailRef = useRef<HTMLElement | null>(null);
   const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
 
@@ -8231,6 +8259,16 @@ function CatalogPanel({
             {statusOptions.map((value) => (
               <option value={value} key={value}>
                 {CATALOG_STATUS_LABELS[value]}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Rarität
+          <select value={rarityFilter} onChange={(event) => onRarity(event.target.value as CatalogRarityFilterKey)}>
+            {CATALOG_RARITY_FILTERS.map((filter) => (
+              <option value={filter.key} key={filter.key}>
+                {filter.label} ({rarityCounts[filter.key]})
               </option>
             ))}
           </select>
@@ -8342,6 +8380,12 @@ function CatalogPanel({
                   <strong>{detail.engineCardId ? "ja" : "nein"}</strong>
                   engine
                 </span>
+                {detailRarityLabel ? (
+                  <span>
+                    <strong>{detailRarityLabel}</strong>
+                    Rarität
+                  </span>
+                ) : null}
               </div>
               {detail.aiHints ? <CatalogAiHintPanel hints={detail.aiHints} /> : null}
               {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
@@ -8476,6 +8520,7 @@ function DeckEditorPanel({
   const [builderSearch, setBuilderSearch] = useState("");
   const [builderTypeFilters, setBuilderTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [builderSetFilter, setBuilderSetFilter] = useState<CatalogSetFilterKey>("all");
+  const [builderRarityFilter, setBuilderRarityFilter] = useState<CatalogRarityFilterKey>("all");
   const [builderOnlyInDeck, setBuilderOnlyInDeck] = useState(false);
   const [builderFiltersOpen, setBuilderFiltersOpen] = useState(false);
   const [deckDetailsOpen, setDeckDetailsOpen] = useState(true);
@@ -8501,8 +8546,10 @@ function DeckEditorPanel({
   const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
   const tableLayout = useMemo(() => (selectedDeck ? normalizeDeckTableLayout(selectedDeck, cardLookup, cardDetailsById) : null), [cardDetailsById, cardLookup, selectedDeck]);
   const sourceFilteredPlayableCards = useMemo(() => filterCatalogCardsBySet(playableCards, builderSetFilter), [builderSetFilter, playableCards]);
+  const rarityFilteredPlayableCards = useMemo(() => filterCatalogCardsByRarity(sourceFilteredPlayableCards, builderRarityFilter), [builderRarityFilter, sourceFilteredPlayableCards]);
   const builderSetCounts = useMemo(() => summarizeCatalogSetFilters(playableCards), [playableCards]);
-  const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(sourceFilteredPlayableCards), [sourceFilteredPlayableCards]);
+  const builderRarityCounts = useMemo(() => summarizeCatalogRarityFilters(sourceFilteredPlayableCards), [sourceFilteredPlayableCards]);
+  const builderTypeCounts = useMemo(() => summarizeCatalogTypeFilters(rarityFilteredPlayableCards), [rarityFilteredPlayableCards]);
   const runnerDeckCount = localDecks.filter((deck) => deck.side === "runner").length;
   const corpDeckCount = localDecks.filter((deck) => deck.side === "corp").length;
   const filteredLocalDecks = useMemo(() => (deckSideFilter === "all" ? localDecks : localDecks.filter((deck) => deck.side === deckSideFilter)), [deckSideFilter, localDecks]);
@@ -8510,7 +8557,7 @@ function DeckEditorPanel({
   const visibleTypeFilterGroups = selectedDeck ? CATALOG_TYPE_FILTER_GROUPS.filter((group) => group.side === selectedDeck.side) : CATALOG_TYPE_FILTER_GROUPS;
   const libraryCards = useMemo(() => {
     const search = builderSearch.trim().toLowerCase();
-    return sourceFilteredPlayableCards
+    return rarityFilteredPlayableCards
       .filter((card) => {
         if (builderOnlyInDeck && !deckQuantities.has(card.catalogCardId)) return false;
         if (!catalogCardMatchesTypeFilters(card, builderTypeFilters)) return false;
@@ -8519,7 +8566,7 @@ function DeckEditorPanel({
         return [card.title, card.type, card.faction, ...card.subtypes, detail?.text ?? ""].some((value) => value.toLowerCase().includes(search));
       })
       .sort((left, right) => deckBuilderCardGroup(left).localeCompare(deckBuilderCardGroup(right)) || left.title.localeCompare(right.title));
-  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, cardDetailsById, deckQuantities, sourceFilteredPlayableCards]);
+  }, [builderOnlyInDeck, builderSearch, builderTypeFilters, cardDetailsById, deckQuantities, rarityFilteredPlayableCards]);
   const deckRows = useMemo(
     () =>
       (selectedDeck?.cards ?? [])
@@ -8624,6 +8671,10 @@ function DeckEditorPanel({
     if (builderSetFilter === "all" || builderSetCounts[builderSetFilter] > 0) return;
     setBuilderSetFilter("all");
   }, [builderSetCounts, builderSetFilter]);
+  useEffect(() => {
+    if (builderRarityFilter === "all" || builderRarityCounts[builderRarityFilter] > 0) return;
+    setBuilderRarityFilter("all");
+  }, [builderRarityCounts, builderRarityFilter]);
   useEffect(() => {
     setTableSelectionMode(false);
     setSelectedTableCardKeys([]);
@@ -9054,7 +9105,7 @@ function DeckEditorPanel({
                     <div>
                       <h3>Kartenbibliothek</h3>
                       <p className="meta">
-                        {libraryCards.length} von {sourceFilteredPlayableCards.length} sichtbaren gültigen {sideLabel(selectedDeck.side)}-Karten
+                        {libraryCards.length} von {rarityFilteredPlayableCards.length} sichtbaren gültigen {sideLabel(selectedDeck.side)}-Karten
                       </p>
                     </div>
                     <div className="deckLibraryHeaderActions">
@@ -9077,6 +9128,14 @@ function DeckEditorPanel({
                           <button className={builderSetFilter === filter.key ? "active" : ""} disabled={builderSetCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderSetFilter(filter.key)} type="button" aria-pressed={builderSetFilter === filter.key}>
                             <span>{filter.label}</span>
                             <small>{builderSetCounts[filter.key]}</small>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="deckSourceFilter deckRarityFilter" role="group" aria-label="Rarität anzeigen">
+                        {CATALOG_RARITY_FILTERS.map((filter) => (
+                          <button className={builderRarityFilter === filter.key ? "active" : ""} disabled={builderRarityCounts[filter.key] === 0} key={filter.key} onClick={() => setBuilderRarityFilter(filter.key)} type="button" aria-pressed={builderRarityFilter === filter.key}>
+                            <span>{filter.label}</span>
+                            <small>{builderRarityCounts[filter.key]}</small>
                           </button>
                         ))}
                       </div>

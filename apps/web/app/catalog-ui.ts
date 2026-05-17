@@ -2,6 +2,7 @@ export type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "
 
 export type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
 export type CatalogSetFilterKey = "all" | "original" | "test" | "other";
+export type CatalogRarityFilterKey = "all" | "common" | "uncommon" | "rare" | "vital";
 
 export type CatalogCardForTypeFilter = {
   catalogCardId: string;
@@ -12,6 +13,29 @@ export type CatalogCardForTypeFilter = {
 export type CatalogCardForSetFilter = {
   catalogCardId: string;
   setId: string;
+};
+
+export type CatalogCardForRarityFilter = {
+  catalogCardId: string;
+  rarity?: {
+    code?: string;
+    labelDe?: string;
+  } | null;
+};
+
+export const CATALOG_RARITY_FILTERS: Array<{ key: CatalogRarityFilterKey; label: string }> = [
+  { key: "all", label: "Alle Raritäten" },
+  { key: "common", label: "Häufig" },
+  { key: "uncommon", label: "Ungewöhnlich" },
+  { key: "rare", label: "Selten" },
+  { key: "vital", label: "Vital" }
+];
+
+const CATALOG_RARITY_LABELS_DE: Record<Exclude<CatalogRarityFilterKey, "all">, string> = {
+  common: "Häufig",
+  uncommon: "Ungewöhnlich",
+  rare: "Selten",
+  vital: "Vital"
 };
 
 const ORIGINAL_SET_PREFIXES = ["onr-"];
@@ -92,4 +116,31 @@ export function summarizeCatalogSetFilters(cards: CatalogCardForSetFilter[]): Re
     counts[catalogSetKeyForCard(card)] += 1;
   }
   return counts;
+}
+
+export function catalogRarityLabel(card: CatalogCardForRarityFilter): string | null {
+  const code = card.rarity?.code;
+  if (isCatalogRarityCode(code)) return CATALOG_RARITY_LABELS_DE[code];
+  return card.rarity?.labelDe ?? null;
+}
+
+export function catalogCardMatchesRarityFilter(card: CatalogCardForRarityFilter, filter: CatalogRarityFilterKey): boolean {
+  return filter === "all" || card.rarity?.code === filter;
+}
+
+export function filterCatalogCardsByRarity<T extends CatalogCardForRarityFilter>(cards: T[], filter: CatalogRarityFilterKey): T[] {
+  return cards.filter((card) => catalogCardMatchesRarityFilter(card, filter));
+}
+
+export function summarizeCatalogRarityFilters(cards: CatalogCardForRarityFilter[]): Record<CatalogRarityFilterKey, number> {
+  const counts: Record<CatalogRarityFilterKey, number> = { all: cards.length, common: 0, uncommon: 0, rare: 0, vital: 0 };
+  for (const card of cards) {
+    const code = card.rarity?.code;
+    if (isCatalogRarityCode(code)) counts[code] += 1;
+  }
+  return counts;
+}
+
+function isCatalogRarityCode(value: string | undefined): value is Exclude<CatalogRarityFilterKey, "all"> {
+  return value === "common" || value === "uncommon" || value === "rare" || value === "vital";
 }
