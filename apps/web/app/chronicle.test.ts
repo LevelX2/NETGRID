@@ -606,7 +606,8 @@ describe("formatChronicleEvent", () => {
         title: "Krash",
         aiReasonCode: "runner.encounter.break_etr",
         breakSubroutineBaseCost: 2,
-        subroutineIndex: 0
+        subroutineIndex: 0,
+        targetIceTitle: "Filter"
       }),
       "corp"
     );
@@ -614,9 +615,9 @@ describe("formatChronicleEvent", () => {
     expect(pump.title).toBe("Die Runner-KI hat Krash gepumpt.");
     expect(pump.description).toBe("2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.");
     expect(pump.chips).toEqual(expect.arrayContaining(["Breaker", "+1 Stärke", "2 Credits"]));
-    expect(breakAction.title).toBe("Die Runner-KI hat mit Krash eine Subroutine gebrochen.");
-    expect(breakAction.description).toBe("2 Credits: eine Subroutine gebrochen.");
-    expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine", "Gebrochen", "2 Credits", "Krash"]));
+    expect(breakAction.title).toBe("Die Runner-KI hat mit Krash Subroutine 1 auf Filter gebrochen.");
+    expect(breakAction.description).toBe("2 Credits: Subroutine 1 auf Filter gebrochen.");
+    expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine", "Subroutine 1", "Gebrochen", "2 Credits", "Krash", "Filter"]));
   });
 
   it("names visible Runner installs from the public label and Rig zone", () => {
@@ -848,6 +849,43 @@ describe("formatChronicleEvent", () => {
     expect(runnerBid.title).toBe("Trace entschieden: Korp 2 Credits, Du 1 Credit; Trace erfolgreich.");
     expect(runnerBid.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 1.");
     expect(runnerBid.chips).toEqual(["Runner", "Trace", "Korp 2", "Runner 1", "6:1", "Erfolg", "+1 Tag"]);
+  });
+
+  it("keeps Cinderella trace outcome and break costs distinct", () => {
+    const trace = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        traceStep: "runner_bid",
+        sourceDefinitionId: "onr_v1_228_cinderella",
+        corpBid: 1,
+        traceStrength: 7,
+        runnerBid: 0,
+        runnerStrength: 0,
+        traceSuccessful: true,
+        traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+        trashedCount: 1,
+        damageAmount: 2,
+        damageCannotBePrevented: true
+      }),
+      "runner"
+    );
+    const breakAction = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        title: "Replicator",
+        subroutineIndex: 0,
+        targetIceTitle: "Cinderella",
+        breakSubroutineBaseCost: 0
+      }),
+      "runner"
+    );
+
+    expect(trace.title).toBe("Trace entschieden: Korp 1 Credit, Du 0 Credits; Trace erfolgreich.");
+    expect(trace.description).toBe("Endstand: Trace 7 gegen Runner-Stärke 0; Karteneffekt: 1 Hardware getrasht, 2 Meat-Schaden nicht verhinderbar, Run endet.");
+    expect(trace.chips).toEqual(expect.arrayContaining(["Trace", "Erfolg", "Hardware -1", "2 Schaden", "Run endet"]));
+    expect(breakAction.title).toBe("Du hast mit Replicator Subroutine 1 auf Cinderella gebrochen.");
+    expect(breakAction.description).toBe("0 Credits: Subroutine 1 auf Cinderella gebrochen.");
+    expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine 1", "0 Credits", "Replicator", "Cinderella"]));
   });
 
   it("describes Hacker Tracker, Fang 2.0 and Arasaka Owns You follow-up payloads", () => {

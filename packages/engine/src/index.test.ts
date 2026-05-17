@@ -29024,6 +29024,96 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     }
   });
 
+  it("documents Cinderella failure without keeping stale break options or applying break costs", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-cinderella-failed-trace-break-cost"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const hardwareId = installRunnerHardwareForTest(state, "onr_v1_120_armadillo-armored-road-home");
+    const replicatorId = installRunnerProgramForTest(state, "onr_v1_056_replicator");
+    state.cardInstances[replicatorId] = {
+      ...state.cardInstances[replicatorId]!,
+      strengthModifier: 4,
+    };
+    putCorpIceOnServer(state, "rd", "onr_v1_228_cinderella");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_228_cinderella",
+    );
+    const visibleBreakBeforeTrace = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator",
+    );
+    expect(visibleBreakBeforeTrace.payload).toMatchObject({
+      targetIceDefinitionId: "onr_v1_228_cinderella",
+      targetIceTitle: "Cinderella",
+      subroutineIndex: 0,
+      breakSubroutineBaseCost: 0,
+    });
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    const creditsBeforeRunnerBid = state.runner.credits;
+    const heapBeforeRunnerBid = state.runner.heap.length;
+    state = applyChoice(state, "runner", "bid_6");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "runner_bid",
+      sourceDefinitionId: "onr_v1_228_cinderella",
+      traceSuccessful: false,
+      corpBid: 0,
+      runnerBid: 6,
+      traceStrength: 6,
+      runnerStrength: 6,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+    });
+    expect(state.runner.credits).toBe(creditsBeforeRunnerBid - 6);
+    expect(state.runner.heap).toHaveLength(heapBeforeRunnerBid);
+    expect(state.runner.rig.hardware).toContain(hardwareId);
+    expect(state.run?.phase).toBe("encounter_ice");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "break_subroutine" && sourceDefinition(state, action) === "onr_v1_056_replicator",
+      ),
+    ).toBe(false);
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: visibleBreakBeforeTrace.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      }).ok,
+    ).toBe(false);
+
+    let successful = toRunnerTurn(MECHANIC_SMOKE_GAMES.traceTags("spotcheck-cinderella-success-trace-cost"));
+    successful.runner.credits = 20;
+    successful.corp.credits = 20;
+    installRunnerHardwareForTest(successful, "onr_v1_120_armadillo-armored-road-home");
+    putCorpIceOnServer(successful, "rd", "onr_v1_228_cinderella");
+    successful = apply(successful, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    successful = apply(
+      successful,
+      "corp",
+      (action) => action.type === "rez_ice" && sourceDefinition(successful, action) === "onr_v1_228_cinderella",
+    );
+    successful = apply(successful, "runner", (action) => action.type === "continue_run");
+    successful = applyChoice(successful, "corp", "bid_1");
+    const runnerCreditsBeforeSuccessBid = successful.runner.credits;
+    successful = applyChoice(successful, "runner", "bid_0");
+    expect(successful.runner.credits).toBe(runnerCreditsBeforeSuccessBid);
+    expect(successful.run).toBeUndefined();
+    expect(successful.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceSuccessful: true,
+      traceSuccessEffect: "hardware_trash_meat_damage_end_run",
+      trashedCount: 1,
+      damageAmount: 2,
+    });
+  });
+
   it("places Management Shake-Up advancement counters and scales Shattered Remains hardware trash", () => {
     let state = MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-management-shake-up");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
