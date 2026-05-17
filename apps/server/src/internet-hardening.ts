@@ -217,13 +217,80 @@ export function redactedDiagnosticsUnavailable(): { error: { code: "diagnostics_
   return { error: { code: "diagnostics_unavailable", message: "Diagnose ist in diesem Profil nicht verfügbar." } };
 }
 
+export const OBSERVABILITY_ALLOWED_TECHNICAL_LABELS = [
+  "rulesBaseline",
+  "cardPoolVersion",
+  "formatProfileId",
+  "formatProfileVersion",
+  "aiVersion",
+  "serverVersion",
+  "release",
+  "profile",
+  "storageKind",
+  "status",
+  "mode",
+  "eventFamily",
+  "rateLimitCategory",
+  "errorCode",
+  "matchStatus",
+  "latencyBucket",
+  "regionCode"
+] as const;
+
+export type ObservabilityRedactionViolation = {
+  id: "raw_token" | "token_hash" | "deck_private" | "hidden_info" | "ai_debug" | "local_path";
+  label: string;
+};
+
+export function findObservabilityRedactionViolations(value: unknown): ObservabilityRedactionViolation[] {
+  const text = serializedObservabilityValue(value);
+  const checks: Array<{ id: ObservabilityRedactionViolation["id"]; label: string; pattern: RegExp }> = [
+    {
+      id: "raw_token",
+      label: "Roh-Token oder Account-Session-Cookie",
+      pattern: /\b(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|accountSessionToken|inviteToken|recoveryToken|ng_account_session)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{8,}/i
+    },
+    {
+      id: "token_hash",
+      label: "Token-Hash",
+      pattern: /\b(?:tokenHash|sessionTokenHash|inviteTokenHash|recoveryTokenHash)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{8,}|sha256:[a-f0-9]{64}/i
+    },
+    {
+      id: "deck_private",
+      label: "Deckliste, Deckhash oder privater Decksnapshot",
+      pattern: /\b(?:decklist|privateDeckSnapshots)\b|\b(?:deckHash|cloudDeckId)\b["']?\s*[:=]\s*["']?(?!\[redacted\])[A-Za-z0-9_.:-]{4,}|["']cards["']\s*:/i
+    },
+    {
+      id: "hidden_info",
+      label: "Hidden-Info- oder FullState-Daten",
+      pattern: /\b(?:privatePayload|cardInstances|fullGameState|FullState|hidden-card|Hidden Priority Agenda)\b/i
+    },
+    {
+      id: "ai_debug",
+      label: "AIInput oder DecisionDebug",
+      pattern: /\b(?:AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|beliefState)\b/i
+    },
+    {
+      id: "local_path",
+      label: "lokaler Dateipfad",
+      pattern: /(?:[A-Za-z]:\\|\/Users\/|\/home\/|%APPDATA%)/i
+    }
+  ];
+  return checks.filter((check) => check.pattern.test(text)).map(({ id, label }) => ({ id, label }));
+}
+
 export function redactSensitiveText(value: unknown): string {
   return String(value)
     .replace(/(joinToken=)[A-Za-z0-9_-]+/g, "$1[redacted]")
+    .replace(/(ng_account_session=)[A-Za-z0-9_.:-]+/gi, "$1[redacted]")
     .replace(/("(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)"\s*:\s*")[^"]+(")/gi, "$1[redacted]$2")
-    .replace(/\b(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash)\b\s*[:=]\s*[A-Za-z0-9_.:-]+/gi, (match) => match.replace(/[:=]\s*.*/, "=[redacted]"))
+    .replace(
+      /\b(?:hostSessionToken|hostReconnectToken|sessionToken|reconnectToken|joinToken|tokenHash|accountSessionToken|sessionTokenHash|inviteToken|inviteTokenHash|recoveryToken|recoveryTokenHash|deckHash)\b\s*[:=]\s*[A-Za-z0-9_.:-]+/gi,
+      (match) => match.replace(/[:=]\s*.*/, "=[redacted]")
+    )
     .replace(/sha256:[a-f0-9]{64}/gi, "sha256:[redacted]")
-    .replace(/privateDeckSnapshots|privatePayload|cardInstances|decklist/gi, "[redacted-field]");
+    .replace(/privateDeckSnapshots|privatePayload|cardInstances|decklist|fullGameState|FullState|AIInput|DecisionDebug|aiDecisionDebug|decisionDebug|cloudDeckId/gi, "[redacted-field]")
+    .replace(/[A-Za-z]:\\[^\s"]+|\/Users\/[^\s"]+|\/home\/[^\s"]+|%APPDATA%\\?[^\s"]*/gi, "[redacted-path]");
 }
 
 export function redactedJoinUrl(url: string | undefined): string | undefined {
@@ -291,4 +358,13 @@ function firstHeaderValue(value: string | string[] | undefined): string | undefi
 
 function trimTrailingSlash(value: string): string {
   return value.replace(/\/+$/, "");
+}
+
+function serializedObservabilityValue(value: unknown): string {
+  if (typeof value === "string") return value;
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return String(value);
+  }
 }
