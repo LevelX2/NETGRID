@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-proteus-bad-publicity-engine-harness
-status: inbox
+status: in_progress
 kind: test
 area: engine
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
+parallelWorker: worker-2
 releaseTarget: Proteus planning
 blockedBy:
   - act-2026-05-17-proteus-bad-publicity-loss-gate
