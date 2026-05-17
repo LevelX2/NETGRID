@@ -200,7 +200,7 @@ function deriveHighlight(
   if (actionType === "trash_resource" || actionType === "remove_tag") return { kind: "zone", side: "runner", zone: "rig" };
   if (visibility === "redacted") return serverHighlight(payload);
 
-  const cardDefinitionId = stringValue(payload.cardDefinitionId);
+  const cardDefinitionId = stringValue(payload.cardDefinitionId) ?? stringValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId ? visibleCards.get(cardDefinitionId) : undefined;
   if (visibleCard?.instanceId) {
     return {
@@ -223,7 +223,7 @@ function deriveHighlight(
 
 function deriveRelatedCard(payload: Record<string, unknown>, visibility: ChronicleVisibility, visibleCards: Map<string, VisibleCard>): VisibleCard | undefined {
   if (visibility === "redacted") return undefined;
-  const cardDefinitionId = stringValue(payload.cardDefinitionId);
+  const cardDefinitionId = stringValue(payload.cardDefinitionId) ?? stringValue(payload.sourceDefinitionId);
   const visibleCard = cardDefinitionId ? visibleCards.get(cardDefinitionId) : undefined;
   return visibleCard?.known ? visibleCard : undefined;
 }

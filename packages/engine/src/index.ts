@@ -18247,14 +18247,27 @@ function resolveCorporateNegotiatingCenterChoice(
     )
   )
     throw new Error("Corporate Negotiating Center darf nur HQ-Agenden zeigen.");
+  const sourceDefinition = definitionFor(state, sourceIds[0]!);
+  const revealedDefinitions = selectedIds.map((cardId) =>
+    definitionFor(state, cardId),
+  );
   credits(state, "corp", selectedIds.length);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
-    revealedAgendaDefinitionIds: selectedIds
-      .map((cardId) => definitionFor(state, cardId).id)
+    sourceDefinitionId: sourceDefinition.id,
+    sourceTitle: sourceDefinition.title,
+    publicRevealKind: "reveal",
+    publicRevealDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    publicRevealTitles: revealedDefinitions
+      .map((definition) => definition.title)
+      .join("||"),
+    revealedAgendaDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
       .join(","),
     revealedCount: selectedIds.length,
     gainedCredits: selectedIds.length,
@@ -21406,6 +21419,10 @@ function publicContextForAction(
     if (typeof legalAction.payload.revealedAgendaDefinitionIds === "string")
       context.revealedAgendaDefinitionIds =
         legalAction.payload.revealedAgendaDefinitionIds;
+    if (typeof legalAction.payload.publicRevealTitles === "string")
+      context.publicRevealTitles = legalAction.payload.publicRevealTitles;
+    if (typeof legalAction.payload.sourceTitle === "string")
+      context.sourceTitle = legalAction.payload.sourceTitle;
     if (typeof legalAction.payload.hqCardCount === "number")
       context.hqCardCount = legalAction.payload.hqCardCount;
     if (typeof legalAction.payload.drawnCount === "number")

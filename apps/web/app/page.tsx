@@ -999,6 +999,15 @@ function revealedEventCardId(event: PublicGameEvent): string | null {
   return typeof cardId === "string" ? cardId : null;
 }
 
+function revealedEventCardIds(event: PublicGameEvent): string[] {
+  const ids = [
+    revealedEventCardId(event),
+    ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds"),
+    ...payloadStringList(event.publicPayload, "revealedAgendaDefinitionIds")
+  ].filter((value): value is string => Boolean(value));
+  return Array.from(new Set(ids));
+}
+
 function eventCardDetail(event: PublicGameEvent, detailsById: Record<string, CatalogCardDetail>): CatalogCardDetail | null {
   const cardId = revealedEventCardId(event);
   return cardId ? (detailsById[cardId] ?? null) : null;
@@ -1110,6 +1119,15 @@ function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, titl
 function payloadString(payload: Record<string, unknown>, key: string): string | null {
   const value = payload[key];
   return typeof value === "string" && value.trim() ? value : null;
+}
+
+function payloadStringList(payload: Record<string, unknown>, key: string): string[] {
+  return (
+    payloadString(payload, key)
+      ?.split(",")
+      .map((item) => item.trim())
+      .filter(Boolean) ?? []
+  );
 }
 
 function payloadSide(payload: Record<string, unknown>, key: string): Side | null {
@@ -2198,7 +2216,7 @@ export default function Page() {
   }, [selectedCatalogId]);
 
   useEffect(() => {
-    const eventIds = (payload?.eventTail ?? []).map(revealedEventCardId).filter((value): value is string => Boolean(value));
+    const eventIds = (payload?.eventTail ?? []).flatMap(revealedEventCardIds);
     const visibleIds = visibleKnownCardIds(payload?.playerView);
     const missingIds = Array.from(new Set([...eventIds, ...visibleIds])).filter((cardId) => !catalogDetailsById[cardId]);
     if (missingIds.length === 0) return;

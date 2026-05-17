@@ -230,6 +230,32 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("SeeYa");
   });
 
+  it("shows Corporate Negotiating Center HQ agenda reveals with public card names", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+        sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+        sourceTitle: "Corporate Negotiating Center",
+        publicRevealKind: "reveal",
+        publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+        publicRevealTitles: "Simple Agenda||Hostile Takeover",
+        revealedAgendaDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+        revealedCount: 2,
+        gainedCredits: 2
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Die Korp hat 2 Agenden aus HQ durch Corporate Negotiating Center vorgezeigt.");
+    expect(item.description).toBe("Gezeigt: Simple Agenda, Hostile Takeover. Timing: Start-of-turn.");
+    expect(item.category).toBe("agenda");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_314_corporate-negotiating-center");
+    expect(item.chips).toEqual(expect.arrayContaining(["Corporate Negotiating Center", "HQ Reveal", "2 Agenden", "+2 Credits", "Start-of-turn"]));
+  });
+
   it("does not claim a stack-search program was installed when the engine reports failure", () => {
     const failed = formatChronicleEvent(
       makeEvent("resolve_choice", {

@@ -17795,6 +17795,13 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
       agendaId,
     );
+    expect(
+      getPlayerView(state, "corp").pendingChoice?.options.map(
+        (option) => option.publicLabel,
+      ),
+    ).toEqual(
+      expect.arrayContaining(["HQ-Agenda", "HQ-Agenda"]),
+    );
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       operationId,
@@ -17807,10 +17814,31 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+      sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+      sourceTitle: "Corporate Negotiating Center",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealTitles: "Simple Agenda",
       revealedAgendaDefinitionIds: "simple_agenda",
       revealedCount: 1,
       gainedCredits: 1,
     });
+    const corpPublicEvent = getPlayerView(state, "corp").publicEvents.at(-1);
+    const runnerPublicEvent = getPlayerView(state, "runner").publicEvents.at(-1);
+    expect(corpPublicEvent?.publicPayload).toMatchObject(
+      runnerPublicEvent?.publicPayload ?? {},
+    );
+    expect(runnerPublicEvent?.publicPayload).toMatchObject({
+      publicRevealDefinitionIds: "simple_agenda",
+      publicRevealTitles: "Simple Agenda",
+      revealedCount: 1,
+    });
+    expect(JSON.stringify(runnerPublicEvent?.publicPayload)).not.toContain(
+      operationId,
+    );
+    expect(JSON.stringify(runnerPublicEvent?.publicPayload)).not.toContain(
+      "simple_economy_operation",
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

@@ -85,8 +85,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const label = stringValue(payload.label);
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
-  const cardTitle = explicitCardTitle ?? labelCardTitle;
+  let cardTitle = explicitCardTitle ?? labelCardTitle;
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+  const sourceTitle = stringValue(payload.sourceTitle);
   let cardDefinitionId = stringValue(payload.cardDefinitionId);
   const cardText = context.cardText ?? undefined;
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
@@ -326,6 +327,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         visibility = "redacted";
         title = phrase(subject, `${sourceLabel} als Sneak-Preview-Quelle gewählt`);
         chips.push("Sneak Preview", sourceLabel);
+        break;
+      }
+      if (hiddenZoneAction === "v1917_corporate_negotiating_center_hq_agenda_reveal") {
+        const revealedTitles = publicRevealTitleList(payload.publicRevealTitles);
+        const revealedCount = numberValue(payload.revealedCount) ?? revealedTitles.length;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? revealedCount;
+        const source = sourceTitle ?? "Corporate Negotiating Center";
+        category = "agenda";
+        importance = revealedCount > 0 ? "important" : "normal";
+        visibility = "public";
+        title =
+          revealedCount > 0
+            ? phrase(subject, `${agendaRevealCountText(revealedCount)} aus HQ durch ${source} vorgezeigt`)
+            : phrase(subject, `keine HQ-Agenda durch ${source} vorgezeigt`);
+        description =
+          revealedTitles.length > 0
+            ? `Gezeigt: ${revealedTitles.join(", ")}. Timing: Start-of-turn.`
+            : "Timing: Start-of-turn.";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = cardTitle ?? source;
+        chips.push(source, "HQ Reveal", `${revealedCount} ${revealedCount === 1 ? "Agenda" : "Agenden"}`, `+${gainedCredits} ${creditLabel(gainedCredits)}`, "Start-of-turn");
         break;
       }
       category = "system";
@@ -1168,6 +1190,10 @@ function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
 }
 
+function agendaRevealCountText(amount: number): string {
+  return amount === 1 ? "eine Agenda" : `${amount} Agenden`;
+}
+
 function accessReplacementEffectParts(creditLoss: number, tagsAdded: number, corpDrawnCount: number): string[] {
   const parts: string[] = [];
   if (creditLoss > 0) parts.push(`Korp verliert ${creditText(creditLoss)}`);
@@ -1342,6 +1368,13 @@ function numberArrayValue(value: unknown): number[] {
       .filter((item) => Number.isFinite(item));
   if (!Array.isArray(value)) return [];
   return value.filter((item): item is number => typeof item === "number" && Number.isFinite(item));
+}
+
+function publicRevealTitleList(value: unknown): string[] {
+  return stringValue(value)
+    ?.split("||")
+    .map((item) => item.trim())
+    .filter(Boolean) ?? [];
 }
 
 function positiveIntegerValue(value: unknown): number | undefined {
