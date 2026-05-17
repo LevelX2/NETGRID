@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-docs-designsets-curation
-status: inbox
+status: in_progress
 kind: cleanup
 area: docs
 priority: low
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
+parallelWorker: worker-4
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
