@@ -3970,8 +3970,8 @@ select {
   grid-auto-flow: column;
   grid-auto-columns: auto;
   align-items: start;
-  justify-items: center;
-  gap: 2px;
+  justify-items: start;
+  gap: 1px;
 }
 
 .zoneIdentityIcon {
@@ -3990,7 +3990,8 @@ select {
 }
 
 .sideZoneLead .zoneIdentityIcon {
-  align-self: center;
+  align-self: flex-start;
+  margin-left: -1px;
 }
 
 .zoneIdentityIcon.runnerZoneSideLabel {
@@ -6568,10 +6569,10 @@ select {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 6px;
+  gap: 5px;
   align-self: stretch;
-  min-width: 28px;
-  padding-right: 4px;
+  min-width: 24px;
+  padding-right: 3px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
 }
 
@@ -6646,7 +6647,7 @@ select {
   width: 100%;
   max-width: 100%;
   gap: 10px;
-  align-items: start;
+  align-items: stretch;
   overflow: visible;
 }
 
@@ -6655,6 +6656,7 @@ select {
   box-sizing: border-box;
   min-width: 0;
   width: fit-content;
+  flex: 0 0 auto;
   max-width: 100%;
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
@@ -6671,19 +6673,19 @@ select {
 }
 
 .runnerGripZone {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
 }
 
 .runnerStackZone {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
 }
 
 .runnerHeapZone {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
 }
@@ -6695,6 +6697,7 @@ select {
   min-width: 0;
   width: fit-content;
   max-width: 100%;
+  min-height: calc(var(--cards-min-width, 108px) * 1.4);
   overflow: visible;
 }
 
@@ -8482,15 +8485,17 @@ select,
 
 .rigSectionLead {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
   align-self: stretch;
-  min-width: 28px;
-  padding-right: 4px;
+  gap: 5px;
+  min-width: 24px;
+  padding-right: 3px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
 }
 
 .rigSectionLeadCompact {
-  gap: 7px;
+  gap: 5px;
 }
 
 .rigSectionTitle {
@@ -8501,18 +8506,20 @@ select,
 }
 
 .rigSectionTitle.rigGroupSideLabel {
-  font-size: clamp(13px, calc(var(--cards-min-width, 116px) * 0.15), 19px);
+  font-size: clamp(13px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 18px);
   color: color-mix(in srgb, var(--runner), white 12%);
   border-left: 0;
   border-right: 0;
   padding-left: 0;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.05em;
 }
 
 .rigSectionIcon {
   display: inline-grid;
-  width: 24px;
-  height: 24px;
+  align-self: flex-start;
+  width: 22px;
+  height: 22px;
+  margin-left: -1px;
   place-items: center;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 46%);
   border-radius: 6px;
@@ -8599,8 +8606,8 @@ select,
 }
 
 .sideZoneTitle.rigGroupSideLabel {
-  font-size: clamp(12px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 17px);
-  letter-spacing: 0.06em;
+  font-size: clamp(13px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 18px);
+  letter-spacing: 0.05em;
 }
 
 .rigMemoryBadge {

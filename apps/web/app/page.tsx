@@ -4762,6 +4762,7 @@ export default function Page() {
             <section className="section panel boardSection rigBoardSection">
               <div className={`rigSectionLayout ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
                 <div className="rigSectionLead">
+                  <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
                   <div className="sideZoneLeadTop">
                     <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
                   </div>
@@ -6530,8 +6531,8 @@ function RunnerRigStrip({
     <section className="runnerRigStrip" data-testid="runner-rig">
       <div className="rigSectionLayout rigSectionLayoutCompact">
         <div className="rigSectionLead rigSectionLeadCompact">
-          <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
           <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
+          <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
         </div>
         {groups.length > 0 ? (
           <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
@@ -11490,12 +11491,12 @@ function SideZoneFrame({
   return (
     <div className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`} title={title} aria-label={ariaLabel}>
       <div className="sideZoneLead">
+        {iconKind ? <ZoneIdentityIcon side={side} kind={iconKind} label={label} /> : null}
         <div className="sideZoneLeadTop">
           <h2 className={`sideZoneTitle rigGroupSideLabel ${zoneSideClass(side)}`}>{label}</h2>
           <ZoneSideCount side={side} value={countLabel} />
           {onToggleCollapse ? <ZoneCollapseButton side={side} label={collapseLabel ?? label} collapsed={collapsed} onToggle={onToggleCollapse} /> : null}
         </div>
-        {iconKind ? <ZoneIdentityIcon side={side} kind={iconKind} label={label} /> : null}
       </div>
       {hasBody ? <div className="sideZoneBody">{children}</div> : null}
     </div>
