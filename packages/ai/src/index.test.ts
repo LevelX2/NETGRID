@@ -169,6 +169,222 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
   });
 
+  it("redacts nested forbidden DTO payload fields through allowlisted shapes for both perspectives", () => {
+    for (const side of ["runner", "corp"] as const) {
+      const state =
+        side === "runner"
+          ? toRunnerTurn(createGameAfterSetup({ seed: `ai-nested-dto-${side}` }))
+          : createGameAfterSetup({ seed: `ai-nested-dto-${side}` });
+      const playerView = structuredClone(getPlayerView(state, side));
+      const baseAction = getLegalActions(state, side)[0];
+      if (!baseAction) throw new Error(`Missing ${side} LegalAction`);
+      playerView.pendingChoice = {
+        choiceId: `ai_nested_choice_${side}`,
+        side,
+        source: "ai_nested_payload_allowlist",
+        prompt: "Side-safe test choice",
+        kind: "select_option",
+        options: [
+          {
+            id: "safe_option",
+            label: "Safe option",
+            publicLabel: "Safe option",
+            value: {
+              privatePayload: { [side]: { gripOrHq: ["hidden-card"] } },
+            } as unknown as string,
+            selectable: true,
+            card: {
+              instanceId: "visible-test-card",
+              known: true,
+              title: "Visible Test Card",
+              definitionId: "simple_run_event",
+              type: "event",
+              privateTitle: "Hidden Priority Agenda",
+            } as VisibleCard & { privateTitle: string },
+            privatePayload: { sessionToken: "hidden-session-token" },
+          } as NonNullable<typeof playerView.pendingChoice>["options"][number] & {
+            privatePayload: Record<string, unknown>;
+          },
+        ],
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: playerView.stateVersion,
+        visibility: "private_to_side",
+        stackSearchResolution: {
+          reveal: "public",
+          destination: "grip",
+          shuffleAfter: true,
+          publicRevealKind: "safe_reveal",
+          privatePayload: { decklist: ["hidden-deck-card"] },
+        } as NonNullable<typeof playerView.pendingChoice>["stackSearchResolution"] & {
+          privatePayload: Record<string, unknown>;
+        },
+      };
+      const eventTail: PublicGameEvent[] = [
+        {
+          eventId: `ai-nested-event-${side}`,
+          type: "start_run",
+          stateVersionBefore: state.stateVersion,
+          stateVersionAfter: state.stateVersion + 1,
+          stateHashAfter: "fnv1a:aiNestedDto",
+          visibilityClass: "public",
+          publicPayload: {
+            actor: side,
+            actionType: "start_run",
+            serverId: "rd",
+            abilityFamily: "run-access",
+            abilityId: "ai_nested_safe_run",
+            effectKind: "run",
+            amounts: {
+              randomRoll: 4,
+              privatePayload: "hidden-roll-source",
+            },
+            targets: {
+              serverLabel: "R&D",
+              decklist: ["hidden-deck-card"],
+            },
+            visibility: {
+              class: "public",
+              hiddenZoneBarrier: true,
+              privatePayload: "hidden-visibility",
+            },
+            privatePayload: { [side]: { gripOrHq: ["hidden-card"] } },
+            cardInstances: { hidden: { definitionId: "simple_agenda" } },
+            fullGameState: { stateVersion: 999 },
+            decisionDebug: { hidden: "debug-hidden-card" },
+            sessionToken: "hidden-session-token",
+          },
+        },
+      ];
+      const legalActions = [
+        {
+          ...baseAction,
+          payload: {
+            ...(baseAction.payload ?? {}),
+            serverId: "rd",
+            placement: "ice",
+            encounterContinue: true,
+            shellTradersAbility: "set_aside_from_grip",
+            privatePayload: { [side]: { gripOrHq: ["hidden-card"] } },
+            cardInstances: { hidden: { definitionId: "simple_agenda" } },
+            fullGameState: { stateVersion: 999 },
+            reconnectToken: "hidden-reconnect-token",
+          },
+        } as unknown as LegalAction,
+      ];
+
+      const input = buildAiDecisionInputDto({
+        side,
+        playerView,
+        eventTail,
+        legalActions,
+        difficulty: "normal",
+        seed: state.seed,
+        decisionId: `ai-nested-dto:${side}`,
+        actionNumber: state.stateVersion,
+        profileId: `${side}-ai-v1.4.2-normal`,
+      });
+      const serialized = JSON.stringify(input);
+
+      expect(input.legalActions[0]?.payload).toMatchObject({
+        serverId: "rd",
+        placement: "ice",
+        encounterContinue: true,
+        shellTradersAbility: "set_aside_from_grip",
+      });
+      expect(input.eventTail[0]?.publicPayload).toMatchObject({
+        actor: side,
+        actionType: "start_run",
+        serverId: "rd",
+        abilityFamily: "run-access",
+        abilityId: "ai_nested_safe_run",
+        effectKind: "run",
+        amounts: { randomRoll: 4 },
+        targets: { serverLabel: "R&D" },
+        visibility: { class: "public", hiddenZoneBarrier: true },
+      });
+      expect(input.playerView.pendingChoice?.options[0]).toMatchObject({
+        id: "safe_option",
+        publicLabel: "Safe option",
+        selectable: true,
+        card: {
+          instanceId: "visible-test-card",
+          definitionId: "simple_run_event",
+        },
+      });
+      expect(input.playerView.pendingChoice?.options[0]).not.toHaveProperty(
+        "value",
+      );
+      expect(input.playerView.pendingChoice?.stackSearchResolution).toEqual({
+        reveal: "public",
+        destination: "grip",
+        shuffleAfter: true,
+        publicRevealKind: "safe_reveal",
+      });
+      expect(serialized).not.toMatch(
+        /privatePayload|cardInstances|fullGameState|decisionDebug|decklist|sessionToken|reconnectToken|Hidden Priority Agenda|hidden-card|hidden-deck-card/i,
+      );
+      expect(assertAiInputIsSideSafe(input)).toBe(true);
+    }
+  });
+
+  it("keeps AI choices stable when nested forbidden payload fields are injected", () => {
+    for (const side of ["runner", "corp"] as const) {
+      const state =
+        side === "runner"
+          ? toRunnerTurn(createGameAfterSetup({ seed: `ai-nested-choice-${side}` }))
+          : createGameAfterSetup({ seed: `ai-nested-choice-${side}` });
+      const cleanInput = buildAiDecisionInput(state, side, {
+        difficulty: "normal",
+        profileId: `${side}-ai-v1.4.2-normal`,
+      });
+      const taintedPlayerView = {
+        ...cleanInput.playerView,
+        publicEvents: cleanInput.playerView.publicEvents.map((event) => ({
+          ...event,
+          publicPayload: {
+            ...event.publicPayload,
+            privatePayload: { [side]: { gripOrHq: ["hidden-card"] } },
+            cardInstances: { hidden: { definitionId: "simple_agenda" } },
+            fullGameState: { stateVersion: 999 },
+          },
+        })),
+      };
+      const taintedLegalActions = cleanInput.legalActions.map(
+        (action) =>
+          ({
+            ...action,
+            payload: {
+              ...(action.payload ?? {}),
+              privatePayload: { [side]: { gripOrHq: ["hidden-card"] } },
+              cardInstances: { hidden: { definitionId: "simple_agenda" } },
+              fullGameState: { stateVersion: 999 },
+            },
+          }) as unknown as LegalAction,
+      );
+      const taintedInput = buildAiDecisionInputDto({
+        side,
+        playerView: taintedPlayerView,
+        eventTail: taintedPlayerView.publicEvents,
+        legalActions: taintedLegalActions,
+        difficulty: cleanInput.difficulty,
+        seed: cleanInput.seed,
+        decisionId: `${cleanInput.decisionId}:tainted`,
+        actionNumber: cleanInput.actionNumber,
+        profileId: cleanInput.profileId,
+      });
+      const cleanDecision = chooseAiAction(cleanInput);
+      const taintedDecision = chooseAiAction(taintedInput);
+
+      expect(taintedDecision.actionId).toBe(cleanDecision.actionId);
+      expect(taintedDecision.reasonCode).toBe(cleanDecision.reasonCode);
+      expect(JSON.stringify(taintedInput)).not.toMatch(
+        /privatePayload|cardInstances|fullGameState|hidden-card/i,
+      );
+      expect(assertAiInputIsSideSafe(taintedInput)).toBe(true);
+    }
+  });
+
   it("marks longtail completion cards AI-supported after every promotion gate", () => {
     const cardsById = createRuntimeCardsById();
 

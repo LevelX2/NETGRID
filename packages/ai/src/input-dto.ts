@@ -1,18 +1,29 @@
-import type {
-  AiDecisionInput,
-  AiDifficulty,
-  AiDeckDoctrineProfile,
-  ChoiceRequirement,
-  Cost,
-  LegalAction,
-  PlayerView,
-  PublicGameEvent,
-  ResolvedGameEffect,
-  Side,
-  TargetRequirement,
-  VisibleCard,
-  VisibleChoiceRequest,
+import {
+  LEGACY_ABILITY_PAYLOAD_FIELDS,
+  type AiDecisionInput,
+  type AiDifficulty,
+  type AiDeckDoctrineProfile,
+  type ChoiceRequirement,
+  type Cost,
+  type LegalAction,
+  type PlayerView,
+  type PublicGameEvent,
+  type ResolvedGameEffect,
+  type Side,
+  type TargetRequirement,
+  type VisibleCard,
+  type VisibleChoiceRequest,
 } from "@netgrid/shared";
+
+type AiPublicPayloadAbilityFamily =
+  | "agenda-scoring"
+  | "damage-prevention"
+  | "hidden-zone"
+  | "hosting-counters"
+  | "payment-costs"
+  | "random-effects"
+  | "run-access"
+  | "trace-tags";
 
 export type BuildAiDecisionInputDtoParams = {
   side: Side;
@@ -39,6 +50,194 @@ export const AI_DECISION_INPUT_TOP_LEVEL_FIELDS = [
   "profileId",
   "ownDeckDoctrine",
 ] as const;
+
+// Nested AI-input payloads are positive allowlists. New engine/public payload
+// shapes must be added here deliberately instead of being deep-copied.
+const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
+  "serverId",
+  "placement",
+  "encounterContinue",
+  "shellTradersAbility",
+  "abilityFamily",
+  "abilityId",
+  "effectKind",
+  "sourceDefinitionId",
+  "cardDefinitionId",
+  "targetCardDefinitionId",
+  "serverLabel",
+  "targetServerId",
+  "targetServerLabel",
+  "redactedKind",
+  "amount",
+  "traceStrength",
+  "runnerLink",
+  ...LEGACY_ABILITY_PAYLOAD_FIELDS,
+]);
+
+const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
+  "actor",
+  "side",
+  "actionType",
+  "label",
+  "publicLabel",
+  "title",
+  "cardTitle",
+  "cardDefinitionId",
+  "sourceDefinitionId",
+  "sourceTitle",
+  "targetCardDefinitionId",
+  "targetIceDefinitionId",
+  "trashedCardDefinitionId",
+  "installedProgramDefinitionId",
+  "returnedCardDefinitionId",
+  "hostDefinitionId",
+  "serverId",
+  "attackedServerId",
+  "targetServerId",
+  "server",
+  "serverLabel",
+  "targetServerLabel",
+  "targetVisibility",
+  "choiceVisibility",
+  "redactedKind",
+  "hiddenZoneAction",
+  "discardResolved",
+  "revealKind",
+  "abilityFamily",
+  "abilityId",
+  "effectKind",
+  "hiddenZoneBarrier",
+  "damageType",
+  "damageResolved",
+  "traceStarted",
+  "traceStep",
+  "traceStrength",
+  "runnerLink",
+  "successful",
+  "setupStatus",
+  "agendaPointsToWin",
+  "runnerDeckId",
+  "corpDeckId",
+  "amount",
+  "gainedActions",
+  "gainedCredits",
+  "gainCreditsAmount",
+  "damageAmount",
+  "baseDamageAmount",
+  "preventedAmount",
+  "finalAmount",
+  "removedTags",
+  "tagsAdded",
+  "runnerTagsAfter",
+  "addedCounterAmount",
+  "removedCounterAmount",
+  "remainingCounters",
+  "preservedCounterAmount",
+  "remainingVirusCounters",
+  "recurringCreditsLoaded",
+  "paidCredits",
+  "rezCostPaid",
+  "trashCostPaid",
+  "agendaPointCost",
+  "agendaPointCostPaid",
+  "temporaryCreditsProvided",
+  "temporaryCreditsSpent",
+  "temporaryCreditsRemaining",
+  "corpCreditsAfter",
+  "runnerCreditsAfter",
+  "randomRoll",
+  "dieRoll",
+  "randomCounterAfter",
+  "returnedCount",
+  ...LEGACY_ABILITY_PAYLOAD_FIELDS,
+]);
+
+const PUBLIC_PAYLOAD_STRING_ARRAY_KEYS = new Set([
+  "cardDefinitionIds",
+  "targetCardDefinitionIds",
+  "returnedCardDefinitionIds",
+  "revealedCardDefinitionIds",
+  "exposedCardDefinitionIds",
+]);
+
+const PUBLIC_AMOUNT_KEYS = new Set([
+  "amount",
+  "gainedActions",
+  "gainedCredits",
+  "gainCreditsAmount",
+  "damageAmount",
+  "baseDamageAmount",
+  "preventedAmount",
+  "finalAmount",
+  "removedTags",
+  "tagsAdded",
+  "runnerTagsAfter",
+  "addedCounterAmount",
+  "removedCounterAmount",
+  "remainingCounters",
+  "preservedCounterAmount",
+  "remainingVirusCounters",
+  "recurringCreditsLoaded",
+  "paidCredits",
+  "rezCostPaid",
+  "trashCostPaid",
+  "agendaPointCost",
+  "agendaPointCostPaid",
+  "temporaryCreditsProvided",
+  "temporaryCreditsSpent",
+  "temporaryCreditsRemaining",
+  "corpCreditsAfter",
+  "runnerCreditsAfter",
+  "randomRoll",
+  "dieRoll",
+  "randomCounterAfter",
+  "returnedCount",
+]);
+
+const PUBLIC_TARGET_KEYS = new Set([
+  "sourceDefinitionId",
+  "cardDefinitionId",
+  "targetCardDefinitionId",
+  "targetIceDefinitionId",
+  "trashedCardDefinitionId",
+  "installedProgramDefinitionId",
+  "returnedCardDefinitionId",
+  "hostDefinitionId",
+  "serverLabel",
+  "targetServerLabel",
+  "targetVisibility",
+  "choiceVisibility",
+  "redactedKind",
+]);
+
+const PUBLIC_BASELINE_KEYS = new Set([
+  "rulesVersion",
+  "engineSchemaVersion",
+  "cardTextSnapshotId",
+  "cardTextSource",
+  "cardImplementationVersion",
+  "deviationRegistryVersion",
+]);
+
+const PUBLIC_DECK_METADATA_KEYS = new Set([
+  "deckName",
+  "deckHash",
+  "side",
+  "identityCardId",
+  "formatProfileId",
+  "cardPoolSnapshotId",
+]);
+
+const ALLOWED_ABILITY_FAMILIES: ReadonlySet<AiPublicPayloadAbilityFamily> = new Set([
+  "agenda-scoring",
+  "damage-prevention",
+  "hidden-zone",
+  "hosting-counters",
+  "payment-costs",
+  "random-effects",
+  "run-access",
+  "trace-tags",
+]);
 
 export function buildAiDecisionInputDto(params: BuildAiDecisionInputDtoParams): AiDecisionInput {
   return {
@@ -179,29 +378,34 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
 }
 
 function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoiceRequest {
+  const stackSearchResolution = sanitizeStackSearchResolution(choice.stackSearchResolution);
   return {
     choiceId: choice.choiceId,
     side: choice.side,
     source: choice.source,
     prompt: choice.prompt,
     kind: choice.kind,
-    options: choice.options.map((option) => ({
-      id: option.id,
-      label: option.label,
-      ...(option.publicLabel !== undefined ? { publicLabel: option.publicLabel } : {}),
-      ...(option.value !== undefined ? { value: option.value } : {}),
-      ...(option.selectable !== undefined ? { selectable: option.selectable } : {}),
-      ...(option.card ? { card: sanitizeVisibleCard(option.card) } : {}),
-    })),
+    options: choice.options.map((option) => {
+      const value = sanitizePrimitive(option.value);
+      return {
+        id: option.id,
+        label: option.label,
+        ...(option.publicLabel !== undefined ? { publicLabel: option.publicLabel } : {}),
+        ...(value !== undefined ? { value } : {}),
+        ...(option.selectable !== undefined ? { selectable: option.selectable } : {}),
+        ...(option.card ? { card: sanitizeVisibleCard(option.card) } : {}),
+      };
+    }),
     minSelections: choice.minSelections,
     maxSelections: choice.maxSelections,
     stateVersion: choice.stateVersion,
     visibility: choice.visibility,
-    ...(choice.stackSearchResolution ? { stackSearchResolution: { ...choice.stackSearchResolution } } : {}),
+    ...(stackSearchResolution ? { stackSearchResolution } : {}),
   };
 }
 
 function sanitizeLegalAction(action: LegalAction): LegalAction {
+  const payload = action.payload ? sanitizeLegalActionPayload(action.payload as Record<string, unknown>) : undefined;
   return {
     actionId: action.actionId,
     side: action.side,
@@ -217,7 +421,7 @@ function sanitizeLegalAction(action: LegalAction): LegalAction {
     ...(action.resolvedEffects ? { resolvedEffects: action.resolvedEffects.map(sanitizeResolvedGameEffect) } : {}),
     visibility: action.visibility,
     expiresAtStateVersion: action.expiresAtStateVersion,
-    ...(action.payload ? { payload: { ...action.payload } } : {}),
+    ...(payload ? { payload } : {}),
   };
 }
 
@@ -286,26 +490,81 @@ function sanitizePublicGameEvent(event: PublicGameEvent): PublicGameEvent {
 }
 
 function sanitizePublicPayload(payload: Record<string, unknown>): Record<string, unknown> {
-  const result: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(payload)) {
-    const sanitized = sanitizeJsonValue(value);
-    if (sanitized !== undefined) result[key] = sanitized;
+  const result: Record<string, unknown> = sanitizeAllowedPrimitiveRecord(payload, PUBLIC_PAYLOAD_PRIMITIVE_KEYS);
+  for (const key of PUBLIC_PAYLOAD_STRING_ARRAY_KEYS) {
+    const value = sanitizeStringArray(payload[key]);
+    if (value) result[key] = value;
   }
+  const amounts = sanitizeNumberRecord(payload.amounts, PUBLIC_AMOUNT_KEYS);
+  if (amounts) result.amounts = amounts;
+  const targets = sanitizeAllowedPrimitiveRecord(payload.targets, PUBLIC_TARGET_KEYS);
+  if (Object.keys(targets).length > 0) result.targets = targets;
+  const visibility = sanitizePublicVisibility(payload.visibility);
+  if (visibility) result.visibility = visibility;
+  const baseline = sanitizeAllowedPrimitiveRecord(payload.baseline, PUBLIC_BASELINE_KEYS);
+  if (Object.keys(baseline).length > 0) result.baseline = baseline;
+  const runnerDeck = sanitizeAllowedPrimitiveRecord(payload.runnerDeck, PUBLIC_DECK_METADATA_KEYS);
+  if (Object.keys(runnerDeck).length > 0) result.runnerDeck = runnerDeck;
+  const corpDeck = sanitizeAllowedPrimitiveRecord(payload.corpDeck, PUBLIC_DECK_METADATA_KEYS);
+  if (Object.keys(corpDeck).length > 0) result.corpDeck = corpDeck;
   return result;
 }
 
-function sanitizeJsonValue(value: unknown): unknown {
-  if (value === null || typeof value === "string" || typeof value === "number" || typeof value === "boolean") return value;
-  if (Array.isArray(value)) return value.map(sanitizeJsonValue).filter((entry) => entry !== undefined);
-  if (typeof value === "object") {
-    const result: Record<string, unknown> = {};
-    for (const [key, nested] of Object.entries(value as Record<string, unknown>)) {
-      const sanitized = sanitizeJsonValue(nested);
-      if (sanitized !== undefined) result[key] = sanitized;
-    }
-    return result;
+function sanitizeLegalActionPayload(payload: Record<string, unknown>): Record<string, string | number | boolean> {
+  return sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS);
+}
+
+function sanitizeAllowedPrimitiveRecord(value: unknown, allowedKeys: ReadonlySet<string>): Record<string, string | number | boolean> {
+  const result: Record<string, string | number | boolean> = {};
+  if (!value || typeof value !== "object" || Array.isArray(value)) return result;
+  for (const key of allowedKeys) {
+    const sanitized = sanitizePrimitive((value as Record<string, unknown>)[key]);
+    if (sanitized !== undefined) result[key] = sanitized;
   }
+  if (typeof result.abilityFamily === "string" && !ALLOWED_ABILITY_FAMILIES.has(result.abilityFamily as AiPublicPayloadAbilityFamily)) delete result.abilityFamily;
+  return result;
+}
+
+function sanitizePrimitive(value: unknown): string | number | boolean | undefined {
+  if (typeof value === "string" || typeof value === "boolean") return value;
+  if (typeof value === "number" && Number.isFinite(value)) return value;
   return undefined;
+}
+
+function sanitizeStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const entries = value.filter((entry): entry is string => typeof entry === "string");
+  return entries.length > 0 ? entries : undefined;
+}
+
+function sanitizeNumberRecord(value: unknown, allowedKeys: ReadonlySet<string>): Record<string, number> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const result: Record<string, number> = {};
+  for (const key of allowedKeys) {
+    const candidate = (value as Record<string, unknown>)[key];
+    if (typeof candidate === "number" && Number.isFinite(candidate)) result[key] = candidate;
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function sanitizePublicVisibility(value: unknown): Record<string, string | boolean> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const raw = value as Record<string, unknown>;
+  const result: Record<string, string | boolean> = {};
+  if (typeof raw.class === "string") result.class = raw.class;
+  if (typeof raw.hiddenZoneBarrier === "boolean") result.hiddenZoneBarrier = raw.hiddenZoneBarrier;
+  if (typeof raw.redactedKind === "string") result.redactedKind = raw.redactedKind;
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function sanitizeStackSearchResolution(value: VisibleChoiceRequest["stackSearchResolution"]): VisibleChoiceRequest["stackSearchResolution"] | undefined {
+  if (!value) return undefined;
+  return {
+    reveal: value.reveal,
+    destination: value.destination,
+    shuffleAfter: value.shuffleAfter,
+    ...(value.publicRevealKind ? { publicRevealKind: value.publicRevealKind } : {}),
+  };
 }
 
 function sanitizeAiDeckDoctrineProfile(profile: AiDeckDoctrineProfile): AiDeckDoctrineProfile {
