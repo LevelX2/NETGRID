@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-v2-chat-contract-preflight
-status: inbox
+status: in-progress
 kind: architecture
 area: server
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-5
 releaseTarget: V2.2
 blockedBy: []
 resultArtifacts: []

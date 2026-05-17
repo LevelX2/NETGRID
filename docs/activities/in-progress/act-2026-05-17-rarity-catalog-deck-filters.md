@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-rarity-catalog-deck-filters
-status: inbox
+status: in-progress
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-3
 releaseTarget: catalog UX
 blockedBy: []
 resultArtifacts: []

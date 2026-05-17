@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-undo-request-clears-after-response
-status: inbox
+status: in-progress
 kind: fix
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-1
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

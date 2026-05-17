@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-decisiondebug-schema-redaction-snapshots
-status: inbox
+status: in-progress
 kind: architecture
 area: ai
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

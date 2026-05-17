@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-v2-private-invite-redaction-harness
-status: inbox
+status: in-progress
 kind: fix
 area: server
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
 releaseTarget: V2.1
 blockedBy: []
 resultArtifacts: []
