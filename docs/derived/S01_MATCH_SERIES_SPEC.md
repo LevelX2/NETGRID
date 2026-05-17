@@ -32,9 +32,9 @@ Nach Spielende erzeugt der Server eine side-sichere `series`-Zusammenfassung inn
 
 ## Serienwertung
 
-Die private Zwei-Spiel-Serie wird zuerst nach Spielgewinnen entschieden. Wenn beide Spieler nach den zwei Spielen gleich viele Spielgewinne haben, entscheidet die Summe der side-sicher gespeicherten Agenda-Punkte über die Serie. Sind auch die Agenda-Punkte gleich, endet die private Matchserie unentschieden.
+Die private Zwei-Spiel-Serie nutzt die Original-Netrunner-nahe Matchpunktwertung: Jeder Einzelspielsieg gibt dem Gewinner 10 Matchpunkte. Der Verlierer erhält für dieses Einzelspiel so viele Matchpunkte, wie er eigene Agenda-Punkte erzielt hat. Bei einem Einzelspiel-Draw erhalten beide Spieler ihre erzielten Agenda-Punkte als Matchpunkte. Nach den geplanten Serienspielen entscheidet die Summe dieser Matchpunkte über die Serie; gleiche Matchpunkte ergeben ein Serienunentschieden.
 
-Diese Serienwertung ist eine private Produktregel für NETGRID. Sie bleibt getrennt von offizieller öffentlicher Turnierlogik und verändert nicht den Engine-Vertrag für einzelne Spiele.
+Diese Serienwertung ist eine private Produktregel für NETGRID und ist bewusst so geschnitten, dass sie später auch für Serien mit mehr als zwei geplanten Spielen erweitert werden kann. Sie bleibt getrennt von offizieller öffentlicher Turnierlogik und verändert nicht den Engine-Vertrag für einzelne Spiele.
 
 ## Folgespiel
 
@@ -61,7 +61,7 @@ Das neue Spiel nutzt dieselben Deck-Snapshots und Matchsettings, aber die Seite 
 Die Umsetzung ist über Server-Tests und Visibility-Vertrag abgedeckt:
 
 - Spiel 1 einer Serie endet mit side-sicherem Serienstand.
-- Geteilte Spielgewinne werden per Agenda-Punkte-Summe als Serien-Tiebreaker entschieden.
+- Serienergebnisse werden per 10-Punkte-Siegwertung plus Verlierer-Agenda-Punkten entschieden.
 - `series-next` erstellt Spiel 2 mit Seitenwechsel.
 - doppeltes Erstellen des Folgespiels wird abgelehnt.
 - UI-Vertrag enthält private Matchserie, Folgespiel-Aktion und keine verbotenen ResultSummary-Felder.

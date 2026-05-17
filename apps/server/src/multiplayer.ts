@@ -96,6 +96,7 @@ export type MatchSettings = {
 };
 
 const RULE_AGENDA_POINTS_TO_WIN = 7;
+const SERIES_WIN_MATCH_POINTS = 10;
 
 export type GameResultReason = ApiGameResultReason;
 
@@ -2661,6 +2662,7 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
   const viewerPlayer = seriesPlayerForSide(series, viewerSide);
   const wins = { player_a: 0, player_b: 0 };
   const agendaPoints = { player_a: 0, player_b: 0 };
+  const matchPoints = { player_a: 0, player_b: 0 };
   let draws = 0;
   for (const result of series.results) {
     const winningPlayer = winningSeriesPlayer(result);
@@ -2668,9 +2670,11 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
     else wins[winningPlayer] += 1;
     agendaPoints[result.runnerPlayer] += result.runnerAgendaPoints;
     agendaPoints[result.corpPlayer] += result.corpAgendaPoints;
+    matchPoints.player_a += seriesMatchPointsFor(result, "player_a");
+    matchPoints.player_b += seriesMatchPointsFor(result, "player_b");
   }
   const opponentPlayer = oppositeSeriesPlayer(viewerPlayer);
-  const seriesDecision = seriesDecisionFor(wins[viewerPlayer], wins[opponentPlayer], agendaPoints[viewerPlayer], agendaPoints[opponentPlayer]);
+  const seriesDecision = seriesDecisionFor(matchPoints[viewerPlayer], matchPoints[opponentPlayer]);
   return {
     seriesId: series.seriesId,
     mode: series.mode,
@@ -2681,6 +2685,8 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
     viewerWins: wins[viewerPlayer],
     opponentWins: wins[opponentPlayer],
     draws,
+    viewerMatchPoints: matchPoints[viewerPlayer],
+    opponentMatchPoints: matchPoints[opponentPlayer],
     viewerAgendaPoints: agendaPoints[viewerPlayer],
     opponentAgendaPoints: agendaPoints[opponentPlayer],
     viewerSeriesOutcome: seriesDecision.outcome,
@@ -2691,16 +2697,19 @@ function seriesSummaryFor(record: StoredMatch, viewerSide: Side): SeriesResultSu
 }
 
 function seriesDecisionFor(
-  viewerWins: number,
-  opponentWins: number,
-  viewerAgendaPoints: number,
-  opponentAgendaPoints: number
-): { outcome: "won" | "lost" | "draw"; decision: "wins" | "agenda_points" | "draw" } {
-  if (viewerWins > opponentWins) return { outcome: "won", decision: "wins" };
-  if (viewerWins < opponentWins) return { outcome: "lost", decision: "wins" };
-  if (viewerAgendaPoints > opponentAgendaPoints) return { outcome: "won", decision: "agenda_points" };
-  if (viewerAgendaPoints < opponentAgendaPoints) return { outcome: "lost", decision: "agenda_points" };
+  viewerMatchPoints: number,
+  opponentMatchPoints: number
+): { outcome: "won" | "lost" | "draw"; decision: "match_points" | "draw" } {
+  if (viewerMatchPoints > opponentMatchPoints) return { outcome: "won", decision: "match_points" };
+  if (viewerMatchPoints < opponentMatchPoints) return { outcome: "lost", decision: "match_points" };
   return { outcome: "draw", decision: "draw" };
+}
+
+function seriesMatchPointsFor(result: SeriesGameResult, player: SeriesPlayerSlot): number {
+  const side = player === result.runnerPlayer ? "runner" : "corp";
+  const agendaPoints = side === "runner" ? result.runnerAgendaPoints : result.corpAgendaPoints;
+  if (result.winner === "draw") return agendaPoints;
+  return winningSeriesPlayer(result) === player ? SERIES_WIN_MATCH_POINTS : agendaPoints;
 }
 
 function winningSeriesPlayer(result: SeriesGameResult): SeriesPlayerSlot | "draw" {

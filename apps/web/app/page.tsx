@@ -5537,8 +5537,10 @@ function GameOverModal({
               <small>{seriesText}</small>
             </div>
             <div className="seriesScore">
-              <span>Du {result.series.viewerWins}</span>
-              <span>Gegenseite {result.series.opponentWins}</span>
+              <span>Matchpunkte Du {result.series.viewerMatchPoints}</span>
+              <span>Matchpunkte Gegenseite {result.series.opponentMatchPoints}</span>
+              <span>Siege Du {result.series.viewerWins}</span>
+              <span>Siege Gegenseite {result.series.opponentWins}</span>
               <span>Draws {result.series.draws}</span>
               <span>Agenda Du {result.series.viewerAgendaPoints}</span>
               <span>Agenda Gegenseite {result.series.opponentAgendaPoints}</span>
@@ -5669,8 +5671,8 @@ function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
 
 function seriesStatusText(series: SeriesResultSummary): string {
   if (series.status === "finished") {
-    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "agenda_points" ? "Du hast die Matchserie nach Agenda-Punkten gewonnen." : "Du hast die Matchserie gewonnen.";
-    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "agenda_points" ? "Du hast die Matchserie nach Agenda-Punkten verloren." : "Du hast die Matchserie verloren.";
+    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Du hast die Matchserie nach Matchpunkten gewonnen." : "Du hast die Matchserie gewonnen.";
+    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Du hast die Matchserie nach Matchpunkten verloren." : "Du hast die Matchserie verloren.";
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";

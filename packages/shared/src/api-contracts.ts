@@ -48,10 +48,12 @@ export type ApiSeriesResultSummary = {
   viewerWins: number;
   opponentWins: number;
   draws: number;
+  viewerMatchPoints: number;
+  opponentMatchPoints: number;
   viewerAgendaPoints: number;
   opponentAgendaPoints: number;
   viewerSeriesOutcome: "won" | "lost" | "draw";
-  seriesDecision: "wins" | "agenda_points" | "draw";
+  seriesDecision: "wins" | "match_points" | "agenda_points" | "draw";
   nextAvailable: boolean;
   nextMatchId?: string;
 };

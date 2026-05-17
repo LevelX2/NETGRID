@@ -174,6 +174,8 @@ describe("Client visibility contract", () => {
     expect(page).not.toContain('setParticipantBCorpDeckSource("local");');
     expect(page).toContain("viewerAgendaPoints");
     expect(page).toContain("opponentAgendaPoints");
+    expect(page).toContain("viewerMatchPoints");
+    expect(page).toContain("opponentMatchPoints");
     expect(page).toContain("viewerSeriesOutcome");
     expect(page).toContain("seriesDecision");
     expect(page).not.toContain("applyAction(");

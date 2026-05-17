@@ -3025,8 +3025,10 @@ describe("MVP 0.2 multiplayer service", () => {
       viewerWins: 1,
       opponentWins: 0,
       draws: 0,
+      viewerMatchPoints: 10,
+      opponentMatchPoints: 0,
       viewerSeriesOutcome: "won",
-      seriesDecision: "wins",
+      seriesDecision: "match_points",
       nextAvailable: true
     });
 
@@ -3067,7 +3069,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(duplicate.error.code).toBe("series_next_exists");
   });
 
-  it("uses total agenda points as the private series tiebreaker after split game wins", async () => {
+  it("uses 10-point game wins and loser agenda points for private series scoring", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "series-agenda-tiebreak" });
     const created = await service.createMatch({
@@ -3093,10 +3095,10 @@ describe("MVP 0.2 multiplayer service", () => {
         {
           matchId: "series-game-1",
           gameNumber: 1,
-          winner: "runner",
-          runnerPlayer: "player_a",
-          corpPlayer: "player_b",
-          runnerAgendaPoints: 7,
+          winner: "corp",
+          runnerPlayer: "player_b",
+          corpPlayer: "player_a",
+          runnerAgendaPoints: 2,
           corpAgendaPoints: 0,
           finishedAt: "2026-05-07T10:00:00.000Z",
           finalStateHash: "hash-game-1"
@@ -3108,7 +3110,7 @@ describe("MVP 0.2 multiplayer service", () => {
           runnerPlayer: "player_b",
           corpPlayer: "player_a",
           runnerAgendaPoints: 7,
-          corpAgendaPoints: 1,
+          corpAgendaPoints: 0,
           finishedAt: "2026-05-07T10:30:00.000Z",
           finalStateHash: hashState(record.gameState)
         }
@@ -3124,10 +3126,12 @@ describe("MVP 0.2 multiplayer service", () => {
       status: "finished",
       viewerWins: 1,
       opponentWins: 1,
-      viewerAgendaPoints: 8,
-      opponentAgendaPoints: 7,
-      viewerSeriesOutcome: "won",
-      seriesDecision: "agenda_points"
+      viewerMatchPoints: 10,
+      opponentMatchPoints: 12,
+      viewerAgendaPoints: 0,
+      opponentAgendaPoints: 9,
+      viewerSeriesOutcome: "lost",
+      seriesDecision: "match_points"
     });
   });
 
