@@ -12,6 +12,16 @@ describe("score area UI helpers", () => {
     expect(scoredAgendaEffectLineForScoreArea("onr_v1_219_superior-net-barriers", "runner")).toBeNull();
   });
 
+  it("shows Black Ice Quality Assurance as a +2 Black ICE effect only in the Corp scored area", () => {
+    const corpLine = scoredAgendaEffectLineForScoreArea("onr_v1_191_black-ice-quality-assurance", "corp");
+
+    expect(corpLine).toMatchObject({
+      value: "Aktiv",
+      label: "Black ICE hat +2 Stärke"
+    });
+    expect(scoredAgendaEffectLineForScoreArea("onr_v1_191_black-ice-quality-assurance", "runner")).toBeNull();
+  });
+
   it("identifies scored Coup agenda counters as credit counters", () => {
     expect(scoredAgendaCreditCounterSource("onr_v1_193_corporate-coup")).toBe("Corporate Coup");
     expect(scoredAgendaCreditCounterSource("onr_v1_209_political-coup")).toBe("Political Coup");

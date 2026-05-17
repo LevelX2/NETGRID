@@ -891,7 +891,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         id: "spotcheck_black_ice_quality_corp",
         name: "Spotcheck Black Ice Quality Corp",
         cards: [
-          { id: "onr_v1_242_fatal-attractor", quantity: 1 },
+          { id: "onr_v1_228_cinderella", quantity: 1 },
           { id: "simple_barrier_ice", quantity: 1 },
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
         ],
@@ -903,7 +903,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     const blackIceId = putCorpIceOnServer(
       agendaState,
       "rd",
-      "onr_v1_242_fatal-attractor",
+      "onr_v1_228_cinderella",
     );
     const nonBlackIceId = putCorpIceOnServer(agendaState, "hq", "simple_barrier_ice");
     agendaState.cardInstances[blackIceId] = {
@@ -920,7 +920,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       getPlayerView(agendaState, "corp")
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.instanceId === blackIceId)?.strength,
-    ).toBe(4);
+    ).toBe(6);
     const agendaId = scoreCorpAgendaForTest(
       agendaState,
       "onr_v1_191_black-ice-quality-assurance",
@@ -929,7 +929,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       getPlayerView(agendaState, "corp")
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.instanceId === blackIceId)?.strength,
-    ).toBe(5);
+    ).toBe(8);
     expect(
       getPlayerView(agendaState, "corp")
         .servers.find((server) => server.id === "hq")
@@ -947,7 +947,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       getPlayerView(agendaState, "corp")
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.instanceId === blackIceId)?.strength,
-    ).toBe(4);
+    ).toBe(6);
 
     let assetState = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "spotcheck-bbs-omniscience-source",
