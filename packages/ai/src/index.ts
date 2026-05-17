@@ -159,6 +159,47 @@ export type AiDoctrineQualityBenchmarkResult = {
   candidateRun: V143SimulationRunResult;
 };
 
+export type AiMatchProgressionMetrics = {
+  games: number;
+  actionLimitRate: number;
+  averageActions: number;
+  runnerAgendaPoints: number;
+  corpAgendaPoints: number;
+  runnerSteals: number;
+  corpScores: number;
+  centralPressureRuns: number;
+  hqPressureRuns: number;
+  rdPressureRuns: number;
+  archivesPressureRuns: number;
+  remotePressureRuns: number;
+  pressureTargetSwitches: number;
+  distinctPressureTargets: number;
+  remoteRootInstalls: number;
+  remoteIceInstalls: number;
+  remoteAdvances: number;
+  scoreWindows: number;
+  illegalActions: number;
+  replayFailures: number;
+  fallbackRate: number;
+  timeoutRate: number;
+};
+
+export type AiMatchProgressionBenchmarkResult = {
+  version: "ai-match-progression-v1";
+  baselineProfile: SimulationBenchmarkProfileId;
+  candidateProfile: SimulationBenchmarkProfileId;
+  seeds: string[];
+  runnerDeckId: string;
+  corpDeckId: string;
+  maxActions: number;
+  diagnosticOnly: true;
+  baseline: AiMatchProgressionMetrics;
+  candidate: AiMatchProgressionMetrics;
+  delta: AiMatchProgressionMetrics;
+  baselineRun: V143SimulationRunResult;
+  candidateRun: V143SimulationRunResult;
+};
+
 export type AiDoctrineQualityGateThresholds = {
   maxCandidateIllegalActions: number;
   maxCandidateReplayFailures: number;
@@ -368,6 +409,7 @@ export type AiSimulationSummary = {
     targetServerId?: string;
     qualityTags: string[];
     stateHashAfter: string;
+    installPlacement?: string;
   }>;
   errors: string[];
   cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
@@ -578,6 +620,7 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
       fallbackUsed: decision.fallbackUsed,
       timeoutUsed: decision.timeoutUsed ?? false,
       ...(typeof action.payload?.serverId === "string" ? { targetServerId: action.payload.serverId } : {}),
+      ...(typeof action.payload?.placement === "string" ? { installPlacement: action.payload.placement } : {}),
       qualityTags: qualityTagsForAction(input, action, decision),
       stateHashAfter: result.stateHash
     });
@@ -702,6 +745,33 @@ export function runDoctrineQualityBenchmark(config: AiDoctrineQualityBenchmarkCo
   };
 }
 
+export function runMatchProgressionBenchmark(config: AiDoctrineQualityBenchmarkConfig = {}): AiMatchProgressionBenchmarkResult {
+  const baselineProfileId = config.baselineProfile ?? "belief_ai_v1_4_2";
+  const candidateProfileId = config.candidateProfile ?? "current_candidate";
+  const baselineProfile = benchmarkProfileById(baselineProfileId);
+  const candidateProfile = benchmarkProfileById(candidateProfileId);
+  const seeds = config.includeHoldout === false ? SOAK_SEEDS_143.tuningSeeds : [...SOAK_SEEDS_143.tuningSeeds, ...SOAK_SEEDS_143.holdoutSeeds];
+  const baselineRun = runV143Profile(baselineProfile, seeds, config);
+  const candidateRun = runV143Profile(candidateProfile, seeds, config);
+  const baseline = summarizeMatchProgressionMetrics(baselineRun.summaries);
+  const candidate = summarizeMatchProgressionMetrics(candidateRun.summaries);
+  return {
+    version: "ai-match-progression-v1",
+    baselineProfile: baselineProfileId,
+    candidateProfile: candidateProfileId,
+    seeds,
+    runnerDeckId: config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+    corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId,
+    maxActions: config.maxActions ?? SOAK_SEEDS_143.league.maxActions,
+    diagnosticOnly: true,
+    baseline,
+    candidate,
+    delta: diffMatchProgressionMetrics(candidate, baseline),
+    baselineRun,
+    candidateRun
+  };
+}
+
 export function evaluateDoctrineQualityGate(
   benchmark: AiDoctrineQualityBenchmarkResult,
   thresholds: Partial<AiDoctrineQualityGateThresholds> = {}
@@ -791,6 +861,58 @@ export function formatDoctrineQualityBenchmarkReport(
     gate.accepted
       ? "Der Kandidat verletzt keine harte Safety- oder Doctrine-Schwelle. Einzelne Warnungen bleiben Review-Material, bevor Gewichte angepasst werden."
       : "Der Kandidat verletzt mindestens eine harte Schwelle. Gewichtungs- oder Planänderungen sollten vor weiterer Ausweitung geprüft werden."
+  ].join("\n");
+}
+
+export function formatMatchProgressionBenchmarkReport(benchmark: AiMatchProgressionBenchmarkResult): string {
+  const progressionRows: Array<[string, number, number, number]> = [
+    ["actionLimitRate", benchmark.baseline.actionLimitRate, benchmark.candidate.actionLimitRate, benchmark.delta.actionLimitRate],
+    ["averageActions", benchmark.baseline.averageActions, benchmark.candidate.averageActions, benchmark.delta.averageActions],
+    ["runnerAgendaPoints", benchmark.baseline.runnerAgendaPoints, benchmark.candidate.runnerAgendaPoints, benchmark.delta.runnerAgendaPoints],
+    ["corpAgendaPoints", benchmark.baseline.corpAgendaPoints, benchmark.candidate.corpAgendaPoints, benchmark.delta.corpAgendaPoints],
+    ["runnerSteals", benchmark.baseline.runnerSteals, benchmark.candidate.runnerSteals, benchmark.delta.runnerSteals],
+    ["corpScores", benchmark.baseline.corpScores, benchmark.candidate.corpScores, benchmark.delta.corpScores],
+    ["centralPressureRuns", benchmark.baseline.centralPressureRuns, benchmark.candidate.centralPressureRuns, benchmark.delta.centralPressureRuns],
+    ["remotePressureRuns", benchmark.baseline.remotePressureRuns, benchmark.candidate.remotePressureRuns, benchmark.delta.remotePressureRuns],
+    ["pressureTargetSwitches", benchmark.baseline.pressureTargetSwitches, benchmark.candidate.pressureTargetSwitches, benchmark.delta.pressureTargetSwitches],
+    ["remoteRootInstalls", benchmark.baseline.remoteRootInstalls, benchmark.candidate.remoteRootInstalls, benchmark.delta.remoteRootInstalls],
+    ["remoteIceInstalls", benchmark.baseline.remoteIceInstalls, benchmark.candidate.remoteIceInstalls, benchmark.delta.remoteIceInstalls],
+    ["remoteAdvances", benchmark.baseline.remoteAdvances, benchmark.candidate.remoteAdvances, benchmark.delta.remoteAdvances],
+    ["scoreWindows", benchmark.baseline.scoreWindows, benchmark.candidate.scoreWindows, benchmark.delta.scoreWindows]
+  ];
+  const safetyRows: Array<[string, number, number, number]> = [
+    ["illegalActions", benchmark.baseline.illegalActions, benchmark.candidate.illegalActions, benchmark.delta.illegalActions],
+    ["replayFailures", benchmark.baseline.replayFailures, benchmark.candidate.replayFailures, benchmark.delta.replayFailures],
+    ["fallbackRate", benchmark.baseline.fallbackRate, benchmark.candidate.fallbackRate, benchmark.delta.fallbackRate],
+    ["timeoutRate", benchmark.baseline.timeoutRate, benchmark.candidate.timeoutRate, benchmark.delta.timeoutRate]
+  ];
+  return [
+    "# AI Match Progression Benchmark Report",
+    "",
+    `Version: ${benchmark.version}`,
+    `Baseline: ${benchmark.baselineProfile}`,
+    `Candidate: ${benchmark.candidateProfile}`,
+    `Seeds: ${benchmark.seeds.length}`,
+    `Runner deck: ${benchmark.runnerDeckId}`,
+    `Corp deck: ${benchmark.corpDeckId}`,
+    `Max actions: ${benchmark.maxActions}`,
+    "Gate: diagnostic_only",
+    "",
+    "## Progression Metrics",
+    "",
+    "| Metric | Baseline | Candidate | Delta |",
+    "| --- | ---: | ---: | ---: |",
+    ...progressionRows.map(([metric, baseline, candidate, delta]) => `| ${metric} | ${baseline} | ${candidate} | ${delta} |`),
+    "",
+    "## Safety Metrics",
+    "",
+    "| Metric | Baseline | Candidate | Delta |",
+    "| --- | ---: | ---: | ---: |",
+    ...safetyRows.map(([metric, baseline, candidate, delta]) => `| ${metric} | ${baseline} | ${candidate} | ${delta} |`),
+    "",
+    "## Interpretation",
+    "",
+    "This benchmark is diagnostic, not a hard release gate. P1 AI tuning should improve progression without increasing illegal actions, replay failures, timeout rate, or fallback rate."
   ].join("\n");
 }
 
@@ -2084,6 +2206,78 @@ function publicRoleEvidence(roles: string[]): string[] {
 
 function scrubEvidence(evidence: string[]): string[] {
   return evidence.filter((entry) => !FORBIDDEN_AI_INPUT_FIELDS.some((needle) => entry.includes(needle)) && !entry.includes("_1"));
+}
+
+const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
+  "games",
+  "actionLimitRate",
+  "averageActions",
+  "runnerAgendaPoints",
+  "corpAgendaPoints",
+  "runnerSteals",
+  "corpScores",
+  "centralPressureRuns",
+  "hqPressureRuns",
+  "rdPressureRuns",
+  "archivesPressureRuns",
+  "remotePressureRuns",
+  "pressureTargetSwitches",
+  "distinctPressureTargets",
+  "remoteRootInstalls",
+  "remoteIceInstalls",
+  "remoteAdvances",
+  "scoreWindows",
+  "illegalActions",
+  "replayFailures",
+  "fallbackRate",
+  "timeoutRate"
+];
+
+function summarizeMatchProgressionMetrics(summaries: AiSimulationSummary[]): AiMatchProgressionMetrics {
+  const games = summaries.length;
+  const actionSequence = summaries.flatMap((summary) => summary.actionSequence);
+  const runnerRuns = actionSequence.filter((entry) => entry.side === "runner" && entry.actionType === "start_run");
+  const pressureTargets = runnerRuns.map((entry) => entry.targetServerId ?? "unknown");
+  const totalActions = actionSequence.length || 1;
+  const pressureTargetSwitches = pressureTargets.reduce((switches, target, index) => {
+    if (index === 0) return switches;
+    return target !== pressureTargets[index - 1] ? switches + 1 : switches;
+  }, 0);
+  return {
+    games,
+    actionLimitRate: round(summaries.filter((summary) => summary.winner === "action_limit_reached").length / Math.max(games, 1)),
+    averageActions: round(summaries.reduce((sum, summary) => sum + summary.actions, 0) / Math.max(games, 1)),
+    runnerAgendaPoints: summaries.reduce((sum, summary) => sum + summary.finalAgendaPoints.runner, 0),
+    corpAgendaPoints: summaries.reduce((sum, summary) => sum + summary.finalAgendaPoints.corp, 0),
+    runnerSteals: actionSequence.filter((entry) => entry.side === "runner" && entry.actionType === "steal_agenda").length,
+    corpScores: actionSequence.filter((entry) => entry.side === "corp" && entry.actionType === "score_agenda").length,
+    centralPressureRuns: runnerRuns.filter((entry) => entry.targetServerId === "hq" || entry.targetServerId === "rd" || entry.targetServerId === "archives").length,
+    hqPressureRuns: runnerRuns.filter((entry) => entry.targetServerId === "hq").length,
+    rdPressureRuns: runnerRuns.filter((entry) => entry.targetServerId === "rd").length,
+    archivesPressureRuns: runnerRuns.filter((entry) => entry.targetServerId === "archives").length,
+    remotePressureRuns: runnerRuns.filter((entry) => isRemoteServerTarget(entry.targetServerId)).length,
+    pressureTargetSwitches,
+    distinctPressureTargets: new Set(pressureTargets).size,
+    remoteRootInstalls: actionSequence.filter((entry) => entry.side === "corp" && entry.actionType === "install_card" && isRemoteServerTarget(entry.targetServerId) && entry.installPlacement !== "ice").length,
+    remoteIceInstalls: actionSequence.filter((entry) => entry.side === "corp" && entry.actionType === "install_card" && isRemoteServerTarget(entry.targetServerId) && entry.installPlacement === "ice").length,
+    remoteAdvances: actionSequence.filter((entry) => entry.side === "corp" && entry.actionType === "advance_card" && isRemoteServerTarget(entry.targetServerId)).length,
+    scoreWindows: actionSequence.filter((entry) => entry.side === "corp" && entry.actionType === "score_agenda").length,
+    illegalActions: summaries.reduce((sum, summary) => sum + summary.metrics.illegalActions, 0),
+    replayFailures: summaries.filter((summary) => !summary.replayOk).length,
+    fallbackRate: round(actionSequence.filter((entry) => entry.fallbackUsed).length / totalActions),
+    timeoutRate: round(actionSequence.filter((entry) => entry.timeoutUsed).length / totalActions)
+  };
+}
+
+function diffMatchProgressionMetrics(candidate: AiMatchProgressionMetrics, baseline: AiMatchProgressionMetrics): AiMatchProgressionMetrics {
+  return MATCH_PROGRESSION_METRIC_KEYS.reduce((delta, key) => {
+    delta[key] = round(candidate[key] - baseline[key]);
+    return delta;
+  }, {} as AiMatchProgressionMetrics);
+}
+
+function isRemoteServerTarget(serverId: string | undefined): boolean {
+  return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
 }
 
 function metricsFor(actionSequence: AiSimulationSummary["actionSequence"], errors: string[], replayOk: boolean, holdout: boolean): AiQualityMetrics {

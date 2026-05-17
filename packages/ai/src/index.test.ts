@@ -62,8 +62,10 @@ import {
   runV143ExploitRegressionFixtures,
   runV143SimulationLeague,
   runDoctrineQualityBenchmark,
+  runMatchProgressionBenchmark,
   formatDoctrineQualityBenchmarkReport,
   formatDoctrineQualityCaseAnalysisReport,
+  formatMatchProgressionBenchmarkReport,
   generateCorpPlanCandidates,
   generateRunnerPlanCandidates,
   runnerPlanUsesOnlyAiSupportedCards,
@@ -5241,6 +5243,47 @@ describe("V1.4.3 simulation, selfplay and exploit regression", () => {
     expect(report).toContain(`Gate: ${gate.accepted ? "PASS" : "FAIL"}`);
     expect(gate.thresholds.maxCandidateIllegalActions).toBe(0);
     expect(JSON.stringify({ gate, report })).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
+    );
+  }, 30_000);
+
+  it("reports match progression metrics alongside safety signals", () => {
+    const benchmark = runMatchProgressionBenchmark({
+      includeHoldout: false,
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 20,
+      baselineProfile: "belief_ai_v1_4_2",
+      candidateProfile: "current_candidate",
+    });
+    const report = formatMatchProgressionBenchmarkReport(benchmark);
+
+    expect(benchmark.version).toBe("ai-match-progression-v1");
+    expect(benchmark.diagnosticOnly).toBe(true);
+    expect(benchmark.baselineProfile).toBe("belief_ai_v1_4_2");
+    expect(benchmark.candidateProfile).toBe("current_candidate");
+    expect(benchmark.runnerDeckId).toBe("demo_runner_008");
+    expect(benchmark.corpDeckId).toBe("demo_corp_008");
+    expect(benchmark.maxActions).toBe(20);
+    expect(benchmark.seeds.length).toBeGreaterThan(0);
+    expect(benchmark.baseline.games).toBe(benchmark.seeds.length);
+    expect(benchmark.candidate.games).toBe(benchmark.seeds.length);
+    expect(benchmark.baseline.actionLimitRate).toBeGreaterThanOrEqual(0);
+    expect(benchmark.candidate.actionLimitRate).toBeLessThanOrEqual(1);
+    expect(benchmark.delta.actionLimitRate).toBe(
+      benchmark.candidate.actionLimitRate - benchmark.baseline.actionLimitRate,
+    );
+    expect(
+      benchmark.candidate.centralPressureRuns +
+        benchmark.candidate.remotePressureRuns,
+    ).toBeGreaterThanOrEqual(0);
+    expect(benchmark.candidate.illegalActions).toBe(0);
+    expect(benchmark.candidate.replayFailures).toBe(0);
+    expect(report).toContain("# AI Match Progression Benchmark Report");
+    expect(report).toContain("## Progression Metrics");
+    expect(report).toContain("## Safety Metrics");
+    expect(report).toContain("Gate: diagnostic_only");
+    expect(JSON.stringify({ benchmark, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
   }, 30_000);
