@@ -3537,13 +3537,20 @@ describe("MVP 0.94 Damage and Flatline", () => {
 
     const corpView = getPlayerView(state, "corp");
     const serializedCorpView = JSON.stringify(corpView);
-    for (const cardId of beforeGripIds) {
+    const publicHeapCardIds = new Set(state.runner.heap);
+    for (const cardId of beforeGripIds.filter((id) => !publicHeapCardIds.has(id))) {
       const title =
         DEMO_CARDS_BY_ID[state.cardInstances[cardId]?.definitionId ?? ""]
           ?.title;
       if (title) expect(serializedCorpView).not.toContain(title);
     }
     expect(corpView.opponent.discardCount).toBe(1);
+    expect(corpView.opponent.discardCards?.map((card) => card.instanceId)).toEqual(
+      state.runner.heap,
+    );
+    expect(corpView.opponent.discardCards?.every((card) => card.known)).toBe(
+      true,
+    );
   });
 
   it("flatlines the Runner without randomly revealing grip cards when damage exceeds grip size", () => {

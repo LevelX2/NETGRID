@@ -1066,6 +1066,7 @@ export type PlayerView = {
     coreDamage?: number;
     deckCount: number;
     discardCount: number;
+    discardCards?: VisibleCard[];
     scoreArea: VisibleCard[];
     rig?: VisibleCard[];
   };

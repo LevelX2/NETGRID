@@ -2204,6 +2204,9 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           coreDamage: state.runner.coreDamage,
           deckCount: state.runner.stack.length,
           discardCount: state.runner.heap.length,
+          discardCards: state.runner.heap.map((id) =>
+            visibleOwnCard(state, id),
+          ),
           scoreArea: state.runner.scoreArea.map((id) =>
             visibleOwnCard(state, id),
           ),

@@ -6523,6 +6523,10 @@ select {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
 }
 
+.runnerGripHeapLayout .sideZoneFrame.corp {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+}
+
 .runnerGripZone {
   flex: 0 1 auto;
   width: fit-content;

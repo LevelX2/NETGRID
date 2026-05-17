@@ -1100,6 +1100,7 @@ function visibleKnownCardIds(view: PlayerView | undefined): string[] {
     ...view.own.heapOrArchives,
     ...view.own.scoreArea,
     ...(view.own.rig ?? []),
+    ...(view.opponent.discardCards ?? []),
     ...view.opponent.scoreArea,
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
@@ -4911,37 +4912,81 @@ export default function Page() {
                 </SideZoneFrame>
               </div>
             ) : (
-              <SideZoneFrame side="corp" label="HQ" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "hq")}>
-                <div className="cards fixedZoneCards" style={handCardsStyle}>
-                  {activeView.own.gripOrHq.map((card) => {
-                    const displayCard = enrichCard(card);
-                    const discardOption = discardOptionForCard(card);
-                    return (
-                      <CardView
-                        key={card.instanceId}
-                        card={displayCard}
-                        displayMode={cardDisplayMode}
-                        hiddenSide={activeView.side}
-                        selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                        actions={cardActionsFor(card)}
-                        actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                        {...(discardOption
-                          ? {
-                              discardShortcut: {
-                                selected: selectedDiscardOptionIdSet.has(discardOption.id),
-                                disabled: Boolean(payload.winner) || connection !== "online",
-                                onToggle: () => toggleDiscardOption(discardOption.id)
+              <div className="runnerGripHeapLayout">
+                <SideZoneFrame side="corp" label="HQ" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "hq")}>
+                  <div className="cards fixedZoneCards" style={handCardsStyle}>
+                    {activeView.own.gripOrHq.map((card) => {
+                      const displayCard = enrichCard(card);
+                      const discardOption = discardOptionForCard(card);
+                      return (
+                        <CardView
+                          key={card.instanceId}
+                          card={displayCard}
+                          displayMode={cardDisplayMode}
+                          hiddenSide={activeView.side}
+                          selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                          actions={cardActionsFor(card)}
+                          actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                          {...(discardOption
+                            ? {
+                                discardShortcut: {
+                                  selected: selectedDiscardOptionIdSet.has(discardOption.id),
+                                  disabled: Boolean(payload.winner) || connection !== "online",
+                                  onToggle: () => toggleDiscardOption(discardOption.id)
+                                }
                               }
-                            }
-                          : {})}
-                        onAction={submitAction}
-                        onFocus={focusCard}
-                        onActionContextSelect={selectActionCard}
-                      />
-                    );
-                  })}
-                </div>
-              </SideZoneFrame>
+                            : {})}
+                          onAction={submitAction}
+                          onFocus={focusCard}
+                          onActionContextSelect={selectActionCard}
+                        />
+                      );
+                    })}
+                  </div>
+                </SideZoneFrame>
+                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, "runner", "grip")} className="runnerGripZone">
+                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Grip ${formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)}`}>
+                    <p className="archivesPileEmpty">{activeView.opponent.handCount > 0 ? "Grip-Inhalte verborgen." : "Keine Karten im Grip."}</p>
+                  </div>
+                </SideZoneFrame>
+                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.opponent.deckCount)} highlighted={zoneHighlighted(activeCueHighlight, "runner", "stack")} className="runnerStackZone">
+                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.opponent.deckCount)}`}>
+                    {activeView.opponent.deckCount > 0 ? (
+                      <div className="runnerStackBack" aria-hidden="true">
+                        <span />
+                      </div>
+                    ) : (
+                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                    )}
+                  </div>
+                </SideZoneFrame>
+                <SideZoneFrame side="runner" label="Heap" countLabel={formatCardCount(activeView.opponent.discardCount)} highlighted={zoneHighlighted(activeCueHighlight, "runner", "heap")} className="runnerHeapZone">
+                  {(activeView.opponent.discardCards ?? []).length > 0 ? (
+                    <div className="runnerHeapOverlapRow" style={zoneCardsStyle}>
+                      {(activeView.opponent.discardCards ?? []).slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+                        const displayCard = enrichCard(card);
+                        return (
+                          <CardView
+                            key={card.instanceId}
+                            card={displayCard}
+                            compact
+                            displayMode={cardDisplayMode}
+                            selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                            actions={cardActionsFor(card)}
+                            actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                            onAction={submitAction}
+                            onFocus={focusCard}
+                            onActionContextSelect={selectActionCard}
+                          />
+                        );
+                      })}
+                      {activeView.opponent.discardCount > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{activeView.opponent.discardCount - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
+                    </div>
+                  ) : (
+                    <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
+                  )}
+                </SideZoneFrame>
+              </div>
             )}
           </section>
         </section>
