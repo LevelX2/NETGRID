@@ -359,6 +359,7 @@ const BLINK_ID = "onr_v1_007_blink";
 const BUTCHER_BOY_ID = "onr_v1_009_butcher-boy";
 const COCKROACH_ID = "onr_v1_013_cockroach";
 const GRUBB_ID = "onr_v1_030_grubb";
+const KRASH_ID = "onr_v1_039_krash";
 const INCUBATOR_ID = "onr_v1_034_incubator";
 const ALL_NIGHTER_ID = "onr_v1_076_all-nighter";
 const DEAL_WITH_MILITECH_ID = "onr_v1_082_deal-with-militech";
@@ -8066,7 +8067,7 @@ function performAction(
         }
         if (
           breakerId &&
-          definitionFor(state, breakerId).id === GRUBB_ID &&
+          [GRUBB_ID, KRASH_ID].includes(definitionFor(state, breakerId).id) &&
           state.run
         ) {
           const run = mustRun(state);

@@ -5806,6 +5806,148 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(dwarfBreak.label).toBe("Dwarf: Subroutine brechen");
   });
 
+  it("keeps Krash strength pumps for the current run and clears them at run end", () => {
+    const runnerDeck: DeckDefinition = {
+      ...ONR_V1_RUNNER_DECK,
+      id: "v123_krash_run_pump_runner",
+      name: "V1.2.3 Krash Run Pump Runner",
+      cards: [
+        { id: "onr_v1_039_krash", quantity: 1 },
+        ...ONR_V1_RUNNER_DECK.cards.filter(
+          (card) => card.id !== "onr_v1_039_krash",
+        ),
+      ],
+    };
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_CORP_DECK,
+      id: "v123_krash_run_pump_corp",
+      name: "V1.2.3 Krash Run Pump Corp",
+      cards: [
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "simple_code_gate_ice", quantity: 2 },
+        { id: "simple_economy_operation", quantity: 1 },
+        ...ONR_V1_CORP_DECK.cards.filter(
+          (card) =>
+            card.id !== "simple_barrier_ice" &&
+            card.id !== "simple_code_gate_ice" &&
+            card.id !== "simple_economy_operation",
+        ),
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v123-krash-run-pump-duration",
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 20;
+    installRunnerProgramForTest(state, "onr_v1_039_krash");
+    const krashId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_039_krash",
+    );
+    expect(krashId).toBeDefined();
+    if (!krashId) return;
+
+    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === krashId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === krashId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === krashId,
+    );
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === krashId,
+      )?.strength,
+    ).toBe(3);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === krashId &&
+        action.payload?.subroutineIndex === 0,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_code_gate_ice",
+    );
+
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === krashId,
+      )?.strength,
+    ).toBe(3);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === krashId,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === krashId &&
+        action.payload?.subroutineIndex === 0,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === krashId &&
+        action.payload?.subroutineIndex === 1,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === krashId,
+      )?.strength,
+    ).toBe(0);
+  });
+
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
     let rdState = toRunnerTurn(v123CardReleaseGame("v123-custodial-position"));
     moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
