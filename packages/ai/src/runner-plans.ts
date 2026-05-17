@@ -1,5 +1,5 @@
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
-import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory, type RndTopFreshnessMemory } from "./belief-state";
 import { assessKnownRezzedIcePath, canBreakerDefinitionBreakIce, iceHasEndTheRun, serverIdFromEvent } from "./visible-run-analysis";
@@ -41,8 +41,9 @@ export type RunnerPlanScore = {
   evidence: string[];
 };
 
-export type RunnerPlanDebug = {
+export type RunnerPlanDebug = AiDecisionDebug & {
   aiLevel: 2;
+  schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
   planId: string;
   planKind: RunnerPlanKind | "fallback";
   selectedActionType: LegalAction["type"] | "none";
@@ -183,6 +184,7 @@ export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { time
     fallbackUsed: false,
     score: selected.score,
     debug: {
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
       planId: selected.candidate.planId,
       planKind: selected.candidate.kind,
@@ -972,6 +974,7 @@ function fallbackDebug(
   const beliefSummary = beliefDebugSummary(beliefState);
   const opponentModel = toRecord(beliefSummary.runnerOpponentModel);
   return {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: 2,
     planId: "fallback",
     planKind: "fallback",

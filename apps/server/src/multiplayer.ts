@@ -5,12 +5,14 @@ import { buildAiDecisionInput, chooseAiAction } from "@netgrid/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netgrid/engine";
 import {
+  AI_DECISION_DEBUG_SCHEMA_VERSION,
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,
   MVP_0_4_BASELINE,
   MVP_0_94_BASELINE,
   MVP_0_99_BASELINE,
   MVP_0_8_BASELINE,
+  sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
   type ApiConnectionQuality,
@@ -2484,22 +2486,25 @@ function replayTimelineStepFor(input: {
 function replayDecisionDebugForPerspective(debug: unknown, actor: Side | undefined, perspective: ReplayPerspective): Record<string, unknown> | undefined {
   if (!debug || typeof debug !== "object" || Array.isArray(debug)) return undefined;
   if (perspective !== "local_analysis" && actor && perspective !== actor) {
-    return { redacted: true, reason: "side_private_ai_debug" };
+    return { schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, redacted: true, reason: "side_private_ai_debug" };
   }
-  return replayDecisionDebug(debug as Record<string, unknown>, actor);
+  return replayDecisionDebug(debug, actor);
 }
 
-function replayDecisionDebug(debug: Record<string, unknown>, actor: Side | undefined): Record<string, unknown> {
+function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<string, unknown> | undefined {
+  const safeDebug = sanitizeAiDecisionDebug(debug);
+  if (!safeDebug) return undefined;
   const result: Record<string, unknown> = {};
-  if (typeof debug.aiLevel === "number") result.aiLevel = debug.aiLevel;
-  if (typeof debug.planKind === "string") result.planKind = debug.planKind;
-  if (typeof debug.memoryVersion === "string") result.memoryVersion = debug.memoryVersion;
-  if (Array.isArray(debug.facts)) result.facts = debug.facts.filter((entry): entry is string => typeof entry === "string").slice(0, 8);
-  if (Array.isArray(debug.hypotheses)) result.hypotheses = debug.hypotheses.filter((entry): entry is string => typeof entry === "string").slice(0, 8);
-  if (Array.isArray(debug.uncertainty)) result.uncertainty = debug.uncertainty.filter((entry): entry is string => typeof entry === "string").slice(0, 8);
-  if (typeof debug.fallbackUsed === "boolean") result.fallbackUsed = debug.fallbackUsed;
-  if (typeof debug.timeoutUsed === "boolean") result.timeoutUsed = debug.timeoutUsed;
-  if (typeof debug.confidence === "number") result.confidence = debug.confidence;
+  result.schemaVersion = safeDebug.schemaVersion;
+  result.aiLevel = safeDebug.aiLevel;
+  if (typeof safeDebug.planKind === "string") result.planKind = safeDebug.planKind;
+  if (typeof safeDebug.memoryVersion === "string") result.memoryVersion = safeDebug.memoryVersion;
+  if (Array.isArray(safeDebug.facts)) result.facts = safeDebug.facts.slice(0, 8);
+  if (Array.isArray(safeDebug.hypotheses)) result.hypotheses = safeDebug.hypotheses.slice(0, 8);
+  if (Array.isArray(safeDebug.uncertainty)) result.uncertainty = safeDebug.uncertainty.slice(0, 8);
+  if (typeof safeDebug.fallbackUsed === "boolean") result.fallbackUsed = safeDebug.fallbackUsed;
+  if (typeof safeDebug.timeoutUsed === "boolean") result.timeoutUsed = safeDebug.timeoutUsed;
+  if (typeof safeDebug.confidence === "number") result.confidence = safeDebug.confidence;
   if (actor) result.actor = actor;
   return result;
 }

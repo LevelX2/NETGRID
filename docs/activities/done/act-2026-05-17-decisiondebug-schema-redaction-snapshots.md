@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-decisiondebug-schema-redaction-snapshots
-status: in-progress
+status: done
 kind: architecture
 area: ai
 priority: normal
@@ -8,12 +8,25 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-2
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/ai/src/index.ts
+  - packages/ai/src/corp-plans.ts
+  - packages/ai/src/runner-plans.ts
+  - apps/server/src/multiplayer.ts
+  - packages/ai/src/index.test.ts
+  - apps/server/src/multiplayer.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai test -- -t "DecisionDebug"
+  - corepack pnpm --filter @netgrid/server test -- -t "keeps replay DecisionDebug side-safe"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/server typecheck
+  - git diff --check
 ---
 
 # DecisionDebug-Schema und Redaction-Snapshots absichern
@@ -45,11 +58,11 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] `DecisionDebug` hat einen nachvollziehbaren Vertrag: Typ, Builder, Schema oder eng getestete Snapshot-Grenze.
-- [ ] Runner- und Korp-Snapshots zeigen nur side-sichere Debugdaten.
-- [ ] Verbotene Debugfelder scheitern oder werden deterministisch redigiert.
-- [ ] Neue Debugfelder erfordern sichtbare Testanpassung.
-- [ ] Replay-/Reconnect-/Log-nahes Verhalten bleibt side-sicher und bestehende Event-Projection-Tests bleiben grün.
+- [x] `DecisionDebug` hat einen nachvollziehbaren Vertrag: Typ, Builder, Schema oder eng getestete Snapshot-Grenze.
+- [x] Runner- und Korp-Snapshots zeigen nur side-sichere Debugdaten.
+- [x] Verbotene Debugfelder scheitern oder werden deterministisch redigiert.
+- [x] Neue Debugfelder erfordern sichtbare Testanpassung.
+- [x] Replay-/Reconnect-/Log-nahes Verhalten bleibt side-sicher und bestehende Event-Projection-Tests bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -59,4 +72,8 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `DecisionDebug` ist jetzt über `AiDecisionDebug` mit `ai-decision-debug-v1`, zentralem Sanitizer und Replay-Projektionsgrenze versioniert. Runner- und Korp-Debug-Ausgaben haben Snapshot-Tests; verbotene Debug-Key-/Value-Muster für private Payloads, FullState, Token-/Sessionwerte und gegnerische Hidden-Zone-Inhalte werden deterministisch redigiert oder nicht in Replay-Projektionen übernommen. Public Replay/Reconnect-nahe Replay-Views bleiben bei fremder Perspektive vollständig redigiert und bei eigener Perspektive auf die erlaubten Debugfelder begrenzt.
+
+Checks: AI-DecisionDebug-Tests, Server-Replay-DecisionDebug-Test, Shared-/AI-/Server-Typechecks und `git diff --check` grün.
+
+Offene Folgepunkte: keine im Scope dieses Pakets.

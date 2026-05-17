@@ -11,7 +11,7 @@ import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpenin
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, iceHasEndTheRun } from "./visible-run-analysis";
 import { buildAiDecisionInputDto } from "./input-dto";
-import { DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
   BeliefEntry,
@@ -1433,7 +1433,9 @@ function createSimulationRng(seed: string): SimulationRng {
 function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): AiDecision {
   const consideredActionIds = input.legalActions.map((action) => action.actionId).sort();
   const beliefSummary = beliefDebugSummary(reconstructBeliefState(input));
+  const opponentModel = input.side === "runner" ? toRecord(beliefSummary.runnerOpponentModel) : toRecord(beliefSummary.corpOpponentModel);
   const decisionDebug = {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: 1,
     memoryVersion: String(beliefSummary.memoryVersion ?? ""),
     facts: toStringArray(beliefSummary.facts),
@@ -1441,8 +1443,8 @@ function decisionFromChoices(input: AiDecisionInput, choices: RankedChoice[]): A
     uncertainty: toStringArray(beliefSummary.uncertainty),
     invalidations: toStringArray(beliefSummary.invalidations),
     ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine) } : {}),
-    ...(input.side === "runner" ? { opponentModel: toRecord(beliefSummary.runnerOpponentModel) } : { opponentModel: toRecord(beliefSummary.corpOpponentModel) })
-  };
+    ...(opponentModel ? { opponentModel } : {})
+  } satisfies AiDecisionDebug;
   const choice = choices
     .filter((candidate) => candidate.action && candidate.score > 200)
     .sort((left, right) => right.score - left.score || compareAction(left.action!, right.action!))[0];
@@ -2594,15 +2596,13 @@ function toRecord(value: unknown): Record<string, unknown> | undefined {
   return value as Record<string, unknown>;
 }
 
-function deckDoctrineDebug(profile: AiDeckDoctrineProfile): Record<string, unknown> {
+function deckDoctrineDebug(profile: AiDeckDoctrineProfile): NonNullable<AiDecisionDebug["ownDeckDoctrine"]> {
   return {
     schemaVersion: profile.schemaVersion,
-    deckSnapshotId: profile.deckSnapshotId,
     side: profile.side,
     confidence: profile.confidence,
     archetypeTags: profile.archetypeTags.slice(0, 4),
-    riskFlags: profile.riskFlags.slice(0, 6),
-    evidence: profile.evidence.slice(0, 6)
+    riskFlags: profile.riskFlags.slice(0, 6)
   };
 }
 

@@ -1161,6 +1161,145 @@ export type AiDecisionInput = {
   ownDeckDoctrine?: AiDeckDoctrineProfile;
 };
 
+export const AI_DECISION_DEBUG_SCHEMA_VERSION = "ai-decision-debug-v1";
+
+export const AI_DECISION_DEBUG_REPLAY_FIELDS = [
+  "schemaVersion",
+  "aiLevel",
+  "planKind",
+  "memoryVersion",
+  "facts",
+  "hypotheses",
+  "uncertainty",
+  "fallbackUsed",
+  "timeoutUsed",
+  "confidence"
+] as const;
+
+export type AiDecisionDebug = {
+  schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
+  aiLevel: number;
+  planId?: string;
+  planKind?: string;
+  selectedActionType?: string;
+  score?: number;
+  confidence?: number;
+  visibleReasons?: string[];
+  uncertainty?: string[];
+  evidence?: string[];
+  fallbackUsed?: boolean;
+  seed?: string;
+  profileId?: string;
+  timeBudgetMs?: number;
+  timeoutUsed?: boolean;
+  memoryVersion?: string;
+  facts?: string[];
+  hypotheses?: string[];
+  invalidations?: string[];
+  beliefUncertainty?: string[];
+  opponentModel?: Record<string, unknown>;
+  ownDeckDoctrine?: {
+    schemaVersion?: string;
+    side: Side;
+    confidence: number;
+    archetypeTags: string[];
+    riskFlags: string[];
+  };
+  doctrinePlanWeight?: number;
+};
+
+const AI_DECISION_DEBUG_FORBIDDEN_KEY_PATTERN =
+  /(?:privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|privateDeckSnapshots|decklist|deckList|deckContents|runnerDeck|corpDeck|opponentHand|opponentHq|hqContents|rdContents|rndContents|stackContents|handContents|deckCards|sessions?)/i;
+const AI_DECISION_DEBUG_FORBIDDEN_VALUE_PATTERN =
+  /(?:privatePayload|cardInstances|fullGameState|FullState|sessionToken|reconnectToken|joinToken|tokenHash|decklist|hidden-card|hidden-deck-card)/i;
+
+export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undefined {
+  if (!debug || typeof debug !== "object" || Array.isArray(debug)) return undefined;
+  const source = debug as Record<string, unknown>;
+  const aiLevel = typeof source.aiLevel === "number" && Number.isFinite(source.aiLevel) ? source.aiLevel : 0;
+  const result: AiDecisionDebug = {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+    aiLevel
+  };
+  const stringFields = ["planId", "planKind", "selectedActionType", "seed", "profileId", "memoryVersion"] as const;
+  for (const field of stringFields) {
+    const value = sanitizeAiDecisionDebugString(source[field]);
+    if (value !== undefined) result[field] = value;
+  }
+  const numberFields = ["score", "confidence", "timeBudgetMs", "doctrinePlanWeight"] as const;
+  for (const field of numberFields) {
+    const value = source[field];
+    if (typeof value === "number" && Number.isFinite(value)) result[field] = value;
+  }
+  const booleanFields = ["fallbackUsed", "timeoutUsed"] as const;
+  for (const field of booleanFields) {
+    const value = source[field];
+    if (typeof value === "boolean") result[field] = value;
+  }
+  const stringArrayFields = ["visibleReasons", "uncertainty", "evidence", "facts", "hypotheses", "invalidations", "beliefUncertainty"] as const;
+  for (const field of stringArrayFields) {
+    const value = sanitizeAiDecisionDebugStringArray(source[field]);
+    if (value) result[field] = value;
+  }
+  const opponentModel = sanitizeAiDecisionDebugJson(source.opponentModel);
+  if (opponentModel && typeof opponentModel === "object" && !Array.isArray(opponentModel)) result.opponentModel = opponentModel as Record<string, unknown>;
+  const ownDeckDoctrine = sanitizeAiDecisionDebugDoctrine(source.ownDeckDoctrine);
+  if (ownDeckDoctrine) result.ownDeckDoctrine = ownDeckDoctrine;
+  return result;
+}
+
+function sanitizeAiDecisionDebugDoctrine(value: unknown): AiDecisionDebug["ownDeckDoctrine"] | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const side = source.side === "runner" || source.side === "corp" ? source.side : undefined;
+  const confidence = typeof source.confidence === "number" && Number.isFinite(source.confidence) ? source.confidence : undefined;
+  if (!side || confidence === undefined) return undefined;
+  return {
+    ...(typeof source.schemaVersion === "string" ? { schemaVersion: source.schemaVersion } : {}),
+    side,
+    confidence,
+    archetypeTags: sanitizeAiDecisionDebugStringArray(source.archetypeTags) ?? [],
+    riskFlags: sanitizeAiDecisionDebugStringArray(source.riskFlags) ?? []
+  };
+}
+
+function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
+  if (depth > 4) return undefined;
+  if (typeof value === "string") return sanitizeAiDecisionDebugString(value);
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  if (typeof value === "boolean" || value === null) return value;
+  if (Array.isArray(value)) {
+    return value
+      .slice(0, 16)
+      .map((entry) => sanitizeAiDecisionDebugJson(entry, depth + 1))
+      .filter((entry) => entry !== undefined);
+  }
+  if (!value || typeof value !== "object") return undefined;
+  const result: Record<string, unknown> = {};
+  for (const [key, entry] of Object.entries(value as Record<string, unknown>).slice(0, 32)) {
+    if (AI_DECISION_DEBUG_FORBIDDEN_KEY_PATTERN.test(key)) {
+      result[key] = "[redacted-debug-field]";
+      continue;
+    }
+    const sanitized = sanitizeAiDecisionDebugJson(entry, depth + 1);
+    if (sanitized !== undefined) result[key] = sanitized;
+  }
+  return result;
+}
+
+function sanitizeAiDecisionDebugStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  return value
+    .slice(0, 16)
+    .map((entry) => sanitizeAiDecisionDebugString(entry))
+    .filter((entry): entry is string => entry !== undefined);
+}
+
+function sanitizeAiDecisionDebugString(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  return AI_DECISION_DEBUG_FORBIDDEN_VALUE_PATTERN.test(value) ? "[redacted-debug-value]" : value;
+}
+
 export type AiDecision = {
   actionId: string;
   selectedChoices?: PlayerAction["selectedChoices"];
@@ -1170,7 +1309,7 @@ export type AiDecision = {
   fallbackUsed: boolean;
   confidence?: number;
   evidence?: string[];
-  decisionDebug?: Record<string, unknown>;
+  decisionDebug?: AiDecisionDebug;
   timeoutUsed?: boolean;
   profileId?: string;
   difficulty?: AiDifficulty;
