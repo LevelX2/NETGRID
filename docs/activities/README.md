@@ -39,6 +39,14 @@ Nutze stattdessen `docs/derived/`, wenn das Ergebnis ein dauerhaftes Referenzart
 - `done`: umgesetzt oder bewusst abgeschlossen.
 - `superseded`: durch ein anderes Paket ersetzt.
 
+## Prioritäten
+
+- `hotfix`: ausdrücklich priorisierte oder blockierende Korrektur. Diese Pakete werden bei passender Rolle immer vor allen anderen Inbox-Paketen ausgewählt.
+- `critical`: sehr dringendes Risiko oder schwere Regression, aber ohne ausdrücklichen Hotfix-Vorrang.
+- `high`: wichtiges Paket mit klarem Nutzen oder hohem Folgeeffekt.
+- `normal`: reguläre Arbeit ohne besonderen Vorrang.
+- `low`: Nebenarbeit, Hygiene oder spätere Optimierung.
+
 ## Verschieberegeln
 
 1. Neues Paket aus `templates/activity.md` in `inbox/` anlegen.
@@ -49,4 +57,4 @@ Nutze stattdessen `docs/derived/`, wenn das Ergebnis ein dauerhaftes Referenzart
 
 ## Auswahlregel für Agenten
 
-Wenn kein konkretes Paket genannt ist, wählt der Agent aus `inbox/` ein Paket mit passender Rolle, hoher Priorität, klaren Akzeptanzkriterien und begrenztem Scope. Bei mehreren gleich geeigneten Paketen gilt: erst `critical`, dann `high`, dann ältere `normal`-Pakete.
+Wenn kein konkretes Paket genannt ist, wählt der Agent aus `inbox/` ein Paket mit passender Rolle, hoher Priorität, klaren Akzeptanzkriterien und begrenztem Scope. Bei mehreren gleich geeigneten Paketen gilt: erst `hotfix`, dann `critical`, dann `high`, dann ältere `normal`-Pakete.

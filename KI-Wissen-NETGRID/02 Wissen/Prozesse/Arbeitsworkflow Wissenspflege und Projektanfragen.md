@@ -14,6 +14,8 @@ Offene Konzepte, kleine Umsetzungspakete, Fixes, Nacharbeiten, Testlücken und C
 
 Formale dauerhafte Artefakte wie Releasepläne, Requirements, Spezifikationen, Testmatrizen, Implementation Reviews und Final Reviews bleiben unter `docs/derived/`. Wenn der Nutzer sinngemäß sagt "such dir ein Paket aus", wählt Codex ein geeignetes Paket aus `docs/activities/inbox/` nach Rolle, Priorität, Klarheit und begrenztem Scope.
 
+Activity-Prioritäten sind `low`, `normal`, `high`, `critical` und `hotfix`. `hotfix` ist der höchste Vorrang: Wenn ein passendes Hotfix-Paket in der Inbox liegt, wird es bei der nächsten Paketauswahl vor allen anderen Prioritäten bearbeitet. Diese Priorität ist für ausdrücklich gemeldete Hotfix-/Fixed-Priority-Funde, blockierende Kernworkflows, Hidden-Info-/Engine-Korrektheitsrisiken oder ähnlich akute Regressionsfälle reserviert.
+
 ## Fall 1: Projektfrage beantworten
 
 1. [[../00 Uebersichten/Index]] lesen.

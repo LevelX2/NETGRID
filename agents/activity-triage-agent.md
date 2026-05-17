@@ -52,7 +52,7 @@ activityId: act-YYYY-MM-DD-kurzer-slug
 status: inbox
 kind: fix | concept | architecture | cleanup
 area: ui | cards | ai | engine | server | shared | web
-priority: low | normal | high
+priority: low | normal | high | critical | hotfix
 primaryAgent: <agent-name>
 requiresImplementation: true | false
 createdAt: YYYY-MM-DD
@@ -79,6 +79,7 @@ Danach:
 
 ## Paket-Schnitt
 
+- `priority: hotfix` verwenden, wenn der Nutzer ausdrücklich Hotfix, Fixed Priority, "als erstes" oder eine vergleichbare unmittelbare Vorrangigkeit nennt, oder wenn ein Befund einen blockierenden Kernworkflow, Hidden-Info-Sicherheit, Engine-Korrektheit oder lokalen Arbeitsfortschritt akut betrifft. Hotfix-Pakete müssen bei späterer Paketauswahl vor `critical`, `high`, `normal` und `low` kommen.
 - UI-/Text-/Interaktionsfunde: meistens `small-adjustments-agent`.
 - Karten-, Regel-, Resolver- oder KI-nahe Funde: meistens `card-enablement-ai-knowledge-agent`.
 - Architektur- oder Schichtgrenzen: `architecture-review-agent`.
