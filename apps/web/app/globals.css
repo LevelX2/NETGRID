@@ -9002,6 +9002,22 @@ select,
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .runnerGripHeapLayout .sideZoneFrame,
+  .runnerGripZone,
+  .runnerStackZone,
+  .runnerHeapZone {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .fixedZoneCards {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-bottom: 3px;
+  }
+
   .opponentRunnerBoardStrip .runnerRigStrip {
     flex-basis: 100%;
     width: 100%;

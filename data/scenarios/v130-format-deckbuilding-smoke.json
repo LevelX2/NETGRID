@@ -33,7 +33,7 @@
   "negativeCases": [
     {
       "id": "v130-nondecklegal-card-blocked",
-      "cardId": "onr_v1_018_dogcatcher",
+      "cardId": "catalog_preview_resource_001",
       "expectedErrorCodes": [
         "card_missing_required_status",
         "format_legal_requires_deck_legal"

@@ -24,12 +24,13 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
     await expectActiveBoardBasics(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
-    await expect(page.getByTestId("server-run-action").first().getByTestId("cost-chips")).toBeVisible();
+    await expect(page.getByTestId("server-run-action").first()).toHaveAttribute("aria-label", /Run auf .+ starten/);
     await page.getByRole("button", { name: "Optionen öffnen" }).click();
     await page.getByRole("button", { name: "Einzelschritt" }).click();
     await expect(page.getByRole("button", { name: "Einzelschritt" })).toHaveClass(/active/);
-    await page.getByRole("button", { name: "Optionen schließen" }).click();
+    await page.getByRole("button", { name: "Zurück zum aktiven Spiel" }).click();
     await page.locator('[data-testid="action-button"][data-action-type="gain_credit"]').first().click();
+    await expect(page.getByTestId("action-availability")).toContainText("noch 3");
     await page.locator('[data-testid="action-button"][data-action-type="end_turn"]').first().click();
     await expect(page.getByRole("button", { name: "KI-Schritt" })).toBeEnabled();
     await page.getByRole("button", { name: "KI-Schritt" }).click();
@@ -84,7 +85,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
 
       await joinHumanVsHumanLobby(joiner.page, secondJoinUrl);
       await joiner.page.getByTestId("leave-lobby").click();
-      await expect(joiner.page.getByText(/Match nicht mehr aktiv|Lobby verlassen/)).toBeVisible();
+      await expect(joiner.page.getByRole("heading", { name: "Lobby verlassen" })).toBeVisible();
       await expect(page.getByText(/Match nicht mehr aktiv|Die Gegenseite hat die Lobby verlassen/)).toBeVisible();
       await saveFlowScreenshot(page, testInfo, "desktop-lifecycle-terminal");
     } finally {
@@ -95,8 +96,9 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await expect(page.getByTestId("active-game")).toBeVisible();
     await page.reload();
     await expect(page.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
-    page.once("dialog", (dialog) => dialog.accept());
     await page.getByRole("button", { name: "Aufgeben" }).click();
+    await expect(page.getByRole("alertdialog", { name: "Spiel aufgeben?" })).toBeVisible();
+    await page.getByRole("alertdialog", { name: "Spiel aufgeben?" }).getByRole("button", { name: "Aufgeben" }).click();
     await expect(page.getByText(/Spiel aufgegeben|gewinnt/i).first()).toBeVisible();
     await page.getByRole("button", { name: "Board ansehen" }).click();
     await page.getByRole("button", { name: "Startbildschirm" }).click();
@@ -123,7 +125,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     await expectActiveBoardBasics(page);
     await expect(page.getByTestId("server-run-action").first()).toBeVisible();
     if (await page.getByTestId("opponent-cue").isVisible().catch(() => false)) {
-      await page.getByRole("button", { name: "Hinweis schließen" }).click();
+      await page.getByRole("button", { name: /Ausblenden|Hinweis schließen/ }).click();
     }
     await page.getByTestId("server-run-action").first().click();
     await expect(page.getByTestId("run-timeline")).toContainText("Run auf");
@@ -206,7 +208,7 @@ test.describe("V1.0.7 Browser-E2E und Visual QA", () => {
     expect(validBody.snapshot.formatProfileVersion).toBe("1.3.0");
     expect(validBody.snapshot.publicMetadata).not.toHaveProperty("cards");
 
-    const invalid = await request.post("/api/decks/validate", { data: { deck: { ...legalDeck, deckId: "e2e_v130_invalid", cards: [...legalDeck.cards, { cardId: "onr_v1_018_dogcatcher", quantity: 1 }] } } });
+    const invalid = await request.post("/api/decks/validate", { data: { deck: { ...legalDeck, deckId: "e2e_v130_invalid", cards: [...legalDeck.cards, { cardId: "catalog_preview_resource_001", quantity: 1 }] } } });
     const invalidBody = await invalid.json();
     expect(invalidBody.validation.ok).toBe(false);
     expect(invalidBody.validation.errorCodes).toContain("card_missing_required_status");

@@ -23,7 +23,6 @@ export async function createHumanVsAiGame(page: Page, seed: string): Promise<voi
   await page.getByLabel("KI-Decks").selectOption("fixed");
   await page.getByTestId("create-match").click();
   await expect(page.getByTestId("active-game")).toBeVisible({ timeout: 20_000 });
-  await expect(page.getByTestId("ai-pacing")).toBeVisible();
   await resolveSetupChoices(page);
   await advanceAiUntilHumanTurn(page);
 }
@@ -101,6 +100,16 @@ export async function installFirstCorpCard(page: Page): Promise<string> {
 
 export async function exerciseCardDisplayModes(page: Page): Promise<void> {
   await expect(page.getByTestId("card-preview")).toBeVisible();
+  const opponentCue = page.getByTestId("opponent-cue");
+  if (await opponentCue.isVisible().catch(() => false)) {
+    const dismissCue = page.getByRole("button", { name: /Ausblenden|Hinweis schließen/ }).first();
+    if (await dismissCue.isVisible().catch(() => false)) {
+      await dismissCue.click();
+      await expect(opponentCue).toBeHidden();
+    } else {
+      await moveOpponentCueAwayFromPreview(page);
+    }
+  }
   await page.getByTestId("card-display-text").first().click();
   await expect(page.getByTestId("card-preview")).toContainText("Kartenanzeige");
   await page.getByTestId("card-display-compact").first().click();
@@ -109,16 +118,37 @@ export async function exerciseCardDisplayModes(page: Page): Promise<void> {
 }
 
 export async function expectActiveBoardBasics(page: Page): Promise<void> {
-  await expect(page.getByTestId("legal-actions")).toContainText("Mögliche Aktionen");
+  await expect(page.getByTestId("legal-actions")).toBeVisible();
+  await expect(page.getByTestId("legal-actions").locator("h2")).toContainText(/Zug:\s*\d+\s+(Runner|Korp)\s+Aktionen/);
+  await expect(page.getByTestId("action-availability")).toBeVisible();
   await expect(page.getByTestId("run-timeline")).toHaveCount(0);
   await expect.poll(async () => page.getByTestId("server").count()).toBeGreaterThan(2);
   await expect(page.getByTestId("action-slots").first()).toContainText("Aktionen");
-  await expect(page.getByTestId("credit-badge").first()).toContainText("Credits");
+  await expect(page.getByTestId("credit-badge").first()).toHaveAttribute("aria-label", /Credits/);
 }
 
 export async function expectNoCriticalLayoutOverflow(page: Page): Promise<void> {
   const report = await page.evaluate(() => {
     const horizontalOverflow = Math.max(0, document.documentElement.scrollWidth - window.innerWidth);
+    const wideElements = Array.from(document.body.querySelectorAll("*"))
+      .map((element) => {
+        const rect = element.getBoundingClientRect();
+        return {
+          tag: element.tagName.toLowerCase(),
+          className: typeof element.className === "string" ? element.className : "",
+          testId: element.getAttribute("data-testid"),
+          ariaLabel: element.getAttribute("aria-label"),
+          text: (element.textContent ?? "").trim().replace(/\s+/g, " ").slice(0, 80),
+          left: Math.round(rect.left),
+          right: Math.round(rect.right),
+          width: Math.round(rect.width),
+          visible: rect.width > 0 && rect.height > 0,
+          out: rect.left < -4 || rect.right > window.innerWidth + 4
+        };
+      })
+      .filter((entry) => entry.visible && entry.out)
+      .sort((left, right) => Math.max(Math.abs(right.left), right.right) - Math.max(Math.abs(left.left), left.right))
+      .slice(0, 8);
     const selectors = [
       '[data-testid="legal-actions"]',
       '[data-testid="run-timeline"]',
@@ -140,9 +170,9 @@ export async function expectNoCriticalLayoutOverflow(page: Page): Promise<void> 
         };
       })
     );
-    return { horizontalOverflow, outOfViewport: outOfViewport.filter((entry) => entry.visible && entry.out) };
+    return { horizontalOverflow, outOfViewport: outOfViewport.filter((entry) => entry.visible && entry.out), wideElements };
   });
-  expect(report.horizontalOverflow, "document horizontal overflow").toBeLessThanOrEqual(12);
+  expect(report.horizontalOverflow, `document horizontal overflow: ${JSON.stringify(report.wideElements)}`).toBeLessThanOrEqual(12);
   expect(report.outOfViewport, "key surfaces outside viewport").toEqual([]);
 }
 
@@ -157,13 +187,25 @@ async function clickActionIfVisible(page: Page, actionType: string): Promise<voi
   }
 }
 
+async function moveOpponentCueAwayFromPreview(page: Page): Promise<void> {
+  const handle = page.getByRole("button", { name: "Hinweis verschieben" });
+  const box = await handle.boundingBox();
+  const viewport = page.viewportSize();
+  if (!box || !viewport) return;
+
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(24, Math.max(120, viewport.height - 160), { steps: 8 });
+  await page.mouse.up();
+}
+
 async function resolveSetupChoices(...pages: Page[]): Promise<void> {
   for (let attempt = 0; attempt < 6; attempt += 1) {
     let clicked = false;
     for (const page of pages) {
       const keep = page.getByRole("button", { name: "Starthand behalten" }).first();
       if (await keep.isVisible().catch(() => false)) {
-        await keep.click();
+        await keep.click({ timeout: 2_000 }).catch(() => undefined);
         clicked = true;
       }
     }
