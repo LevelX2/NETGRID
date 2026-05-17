@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-v2-chat-report-block-ui-contract
-status: inbox
+status: in-progress
 kind: concept
 area: web
 priority: normal
 primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
 releaseTarget: V2.2
 blockedBy:
   - docs/derived/V2_2_CHAT_DATA_CONTRACT.md

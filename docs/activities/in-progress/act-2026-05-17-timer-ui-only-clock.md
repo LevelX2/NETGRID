@@ -1,15 +1,15 @@
 ---
 activityId: act-2026-05-17-timer-ui-only-clock
-status: inbox
+status: in-progress
 kind: implementation
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-5
 releaseTarget:
 blockedBy:
   - docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md
