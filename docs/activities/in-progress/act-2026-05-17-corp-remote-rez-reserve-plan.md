@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-corp-remote-rez-reserve-plan
-status: inbox
+status: in_progress
 kind: fix
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-3
+parallelWorker: worker-3
 releaseTarget:
 blockedBy:
   - act-2026-05-17-ai-match-progression-benchmark

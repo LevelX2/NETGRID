@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-v23-public-lobby-risk-review
-status: inbox
+status: in_progress
 kind: concept
 area: server
 priority: normal
 primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
+parallelWorker: worker-2
 releaseTarget: V2.3
 blockedBy:
   - act-2026-05-17-v2-account-session-foundation

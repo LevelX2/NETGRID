@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-v2-spectator-payload-leakscan-harness
-status: inbox
+status: in_progress
 kind: test
 area: server
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-1
+parallelWorker: worker-1
 releaseTarget: V2.4
 blockedBy:
   - act-2026-05-17-v2-spectator-projection-spike

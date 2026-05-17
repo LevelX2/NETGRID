@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-proteus-release-slicing-plan
-status: inbox
+status: in_progress
 kind: concept
 area: docs
 priority: normal
 primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
+parallelWorker: worker-4
 releaseTarget: Proteus planning
 blockedBy:
   - act-2026-05-17-proteus-mechanics-coverage-analysis
