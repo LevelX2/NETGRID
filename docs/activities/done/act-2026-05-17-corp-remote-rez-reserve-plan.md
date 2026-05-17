@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-corp-remote-rez-reserve-plan
-status: in_progress
+status: done
 kind: fix
 area: ai
 priority: normal
@@ -8,14 +8,22 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-3
 parallelWorker: worker-3
 releaseTarget:
 blockedBy:
   - act-2026-05-17-ai-match-progression-benchmark
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/corp-plans.ts
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - "PASS: corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t \"remote rez reserve|affordable remote ICE|score horizons|naked agenda\""
+  - "PASS: corepack pnpm --filter @netgrid/ai typecheck"
+  - "PASS: corepack pnpm --filter @netgrid/ai test"
+  - "PASS: corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t \"reports match progression metrics\" --reporter verbose"
+  - "PASS: git diff --check"
 ---
 
 # Korp-Remote-Plan mit Rezreserve stabilisieren
@@ -48,11 +56,11 @@ Die Korp-KI soll geschützte Scoring-Remote-Linien kohärenter verfolgen: erst I
 
 ## Akzeptanzkriterien
 
-- [ ] Korp-KI bevorzugt in Fixtures geschützte Score-Fenster gegenüber vermeidbaren nackten Agenda-Installationen.
-- [ ] Rezreserve wird als Mittel zum Score-Plan genutzt, nicht als endloser Passivitätsgrund.
-- [ ] Bestehende nackte-Agenda-Regressionsfälle bleiben grün.
-- [ ] Matchprogression-Metriken zeigen mindestens keinen schlechteren Action-Limit- oder Remote-Stagnationswert im relevanten Benchmarkprofil.
-- [ ] No-Cheat-Gate bleibt gewahrt: keine gegnerischen Hidden-Zonen als Entscheidungsquelle.
+- [x] Korp-KI bevorzugt in Fixtures geschützte Score-Fenster gegenüber vermeidbaren nackten Agenda-Installationen.
+- [x] Rezreserve wird als Mittel zum Score-Plan genutzt, nicht als endloser Passivitätsgrund.
+- [x] Bestehende nackte-Agenda-Regressionsfälle bleiben grün.
+- [x] Matchprogression-Metriken zeigen mindestens keinen schlechteren Action-Limit- oder Remote-Stagnationswert im relevanten Benchmarkprofil.
+- [x] No-Cheat-Gate bleibt gewahrt: keine gegnerischen Hidden-Zonen als Entscheidungsquelle.
 
 ## Umsetzungshinweise
 
@@ -62,4 +70,12 @@ Die Korp-KI soll geschützte Scoring-Remote-Linien kohärenter verfolgen: erst I
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. `build_scoring_remote` berücksichtigt jetzt side-sicher Remote-ICE-Installationen als ersten Scoring-Remote-Schritt und bewertet eine kleine Rezreserve-Linie für Remote-ICE, Economy, Agenda-Installation und Advance/Score-Fortschritt. Niedrige Credits vor einem geschützten Agenda-Install fördern Economy, ausreichende Reserve beendet die Passivität und bevorzugt die Score-Linie.
+
+Enge Regressionstests decken ab:
+
+- bezahlbares Remote-ICE vor neuer nackter Agenda,
+- Economy vor Agenda-Install bei fehlender Remote-ICE-Rezreserve,
+- Advance/Score-Linie bei ausreichender Reserve statt endloser Economy.
+
+No-Cheat-Gate bleibt gewahrt: Die Bewertung nutzt eigene Korp-PlayerView/LegalActions, sichtbare Runner-Credits, installierte Runner-Rig-Karten und öffentliche Serverlage, aber keine Runner-Hand, keinen Stack, keine Deckliste und keine Engine-Regeländerung.
