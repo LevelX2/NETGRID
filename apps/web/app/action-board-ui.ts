@@ -255,7 +255,7 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
-  return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
+  return withActionCostPrefix(action, resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label));
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
@@ -331,7 +331,8 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
 
 function pumpBreakerActionLabel(action: LegalAction): string {
   const breakerName = breakerNameFromActionLabel(action.label, "pumpen") ?? breakerNameFromActionLabel(action.label, "stärke \\+1");
-  return breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
+  const label = breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
+  return withActionCostPrefix(action, label);
 }
 
 function breakSubroutineActionLabel(action: LegalAction): string {
@@ -339,7 +340,19 @@ function breakSubroutineActionLabel(action: LegalAction): string {
   const hasIndex = typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0;
   const base = hasIndex ? `Subroutine ${Math.floor(rawIndex) + 1} brechen` : "Subroutine brechen";
   const breakerName = breakerNameFromActionLabel(action.label, "subroutine \\d+ brechen") ?? breakerNameFromActionLabel(action.label, "subroutine brechen");
-  return breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
+  const label = breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
+  return withActionCostPrefix(action, label);
+}
+
+function withActionCostPrefix(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>, label: string): string {
+  const costLabel = actionCostText(action);
+  return costLabel ? `${costLabel} - ${label}` : label;
+}
+
+function actionCostText(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>): string | null {
+  const chips = actionCostChips(action);
+  if (chips.length === 0) return null;
+  return chips.map((chip) => chip.label).join(" + ");
 }
 
 function breakerNameFromActionLabel(label: string | undefined, actionSuffixPattern: string): string | null {
