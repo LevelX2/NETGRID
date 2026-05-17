@@ -1095,6 +1095,8 @@ export type PlayerView = {
     discardCards?: VisibleCard[];
     scoreArea: VisibleCard[];
     rig?: VisibleCard[];
+    memoryUsed?: number;
+    memoryLimit?: number;
   };
   servers: Array<{
     id: Exclude<ServerId, "new_remote">;

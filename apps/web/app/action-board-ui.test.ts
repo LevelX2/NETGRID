@@ -31,6 +31,7 @@ import {
   runWindowActionButtonLabel,
   runWindowActions,
   runWindowStatusLabel,
+  runnerRigMemorySummary,
   serverBoardRows,
   serverDisplayLabel,
   splitLegalActions,
@@ -243,6 +244,34 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(groups.map((group) => group.label)).toEqual(["Programme", "Hardware", "Ressourcen"]);
     expect(groups.flatMap((group) => group.cards.map((entry) => entry.instanceId))).toEqual(["program_1", "hardware_1", "resource_1"]);
+  });
+
+  it("summarizes public Runner MU for the Corp rig view", () => {
+    const corpView = view("corp", {
+      opponent: {
+        ...view("corp").opponent,
+        rig: [card("killer_1", "Simple Killer", "program"), card("chip_1", "Memory Chip", "hardware")],
+        memoryUsed: 2,
+        memoryLimit: 4
+      }
+    });
+
+    expect(runnerRigMemorySummary(corpView, "opponent")).toEqual({
+      used: 2,
+      limit: 4,
+      text: "2/4",
+      ariaLabel: "MU 2 von 4"
+    });
+
+    const updatedCorpView = view("corp", {
+      opponent: {
+        ...corpView.opponent,
+        rig: [card("killer_1", "Simple Killer", "program")],
+        memoryUsed: 1
+      }
+    });
+
+    expect(runnerRigMemorySummary(updatedCorpView, "opponent")?.text).toBe("1/4");
   });
 
   it("keeps Corp installed rez state side-safe", () => {

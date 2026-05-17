@@ -2253,6 +2253,8 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
             ...state.runner.rig.hardware,
             ...state.runner.rig.resources,
           ].map((id) => visibleOwnCard(state, id)),
+          memoryUsed: state.runner.memoryUsed,
+          memoryLimit: state.runner.memoryLimit,
         },
     servers: visibleServers,
     specialZones: visibleSpecialZones(state, side),
