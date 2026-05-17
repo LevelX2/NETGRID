@@ -61,6 +61,26 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(actions[1]!)).toBe("Run auf F&E (R&D)");
   });
 
+  it("keeps Olivia Salazar reduced rez source and paid cost visible in the button label", () => {
+    const action = legalAction(
+      "corp",
+      "rez_ice",
+      "ice_1",
+      "Olivia Salazar: Crystal Wall für 2 Credits rezzen",
+      {
+        cardId: "ice_1",
+        oliviaSalazarRezSourceCardId: "olivia_1",
+        oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+        oliviaSalazarRezCostBase: 4,
+        oliviaSalazarTemporaryDerez: true,
+        rezCostPaid: 2
+      },
+      "run.approach_ice"
+    );
+
+    expect(actionButtonLabel(action)).toBe("Olivia Salazar: Crystal Wall für 2 Credits rezzen");
+  });
+
   it("only offers automatic end turn when end turn is the sole remaining own action", () => {
     const board = view("corp", { activeSide: "corp", own: { ...view("corp").own, clicks: 0 } });
     const endTurn = legalAction("corp", "end_turn", "game_rule", "Zug beenden");

@@ -29,7 +29,7 @@
       "label": "Scored Agenda Static/Active",
       "currentStatus": "implemented_release",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Artificial Security Directors und Genetics-Visionary Acquisition haben gescorte R&D-Top-Reveal-LegalActions mit Hidden-Info-Barriere; Fait Accompli, Arasaka Owns You und Olivia Salazar decken Runner-Agenda-Counter-/Kostenpfade ab.",
+      "currentScopeNote": "Artificial Security Directors und Genetics-Visionary Acquisition haben gescorte R&D-Top-Reveal-LegalActions mit Hidden-Info-Barriere; Fait Accompli und Arasaka Owns You decken Runner-Agenda-Counter-/Kostenpfade ab.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "hidden_info_smoke"]
     },
     {
@@ -37,7 +37,7 @@
       "label": "Agenda Difficulty und Overadvance",
       "currentStatus": "implemented_release",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Score/Difficulty/Overadvance werden für Artificial Security Directors und Genetics-Visionary Acquisition engine-seitig revalidiert; Roving Submarine und Washington, D.C., City Grid liefern servergebundene Difficulty-Modifier. Olivia Salazar deckt den zusätzlichen Agenda-Steal-Kostenpfad ab.",
+      "currentScopeNote": "Score/Difficulty/Overadvance werden für Artificial Security Directors und Genetics-Visionary Acquisition engine-seitig revalidiert; Roving Submarine und Washington, D.C., City Grid liefern servergebundene Difficulty-Modifier. Olivia Salazar ist nach Quellenprüfung kein Agenda-Steal-Kostenpfad.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "replay_statehash_smoke"]
     },
     {
@@ -45,7 +45,7 @@
       "label": "Agenda-Kosten, Forfeit und Counter",
       "currentStatus": "implemented_release",
       "targetGate": "v1.9.19",
-      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch, Vapor Ops und Fait Accompli laden Power-Counter über explizite LegalActions; Systematic Layoffs forfeitet eine legal gewählte gescorte Korp-Agenda und gewinnt Credits in Höhe ihrer Agenda-Punkte, Arasaka Owns You und Olivia Salazar forfeiten Agenden als öffentliche Removed-from-game-Kosten.",
+      "currentScopeNote": "Falsified-Transactions Expert, Management Shake-Up, Team Restructuring, Chicago Branch, Vapor Ops und Fait Accompli laden Power-Counter über explizite LegalActions; Systematic Layoffs forfeitet eine legal gewählte gescorte Korp-Agenda und gewinnt Credits in Höhe ihrer Agenda-Punkte, Arasaka Owns You forfeitet Agenden als öffentliche Removed-from-game-Kosten.",
       "coverage": ["runtime_definition", "legal_action", "apply_action_revalidation", "counter_smoke", "forfeit_cost_smoke"]
     },
     {

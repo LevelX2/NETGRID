@@ -781,6 +781,8 @@ export type RunState = {
     Record<Exclude<ServerId, "new_remote">, CardInstanceId>
   >;
   singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
+  oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
+  oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
   speedTrapPendingRezCardId?: CardInstanceId;
@@ -4563,14 +4565,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 1,
     rulesText:
-      "Rezzed server upgrade with agenda-point cost and scored-agenda surfaces. Server scope is explicit.",
+      "For half cost, rounded down, rez a piece of ICE installed on this fort. Derez that ICE at the end of the run. Use this ability only once during each run on this fort.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_upgrade_root_server",
-      "scored_agenda",
-      "agenda_difficulty",
+      "ice_rez_cost_modifier",
+      "temporary_derez",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

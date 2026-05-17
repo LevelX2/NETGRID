@@ -580,7 +580,15 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     }
     case "rez_ice":
       category = context.cardType === "asset" || context.cardType === "upgrade" ? "card" : "run";
-      title = phrase(subject, `${cardTitle ?? "eine Karte"} gerezzt${rezSuffix(context.cardType, effect)}`);
+      if (payload.oliviaSalazarTemporaryDerez === true) {
+        const paid = numberValue(payload.rezCostPaid) ?? 0;
+        const base = numberValue(payload.oliviaSalazarRezCostBase);
+        title = phrase(subject, `${cardTitle ?? "ein ICE"} mit Olivia Salazar für ${creditText(paid)} gerezzt${rezSuffix(context.cardType, effect)}`);
+        description = `Olivia Salazar reduziert die effektiven Rez-Kosten${base !== undefined ? ` von ${creditText(base)}` : ""} auf ${creditText(paid)}; das ICE wird am Runende derezzt.`;
+        chips.push("Olivia Salazar", `${paid} ${creditLabel(paid)}`, "Temporär");
+      } else {
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} gerezzt${rezSuffix(context.cardType, effect)}`);
+      }
       chips.push("Rez", ...effect.chips);
       if (context.cardType === "ice" || cardTitle?.includes("ICE")) chips.push("Begegnung");
       break;
