@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-proteus-hidden-resource-foundation-slice
-status: inbox
+status: in_progress
 kind: implementation
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-1
+parallelWorker: worker-1
 releaseTarget: Proteus planning
 blockedBy: []
 resultArtifacts: []
