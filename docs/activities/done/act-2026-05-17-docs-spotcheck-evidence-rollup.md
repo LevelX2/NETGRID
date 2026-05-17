@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-spotcheck-evidence-rollup
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,20 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-3
 parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_EVIDENCE_ROLLUP_2026_05_17.md
+  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_A.md
+  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md
+  - data/reports/originalset-card-spotcheck-register.json
+checks:
+  - git diff --check
+  - Spotcheck-register path validation via PowerShell
+outcome: done
 ---
 
 # Originalset-Spotcheck-Nachweise verdichten
@@ -51,10 +58,10 @@ Die Originalset-Spotcheck-Nachweise sollen so verdichtet werden, dass Register, 
 
 ## Akzeptanzkriterien
 
-- [ ] Jede Spotcheck-Runde ist genau einem Registereintrag, Detailbericht und ggf. Jobfile zugeordnet.
-- [ ] Fehlende Evidence-Links sind dokumentiert.
-- [ ] Es gibt eine klare Retention-Regel für künftige Spotcheck-Jobs.
-- [ ] Historische Nachweise bleiben auffindbar.
+- [x] Jede Spotcheck-Runde ist genau einem Registereintrag, Detailbericht und ggf. Jobfile zugeordnet.
+- [x] Fehlende Evidence-Links sind dokumentiert.
+- [x] Es gibt eine klare Retention-Regel für künftige Spotcheck-Jobs.
+- [x] Historische Nachweise bleiben auffindbar.
 
 ## Umsetzungshinweise
 
@@ -63,4 +70,4 @@ Die Originalset-Spotcheck-Nachweise sollen so verdichtet werden, dass Register, 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `docs/derived/ORIGINALSET_CARD_SPOTCHECK_EVIDENCE_ROLLUP_2026_05_17.md` inventarisiert 41 Registerrunden, 41 Detailbericht-Zuordnungen, 40 eindeutige Detailbericht-Dateien, 39 erledigte Jobfiles und die zwei historischen Zufallsrunden ohne Jobfile. Der fehlende Detailbericht für `2026-05-14-A` wurde als historisches Evidence-Artefakt angelegt, der veraltete Reorder-Jobpfad wurde auf `done/` korrigiert, und Register/JSON verweisen jetzt auf die vollständige Evidence. Die Retention-Regel hält Register/JSON als `keep-active`, Detailberichte als `keep-evidence` und erledigte Jobfiles als `archive`; Jobfiles wurden nicht gelöscht.
