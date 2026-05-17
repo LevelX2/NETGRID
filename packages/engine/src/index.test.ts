@@ -12,6 +12,7 @@ import {
   getPlayerView,
   hashState,
   isHiddenInfoBarrierEvent,
+  quoteCorpRezCost,
   replayEvents,
   validateDeckDefinition,
   validateGameState,
@@ -13016,6 +13017,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       idempotencyKey: "olivia-source-drift",
     });
     expect(driftResult.ok).toBe(false);
+    const staleCredits = structuredClone(state);
+    staleCredits.corp.credits = 1;
+    const staleCreditResult = applyAction(staleCredits, {
+      matchId: staleCredits.matchId,
+      side: "corp",
+      actionId: oliviaRez.actionId,
+      clientKnownStateVersion: staleCredits.stateVersion,
+      idempotencyKey: "olivia-stale-cost",
+    });
+    expect(staleCreditResult.ok).toBe(false);
 
     state = apply(state, "corp", (action) => action.actionId === oliviaRez.actionId);
     expect(state.corp.credits).toBe(0);
@@ -13041,6 +13052,147 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps Olivia Salazar normal ICE rez actions when regular rez cost is payable", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1919-olivia-normal-rez-still-payable",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: "onr_v1_corp_v1919_olivia_normal_rez",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.maxHandSize = 100;
+    const oliviaId = putCorpRootInRemote(
+      state,
+      "onr_v1_363_olivia-salazar",
+    );
+    state.cardInstances[oliviaId] = {
+      ...state.cardInstances[oliviaId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_232_crystal-wall",
+    );
+
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const actions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "rez_ice" && action.payload?.cardId === iceId,
+    );
+    const normalRez = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === iceId &&
+        !action.payload?.oliviaSalazarRezSourceCardId,
+    );
+    const oliviaRez = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === iceId &&
+        action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
+    );
+    expect(actions).toHaveLength(2);
+    expect(normalRez.costs[0]?.credits).toBe(4);
+    expect(normalRez.payload?.rezCostPaid).toBeUndefined();
+    expect(oliviaRez.costs[0]?.credits).toBe(2);
+    expect(oliviaRez.payload).toMatchObject({
+      oliviaSalazarRezSourceCardId: oliviaId,
+      oliviaSalazarRezCostBase: 4,
+      rezCostPaid: 2,
+    });
+  });
+
+  it("quotes Olivia Salazar ICE rez costs without mutating state", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1919-olivia-quote-no-mutation",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: "onr_v1_corp_v1919_olivia_quote_no_mutation",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.maxHandSize = 100;
+    const oliviaId = putCorpRootInRemote(
+      state,
+      "onr_v1_363_olivia-salazar",
+    );
+    state.cardInstances[oliviaId] = {
+      ...state.cardInstances[oliviaId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_232_crystal-wall",
+    );
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    const beforeHash = hashState(state);
+    const beforeState = structuredClone(state);
+    const normalQuote = quoteCorpRezCost(state, iceId);
+    const oliviaQuote = quoteCorpRezCost(state, iceId, {
+      oliviaSalazarSourceCardId: oliviaId,
+    });
+
+    expect(hashState(state)).toBe(beforeHash);
+    expect(state).toEqual(beforeState);
+    expect(normalQuote.finalCredits).toBe(4);
+    expect(normalQuote.costs).toEqual([{ credits: 4 }]);
+    expect(normalQuote.publicPayload).toEqual({ cardId: iceId });
+    expect(oliviaQuote.finalCredits).toBe(2);
+    expect(oliviaQuote.costs).toEqual([{ credits: 2 }]);
+    expect(oliviaQuote.publicPayload).toMatchObject({
+      cardId: iceId,
+      oliviaSalazarRezSourceCardId: oliviaId,
+      oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      oliviaSalazarRezCostBase: 4,
+      oliviaSalazarTemporaryDerez: true,
+      rezCostPaid: 2,
+      rezCostReductionAmount: 2,
+    });
   });
 
   it("binds Fait Accompli counters to the successful remote fort and raises only that agenda difficulty", () => {
@@ -13763,6 +13915,13 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
     );
     expect(wallRez.costs[0]?.credits).toBe(3);
+    expect(wallRez.payload).toMatchObject({
+      rezCostPaid: 3,
+      rezCostReductionAmount: 1,
+    });
+    expect(String(wallRez.payload?.rezCostReductionSourceDefinitionIds)).toContain(
+      "onr_v1_324_fortress-architects",
+    );
     state = apply(
       state,
       "corp",
@@ -14234,10 +14393,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.type === "rez_ice",
     );
     expect(ownServerRez.costs[0]?.credits).toBe(0);
+    expect(ownServerRez.payload).toMatchObject({
+      rezCostPaid: 0,
+      rezCostReductionAmount: 4,
+    });
     expect(ownServerRez.payload?.rezCostReductionSourceDefinitionIds).toContain(
       "onr_v1_360_jerusalem-city-grid",
     );
     expect(otherServerRez.costs[0]?.credits).toBe(4);
+    expect(
+      otherServerRez.payload?.rezCostReductionSourceDefinitionIds,
+    ).toBeUndefined();
   });
 
   it("applies City Surveillance draw tax only from rezzed public assets", () => {
@@ -23168,6 +23334,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           "startup_immolator_trash_ice",
     );
     expect(startupAction.payload?.targetIceId).toBe(iceId);
+    expect(startupAction.costs[0]?.credits).toBe(3);
 
     state = apply(
       state,
