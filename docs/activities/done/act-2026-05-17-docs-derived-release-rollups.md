@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-derived-release-rollups
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,19 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-1
 parallelWorker: worker-1
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_BACKEND_0_5.md
+  - docs/activities/inbox/act-2026-05-17-docs-derived-backend-0-5-link-audit-move-plan.md
+  - docs/activities/inbox/act-2026-05-17-docs-derived-s01-rollup-proposal.md
+  - docs/activities/inbox/act-2026-05-17-docs-derived-v1-0-small-release-rollup-proposal.md
+checks:
+  - rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Maintenance" .
+  - git diff --check
 ---
 
 # Release-Artefakte unter docs/derived verdichten
@@ -60,11 +66,11 @@ Die vielen releaseweisen Einzelartefakte unter `docs/derived/` sollen in eine le
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt einen konkreten Rollup-Vorschlag für mindestens eine Releasefamilie.
-- [ ] Final Reviews und Implementation Reviews bleiben als Audit-Trail auffindbar.
-- [ ] Detailpläne, Preflights und erledigte Requirements-Artefakte sind als Verdichtungs- oder Archivkandidaten klassifiziert.
-- [ ] Linkbruchrisiken sind vor jedem Move benannt.
-- [ ] Folgepakete für weitere Releasefamilien sind klein geschnitten.
+- [x] Es gibt einen konkreten Rollup-Vorschlag für mindestens eine Releasefamilie.
+- [x] Final Reviews und Implementation Reviews bleiben als Audit-Trail auffindbar.
+- [x] Detailpläne, Preflights und erledigte Requirements-Artefakte sind als Verdichtungs- oder Archivkandidaten klassifiziert.
+- [x] Linkbruchrisiken sind vor jedem Move benannt.
+- [x] Folgepakete für weitere Releasefamilien sind klein geschnitten.
 
 ## Umsetzungshinweise
 
@@ -73,4 +79,4 @@ Die vielen releaseweisen Einzelartefakte unter `docs/derived/` sollen in eine le
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Als kleiner Musterbereich wurde `BACKEND_0_5_*` gewählt; es wurden keine Gate-Nachweise gelöscht, bewegt oder inhaltlich umgeschrieben. `docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_BACKEND_0_5.md` klassifiziert Final Review und Implementation Review als `keep-evidence`, Requirements und Testmatrix als `condense-candidate-after-rollup` und den Detailplan als `archive-candidate-after-condense`. Linkbruchrisiken vor späteren Moves sind konkret benannt, insbesondere Referenzen in KI-Wissen, Projektlog, Codex-Status sowie internen Backend-0.5-Artefakten. Drei kleine Folgepakete wurden in `docs/activities/inbox/` angelegt: Backend-0.5-Linkaudit/Move-Plan, S01-Rollup-Vorschlag und kleiner V1.0.x-Rollup-Vorschlag. `git diff --check` ist grün.
