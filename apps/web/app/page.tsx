@@ -334,6 +334,11 @@ type ServerMessage = ApiServerMessage;
 type CreateMatchResponse = ApiCreateMatchResponse;
 type JoinMatchResponse = ApiJoinMatchResponse;
 
+function removePendingUndo<T extends { pendingUndo?: unknown }>(payload: T): Omit<T, "pendingUndo"> {
+  const { pendingUndo: _pendingUndo, ...withoutPendingUndo } = payload;
+  return withoutPendingUndo;
+}
+
 type OpenMatchEntry = {
   matchId: string;
   hostDisplayName: string;
@@ -3749,8 +3754,9 @@ export default function Page() {
           matchVersion: message.payload.matchVersion,
           playerView: message.payload.playerView
         };
+        const nextWithUndo = message.payload.pendingUndo ? { ...next, pendingUndo: message.payload.pendingUndo } : removePendingUndo(next);
         if (message.payload.playerView.winner) return { ...next, winner: message.payload.playerView.winner };
-        const { winner: _winner, finalStateHash: _finalStateHash, ...withoutWinner } = next;
+        const { winner: _winner, finalStateHash: _finalStateHash, ...withoutWinner } = nextWithUndo;
         return withoutWinner;
       });
       setLobby(null);
@@ -11658,6 +11664,7 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
   };
   if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
+  if (response.pendingUndo) payload.pendingUndo = response.pendingUndo;
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
   if (response.resultSummary) payload.resultSummary = response.resultSummary;

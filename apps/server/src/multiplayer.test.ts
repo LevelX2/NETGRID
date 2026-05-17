@@ -1578,8 +1578,19 @@ describe("MVP 0.2 multiplayer service", () => {
       undoRequestId: undo.undoRequest.undoRequestId
     });
     expect(accepted.ok).toBe(true);
+    if (!accepted.ok) throw new Error(accepted.error.message);
+    expect(accepted.requesterPayload.pendingUndo).toBeUndefined();
+    expect(accepted.opponentPayload.pendingUndo).toBeUndefined();
     const restored = await bootstrap(first.service, first.matchId, first.corp);
     expect(restored.playerView.stateVersion).toBe(0);
+    expect(restored.pendingUndo).toBeUndefined();
+    const acceptedReconnect = await first.service.reconnectMatch(first.matchId, {
+      side: "runner",
+      reconnectToken: first.runner.reconnectToken
+    });
+    expect("error" in acceptedReconnect).toBe(false);
+    if ("error" in acceptedReconnect) throw new Error(acceptedReconnect.error.message);
+    expect(acceptedReconnect.pendingUndo).toBeUndefined();
 
     const declineMatch = await joinedMatch("undo-decline");
     const declineAction = await submit(declineMatch.service, declineMatch.matchId, declineMatch.corp, (action) => action.type === "mandatory_draw", "mandatory");
@@ -1598,6 +1609,43 @@ describe("MVP 0.2 multiplayer service", () => {
       undoRequestId: declineRequest.undoRequest.undoRequestId
     });
     expect(declined.ok).toBe(true);
+    if (!declined.ok) throw new Error(declined.error.message);
+    expect(declined.requesterPayload.pendingUndo).toBeUndefined();
+    expect(declined.opponentPayload.pendingUndo).toBeUndefined();
+    const declinedRequester = await bootstrap(declineMatch.service, declineMatch.matchId, declineMatch.corp);
+    const declinedResponder = await declineMatch.service.reconnectMatch(declineMatch.matchId, {
+      side: "runner",
+      reconnectToken: declineMatch.runner.reconnectToken
+    });
+    expect(declinedRequester.pendingUndo).toBeUndefined();
+    expect("error" in declinedResponder).toBe(false);
+    if ("error" in declinedResponder) throw new Error(declinedResponder.error.message);
+    expect(declinedResponder.pendingUndo).toBeUndefined();
+
+    const invalidMatch = await joinedMatch("undo-invalid-cleanup");
+    const invalidAction = await submit(invalidMatch.service, invalidMatch.matchId, invalidMatch.corp, (action) => action.type === "mandatory_draw", "invalid-mandatory");
+    const invalidRequest = await invalidMatch.service.requestUndo({
+      matchId: invalidMatch.matchId,
+      side: "corp",
+      sessionToken: invalidMatch.corp.sessionToken,
+      targetEventId: `evt_${invalidAction.receipt.stateVersionAfter}`
+    });
+    expect(invalidRequest.ok).toBe(true);
+    if (!invalidRequest.ok || !invalidRequest.undoRequest) throw new Error("Expected undo request");
+    const invalidRecord = await invalidMatch.service.loadForTest(invalidMatch.matchId);
+    if (!invalidRecord) throw new Error("Missing invalid cleanup match");
+    invalidRecord.undoSnapshots = [];
+    await (invalidMatch.service as unknown as { storage: MultiplayerStorage }).storage.save(invalidRecord);
+    const invalidResponse = await invalidMatch.service.acceptUndo({
+      matchId: invalidMatch.matchId,
+      side: "runner",
+      sessionToken: invalidMatch.runner.sessionToken,
+      undoRequestId: invalidRequest.undoRequest.undoRequestId
+    });
+    expect(invalidResponse.ok).toBe(false);
+    if (invalidResponse.ok) throw new Error("Expected invalid undo response");
+    expect(invalidResponse.payload?.pendingUndo).toBeUndefined();
+    expect((await invalidMatch.service.loadForTest(invalidMatch.matchId))?.pendingUndo).toBeUndefined();
 
     const second = await joinedMatch("undo-blocked");
     await submit(second.service, second.matchId, second.corp, (action) => action.type === "mandatory_draw", "mandatory");
@@ -3349,6 +3397,71 @@ describe("MVP 0.2 multiplayer service", () => {
       expect(JSON.stringify(auditEvents)).not.toMatch(/Simple Agenda|cardInstances|privatePayload|decklist/i);
     } finally {
       socket.close();
+      await handle.close();
+    }
+  });
+
+  it("clears pending undo prompts over WebSocket after a response", async () => {
+    const match = await joinedMatch("ws-undo-clear");
+    const mandatory = await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "ws-undo-clear-mandatory");
+    const targetEventId = `evt_${mandatory.receipt.stateVersionAfter}`;
+    const handle = createNetgridHttpServer(match.service);
+    await new Promise<void>((resolve) => handle.server.listen(0, "127.0.0.1", resolve));
+    const address = handle.server.address();
+    if (!address || typeof address === "string") throw new Error("Missing server address");
+    const corpSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+    const runnerSocket = new WebSocket(`ws://127.0.0.1:${address.port}/ws`);
+
+    try {
+      await Promise.all([waitForOpen(corpSocket), waitForOpen(runnerSocket)]);
+      corpSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: match.matchId, sessionToken: match.corp.sessionToken, side: "corp" }
+        })
+      );
+      runnerSocket.send(
+        JSON.stringify({
+          type: "join_match",
+          payload: { matchId: match.matchId, sessionToken: match.runner.sessionToken, side: "runner" }
+        })
+      );
+      await Promise.all([waitForMessage(corpSocket, "state_update"), waitForMessage(runnerSocket, "state_update")]);
+
+      const corpPendingUpdate = waitForMessage(corpSocket, "state_update");
+      const runnerPendingUpdate = waitForMessage(runnerSocket, "state_update");
+      const corpUndoRequest = waitForMessage(corpSocket, "undo_request");
+      const runnerUndoRequest = waitForMessage(runnerSocket, "undo_request");
+      corpSocket.send(JSON.stringify({ type: "request_undo", payload: { targetEventId, reason: "Misclick" } }));
+
+      expect((messagePayload(await corpPendingUpdate) as { pendingUndo?: { needsResponse?: boolean } }).pendingUndo?.needsResponse).toBe(false);
+      expect((messagePayload(await runnerPendingUpdate) as { pendingUndo?: { needsResponse?: boolean } }).pendingUndo?.needsResponse).toBe(true);
+      const runnerUndoMessage = (await runnerUndoRequest) as { payload?: { undoRequestId?: string; needsResponse?: boolean } };
+      const runnerUndoPayload = runnerUndoMessage.payload;
+      expect(runnerUndoPayload?.needsResponse).toBe(true);
+      expect(JSON.stringify(await corpUndoRequest)).not.toMatch(/Simple Agenda|cardInstances|privatePayload|decklist/i);
+      expect(runnerUndoPayload?.undoRequestId).toBeTruthy();
+
+      const corpClearedUpdate = waitForMessage(corpSocket, "state_update");
+      const runnerClearedUpdate = waitForMessage(runnerSocket, "state_update");
+      runnerSocket.send(JSON.stringify({ type: "accept_undo", payload: { undoRequestId: runnerUndoPayload!.undoRequestId } }));
+
+      expect((messagePayload(await corpClearedUpdate) as { pendingUndo?: unknown }).pendingUndo).toBeNull();
+      expect((messagePayload(await runnerClearedUpdate) as { pendingUndo?: unknown }).pendingUndo).toBeNull();
+      const corpBootstrap = await match.service.bootstrap(match.matchId, "corp", match.corp.sessionToken);
+      expect("error" in corpBootstrap).toBe(false);
+      if ("error" in corpBootstrap) throw new Error(corpBootstrap.error.message);
+      expect(corpBootstrap.pendingUndo).toBeUndefined();
+      const reconnected = await match.service.reconnectMatch(match.matchId, {
+        side: "runner",
+        reconnectToken: match.runner.reconnectToken
+      });
+      expect("error" in reconnected).toBe(false);
+      if ("error" in reconnected) throw new Error(reconnected.error.message);
+      expect(reconnected.pendingUndo).toBeUndefined();
+    } finally {
+      corpSocket.close();
+      runnerSocket.close();
       await handle.close();
     }
   });

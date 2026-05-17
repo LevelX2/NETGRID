@@ -422,6 +422,7 @@ export type JoinMatchResult = {
   matchStatus?: MatchStatus;
   lobby?: MatchStartLobbyPayload;
   pendingChoice?: PlayerView["pendingChoice"];
+  pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
   finalStateHash?: string;
@@ -1061,6 +1062,7 @@ export class MultiplayerService {
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby ? { lobby: payload.startLobby } : {}),
       ...(isSidePayload(payload) && payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(isSidePayload(payload) && payload.pendingUndo ? { pendingUndo: payload.pendingUndo } : {}),
       ...(isSidePayload(payload) && payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(isSidePayload(payload) && payload.winner ? { winner: payload.winner } : {}),
       ...(isSidePayload(payload) && payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
@@ -1718,12 +1720,23 @@ export class MultiplayerService {
         return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
       }
       const undoRecord = record.undoSnapshots.find((candidate) => candidate.undoRequestId === input.undoRequestId);
-      if (!undoRecord) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      if (!undoRecord) {
+        delete record.pendingUndo;
+        record.match.matchVersion += 1;
+        record.match.updatedAt = this.now();
+        await this.storage.save(record);
+        return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+      }
       undoRecord.status = status;
       delete record.pendingUndo;
       if (status === "accepted") {
         const restored = this.applyAcceptedUndo(record, undoRecord);
-        if (!restored) return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+        if (!restored) {
+          record.match.matchVersion += 1;
+          record.match.updatedAt = this.now();
+          await this.storage.save(record);
+          return { ok: false, error: safeError("undo_not_available", "Undo ist aktuell nicht möglich."), payload: this.payloadFor(record, input.side) };
+        }
       }
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
