@@ -16,6 +16,7 @@ Lokale Quellen:
 - `docs/derived/VIRUS_PURGE_0.99_SPEC.md`
 - `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
 - `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md`
+- `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`
 - `docs/source/Netrunner Errata 1.70.md`
 
 ## Betroffene Karten
@@ -140,7 +141,9 @@ PublicPayload:
 
 Proteus-Purge ist nicht identisch mit dem vorhandenen V0.99-Main-Action-Vertrag `click click click: Purge virus counters`.
 
-Offene Vertragsanforderungen:
+Der enge Folgekontrakt liegt jetzt in `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`. Er bleibt planning-only und erzeugt keine Runtime-Implementierung, keine AI-Hints und keine Kartenpromotion.
+
+Kernaussagen:
 
 - Timingfenster: lokale Errata erlaubt Virus-Removal in Spezialeffekt-/Rez-ähnlichen Fenstern, nicht nur im Korp-Main-Window.
 - Kostenmodell: Proteus-Texte sprechen von `forgo its next three actions`; das ist ein zukünftiger Action-Debt, nicht zwingend eine sofortige Drei-Click-Zahlung.
