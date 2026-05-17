@@ -42,6 +42,7 @@ Es gibt keine automatische Agent-Kette, keine implizite Übergabe an Folgeagente
 
 - Release-Zuschnitt, Prioritäten, Abhängigkeiten, Gates: `release-planning-agent` (`agents/release-planning-agent.md`).
 - Kartenfreischaltung, Mechanikfolgen, KI-Verhalten: `card-enablement-ai-knowledge-agent` (`agents/card-enablement-ai-knowledge-agent.md`).
+- Nutzerfunde, Playtest-Beobachtungen, Review-Findings und Ideen in kleine `docs/activities/`-Pakete vorsortieren: `activity-triage-agent` (`agents/activity-triage-agent.md`).
 - Geplante Umsetzung in Code und Artefakten: `release-implementation-agent` (`agents/release-implementation-agent.md`).
 - Kleine UI-/Text-/Interaktions-Korrekturen ohne Redesign: `small-adjustments-agent` (`agents/small-adjustments-agent.md`).
 - Strukturqualität, technische Schulden, Schichtgrenzen: `architecture-review-agent` (`agents/architecture-review-agent.md`).
