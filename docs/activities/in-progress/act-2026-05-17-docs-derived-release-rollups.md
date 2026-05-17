@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-docs-derived-release-rollups
-status: inbox
+status: in_progress
 kind: cleanup
 area: docs
 priority: low
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-1
+parallelWorker: worker-1
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
