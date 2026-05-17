@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-root-source-duplicates-cleanup
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,19 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-3
 parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/ROOT_SOURCE_DUPLICATES_CLEANUP_REVIEW_2026_05_17.md
+checks:
+  - SHA-256 duplicate check via Get-FileHash
+  - Runbook diff via git diff --no-index
+  - Reference scan via rg for affected root and leading paths
+  - git diff --check
+outcome: done
 ---
 
 # Root-/Source-Duplikate in docs sicher bereinigen
@@ -51,10 +57,10 @@ Bitgleiche oder nahezu gleiche Dokumente im `docs/`-Root und in Unterordnern sol
 
 ## Akzeptanzkriterien
 
-- [ ] Duplikate sind mit Hash oder Diff belegt.
-- [ ] Alle internen Referenzen auf betroffene Pfade sind gefunden.
-- [ ] Es gibt eine klare Empfehlung pro Datei: `keep-source`, `archive` oder `git-remove-after-condense`.
-- [ ] Wenn Dateien entfernt werden sollen, ist vorher ein Link-Migrationsplan dokumentiert.
+- [x] Duplikate sind mit Hash oder Diff belegt.
+- [x] Alle internen Referenzen auf betroffene Pfade sind gefunden.
+- [x] Es gibt eine klare Empfehlung pro Datei: `keep-source`, `archive` oder `git-remove-after-condense`.
+- [x] Wenn Dateien entfernt werden sollen, ist vorher ein Link-Migrationsplan dokumentiert.
 
 ## Umsetzungshinweise
 
@@ -63,4 +69,4 @@ Bitgleiche oder nahezu gleiche Dokumente im `docs/`-Root und in Unterordnern sol
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `docs/derived/ROOT_SOURCE_DUPLICATES_CLEANUP_REVIEW_2026_05_17.md` belegt die drei bitgleichen Root-/Source-Rohquellen per SHA-256, ordnet die sieben Zeilen Differenz zwischen Root- und `docs/codex/`-Runbook bewusst zugunsten des führenden `docs/codex/`-Pfads ein, dokumentiert die Referenzsuche und empfiehlt `docs/source/*` sowie `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` als `keep-source`. Die vier Root-Duplikate sind als `git-remove-after-condense` eingestuft, aber in diesem Paket nicht entfernt; der Review enthält einen Link-Migrationsplan für ein separates Folgecleanup.
