@@ -45,7 +45,7 @@ Jobstatus: `done`; Umsetzung, Pflichtchecks und lokaler Commit sind abgeschlosse
 | Junkyard BBS | `onr_v1_165_junkyard-bbs` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
 | Karl de Veres, Corporate Stooge | `onr_v1_166_karl-de-veres-corporate-stooge` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
 | Leland, Corporate Bodyguard | `onr_v1_167_leland-corporate-bodyguard` | Resource-Installation bleibt source-bound und replaybar | Install-/Leak-/Replay-Test ergänzt |
-| Loan from Chiba | `onr_v1_168_loan-from-chiba` | Recurring-Credits refreshen turn-sicher | Counter-/Turn-/Replay-Test ergänzt |
+| Loan from Chiba | `onr_v1_168_loan-from-chiba` | Installation gibt 12 Credits ohne Recurring-Counter | Install-/Credit-/Leak-/Replay-Test ergänzt |
 | The Shell Traders | `onr_v1_176_the-shell-traders` | Recurring-Credit refresh't turn-sicher | Counter-/Turn-/Replay-Test ergänzt |
 
 ## Runde 2026-05-16-runner-program-prevention-tools

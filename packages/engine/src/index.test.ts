@@ -13419,10 +13419,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("tracks V1.9.20 persistent recurring state on installed Loan from Chiba", () => {
+  it("installs Loan from Chiba as a 12-credit gain without recurring counters", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
-        seed: "v1920-loan-persistent",
+        seed: "v1920-loan-install-credit",
         baseline: MVP_0_99_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -13431,6 +13431,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
     state = apply(
       state,
       "runner",
@@ -13444,46 +13446,25 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     expect(loanId).toBeDefined();
     if (!loanId) throw new Error("Missing Loan from Chiba");
-    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+    expect(state.runner.credits).toBe(32);
+    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(0);
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
         (card) => card.definitionId === "onr_v1_168_loan-from-chiba",
       )?.counters?.recurring_credit,
-    ).toBe(2);
-
-    state.cardInstances[loanId] = {
-      ...state.cardInstances[loanId]!,
-      counters: {
-        ...state.cardInstances[loanId]!.counters,
-        recurring_credit: 0,
-      },
-    };
-    const initial = structuredClone(state);
-    const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "end_turn");
-    if (
-      state.pendingChoice?.source === "discard_phase" &&
-      state.pendingChoice.side === "runner"
-    ) {
-      state = applyChoice(
-        state,
-        "runner",
-        String(state.pendingChoice.options[0]?.id),
-      );
-    }
-    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-    if (
-      state.pendingChoice?.source === "discard_phase" &&
-      state.pendingChoice.side === "corp"
-    ) {
-      state = applyChoice(
-        state,
-        "corp",
-        String(state.pendingChoice.options[0]?.id),
-      );
-    }
-    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
+    ).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_168_loan-from-chiba",
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "runner",
+          amount: 12,
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+          reason: "card_resolver",
+        }),
+      ],
+    });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/,
     );
@@ -34793,18 +34774,31 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         privatePayloadMarkers,
       );
-      if (
-        definitionId === "onr_v1_168_loan-from-chiba" ||
-        definitionId === "onr_v1_176_the-shell-traders"
-      ) {
+      if (definitionId === "onr_v1_168_loan-from-chiba") {
         const resourceId = state.runner.rig.resources.find(
           (id) => state.cardInstances[id]?.definitionId === definitionId,
         );
         expect(resourceId).toBeDefined();
         if (!resourceId) throw new Error(`Missing ${definitionId}`);
-        expect(cardCounterAmount(state, resourceId, "recurring_credit")).toBe(
-          definitionId === "onr_v1_168_loan-from-chiba" ? 2 : 1,
+        expect(cardCounterAmount(state, resourceId, "recurring_credit")).toBe(0);
+        expect(state.runner.credits).toBe(initial.runner.credits + 12);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          resolvedEffects: [
+            expect.objectContaining({
+              kind: "gain_credits",
+              amount: 12,
+              sourceDefinitionId: definitionId,
+            }),
+          ],
+        });
+      }
+      if (definitionId === "onr_v1_176_the-shell-traders") {
+        const resourceId = state.runner.rig.resources.find(
+          (id) => state.cardInstances[id]?.definitionId === definitionId,
         );
+        expect(resourceId).toBeDefined();
+        if (!resourceId) throw new Error(`Missing ${definitionId}`);
+        expect(cardCounterAmount(state, resourceId, "recurring_credit")).toBe(1);
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok, definitionId).toBe(true);
@@ -34932,11 +34926,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(hashState(dataReplay.state)).toBe(hashState(databroker));
   });
 
-  it("keeps Floating Runner BBS and recurring contact credits turn-safe", () => {
+  it("keeps Floating Runner BBS and Shell Traders recurring contact credits turn-safe", () => {
     let state = resourceContactState("turn-credits");
     for (const definitionId of [
       "onr_v1_163_floating-runner-bbs",
-      "onr_v1_168_loan-from-chiba",
       "onr_v1_176_the-shell-traders",
     ] as const) {
       moveRunnerCardToGrip(state, definitionId);
@@ -34948,16 +34941,11 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           sourceDefinition(state, action) === definitionId,
       );
     }
-    const loanId = state.runner.rig.resources.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
-    );
     const shellId = state.runner.rig.resources.find(
       (id) => state.cardInstances[id]?.definitionId === "onr_v1_176_the-shell-traders",
     );
-    expect(loanId).toBeDefined();
     expect(shellId).toBeDefined();
-    if (!loanId || !shellId) throw new Error("Missing recurring contacts");
-    setCardCounterForTest(state, loanId, "recurring_credit", 0);
+    if (!shellId) throw new Error("Missing recurring contact");
     setCardCounterForTest(state, shellId, "recurring_credit", 0);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -34970,21 +34958,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           kind: "counter_change",
           side: "runner",
           counterType: "recurring_credit",
-          remainingCounters: 2,
-          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
-          reason: "start_of_turn",
-        }),
-        expect.objectContaining({
-          kind: "counter_change",
-          side: "runner",
-          counterType: "recurring_credit",
           remainingCounters: 1,
           sourceDefinitionId: "onr_v1_176_the-shell-traders",
           reason: "start_of_turn",
         }),
       ]),
     );
-    expect(cardCounterAmount(state, loanId, "recurring_credit")).toBe(2);
     expect(cardCounterAmount(state, shellId, "recurring_credit")).toBe(1);
     expect(state.runner.credits).toBeGreaterThan(initial.runner.credits);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));

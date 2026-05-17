@@ -188,7 +188,7 @@
           "cardId": "onr_v1_168_loan-from-chiba",
           "title": "Loan from Chiba",
           "spotcheckStatus": "completed",
-          "result": "verified_recurring_credit_turn_refresh_replay",
+          "result": "verified_install_credit_gain_no_recurring_counters_replay",
           "followUpStatus": "fixed_and_tested"
         },
         {

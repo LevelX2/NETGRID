@@ -42,9 +42,9 @@
     "Ice Transmutation scores into a rezzed-ICE target choice, then applies public strength and subroutine modifiers replay-stably.",
     "I Got a Rock opens only for a double-tagged Runner with enough scored Corp agenda points and resolves 15 Meat Damage through the damage system.",
     "Main-Office Relocation projects a scored-agenda Corp handlimit modifier through both PlayerViews without mutating the base hand size.",
-    "Loan from Chiba keeps and refreshes public recurring-credit state across turn transitions.",
-    "Covered MRAM, action-economy, global rez-cost, handlimit and recurring-state paths replay deterministically and reproduce final StateHash.",
-    "Covered action-economy, global rez-cost, handlimit and recurring-state events do not expose hidden HQ/R&D card identities or private payload structures.",
+    "Loan from Chiba gives the Runner 12 normal credits when installed and creates no recurring-credit counters.",
+    "Covered MRAM, action-economy, global rez-cost, handlimit and Loan-from-Chiba install-credit paths replay deterministically and reproduce final StateHash.",
+    "Covered action-economy, global rez-cost, handlimit and Loan-from-Chiba install-credit events do not expose hidden HQ/R&D card identities or private payload structures.",
     "All 26 V1.9.20 cards are release-promoted and AI-approved after the full gate.",
     "V1.9.21 AI Boon remains outside the V1.9.20 release runtime guard.",
     "AI, release promotion and final review are complete for V1.9.20."

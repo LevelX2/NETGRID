@@ -741,6 +741,35 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("shows Loan from Chiba install credit gains as a public economy effect", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Loan from Chiba",
+        cardDefinitionId: "onr_v1_168_loan-from-chiba",
+        resolvedEffects: [
+          {
+            effectId: "runner.install.loan_from_chiba.card_123",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "runner",
+            amount: 12,
+            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceTitle: "Loan from Chiba",
+            reason: "card_resolver"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toBe("Du hast 12 Credits durch Loan from Chiba erhalten.");
+    expect(items[0]?.category).toBe("economy");
+    expect(items[0]?.cardDefinitionId).toBe("onr_v1_168_loan-from-chiba");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+12 Credits"]));
+  });
+
   it("highlights stolen agendas with visible agenda points", () => {
     const item = formatChronicleEvent(
       makeEvent("steal_agenda", {
@@ -1268,12 +1297,12 @@ describe("formatChronicleEvent", () => {
             kind: "counter_change",
             visibility: "public",
             side: "runner",
-            amount: 2,
+            amount: 1,
             counterType: "recurring_credit",
-            remainingCounters: 2,
-            addedCounterAmount: 2,
-            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
-            sourceTitle: "Loan from Chiba",
+            remainingCounters: 1,
+            addedCounterAmount: 1,
+            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            sourceTitle: "The Shell Traders",
             reason: "start_of_turn"
           }
         ]
@@ -1281,9 +1310,9 @@ describe("formatChronicleEvent", () => {
       "runner"
     );
 
-    expect(items[0]?.title).toBe("Du hast Recurring Credits auf Loan from Chiba aufgefrischt.");
+    expect(items[0]?.title).toBe("Du hast Recurring Credits auf The Shell Traders aufgefrischt.");
     expect(items[0]?.category).toBe("card");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "2 bereit", "+2", "Automatisch"]));
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
   });
 
   it("shows delayed agenda steals from automatic start-of-turn effects", () => {

@@ -378,6 +378,7 @@ const DRIFTER_MOBILE_ENVIRONMENT_ID =
 const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
 const BROKER_ID = "onr_v1_154_broker";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
+const LOAN_FROM_CHIBA_ID = "onr_v1_168_loan-from-chiba";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -9265,6 +9266,22 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           addedCounterAmount: 6,
           remainingCounters: 6,
         };
+      }
+      if (definition.id === LOAN_FROM_CHIBA_ID) {
+        credits(state, "runner", 12);
+        legalAction.resolvedEffects = [
+          ...(legalAction.resolvedEffects ?? []),
+          {
+            effectId: `runner.install.loan_from_chiba.${cardId}`,
+            kind: "gain_credits",
+            visibility: "public",
+            side: "runner",
+            amount: 12,
+            reason: "card_resolver",
+            sourceDefinitionId: LOAN_FROM_CHIBA_ID,
+            sourceTitle: publicCardTitle(LOAN_FROM_CHIBA_ID),
+          },
+        ];
       }
     } else {
       throw new Error(

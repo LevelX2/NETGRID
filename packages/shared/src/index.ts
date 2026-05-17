@@ -5721,12 +5721,11 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    recurringCredits: 2,
     rulesText:
-      "Installed resource with recurring-credit and persistent-state surfaces. Credit timing remains resolver-driven.",
+      "Gain [12] when Loan from Chiba is installed. At the start of each of your turns, lose [1]. If Loan from Chiba leaves play, pay [10] or lose the game. You may trash Loan from Chiba at the end of any of your turns.",
     mechanics: [
       "install_resource",
-      "recurring_credit",
+      "gain_credits",
       "persistent_special_state",
       "action_economy",
       ONR_V1_LOCAL_PRIVATE,

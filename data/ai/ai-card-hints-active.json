@@ -11478,20 +11478,24 @@
       "roles": [
         "runner",
         "resource",
+        "economy",
         "persistent"
       ],
       "planRoles": [
-        "remote_upgrade_modifier"
+        "credit_swing"
       ],
       "requiredMechanics": [
         "persistent_special_state_resolver",
-        "recurring_pool_start_turn_resolver"
+        "gain_credits_on_install"
       ],
       "valueHints": {
-        "modifier": 1
+        "installCreditGain": 12,
+        "startOfTurnCreditLoss": 1,
+        "leavePlayPayCost": 10
       },
       "riskTags": [
-        "modifier_layering",
+        "credit_swing",
+        "leave_play_penalty",
         "state_hash_replay_stable"
       ],
       "aiSupportStatus": "ai_supported",

@@ -23,11 +23,11 @@
       "label": "Persistente Sonderzustaende",
       "currentStatus": "implemented_limited",
       "targetGate": "v1.9.20",
-      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den ersten installierten persistenten Recurring-Credit-Zustand mit Refresh ueber Turnwechsel, side-sicheren PublicEvents und replay-stabilem StateHash ab.",
+      "currentScopeNote": "26 Runtime-Definitionen sind vorhanden; Loan from Chiba deckt den installierten persistenten Kredit-/Schuldenzustand mit sofortigem Installations-Credit-Gain, ohne Recurring-Counter, side-sicheren PublicEvents und replay-stabilem StateHash ab.",
       "coverage": [
         "scope_guard",
         "runtime_definitions",
-        "loan_from_chiba_recurring_state_smoke",
+        "loan_from_chiba_install_credit_smoke",
         "loan_from_chiba_replay_statehash_smoke",
         "loan_from_chiba_visibility_smoke"
       ]
