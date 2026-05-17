@@ -25585,6 +25585,18 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
 
     const secondGridId = moveCorpCardToHq(state, "onr_v1_365_paris-city-grid");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const replacementAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === secondGridId &&
+        action.payload?.serverId === "remote_1" &&
+        action.payload?.placement === "root",
+    );
+    expect(replacementAction.payload?.regionReplacementWarning).toBe(true);
     state = apply(
       state,
       "corp",
@@ -25606,6 +25618,79 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         .servers.find((server) => server.id === "archives")
         ?.root.find((card) => card.instanceId === firstGridId)?.definitionId,
     ).toBe("onr_v1_355_crystal-palace-station-grid");
+    const replacementEvent = state.eventLog.at(-1);
+    expect(replacementEvent?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trash_card",
+          reason: "region_limit",
+          sourceDefinitionId: "onr_v1_365_paris-city-grid",
+          cardDefinitionId: "onr_v1_355_crystal-palace-station-grid",
+          cardTitle: "Crystal Palace Station Grid",
+        }),
+      ]),
+    );
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("keeps hidden old region names out of replacement events", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-hidden-region-replacement");
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const firstGridId = moveCorpCardToHq(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === firstGridId &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    state.cardInstances[firstGridId] = {
+      ...state.cardInstances[firstGridId]!,
+      faceup: false,
+      rezzed: false,
+    };
+
+    const secondGridId = moveCorpCardToHq(state, "onr_v1_365_paris-city-grid");
+    const replacementAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === secondGridId &&
+        action.payload?.serverId === "remote_1" &&
+        action.payload?.placement === "root",
+    );
+    expect(replacementAction.payload?.regionReplacementWarning).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === replacementAction.actionId,
+    );
+
+    expect(state.corp.archives).toContain(firstGridId);
+    const eventText = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
+    expect(eventText).not.toContain("Crystal Palace Station Grid");
+    expect(eventText).not.toContain("onr_v1_355_crystal-palace-station-grid");
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trash_card",
+          reason: "region_limit",
+          sourceDefinitionId: "onr_v1_365_paris-city-grid",
+          redactedKind: "installed_card",
+        }),
+      ]),
+    );
     expect(validateGameState(state).ok).toBe(true);
   });
 

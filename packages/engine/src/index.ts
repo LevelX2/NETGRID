@@ -3156,6 +3156,9 @@ function corpMainActions(state: GameState): LegalAction[] {
           const replacesRootAsset =
             definition.type === "agenda" &&
             corpRootAssetIdsInServer(state, server).length > 0;
+          const replacesRegion =
+            isRegionUpgrade(definition) &&
+            corpRegionUpgradeIdsInServer(state, server).length > 0;
           actions.push(
             action(
               state,
@@ -3177,6 +3180,9 @@ function corpMainActions(state: GameState): LegalAction[] {
                 placement: "root",
                 ...(replacesRootAsset
                   ? { rootReplacement: "asset_to_agenda" }
+                  : {}),
+                ...(replacesRegion
+                  ? { regionReplacementWarning: true }
                   : {}),
               },
             ),
@@ -9494,7 +9500,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
   if (regionInstall) {
-    trashOlderRegionUpgradesInServer(state, server, cardId);
+    trashOlderRegionUpgradesInServer(state, server, cardId, legalAction);
   }
   markRovingSubmarineActivityForServer(state, server.id, legalAction);
   consumeEdgerunnerTempsInstallAction(state, legalAction);
@@ -9530,6 +9536,18 @@ function corpRootMainCardIdsInServer(
     .filter((id) => {
       const installedType = definitionFor(state, id).type;
       return installedType === "agenda" || installedType === "asset";
+    })
+    .sort();
+}
+
+function corpRegionUpgradeIdsInServer(
+  state: GameState,
+  server: CorpServer,
+): CardInstanceId[] {
+  return server.root
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return definition.type === "upgrade" && cardHasSubtype(definition, "region");
     })
     .sort();
 }
@@ -12506,6 +12524,7 @@ function trashOlderRegionUpgradesInServer(
   state: GameState,
   server: CorpServer,
   keepCardId: CardInstanceId,
+  legalAction?: LegalAction,
 ): void {
   const olderRegions = server.root
     .filter((cardId) => cardId !== keepCardId)
@@ -12516,8 +12535,47 @@ function trashOlderRegionUpgradesInServer(
       );
     })
     .sort();
-  for (const cardId of olderRegions)
+  for (const cardId of olderRegions) {
+    appendRegionReplacementTrashEffect(state, server, keepCardId, cardId, legalAction);
     trashCorpInstalledCardToArchives(state, cardId);
+  }
+}
+
+function appendRegionReplacementTrashEffect(
+  state: GameState,
+  server: CorpServer,
+  sourceCardId: CardInstanceId,
+  trashedCardId: CardInstanceId,
+  legalAction?: LegalAction,
+): void {
+  if (!legalAction) return;
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const trashedInstance = mustInstance(state.cardInstances, trashedCardId);
+  const trashedDefinition = definitionFor(state, trashedCardId);
+  const trashedRegionWasPublic =
+    trashedInstance.faceup === true || trashedInstance.rezzed === true;
+  const effectIndex = legalAction.resolvedEffects?.length ?? 0;
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    {
+      effectId: `corp.region_replacement.${server.id}.${effectIndex}`,
+      kind: "trash_card",
+      visibility: "public",
+      side: "corp",
+      reason: "region_limit",
+      serverId: server.id,
+      serverLabel: server.label,
+      sourceDefinitionId: sourceDefinition.id,
+      sourceTitle: sourceDefinition.title,
+      ...(trashedRegionWasPublic ? {} : { redactedKind: "installed_card" }),
+      ...(trashedRegionWasPublic
+        ? {
+            cardDefinitionId: trashedDefinition.id,
+            cardTitle: trashedDefinition.title,
+          }
+        : {}),
+    },
+  ];
 }
 
 function rovingSubmarineIdsForServer(

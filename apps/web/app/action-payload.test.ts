@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  actionNeedsRegionReplacementConfirmation,
   actionHasAbility,
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
@@ -70,5 +71,29 @@ describe("action payload ability compatibility", () => {
     expect(isSecurityPurgePayload({ agendaAbility: "v1922_security_purge" })).toBe(
       true,
     );
+  });
+
+  it("requires confirmation for flagged Corp region replacements only", () => {
+    expect(
+      actionNeedsRegionReplacementConfirmation({
+        side: "corp",
+        type: "install_card",
+        payload: { regionReplacementWarning: true },
+      }),
+    ).toBe(true);
+    expect(
+      actionNeedsRegionReplacementConfirmation({
+        side: "runner",
+        type: "install_card",
+        payload: { regionReplacementWarning: true },
+      }),
+    ).toBe(false);
+    expect(
+      actionNeedsRegionReplacementConfirmation({
+        side: "corp",
+        type: "install_card",
+        payload: {},
+      }),
+    ).toBe(false);
   });
 });
