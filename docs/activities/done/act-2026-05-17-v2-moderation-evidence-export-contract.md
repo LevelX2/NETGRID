@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-v2-moderation-evidence-export-contract
-status: in-progress
+status: done
 kind: architecture
 area: docs
 priority: normal
@@ -8,12 +8,16 @@ primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-3
 releaseTarget: V2.6
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/V2_6_MODERATION_EVIDENCE_EXPORT_CONTRACT.md
+checks:
+  - "rg -n \"Evidence-Export|FullState|privatePayload|AIInput|DecisionDebug|local_analysis|Public Replay|Account-Datenexport\" docs/derived/V2_6_MODERATION_EVIDENCE_EXPORT_CONTRACT.md docs/activities/done/act-2026-05-17-v2-moderation-evidence-export-contract.md"
+  - "rg -n \"exportReplay|local_analysis|privatePayload|stateHash|tokenHash|aiDecisionDebug\" apps/server/src/multiplayer.ts"
+  - "git diff --check"
 ---
 
 # V2.6 Evidence-Export-Vertrag schneiden
@@ -43,10 +47,10 @@ Vor einem Evidence-Export soll exakt festgelegt werden, welche Moderationsdaten 
 
 ## Akzeptanzkriterien
 
-- [ ] Exportdaten und Exportverbote sind tabellarisch dokumentiert.
-- [ ] Evidence-Export ist von Public Replay und Account-Datenexport getrennt.
-- [ ] Hidden-Info- und Decklisten-Verbot ist explizit.
-- [ ] Audit- und Retention-Anforderungen sind sichtbar.
+- [x] Exportdaten und Exportverbote sind tabellarisch dokumentiert.
+- [x] Evidence-Export ist von Public Replay und Account-Datenexport getrennt.
+- [x] Hidden-Info- und Decklisten-Verbot ist explizit.
+- [x] Audit- und Retention-Anforderungen sind sichtbar.
 
 ## Umsetzungshinweise
 
@@ -55,4 +59,6 @@ Vor einem Evidence-Export soll exakt festgelegt werden, welche Moderationsdaten 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/V2_6_MODERATION_EVIDENCE_EXPORT_CONTRACT.md` definiert exportierbare Evidence-Datenklassen, harte Exportverbote, die Trennung zu V2.0 Account-Datenexport und V2.8 Public Replay sowie Ablauf, Downloadfenster, Auditpflicht, Retention und Review-Checks für spätere Implementierungsslices.
+
+Kein Export-Code, keine Moderationskonsole und keine Public-Replay-Freigabe wurden umgesetzt. Restrisiko: Retention-Zahlen bleiben Alpha-Defaults und müssen vor Implementierung als Produkt-/Betriebsentscheidung bestätigt werden.
