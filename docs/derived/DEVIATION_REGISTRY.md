@@ -2,7 +2,7 @@
 
 Status: Phase 1 freeze candidate  
 Stand: 2026-05-03  
-Maschinenlesbar: `data/deviations/rule-deviations.json`
+Referenz: konsolidierte historische Abweichungsdokumentation. Die früheren maschinenlesbaren `data/deviations/rule-deviations*.json`-Artefakte wurden nach der Card-Set-Konsolidierung entfernt; aktuelle Abweichungen werden in den aktiven Spezifikationen, Reviews und dieser Registry dokumentiert.
 
 ## Aktueller Trace-Nachtrag
 

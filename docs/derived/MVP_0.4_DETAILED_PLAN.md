@@ -373,7 +373,7 @@ Empfohlene Dateien:
 - `data/cards/demo-cards-0.4.json`
 - `data/decks/demo-decks-0.4.json`
 - `data/manifests/card-implementation-manifest-0.4.json`
-- `data/deviations/rule-deviations-0.4.json`
+- `docs/derived/DEVIATION_REGISTRY.md` (historische Abweichungsdokumentation)
 - `data/scenarios/v04-safe-card-batch-smoke.json`
 - `data/scenarios/v04-upgrade-access-trash.json`
 - `data/scenarios/v04-tag-runner-and-remove-tag.json`
@@ -621,7 +621,7 @@ Read:
 - data/cards/demo-cards.json
 - data/decks/demo-decks.json
 - data/manifests/card-implementation-manifest.json
-- data/deviations/rule-deviations.json
+- docs/derived/DEVIATION_REGISTRY.md
 
 Task:
 Derive executable MVP 0.4 requirements for controlled card pool and rules breadth expansion. Do not implement code.
@@ -637,7 +637,7 @@ Create or update:
 - data/cards/demo-cards-0.4.json
 - data/decks/demo-decks-0.4.json
 - data/manifests/card-implementation-manifest-0.4.json
-- data/deviations/rule-deviations-0.4.json
+- docs/derived/DEVIATION_REGISTRY.md
 - tests/specs/card-pool-0.4-acceptance-tests.todo.md
 
 Rules:

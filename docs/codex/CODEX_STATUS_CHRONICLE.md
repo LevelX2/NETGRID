@@ -665,7 +665,7 @@ Data artifacts:
 - `data/cards/demo-cards.json`
 - `data/decks/demo-decks.json`
 - `data/manifests/card-implementation-manifest.json`
-- `data/deviations/rule-deviations.json`
+- historische Abweichungsdokumentation, später konsolidiert in `docs/derived/DEVIATION_REGISTRY.md`
 - `data/scenarios/runner-steals-rd-agenda.json`
 - `data/scenarios/runner-breaks-ice-and-accesses-rd.json`
 - `data/scenarios/runner-fails-on-end-the-run.json`
@@ -908,7 +908,7 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 - `data/cards/demo-cards-0.4.json`
 - `data/decks/demo-decks-0.4.json`
 - `data/manifests/card-implementation-manifest-0.4.json`
-- `data/deviations/rule-deviations-0.4.json`
+- historische Abweichungsdokumentation, später konsolidiert in `docs/derived/DEVIATION_REGISTRY.md`
 - `data/scenarios/v04-safe-card-batch-smoke.json`
 - `data/scenarios/v04-tag-runner-and-remove-tag.json`
 - `data/scenarios/v04-tag-punishment-blocked-when-untagged.json`
@@ -1278,7 +1278,7 @@ V0.8 is frozen as a small local/fictitious playable starter slice. The slice con
 - `data/decks/deck-format-profiles-0.8.json`
 - `data/decks/deck-templates-0.8.json`
 - `data/decks/deck-snapshots-0.8.json`
-- `data/deviations/rule-deviations-0.8.json`
+- historische Abweichungsdokumentation, später konsolidiert in `docs/derived/DEVIATION_REGISTRY.md`
 - `data/manifests/deck-validation-manifest-0.8.json`
 - `data/rules/rules-baseline-0.8.json`
 - `tests/specs/phase1-artifacts.test.ts`

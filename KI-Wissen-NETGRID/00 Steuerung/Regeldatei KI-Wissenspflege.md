@@ -64,7 +64,7 @@ Neue Logeinträge werden im Archiv des jeweiligen Kalendermonats oberhalb aller 
 
 ## Projektbesonderheiten
 
-- `data/rules`, `data/cards`, `data/decks`, `data/manifests`, `data/deviations` und `data/scenarios` sind versionierte Projektartefakte.
+- `data/cards`, `data/decks`, `data/manifests` und `data/scenarios` sind versionierte Projektartefakte.
 - Lokale Datenbanken, Runtime-Daten, temporäre Dateien, Build-Artefakte und Secrets werden nicht versioniert.
 - Hidden-Info-Sicherheit ist ein Gate, kein UI-Komfortthema.
 - Offizielle Assets, Logos, Card Frames, Card Backs und externe Kartendatenbank-Abhängigkeiten sind für MVP 0.1 und 0.2 ausgeschlossen.

@@ -205,7 +205,7 @@ Codex soll zuerst die Struktur erzeugen, bevor Implementierung beginnt. Diese St
     /manifests
       card-implementation-manifest.json
     /deviations
-      rule-deviations.json
+      DEVIATION_REGISTRY.md
     /scenarios
       runner-steals-rd-agenda.json
       runner-breaks-ice-and-accesses-rd.json
@@ -461,7 +461,7 @@ Create or verify:
 - /data/cards
 - /data/decks
 - /data/manifests
-- /data/deviations
+- /docs/derived/DEVIATION_REGISTRY.md
 - /data/scenarios
 - /packages/shared
 - /packages/engine
@@ -553,7 +553,7 @@ After all subagents return, create or update:
 - /data/cards/demo-cards.json
 - /data/decks/demo-decks.json
 - /data/manifests/card-implementation-manifest.json
-- /data/deviations/rule-deviations.json
+- /docs/derived/DEVIATION_REGISTRY.md
 - /data/scenarios/runner-steals-rd-agenda.json
 - /data/scenarios/runner-breaks-ice-and-accesses-rd.json
 - /data/scenarios/runner-fails-on-end-the-run.json

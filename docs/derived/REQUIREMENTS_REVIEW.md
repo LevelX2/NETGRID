@@ -16,7 +16,7 @@ Phase 1 ist reviewfähig abgeschlossen. Die Derived-Artefakte, Datenartefakte, S
 | Jede konkrete Requirement hat stabile ID. | pass | `docs/derived/MVP_0.1_REQUIREMENTS.md` enthält REQ-001 bis REQ-045. |
 | Jedes Must ist auf Test oder Szenario abgebildet. | pass | `docs/derived/TEST_MATRIX.md`, `docs/derived/ACCEPTANCE_CRITERIA.md`; Coverage-Check ohne fehlende Must-IDs. |
 | Jede `playable_mvp` Karte hat Unit- und Szenario-/Integrationstest-Zuordnung. | pass | `data/manifests/card-implementation-manifest.json` und Kartenabdeckung in `docs/derived/TEST_MATRIX.md`. |
-| Jede Regelabweichung ist dokumentiert. | pass | `docs/derived/DEVIATION_REGISTRY.md` und `data/deviations/rule-deviations.json`. |
+| Jede Regelabweichung ist dokumentiert. | pass | `docs/derived/DEVIATION_REGISTRY.md` als konsolidierte historische Abweichungsdokumentation. |
 | Jede Unklarheit hat deterministische MVP-Annahme. | pass | `docs/derived/OPEN_QUESTIONS.md`. |
 | Konflikte zwischen Quellen sind sichtbar gemacht. | pass | `docs/derived/CONFLICT_MATRIX.md`. |
 | Keine Implementierung vor Phase-1-Gate. | pass | Nur Docs, JSON-Artefakte und Test-TODO aktualisiert; kein Engine-/UI-/Server-/KI-Code. |
@@ -38,4 +38,3 @@ Phase 1 ist reviewfähig abgeschlossen. Die Derived-Artefakte, Datenartefakte, S
 ## Nächster Schritt
 
 Phase 2 starten: MVP-0.1-Implementierung gemäß Derived-Artefakten, beginnend mit Shared Types, Engine-Basismodell, deterministischem Setup, StateHash und Validierung.
-

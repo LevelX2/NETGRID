@@ -280,7 +280,7 @@ Daten:
 - `data/decks/deck-format-profiles-0.8.json`
 - `data/decks/deck-snapshots-0.8.json`
 - `data/rules/rules-baseline-0.8.json`
-- `data/deviations/rule-deviations-0.8.json`
+- `docs/derived/DEVIATION_REGISTRY.md` (historische Abweichungsdokumentation)
 - `data/scenarios/v08-*.json`
 
 Tests:

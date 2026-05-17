@@ -417,7 +417,7 @@ Für jedes Gate `Mx` sollten vor Implementierung entstehen:
 - `docs/derived/MECHANIC_Mx_TEST_MATRIX.md`
 - `docs/derived/MECHANIC_Mx_REQUIREMENTS_REVIEW.md`
 - `data/rules/rules-baseline-Mx.json`
-- `data/deviations/rule-deviations-Mx.json`
+- `docs/derived/DEVIATION_REGISTRY.md` beziehungsweise aktive Release-/Mechanik-Reviews
 - `data/manifests/card-implementation-manifest-Mx.json`
 - `data/scenarios/mx-*.json`
 - `tests/specs/mechanic-mx-acceptance-tests.todo.md`
