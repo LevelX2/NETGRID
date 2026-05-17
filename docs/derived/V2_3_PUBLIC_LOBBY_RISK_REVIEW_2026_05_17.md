@@ -109,7 +109,7 @@ V2.3a ist keine Public-Freigabe:
 | Paket | Status | Zweck |
 | --- | --- | --- |
 | `act-2026-05-17-v23-public-lobby-redaction-rate-limit-matrix` | bestätigt, liegt in `docs/activities/inbox/` | Testmatrix für erlaubte/verbotene Public-Lobby-Felder, Rate Limits, Abuse-Events und redigierte Audit-Signale |
-| `act-2026-05-17-v23-public-alpha-rollback-operability-contract` | bestätigt, liegt in `docs/activities/inbox/` | Kill-Switch, Rollback, Health, Alerting, Safe Mode und Incident-Grenzen |
+| `act-2026-05-17-v23-public-alpha-rollback-operability-contract` | abgeschlossen; Vertrag liegt unter `docs/derived/V2_3_PUBLIC_ALPHA_ROLLBACK_OPERABILITY_CONTRACT_2026_05_17.md` | Kill-Switch, Rollback, Health, Alerting, Safe Mode und Incident-Grenzen |
 | `act-2026-05-17-v23-public-lobby-ui-filter-contract` | neu angelegt in `docs/activities/inbox/` | UI-/Filtervertrag für erlaubte Filter, Statusanzeigen, leere/error Zustände, Sichtbarkeitsklassen und Metadaten-Redaction |
 
 ## Handoff
