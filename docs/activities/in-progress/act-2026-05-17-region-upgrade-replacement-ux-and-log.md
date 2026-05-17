@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-region-upgrade-replacement-ux-and-log
-status: inbox
+status: in_progress
 kind: fix
 area: engine
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-5
+parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-hq-access-randomization-audit
-status: inbox
+status: in_progress
 kind: concept
 area: engine
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
+parallelWorker: worker-4
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-effect-event-chronicle-visibility-audit
-status: inbox
+status: in_progress
 kind: architecture
 area: shared
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-3
+parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
