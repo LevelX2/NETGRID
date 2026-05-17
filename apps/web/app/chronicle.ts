@@ -962,7 +962,10 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     case "trash_card":
       category = "card";
       importance = "important";
-      title = `${cardTitle ?? "Eine Karte"} wurde${through} getrasht`;
+      title =
+        effect.reason === "region_limit"
+          ? `${cardTitle ?? "Eine vorhandene Region"} wurde${through} ins Archiv gelegt`
+          : `${cardTitle ?? "Eine Karte"} wurde${through} getrasht`;
       chips.push("Trash", effect.reason === "region_limit" ? "Region" : "Automatisch");
       break;
     case "purge_counters":

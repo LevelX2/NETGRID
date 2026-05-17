@@ -179,6 +179,7 @@ import {
   type CatalogTypeFilterState
 } from "./catalog-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
+import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import { scoredAgendaCreditCounterSource, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
@@ -3094,8 +3095,19 @@ export default function Page() {
     if (keys.size > 20 && oldestKey) keys.delete(oldestKey);
   };
 
-  const submitAction = (action: LegalAction, options: { immediateAudio?: boolean } = {}): boolean => {
+  const submitAction = (action: LegalAction, options: { immediateAudio?: boolean; confirmed?: boolean } = {}): boolean => {
     if (!session || !payload || !ensureSocketConnected()) return false;
+    if (!options.confirmed && actionNeedsRegionReplacementConfirmation(action)) {
+      setConfirmationDialog({
+        title: "Region ersetzen",
+        message: "Diese Installation ersetzt die vorhandene Region. Die bisherige Region wird ins Archiv gelegt.",
+        confirmLabel: "Fortfahren",
+        onConfirm: () => {
+          submitAction(action, { ...options, confirmed: true });
+        },
+      });
+      return false;
+    }
     const stateVersion = payload.playerView.stateVersion;
     if (options.immediateAudio !== false) playImmediateActionAudio(action, stateVersion);
     if (selectedActionContext && actionMatchesContext(action, selectedActionContext)) setSelectedActionContext(null);

@@ -1257,6 +1257,54 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toContain("Automatisch");
   });
 
+  it("formats region replacement trash effects without leaking hidden old names", () => {
+    const visibleItems = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "region-replace-visible",
+            kind: "trash_card",
+            visibility: "public",
+            side: "corp",
+            reason: "region_limit",
+            cardDefinitionId: "onr_v1_355_crystal-palace-station-grid",
+            cardTitle: "Crystal Palace Station Grid",
+            sourceDefinitionId: "onr_v1_365_paris-city-grid",
+            sourceTitle: "Paris City Grid",
+            serverLabel: "Remote 1"
+          }
+        ]
+      }),
+      "corp"
+    );
+    expect(visibleItems[0]?.title).toBe("Crystal Palace Station Grid wurde durch Paris City Grid ins Archiv gelegt.");
+    expect(visibleItems[0]?.chips).toContain("Region");
+
+    const hiddenItems = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "region-replace-hidden",
+            kind: "trash_card",
+            visibility: "public",
+            side: "corp",
+            reason: "region_limit",
+            redactedKind: "installed_card",
+            sourceDefinitionId: "onr_v1_365_paris-city-grid",
+            sourceTitle: "Paris City Grid",
+            serverLabel: "Remote 1"
+          }
+        ]
+      }),
+      "runner"
+    );
+    expect(hiddenItems[0]?.title).toBe("Eine vorhandene Region wurde durch Paris City Grid ins Archiv gelegt.");
+    expect(JSON.stringify(hiddenItems)).not.toContain("Crystal Palace Station Grid");
+    expect(JSON.stringify(hiddenItems)).not.toContain("onr_v1_355_crystal-palace-station-grid");
+  });
+
   it("formats self-trash effects without repeating the source card name", () => {
     const items = formatChronicleEffectItems(
       makeEvent("start_run", {

@@ -68,6 +68,16 @@ export function isSecurityPurgePayload(payload: PayloadLike): boolean {
   return payloadHasAbility(payload, "v1922_security_purge");
 }
 
+export function actionNeedsRegionReplacementConfirmation(
+  action: Partial<Pick<LegalAction, "payload" | "side" | "type">>,
+): boolean {
+  return (
+    action.side === "corp" &&
+    action.type === "install_card" &&
+    action.payload?.regionReplacementWarning === true
+  );
+}
+
 export function actionHasAbility(
   action: Partial<Pick<LegalAction, "payload">>,
   abilityId: string,
