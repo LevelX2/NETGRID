@@ -3139,6 +3139,71 @@ describe("MVP 0.1 runs, access and scoring", () => {
     ).toBeUndefined();
   });
 
+  it("randomizes single HQ access across all current HQ cards with replay-stable records", () => {
+    const hqDefinitions = [
+      "simple_economy_operation",
+      "simple_economy_asset",
+      "simple_barrier_ice",
+      "simple_agenda",
+      "simple_priority_agenda",
+    ];
+    const seenDefinitions = new Set<string>();
+
+    for (let index = 0; index < 80; index += 1) {
+      let state = toRunnerTurn(
+        v099CounterHostingGame(`hq-random-audit-${index}`),
+      );
+      const hqIds = hqDefinitions.map((definitionId) =>
+        moveCorpCardToHq(state, definitionId),
+      );
+      keepOnlyCorpHqCards(state, hqIds);
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const randomBefore = state.randomDrawRecords.length;
+
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "hq",
+      );
+
+      const selectedId = state.run?.breach?.queue[0]?.cardInstanceId;
+      expect(selectedId).toBeDefined();
+      expect(hqIds).toContain(selectedId);
+      expect(state.run?.breach?.queue).toHaveLength(1);
+      expect(state.randomDrawRecords).toHaveLength(randomBefore + 1);
+      expect(state.randomDrawRecords.at(-1)).toMatchObject({
+        counter: randomBefore,
+        purpose: `hq_multiaccess:${state.run?.runId}:selection:0`,
+      });
+      expect(state.randomCounter).toBe(randomBefore + 1);
+      for (const definitionId of hqDefinitions) {
+        expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+          DEMO_CARDS_BY_ID[definitionId]?.title ?? definitionId,
+        );
+      }
+
+      state = apply(state, "runner", (action) => action.type === "access_card");
+      const selectedDefinitionId =
+        state.cardInstances[selectedId!]?.definitionId;
+      expect(hqDefinitions).toContain(selectedDefinitionId);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "access_card",
+        cardDefinitionId: selectedDefinitionId,
+        serverLabel: "HQ",
+      });
+      seenDefinitions.add(String(selectedDefinitionId));
+
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(replay.state.randomDrawRecords).toEqual(state.randomDrawRecords);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+
+    expect(seenDefinitions).toEqual(new Set(hqDefinitions));
+  });
+
   it("shows a card trashed from HQ in Runner-visible Archives", () => {
     let state = toRunnerTurn(createGameAfterSetup({ seed: "trash-hq-asset" }));
     state.runner.credits = 10;
