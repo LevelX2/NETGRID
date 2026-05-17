@@ -11130,18 +11130,18 @@ function buildBreachState(state: GameState, run: ActiveRun): ActiveBreach {
   const accessServerId = run.accessServerOverride ?? run.attackedServerId;
   const server = mustServer(state, accessServerId);
   const accessCount = Math.max(1, run.accessCount ?? 1);
-  const queueIds = accessQueueIds(state, server, run, accessCount);
+  const queue = accessQueueEntries(state, server, run, accessCount);
   return {
     breachId: `${run.runId}.breach`,
     serverId: server.id,
-    accessMode: accessCount > 1 ? "multi" : "single",
-    queue: queueIds.map((cardId, index) => ({
+    accessMode: queue.length > 1 ? "multi" : "single",
+    queue: queue.map((entry, index) => ({
       entryId: `${run.runId}.breach.${index}`,
-      cardInstanceId: cardId,
+      cardInstanceId: entry.cardInstanceId,
       serverId: server.id,
-      zone: accessQueueZone(server.id),
+      zone: entry.zone,
       status: "pending",
-      hiddenInfo: isBreachEntryHidden(state, cardId),
+      hiddenInfo: isBreachEntryHidden(state, entry.cardInstanceId),
     })),
     currentIndex: 0,
     completed: false,
@@ -11149,20 +11149,45 @@ function buildBreachState(state: GameState, run: ActiveRun): ActiveBreach {
   };
 }
 
-function accessQueueIds(
+function accessQueueEntries(
   state: GameState,
   server: CorpServer,
   run: ActiveRun,
   accessCount: number,
-): CardInstanceId[] {
+): Array<{
+  cardInstanceId: CardInstanceId;
+  zone: ActiveBreach["queue"][number]["zone"];
+}> {
   if (server.id === "rd")
-    return state.corp.rd.slice(0, Math.min(accessCount, state.corp.rd.length));
+    return state.corp.rd
+      .slice(0, Math.min(accessCount, state.corp.rd.length))
+      .map((cardInstanceId) => ({ cardInstanceId, zone: "rd" as const }));
   if (server.id === "hq") {
     const bonus = runnerHqAccessBonus(state);
-    return randomHqAccessQueue(state, run.runId, accessCount + bonus);
+    return [
+      ...randomHqAccessQueue(state, run.runId, accessCount + bonus).map(
+        (cardInstanceId) => ({ cardInstanceId, zone: "hq" as const }),
+      ),
+      ...server.root
+        .filter(
+          (cardInstanceId) =>
+            definitionFor(state, cardInstanceId).type === "upgrade",
+        )
+        .map((cardInstanceId) => ({
+          cardInstanceId,
+          zone: "remote_root" as const,
+        })),
+    ];
   }
-  if (server.id === "archives") return state.corp.archives.slice();
-  return server.root.slice();
+  if (server.id === "archives")
+    return state.corp.archives.map((cardInstanceId) => ({
+      cardInstanceId,
+      zone: "archives" as const,
+    }));
+  return server.root.map((cardInstanceId) => ({
+    cardInstanceId,
+    zone: "remote_root" as const,
+  }));
 }
 
 function v1915InstalledAccessBonus(
