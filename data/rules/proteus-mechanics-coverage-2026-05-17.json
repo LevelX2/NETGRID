@@ -1,0 +1,3144 @@
+{
+  "schemaVersion": "proteus-mechanics-coverage-v1",
+  "matrixId": "proteus-mechanics-coverage-2026-05-17",
+  "generatedAt": "2026-05-17",
+  "sourceSnapshotId": "proteus-card-basis-2026-05-17",
+  "sourceReportId": "proteus-spoiler-import-report-2026-05-17",
+  "scopeAssertions": {
+    "noRuntimeImplementation": true,
+    "noCardPromotion": true,
+    "noAiHints": true,
+    "noDeckLegality": true,
+    "sourceTextIsPlanningInputOnly": true
+  },
+  "totals": {
+    "cards": 154,
+    "sideCounts": {
+      "corp": 77,
+      "runner": 77
+    },
+    "rarityCounts": {
+      "common": 66,
+      "uncommon": 44,
+      "rare": 44,
+      "vital": 0
+    },
+    "statusCounts": {
+      "deepen": 80,
+      "resolver": 56,
+      "covered": 17,
+      "blocked": 1
+    },
+    "clusterCounts": {
+      "agenda_scoring_core": 10,
+      "additional_action_economy": 7,
+      "random_die_resolution": 9,
+      "economy_draw_basics": 31,
+      "bad_publicity_loss_gate": 10,
+      "damage_prevention_and_core_hand_size": 25,
+      "access_breach_multiaccess_ambush": 15,
+      "tag_flow": 11,
+      "prevention_avoid_replacement": 15,
+      "agenda_point_modification_overadvance": 6,
+      "virus_antibody_counter_family": 13,
+      "trash_forfeit_sabotage": 14,
+      "ice_encounter_subroutines": 35,
+      "installed_ice_relative_counting": 4,
+      "variable_rez_cost_strength_subroutines": 11,
+      "trace_link_modifiers": 12,
+      "icebreaker_breaker_pump": 22,
+      "pass_trigger_uninstall_ice": 6,
+      "ice_repositioning": 2,
+      "corp_operation_play": 8,
+      "corp_node_asset_install_rez_access": 11,
+      "corp_upgrade_root_install_rez_access": 13,
+      "run_event_basics": 23,
+      "runner_program_install": 23,
+      "runner_prep_play": 27,
+      "hidden_zone_search_install_tutor": 3,
+      "runner_resource_install": 21,
+      "hidden_runner_resources": 16,
+      "runner_hardware_install": 6,
+      "cybernetics_deck_hardware": 4,
+      "data_fort_creation_lock": 1
+    }
+  },
+  "sourceReviewNotes": [
+    "Source header states 26 Prep and 7 Hardware, while card rows parse as 27 Prep/Event and 6 Hardware. Runner total remains 77.",
+    "Source header states 28 Hardware/Resources rows, while card rows parse as 27 Hardware/Resources."
+  ],
+  "nonNormalizableFields": [
+    {
+      "sourceIndex": 20,
+      "title": "Digiconda",
+      "field": "strength",
+      "rawValue": "X",
+      "note": "Variable numeric value; resolver contract must define runtime value."
+    },
+    {
+      "sourceIndex": 25,
+      "title": "Homing Missile",
+      "field": "strength",
+      "rawValue": "X",
+      "note": "Variable numeric value; resolver contract must define runtime value."
+    },
+    {
+      "sourceIndex": 111,
+      "title": "Ice and Data Special Report",
+      "field": "cost",
+      "rawValue": "3 (0)",
+      "note": "Unparsed numeric source value; requires manual review."
+    }
+  ],
+  "cards": [
+    {
+      "cardId": "onr_proteus_001_ai-board-member",
+      "title": "AI Board Member",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "research",
+        "ai",
+        "random"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "additional_action_economy",
+        "random_die_resolution",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_002_charity-takeover",
+      "title": "Charity Takeover",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "black_ops",
+        "bad_publicity"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "bad_publicity_loss_gate",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "damage_prevention_and_core_hand_size"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset",
+        "ai",
+        "ambush"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "damage_prevention_and_core_hand_size",
+        "access_breach_multiaccess_ambush"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "gray_ops",
+        "ambush"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "tag_flow",
+        "access_breach_multiaccess_ambush"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "title": "Please Don't Choke Anyone",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "additional_action_economy",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "additional_action_economy",
+        "agenda_point_modification_overadvance"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "agenda_point_modification_overadvance",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "research",
+        "ambush",
+        "virus"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "access_breach_multiaccess_ambush",
+        "virus_antibody_counter_family",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "black_ops"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "agenda_scoring_core",
+        "agenda_point_modification_overadvance"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "title": "Brain Wash",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "black_ice",
+        "ap",
+        "brainwipe"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "damage_prevention_and_core_hand_size"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_012_bug-zapper",
+      "title": "Bug Zapper",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "hellbolt"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "damage_prevention_and_core_hand_size",
+        "installed_ice_relative_counting"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "title": "Caryatid",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "title": "Chihuahua",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "hellhound"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "trace_link_modifiers",
+        "damage_prevention_and_core_hand_size",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "title": "Colonel Failure",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "killer"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "title": "Coyote",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "icebreaker_breaker_pump",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "title": "Credit Blocks",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "pass_trigger_uninstall_ice"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "black_ice",
+        "ap",
+        "brainwipe"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "pass_trigger_uninstall_ice",
+        "damage_prevention_and_core_hand_size",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "title": "Digiconda",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "sword"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines",
+        "damage_prevention_and_core_hand_size"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "title": "Dog Pile",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "ap"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "damage_prevention_and_core_hand_size",
+        "icebreaker_breaker_pump",
+        "installed_ice_relative_counting"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "title": "Food Fight",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "deckrash"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_023_galatea",
+      "title": "Galatea",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "title": "Gatekeeper",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines",
+        "trace_link_modifiers"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "title": "Hunting Pack",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "bloodhound"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "trace_link_modifiers",
+        "tag_flow",
+        "installed_ice_relative_counting"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "damage_prevention_and_core_hand_size"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "title": "Lesser Arcana",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "title": "Marionette",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "killer"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "pass_trigger_uninstall_ice",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "title": "Mastermind",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "black_ice",
+        "ap",
+        "zombie"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "damage_prevention_and_core_hand_size",
+        "icebreaker_breaker_pump",
+        "installed_ice_relative_counting"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "title": "Minotaur",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "title": "Mobile Barricade",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "ice_repositioning",
+        "damage_prevention_and_core_hand_size"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "title": "Riddler",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rarity": "common",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "title": "Roadblock",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate",
+        "random"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "random_die_resolution"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "title": "Sandstorm",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "pass_trigger_uninstall_ice",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "title": "Snowbank",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "title": "Sphinx 2006",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_040_sumo-2008",
+      "title": "Sumo 2008",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "variable_rez_cost_strength_subroutines"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium™ Wall",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "pass_trigger_uninstall_ice",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "pass_trigger_uninstall_ice"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "title": "Walking Wall",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "ice_repositioning"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "title": "Washed-Up Solo Construct",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "killer"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "ice_encounter_subroutines",
+        "trash_forfeit_sabotage",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "title": "Corporate Guard(R) Temps",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_operation_play",
+        "additional_action_economy",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "title": "Credit Consolidation",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_operation_play",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "title": "Data Sifters",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_operation_play",
+        "tag_flow"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "title": "Emergency Rig",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_operation_play"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_050_manhunt",
+      "title": "Manhunt",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_operation_play",
+        "trace_link_modifiers"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "title": "Rent-to-Own Contract",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_operation_play"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "title": "Schlaghund Pointers",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_operation_play",
+        "trace_link_modifiers",
+        "tag_flow"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "title": "Underworld Mole",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_operation_play",
+        "trace_link_modifiers",
+        "tag_flow"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "title": "Bel-Digmo Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "ambush",
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "damage_prevention_and_core_hand_size",
+        "access_breach_multiaccess_ambush",
+        "virus_antibody_counter_family"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_055_cybertech-think-tank",
+      "title": "Cybertech Think Tank",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "asset"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "damage_prevention_and_core_hand_size"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_056_department-of-misinformation",
+      "title": "Department of Misinformation",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "asset"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "title": "Doppelganger Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "ambush",
+        "virus"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "additional_action_economy",
+        "access_breach_multiaccess_ambush",
+        "virus_antibody_counter_family"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_058_executive-boot-camp",
+      "title": "Executive Boot Camp",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "random_die_resolution",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_059_government-contract",
+      "title": "Government Contract",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "asset"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_060_herman-revista",
+      "title": "Herman Revista",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+      "title": "LDL Traffic Analyzers",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "asset"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "trace_link_modifiers",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_062_lesley-major",
+      "title": "Lesley Major",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_063_lisa-blight",
+      "title": "Lisa Blight",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access",
+        "random_die_resolution"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_064_marcel-desoleil",
+      "title": "Marcel DeSoleil",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_065_networked-center",
+      "title": "Networked Center",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "region",
+        "asset"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_066_obfuscated-fortress",
+      "title": "Obfuscated Fortress",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_067_panic-button",
+      "title": "Panic Button",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access",
+        "economy_draw_basics",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_068_pattel-antibody",
+      "title": "Pattel Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "ambush",
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "access_breach_multiaccess_ambush",
+        "virus_antibody_counter_family",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_069_pavit-bharat",
+      "title": "Pavit Bharat",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_070_rasmin-bridger",
+      "title": "Rasmin Bridger",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_071_raymond-ellison",
+      "title": "Raymond Ellison",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_072_research-bunker",
+      "title": "Research Bunker",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "region",
+        "asset"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_073_simon-francisco",
+      "title": "Simon Francisco",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_074_siren",
+      "title": "Siren",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "title": "Stereogram Antibody",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "ambush",
+        "virus"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "damage_prevention_and_core_hand_size",
+        "access_breach_multiaccess_ambush",
+        "virus_antibody_counter_family"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "title": "Syd Meyer Superstores",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "asset"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "corp_node_asset_install_rez_access",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_077_weapons-depot",
+      "title": "Weapons Depot",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "region",
+        "asset"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "corp_upgrade_root_install_rez_access"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_078_armageddon",
+      "title": "Armageddon",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus",
+        "random"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "random_die_resolution",
+        "virus_antibody_counter_family",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_079_big-frackin-gun",
+      "title": "Big Frackin' Gun",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_080_black-widow",
+      "title": "Black Widow",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_081_boring-bit",
+      "title": "Boring Bit",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "worm"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_082_bulldozer",
+      "title": "Bulldozer",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "noisy"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_083_corrosion",
+      "title": "Corrosion",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "worm"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_084_crumble",
+      "title": "Crumble",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "virus_antibody_counter_family",
+        "trash_forfeit_sabotage",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_085_disintegrator",
+      "title": "Disintegrator",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "rarity": "uncommon",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "runner_program_install"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "title": "Enterprise, Inc., Shields",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_087_forwards-legacy",
+      "title": "Forward's Legacy",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "random_die_resolution",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_088_fubar",
+      "title": "Fubar",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "noisy"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_089_garbage-in",
+      "title": "Garbage In",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "access_breach_multiaccess_ambush",
+        "virus_antibody_counter_family",
+        "trash_forfeit_sabotage",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_090_highlighter",
+      "title": "Highlighter",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "virus_antibody_counter_family",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "title": "Lockjaw",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_092_morphing-tool",
+      "title": "Morphing Tool",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_093_redecorator",
+      "title": "Redecorator",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_094_scaldan",
+      "title": "Scaldan",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus",
+        "bad_publicity",
+        "random"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "bad_publicity_loss_gate",
+        "random_die_resolution",
+        "virus_antibody_counter_family",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_095_skeleton-passkeys",
+      "title": "Skeleton Passkeys",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_096_skullcap",
+      "title": "Skullcap",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_097_taxman",
+      "title": "Taxman",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "virus_antibody_counter_family",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_098_vienna-22",
+      "title": "Vienna 22",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "virus_antibody_counter_family",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_099_viral-pipeline",
+      "title": "Viral Pipeline",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "virus_antibody_counter_family"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_100_wrecking-ball",
+      "title": "Wrecking Ball",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "noisy"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_program_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_101_all-hands",
+      "title": "All-Hands",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "access_breach_multiaccess_ambush",
+        "icebreaker_breaker_pump",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_102_blackmail",
+      "title": "Blackmail",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "agenda_point_modification_overadvance",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_103_cruising-for-netwatch",
+      "title": "Cruising for Netwatch",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_104_decoy-signal",
+      "title": "Decoy Signal",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_105_demolition-run",
+      "title": "Demolition Run",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "sabotage"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "tag_flow",
+        "trash_forfeit_sabotage",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_106_disgruntled-ice-technician",
+      "title": "Disgruntled Ice Technician",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "sabotage"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_107_drone-for-a-day",
+      "title": "Drone for a Day",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "tag_flow",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_108_faked-hit",
+      "title": "Faked Hit",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_109_frame-up",
+      "title": "Frame-Up",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate",
+        "access_breach_multiaccess_ambush"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_110_hijack",
+      "title": "Hijack",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "hidden_zone_search_install_tutor",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_111_ice-and-data-special-report",
+      "title": "Ice and Data Special Report",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "blocked",
+      "coverageLabel": "blockiert/Regelklärung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play"
+      ],
+      "notes": [
+        "Kostenangabe 3 (0) ist ohne Quellenklärung nicht eindeutig normalisierbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_112_identity-donor",
+      "title": "Identity Donor",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_113_live-news-feed",
+      "title": "Live News Feed",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate",
+        "tag_flow",
+        "access_breach_multiaccess_ambush",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_114_on-the-fast-track",
+      "title": "On the Fast Track",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_115_personal-touch-the",
+      "title": "Personal Touch, The",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_116_pirate-broadcast",
+      "title": "Pirate Broadcast",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "agenda_point_modification_overadvance",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_117_poisoned-water-supply",
+      "title": "Poisoned Water Supply",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_118_prearranged-drop",
+      "title": "Prearranged Drop",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_119_promises-promises",
+      "title": "Promises, Promises",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "agenda_point_modification_overadvance"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_120_reconnaissance",
+      "title": "Reconnaissance",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "economy_draw_basics",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_121_remote-detonator",
+      "title": "Remote Detonator",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "sabotage"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "tag_flow",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_122_rush-hour",
+      "title": "Rush Hour",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "access_breach_multiaccess_ambush",
+        "icebreaker_breaker_pump",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_123_senatorial-field-trip",
+      "title": "Senatorial Field Trip",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_124_stakeout",
+      "title": "Stakeout",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_125_subliminal-corruption",
+      "title": "Subliminal Corruption",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "bad_publicity"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "bad_publicity_loss_gate",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_126_test-spin",
+      "title": "Test Spin",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "damage_prevention_and_core_hand_size",
+        "hidden_zone_search_install_tutor",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_127_weefle-initiation",
+      "title": "Weefle Initiation",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_prep_play",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "title": "Airport Locker",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources",
+        "hidden_zone_search_install_tutor"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_129_back-door-to-netwatch",
+      "title": "Back Door to Netwatch",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "bad_publicity"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "bad_publicity_loss_gate",
+        "trace_link_modifiers",
+        "tag_flow",
+        "prevention_avoid_replacement",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_130_back-door-to-rivals",
+      "title": "Back Door to Rivals",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "base_link"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "trace_link_modifiers",
+        "prevention_avoid_replacement",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_131_bargain-with-viacox",
+      "title": "Bargain with Viacox",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "random"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "additional_action_economy",
+        "random_die_resolution",
+        "economy_draw_basics",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_132_bolt-hole",
+      "title": "Bolt-Hole",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_133_chiba-bank-account",
+      "title": "Chiba Bank Account",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "title": "Cortical Cybermodem",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "deck",
+        "cybernetics"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_hardware_install",
+        "cybernetics_deck_hardware",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_135_cortical-stimulators",
+      "title": "Cortical Stimulators",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_hardware_install",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement",
+        "cybernetics_deck_hardware"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_136_credit-subversion",
+      "title": "Credit Subversion",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "sabotage"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources",
+        "trash_forfeit_sabotage",
+        "run_event_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_137_death-from-above",
+      "title": "Death from Above",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "sabotage"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_138_deck-the",
+      "title": "Deck, The",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "deck",
+        "base_link"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_hardware_install",
+        "trace_link_modifiers",
+        "cybernetics_deck_hardware"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "chip"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_hardware_install",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_140_expendable-family-member",
+      "title": "Expendable Family Member",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "tag_flow",
+        "prevention_avoid_replacement",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_141_get-ready-to-rumble",
+      "title": "Get Ready to Rumble",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection",
+        "hidden"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "random_die_resolution",
+        "damage_prevention_and_core_hand_size",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_142_hq-mole",
+      "title": "HQ Mole",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "access_breach_multiaccess_ambush",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_143_liberated-savings-account",
+      "title": "Liberated Savings Account",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "access_breach_multiaccess_ambush",
+        "hidden_runner_resources",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "title": "Lucidrine™ Drip Feed",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_hardware_install",
+        "additional_action_economy",
+        "damage_prevention_and_core_hand_size",
+        "prevention_avoid_replacement"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_145_mercenary-subcontract",
+      "title": "Mercenary Subcontract",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden",
+        "sabotage"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources",
+        "trash_forfeit_sabotage"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_146_precision-bribery",
+      "title": "Precision Bribery",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "unique"
+      ],
+      "rarity": "uncommon",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "trash_forfeit_sabotage",
+        "data_fort_creation_lock"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_147_r-and-d-mole",
+      "title": "R&D Mole",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "access_breach_multiaccess_ambush",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_148_runner-sensei",
+      "title": "Runner Sensei",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "base_link",
+        "position"
+      ],
+      "rarity": "common",
+      "coverageStatus": "resolver",
+      "coverageLabel": "kleiner Resolver nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "trace_link_modifiers",
+        "prevention_avoid_replacement",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Vorhandene Mechanikbasis ist erkennbar, aber ein enger Kartenresolver und Tests sind nötig."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_149_simulacrum",
+      "title": "Simulacrum",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection",
+        "hidden"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_150_streetware-distributor",
+      "title": "Streetware Distributor",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "bbs",
+        "position"
+      ],
+      "rarity": "common",
+      "coverageStatus": "covered",
+      "coverageLabel": "wahrscheinlich abgedeckt",
+      "mechanicsClusters": [
+        "runner_resource_install"
+      ],
+      "notes": [
+        "Die Karte wirkt mit bestehenden Basisfamilien grundsätzlich abdeckbar."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "title": "Sunburst Cranial Interface",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "deck",
+        "cybernetics",
+        "stealth"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_hardware_install",
+        "cybernetics_deck_hardware",
+        "icebreaker_breaker_pump"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_152_swiss-bank-account",
+      "title": "Swiss Bank Account",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "hidden_runner_resources",
+        "economy_draw_basics"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_153_time-to-collect",
+      "title": "Time to Collect",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "rare",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "prevention_avoid_replacement",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    },
+    {
+      "cardId": "onr_proteus_154_wired-switchboard",
+      "title": "Wired Switchboard",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "rarity": "common",
+      "coverageStatus": "deepen",
+      "coverageLabel": "Mechanikvertiefung nötig",
+      "mechanicsClusters": [
+        "runner_resource_install",
+        "trace_link_modifiers",
+        "hidden_runner_resources"
+      ],
+      "notes": [
+        "Mindestens ein Cluster braucht vor Runtime-Umsetzung einen vertieften Mechanikvertrag."
+      ]
+    }
+  ]
+}
