@@ -441,6 +441,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionConsumesClick({ costs: [] })).toBe(false);
   });
 
+  it("prefixes paid ability labels from LegalAction cost metadata", () => {
+    const paidAbility: LegalAction = {
+      ...legalAction("runner", "trigger_ability", "ability_1", "Bezahlte Fähigkeit ausführen", { cardId: "ability_1" }),
+      costs: [{ clicks: 1 }, { credits: 2 }]
+    };
+
+    expect(actionButtonLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
+    expect(contextualCardActionLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
+  });
+
   it("maps BBS stored bit counters to the existing card credit badge pattern", () => {
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
@@ -508,6 +518,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
   it("moves rig icebreaker actions to their card context", () => {
     const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder pumpen", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
     const breakAction = legalAction("runner", "break_subroutine", "breaker_1", "Simple Decoder: Subroutine 1 brechen", { breakerId: "breaker_1", iceId: "ice_1", subroutineIndex: 0 }, "run.encounter_ice");
+    const paidBreakAction: LegalAction = { ...breakAction, costs: [{ credits: 2 }] };
+    const paidPump: LegalAction = { ...pump, costs: [{ credits: 1 }] };
+    const multiCostBreakAction: LegalAction = { ...breakAction, costs: [{ clicks: 1 }, { credits: 2 }] };
     const continueRun = legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.approach_ice");
 
     const split = splitLegalActions([pump, breakAction, continueRun]);
@@ -519,6 +532,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(actionButtonLabel(paidBreakAction)).toBe("2 Credits - Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(paidBreakAction)).toBe("2 Credits - Subroutine 1 brechen (Simple Decoder)");
+    expect(actionButtonLabel(paidPump)).toBe("1 Credit - Stärke +1 (Simple Decoder)");
+    expect(actionButtonLabel(multiCostBreakAction)).toBe("1 Aktion + 2 Credits - Subroutine 1 brechen (Simple Decoder)");
   });
 
   it("keeps Broker abilities on the installed resource overlay", () => {
@@ -640,7 +657,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       v1911HiddenZoneAbility: "self_modifying_code_install_program",
       trashOnUse: true
     }, "run.encounter_ice");
-    const pump = legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice");
+    const pump: LegalAction = { ...legalAction("runner", "pump_breaker", "breaker_1", "Simple Decoder: Stärke +1", { breakerId: "breaker_1", iceId: "ice_1" }, "run.encounter_ice"), costs: [{ credits: 1 }] };
     const continueRun = legalAction("runner", "continue_run", "game_rule", "ICE passieren", { encounterContinue: true, unbrokenSubroutineCount: 0 }, "run.encounter_ice");
     const offRunAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" });
 
@@ -651,6 +668,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
     expect(mirrored).toEqual([searchInstall, pump, continueRun]);
     expect(runWindowActionButtonLabel(running, searchInstall)).toBe("Self-Modifying Code trashen: Programm suchen");
+    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Stärke +1 (Simple Decoder) gegen ICE 1");
     expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
