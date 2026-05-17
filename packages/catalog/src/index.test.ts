@@ -22,6 +22,7 @@ import cardImplementationManifest1919Data from "../../../data/manifests/card-imp
 import cardImplementationManifest1920Data from "../../../data/manifests/card-implementation-manifest-1.9.20.json";
 import cardImplementationManifest1921Data from "../../../data/manifests/card-implementation-manifest-1.9.21.json";
 import cardImplementationManifest1922Data from "../../../data/manifests/card-implementation-manifest-1.9.22.json";
+import proteusVisibleBaselineManifestData from "../../../data/manifests/card-implementation-manifest-proteus-visible-baseline-2026-05-17.json";
 import cardSupportManifest131Data from "../../../data/manifests/card-support-manifest-1.3.1.json";
 import v1910StatusScenarioData from "../../../data/scenarios/v1910-status-manifest-catalog-smoke.json";
 import v1911ReleaseScenarioData from "../../../data/scenarios/v1911-hidden-zone-release-smoke.json";
@@ -36,6 +37,7 @@ import v1919ReleaseScenarioData from "../../../data/scenarios/v1919-agenda-overa
 import v1920ReleaseScenarioData from "../../../data/scenarios/v1920-global-modifier-special-state-release-smoke.json";
 import v1921ReleaseScenarioData from "../../../data/scenarios/v1921-deterministic-random-release-smoke.json";
 import v1922ReleaseScenarioData from "../../../data/scenarios/v1922-per-card-longtail-release-smoke.json";
+import proteusVisibleBaselineScenarioData from "../../../data/scenarios/proteus-visible-baseline-smoke-2026-05-17.json";
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
@@ -55,6 +57,7 @@ import v1919MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1
 import v1920MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.20.json";
 import v1921MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.21.json";
 import v1922MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.22.json";
+import proteusVisibleBaselineMechanicsCoverageData from "../../../data/rules/proteus-visible-baseline-mechanics-coverage-2026-05-17.json";
 import v1922ResolverContractInventoryData from "../../../data/rules/v1922-resolver-contract-inventory.json";
 import v1922ResolverContractsData from "../../../data/rules/v1922-resolver-contracts.json";
 import v1922LocalResolverWorkingBasisData from "../../../data/rules/v1922-local-resolver-working-basis.json";
@@ -135,6 +138,7 @@ import {
   assertPipelinePayloadSafe,
   assertCatalogPayloadSafe,
   CATALOG_AI_APPROVAL_BATCHES,
+  ACTIVE_RUNTIME_RELEASE_CARD_IDS,
   activeAiApprovedCardIds,
   activeRuntimeCardIds,
   aiApprovalByCardId,
@@ -210,6 +214,7 @@ import {
   ONR_V1_9_20_RELEASE_CARD_IDS,
   ONR_V1_9_21_RELEASE_CARD_IDS,
   ONR_V1_9_22_RELEASE_CARD_IDS,
+  PROTEUS_VISIBLE_BASELINE_CARD_IDS,
   ONR_V1_9_12_WIP_CARD_IDS,
   ONR_V1_9_13_WIP_CARD_IDS,
   ONR_V1_9_14_WIP_CARD_IDS,
@@ -1239,7 +1244,7 @@ function expectV1922LongtailCompletionGroup(
 
 describe("catalog import and status logic", () => {
   it("exposes fachliche gate evidence maps for runtime, AI and release audit status", () => {
-    const releaseIds = [...ONR_V1_RUNTIME_RELEASE_CARD_IDS];
+    const releaseIds = [...ACTIVE_RUNTIME_RELEASE_CARD_IDS];
     const aiIds = buildAiApprovedCardIds(CATALOG_AI_APPROVAL_BATCHES);
     expect(activeRuntimeCardIds).toEqual(releaseIds);
     expect(activeAiApprovedCardIds).toEqual(aiIds);
@@ -1255,6 +1260,13 @@ describe("catalog import and status logic", () => {
     ).toMatchObject({
       engineCardId: "onr_v1_092_ice-and-datas-guide-to-the-net",
       deckLegal: true,
+    });
+    expect(
+      cardFactsById["onr_proteus_041_toughoniumtm-wall"]?.runtimeGate,
+    ).toMatchObject({
+      engineCardId: "onr_proteus_041_toughoniumtm-wall",
+      deckLegal: false,
+      formatLegal: false,
     });
     expect(
       aiApprovalByCardId["onr_v1_092_ice-and-datas-guide-to-the-net"]
@@ -1465,12 +1477,132 @@ describe("catalog import and status logic", () => {
       expect(card.statuses.format_legal, card.catalogCardId).toBe(false);
       expect(card.blockReasons.length, card.catalogCardId).toBeGreaterThan(0);
     }
+    const runtimeProteusBlocked = getCatalogCard(
+      createRuntimeCardSnapshot(),
+      "onr_proteus_001_ai-board-member",
+    );
+    expect(runtimeProteusBlocked?.statuses.blocked).toBe(true);
+    expect(runtimeProteusBlocked?.statuses.human_playable).toBe(false);
+    expect(runtimeProteusBlocked?.statuses.deck_legal).toBe(false);
+    expect(runtimeProteusBlocked?.statuses.ai_supported).toBe(false);
+  });
+
+  it("promotes only Toughonium Wall for the Proteus visible baseline without deck or AI support", () => {
+    const runtimeSnapshot = createRuntimeCardSnapshot();
+    const toughonium = getCatalogCard(
+      runtimeSnapshot,
+      "onr_proteus_041_toughoniumtm-wall",
+    );
+    const blockedProteusCards = runtimeSnapshot.cards.filter(
+      (card) =>
+        card.catalogCardId.startsWith("onr_proteus_") &&
+        card.catalogCardId !== "onr_proteus_041_toughoniumtm-wall",
+    );
+
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+      "onr_proteus_041_toughoniumtm-wall",
+    ]);
+    expect(toughonium).toMatchObject({
+      engineCardId: "onr_proteus_041_toughoniumtm-wall",
+      title: "Toughonium™ Wall",
+      statuses: {
+        implemented: true,
+        engine_supported: true,
+        playable: true,
+        human_playable: true,
+        deck_legal: false,
+        format_legal: false,
+        ai_supported: false,
+        blocked: false,
+      },
+      implementationManifest: {
+        manifestVersion:
+          "card-implementation-manifest-proteus-visible-baseline-2026-05-17",
+      },
+    });
+    expect(toughonium?.numeric).toMatchObject({ rezCost: 13, strength: 7 });
+    expect(toughonium?.text).toBe(
+      "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+    );
+    expect(blockedProteusCards).toHaveLength(153);
     expect(
-      getCatalogCard(
-        createRuntimeCardSnapshot(),
-        "onr_proteus_001_ai-board-member",
+      blockedProteusCards.every(
+        (card) =>
+          card.statuses.blocked &&
+          !card.statuses.human_playable &&
+          !card.statuses.deck_legal &&
+          !card.statuses.format_legal &&
+          !card.statuses.ai_supported,
       ),
-    ).toBeUndefined();
+    ).toBe(true);
+  });
+
+  it("keeps Proteus visible baseline manifest, coverage and scenario aligned to the exact candidate", () => {
+    const manifest = proteusVisibleBaselineManifestData as {
+      gateAssertions: Record<string, unknown>;
+      cards: Array<{
+        cardCode: string;
+        deckLegal: boolean;
+        aiSupported: boolean;
+        coveredSmokes: string[];
+      }>;
+    };
+    const coverage = proteusVisibleBaselineMechanicsCoverageData as {
+      gateAssertions: Record<string, unknown>;
+      mechanics: Array<{ cards: string[]; coverage: string[] }>;
+      deferred: Array<{ cardCount: number; status: string }>;
+    };
+    const scenario = proteusVisibleBaselineScenarioData as {
+      coversCards: string[];
+      completionGate: {
+        deckLegalPromoted: boolean;
+        aiPromoted: boolean;
+        outsideCandidateSetBlocked: boolean;
+      };
+    };
+
+    expect(manifest.gateAssertions.candidateCount).toBe(1);
+    expect(manifest.gateAssertions.noProteusDeckLegalPromotion).toBe(true);
+    expect(manifest.gateAssertions.noAiHints).toBe(true);
+    expect(manifest.cards.map((card) => card.cardCode)).toEqual([
+      ...PROTEUS_VISIBLE_BASELINE_CARD_IDS,
+    ]);
+    expect(manifest.cards[0]?.deckLegal).toBe(false);
+    expect(manifest.cards[0]?.aiSupported).toBe(false);
+    expect(manifest.cards[0]?.coveredSmokes).toEqual(
+      expect.arrayContaining([
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "rez_cost_revalidation",
+        "public_payload_visibility",
+        "replay_statehash",
+        "web_catalog_no_broad_promotion",
+      ]),
+    );
+
+    expect(coverage.gateAssertions.outsideCandidateSetRemainsBlocked).toBe(
+      true,
+    );
+    expect(coverage.mechanics[0]?.cards).toEqual([
+      ...PROTEUS_VISIBLE_BASELINE_CARD_IDS,
+    ]);
+    expect(coverage.mechanics[0]?.coverage).toContain("cost_revalidation");
+    expect(coverage.deferred).toEqual([
+      {
+        scope: "proteus_outside_visible_baseline_candidate",
+        cardCount: 153,
+        status: "blocked_not_decklegal_not_ai_supported",
+        reason:
+          "Outside cards need dedicated resolver contracts or foundation slices before Runtime, Decklegal or AI promotion.",
+      },
+    ]);
+
+    expect(scenario.coversCards).toEqual([...PROTEUS_VISIBLE_BASELINE_CARD_IDS]);
+    expect(scenario.completionGate).toMatchObject({
+      deckLegalPromoted: false,
+      aiPromoted: false,
+      outsideCandidateSetBlocked: true,
+    });
   });
 
   it("keeps import-only and blocked cards out of playability", () => {
@@ -1607,7 +1739,12 @@ describe("catalog import and status logic", () => {
     expect(ONR_V1_9_20_WIP_CARD_IDS).toEqual(ONR_V1_9_20_RELEASE_CARD_IDS);
     expect(ONR_V1_9_21_WIP_CARD_IDS).toEqual(ONR_V1_9_21_RELEASE_CARD_IDS);
     expect(ONR_V1_9_22_WIP_CARD_IDS).toEqual(ONR_V1_9_22_RELEASE_CARD_IDS);
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toHaveLength(1);
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toHaveLength(374);
+    expect(ACTIVE_RUNTIME_RELEASE_CARD_IDS).toHaveLength(375);
+    expect(ACTIVE_RUNTIME_RELEASE_CARD_IDS).toEqual(
+      expect.arrayContaining([...PROTEUS_VISIBLE_BASELINE_CARD_IDS]),
+    );
     expect(ONR_V1_RUNTIME_RELEASE_CARD_IDS).toEqual(
       expect.arrayContaining([...ONR_V1_9_15_RELEASE_CARD_IDS]),
     );

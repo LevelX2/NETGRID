@@ -112,7 +112,10 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
       deck.id.includes("_0_94") ||
       deck.id.includes("_v0_94") ||
       deck.cards.some(
-        (card) => card.id.startsWith("v094_") || card.id.startsWith("onr_v1_"),
+        (card) =>
+          card.id.startsWith("v094_") ||
+          card.id.startsWith("onr_v1_") ||
+          card.id.startsWith("onr_proteus_"),
       ),
   },
   {

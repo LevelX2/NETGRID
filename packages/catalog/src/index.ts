@@ -1,4 +1,5 @@
 import snapshotData from "../../../data/card-import/card-snapshot-0.8.json";
+import proteusCardBasisData from "../../../data/card-import/proteus-card-basis-2026-05-17.json";
 import { DEMO_CARDS_BY_ID, type CardDefinition } from "@netgrid/shared";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -1144,7 +1145,9 @@ export function createRuntimeCardPool(): RuntimeCardPool {
 
 export function createRuntimeCardSnapshot(): CardSnapshot {
   const baseSnapshot = snapshotData as unknown as CardSnapshot;
+  const proteusSnapshot = proteusCardBasisData as unknown as CardSnapshot;
   const rarityByTitleSide = readProjectOriginalSetRarityByTitleSide();
+  const proteusCards = applyProteusVisibleBaselineGate(proteusSnapshot.cards);
   const localOnrSnapshot = readLocalOnrSnapshot();
   const baseCards = applyRuntimeBaseStatusModel(
     applyCatalogRarityMetadata(baseSnapshot.cards, rarityByTitleSide),
@@ -1152,7 +1155,13 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
   if (!localOnrSnapshot)
     return {
       ...baseSnapshot,
-      cards: [...baseCards, ...createFallbackOnrRuntimeCards(rarityByTitleSide)],
+      snapshotId: `${baseSnapshot.snapshotId}+${proteusSnapshot.snapshotId}`,
+      status: `${baseSnapshot.status}+proteus_visible_baseline`,
+      cards: [
+        ...baseCards,
+        ...createFallbackOnrRuntimeCards(rarityByTitleSide),
+        ...proteusCards,
+      ],
     };
   const confirmedTextOverrides = readLocalConfirmedTextOverrides();
   const localCardsWithConfirmedText = applyLocalConfirmedTextOverrides(
@@ -1167,15 +1176,15 @@ export function createRuntimeCardSnapshot(): CardSnapshot {
 
   return {
     ...baseSnapshot,
-    snapshotId: `${baseSnapshot.snapshotId}+${localOnrSnapshot.snapshotId}`,
-    status: `${baseSnapshot.status}+private_local_onr_v1_overlay`,
-    copyrightNote: `${baseSnapshot.copyrightNote} Private lokale O:NR-v1-Katalogdaten werden nur aus dem lokalen Import-Overlay geladen; deck-legale Karten müssen zusätzlich in der Engine implementiert sein.`,
+    snapshotId: `${baseSnapshot.snapshotId}+${localOnrSnapshot.snapshotId}+${proteusSnapshot.snapshotId}`,
+    status: `${baseSnapshot.status}+private_local_onr_v1_overlay+proteus_visible_baseline`,
+    copyrightNote: `${baseSnapshot.copyrightNote} Private lokale O:NR-v1-Katalogdaten werden nur aus dem lokalen Import-Overlay geladen; deck-legale Karten müssen zusätzlich in der Engine implementiert sein. Proteus-Karten bleiben blockiert, außer eng gegateten Human-Playable-Slices ohne Decklegalität.`,
     normalization: {
       ...baseSnapshot.normalization,
       textPolicy: `${baseSnapshot.normalization.textPolicy} Lokale O:NR-v1-Texte bleiben Anzeigeinformation und sind kein Regelparser.`,
       assetPolicy: `${baseSnapshot.normalization.assetPolicy} Lokale O:NR-v1-Bilder werden nur aus data/local-assets gelesen.`,
     },
-    cards: [...baseCards, ...v105kCards],
+    cards: [...baseCards, ...v105kCards, ...proteusCards],
   };
 }
 
@@ -1641,10 +1650,19 @@ function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
   );
 }
 
+function applyProteusVisibleBaselineGate(cards: CatalogCard[]): CatalogCard[] {
+  return cards.map((card) =>
+    ACTIVE_RUNTIME_CARD_ID_SET.has(card.catalogCardId)
+      ? promoteOnrRuntimeReleaseCard(card)
+      : demoteLocalOnrCard(card),
+  );
+}
+
 function createFallbackOnrRuntimeCards(
   rarityByTitleSide: ReadonlyMap<string, CatalogRarity>,
 ): CatalogCard[] {
   return activeRuntimeCardIds.map((cardId) => {
+    if (!cardId.startsWith("onr_v1_")) return null;
     const definition = DEMO_CARDS_BY_ID[cardId];
     if (!definition) return null;
     return promoteOnrRuntimeReleaseCard(

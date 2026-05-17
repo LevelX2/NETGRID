@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  ACTIVE_RUNTIME_RELEASE_CARD_IDS,
   CATALOG_AI_APPROVAL_BATCHES,
   CATALOG_GATE_BATCHES,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
@@ -81,7 +82,10 @@ describe("catalog gate evidence builders", () => {
 
   it("keeps catalog gate audit data in a dedicated batch module", () => {
     expect(buildRuntimeCardIds(CATALOG_GATE_BATCHES)).toEqual(
-      ONR_V1_RUNTIME_RELEASE_CARD_IDS,
+      ACTIVE_RUNTIME_RELEASE_CARD_IDS,
+    );
+    expect(ACTIVE_RUNTIME_RELEASE_CARD_IDS).toEqual(
+      expect.arrayContaining([...ONR_V1_RUNTIME_RELEASE_CARD_IDS]),
     );
     expect(CATALOG_GATE_BATCHES.every((batch) => batch.auditReleaseId)).toBe(
       true,
