@@ -100,6 +100,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
   const shellTradersAbility = stringValue(payload.shellTradersAbility);
+  const v1922RunnerProgramAbility = stringValue(payload.v1922RunnerProgramAbility);
 
   const baseChipList = baseChips(actor, isAi);
   const cardDetailLines = context.cardDetailLines ?? [];
@@ -771,6 +772,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
         chips.push("The Shell Traders", "Installiert", "0 Kosten");
+        break;
+      }
+      if (v1922RunnerProgramAbility === "startup_immolator_trash_ice") {
+        const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
+        const targetDefinitionId = stringValue(payload.targetIceDefinitionId) ?? stringValue(payload.trashedCardDefinitionId);
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        title = phrase(subject, `${cardTitle ?? "Startup Immolator"} erschöpft, das passierte ICE getrasht und ${creditText(rezCostPaid)} bezahlt`);
+        description = "Quelle und Ziel sind öffentlich: Startup Immolator wurde erschöpft; das Ziel-ICE wurde in die Archive bewegt.";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId ?? targetDefinitionId;
+        chips.push("Startup Immolator", "ICE getrasht", "Archive", `${rezCostPaid} ${creditLabel(rezCostPaid)}`);
         break;
       }
       if (resourceAbility === "broker_load_credits") {

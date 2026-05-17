@@ -101,6 +101,31 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Run", "Jack-out", "Kein Zugriff", "R&D"]);
   });
 
+  it("describes Startup Immolator source, cost and ICE trash movement", () => {
+    const item = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "Startup Immolator: ICE trashen",
+        sourceDefinitionId: "onr_v1_068_startup-immolator",
+        targetIceDefinitionId: "simple_barrier_ice",
+        trashedCardDefinitionId: "simple_barrier_ice",
+        v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+        rezCostPaid: 3,
+        trashedCount: 1,
+        startupImmolatorExhausted: true
+      }),
+      "runner",
+      { cardTitle: "Startup Immolator" }
+    );
+
+    expect(item.title).toBe("Du hast Startup Immolator erschöpft, das passierte ICE getrasht und 3 Credits bezahlt.");
+    expect(item.description).toBe("Quelle und Ziel sind öffentlich: Startup Immolator wurde erschöpft; das Ziel-ICE wurde in die Archive bewegt.");
+    expect(item.category).toBe("run");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_068_startup-immolator");
+    expect(item.chips).toEqual(expect.arrayContaining(["Startup Immolator", "ICE getrasht", "Archive", "3 Credits"]));
+  });
+
   it("describes Olivia Salazar reduced ICE rez with source, ICE and paid cost", () => {
     const item = formatChronicleEvent(
       makeEvent("rez_ice", {
