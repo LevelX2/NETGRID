@@ -1,0 +1,94 @@
+import {
+  getLegalActions,
+  getPlayerView,
+  hashState,
+  redactPublicEventForSide,
+} from "@netgrid/engine";
+import type { Side } from "@netgrid/shared";
+import type {
+  AiTurnPresentationState,
+  GameResultSummary,
+  SidePayload,
+  StoredMatch,
+} from "./multiplayer";
+
+export type SidePayloadBuilderDeps = {
+  isAiSide: (side: Side) => boolean;
+  safeDisplayNameFor: (side: Side) => string | undefined;
+  aiTurnPresentationFor: (side: Side) => AiTurnPresentationState | undefined;
+  resultSummaryFor: (
+    side: Side,
+    finalStateHash: string,
+  ) => GameResultSummary | undefined;
+  retentionProtectionPayload: {
+    retentionProtected: boolean;
+    retentionProtectedAt?: string;
+  };
+};
+
+export function buildSidePayload(
+  record: StoredMatch,
+  side: Side,
+  deps: SidePayloadBuilderDeps,
+): SidePayload {
+  if (!record.gameState) throw new Error("match_not_active");
+  const opponentSide = opposite(side);
+  const playerView = getPlayerView(record.gameState, side);
+  const opponent = record.sessions.find(
+    (session) => session.side === opponentSide,
+  );
+  const opponentIsAi = deps.isAiSide(opponentSide);
+  const pendingUndo = record.pendingUndo
+    ? opponentIsAi
+      ? undefined
+      : {
+          ...record.pendingUndo,
+          needsResponse: record.pendingUndo.requestedBy !== side,
+        }
+    : undefined;
+  const lifecycleFinalHash = record.lifecycleResult?.finalEngineStateHash;
+  const terminalWinner =
+    record.match.status === "forfeited"
+      ? record.lifecycleResult?.winnerSide
+      : record.gameState.winner;
+  const finalStateHash = terminalWinner
+    ? lifecycleFinalHash ?? hashState(record.gameState)
+    : undefined;
+  const resultSummary =
+    terminalWinner && finalStateHash
+      ? deps.resultSummaryFor(side, finalStateHash)
+      : undefined;
+  const aiTurnPresentation = deps.aiTurnPresentationFor(side);
+  const opponentDisplayName = deps.safeDisplayNameFor(opponentSide);
+
+  return {
+    matchId: record.match.matchId,
+    matchStatus: record.match.status,
+    matchVersion: record.match.matchVersion,
+    side,
+    playerView,
+    legalActions:
+      record.match.status === "active" ? getLegalActions(record.gameState, side) : [],
+    eventTail: record.eventLog
+      .slice(-20)
+      .map((event) => redactPublicEventForSide(event.publicPayload, side)),
+    opponentStatus: {
+      side: opponentSide,
+      connected: opponentIsAi || (opponent?.connected ?? false),
+      ...(opponentDisplayName ? { displayName: opponentDisplayName } : {}),
+    },
+    ...(playerView.pendingChoice ? { pendingChoice: playerView.pendingChoice } : {}),
+    ...(pendingUndo ? { pendingUndo } : {}),
+    ...(aiTurnPresentation ? { aiTurnPresentation } : {}),
+    ...(terminalWinner && finalStateHash
+      ? { winner: terminalWinner, finalStateHash }
+      : {}),
+    ...(resultSummary ? { resultSummary } : {}),
+    ...(record.lifecycleResult ? { lifecycleResult: record.lifecycleResult } : {}),
+    ...deps.retentionProtectionPayload,
+  };
+}
+
+function opposite(side: Side): Side {
+  return side === "corp" ? "runner" : "corp";
+}
