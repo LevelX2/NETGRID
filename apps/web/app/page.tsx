@@ -4663,6 +4663,7 @@ export default function Page() {
                                 />
                               ) : null}
                             </div>
+                            <ZoneIdentityIcon side="corp" kind={serverZoneIdentityIconKind(server.id)} label={serverDisplayLabel(server.id)} />
                             {runAction ? (
                               <button
                                 className="serverRunButton serverRunButtonSide serverRunButtonCorner"
@@ -4807,7 +4808,7 @@ export default function Page() {
           <section className="section panel boardSection zoneBoardSection">
             {activeView.side === "runner" ? (
               <div className="runnerGripHeapLayout">
-                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "grip")} className="runnerGripZone">
+                <SideZoneFrame side="runner" label="Grip" countLabel={formatHandLimitCount(activeView.own.gripOrHq.length, activeView.own.maxHandSize)} iconKind="grip" highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "grip")} className="runnerGripZone">
                   <div className="cards fixedZoneCards" style={handCardsStyle}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
@@ -4842,6 +4843,7 @@ export default function Page() {
                   side="runner"
                   label="Heap"
                   countLabel={formatCardCount(activeView.own.heapOrArchives.length)}
+                  iconKind="heap"
                   highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "heap")}
                   className="runnerHeapZone"
                   collapsed={runnerHeapCollapsed}
@@ -4873,7 +4875,7 @@ export default function Page() {
                     <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
                   )}
                 </SideZoneFrame>
-                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.own.stackOrRdCount)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")} className="runnerStackZone">
+                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.own.stackOrRdCount)} iconKind="stack" highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")} className="runnerStackZone">
                   <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
                     {activeView.own.stackOrRdCount > 0 ? (
                       <div className="runnerStackBack" aria-hidden="true">
@@ -6428,6 +6430,7 @@ function RunnerOpponentZonesStrip({
         side="runner"
         label="Grip"
         countLabel={gripCountLabel}
+        iconKind="grip"
         highlighted={zoneHighlighted(highlightedZone, "runner", "grip")}
         className="runnerOpponentZone runnerOpponentCountZone runnerOpponentGripZone"
         title="Grip: Runner-Hand. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
@@ -6439,6 +6442,7 @@ function RunnerOpponentZonesStrip({
         side="runner"
         label="Heap"
         countLabel={heapCountLabel}
+        iconKind="heap"
         highlighted={zoneHighlighted(highlightedZone, "runner", "heap")}
         className="runnerOpponentZone runnerOpponentHeapCompact"
         title="Heap: öffentliche Runner-Ablage."
@@ -6476,6 +6480,7 @@ function RunnerOpponentZonesStrip({
         side="runner"
         label="Stack"
         countLabel={stackCountLabel}
+        iconKind="stack"
         highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
         className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
         title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
@@ -6526,9 +6531,7 @@ function RunnerRigStrip({
       <div className="rigSectionLayout rigSectionLayoutCompact">
         <div className="rigSectionLead rigSectionLeadCompact">
           <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
-          <span className="rigSectionIcon" aria-hidden="true">
-            <RunIcon size={14} />
-          </span>
+          <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
         </div>
         {groups.length > 0 ? (
           <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
@@ -11411,10 +11414,56 @@ function zoneSideClass(side: Side): "runnerZoneSideLabel" | "corpZoneSideLabel" 
   return side === "runner" ? "runnerZoneSideLabel" : "corpZoneSideLabel";
 }
 
+type ZoneIdentityIconKind = "hq" | "rd" | "archives" | "remote" | "rig" | "grip" | "heap" | "stack";
+
+function serverZoneIdentityIconKind(serverId: PlayerView["servers"][number]["id"]): ZoneIdentityIconKind {
+  if (serverId === "hq") return "hq";
+  if (serverId === "rd") return "rd";
+  if (serverId === "archives") return "archives";
+  return "remote";
+}
+
+function ZoneIdentityIcon({ side, kind, label, className = "" }: { side: Side; kind: ZoneIdentityIconKind; label: string; className?: string }) {
+  let Icon: typeof Building2;
+  switch (kind) {
+    case "hq":
+      Icon = Building2;
+      break;
+    case "rd":
+      Icon = Brain;
+      break;
+    case "archives":
+      Icon = Clipboard;
+      break;
+    case "remote":
+      Icon = Shield;
+      break;
+    case "rig":
+      Icon = Cable;
+      break;
+    case "heap":
+      Icon = Trash2;
+      break;
+    case "stack":
+      Icon = Layers3;
+      break;
+    case "grip":
+    default:
+      Icon = CopyPlus;
+      break;
+  }
+  return (
+    <span className={`zoneIdentityIcon ${zoneSideClass(side)} ${className}`} role="img" aria-label={`${label}: Zonen-Icon`} title={`${label}: Zonen-Icon`}>
+      <Icon size={14} strokeWidth={2.2} />
+    </span>
+  );
+}
+
 function SideZoneFrame({
   side,
   label,
   countLabel,
+  iconKind,
   highlighted = false,
   className = "",
   title,
@@ -11427,6 +11476,7 @@ function SideZoneFrame({
   side: Side;
   label: string;
   countLabel: string;
+  iconKind?: ZoneIdentityIconKind;
   highlighted?: boolean;
   className?: string;
   title?: string;
@@ -11445,6 +11495,7 @@ function SideZoneFrame({
           <ZoneSideCount side={side} value={countLabel} />
           {onToggleCollapse ? <ZoneCollapseButton side={side} label={collapseLabel ?? label} collapsed={collapsed} onToggle={onToggleCollapse} /> : null}
         </div>
+        {iconKind ? <ZoneIdentityIcon side={side} kind={iconKind} label={label} /> : null}
       </div>
       {hasBody ? <div className="sideZoneBody">{children}</div> : null}
     </div>

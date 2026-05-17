@@ -3974,6 +3974,37 @@ select {
   gap: 2px;
 }
 
+.zoneIdentityIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 18%);
+  border-radius: 6px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--panel), transparent 8%);
+}
+
+.serverLead > .zoneIdentityIcon {
+  align-self: center;
+}
+
+.sideZoneLead .zoneIdentityIcon {
+  align-self: center;
+}
+
+.zoneIdentityIcon.runnerZoneSideLabel {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 46%);
+  color: var(--runner-zone-accent);
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+}
+
+.zoneIdentityIcon.corpZoneSideLabel {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 46%);
+  color: var(--corp-zone-accent);
+  background: color-mix(in srgb, var(--corp-zone-accent), var(--section-bg) 88%);
+}
+
 .serverRunButtonCorner {
   align-self: flex-start;
   margin-top: auto;
@@ -6535,7 +6566,9 @@ select {
 
 .sideZoneLead {
   display: flex;
+  flex-direction: column;
   align-items: flex-start;
+  gap: 6px;
   align-self: stretch;
   min-width: 28px;
   padding-right: 4px;
@@ -6557,6 +6590,7 @@ select {
 .sideZoneFrameCountOnly .sideZoneLead {
   padding-right: 0;
   border-right: 0;
+  align-items: center;
 }
 
 .sideZoneTitle {
@@ -8477,13 +8511,13 @@ select,
 
 .rigSectionIcon {
   display: inline-grid;
-  width: 22px;
-  height: 22px;
+  width: 24px;
+  height: 24px;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--line), transparent 20%);
-  border-radius: 999px;
-  color: var(--muted);
-  background: color-mix(in srgb, var(--panel), transparent 8%);
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 46%);
+  border-radius: 6px;
+  color: var(--runner-zone-accent);
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
 }
 
 .rigSectionLead .zoneLimitBadge {
