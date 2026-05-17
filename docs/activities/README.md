@@ -55,6 +55,22 @@ Nutze stattdessen `docs/derived/`, wenn das Ergebnis ein dauerhaftes Referenzart
 4. Beim Abschluss nach `done/` verschieben, `completedAt`, `outcome`, `resultArtifacts` und `checks` ergänzen.
 5. Dauerhafte Erkenntnisse nach Bedarf zusätzlich in `KI-Wissen-NETGRID/`, `docs/codex/CODEX_STATUS.md` oder formale `docs/derived/`-Artefakte zurückführen.
 
+## Tracking und Retention
+
+`docs/activities/` bleibt ein Arbeitsboard, kein zweites dauerhaftes Dokumentationsarchiv.
+
+- `inbox/` darf bewusst untracked bleiben, solange Pakete noch lose Vorschläge sind. Diese Vereinfachung verhindert Git-Blockaden durch große Mengen vorbereiteter, noch nicht beanspruchter Arbeit.
+- Pakete werden spätestens beim Verschieben nach `in-progress/` versioniert. Erledigte Pakete in `done/` werden ebenfalls versioniert, damit Ergebnisnotiz, Checks und erzeugte Artefakte nachvollziehbar bleiben.
+- `done/` wird periodisch gesichtet und in Monats- oder Themenrollups verdichtet, sobald viele abgeschlossene Pakete nur noch denselben Prozess-, Release- oder Befundzusammenhang belegen.
+- Nach einem Rollup muss ein erledigtes Paket nicht dauerhaft im Board bleiben, wenn sein Ergebnis vollständig im Rollup, in verlinkten Artefakten und in der Git-Historie nachvollziehbar ist.
+- Ein erledigtes Paket bleibt im Board, wenn es einen offenen Folgehinweis, eine wichtige Removal Condition, einen noch nicht verdichteten Befund, einen Audit-/Gate-Nachweis oder eine häufig referenzierte Entscheidung enthält.
+- Dauerhafte Erkenntnisse gehören nicht in `done/` versteckt. Sie werden nach `KI-Wissen-NETGRID/`, `docs/codex/` oder in formale `docs/derived/`-Artefakte übernommen und aus dem Paket verlinkt.
+- Retention-Aufräumarbeiten erfolgen über eigene kleine Cleanup-Activities. Keine Masselöschung oder Massenverschiebung von erledigten Paketen ohne vorheriges Rollup und fokussierten Review.
+
+Für technische Activities bleiben Hidden-Info-, LegalAction-, Replay- und StateHash-Gates harte Nicht-Scope-Grenzen, solange ein Paket sie nicht ausdrücklich und mit passender Rolle adressiert.
+
+Activity-Pakete bleiben klein: Ein Paket soll einen klaren Befund, einen begrenzten Scope, expliziten Nicht-Scope, prüfbare Akzeptanzkriterien und einen primären Folgeagenten enthalten. Wenn ein Rollup neue Arbeit sichtbar macht, entstehen daraus neue kleine Pakete statt eines pauschalen Sammelpakets.
+
 ## Auswahlregel für Agenten
 
 Wenn kein konkretes Paket genannt ist, wählt der Agent aus `inbox/` ein Paket mit passender Rolle, hoher Priorität, klaren Akzeptanzkriterien und begrenztem Scope. Bei mehreren gleich geeigneten Paketen gilt: erst `hotfix`, dann `critical`, dann `high`, dann ältere `normal`-Pakete.

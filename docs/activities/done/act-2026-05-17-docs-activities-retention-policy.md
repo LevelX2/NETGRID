@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-activities-retention-policy
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,16 @@ primaryAgent: activity-triage-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-3
 parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/activities/README.md
+checks:
+  - git diff --check
+outcome: done
 ---
 
 # Retention-Regel für docs/activities festlegen
@@ -48,11 +51,11 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Die Inbox-Tracking-Vereinfachung ist ausdrücklich als gültig beschrieben.
-- [ ] Es gibt eine klare Done-Retention-Regel.
-- [ ] Es gibt Kriterien für Rollup, Archivierung und Git-Historie.
-- [ ] Activity-Pakete bleiben klein und bearbeitbar.
-- [ ] Hidden-Info-, LegalAction-, Replay- und StateHash-Gates bleiben als harte Nicht-Scope-Grenzen erhalten, wenn Activities technische Arbeit betreffen.
+- [x] Die Inbox-Tracking-Vereinfachung ist ausdrücklich als gültig beschrieben.
+- [x] Es gibt eine klare Done-Retention-Regel.
+- [x] Es gibt Kriterien für Rollup, Archivierung und Git-Historie.
+- [x] Activity-Pakete bleiben klein und bearbeitbar.
+- [x] Hidden-Info-, LegalAction-, Replay- und StateHash-Gates bleiben als harte Nicht-Scope-Grenzen erhalten, wenn Activities technische Arbeit betreffen.
 
 ## Umsetzungshinweise
 
@@ -61,4 +64,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `docs/activities/README.md` beschreibt jetzt `docs/activities/` als leichtes Arbeitsboard mit gültiger untracked-Inbox, versionierten `in-progress`-/`done`-Paketen, periodischen Monats- oder Themenrollups, Kriterien für Board-Verbleib vs. Git-Historie plus Rollup und der Rückführung dauerhafter Erkenntnisse in `KI-Wissen-NETGRID/`, `docs/codex/` oder `docs/derived/`. Die Regel hält ausdrücklich fest, dass technische Activities Hidden-Info-, LegalAction-, Replay- und StateHash-Gates nicht nebenbei abschwächen dürfen.
