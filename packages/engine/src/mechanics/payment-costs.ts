@@ -1,7 +1,6 @@
 export const INVESTMENT_FIRM_ASSET_CARD_ID = "onr_v1_329_investment-firm";
 
 export const CORP_ECONOMY_ASSET_CARD_IDS = new Set([
-  "onr_v1_309_bbs-whispering-campaign",
   "onr_v1_311_braindance-campaign",
   "onr_v1_321_esa-contract",
   "onr_v1_326_holovid-campaign",

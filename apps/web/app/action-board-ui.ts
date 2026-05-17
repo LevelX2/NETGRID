@@ -104,6 +104,44 @@ export type CostChipView = {
   label: string;
 };
 
+export type CardCreditCounterVisual = {
+  safeAmount: number;
+  showCount: boolean;
+  iconCount: number;
+  iconColumns: number;
+};
+
+type StoredCreditCounterType = "power" | "bit";
+
+const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
+  "onr_v1_154_broker": { label: "Broker", counter: "power" },
+  "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "power" },
+  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" }
+};
+
+export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {
+  return storedCreditCounterSource(card)?.label ?? null;
+}
+
+export function storedCreditAmount(card: Pick<VisibleCard, "definitionId" | "counters">): number {
+  const source = storedCreditCounterSource(card);
+  if (!source) return 0;
+  const amount = card.counters?.[source.counter] ?? 0;
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+function storedCreditCounterSource(card: Pick<VisibleCard, "definitionId">): { label: string; counter: StoredCreditCounterType } | null {
+  return card.definitionId ? STORED_CREDIT_COUNTER_SOURCES[card.definitionId] ?? null : null;
+}
+
+export function cardCreditCounterVisual(amount: number): CardCreditCounterVisual {
+  const safeAmount = Math.max(0, Math.floor(amount));
+  const showCount = safeAmount >= 10;
+  const iconCount = showCount ? 1 : Math.min(9, safeAmount);
+  const iconColumns = Math.max(1, Math.min(3, iconCount));
+  return { safeAmount, showCount, iconCount, iconColumns };
+}
+
 export function splitLegalActions(actions: LegalAction[]): { primaryActions: LegalAction[]; contextualActions: LegalAction[] } {
   const primaryActions: LegalAction[] = [];
   const contextualActions: LegalAction[] = [];

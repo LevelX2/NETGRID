@@ -974,6 +974,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       "corp",
       (action) => action.type === "rez_ice" && String(action.payload?.cardId) === bbsId,
     );
+    expect(assetState.cardInstances[bbsId]?.counters?.bit).toBe(16);
     const bbsAction = mustAction(
       assetState,
       "corp",
@@ -998,14 +999,44 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       idempotencyKey: "spotcheck-bbs-removed-source",
     });
     expect(removedResult.ok).toBe(false);
+    const initial = structuredClone(assetState);
+    const replayStart = assetState.eventLog.length;
+    const creditsBefore = assetState.corp.credits;
     assetState = apply(assetState, "corp", (action) => action.actionId === bbsAction.actionId);
+    expect(assetState.corp.credits).toBe(creditsBefore + 2);
+    expect(assetState.cardInstances[bbsId]?.counters?.bit).toBe(14);
+    expect(
+      getPlayerView(assetState, "corp")
+        .servers.flatMap((server) => server.root)
+        .find((card) => card.instanceId === bbsId)?.counters?.bit,
+    ).toBe(14);
     expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      v1917AssetAbility: "gain_credits",
+      counterType: "bit",
+      removedCounterAmount: 2,
+      remainingCounters: 14,
       gainedCredits: 2,
     });
     expect(JSON.stringify(assetState.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
+    const replay = replayEvents(initial, assetState.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(assetState));
+    assetState.cardInstances[bbsId] = {
+      ...assetState.cardInstances[bbsId]!,
+      counters: { bit: 2 },
+    };
+    assetState.corp.clicks = Math.max(assetState.corp.clicks, 1);
+    assetState = apply(assetState, "corp", (action) => action.actionId === bbsAction.actionId);
+    expect(assetState.corp.archives).toContain(bbsId);
+    expect(assetState.cardInstances[bbsId]?.counters?.bit).toBeUndefined();
+    expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      remainingCounters: 0,
+      selfTrashed: true,
+    });
     assetState.cardInstances[omniId] = {
       ...assetState.cardInstances[omniId]!,
       faceup: true,
@@ -17178,7 +17209,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
   it("offers the public V1.9.17 economy asset action for every scoped economy asset", () => {
     const economyAssets = [
-      "onr_v1_309_bbs-whispering-campaign",
       "onr_v1_311_braindance-campaign",
       "onr_v1_321_esa-contract",
       "onr_v1_326_holovid-campaign",

@@ -14,6 +14,7 @@ import {
   aiPacingDelayMs,
   automaticEndTurnAction,
   breachProgressLabel,
+  cardCreditCounterVisual,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -32,7 +33,9 @@ import {
   runWindowStatusLabel,
   serverBoardRows,
   serverDisplayLabel,
-  splitLegalActions
+  splitLegalActions,
+  storedCreditAmount,
+  storedCreditSourceLabel
 } from "./action-board-ui";
 
 describe("V1.0.5 action board UI helpers", () => {
@@ -407,6 +410,38 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionConsumesClick({ costs: [{ clicks: 1, credits: 2 }] })).toBe(true);
     expect(actionConsumesClick({ costs: [{ credits: 2 }] })).toBe(false);
     expect(actionConsumesClick({ costs: [] })).toBe(false);
+  });
+
+  it("maps BBS stored bit counters to the existing card credit badge pattern", () => {
+    const bbsUnderTen: VisibleCard = {
+      ...card("bbs_1", "BBS Whispering Campaign", "asset"),
+      definitionId: "onr_v1_309_bbs-whispering-campaign",
+      counters: { bit: 8 }
+    };
+    const bbsTenPlus: VisibleCard = {
+      ...bbsUnderTen,
+      instanceId: "bbs_2",
+      counters: { bit: 10 }
+    };
+    const unknownPowerCard: VisibleCard = {
+      ...card("unknown_1", "Unknown Power Counter Card", "asset"),
+      counters: { power: 8 }
+    };
+
+    expect(storedCreditSourceLabel(bbsUnderTen)).toBe("BBS Whispering Campaign");
+    expect(storedCreditAmount(bbsUnderTen)).toBe(8);
+    expect(cardCreditCounterVisual(storedCreditAmount(bbsUnderTen))).toMatchObject({
+      safeAmount: 8,
+      showCount: false,
+      iconCount: 8
+    });
+    expect(storedCreditAmount(bbsTenPlus)).toBe(10);
+    expect(cardCreditCounterVisual(storedCreditAmount(bbsTenPlus))).toMatchObject({
+      safeAmount: 10,
+      showCount: true,
+      iconCount: 1
+    });
+    expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 
   it("keeps contextual card action labels distinct for server-targeted events", () => {

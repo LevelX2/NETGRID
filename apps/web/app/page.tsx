@@ -115,6 +115,7 @@ import {
   automaticEndTurnAction,
   baseActionSlotCapacity,
   breachProgressLabel,
+  cardCreditCounterVisual,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -138,6 +139,8 @@ import {
   serverDisplayLabel,
   splitArchiveCardsForDisplay,
   splitLegalActions,
+  storedCreditAmount,
+  storedCreditSourceLabel,
   currentRunTimelineStep,
   type ActionContext,
   type CuePositionPreference,
@@ -10654,19 +10657,19 @@ function CardView({
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const scoredAgendaCreditSource = showScoreStateBadges ? scoredAgendaCreditCounterSource(card.definitionId) : null;
   const scoredAgendaCredits = scoredAgendaCreditSource ? counterAmount(card, "power") : 0;
-  const brokerStoredCredits = preview ? 0 : brokerStoredCreditsAmount(card);
+  const storedCredits = preview ? 0 : storedCreditAmount(card);
   const recurringCredits = preview ? 0 : recurringCreditAmount(card);
   const shellCounters = preview ? 0 : shellCounterAmount(card);
   const dataRavenCounters = preview ? 0 : dataRavenCounterAmount(card);
   const storedCreditSource = storedCreditSourceLabel(card);
-  const brokerStoredCreditsAria =
-    brokerStoredCredits > 0 && storedCreditSource
-      ? `${brokerStoredCredits} ${brokerStoredCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
+  const storedCreditsAria =
+    storedCredits > 0 && storedCreditSource
+      ? `${storedCredits} ${storedCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
       : null;
   const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
   const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
   const dataRavenCountersAria = dataRavenCounters > 0 ? `${dataRavenCounters} Data-Raven-Counter` : null;
-  const counterAriaSuffix = [brokerStoredCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria].filter(Boolean).join(", ");
+  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria].filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
@@ -11001,7 +11004,7 @@ function CardView({
         ) : null}
         {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
-        {brokerStoredCredits > 0 && storedCreditSource ? <BrokerStoredCreditsBadge amount={brokerStoredCredits} sourceLabel={storedCreditSource} /> : null}
+        {storedCredits > 0 && storedCreditSource ? <StoredCreditsBadge amount={storedCredits} sourceLabel={storedCreditSource} /> : null}
         {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
         {scoredAgendaCredits > 0 && scoredAgendaCreditSource ? <ScoredAgendaCreditsBadge amount={scoredAgendaCredits} sourceLabel={scoredAgendaCreditSource} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
@@ -11209,13 +11212,13 @@ function StrengthBoostBadge({ amount }: { amount: number }) {
   );
 }
 
-function BrokerStoredCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
+function StoredCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
   return (
     <CardCreditCounter
       amount={amount}
       ariaLabel={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf ${sourceLabel}`}
-      className="brokerStoredCreditsBadge"
-      testId="broker-stored-credits-badge"
+      className="storedCreditsBadge brokerStoredCreditsBadge"
+      testId="stored-credits-badge"
     />
   );
 }
@@ -11243,10 +11246,7 @@ function ScoredAgendaCreditsBadge({ amount, sourceLabel }: { amount: number; sou
 }
 
 function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {
-  const safeAmount = Math.max(0, Math.floor(amount));
-  const showCount = safeAmount >= 10;
-  const iconCount = showCount ? 1 : Math.min(9, safeAmount);
-  const iconColumns = Math.max(1, Math.min(3, iconCount));
+  const { safeAmount, showCount, iconCount, iconColumns } = cardCreditCounterVisual(amount);
   return (
     <span
       className={`${className} cardCreditCounterBadge ${showCount ? "counted" : "iconsOnly"}`}
@@ -11317,7 +11317,7 @@ function cardDetailLines(card: VisibleCard): string[] {
     neededDevelopmentLabel(card.advancementRequirement),
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
-    brokerStoredCreditsLabel(card),
+    storedCreditsLabel(card),
     recurringCreditLabel(card),
     shellCounterLabel(card),
     dataRavenCounterLabel(card)
@@ -11327,10 +11327,10 @@ function cardDetailLines(card: VisibleCard): string[] {
   return [typeLine, numberLine].filter(Boolean);
 }
 
-function brokerStoredCreditsLabel(card: VisibleCard): string | null {
+function storedCreditsLabel(card: VisibleCard): string | null {
   const sourceLabel = storedCreditSourceLabel(card);
   if (!sourceLabel) return null;
-  const amount = brokerStoredCreditsAmount(card);
+  const amount = storedCreditAmount(card);
   if (amount <= 0) return null;
   return `${sourceLabel} ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
 }
@@ -11363,22 +11363,10 @@ function recurringCreditAmount(card: VisibleCard): number {
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
 
-function brokerStoredCreditsAmount(card: VisibleCard): number {
-  if (!storedCreditSourceLabel(card)) return 0;
-  const amount = card.counters?.power ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
 function dataRavenCounterAmount(card: VisibleCard): number {
   if (card.definitionId !== "onr_v1_236_data-raven") return 0;
   const amount = card.counters?.power ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function storedCreditSourceLabel(card: VisibleCard): string | null {
-  if (card.definitionId === "onr_v1_154_broker") return "Broker";
-  if (card.definitionId === "onr_v1_178_short-term-contract") return "Short-Term Contract";
-  return null;
 }
 
 function cardWithoutDevelopmentCounters(card: DisplayVisibleCard): DisplayVisibleCard {

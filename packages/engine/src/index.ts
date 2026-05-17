@@ -430,6 +430,8 @@ const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
 const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
+const BBS_WHISPERING_CAMPAIGN_ID = "onr_v1_309_bbs-whispering-campaign";
+const BBS_WHISPERING_CAMPAIGN_STARTING_BITS = 16;
 const HOLOVID_CAMPAIGN_ID = "onr_v1_326_holovid-campaign";
 const HOLOVID_CAMPAIGN_STARTING_BITS = 12;
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
@@ -3520,6 +3522,29 @@ function corpMainActions(state: GameState): LegalAction[] {
             counterType: "bit",
             addCounterAmount: 6,
             gainCreditsAmount: 0,
+          },
+        ),
+      );
+      continue;
+    }
+    if (
+      definition.id === BBS_WHISPERING_CAMPAIGN_ID &&
+      cardCounter(state, assetId, "bit") >= 2
+    ) {
+      actions.push(
+        action(
+          state,
+          "corp",
+          "gain_credit",
+          `${definition.title}: 2 Credits`,
+          assetId,
+          [{ clicks: 1 }],
+          {
+            cardId: assetId,
+            v1917AssetAbility: "gain_credits",
+            counterType: "bit",
+            removeCounterAmount: 2,
+            gainCreditsAmount: 2,
           },
         ),
       );
@@ -7024,6 +7049,9 @@ function performAction(
         };
         return;
       }
+      if (resolveBbsWhisperingCampaignCreditAction(state, legalAction)) {
+        return;
+      }
       if (resolveCorpInstalledEconomyAction(state, legalAction)) {
         return;
       }
@@ -9672,6 +9700,23 @@ function rezCard(
         counterType: "bit",
         addedCounterAmount: PARIS_CITY_GRID_TRACE_POOL_BITS,
         remainingCounters: PARIS_CITY_GRID_TRACE_POOL_BITS,
+      };
+    }
+  }
+  if (definition.id === BBS_WHISPERING_CAMPAIGN_ID) {
+    setCardCounter(
+      state,
+      cardId as CardInstanceId,
+      "bit",
+      BBS_WHISPERING_CAMPAIGN_STARTING_BITS,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: BBS_WHISPERING_CAMPAIGN_ID,
+        counterType: "bit",
+        addedCounterAmount: BBS_WHISPERING_CAMPAIGN_STARTING_BITS,
+        remainingCounters: BBS_WHISPERING_CAMPAIGN_STARTING_BITS,
       };
     }
   }
@@ -15911,6 +15956,47 @@ function resolveCorpInstalledEconomyAction(
   return true;
 }
 
+function resolveBbsWhisperingCampaignCreditAction(
+  state: GameState,
+  legalAction: LegalAction,
+): boolean {
+  if (legalAction.payload?.v1917AssetAbility !== "gain_credits") return false;
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!sourceCardId || !state.cardInstances[sourceCardId]) return false;
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.id !== BBS_WHISPERING_CAMPAIGN_ID) return false;
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf BBS Whispering Campaign nutzen.");
+  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+    throw new Error("BBS Whispering Campaign ist nur in der Korp-Aktionsphase nutzbar.");
+  if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
+    throw new Error("BBS Whispering Campaign ist nicht rezzed installiert.");
+  const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
+  if (!Number.isInteger(removeAmount) || removeAmount !== 2)
+    throw new Error("BBS Whispering Campaign entfernt genau 2 Bits.");
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (!Number.isInteger(gainAmount) || gainAmount !== 2)
+    throw new Error("BBS Whispering Campaign nimmt genau 2 Credits.");
+  const counterPayload = spendVisibleCardCounter(
+    state,
+    sourceCardId,
+    "bit",
+    removeAmount,
+  );
+  credits(state, "corp", gainAmount);
+  const selfTrashed = counterPayload.remainingCounters <= 0;
+  if (selfTrashed) trashCorpInstalledCardToArchives(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: BBS_WHISPERING_CAMPAIGN_ID,
+    ...counterPayload,
+    gainedCredits: gainAmount,
+    ...(selfTrashed ? { selfTrashed: true } : {}),
+    corpCreditsAfter: state.corp.credits,
+  };
+  return true;
+}
+
 function validateCorpInstalledEconomyAction(
   state: GameState,
   legalAction: LegalAction,
@@ -21504,9 +21590,12 @@ function publicContextForAction(
     for (const key of [
       "spinnPublicRelationsPoolBefore",
       "spinnPublicRelationsPoolAfter",
+      "counterType",
       "addedCounterAmount",
+      "removedCounterAmount",
       "remainingCounters",
       "gainedCredits",
+      "selfTrashed",
       "corpCreditsAfter",
     ]) {
       const value = legalAction.payload[key];
