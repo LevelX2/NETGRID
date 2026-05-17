@@ -1684,6 +1684,8 @@ export default function Page() {
   const [deckExportText, setDeckExportText] = useState("");
   const [cardDisplayMode, setCardDisplayMode] = useState<CardDisplayMode>("placeholder");
   const [cardPreviewCollapsed, setCardPreviewCollapsed] = useState(false);
+  const [runnerHeapCollapsed, setRunnerHeapCollapsed] = useState(false);
+  const [archivesCollapsed, setArchivesCollapsed] = useState(false);
   const [scoreAreaOverlays, setScoreAreaOverlays] = useState<Record<Side, boolean>>({ runner: false, corp: false });
   const [scoreAreaOverlayPositions, setScoreAreaOverlayPositions] = useState<Record<Side, RunOverlayPositionPreference>>({
     runner: { kind: "default" },
@@ -4589,6 +4591,7 @@ export default function Page() {
                             viewerSide={activeView.side}
                             visibleCards={lane.cards}
                             totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
+                            collapsed={archivesCollapsed}
                             displayMode={cardDisplayMode}
                             selectedContext={selectedActionContext}
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
@@ -4647,6 +4650,14 @@ export default function Page() {
                                 {serverDisplayLabel(server.id)}
                               </button>
                               {countLabel !== null ? <span className={`serverCount serverCountSideLabel ${zoneSideClass("corp")}`}>{countLabel}</span> : null}
+                              {server.id === "archives" ? (
+                                <ZoneCollapseButton
+                                  side="corp"
+                                  label="Archive"
+                                  collapsed={archivesCollapsed}
+                                  onToggle={() => setArchivesCollapsed((current) => !current)}
+                                />
+                              ) : null}
                             </div>
                             {runAction ? (
                               <button
@@ -4771,18 +4782,16 @@ export default function Page() {
                     })}
                   </div>
                 </SideZoneFrame>
-                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.own.stackOrRdCount)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")} className="runnerStackZone">
-                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
-                    {activeView.own.stackOrRdCount > 0 ? (
-                      <div className="runnerStackBack" aria-hidden="true">
-                        <span />
-                      </div>
-                    ) : (
-                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
-                    )}
-                  </div>
-                </SideZoneFrame>
-                <SideZoneFrame side="runner" label="Heap" countLabel={formatCardCount(activeView.own.heapOrArchives.length)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "heap")} className="runnerHeapZone">
+                <SideZoneFrame
+                  side="runner"
+                  label="Heap"
+                  countLabel={formatCardCount(activeView.own.heapOrArchives.length)}
+                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "heap")}
+                  className="runnerHeapZone"
+                  collapsed={runnerHeapCollapsed}
+                  onToggleCollapse={() => setRunnerHeapCollapsed((current) => !current)}
+                  collapseLabel="Heap"
+                >
                   {activeView.own.heapOrArchives.length > 0 ? (
                     <div className="runnerHeapOverlapRow" style={zoneCardsStyle}>
                       {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
@@ -4807,6 +4816,17 @@ export default function Page() {
                   ) : (
                     <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
                   )}
+                </SideZoneFrame>
+                <SideZoneFrame side="runner" label="Stack" countLabel={formatCardCount(activeView.own.stackOrRdCount)} highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")} className="runnerStackZone">
+                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
+                    {activeView.own.stackOrRdCount > 0 ? (
+                      <div className="runnerStackBack" aria-hidden="true">
+                        <span />
+                      </div>
+                    ) : (
+                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                    )}
+                  </div>
                 </SideZoneFrame>
               </div>
             ) : (
@@ -6366,6 +6386,7 @@ function RunnerOpponentZonesStrip({
   const { zonePercent } = useCardScaleSettings();
   const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
   const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
+  const [heapCollapsed, setHeapCollapsed] = useState(false);
   if (view.side !== "corp") return null;
   const heapCards = view.opponent.discardCards ?? [];
   const heapCount = view.opponent.discardCount ?? heapCards.length;
@@ -6379,34 +6400,29 @@ function RunnerOpponentZonesStrip({
 
   return (
     <section className="runnerOpponentZonesStrip" aria-label="Runner-Zonen" data-testid="runner-opponent-zones">
-      <div
-        className={`runnerOpponentZoneChip ${zoneHighlighted(highlightedZone, "runner", "grip") ? "cueHighlightSoft" : ""}`}
+      <SideZoneFrame
+        side="runner"
+        label="Grip"
+        countLabel={gripCountLabel}
+        highlighted={zoneHighlighted(highlightedZone, "runner", "grip")}
+        className="runnerOpponentZone runnerOpponentCountZone runnerOpponentGripZone"
         title="Grip: Runner-Hand. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
-        aria-label={`Runner-Grip ${gripCountLabel}. Inhalte verborgen.`}
+        ariaLabel={`Runner-Grip ${gripCountLabel}`}
       >
-        <span>Grip</span>
-        <strong>{gripCountLabel}</strong>
-        <small>Hand</small>
-      </div>
-      <div
-        className={`runnerOpponentZoneChip ${zoneHighlighted(highlightedZone, "runner", "stack") ? "cueHighlightSoft" : ""}`}
-        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
-        aria-label={`Runner-Stack ${stackCountLabel}. Inhalte verborgen.`}
-      >
-        <span>Stack</span>
-        <strong>{stackCountLabel}</strong>
-        <small>Deck</small>
-      </div>
-      <details
-        className={`runnerOpponentZoneChip runnerOpponentHeapCompact ${zoneHighlighted(highlightedZone, "runner", "heap") ? "cueHighlightSoft" : ""}`}
+        <span className="runnerOpponentZoneHeightShim" style={zoneCardsStyle} aria-hidden="true" />
+      </SideZoneFrame>
+      <SideZoneFrame
+        side="runner"
+        label="Heap"
+        countLabel={heapCountLabel}
+        highlighted={zoneHighlighted(highlightedZone, "runner", "heap")}
+        className="runnerOpponentZone runnerOpponentHeapCompact"
         title="Heap: öffentliche Runner-Ablage."
-        aria-label={`Runner-Heap ${heapCountLabel}`}
+        ariaLabel={`Runner-Heap ${heapCountLabel}`}
+        collapsed={heapCollapsed}
+        onToggleCollapse={() => setHeapCollapsed((current) => !current)}
+        collapseLabel="Heap"
       >
-        <summary>
-          <span>Heap</span>
-          <strong>{heapCountLabel}</strong>
-          <small>Ablage</small>
-        </summary>
         {heapCards.length > 0 ? (
           <div className="runnerHeapCompactPreview runnerHeapOverlapRow" style={zoneCardsStyle}>
             {heapCards.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
@@ -6431,7 +6447,18 @@ function RunnerOpponentZonesStrip({
         ) : (
           <p className="archivesPileEmpty">Keine Karten im Heap.</p>
         )}
-      </details>
+      </SideZoneFrame>
+      <SideZoneFrame
+        side="runner"
+        label="Stack"
+        countLabel={stackCountLabel}
+        highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
+        className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
+        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
+        ariaLabel={`Runner-Stack ${stackCountLabel}`}
+      >
+        <span className="runnerOpponentZoneHeightShim" style={zoneCardsStyle} aria-hidden="true" />
+      </SideZoneFrame>
     </section>
   );
 }
@@ -10415,6 +10442,7 @@ function ArchivesDualStackLane({
   viewerSide,
   visibleCards,
   totalArchivesCount,
+  collapsed,
   displayMode,
   selectedContext,
   actionDisabled,
@@ -10427,6 +10455,7 @@ function ArchivesDualStackLane({
   viewerSide: Side;
   visibleCards: VisibleCard[];
   totalArchivesCount: number;
+  collapsed: boolean;
   displayMode: CardDisplayMode;
   selectedContext: ActionContext | null;
   actionDisabled: boolean;
@@ -10444,6 +10473,10 @@ function ArchivesDualStackLane({
   const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
   const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
   const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
+
+  if (collapsed) {
+    return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label="Archive eingeklappt" />;
+  }
 
   if (faceupCards.length === 0 && facedownCount === 0) {
     return (
@@ -11375,6 +11408,11 @@ function SideZoneFrame({
   countLabel,
   highlighted = false,
   className = "",
+  title,
+  ariaLabel,
+  collapsed = false,
+  onToggleCollapse,
+  collapseLabel,
   children
 }: {
   side: Side;
@@ -11382,18 +11420,34 @@ function SideZoneFrame({
   countLabel: string;
   highlighted?: boolean;
   className?: string;
-  children: ReactNode;
+  title?: string;
+  ariaLabel?: string;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+  collapseLabel?: string;
+  children?: ReactNode;
 }) {
+  const hasBody = children !== undefined && children !== null && !collapsed;
   return (
-    <div className={`sideZoneFrame ${side} ${highlighted ? "cueHighlightSoft" : ""} ${className}`}>
+    <div className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`} title={title} aria-label={ariaLabel}>
       <div className="sideZoneLead">
         <div className="sideZoneLeadTop">
           <h2 className={`sideZoneTitle rigGroupSideLabel ${zoneSideClass(side)}`}>{label}</h2>
           <ZoneSideCount side={side} value={countLabel} />
+          {onToggleCollapse ? <ZoneCollapseButton side={side} label={collapseLabel ?? label} collapsed={collapsed} onToggle={onToggleCollapse} /> : null}
         </div>
       </div>
-      <div className="sideZoneBody">{children}</div>
+      {hasBody ? <div className="sideZoneBody">{children}</div> : null}
     </div>
+  );
+}
+
+function ZoneCollapseButton({ side, label, collapsed, onToggle }: { side: Side; label: string; collapsed: boolean; onToggle: () => void }) {
+  const actionLabel = `${label} ${collapsed ? "ausklappen" : "einklappen"}`;
+  return (
+    <button className={`zoneCollapseButton ${zoneSideClass(side)}`} type="button" onClick={onToggle} title={actionLabel} aria-label={actionLabel} aria-expanded={!collapsed}>
+      {collapsed ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
+    </button>
   );
 }
 

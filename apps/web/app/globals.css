@@ -3951,25 +3951,27 @@ select {
   justify-content: flex-start;
   align-items: flex-start;
   gap: 8px;
-  min-width: 32px;
-  padding-right: 6px;
+  min-width: 28px;
+  padding-right: 4px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
   align-self: stretch;
 }
 
 .serverLeadTop {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: auto;
   align-items: start;
-  gap: 4px;
+  gap: 2px;
 }
 
 .sideZoneLeadTop {
   display: grid;
-  grid-template-columns: auto auto;
+  grid-auto-flow: column;
+  grid-auto-columns: auto;
   align-items: start;
   justify-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
 .serverRunButtonCorner {
@@ -4225,6 +4227,35 @@ select {
 .serverCountSideLabel.corpZoneSideLabel,
 .sideZoneCount.corpZoneSideLabel {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 42%);
+  color: var(--corp-zone-accent);
+}
+
+.zoneCollapseButton {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--zone-chip-bg);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.zoneCollapseButton:hover,
+.zoneCollapseButton:focus-visible {
+  color: var(--text);
+  border-color: currentColor;
+}
+
+.zoneCollapseButton.runnerZoneSideLabel {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 48%);
+  color: var(--runner-zone-accent);
+}
+
+.zoneCollapseButton.corpZoneSideLabel {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 48%);
   color: var(--corp-zone-accent);
 }
 
@@ -6437,8 +6468,8 @@ select {
   display: flex;
   align-items: flex-start;
   align-self: stretch;
-  min-width: 32px;
-  padding-right: 6px;
+  min-width: 28px;
+  padding-right: 4px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
 }
 
@@ -6448,6 +6479,15 @@ select {
 
 .sideZoneBody {
   min-width: 0;
+}
+
+.sideZoneFrameCountOnly {
+  grid-template-columns: auto;
+}
+
+.sideZoneFrameCountOnly .sideZoneLead {
+  padding-right: 0;
+  border-right: 0;
 }
 
 .sideZoneTitle {
@@ -8139,97 +8179,81 @@ select,
 }
 
 .opponentRunnerBoardStrip {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  align-items: start;
+  align-items: flex-start;
   margin-bottom: 12px;
 }
 
 .opponentRunnerBoardStrip .runnerRigStrip {
-  min-width: 0;
+  flex: 1 1 min(100%, 520px);
+  min-width: min(100%, 360px);
 }
 
 .runnerOpponentZonesStrip {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  flex: 0 1 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 10px;
   min-width: 0;
-  padding: 10px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 62%);
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.runnerOpponentZonesStrip .sideZoneFrame {
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), var(--panel-bg) 28%);
+  background: color-mix(in srgb, var(--section-bg), transparent 5%);
 }
 
-.runnerOpponentZoneChip {
-  display: grid;
-  min-width: 0;
-  gap: 3px;
-  align-content: start;
-  padding: 8px;
-  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 70%);
-  border-radius: 7px;
-  background: color-mix(in srgb, var(--panel-bg), var(--runner-zone-accent) 7%);
-  color: var(--text);
-  overflow-wrap: anywhere;
-}
-
-.runnerOpponentZoneChip span,
-.runnerOpponentZoneChip small {
-  min-width: 0;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.2;
-}
-
-.runnerOpponentZoneChip span {
-  font-weight: 900;
-  letter-spacing: 0;
-  text-transform: uppercase;
-}
-
-.runnerOpponentZoneChip strong {
-  min-width: 0;
-  font-size: 14px;
-  line-height: 1.2;
+.runnerOpponentCountZone {
+  flex: 0 0 auto;
 }
 
 .runnerOpponentHeapCompact {
-  grid-column: 1 / -1;
-}
-
-.runnerOpponentHeapCompact summary {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-  cursor: pointer;
-  list-style: none;
-}
-
-.runnerOpponentHeapCompact summary::-webkit-details-marker {
-  display: none;
-}
-
-.runnerOpponentHeapCompact[open] summary {
-  padding-bottom: 7px;
-  border-bottom: 1px solid color-mix(in srgb, var(--runner-zone-accent), transparent 66%);
+  flex: 0 1 auto;
+  width: fit-content;
 }
 
 .runnerHeapCompactPreview {
   max-width: 100%;
-  min-height: calc(104px * var(--zone-card-scale, 1));
-  margin-top: 8px;
+  min-height: calc(151px * var(--zone-card-scale, 1));
 }
 
 .runnerHeapCompactPreview .cardSlot {
-  flex: 0 0 calc(74px * var(--zone-card-scale, 1));
-  width: calc(74px * var(--zone-card-scale, 1));
-  max-width: calc(74px * var(--zone-card-scale, 1));
+  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
+  width: calc(108px * var(--zone-card-scale, 1));
+  max-width: calc(108px * var(--zone-card-scale, 1));
 }
 
 .runnerHeapCompactPreview .cardSlot + .cardSlot {
-  margin-left: calc(-52px * var(--zone-card-scale, 1));
+  margin-left: calc(-76px * var(--zone-card-scale, 1));
+}
+
+.runnerOpponentZoneHeightShim {
+  display: block;
+  width: calc(28px * var(--zone-card-scale, 1));
+  min-width: calc(28px * var(--zone-card-scale, 1));
+  min-height: calc(151px * var(--zone-card-scale, 1));
+  pointer-events: none;
+}
+
+.laneCollapsedPlaceholder {
+  display: block;
+  width: calc(34px * var(--archive-card-scale, 1));
+  min-height: calc(58px * var(--archive-card-scale, 1));
+  border: 1px dashed var(--lane-border);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--section-bg), transparent 18%);
 }
 
 .specialZoneStrip {
@@ -8346,7 +8370,7 @@ select,
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
-  gap: 10px;
+  gap: 8px;
 }
 
 .rigSectionLayoutCompact {
@@ -8357,8 +8381,8 @@ select,
   display: flex;
   align-items: flex-start;
   align-self: stretch;
-  min-width: 32px;
-  padding-right: 6px;
+  min-width: 28px;
+  padding-right: 4px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
 }
 
@@ -8425,7 +8449,7 @@ select,
 .rigGroupHorizontal {
   grid-template-columns: auto minmax(0, 1fr);
   align-items: stretch;
-  gap: 16px;
+  gap: 12px;
   flex: 0 1 auto;
   width: fit-content;
   min-width: 0;
@@ -8444,7 +8468,7 @@ select,
 .rigGroupLead {
   display: flex;
   align-items: stretch;
-  gap: 6px;
+  gap: 4px;
   min-width: 0;
 }
 
@@ -8469,6 +8493,11 @@ select,
   letter-spacing: 0.03em;
   font-size: clamp(10px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.1), 13px);
   max-block-size: 100%;
+}
+
+.sideZoneTitle.rigGroupSideLabel {
+  font-size: clamp(12px, calc(var(--cards-min-width, var(--mini-cards-min-width, 96px)) * 0.135), 17px);
+  letter-spacing: 0.06em;
 }
 
 .rigMemoryBadge {
@@ -8698,15 +8727,18 @@ select,
   }
 
   .opponentRunnerBoardStrip {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+    flex-wrap: nowrap;
+  }
+
+  .opponentRunnerBoardStrip .runnerRigStrip {
+    width: 100%;
+    min-width: 0;
   }
 
   .runnerOpponentZonesStrip {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .runnerOpponentHeapCompact {
-    grid-column: 1 / -1;
+    flex-basis: 100%;
+    width: 100%;
   }
 
   .main.rightRailCollapsed {
@@ -8818,8 +8850,15 @@ select,
     grid-template-columns: minmax(0, 1fr);
   }
 
+  .opponentRunnerBoardStrip .runnerRigStrip {
+    flex-basis: 100%;
+    width: 100%;
+    min-width: 0;
+  }
+
   .runnerOpponentZonesStrip {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    flex-basis: 100%;
+    width: 100%;
   }
 
   .pairedServerLanes {
@@ -8837,13 +8876,13 @@ select,
   }
 
   .runnerHeapCompactPreview .cardSlot {
-    flex: 0 0 calc(74px * var(--zone-card-scale, 1));
-    width: calc(74px * var(--zone-card-scale, 1));
-    max-width: calc(74px * var(--zone-card-scale, 1));
+    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
+    width: calc(108px * var(--zone-card-scale, 1));
+    max-width: calc(108px * var(--zone-card-scale, 1));
   }
 
   .runnerHeapCompactPreview .cardSlot + .cardSlot {
-    margin-left: calc(-52px * var(--zone-card-scale, 1));
+    margin-left: calc(-76px * var(--zone-card-scale, 1));
   }
 
   .specialZoneOverlapRow .cardSlot {
