@@ -8,6 +8,7 @@ export * from "./http-server";
 export * from "./account-session";
 export * from "./connection-audit";
 export * from "./internet-hardening";
+export * from "./moderation-rbac";
 export * from "./multiplayer";
 export * from "./storage-sqlite";
 

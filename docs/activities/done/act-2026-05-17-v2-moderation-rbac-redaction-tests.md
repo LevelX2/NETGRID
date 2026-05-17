@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-05-17-v2-moderation-rbac-redaction-tests
-status: inbox
+status: done
 kind: test
 area: server
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget: V2.6
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/moderation-rbac.ts
+  - apps/server/src/moderation-rbac.test.ts
+  - docs/derived/V2_6_MODERATION_RBAC_REDACTION_TEST_MATRIX.md
+checks:
+  - corepack pnpm --filter @netgrid/server test -- moderation-rbac.test.ts
+  - corepack pnpm --filter @netgrid/server typecheck
+  - git diff --check
 ---
 
 # V2.6 Moderations-RBAC- und Redaction-Tests vorbereiten
@@ -42,10 +48,10 @@ Für spätere Moderationsslices soll eine fokussierte RBAC-/Redaction-Testbasis 
 
 ## Akzeptanzkriterien
 
-- [ ] Rollen- und Datenklassenfälle sind testbar beschrieben.
-- [ ] Verbotene Datenmuster sind als Assertions oder Checkkonzept erfasst.
-- [ ] Break-Glass-Fälle bleiben getrennt von Standard-Moderatorzugriff.
-- [ ] Bestehende private Replay- und Wartungsflächen werden nicht als Public-Moderation gleichgesetzt.
+- [x] Rollen- und Datenklassenfälle sind testbar beschrieben.
+- [x] Verbotene Datenmuster sind als Assertions oder Checkkonzept erfasst.
+- [x] Break-Glass-Fälle bleiben getrennt von Standard-Moderatorzugriff.
+- [x] Bestehende private Replay- und Wartungsflächen werden nicht als Public-Moderation gleichgesetzt.
 
 ## Umsetzungshinweise
 
@@ -54,4 +60,4 @@ Für spätere Moderationsslices soll eine fokussierte RBAC-/Redaction-Testbasis 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `apps/server/src/moderation-rbac.ts` legt eine testbare RBAC-Matrix mit Rollen, Datenklassen und Zugriffsstufen an. `apps/server/src/moderation-rbac.test.ts` prüft vollständige Matrixabdeckung, Standardzugriffsverbote für Hidden-Match-Daten und AI-Debug, Break-Glass-Trennung, public-safe Evidence und verbotene Evidence-Muster. Keine Moderationskonsole, keine Report-/Sanktions-API und keine Hidden-Info-Freigabe.
