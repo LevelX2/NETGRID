@@ -35019,6 +35019,142 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(hashState(dataReplay.state)).toBe(hashState(databroker));
   });
 
+  it("offers Junkyard BBS for the top heap card and revalidates source, cost and target drift", () => {
+    let state = resourceContactState("junkyard-bbs");
+    moveRunnerCardToGrip(state, "onr_v1_165_junkyard-bbs");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const junkyardId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_165_junkyard-bbs",
+    );
+    expect(junkyardId).toBeDefined();
+    if (!junkyardId) throw new Error("Missing Junkyard BBS");
+
+    const bottomHeapId = findCard(state, "simple_economy_event");
+    removeEverywhere(state, bottomHeapId);
+    state.runner.heap.push(bottomHeapId);
+    state.cardInstances[bottomHeapId] = {
+      ...state.cardInstances[bottomHeapId]!,
+      zone: { side: "runner", zone: "heap" },
+      faceup: true,
+      rezzed: true,
+    };
+    const topHeapId = findCard(
+      state,
+      "onr_v1_157_crash-everett-inventive-fixer",
+    );
+    removeEverywhere(state, topHeapId);
+    state.runner.heap.push(topHeapId);
+    state.cardInstances[topHeapId] = {
+      ...state.cardInstances[topHeapId]!,
+      zone: { side: "runner", zone: "heap" },
+      faceup: true,
+      rezzed: true,
+    };
+
+    const junkyardAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "junkyard_bbs_return_top_heap" &&
+        action.payload?.cardId === junkyardId &&
+        action.payload?.targetCardId === topHeapId,
+    );
+    expect(junkyardAction.costs).toEqual([{ clicks: 1, credits: 1 }]);
+
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: junkyardAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "junkyard-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: junkyardAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "junkyard-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const removedSource = structuredClone(state);
+    removeEverywhere(removedSource, junkyardId);
+    expect(
+      applyAction(removedSource, {
+        matchId: removedSource.matchId,
+        side: "runner",
+        actionId: junkyardAction.actionId,
+        clientKnownStateVersion: removedSource.stateVersion,
+        idempotencyKey: "junkyard-removed-source",
+      }).ok,
+    ).toBe(false);
+
+    const targetDrift = structuredClone(state);
+    targetDrift.runner.heap = targetDrift.runner.heap.filter(
+      (id) => id !== topHeapId,
+    );
+    targetDrift.runner.heap.push(bottomHeapId);
+    expect(
+      applyAction(targetDrift, {
+        matchId: targetDrift.matchId,
+        side: "runner",
+        actionId: junkyardAction.actionId,
+        clientKnownStateVersion: targetDrift.stateVersion,
+        idempotencyKey: "junkyard-target-drift",
+      }).ok,
+    ).toBe(false);
+
+    const cannotPay = structuredClone(state);
+    cannotPay.runner.credits = 0;
+    expect(
+      getLegalActions(cannotPay, "runner").some(
+        (action) => action.actionId === junkyardAction.actionId,
+      ),
+    ).toBe(false);
+
+    const creditsBefore = state.runner.credits;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === junkyardAction.actionId,
+    );
+    expect(state.runner.credits).toBe(creditsBefore - 1);
+    expect(state.runner.heap).toEqual([bottomHeapId]);
+    expect(state.runner.grip[0]).toBe(topHeapId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      cardDefinitionId: "onr_v1_165_junkyard-bbs",
+      resourceAbility: "junkyard_bbs_return_top_heap",
+      sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+      targetCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      returnedCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      returnedCount: 1,
+      sourceZone: "heap",
+      destinationZone: "grip",
+      returnedToGrip: true,
+      runnerCreditsAfter: creditsBefore - 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"cardInstances"|"privatePayload"|"stack"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("keeps Floating Runner BBS and Shell Traders recurring contact credits turn-safe", () => {
     let state = resourceContactState("turn-credits");
     for (const definitionId of [
