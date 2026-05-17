@@ -118,6 +118,14 @@ type VisibleBreakerPressure = {
   matchingInstallActionIds: Set<string>;
   missingAnswerCount: number;
 };
+type RunnerTwoTurnRunIntent = {
+  targetServerId: string;
+  thresholdCredits: number;
+  visibleBreakCost: number;
+  creditsNeeded: number;
+  ready: boolean;
+  stateKey: string;
+};
 
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
@@ -260,6 +268,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const corpThreat = evaluateCorpScoringThreat(input, candidate, beliefState);
   const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
   const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
+  const twoTurnIntent = evaluateRunnerTwoTurnRunIntent(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
@@ -271,20 +280,22 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     access.score * profile.weights.serverAccessValue +
     remote.score * profile.weights.remoteThreat +
     corpThreat.score * profile.weights.corpScoringThreat +
-    breakerPlan.score -
+    breakerPlan.score +
+    twoTurnIntent.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
     easyRunPenalty;
   return {
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
       `doctrine_plan_weight:${doctrinePlanWeight}`,
       ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
       ...candidate.visibleBenefits,
+      ...twoTurnIntent.evidence,
       ...rig.evidence,
       ...runCost.evidence,
       ...access.evidence,
@@ -296,6 +307,106 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...(beliefState.runnerOpponentModel ? [`belief_credit_reserve:${beliefState.runnerOpponentModel.corpCreditReserveInterpretation}`] : [])
     ])
   };
+}
+
+function evaluateRunnerTwoTurnRunIntent(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+  const intent = inferRunnerTwoTurnRunIntent(input);
+  if (!intent) return { score: 0, reasons: [], evidence: [] };
+  const target = targetServerId(input, candidate);
+  const targetsIntent = target === intent.targetServerId;
+  let score = 0;
+  const reasons: string[] = [];
+  if (!intent.ready && candidate.kind === "recover_economy") {
+    score += intent.creditsNeeded <= 1 ? 280 : 180;
+    reasons.push("two_turn_run_intent_economy_threshold");
+  }
+  if (!intent.ready && candidate.kind === "draw_for_answers" && input.playerView.own.gripOrHq.length < 3) {
+    score += 90;
+    reasons.push("two_turn_run_intent_preserve_options");
+  }
+  if (!intent.ready && targetsIntent && isRunPlan(candidate.kind)) {
+    score -= 210;
+    reasons.push("two_turn_run_intent_setup_before_run");
+  }
+  if (intent.ready && targetsIntent && isRunPlan(candidate.kind)) {
+    score += 300;
+    reasons.push("two_turn_run_intent_ready_for_target");
+  }
+  if (intent.ready && candidate.kind === "recover_economy") {
+    score -= 120;
+    reasons.push("two_turn_run_intent_stop_building");
+  }
+  return {
+    score,
+    reasons,
+    evidence: [
+      `two_turn_run_intent_target:${intent.targetServerId}`,
+      `two_turn_run_intent_ready:${intent.ready}`,
+      `two_turn_run_intent_threshold:${intent.thresholdCredits}`,
+      `two_turn_run_intent_credits_needed:${intent.creditsNeeded}`,
+      `two_turn_run_intent_visible_break_cost:${intent.visibleBreakCost}`,
+      `two_turn_run_intent_state:${intent.stateKey}`,
+      "two_turn_run_intent_lifetime:single_decision",
+      "two_turn_run_intent_invalidates_on:target_credits_visible_ice_breakers"
+    ]
+  };
+}
+
+function inferRunnerTwoTurnRunIntent(input: AiDecisionInput): RunnerTwoTurnRunIntent | undefined {
+  if (input.side !== "runner" || input.playerView.phase !== "runner_action_phase") return undefined;
+  const features = extractRunnerFeatures(input);
+  const visibleBreakerRoles = [...features.rigRoles].filter((role) => role.startsWith("breaker_")).sort();
+  if (visibleBreakerRoles.length === 0) return undefined;
+  const legalRunTargets = new Set(
+    input.legalActions
+      .filter((action) => action.type === "start_run" && typeof action.payload?.serverId === "string")
+      .map((action) => String(action.payload?.serverId))
+  );
+  const candidates = [...legalRunTargets]
+    .map((serverId) => {
+      const server = features.serverFeatures.get(serverId);
+      const visibleBreakCost = features.visibleRunBreakCosts.get(serverId);
+      if (!server || visibleBreakCost === undefined || visibleBreakCost <= 0) return undefined;
+      if (!isStrategicTwoTurnRunTarget(serverId, server)) return undefined;
+      const thresholdCredits = Math.max(1, Math.ceil(visibleBreakCost));
+      const creditsNeeded = Math.max(0, thresholdCredits - features.credits);
+      const ready = creditsNeeded === 0;
+      if (!ready && creditsNeeded > 3) return undefined;
+      return {
+        intent: {
+          targetServerId: serverId,
+          thresholdCredits,
+          visibleBreakCost,
+          creditsNeeded,
+          ready,
+          stateKey: [
+            serverId,
+            `credits:${features.credits}`,
+            `break:${visibleBreakCost}`,
+            `ice:${server.iceCount}`,
+            `rezzed:${server.rezzedIceCount}`,
+            `rig:${visibleBreakerRoles.join(",") || "none"}`
+          ].join("|")
+        },
+        priority: twoTurnRunTargetPriority(serverId, server) + (ready ? 40 : Math.max(0, 4 - creditsNeeded) * 20) - visibleBreakCost * 4
+      };
+    })
+    .filter((candidate): candidate is { intent: RunnerTwoTurnRunIntent; priority: number } => Boolean(candidate))
+    .sort((left, right) => right.priority - left.priority || left.intent.targetServerId.localeCompare(right.intent.targetServerId));
+  return candidates[0]?.intent;
+}
+
+function isStrategicTwoTurnRunTarget(serverId: string, server: RunnerServerFeatures): boolean {
+  if (serverId === "rd" || serverId === "hq") return true;
+  return serverId.startsWith("remote_") && server.rootCount > 0;
+}
+
+function twoTurnRunTargetPriority(serverId: string, server: RunnerServerFeatures): number {
+  if (serverId.startsWith("remote_")) return 120 + server.rootCount * 35 + server.advancedRootCount * 45;
+  if (serverId === "rd") return 100;
+  if (serverId === "hq") return 85;
+  if (serverId === "archives") return 35;
+  return 0;
 }
 
 function evaluateVisibleBreakerPlan(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {

@@ -1618,6 +1618,119 @@ describe("MVP 0.3 Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
+  it("uses a short Runner two-turn economy intent before an unprofitable visible HQ run", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-two-turn-hq-economy-setup",
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    moveRunnerCardToGrip(state, "simple_killer");
+    state.runner.credits = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "simple_killer",
+    );
+    const iceId = putCorpIceOnServer(state, "hq", "onr_v1_259_in-the-face");
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.runner.credits = 2;
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(hqRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqRun || !gain)
+      throw new Error("Missing two-turn economy fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [hqRun, gain],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(debugText).toContain("two_turn_run_intent_target:hq");
+    expect(debugText).toContain("two_turn_run_intent_ready:false");
+    expect(debugText).toContain("two_turn_run_intent_credits_needed:1");
+    expect(debugText).toContain(
+      "two_turn_run_intent_invalidates_on:target_credits_visible_ice_breakers",
+    );
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("switches from the Runner two-turn economy intent to the target run after the visible threshold is met", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-two-turn-hq-economy-ready",
+        corpDeck: ONR_V1_1_2K_CORP_DECK,
+        agendaPointsToWin: 7,
+      }),
+    );
+    moveRunnerCardToGrip(state, "simple_killer");
+    state.runner.credits = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "simple_killer",
+    );
+    const iceId = putCorpIceOnServer(state, "hq", "onr_v1_259_in-the-face");
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.runner.credits = 3;
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(hqRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!hqRun || !gain)
+      throw new Error("Missing two-turn ready fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [hqRun, gain],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(hqRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.pressure_hq");
+    expect(debugText).toContain("two_turn_run_intent_target:hq");
+    expect(debugText).toContain("two_turn_run_intent_ready:true");
+    expect(debugText).toContain("two_turn_run_intent_credits_needed:0");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
   it("hard Runner backs off from visibly unreachable protected remote roots", () => {
     const requiredCorpCards = [
       "onr_v1_279_wall-of-static",
