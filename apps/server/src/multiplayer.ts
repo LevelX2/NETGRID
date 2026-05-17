@@ -11,6 +11,25 @@ import {
   MVP_0_94_BASELINE,
   MVP_0_99_BASELINE,
   MVP_0_8_BASELINE,
+  type ApiAiPacingMode,
+  type ApiAiTurnPresentationState,
+  type ApiConnectionQuality,
+  type ApiGameResultReason,
+  type ApiGameResultSummary,
+  type ApiLifecycleResultSummary,
+  type ApiLobbyChatMessage,
+  type ApiLobbyParticipantPayload,
+  type ApiLobbyPayload,
+  type ApiMatchFormat,
+  type ApiMatchMode,
+  type ApiMatchStartLobbyPayload,
+  type ApiMatchStatus,
+  type ApiSeriesPlayerSlot,
+  type ApiSeriesResultSummary,
+  type ApiSeriesStatus,
+  type ApiServicePayload,
+  type ApiSidePayload,
+  type ApiPendingUndoRequest,
   type AiDifficulty,
   type DeckPublicMetadata,
   type GameEvent,
@@ -60,27 +79,16 @@ import type {
   StorageMaintenanceSummary
 } from "./storage-sqlite";
 
-export type MatchStatus =
-  | "pending"
-  | "waiting_for_runner"
-  | "waiting_for_corp"
-  | "waiting_for_joiner_decks"
-  | "ready_check"
-  | "countdown"
-  | "active"
-  | "cancelled"
-  | "abandoned"
-  | "forfeited"
-  | "finished";
+export type MatchStatus = ApiMatchStatus;
 export type HostSideSelection = Side | "random";
-export type MatchMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai";
-export type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
-export type AiPacingMode = "fast" | "paced" | "manual";
+export type MatchMode = ApiMatchMode;
+export type MatchFormat = ApiMatchFormat;
+export type AiPacingMode = ApiAiPacingMode;
 export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
-export type SeriesPlayerSlot = "player_a" | "player_b";
-export type SeriesStatus = "active" | "between_games" | "finished";
-export type ConnectionQuality = "online" | "unstable" | "offline";
+export type SeriesPlayerSlot = ApiSeriesPlayerSlot;
+export type SeriesStatus = ApiSeriesStatus;
+export type ConnectionQuality = ApiConnectionQuality;
 
 export type MatchSettings = {
   agendaPointsToWin: number;
@@ -89,7 +97,7 @@ export type MatchSettings = {
 
 const RULE_AGENDA_POINTS_TO_WIN = 7;
 
-export type GameResultReason = "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "forfeit" | "unknown";
+export type GameResultReason = ApiGameResultReason;
 
 export type SeriesGameResult = {
   matchId: string;
@@ -116,73 +124,11 @@ export type MatchSeriesState = {
   nextMatchId?: string;
 };
 
-export type SeriesResultSummary = {
-  seriesId: string;
-  mode: "two_game_side_swap";
-  status: SeriesStatus;
-  gameNumber: number;
-  gamesPlanned: number;
-  viewerPlayer: SeriesPlayerSlot;
-  viewerWins: number;
-  opponentWins: number;
-  draws: number;
-  viewerAgendaPoints: number;
-  opponentAgendaPoints: number;
-  viewerSeriesOutcome: "won" | "lost" | "draw";
-  seriesDecision: "wins" | "agenda_points" | "draw";
-  nextAvailable: boolean;
-  nextMatchId?: string;
-};
-
-export type GameResultSummary = {
-  winner: Side | "draw";
-  winnerSide?: Side;
-  loserSide?: Side;
-  viewerOutcome: "won" | "lost" | "draw";
-  reason: GameResultReason;
-  matchFormat: MatchFormat;
-  agendaPointsToWin: number;
-  runnerAgendaPoints: number;
-  corpAgendaPoints: number;
-  actionCount: number;
-  runCount: number;
-  successfulRunCount: number;
-  stolenAgendaCount: number;
-  scoredAgendaCount: number;
-  startedAt: string;
-  finishedAt: string;
-  finalStateHash: string;
-  finalEngineStateHash?: string;
-  series?: SeriesResultSummary;
-};
-
-export type LifecycleResultSummary = {
-  status: Extract<MatchStatus, "cancelled" | "abandoned" | "forfeited">;
-  reason: "cancel" | "leave" | "forfeit";
-  occurredAt: string;
-  actorSide: Side;
-  winnerSide?: Side;
-  loserSide?: Side;
-  finalEngineStateHash?: string;
-};
-
-export type LobbyParticipantPayload = {
-  displayName: string;
-  side?: Side;
-  runnerDeckReady: boolean;
-  corpDeckReady: boolean;
-  connected: boolean;
-  connectionQuality: ConnectionQuality;
-  ready: boolean;
-};
-
-export type LobbyChatMessage = {
-  id: number;
-  side: Side;
-  displayName: string;
-  sentAt: string;
-  text: string;
-};
+export type SeriesResultSummary = ApiSeriesResultSummary;
+export type GameResultSummary = ApiGameResultSummary;
+export type LifecycleResultSummary = ApiLifecycleResultSummary;
+export type LobbyParticipantPayload = ApiLobbyParticipantPayload;
+export type LobbyChatMessage = ApiLobbyChatMessage;
 
 export type MatchStartLobbyState = {
   hostReady: boolean;
@@ -199,18 +145,7 @@ export type MatchStartLobbyState = {
   chatMessages: LobbyChatMessage[];
 };
 
-export type MatchStartLobbyPayload = {
-  hostReady: boolean;
-  joinerReady: boolean;
-  countdownSeconds: 3 | 5 | 10;
-  countdownStartedAt?: string;
-  countdownEndsAt?: string;
-  agendaPointsToWin: number;
-  matchFormat: MatchFormat;
-  sideAssignment: MatchStartLobbyState["sideAssignment"];
-  participants: Record<SeriesPlayerSlot, LobbyParticipantPayload>;
-  chatMessages: LobbyChatMessage[];
-};
+export type MatchStartLobbyPayload = ApiMatchStartLobbyPayload;
 
 export type MatchRecord = {
   matchId: string;
@@ -312,12 +247,7 @@ export type UndoSnapshot = {
   hiddenInfoSafe: boolean;
 };
 
-export type PendingUndoRequest = {
-  undoRequestId: string;
-  requestedBy: Side;
-  targetEventId: string;
-  reason?: string;
-};
+export type PendingUndoRequest = ApiPendingUndoRequest;
 
 export type StoredMatch = {
   match: MatchRecord;
@@ -356,50 +286,10 @@ export type MultiplayerStorage = {
   close?(): void;
 };
 
-export type SidePayload = {
-  matchId: string;
-  matchStatus: MatchStatus;
-  matchVersion: number;
-  side: Side;
-  playerView: PlayerView;
-  legalActions: LegalAction[];
-  eventTail: PublicGameEvent[];
-  opponentStatus: { side: Side; connected: boolean; displayName?: string };
-  pendingChoice?: PlayerView["pendingChoice"];
-  pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
-  aiTurnPresentation?: AiTurnPresentationState;
-  winner?: Side | "draw";
-  finalStateHash?: string;
-  resultSummary?: GameResultSummary;
-  lifecycleResult?: LifecycleResultSummary;
-  retentionProtected?: boolean;
-  retentionProtectedAt?: string;
-};
-
-export type AiTurnPresentationState = {
-  activeAiSide?: Side;
-  canAdvanceAi: boolean;
-  pacingMode: AiPacingMode;
-};
-
-export type LobbyPayload = {
-  matchId: string;
-  matchStatus: MatchStatus;
-  matchVersion: number;
-  side: Side;
-  eventTail: PublicGameEvent[];
-  opponentStatus: { side: Side; connected: boolean; displayName?: string };
-  lifecycleResult?: LifecycleResultSummary;
-  pendingDeckHandshake?: {
-    required: boolean;
-    message: string;
-  };
-  startLobby?: MatchStartLobbyPayload;
-  retentionProtected?: boolean;
-  retentionProtectedAt?: string;
-};
-
-export type ServicePayload = SidePayload | LobbyPayload;
+export type SidePayload = ApiSidePayload;
+export type AiTurnPresentationState = ApiAiTurnPresentationState;
+export type LobbyPayload = ApiLobbyPayload;
+export type ServicePayload = ApiServicePayload;
 
 export type { ReplayPerspective } from "./event-projection";
 

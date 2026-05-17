@@ -54,7 +54,29 @@ import {
 import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
-import type { DeckPublicMetadata, LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard, Winner } from "@netgrid/shared";
+import type {
+  ApiAiPacingMode,
+  ApiClientGameMode,
+  ApiCreateMatchResponse,
+  ApiGameResultSummary,
+  ApiJoinMatchResponse,
+  ApiLifecycleResultSummary,
+  ApiLobbyParticipantPayload,
+  ApiLobbyPayload,
+  ApiMatchFormat,
+  ApiMatchStartLobbyPayload,
+  ApiMatchStatus,
+  ApiSeriesResultSummary,
+  ApiServerMessage,
+  ApiSidePayload,
+  DeckPublicMetadata,
+  LegalAction,
+  PlayerView,
+  PublicGameEvent,
+  Side,
+  VisibleCard,
+  Winner,
+} from "@netgrid/shared";
 import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
@@ -223,23 +245,12 @@ const DEFAULT_IDENTITY_BY_SIDE: Record<Side, string> = {
 
 let sharedAudioContext: AudioContext | null = null;
 
-type MatchStatus =
-  | "pending"
-  | "waiting_for_runner"
-  | "waiting_for_corp"
-  | "waiting_for_joiner_decks"
-  | "ready_check"
-  | "countdown"
-  | "active"
-  | "cancelled"
-  | "abandoned"
-  | "forfeited"
-  | "finished";
-type GameMode = "human_vs_human" | "human_runner_vs_corp_ai" | "human_corp_vs_runner_ai" | "ai_vs_ai";
-type MatchFormat = "single_game" | "rules_match" | "two_game_side_swap";
+type MatchStatus = ApiMatchStatus;
+type GameMode = ApiClientGameMode;
+type MatchFormat = ApiMatchFormat;
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
-type AiPacingMode = "fast" | "paced" | "manual";
+type AiPacingMode = ApiAiPacingMode;
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
@@ -295,84 +306,10 @@ function useCardScaleSettings(): CardScaleSettings {
   return useContext(CardScaleSettingsContext);
 }
 
-type SeriesResultSummary = {
-  seriesId: string;
-  mode: "two_game_side_swap";
-  status: "active" | "between_games" | "finished";
-  gameNumber: number;
-  gamesPlanned: number;
-  viewerPlayer: "player_a" | "player_b";
-  viewerWins: number;
-  opponentWins: number;
-  draws: number;
-  viewerAgendaPoints: number;
-  opponentAgendaPoints: number;
-  viewerSeriesOutcome: "won" | "lost" | "draw";
-  seriesDecision: "wins" | "agenda_points" | "draw";
-  nextAvailable: boolean;
-  nextMatchId?: string;
-};
-
-type GameResultSummary = {
-  winner: Winner;
-  winnerSide?: Side;
-  loserSide?: Side;
-  viewerOutcome: "won" | "lost" | "draw";
-  reason: "agenda_points" | "corp_deck_empty" | "flatline" | "draw" | "forfeit" | "unknown";
-  matchFormat: MatchFormat;
-  agendaPointsToWin: number;
-  runnerAgendaPoints: number;
-  corpAgendaPoints: number;
-  actionCount: number;
-  runCount: number;
-  successfulRunCount: number;
-  stolenAgendaCount: number;
-  scoredAgendaCount: number;
-  startedAt: string;
-  finishedAt: string;
-  finalStateHash: string;
-  finalEngineStateHash?: string;
-  series?: SeriesResultSummary;
-};
-
-type LifecycleResultSummary = {
-  status: "cancelled" | "abandoned" | "forfeited";
-  reason: "cancel" | "leave" | "forfeit";
-  occurredAt: string;
-  actorSide: Side;
-  winnerSide?: Side;
-  loserSide?: Side;
-  finalEngineStateHash?: string;
-};
-
-type ClientPayload = {
-  matchId: string;
-  matchStatus: MatchStatus;
-  matchVersion: number;
-  side: Side;
-  playerView: PlayerView;
-  legalActions: LegalAction[];
-  eventTail: PublicGameEvent[];
-  opponentStatus: { side: Side; connected: boolean; displayName?: string };
-  pendingUndo?: {
-    undoRequestId: string;
-    requestedBy: Side;
-    targetEventId: string;
-    reason?: string;
-    needsResponse: boolean;
-  };
-  aiTurnPresentation?: {
-    activeAiSide?: Side;
-    canAdvanceAi: boolean;
-    pacingMode: AiPacingMode;
-  };
-  winner?: Winner;
-  finalStateHash?: string;
-  resultSummary?: GameResultSummary;
-  lifecycleResult?: LifecycleResultSummary;
-  retentionProtected?: boolean;
-  retentionProtectedAt?: string;
-};
+type SeriesResultSummary = ApiSeriesResultSummary;
+type GameResultSummary = ApiGameResultSummary;
+type LifecycleResultSummary = ApiLifecycleResultSummary;
+type ClientPayload = ApiSidePayload;
 
 function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
   const presentation = payload?.aiTurnPresentation;
@@ -382,111 +319,12 @@ function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPaylo
   return { ...presentation, canAdvanceAi: false };
 }
 
-type LobbyParticipant = {
-  displayName: string;
-  side?: Side;
-  runnerDeckReady: boolean;
-  corpDeckReady: boolean;
-  connected: boolean;
-  connectionQuality: "online" | "unstable" | "offline";
-  ready: boolean;
-};
-
-type LobbyChatMessage = {
-  id: number;
-  side: Side;
-  displayName: string;
-  sentAt: string;
-  text: string;
-};
-
-type MatchStartLobby = {
-  hostReady: boolean;
-  joinerReady: boolean;
-  countdownSeconds: 3 | 5 | 10;
-  countdownStartedAt?: string;
-  countdownEndsAt?: string;
-  agendaPointsToWin: number;
-  matchFormat: MatchFormat;
-  sideAssignment: { runnerPlayer: "player_a" | "player_b"; corpPlayer: "player_a" | "player_b" };
-  participants: Record<"player_a" | "player_b", LobbyParticipant>;
-  chatMessages: LobbyChatMessage[];
-};
-
-type LobbyClientPayload = {
-  matchId: string;
-  matchStatus: MatchStatus;
-  matchVersion: number;
-  side: Side;
-  eventTail: PublicGameEvent[];
-  opponentStatus: { side: Side; connected: boolean; displayName?: string };
-  lifecycleResult?: LifecycleResultSummary;
-  pendingDeckHandshake?: {
-    required: boolean;
-    message: string;
-  };
-  startLobby?: MatchStartLobby;
-  retentionProtected?: boolean;
-  retentionProtectedAt?: string;
-};
-
-type ServerMessage =
-  | { type: "state_update"; payload: { matchStatus: MatchStatus; matchVersion: number; playerView: PlayerView } }
-  | { type: "lobby_update"; payload: LobbyClientPayload }
-  | { type: "legal_actions"; payload: { legalActions: LegalAction[] } }
-  | { type: "event_log_update"; payload: { events: PublicGameEvent[] } }
-  | { type: "opponent_status"; payload: ClientPayload["opponentStatus"] }
-  | { type: "undo_request"; payload: NonNullable<ClientPayload["pendingUndo"]> }
-  | { type: "ai_turn"; payload: ClientPayload["aiTurnPresentation"] | null }
-  | { type: "match_finished"; payload: { matchStatus: MatchStatus; winner: Winner; finalStateHash: string; resultSummary?: GameResultSummary } }
-  | { type: "error"; payload: { code: string; message: string; playerView?: PlayerView } }
-  | { type: "action_receipt"; payload: { accepted: boolean; stateVersionAfter: number; errorCode?: string } }
-  | { type: "choice_request"; payload: { choice: null } }
-  | { type: "pong"; payload: { serverTime: number } };
-
-type CreateMatchResponse = {
-  matchId: string;
-  matchStatus?: MatchStatus;
-  pendingDeckHandshake?: boolean;
-  hostSide: Side;
-  hostSessionToken: string;
-  hostReconnectToken: string;
-  joinUrl?: string;
-  webSocketUrl: string;
-  mode: Exclude<GameMode, "ai_vs_ai">;
-  playerView?: PlayerView;
-  legalActions: LegalAction[];
-  matchVersion: number;
-  lobby?: MatchStartLobby;
-  aiTurnPresentation?: ClientPayload["aiTurnPresentation"];
-  winner?: Winner;
-  finalStateHash?: string;
-  resultSummary?: GameResultSummary;
-  retentionProtected?: boolean;
-  retentionProtectedAt?: string;
-  error?: { message: string };
-};
-
-type JoinMatchResponse = {
-  matchId: string;
-  side: Side;
-  sessionToken: string;
-  reconnectToken: string;
-  webSocketUrl: string;
-  playerView?: PlayerView;
-  legalActions: LegalAction[];
-  matchVersion: number;
-  matchStatus?: MatchStatus;
-  lobby?: MatchStartLobby;
-  eventTail?: PublicGameEvent[];
-  aiTurnPresentation?: ClientPayload["aiTurnPresentation"];
-  winner?: Winner;
-  finalStateHash?: string;
-  resultSummary?: GameResultSummary;
-  retentionProtected?: boolean;
-  retentionProtectedAt?: string;
-  error?: { message: string };
-};
+type LobbyParticipant = ApiLobbyParticipantPayload;
+type MatchStartLobby = ApiMatchStartLobbyPayload;
+type LobbyClientPayload = ApiLobbyPayload;
+type ServerMessage = ApiServerMessage;
+type CreateMatchResponse = ApiCreateMatchResponse;
+type JoinMatchResponse = ApiJoinMatchResponse;
 
 type OpenMatchEntry = {
   matchId: string;

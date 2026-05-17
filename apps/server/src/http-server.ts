@@ -12,12 +12,8 @@ import {
   type MatchMode,
   type MatchStatus,
   type ReplayPerspective,
-  type ActionReceipt,
-  type AiTurnPresentationState,
-  type GameResultSummary,
   type LifecycleActionResult,
   type LobbyPayload,
-  type SafeErrorPayload,
   type ServicePayload,
   type SidePayload,
   type SubmitActionResult,
@@ -51,7 +47,7 @@ import {
   type DeploymentConfig,
   type RateLimitCategory
 } from "./internet-hardening";
-import type { Side } from "@netgrid/shared";
+import type { ApiServerMessage, Side } from "@netgrid/shared";
 import type { AiDifficulty } from "@netgrid/shared";
 
 type ClientWsMessage =
@@ -77,19 +73,7 @@ type ClientWsMessage =
   | { type: "advance_ai"; payload: { knownStateVersion?: number; knownMatchVersion?: number; mode?: "single_step" | "until_human" } }
   | { type: "ping"; payload: { clientTime: number } };
 
-export type ServerWsMessage =
-  | { type: "state_update"; payload: { matchStatus: SidePayload["matchStatus"]; matchVersion: number; playerView: SidePayload["playerView"] } }
-  | { type: "lobby_update"; payload: LobbyPayload }
-  | { type: "legal_actions"; payload: { stateVersion: number; legalActions: SidePayload["legalActions"] } }
-  | { type: "choice_request"; payload: { choice: SidePayload["pendingChoice"] | null } }
-  | { type: "event_log_update"; payload: { events: SidePayload["eventTail"] } }
-  | { type: "action_receipt"; payload: ActionReceipt }
-  | { type: "opponent_status"; payload: SidePayload["opponentStatus"] }
-  | { type: "undo_request"; payload: NonNullable<SidePayload["pendingUndo"]> }
-  | { type: "ai_turn"; payload: AiTurnPresentationState | null }
-  | { type: "match_finished"; payload: { matchStatus: SidePayload["matchStatus"]; winner: SidePayload["winner"]; finalStateHash: string; resultSummary?: GameResultSummary } }
-  | { type: "error"; payload: SafeErrorPayload }
-  | { type: "pong"; payload: { clientTime: number; serverTime: number } };
+export type ServerWsMessage = ApiServerMessage;
 
 type WsContext = {
   matchId: string;
