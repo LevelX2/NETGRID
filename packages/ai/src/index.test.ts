@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import aiDeckPoolData from "../../../data/ai/ai-deck-pool-1.0.1.json";
 import selfplayExploitLeagueData from "../../../data/ai/ai-selfplay-exploit-league-2026-05-17.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
@@ -87,6 +87,7 @@ import {
 } from "./visible-run-analysis";
 import type {
   AiDeckDoctrineProfile,
+  CardDefinition,
   CardInstanceId,
   ChoiceRequest,
   DeckDefinition,
@@ -99,6 +100,10 @@ import type {
 import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
+  afterEach(() => {
+    delete DEMO_CARDS_BY_ID.test_hidden_runner_resource_harness;
+  });
+
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
     const state = createGameAfterSetup({ seed: "ai-contract" });
     const corpInput = buildAiDecisionInput(state, "corp", {
@@ -126,6 +131,91 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(corpInput)).not.toContain("sessionToken");
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(assertAiInputIsSideSafe(runnerInput)).toBe(true);
+  });
+
+  it("redacts hidden Runner Resources in Corp AIInput before reveal", () => {
+    const hiddenResourceDefinitionId = "test_hidden_runner_resource_harness";
+    const hiddenResourceTitle = "Hidden Resource Harness";
+    DEMO_CARDS_BY_ID[hiddenResourceDefinitionId] ??= {
+      id: hiddenResourceDefinitionId,
+      title: hiddenResourceTitle,
+      side: "runner",
+      type: "resource",
+      subtypes: ["hidden"],
+      implementationStatus: "playable_mvp",
+      installCost: 1,
+      rulesText:
+        "Harness-only hidden Runner resource for side-safe install and trash tests.",
+      mechanics: [
+        "install_resource",
+        "resource",
+        "hidden_runner_resource_foundation",
+        "test_fixture",
+      ],
+    } satisfies CardDefinition;
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-hidden-runner-resource" }),
+    );
+    state.runner.credits = 6;
+    const hiddenResourceId = "runner_test_hidden_resource_harness_0";
+    state.cardInstances[hiddenResourceId] = {
+      instanceId: hiddenResourceId,
+      definitionId: hiddenResourceDefinitionId,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "grip" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.runner.grip.unshift(hiddenResourceId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === hiddenResourceId,
+    );
+    state.activeSide = "corp";
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.corp.clicks = 3;
+    state.corp.credits = 5;
+    state.runner.tags = 1;
+
+    const corpInput = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+    });
+    const hiddenSlot = corpInput.playerView.opponent.rig?.find(
+      (card) => card.known === false,
+    );
+    const inputJson = JSON.stringify(corpInput);
+
+    expect(hiddenSlot).toMatchObject({
+      known: false,
+      type: "resource",
+      subtypes: ["hidden_runner_resource"],
+      owner: "runner",
+      controller: "runner",
+    });
+    expect(hiddenSlot?.instanceId).toMatch(/^hidden_runner_resource_/);
+    expect(hiddenSlot?.instanceId).not.toBe(hiddenResourceId);
+    expect(corpInput.legalActions).toContainEqual(
+      expect.objectContaining({
+        type: "trash_resource",
+        label: "Verdeckte Runner-Resource trashen",
+        payload: expect.objectContaining({
+          hiddenResourceSlotId: hiddenSlot?.instanceId,
+          redactedKind: "hidden_runner_resource",
+        }),
+      }),
+    );
+    expect(inputJson).toContain("hidden_runner_resource");
+    expect(inputJson).not.toContain(hiddenResourceDefinitionId);
+    expect(inputJson).not.toContain(hiddenResourceTitle);
+    expect(inputJson).not.toContain(hiddenResourceId);
+    expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
   });
 
   it("constructs AI inputs from positive DTO fields for both perspectives", () => {
