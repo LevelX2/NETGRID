@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-derived-s01-rollup-proposal
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,16 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-5
 parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_S01.md
+checks:
+  - rg -n "docs/derived/S01_|S01_[A-Z_]+\\.md|S01 |Sonderphase 01" .
+  - git diff --check
 ---
 
 # S01 Release-Artefakte als Rollup vorschlagen
@@ -47,10 +50,10 @@ Für die abgeschlossene S01-Familie soll ein Rollup-Vorschlag entstehen, ohne be
 
 ## Akzeptanzkriterien
 
-- [ ] Ein konkreter S01-Rollup-Vorschlag liegt unter `docs/derived/`.
-- [ ] Audit-Trail und Gate-Nachweise bleiben auffindbar.
-- [ ] Linkbruchrisiken sind benannt.
-- [ ] `git diff --check` ist ausgeführt.
+- [x] Ein konkreter S01-Rollup-Vorschlag liegt unter `docs/derived/`.
+- [x] Audit-Trail und Gate-Nachweise bleiben auffindbar.
+- [x] Linkbruchrisiken sind benannt.
+- [x] `git diff --check` ist ausgeführt.
 
 ## Umsetzungshinweise
 
@@ -58,4 +61,4 @@ Analog zum Backend-0.5-Muster arbeiten, aber S01 wegen Specs getrennt klassifizi
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_S01.md` klassifiziert alle sieben S01-Artefakte und trifft ausdrücklich `decision-no-move`: Requirements Review, Requirements, Testmatrix und Match-Series-Spec bleiben `keep-evidence`; Result-Modal- und Audio-Spec sind `condense-candidate-after-rollup`; der Detailplan ist `archive-candidate-after-condense`. Harte Linkbruchrisiken vor späteren Moves sind benannt, insbesondere in KI-Wissen, Log, Codex-Status-Chronik, S01-Detailplan, V1.0.2-Folgeartefakten, Mechanics-Planung und Activity-Audit. Es wurden keine S01-Inhalte geändert und keine Dateien bewegt.
