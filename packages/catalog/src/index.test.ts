@@ -142,7 +142,9 @@ import {
   createAiCardHintsV2,
   createCardPipelineReport,
   createCardPipelineSnapshot,
+  createCardRarityImportReport,
   createPipelineRollbackReport,
+  createRuntimeCardSnapshot,
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_LEGACY_OPEN64_CARD_IDS,
   DECK_LEGAL_AI_APPROVAL_V190_CARD_IDS,
@@ -216,6 +218,7 @@ import {
   ONR_V1_9_22_WIP_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
   releaseEvidenceByCardId,
+  readProjectCardRaritySources,
   runtimeGateByCardId,
   searchCatalog,
   validateAiCardHintsV2,
@@ -1284,6 +1287,67 @@ describe("catalog import and status logic", () => {
       ok: true,
       errors: [],
     });
+  });
+
+  it("imports display-only rarity metadata from local spoiler sources", () => {
+    const report = createCardRarityImportReport(readProjectCardRaritySources());
+    const sourceReportById = new Map(
+      report.sources.map((sourceReport) => [
+        sourceReport.sourceId,
+        sourceReport,
+      ]),
+    );
+
+    expect(report.unknownValues).toEqual([]);
+    expect(sourceReportById.get("onr-v1-limited-corp-spoiler")).toMatchObject({
+      totalEntries: 187,
+      countsByRarity: {
+        common: 44,
+        uncommon: 66,
+        rare: 55,
+        vital: 22,
+      },
+    });
+    expect(sourceReportById.get("onr-v1-limited-runner-spoiler")).toMatchObject(
+      {
+        totalEntries: 187,
+        countsByRarity: {
+          common: 44,
+          uncommon: 66,
+          rare: 55,
+          vital: 22,
+        },
+      },
+    );
+    expect(sourceReportById.get("onr-proteus-spoiler")).toMatchObject({
+      totalEntries: 154,
+      countsByRarity: {
+        common: 66,
+        uncommon: 44,
+        rare: 44,
+        vital: 0,
+      },
+    });
+
+    const runtimeSnapshot = createRuntimeCardSnapshot();
+    const afreet = getCatalogCard(runtimeSnapshot, "onr_v1_001_afreet");
+    expect(afreet?.rarity).toMatchObject({
+      code: "uncommon",
+      labelDe: "Ungewöhnlich",
+      labelEn: "Uncommon",
+      sourceValue: "Uncommon",
+      sourceId: "onr-v1-limited-runner-spoiler",
+    });
+    const blackDahlia = getCatalogCard(runtimeSnapshot, "onr_v1_006_black-dahlia");
+    expect(blackDahlia?.rarity).toMatchObject({
+      code: "vital",
+      labelDe: "Vital",
+    });
+    expect(
+      searchCatalog(runtimeSnapshot, { q: "ungewöhnlich", side: "runner" })
+        .map((card) => card.catalogCardId),
+    ).toContain("onr_v1_001_afreet");
+    expect(validateSnapshot(runtimeSnapshot)).toEqual({ ok: true, errors: [] });
   });
 
   it("keeps import-only and blocked cards out of playability", () => {

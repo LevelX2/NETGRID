@@ -172,6 +172,42 @@ describe("catalog API filters", () => {
     );
   });
 
+  it("exposes display-only rarity metadata in list and detail responses", () => {
+    const detailResponse = catalogDetailResponse("onr_v1_001_afreet");
+    expect(detailResponse.status).toBe(200);
+    const detailBody = detailResponse.body as {
+      card: {
+        rarity?: {
+          code: string;
+          labelDe: string;
+          labelEn: string;
+          sourceId: string;
+        };
+      };
+    };
+    expect(detailBody.card.rarity).toMatchObject({
+      code: "uncommon",
+      labelDe: "Ungewöhnlich",
+      labelEn: "Uncommon",
+      sourceId: "onr-v1-limited-runner-spoiler",
+    });
+
+    const listResponse = catalogListResponse(
+      new URLSearchParams({ q: "Afreet" }),
+    );
+    expect(listResponse.status).toBe(200);
+    const listBody = listResponse.body as {
+      cards: Array<{
+        catalogCardId: string;
+        rarity?: { code: string; labelDe: string };
+      }>;
+    };
+    expect(
+      listBody.cards.find((card) => card.catalogCardId === "onr_v1_001_afreet")
+        ?.rarity,
+    ).toMatchObject({ code: "uncommon", labelDe: "Ungewöhnlich" });
+  });
+
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of ONR_V1_9_22_WIP_CARD_IDS) {
       const response = catalogDetailResponse(cardId);

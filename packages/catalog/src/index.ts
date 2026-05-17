@@ -18,6 +18,13 @@ import {
   CATALOG_AI_APPROVAL_BATCHES,
   CATALOG_GATE_BATCHES,
 } from "./catalog-gates";
+import {
+  CATALOG_RARITY_CODES,
+  CATALOG_RARITY_LABELS,
+  cardRarityTitleSideKey,
+  createCatalogRarity,
+  readProjectOriginalSetRarityByTitleSide,
+} from "./rarity";
 import type {
   CardSnapshot,
   CatalogCard,
@@ -27,6 +34,7 @@ import type {
   CatalogManifestReference,
   CatalogNumericFields,
   CatalogQuery,
+  CatalogRarity,
   CatalogSide,
   CatalogStatusKey,
   CatalogStatuses,
@@ -50,6 +58,8 @@ export type {
   CatalogManifestReference,
   CatalogNumericFields,
   CatalogQuery,
+  CatalogRarity,
+  CatalogRarityCode,
   CatalogSide,
   CatalogStatusKey,
   CatalogStatuses,
@@ -261,6 +271,7 @@ export const FORBIDDEN_PIPELINE_PAYLOAD_PATTERNS = [
 ] as const;
 
 export * from "./catalog-gates";
+export * from "./rarity";
 export const activeRuntimeCardIds = buildRuntimeCardIds(CATALOG_GATE_BATCHES);
 const ACTIVE_RUNTIME_CARD_ID_SET = new Set(activeRuntimeCardIds);
 
@@ -294,6 +305,7 @@ export function normalizeSnapshot(snapshot: CardSnapshot): CardSnapshot {
     cards: snapshot.cards
       .map((card) => ({
         ...card,
+        ...cloneRarityField(card.rarity),
         subtypes: [...card.subtypes],
         blockReasons: [...card.blockReasons],
         statuses: { ...card.statuses },
@@ -331,6 +343,22 @@ export function validateSnapshot(
     if (!card.type) errors.push(`Card ${card.catalogCardId} is missing type.`);
     if (!card.displayOnlyText)
       errors.push(`Card ${card.catalogCardId} text must be display-only.`);
+    if (card.rarity) {
+      if (!CATALOG_RARITY_CODES.includes(card.rarity.code))
+        errors.push(`Card ${card.catalogCardId} has invalid rarity code.`);
+      const labels = CATALOG_RARITY_LABELS[card.rarity.code];
+      if (
+        labels &&
+        (card.rarity.labelDe !== labels.labelDe ||
+          card.rarity.labelEn !== labels.labelEn)
+      ) {
+        errors.push(
+          `Card ${card.catalogCardId} has inconsistent rarity labels.`,
+        );
+      }
+      if (!card.rarity.sourceValue || !card.rarity.sourceId)
+        errors.push(`Card ${card.catalogCardId} has incomplete rarity source.`);
+    }
     if (!card.statuses.catalog_ready && card.statuses.deck_legal)
       errors.push(
         `Card ${card.catalogCardId} is deck_legal but not catalog_ready.`,
@@ -428,6 +456,7 @@ export function toCatalogSummary(card: CatalogCard): CatalogCardSummary {
     subtypes: card.subtypes,
     faction: card.faction,
     setId: card.setId,
+    ...cloneRarityField(card.rarity),
     statuses: card.statuses,
     blockReasons: card.blockReasons,
   };
@@ -1096,19 +1125,26 @@ export function createRuntimeCardPool(): RuntimeCardPool {
 
 export function createRuntimeCardSnapshot(): CardSnapshot {
   const baseSnapshot = snapshotData as unknown as CardSnapshot;
+  const rarityByTitleSide = readProjectOriginalSetRarityByTitleSide();
   const localOnrSnapshot = readLocalOnrSnapshot();
-  const baseCards = applyRuntimeBaseStatusModel(baseSnapshot.cards);
+  const baseCards = applyRuntimeBaseStatusModel(
+    applyCatalogRarityMetadata(baseSnapshot.cards, rarityByTitleSide),
+  );
   if (!localOnrSnapshot)
     return {
       ...baseSnapshot,
-      cards: [...baseCards, ...createFallbackOnrRuntimeCards()],
+      cards: [...baseCards, ...createFallbackOnrRuntimeCards(rarityByTitleSide)],
     };
   const confirmedTextOverrides = readLocalConfirmedTextOverrides();
   const localCardsWithConfirmedText = applyLocalConfirmedTextOverrides(
     localOnrSnapshot.cards,
     confirmedTextOverrides,
   );
-  const v105kCards = applyOnrV105KReleaseGate(localCardsWithConfirmedText);
+  const localCardsWithRarity = applyCatalogRarityMetadata(
+    localCardsWithConfirmedText,
+    rarityByTitleSide,
+  );
+  const v105kCards = applyOnrV105KReleaseGate(localCardsWithRarity);
 
   return {
     ...baseSnapshot,
@@ -1342,6 +1378,7 @@ function searchableText(card: CatalogCard): string {
       card.faction,
       card.setId,
       ...card.subtypes,
+      ...raritySearchTerms(card.rarity),
       card.text,
     ].join(" "),
   );
@@ -1353,6 +1390,66 @@ function normalizeSearch(value: string): string {
 
 function unique<T extends string>(values: T[]): T[] {
   return [...new Set(values)].sort((a, b) => a.localeCompare(b));
+}
+
+function raritySearchTerms(rarity: CatalogRarity | undefined): string[] {
+  if (!rarity) return [];
+  return [
+    rarity.code,
+    rarity.labelDe,
+    rarity.labelEn,
+    rarity.sourceValue,
+  ];
+}
+
+function cloneRarityField(
+  rarity: CatalogRarity | null | undefined,
+): { rarity?: CatalogRarity } {
+  return rarity ? { rarity: { ...rarity } } : {};
+}
+
+function applyCatalogRarityMetadata(
+  cards: CatalogCard[],
+  rarityByTitleSide: ReadonlyMap<string, CatalogRarity>,
+): CatalogCard[] {
+  return cards.map((card) =>
+    applyCatalogRarityMetadataToCard(card, rarityByTitleSide),
+  );
+}
+
+function applyCatalogRarityMetadataToCard(
+  card: CatalogCard,
+  rarityByTitleSide: ReadonlyMap<string, CatalogRarity>,
+): CatalogCard {
+  const sourceRarity = rarityByTitleSide.get(
+    cardRarityTitleSideKey(card.title, card.side),
+  );
+  if (sourceRarity) return withCatalogRarity(card, sourceRarity);
+  if (card.rarity) return withCatalogRarity(card, card.rarity);
+  return withCatalogRarity(
+    card,
+    createCatalogRarity(
+      legacyOnrRaritySourceValue(card),
+      "private-local-onr-v1-overlay",
+    ),
+  );
+}
+
+function withCatalogRarity(
+  card: CatalogCard,
+  rarity: CatalogRarity | null | undefined,
+): CatalogCard {
+  const nextCard = { ...card };
+  if (rarity) nextCard.rarity = { ...rarity };
+  else delete nextCard.rarity;
+  return nextCard;
+}
+
+function legacyOnrRaritySourceValue(
+  card: CatalogCard,
+): string | null | undefined {
+  return (card as CatalogCard & { onr?: { rarity?: string | null } }).onr
+    ?.rarity;
 }
 
 function readLocalOnrSnapshot(): CardSnapshot | null {
@@ -1525,11 +1622,18 @@ function applyOnrV105KReleaseGate(cards: CatalogCard[]): CatalogCard[] {
   );
 }
 
-function createFallbackOnrRuntimeCards(): CatalogCard[] {
+function createFallbackOnrRuntimeCards(
+  rarityByTitleSide: ReadonlyMap<string, CatalogRarity>,
+): CatalogCard[] {
   return activeRuntimeCardIds.map((cardId) => {
     const definition = DEMO_CARDS_BY_ID[cardId];
     if (!definition) return null;
-    return promoteOnrRuntimeReleaseCard(catalogCardFromDefinition(definition));
+    return promoteOnrRuntimeReleaseCard(
+      applyCatalogRarityMetadataToCard(
+        catalogCardFromDefinition(definition),
+        rarityByTitleSide,
+      ),
+    );
   }).filter((card): card is CatalogCard => Boolean(card));
 }
 

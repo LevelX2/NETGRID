@@ -27,6 +27,16 @@ export type CatalogStatusKey =
 
 export type CatalogStatuses = Record<CatalogStatusKey, boolean>;
 
+export type CatalogRarityCode = "common" | "uncommon" | "rare" | "vital";
+
+export type CatalogRarity = {
+  code: CatalogRarityCode;
+  labelDe: string;
+  labelEn: string;
+  sourceValue: string;
+  sourceId: string;
+};
+
 export type CatalogNumericFields = {
   cost: number | null;
   installCost: number | null;
@@ -61,6 +71,7 @@ export type CatalogCard = {
   collectorNumber: string;
   text: string;
   displayOnlyText: boolean;
+  rarity?: CatalogRarity;
   numeric: CatalogNumericFields;
   statuses: CatalogStatuses;
   blockReasons: string[];
@@ -92,6 +103,7 @@ export type CatalogCardSummary = Pick<
   | "subtypes"
   | "faction"
   | "setId"
+  | "rarity"
   | "statuses"
   | "blockReasons"
 >;
