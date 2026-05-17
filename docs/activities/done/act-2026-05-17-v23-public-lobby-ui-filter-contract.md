@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-v23-public-lobby-ui-filter-contract
-status: in_progress
+status: done
 kind: concept
 area: web
 priority: normal
@@ -8,14 +8,18 @@ primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-1
 parallelWorker: worker-1
 releaseTarget: V2.3
-blockedBy:
-  - act-2026-05-17-v23-public-lobby-risk-review
-resultArtifacts: []
-checks: []
+blockedBy: []
+resultArtifacts:
+  - docs/derived/V2_3_PUBLIC_LOBBY_UI_FILTER_CONTRACT.md
+checks:
+  - "Test-Path references for V2.3 Public-Lobby UI/filter contract sources"
+  - "rg reference check for V2_3_PUBLIC_LOBBY_UI_FILTER_CONTRACT"
+  - "git diff --check"
+outcome: completed
 ---
 
 # V2.3 Public Lobby UI- und Filtervertrag
@@ -49,11 +53,11 @@ Vor einer Public-Lobby-Alpha soll ein UI-/Filtervertrag festlegen, welche Filter
 
 ## Akzeptanzkriterien
 
-- [ ] Erlaubte Filter und Listenmetadaten sind konkret benannt.
-- [ ] Verbotene Felder und Korrelationen sind explizit aufgeführt.
-- [ ] UI-Fehler- und Leerezustände leaken keine Account-, Match-, Deck-, Token-, Hidden-Info- oder Moderationsdetails.
-- [ ] Handoff an spätere UI- und API-Slices ist eindeutig.
+- [x] Erlaubte Filter und Listenmetadaten sind konkret benannt.
+- [x] Verbotene Felder und Korrelationen sind explizit aufgeführt.
+- [x] UI-Fehler- und Leerezustände leaken keine Account-, Match-, Deck-, Token-, Hidden-Info- oder Moderationsdetails.
+- [x] Handoff an spätere UI- und API-Slices ist eindeutig.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/V2_3_PUBLIC_LOBBY_UI_FILTER_CONTRACT.md` definiert die erlaubten Public-Lobby-Filter, Listenmetadaten, sicheren UI-Zustände, verbotenen Felder und verbotenen Korrelationen für V2.3 Public Lobby Alpha. Das Artefakt bestätigt weiterhin, dass V2.3 blockiert bleibt und keine UI-, API-, Matchmaking-, Chat-, Spectator-, Replay-, Account-, Moderations-, KI-, Karten- oder Asset-Freigabe erhält. Handoff an spätere UI- und API-Slices ist im Vertrag getrennt beschrieben.
