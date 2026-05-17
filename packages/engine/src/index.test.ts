@@ -26224,6 +26224,99 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
     expect(runnerView.run?.breach?.remainingCount).toBe(2);
   });
 
+  it("adds HQ root upgrades after the random HQ hand access without leaking unaccessed HQ cards", () => {
+    let state = toRunnerTurn(v097RunGame("v097-hq-root-upgrade-access"));
+    state.runner.credits = 10;
+    const operationId = moveCorpCardToHq(state, "simple_economy_operation");
+    const agendaId = moveCorpCardToHq(state, "simple_agenda");
+    keepOnlyCorpHqCards(state, [operationId, agendaId]);
+    const upgradeId = findCard(state, "simple_upgrade");
+    const hqServer = state.corp.servers.find((server) => server.id === "hq");
+    if (!hqServer) throw new Error("Missing HQ server.");
+    removeEverywhere(state, upgradeId);
+    hqServer.root.push(upgradeId);
+    state.cardInstances[upgradeId] = {
+      ...state.cardInstances[upgradeId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "hq" },
+      faceup: true,
+      rezzed: true,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+
+    const queue = state.run?.breach?.queue ?? [];
+    expect(queue).toHaveLength(2);
+    expect(queue[1]?.cardInstanceId).toBe(upgradeId);
+    expect(queue.map((entry) => entry.zone)).toEqual(["hq", "remote_root"]);
+    const accessedHqId = queue[0]?.cardInstanceId;
+    const unaccessedHqId = [operationId, agendaId].find(
+      (cardId) => cardId !== accessedHqId,
+    );
+    if (!accessedHqId || !unaccessedHqId)
+      throw new Error("Missing HQ access selection.");
+    const accessedHqDefinition =
+      state.cardInstances[accessedHqId]?.definitionId;
+    const unaccessedHqTitle = DEMO_CARDS_BY_ID[
+      state.cardInstances[unaccessedHqId]?.definitionId ?? ""
+    ]?.title;
+    expect(unaccessedHqTitle).toBeDefined();
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      unaccessedHqTitle,
+    );
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: accessedHqDefinition,
+      serverLabel: "HQ",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      unaccessedHqTitle,
+    );
+    if (accessedHqDefinition === "simple_agenda") {
+      state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    }
+    expect(state.run?.breach?.currentIndex).toBe(1);
+    expect(state.run?.accessedCardId).toBeUndefined();
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_upgrade",
+      serverLabel: "HQ",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      unaccessedHqTitle,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+
+    expect(state.corp.archives).toContain(upgradeId);
+    expect(state.run).toBeUndefined();
+    const accessEvents = state.eventLog
+      .slice(replayStart)
+      .filter((event) => event.publicPayload.actionType === "access_card");
+    expect(
+      accessEvents.map((event) => event.publicPayload.cardDefinitionId),
+    ).toEqual([accessedHqDefinition, "simple_upgrade"]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
   it("does not expose post-V0.97 mechanics while enabling Breach and Multiaccess", () => {
     const state = toRunnerTurn(v097RunGame("v097-no-scope"));
     const actionTypes = getLegalActions(state, "runner").map(
