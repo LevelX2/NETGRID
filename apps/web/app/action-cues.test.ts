@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
-import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues } from "./action-cues";
+import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues, turnStartAudioCue } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -138,7 +138,59 @@ describe("deriveOpponentActionCues", () => {
     });
 
     expect(cues).toHaveLength(0);
-    expect(actionSoundForActionType("end_turn", "public")).toBe("turn");
+    expect(actionSoundForActionType("end_turn", "public")).toBeUndefined();
+  });
+
+  it("derives one side-specific turn-start cue only for live side changes", () => {
+    const previous = {
+      matchId: "match_1",
+      stateVersion: 8,
+      activeSide: "corp" as const,
+      phase: "corp_action_phase" as const
+    };
+
+    expect(
+      turnStartAudioCue({
+        matchId: "match_1",
+        stateVersion: 9,
+        activeSide: "runner",
+        phase: "runner_action_phase"
+      }, previous)
+    ).toEqual({ key: "match_1:9:runner", side: "runner", sound: "runner_turn" });
+
+    expect(
+      turnStartAudioCue({
+        matchId: "match_1",
+        stateVersion: 10,
+        activeSide: "runner",
+        phase: "runner_action_phase"
+      }, { ...previous, activeSide: "runner", phase: "runner_action_phase" })
+    ).toBeNull();
+
+    expect(
+      turnStartAudioCue({
+        matchId: "match_2",
+        stateVersion: 1,
+        activeSide: "corp",
+        phase: "corp_action_phase"
+      }, previous)
+    ).toBeNull();
+  });
+
+  it("does not cue non-action setup transitions as turn starts", () => {
+    expect(
+      turnStartAudioCue({
+        matchId: "match_1",
+        stateVersion: 3,
+        activeSide: "runner",
+        phase: "setup"
+      }, {
+        matchId: "match_1",
+        stateVersion: 2,
+        activeSide: "corp",
+        phase: "setup"
+      })
+    ).toBeNull();
   });
 
   it("marks substantive opponent actions when local play can continue", () => {

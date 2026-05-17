@@ -42,6 +42,8 @@ export type BoardHighlight =
 
 export type ActionSoundKind =
   | "turn"
+  | "runner_turn"
+  | "corp_turn"
   | "draw"
   | "credit"
   | "install_hidden"
@@ -55,6 +57,19 @@ export type ActionSoundKind =
   | "tag_or_damage"
   | "choice"
   | "game_end";
+
+export type TurnStartAudioState = {
+  matchId: string;
+  stateVersion: number;
+  activeSide: Side;
+  phase: PlayerView["phase"];
+};
+
+export type TurnStartAudioCue = {
+  key: string;
+  side: Side;
+  sound: ActionSoundKind;
+};
 
 export type CueDerivationInput = {
   viewerSide: Side;
@@ -259,17 +274,30 @@ export function actionSoundForActionType(actionType: string, visibility: Chronic
       return "choice";
     case "game_end":
       return "game_end";
-    case "end_turn":
-      return "turn";
     default:
       return undefined;
   }
+}
+
+export function turnStartAudioCue(current: TurnStartAudioState, previous?: TurnStartAudioState | null): TurnStartAudioCue | null {
+  if (!previous || previous.matchId !== current.matchId) return null;
+  if (previous.activeSide === current.activeSide) return null;
+  if (!isActionPhaseForSide(current.phase, current.activeSide)) return null;
+  return {
+    key: `${current.matchId}:${current.stateVersion}:${current.activeSide}`,
+    side: current.activeSide,
+    sound: current.activeSide === "runner" ? "runner_turn" : "corp_turn"
+  };
 }
 
 export function actionSoundCountForAction(actionType: string, payload: Record<string, unknown> | undefined): number {
   if (actionType !== "mandatory_draw" && actionType !== "draw_card") return 1;
   const amount = typeof payload?.amount === "number" ? payload.amount : 1;
   return Math.min(5, Math.max(1, Math.floor(amount)));
+}
+
+function isActionPhaseForSide(phase: PlayerView["phase"], side: Side): boolean {
+  return (side === "runner" && phase === "runner_action_phase") || (side === "corp" && phase === "corp_action_phase");
 }
 
 function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {
