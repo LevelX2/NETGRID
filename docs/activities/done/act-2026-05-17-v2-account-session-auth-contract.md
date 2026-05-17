@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-05-17-v2-account-session-auth-contract
-status: inbox
+status: done
 kind: architecture
 area: server
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget: V2.0
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md
+  - docs/activities/inbox/act-2026-05-17-v2-account-session-foundation.md
+  - docs/codex/CODEX_STATUS.md
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
+checks:
+  - Quellenprüfung gegen V2_0_AUTH_PRIVACY_DECISION_SPIKE.md, Multiplayer-Service, Web-Session-Recovery und Internet-Hardening
+  - git diff --check
 ---
 
 # V2.0 Account-/Session-/Passkey-Vertrag spezifizieren
@@ -47,12 +53,12 @@ Vor Auth-Code soll ein enger Account- und Session-Vertrag entstehen: geschlossen
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt ein versioniertes Vertragsartefakt für Account-, Credential- und Session-Modell.
-- [ ] Cookie-/CSRF-/Origin-Strategie ist konkret oder als Blocker benannt.
-- [ ] Passkey/WebAuthn-Teststrategie ist konkret oder als Blocker benannt.
-- [ ] Match-Tokens bleiben als per-match Capabilities getrennt.
-- [ ] Revocation-Fälle sind als Tests oder Testmatrix benannt.
-- [ ] KI-Input und DecisionDebug bleiben ausdrücklich accountfrei.
+- [x] Es gibt ein versioniertes Vertragsartefakt für Account-, Credential- und Session-Modell.
+- [x] Cookie-/CSRF-/Origin-Strategie ist konkret oder als Blocker benannt.
+- [x] Passkey/WebAuthn-Teststrategie ist konkret oder als Blocker benannt.
+- [x] Match-Tokens bleiben als per-match Capabilities getrennt.
+- [x] Revocation-Fälle sind als Tests oder Testmatrix benannt.
+- [x] KI-Input und DecisionDebug bleiben ausdrücklich accountfrei.
 
 ## Umsetzungshinweise
 
@@ -61,4 +67,6 @@ Vor Auth-Code soll ein enger Account- und Session-Vertrag entstehen: geschlossen
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md` friert den V2.0-Account-/Session-/Passkey-Vertrag ein: Account-, Credential-, Account-Session- und Invite-Modelle, `ng_account_session` als `HttpOnly Secure` Cookie-Ziel, Same-Site-/Reverse-Proxy-Blocker, CSRF über `X-NETGRID-CSRF`, Passkey/WebAuthn-Challenge-Regeln, Revocation-Fälle und eine 18-Punkte-Testmatrix.
+
+Match-Join-/Session-/Reconnect-Tokens bleiben per-match Capabilities; ein Account allein darf keine PlayerActions ausführen. Lokaler Gast-/Privatmodus bleibt erhalten, und Account-IDs dürfen nicht in Gegnerpayloads, PlayerViews, PublicEvents, `AIInput` oder `DecisionDebug` erscheinen. Der vorbereitete Foundation-Slice `act-2026-05-17-v2-account-session-foundation` verweist nun auf den Vertrag und hat keinen aktiven Blocker mehr. Verifikation: Quellenprüfung und `git diff --check`.

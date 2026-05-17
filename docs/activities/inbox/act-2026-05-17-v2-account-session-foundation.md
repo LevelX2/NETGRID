@@ -11,8 +11,7 @@ startedAt:
 completedAt:
 branch:
 releaseTarget: V2.0
-blockedBy:
-  - act-2026-05-17-v2-account-session-auth-contract
+blockedBy: []
 resultArtifacts: []
 checks: []
 ---
@@ -26,7 +25,7 @@ Nach Vertragsfreeze soll ein kleiner, nicht-öffentlicher Foundation-Slice für 
 ## Kontext und Quellen
 
 - `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
-- Folgeblocker: `act-2026-05-17-v2-account-session-auth-contract`
+- `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md`
 
 ## Scope
 
