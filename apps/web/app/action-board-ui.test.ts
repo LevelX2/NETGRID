@@ -411,6 +411,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Vor neuem Fort");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Fort");
+    expect(
+      contextualCardActionLabel(
+        legalAction("corp", "install_card", "agenda_1", "Karte in Remote 1 installieren", {
+          cardId: "agenda_1",
+          serverId: "remote_1",
+          placement: "root",
+          rootReplacement: "asset_to_agenda",
+        }),
+      ),
+    ).toBe("In Fort 1 (Node ersetzen)");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "upgrade_1", "Karte in HQ installieren", { cardId: "upgrade_1", serverId: "hq", placement: "root" }))).toBe(
       "In HQ",
     );

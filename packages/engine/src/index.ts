@@ -3145,6 +3145,9 @@ function corpMainActions(state: GameState): LegalAction[] {
           canInstallCorpRootCardInServer(state, definition, server) &&
           state.corp.credits >= regionInstallCost
         ) {
+          const replacesRootAsset =
+            definition.type === "agenda" &&
+            corpRootAssetIdsInServer(state, server).length > 0;
           actions.push(
             action(
               state,
@@ -3160,7 +3163,14 @@ function corpMainActions(state: GameState): LegalAction[] {
                     : {}),
                 },
               ],
-              { cardId: id, serverId: server.id, placement: "root" },
+              {
+                cardId: id,
+                serverId: server.id,
+                placement: "root",
+                ...(replacesRootAsset
+                  ? { rootReplacement: "asset_to_agenda" }
+                  : {}),
+              },
             ),
           );
         }
@@ -9272,6 +9282,23 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       "In diesem Server darf diese Karte nicht im Root installiert sein.",
     );
   }
+  const replacedRootAssetIds =
+    definition.type === "agenda" ? corpRootAssetIdsInServer(state, server) : [];
+  const replacedRootDefinitionIds = replacedRootAssetIds.map(
+    (replacedId) => definitionFor(state, replacedId).id,
+  );
+  for (const replacedId of replacedRootAssetIds) {
+    trashCorpInstalledCardToArchives(state, replacedId, legalAction);
+  }
+  if (replacedRootAssetIds.length > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      rootReplacement: "asset_to_agenda",
+      replacedRootCardIds: replacedRootAssetIds.join(","),
+      replacedRootDefinitionIds: replacedRootDefinitionIds.join(","),
+      replacedRootCardType: "asset",
+    };
+  }
   server.root.push(cardId);
   const regionInstall = isRegionUpgrade(definition);
   if (regionInstall) {
@@ -9302,10 +9329,30 @@ function canInstallCorpRootCardInServer(
   if (definition.type === "upgrade") return server.kind !== "archives";
   if (server.kind !== "remote") return false;
   if (definition.type !== "agenda" && definition.type !== "asset") return false;
-  return !server.root.some((id) => {
-    const installedType = definitionFor(state, id).type;
-    return installedType === "agenda" || installedType === "asset";
-  });
+  if (definition.type === "agenda")
+    return !server.root.some((id) => definitionFor(state, id).type === "agenda");
+  return corpRootMainCardIdsInServer(state, server).length === 0;
+}
+
+function corpRootAssetIdsInServer(
+  state: GameState,
+  server: CorpServer,
+): CardInstanceId[] {
+  return server.root
+    .filter((id) => definitionFor(state, id).type === "asset")
+    .sort();
+}
+
+function corpRootMainCardIdsInServer(
+  state: GameState,
+  server: CorpServer,
+): CardInstanceId[] {
+  return server.root
+    .filter((id) => {
+      const installedType = definitionFor(state, id).type;
+      return installedType === "agenda" || installedType === "asset";
+    })
+    .sort();
 }
 
 function trashTopRunnersConferenceOnRunStart(state: GameState): void {
@@ -12142,6 +12189,7 @@ function trashCorpInstalledCardToArchives(
     rezzed: true,
     zone: { side: "corp", zone: "archives" },
   };
+  clearCardCounters(state, cardId);
   if (rezzedNevinyrralLeftPlay) {
     state.winner = "runner";
     state.gameEndReason = "nevinyrral_left_play";
@@ -20720,6 +20768,8 @@ function publicContextForAction(
       "iceInstallReduction",
       "iceInstallTotalCost",
       "recurringCreditsLoaded",
+      "rootReplacement",
+      "replacedRootCardType",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;

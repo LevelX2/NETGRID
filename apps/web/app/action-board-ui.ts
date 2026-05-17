@@ -310,6 +310,11 @@ function installContextLabel(action: LegalAction): string {
   if (!serverId) return "Installieren";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
+  if (
+    action.payload?.placement === "root" &&
+    action.payload?.rootReplacement === "asset_to_agenda"
+  )
+    return `In ${serverLabel} (Node ersetzen)`;
   if (action.payload?.placement === "root") return `In ${serverLabel}`;
   return `Installieren: ${serverLabel}`;
 }

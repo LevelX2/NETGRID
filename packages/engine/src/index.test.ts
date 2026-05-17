@@ -4691,6 +4691,86 @@ describe("V1.0.5K Card Release", () => {
     ).toBe(true);
   });
 
+  it("lets the Corp install an agenda over an installed asset in a remote root", () => {
+    const corpDeck: DeckDefinition = {
+      ...ONR_V1_0_5K_CORP_DECK,
+      id: "v105k_agenda_over_node_corp",
+      cards: [
+        ...ONR_V1_0_5K_CORP_DECK.cards,
+        { id: "simple_economy_asset", quantity: 1 },
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v105k-agenda-over-node",
+      runnerDeck: ONR_V1_0_5K_RUNNER_DECK,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    const assetId = moveCorpCardToHq(state, "simple_economy_asset");
+    const agendaId = moveCorpCardToHq(state, "simple_agenda");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === assetId &&
+        action.payload?.serverId === "new_remote",
+    );
+    const installAgenda = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === agendaId &&
+        action.payload?.serverId === "remote_1" &&
+        action.payload?.rootReplacement === "asset_to_agenda",
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === "simple_economy_asset" &&
+          action.payload?.serverId === "remote_1",
+      ),
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === installAgenda.actionId,
+    );
+    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    expect(remote?.root).toContain(agendaId);
+    expect(remote?.root).not.toContain(assetId);
+    expect(state.corp.archives).toContain(assetId);
+    expect(state.cardInstances[assetId]?.zone).toEqual({
+      side: "corp",
+      zone: "archives",
+    });
+    expect(state.cardInstances[agendaId]?.zone).toEqual({
+      side: "corp",
+      zone: "serverRoot",
+      serverId: "remote_1",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      rootReplacement: "asset_to_agenda",
+      replacedRootCardType: "asset",
+    });
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      agendaId,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("keeps V1.0.5K ICE hidden in Runner views until rez", () => {
     let state = toRunnerTurn(
       v105kCardReleaseGame("v105k-visibility-data-wall-2"),
