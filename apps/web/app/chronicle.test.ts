@@ -1282,6 +1282,56 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toContain("Automatisch");
   });
 
+  it("redacts automatic hidden card movements before titles and card fields are exposed", () => {
+    const hiddenBarrierItems = formatChronicleEffectItems(
+      makeEvent("install_card", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "region-replacement",
+            kind: "trash_card",
+            visibility: "hidden_info_barrier",
+            side: "corp",
+            cardDefinitionId: "simple_agenda",
+            cardTitle: "Simple Agenda",
+            sourceDefinitionId: "secret_region_upgrade",
+            sourceTitle: "Secret Region Upgrade",
+            redactedKind: "region_replacement"
+          }
+        ]
+      }),
+      "runner"
+    );
+    const privateSideItems = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "runner-private-trash",
+            kind: "trash_card",
+            visibility: "private_to_side",
+            side: "runner",
+            cardDefinitionId: "onr_v1_036_jackhammer",
+            cardTitle: "Jackhammer",
+            sourceDefinitionId: "runner_secret_source",
+            sourceTitle: "Runner Secret Source"
+          }
+        ]
+      }),
+      "corp"
+    );
+
+    expect(hiddenBarrierItems[0]?.title).toBe("Ein verdecktes Region Upgrade wurde ersetzt.");
+    expect(hiddenBarrierItems[0]?.visibility).toBe("redacted");
+    expect(hiddenBarrierItems[0]?.category).toBe("hidden");
+    expect(hiddenBarrierItems[0]?.cardDefinitionId).toBeUndefined();
+    expect(hiddenBarrierItems[0]?.cardTitle).toBeUndefined();
+    expect(JSON.stringify(hiddenBarrierItems[0])).not.toMatch(/Simple Agenda|simple_agenda|Secret Region Upgrade|secret_region_upgrade/);
+    expect(privateSideItems[0]?.title).toBe("Eine verdeckte Karte wurde in den Heap gelegt.");
+    expect(privateSideItems[0]?.visibility).toBe("redacted");
+    expect(JSON.stringify(privateSideItems[0])).not.toMatch(/Jackhammer|onr_v1_036_jackhammer|Runner Secret Source|runner_secret_source/);
+  });
+
   it("shows Top Runners' Conference start-of-turn credits from automatic effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {

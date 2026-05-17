@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-effect-event-chronicle-visibility-audit
-status: in_progress
+status: done
 kind: architecture
 area: shared
 priority: high
@@ -8,13 +8,19 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17T18:51:59+02:00
 branch: codex/activity-worker-3
 parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/EFFECT_EVENT_CHRONICLE_VISIBILITY_AUDIT_2026_05_17.md
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - corepack pnpm exec vitest run apps/web/app/chronicle.test.ts apps/web/app/action-cues.test.ts --passWithNoTests
+  - corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts --passWithNoTests (known existing failures in page.tsx string-contract expectations)
+  - git diff --check
 ---
 
 # Effekt-Events: Chronik und sichtbare Darstellung härten
@@ -42,10 +48,10 @@ Wichtige Effekte sollen nicht nur intern korrekt passieren, sondern einheitlich 
 
 ## Akzeptanzkriterien
 
-- [ ] Gemeinsame Lücken in Eventprojektion, Chronik und UI-Cues sind identifiziert.
-- [ ] Mindestens ein konkreter, kleiner gemeinsamer Fix ist umgesetzt oder als Folgeactivity geschnitten.
-- [ ] Hidden-Info-Textmuster für verdeckte Kartenbewegungen sind festgehalten.
-- [ ] Regressionen prüfen, dass verdeckte Kartennamen nicht in öffentliche Chronik/Events gelangen.
+- [x] Gemeinsame Lücken in Eventprojektion, Chronik und UI-Cues sind identifiziert.
+- [x] Mindestens ein konkreter, kleiner gemeinsamer Fix ist umgesetzt oder als Folgeactivity geschnitten.
+- [x] Hidden-Info-Textmuster für verdeckte Kartenbewegungen sind festgehalten.
+- [x] Regressionen prüfen, dass verdeckte Kartennamen nicht in öffentliche Chronik/Events gelangen.
 
 ## Umsetzungshinweise
 
@@ -54,4 +60,4 @@ Wichtige Effekte sollen nicht nur intern korrekt passieren, sondern einheitlich 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Der gemeinsame Event-/Chronik-/Cue-Vertrag wurde auditiert; Ergebnis und Hidden-Info-Textmuster sind in `docs/derived/EFFECT_EVENT_CHRONICLE_VISIBILITY_AUDIT_2026_05_17.md` festgehalten. Als kleiner gemeinsamer Fix redigiert `formatChronicleEffectItems` automatische `resolvedEffects` jetzt side-bewusst, bevor Titel oder Kartenfelder aus `cardTitle`, `sourceTitle` oder Definition-IDs entstehen. Der neue Regressionstest deckt `hidden_info_barrier` und fremde `private_to_side`-Trash-Effekte ab. Betroffene Chronik-/Cue-Tests sind grün; der separate alte `visibility-contract.test.ts` bleibt wegen bestehenden String-Contract-Abweichungen in `apps/web/app/page.tsx` rot und wurde nicht im Scope repariert.

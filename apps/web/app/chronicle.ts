@@ -932,9 +932,13 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   const chips = [...baseChips(actor, false)];
   let category: ChronicleCategory = "system";
   let importance: ChronicleImportance = "normal";
-  let visibility: ChronicleVisibility = effect.visibility === "public" ? "public" : effect.visibility === "private_to_side" ? "side" : "redacted";
+  let visibility: ChronicleVisibility = chronicleEffectVisibility(effect, side);
   let title = "Ein automatischer Effekt wurde aufgelöst";
   const through = sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
+
+  if (visibility === "redacted") {
+    return redactedChronicleEffectItem(event, effect, index, actor, subject, amount);
+  }
 
   switch (effect.kind) {
     case "gain_credits":
@@ -1019,6 +1023,58 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     chips: uniqueChips(chips.filter(Boolean)),
     ...(sourceDefinitionId && visibility !== "redacted" ? { cardDefinitionId: sourceDefinitionId } : {}),
     ...(sourceTitle && visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    cardDetailLines: [],
+    groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
+  };
+}
+
+function chronicleEffectVisibility(effect: ResolvedGameEffect, viewerSide: Side): ChronicleVisibility {
+  if (effect.visibility === "public") return "public";
+  if (effect.visibility === "private_to_side" && effect.side === viewerSide) return "side";
+  return "redacted";
+}
+
+function redactedChronicleEffectItem(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+  index: number,
+  actor: Side | undefined,
+  subject: string,
+  amount: number
+): ChronicleItem {
+  const chips = uniqueChips([...baseChips(actor, false), "Verdeckt", "Automatisch"]);
+  const zoneLabel = actor === "corp" ? "ins Archiv" : actor === "runner" ? "in den Heap" : "abgelegt";
+  let category: ChronicleCategory = "hidden";
+  let importance: ChronicleImportance = "normal";
+  let title = "Ein verdeckter Effekt wurde aufgelöst";
+
+  switch (effect.kind) {
+    case "draw_cards":
+      category = "card";
+      title = phrase(subject, `${cardCountText(amount)} verdeckt gezogen`);
+      break;
+    case "trash_card":
+      importance = "important";
+      title =
+        effect.redactedKind === "region_replacement"
+          ? "Ein verdecktes Region Upgrade wurde ersetzt"
+          : `Eine verdeckte Karte wurde ${zoneLabel} gelegt`;
+      break;
+    case "damage":
+      category = "danger";
+      importance = "critical";
+      title = phrase(subject, `${amount} Schaden erlitten`);
+      break;
+  }
+
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category,
+    importance,
+    visibility: "redacted",
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(title),
+    chips,
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
