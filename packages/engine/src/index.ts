@@ -5949,6 +5949,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
                 iceId: encounteredIceId,
                 subroutineIndex: index,
                 targetIceDefinitionId: iceDefinition.id,
+                targetIceTitle: iceDefinition.title,
                 breakSubroutineBaseCost: breakAbility.cost.credits,
                 ...(additionalBreakCost > 0
                   ? {
@@ -6043,6 +6044,7 @@ function pileDriverBreakActions(
             breakSubroutineCount: subroutineIndexes.length,
             pileDriverMultiBreak: true,
             targetIceDefinitionId: iceDefinition.id,
+            targetIceTitle: iceDefinition.title,
             breakSubroutineBaseCost: breakAbility.cost.credits,
             ...(additionalBreakCost > 0
               ? {
@@ -19969,6 +19971,7 @@ function resolveTraceRunnerBid(
       traceId: trace.traceId,
       traceStep: "runner_bid",
       baseTraceStrength: trace.baseTraceStrength,
+      sourceDefinitionId: trace.sourceDefinitionId,
       corpBid: trace.corpBid ?? 0,
       traceStrength,
       runnerLink,
@@ -20072,6 +20075,7 @@ function resolveTraceRunnerBid(
     traceId: trace.traceId,
     traceStep: "runner_bid",
     baseTraceStrength: trace.baseTraceStrength,
+    sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
     traceStrength,
     runnerLink,
@@ -20326,6 +20330,7 @@ function completeTraceAfterPostBidLink(
     traceId: trace.traceId,
     traceStep: "post_bid_link",
     baseTraceStrength: trace.baseTraceStrength,
+    sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
     traceStrength,
     runnerLink,
@@ -20973,6 +20978,20 @@ function publicContextForAction(
     typeof legalAction.payload?.breakSubroutineCount === "number"
   ) {
     context.breakSubroutineCount = legalAction.payload.breakSubroutineCount;
+  }
+  if (legalAction.type === "break_subroutine") {
+    for (const key of [
+      "subroutineIndex",
+      "subroutineIndexes",
+      "targetIceDefinitionId",
+      "targetIceTitle",
+      "breakSubroutineBaseCost",
+      "breakSubroutineAdditionalCost",
+      "breakSubroutineTotalCost",
+    ]) {
+      const value = legalAction.payload?.[key];
+      if (value !== undefined) context[key] = value;
+    }
   }
   if (
     legalAction.type === "break_subroutine" &&

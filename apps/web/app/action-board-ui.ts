@@ -596,6 +596,13 @@ export function runCurrentIceLabel(view: PlayerView): string | null {
   return `ICE ${position.iceIndex + 1}`;
 }
 
+function runCurrentIceTargetLabel(view: PlayerView): string | null {
+  const iceLabel = runCurrentIceLabel(view);
+  const title = view.run?.encounteredIce?.known === false ? null : view.run?.encounteredIce?.title;
+  if (title && iceLabel) return `${title} (${iceLabel})`;
+  return title ?? iceLabel;
+}
+
 export function runPositionStatusLabel(view: PlayerView): string | null {
   const run = view.run;
   if (!run?.position) return null;
@@ -639,7 +646,7 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
     if (view.run.phase === "approach_ice" && iceLabel) return `Annäherung an ${iceLabel} fortsetzen`;
   }
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && iceLabel && action.payload?.iceId === activeRunIceInstanceId(view)) {
-    return `${base} gegen ${iceLabel}`;
+    return `${base} gegen ${runCurrentIceTargetLabel(view) ?? iceLabel}`;
   }
   return base;
 }

@@ -668,7 +668,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
     expect(mirrored).toEqual([searchInstall, pump, continueRun]);
     expect(runWindowActionButtonLabel(running, searchInstall)).toBe("Self-Modifying Code trashen: Programm suchen");
-    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Stärke +1 (Simple Decoder) gegen ICE 1");
+    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Stärke +1 (Simple Decoder) gegen Data Wall (ICE 1)");
+    const breakAction = legalAction(
+      "runner",
+      "break_subroutine",
+      "breaker_1",
+      "Simple Decoder: Subroutine 1 brechen",
+      { breakerId: "breaker_1", iceId: "ice_1", subroutineIndex: 0 },
+      "run.encounter_ice"
+    );
+    expect(runWindowActionButtonLabel(running, breakAction)).toBe("Subroutine 1 brechen (Simple Decoder) gegen Data Wall (ICE 1)");
     expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
   });

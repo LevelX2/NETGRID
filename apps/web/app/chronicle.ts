@@ -183,11 +183,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const hackerTrackerCountersAdded = numberValue(payload.hackerTrackerCountersAdded) ?? 0;
         const fangRunLockCreditCost = numberValue(payload.fangRunLockCreditCost);
         const successful = payload.traceSuccessful === true;
+        const hardwareWreckerEffect = successful && payload.traceSuccessEffect === "hardware_trash_meat_damage_end_run";
+        const trashedCount = numberValue(payload.trashedCount) ?? 0;
+        const damageAmount = numberValue(payload.damageAmount) ?? 0;
         category = "danger";
         importance = "important";
         visibility = "public";
         title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
-        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.fangRunEnded === true ? `; Fang 2.0 beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(fangRunLockCreditCost ?? 2)}` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
+        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.fangRunEnded === true ? `; Fang 2.0 beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(fangRunLockCreditCost ?? 2)}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
@@ -196,6 +199,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           ...(traceStrength !== undefined && runnerStrength !== undefined ? [`${traceStrength}:${runnerStrength}`] : []),
           successful ? "Erfolg" : "Fehlschlag",
           ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
+          ...(hardwareWreckerEffect ? [`Hardware -${trashedCount}`, `${damageAmount} Schaden`, "Run endet"] : []),
           ...(payload.fangRunEnded === true ? ["Run endet", `Run-Sperre ${fangRunLockCreditCost ?? 2}`] : []),
           ...(hackerTrackerCountersAdded > 0 ? [`HTC +${hackerTrackerCountersAdded}`] : [])
         );
@@ -574,15 +578,21 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       {
         const breakSubroutineCount = numberValue(payload.breakSubroutineCount) ?? 1;
         const breakSubroutineBaseCost = numberValue(payload.breakSubroutineBaseCost);
-        description = `${breakSubroutineBaseCost !== undefined ? `${creditText(breakSubroutineBaseCost)}: ` : ""}${breakSubroutineCount === 1 ? "eine Subroutine" : `${breakSubroutineCount} Subroutinen`} gebrochen.`;
+        const breakSubroutineTotalCost = numberValue(payload.breakSubroutineTotalCost) ?? breakSubroutineBaseCost;
+        const subroutineLabel = breakSubroutineLabel(payload, breakSubroutineCount);
+        const targetIceTitle = stringValue(payload.targetIceTitle);
+        const targetIceSuffix = targetIceTitle ? ` auf ${targetIceTitle}` : "";
+        description = `${breakSubroutineTotalCost !== undefined ? `${creditText(breakSubroutineTotalCost)}: ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen.`;
         chips.push(
           "Subroutine",
-          breakSubroutineCount === 1 ? "Gebrochen" : `${breakSubroutineCount} gebrochen`,
-          ...(breakSubroutineBaseCost !== undefined ? [`${breakSubroutineBaseCost} ${creditLabel(breakSubroutineBaseCost)}`] : []),
-          ...(cardTitle ? [cardTitle] : [])
+          subroutineLabel,
+          "Gebrochen",
+          ...(breakSubroutineTotalCost !== undefined ? [`${breakSubroutineTotalCost} ${creditLabel(breakSubroutineTotalCost)}`] : []),
+          ...(cardTitle ? [cardTitle] : []),
+          ...(targetIceTitle ? [targetIceTitle] : [])
         );
+        title = phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen`);
       }
-      title = phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}eine Subroutine gebrochen`);
       break;
     case "continue_run":
       if (abilityId === "rio_de_janeiro_passed_ice") {
@@ -1086,6 +1096,18 @@ function creditText(amount: number): string {
 
 function creditLabel(amount: number): string {
   return amount === 1 ? "Credit" : "Credits";
+}
+
+function breakSubroutineLabel(payload: Record<string, unknown>, fallbackCount: number): string {
+  const rawIndex = numberValue(payload.subroutineIndex);
+  if (rawIndex !== undefined && Number.isInteger(rawIndex) && rawIndex >= 0) return `Subroutine ${rawIndex + 1}`;
+  const rawIndexes = stringValue(payload.subroutineIndexes);
+  const indexes = rawIndexes
+    ?.split(",")
+    .map((value) => Number(value))
+    .filter((value) => Number.isInteger(value) && value >= 0);
+  if (indexes && indexes.length > 0) return `Subroutinen ${indexes.map((index) => index + 1).join(", ")}`;
+  return fallbackCount === 1 ? "eine Subroutine" : `${fallbackCount} Subroutinen`;
 }
 
 function dieText(amount: number): string {
