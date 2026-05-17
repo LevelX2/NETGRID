@@ -106,6 +106,8 @@ type CorpPlanFeatures = {
   runnerCredits: number;
   runnerTags: number;
   serverFeatures: Map<string, { iceCount: number; rootCount: number; knownRootCount: number; rezzedIceCount: number; unrezzedIceCount: number }>;
+  ownAgendaCount: number;
+  ownAgendaPressure: number;
 };
 
 type RemoteIntentMemory = {
@@ -290,7 +292,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const context = corpEvaluationContext(input, contextOrBelief);
   const beliefState = context.beliefState;
   const profile = corpPlanProfile(input);
-  const agendaRisk = evaluateAgendaRisk(input, candidate);
+  const agendaRisk = evaluateAgendaRisk(input, candidate, context);
   const serverThreat = evaluateServerThreat(input, candidate, beliefState);
   const economyReserve = evaluateEconomyReserve(input, candidate);
   const iceRez = evaluateIceRez(input, candidate);
@@ -347,16 +349,75 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   };
 }
 
-export function evaluateAgendaRisk(input: AiDecisionInput, candidate: CorpPlanCandidate): CorpPlanEvaluatorResult {
+export function evaluateAgendaRisk(input: AiDecisionInput, candidate: CorpPlanCandidate, context: CorpEvaluationContext = createCorpEvaluationContext(input)): CorpPlanEvaluatorResult {
   const features = extractCorpPlanFeatures(input);
   const scorePressure = Math.max(0, features.opponentAgendaPoints - features.agendaPoints) * 20;
   const closeToWin = Math.max(0, features.agendaPointsToWin - features.agendaPoints <= 2 ? 40 : 0);
-  const score = candidate.kind === "score_now" ? 180 + closeToWin : candidate.kind === "score_next_turn" || candidate.kind === "build_scoring_remote" ? 70 - scorePressure : -10;
+  const actions = actionsForCandidate(input, candidate);
+  const hasProtectedAgendaInstall = actions.some((action) => action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole) && remoteRootActionSecurityScore(input, action, context) > 0);
+  const protectedRemoteAvailable = input.legalActions.some((action) => action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole) && remoteRootActionSecurityScore(input, action, context) > 0);
+  const hasRemoteIceInstall = actions.some((action) => action.type === "install_card" && action.payload?.placement === "ice" && isRemoteServerId(action.payload?.serverId));
+  const reserve = bestRemoteRezReserveNeed(input, context);
+  const rezReserveAvailable = !reserve || features.credits >= reserve.reserveTarget;
+  const agendaFloodScore = agendaFloodPlanScore(candidate, features, {
+    hasProtectedAgendaInstall,
+    protectedRemoteAvailable,
+    hasRemoteIceInstall,
+    rezReserveAvailable
+  });
+  const publicScoreRisk = candidate.kind === "score_now" ? 180 + closeToWin : candidate.kind === "score_next_turn" || candidate.kind === "build_scoring_remote" ? 70 - scorePressure : -10;
+  const score = publicScoreRisk + agendaFloodScore;
   return {
     score,
-    reasons: candidate.kind === "score_now" ? ["score_window_visible"] : ["agenda_risk_from_public_score"],
-    evidence: [`agenda_own:${features.agendaPoints}`, `agenda_runner:${features.opponentAgendaPoints}`, `agenda_to_win:${features.agendaPointsToWin}`]
+    reasons: sortedUnique([
+      candidate.kind === "score_now" ? "score_window_visible" : "agenda_risk_from_public_score",
+      ...(features.ownAgendaPressure > 0
+        ? [
+            "own_agenda_pressure",
+            ...(hasProtectedAgendaInstall ? ["protected_remote_available"] : []),
+            ...(hasRemoteIceInstall && !protectedRemoteAvailable ? ["prepare_protected_remote"] : []),
+            ...(!rezReserveAvailable ? ["remote_rez_reserve_unavailable"] : [])
+          ]
+        : [])
+    ]),
+    evidence: [
+      `agenda_own:${features.agendaPoints}`,
+      `agenda_runner:${features.opponentAgendaPoints}`,
+      `agenda_to_win:${features.agendaPointsToWin}`,
+      `own_agenda_count:${features.ownAgendaCount}`,
+      `ownAgendaPressure:${features.ownAgendaPressure}`,
+      `protectedRemoteAvailable:${protectedRemoteAvailable}`,
+      `rezReserveAvailable:${rezReserveAvailable}`
+    ]
   };
+}
+
+function agendaFloodPlanScore(
+  candidate: CorpPlanCandidate,
+  features: CorpPlanFeatures,
+  flags: {
+    hasProtectedAgendaInstall: boolean;
+    protectedRemoteAvailable: boolean;
+    hasRemoteIceInstall: boolean;
+    rezReserveAvailable: boolean;
+  }
+): number {
+  const ownAgendaPressure = features.ownAgendaPressure;
+  if (ownAgendaPressure <= 0) return 0;
+  if (candidate.kind === "score_now") return Math.round(ownAgendaPressure * 1.25);
+  if ((candidate.kind === "score_next_turn" || candidate.kind === "build_scoring_remote") && flags.hasProtectedAgendaInstall) {
+    return flags.rezReserveAvailable ? Math.round(ownAgendaPressure * 1.15) : Math.round(ownAgendaPressure * 0.2);
+  }
+  if (candidate.kind === "build_scoring_remote" && !flags.protectedRemoteAvailable && flags.hasRemoteIceInstall) {
+    return Math.round(ownAgendaPressure * 0.9);
+  }
+  if (candidate.kind === "recover_economy" && flags.protectedRemoteAvailable && !flags.rezReserveAvailable) {
+    return Math.round(ownAgendaPressure * 0.95);
+  }
+  if (candidate.kind === "protect_hq" && !flags.protectedRemoteAvailable) {
+    return Math.round(ownAgendaPressure * 0.7);
+  }
+  return -Math.round(ownAgendaPressure * 0.25);
 }
 
 export function evaluateServerThreat(input: AiDecisionInput, candidate: CorpPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): CorpPlanEvaluatorResult {
@@ -888,6 +949,7 @@ function shouldCorpDrawForScoring(input: AiDecisionInput): boolean {
 }
 
 function extractCorpPlanFeatures(input: AiDecisionInput): CorpPlanFeatures {
+  const ownAgendaCount = input.playerView.own.gripOrHq.filter((card) => card.known && card.definitionId && isAgendaDefinition(card.definitionId)).length;
   return {
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
@@ -897,6 +959,8 @@ function extractCorpPlanFeatures(input: AiDecisionInput): CorpPlanFeatures {
     agendaPointsToWin: input.playerView.agendaPointsToWin,
     runnerCredits: input.playerView.opponent.credits,
     runnerTags: input.playerView.opponent.tags,
+    ownAgendaCount,
+    ownAgendaPressure: ownAgendaPressureScore(ownAgendaCount, input.playerView.own.gripOrHq.length),
     serverFeatures: new Map(
       input.playerView.servers.map((server) => [
         server.id,
@@ -910,6 +974,13 @@ function extractCorpPlanFeatures(input: AiDecisionInput): CorpPlanFeatures {
       ])
     )
   };
+}
+
+function ownAgendaPressureScore(agendaCount: number, handCount: number): number {
+  if (agendaCount < 2) return 0;
+  const densityPressure = handCount > 0 ? Math.round((agendaCount / handCount) * 80) : 0;
+  const countPressure = agendaCount >= 4 ? 145 : agendaCount === 3 ? 110 : 50;
+  return Math.max(countPressure, densityPressure);
 }
 
 function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {

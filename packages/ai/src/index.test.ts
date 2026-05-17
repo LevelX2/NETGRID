@@ -3162,6 +3162,200 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.reasonCode).toBe("corp.plan.score_next_turn");
   });
 
+  it("uses own HQ agenda pressure to choose a protected remote score line", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-agenda-flood-protected-remote",
+      (state) => {
+        state.corp.credits = 7;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putAgendaFloodInCorpHq(state);
+        moveUnusedCorpCardToHq(state, "simple_code_gate_ice");
+      },
+    );
+    const floodInput = withSyntheticCorpAgendaPressure(input);
+    const protectedAgendaInstall = floodInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(floodInput, action) === "simple_agenda",
+    );
+    const hqIceInstall = floodInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "hq",
+    );
+    const gain = floodInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(protectedAgendaInstall).toBeDefined();
+    expect(hqIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!protectedAgendaInstall || !hqIceInstall || !gain)
+      throw new Error("Missing protected agenda-flood fixture actions");
+
+    const scopedInput = {
+      ...floodInput,
+      legalActions: [protectedAgendaInstall, hqIceInstall, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    if (!scoreCandidate)
+      throw new Error("Missing protected agenda-flood score candidate");
+    expect(evaluateAgendaRisk(scopedInput, scoreCandidate).evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^own_agenda_count:[3-9]\d*$/),
+        "protectedRemoteAvailable:true",
+        "rezReserveAvailable:true",
+      ]),
+    );
+    expect(evaluateAgendaRisk(scopedInput, scoreCandidate).reasons).toContain(
+      "own_agenda_pressure",
+    );
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(protectedAgendaInstall.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda|simple_priority_agenda/,
+    );
+  });
+
+  it("prepares remote ICE instead of exposing flooded HQ agendas into an unprotected remote", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-agenda-flood-unprotected-remote",
+      (state) => {
+        state.corp.credits = 7;
+        ensureRemoteServer(state, "remote_1");
+        putAgendaFloodInCorpHq(state);
+        moveUnusedCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const floodInput = withSyntheticCorpAgendaPressure(input);
+    const unprotectedAgendaInstall = floodInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(floodInput, action) === "simple_agenda",
+    );
+    const remoteIceInstall = floodInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(floodInput, action) === "simple_barrier_ice",
+    );
+    const gain = floodInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(unprotectedAgendaInstall).toBeDefined();
+    expect(remoteIceInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!unprotectedAgendaInstall || !remoteIceInstall || !gain)
+      throw new Error("Missing unprotected agenda-flood fixture actions");
+
+    const scopedInput = {
+      ...floodInput,
+      legalActions: [unprotectedAgendaInstall, remoteIceInstall, gain],
+    };
+    const candidates = generateCorpPlanCandidates(scopedInput);
+    const remoteCandidate = candidates.find(
+      (candidate) => candidate.kind === "build_scoring_remote",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(
+      candidates
+        .filter((candidate) => candidate.kind === "score_next_turn")
+        .flatMap((candidate) => candidate.legalActionIds),
+    ).not.toContain(unprotectedAgendaInstall.actionId);
+    expect(remoteCandidate?.legalActionIds).toContain(
+      remoteIceInstall.actionId,
+    );
+    expect(remoteCandidate).toBeDefined();
+    if (!remoteCandidate)
+      throw new Error("Missing unprotected agenda-flood remote candidate");
+    expect(evaluateAgendaRisk(scopedInput, remoteCandidate).evidence).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(/^own_agenda_count:[3-9]\d*$/),
+        "protectedRemoteAvailable:false",
+      ]),
+    );
+    expect(evaluateAgendaRisk(scopedInput, remoteCandidate).reasons).toContain(
+      "prepare_protected_remote",
+    );
+    expect(decision.debug.planKind).toBe("build_scoring_remote");
+    expect(decision.selectedActionId).toBe(remoteIceInstall.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda|simple_priority_agenda/,
+    );
+  });
+
+  it("builds economy when agenda-flooded HQ lacks remote ICE rez reserve", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-agenda-flood-missing-rez-reserve",
+      (state) => {
+        state.corp.credits = 2;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putAgendaFloodInCorpHq(state);
+      },
+    );
+    const floodInput = withSyntheticCorpAgendaPressure(input);
+    const protectedAgendaInstall = floodInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(floodInput, action) === "simple_agenda",
+    );
+    const gain = floodInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(protectedAgendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!protectedAgendaInstall || !gain)
+      throw new Error("Missing missing-reserve agenda-flood fixture actions");
+
+    const scopedInput = {
+      ...floodInput,
+      legalActions: [protectedAgendaInstall, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!scoreCandidate || !economyCandidate)
+      throw new Error("Missing missing-reserve agenda-flood candidates");
+    expect(evaluateAgendaRisk(scopedInput, scoreCandidate).evidence).toContain(
+      "rezReserveAvailable:false",
+    );
+    expect(
+      evaluateRemoteRezReserve(scopedInput, economyCandidate).reasons,
+    ).toContain("remote_rez_reserve_building");
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda|simple_priority_agenda/,
+    );
+  });
+
   it("pushes protected Corp scoring progress before redundant central defense", () => {
     const input = corpActionPhaseInput("ai-v140-scoring-progress", (state) => {
       state.stateVersion = 32;
@@ -7752,6 +7946,33 @@ function moveUnusedCorpCardToHq(
     rezzed: false,
   };
   return id;
+}
+
+function putAgendaFloodInCorpHq(state: GameState): void {
+  moveCorpCardToHq(state, "simple_agenda");
+}
+
+function withSyntheticCorpAgendaPressure(
+  input: ReturnType<typeof buildAiDecisionInput>,
+): ReturnType<typeof buildAiDecisionInput> {
+  const existingSynthetic = input.playerView.own.gripOrHq.some(
+    (card) => card.instanceId === "synthetic_corp_agenda_pressure_a",
+  );
+  if (existingSynthetic) return input;
+  return {
+    ...input,
+    playerView: {
+      ...input.playerView,
+      own: {
+        ...input.playerView.own,
+        gripOrHq: [
+          ...input.playerView.own.gripOrHq,
+          visibleCard("simple_agenda", "synthetic_corp_agenda_pressure_a"),
+          visibleCard("simple_agenda", "synthetic_corp_agenda_pressure_b"),
+        ],
+      },
+    },
+  };
 }
 
 function moveCorpHqAgendasToRd(state: GameState): void {
