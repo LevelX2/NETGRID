@@ -44,14 +44,14 @@ export const CORP_INSTALLED_ECONOMY_ACTION_PROFILES: EconomyActionProfile[] = [
       creditGain: 2,
     })),
   {
-    profileId: "v1920.south_african_mining_corp_gain_8_trash",
+    profileId: "v1920.south_african_mining_corp_gain_6_trash",
     sourceDefinitionId: SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID,
     side: "corp",
     abilityPayloadKey: "v1920AssetAbility",
-    abilityPayloadValue: "south_african_mining_corp_gain_8_trash",
-    clickCost: 1,
+    abilityPayloadValue: "south_african_mining_corp_gain_6_trash",
+    clickCost: 3,
     creditCost: 0,
-    creditGain: 8,
+    creditGain: 6,
     trashSource: true,
   },
 ];

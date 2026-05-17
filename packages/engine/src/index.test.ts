@@ -13402,7 +13402,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
   });
 
-  it("resolves South African Mining Corp as rezzed self-trash economy", () => {
+  it("resolves South African Mining Corp as 3-action rezzed self-trash economy", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "spotcheck-south-african-mining",
@@ -13423,7 +13423,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       getLegalActions(state, "corp").some(
         (action) =>
           action.payload?.v1920AssetAbility ===
-          "south_african_mining_corp_gain_8_trash",
+          "south_african_mining_corp_gain_6_trash",
       ),
     ).toBe(false);
     state.cardInstances[assetId] = {
@@ -13436,8 +13436,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) =>
         action.payload?.v1920AssetAbility ===
-        "south_african_mining_corp_gain_8_trash",
+        "south_african_mining_corp_gain_6_trash",
     );
+    expect(legal.costs).toEqual([{ clicks: 3 }]);
     const unrezzed = structuredClone(state);
     unrezzed.cardInstances[assetId] = {
       ...unrezzed.cardInstances[assetId]!,
@@ -13451,6 +13452,16 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       idempotencyKey: "south-african-unrezzed-source",
     });
     expect(rejected.ok).toBe(false);
+    const lowClicks = structuredClone(state);
+    lowClicks.corp.clicks = 2;
+    const clickRejected = applyAction(lowClicks, {
+      matchId: lowClicks.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: lowClicks.stateVersion,
+      idempotencyKey: "south-african-low-clicks",
+    });
+    expect(clickRejected.ok).toBe(false);
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -13459,13 +13470,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       (action) => action.actionId === legal.actionId,
     );
 
-    expect(state.corp.credits).toBe(13);
+    expect(state.corp.credits).toBe(11);
+    expect(state.corp.clicks).toBe(0);
     expect(state.corp.archives).toContain(assetId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1920AssetAbility: "south_african_mining_corp_gain_8_trash",
-      gainedCredits: 8,
+      v1920AssetAbility: "south_african_mining_corp_gain_6_trash",
+      gainedCredits: 6,
       selfTrashed: true,
-      corpCreditsAfter: 13,
+      corpCreditsAfter: 11,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

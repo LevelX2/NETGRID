@@ -221,34 +221,43 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
-  if (typeof action.payload?.v1917AssetAbility !== "string") return null;
-  switch (action.payload.v1917AssetAbility) {
-    case "gain_credits": {
-      const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 0);
-      return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : stripActionSourcePrefix(action.label);
+  if (typeof action.payload?.v1917AssetAbility === "string") {
+    switch (action.payload.v1917AssetAbility) {
+      case "gain_credits": {
+        const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 0);
+        return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"}` : stripActionSourcePrefix(action.label);
+      }
+      case "trace_3_tag": {
+        const strength = Number(action.payload.traceStrength ?? 3);
+        return Number.isFinite(strength) && strength > 0 ? `Trace ${strength} starten` : stripActionSourcePrefix(action.label);
+      }
+      case "reveal_rd_top":
+        return "R&D-Spitze revealn";
+      case "reorder_rd_top2":
+        return "R&D-Spitze anordnen";
+      case "rescheduler_hq_shuffle_draw":
+        return "HQ in R&D mischen und ziehen";
+      case "meat_damage_1":
+        return "1 Meat Damage";
+      case "spinn_load_pool": {
+        const amount = Number(action.payload.addCounterAmount ?? 6);
+        return Number.isFinite(amount) && amount > 0 ? `${amount} Bits laden` : "Bits laden";
+      }
+      case "trash_installed_runner_card":
+      case "remove_virus_counter":
+        return stripActionSourcePrefix(action.label);
+      default:
+        return stripActionSourcePrefix(action.label);
     }
-    case "trace_3_tag": {
-      const strength = Number(action.payload.traceStrength ?? 3);
-      return Number.isFinite(strength) && strength > 0 ? `Trace ${strength} starten` : stripActionSourcePrefix(action.label);
-    }
-    case "reveal_rd_top":
-      return "R&D-Spitze revealn";
-    case "reorder_rd_top2":
-      return "R&D-Spitze anordnen";
-    case "rescheduler_hq_shuffle_draw":
-      return "HQ in R&D mischen und ziehen";
-    case "meat_damage_1":
-      return "1 Meat Damage";
-    case "spinn_load_pool": {
-      const amount = Number(action.payload.addCounterAmount ?? 6);
-      return Number.isFinite(amount) && amount > 0 ? `${amount} Bits laden` : "Bits laden";
-    }
-    case "trash_installed_runner_card":
-    case "remove_virus_counter":
-      return stripActionSourcePrefix(action.label);
-    default:
-      return stripActionSourcePrefix(action.label);
   }
+  if (
+    action.payload?.v1920AssetAbility ===
+    "south_african_mining_corp_gain_6_trash"
+  ) {
+    const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 6);
+    return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
+  }
+  return null;
 }
 
 function scoredAgendaAbilityContextLabel(action: LegalAction): string | null {

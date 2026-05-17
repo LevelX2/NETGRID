@@ -151,10 +151,21 @@ describe("V1.0.5 action board UI helpers", () => {
       v1917AssetAbility: "trace_3_tag",
       traceStrength: 5
     });
+    const southAfrican = legalAction("corp", "gain_credit", "south_african_1", "South African Mining Corp: 6 Credits und trashen", {
+      cardId: "south_african_1",
+      v1920AssetAbility: "south_african_mining_corp_gain_6_trash",
+      gainCreditsAmount: 6
+    });
+    const trashNode = legalAction("runner", "trash_accessed_card", "node_1", "South African Mining Corp trashen", {
+      accessedCardId: "node_1",
+    });
 
     expect(actionButtonLabel(bbs)).toBe("BBS Whispering Campaign: 2 Credits");
     expect(contextualCardActionLabel(bbs)).toBe("2 Credits");
     expect(contextualCardActionLabel(bloodCat)).toBe("Trace 5 starten");
+    expect(actionButtonLabel(southAfrican)).toBe("South African Mining Corp: 6 Credits und trashen");
+    expect(contextualCardActionLabel(southAfrican)).toBe("6 Credits nehmen");
+    expect(contextualCardActionLabel(trashNode)).toBe("Trashen");
   });
 
   it("uses compact labels for scored agenda credit actions in card context", () => {

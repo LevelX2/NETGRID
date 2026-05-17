@@ -15884,6 +15884,9 @@ function resolveCorpInstalledEconomyAction(
   );
   if (!profile) return false;
   validateCorpInstalledEconomyAction(state, legalAction, sourceCardId, profile);
+  for (let spentClicks = 1; spentClicks < profile.clickCost; spentClicks += 1) {
+    spendClick(state, "corp");
+  }
   if (profile.creditCost > 0) spendCredits(state, "corp", profile.creditCost);
   credits(state, "corp", profile.creditGain);
   if (profile.trashSource) trashCorpInstalledCardToArchives(state, sourceCardId);
