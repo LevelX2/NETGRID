@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "card-implementation-manifest-proteus-visible-baseline-2026-05-17",
+  "id": "proteus-visible-baseline-card-slice",
+  "status": "human_playable_no_decklegal",
+  "extends": "data/manifests/card-implementation-manifest-1.9.22.json",
+  "sourceMode": "proteus_spoiler_display_only_candidate_slice",
+  "gateAssertions": {
+    "candidateSetFrozen": true,
+    "candidateCount": 1,
+    "onlyCoveredLowRiskCards": true,
+    "noHiddenResources": true,
+    "noVariableIce": true,
+    "noBadPublicityCards": true,
+    "noVirusAntibodyPurge": true,
+    "noRandomCards": true,
+    "noProteusDeckLegalPromotion": true,
+    "noAiHints": true,
+    "outsideCandidateSetRemainsBlocked": true,
+    "stateHashReplayStableForCoveredSmokes": true,
+    "visibilitySafeForCoveredSmokes": true
+  },
+  "cards": [
+    {
+      "cardCode": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium™ Wall",
+      "releaseStatus": "human_playable",
+      "deckLegal": false,
+      "formatLegal": false,
+      "aiSupported": false,
+      "resolverFamily": "proteus_visible_baseline_static_wall_etr",
+      "coveredSmokes": [
+        "install_ice_legal_action",
+        "rez_ice_legal_action",
+        "wrong_side_revalidation",
+        "stale_state_revalidation",
+        "rez_cost_revalidation",
+        "four_static_end_the_run_subroutines",
+        "public_payload_visibility",
+        "replay_statehash",
+        "web_catalog_no_broad_promotion"
+      ]
+    }
+  ],
+  "deferredSummary": {
+    "proteusImportedCardCount": 154,
+    "implementedCardCount": 1,
+    "deckLegalCardCount": 0,
+    "aiSupportedCardCount": 0,
+    "deferredCardCount": 153,
+    "deferredReason": "All other Proteus cards remain blocked until a dedicated per-card or foundation slice proves their resolver contract."
+  }
+}

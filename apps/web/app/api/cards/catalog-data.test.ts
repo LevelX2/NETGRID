@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   activeAiApprovedCardIds,
   ONR_V1_9_22_WIP_CARD_IDS,
+  PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
@@ -170,6 +171,80 @@ describe("catalog API filters", () => {
     expect(body.cards.map((card) => card.catalogCardId)).toEqual(
       expect.arrayContaining([...ONR_V1_9_22_WIP_CARD_IDS]),
     );
+    expect(body.cards.map((card) => card.catalogCardId)).not.toEqual(
+      expect.arrayContaining([...PROTEUS_VISIBLE_BASELINE_CARD_IDS]),
+    );
+  });
+
+  it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
+    const [candidateId] = PROTEUS_VISIBLE_BASELINE_CARD_IDS;
+    const candidateResponse = catalogDetailResponse(candidateId);
+    expect(candidateResponse.status).toBe(200);
+    const candidateBody = candidateResponse.body as {
+      card: {
+        catalogCardId: string;
+        statuses: {
+          human_playable: boolean;
+          deck_legal: boolean;
+          format_legal: boolean;
+          ai_supported: boolean;
+          blocked: boolean;
+        };
+        aiHints: { aiSupportStatus: string } | null;
+      };
+    };
+    expect(candidateBody.card).toMatchObject({
+      catalogCardId: candidateId,
+      statuses: {
+        human_playable: true,
+        deck_legal: false,
+        format_legal: false,
+        ai_supported: false,
+        blocked: false,
+      },
+      aiHints: null,
+    });
+
+    const humanPlayableResponse = catalogListResponse(
+      new URLSearchParams({ status: "human_playable", q: "Toughonium" }),
+    );
+    expect(humanPlayableResponse.status).toBe(200);
+    const humanPlayableBody = humanPlayableResponse.body as {
+      cards: Array<{ catalogCardId: string }>;
+    };
+    expect(humanPlayableBody.cards.map((card) => card.catalogCardId)).toEqual([
+      candidateId,
+    ]);
+
+    for (const status of ["deck_legal", "format_legal", "ai_supported"] as const) {
+      const response = catalogListResponse(
+        new URLSearchParams({ status, q: "Toughonium" }),
+      );
+      expect(response.status).toBe(200);
+      const body = response.body as { cards: Array<{ catalogCardId: string }> };
+      expect(body.cards).toEqual([]);
+    }
+
+    const outsideResponse = catalogDetailResponse(
+      "onr_proteus_031_minotaur",
+    );
+    expect(outsideResponse.status).toBe(200);
+    const outsideBody = outsideResponse.body as {
+      card: {
+        statuses: {
+          human_playable: boolean;
+          deck_legal: boolean;
+          ai_supported: boolean;
+          blocked: boolean;
+        };
+      };
+    };
+    expect(outsideBody.card.statuses).toMatchObject({
+      human_playable: false,
+      deck_legal: false,
+      ai_supported: false,
+      blocked: true,
+    });
   });
 
   it("exposes display-only rarity metadata in list and detail responses", () => {

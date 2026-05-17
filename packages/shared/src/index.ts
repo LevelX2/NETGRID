@@ -8684,6 +8684,34 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
   }),
 ];
 
+const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
+  {
+    id: "onr_proteus_041_toughoniumtm-wall",
+    title: "Toughonium™ Wall",
+    side: "corp",
+    type: "ice",
+    subtypes: ["wall"],
+    implementationStatus: "playable_mvp",
+    rezCost: 13,
+    strength: 7,
+    rulesText:
+      "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+    subroutines: [
+      { id: "onr_proteus_041_toughonium_wall_etr_1", type: "end_the_run" },
+      { id: "onr_proteus_041_toughonium_wall_etr_2", type: "end_the_run" },
+      { id: "onr_proteus_041_toughonium_wall_etr_3", type: "end_the_run" },
+      { id: "onr_proteus_041_toughonium_wall_etr_4", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "end_the_run",
+      "proteus_visible_baseline",
+    ],
+  },
+];
+
 export const DEMO_CARDS: CardDefinition[] = [
   {
     id: "runner_identity_001",
@@ -9695,6 +9723,7 @@ export const DEMO_CARDS: CardDefinition[] = [
     ],
   },
   ...ONR_V1_LIMITED_PLAYABLE_CARDS,
+  ...PROTEUS_VISIBLE_BASELINE_CARDS,
 ];
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =

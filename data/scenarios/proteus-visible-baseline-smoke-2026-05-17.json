@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "netgrid.scenario.v1",
+  "scenarioId": "proteus-visible-baseline-smoke-2026-05-17",
+  "release": "Proteus Visible Baseline 2026-05-17",
+  "status": "human_playable_no_decklegal",
+  "coversCards": [
+    "onr_proteus_041_toughoniumtm-wall"
+  ],
+  "assertions": [
+    "The candidate set contains exactly Toughonium Wall.",
+    "Toughonium Wall uses existing public install ICE, rez ICE, encounter ICE and End the run resolver paths.",
+    "applyAction revalidates wrong side, stale state and rez costs for the candidate.",
+    "Player views and public payloads reveal Toughonium Wall only through public install and rez state.",
+    "Replay reproduces the same final StateHash after the rez smoke.",
+    "No other Proteus card becomes human_playable, deck_legal, format_legal or ai_supported.",
+    "The web catalog shows the candidate as human_playable but not deck_legal, format_legal or ai_supported."
+  ],
+  "completionGate": {
+    "releaseDone": true,
+    "catalogPromoted": "candidate_human_playable_only",
+    "deckLegalPromoted": false,
+    "aiPromoted": false,
+    "coveredCardCount": 1,
+    "outsideCandidateSetBlocked": true
+  }
+}

@@ -498,6 +498,10 @@ export const ONR_V1_9_22_WIP_CARD_IDS = [
 
 export const ONR_V1_9_22_RELEASE_CARD_IDS = ONR_V1_9_22_WIP_CARD_IDS;
 
+export const PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
+  "onr_proteus_041_toughoniumtm-wall",
+] as const;
+
 export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_0_5K_RELEASE_CARD_IDS,
   ...ONR_V1_0_6K_RELEASE_CARD_IDS,
@@ -533,6 +537,11 @@ export const ONR_V1_RUNTIME_RELEASE_CARD_IDS = [
   ...ONR_V1_9_20_RELEASE_CARD_IDS,
   ...ONR_V1_9_21_RELEASE_CARD_IDS,
   ...ONR_V1_9_22_RELEASE_CARD_IDS,
+] as const;
+
+export const ACTIVE_RUNTIME_RELEASE_CARD_IDS = [
+  ...ONR_V1_RUNTIME_RELEASE_CARD_IDS,
+  ...PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 ] as const;
 
 export const KING_OF_THE_ROAD_AI_APPROVED_CARD_IDS = [
@@ -1316,6 +1325,26 @@ const ONR_V1_9_22_RELEASE_MANIFEST: CatalogManifestReference = {
   ],
   replayTests: [
     "packages/engine/src/index.test.ts::V1.9.22 Per-card Longtail WIP",
+  ],
+};
+
+const PROTEUS_VISIBLE_BASELINE_MANIFEST: CatalogManifestReference = {
+  manifestVersion: "card-implementation-manifest-proteus-visible-baseline-2026-05-17",
+  status: "human_playable_proteus_visible_baseline_no_decklegal",
+  unitTests: [
+    "packages/engine/src/index.test.ts::Proteus Visible Baseline",
+    "packages/catalog/src/index.test.ts::Proteus Visible Baseline",
+    "apps/web/app/api/cards/catalog-data.test.ts::catalog API filters",
+  ],
+  scenarioTests: [
+    "data/scenarios/proteus-visible-baseline-smoke-2026-05-17.json",
+  ],
+  visibilityTests: [
+    "packages/engine/src/index.test.ts::Proteus Visible Baseline",
+    "apps/web/app/api/cards/catalog-data.test.ts::catalog API filters",
+  ],
+  replayTests: [
+    "packages/engine/src/index.test.ts::Proteus Visible Baseline",
   ],
 };
 
@@ -2225,5 +2254,17 @@ export const CATALOG_GATE_BATCHES: CatalogGateBatch[] = [
     implementationManifest: ONR_V1_9_22_RELEASE_MANIFEST,
     textOverrides: {},
     numericOverrides: {},
+  },
+  {
+    auditReleaseId: "proteus-visible-baseline-2026-05-17",
+    cardIds: PROTEUS_VISIBLE_BASELINE_CARD_IDS,
+    implementationManifest: PROTEUS_VISIBLE_BASELINE_MANIFEST,
+    textOverrides: {
+      "onr_proteus_041_toughoniumtm-wall":
+        "[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.\n[Subroutine] End the run.",
+    },
+    numericOverrides: {},
+    deckLegal: false,
+    formatLegal: false,
   },
 ];

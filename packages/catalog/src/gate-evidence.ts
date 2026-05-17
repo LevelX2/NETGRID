@@ -7,8 +7,8 @@ export type RuntimeGateEvidence = {
   cardId: string;
   engineCardId: string;
   runtimeStatus: "human_playable";
-  deckLegal: true;
-  formatLegal: true;
+  deckLegal: boolean;
+  formatLegal: boolean;
 };
 
 export type AiApprovalEvidence = {
@@ -38,6 +38,8 @@ export type CatalogGateBatch = {
   implementationManifest: CatalogManifestReference;
   textOverrides: Partial<Record<string, string>>;
   numericOverrides: Partial<Record<string, Partial<CatalogNumericFields>>>;
+  deckLegal?: boolean;
+  formatLegal?: boolean;
 };
 
 export type CatalogAiApprovalBatch = {
@@ -123,8 +125,8 @@ export function buildRuntimeGateByCardId(
             cardId,
             engineCardId: cardId,
             runtimeStatus: "human_playable" as const,
-            deckLegal: true as const,
-            formatLegal: true as const,
+            deckLegal: batch.deckLegal ?? true,
+            formatLegal: batch.formatLegal ?? batch.deckLegal ?? true,
           },
         ]),
       ),

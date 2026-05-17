@@ -406,6 +406,116 @@ describe("MVP 0.1 engine foundation", () => {
   });
 });
 
+describe("Proteus Visible Baseline", () => {
+  const TOUGHONIUM = "onr_proteus_041_toughoniumtm-wall";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  it("rezzes Toughonium Wall through public ICE paths with revalidation and replay coverage", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "proteus-visible-baseline-toughonium",
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: "proteus_visible_baseline_runner",
+          name: "Proteus Visible Baseline Runner",
+          cards: [...ONR_V1_1_2K_RUNNER_DECK.cards],
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: "proteus_visible_baseline_corp",
+          name: "Proteus Visible Baseline Corp",
+          cards: [
+            { id: TOUGHONIUM, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.corp.credits = 20;
+    const iceId = putCorpIceOnServer(state, "rd", TOUGHONIUM);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const rezAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && sourceDefinition(state, action) === TOUGHONIUM,
+    );
+    expect(rezAction.costs).toEqual([{ credits: 13 }]);
+
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: rezAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "proteus-toughonium-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: rezAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "proteus-toughonium-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+
+    const lowCredits = structuredClone(state);
+    lowCredits.corp.credits = 12;
+    const costRejected = applyAction(lowCredits, {
+      matchId: lowCredits.matchId,
+      side: "corp",
+      actionId: rezAction.actionId,
+      clientKnownStateVersion: lowCredits.stateVersion,
+      idempotencyKey: "proteus-toughonium-cost",
+    });
+    expect(costRejected.ok).toBe(false);
+    if (!costRejected.ok)
+      expect(["ERR_UNKNOWN_ACTION", "ERR_ILLEGAL_ACTION"]).toContain(
+        costRejected.error.code,
+      );
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === rezAction.actionId);
+
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.corp.credits).toBe(7);
+    expect(state.run?.encounteredIceId).toBe(iceId);
+    expect(DEMO_CARDS_BY_ID[TOUGHONIUM]?.subroutines).toHaveLength(4);
+    expect(
+      DEMO_CARDS_BY_ID[TOUGHONIUM]?.subroutines?.every(
+        (subroutine) => subroutine.type === "end_the_run",
+      ),
+    ).toBe(true);
+
+    const runnerViewIce = getPlayerView(state, "runner").run?.encounteredIce;
+    expect(runnerViewIce).toMatchObject({
+      definitionId: TOUGHONIUM,
+      title: "Toughonium™ Wall",
+      rezzed: true,
+      rezCost: 13,
+      strength: 7,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      hiddenPayloadMarkers,
+    );
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
