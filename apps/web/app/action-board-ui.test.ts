@@ -513,6 +513,28 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "In F&E (R&D)",
     );
     expect(contextualCardActionLabel(legalAction("runner", "install_card", "program_1", "Programm installieren", { cardId: "program_1" }))).toBe("Installieren");
+    expect(
+      contextualCardActionLabel(
+        legalAction(
+          "runner",
+          "install_card",
+          "restrictive_1",
+          "Restrictive Net Zoning auf R&D ausrichten",
+          { cardId: "restrictive_1", selectedServerId: "rd" },
+        ),
+      ),
+    ).toBe("Auf F&E (R&D) ausrichten");
+    expect(
+      contextualCardActionLabel(
+        legalAction(
+          "runner",
+          "install_card",
+          "restrictive_1",
+          "Restrictive Net Zoning auf Remote Server 1 ausrichten",
+          { cardId: "restrictive_1", selectedServerId: "remote_1" },
+        ),
+      ),
+    ).toBe("Auf Fort 1 ausrichten");
   });
 
   it("moves rig icebreaker actions to their card context", () => {

@@ -491,6 +491,23 @@ describe("formatChronicleEvent", () => {
     expect(taxedIce.chips).toEqual(expect.arrayContaining(["+2 Installkosten", "5 gesamt"]));
   });
 
+  it("names Restrictive Net Zoning selected servers in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("install_card", {
+        actor: "runner",
+        title: "Restrictive Net Zoning",
+        zoneLabel: "Resource",
+        selectedServerId: "remote_1",
+        selectedServerLabel: "Remote Server 1"
+      }),
+      "runner",
+      { cardTitle: "Restrictive Net Zoning" }
+    );
+
+    expect(item.title).toBe("Du hast Restrictive Net Zoning auf Remote Server 1 ausgerichtet installiert.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote Server 1"]));
+  });
+
   it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
     const dataFortInstall = formatChronicleEvent(
       makeEvent("resolve_choice", {

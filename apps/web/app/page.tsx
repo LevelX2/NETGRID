@@ -11406,6 +11406,7 @@ function cardDetailLines(card: VisibleCard): string[] {
     neededDevelopmentLabel(card.advancementRequirement),
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
+    selectedServerLabel(card),
     storedCreditsLabel(card),
     recurringCreditLabel(card),
     shellCounterLabel(card),
@@ -11414,6 +11415,11 @@ function cardDetailLines(card: VisibleCard): string[] {
     .filter(Boolean)
     .join(" · ");
   return [typeLine, numberLine].filter(Boolean);
+}
+
+function selectedServerLabel(card: VisibleCard): string | null {
+  if (!card.selectedServerLabel) return null;
+  return `Zielserver ${card.selectedServerLabel}`;
 }
 
 function storedCreditsLabel(card: VisibleCard): string | null {

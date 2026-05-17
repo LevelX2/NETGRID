@@ -4258,15 +4258,16 @@ function runnerMainActions(state: GameState): LegalAction[] {
       }
       if (definition.id === "onr_v1_173_restrictive-net-zoning") {
         for (const server of state.corp.servers) {
+          const serverLabel = serverChoiceDisplayLabel(state, server.id);
           actions.push(
             action(
               state,
               "runner",
               "install_card",
-              `${definition.title} auf ${server.label} ausrichten`,
+              `${definition.title} auf ${serverLabel} ausrichten`,
               id,
               [{ clicks: 1, credits: definition.installCost ?? 0 }],
-              { cardId: id, selectedServerId: server.id },
+              { cardId: id, selectedServerId: server.id, selectedServerLabel: serverLabel },
               {
                 targetRequirements: [
                   {
@@ -9111,6 +9112,19 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       selectedServerId && selectedServerId !== "new_remote"
         ? (selectedServerId as Exclude<ServerId, "new_remote">)
         : undefined;
+    if (
+      definition.id === "onr_v1_173_restrictive-net-zoning" &&
+      restrictiveTargetServerId
+    ) {
+      mustServer(state, restrictiveTargetServerId);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        selectedServerLabel: serverChoiceDisplayLabel(
+          state,
+          restrictiveTargetServerId,
+        ),
+      };
+    }
     const zetatechRecurringBefore =
       zetatechOverlayInstall && hostOnCardId
         ? cardCounter(state, hostOnCardId, "recurring_credit")
@@ -21529,6 +21543,13 @@ function publicContextForAction(
       legalAction.payload.securityNetOptimizationServerId;
   if (typeof legalAction.payload?.selectedServerId === "string")
     context.selectedServerId = legalAction.payload.selectedServerId;
+  if (typeof legalAction.payload?.selectedServerLabel === "string")
+    context.selectedServerLabel = legalAction.payload.selectedServerLabel;
+  else if (typeof legalAction.payload?.selectedServerId === "string")
+    context.selectedServerLabel = serverChoiceDisplayLabel(
+      state,
+      legalAction.payload.selectedServerId as Exclude<ServerId, "new_remote">,
+    );
   if (typeof legalAction.payload?.agendaAbility === "string")
     context.agendaAbility = legalAction.payload.agendaAbility;
   if (typeof legalAction.payload?.cardDefinitionId === "string")
@@ -22131,6 +22152,15 @@ function publicServerLabel(
   return state.corp.servers.find((server) => server.id === serverId)?.label;
 }
 
+function serverChoiceDisplayLabel(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): string {
+  const label = publicServerLabel(state, serverId) ?? serverId;
+  const remote = /^Remote\s+(\d+)$/i.exec(label.trim());
+  return remote?.[1] ? `Remote Server ${remote[1]}` : label;
+}
+
 function publicServerLabelForCard(
   state: GameState,
   cardId: string | undefined,
@@ -22338,6 +22368,16 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
       ? { counters: cloneCounters(instance.counters) }
       : {}),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
+    ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
+    instance.selectedServerId
+      ? {
+          selectedServerId: instance.selectedServerId,
+          selectedServerLabel: serverChoiceDisplayLabel(
+            state,
+            instance.selectedServerId,
+          ),
+        }
+      : {}),
     owner: instance.owner,
     controller: instance.controller,
   };

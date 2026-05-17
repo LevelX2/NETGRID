@@ -8586,6 +8586,15 @@ describe("V1.8.1 Mechanikpaket H", () => {
   it("keeps Restrictive action IDs server-distinct and applies Restrictive plus Pox install tax deterministically", () => {
     let state = toRunnerTurn(v181CardReleaseGame("v181-restrictive-pox-tax"));
     state.runner.credits = 40;
+    if (!state.corp.servers.some((server) => server.id === "remote_1")) {
+      state.corp.servers.push({
+        id: "remote_1",
+        kind: "remote",
+        label: "Remote 1",
+        ice: [],
+        root: [],
+      });
+    }
     const restrictiveCardId = moveRunnerCardToGrip(
       state,
       "onr_v1_173_restrictive-net-zoning",
@@ -8599,6 +8608,19 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(
       new Set(restrictiveInstallActions.map((action) => action.actionId)).size,
     ).toBe(restrictiveInstallActions.length);
+    expect(
+      restrictiveInstallActions.map((action) => [
+        action.payload?.selectedServerId,
+        action.label,
+      ]),
+    ).toEqual(
+      expect.arrayContaining([
+        ["hq", "Restrictive Net Zoning auf HQ ausrichten"],
+        ["rd", "Restrictive Net Zoning auf R&D ausrichten"],
+        ["archives", "Restrictive Net Zoning auf Archives ausrichten"],
+        ["remote_1", "Restrictive Net Zoning auf Remote Server 1 ausrichten"],
+      ]),
+    );
     state = apply(
       state,
       "runner",
@@ -8608,6 +8630,22 @@ describe("V1.8.1 Mechanikpaket H", () => {
           "onr_v1_173_restrictive-net-zoning" &&
         action.payload?.selectedServerId === "rd",
     );
+    expect(state.cardInstances[restrictiveCardId]?.selectedServerId).toBe("rd");
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === restrictiveCardId,
+      ),
+    ).toMatchObject({ selectedServerId: "rd", selectedServerLabel: "R&D" });
+    expect(
+      getPlayerView(state, "corp").opponent.rig?.find(
+        (card) => card.instanceId === restrictiveCardId,
+      ),
+    ).toMatchObject({ selectedServerId: "rd", selectedServerLabel: "R&D" });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      selectedServerId: "rd",
+      selectedServerLabel: "R&D",
+    });
     installRunnerProgramForTest(state, "onr_v1_049_pox");
 
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
