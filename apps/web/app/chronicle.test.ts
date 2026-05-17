@@ -101,6 +101,28 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Run", "Jack-out", "Kein Zugriff", "R&D"]);
   });
 
+  it("describes Olivia Salazar reduced ICE rez with source, ICE and paid cost", () => {
+    const item = formatChronicleEvent(
+      makeEvent("rez_ice", {
+        actor: "corp",
+        label: "Olivia Salazar: Crystal Wall für 2 Credits rezzen",
+        cardDefinitionId: "onr_v1_232_crystal-wall",
+        title: "Crystal Wall",
+        cardType: "ice",
+        oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+        oliviaSalazarRezCostBase: 4,
+        oliviaSalazarTemporaryDerez: true,
+        rezCostPaid: 2
+      }),
+      "corp",
+      { cardTitle: "Crystal Wall", cardType: "ice" }
+    );
+
+    expect(item.title).toBe("Du hast Crystal Wall mit Olivia Salazar für 2 Credits gerezzt. Die Begegnung beginnt.");
+    expect(item.description).toBe("Olivia Salazar reduziert die effektiven Rez-Kosten von 4 Credits auf 2 Credits; das ICE wird am Runende derezzt.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Olivia Salazar", "2 Credits", "Temporär", "Rez", "Begegnung"]));
+  });
+
   it("formats Coup agenda credits as card credits with the remaining amount", () => {
     const item = formatChronicleEvent(
       makeEvent("gain_credit", {

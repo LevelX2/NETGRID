@@ -74,7 +74,7 @@ import {
   GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
   INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
-  OLIVIA_SALAZAR_STEAL_COST_UPGRADE_ID,
+  OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
@@ -5168,6 +5168,65 @@ function rezCostForCard(state: GameState, cardId: CardInstanceId): number {
   return Math.max(0, baseCost - reduction);
 }
 
+function oliviaSalazarRezCostForCard(
+  state: GameState,
+  iceId: CardInstanceId,
+): number {
+  return Math.floor(rezCostForCard(state, iceId) / 2);
+}
+
+function oliviaSalazarRezSourcesForRunIce(
+  state: GameState,
+  iceId: CardInstanceId,
+): CardInstanceId[] {
+  const run = state.run;
+  if (!run || run.phase !== "approach_ice" || run.approachedIceId !== iceId)
+    return [];
+  if (corpServerIdForInstalledCard(state, iceId) !== run.attackedServerId)
+    return [];
+  const used = new Set(run.oliviaSalazarUsedSourceIdsThisRun ?? []);
+  const server = mustServer(state, run.attackedServerId);
+  return server.root
+    .filter((sourceId) => {
+      const instance = state.cardInstances[sourceId];
+      return (
+        instance?.rezzed === true &&
+        definitionFor(state, sourceId).id === OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID &&
+        !used.has(sourceId)
+      );
+    })
+    .sort();
+}
+
+function oliviaSalazarRezActionPayload(
+  state: GameState,
+  iceId: CardInstanceId,
+  sourceId: CardInstanceId,
+  definition: CardDefinition,
+): NonNullable<LegalAction["payload"]> {
+  const effectiveCostBeforeOlivia = rezCostForCard(state, iceId);
+  const paidCost = Math.max(0, Math.floor(effectiveCostBeforeOlivia / 2));
+  const existingSources = rezCostReductionSourceDefinitionIdsFor(
+    state,
+    iceId,
+    definition,
+  );
+  return {
+    cardId: iceId,
+    serverId: corpServerIdForInstalledCard(state, iceId) ?? "",
+    oliviaSalazarRezSourceCardId: sourceId,
+    oliviaSalazarRezSourceDefinitionId: OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
+    oliviaSalazarRezCostBase: effectiveCostBeforeOlivia,
+    oliviaSalazarTemporaryDerez: true,
+    rezCostReductionSourceDefinitionIds: [
+      ...existingSources,
+      OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
+    ].join(","),
+    rezCostReductionAmount: (definition.rezCost ?? 0) - paidCost,
+    rezCostPaid: paidCost,
+  };
+}
+
 function runnerHasInstalledCardDefinition(
   state: GameState,
   side: Side,
@@ -5574,12 +5633,12 @@ function corpApproachActions(state: GameState): LegalAction[] {
   const definition = definitionFor(state, run.approachedIceId);
   const actions: LegalAction[] = [];
   const rezCost = rezCostForCard(state, run.approachedIceId);
-      const rezCostReductionSourceDefinitionIds =
-        rezCostReductionSourceDefinitionIdsFor(
-          state,
-          run.approachedIceId,
-          definition,
-        );
+  const rezCostReductionSourceDefinitionIds =
+    rezCostReductionSourceDefinitionIdsFor(
+      state,
+      run.approachedIceId,
+      definition,
+    );
   if (!ice.rezzed && state.corp.credits >= rezCost) {
     actions.push(
       action(
@@ -5602,6 +5661,34 @@ function corpApproachActions(state: GameState): LegalAction[] {
         },
       ),
     );
+  }
+  if (!ice.rezzed) {
+    for (const sourceId of oliviaSalazarRezSourcesForRunIce(
+      state,
+      run.approachedIceId,
+    )) {
+      const oliviaRezCost = oliviaSalazarRezCostForCard(
+        state,
+        run.approachedIceId,
+      );
+      if (state.corp.credits < oliviaRezCost) continue;
+      actions.push(
+        action(
+          state,
+          "corp",
+          "rez_ice",
+          `Olivia Salazar: ${definition.title} für ${oliviaRezCost} ${oliviaRezCost === 1 ? "Credit" : "Credits"} rezzen`,
+          run.approachedIceId,
+          [{ credits: oliviaRezCost }],
+          oliviaSalazarRezActionPayload(
+            state,
+            run.approachedIceId,
+            sourceId,
+            definition,
+          ),
+        ),
+      );
+    }
   }
   actions.push(
     action(state, "corp", "decline_rez", "Nicht rezzen", "game_rule"),
@@ -6542,45 +6629,6 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   );
   const accessedFromArchives = isCurrentAccessFromArchives(state, run);
   if (definition.type === "agenda") {
-    const oliviaSalazarId = oliviaSalazarCardIdForCurrentAccess(state, run);
-    if (oliviaSalazarId) {
-      const forfeitAgendaCardId = pickRunnerAgendaForAgendaPointCost(state);
-      if (!forfeitAgendaCardId) {
-        return [
-          action(
-            state,
-            "runner",
-            "decline_trash",
-            `${definition.title} nicht stehlen`,
-            "game_rule",
-            [],
-            {
-              cardId: run.accessedCardId,
-              v1919UpgradeAbility: "olivia_salazar_steal_cost",
-              oliviaSalazarCardId: oliviaSalazarId,
-              stealBlockedByAgendaPointCost: true,
-            },
-          ),
-        ];
-      }
-      return [
-        action(
-          state,
-          "runner",
-          "steal_agenda",
-          `${definition.title} stehlen`,
-          run.accessedCardId,
-          [],
-          {
-            cardId: run.accessedCardId,
-            v1919UpgradeAbility: "olivia_salazar_steal_cost",
-            oliviaSalazarCardId: oliviaSalazarId,
-            forfeitAgendaCardId,
-            agendaPointCost: 1,
-          },
-        ),
-      ];
-    }
     const redHerringsId = redHerringsCardIdForCurrentAccess(state, run);
     if (redHerringsId) {
       const stealCost = 5;
@@ -6749,19 +6797,6 @@ function redHerringsCardIdForCurrentAccess(
       RED_HERRINGS_STEAL_TAX_UPGRADE_ID,
     ) ??
     run.redHerringsTaxSourceByServer?.[serverId]
-  );
-}
-
-function oliviaSalazarCardIdForCurrentAccess(
-  state: GameState,
-  run: ActiveRun,
-): CardInstanceId | undefined {
-  const serverId =
-    run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
-  return rezzedRootCardIdOnServer(
-    state,
-    serverId,
-    OLIVIA_SALAZAR_STEAL_COST_UPGRADE_ID,
   );
 }
 
@@ -8180,39 +8215,6 @@ function performAction(
       return;
     case "steal_agenda":
       spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
-      if (
-        legalAction.payload?.v1919UpgradeAbility === "olivia_salazar_steal_cost"
-      ) {
-        if (legalAction.side !== "runner")
-          throw new Error(
-            "Nur der Runner darf Olivia Salazar-Stehlkosten bezahlen.",
-          );
-        const run = mustRun(state);
-        const oliviaSalazarId = oliviaSalazarCardIdForCurrentAccess(state, run);
-        if (
-          !oliviaSalazarId ||
-          oliviaSalazarId !== legalAction.payload.oliviaSalazarCardId
-        ) {
-          throw new Error(
-            "Olivia Salazar ist fuer diesen Zugriff nicht aktiv.",
-          );
-        }
-        const agendaCost = Number(legalAction.payload.agendaPointCost ?? 0);
-        if (!Number.isInteger(agendaCost) || agendaCost !== 1)
-          throw new Error("Olivia Salazar verlangt genau 1 Agenda-Punkt.");
-        const forfeitAgendaCardId = String(
-          legalAction.payload.forfeitAgendaCardId ?? "",
-        );
-        forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          forfeitedAgendaCardId: forfeitAgendaCardId,
-          agendaPointCostPaid: agendaCost,
-          specialZone: "removed_from_game",
-          specialZoneVisibility: "public",
-          specialZoneReason: "v1919_olivia_salazar",
-        };
-      }
       stealAgenda(state, mustRun(state).accessedCardId ?? "", legalAction);
       return;
     case "trash_accessed_card":
@@ -9668,6 +9670,45 @@ function rezCard(
   legalAction?: LegalAction,
 ): void {
   const definition = definitionFor(state, cardId);
+  let creditCost = rezCostForCard(state, cardId);
+  if (legalAction?.payload?.oliviaSalazarRezSourceCardId) {
+    if (definition.type !== "ice")
+      throw new Error("Olivia Salazar kann nur ICE rezzen.");
+    const run = mustRun(state);
+    const iceId = cardId as CardInstanceId;
+    if (
+      state.timingPoint !== "run.approach_ice" ||
+      run.phase !== "approach_ice" ||
+      run.approachedIceId !== iceId
+    )
+      throw new Error("Olivia Salazar darf nur im passenden Rez-Fenster wirken.");
+    const sourceId = String(
+      legalAction.payload.oliviaSalazarRezSourceCardId,
+    ) as CardInstanceId;
+    const availableSources = oliviaSalazarRezSourcesForRunIce(state, iceId);
+    if (!availableSources.includes(sourceId))
+      throw new Error("Olivia Salazar ist fuer dieses ICE nicht aktiv.");
+    if (corpServerIdForInstalledCard(state, sourceId) !== run.attackedServerId)
+      throw new Error("Olivia Salazar gehoert nicht zu diesem Fort.");
+    creditCost = oliviaSalazarRezCostForCard(state, iceId);
+    if ((legalAction.costs[0]?.credits ?? 0) !== creditCost)
+      throw new Error("Olivia-Salazar-Rez-Kosten sind nicht mehr gueltig.");
+    run.oliviaSalazarUsedSourceIdsThisRun = [
+      ...(run.oliviaSalazarUsedSourceIdsThisRun ?? []),
+      sourceId,
+    ].sort();
+    run.oliviaSalazarTemporaryRezzedIceIds = [
+      ...new Set([...(run.oliviaSalazarTemporaryRezzedIceIds ?? []), iceId]),
+    ].sort();
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      serverId: run.attackedServerId,
+      oliviaSalazarRezSourceDefinitionId: OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
+      oliviaSalazarRezCostBase: rezCostForCard(state, iceId),
+      oliviaSalazarTemporaryDerez: true,
+      rezCostPaid: creditCost,
+    };
+  }
   if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
     if (!legalAction)
       throw new Error("ACME Savings and Loan braucht eine LegalAction.");
@@ -9696,7 +9737,7 @@ function rezCard(
         : {}),
     };
   }
-  spendCredits(state, "corp", rezCostForCard(state, cardId));
+  spendCredits(state, "corp", creditCost);
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
     rezzed: true,
@@ -12383,6 +12424,7 @@ function finishRun(
 ): void {
   const run = state.run;
   if (run) applyDupreRunEndCounters(state, run);
+  if (run) derezOliviaSalazarTemporaryIce(state, run, legalAction);
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(state, run, legalAction);
   if (run && successful) {
@@ -12420,6 +12462,38 @@ function finishRun(
   state.activeSide = "runner";
   consumeRunnerFutureActionDebt(state);
   cleanupEmptyRemotes(state);
+}
+
+function derezOliviaSalazarTemporaryIce(
+  state: GameState,
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const iceIds = [...new Set(run.oliviaSalazarTemporaryRezzedIceIds ?? [])].sort();
+  let derezzedCount = 0;
+  for (const iceId of iceIds) {
+    const instance = state.cardInstances[iceId];
+    if (!instance?.rezzed) continue;
+    if (
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce" ||
+      instance.zone.serverId !== run.attackedServerId
+    )
+      continue;
+    state.cardInstances[iceId] = {
+      ...instance,
+      faceup: false,
+      rezzed: false,
+    };
+    derezzedCount += 1;
+  }
+  if (derezzedCount > 0 && legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      oliviaSalazarRunEndDerez: true,
+      derezzedCount,
+    };
+  }
 }
 
 function applyDupreRunEndCounters(state: GameState, run: ActiveRun): void {
@@ -20696,8 +20770,8 @@ function makeActionId(
     parts.push(entry.abilityId);
   }
   if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
-  if (payload?.oliviaSalazarCardId)
-    parts.push(String(payload.oliviaSalazarCardId));
+  if (payload?.oliviaSalazarRezSourceCardId)
+    parts.push(String(payload.oliviaSalazarRezSourceCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
@@ -20895,6 +20969,8 @@ function publicContextForAction(
     "vacuumLinkRewindApplied",
     "vacuumLinkRewindRezzedIceBack",
     "vacuumLinkTargetIceIndex",
+    "oliviaSalazarRunEndDerez",
+    "derezzedCount",
   ]) {
     const value = legalAction.payload?.[key];
     if (typeof value === "number" || typeof value === "boolean")
@@ -20978,6 +21054,11 @@ function publicContextForAction(
       "rezCostPaid",
       "rezCostReductionAmount",
       "rezCostReductionSourceDefinitionIds",
+      "oliviaSalazarRezSourceCardId",
+      "oliviaSalazarRezSourceDefinitionId",
+      "oliviaSalazarRezCostBase",
+      "oliviaSalazarTemporaryDerez",
+      "oliviaSalazarRunEndDerez",
       "encounterTaxForFutureIce",
       "encounterTaxPaid",
       "encounterTaxSource",

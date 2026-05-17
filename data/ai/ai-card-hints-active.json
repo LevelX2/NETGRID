@@ -5507,26 +5507,29 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "agenda"
+        "ice_rez",
+        "run_defense"
       ],
       "planRoles": [
-        "remote_upgrade_agenda_support"
+        "remote_upgrade_rez_support"
       ],
       "requiredMechanics": [
         "install_upgrade",
         "rez_card",
-        "scored_agenda",
-        "agenda_difficulty"
+        "rez_ice",
+        "ice_rez_cost_modifier",
+        "temporary_derez"
       ],
       "valueHints": {
         "remote": 1
       },
       "riskTags": [
-        "score_window"
+        "run_window",
+        "source_bound_rez_cost"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_agenda_support"
+        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_rez_support"
       ]
     },
     {
@@ -5679,7 +5682,7 @@
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_agenda_support"
+        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_rez_support"
       ]
     },
     {
@@ -5858,7 +5861,7 @@
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
-        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_agenda_support"
+        "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_upgrade_rez_support"
       ]
     },
     {

@@ -33,11 +33,11 @@
       "sideSafetyAssertions": ["access_window_only", "visible_targeting", "damage_payload_redacted", "hidden_zone_barrier"]
     },
     {
-      "id": "corp_v1919_upgrade_agenda_support",
+      "id": "corp_v1919_upgrade_rez_support",
       "side": "corp",
       "coversCards": ["onr_v1_363_olivia-salazar", "onr_v1_368_roving-submarine", "onr_v1_374_washington-d-c-city-grid"],
-      "expectedDecisionFamilies": ["install_card", "rez_ice", "advance_card", "score_agenda"],
-      "sideSafetyAssertions": ["server_scope_revalidated", "region_unique_server_scope", "agenda_cost_revalidated"]
+      "expectedDecisionFamilies": ["install_card", "rez_ice", "start_run", "advance_card", "score_agenda"],
+      "sideSafetyAssertions": ["server_scope_revalidated", "source_bound_rez_cost_revalidated", "temporary_derez_run_end", "region_unique_server_scope"]
     }
   ],
   "verification": {

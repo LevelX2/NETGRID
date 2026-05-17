@@ -12403,7 +12403,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     });
   });
 
-  it("uses V1.9.19 Runner agenda-cost paths for Fait Accompli, Arasaka Owns You and Olivia Salazar", () => {
+  it("uses V1.9.19 Runner agenda-cost paths for Fait Accompli and Arasaka Owns You", () => {
     let faitState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-accompli"),
     );
@@ -12488,56 +12488,109 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       futureAgendaPointForfeitPending: 3,
     });
 
-    let oliviaState = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.agendaScoring("v1919-olivia-salazar"),
+  });
+
+  it("offers Olivia Salazar half-cost ICE rez actions and derezzes that ICE at run end", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1919-olivia-rez-cost",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+          id: "onr_v1_corp_v1919_olivia_rez_cost",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
     );
-    oliviaState.runner.credits = 20;
-    const oliviaCostAgendaId = scoreRunnerAgendaForTest(
-      oliviaState,
-      "simple_agenda",
-    );
-    const accessedAgendaId = putCorpRootInRemote(
-      oliviaState,
-      "onr_v1_202_genetics-visionary-acquisition",
-    );
+    state.corp.credits = 2;
+    state.corp.maxHandSize = 100;
     const oliviaId = putCorpRootInRemote(
-      oliviaState,
+      state,
       "onr_v1_363_olivia-salazar",
     );
-    oliviaState.cardInstances[oliviaId] = {
-      ...oliviaState.cardInstances[oliviaId]!,
+    state.cardInstances[oliviaId] = {
+      ...state.cardInstances[oliviaId]!,
       faceup: true,
       rezzed: true,
     };
-    oliviaState = apply(
-      oliviaState,
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_232_crystal-wall",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(
+      state,
       "runner",
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    oliviaState = apply(
-      oliviaState,
-      "runner",
-      (action) => action.type === "access_card",
+    const actions = getLegalActions(state, "corp").filter(
+      (action) => action.type === "rez_ice",
     );
-    oliviaState = apply(
-      oliviaState,
-      "runner",
-      (action) =>
-        action.type === "steal_agenda" &&
-        action.payload?.v1919UpgradeAbility === "olivia_salazar_steal_cost",
-    );
-    expect(oliviaState.runner.scoreArea).not.toContain(oliviaCostAgendaId);
-    expect(oliviaState.runner.scoreArea).toContain(accessedAgendaId);
-    expect(oliviaState.specialZones?.removedFromGame).toContain(
-      oliviaCostAgendaId,
-    );
-    expect(oliviaState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "steal_agenda",
-      v1919UpgradeAbility: "olivia_salazar_steal_cost",
-      agendaPointCostPaid: 1,
-      specialZoneReason: "v1919_olivia_salazar",
+    expect(actions).toHaveLength(1);
+    const oliviaRez = actions[0]!;
+    expect(oliviaRez.label).toContain("Olivia Salazar");
+    expect(oliviaRez.label).toContain("2 Credits");
+    expect(oliviaRez.costs[0]?.credits).toBe(2);
+    expect(oliviaRez.payload).toMatchObject({
+      cardId: iceId,
+      oliviaSalazarRezSourceCardId: oliviaId,
+      oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      oliviaSalazarRezCostBase: 4,
+      oliviaSalazarTemporaryDerez: true,
+      rezCostPaid: 2,
+      rezCostReductionAmount: 2,
     });
+
+    const sourceDrift = structuredClone(state);
+    sourceDrift.cardInstances[oliviaId] = {
+      ...sourceDrift.cardInstances[oliviaId]!,
+      rezzed: false,
+    };
+    const driftResult = applyAction(sourceDrift, {
+      matchId: sourceDrift.matchId,
+      side: "corp",
+      actionId: oliviaRez.actionId,
+      clientKnownStateVersion: sourceDrift.stateVersion,
+      idempotencyKey: "olivia-source-drift",
+    });
+    expect(driftResult.ok).toBe(false);
+
+    state = apply(state, "corp", (action) => action.actionId === oliviaRez.actionId);
+    expect(state.corp.credits).toBe(0);
+    expect(state.cardInstances[iceId]?.rezzed).toBe(true);
+    expect(state.run?.oliviaSalazarUsedSourceIdsThisRun).toEqual([oliviaId]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      cardDefinitionId: "onr_v1_232_crystal-wall",
+      oliviaSalazarRezSourceDefinitionId: "onr_v1_363_olivia-salazar",
+      oliviaSalazarRezCostBase: 4,
+      oliviaSalazarTemporaryDerez: true,
+      rezCostPaid: 2,
+    });
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.cardInstances[iceId]?.rezzed).toBe(false);
+    expect(state.cardInstances[iceId]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      oliviaSalazarRunEndDerez: true,
+      derezzedCount: 1,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("binds Fait Accompli counters to the successful remote fort and raises only that agenda difficulty", () => {

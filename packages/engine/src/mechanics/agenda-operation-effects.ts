@@ -46,7 +46,7 @@ export const VAPOR_OPS_COUNTER_ASSET_ID = "onr_v1_347_vapor-ops";
 export const VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID =
   "onr_v1_348_virus-test-site";
 
-export const OLIVIA_SALAZAR_STEAL_COST_UPGRADE_ID =
+export const OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID =
   "onr_v1_363_olivia-salazar";
 
 export const ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID =

@@ -63,8 +63,8 @@
     { "cardId": "onr_v1_346_vacant-soulkiller", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_346_vacant-soulkiller", "scenarioRefs": ["corp_v1919_asset_agenda_support"] },
     { "cardId": "onr_v1_347_vapor-ops", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_347_vapor-ops", "scenarioRefs": ["corp_v1919_asset_agenda_support"] },
     { "cardId": "onr_v1_348_virus-test-site", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_348_virus-test-site", "scenarioRefs": ["corp_v1919_asset_agenda_support"] },
-    { "cardId": "onr_v1_363_olivia-salazar", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_363_olivia-salazar", "scenarioRefs": ["corp_v1919_upgrade_agenda_support"] },
-    { "cardId": "onr_v1_368_roving-submarine", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_368_roving-submarine", "scenarioRefs": ["corp_v1919_upgrade_agenda_support"] },
-    { "cardId": "onr_v1_374_washington-d-c-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_374_washington-d-c-city-grid", "scenarioRefs": ["corp_v1919_upgrade_agenda_support"] }
+    { "cardId": "onr_v1_363_olivia-salazar", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_363_olivia-salazar", "scenarioRefs": ["corp_v1919_upgrade_rez_support"] },
+    { "cardId": "onr_v1_368_roving-submarine", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_368_roving-submarine", "scenarioRefs": ["corp_v1919_upgrade_rez_support"] },
+    { "cardId": "onr_v1_374_washington-d-c-city-grid", "status": "ai_supported", "hintRef": "ai-card-hints-active:onr_v1_374_washington-d-c-city-grid", "scenarioRefs": ["corp_v1919_upgrade_rez_support"] }
   ]
 }
