@@ -17,7 +17,7 @@ import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks 
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import { MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
 describe("V1.0.9 private internet hardening", () => {
   it("uses a LAN-capable default bind address for direct server starts", async () => {
@@ -2763,7 +2763,8 @@ describe("MVP 0.2 multiplayer service", () => {
   });
 
   it("keeps replay DecisionDebug side-safe across runner/corp/local perspectives", async () => {
-    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "v150-decision-debug" });
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "v150-decision-debug" });
     const created = await service.createMatch({
       mode: "human_runner_vs_corp_ai",
       hostSide: "runner",
@@ -2804,11 +2805,43 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!runnerDebugStep || !corpDebugStep || !localDebugStep) throw new Error("Missing decision debug step");
 
     expect(runnerDebugStep.side).toBe("corp");
-    expect(runnerDebugStep.decisionDebug).toMatchObject({ redacted: true, reason: "side_private_ai_debug" });
-    expect(corpDebugStep.decisionDebug).toMatchObject({ actor: "corp" });
+    expect(runnerDebugStep.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, redacted: true, reason: "side_private_ai_debug" });
+    expect(corpDebugStep.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
     expect((corpDebugStep.decisionDebug as { redacted?: boolean })?.redacted).toBeUndefined();
-    expect(localDebugStep.decisionDebug).toMatchObject({ actor: "corp" });
+    expect(localDebugStep.decisionDebug).toMatchObject({ schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION, actor: "corp" });
     expect((localDebugStep.decisionDebug as { redacted?: boolean })?.redacted).toBeUndefined();
+
+    const stored = await storage.load(created.matchId);
+    expect(stored).toBeDefined();
+    if (!stored) throw new Error("Missing stored match");
+    const debugRecord = stored.eventLog.find((event) => event.publicPayload.publicPayload.aiDecisionDebug);
+    expect(debugRecord).toBeDefined();
+    if (!debugRecord) throw new Error("Missing AI debug record");
+    debugRecord.publicPayload.publicPayload.aiDecisionDebug = {
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planKind: "fallback",
+      facts: ["public_fact:ok", "privatePayload runner-sessionToken"],
+      opponentHqContents: ["Hidden Priority Agenda"],
+      privatePayload: { FullState: true },
+      opponentModel: {
+        visibleSignal: "safe",
+        rdContents: ["hidden-deck-card"],
+        sessionToken: "runner-session-secret"
+      }
+    };
+    await storage.save(stored);
+
+    const redactedCorpReplayLoaded = await service.loadReplayView(created.matchId, "corp");
+    expect(redactedCorpReplayLoaded.ok).toBe(true);
+    if (!redactedCorpReplayLoaded.ok) throw new Error(redactedCorpReplayLoaded.error.message);
+    const redactedDebugStep = redactedCorpReplayLoaded.replay.timeline.find((step) => step.decisionDebug);
+    expect(redactedDebugStep?.decisionDebug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      actor: "corp",
+      facts: ["public_fact:ok", "[redacted-debug-value]"]
+    });
+    expect(JSON.stringify(redactedCorpReplayLoaded.replay)).not.toMatch(/runner-session-secret|privatePayload|FullState|Hidden Priority Agenda|hidden-deck-card|decklist|sessionToken|reconnectToken|joinToken/i);
   });
 
   it("classifies V1.5.0 replay event families for access, damage, trace, replacement and special-zone flows", async () => {

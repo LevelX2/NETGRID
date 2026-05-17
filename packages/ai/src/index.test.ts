@@ -94,7 +94,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { DEMO_CARDS_BY_ID, MVP_0_99_BASELINE } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -5386,6 +5386,104 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(serializedDebug).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
+  });
+
+  it("snapshots the versioned DecisionDebug contract for Runner and Korp outputs", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-decision-debug-contract" }));
+    const runnerDecision = chooseRunnerAction(buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    const corpDecision = chooseCorpAction(buildAiDecisionInput(state, "corp", { difficulty: "normal", profileId: "corp-ai-v1.4.2-normal" }));
+
+    const snapshot = {
+      runner: {
+        schemaVersion: runnerDecision.decisionDebug?.schemaVersion,
+        keys: Object.keys(runnerDecision.decisionDebug ?? {}).sort()
+      },
+      corp: {
+        schemaVersion: corpDecision.decisionDebug?.schemaVersion,
+        keys: Object.keys(corpDecision.decisionDebug ?? {}).sort()
+      }
+    };
+
+    expect(snapshot).toMatchInlineSnapshot(`
+      {
+        "corp": {
+          "keys": [
+            "aiLevel",
+            "facts",
+            "hypotheses",
+            "invalidations",
+            "memoryVersion",
+            "opponentModel",
+            "schemaVersion",
+            "uncertainty",
+          ],
+          "schemaVersion": "ai-decision-debug-v1",
+        },
+        "runner": {
+          "keys": [
+            "aiLevel",
+            "beliefUncertainty",
+            "confidence",
+            "evidence",
+            "facts",
+            "fallbackUsed",
+            "hypotheses",
+            "invalidations",
+            "memoryVersion",
+            "opponentModel",
+            "planId",
+            "planKind",
+            "profileId",
+            "schemaVersion",
+            "score",
+            "seed",
+            "selectedActionType",
+            "timeBudgetMs",
+            "timeoutUsed",
+            "uncertainty",
+            "visibleReasons",
+          ],
+          "schemaVersion": "ai-decision-debug-v1",
+        },
+      }
+    `);
+    expect(snapshot.runner.schemaVersion).toBe(AI_DECISION_DEBUG_SCHEMA_VERSION);
+    expect(snapshot.corp.schemaVersion).toBe(AI_DECISION_DEBUG_SCHEMA_VERSION);
+    expect(JSON.stringify(snapshot)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist/i);
+  });
+
+  it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      planKind: "fallback",
+      facts: ["public_fact:ok", "privatePayload runner-sessionToken"],
+      opponentHqContents: ["Hidden Priority Agenda"],
+      privatePayload: { FullState: true },
+      opponentModel: {
+        visibleSignal: "safe",
+        rdContents: ["hidden-deck-card"],
+        sessionToken: "runner-session-secret"
+      }
+    });
+
+    expect(sanitized).toMatchInlineSnapshot(`
+      {
+        "aiLevel": 2,
+        "facts": [
+          "public_fact:ok",
+          "[redacted-debug-value]",
+        ],
+        "opponentModel": {
+          "rdContents": "[redacted-debug-field]",
+          "sessionToken": "[redacted-debug-field]",
+          "visibleSignal": "safe",
+        },
+        "planKind": "fallback",
+        "schemaVersion": "ai-decision-debug-v1",
+      }
+    `);
+    expect(JSON.stringify(sanitized)).not.toMatch(/runner-session-secret|privatePayload|FullState|hidden-deck-card|decklist/i);
   });
 
   it("does not mutate real game state hash while building belief state and choosing actions", () => {

@@ -1,5 +1,5 @@
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
-import { DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionInput, type AiDifficulty, type LegalAction, type Side, type VisibleCard } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type LegalAction, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 import { cardDefinitionStrength, endTheRunSubroutineCount, minimumCreditsToBreakEndTheRunSubroutines, serverIdFromEvent } from "./visible-run-analysis";
@@ -39,8 +39,9 @@ export type CorpPlanScore = {
   evidence: string[];
 };
 
-export type CorpPlanDebug = {
+export type CorpPlanDebug = AiDecisionDebug & {
   aiLevel: 2;
+  schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
   planId: string;
   planKind: CorpPlanKind | "fallback";
   selectedActionType: LegalAction["type"] | "none";
@@ -230,6 +231,7 @@ export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBu
     fallbackUsed: false,
     score: selected.score,
     debug: {
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
       planId: selected.candidate.planId,
       planKind: selected.candidate.kind,
@@ -852,6 +854,7 @@ function fallbackDebug(
   const beliefSummary = beliefDebugSummary(beliefState);
   const opponentModel = toRecord(beliefSummary.corpOpponentModel);
   return {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: 2,
     planId: "fallback",
     planKind: "fallback",
