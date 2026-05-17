@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-derived-backend-0-5-link-audit-move-plan
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,17 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-1
 parallelWorker: worker-1
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md
+  - docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_BACKEND_0_5.md
+checks:
+  - rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Maintenance" .
+  - git diff --check
 ---
 
 # Backend 0.5 Rollup-Linkaudit und Move-Plan
@@ -46,10 +50,10 @@ Für die Musterfamilie `BACKEND_0_5_*` soll entschieden werden, ob eine echte Zi
 
 ## Akzeptanzkriterien
 
-- [ ] Linkbruchrisiken sind vollständig benannt.
-- [ ] Move-/Stub-Entscheidung ist dokumentiert.
-- [ ] Falls Dateien bewegt werden: alle betroffenen Links sind aktualisiert oder abgesichert.
-- [ ] `git diff --check` ist ausgeführt.
+- [x] Linkbruchrisiken sind vollständig benannt.
+- [x] Move-/Stub-Entscheidung ist dokumentiert.
+- [x] Falls Dateien bewegt werden: alle betroffenen Links sind aktualisiert oder abgesichert.
+- [x] `git diff --check` ist ausgeführt.
 
 ## Umsetzungshinweise
 
@@ -57,4 +61,4 @@ Vor jedem Move mindestens `rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Mai
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md` dokumentiert den vollständigen Backend-0.5-Linkaudit, trennt harte Pfadlinks von unkritischen Textreferenzen und entscheidet konservativ `decision-no-move`: Die bestehenden `docs/derived/BACKEND_0_5_*`-Pfade bleiben vorerst kanonisch, es werden keine Redirect-Stubs angelegt und keine Gate-Nachweise bewegt. Das Rollup `docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_BACKEND_0_5.md` verweist auf diese Entscheidung. Da keine Dateien bewegt wurden, war keine Linkmigration nötig; spätere Move-Voraussetzungen und Stub-Optionen sind dokumentiert. Pflichtchecks `rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Maintenance" .` und `git diff --check` sind ausgeführt, `git diff --check` ist grün.
