@@ -725,6 +725,39 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
 
+  it("mirrors Startup Immolator post-pass trash into the Run window", () => {
+    const startup = card("startup_1", "Startup Immolator", "program");
+    const running = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [startup]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+        successful: false
+      }
+    });
+    const startupTrash: LegalAction = {
+      ...legalAction("runner", "trigger_ability", "startup_1", "Startup Immolator: ICE trashen", {
+        cardId: "startup_1",
+        targetIceId: "ice_1",
+        v1922RunnerProgramAbility: "startup_immolator_trash_ice",
+        rezCostPaid: 3
+      }, "run.jack_out_window"),
+      costs: [{ credits: 3 }]
+    };
+    const continueRun = legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window");
+    const offRunAbility = legalAction("runner", "trigger_ability", "broker_1", "Broker: 3 Credits auf Broker legen", { cardId: "broker_1", resourceAbility: "broker_load_credits" });
+
+    const mirrored = runWindowActions(running, [startupTrash, continueRun, offRunAbility]);
+
+    expect(mirrored).toEqual([startupTrash, continueRun]);
+    expect(runWindowActionButtonLabel(running, startupTrash)).toBe("3 Credits - Startup Immolator: ICE trashen");
+    expect(actionMatchesContext(startupTrash, { kind: "card", id: "startup_1", label: "Startup Immolator" })).toBe(true);
+  });
+
   it("mirrors the card access action into the Run window with a German label", () => {
     const running = view("runner", {
       run: {

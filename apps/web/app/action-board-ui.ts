@@ -672,7 +672,7 @@ export function runWindowActions(view: PlayerView, actions: LegalAction[]): Lega
     if (!action.timingPoint.startsWith("run.")) return false;
     if (action.type === "jack_out" || action.type === "continue_run" || action.type === "rez_ice" || action.type === "decline_rez") return true;
     if (action.type === "pump_breaker" || action.type === "break_subroutine") return action.payload?.iceId === activeRunIceInstanceId(view);
-    return isSelfModifyingCodeAction(action);
+    return isRunWindowTriggerAction(action);
   });
 }
 
@@ -802,6 +802,14 @@ function objectBoundAction(action: LegalAction): boolean {
 
 function isSelfModifyingCodeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
   return action.type === "trigger_ability" && actionHasAbility(action, "self_modifying_code_install_program");
+}
+
+function isStartupImmolatorAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return action.type === "trigger_ability" && actionHasAbility(action, "startup_immolator_trash_ice");
+}
+
+function isRunWindowTriggerAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action);
 }
 
 function sourceCardTitleForAction(view: PlayerView, action: LegalAction): string | null {
