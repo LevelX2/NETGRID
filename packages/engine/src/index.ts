@@ -2259,7 +2259,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
             ...state.runner.rig.programs,
             ...state.runner.rig.hardware,
             ...state.runner.rig.resources,
-          ].map((id) => visibleOwnCard(state, id)),
+          ].map((id) => visibleRunnerRigCardForViewer(state, id, side)),
           memoryUsed: state.runner.memoryUsed,
           memoryLimit: state.runner.memoryLimit,
         },
@@ -3015,16 +3015,30 @@ function corpMainActions(state: GameState): LegalAction[] {
     );
   if (state.runner.tags > 0 && state.corp.credits >= 2) {
     for (const id of state.runner.rig.resources) {
-      const definition = definitionFor(state, id);
+      const hiddenResource = isConcealedRunnerResource(state, id);
+      const resourceSlotId = hiddenResource
+        ? hiddenRunnerResourceSlotId(id)
+        : id;
+      const definition = hiddenResource ? undefined : definitionFor(state, id);
       actions.push(
         action(
           state,
           "corp",
           "trash_resource",
-          `${definition.title} trashen`,
+          hiddenResource
+            ? "Verdeckte Runner-Resource trashen"
+            : `${definition?.title ?? "Resource"} trashen`,
           "basic_action",
           [{ clicks: 1, credits: 2 }],
-          { cardId: id, resourceId: id },
+          hiddenResource
+            ? {
+                cardId: resourceSlotId,
+                resourceSlotId,
+                hiddenResourceSlotId: resourceSlotId,
+                hiddenRunnerResource: true,
+                redactedKind: "hidden_runner_resource",
+              }
+            : { cardId: id, resourceId: id },
           {
             targetRequirements: [
               {
@@ -8400,6 +8414,7 @@ function performAction(
         String(
           legalAction.payload?.resourceId ?? legalAction.payload?.cardId ?? "",
         ),
+        legalAction,
       );
       return;
     case "decline_trash":
@@ -9368,6 +9383,8 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       zetatechOverlayInstall && hostOnCardId
         ? cardCounter(state, hostOnCardId, "recurring_credit")
         : 0;
+    const concealedHiddenRunnerResource =
+      definition.type === "resource" && cardHasSubtype(definition, "hidden");
     if (definition.id === "onr_v1_156_corporate-ally") {
       const agendaCost = Number(
         legalAction.payload?.installAgendaPointCost ?? 0,
@@ -9477,7 +9494,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         addCardCounter(state, cardId, "virus", 1);
     } else if (definition.type === "resource") {
       state.runner.rig.resources.push(cardId);
-      if ((definition.recurringCredits ?? 0) > 0)
+      if ((definition.recurringCredits ?? 0) > 0 && !concealedHiddenRunnerResource)
         setCardCounter(
           state,
           cardId,
@@ -9518,6 +9535,14 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           },
         ];
       }
+      if (concealedHiddenRunnerResource) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          hiddenRunnerResourceInstall: true,
+          hiddenResourceSlotId: hiddenRunnerResourceSlotId(cardId),
+          redactedKind: "hidden_runner_resource",
+        };
+      }
     } else {
       throw new Error(
         "Nur Programme, Hardware und Resources koennen vom Runner installiert werden.",
@@ -9525,8 +9550,8 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     }
     state.cardInstances[cardId] = {
       ...mustInstance(state.cardInstances, cardId),
-      faceup: true,
-      rezzed: true,
+      faceup: !concealedHiddenRunnerResource,
+      rezzed: !concealedHiddenRunnerResource,
       zone: { side: "runner", zone: "rig" },
       ...(hostOnCardId ? { hostedOn: hostOnCardId } : {}),
       ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
@@ -12504,16 +12529,41 @@ function completeCurrentBreachAccess(
   state.activeSide = "runner";
 }
 
-function trashResource(state: GameState, cardId: string): void {
+function trashResource(
+  state: GameState,
+  cardId: string,
+  legalAction?: LegalAction,
+): void {
   if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
-  if (!state.runner.rig.resources.includes(cardId))
+  const resolvedCardId =
+    state.runner.rig.resources.includes(cardId)
+      ? cardId
+      : resolveHiddenRunnerResourceSlot(state, cardId);
+  if (!resolvedCardId || !state.runner.rig.resources.includes(resolvedCardId))
     throw new Error("Diese Resource ist nicht installiert.");
-  const definition = definitionFor(state, cardId);
+  const definition = definitionFor(state, resolvedCardId);
   if (definition.type !== "resource")
     throw new Error("Nur installierte Resources koennen getrasht werden.");
+  const wasConcealedHiddenResource = isConcealedRunnerResource(
+    state,
+    resolvedCardId,
+  );
+  const hiddenResourceSlotId = hiddenRunnerResourceSlotId(resolvedCardId);
   spendClick(state, "corp");
   spendCredits(state, "corp", 2);
-  trashRunnerInstalledCardToHeap(state, cardId);
+  trashRunnerInstalledCardToHeap(state, resolvedCardId);
+  if (legalAction && wasConcealedHiddenResource) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      cardId: hiddenResourceSlotId,
+      resourceSlotId: hiddenResourceSlotId,
+      hiddenResourceSlotId,
+      hiddenRunnerResource: true,
+      hiddenRunnerResourceRevealed: true,
+      publicRevealDefinitionId: definition.id,
+      redactedKind: "hidden_runner_resource",
+    };
+  }
 }
 
 function pickRunnerProgramForUninstall(
@@ -21332,6 +21382,11 @@ function baseClicksForSide(side: Side): number {
 
 function publicLabel(legalAction: LegalAction): string {
   if (
+    legalAction.type === "install_card" &&
+    legalAction.payload?.hiddenRunnerResourceInstall === true
+  )
+    return "Runner installiert eine verdeckte Resource.";
+  if (
     legalAction.type === "resolve_choice" &&
     legalAction.payload?.setupStep === "mulligan"
   )
@@ -21453,6 +21508,12 @@ function publicContextForAction(
         : legalAction.payload?.placement === "ice"
           ? "ICE"
         : "Remote";
+    if (legalAction.payload?.hiddenRunnerResourceInstall === true) {
+      context.redactedKind = "hidden_runner_resource";
+      context.hiddenRunnerResourceInstall = true;
+      if (typeof legalAction.payload.hiddenResourceSlotId === "string")
+        context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
+    }
     if (legalAction.payload?.zetatechOverlayInstall === true) {
       context.v1922RunnerProgramAbility = "zetatech_overlay_install";
       context.zetatechOverlayInstall = true;
@@ -21504,7 +21565,16 @@ function publicContextForAction(
     if (typeof legalAction.payload.choiceVisibility === "string")
       context.choiceVisibility = legalAction.payload.choiceVisibility;
   }
-  if (legalAction.type === "trash_resource") context.zoneLabel = "Resource";
+  if (legalAction.type === "trash_resource") {
+    context.zoneLabel = "Resource";
+    if (legalAction.payload?.hiddenRunnerResource === true) {
+      context.redactedKind = "hidden_runner_resource";
+      if (typeof legalAction.payload.hiddenResourceSlotId === "string")
+        context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
+      if (legalAction.payload.hiddenRunnerResourceRevealed === true)
+        context.hiddenRunnerResourceRevealed = true;
+    }
+  }
   if (legalAction.type === "rez_ice")
     context.zoneLabel =
       legalAction.payload?.rootRez === true ||
@@ -22770,6 +22840,11 @@ function revealForPublicEvent(
   state: GameState,
   legalAction: LegalAction,
 ): Record<string, unknown> {
+  if (
+    legalAction.type === "install_card" &&
+    legalAction.payload?.hiddenRunnerResourceInstall === true
+  )
+    return {};
   if (typeof legalAction.payload?.publicRevealDefinitionId === "string") {
     const definition =
       DEMO_CARDS_BY_ID[legalAction.payload.publicRevealDefinitionId];
@@ -22976,6 +23051,54 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+function visibleRunnerRigCardForViewer(
+  state: GameState,
+  id: CardInstanceId,
+  viewer: Side,
+): VisibleCard {
+  if (viewer !== "corp" || !isConcealedRunnerResource(state, id))
+    return visibleOwnCard(state, id);
+  const instance = mustInstance(state.cardInstances, id);
+  return {
+    instanceId: hiddenRunnerResourceSlotId(id),
+    known: false,
+    type: "resource",
+    subtypes: ["hidden_runner_resource"],
+    rezzed: false,
+    owner: instance.owner,
+    controller: instance.controller,
+  };
+}
+
+function isConcealedRunnerResource(
+  state: GameState,
+  id: CardInstanceId,
+): boolean {
+  if (!state.runner.rig.resources.includes(id)) return false;
+  const instance = state.cardInstances[id];
+  if (!instance || instance.faceup) return false;
+  const definition = definitionFor(state, id);
+  return definition.type === "resource" && cardHasSubtype(definition, "hidden");
+}
+
+function hiddenRunnerResourceSlotId(id: CardInstanceId): CardInstanceId {
+  return `hidden_runner_resource_${hiddenVisibleCardId(id).replace(
+    /^hidden_/,
+    "",
+  )}`;
+}
+
+function resolveHiddenRunnerResourceSlot(
+  state: GameState,
+  slotId: string,
+): CardInstanceId | undefined {
+  return state.runner.rig.resources.find(
+    (id) =>
+      isConcealedRunnerResource(state, id) &&
+      hiddenRunnerResourceSlotId(id) === slotId,
+  );
 }
 
 function visibleCorpCard(
