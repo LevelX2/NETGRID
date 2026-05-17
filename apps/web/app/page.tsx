@@ -11,6 +11,7 @@ import {
   ChevronDown,
   ChevronUp,
   Clipboard,
+  Clock,
   Crosshair,
   Flag,
   CopyPlus,
@@ -164,6 +165,7 @@ import {
   type HumanSideSelection,
   type PlayMode
 } from "./match-start";
+import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
@@ -323,6 +325,12 @@ type SeriesResultSummary = ApiSeriesResultSummary;
 type GameResultSummary = ApiGameResultSummary;
 type LifecycleResultSummary = ApiLifecycleResultSummary;
 type ClientPayload = ApiSidePayload;
+type LocalMatchClockAnchor = {
+  matchId: string;
+  matchStartedAtMs: number;
+  decisionKey: string;
+  decisionStartedAtMs: number;
+};
 
 function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
   const presentation = payload?.aiTurnPresentation;
@@ -1683,6 +1691,8 @@ export default function Page() {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [payload, setPayload] = useState<ClientPayload | null>(null);
   const [lobby, setLobby] = useState<LobbyClientPayload | null>(null);
+  const [matchClockNowMs, setMatchClockNowMs] = useState(() => Date.now());
+  const [matchClockAnchor, setMatchClockAnchor] = useState<LocalMatchClockAnchor | null>(null);
   const [lobbyChatText, setLobbyChatText] = useState("");
   const [simulation, setSimulation] = useState<AiSimulationSummary | null>(null);
   const [simulationPending, setSimulationPending] = useState(false);
@@ -2286,6 +2296,46 @@ export default function Page() {
   }, []);
 
   const activeView = payload?.playerView;
+  useEffect(() => {
+    if (!payload || !activeView) {
+      setMatchClockAnchor(null);
+      return;
+    }
+    const decisionKey = matchTimerDecisionKey({ matchId: payload.matchId, playerView: activeView, legalActions: payload.legalActions, winner: payload.winner });
+    const now = Date.now();
+    setMatchClockNowMs(now);
+    setMatchClockAnchor((current) => {
+      if (!current || current.matchId !== payload.matchId) {
+        return {
+          matchId: payload.matchId,
+          matchStartedAtMs: now,
+          decisionKey,
+          decisionStartedAtMs: now
+        };
+      }
+      if (current.decisionKey !== decisionKey) {
+        return {
+          ...current,
+          decisionKey,
+          decisionStartedAtMs: now
+        };
+      }
+      return current;
+    });
+  }, [
+    activeView,
+    payload?.legalActions,
+    payload?.matchId,
+    payload?.winner
+  ]);
+
+  useEffect(() => {
+    if (!payload || !activeView) return;
+    setMatchClockNowMs(Date.now());
+    const handle = window.setInterval(() => setMatchClockNowMs(Date.now()), 1000);
+    return () => window.clearInterval(handle);
+  }, [activeView, payload?.matchId]);
+
   const activeDiscardChoice = activeView?.pendingChoice?.source === "discard_phase" ? activeView.pendingChoice : null;
   const activeDiscardOptionIds = useMemo(() => new Set(activeDiscardChoice?.options.map((option) => option.id) ?? []), [activeDiscardChoice]);
   const currentDiscardChoiceSelection = discardChoiceSelection;
@@ -2407,6 +2457,14 @@ export default function Page() {
   const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
   const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
   const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
+  const matchClockDisplay =
+    payload && activeView && matchClockAnchor?.matchId === payload.matchId
+      ? {
+          matchElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.matchStartedAtMs),
+          decisionElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.decisionStartedAtMs),
+          scopeLabel: payload.winner ? "Spiel beendet" : matchTimerScopeLabel(activeView, payload.legalActions)
+        }
+      : null;
   const activeMatchIsGame = activeMatchWorkspace === "game";
   const activeCueHighlight = currentActionCue?.highlight ?? null;
   const hasDecisionCue = Boolean(currentActionCue?.requiresLocalAttention || activeView?.pendingChoice || (activeView?.activeSide === activeView?.side && payload?.legalActions.length));
@@ -4620,6 +4678,20 @@ export default function Page() {
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
+          {matchClockDisplay ? (
+            <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
+              <span className="matchClockIcon" aria-hidden="true">
+                <Clock size={15} />
+              </span>
+              <span>
+                <strong>Match</strong> {matchClockDisplay.matchElapsed}
+              </span>
+              <span>
+                <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
+              </span>
+              <small>Orientierung</small>
+            </div>
+          ) : null}
           {activeView.side === "corp" ? (
             <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
               <RunnerRigStrip

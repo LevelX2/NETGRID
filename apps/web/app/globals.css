@@ -7617,6 +7617,43 @@ select,
   gap: 12px;
 }
 
+.matchClockStrip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  min-height: 34px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel), var(--chronicle-system) 9%);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.matchClockStrip span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+  white-space: nowrap;
+}
+
+.matchClockStrip strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.matchClockStrip small {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.matchClockIcon {
+  color: var(--chronicle-system);
+}
+
 .boardHeader {
   display: flex;
   align-items: end;
@@ -9082,6 +9119,10 @@ select,
   .matchStrip span {
     flex: 0 1 auto;
     max-width: 100%;
+  }
+
+  .matchClockStrip small {
+    margin-left: 0;
   }
 
   .seriesStrip {
