@@ -151,6 +151,8 @@ Ein Implementierungspaket für V2.2 muss mindestens prüfen:
 6. Report-/Block-/Retention-Pfade nutzen Chatreferenzen und redigierte Evidence, keine kopierten FullState- oder Hidden-Daten.
 7. Observability-, Fehler- und Auditlogs redigieren Tokens, private Matchdaten und Chatrohtexte gemäß Policy.
 
+Der konkrete Redaction- und Boundary-Testvertrag liegt in `docs/derived/V2_2_CHAT_REDACTION_BOUNDARY_TEST_PLAN.md`. Er konkretisiert Reconnect-, WebSocket-, Server-Payload-, Replay-/StateHash-, AIInput-/DecisionDebug- und Log-Checks, ohne Chat-Implementierung, Public-Chat, Moderationskonsole oder LLM-Moderation freizugeben.
+
 ## Folgepakete
 
 Angelegt:
