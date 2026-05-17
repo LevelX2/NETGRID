@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "card-source-registry-v1.3.1",
+  "registryId": "source-registry-proteus-2026-05-17",
+  "createdAt": "2026-05-17T00:00:00.000+02:00",
+  "sources": [
+    {
+      "sourceId": "onr-proteus-spoiler",
+      "sourceType": "project_file",
+      "scope": "versioned_project",
+      "pathOrReference": "docs/source/Proteusspoiler.txt",
+      "provenance": "Versioned local Proteus spoiler source for planning and review.",
+      "usageDecision": "allowed_project_data",
+      "reviewStatus": "unreviewed",
+      "notes": "Display-only card-basis import. Does not grant runtime support, deck legality, AI support, or asset rights."
+    },
+    {
+      "sourceId": "onr-proteus-private-scans",
+      "sourceType": "local_private_file",
+      "scope": "private_local",
+      "pathOrReference": "private-local-proteus-scans",
+      "provenance": "Private local scan references for operator-side review only.",
+      "usageDecision": "private_display_only",
+      "reviewStatus": "unreviewed",
+      "notes": "Logical reference only; private paths and official images are not versioned and are not public assets."
+    }
+  ]
+}

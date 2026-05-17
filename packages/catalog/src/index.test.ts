@@ -4,6 +4,8 @@ import snapshotData from "../../../data/card-import/card-snapshot-0.5.json";
 import snapshotData08 from "../../../data/card-import/card-snapshot-0.8.json";
 import pipelineSnapshotData from "../../../data/card-import/card-pipeline-snapshot-1.3.1.json";
 import sourceRegistry131Data from "../../../data/card-import/source-registry-1.3.1.json";
+import proteusCardBasisData from "../../../data/card-import/proteus-card-basis-2026-05-17.json";
+import proteusSourceRegistryData from "../../../data/card-import/source-registry-proteus-2026-05-17.json";
 import aiHints131Data from "../../../data/ai/ai-card-hints-1.3.1.json";
 import aiHintsReport131Data from "../../../data/ai/ai-card-hints-report-1.3.1.json";
 import cardImplementationManifest123Data from "../../../data/manifests/card-implementation-manifest-1.2.3.json";
@@ -37,6 +39,7 @@ import v1922ReleaseScenarioData from "../../../data/scenarios/v1922-per-card-lon
 import pipelineReport131Data from "../../../data/reports/card-pipeline-report-1.3.1.json";
 import diffReport131Data from "../../../data/reports/card-pipeline-diff-report-1.3.1.json";
 import rollbackReport131Data from "../../../data/reports/card-pipeline-rollback-report-1.3.1.json";
+import proteusImportReportData from "../../../data/reports/proteus-spoiler-import-report-2026-05-17.json";
 import v1910RuntimeStatusReportData from "../../../data/reports/onr-v1-runtime-status-1.9.10.json";
 import v1922CompletionGateStatusData from "../../../data/reports/v1922-completion-gate-status.json";
 import v1910MechanicsCoverageData from "../../../data/rules/mechanics-coverage-1.9.10.json";
@@ -143,6 +146,8 @@ import {
   createCardPipelineReport,
   createCardPipelineSnapshot,
   createCardRarityImportReport,
+  createProteusCardBasisSnapshot,
+  createProteusSpoilerImportReport,
   createPipelineRollbackReport,
   createRuntimeCardSnapshot,
   DECK_LEGAL_AI_APPROVAL_CORP_TAG_SLICE_CARD_IDS,
@@ -217,6 +222,11 @@ import {
   ONR_V1_9_21_WIP_CARD_IDS,
   ONR_V1_9_22_WIP_CARD_IDS,
   ONR_V1_RUNTIME_RELEASE_CARD_IDS,
+  parseProteusSpoilerSource,
+  PROTEUS_CARD_BASIS_SNAPSHOT_ID,
+  PROTEUS_EXPECTED_TOTAL,
+  PROTEUS_SOURCE_REGISTRY_ID,
+  readProjectProteusSpoilerSource,
   releaseEvidenceByCardId,
   readProjectCardRaritySources,
   runtimeGateByCardId,
@@ -228,6 +238,8 @@ import {
   type AiCardHintsV2,
   type CardPipelineSnapshot,
   type CardSnapshot,
+  type ProteusSpoilerImportReport,
+  type SourceRegistryV2,
 } from "./index";
 import { buildAiApprovedCardIds } from "./gate-evidence";
 
@@ -235,6 +247,11 @@ const snapshot = snapshotData as unknown as CardSnapshot;
 const snapshot08 = snapshotData08 as unknown as CardSnapshot;
 const pipelineSnapshot131 =
   pipelineSnapshotData as unknown as CardPipelineSnapshot;
+const proteusSnapshot = proteusCardBasisData as unknown as CardSnapshot;
+const proteusSourceRegistry =
+  proteusSourceRegistryData as unknown as SourceRegistryV2;
+const proteusImportReport =
+  proteusImportReportData as unknown as ProteusSpoilerImportReport;
 const aiHints131 = aiHints131Data as unknown as AiCardHintsV2;
 const runtimeSupplementAiHintsData = { cards: [] };
 
@@ -1348,6 +1365,112 @@ describe("catalog import and status logic", () => {
         .map((card) => card.catalogCardId),
     ).toContain("onr_v1_001_afreet");
     expect(validateSnapshot(runtimeSnapshot)).toEqual({ ok: true, errors: [] });
+  });
+
+  it("imports Proteus spoiler rows as a blocked planning card basis", () => {
+    const source = readProjectProteusSpoilerSource();
+    const parsed = parseProteusSpoilerSource(source);
+    const recreatedSnapshot = createProteusCardBasisSnapshot(source);
+    const recreatedReport = createProteusSpoilerImportReport(source);
+
+    expect(parsed.cards).toHaveLength(PROTEUS_EXPECTED_TOTAL);
+    expect(recreatedSnapshot).toEqual(proteusSnapshot);
+    expect(recreatedReport).toEqual(proteusImportReport);
+    expect(proteusSnapshot.snapshotId).toBe(PROTEUS_CARD_BASIS_SNAPSHOT_ID);
+    expect(proteusSnapshot.sourceRegistryId).toBe(PROTEUS_SOURCE_REGISTRY_ID);
+    expect(validateSnapshot(proteusSnapshot)).toEqual({
+      ok: true,
+      errors: [],
+    });
+    expect(validateSourceRegistryV2(proteusSourceRegistry)).toEqual({
+      ok: true,
+      errors: [],
+    });
+    expect(proteusImportReport).toMatchObject({
+      totalCards: 154,
+      sideCounts: { corp: 77, runner: 77 },
+      rarityCounts: { common: 66, uncommon: 44, rare: 44, vital: 0 },
+      unknownTypeValues: [],
+      unknownRarityValues: [],
+      noScopeAssertions: {
+        noRuntimeResolvers: true,
+        noAutomaticPlayability: true,
+        noDeckLegality: true,
+        noAiSupport: true,
+        noOfficialAssets: true,
+      },
+    });
+    expect(proteusImportReport.typeCounts).toMatchObject({
+      agenda: 10,
+      ice: 35,
+      operation: 8,
+      asset: 11,
+      upgrade: 13,
+      program: 23,
+      event: 27,
+      resource: 21,
+      hardware: 6,
+    });
+    expect(proteusImportReport.sourceHeaderNotes).toContain(
+      "Source header states 26 Prep and 7 Hardware, while card rows parse as 27 Prep/Event and 6 Hardware. Runner total remains 77.",
+    );
+    expect(
+      proteusImportReport.nonNormalizableFields.map((field) => field.title),
+    ).toEqual(["Digiconda", "Homing Missile", "Ice and Data Special Report"]);
+
+    const aiBoardMember = getCatalogCard(
+      proteusSnapshot,
+      "onr_proteus_001_ai-board-member",
+    );
+    expect(aiBoardMember).toMatchObject({
+      title: "AI Board Member",
+      side: "corp",
+      type: "agenda",
+      rarity: { code: "rare", sourceId: "onr-proteus-spoiler" },
+      numeric: { advancementRequirement: 5, agendaPoints: 3 },
+    });
+    const wiredSwitchboard = getCatalogCard(
+      proteusSnapshot,
+      "onr_proteus_154_wired-switchboard",
+    );
+    expect(wiredSwitchboard).toMatchObject({
+      title: "Wired Switchboard",
+      side: "runner",
+      type: "resource",
+      subtypes: ["hidden"],
+      numeric: { installCost: 0 },
+    });
+    const morphingTool = getCatalogCard(
+      proteusSnapshot,
+      "onr_proteus_092_morphing-tool",
+    );
+    expect(morphingTool?.numeric).toMatchObject({
+      installCost: 10,
+      memoryCost: 1,
+      strength: 4,
+    });
+    for (const card of proteusSnapshot.cards) {
+      expect(card.engineCardId, card.catalogCardId).toBeNull();
+      expect(card.displayOnlyText, card.catalogCardId).toBe(true);
+      expect(card.statuses.imported, card.catalogCardId).toBe(true);
+      expect(card.statuses.validated, card.catalogCardId).toBe(true);
+      expect(card.statuses.catalog_ready, card.catalogCardId).toBe(true);
+      expect(card.statuses.blocked, card.catalogCardId).toBe(true);
+      expect(card.statuses.implemented, card.catalogCardId).toBe(false);
+      expect(card.statuses.engine_supported, card.catalogCardId).toBe(false);
+      expect(card.statuses.playable, card.catalogCardId).toBe(false);
+      expect(card.statuses.human_playable, card.catalogCardId).toBe(false);
+      expect(card.statuses.ai_supported, card.catalogCardId).toBe(false);
+      expect(card.statuses.deck_legal, card.catalogCardId).toBe(false);
+      expect(card.statuses.format_legal, card.catalogCardId).toBe(false);
+      expect(card.blockReasons.length, card.catalogCardId).toBeGreaterThan(0);
+    }
+    expect(
+      getCatalogCard(
+        createRuntimeCardSnapshot(),
+        "onr_proteus_001_ai-board-member",
+      ),
+    ).toBeUndefined();
   });
 
   it("keeps import-only and blocked cards out of playability", () => {

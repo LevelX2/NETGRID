@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "proteus-spoiler-import-report-v1",
+  "sourceId": "onr-proteus-spoiler",
+  "sourcePath": "docs/source/Proteusspoiler.txt",
+  "snapshotId": "proteus-card-basis-2026-05-17",
+  "totalCards": 154,
+  "expectedTotalCards": 154,
+  "sideCounts": {
+    "corp": 77,
+    "runner": 77
+  },
+  "typeCounts": {
+    "agenda": 10,
+    "ice": 35,
+    "operation": 8,
+    "asset": 11,
+    "upgrade": 13,
+    "program": 23,
+    "event": 27,
+    "resource": 21,
+    "hardware": 6
+  },
+  "rarityCounts": {
+    "common": 66,
+    "uncommon": 44,
+    "rare": 44,
+    "vital": 0
+  },
+  "sourceHeaderNotes": [
+    "Source header states 26 Prep and 7 Hardware, while card rows parse as 27 Prep/Event and 6 Hardware. Runner total remains 77.",
+    "Source header states 28 Hardware/Resources rows, while card rows parse as 27 Hardware/Resources."
+  ],
+  "nonNormalizableFields": [
+    {
+      "sourceIndex": 20,
+      "title": "Digiconda",
+      "field": "strength",
+      "rawValue": "X",
+      "note": "Variable numeric value; resolver contract must define runtime value."
+    },
+    {
+      "sourceIndex": 25,
+      "title": "Homing Missile",
+      "field": "strength",
+      "rawValue": "X",
+      "note": "Variable numeric value; resolver contract must define runtime value."
+    },
+    {
+      "sourceIndex": 111,
+      "title": "Ice and Data Special Report",
+      "field": "cost",
+      "rawValue": "3 (0)",
+      "note": "Unparsed numeric source value; requires manual review."
+    }
+  ],
+  "unknownTypeValues": [],
+  "unknownRarityValues": [],
+  "noScopeAssertions": {
+    "noRuntimeResolvers": true,
+    "noAutomaticPlayability": true,
+    "noDeckLegality": true,
+    "noAiSupport": true,
+    "noOfficialAssets": true
+  }
+}
