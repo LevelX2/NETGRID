@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-v2-private-invite-redaction-harness
-status: in-progress
+status: done
 kind: fix
 area: server
 priority: normal
@@ -8,12 +8,20 @@ primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-4
 releaseTarget: V2.1
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/invite-lobby-redaction.test-helper.ts
+  - apps/server/src/multiplayer.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts --testNamePattern "Invite and lobby redaction harness"
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts --testNamePattern "V23A|Invite and lobby redaction harness|keeps normal Human-vs-Human matches in the start lobby"
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server test
+  - corepack pnpm typecheck
+  - git diff --check
 ---
 
 # Invite-Payload-Redaction-Harness vorbereiten
@@ -44,10 +52,10 @@ Vor V2.1-Freundeslisten und privaten Invites soll ein kleiner Regression-Schutz 
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt einen wiederverwendbaren Redaction-Test oder Testhelper für Lobby-/Invite-Payloads.
-- [ ] Bestehende Join-/Open-Lobby-Pfade bleiben grün.
-- [ ] Verbotene Felder und Muster sind im Test klar benannt.
-- [ ] Der Test verändert keine Produktpayloads ohne explizite Notwendigkeit.
+- [x] Es gibt einen wiederverwendbaren Redaction-Test oder Testhelper für Lobby-/Invite-Payloads.
+- [x] Bestehende Join-/Open-Lobby-Pfade bleiben grün.
+- [x] Verbotene Felder und Muster sind im Test klar benannt.
+- [x] Der Test verändert keine Produktpayloads ohne explizite Notwendigkeit.
 
 ## Umsetzungshinweise
 
@@ -57,4 +65,6 @@ Vor V2.1-Freundeslisten und privaten Invites soll ein kleiner Regression-Schutz 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt: `apps/server/src/invite-lobby-redaction.test-helper.ts` ergänzt einen wiederverwendbaren rekursiven Redaction-Scanner für Invite-/Lobby-Testpayloads. Die Regeln benennen Tokens und Token-Hashes, Session-IDs, Decklisten und Deckhashes, verdeckte Kartenidentitäten sowie AIInput/DecisionDebug. `apps/server/src/multiplayer.test.ts` nutzt den Helper für die bestehenden Join-Info-, Pending-Lobby-, Join-Fehler-, Startlobby- und V2.3a-Open-Lobby-Metadaten. Produktpayloads wurden nicht angepasst.
+
+Checks grün: fokussierter Invite-/Lobby-Harness-Test, V2.3a-/Startlobby-Ausschnitt, Server-Typecheck, kompletter Server-Testlauf, Workspace-Typecheck und `git diff --check`.
