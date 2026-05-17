@@ -1055,6 +1055,8 @@ export type VisibleCard = {
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
+  selectedServerId?: Exclude<ServerId, "new_remote">;
+  selectedServerLabel?: string;
   owner?: Side;
   controller?: Side;
 };

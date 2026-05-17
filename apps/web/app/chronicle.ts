@@ -72,6 +72,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const actor = sideValue(payload.actor);
   const amount = numberValue(payload.gainedCredits) ?? numberValue(payload.gainCreditsAmount) ?? numberValue(payload.amount);
   const serverLabel = displayServerLabel(stringValue(payload.serverLabel));
+  const selectedServerLabel = displayServerLabel(stringValue(payload.selectedServerLabel));
   const zoneLabel = stringValue(payload.zoneLabel);
   const result = stringValue(payload.result);
   const runPhase = stringValue(payload.runPhase);
@@ -414,7 +415,11 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push(amount && amount > 1 ? `${amount} Karten` : "Karte ziehen");
       break;
     case "install_card":
-      if (actor === "corp" && (redactedKind || !cardTitle)) {
+      if (actor === "runner" && selectedServerLabel) {
+        category = "card";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} auf ${selectedServerLabel} ausgerichtet installiert`);
+        chips.push("Install", "Resource", selectedServerLabel);
+      } else if (actor === "corp" && (redactedKind || !cardTitle)) {
         category = "hidden";
         visibility = "redacted";
         title = phrase(subject, `eine verdeckte Karte${installLocation(serverLabel, zoneLabel, label)} installiert`);

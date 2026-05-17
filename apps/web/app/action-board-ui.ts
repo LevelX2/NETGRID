@@ -367,6 +367,8 @@ function breakerNameFromActionLabel(label: string | undefined, actionSuffixPatte
 
 function installContextLabel(action: LegalAction): string {
   const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
+  const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
+  if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;

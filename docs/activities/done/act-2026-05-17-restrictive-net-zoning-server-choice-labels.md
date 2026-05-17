@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-restrictive-net-zoning-server-choice-labels
-status: in_progress
+status: done
 kind: fix
 area: cards
 priority: hotfix
@@ -8,13 +8,27 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-5
 parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+  - packages/shared/src/index.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - "corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t \"Restrictive\""
+  - "corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts app/chronicle.test.ts"
+  - "corepack pnpm --filter @netgrid/shared typecheck"
+  - "corepack pnpm --filter @netgrid/engine typecheck"
+  - "corepack pnpm --filter @netgrid/web typecheck"
+  - "git diff --check"
 ---
 
 # Restrictive Net Zoning: Serverauswahl und Zielbindung sichtbar machen
@@ -44,11 +58,11 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Jede auswählbare Serveroption hat ein menschenlesbares Label; Kosten sind höchstens Zusatzinformation.
-- [ ] Nach Ausspielen zeigt die Karte oder ihr Tooltip den Zielserver dauerhaft an.
-- [ ] Die Chronik nennt den gewählten Server ohne Hidden-Info-Leak.
-- [ ] Reload/Reconnect/Multiplayer erhalten die Zielbindung korrekt.
-- [ ] Regressionen decken mindestens zentrale Server und einen Remote Server ab.
+- [x] Jede auswählbare Serveroption hat ein menschenlesbares Label; Kosten sind höchstens Zusatzinformation.
+- [x] Nach Ausspielen zeigt die Karte oder ihr Tooltip den Zielserver dauerhaft an.
+- [x] Die Chronik nennt den gewählten Server ohne Hidden-Info-Leak.
+- [x] Reload/Reconnect/Multiplayer erhalten die Zielbindung korrekt.
+- [x] Regressionen decken mindestens zentrale Server und einen Remote Server ab.
 
 ## Umsetzungshinweise
 
@@ -57,4 +71,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `Restrictive Net Zoning` erzeugt servergebundene Installoptionen mit expliziten Labels für zentrale Server und Remote Server, zeigt die gewählte Zielbindung nach dem Installieren über die öffentliche `VisibleCard` im Karten-/Tooltip-Detail an und schreibt `selectedServerLabel` in die öffentliche Chronik. Die Bindung bleibt über PlayerView/Reconnect/Multiplayer erhalten, weil sie aus dem persistenten `CardInstance.selectedServerId` abgeleitet wird; es werden nur öffentliche Servernamen übertragen.
