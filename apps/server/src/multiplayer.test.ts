@@ -16,7 +16,7 @@ import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAd
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import type { CardInstanceId, ChoiceRequest, DeckDefinition, GameEvent, GameState, LegalAction, PublicGameEvent, Side } from "@netgrid/shared";
+import { MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 
 describe("V1.0.9 private internet hardening", () => {
   it("uses a LAN-capable default bind address for direct server starts", async () => {
@@ -3674,6 +3674,156 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(continued.ok).toBe(true);
     if (!continued.ok) throw new Error(continued.error.message);
     expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(declined.actorPayload.playerView.stateVersion);
+  });
+
+  it("advances Runner AI through Krash breaking Filter into R&D access without post-pass jack-out", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-krash-filter-access" });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "server-runner-ai-krash-filter-access",
+      runnerDifficulty: "normal",
+      runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+      corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+    });
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing stored match");
+
+    const runnerDeck: DeckDefinition = {
+      id: "server_runner_ai_krash_filter_runner",
+      name: "Server Runner AI Krash Filter Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_039_krash", quantity: 1 },
+        { id: "simple_economy_event", quantity: 8 }
+      ]
+    };
+    const corpDeck: DeckDefinition = {
+      id: "server_runner_ai_krash_filter_corp",
+      name: "Server Runner AI Krash Filter Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_244_filter", quantity: 1 },
+        { id: "simple_draw_operation", quantity: 1 },
+        { id: "simple_economy_operation", quantity: 3 },
+        { id: "simple_agenda", quantity: 3 }
+      ]
+    };
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "server-runner-ai-krash-filter-access-engine",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7
+      })
+    );
+    gameState.runner.credits = 5;
+    gameState.corp.credits = 5;
+    moveRunnerCardToGripForTest(gameState, "onr_v1_039_krash");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) => {
+        const cardId = String(action.payload?.cardId ?? "");
+        return action.type === "install_card" && gameState.cardInstances[cardId]?.definitionId === "onr_v1_039_krash";
+      }
+    );
+    putCorpIceOnServerForTest(gameState, "rd", "onr_v1_244_filter");
+    putCorpCardOnTopOfRdForTest(gameState, "simple_draw_operation");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(gameState.activeSide).toBe("corp");
+    expect(gameState.timingPoint).toBe("run.approach_ice");
+
+    record.gameState = gameState;
+    record.match.baseline = gameState.baseline;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_krash_filter_access")];
+    record.actionReceipts = [];
+    record.undoSnapshots = [];
+    delete record.pendingUndo;
+    await storage.save(record);
+
+    const beforeRez = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in beforeRez).toBe(false);
+    if ("error" in beforeRez) throw new Error(beforeRez.error.message);
+    expect(beforeRez.legalActions.map((action) => action.type).sort()).toEqual(["decline_rez", "rez_ice"]);
+
+    const rezAction = beforeRez.legalActions.find((action) => action.type === "rez_ice");
+    if (!rezAction) throw new Error("Missing rez action");
+    const rezzed = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: rezAction.actionId,
+      clientKnownStateVersion: beforeRez.playerView.stateVersion,
+      idempotencyKey: "human-corp-rez-filter-for-runner-ai"
+    });
+    expect(rezzed.ok).toBe(true);
+    if (!rezzed.ok) throw new Error(rezzed.error.message);
+    expect(rezzed.publicEvent?.publicPayload).toMatchObject({ actionType: "rez_ice" });
+
+    let corpPayload = rezzed.actorPayload;
+    const actionTypes: string[] = [];
+    const reasonCodes: string[] = [];
+    async function advanceRunnerAiStep(label: string) {
+      const result = await service.advanceAi({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        knownStateVersion: corpPayload.playerView.stateVersion,
+        knownMatchVersion: corpPayload.matchVersion,
+        mode: "single_step"
+      });
+      expect(result.ok, label).toBe(true);
+      if (!result.ok) throw new Error(result.error.message);
+      corpPayload = result.requesterPayload;
+      actionTypes.push(String(result.publicEvent?.publicPayload.actionType));
+      reasonCodes.push(String(result.publicEvent?.publicPayload.aiReasonCode));
+      return result;
+    }
+
+    const breakStep = await advanceRunnerAiStep("break Filter with Krash");
+    expect(breakStep.publicEvent?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      aiReasonCode: "runner.encounter.break_etr"
+    });
+
+    const passIceStep = await advanceRunnerAiStep("continue after broken Filter");
+    expect(passIceStep.publicEvent?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      encounterContinue: true
+    });
+
+    const accessWindowStep = await advanceRunnerAiStep("continue from server movement to access");
+    expect(accessWindowStep.publicEvent?.publicPayload.actionType).toBe("continue_run");
+    expect(["runner.plan.safe_probe_run", "runner.encounter.continue"]).toContain(
+      accessWindowStep.publicEvent?.publicPayload.aiReasonCode
+    );
+    expect(JSON.stringify(accessWindowStep.publicEvent?.publicPayload)).not.toMatch(
+      /ambush|simple_economy_operation|privatePayload|cardInstances/i
+    );
+
+    const accessStep = await advanceRunnerAiStep("access R&D");
+    expect(accessStep.publicEvent?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      aiReasonCode: "runner.access.open_card"
+    });
+    expect(actionTypes).toEqual([
+      "break_subroutine",
+      "continue_run",
+      "continue_run",
+      "access_card"
+    ]);
+    expect(reasonCodes).not.toContain("runner.run.jack_out_before_access_low_value");
+    expect(actionTypes).not.toContain("jack_out");
+    expect(JSON.stringify(accessStep.requesterPayload)).not.toMatch(
+      /Simple Draw Operation|simple_draw_operation|privatePayload|cardInstances/i
+    );
   });
 
   it("redacts R&D access card identities from Corp payloads", async () => {

@@ -2036,6 +2036,52 @@ describe("MVP 0.3 Runner AI", () => {
     expect(accessDecision.reasonCode).toBe("runner.access.open_card");
   });
 
+  it("runs the Krash/Filter R&D path through sequential Runner AI decisions without hidden access assumptions", () => {
+    let state = krashFilterEncounterState("ai-krash-filter-sequenced-rd-access");
+    const actionTypes: string[] = [];
+    const reasonCodes: string[] = [];
+
+    for (let step = 0; step < 4; step += 1) {
+      const input = buildAiDecisionInput(state, "runner", {
+        difficulty: "normal",
+        profileId: "runner-ai-v1.4.1-normal",
+        decisionId: `krash-filter-rd-access:${step}`,
+        actionNumber: step,
+      });
+      const decision = chooseRunnerAction(input);
+      const selected = input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      );
+      expect(selected, `Missing selected action at step ${step}`).toBeDefined();
+      if (!selected) throw new Error(`Missing selected action at step ${step}`);
+
+      const serializedDecision = JSON.stringify({
+        evidence: decision.evidence,
+        decisionDebug: decision.decisionDebug,
+        explanation: decision.explanation,
+        reasonCode: decision.reasonCode,
+      });
+      expect(selected.type).not.toBe("jack_out");
+      expect(serializedDecision).not.toMatch(/ambush|simple_economy_operation/i);
+
+      actionTypes.push(selected.type);
+      reasonCodes.push(decision.reasonCode);
+      state = apply(state, "runner", (action) => action.actionId === selected.actionId);
+      if (selected.type === "access_card") break;
+    }
+
+    expect(actionTypes).toEqual([
+      "break_subroutine",
+      "continue_run",
+      "continue_run",
+      "access_card",
+    ]);
+    expect(reasonCodes[0]).toBe("runner.encounter.break_etr");
+    expect(reasonCodes).toContain("runner.plan.safe_probe_run");
+    expect(reasonCodes.at(-1)).toBe("runner.access.open_card");
+    expect(state.eventLog.map((event) => event.publicPayload.actionType)).not.toContain("jack_out");
+  });
+
   it("still pumps when strength is the missing requirement for a useful break", () => {
     const state = weakFracterBarrierEncounterState("ai-useful-pump");
     const input = buildAiDecisionInput(state, "runner", {
