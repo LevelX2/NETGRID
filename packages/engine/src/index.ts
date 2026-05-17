@@ -56,8 +56,12 @@ import {
   COUNTER_ASSET_CARD_IDS,
   COUNTER_OPERATION_CARD_IDS,
   OVERADVANCE_AGENDA_CARD_IDS,
+  scoredAgendaCounterCreditPayload,
+  scoredAgendaCounterCreditProfileForDefinition,
+  scoredAgendaCounterCreditProfileForPayload,
   SCORED_REVEAL_AGENDA_CARD_IDS,
   SERVER_DIFFICULTY_UPGRADE_CARD_IDS,
+  type ScoredAgendaActionProfile,
 } from "./mechanics/agenda-scoring";
 import {
   ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
@@ -3598,25 +3602,25 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
+    const scoredCounterCreditProfile =
+      scoredAgendaCounterCreditProfileForDefinition(definition.id);
     if (
-      definition.id === DETROIT_POLICE_CONTRACT_ID &&
-      cardCounter(state, agendaId, "power") > 0
+      scoredCounterCreditProfile &&
+      cardCounter(state, agendaId, scoredCounterCreditProfile.counterType) >=
+        scoredCounterCreditProfile.removeCounterAmount
     ) {
       actions.push(
         action(
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: 1 Credit aus Contract-Counter`,
+          `${definition.title}: ${scoredCounterCreditProfile.label}`,
           agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1912_detroit_police_contract",
-            counterType: "power",
-            removePowerCounterAmount: 1,
-            gainCreditsAmount: 1,
-          },
+          [{ clicks: scoredCounterCreditProfile.clickCost }],
+          scoredAgendaCounterCreditPayload(
+            scoredCounterCreditProfile,
+            agendaId,
+          ),
         ),
       );
       continue;
@@ -3699,33 +3703,6 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (
-      definition.id !== "onr_v1_193_corporate-coup" &&
-      definition.id !== "onr_v1_209_political-coup"
-    )
-      continue;
-    const agendaAbility =
-      definition.id === "onr_v1_193_corporate-coup"
-        ? "corporate_coup"
-        : "political_coup";
-    const removePowerCounterAmount = 3;
-    if (cardCounter(state, agendaId, "power") < removePowerCounterAmount) continue;
-    actions.push(
-      action(
-        state,
-        "corp",
-        "gain_credit",
-        `${definition.title}: ${removePowerCounterAmount} Credit${removePowerCounterAmount > 1 ? "s" : ""} aus Coup-Counter`,
-        agendaId,
-        [{ clicks: 1 }],
-        {
-          cardId: agendaId,
-          agendaAbility,
-          removePowerCounterAmount,
-          gainCreditsAmount: removePowerCounterAmount,
-        },
-      ),
-    );
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
@@ -7621,51 +7598,7 @@ function performAction(
         if (definitionFor(state, sourceCardId).id !== "onr_v1_179_silicon-saloon-franchise")
           throw new Error("Die Silicon-Saloon-Faehigkeit passt nicht zur Karte.");
       }
-      if (
-        legalAction.payload?.agendaAbility === "corporate_coup" ||
-        legalAction.payload?.agendaAbility === "political_coup"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Coup-Agenda-Counter ausgeben.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Die gewaehlte Coup-Agenda ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        const expectedDefinitionId =
-          legalAction.payload?.agendaAbility === "corporate_coup"
-            ? "onr_v1_193_corporate-coup"
-            : "onr_v1_209_political-coup";
-        if (definition.id !== expectedDefinitionId)
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zur ausgewaehlten Coup-Agenda.",
-          );
-        const removeAmount = Number(
-          legalAction.payload?.removePowerCounterAmount ?? 0,
-        );
-        const expectedRemoveAmount = 3;
-        if (
-          !Number.isInteger(removeAmount) ||
-          removeAmount !== expectedRemoveAmount
-        )
-          throw new Error(
-            "Coup-Agenda muss genau den gültigen Counter-Betrag ausgeben.",
-          );
-        if (cardCounter(state, sourceCardId, "power") < removeAmount)
-          throw new Error("Auf der Coup-Agenda sind nicht genug Counter.");
-        spendCardCounter(state, sourceCardId, "power", removeAmount);
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        const expectedGainAmount = 3;
-        if (!Number.isInteger(gainAmount) || gainAmount !== expectedGainAmount)
-          throw new Error(
-            "Coup-Agenda gewaehrt in diesem Scope die falsche Anzahl Credits.",
-          );
-        credits(state, "corp", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          spentPowerCounters: removeAmount,
-          gainedCredits: gainAmount,
-          remainingPowerCounters: cardCounter(state, sourceCardId, "power"),
-        };
+      if (resolveScoredAgendaCounterCreditAction(state, legalAction)) {
         return;
       }
       if (legalAction.payload?.agendaAbility === "v1922_political_overthrow") {
@@ -7740,45 +7673,6 @@ function performAction(
           ...(legalAction.payload ?? {}),
           gainedCredits: gainAmount,
           corpCreditsAfter: state.corp.credits,
-        };
-        return;
-      }
-      if (
-        legalAction.payload?.agendaAbility === "v1912_detroit_police_contract"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Detroit Police Contract nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Detroit Police Contract ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== DETROIT_POLICE_CONTRACT_ID)
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zu Detroit Police Contract.",
-          );
-        const removeAmount = Number(
-          legalAction.payload?.removePowerCounterAmount ?? 0,
-        );
-        if (!Number.isInteger(removeAmount) || removeAmount !== 1)
-          throw new Error(
-            "Detroit Police Contract muss genau 1 Counter ausgeben.",
-          );
-        if (cardCounter(state, sourceCardId, "power") < removeAmount)
-          throw new Error(
-            "Auf Detroit Police Contract sind nicht genug Counter.",
-          );
-        spendCardCounter(state, sourceCardId, "power", removeAmount);
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 1)
-          throw new Error(
-            "Detroit Police Contract gewaehrt in diesem Scope genau 1 Credit.",
-          );
-        credits(state, "corp", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          spentPowerCounters: removeAmount,
-          gainedCredits: gainAmount,
-          remainingPowerCounters: cardCounter(state, sourceCardId, "power"),
         };
         return;
       }
@@ -15946,6 +15840,73 @@ function validateCorpInstalledEconomyAction(
     throw new Error("Die Economy-Faehigkeit hat einen ungueltigen Creditbetrag.");
   if (Boolean(legalAction.payload?.trashOnUse) !== Boolean(profile.trashSource))
     throw new Error("Die Economy-Faehigkeit hat einen ungueltigen Trash-Parameter.");
+}
+
+function resolveScoredAgendaCounterCreditAction(
+  state: GameState,
+  legalAction: LegalAction,
+): boolean {
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!sourceCardId || !state.cardInstances[sourceCardId]) return false;
+  const definition = definitionFor(state, sourceCardId);
+  const profile = scoredAgendaCounterCreditProfileForPayload(
+    definition.id,
+    legalAction.payload,
+  );
+  if (!profile) return false;
+  validateScoredAgendaCounterCreditAction(
+    state,
+    legalAction,
+    sourceCardId,
+    profile,
+  );
+  spendCardCounter(
+    state,
+    sourceCardId,
+    profile.counterType,
+    profile.removeCounterAmount,
+  );
+  credits(state, "corp", profile.creditGain);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    spentPowerCounters: profile.removeCounterAmount,
+    gainedCredits: profile.creditGain,
+    remainingPowerCounters: cardCounter(
+      state,
+      sourceCardId,
+      profile.counterType,
+    ),
+  };
+  return true;
+}
+
+function validateScoredAgendaCounterCreditAction(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: string,
+  profile: ScoredAgendaActionProfile,
+): void {
+  if (legalAction.side !== profile.side)
+    throw new Error("Nur die Korp darf diese scored Agenda-Aktion nutzen.");
+  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+    throw new Error("Diese scored Agenda-Aktion ist nur in der Korp-Aktionsphase nutzbar.");
+  if (!state.corp.scoreArea.includes(sourceCardId))
+    throw new Error("Die scored Agenda-Aktion ist nicht gescort.");
+  if (definitionFor(state, sourceCardId).id !== profile.sourceDefinitionId)
+    throw new Error("Die scored Agenda-Aktion passt nicht zur Karte.");
+  if (legalAction.payload?.agendaAbility !== profile.agendaAbility)
+    throw new Error("Die scored Agenda-Aktion passt nicht zum Profil.");
+  const removeAmount = Number(legalAction.payload?.removePowerCounterAmount ?? 0);
+  if (
+    !Number.isInteger(removeAmount) ||
+    removeAmount !== profile.removeCounterAmount
+  )
+    throw new Error("Die scored Agenda-Aktion hat ungueltige Counterkosten.");
+  if (cardCounter(state, sourceCardId, profile.counterType) < removeAmount)
+    throw new Error("Auf der scored Agenda sind nicht genug Counter.");
+  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
+  if (!Number.isInteger(gainAmount) || gainAmount !== profile.creditGain)
+    throw new Error("Die scored Agenda-Aktion hat einen ungueltigen Creditbetrag.");
 }
 
 function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {

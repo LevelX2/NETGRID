@@ -14426,13 +14426,37 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     expect(detroitId).toBeDefined();
     if (detroitId)
       expect(state.cardInstances[detroitId]?.counters?.power).toBe(4);
-    const beforeCredit = state.corp.credits;
-    state = apply(
+    const legal = mustAction(
       state,
       "corp",
       (action) =>
         action.type === "gain_credit" &&
         action.payload?.agendaAbility === "v1912_detroit_police_contract",
+    );
+    if (detroitId) {
+      const stolen = structuredClone(state);
+      stolen.corp.scoreArea = stolen.corp.scoreArea.filter(
+        (id) => id !== detroitId,
+      );
+      stolen.runner.scoreArea.push(detroitId);
+      stolen.cardInstances[detroitId] = {
+        ...stolen.cardInstances[detroitId]!,
+        zone: { side: "runner", zone: "scoreArea" },
+      };
+      const rejected = applyAction(stolen, {
+        matchId: stolen.matchId,
+        side: "corp",
+        actionId: legal.actionId,
+        clientKnownStateVersion: stolen.stateVersion,
+        idempotencyKey: "detroit-stolen-score-area",
+      });
+      expect(rejected.ok).toBe(false);
+    }
+    const beforeCredit = state.corp.credits;
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === legal.actionId,
     );
     expect(state.corp.credits).toBe(beforeCredit + 1);
     if (detroitId)

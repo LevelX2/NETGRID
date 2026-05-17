@@ -41,3 +41,83 @@ export const ACTION_ASSET_CARD_IDS = new Set([
   "onr_v1_334_pacifica-regional-ai",
   "onr_v1_335_remote-facility",
 ]);
+
+export type ScoredAgendaActionProfile = {
+  profileId: string;
+  sourceDefinitionId: string;
+  agendaAbility: string;
+  side: "corp";
+  clickCost: number;
+  counterType: "power";
+  removeCounterAmount: number;
+  creditGain: number;
+  label: string;
+};
+
+export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] = [
+  {
+    profileId: "v1912.detroit_police_contract_counter_credit",
+    sourceDefinitionId: "onr_v1_198_detroit-police-contract",
+    agendaAbility: "v1912_detroit_police_contract",
+    side: "corp",
+    clickCost: 1,
+    counterType: "power",
+    removeCounterAmount: 1,
+    creditGain: 1,
+    label: "1 Credit aus Contract-Counter",
+  },
+  {
+    profileId: "v1.corporate_coup_counter_credit",
+    sourceDefinitionId: "onr_v1_193_corporate-coup",
+    agendaAbility: "corporate_coup",
+    side: "corp",
+    clickCost: 1,
+    counterType: "power",
+    removeCounterAmount: 3,
+    creditGain: 3,
+    label: "3 Credits aus Coup-Counter",
+  },
+  {
+    profileId: "v1.political_coup_counter_credit",
+    sourceDefinitionId: "onr_v1_209_political-coup",
+    agendaAbility: "political_coup",
+    side: "corp",
+    clickCost: 1,
+    counterType: "power",
+    removeCounterAmount: 3,
+    creditGain: 3,
+    label: "3 Credits aus Coup-Counter",
+  },
+];
+
+export function scoredAgendaCounterCreditProfileForDefinition(
+  sourceDefinitionId: string,
+): ScoredAgendaActionProfile | undefined {
+  return SCORED_AGENDA_COUNTER_CREDIT_PROFILES.find(
+    (profile) => profile.sourceDefinitionId === sourceDefinitionId,
+  );
+}
+
+export function scoredAgendaCounterCreditProfileForPayload(
+  sourceDefinitionId: string,
+  payload: Record<string, unknown> | undefined,
+): ScoredAgendaActionProfile | undefined {
+  return SCORED_AGENDA_COUNTER_CREDIT_PROFILES.find(
+    (profile) =>
+      profile.sourceDefinitionId === sourceDefinitionId &&
+      payload?.agendaAbility === profile.agendaAbility,
+  );
+}
+
+export function scoredAgendaCounterCreditPayload(
+  profile: ScoredAgendaActionProfile,
+  cardId: string,
+): Record<string, string | number> {
+  return {
+    cardId,
+    agendaAbility: profile.agendaAbility,
+    counterType: profile.counterType,
+    removePowerCounterAmount: profile.removeCounterAmount,
+    gainCreditsAmount: profile.creditGain,
+  };
+}

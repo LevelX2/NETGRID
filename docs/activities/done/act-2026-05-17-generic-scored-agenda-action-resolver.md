@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-17-generic-scored-agenda-action-resolver
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-17-card-effect-generic-resolver-analysis
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/mechanics/agenda-scoring.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine test -- -t "Coup agendas|Detroit Police Contract"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Generischen Resolver für scored Agenda-Aktionen schneiden
@@ -52,4 +58,4 @@ Scored Agenda-Aktionen mit einfachen Kosten und Effekten sollen als begrenzte Pr
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `ScoredAgendaActionProfile` modelliert jetzt einfache scored Agenda-Aktionen mit Power-Counter-Kosten und Creditgewinn. Detroit Police Contract sowie Corporate Coup und Political Coup nutzen denselben LegalAction-/Resolverpfad. Der Resolver revalidiert Side, Korp-Aktionsphase, Score-Area-Zustand, Profilzuordnung, Counterkosten und Creditbetrag. Bestehende PublicPayload-Felder bleiben erhalten; der Detroit-Test deckt zusätzlich einen illegalen Score-Area-Zustand ab.
