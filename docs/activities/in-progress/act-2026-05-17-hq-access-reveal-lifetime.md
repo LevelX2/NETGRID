@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-hq-access-reveal-lifetime
-status: inbox
+status: in_progress
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
+parallelWorker: worker-4
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
