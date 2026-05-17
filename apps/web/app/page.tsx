@@ -91,9 +91,11 @@ import {
   actionSoundCountForAction,
   actionSoundForActionType,
   deriveOpponentActionCues,
+  turnStartAudioCue,
   type ActionSoundKind,
   type BoardHighlight,
-  type OpponentActionCue
+  type OpponentActionCue,
+  type TurnStartAudioState
 } from "./action-cues";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
@@ -1756,6 +1758,8 @@ export default function Page() {
   const resultAudioPrimedRef = useRef(false);
   const lastAudioResultKeyRef = useRef<string | null>(null);
   const lastSeenCueEventIdRef = useRef<string | null>(null);
+  const lastTurnStartAudioStateRef = useRef<TurnStartAudioState | null>(null);
+  const lastTurnStartAudioCueKeyRef = useRef<string | null>(null);
   const locallyPlayedActionSoundKeysRef = useRef<Set<string>>(new Set());
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
@@ -2499,6 +2503,8 @@ export default function Page() {
 
   useEffect(() => {
     lastSeenCueEventIdRef.current = payload?.eventTail.at(-1)?.eventId ?? null;
+    lastTurnStartAudioStateRef.current = null;
+    lastTurnStartAudioCueKeyRef.current = null;
     setActionCueQueue([]);
     setCurrentActionCue(null);
     pendingAiAdvanceKeyRef.current = null;
@@ -2518,6 +2524,25 @@ export default function Page() {
     pendingAiAdvanceKeyRef.current = null;
     setLocalAiPacingMode(mode);
   };
+
+  useEffect(() => {
+    if (!payload) {
+      lastTurnStartAudioStateRef.current = null;
+      lastTurnStartAudioCueKeyRef.current = null;
+      return;
+    }
+    const current: TurnStartAudioState = {
+      matchId: payload.matchId,
+      stateVersion: payload.playerView.stateVersion,
+      activeSide: payload.playerView.activeSide,
+      phase: payload.playerView.phase
+    };
+    const cue = turnStartAudioCue(current, lastTurnStartAudioStateRef.current);
+    lastTurnStartAudioStateRef.current = current;
+    if (!audioEnabled || !cue || lastTurnStartAudioCueKeyRef.current === cue.key) return;
+    lastTurnStartAudioCueKeyRef.current = cue.key;
+    playActionCueSound(cue.sound, audioVolume);
+  }, [audioEnabled, audioVolume, payload?.matchId, payload?.playerView.activeSide, payload?.playerView.phase, payload?.playerView.stateVersion]);
 
   useEffect(() => {
     if (!payload) return;
@@ -3040,7 +3065,9 @@ export default function Page() {
 
   const playImmediateActionAudio = (action: LegalAction, stateVersion: number) => {
     if (!audioEnabled) return;
-    playActionCueSound(localActionSoundKind(action), audioVolume);
+    const sound = localActionSoundKind(action);
+    if (!sound) return;
+    playActionCueSound(sound, audioVolume);
     const keys = locallyPlayedActionSoundKeysRef.current;
     keys.add(localActionSoundKey(action.side, stateVersion, action.type));
     const oldestKey = keys.values().next().value;
@@ -5135,7 +5162,8 @@ function localActionSoundKey(side: Side, stateVersion: number, actionType: strin
   return `${side}:${stateVersion}:${actionType}`;
 }
 
-function localActionSoundKind(action: LegalAction): ActionSoundKind {
+function localActionSoundKind(action: LegalAction): ActionSoundKind | undefined {
+  if (action.type === "end_turn") return undefined;
   const visibility = action.side === "corp" && (action.type === "install_card" || action.type === "advance_card") ? "redacted" : "public";
   return actionSoundForActionType(action.type, visibility) ?? "choice";
 }
@@ -11962,6 +11990,16 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
       return [
         { frequency: 523, duration: 0.1, gain: 0.07, type: "sine" },
         { frequency: 659, duration: 0.1, gain: 0.06, type: "sine" }
+      ];
+    case "runner_turn":
+      return [
+        { frequency: 523, duration: 0.08, gain: 0.075, type: "triangle" },
+        { frequency: 784, duration: 0.12, gain: 0.06, type: "sine" }
+      ];
+    case "corp_turn":
+      return [
+        { frequency: 220, duration: 0.09, gain: 0.08, type: "sawtooth" },
+        { frequency: 147, duration: 0.13, gain: 0.055, type: "triangle" }
       ];
     case "turn":
     default:
