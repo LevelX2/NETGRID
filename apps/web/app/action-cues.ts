@@ -93,13 +93,14 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
     if (actionType === "access_card" && stringValue(payload.cardDefinitionId) && stringValue(payload.title)) return [];
     const actor = sideValue(payload.actor);
     const opponent = Boolean(actor && actor !== input.viewerSide);
+    const forcedPublicEffectCue = isForcedPublicEffectCue(actionType, payload);
     const systemCue = !actor && actionType !== "game_created" && (input.includeAutomaticEffectCues || actionType === "game_end");
-    if (!input.includeOwnActions && !opponent && !systemCue) return [];
+    if (!input.includeOwnActions && !opponent && !systemCue && !forcedPublicEffectCue) return [];
     if (actionType === "end_turn" && opponent && localAttention && !input.playerView.pendingChoice) return [];
 
     const item = formatChronicleEvent(event, input.viewerSide, input.contextByEventId?.[event.eventId] ?? {});
     const aiExplanation = stringValue(payload.aiExplanation);
-    const source = aiExplanation || stringValue(payload.aiReasonCode) ? "ai" : actor ? "human" : "system";
+    const source = aiExplanation || stringValue(payload.aiReasonCode) ? "ai" : forcedPublicEffectCue || !actor ? "system" : "human";
     const visibility = item.visibility;
     const highlight = deriveHighlight(actionType, payload, actor, visibility, visibleCards);
     const relatedCard = deriveRelatedCard(payload, visibility, visibleCards);
@@ -296,6 +297,10 @@ export function actionSoundCountForAction(actionType: string, payload: Record<st
   return Math.min(5, Math.max(1, Math.floor(amount)));
 }
 
+function isForcedPublicEffectCue(actionType: string, payload: Record<string, unknown>): boolean {
+  return actionType === "continue_run" && payload.v1921UpgradeAbility === "rio_de_janeiro_passed_ice";
+}
+
 function isActionPhaseForSide(phase: PlayerView["phase"], side: Side): boolean {
   return (side === "runner" && phase === "runner_action_phase") || (side === "corp" && phase === "corp_action_phase");
 }
@@ -320,6 +325,7 @@ function hasLocalAttention(view: PlayerView, viewerSide: Side): boolean {
 }
 
 function actorLabel(actor: Side | undefined, source: OpponentActionCue["source"]): string {
+  if (source === "system") return "Spiel";
   if (!actor) return "Spiel";
   if (actor === "corp") return source === "ai" ? "Korp-KI" : "Korp";
   return source === "ai" ? "Runner-KI" : "Runner";
