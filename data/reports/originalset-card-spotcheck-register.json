@@ -1,6 +1,6 @@
 {
   "schemaVersion": "netgrid.originalset-card-spotcheck-register.v1",
-  "updatedAt": "2026-05-16",
+  "updatedAt": "2026-05-17",
   "selectionPolicy": {
     "defaultExcludeStatuses": [
       "completed"
@@ -1746,7 +1746,7 @@
       "roundId": "2026-05-15-reorder-counter-runlock",
       "selectionMode": "sequential_implementation_job_from_originalset_spotcheck_queue",
       "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REORDER_COUNTER_RUNLOCK_IMPLEMENTATION.md",
-      "jobReport": "docs/derived/originalset-spotcheck-jobs/inbox/spotcheck-2026-05-15-reorder-counter-runlock.md",
+      "jobReport": "docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-reorder-counter-runlock.md",
       "jobStatus": "done",
       "cards": [
         {
@@ -3012,6 +3012,7 @@
     {
       "roundId": "2026-05-14-A",
       "selectionMode": "random_sample_from_complex_decklegal_originalset_cards",
+      "detailReport": "docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_A.md",
       "cards": [
         {
           "cardId": "onr_v1_216_security-purge",

@@ -4,6 +4,8 @@ Zweck: Dieses Register hält fest, welche Originalset-Karten bereits in einer ve
 
 Maschinenlesbare Begleitdatei: `data/reports/originalset-card-spotcheck-register.json`
 
+Evidence-Rollup und Retention-Plan: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_EVIDENCE_ROLLUP_2026_05_17.md`
+
 ## Runde 2026-05-15-hosting-damage-multiaccess
 
 Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-jobs/inbox/` für komplexe bereits decklegale Originalset-Karten.
@@ -466,6 +468,8 @@ Auswahlart: sequenzieller Umsetzungsjob aus `docs/derived/originalset-spotcheck-
 
 Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_15_REORDER_COUNTER_RUNLOCK_IMPLEMENTATION.md`
 
+Jobbericht: `docs/derived/originalset-spotcheck-jobs/done/spotcheck-2026-05-15-reorder-counter-runlock.md`
+
 Jobstatus: `done`; Umsetzung und Checks sind grün.
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
@@ -807,6 +811,8 @@ Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_B.md`
 ## Runde 2026-05-14-A
 
 Auswahlart: zufällige 10er-Stichprobe aus komplexeren bereits decklegalen Originalset-Karten.
+
+Detailbericht: `docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_A.md`
 
 | Karte | Card ID | Ergebnis | Nacharbeit |
 |---|---|---|---|
