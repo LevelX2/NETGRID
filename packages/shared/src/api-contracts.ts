@@ -32,6 +32,7 @@ export type ApiSeriesStatus = "active" | "between_games" | "finished";
 export type ApiConnectionQuality = "online" | "unstable" | "offline";
 export type ApiGameResultReason =
   | "agenda_points"
+  | "bad_publicity_7"
   | "corp_deck_empty"
   | "flatline"
   | "draw"

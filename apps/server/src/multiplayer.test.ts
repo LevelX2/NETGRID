@@ -10,7 +10,7 @@ import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { beliefStateInvariantSignature, buildAiDecisionInputDto, reconstructBeliefState } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
-import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
+import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
 import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
@@ -2689,6 +2689,48 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(flatline.actorPayload.resultSummary).toMatchObject({ winner: "corp", reason: "flatline" });
     expect(JSON.stringify(flatline.opponentPayload)).not.toContain("Simple Killer");
     expect(JSON.stringify(flatline.publicEvent)).not.toContain("Simple Killer");
+  });
+
+  it("projects Bad-Publicity-7+ game end as a side-safe result reason on reconnect", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "mp-bad-publicity-result" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      playMode: "human_vs_ai",
+      seed: "mp-bad-publicity-result",
+    });
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing stored match");
+
+    const gameState = createGameAfterSetup({
+      matchId: created.matchId,
+      seed: "mp-bad-publicity-result",
+      agendaPointsToWin: 7,
+    });
+    gameState.corp.badPublicity = 7;
+    checkWinConditions(gameState);
+    record.gameState = gameState;
+    record.match.status = "finished";
+    record.match.winner = "runner";
+    record.match.updatedAt = "2026-05-17T00:00:00.000Z";
+    record.eventLog = [];
+    await storage.save(record);
+
+    const reconnected = await service.reconnectMatch(created.matchId, {
+      side: "runner",
+      reconnectToken: created.hostReconnectToken,
+    });
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+
+    expect(reconnected.winner).toBe("runner");
+    expect(reconnected.resultSummary).toMatchObject({
+      winner: "runner",
+      reason: "bad_publicity_7",
+    });
+    expect(reconnected.playerView.gameEndReason).toBe("bad_publicity_7");
+    expect(JSON.stringify(reconnected)).not.toContain("cardInstances");
+    expect(JSON.stringify(reconnected)).not.toContain("privatePayload");
+    expect(JSON.stringify(reconnected)).not.toContain("onr_proteus_");
   });
 
   it("replays a multiplayer match to the stored final state hash", async () => {

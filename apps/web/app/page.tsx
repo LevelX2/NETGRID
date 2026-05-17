@@ -5806,6 +5806,7 @@ function matchFormatLabel(format: MatchFormat): string {
 
 function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "agenda_points") return "Das Agenda-Ziel wurde erreicht.";
+  if (reason === "bad_publicity_7") return "Die Korp hat 7 Bad Publicity erreicht.";
   if (reason === "corp_deck_empty") return "Die Korp konnte keine Karte mehr ziehen.";
   if (reason === "flatline") return "Der Runner wurde flatlined.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";

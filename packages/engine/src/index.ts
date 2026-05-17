@@ -220,6 +220,8 @@ type VisibleCounterPayload = {
   remainingCounters: number;
 };
 
+const BAD_PUBLICITY_LOSS_THRESHOLD = 7;
+
 const ACTION_ID_ABILITY_PAYLOAD_FIELDS = [
   "v1917AssetAbility",
   "v1918UpgradeAbility",
@@ -2770,6 +2772,15 @@ export function validateDeckDefinition(
 }
 
 export function checkWinConditions(state: GameState): Winner | null {
+  if (state.corp.badPublicity >= BAD_PUBLICITY_LOSS_THRESHOLD) {
+    state.winner = "runner";
+    state.gameEndReason = "bad_publicity_7";
+    state.phase = "game_over";
+    state.timingPoint = "game.checkpoint";
+    delete state.pendingChoice;
+    delete state.run;
+    return state.winner;
+  }
   if (state.winner) {
     state.phase = "game_over";
     state.timingPoint = "game.checkpoint";
@@ -21044,6 +21055,19 @@ function buildEvent(
     ),
     ...reveal,
   };
+  if (state.gameEndReason === "bad_publicity_7") {
+    publicPayload.badPublicityThreshold = BAD_PUBLICITY_LOSS_THRESHOLD;
+    publicPayload.corpBadPublicityBefore = previousState.corp.badPublicity;
+    publicPayload.corpBadPublicityAfter = state.corp.badPublicity;
+    publicPayload.sourceVisibility =
+      publicPayload.sourceVisibility === "redacted" ? "redacted" : "public";
+    if (publicPayload.sourceVisibility === "redacted") {
+      delete publicPayload.sourceCardDefinitionId;
+      delete publicPayload.sourceDefinitionId;
+      delete publicPayload.sourceTitle;
+      publicPayload.redactedKind = "hidden_resource_source";
+    }
+  }
   return {
     eventId: `evt_${after}`,
     type: legalAction.type,
