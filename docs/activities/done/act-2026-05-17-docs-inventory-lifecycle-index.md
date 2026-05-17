@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-inventory-lifecycle-index
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,19 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-5
 parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/DOCS_INVENTORY_LIFECYCLE_INDEX_2026_05_17.md
+checks:
+  - git ls-files -- docs
+  - git ls-files -- docs/derived
+  - git ls-files --others --exclude-standard -- docs
+  - Folgepaket-Referenzcheck per Get-ChildItem docs/activities
+  - git diff --check
 ---
 
 # docs-Inventar mit Lebenszyklus-Kategorien anlegen
@@ -56,11 +62,11 @@ Für `docs/` soll ein belastbarer Inventar-Index entstehen, der Dateien nach Ver
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt einen nachvollziehbaren Inventar-Index für `docs/`.
-- [ ] Jede größere Pfadgruppe hat eine Lebenszyklus-Kategorie.
-- [ ] Doppelte Root-/Source-Dateien, `docs/derived/`, `docs/activities/`, `docs/source/`, `docs/codex/`, `docs/ui-designsets/` und das historische Dokumentenpaket sind sichtbar eingeordnet.
-- [ ] Die ungetrackte Inbox-Vereinfachung ist als bewusstes Arbeitsmodell beschrieben.
-- [ ] Folgepakete für Verdichtung oder Archivierung sind benannt, falls das Inventar neue Lücken zeigt.
+- [x] Es gibt einen nachvollziehbaren Inventar-Index für `docs/`.
+- [x] Jede größere Pfadgruppe hat eine Lebenszyklus-Kategorie.
+- [x] Doppelte Root-/Source-Dateien, `docs/derived/`, `docs/activities/`, `docs/source/`, `docs/codex/`, `docs/ui-designsets/` und das historische Dokumentenpaket sind sichtbar eingeordnet.
+- [x] Die ungetrackte Inbox-Vereinfachung ist als bewusstes Arbeitsmodell beschrieben.
+- [x] Folgepakete für Verdichtung oder Archivierung sind benannt, falls das Inventar neue Lücken zeigt.
 
 ## Umsetzungshinweise
 
@@ -70,4 +76,8 @@ Für `docs/` soll ein belastbarer Inventar-Index entstehen, der Dateien nach Ver
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/DOCS_INVENTORY_LIFECYCLE_INDEX_2026_05_17.md` ordnet den aktuellen getrackten `docs/`-Bestand zum Stichtag 2026-05-17 nach Pfadgruppen, Dateitypen, Release-/Themenbezug, vermutetem Dokumenttyp, Lebenszyklus-Kategorie und Rollup-/Nachfolgerkandidaten ein.
+
+Der neue Stichtagsbefund lautet: 948 getrackte Dateien unter `docs/`, davon 749 unter `docs/derived/`; ungetrackte `docs/`-Dateien wurden im Worker-Worktree nicht festgestellt. Root-/Source-Duplikate, `docs/derived/`, `docs/activities/`, `docs/source/`, `docs/codex/`, `docs/ui-designsets/` und das historische Dokumentenpaket sind sichtbar eingeordnet. Die bewusst mögliche ungetrackte `activities/inbox/` ist als Arbeitsboard-Modell dokumentiert, nicht als Problem.
+
+Checks: `git ls-files -- docs`, `git ls-files -- docs/derived`, `git ls-files --others --exclude-standard -- docs`, Folgepaket-Referenzcheck per `Get-ChildItem docs/activities`, `git diff --check`. Offene Folgepunkte sind im Inventar als bestehende und empfohlene Folgepakete benannt; außer dem Activity-Abschlussmove wurden keine Dateien verschoben, gelöscht oder entversioniert.
