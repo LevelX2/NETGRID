@@ -516,6 +516,247 @@ describe("Proteus Visible Baseline", () => {
   });
 });
 
+describe("Proteus variable ICE harness", () => {
+  const DIGICONDA = "onr_proteus_020_digiconda";
+  const FOOD_FIGHT = "onr_proteus_022_food-fight";
+  const hiddenPayloadMarkers =
+    /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
+
+  function proteusVariableIceGame(seed: string): GameState {
+    return toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_1_2K_RUNNER_DECK,
+          id: `${seed}_runner`,
+          name: "Proteus Variable ICE Harness Runner",
+          cards: [
+            { id: "simple_killer", quantity: 1 },
+            ...ONR_V1_1_2K_RUNNER_DECK.cards,
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_1_2K_CORP_DECK,
+          id: `${seed}_corp`,
+          name: "Proteus Variable ICE Harness Corp",
+          cards: [
+            { id: DIGICONDA, quantity: 1 },
+            { id: FOOD_FIGHT, quantity: 1 },
+            ...ONR_V1_1_2K_CORP_DECK.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+  }
+
+  it("offers Digiconda X rez variants, persists strength and rejects manipulated values", () => {
+    for (const x of [0, 3, 6]) {
+      let state = proteusVariableIceGame(`proteus-variable-digiconda-${x}`);
+      state.corp.credits = 12;
+      const iceId = putCorpIceOnServer(state, "rd", DIGICONDA);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rezActions = getLegalActions(state, "corp").filter(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.proteusVariableRez === "x_strength",
+      );
+      expect(
+        rezActions.map((action) => action.payload?.variableRezValue),
+      ).toEqual([0, 1, 2, 3, 4, 5, 6]);
+      const rezAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.variableRezValue === x,
+      );
+      expect(rezAction.costs).toEqual([{ credits: 6 + x }]);
+      const wrongSide = applyAction(state, {
+        matchId: state.matchId,
+        side: "runner",
+        actionId: rezAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(wrongSide.ok).toBe(false);
+      if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+      const fakeX7 = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: rezAction.actionId.replace(
+          `.x_strength.${x}.${x}`,
+          ".x_strength.7.7",
+        ),
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(fakeX7.ok).toBe(false);
+      const lowCredits = structuredClone(state);
+      lowCredits.corp.credits = 5 + x;
+      const lowCreditResult = applyAction(lowCredits, {
+        matchId: lowCredits.matchId,
+        side: "corp",
+        actionId: rezAction.actionId,
+        clientKnownStateVersion: lowCredits.stateVersion,
+      });
+      expect(lowCreditResult.ok).toBe(false);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === rezAction.actionId,
+      );
+      expect(state.cardInstances[iceId]?.proteusVariableIceState).toEqual({
+        family: "x_strength",
+        additionalCostPaid: x,
+        value: x,
+        cap: 6,
+        strength: x,
+      });
+      expect(getPlayerView(state, "runner").run?.encounteredIce).toMatchObject({
+        definitionId: DIGICONDA,
+        title: "Digiconda",
+        rezzed: true,
+        strength: x,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "rez_ice",
+        cardDefinitionId: DIGICONDA,
+        title: "Digiconda",
+        baseRezCost: 6,
+        variableRezAdditionalCost: x,
+        variableRezValue: x,
+        variableRezCap: 6,
+        rezCostPaid: 6 + x,
+        effectiveStrengthAfterRez: x,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        hiddenPayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("persists Food Fight paid ETR subroutines for views, breaking and replay", () => {
+    for (const [additionalCost, subroutineCount] of [
+      [0, 0],
+      [2, 1],
+      [6, 3],
+    ] as const) {
+      let state = proteusVariableIceGame(
+        `proteus-variable-food-fight-${additionalCost}`,
+      );
+      state.corp.credits = 12;
+      const killerId =
+        subroutineCount > 0
+          ? installRunnerProgramForTest(state, "simple_killer")
+          : undefined;
+      if (killerId) state.runner.credits = 10;
+      const iceId = putCorpIceOnServer(state, "rd", FOOD_FIGHT);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      const rezAction = mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.source === iceId &&
+          action.payload?.variableRezAdditionalCost === additionalCost,
+      );
+      const oddFake = applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: rezAction.actionId.replace(
+          `.paid_etr_subroutines.${additionalCost}.${subroutineCount}`,
+          `.paid_etr_subroutines.${additionalCost + 1}.${subroutineCount}`,
+        ),
+        clientKnownStateVersion: state.stateVersion,
+      });
+      expect(oddFake.ok).toBe(false);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (action) => action.actionId === rezAction.actionId,
+      );
+      expect(state.cardInstances[iceId]?.proteusVariableIceState).toEqual({
+        family: "paid_etr_subroutines",
+        additionalCostPaid: additionalCost,
+        value: subroutineCount,
+        subroutineCount,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "rez_ice",
+        cardDefinitionId: FOOD_FIGHT,
+        title: "Food Fight",
+        baseRezCost: 4,
+        variableRezAdditionalCost: additionalCost,
+        variableRezValue: subroutineCount,
+        rezCostPaid: 4 + additionalCost,
+        effectiveSubroutineCountAfterRez: subroutineCount,
+      });
+      expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+        DIGICONDA,
+      );
+      if (subroutineCount > 0) {
+        while (
+          getPlayerView(state, "runner").own.rig?.find(
+            (card) => card.instanceId === killerId,
+          )?.strength !== 3
+        ) {
+          state = apply(
+            state,
+            "runner",
+            (action) =>
+              action.type === "pump_breaker" &&
+              action.payload?.breakerId === killerId,
+          );
+        }
+        const breakAction = mustAction(
+          state,
+          "runner",
+          (action) =>
+            action.type === "break_subroutine" &&
+            action.payload?.iceId === iceId &&
+            action.payload?.subroutineIndex === subroutineCount - 1,
+        );
+        state = apply(
+          state,
+          "runner",
+          (action) => action.actionId === breakAction.actionId,
+        );
+        expect(state.run?.brokenSubroutineIndexes).toContain(
+          subroutineCount - 1,
+        );
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          actionType: "break_subroutine",
+          targetIceDefinitionId: FOOD_FIGHT,
+          subroutineIndex: subroutineCount - 1,
+        });
+      }
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+});
+
 describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", () => {
   const privatePayloadMarkers =
     /"cardInstances"|"privatePayload"|"grip"|"stack"|"hq"|"rd"/;
