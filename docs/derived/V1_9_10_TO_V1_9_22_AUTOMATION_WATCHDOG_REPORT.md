@@ -1,5 +1,7 @@
 # V1.9.10 bis V1.9.22 Automation Watchdog Report
 
+Status: historischer Betriebsnachweis; kein aktiver Watchdog.
+
 ## Konsolidierungsstand
 
 - Nach `main` übernommen am 2026-05-16.

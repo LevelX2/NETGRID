@@ -1,8 +1,10 @@
 # V1.9.10 bis V1.9.22 Automation Prompt
 
-Status: aktiver Controller-Prompt fuer stündliche Completion-Automation
+Status: historischer Controller-Prompt, nicht mehr aktive operative Vorgabe
 Stand: 2026-05-12
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
+
+Historischer Hinweis 2026-05-17: Die V1.9.10-bis-V1.9.22-Completion ist laut State-Artefakt abgeschlossen. Dieser Prompt ist Evidence für die damalige stündliche Completion-Automation und darf nicht als aktuelle Startanweisung für neue Automationsläufe verwendet werden.
 
 ## Auftrag
 

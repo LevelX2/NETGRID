@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-docs-derived-automation-archive
-status: in_progress
+status: done
 kind: cleanup
 area: docs
 priority: low
@@ -8,13 +8,27 @@ primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-1
 parallelWorker: worker-1
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_ARCHIVE_ROLLUP_2026_05_17.md
+  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md
+  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md
+  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md
+  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_PROMPT.md
+  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_REPORT.md
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+  - docs/codex/CODEX_STATUS.md
+checks:
+  - git status --short --branch
+  - rg --files docs/derived | rg -i 'automation|watchdog|heartbeat|cron'
+  - rg -n "V1_9_10_TO_V1_9_22_AUTOMATION_(CONTROLLER_PLAN|PROMPT|STATE|WATCHDOG_PROMPT|WATCHDOG_REPORT)"
+  - rg -n "aktive Codex-Automation|Status: aktiver|stündliche aktive|Naechster Lauf: V1.9.12"
+  - git diff --check
 ---
 
 # Abgeschlossene Automationsartefakte archivieren
@@ -64,4 +78,10 @@ Abgeschlossene Automationspläne, Prompts, Watchdog-Berichte und State-Dateien u
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-17. Alle Automationsartefakte unter `docs/derived/` wurden identifiziert: Controller-Plan, Controller-Prompt, State, Watchdog-Prompt und Watchdog-Report. Der State steht auf `complete`; es wurde kein aktives V1.9.10-bis-V1.9.22-Automationsartefakt gefunden.
+
+`docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_ARCHIVE_ROLLUP_2026_05_17.md` trennt `keep-evidence`, `archive` und den aktuell nicht empfohlenen `git-remove-after-condense`-Pfad. Die Prompts, der Controller-Plan, der State und der Watchdog-Report sind als historische Evidence markiert; `docs/codex/CODEX_STATUS.md`, der Wissensindex und das Monatslog wurden nachgezogen. Es wurden keine Automationskonfigurationen geändert, keine Cron-/Heartbeat-Einstellungen angepasst, keine Gate-Nachweise gelöscht und keine Automationsartefakte verschoben.
+
+Linkbruchrisiken vor einem späteren Move sind im Rollup dokumentiert: Wissensindex, `CODEX_STATUS.md`, Monatslog, `data/reports/v1922-completion-gate-status.json` und Querverweise innerhalb der Automationsartefakte.
+
+Checks: Repository-Suche nach Automationsartefakten und Referenzen, Suche nach irreführenden aktiven Statusformulierungen, `git diff --check`.

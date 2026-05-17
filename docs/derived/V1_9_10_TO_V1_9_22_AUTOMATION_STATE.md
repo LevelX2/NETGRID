@@ -5,13 +5,15 @@ Stand: 2026-05-14
 Modus: Expeditionsmodus mit WIP-Commits und WIP-Pushes
 Automation-ID: `netgrid-v1-9-originalset-completion-local`
 Watchdog-Automation-ID: gelöscht / nicht aktiv
-Ausfuehrung: stündliche aktive Codex-Cron-Automation im festen lokalen Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`
+Ausfuehrung (historisch): stündliche Codex-Cron-Automation im festen lokalen Automations-Worktree `C:\Projekte\NETGRID_AUTOMATION_V1_9_ORIGINALSET`
 Branch: `codex/v1-9-originalset-completion`
 Primaerer Agent: release-implementation-agent
 Kontrollartefakt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
 Controller-Prompt: `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md`
 Text-Finalisierung: `docs/derived/V1_9_ORIGINALSET_DISPLAY_TEXT_FINALIZATION_POLICY.md`
 Watchdog-Prompt: derzeit nicht aktiv
+
+Historischer Hinweis 2026-05-17: Dieser Cursor ist abgeschlossenes Evidence-Artefakt. Er ist keine aktive operative Vorgabe mehr; neue Automationsläufe benötigen einen neuen State/Cursor und eine neue Freigabe.
 
 ## Cursor
 
@@ -1251,4 +1253,3 @@ Push erfolgreich: `caa74b9` auf `origin/codex/v1-9-originalset-completion`.
 
 Status: gelöscht / nicht aktiv
 Aufgabe: kein separater Watchdog aktiv; Kontrolle erfolgt aktuell durch explizite Nutzerstarts und den Completion-Controller selbst.
-
