@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-docs-activities-retention-policy
-status: inbox
+status: in_progress
 kind: cleanup
 area: docs
 priority: low
 primaryAgent: activity-triage-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-3
+parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
 resultArtifacts: []

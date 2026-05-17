@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-corp-view-runner-rig-mu-display
-status: inbox
+status: in_progress
 kind: fix
 area: ui
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
+parallelWorker: worker-2
 releaseTarget:
 blockedBy: []
 resultArtifacts: []
