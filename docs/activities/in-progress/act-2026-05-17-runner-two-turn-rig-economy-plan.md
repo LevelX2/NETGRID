@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-runner-two-turn-rig-economy-plan
-status: inbox
+status: in_progress
 kind: fix
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-1
+parallelWorker: worker-1
 releaseTarget:
 blockedBy:
   - act-2026-05-17-ai-visible-run-runtime-card-audit

@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-proteus-visible-baseline-card-slice
-status: inbox
+status: in_progress
 kind: implementation
 area: cards
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-5
+parallelWorker: worker-5
 releaseTarget: Proteus planning
 blockedBy:
   - act-2026-05-17-proteus-release-slicing-plan

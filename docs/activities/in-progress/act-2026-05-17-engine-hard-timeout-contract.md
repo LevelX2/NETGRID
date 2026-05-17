@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-engine-hard-timeout-contract
-status: inbox
+status: in_progress
 kind: concept
 area: engine
 priority: normal
 primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-4
+parallelWorker: worker-4
 releaseTarget:
 blockedBy:
   - docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md
