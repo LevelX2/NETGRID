@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-17-ai-coaching-boundary-spec
-status: in_progress
+status: done
 kind: concept
 area: ai
 priority: low
@@ -8,15 +8,17 @@ primaryAgent: release-planning-agent
 requiresImplementation: false
 createdAt: 2026-05-17
 startedAt: 2026-05-17
-completedAt:
+completedAt: 2026-05-17
 branch: codex/activity-worker-2
 parallelWorker: worker-2
 releaseTarget:
 blockedBy:
   - act-2026-05-17-ai-input-nested-payload-allowlist
   - act-2026-05-17-decisiondebug-schema-redaction-snapshots
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/derived/AI_COACHING_BOUNDARY_SPEC_2026_05_17.md
+checks:
+  - git diff --check
 ---
 
 # Side-sichere Grenzen für AI-Coaching spezifizieren
@@ -58,11 +60,11 @@ Für spätere Lern-, Review- oder Coaching-Funktionen soll ein klarer Sicherheit
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt eine klare Spezifikation mit erlaubten und verbotenen Datenquellen.
-- [ ] Die Spezifikation enthält mindestens je ein Runner-, Korp- und Replaysicht-Beispiel.
-- [ ] Hidden-Info-Fixtures sind als rote Tests oder künftige Testfälle beschrieben.
-- [ ] Der Coach wird ausdrücklich als Erklärungsschicht eingeordnet, nicht als Regel- oder Aktionsautorität.
-- [ ] Folgepakete für UI, Server oder LLM werden nur empfohlen, wenn ihre Gates und Redaction-Grenzen benannt sind.
+- [x] Es gibt eine klare Spezifikation mit erlaubten und verbotenen Datenquellen.
+- [x] Die Spezifikation enthält mindestens je ein Runner-, Korp- und Replaysicht-Beispiel.
+- [x] Hidden-Info-Fixtures sind als rote Tests oder künftige Testfälle beschrieben.
+- [x] Der Coach wird ausdrücklich als Erklärungsschicht eingeordnet, nicht als Regel- oder Aktionsautorität.
+- [x] Folgepakete für UI, Server oder LLM werden nur empfohlen, wenn ihre Gates und Redaction-Grenzen benannt sind.
 
 ## Umsetzungshinweise
 
@@ -72,4 +74,10 @@ Für spätere Lern-, Review- oder Coaching-Funktionen soll ein klarer Sicherheit
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/derived/AI_COACHING_BOUNDARY_SPEC_2026_05_17.md` definiert AI-Coaching als reine Erklärungsschicht ohne Regel-, LegalAction- oder Aktionsautorität. Die Spezifikation grenzt erlaubte Coach-Inputs auf seitengebundene `PlayerView`, aktuelle `LegalActions`, side-sichere `PublicEvents`, eigene Perspektivdaten und optional versionierte, side-sichere `DecisionDebug`-Auszüge ein. Verboten bleiben FullState, gegnerische Hidden-Zonen, gegnerische Decklisten, Replay-PrivatePayload, Tokens/Sessions, unredigiertes `AIInput`/`DecisionDebug` und freie Regelentscheidung durch LLM.
+
+Enthalten sind Runner-, Korp- und Replay-Beispiele, rote Hidden-Info-Fixtures sowie Folgepaket-Empfehlungen mit eigenen Gates für `CoachInputV1`, Response-Contract, UI-Privacy und Replay-Review. Keine UI, keine LLM-Integration und keine Codeänderung wurden vorgenommen.
+
+Checks: `git diff --check`.
+
+Offene Folgepunkte: Nur die benannten späteren Coach-Input-/Response-/UI-/Replay-Gates; keine Umsetzung im Scope dieses Pakets.
