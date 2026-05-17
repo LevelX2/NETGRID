@@ -130,6 +130,7 @@ import {
   runWindowActionButtonLabel,
   runWindowActions,
   runCurrentIceLabel,
+  runnerRigMemorySummary,
   runPositionStatusLabel,
   runWindowStatusLabel,
   serializeCuePositionPreference,
@@ -6552,6 +6553,7 @@ function RunnerRigStrip({
   if (opponentSide(view.side) !== "runner") return null;
   const runnerRig = view.opponent.rig ?? [];
   const groups = groupRunnerRigCards(runnerRig);
+  const memorySummary = runnerRigMemorySummary(view, "opponent");
   const cardActionsForRig = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
@@ -6569,6 +6571,11 @@ function RunnerRigStrip({
               <div className="rigGroup rigGroupHorizontal" key={group.key} style={opponentMiniCardsStyle}>
                 <div className="rigGroupLead">
                   <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                  {group.key === "program" && memorySummary ? (
+                    <span className="zoneLimitBadge rigMemoryBadge" aria-label={memorySummary.ariaLabel}>
+                      MU <strong>{memorySummary.text}</strong>
+                    </span>
+                  ) : null}
                 </div>
                 <div className="cards rigGroupCards rigGroupCardsMini">
                   {group.cards.map((card) => {

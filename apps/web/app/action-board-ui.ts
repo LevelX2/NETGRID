@@ -659,6 +659,17 @@ export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; 
   return groups.filter((group) => group.cards.length > 0);
 }
 
+export function runnerRigMemorySummary(view: PlayerView, owner: "own" | "opponent"): { used: number; limit: number; text: string; ariaLabel: string } | null {
+  const source = owner === "own" ? view.own : view.opponent;
+  if (typeof source.memoryUsed !== "number" || typeof source.memoryLimit !== "number") return null;
+  return {
+    used: source.memoryUsed,
+    limit: source.memoryLimit,
+    text: `${source.memoryUsed}/${source.memoryLimit}`,
+    ariaLabel: `MU ${source.memoryUsed} von ${source.memoryLimit}`
+  };
+}
+
 export function corpInstalledCardState(card: VisibleCard): "hidden" | "unrezzed" | "rezzed" | "known" {
   if (!card.known) return "hidden";
   if (card.rezzed === false) return "unrezzed";
