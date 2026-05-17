@@ -213,7 +213,8 @@ export type ResolvedGameEffectKind =
   | "add_tags"
   | "remove_tags"
   | "bad_publicity"
-  | "damage";
+  | "damage"
+  | "resolve_subroutine";
 
 export type ResolvedGameEffect = {
   effectId: string;
@@ -228,6 +229,11 @@ export type ResolvedGameEffect = {
   addedCounterAmount?: number;
   runnerTagsAfter?: number;
   redactedKind?: string;
+  subroutineIndex?: number;
+  subroutineType?: SubroutineType;
+  damageType?: DamageType;
+  cardsTrashed?: number;
+  endedRun?: boolean;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;
