@@ -947,6 +947,7 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   let importance: ChronicleImportance = "normal";
   let visibility: ChronicleVisibility = chronicleEffectVisibility(effect, side);
   let title = "Ein automatischer Effekt wurde aufgelöst";
+  let description: string | undefined;
   const through = sourceTitle && sourceTitle !== cardTitle ? ` durch ${sourceTitle}` : "";
 
   if (visibility === "redacted") {
@@ -1024,6 +1025,32 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       title = phrase(subject, `${amount} Schaden${through} erlitten`);
       chips.push("Schaden");
       break;
+    case "resolve_subroutine": {
+      const source = sourceTitle ?? "ICE";
+      const subroutineIndex = numberValue(effect.subroutineIndex);
+      const subroutineNumber = subroutineIndex !== undefined ? subroutineIndex + 1 : undefined;
+      const subroutineChip = subroutineNumber !== undefined ? `Subroutine ${subroutineNumber}` : "Subroutine";
+      const subroutineType = stringValue(effect.subroutineType);
+      const damageType = stringValue(effect.damageType);
+      const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
+      category = subroutineType === "do_damage" ? "danger" : "run";
+      importance = subroutineType === "do_damage" || effect.endedRun === true ? "critical" : "important";
+      title =
+        subroutineType === "do_damage"
+          ? `${source}: ${subroutineChip} macht ${amount} ${damageTypeLabel(damageType)}`
+          : effect.endedRun === true
+            ? `${source}: ${subroutineChip} beendet den Run`
+            : `${source}: ${subroutineChip} aufgelöst`;
+      if (subroutineType === "do_damage")
+        description = `${cardCountText(cardsTrashed)} wurden in den Heap bewegt.`;
+      chips.push(
+        subroutineChip,
+        ...(subroutineType === "do_damage" ? [`${amount} ${damageTypeLabel(damageType)}`, `${cardsTrashed} Heap`] : []),
+        ...(effect.endedRun === true ? ["Run endet"] : []),
+        source
+      );
+      break;
+    }
   }
 
   return {
@@ -1033,6 +1060,7 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     visibility,
     ...(actor ? { actor } : {}),
     title: ensurePeriod(title),
+    ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
     ...(sourceDefinitionId && visibility !== "redacted" ? { cardDefinitionId: sourceDefinitionId } : {}),
     ...(sourceTitle && visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
@@ -1265,6 +1293,13 @@ function traceStartTitle(subject: string, cardTitle: string | undefined, baseTra
 
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function damageTypeLabel(damageType: string | undefined): string {
+  if (damageType === "net") return "Net Damage";
+  if (damageType === "meat") return "Meat Damage";
+  if (damageType === "core") return "Core Damage";
+  return "Damage";
 }
 
 function agendaRevealCountText(amount: number): string {

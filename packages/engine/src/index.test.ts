@@ -4204,7 +4204,40 @@ describe("O:NR v1 Limited local private test access", () => {
       damageAmount: 4,
       cardsTrashed: 4,
       flatline: false,
+      resolvedEffects: [
+        {
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_278_wall-of-ice",
+          sourceTitle: "Wall of Ice",
+          subroutineIndex: 0,
+          subroutineType: "do_damage",
+          damageType: "net",
+          amount: 2,
+          cardsTrashed: 2,
+        },
+        {
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_278_wall-of-ice",
+          sourceTitle: "Wall of Ice",
+          subroutineIndex: 1,
+          subroutineType: "do_damage",
+          damageType: "net",
+          amount: 2,
+          cardsTrashed: 2,
+        },
+        {
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_278_wall-of-ice",
+          sourceTitle: "Wall of Ice",
+          subroutineIndex: 2,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
     });
+    expect(JSON.stringify(wallState.eventLog.at(-1)?.publicPayload)).not.toContain(
+      wallState.runner.heap[0],
+    );
   });
 
   it("plays O:NR tagged operations, meat damage operations and Tycho Extension scoring", () => {

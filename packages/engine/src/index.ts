@@ -10208,6 +10208,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       }
       const summary = resolveDamageImminentEvent(state, event);
       damageSummaries.push(summary);
+      appendResolvedSubroutineEffect(legalAction, definition, index, subroutine, summary);
       if (legalAction) {
         setDamagePayload(
           legalAction,
@@ -10348,7 +10349,10 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     if (subroutine.type === "rewind_run_to_rezzed_ice_by_die") {
       if (resolveVacuumLinkRewindSubroutine(state, run, legalAction)) return;
     }
-    if (subroutine.type === "end_the_run") ended = true;
+    if (subroutine.type === "end_the_run") {
+      appendResolvedSubroutineEffect(legalAction, definition, index, subroutine);
+      ended = true;
+    }
   }
   if (state.winner) return;
   const encounteredIceId = run.encounteredIceId;
@@ -10390,6 +10394,38 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   }
   applyBartmossPostEncounterTrigger(state, run, legalAction);
   movePastCurrentIce(state, legalAction);
+}
+
+function appendResolvedSubroutineEffect(
+  legalAction: LegalAction | undefined,
+  definition: CardDefinition,
+  subroutineIndex: number,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+  damageSummary?: DamageSummary,
+): void {
+  if (!legalAction) return;
+  legalAction.resolvedEffects = [
+    ...(legalAction.resolvedEffects ?? []),
+    {
+      effectId: `subroutine_${subroutineIndex + 1}`,
+      kind: "resolve_subroutine",
+      visibility: "public",
+      side: "runner",
+      reason: "ice_subroutine",
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+      subroutineIndex,
+      subroutineType: subroutine.type,
+      ...(damageSummary
+        ? {
+            damageType: damageSummary.damageType,
+            amount: damageSummary.amount,
+            cardsTrashed: damageSummary.cardsTrashed,
+          }
+        : {}),
+      ...(subroutine.type === "end_the_run" ? { endedRun: true } : {}),
+    },
+  ];
 }
 
 function encounterWasFullyBrokenByRunner(

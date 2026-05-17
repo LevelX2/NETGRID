@@ -485,6 +485,67 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Fort 1", "Wurf 1", "Run endet"]));
   });
 
+  it("shows Wall of Ice subroutine damage and end-the-run as separate chronicle steps", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        damageResolved: true,
+        damageType: "net",
+        damageAmount: 4,
+        cardsTrashed: 4,
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_278_wall-of-ice",
+            sourceTitle: "Wall of Ice",
+            subroutineIndex: 0,
+            subroutineType: "do_damage",
+            damageType: "net",
+            amount: 2,
+            cardsTrashed: 2
+          },
+          {
+            effectId: "subroutine_2",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_278_wall-of-ice",
+            sourceTitle: "Wall of Ice",
+            subroutineIndex: 1,
+            subroutineType: "do_damage",
+            damageType: "net",
+            amount: 2,
+            cardsTrashed: 2
+          },
+          {
+            effectId: "subroutine_3",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_278_wall-of-ice",
+            sourceTitle: "Wall of Ice",
+            subroutineIndex: 2,
+            subroutineType: "end_the_run",
+            endedRun: true
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items.map((item) => item.title)).toEqual([
+      "Wall of Ice: Subroutine 1 macht 2 Net Damage.",
+      "Wall of Ice: Subroutine 2 macht 2 Net Damage.",
+      "Wall of Ice: Subroutine 3 beendet den Run."
+    ]);
+    expect(items[0]?.description).toBe("2 Karten wurden in den Heap bewegt.");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "2 Net Damage", "2 Heap", "Wall of Ice"]));
+    expect(JSON.stringify(items)).not.toContain("runner_card_");
+  });
+
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
