@@ -57,6 +57,8 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "serverId",
   "placement",
   "encounterContinue",
+  "unbrokenSubroutineCount",
+  "encounterWillEndRun",
   "shellTradersAbility",
   "abilityFamily",
   "abilityId",

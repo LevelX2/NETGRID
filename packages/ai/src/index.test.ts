@@ -1897,6 +1897,111 @@ describe("MVP 0.3 Runner AI", () => {
     expect(afterRunDecision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
+  it("breaks Filter directly with Krash and does not pump after the only subroutine is broken", () => {
+    let state = krashFilterEncounterState("ai-krash-filter-direct-break");
+    const encounterInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const pump = encounterInput.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(encounterInput, action) ===
+          "onr_v1_039_krash",
+    );
+    const breakAction = encounterInput.legalActions.find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinitionFromInput(encounterInput, action) ===
+          "onr_v1_039_krash",
+    );
+    const encounterDecision = chooseRunnerAction(encounterInput);
+    const encounterSelected = encounterInput.legalActions.find(
+      (action) => action.actionId === encounterDecision.actionId,
+    );
+
+    expect(pump).toBeDefined();
+    expect(breakAction).toBeDefined();
+    expect(encounterSelected?.type).toBe("break_subroutine");
+    expect(encounterDecision.reasonCode).toBe("runner.encounter.break_etr");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_039_krash",
+    );
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+
+    const afterBreakInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const afterBreakPump = afterBreakInput.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(afterBreakInput, action) ===
+          "onr_v1_039_krash",
+    );
+    const afterBreakContinue = afterBreakInput.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    const afterBreakDecision = chooseRunnerAction(afterBreakInput);
+    const afterBreakSelected = afterBreakInput.legalActions.find(
+      (action) => action.actionId === afterBreakDecision.actionId,
+    );
+
+    expect(afterBreakPump).toBeDefined();
+    expect(afterBreakContinue?.payload?.unbrokenSubroutineCount).toBe(0);
+    expect(afterBreakSelected?.type).toBe("continue_run");
+    expect([
+      "runner.encounter.continue",
+      "runner.plan.safe_probe_run",
+    ]).toContain(afterBreakDecision.reasonCode);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === afterBreakContinue?.actionId,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      encounterContinue: true,
+      unbrokenSubroutineCount: 0,
+      encounterWillEndRun: false,
+    });
+  });
+
+  it("still pumps when strength is the missing requirement for a useful break", () => {
+    const state = weakFracterBarrierEncounterState("ai-useful-pump");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const pump = input.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(input, action) === "efficient_fracter",
+    );
+    const breakAction = input.legalActions.find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinitionFromInput(input, action) === "efficient_fracter",
+    );
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(pump).toBeDefined();
+    expect(breakAction).toBeUndefined();
+    expect(selected?.type).toBe("pump_breaker");
+    expect(decision.reasonCode).toBe("runner.encounter.pump_breaker");
+  });
+
   it("prioritizes removing public tags when legal", () => {
     const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-remove-tag" }));
     state.runner.tags = 1;
@@ -6617,6 +6722,106 @@ function runRunnerAiSmoke(
     state = result.state;
   }
   return { actions: state.stateVersion, errors, runnerPlanDecisions };
+}
+
+function krashFilterEncounterState(seed: string): GameState {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: batchARunnerDeck(),
+      corpDeck: {
+        id: "ai_krash_filter_corp",
+        name: "AI Krash Filter Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_244_filter", quantity: 1 },
+          { id: "simple_economy_operation", quantity: 4 },
+          { id: "simple_agenda", quantity: 3 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 5;
+  state.corp.credits = 5;
+  moveRunnerCardToGrip(state, "onr_v1_039_krash");
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === "onr_v1_039_krash",
+  );
+  putCorpIceOnServer(state, "rd", "onr_v1_244_filter");
+  putCorpCardOnTopOfRd(state, "simple_economy_operation");
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  return apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" &&
+      sourceDefinition(state, action) === "onr_v1_244_filter",
+  );
+}
+
+function weakFracterBarrierEncounterState(seed: string): GameState {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: "ai_weak_fracter_runner",
+        name: "AI Weak Fracter Runner",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "efficient_fracter", quantity: 1 },
+          { id: "simple_economy_event", quantity: 8 },
+        ],
+      },
+      corpDeck: {
+        id: "ai_taxing_barrier_corp",
+        name: "AI Taxing Barrier Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_taxing_barrier_ice", quantity: 1 },
+          { id: "simple_economy_operation", quantity: 4 },
+          { id: "simple_agenda", quantity: 3 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 10;
+  state.corp.credits = 10;
+  moveRunnerCardToGrip(state, "efficient_fracter");
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === "efficient_fracter",
+  );
+  putCorpIceOnServer(state, "rd", "simple_taxing_barrier_ice");
+  putCorpCardOnTopOfRd(state, "simple_economy_operation");
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  return apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" &&
+      sourceDefinition(state, action) === "simple_taxing_barrier_ice",
+  );
 }
 
 function kingOfTheRoadRunnerTurn(seed: string): GameState {

@@ -20644,6 +20644,14 @@ function clickCostForAction(legalAction: LegalAction): number {
   );
 }
 
+function creditCostForAction(legalAction: LegalAction): number {
+  return legalAction.costs.reduce(
+    (sum, cost) =>
+      sum + (Number.isInteger(cost.credits) && cost.credits ? cost.credits : 0),
+    0,
+  );
+}
+
 function clicksForSide(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.clicks : state.runner.clicks;
 }
@@ -20705,6 +20713,28 @@ function publicContextForAction(
     state.cardInstances[legalAction.source]
       ? legalAction.source
       : undefined;
+  if (legalAction.type === "pump_breaker") {
+    const pumpStrengthAmount =
+      typeof legalAction.payload?.pumpStrengthAmount === "number"
+        ? legalAction.payload.pumpStrengthAmount
+        : pumpAmountForLegalAction(state, legalAction);
+    const pumpBreakerCreditCost = creditCostForAction(legalAction);
+    context.pumpStrengthAmount = pumpStrengthAmount;
+    if (pumpBreakerCreditCost > 0)
+      context.pumpBreakerCreditCost = pumpBreakerCreditCost;
+    const breakerId =
+      typeof legalAction.payload?.breakerId === "string"
+        ? legalAction.payload.breakerId
+        : undefined;
+    if (breakerId && state.cardInstances[breakerId]) {
+      const definition = definitionFor(state, breakerId);
+      if (typeof definition.strength === "number") {
+        context.breakerStrengthAfter =
+          definition.strength +
+          mustInstance(state.cardInstances, breakerId).strengthModifier;
+      }
+    }
+  }
   const serverLabel =
     publicServerLabelForCard(state, cardId) ??
     publicServerLabel(state, legalAction.payload?.serverId);

@@ -560,13 +560,29 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "pump_breaker":
       category = "run";
+      {
+        const pumpStrengthAmount = numberValue(payload.pumpStrengthAmount) ?? 1;
+        const pumpBreakerCreditCost = numberValue(payload.pumpBreakerCreditCost);
+        const breakerStrengthAfter = numberValue(payload.breakerStrengthAfter);
+        description = `${pumpBreakerCreditCost !== undefined ? `${creditText(pumpBreakerCreditCost)}: ` : ""}+${pumpStrengthAmount} Stärke für diese Begegnung${breakerStrengthAfter !== undefined ? `; Stärke danach ${breakerStrengthAfter}` : ""}.`;
+        chips.push("Breaker", `+${pumpStrengthAmount} Stärke`, ...(pumpBreakerCreditCost !== undefined ? [`${pumpBreakerCreditCost} ${creditLabel(pumpBreakerCreditCost)}`] : []));
+      }
       title = phrase(subject, `${cardTitle ?? "einen Icebreaker"} gepumpt`);
-      chips.push("Breaker", "+Stärke");
       break;
     case "break_subroutine":
       category = "run";
+      {
+        const breakSubroutineCount = numberValue(payload.breakSubroutineCount) ?? 1;
+        const breakSubroutineBaseCost = numberValue(payload.breakSubroutineBaseCost);
+        description = `${breakSubroutineBaseCost !== undefined ? `${creditText(breakSubroutineBaseCost)}: ` : ""}${breakSubroutineCount === 1 ? "eine Subroutine" : `${breakSubroutineCount} Subroutinen`} gebrochen.`;
+        chips.push(
+          "Subroutine",
+          breakSubroutineCount === 1 ? "Gebrochen" : `${breakSubroutineCount} gebrochen`,
+          ...(breakSubroutineBaseCost !== undefined ? [`${breakSubroutineBaseCost} ${creditLabel(breakSubroutineBaseCost)}`] : []),
+          ...(cardTitle ? [cardTitle] : [])
+        );
+      }
       title = phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}eine Subroutine gebrochen`);
-      chips.push("Subroutine", "Gebrochen", ...(cardTitle ? [cardTitle] : []));
       break;
     case "continue_run":
       if (abilityId === "rio_de_janeiro_passed_ice") {
@@ -592,10 +608,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       category = "run";
-      title = encounterContinue
-        ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
-        : phrase(subject, result === "ended" ? "den Run beendet" : "den Run fortgesetzt");
-      chips.push("Run", ...(encounterContinue ? ["Subroutinen"] : runPhase ? [runPhaseLabel(runPhase)] : []));
+      {
+        const unbrokenSubroutineCount = numberValue(payload.unbrokenSubroutineCount);
+        if (encounterContinue && unbrokenSubroutineCount === 0) {
+          title = phrase(subject, "das ICE passiert");
+          chips.push("Run", "ICE passiert");
+        } else {
+          title = encounterContinue
+            ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
+            : phrase(subject, result === "ended" ? "den Run beendet" : "den Run fortgesetzt");
+          chips.push("Run", ...(encounterContinue ? ["Subroutinen"] : runPhase ? [runPhaseLabel(runPhase)] : []));
+        }
+      }
       break;
     case "access_card":
       category = "run";

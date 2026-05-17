@@ -537,6 +537,54 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("Subroutinen");
   });
 
+  it("shows fully broken Encounter continuation as passed ICE", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "continued",
+        encounterContinue: true,
+        encounterWillEndRun: false,
+        unbrokenSubroutineCount: 0
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast das ICE passiert.");
+    expect(item.chips).toContain("ICE passiert");
+    expect(JSON.stringify(item)).not.toContain("ungebrochene Subroutinen");
+  });
+
+  it("describes breaker pump and break actions with action-specific effects", () => {
+    const pump = formatChronicleEvent(
+      makeEvent("pump_breaker", {
+        actor: "runner",
+        title: "Krash",
+        aiReasonCode: "runner.encounter.pump_breaker",
+        pumpStrengthAmount: 1,
+        pumpBreakerCreditCost: 2,
+        breakerStrengthAfter: 1
+      }),
+      "corp"
+    );
+    const breakAction = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        title: "Krash",
+        aiReasonCode: "runner.encounter.break_etr",
+        breakSubroutineBaseCost: 2,
+        subroutineIndex: 0
+      }),
+      "corp"
+    );
+
+    expect(pump.title).toBe("Die Runner-KI hat Krash gepumpt.");
+    expect(pump.description).toBe("2 Credits: +1 Stärke für diese Begegnung; Stärke danach 1.");
+    expect(pump.chips).toEqual(expect.arrayContaining(["Breaker", "+1 Stärke", "2 Credits"]));
+    expect(breakAction.title).toBe("Die Runner-KI hat mit Krash eine Subroutine gebrochen.");
+    expect(breakAction.description).toBe("2 Credits: eine Subroutine gebrochen.");
+    expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine", "Gebrochen", "2 Credits", "Krash"]));
+  });
+
   it("names visible Runner installs from the public label and Rig zone", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

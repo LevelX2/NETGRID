@@ -2173,7 +2173,35 @@ function pumpCanLeadToBreak(input: AiDecisionInput, action: LegalAction): boolea
   const breaker = findVisibleCard(input, action.source);
   const encounteredIce = input.playerView.run?.encounteredIce;
   if (!breaker?.definitionId || !encounteredIce?.definitionId) return true;
-  return canBreakerDefinitionBreakIce(breaker.definitionId, encounteredIce.definitionId);
+  if (!canBreakerDefinitionBreakIce(breaker.definitionId, encounteredIce.definitionId)) return false;
+
+  const breakerId = breakerIdForEncounterAction(action);
+  const targetIceId = typeof action.payload?.iceId === "string" ? action.payload.iceId : undefined;
+  const directBreakIsLegal = input.legalActions.some(
+    (candidate) =>
+      candidate.type === "break_subroutine" &&
+      breakerIdForEncounterAction(candidate) === breakerId &&
+      (!targetIceId || candidate.payload?.iceId === targetIceId),
+  );
+  if (directBreakIsLegal) return false;
+
+  const encounterContinue = input.legalActions.find(
+    (candidate) => candidate.type === "continue_run" && candidate.payload?.encounterContinue === true,
+  );
+  if (encounterContinue?.payload?.unbrokenSubroutineCount === 0) return false;
+  if (
+    typeof breaker.strength === "number" &&
+    typeof encounteredIce.strength === "number" &&
+    breaker.strength >= encounteredIce.strength
+  )
+    return false;
+
+  return true;
+}
+
+function breakerIdForEncounterAction(action: LegalAction): string | undefined {
+  if (typeof action.payload?.breakerId === "string") return action.payload.breakerId;
+  return action.source === "basic_action" || action.source === "game_rule" ? undefined : action.source;
 }
 
 function scoreCorpRootInstall(roles: string[], action: LegalAction, features: AiFeatures, profile: Record<string, number>): number {
