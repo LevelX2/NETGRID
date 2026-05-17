@@ -13,6 +13,7 @@ import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type Edi
 import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
+import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
@@ -242,6 +243,76 @@ describe("V1.0.9 private internet hardening", () => {
     expect(text).not.toContain(created.hostSessionToken);
     expect(text).not.toContain(joinToken ?? "missing");
     expect(text).not.toMatch(/sha256:[a-f0-9]{64}|privatePayload|cardInstances|decklist/i);
+  });
+});
+
+describe("Invite and lobby redaction harness", () => {
+  it("names forbidden invite/lobby metadata patterns", () => {
+    const leaks = findInviteLobbyPayloadRedactionLeaks({
+      sessionToken: "raw-session-token",
+      reconnectToken: "raw-reconnect-token",
+      tokenHash: "sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      sessionId: "session_private_123",
+      decklist: [{ cardId: "onr_v1_001_afreet", quantity: 3 }],
+      deckHash: "fnv1a:deadbeef",
+      hiddenCard: { definitionId: "simple_agenda" },
+      AIInput: { side: "runner" },
+      DecisionDebug: { explored: true },
+      url: "http://127.0.0.1:3100/?matchId=match_1&joinToken=raw-join-token"
+    });
+    const ruleIds = leaks.map((leak) => leak.ruleId);
+
+    expect(ruleIds).toEqual(
+      expect.arrayContaining([
+        "token-or-token-hash-field",
+        "session-id-field",
+        "decklist-or-deckhash-field",
+        "hidden-card-identity-field",
+        "ai-input-or-decision-debug-field",
+        "join-token-query-value",
+        "token-hash-value",
+        "session-id-value",
+        "deck-hash-value"
+      ])
+    );
+  });
+
+  it("accepts current join-info, pending-lobby, and open-lobby metadata surfaces", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "invite-lobby-redaction-harness" });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "invite-lobby-redaction-harness",
+      mode: "human_vs_human",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
+      }
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+
+    assertInviteLobbyPayloadRedacted(created.lobby, "createMatch pending lobby");
+    assertInviteLobbyPayloadRedacted(await service.getJoinInfo(created.matchId), "join-info without token");
+    assertInviteLobbyPayloadRedacted(await service.getJoinInfo(created.matchId, joinToken), "join-info with token");
+    assertInviteLobbyPayloadRedacted(await service.listOpenMatches(), "V2.3a open lobby list");
+
+    const missingDecks = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Joiner" });
+    expect("error" in missingDecks).toBe(true);
+    assertInviteLobbyPayloadRedacted(missingDecks, "join error payload");
+
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Joiner",
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+    });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    assertInviteLobbyPayloadRedacted(joined.lobby, "joinMatch start lobby");
+
+    const hostLobby = await service.bootstrap(created.matchId, created.hostSide, created.hostSessionToken, { allowLobby: true });
+    expect("error" in hostLobby).toBe(false);
+    assertInviteLobbyPayloadRedacted(hostLobby, "host bootstrap lobby payload");
   });
 });
 
