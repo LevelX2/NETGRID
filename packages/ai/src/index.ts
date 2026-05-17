@@ -40,6 +40,7 @@ export {
   evaluateCorpScoringProgress,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
+  evaluateRemoteRezReserve,
   evaluateRemoteScoreHorizon,
   evaluateRunnerContestCapacity,
   evaluateScoringWindow,

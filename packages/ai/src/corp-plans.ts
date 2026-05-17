@@ -269,7 +269,7 @@ export function generateCorpPlanCandidates(input: AiDecisionInput, context: Corp
     buildCandidate(
       input,
       "build_scoring_remote",
-      actions.filter((action) => action.type === "install_card" && action.payload?.placement !== "ice" && isRemoteServerId(action.payload?.serverId) && (!rolesForAction(input, action).some(isAgendaRole) || isSafeScoringRootAction(input, action, context)))
+      actions.filter((action) => action.type === "install_card" && isRemoteServerId(action.payload?.serverId) && ((action.payload?.placement === "ice" && isRemoteScoringIceInstall(input, action)) || (action.payload?.placement !== "ice" && (!rolesForAction(input, action).some(isAgendaRole) || isSafeScoringRootAction(input, action, context)))))
     ),
     buildCandidate(input, "protect_hq", actions.filter((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "hq")),
     buildCandidate(input, "protect_rnd", actions.filter((action) => action.type === "install_card" && action.payload?.placement === "ice" && action.payload?.serverId === "rd")),
@@ -298,6 +298,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const scoringProgress = evaluateCorpScoringProgress(input, candidate, context);
   const runnerContest = evaluateRemoteScoringContest(input, candidate, context);
   const scoringHorizon = evaluateRemoteScoreHorizon(input, candidate, context);
+  const remoteRezReserve = evaluateRemoteRezReserve(input, candidate, context);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
@@ -312,6 +313,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     scoringProgress.score +
     runnerContest.score +
     scoringHorizon.score +
+    remoteRezReserve.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(input, candidate, profile.riskTolerance, context) -
@@ -331,6 +333,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     ...scoringWindow.evidence,
     ...scoringProgress.evidence,
     ...remoteRootExposureEvidence(input, candidate, context),
+    ...remoteRezReserve.evidence,
     ...remoteIntent.evidence,
     `belief_version:${beliefState.version}`,
     ...(beliefState.corpOpponentModel ? [`runner_contest_probability:${round(beliefState.corpOpponentModel.remoteContestProbability)}`] : [])
@@ -339,7 +342,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -533,6 +536,127 @@ export function evaluateRemoteScoreHorizon(input: AiDecisionInput, candidate: Co
     reasons: best.reasons,
     evidence: best.evidence
   };
+}
+
+export function evaluateRemoteRezReserve(input: AiDecisionInput, candidate: CorpPlanCandidate, contextOrBelief: BeliefState | CorpEvaluationContext = reconstructBeliefState(input)): CorpPlanEvaluatorResult {
+  const context = corpEvaluationContext(input, contextOrBelief);
+  const features = extractCorpPlanFeatures(input);
+  if (candidate.kind === "recover_economy") {
+    const reserve = bestRemoteRezReserveNeed(input, context);
+    if (!reserve) return { score: 0, reasons: [], evidence: ["remote_rez_reserve:none"] };
+    const bestCreditsAfterEconomy = Math.max(features.credits, ...actionsForCandidate(input, candidate).map((action) => creditsAfterCorpPlanAction(input, action)));
+    const hasScoringLine = hasRemoteScoringLegalAction(input, context);
+    if (features.credits < reserve.reserveTarget) {
+      const closesReserveGap = bestCreditsAfterEconomy >= reserve.reserveTarget;
+      return {
+        score: closesReserveGap ? 125 : 70,
+        reasons: ["remote_rez_reserve_building"],
+        evidence: [`remote_rez_reserve_server:${reserve.serverId}`, `remote_rez_reserve_target:${reserve.reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`, `remote_rez_reserve_after_action:${bestCreditsAfterEconomy}`, `remote_rez_reserve_gap:${Math.max(0, reserve.reserveTarget - features.credits)}`]
+      };
+    }
+    if (hasScoringLine) {
+      return {
+        score: -90,
+        reasons: ["remote_rez_reserve_ready_for_score_line"],
+        evidence: [`remote_rez_reserve_server:${reserve.serverId}`, `remote_rez_reserve_target:${reserve.reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`, "remote_rez_reserve_scoring_line:true"]
+      };
+    }
+    return {
+      score: 0,
+      reasons: ["remote_rez_reserve_stable"],
+      evidence: [`remote_rez_reserve_server:${reserve.serverId}`, `remote_rez_reserve_target:${reserve.reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`]
+    };
+  }
+
+  if (candidate.kind !== "score_next_turn" && candidate.kind !== "build_scoring_remote") {
+    return { score: 0, reasons: [], evidence: [] };
+  }
+
+  const assessments = actionsForCandidate(input, candidate)
+    .map((action) => remoteRezReserveForAction(input, action, context))
+    .filter((assessment): assessment is CorpPlanEvaluatorResult => Boolean(assessment))
+    .sort((left, right) => right.score - left.score || left.evidence.join("|").localeCompare(right.evidence.join("|")));
+  const best = assessments[0];
+  if (!best) return { score: 0, reasons: [], evidence: ["remote_rez_reserve:none"] };
+  return best;
+}
+
+function remoteRezReserveForAction(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): CorpPlanEvaluatorResult | undefined {
+  if (action.type !== "install_card" && action.type !== "advance_card" && action.type !== "score_agenda") return undefined;
+  const features = extractCorpPlanFeatures(input);
+  const serverId = remoteServerIdForAction(input, action);
+  if (!serverId?.startsWith("remote_") && action.payload?.serverId !== "new_remote") return undefined;
+
+  if (action.type === "install_card" && action.payload?.placement === "ice") {
+    const reserveTarget = Math.max(0, rezCostForActionSource(input, action));
+    const ready = features.credits >= reserveTarget;
+    return {
+      score: ready ? 135 : -60,
+      reasons: [ready ? "remote_ice_rez_reserve_ready" : "remote_ice_rez_reserve_short"],
+      evidence: [`remote_rez_reserve_server:${String(action.payload?.serverId ?? "unknown")}`, `remote_rez_reserve_target:${reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`, "remote_rez_reserve_action:install_ice"]
+    };
+  }
+
+  const reserve = serverId?.startsWith("remote_") ? remoteRezReserveNeedForServer(input, serverId, context) : undefined;
+  if (!reserve) return undefined;
+  const creditsAfterAction = creditsAfterCorpPlanAction(input, action);
+  if (action.type === "score_agenda") {
+    return {
+      score: 80,
+      reasons: ["remote_rez_reserve_score_now"],
+      evidence: [`remote_rez_reserve_server:${reserve.serverId}`, `remote_rez_reserve_target:${reserve.reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`, "remote_rez_reserve_action:score_agenda"]
+    };
+  }
+  if (reserve.reserveTarget > 0 && creditsAfterAction < reserve.reserveTarget) {
+    return {
+      score: -170,
+      reasons: ["remote_rez_reserve_missing_before_score_line"],
+      evidence: [`remote_rez_reserve_server:${reserve.serverId}`, `remote_rez_reserve_target:${reserve.reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`, `remote_rez_reserve_after_action:${creditsAfterAction}`, "remote_rez_reserve_action:score_setup"]
+    };
+  }
+  return {
+    score: reserve.reserveTarget > 0 ? 70 : 40,
+    reasons: ["remote_rez_reserve_ready_for_score_line"],
+    evidence: [`remote_rez_reserve_server:${reserve.serverId}`, `remote_rez_reserve_target:${reserve.reserveTarget}`, `remote_rez_reserve_credits:${features.credits}`, `remote_rez_reserve_after_action:${creditsAfterAction}`, "remote_rez_reserve_action:score_setup"]
+  };
+}
+
+function bestRemoteRezReserveNeed(input: AiDecisionInput, context: CorpEvaluationContext): { serverId: string; reserveTarget: number } | undefined {
+  const serverIds = sortedUnique(input.legalActions.map((action) => remoteServerIdForAction(input, action)).filter((serverId): serverId is string => Boolean(serverId?.startsWith("remote_"))));
+  const needs = serverIds
+    .map((serverId) => remoteRezReserveNeedForServer(input, serverId, context))
+    .filter((need): need is { serverId: string; reserveTarget: number } => Boolean(need))
+    .sort((left, right) => right.reserveTarget - left.reserveTarget || left.serverId.localeCompare(right.serverId));
+  return needs[0];
+}
+
+function remoteRezReserveNeedForServer(input: AiDecisionInput, serverId: string, context: CorpEvaluationContext): { serverId: string; reserveTarget: number } | undefined {
+  const server = input.playerView.servers.find((candidate) => candidate.id === serverId);
+  if (!server || !serverId.startsWith("remote_")) return undefined;
+  const contest = evaluateRunnerContestCapacity(input, serverId, context);
+  const unrezzedRezCosts = server.ice
+    .filter((ice) => ice.rezzed !== true)
+    .map((ice) => rezCostForVisibleCard(ice))
+    .filter((cost) => cost > 0)
+    .sort((left, right) => left - right);
+  const cheapestRelevantRez = unrezzedRezCosts[0] ?? 0;
+  const contestBuffer = contest.capacity === "high" && cheapestRelevantRez > 0 ? 1 : 0;
+  if (cheapestRelevantRez > 0) return { serverId, reserveTarget: cheapestRelevantRez + contestBuffer };
+  if (server.ice.some((ice) => ice.rezzed === true)) return { serverId, reserveTarget: 0 };
+  return undefined;
+}
+
+function hasRemoteScoringLegalAction(input: AiDecisionInput, context: CorpEvaluationContext): boolean {
+  return input.legalActions.some((action) => {
+    if (action.type === "score_agenda" || action.type === "advance_card") return Boolean(remoteServerIdForAction(input, action)?.startsWith("remote_"));
+    return action.type === "install_card" && action.payload?.placement !== "ice" && rolesForAction(input, action).some(isAgendaRole) && isSafeScoringRootAction(input, action, context);
+  });
+}
+
+function creditsAfterCorpPlanAction(input: AiDecisionInput, action: LegalAction): number {
+  const credits = input.playerView.own.credits;
+  if (action.type === "gain_credit") return credits + 1;
+  return credits;
 }
 
 function remoteScoreHorizonForAction(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): RemoteScoreHorizon | undefined {
@@ -743,6 +867,7 @@ function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: Lega
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
   if (kind === "recover_economy" && action.type === "draw_card" && shouldCorpDrawForScoring(input)) return 78;
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
+  if (kind === "build_scoring_remote" && action.type === "install_card" && action.payload?.placement === "ice" && isRemoteServerId(action.payload?.serverId)) return 82;
   if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action, context) + boundedScoreHorizonActionBonus(input, action, context);
   if ((kind === "build_scoring_remote" || kind === "bait_runner") && action.type === "install_card" && action.payload?.placement !== "ice") return 75 + boundedRemotePriorityBonus(input, action, context) + boundedScoreHorizonActionBonus(input, action, context);
   if (action.type === "draw_card") return 45;
@@ -1021,6 +1146,22 @@ function isAgendaRole(role: string): boolean {
 
 function isAgendaDefinition(definitionId: string): boolean {
   return DEMO_CARDS_BY_ID[definitionId]?.type === "agenda" || RUNTIME_CARDS[definitionId]?.type === "agenda";
+}
+
+function isRemoteScoringIceInstall(input: AiDecisionInput, action: LegalAction): boolean {
+  if (action.type !== "install_card" || action.payload?.placement !== "ice" || !isRemoteServerId(action.payload?.serverId)) return false;
+  const card = findVisibleCard(input, action.source);
+  if (!card?.definitionId) return false;
+  return DEMO_CARDS_BY_ID[card.definitionId]?.type === "ice" || RUNTIME_CARDS[card.definitionId]?.type === "ice";
+}
+
+function rezCostForActionSource(input: AiDecisionInput, action: LegalAction): number {
+  return rezCostForVisibleCard(findVisibleCard(input, action.source));
+}
+
+function rezCostForVisibleCard(card: VisibleCard | undefined): number {
+  if (!card?.definitionId) return 0;
+  return card.rezCost ?? RUNTIME_CARDS[card.definitionId]?.numeric.rezCost ?? DEMO_CARDS_BY_ID[card.definitionId]?.rezCost ?? 0;
 }
 
 function explanationForPlan(kind: CorpPlanDebug["planKind"]): string {

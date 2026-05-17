@@ -47,6 +47,7 @@ import {
   evaluateEconomyReserve,
   evaluateIceRez,
   evaluateRemoteIntentMemory,
+  evaluateRemoteRezReserve,
   evaluateRemoteScoreHorizon,
   evaluateRunnerContestCapacity,
   evaluateScoringWindow,
@@ -2567,6 +2568,169 @@ describe("V1.4.0 plan-based Corp AI", () => {
       "score_horizon_advances_remaining_after_action:0",
     );
     expect(horizon.evidence).toContain("score_horizon_contest_capacity:low");
+    expect(decision.debug.planKind).toBe("score_next_turn");
+    expect(decision.selectedActionId).toBe(advance.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("installs affordable remote ICE before exposing a new naked agenda", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-remote-ice-before-naked-agenda",
+      (state) => {
+        state.corp.credits = 4;
+        ensureRemoteServer(state, "remote_1");
+        moveCorpCardToHq(state, "simple_agenda");
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const remoteIceInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        ["remote_1", "new_remote"].includes(
+          String(action.payload?.serverId ?? ""),
+        ) &&
+        sourceDefinitionFromInput(input, action) === "simple_barrier_ice",
+    );
+    const nakedAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "new_remote" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(remoteIceInstall).toBeDefined();
+    expect(nakedAgendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteIceInstall || !nakedAgendaInstall || !gain)
+      throw new Error("Missing remote ICE reserve fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [remoteIceInstall, nakedAgendaInstall, gain],
+    };
+    const remoteCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "build_scoring_remote",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(remoteCandidate?.legalActionIds).toContain(
+      remoteIceInstall.actionId,
+    );
+    expect(decision.debug.planKind).toBe("build_scoring_remote");
+    expect(decision.selectedActionId).toBe(remoteIceInstall.actionId);
+    expect(decision.score.reasons).toContain("remote_ice_rez_reserve_ready");
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("builds economy before agenda installation when remote ICE rez reserve is missing", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-remote-rez-reserve-economy",
+      (state) => {
+        state.corp.credits = 2;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        moveCorpCardToHq(state, "simple_agenda");
+      },
+    );
+    const protectedAgendaInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement !== "ice" &&
+        action.payload?.serverId === "remote_1" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(protectedAgendaInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!protectedAgendaInstall || !gain)
+      throw new Error("Missing remote rez reserve economy fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [protectedAgendaInstall, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!scoreCandidate || !economyCandidate)
+      throw new Error("Missing remote rez reserve candidates");
+    expect(
+      evaluateRemoteRezReserve(scopedInput, scoreCandidate).reasons,
+    ).toContain("remote_rez_reserve_missing_before_score_line");
+    expect(
+      evaluateRemoteRezReserve(scopedInput, economyCandidate).reasons,
+    ).toContain("remote_rez_reserve_building");
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+    expect(JSON.stringify(decision.score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("uses sufficient remote rez reserve for the score line instead of endless economy", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-remote-rez-reserve-score-line",
+      (state) => {
+        state.corp.credits = 5;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing remote rez reserve score-line fixture actions");
+
+    const scopedInput = { ...input, legalActions: [advance, gain] };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const economyCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    expect(economyCandidate).toBeDefined();
+    if (!scoreCandidate || !economyCandidate)
+      throw new Error("Missing remote rez reserve score-line candidates");
+    expect(
+      evaluateRemoteRezReserve(scopedInput, scoreCandidate).reasons,
+    ).toContain("remote_rez_reserve_ready_for_score_line");
+    expect(
+      evaluateRemoteRezReserve(scopedInput, economyCandidate).score,
+    ).toBeLessThan(0);
     expect(decision.debug.planKind).toBe("score_next_turn");
     expect(decision.selectedActionId).toBe(advance.actionId);
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
