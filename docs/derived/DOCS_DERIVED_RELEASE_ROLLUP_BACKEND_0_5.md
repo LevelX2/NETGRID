@@ -70,6 +70,8 @@ Kurzstand:
 
 ## Linkbruchrisiken vor Moves
 
+Die konkrete Move-/Stub-Entscheidung liegt in `docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md`: Stand 2026-05-17 bleibt `decision-no-move`; die bestehenden `docs/derived/BACKEND_0_5_*`-Pfade bleiben vorerst kanonisch.
+
 Aktuelle direkte Referenzen auf `BACKEND_0_5_*` liegen mindestens in:
 
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
