@@ -673,6 +673,14 @@ export type CardInstance = {
   counters?: Partial<Record<CounterType, number>>;
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
+  proteusVariableIceState?: {
+    family: "x_strength" | "paid_etr_subroutines";
+    additionalCostPaid: number;
+    value: number;
+    cap?: number;
+    strength?: number;
+    subroutineCount?: number;
+  };
 };
 
 export type CorpServer = {
@@ -8712,6 +8720,57 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
   },
 ];
 
+const PROTEUS_VARIABLE_ICE_HARNESS_CARDS: CardDefinition[] = [
+  {
+    id: "onr_proteus_020_digiconda",
+    title: "Digiconda",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "ap", "sword"],
+    implementationStatus: "playable_mvp",
+    rezCost: 6,
+    strength: 0,
+    rulesText:
+      "[Subroutine] Do 2 net damage.\n[Subroutine] End the run.\nPay X above the rez cost when you rez Digiconda. X is Digiconda's strength and cannot be greater than 6.",
+    subroutines: [
+      {
+        id: "onr_proteus_020_digiconda_net_damage",
+        type: "do_damage",
+        damageType: "net",
+        amount: 2,
+      },
+      { id: "onr_proteus_020_digiconda_etr", type: "end_the_run" },
+    ],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez_harness",
+      "proteus_planning_harness",
+    ],
+  },
+  {
+    id: "onr_proteus_022_food-fight",
+    title: "Food Fight",
+    side: "corp",
+    type: "ice",
+    subtypes: ["sentry", "deckrash"],
+    implementationStatus: "playable_mvp",
+    rezCost: 4,
+    strength: 3,
+    rulesText:
+      "Food Fight has one [Subroutine] End the run for every 2 credits you pay above the rez cost when you rez it.",
+    subroutines: [],
+    mechanics: [
+      "install_ice",
+      "rez_ice",
+      "encounter_ice",
+      "variable_rez_harness",
+      "proteus_planning_harness",
+    ],
+  },
+];
+
 export const DEMO_CARDS: CardDefinition[] = [
   {
     id: "runner_identity_001",
@@ -9724,6 +9783,7 @@ export const DEMO_CARDS: CardDefinition[] = [
   },
   ...ONR_V1_LIMITED_PLAYABLE_CARDS,
   ...PROTEUS_VISIBLE_BASELINE_CARDS,
+  ...PROTEUS_VARIABLE_ICE_HARNESS_CARDS,
 ];
 
 export const DEMO_CARDS_BY_ID: Record<CardDefinitionId, CardDefinition> =
