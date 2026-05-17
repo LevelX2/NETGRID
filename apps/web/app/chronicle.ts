@@ -1062,8 +1062,8 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     title: ensurePeriod(title),
     ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
-    ...(sourceDefinitionId && visibility !== "redacted" ? { cardDefinitionId: sourceDefinitionId } : {}),
-    ...(sourceTitle && visibility !== "redacted" ? { cardTitle: sourceTitle } : {}),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    ...(sourceTitle ? { cardTitle: sourceTitle } : {}),
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
