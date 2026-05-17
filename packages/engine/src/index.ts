@@ -209,6 +209,12 @@ import {
 import { hashStateSnapshot } from "./state-hash";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
+type VisibleCounterPayload = {
+  counterType: CounterType;
+  addedCounterAmount?: number;
+  removedCounterAmount?: number;
+  remainingCounters: number;
+};
 
 export {
   DEMO_CARDS,
@@ -6968,13 +6974,17 @@ function performAction(
         if (!Number.isInteger(addAmount) || addAmount !== 6)
           throw new Error("Spinn Public Relations legt genau 6 Bits aus der Bank auf die Karte.");
         const before = cardCounter(state, sourceCardId, "bit");
-        addCardCounter(state, sourceCardId, "bit", addAmount);
+        const counterPayload = addVisibleCardCounter(
+          state,
+          sourceCardId,
+          "bit",
+          addAmount,
+        );
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           spinnPublicRelationsPoolBefore: before,
-          spinnPublicRelationsPoolAfter: cardCounter(state, sourceCardId, "bit"),
-          addedCounterAmount: addAmount,
-          remainingCounters: cardCounter(state, sourceCardId, "bit"),
+          spinnPublicRelationsPoolAfter: counterPayload.remainingCounters,
+          ...counterPayload,
           gainedCredits: 0,
           corpCreditsAfter: state.corp.credits,
         };
@@ -15860,7 +15870,7 @@ function resolveScoredAgendaCounterCreditAction(
     sourceCardId,
     profile,
   );
-  spendCardCounter(
+  const counterPayload = spendVisibleCardCounter(
     state,
     sourceCardId,
     profile.counterType,
@@ -15869,13 +15879,10 @@ function resolveScoredAgendaCounterCreditAction(
   credits(state, "corp", profile.creditGain);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
+    ...counterPayload,
     spentPowerCounters: profile.removeCounterAmount,
     gainedCredits: profile.creditGain,
-    remainingPowerCounters: cardCounter(
-      state,
-      sourceCardId,
-      profile.counterType,
-    ),
+    remainingPowerCounters: counterPayload.remainingCounters,
   };
   return true;
 }
@@ -16002,16 +16009,19 @@ function resolveInvestmentFirmCreditChoice(
   const sourceCardId = String(selectedOption?.value ?? "");
   if (!rezzedInvestmentFirmIds(state).includes(sourceCardId))
     throw new Error("Die gewaehlte Investment Firm ist nicht mehr legal.");
-  addCardCounter(state, sourceCardId, "recurring_credit", 2);
+  const counterPayload = addVisibleCardCounter(
+    state,
+    sourceCardId,
+    "recurring_credit",
+    2,
+  );
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     choiceVisibility: "public",
     cardDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
     sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
-    counterType: "recurring_credit",
-    addedCounterAmount: 2,
-    remainingCounters: cardCounter(state, sourceCardId, "recurring_credit"),
+    ...counterPayload,
     gainCreditsAmount: 0,
     gainedCredits: 0,
     corpCreditsAfter: state.corp.credits,
@@ -22295,6 +22305,34 @@ function spendCardCounter(
   const current = cardCounter(state, cardId, counterType);
   if (current < amount) throw new Error("Nicht genug Counter vorhanden.");
   setCardCounter(state, cardId, counterType, current - amount);
+}
+
+function addVisibleCardCounter(
+  state: GameState,
+  cardId: CardInstanceId,
+  counterType: CounterType,
+  amount: number,
+): VisibleCounterPayload {
+  addCardCounter(state, cardId, counterType, amount);
+  return {
+    counterType,
+    addedCounterAmount: amount,
+    remainingCounters: cardCounter(state, cardId, counterType),
+  };
+}
+
+function spendVisibleCardCounter(
+  state: GameState,
+  cardId: CardInstanceId,
+  counterType: CounterType,
+  amount: number,
+): VisibleCounterPayload {
+  spendCardCounter(state, cardId, counterType, amount);
+  return {
+    counterType,
+    removedCounterAmount: amount,
+    remainingCounters: cardCounter(state, cardId, counterType),
+  };
 }
 
 function totalCounters(state: GameState, counterType: CounterType): number {

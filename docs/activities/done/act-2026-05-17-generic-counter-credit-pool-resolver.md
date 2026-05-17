@@ -1,20 +1,24 @@
 ---
 activityId: act-2026-05-17-generic-counter-credit-pool-resolver
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-17
+completedAt: 2026-05-17
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-17-card-effect-generic-resolver-analysis
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine test -- -t "Investment Firm|Spinn Public Relations|Coup agendas|Detroit Police Contract"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Generische Counter-/Credit-Pool-Helfer schneiden
@@ -52,4 +56,4 @@ Wiederkehrende Muster für Counter auf Karten, gespeicherte Credits, recurring C
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `addVisibleCardCounter` und `spendVisibleCardCounter` kapseln jetzt Counteränderung plus PublicPayload-Bausteine (`counterType`, add/remove amount, `remainingCounters`). Investment Firm und Spinn Public Relations nutzen den gemeinsamen Add-Helfer, scored Agenda-Counter-Credit-Aktionen nutzen den gemeinsamen Spend-Helfer. Sichtbare Counter bleiben in PlayerView/PublicPayload erhalten; Replay-/StateHash-Tests der betroffenen Pfade bleiben grün.
