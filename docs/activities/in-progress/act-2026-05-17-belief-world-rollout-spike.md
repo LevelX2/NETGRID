@@ -1,15 +1,16 @@
 ---
 activityId: act-2026-05-17-belief-world-rollout-spike
-status: inbox
+status: in_progress
 kind: architecture
 area: ai
 priority: low
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-17
-startedAt:
+startedAt: 2026-05-17
 completedAt:
-branch:
+branch: codex/activity-worker-2
+parallelWorker: worker-2
 releaseTarget:
 blockedBy:
   - act-2026-05-17-ai-belief-reconnect-undo-contract
