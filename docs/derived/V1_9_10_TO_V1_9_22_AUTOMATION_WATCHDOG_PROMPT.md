@@ -1,10 +1,12 @@
 # V1.9.10 bis V1.9.22 Automation Watchdog Prompt
 
-Status: aktiver Watchdog-Prompt fuer stündliche Kontrollautomation
+Status: historischer Watchdog-Prompt, nicht mehr aktive operative Vorgabe
 Stand: 2026-05-12
-Watchdog-Automation: `netgrid-v1-9-originalset-watchdog`
-Beaufsichtigte Automation: `netgrid-v1-9-originalset-completion`
+Watchdog-Automation: historisch `netgrid-v1-9-originalset-watchdog`, laut State gelöscht / nicht aktiv
+Beaufsichtigte Automation: historisch `netgrid-v1-9-originalset-completion`
 Arbeitsbranch: `codex/v1-9-originalset-completion`
+
+Historischer Hinweis 2026-05-17: Der Watchdog ist laut `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md` gelöscht beziehungsweise nicht aktiv. Dieser Prompt bleibt nur als Evidence für damalige Watchdog-Regeln erhalten.
 
 ## Auftrag
 

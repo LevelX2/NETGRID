@@ -1,8 +1,10 @@
 # V1.9.10 bis V1.9.22 Automation Controller Plan
 
-Status: Planungs- und Machbarkeitsartefakt, fuer Expeditionsmodus aktualisiert
+Status: historisches Planungs- und Machbarkeitsartefakt, nicht mehr aktive operative Vorgabe
 Stand: 2026-05-12
 Primärer Agent: release-planning-agent
+
+Historischer Hinweis 2026-05-17: Die zugehörige V1.9.10-bis-V1.9.22-Automation steht laut `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md` auf `Status: complete`. Dieses Artefakt bleibt als Evidence für Controller-Design, Lock-/Worktree-Entscheidungen und damalige Gates erhalten; neue Automationsläufe dürfen daraus nicht ohne neue Freigabe abgeleitet werden.
 
 ## Ziel
 
