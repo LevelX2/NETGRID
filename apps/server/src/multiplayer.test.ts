@@ -7,6 +7,7 @@ import { WebSocket } from "ws";
 import snapshotsData from "../../../data/decks/deck-snapshots-0.6.json";
 import snapshotsData08 from "../../../data/decks/deck-snapshots-0.8.json";
 import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
+import { beliefStateInvariantSignature, buildAiDecisionInputDto, reconstructBeliefState } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
 import { applyAction, applyEffectCommands, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
@@ -3738,6 +3739,57 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(playerViewPayload).not.toHaveProperty("redactedKind");
   });
 
+  it("preserves side-safe central-access belief across reconnect without storage leakage", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "belief-reconnect-rd" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "belief-reconnect-rd" });
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing record");
+    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "belief-reconnect-rd-engine" }));
+    putCorpCardOnTopOfRdForTest(gameState, "simple_economy_operation");
+    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "access_card");
+    record.gameState = gameState;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.match.matchVersion += 1;
+    await storage.save(record);
+
+    const storedWithHiddenDecoy = await storage.load(created.matchId);
+    expect(JSON.stringify(storedWithHiddenDecoy?.gameState)).toContain("simple_economy_operation");
+
+    const livePayload = await service.bootstrap(created.matchId, "runner", joined.sessionToken);
+    expect("error" in livePayload).toBe(false);
+    if ("error" in livePayload) throw new Error(livePayload.error.message);
+    const reconnected = await service.reconnectMatch(created.matchId, {
+      side: "runner",
+      reconnectToken: joined.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+
+    const liveBelief = reconstructBeliefState(sidePayloadBeliefInput(livePayload, "runner", "live"));
+    const reconnectBelief = reconstructBeliefState(sidePayloadBeliefInput(reconnected, "runner", "reconnect"));
+    const reconnectSerialized = JSON.stringify(reconnected);
+    const beliefSerialized = JSON.stringify(reconnectBelief);
+
+    expect(beliefStateInvariantSignature(reconnectBelief)).toBe(beliefStateInvariantSignature(liveBelief));
+    expect(reconnectBelief.knownPositionMemory?.[0]).toMatchObject({
+      zone: "rd",
+      positionKey: "top",
+      definitionId: "simple_agenda"
+    });
+    expect(reconnectSerialized).not.toMatch(/privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i);
+    expect(beliefSerialized).not.toMatch(/privatePayload|cardInstances|privateDeckSnapshots|simple_economy_operation/i);
+  });
+
   it("rejects advance_ai when the session or version is wrong", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-auth" });
     const created = await service.createMatch({
@@ -4611,6 +4663,24 @@ async function bootstrap(service: MultiplayerService, matchId: string, session: 
   expect("error" in payload).toBe(false);
   if ("error" in payload) throw new Error(payload.error.message);
   return payload;
+}
+
+function sidePayloadBeliefInput(
+  payload: Pick<SidePayload, "playerView" | "eventTail" | "legalActions">,
+  side: Side,
+  label: string
+) {
+  return buildAiDecisionInputDto({
+    side,
+    playerView: payload.playerView,
+    eventTail: payload.eventTail,
+    legalActions: payload.legalActions,
+    difficulty: "normal",
+    seed: `server-belief:${label}`,
+    decisionId: `server-belief:${label}:${side}:${payload.playerView.stateVersion}`,
+    actionNumber: payload.playerView.stateVersion,
+    profileId: `${side}-ai-v1.4.2-normal`
+  });
 }
 
 function toRunnerTurnEngine(state: GameState): GameState {

@@ -4073,49 +4073,246 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
-  it("keeps hidden-state invariance and deterministic signature for equal projections", () => {
+  it("keeps Runner and Corp reconnect belief signatures stable for equal side-safe projections", () => {
     const stateA = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v142-invariance" }),
     );
     const stateB = structuredClone(stateA);
-    const hiddenId = stateA.corp.rd[0];
-    expect(hiddenId).toBeDefined();
-    if (!hiddenId) throw new Error("Missing hidden R&D card");
-    stateA.cardInstances[hiddenId] = {
-      ...stateA.cardInstances[hiddenId]!,
+    const hiddenCorpRdId = stateA.corp.rd[0];
+    const hiddenRunnerStackId = stateA.runner.stack[0];
+    expect(hiddenCorpRdId).toBeDefined();
+    expect(hiddenRunnerStackId).toBeDefined();
+    if (!hiddenCorpRdId) throw new Error("Missing hidden R&D card");
+    if (!hiddenRunnerStackId) throw new Error("Missing hidden Stack card");
+    stateA.cardInstances[hiddenCorpRdId] = {
+      ...stateA.cardInstances[hiddenCorpRdId]!,
       definitionId: "simple_agenda",
       faceup: false,
       rezzed: false,
     };
-    stateB.cardInstances[hiddenId] = {
-      ...stateB.cardInstances[hiddenId]!,
+    stateB.cardInstances[hiddenCorpRdId] = {
+      ...stateB.cardInstances[hiddenCorpRdId]!,
       definitionId: "simple_economy_asset",
       faceup: false,
       rezzed: false,
     };
+    stateA.cardInstances[hiddenRunnerStackId] = {
+      ...stateA.cardInstances[hiddenRunnerStackId]!,
+      definitionId: "simple_fracter",
+      faceup: false,
+      rezzed: false,
+    };
+    stateB.cardInstances[hiddenRunnerStackId] = {
+      ...stateB.cardInstances[hiddenRunnerStackId]!,
+      definitionId: "simple_decoder",
+      faceup: false,
+      rezzed: false,
+    };
 
-    const beliefA = reconstructBeliefState(
-      buildAiDecisionInput(stateA, "runner", {
-        difficulty: "normal",
-        profileId: "runner-ai-v1.4.2-normal",
-      }),
-    );
-    const beliefB = reconstructBeliefState(
-      buildAiDecisionInput(stateB, "runner", {
-        difficulty: "normal",
-        profileId: "runner-ai-v1.4.2-normal",
-      }),
-    );
+    const runnerInputA = buildAiDecisionInput(stateA, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const runnerInputB = buildAiDecisionInput(stateB, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const corpInputA = buildAiDecisionInput(stateA, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.2-normal",
+    });
+    const corpInputB = buildAiDecisionInput(stateB, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.2-normal",
+    });
+    const runnerBeliefA = reconstructBeliefState({
+      ...runnerInputA,
+      eventTail: runnerInputA.playerView.publicEvents,
+    });
+    const runnerBeliefB = reconstructBeliefState({
+      ...runnerInputB,
+      eventTail: runnerInputB.playerView.publicEvents,
+    });
+    const corpBeliefA = reconstructBeliefState({
+      ...corpInputA,
+      eventTail: corpInputA.playerView.publicEvents,
+    });
+    const corpBeliefB = reconstructBeliefState({
+      ...corpInputB,
+      eventTail: corpInputB.playerView.publicEvents,
+    });
 
     expect(JSON.stringify(getPlayerView(stateA, "runner"))).toBe(
       JSON.stringify(getPlayerView(stateB, "runner")),
     );
-    expect(beliefStateInvariantSignature(beliefA)).toBe(
-      beliefStateInvariantSignature(beliefB),
+    expect(JSON.stringify(getPlayerView(stateA, "corp"))).toBe(
+      JSON.stringify(getPlayerView(stateB, "corp")),
     );
-    expect(JSON.stringify(beliefA)).not.toMatch(
+    expect(beliefStateInvariantSignature(runnerBeliefA)).toBe(
+      beliefStateInvariantSignature(runnerBeliefB),
+    );
+    expect(beliefStateInvariantSignature(corpBeliefA)).toBe(
+      beliefStateInvariantSignature(corpBeliefB),
+    );
+    expect(JSON.stringify(runnerBeliefA)).not.toMatch(
       /simple_agenda|simple_economy_asset|cardInstances|privatePayload/,
     );
+    expect(JSON.stringify(corpBeliefA)).not.toMatch(
+      /simple_fracter|simple_decoder|cardInstances|privatePayload/,
+    );
+  });
+
+  it("preserves central access memory through reconnect history and removes rolled-back HQ facts", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-v142-reconnect-central-memory" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const rdAccess = syntheticCentralAccessEvent(
+      "ai-v142-reconnect-rd-access",
+      100,
+      "rd",
+      "simple_agenda",
+    );
+    const hqAccess = syntheticCentralAccessEvent(
+      "ai-v142-reconnect-hq-access",
+      101,
+      "hq",
+      "simple_economy_operation",
+    );
+    const archivesAccess = syntheticCentralAccessEvent(
+      "ai-v142-reconnect-archives-access",
+      102,
+      "archives",
+      "simple_economy_asset",
+    );
+    const liveInput = {
+      ...baseInput,
+      eventTail: [...baseInput.eventTail, rdAccess, hqAccess, archivesAccess],
+    };
+    const reconnectInput = {
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        publicEvents: [
+          ...baseInput.playerView.publicEvents,
+          rdAccess,
+          hqAccess,
+          archivesAccess,
+        ],
+      },
+      eventTail: [archivesAccess, hqAccess, rdAccess],
+    };
+
+    const liveBelief = reconstructBeliefState(liveInput);
+    const reconnectBelief = reconstructBeliefState(reconnectInput);
+    const memoryByZone = new Map(
+      (reconnectBelief.knownPositionMemory ?? []).map((entry) => [
+        entry.zone,
+        entry,
+      ]),
+    );
+    const rolledBackBelief = reconstructBeliefState({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        publicEvents: baseInput.playerView.publicEvents,
+      },
+      eventTail: baseInput.eventTail,
+    });
+
+    expect(beliefStateInvariantSignature(reconnectBelief)).toBe(
+      beliefStateInvariantSignature(liveBelief),
+    );
+    expect(memoryByZone.get("rd")).toMatchObject({
+      positionKey: "top",
+      definitionId: "simple_agenda",
+    });
+    expect(memoryByZone.get("hq")).toMatchObject({
+      positionKey: "accessed",
+      definitionId: "simple_economy_operation",
+    });
+    expect(memoryByZone.get("archives")).toMatchObject({
+      positionKey: "accessed",
+      definitionId: "simple_economy_asset",
+    });
+    expect(
+      reconnectBelief.runnerOpponentModel?.hqHandMemory.knownDefinitions,
+    ).toContain("simple_economy_operation");
+    expect(
+      rolledBackBelief.runnerOpponentModel?.hqHandMemory.knownDefinitions ?? [],
+    ).not.toContain("simple_economy_operation");
+    expect(
+      rolledBackBelief.knownPositionMemory?.some(
+        (entry) =>
+          entry.zone === "hq" &&
+          entry.definitionId === "simple_economy_operation",
+      ) ?? false,
+    ).toBe(false);
+    expect(JSON.stringify(rolledBackBelief)).not.toContain(
+      "revealed_opponent_card:simple_economy_operation",
+    );
+  });
+
+  it("ignores replay private payload decoys while reconstructing access belief", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-v142-private-payload-decoy" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const accessEvent = syntheticCentralAccessEvent(
+      "ai-v142-private-payload-rd-access",
+      100,
+      "rd",
+      "simple_agenda",
+    );
+    const taintedEvent = {
+      ...accessEvent,
+      privatePayload: {
+        cardDefinitionId: "simple_priority_agenda",
+        title: "Hidden Priority Agenda",
+      },
+      cardInstances: {
+        hidden: { definitionId: "simple_priority_agenda" },
+      },
+    } as PublicGameEvent & {
+      privatePayload: Record<string, unknown>;
+      cardInstances: Record<string, unknown>;
+    };
+    const sanitizedInput = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: {
+        ...baseInput.playerView,
+        publicEvents: [...baseInput.playerView.publicEvents, taintedEvent],
+      },
+      eventTail: [...baseInput.eventTail, taintedEvent],
+      legalActions: baseInput.legalActions,
+      difficulty: "normal",
+      seed: baseInput.seed,
+      decisionId: "ai-v142-private-payload-decoy:runner",
+      actionNumber: baseInput.actionNumber,
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const belief = reconstructBeliefState(sanitizedInput);
+    const serializedInput = JSON.stringify(sanitizedInput);
+    const serializedBelief = JSON.stringify(belief);
+
+    expect(assertAiInputIsSideSafe(sanitizedInput)).toBe(true);
+    expect(serializedInput).not.toMatch(
+      /privatePayload|cardInstances|simple_priority_agenda/,
+    );
+    expect(serializedBelief).not.toMatch(
+      /privatePayload|cardInstances|simple_priority_agenda/,
+    );
+    expect(belief.knownPositionMemory?.[0]).toMatchObject({
+      zone: "rd",
+      positionKey: "top",
+      definitionId: "simple_agenda",
+    });
   });
 
   it("tracks R&D access freshness and invalidates after Corp draw, then reconstructs after undo-like rollback", () => {
@@ -5902,6 +6099,31 @@ function withPublicServerEventTail(
     publicPayload: { serverId },
   }));
   return { ...input, eventTail };
+}
+
+function syntheticCentralAccessEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  serverId: "rd" | "hq" | "archives",
+  cardDefinitionId: string,
+): PublicGameEvent {
+  const serverLabel =
+    serverId === "rd" ? "R&D" : serverId === "hq" ? "HQ" : "Archives";
+  return {
+    eventId,
+    type: "access_card",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      serverId,
+      serverLabel,
+      cardDefinitionId,
+    },
+  };
 }
 
 function syntheticHqMemoryEvent(
