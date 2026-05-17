@@ -1757,6 +1757,19 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       explanation = "Der Run kann nach sichtbarer Bewertung fortgesetzt werden.";
       evidence.push("continue_legal");
       break;
+    case "jack_out":
+      if (runnerReachedAccessMovement(input)) {
+        score = 80;
+        reasonCode = "runner.run.jack_out_before_access_low_value";
+        explanation = "Der Runner hat den Server erreicht; Jack-out wuerde den Zugriff ohne sichtbaren Nutzen aufgeben.";
+        evidence.push("jack_out_legal", "access_window_reached");
+      } else {
+        score = 610;
+        reasonCode = "runner.run.jack_out_safe_exit";
+        explanation = "Der Runner kann vor weiterer sichtbarer Run-Gefahr legal auschecken.";
+        evidence.push("jack_out_legal", "pre_access_window");
+      }
+      break;
     case "remove_tag":
       score = features.tags > 0 ? 760 + (profile.riskTolerance ?? 1) * 40 : 300;
       reasonCode = "runner.tag.clear_visible_tag";
@@ -2063,6 +2076,15 @@ function scoreRunTarget(action: LegalAction, features: AiFeatures, profile: Reco
   if (features.rigRoles.size === 0 && difficulty !== "hard") score -= 60;
   score -= staleCentralRepeatPenalty;
   return score;
+}
+
+function runnerReachedAccessMovement(input: AiDecisionInput): boolean {
+  const run = input.playerView.run;
+  return (
+    input.playerView.timingPoint === "run.jack_out_window" &&
+    run?.phase === "movement" &&
+    run.position?.kind === "server"
+  );
 }
 
 function staleKnownRndRepeatRunPenalty(input: AiDecisionInput, action: LegalAction): number {

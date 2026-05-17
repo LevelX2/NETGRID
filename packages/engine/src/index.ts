@@ -2126,6 +2126,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
     ? {
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
+        position: { ...state.run.position },
         ...(state.run.encounteredIceId
           ? {
               encounteredIce: visibleCorpCard(
@@ -7976,13 +7977,23 @@ function performAction(
           (sum, cost) => sum + (cost.credits ?? 0),
           0,
         );
+        const run = state.run;
+        const serverLabel = run ? publicServerLabel(state, run.attackedServerId) : undefined;
+        const reachedServerBeforeAccess = run?.position.kind === "server";
+        const jackOutPayload = {
+          ...(legalAction.payload ?? {}),
+          ...(serverLabel ? { serverLabel } : {}),
+          ...(reachedServerBeforeAccess ? { jackOutBeforeAccess: true } : {}),
+        };
         if (jackOutAdditionalCost > 0) {
           spendRunnerRunCredits(state, jackOutAdditionalCost);
           legalAction.payload = {
-            ...(legalAction.payload ?? {}),
+            ...jackOutPayload,
             jackOutAdditionalCost,
             runnerCreditsAfter: state.runner.credits,
           };
+        } else {
+          legalAction.payload = jackOutPayload;
         }
       }
       finishRun(state, false);

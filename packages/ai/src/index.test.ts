@@ -1975,6 +1975,67 @@ describe("MVP 0.3 Runner AI", () => {
     });
   });
 
+  it("continues into R&D access after passing the last ICE instead of jacking out", () => {
+    let state = krashFilterEncounterState("ai-krash-filter-access-after-pass");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_039_krash",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.run?.phase).toBe("movement");
+    expect(state.run?.position.kind).toBe("server");
+
+    const movementInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const jackOut = movementInput.legalActions.find(
+      (action) => action.type === "jack_out",
+    );
+    const continueRun = movementInput.legalActions.find(
+      (action) => action.type === "continue_run",
+    );
+    const movementDecision = chooseRunnerAction(movementInput);
+    const movementSelected = movementInput.legalActions.find(
+      (action) => action.actionId === movementDecision.actionId,
+    );
+
+    expect(jackOut).toBeDefined();
+    expect(continueRun).toBeDefined();
+    expect(movementSelected?.type).toBe("continue_run");
+    expect(movementDecision.reasonCode).toBe("runner.plan.safe_probe_run");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueRun?.actionId,
+    );
+    expect(state.timingPoint).toBe("access.resolve_card");
+
+    const accessInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const accessDecision = chooseRunnerAction(accessInput);
+    const accessSelected = accessInput.legalActions.find(
+      (action) => action.actionId === accessDecision.actionId,
+    );
+
+    expect(accessInput.legalActions.some((action) => action.type === "jack_out")).toBe(false);
+    expect(accessSelected?.type).toBe("access_card");
+    expect(accessDecision.reasonCode).toBe("runner.access.open_card");
+  });
+
   it("still pumps when strength is the missing requirement for a useful break", () => {
     const state = weakFracterBarrierEncounterState("ai-useful-pump");
     const input = buildAiDecisionInput(state, "runner", {

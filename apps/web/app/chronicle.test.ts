@@ -17,6 +17,7 @@ const ACTION_TYPES = [
   "pump_breaker",
   "break_subroutine",
   "continue_run",
+  "jack_out",
   "access_card",
   "steal_agenda",
   "trash_accessed_card",
@@ -82,6 +83,22 @@ describe("formatChronicleEvent", () => {
     expect(item.title).toBe("Du hast einen Run auf R&D gestartet.");
     expect(item.chips).toContain("Run");
     expect(item.chips).toContain("R&D");
+  });
+
+  it("describes Runner jack-out as a run abort without access", () => {
+    const item = formatChronicleEvent(
+      makeEvent("jack_out", {
+        actor: "runner",
+        label: "Jack-out",
+        serverLabel: "R&D"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Der Runner hat den Run abgebrochen.");
+    expect(item.description).toBe("Auf R&D wurde keine Karte zugegriffen.");
+    expect(item.category).toBe("run");
+    expect(item.chips).toEqual(["Runner", "Run", "Jack-out", "Kein Zugriff", "R&D"]);
   });
 
   it("formats Coup agenda credits as card credits with the remaining amount", () => {

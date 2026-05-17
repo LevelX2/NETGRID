@@ -621,6 +621,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         }
       }
       break;
+    case "jack_out": {
+      const target = serverLabel ?? "dem angegriffenen Server";
+      category = "run";
+      title = phrase(subject, "den Run abgebrochen");
+      description = `Auf ${target} wurde keine Karte zugegriffen.`;
+      chips.push("Run", "Jack-out", "Kein Zugriff", ...(serverLabel ? [serverLabel] : []));
+      break;
+    }
     case "access_card":
       category = "run";
       importance = "important";
@@ -988,7 +996,7 @@ export function chronicleGroupLabel(item: ChronicleItem): string {
 function categoryFor(actionType: string): ChronicleCategory {
   if (["mandatory_draw", "end_turn"].includes(actionType)) return "turn";
   if (["gain_credit"].includes(actionType)) return "economy";
-  if (["start_run", "rez_ice", "decline_rez", "pump_breaker", "break_subroutine", "continue_run", "access_card", "decline_trash"].includes(actionType)) return "run";
+  if (["start_run", "rez_ice", "decline_rez", "pump_breaker", "break_subroutine", "continue_run", "jack_out", "access_card", "decline_trash"].includes(actionType)) return "run";
   if (["score_agenda", "steal_agenda"].includes(actionType)) return "agenda";
   if (["remove_tag"].includes(actionType)) return "danger";
   if (["game_created"].includes(actionType)) return "system";

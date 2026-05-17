@@ -765,16 +765,26 @@ function selectPlanAction(input: AiDecisionInput, candidate: RunnerPlanCandidate
 }
 
 function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDecisionInput): number {
+  const reachedAccessMovement = runnerReachedAccessMovement(input);
   if (kind === "trash_asset" && action.type === "trash_accessed_card") return 100;
   if ((kind === "pressure_rnd" || kind === "pressure_hq" || kind === "contest_remote" || kind === "safe_probe_run") && action.type === "start_run") return 90;
-  if (kind === "safe_probe_run" && action.type === "jack_out") return 88;
-  if (kind === "safe_probe_run" && action.type === "continue_run") return 70;
+  if (kind === "safe_probe_run" && action.type === "continue_run") return reachedAccessMovement ? 92 : 70;
+  if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement ? 30 : 88;
   if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "draw_for_answers" && action.type === "play_event") return 70;
   if (kind === "draw_for_answers" && action.type === "draw_card") return 60;
   return 10;
+}
+
+function runnerReachedAccessMovement(input: AiDecisionInput): boolean {
+  const run = input.playerView.run;
+  return (
+    input.playerView.timingPoint === "run.jack_out_window" &&
+    run?.phase === "movement" &&
+    run.position?.kind === "server"
+  );
 }
 
 function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
