@@ -17,6 +17,7 @@ import {
   validateDeckDefinition,
   validateGameState,
 } from "./index";
+import { collectActiveModifiers } from "./ability-engine/active-modifiers";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import {
   MECHANIC_SMOKE_CARD_IDS,
@@ -1559,6 +1560,25 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     expect(getPlayerView(state, "runner").own.maxHandSize).toBe(
       maxHandSizeBefore + 2,
     );
+    const mramModifierState = structuredClone(state);
+    const mramModifierHash = hashState(state);
+    const mramModifiers = collectActiveModifiers(state);
+    expect(state).toEqual(mramModifierState);
+    expect(hashState(state)).toBe(mramModifierHash);
+    expect(mramModifiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceCardInstanceId: mramId,
+          sourceDefinitionId: "onr_v1_134_mram-chip",
+          kind: "max_hand_size",
+          side: "runner",
+          amount: 2,
+          duration: "while_installed",
+          target: { kind: "side", id: "runner" },
+          visibility: "public",
+        }),
+      ]),
+    );
     expect(getPlayerView(state, "corp").opponent.maxHandSize).toBe(
       maxHandSizeBefore + 2,
     );
@@ -1575,6 +1595,13 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
       rezzed: false,
     };
     expect(getPlayerView(state, "runner").own.maxHandSize).toBe(maxHandSizeBefore);
+    expect(
+      collectActiveModifiers(state).some(
+        (modifier) =>
+          modifier.kind === "max_hand_size" &&
+          modifier.sourceCardInstanceId === mramId,
+      ),
+    ).toBe(false);
     expect(getPlayerView(state, "corp").opponent.maxHandSize).toBe(
       maxHandSizeBefore,
     );
@@ -6344,6 +6371,28 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         (card) => card.instanceId === krashId,
       )?.strength,
     ).toBe(3);
+    const krashModifierState = structuredClone(state);
+    const krashModifierHash = hashState(state);
+    const krashModifiers = collectActiveModifiers(state);
+    expect(state).toEqual(krashModifierState);
+    expect(hashState(state)).toBe(krashModifierHash);
+    expect(
+      krashModifiers.filter(
+        (modifier) =>
+          modifier.kind === "breaker_strength" &&
+          modifier.target?.id === krashId,
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: krashId,
+        sourceDefinitionId: "onr_v1_039_krash",
+        side: "runner",
+        amount: 3,
+        duration: "run",
+        target: { kind: "card", id: krashId },
+        visibility: "public",
+      }),
+    ]);
     state = apply(
       state,
       "runner",
@@ -6397,6 +6446,13 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         (card) => card.instanceId === krashId,
       )?.strength,
     ).toBe(0);
+    expect(
+      collectActiveModifiers(state).some(
+        (modifier) =>
+          modifier.kind === "breaker_strength" &&
+          modifier.target?.id === krashId,
+      ),
+    ).toBe(false);
   });
 
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
@@ -13684,6 +13740,34 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     const runnerView = getPlayerView(state, "runner");
     expect(runnerView.own.memoryLimit).toBe(beforeMemoryLimit);
     expect(runnerView.own.maxHandSize).toBe(beforeMaxHandSize + 5);
+    const modifiers = collectActiveModifiers(state).filter(
+      (modifier) => modifier.kind === "max_hand_size",
+    );
+    expect(modifiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceDefinitionId: "onr_v1_133_militech-mram-chip",
+          kind: "max_hand_size",
+          side: "runner",
+          amount: 3,
+          duration: "while_installed",
+          target: { kind: "side", id: "runner" },
+          visibility: "public",
+        }),
+        expect.objectContaining({
+          sourceDefinitionId: "onr_v1_134_mram-chip",
+          kind: "max_hand_size",
+          side: "runner",
+          amount: 2,
+          duration: "while_installed",
+          target: { kind: "side", id: "runner" },
+          visibility: "public",
+        }),
+      ]),
+    );
+    expect(
+      modifiers.reduce((sum, modifier) => sum + modifier.amount, 0),
+    ).toBe(5);
     expect(
       runnerView.own.rig?.find(
         (card) => card.definitionId === "onr_v1_133_militech-mram-chip",
@@ -25165,6 +25249,26 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run?.breakSubroutineAdditionalCost).toBe(1);
+    const virizzModifierState = structuredClone(state);
+    const virizzModifierHash = hashState(state);
+    const virizzModifiers = collectActiveModifiers(state);
+    expect(state).toEqual(virizzModifierState);
+    expect(hashState(state)).toBe(virizzModifierHash);
+    expect(
+      virizzModifiers.filter(
+        (modifier) => modifier.kind === "break_subroutine_cost",
+      ),
+    ).toEqual([
+      expect.objectContaining({
+        sourceDefinitionId: "onr_v1_277_virizz",
+        kind: "break_subroutine_cost",
+        side: "runner",
+        amount: 1,
+        duration: "run",
+        target: { kind: "run" },
+        visibility: "public",
+      }),
+    ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       v1922CorpIceAbility: "virizz_break_cost_modifier",
@@ -25232,6 +25336,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      collectActiveModifiers(state).some(
+        (modifier) => modifier.kind === "break_subroutine_cost",
+      ),
+    ).toBe(false);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
