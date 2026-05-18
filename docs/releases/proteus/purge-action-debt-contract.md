@@ -11,7 +11,7 @@ Der Vertrag gilt fuer Proteus-Runner-Virus-Counter aus dem Cluster `virus_antibo
 
 Lokale Quellen:
 
-- `docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md`
+- `docs/releases/proteus/virus-antibody-counter-contract.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
 - `docs/source/Proteusspoiler.txt`
 - `docs/source/Netrunner Errata 1.70.md`

@@ -14,12 +14,12 @@ releaseTarget: Proteus planning
 blockedBy: []
 outcome: completed
 resultArtifacts:
-  - docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md
-  - docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md
+  - docs/releases/proteus/purge-action-debt-contract.md
+  - docs/releases/proteus/virus-antibody-counter-contract.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
 checks:
-  - rg -n "PROTEUS_PURGE_ACTION_DEBT_CONTRACT|P-PAD|proteus_virus_purge|corpActionDebt|V0\\.99|Scaldan|Pipe|Doppelganger|Pattel|Advancement|StateHash|PublicPayload|AI-Hints|Kartenpromotion" docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md "KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md"
-  - rg -n "Runtime-Implementierung|AI-Hints|Kartenpromotion|Decklegalitaet|deck_legal|human_playable|ai_supported" docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md
+  - rg -n "PROTEUS_PURGE_ACTION_DEBT_CONTRACT|P-PAD|proteus_virus_purge|corpActionDebt|V0\\.99|Scaldan|Pipe|Doppelganger|Pattel|Advancement|StateHash|PublicPayload|AI-Hints|Kartenpromotion" docs/releases/proteus/purge-action-debt-contract.md docs/releases/proteus/virus-antibody-counter-contract.md "KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md"
+  - rg -n "Runtime-Implementierung|AI-Hints|Kartenpromotion|Decklegalitaet|deck_legal|human_playable|ai_supported" docs/releases/proteus/purge-action-debt-contract.md docs/releases/proteus/virus-antibody-counter-contract.md
   - git diff --check
 ---
 
@@ -31,7 +31,7 @@ Der Proteus-spezifische Purge-Vertrag soll vom vorhandenen V0.99-Main-Action-Pur
 
 ## Kontext und Quellen
 
-- `docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md`
+- `docs/releases/proteus/virus-antibody-counter-contract.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
 - `docs/source/Netrunner Errata 1.70.md`
 
@@ -56,6 +56,6 @@ Der Proteus-spezifische Purge-Vertrag soll vom vorhandenen V0.99-Main-Action-Pur
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md` beschreibt den separaten Proteus-Purge als Spezialeffekt-/Rez-ähnliches Timingfenster mit sofortiger Counter-Entfernung und kumulierbarem, StateHash-relevantem Korp-Action-Debt. Der Vertrag grenzt V0.99-Main-Action-Purge, Antibody-Folgezähler, Advancement-Counter, Pipe-/Scaldan-Reihenfolge, PublicPayloads, Replay/StateHash und spätere Testskizzen ab.
+Abgeschlossen. `docs/releases/proteus/purge-action-debt-contract.md` beschreibt den separaten Proteus-Purge als Spezialeffekt-/Rez-ähnliches Timingfenster mit sofortiger Counter-Entfernung und kumulierbarem, StateHash-relevantem Korp-Action-Debt. Der Vertrag grenzt V0.99-Main-Action-Purge, Antibody-Folgezähler, Advancement-Counter, Pipe-/Scaldan-Reihenfolge, PublicPayloads, Replay/StateHash und spätere Testskizzen ab.
 
 Der bestehende `PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md` verlinkt den neuen Vertrag, und der Wiki-Index nennt die Proteus-Planungsartefakte als planning-only Stand. Es wurden keine Runtime-Dateien, keine AI-Hints und keine Kartenpromotion geändert.

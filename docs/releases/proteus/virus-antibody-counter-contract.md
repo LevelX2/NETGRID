@@ -11,12 +11,12 @@ Lokale Quellen:
 
 - `data/card-import/proteus-card-basis-2026-05-17.json`
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
-- `docs/derived/PROTEUS_MECHANICS_COVERAGE_ANALYSIS.md`
+- `docs/releases/proteus/mechanics-coverage-analysis.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/counter-hosting-spec.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
 - `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
-- `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md`
-- `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`
+- `docs/releases/proteus/bad-publicity-loss-gate-contract.md`
+- `docs/releases/proteus/purge-action-debt-contract.md`
 - `docs/source/Netrunner Errata 1.70.md`
 
 ## Betroffene Karten
@@ -141,7 +141,7 @@ PublicPayload:
 
 Proteus-Purge ist nicht identisch mit dem vorhandenen V0.99-Main-Action-Vertrag `click click click: Purge virus counters`.
 
-Der enge Folgekontrakt liegt jetzt in `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`. Er bleibt planning-only und erzeugt keine Runtime-Implementierung, keine AI-Hints und keine Kartenpromotion.
+Der enge Folgekontrakt liegt jetzt in `docs/releases/proteus/purge-action-debt-contract.md`. Er bleibt planning-only und erzeugt keine Runtime-Implementierung, keine AI-Hints und keine Kartenpromotion.
 
 Kernaussagen:
 

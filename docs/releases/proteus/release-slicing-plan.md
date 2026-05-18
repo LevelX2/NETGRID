@@ -9,15 +9,15 @@ Dieser Plan schneidet die 154 importierten Proteus-Karten in kleine bis mittlere
 
 Führende Quellen:
 
-- `docs/derived/PROTEUS_SPOILER_IMPORT_REPORT.md`
-- `docs/derived/PROTEUS_MECHANICS_COVERAGE_ANALYSIS.md`
+- `docs/releases/proteus/spoiler-import-report.md`
+- `docs/releases/proteus/mechanics-coverage-analysis.md`
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
-- `docs/derived/PROTEUS_VARIABLE_ICE_CONTRACT.md`
-- `docs/derived/PROTEUS_HIDDEN_RUNNER_RESOURCES_CONTRACT_2026_05_17.md`
-- `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md`
-- `docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md`
-- `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`
-- `docs/derived/PROTEUS_CYBERNETICS_DECK_HARDWARE_CONTRACT.md`
+- `docs/releases/proteus/variable-ice-contract.md`
+- `docs/releases/proteus/hidden-runner-resources-contract-2026-05-17.md`
+- `docs/releases/proteus/bad-publicity-loss-gate-contract.md`
+- `docs/releases/proteus/virus-antibody-counter-contract.md`
+- `docs/releases/proteus/purge-action-debt-contract.md`
+- `docs/releases/proteus/cybernetics-deck-hardware-contract.md`
 
 Aktuelle Basis:
 
@@ -94,7 +94,7 @@ Nicht-Scope:
 
 Abhaengigkeiten, Gate und Stop:
 
-- Grundlage ist `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md`.
+- Grundlage ist `docs/releases/proteus/bad-publicity-loss-gate-contract.md`.
 - Game-End ist Engine-Regel, nicht UI- oder KI-Heuristik.
 - Kein neues LegalAction-Fenster nach erreichtem Game-Over.
 - Stop, wenn der Ergebnisgrund nicht durch API, UI-Ergebnisanzeige, Replay und StateHash konsistent gefuehrt werden kann.
@@ -124,7 +124,7 @@ Nicht-Scope:
 
 Abhaengigkeiten, Gate und Stop:
 
-- Grundlage ist `docs/derived/PROTEUS_VARIABLE_ICE_CONTRACT.md`.
+- Grundlage ist `docs/releases/proteus/variable-ice-contract.md`.
 - `applyAction` akzeptiert keine frei gelieferten Clientwerte.
 - Runner-View sieht vor dem Rezzen keine private ICE-Identität oder abgelehnte Varianten.
 - Stop, wenn variable Werte nicht replaystabil aus Engine-State/Eventlog rekonstruierbar sind.
@@ -155,7 +155,7 @@ Nicht-Scope:
 
 Abhaengigkeiten, Gate und Stop:
 
-- Grundlage ist `docs/derived/PROTEUS_HIDDEN_RUNNER_RESOURCES_CONTRACT_2026_05_17.md`.
+- Grundlage ist `docs/releases/proteus/hidden-runner-resources-contract-2026-05-17.md`.
 - Öffentliche Slot-IDs dürfen keine echte Instance-ID, DefinitionId oder Kartenwert ableitbar machen.
 - PublicEvents nennen vor Reveal keine Hidden-Resource-Titel.
 - Stop, wenn Korp-PlayerView, AIInput, Reconnect, Undo-Preview oder Logs verdeckte Resource-Identität enthalten.
@@ -240,7 +240,7 @@ Nicht-Scope:
 
 Abhaengigkeiten, Gate und Stop:
 
-- Grundlage ist `docs/derived/PROTEUS_CYBERNETICS_DECK_HARDWARE_CONTRACT.md`.
+- Grundlage ist `docs/releases/proteus/cybernetics-deck-hardware-contract.md`.
 - MU-Überzug nach Trash muss als Choice oder Blocker sauber gelöst sein.
 - Modifier werden abgeleitet, nicht als Basiswerte dauerhaft mutiert.
 - Zweckgebundene Bits sind source-bound und werden in `applyAction` erneut geprüft.
@@ -269,7 +269,7 @@ Nicht-Scope:
 
 Abhaengigkeiten, Gate und Stop:
 
-- Grundlagen sind `docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md` und `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`.
+- Grundlagen sind `docs/releases/proteus/virus-antibody-counter-contract.md` und `docs/releases/proteus/purge-action-debt-contract.md`.
 - Fuer `Scaldan` gilt zusätzlich Slice 2.
 - Registry trennt Advancement-, Antibody- und purgefähige Runner-Virus-Counter.
 - `corpActionDebt` oder äquivalentes Feld ist StateHash-relevant und kumulierbar.
