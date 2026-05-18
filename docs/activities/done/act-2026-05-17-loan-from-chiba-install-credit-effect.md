@@ -23,7 +23,7 @@ resultArtifacts:
   - data/scenarios/v1920-global-modifier-special-state-wip-smoke.json
   - data/ai/ai-card-hints-active.json
   - data/reports/originalset-card-spotcheck-register.json
-  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md
+  - docs/reviews/originalset-spotchecks/register.md
 checks:
   - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "Loan from Chiba|Runner Resource Contacts"
   - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "Loan from Chiba|recurring-credit refreshes"

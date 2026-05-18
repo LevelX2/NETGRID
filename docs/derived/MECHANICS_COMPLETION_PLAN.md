@@ -483,7 +483,7 @@ Die früher in diesem Abschnitt empfohlenen V0.94-/V0.95-Schritte sind erledigt.
 - `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `docs/derived/MVP_0.99_FINAL_REVIEW.md`
-- `docs/derived/S01_REQUIREMENTS.md`
+- `docs/releases/special/s01/requirements.md`
 
 Der nächste Schritt ist eine Scope-Entscheidung:
 

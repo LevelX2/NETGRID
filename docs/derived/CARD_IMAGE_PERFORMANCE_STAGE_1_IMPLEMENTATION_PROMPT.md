@@ -15,8 +15,8 @@ Pflichtkontext:
    - docs/derived/CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md
    - docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md
    - docs/derived/CARD_IMAGE_DISPLAY_0.91_SPEC.md
-   - docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md
-   - docs/derived/V1_0_7_TEST_MATRIX.md
+   - docs/releases/v1/v1-0-6-ui-resource-clarity/resource-card-display-spec.md
+   - docs/releases/v1/v1-0-7-browser-e2e-visual-qa/test-matrix.md
 
 Scope:
 - Implementiere nur Stufe 1 aus CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md.

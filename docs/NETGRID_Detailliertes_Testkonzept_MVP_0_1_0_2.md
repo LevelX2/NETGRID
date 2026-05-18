@@ -4,7 +4,7 @@
 **Stand:** 03.05.2026  
 **Gültig für:** MVP 0.1 Engine/Stabilisierung und MVP 0.2 private Human-vs-Human-Partie  
 **Regelbaseline:** Null Signal Games Comprehensive Rules v26.03, begrenzt auf den dokumentierten MVP-Regelumfang  
-**Testbasis:** `NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`, `NETGRID_MVP_0.2_Plan.md`, `Erstes Testdeck.txt`, `Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
+**Testbasis:** `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`, `docs/source/NETGRID_MVP_0.2_Plan.md`, `docs/source/Erstes Testdeck.txt`, `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 ---
 

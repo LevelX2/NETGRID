@@ -79,7 +79,7 @@ Bestehende Ignore-Regeln:
 Versionierte docs-Binärartefakte:
 
 - Regel-/Referenz-PDFs: `docs/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`, `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`, `docs/source/Netrunner_Errata_v1.70.pdf`.
-- Kleine Smoke-Evidence: `docs/derived/artifacts/v1_5_0_replay_smoke.png`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.png`.
+- Kleine Smoke-Evidence: `docs/releases/v1/v1-5-0-private-replay-analysis-learning/artifacts/replay-smoke.png`, `docs/releases/v1/v1-6-0-tutorial-rule-help/artifacts/tutorial-smoke.png`.
 - UI-/Branding-Designassets: PNG-/SVG-Dateien unter `docs/ui-designsets/`.
 
 Private Scanbestände aus `docs/source/PrivateScans/` werden nicht aufgenommen und bleiben lokal.

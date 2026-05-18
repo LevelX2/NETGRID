@@ -21,8 +21,8 @@ Maschinenlesbarer Begleiter: `data/rules/v1922-resolver-contracts.json`.
 ## Quellenbasis
 
 - `docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md`
-- `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`
-- `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md`
+- `docs/releases/v1/card-releases/v1-0-5k-card-release/implementation-review.md`
 - `docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md`
 - `docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md`
 - `docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md`

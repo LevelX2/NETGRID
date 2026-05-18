@@ -21,7 +21,7 @@ Die gedruckte und erratierte Kernfunktion ist dagegen eine Set-Aside-Installatio
 - Aktueller V1.9.12-Abschlussstand: `docs/derived/V1_9_12_FINAL_REVIEW.md`
 - V1.9.12-Implementierungsstand: `docs/derived/V1_9_12_IMPLEMENTATION_REVIEW.md`
 - V1.9.12 Counter-/Recurring-Vertrag: `docs/derived/V1_9_12_COUNTER_VIRUS_RECURRING_SPEC.md`
-- Set-Aside-Grundlage: `docs/derived/SPECIAL_ZONES_OWNERSHIP_CONTROL_1_2_2_SPEC.md`
+- Set-Aside-Grundlage: `docs/releases/v1/v1-2-2-special-zones-ownership-control/spec.md`
 - Lokale Rohquelle: `docs/source/Runnerspoiler 1.0.txt`
 - Lokale Errata-Quelle: `docs/source/Netrunner Errata 1.70.md`
 

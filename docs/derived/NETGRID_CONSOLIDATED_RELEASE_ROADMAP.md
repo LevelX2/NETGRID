@@ -11,7 +11,7 @@ Dieses Dokument ist die führende Release-Roadmap ab V1.1.3, solange `docs/codex
 
 Es konsolidiert:
 
-- die aktive Anschlussplanung `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`,
+- die aktive Anschlussplanung `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`,
 - die langfristige Produktvision `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`,
 - das KI-Briefing `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`,
 - die historischen Roadmaps nach MVP 0.2, MVP 0.4 und V1.0.x,

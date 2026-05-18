@@ -32,7 +32,7 @@ Dieses Paket ist der erste Schritt der Discard-Verbesserung und hat keine vorgel
 ## Kontext und Quellen
 
 - Nutzerfrage vom 2026-05-18: KI-Discard soll sinnvoller nach Kartennützlichkeit erfolgen.
-- `docs/derived/DISCARD_HANDLIMIT_CORE_DAMAGE_1_1_1_SPEC.md`: V1.1.1 erlaubt der KI aktuell eine deterministische Minimalheuristik aus sichtbaren eigenen Choice-Optionen.
+- `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/spec.md`: V1.1.1 erlaubt der KI aktuell eine deterministische Minimalheuristik aus sichtbaren eigenen Choice-Optionen.
 - `packages/ai/src/index.ts`: `selectedChoicesForDecision` wählt bei `source === "discard_phase"` derzeit stabil sortierte erste Optionen.
 - `packages/ai/src/runner-plans.ts`, `packages/ai/src/corp-plans.ts`, `packages/ai/src/deck-doctrine.ts`: vorhandene Rollen-/Hint-/Doctrine-Quellen, die später erweitert eingebunden werden können.
 

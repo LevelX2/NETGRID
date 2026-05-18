@@ -14,13 +14,16 @@ parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V1_0_SMALL_RELEASE_ROLLUP_PROPOSAL.md
+  - docs/releases/v1/v1-0-small-release-rollup.md
+  - docs/releases/v1/README.md
+  - docs/releases/v1/v1-0-2-opponent-action-presentation/README.md
+  - docs/releases/v1/v1-0-4-private-match-lifecycle/README.md
 checks:
   - "rg --files docs/derived | rg 'V1_0_[1-4]|OPPONENT_ACTION_PRESENTATION|PRIVATE_MATCH_LIFECYCLE|MATCHSTART|JOIN_DECK'"
   - "Select-String headings/status scan for V1.0.2 and V1.0.4 source artifacts"
   - "Test-Path checks for absent V1_0_4_TEST_MATRIX.md and MATCH_LIFECYCLE_1_0_4_SPEC.md"
   - "PowerShell reference check: all referenced existing docs/derived markdown paths exist"
-  - "rg -n 'V1_9|V1\\.9|1\\.9' docs/derived/V1_0_SMALL_RELEASE_ROLLUP_PROPOSAL.md: no matches"
+  - "rg -n 'V1_9|V1\\.9|1\\.9' docs/releases/v1/v1-0-small-release-rollup.md: no matches"
   - "git diff --check: pass"
 ---
 
@@ -32,10 +35,10 @@ Für höchstens zwei kleine V1.0.x-Releasefamilien soll ein Rollup-Vorschlag ent
 
 ## Kontext und Quellen
 
-- `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`
-- `docs/derived/V1_0_2_*`
+- `docs/releases/v1/v1-0-1-join-deck-handshake/plan.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/`
 - `docs/derived/V1_0_3_*`
-- `docs/derived/V1_0_4_*`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/`
 
 ## Scope
 
@@ -62,8 +65,10 @@ Nicht mit V1.0.5+ starten, wenn dadurch viele UX-/Karten-Nachrelease-Artefakte i
 
 ## Ergebnisnotiz
 
-Erstellt wurde `docs/derived/V1_0_SMALL_RELEASE_ROLLUP_PROPOSAL.md`. Der Vorschlag begrenzt den Rollup-Schnitt auf V1.0.2 als formal vollständige Gegner-Aktionsdarstellungsfamilie und V1.0.4 als Private-Match-Lifecycle-Familie. V1.0.1 und V1.0.3 bleiben bewusst außerhalb des eigentlichen Rollups, weil sie asymmetrische Brücken-/Einzelartefakte sind und ein gemeinsamer Schnitt historische Struktur rekonstruieren würde.
+Erstellt wurde `docs/releases/v1/v1-0-small-release-rollup.md`. Der Vorschlag begrenzt den Rollup-Schnitt auf V1.0.2 als formal vollständige Gegner-Aktionsdarstellungsfamilie und V1.0.4 als Private-Match-Lifecycle-Familie. V1.0.1 und V1.0.3 bleiben bewusst außerhalb des eigentlichen Rollups, weil sie asymmetrische Brücken-/Einzelartefakte sind und ein gemeinsamer Schnitt historische Struktur rekonstruieren würde.
 
 Implementation Reviews und Final Reviews bleiben ausdrücklich führende Audit-Trail-Artefakte. Detailpläne und erledigte Requirements sind als Verdichtungs- oder Archivkandidaten klassifiziert. Linkbruchrisiken sind benannt; die Empfehlung lautet additive Rollup-Dateien ohne Moves.
 
 Checks: Quellen- und Statusscan für V1.0.1 bis V1.0.4 ausgeführt. Referenzcheck bestätigt, dass die im Vorschlag als bestehende Quellen genannten `docs/derived`-Markdown-Pfade existieren. Der No-V1.9-Scan hatte keine Treffer. `git diff --check` ist bestanden.
+
+Nachtrag 2026-05-18: Nach der Zielstrukturentscheidung wurden V1.0.2 und V1.0.4 als begrenzter Release-Schnitt nach `docs/releases/v1/` migriert. V1.0.1, V1.0.3, V1.0.5+ und V1.0.x-Karten-Nachrelease-Artefakte bleiben vorerst unter `docs/derived/`.

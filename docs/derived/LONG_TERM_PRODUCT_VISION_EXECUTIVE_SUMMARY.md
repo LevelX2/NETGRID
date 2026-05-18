@@ -6,7 +6,7 @@ Hauptdokument: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 
 Nachtrag 2026-05-06: V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert. V1.0.8 Storage/Backup-Härtung ist requirements-frozen; SQLite ist der bevorzugte private lokale Storage-Pfad.
 
-Nachtrag 2026-05-07: Nach V1.1.2 gilt die Anschlussroadmap `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`. V1.1.2 bleibt unverändert. Danach werden fehlende Spielmechaniken, Kartenfreigabe und KI-Weiterentwicklung zusammen geplant; `AI v2` ist kein isolierter später Block mehr, sondern eine kontinuierliche Spur in den Mechanik- und Kartenreleases.
+Nachtrag 2026-05-07: Nach V1.1.2 gilt die Anschlussroadmap `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`. V1.1.2 bleibt unverändert. Danach werden fehlende Spielmechaniken, Kartenfreigabe und KI-Weiterentwicklung zusammen geplant; `AI v2` ist kein isolierter später Block mehr, sondern eine kontinuierliche Spur in den Mechanik- und Kartenreleases.
 
 Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Anschlussplanung sind in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` konsolidiert. Für konkrete Releaseplanung ab V1.1.3 ist die konsolidierte Roadmap führend.
 

@@ -13,7 +13,7 @@ Geprüft wurden:
 - `docs/derived/MECHANIKPAKET_I_1_9_0_SPEC.md`
 - `docs/derived/V1_9_0_TEST_MATRIX.md`
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
-- `docs/derived/V1_8_1_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-8-1-mechanikpaket-h/final-review.md`
 
 ## Ergebnis
 

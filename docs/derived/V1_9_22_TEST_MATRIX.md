@@ -258,7 +258,7 @@ Update 2026-05-14 19:50 CEST: `Zetatech Software Installer` hat einen engen Over
 
 ## Resolver-Teilnotizen 2026-05-13 18:30 CEST
 
-- `data/rules/v1922-resolver-contract-inventory.json` fuehrt lokal bestaetigte Teilnotizen aus `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas.
+- `data/rules/v1922-resolver-contract-inventory.json` fuehrt lokal bestaetigte Teilnotizen aus `docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md` fuer Runner-Programme, Runner-Events, Runner-Hardware und Corp-Agendas.
 - Zusatzabdeckung: Jede `partialLocalNotes`-Karte muss im jeweiligen Cluster und in `ONR_V1_9_22_WIP_CARD_IDS` liegen.
 - Zusatzabdeckung: Teilnotizen duerfen keine `ready_for_promotion`-, `ai_supported`-, `deck_legal`- oder `human_playable`-Aussage enthalten.
 - JSON-Validation fuer `data/**/*.json`: pass, 303 Dateien.

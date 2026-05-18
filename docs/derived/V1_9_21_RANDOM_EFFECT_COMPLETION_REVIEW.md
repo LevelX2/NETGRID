@@ -28,7 +28,7 @@ Diese Completion-Nacharbeit ergänzt den formalen V1.9.21-Abschluss, ohne das ur
 - Engine und Tests: `packages/engine/src/index.ts`, `packages/engine/src/index.test.ts`
 - Shared-State-Typen: `packages/shared/src/index.ts`
 - AI-Choice-Verhalten: `packages/ai/src/index.ts`, `packages/ai/src/index.test.ts`
-- Web-Anzeige fuer Extra-Aktionen: `apps/web/app/action-board-ui.ts`, `apps/web/app/action-board-ui.test.ts`, `apps/web/app/page.tsx`, `docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md`
+- Web-Anzeige fuer Extra-Aktionen: `apps/web/app/action-board-ui.ts`, `apps/web/app/action-board-ui.test.ts`, `apps/web/app/page.tsx`, `docs/releases/v1/v1-0-6-ui-resource-clarity/resource-card-display-spec.md`
 - Datenstatus: `data/manifests/card-implementation-manifest-1.9.21.json`, `data/rules/mechanics-coverage-1.9.21.json`, `data/ai/ai-card-hints-deck-legal-v1921.json`
 - Szenarien: `data/scenarios/v1921-deterministic-random-release-smoke.json`, `data/scenarios/ai-deck-legal-v1921-smokes.json`
 

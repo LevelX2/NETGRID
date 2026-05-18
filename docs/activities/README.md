@@ -62,6 +62,7 @@ Nutze stattdessen `docs/derived/`, wenn das Ergebnis ein dauerhaftes Referenzart
 - `inbox/` darf bewusst untracked bleiben, solange Pakete noch lose Vorschläge sind. Diese Vereinfachung verhindert Git-Blockaden durch große Mengen vorbereiteter, noch nicht beanspruchter Arbeit.
 - Pakete werden spätestens beim Verschieben nach `in-progress/` versioniert. Erledigte Pakete in `done/` werden ebenfalls versioniert, damit Ergebnisnotiz, Checks und erzeugte Artefakte nachvollziehbar bleiben.
 - `done/` wird periodisch gesichtet und in Monats- oder Themenrollups verdichtet, sobald viele abgeschlossene Pakete nur noch denselben Prozess-, Release- oder Befundzusammenhang belegen.
+- Das erste Monatsrollup liegt unter `done/ROLLUP_2026_05.md`. Es verdichtet die Mai-2026-Pakete als Navigations- und Retention-Schicht; die Einzeldateien bleiben bis zu einem separaten Linkmigrationsschnitt erhalten.
 - Nach einem Rollup muss ein erledigtes Paket nicht dauerhaft im Board bleiben, wenn sein Ergebnis vollständig im Rollup, in verlinkten Artefakten und in der Git-Historie nachvollziehbar ist.
 - Ein erledigtes Paket bleibt im Board, wenn es einen offenen Folgehinweis, eine wichtige Removal Condition, einen noch nicht verdichteten Befund, einen Audit-/Gate-Nachweis oder eine häufig referenzierte Entscheidung enthält.
 - Dauerhafte Erkenntnisse gehören nicht in `done/` versteckt. Sie werden nach `KI-Wissen-NETGRID/`, `docs/codex/` oder in formale `docs/derived/`-Artefakte übernommen und aus dem Paket verlinkt.

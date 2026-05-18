@@ -14,7 +14,7 @@ parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_S01.md
+  - docs/releases/special/s01/README.md
 checks:
   - rg -n "docs/derived/S01_|S01_[A-Z_]+\\.md|S01 |Sonderphase 01" .
   - git diff --check
@@ -28,13 +28,13 @@ Für die abgeschlossene S01-Familie soll ein Rollup-Vorschlag entstehen, ohne be
 
 ## Kontext und Quellen
 
-- `docs/derived/S01_DETAILED_PLAN.md`
-- `docs/derived/S01_REQUIREMENTS.md`
-- `docs/derived/S01_REQUIREMENTS_REVIEW.md`
-- `docs/derived/S01_TEST_MATRIX.md`
-- `docs/derived/S01_AUDIO_SPEC.md`
-- `docs/derived/S01_MATCH_SERIES_SPEC.md`
-- `docs/derived/S01_RESULT_MODAL_SPEC.md`
+- `docs/releases/special/s01/detailed-plan.md`
+- `docs/releases/special/s01/requirements.md`
+- `docs/releases/special/s01/requirements-review.md`
+- `docs/releases/special/s01/test-matrix.md`
+- `docs/releases/special/s01/audio-spec.md`
+- `docs/releases/special/s01/match-series-spec.md`
+- `docs/releases/special/s01/result-modal-spec.md`
 
 ## Scope
 
@@ -50,7 +50,7 @@ Für die abgeschlossene S01-Familie soll ein Rollup-Vorschlag entstehen, ohne be
 
 ## Akzeptanzkriterien
 
-- [x] Ein konkreter S01-Rollup-Vorschlag liegt unter `docs/derived/`.
+- [x] Ein konkreter S01-Rollup-Vorschlag lag ursprünglich unter `docs/derived/`; seit 2026-05-18 ist er als Release-Index nach `docs/releases/special/s01/README.md` migriert.
 - [x] Audit-Trail und Gate-Nachweise bleiben auffindbar.
 - [x] Linkbruchrisiken sind benannt.
 - [x] `git diff --check` ist ausgeführt.
@@ -61,4 +61,6 @@ Analog zum Backend-0.5-Muster arbeiten, aber S01 wegen Specs getrennt klassifizi
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/DOCS_DERIVED_RELEASE_ROLLUP_S01.md` klassifiziert alle sieben S01-Artefakte und trifft ausdrücklich `decision-no-move`: Requirements Review, Requirements, Testmatrix und Match-Series-Spec bleiben `keep-evidence`; Result-Modal- und Audio-Spec sind `condense-candidate-after-rollup`; der Detailplan ist `archive-candidate-after-condense`. Harte Linkbruchrisiken vor späteren Moves sind benannt, insbesondere in KI-Wissen, Log, Codex-Status-Chronik, S01-Detailplan, V1.0.2-Folgeartefakten, Mechanics-Planung und Activity-Audit. Es wurden keine S01-Inhalte geändert und keine Dateien bewegt.
+Abgeschlossen. Das ursprüngliche Rollup klassifizierte alle sieben S01-Artefakte und traf `decision-no-move`: Requirements Review, Requirements, Testmatrix und Match-Series-Spec bleiben `keep-evidence`; Result-Modal- und Audio-Spec sind `condense-candidate-after-rollup`; der Detailplan ist `archive-candidate-after-condense`. Harte Linkbruchrisiken vor späteren Moves wurden benannt, insbesondere in KI-Wissen, Log, Codex-Status-Chronik, S01-Detailplan, V1.0.2-Folgeartefakten, Mechanics-Planung und Activity-Audit.
+
+Nachtrag 2026-05-18: Nach der Zielstrukturentscheidung wurde S01 als Sonderrelease nach `docs/releases/special/s01/` migriert. Kanonischer Einstieg ist `docs/releases/special/s01/README.md`; die sieben Einzelartefakte bleiben erhalten.

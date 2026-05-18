@@ -29,10 +29,10 @@ Aktuelle Blocker:
 
 ## Quellenbasis
 
-- `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md`
-- `docs/derived/CARD_DATA_PIPELINE_1_3_1_SPEC.md`
-- `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`
-- `docs/derived/V1_4_1_PLAN_BASED_RUNNER_AI_DETAILED_PLAN.md`
+- `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`
+- `docs/releases/v1/v1-3-1-card-data-pipeline-v2/spec.md`
+- `docs/releases/v1/v1-3-1-card-data-pipeline-v2/implementation-handoff-to-v1-4-1.md`
+- `docs/releases/v1/v1-4-1-plan-based-runner-ai/plan.md`
 - `data/ai/ai-card-hints-1.3.1.json`
 - `data/ai/ai-deck-pool-1.0.1.json`
 - lokale Datei-Deckbibliothek unter `%APPDATA%\NetGrid\Decks`

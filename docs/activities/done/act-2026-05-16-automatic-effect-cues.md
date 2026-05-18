@@ -32,8 +32,8 @@ Automatische, side-sichere Effekte sollen optional im Aktionshinweis-Fenster sic
 ## Kontext und Quellen
 
 - Nutzerwunsch vom 2026-05-16: automatische Effekte wie Start-of-turn-Credits könnten im Aktionsfenster auftauchen.
-- `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`
-- `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/spec.md`
+- `docs/releases/v1/v1-0-5-action-board-ux/action-board-ux-spec.md`
 - `apps/web/app/action-cues.ts`
 - `apps/web/app/page.tsx`
 - `apps/web/app/globals.css`

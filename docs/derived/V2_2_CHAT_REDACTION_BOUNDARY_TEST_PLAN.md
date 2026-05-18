@@ -13,7 +13,7 @@ Der Testplan erweitert keine Produktfreigabe: Er erlaubt keinen globalen Chat, k
 ## Quellenanker
 
 - `docs/derived/V2_2_CHAT_DATA_CONTRACT.md`
-- `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`
+- `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`
 - `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
 - `docs/derived/V2_6_MODERATION_RBAC_REDACTION_TEST_MATRIX.md`
 - Bestehende enge Lobbychat-Form: `ApiLobbyChatMessage` und `ApiMatchStartLobbyPayload.chatMessages`

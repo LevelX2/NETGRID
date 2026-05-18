@@ -12,8 +12,8 @@ Der Planungsbranch `codex/release-planning-2026-05-05` wurde nach dem V1.0.3-Fin
 Aktueller Integrationsstand:
 
 - `main` enthält V1.0.2 Gegner-Aktionsdarstellung und V1.0.3 Matchstart-UX.
-- V1.0.3-Final Review: `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
-- V1.0.4-Kandidaten: `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`.
+- V1.0.3-Final Review: `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`.
+- V1.0.4-Kandidaten: `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`.
 - Übernommene Planungsartefakte: V1.0.4 Private Match Lifecycle, V1.0.5 Action Board UX und langfristige Produktvision.
 
 Verifikation auf `main` nach dem V1.0.3-Finale:
@@ -33,7 +33,7 @@ Belegt durch:
 - `main` zeigt auf diesen Commit.
 - Codepfade für getrennten Matchstart, serverseitige Auslosung, Startbereitschaftslobby, Ready-Flags, Countdown, Lobbychat, lokale Anzeigenamen, gemerkte Sitzungen und Runner-Rig-Anzeige.
 - Server-, Web- und Visibility-Tests.
-- Final Review unter `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
+- Final Review unter `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`.
 
 Das auf dem Planungsbranch erzeugte `V1_0_3_STATUS_REVIEW.md` wurde bewusst nicht übernommen, weil es vor dem Merge auf `main` entstanden ist und danach sachlich falsch wäre.
 
@@ -96,7 +96,7 @@ Die bestehende Basis bleibt stark: PlayerViews, PublicEvents, Reconnect, Undo, A
    - Nach V1.0.5 bis zu 20 lokal geprüfte Karten aktivieren.
    - Keine große neue Mechanikfamilie erzwingen.
    - Nur Karten mit bestätigtem Text, passender Mechanik-Coverage, Manifest, Unit-/Szenariotests, Decklegalität und Visibility-/Replay-/StateHash-Schutz freigeben.
-   - Definition: `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`.
+   - Definition: `docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md`.
 
 4. **Danach**
    - Browser-E2E und Visual QA als eigener Qualitätsrelease.

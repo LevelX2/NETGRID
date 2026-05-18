@@ -14,9 +14,9 @@ parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_EVIDENCE_ROLLUP_2026_05_17.md
-  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_A.md
-  - docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md
+  - docs/reviews/originalset-spotchecks/README.md
+  - docs/reviews/originalset-spotchecks/reports/ORIGINALSET_CARD_SPOTCHECK_2026_05_14_A.md
+  - docs/reviews/originalset-spotchecks/register.md
   - data/reports/originalset-card-spotcheck-register.json
 checks:
   - git diff --check
@@ -33,9 +33,9 @@ Die Originalset-Spotcheck-Nachweise sollen so verdichtet werden, dass Register, 
 ## Kontext und Quellen
 
 - Strukturreview vom 2026-05-17:
-  - `docs/derived/ORIGINALSET_CARD_SPOTCHECK_REGISTER.md`
-  - `docs/derived/ORIGINALSET_CARD_SPOTCHECK_*.md`
-  - `docs/derived/originalset-spotcheck-jobs/done/*.md`
+  - `docs/reviews/originalset-spotchecks/register.md`
+  - `docs/reviews/originalset-spotchecks/reports/ORIGINALSET_CARD_SPOTCHECK_*.md`
+  - `docs/archive/originalset-spotcheck-jobs/2026-05/*.md`
 - Das Register ist ein nützlicher aktiver Einstieg, die Detailberichte sind historische Evidence, die Jobdateien wirken nach Abschluss eher wie Arbeitsboard-Reste.
 
 ## Scope
@@ -70,4 +70,6 @@ Die Originalset-Spotcheck-Nachweise sollen so verdichtet werden, dass Register, 
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/ORIGINALSET_CARD_SPOTCHECK_EVIDENCE_ROLLUP_2026_05_17.md` inventarisiert 41 Registerrunden, 41 Detailbericht-Zuordnungen, 40 eindeutige Detailbericht-Dateien, 39 erledigte Jobfiles und die zwei historischen Zufallsrunden ohne Jobfile. Der fehlende Detailbericht für `2026-05-14-A` wurde als historisches Evidence-Artefakt angelegt, der veraltete Reorder-Jobpfad wurde auf `done/` korrigiert, und Register/JSON verweisen jetzt auf die vollständige Evidence. Die Retention-Regel hält Register/JSON als `keep-active`, Detailberichte als `keep-evidence` und erledigte Jobfiles als `archive`; Jobfiles wurden nicht gelöscht.
+Erledigt. `docs/reviews/originalset-spotchecks/README.md` inventarisiert 41 Registerrunden, 41 Detailbericht-Zuordnungen, 40 eindeutige Detailbericht-Dateien, 39 erledigte Jobfiles und die zwei historischen Zufallsrunden ohne Jobfile. Der fehlende Detailbericht für `2026-05-14-A` wurde als historisches Evidence-Artefakt angelegt, der veraltete Reorder-Jobpfad wurde auf `done/` korrigiert, und Register/JSON verweisen jetzt auf die vollständige Evidence. Die Retention-Regel hält Register/JSON als `keep-active`, Detailberichte als `keep-evidence` und erledigte Jobfiles als `archive`; Jobfiles wurden nicht gelöscht.
+
+Nachtrag 2026-05-18: Register, Rollup und Detailberichte wurden aus `docs/derived/` nach `docs/reviews/originalset-spotchecks/` migriert. Die 39 erledigten Jobfiles wurden link-sicher nach `docs/archive/originalset-spotcheck-jobs/2026-05/` verschoben.

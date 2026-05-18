@@ -7,7 +7,7 @@ Status: WIP-Preflight, Newsgroup-Filter install-only umgesetzt, keine Catalog-/A
 
 `data/rules/v1922-local-card-facts.json` enthaelt fuer 14 Runner-Programme lokale Kosten-/MU-/Effektkerne. Seit den Shield-, install-only-, Breaker- und Zetatech-Schnitten vom 2026-05-14 bleibt nur noch der `Zetatech Software Installer`-Overlay-Vertrag als Runner-Programm-Vollvertragsluecke neben finaler Promotion offen.
 
-Die erneute historische Suche in `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`, `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json` und `data/rules/v1922-resolver-contract-inventory.json` bestaetigt:
+Die erneute historische Suche in `docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md`, `docs/releases/v1/card-releases/v1-0-5k-card-release/implementation-review.md`, `docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md`, `data/rules/v1922-resolver-contracts.json` und `data/rules/v1922-resolver-contract-inventory.json` bestaetigt:
 
 - `Shield` war historisch wegen Prevention-/Turn-Reset-Logik zurueckgestellt und ist inzwischen als enger WIP-Resolver über das bestehende Event-Modification-Prevention-Fenster umgesetzt.
 - `Poltergeist` und `Scatter Shot` haben nur die Teilnotiz "hosted recurring credits fuer Trash-Kosten"; Pool-/Zahlungsumfang und Refresh-Timing bleiben offen.
