@@ -10,6 +10,7 @@ import type { CardEffectImplementation } from "./definition-types";
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
+  sourceTitle?: string;
   controller: Side;
   drawCards?: (
     side: Side,
@@ -105,6 +106,7 @@ export function executeCardImplementationEffects(
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
         return;
       }
@@ -128,6 +130,7 @@ export function executeCardImplementationEffects(
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
         return;
       }

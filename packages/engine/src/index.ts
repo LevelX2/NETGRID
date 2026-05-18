@@ -24162,6 +24162,7 @@ function executeOnPlayCardImplementationAbility(
     {
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
       controller: mustInstance(state.cardInstances, cardId).controller,
       drawCards: (side, amount) =>
         drawCardsForCardImplementationEffect(state, side, amount),

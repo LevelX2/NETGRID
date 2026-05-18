@@ -849,6 +849,118 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges ordered Day Shift card resolver effects into the played card entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Day Shift",
+      cardDefinitionId: "onr_v1_288_day-shift",
+      drawnCards: 2,
+      gainedCredits: 1,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_288_day-shift.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_288_day-shift",
+          sourceTitle: "Day Shift",
+          reason: "card_resolver"
+        },
+        {
+          effectId: "onr_v1_288_day-shift.effect.1.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_288_day-shift",
+          sourceTitle: "Day Shift",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Day Shift gespielt und 2 Karten gezogen und 1 Credit erhalten.");
+    expect(item.title.indexOf("2 Karten gezogen")).toBeLessThan(item.title.indexOf("1 Credit erhalten"));
+    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "2 Karten", "+1 Credit"]));
+    expect(JSON.stringify(item)).not.toContain("Jack 'n' Joe");
+    expect(effects).toEqual([]);
+  });
+
+  it("merges ordered Night Shift card resolver effects into the played card entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Night Shift",
+      cardDefinitionId: "onr_v1_295_night-shift",
+      gainedCredits: 2,
+      drawnCards: 1,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_295_night-shift.effect.0.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_295_night-shift",
+          sourceTitle: "Night Shift",
+          reason: "card_resolver"
+        },
+        {
+          effectId: "onr_v1_295_night-shift.effect.1.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_295_night-shift",
+          sourceTitle: "Night Shift",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Night Shift gespielt und 2 Credits erhalten und eine Karte gezogen.");
+    expect(item.title.indexOf("2 Credits erhalten")).toBeLessThan(item.title.indexOf("eine Karte gezogen"));
+    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "+2 Credits", "Karte ziehen"]));
+    expect(effects).toEqual([]);
+  });
+
+  it("uses card resolver source titles when the play payload has no title", () => {
+    const event = makeEvent("play_event", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_095_jack-n-joe",
+      drawnCount: 3,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "runner",
+          amount: 3,
+          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          sourceTitle: "Jack 'n' Joe",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "corp");
+    const effects = formatChronicleEffectItems(event, "corp");
+    const serialized = JSON.stringify(item);
+
+    expect(item.title).toBe("Der Runner hat Jack 'n' Joe gespielt und 3 Karten gezogen.");
+    expect(serialized).toContain("Jack 'n' Joe");
+    expect(serialized).toContain("3 Karten");
+    expect(serialized).not.toContain("Score!");
+    expect(serialized).not.toContain("Livewire");
+    expect(effects).toEqual([]);
+  });
+
   it("shows Loan from Chiba install credit gains as a public economy effect", () => {
     const items = formatChronicleEffectItems(
       makeEvent("install_card", {

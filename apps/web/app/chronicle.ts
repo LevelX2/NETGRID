@@ -64,6 +64,7 @@ type EffectSummary = {
   suffix?: string;
   sentence?: string;
   chips: string[];
+  sourceTitle?: string;
 };
 
 export function formatChronicleEvent(event: PublicGameEvent, side: Side, context: Omit<ChronicleContext, "side"> = {}): ChronicleItem {
@@ -93,7 +94,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
-  const mergedPlayEffect = simpleMergedPlayEffect(event);
+  const mergedPlayEffect = mergedCardResolverPlayEffect(event);
   const agendaAbility = stringValue(payload.agendaAbility);
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const abilityId = payloadAbilityId(payload);
@@ -545,7 +546,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       const playEffect = mergedPlayEffect ?? effect;
       category = playEffect.category ?? category;
-      title = phrase(subject, `${cardTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
+      title = phrase(subject, `${cardTitle ?? playEffect.sourceTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
       chips.push(actionType === "play_event" ? "Event" : "Operation", ...playEffect.chips);
       break;
     case "advance_card":
@@ -1189,14 +1190,32 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   return { chips: [] };
 }
 
-function simpleMergedPlayEffect(event: PublicGameEvent): EffectSummary | undefined {
+function mergedCardResolverPlayEffect(event: PublicGameEvent): EffectSummary | undefined {
   const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
-  const effect = effects[0];
-  if (effects.length !== 1 || !effect || !shouldMergePlayEffect(event, effect)) return undefined;
+  if (effects.length === 0 || !effects.every((effect) => shouldMergePlayEffect(event, effect))) return undefined;
+  const parts = effects.map(cardResolverPlayEffectPart).filter((part): part is EffectSummary => Boolean(part));
+  if (parts.length !== effects.length) return undefined;
+  const suffix = joinChronicleParts(parts.map((part) => part.suffix).filter((value): value is string => Boolean(value)));
+  const sourceTitle = stringValue(effects[0]?.sourceTitle);
+  return {
+    category: parts.some((part) => part.category === "economy") ? "economy" : "card",
+    chips: parts.flatMap((part) => part.chips),
+    ...(suffix ? { suffix } : {}),
+    ...(sourceTitle ? { sourceTitle } : {}),
+  };
+}
+
+function cardResolverPlayEffectPart(effect: ResolvedGameEffect): EffectSummary | undefined {
   const amount = numberValue(effect.amount) ?? 0;
   if (effect.kind === "draw_cards") return { category: "card", suffix: `${cardCountText(amount)} gezogen`, chips: [amount === 1 ? "Karte ziehen" : `${amount} Karten`] };
   if (effect.kind === "gain_credits") return { category: "economy", suffix: `${creditText(amount)} erhalten`, chips: [`+${amount} ${creditLabel(amount)}`] };
   return undefined;
+}
+
+function joinChronicleParts(parts: string[]): string | undefined {
+  if (parts.length === 0) return undefined;
+  if (parts.length === 1) return parts[0];
+  return `${parts.slice(0, -1).join(", ")} und ${parts[parts.length - 1]}`;
 }
 
 function shouldMergePlayEffect(event: PublicGameEvent, effect: ResolvedGameEffect | undefined): boolean {

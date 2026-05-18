@@ -30176,6 +30176,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           amount: 3,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_097_livewires-contacts",
+          sourceTitle: "Livewire's Contacts",
         }),
       ],
     });
@@ -33583,6 +33584,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           amount: 3,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_282_annual-reviews",
+          sourceTitle: "Annual Reviews",
         }),
       ],
     });
@@ -33613,6 +33615,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           amount: 2,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_288_day-shift",
+          sourceTitle: "Day Shift",
         }),
         expect.objectContaining({
           kind: "gain_credits",
@@ -33620,6 +33623,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           amount: 1,
           reason: "card_resolver",
           sourceDefinitionId: "onr_v1_288_day-shift",
+          sourceTitle: "Day Shift",
         }),
       ],
     });
