@@ -37701,6 +37701,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
           identity: "runner_identity_001",
           cards: [
             ...resourceDefinitions.map((id) => ({ id, quantity: 1 })),
+            { id: "simple_fracter", quantity: 2 },
+            { id: "simple_setup_hardware", quantity: 1 },
             { id: "simple_agenda", quantity: 2 },
             { id: "simple_economy_event", quantity: 12 },
           ],
@@ -37802,7 +37804,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
         );
         expect(resourceId).toBeDefined();
         if (!resourceId) throw new Error(`Missing ${definitionId}`);
-        expect(cardCounterAmount(state, resourceId, "recurring_credit")).toBe(1);
+        expect(cardCounterAmount(state, resourceId, "recurring_credit")).toBe(0);
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok, definitionId).toBe(true);
@@ -38066,46 +38068,221 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("keeps Floating Runner BBS and Shell Traders recurring contact credits turn-safe", () => {
+  it("keeps Floating Runner BBS recurring contact credits turn-safe", () => {
     let state = resourceContactState("turn-credits");
-    for (const definitionId of [
-      "onr_v1_163_floating-runner-bbs",
-      "onr_v1_176_the-shell-traders",
-    ] as const) {
-      moveRunnerCardToGrip(state, definitionId);
-      state = apply(
-        state,
-        "runner",
-        (action) =>
-          action.type === "install_card" &&
-          sourceDefinition(state, action) === definitionId,
-      );
-    }
-    const shellId = state.runner.rig.resources.find(
-      (id) => state.cardInstances[id]?.definitionId === "onr_v1_176_the-shell-traders",
+    moveRunnerCardToGrip(state, "onr_v1_163_floating-runner-bbs");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_163_floating-runner-bbs",
     );
-    expect(shellId).toBeDefined();
-    if (!shellId) throw new Error("Missing recurring contact");
-    setCardCounterForTest(state, shellId, "recurring_credit", 0);
+    const initialCredits = state.runner.credits;
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.credits).toBe(initialCredits + 1);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("offers The Shell Traders prepare action only for legal grip program and hardware targets", () => {
+    let state = resourceContactState("shell-prepare-targets");
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    emptyRunnerGripForTest(state);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.shellTradersAbility === "set_aside_from_grip",
+      ),
+    ).toBe(false);
+
+    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    const hardwareId = moveRunnerCardToGrip(state, "simple_setup_hardware");
+    const prepareActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip",
+    );
+    expect(prepareActions.map((action) => action.payload?.targetCardId).sort()).toEqual([
+      hardwareId,
+      programId,
+    ].sort());
+    for (const action of prepareActions) expect(action.costs).toEqual([{ clicks: 1 }]);
+  });
+
+  it("sets aside Shell Traders targets public, revalidates drift, and keeps hidden grip data out of public payloads", () => {
+    let state = resourceContactState("shell-set-aside");
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const shellId = state.runner.rig.resources.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_176_the-shell-traders",
+    );
+    expect(shellId).toBeDefined();
+    if (!shellId) throw new Error("Missing The Shell Traders");
+    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    const corpViewBefore = JSON.stringify(getPlayerView(state, "corp"));
+    expect(corpViewBefore).not.toContain("Simple Fracter");
+    expect(corpViewBefore).not.toContain(programId);
+    const prepare = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.cardId === shellId &&
+        action.payload?.targetCardId === programId,
+    );
+
+    expect(
+      applyAction(state, {
+        matchId: state.matchId,
+        side: "corp",
+        actionId: prepare.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        idempotencyKey: "shell-prepare-wrong-side",
+      }).ok,
+    ).toBe(false);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: prepare.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "shell-prepare-stale",
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
+    const removedSource = structuredClone(state);
+    removeEverywhere(removedSource, shellId);
+    expect(
+      applyAction(removedSource, {
+        matchId: removedSource.matchId,
+        side: "runner",
+        actionId: prepare.actionId,
+        clientKnownStateVersion: removedSource.stateVersion,
+        idempotencyKey: "shell-prepare-removed-source",
+      }).ok,
+    ).toBe(false);
+    const targetDrift = structuredClone(state);
+    removeEverywhere(targetDrift, programId);
+    expect(
+      applyAction(targetDrift, {
+        matchId: targetDrift.matchId,
+        side: "runner",
+        actionId: prepare.actionId,
+        clientKnownStateVersion: targetDrift.stateVersion,
+        idempotencyKey: "shell-prepare-target-drift",
+      }).ok,
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.actionId === prepare.actionId);
+    expect(state.runner.grip).not.toContain(programId);
+    expect(state.specialZones?.setAside).toContain(programId);
+    expect(state.cardInstances[programId]?.zone).toMatchObject({
+      side: "special",
+      zone: "set_aside",
+      visibility: "public",
+    });
+    expect(cardCounterAmount(state, programId, "shell")).toBe(2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trigger_ability",
+      abilityFamily: "hosting-counters",
+      abilityId: "set_aside_from_grip",
+      effectKind: "counter_change",
+      sourceDefinitionId: "onr_v1_176_the-shell-traders",
+      amounts: expect.objectContaining({
+        addedCounterAmount: 2,
+        remainingCounters: 2,
+      }),
+      targets: expect.objectContaining({
+        targetCardDefinitionId: "simple_fracter",
+      }),
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("removes Shell counters through paid and start-of-turn paths and installs the prepared card", () => {
+    let state = resourceContactState("shell-counter-removal");
+    moveRunnerCardToGrip(state, "onr_v1_176_the-shell-traders");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_176_the-shell-traders",
+    );
+    const programId = moveRunnerCardToGrip(state, "simple_fracter");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === programId,
+    );
+    const paidRemove = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "remove_shell_counter" &&
+        action.payload?.targetCardId === programId,
+    );
+    expect(paidRemove.costs).toEqual([{ credits: 1 }]);
+    const creditsBefore = state.runner.credits;
+    state = apply(state, "runner", (action) => action.actionId === paidRemove.actionId);
+    expect(state.runner.credits).toBe(creditsBefore - 1);
+    expect(cardCounterAmount(state, programId, "shell")).toBe(1);
+    expect(state.specialZones?.setAside).toContain(programId);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.specialZones?.setAside).not.toContain(programId);
+    expect(state.runner.rig.programs).toContain(programId);
+    expect(cardCounterAmount(state, programId, "shell")).toBe(0);
+    expect(state.runner.memoryUsed).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
           kind: "counter_change",
           side: "runner",
-          counterType: "recurring_credit",
-          remainingCounters: 1,
+          counterType: "shell",
+          removedCounterAmount: 1,
+          remainingCounters: 0,
           sourceDefinitionId: "onr_v1_176_the-shell-traders",
+          cardDefinitionId: "simple_fracter",
           reason: "start_of_turn",
         }),
       ]),
     );
-    expect(cardCounterAmount(state, shellId, "recurring_credit")).toBe(1);
-    expect(state.runner.credits).toBeGreaterThan(initial.runner.credits);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

@@ -258,6 +258,7 @@ const ACTION_ID_ABILITY_PAYLOAD_FIELDS = [
   "v1921RunnerResourceAbility",
   "resourceAbility",
   "runnerAbility",
+  "shellTradersAbility",
   "acmeSavingsAndLoanAbility",
   "agendaAbility",
 ] as const satisfies readonly LegacyAbilityPayloadField[];
@@ -405,6 +406,7 @@ const BROKER_ID = "onr_v1_154_broker";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 const LOAN_FROM_CHIBA_ID = "onr_v1_168_loan-from-chiba";
+const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -4656,6 +4658,85 @@ function runnerMainActions(state: GameState): LegalAction[] {
           );
         }
       }
+      if (definition.id === SHELL_TRADERS_ID) {
+        for (const targetCardId of shellTradersPrepareTargetIds(state)) {
+          const targetDefinition = definitionFor(state, targetCardId);
+          const shellCounterAmount = shellTradersInstallCost(targetDefinition);
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: ${targetDefinition.title} vorbereiten`,
+              resourceId,
+              [{ clicks: 1 }],
+              {
+                cardId: resourceId,
+                shellTradersAbility: "set_aside_from_grip",
+                targetCardId,
+                targetCardDefinitionId: targetDefinition.id,
+                shellCounterAmount,
+                counterType: "shell",
+                addedCounterAmount: shellCounterAmount,
+                sourceDefinitionId: SHELL_TRADERS_ID,
+                specialZone: "set_aside",
+                specialZoneVisibility: "public",
+                abilityFamily: "hosting-counters",
+                effectKind: "counter_change",
+              },
+              {
+                targetRequirements: [
+                  {
+                    id: "shellTradersTarget",
+                    kind: "card",
+                    side: "runner",
+                    zoneScope: ["runner.grip"],
+                    visibility: "known_to_actor",
+                  },
+                ],
+              },
+            ),
+          );
+        }
+        if (state.runner.credits >= 1) {
+          for (const targetCardId of shellTradersPreparedTargetIds(state)) {
+            const remainingCounters = cardCounter(state, targetCardId, "shell");
+            actions.push(
+              action(
+                state,
+                "runner",
+                "trigger_ability",
+                `${definition.title}: Shell-Counter entfernen`,
+                resourceId,
+                [{ credits: 1 }],
+                {
+                  cardId: resourceId,
+                  shellTradersAbility: "remove_shell_counter",
+                  targetCardId,
+                  targetCardDefinitionId: definitionFor(state, targetCardId).id,
+                  counterType: "shell",
+                  removeCounterAmount: 1,
+                  remainingCountersBefore: remainingCounters,
+                  sourceDefinitionId: SHELL_TRADERS_ID,
+                  abilityFamily: "hosting-counters",
+                  effectKind: "counter_change",
+                },
+                {
+                  targetRequirements: [
+                    {
+                      id: "shellTradersPreparedCard",
+                      kind: "card",
+                      side: "runner",
+                      zoneScope: ["special.set_aside"],
+                      visibility: "public",
+                    },
+                  ],
+                },
+              ),
+            );
+          }
+        }
+      }
       if (
         definition.id === "onr_v1_158_danshis-second-id" &&
         state.runner.tags > 0
@@ -8384,6 +8465,18 @@ function performAction(
         return;
       }
       if (
+        legalAction.payload?.shellTradersAbility === "set_aside_from_grip"
+      ) {
+        resolveShellTradersSetAside(state, legalAction);
+        return;
+      }
+      if (
+        legalAction.payload?.shellTradersAbility === "remove_shell_counter"
+      ) {
+        resolveShellTradersRemoveCounter(state, legalAction);
+        return;
+      }
+      if (
         legalAction.payload?.resourceAbility === "broker_load_credits" ||
         legalAction.payload?.resourceAbility === "broker_take_credits"
       ) {
@@ -8546,6 +8639,272 @@ function resolveJunkyardBbsAbility(
     returnedToGrip: true,
     runnerCreditsAfter: state.runner.credits,
   };
+}
+
+function shellTradersInstallCost(definition: CardDefinition): number {
+  const value = Number(definition.installCost ?? 0);
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0)
+    throw new Error("Shell-Traders-Installationskosten sind ungueltig.");
+  return value;
+}
+
+function shellTradersPrepareTargetIds(state: GameState): CardInstanceId[] {
+  return state.runner.grip
+    .filter((cardId) => shellTradersCanPrepareTarget(state, cardId))
+    .sort();
+}
+
+function shellTradersCanPrepareTarget(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  if (!state.runner.grip.includes(cardId)) return false;
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program" && definition.type !== "hardware")
+    return false;
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    return false;
+  if (
+    definition.type === "program" &&
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+      state.runner.memoryLimit
+  )
+    return false;
+  return true;
+}
+
+function shellTradersPreparedTargetIds(state: GameState): CardInstanceId[] {
+  return (state.specialZones?.setAside ?? [])
+    .filter((cardId) => {
+      const instance = state.cardInstances[cardId];
+      if (!instance) return false;
+      if (instance.owner !== "runner" || instance.zone.side !== "special")
+        return false;
+      if (instance.zone.zone !== "set_aside") return false;
+      if (instance.zone.visibility !== "public") return false;
+      if (cardCounter(state, cardId, "shell") <= 0) return false;
+      const definition = definitionFor(state, cardId);
+      return definition.type === "program" || definition.type === "hardware";
+    })
+    .sort();
+}
+
+function resolveShellTradersSetAside(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf The Shell Traders nutzen.");
+  if (state.phase !== "runner_action_phase")
+    throw new Error("The Shell Traders darf nur im Runner-Zug genutzt werden.");
+  if (
+    clickCostForAction(legalAction) !== 1 ||
+    creditCostForAction(legalAction) !== 0
+  )
+    throw new Error("The Shell Traders verlangt genau 1 Klick.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("The Shell Traders ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== SHELL_TRADERS_ID)
+    throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+  if (!shellTradersCanPrepareTarget(state, targetCardId))
+    throw new Error("The Shell Traders hat kein gueltiges Ziel.");
+  const targetDefinition = definitionFor(state, targetCardId);
+  if (
+    typeof legalAction.payload?.targetCardDefinitionId === "string" &&
+    legalAction.payload.targetCardDefinitionId !== targetDefinition.id
+  )
+    throw new Error("Die Shell-Traders-Zielkarte hat sich geaendert.");
+  const shellCounterAmount = shellTradersInstallCost(targetDefinition);
+  const payloadCounterAmount = Number(
+    legalAction.payload?.shellCounterAmount ?? shellCounterAmount,
+  );
+  if (
+    !Number.isInteger(payloadCounterAmount) ||
+    payloadCounterAmount !== shellCounterAmount
+  )
+    throw new Error("Die Shell-Counter-Anzahl passt nicht mehr zum Ziel.");
+
+  spendClick(state, "runner");
+  removeFromAllZones(state, targetCardId);
+  const specialZones = ensureSpecialZones(state);
+  specialZones.setAside.push(targetCardId);
+  specialZones.setAside.sort();
+  state.cardInstances[targetCardId] = {
+    ...mustInstance(state.cardInstances, targetCardId),
+    faceup: true,
+    rezzed: true,
+    zone: {
+      side: "special",
+      zone: "set_aside",
+      visibility: "public",
+      returnZone: { side: "runner", zone: "rig" },
+    },
+  };
+  setCardCounter(state, targetCardId, "shell", shellCounterAmount);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "shell_traders_set_aside",
+    sourceDefinitionId: SHELL_TRADERS_ID,
+    targetCardDefinitionId: targetDefinition.id,
+    counterType: "shell",
+    addedCounterAmount: shellCounterAmount,
+    shellCounterAmount,
+    remainingCounters: shellCounterAmount,
+    specialZone: "set_aside",
+    specialZoneVisibility: "public",
+  };
+}
+
+function resolveShellTradersRemoveCounter(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf The Shell Traders nutzen.");
+  if (state.phase !== "runner_action_phase")
+    throw new Error("The Shell Traders darf nur im Runner-Zug genutzt werden.");
+  if (
+    clickCostForAction(legalAction) !== 0 ||
+    creditCostForAction(legalAction) !== 1
+  )
+    throw new Error("Shell-Counter entfernen kostet genau 1 Credit.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("The Shell Traders ist nicht installiert.");
+  if (definitionFor(state, sourceCardId).id !== SHELL_TRADERS_ID)
+    throw new Error("Die Shell-Traders-Faehigkeit passt nicht zur Karte.");
+  const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+  if (!shellTradersPreparedTargetIds(state).includes(targetCardId))
+    throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
+  const targetDefinition = definitionFor(state, targetCardId);
+  if (
+    typeof legalAction.payload?.targetCardDefinitionId === "string" &&
+    legalAction.payload.targetCardDefinitionId !== targetDefinition.id
+  )
+    throw new Error("Die Shell-Traders-Zielkarte hat sich geaendert.");
+
+  spendCredits(state, "runner", 1);
+  const result = removeShellCounterAndMaybeInstall(
+    state,
+    targetCardId,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: SHELL_TRADERS_ID,
+    targetCardDefinitionId: targetDefinition.id,
+    counterType: "shell",
+    removedCounterAmount: 1,
+    remainingCounters: result.remainingCounters,
+    shellTradersInstalledTarget: result.installed,
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function removeShellCounterAndMaybeInstall(
+  state: GameState,
+  targetCardId: CardInstanceId,
+): { remainingCounters: number; installed: boolean } {
+  if (!shellTradersPreparedTargetIds(state).includes(targetCardId))
+    throw new Error("Die Shell-Traders-Zielkarte ist nicht vorbereitet.");
+  spendCardCounter(state, targetCardId, "shell", 1);
+  const remainingCounters = cardCounter(state, targetCardId, "shell");
+  if (remainingCounters > 0)
+    return { remainingCounters, installed: false };
+  installShellTradersPreparedCardForFree(state, targetCardId);
+  return { remainingCounters, installed: true };
+}
+
+function installShellTradersPreparedCardForFree(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  const definition = definitionFor(state, cardId);
+  const instance = mustInstance(state.cardInstances, cardId);
+  if (
+    instance.owner !== "runner" ||
+    instance.zone.side !== "special" ||
+    instance.zone.zone !== "set_aside"
+  )
+    throw new Error("The Shell Traders kann nur vorbereitete Runner-Karten installieren.");
+  if (definition.type !== "program" && definition.type !== "hardware")
+    throw new Error("The Shell Traders installiert nur Programme oder Hardware.");
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+  if (
+    definition.type === "program" &&
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+      state.runner.memoryLimit
+  )
+    throw new Error("Nicht genug Memory fuer The Shell Traders.");
+
+  removeFromAllZones(state, cardId);
+  if (definition.type === "program") {
+    state.runner.rig.programs.push(cardId);
+    state.runner.memoryUsed += definition.memoryCost ?? 0;
+  } else {
+    state.runner.rig.hardware.push(cardId);
+    if (definition.mechanics.includes("modify_memory_limit"))
+      state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
+    else if ((definition.memoryLimitBonus ?? 0) > 0)
+      state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
+  }
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "rig" },
+  };
+  setCardCounter(state, cardId, "shell", 0);
+  if ((definition.recurringCredits ?? 0) > 0)
+    setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
+  if (
+    definition.type === "program" &&
+    definition.mechanics.includes("virus") &&
+    definition.id !== BUTCHER_BOY_ID &&
+    definition.id !== SKIVVISS_ID
+  )
+    addCardCounter(state, cardId, "virus", 1);
+}
+
+function applyShellTradersStartOfTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const resolvedSourceIds = (flags.shellTradersStartTurnResolvedSourceIds ??= []);
+  for (const sourceCardId of state.runner.rig.resources.slice().sort()) {
+    if (definitionFor(state, sourceCardId).id !== SHELL_TRADERS_ID) continue;
+    if (resolvedSourceIds.includes(sourceCardId)) continue;
+    const targetCardId = shellTradersPreparedTargetIds(state)[0];
+    if (!targetCardId) continue;
+    resolvedSourceIds.push(sourceCardId);
+    const targetDefinition = definitionFor(state, targetCardId);
+    const result = removeShellCounterAndMaybeInstall(state, targetCardId);
+    effects?.push({
+      effectId: `runner.start.shell_traders.${sourceCardId}.${targetCardId}`,
+      kind: "counter_change",
+      visibility: "public",
+      side: "runner",
+      amount: result.remainingCounters,
+      reason: "start_of_turn",
+      counterType: "shell",
+      removedCounterAmount: 1,
+      remainingCounters: result.remainingCounters,
+      sourceDefinitionId: SHELL_TRADERS_ID,
+      sourceTitle: publicCardTitle(SHELL_TRADERS_ID),
+      cardDefinitionId: targetDefinition.id,
+      cardTitle: publicCardTitle(targetDefinition.id),
+    });
+  }
 }
 
 function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void {
@@ -13457,6 +13816,7 @@ function startRunnerTurn(
   flags.allNighterBonusRunPending = false;
   flags.valuPakProgramInstallActionsRemaining = 0;
   flags.valuPakTemporaryProgramInstallCredits = 0;
+  flags.shellTradersStartTurnResolvedSourceIds = [];
   flags.bodyweightDataCrecheExtraRunPending = false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
   flags.startupImmolatorUsedSourceIdsThisTurn = [];
@@ -13795,6 +14155,7 @@ function applyRunnerStartOfTurnEffects(
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }
+  applyShellTradersStartOfTurn(state, effects);
   if (state.pendingChoice) return;
   if (queueIncubatorStartOfTurnTransforms(state)) return;
   for (const cardId of state.runner.rig.resources.slice().sort()) {
@@ -16198,6 +16559,7 @@ function action(
     payload?.cardImplementationAbility ||
     payload?.resourceAbility ||
     payload?.runnerAbility ||
+    payload?.shellTradersAbility ||
     payload?.acmeSavingsAndLoanAbility ||
     (side === "runner" && type === "install_card")
       ? "public"
@@ -24733,6 +25095,7 @@ function ensureRunnerTurnFlags(
     fangRunLockCreditCost: 0,
     valuPakProgramInstallActionsRemaining: 0,
     valuPakTemporaryProgramInstallCredits: 0,
+    shellTradersStartTurnResolvedSourceIds: [],
     bodyweightDataCrecheExtraRunPending: false,
     bodyweightDataCrecheExtraRunUsedThisTurn: false,
     startupImmolatorUsedSourceIdsThisTurn: [],
@@ -24753,6 +25116,7 @@ function ensureRunnerTurnFlags(
   flags.fangRunLockCreditCost ??= 0;
   flags.valuPakProgramInstallActionsRemaining ??= 0;
   flags.valuPakTemporaryProgramInstallCredits ??= 0;
+  flags.shellTradersStartTurnResolvedSourceIds ??= [];
   flags.bodyweightDataCrecheExtraRunPending ??= false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
   flags.startupImmolatorUsedSourceIdsThisTurn ??= [];

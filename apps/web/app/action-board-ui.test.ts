@@ -686,6 +686,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.primaryActions).toEqual([]);
     expect(split.contextualActions).toEqual([prepare, remove]);
     expect(actionMatchesContext(prepare, { kind: "card", id: "shell_traders_1", label: "The Shell Traders" })).toBe(true);
+    expect(actionButtonLabel(prepare)).toBe("Karte vorbereiten");
+    expect(actionButtonLabel(remove)).toBe("Shell-Counter entfernen");
     expect(contextualCardActionLabel(prepare)).toBe("Karte vorbereiten");
     expect(contextualCardActionLabel(remove)).toBe("Shell-Counter entfernen");
   });
