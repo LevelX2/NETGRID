@@ -533,6 +533,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 
+  it("renders low credit-counter amounts as separate icons", () => {
+    expect(cardCreditCounterVisual(2)).toMatchObject({
+      safeAmount: 2,
+      showCount: false,
+      iconCount: 2
+    });
+  });
+
   it("keeps contextual card action labels distinct for server-targeted events", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf R&D", { cardId: "card_1", serverId: "rd" }))).toBe("Run auf R&D");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
