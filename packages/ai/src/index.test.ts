@@ -101,6 +101,9 @@ describe("MVP 0.3 AI controller contract", () => {
     delete DEMO_CARDS_BY_ID.test_hidden_runner_resource_harness;
     delete DEMO_CARDS_BY_ID.test_planless_corp_operation;
     delete DEMO_CARDS_BY_ID.test_planless_runner_resource;
+    delete DEMO_CARDS_BY_ID.test_alpha_planless_runner_resource;
+    delete DEMO_CARDS_BY_ID.test_zeta_planless_runner_resource;
+    delete DEMO_CARDS_BY_ID.test_zeta_planless_corp_operation;
   });
 
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -1210,6 +1213,145 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );
+  });
+
+  it("keeps discard choices deterministic for repeated Runner doctrine inputs", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-determinism",
+      ["rig_builder"],
+      { build_rig: 24 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_run_event"],
+      ownDeckDoctrine: doctrine,
+    });
+
+    const first = chooseRunnerAction(input);
+    const second = chooseRunnerAction(input);
+
+    expect(second.selectedChoices).toEqual(first.selectedChoices);
+    expect(second.evidence).toEqual(first.evidence);
+  });
+
+  it("keeps discard tie-break stable when mapped cards have equal keep values", () => {
+    DEMO_CARDS_BY_ID.test_alpha_planless_runner_resource = {
+      id: "test_alpha_planless_runner_resource",
+      title: "Alpha Planless Runner Resource",
+      side: "runner",
+      type: "resource",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      installCost: 1,
+      rulesText: "Discard tie fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    DEMO_CARDS_BY_ID.test_zeta_planless_runner_resource = {
+      id: "test_zeta_planless_runner_resource",
+      title: "Zeta Planless Runner Resource",
+      side: "runner",
+      type: "resource",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      installCost: 1,
+      rulesText: "Discard tie fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: [
+        "test_zeta_planless_runner_resource",
+        "test_alpha_planless_runner_resource",
+      ],
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_alpha_planless_runner_resource_1"],
+    });
+  });
+
+  it("keeps discard evidence and debug output abstract and side-safe", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-redaction",
+      ["hq_pressure"],
+      { pressure_hq: 24 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_run_event", "simple_economy_event"],
+      rig: ["simple_fracter"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(JSON.stringify(decision.evidence)).not.toMatch(
+      /simple_|cardInstances|privatePayload|fullGameState/i,
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_score:base",
+        "discard_score:planfit",
+        "discard_score:doctrinefit",
+      ]),
+    );
+  });
+
+  it("shows Runner discard quality improves over stable first-option selection", () => {
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_run_event"],
+    });
+    const stableFirst = input.playerView.pendingChoice?.options
+      .slice()
+      .sort(
+        (left, right) =>
+          left.label.localeCompare(right.label, "de") ||
+          left.id.localeCompare(right.id),
+      )[0]?.id;
+    const decision = chooseRunnerAction(input);
+
+    expect(stableFirst).toBe("card_discard_simple_fracter_0");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+  });
+
+  it("shows Corp discard quality improves over stable first-option selection", () => {
+    DEMO_CARDS_BY_ID.test_zeta_planless_corp_operation = {
+      id: "test_zeta_planless_corp_operation",
+      title: "Zeta Planless Corp Operation",
+      side: "corp",
+      type: "operation",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      cost: 1,
+      rulesText: "Discard regression fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("corp", {
+      credits: 4,
+      cards: ["simple_agenda", "test_zeta_planless_corp_operation"],
+    });
+    const stableFirst = input.playerView.pendingChoice?.options
+      .slice()
+      .sort(
+        (left, right) =>
+          left.label.localeCompare(right.label, "de") ||
+          left.id.localeCompare(right.id),
+      )[0]?.id;
+    const decision = chooseCorpAction(input);
+
+    expect(stableFirst).toBe("card_discard_simple_agenda_0");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_zeta_planless_corp_operation_1"],
+    });
   });
 
   it("keeps V0.95 Resource trash decisions LegalActions-only and side-safe", () => {

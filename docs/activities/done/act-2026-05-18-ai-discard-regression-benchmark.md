@@ -1,20 +1,22 @@
 ---
 activityId: act-2026-05-18-ai-discard-regression-benchmark
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-18
-startedAt:
-completedAt:
+startedAt: 2026-05-18
+completedAt: 2026-05-18
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-18-ai-discard-keep-value-baseline
   - act-2026-05-18-ai-discard-plan-doctrine-fit
-resultArtifacts: []
+resultArtifacts:
+  - packages/ai/src/index.test.ts
+  - docs/derived/AI_DISCARD_REGRESSION_REVIEW_2026_05_18.md
 checks:
   - corepack pnpm --filter @netgrid/ai test -- --run
   - corepack pnpm --filter @netgrid/ai typecheck
@@ -71,12 +73,12 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline` u
 
 ## Akzeptanzkriterien
 
-- [ ] Alle Vorgänger-Regressionen bleiben grün und werden durch plan-/doctrine-bezogene Tests ergänzt.
-- [ ] Determinismus ist für Auswahl, Tie-Break und Fallback nachgewiesen.
-- [ ] Mindestens ein Hidden-Info-/Redaction-Test deckt Discard-Debug- oder Evidence-Ausgaben ab.
-- [ ] Mindestens ein Runner- und ein Korp-Szenario zeigen qualitativ bessere Discard-Auswahl als die alte stabile Erstoption.
-- [ ] Bestehende Plan-KI-Tests für Runner und Korp bleiben grün.
-- [ ] Falls eine kurze Review-Notiz entsteht, dokumentiert sie Grenzen: keine Vollplanung, keine gegnerische Hidden Info, keine Engine-Regeländerung.
+- [x] Alle Vorgänger-Regressionen bleiben grün und werden durch plan-/doctrine-bezogene Tests ergänzt.
+- [x] Determinismus ist für Auswahl, Tie-Break und Fallback nachgewiesen.
+- [x] Mindestens ein Hidden-Info-/Redaction-Test deckt Discard-Debug- oder Evidence-Ausgaben ab.
+- [x] Mindestens ein Runner- und ein Korp-Szenario zeigen qualitativ bessere Discard-Auswahl als die alte stabile Erstoption.
+- [x] Bestehende Plan-KI-Tests für Runner und Korp bleiben grün.
+- [x] Falls eine kurze Review-Notiz entsteht, dokumentiert sie Grenzen: keine Vollplanung, keine gegnerische Hidden Info, keine Engine-Regeländerung.
 
 ## Umsetzungshinweise
 
@@ -87,4 +89,4 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline` u
 
 ## Ergebnisnotiz
 
-Noch offen.
+Regressionen wurden um Determinismus, Tie-Break, abstrakte Evidence/Debug-Ausgaben und qualitative Runner-/Korp-Szenarien gegen die alte stabile Erstoption erweitert. Der fokussierte Discard-/Plan-/Doctrine-Filter, der vollständige AI-Testlauf, Typecheck, Visibility-Contract und Whitespace-Check sind grün. Die Review-Notiz `docs/derived/AI_DISCARD_REGRESSION_REVIEW_2026_05_18.md` dokumentiert Nachweise und Grenzen: keine Vollplanung, keine gegnerische Hidden Info, keine Engine-Regeländerung und nur normale `resolve_choice`-Discard-Entscheidungen.
