@@ -6920,8 +6920,15 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     dataMasons.corp.credits = 30;
     dataMasons.corp.maxHandSize = 100;
-    putCorpRootInRemote(dataMasons, "onr_v1_317_data-masons");
-    putCorpIceOnServer(dataMasons, "rd", "onr_v1_232_crystal-wall");
+    const dataMasonsId = putCorpRootInRemote(
+      dataMasons,
+      "onr_v1_317_data-masons",
+    );
+    const dataMasonsWallId = putCorpIceOnServer(
+      dataMasons,
+      "rd",
+      "onr_v1_232_crystal-wall",
+    );
     dataMasons = apply(
       dataMasons,
       "corp",
@@ -6948,6 +6955,20 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(dataMasons, action) === "onr_v1_232_crystal-wall",
     );
     expect(wallRez.costs[0]?.credits).toBe(2);
+    const dataMasonsQuoteState = structuredClone(dataMasons);
+    const dataMasonsQuoteHash = hashState(dataMasons);
+    const dataMasonsQuote = quoteCorpRezCost(dataMasons, dataMasonsWallId);
+    expect(dataMasons).toEqual(dataMasonsQuoteState);
+    expect(hashState(dataMasons)).toBe(dataMasonsQuoteHash);
+    expect(dataMasonsQuote.finalCredits).toBe(2);
+    expect(dataMasonsQuote.modifiers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: dataMasonsId,
+        sourceDefinitionId: "onr_v1_317_data-masons",
+        amount: 2,
+        kind: "reduction",
+      }),
+    ]);
     dataMasons = apply(
       dataMasons,
       "corp",
@@ -7028,8 +7049,12 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     encoder.corp.credits = 30;
     encoder.corp.maxHandSize = 100;
-    putCorpRootInRemote(encoder, "onr_v1_320_encoder-inc");
-    putCorpIceOnServer(encoder, "rd", "onr_v1_230_cortical-scanner");
+    const encoderId = putCorpRootInRemote(encoder, "onr_v1_320_encoder-inc");
+    const codeGateId = putCorpIceOnServer(
+      encoder,
+      "rd",
+      "onr_v1_230_cortical-scanner",
+    );
     encoder = apply(
       encoder,
       "corp",
@@ -7052,6 +7077,14 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(encoder, action) === "onr_v1_230_cortical-scanner",
     );
     expect(codeGateRez.costs[0]?.credits).toBe(5);
+    expect(quoteCorpRezCost(encoder, codeGateId).modifiers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: encoderId,
+        sourceDefinitionId: "onr_v1_320_encoder-inc",
+        amount: 2,
+        kind: "reduction",
+      }),
+    ]);
 
     let skalderviken = v162CardReleaseGame("v162-skalderviken");
     skalderviken = apply(
@@ -7061,11 +7094,15 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     skalderviken.corp.credits = 30;
     skalderviken.corp.maxHandSize = 100;
-    putCorpRootInRemote(
+    const skaldervikenId = putCorpRootInRemote(
       skalderviken,
       "onr_v1_341_skalderviken-sa-beta-test-site",
     );
-    putCorpIceOnServer(skalderviken, "hq", "onr_v1_231_cortical-scrub");
+    const blackIceId = putCorpIceOnServer(
+      skalderviken,
+      "hq",
+      "onr_v1_231_cortical-scrub",
+    );
     skalderviken = apply(
       skalderviken,
       "corp",
@@ -7093,6 +7130,14 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(skalderviken, action) === "onr_v1_231_cortical-scrub",
     );
     expect(blackIceRez.costs[0]?.credits).toBe(5);
+    expect(quoteCorpRezCost(skalderviken, blackIceId).modifiers).toEqual([
+      expect.objectContaining({
+        sourceCardInstanceId: skaldervikenId,
+        sourceDefinitionId: "onr_v1_341_skalderviken-sa-beta-test-site",
+        amount: 2,
+        kind: "reduction",
+      }),
+    ]);
 
     let priority = v162CardReleaseGame("v162-priority-requisition");
     priority = apply(
