@@ -448,6 +448,9 @@ const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const BBS_WHISPERING_CAMPAIGN_ID = "onr_v1_309_bbs-whispering-campaign";
 const BBS_WHISPERING_CAMPAIGN_STARTING_BITS = 16;
+const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
+const BRAINDANCE_CAMPAIGN_STARTING_BITS = 12;
+const BRAINDANCE_CAMPAIGN_TURN_DRAIN = 2;
 const HOLOVID_CAMPAIGN_ID = "onr_v1_326_holovid-campaign";
 const HOLOVID_CAMPAIGN_STARTING_BITS = 12;
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
@@ -9907,6 +9910,23 @@ function rezCard(
       };
     }
   }
+  if (definition.id === BRAINDANCE_CAMPAIGN_ID) {
+    setCardCounter(
+      state,
+      cardId as CardInstanceId,
+      "bit",
+      BRAINDANCE_CAMPAIGN_STARTING_BITS,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: BRAINDANCE_CAMPAIGN_ID,
+        counterType: "bit",
+        addedCounterAmount: BRAINDANCE_CAMPAIGN_STARTING_BITS,
+        remainingCounters: BRAINDANCE_CAMPAIGN_STARTING_BITS,
+      };
+    }
+  }
   if (definition.id === HOLOVID_CAMPAIGN_ID) {
     setCardCounter(
       state,
@@ -13546,6 +13566,39 @@ function applyCorpStartOfTurnEffects(
           ),
         );
       }
+      continue;
+    }
+    if (definitionId === BRAINDANCE_CAMPAIGN_ID) {
+      const availableBits = cardCounter(state, cardId, "bit");
+      if (availableBits > 0) {
+        const drainedBits = Math.min(BRAINDANCE_CAMPAIGN_TURN_DRAIN, availableBits);
+        spendCardCounter(state, cardId, "bit", drainedBits);
+        credits(state, "corp", drainedBits);
+        const remainingCounters = cardCounter(state, cardId, "bit");
+        effects?.push(
+          automaticGainCreditsEffect(
+            `corp.start.braindance_campaign.${cardId}`,
+            "corp",
+            drainedBits,
+            definitionId,
+          ),
+        );
+        effects?.push({
+          effectId: `corp.start.braindance_campaign.bits.${cardId}`,
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: remainingCounters,
+          reason: "start_of_turn",
+          counterType: "bit",
+          removedCounterAmount: drainedBits,
+          remainingCounters,
+          sourceDefinitionId: definitionId,
+          sourceTitle: publicCardTitle(definitionId),
+        });
+      }
+      if (cardCounter(state, cardId, "bit") <= 0)
+        trashCorpInstalledCardToArchives(state, cardId);
       continue;
     }
     if (definitionId === HOLOVID_CAMPAIGN_ID) {

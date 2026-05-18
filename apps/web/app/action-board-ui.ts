@@ -116,7 +116,8 @@ type StoredCreditCounterType = "power" | "bit";
 const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
   "onr_v1_154_broker": { label: "Broker", counter: "power" },
   "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "power" },
-  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" }
+  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" },
+  "onr_v1_311_braindance-campaign": { label: "Braindance Campaign", counter: "bit" }
 };
 
 export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {

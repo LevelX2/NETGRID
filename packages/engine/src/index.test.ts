@@ -18749,6 +18749,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         faceup: true,
         rezzed: true,
       };
+      if (definitionId === "onr_v1_311_braindance-campaign")
+        setCardCounterForTest(state, assetId, "bit", 12);
     }
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -18756,7 +18758,17 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
 
-    expect(state.corp.credits).toBe(creditsBefore + recurringAssets.length);
+    expect(state.corp.credits).toBe(creditsBefore + 3);
+    expect(
+      state.corp.servers.some((server) =>
+        server.root.some(
+          (cardId) =>
+            state.cardInstances[cardId]?.definitionId ===
+              "onr_v1_311_braindance-campaign" &&
+            cardCounterAmount(state, cardId, "bit") === 10,
+        ),
+      ),
+    ).toBe(true);
     expect(validateGameState(state).ok).toBe(true);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"/,
@@ -31197,6 +31209,76 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       side: "corp",
       zone: "archives",
     });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("loads Braindance Campaign with 12 public bits and drains 2 at Corp turn start", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-braindance-bits");
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const braindanceId = moveCorpCardToHq(state, "onr_v1_311_braindance-campaign");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === braindanceId &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    const hiddenRunnerRoot = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    )?.root[0];
+    expect(hiddenRunnerRoot?.known).toBe(false);
+    expect(JSON.stringify(hiddenRunnerRoot)).not.toContain("braindance");
+
+    const creditsBeforeRez = state.corp.credits;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_311_braindance-campaign",
+    );
+
+    expect(state.corp.credits).toBe(creditsBeforeRez - 6);
+    expect(cardCounterAmount(state, braindanceId, "bit")).toBe(12);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      addedCounterAmount: 12,
+      remainingCounters: 12,
+      sourceDefinitionId: "onr_v1_311_braindance-campaign",
+    });
+    expect(
+      getPlayerView(state, "runner").servers.some((server) =>
+        server.root.some(
+          (card) =>
+            card.definitionId === "onr_v1_311_braindance-campaign" &&
+            card.counters?.bit === 12,
+        ),
+      ),
+    ).toBe(true);
+
+    setCardCounterForTest(state, braindanceId, "bit", 2);
+    const creditsBeforeDrain = state.corp.credits;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+
+    expect(state.corp.credits).toBe(creditsBeforeDrain + 2);
+    expect(state.corp.archives).toContain(braindanceId);
+    expect(state.cardInstances[braindanceId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "archives",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).toContain(
+      '"removedCounterAmount":2',
+    );
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).toContain(
+      '"amount":2',
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

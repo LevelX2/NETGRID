@@ -474,7 +474,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
   });
 
-  it("maps BBS stored bit counters to the existing card credit badge pattern", () => {
+  it("maps campaign stored bit counters to the existing card credit badge pattern", () => {
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
       definitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -484,6 +484,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
       ...bbsUnderTen,
       instanceId: "bbs_2",
       counters: { bit: 10 }
+    };
+    const braindanceTenPlus: VisibleCard = {
+      ...card("braindance_1", "Braindance Campaign", "asset"),
+      definitionId: "onr_v1_311_braindance-campaign",
+      counters: { bit: 12 }
     };
     const unknownPowerCard: VisibleCard = {
       ...card("unknown_1", "Unknown Power Counter Card", "asset"),
@@ -500,6 +505,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(storedCreditAmount(bbsTenPlus)).toBe(10);
     expect(cardCreditCounterVisual(storedCreditAmount(bbsTenPlus))).toMatchObject({
       safeAmount: 10,
+      showCount: true,
+      iconCount: 1
+    });
+    expect(storedCreditSourceLabel(braindanceTenPlus)).toBe("Braindance Campaign");
+    expect(storedCreditAmount(braindanceTenPlus)).toBe(12);
+    expect(cardCreditCounterVisual(storedCreditAmount(braindanceTenPlus))).toMatchObject({
+      safeAmount: 12,
       showCount: true,
       iconCount: 1
     });
