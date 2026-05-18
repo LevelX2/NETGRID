@@ -1,5 +1,6 @@
 import type {
   CardDefinition,
+  CardDefinitionId,
   CardInstanceId,
   GameState,
   SubroutineDefinition,
@@ -17,6 +18,20 @@ import type {
   CardAdditionalSubroutineModifierImplementation,
   CardSubroutineImplementation,
 } from "./definition-types";
+
+export type DynamicSubroutineAttribution = {
+  internalId: string;
+  publicId: string;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  sourceTitle: string;
+  modifierKind: "additional_subroutine";
+  subroutineKind: CardSubroutineImplementation["kind"];
+};
+
+export type DynamicSubroutineDefinition = SubroutineDefinition & {
+  dynamicSubroutine?: DynamicSubroutineAttribution;
+};
 
 function additionalSubroutineModifierAppliesToIce(
   state: GameState,
@@ -41,13 +56,24 @@ function subroutineDefinitionForImplementation(
   match: ActiveCardImplementationModifier<CardAdditionalSubroutineModifierImplementation>,
   subroutine: CardSubroutineImplementation,
   index: number,
-): SubroutineDefinition {
+): DynamicSubroutineDefinition {
   if (subroutine.visibility !== "public")
     throw new Error("Unsupported additional subroutine visibility.");
+  const publicId = `card_implementation.${match.sourceDefinitionId}.additional_subroutine.${index + 1}.${subroutine.kind}`;
+  const dynamicSubroutine: DynamicSubroutineAttribution = {
+    internalId: `${publicId}.${match.sourceCardInstanceId}`,
+    publicId,
+    sourceCardInstanceId: match.sourceCardInstanceId,
+    sourceDefinitionId: match.sourceDefinitionId,
+    sourceTitle: match.sourceDefinition.title,
+    modifierKind: "additional_subroutine",
+    subroutineKind: subroutine.kind,
+  };
   if (subroutine.kind === "end_the_run") {
     return {
-      id: `card_implementation.${match.sourceDefinitionId}.${match.sourceCardInstanceId}.additional_subroutine.${index + 1}.end_the_run`,
+      id: publicId,
       type: "end_the_run",
+      dynamicSubroutine,
     };
   }
   throw new Error(`Unsupported additional subroutine: ${JSON.stringify(subroutine)}`);
@@ -84,4 +110,11 @@ export function additionalSubroutinesForIce(
     );
   }
   return subroutines;
+}
+
+export function dynamicSubroutineAttributionFor(
+  subroutine: SubroutineDefinition | undefined,
+): DynamicSubroutineAttribution | undefined {
+  return (subroutine as DynamicSubroutineDefinition | undefined)
+    ?.dynamicSubroutine;
 }

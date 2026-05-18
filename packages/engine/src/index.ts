@@ -64,7 +64,10 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "./ability-engine/cost-pipeline";
 export { quoteCorpRezCost } from "./ability-engine/cost-pipeline";
-import { additionalSubroutinesForIce } from "./ability-engine/additional-subroutine-modifiers";
+import {
+  additionalSubroutinesForIce,
+  dynamicSubroutineAttributionFor,
+} from "./ability-engine/additional-subroutine-modifiers";
 import {
   executeCardImplementationEffects,
   type CardEffectDrawCardsResult,
@@ -5995,8 +5998,10 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
                 breakerId,
                 iceId: encounteredIceId,
                 subroutineIndex: index,
+                subroutineId: subroutine.id,
                 targetIceDefinitionId: iceDefinition.id,
                 targetIceTitle: iceDefinition.title,
+                ...dynamicSubroutinePayload(subroutine),
                 breakSubroutineBaseCost: breakAbility.cost.credits,
                 ...(additionalBreakCost > 0
                   ? {
@@ -6180,6 +6185,39 @@ function breakAbilityMatchesSubroutine(
   if (tags.includes("trace") && subroutine.type === "initiate_trace") return true;
   const subroutineTags = subroutine.breakTags ?? [];
   return tags.some((tag) => subroutineTags.includes(tag));
+}
+
+function dynamicSubroutinePayload(
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+): NonNullable<LegalAction["payload"]> {
+  const attribution = dynamicSubroutineAttributionFor(subroutine);
+  if (!attribution) return {};
+  return {
+    dynamicSourceDefinitionId: attribution.sourceDefinitionId,
+    dynamicSourceTitle: attribution.sourceTitle,
+    dynamicSourceKind: attribution.modifierKind,
+    dynamicSubroutineKind: attribution.subroutineKind,
+  };
+}
+
+function assertCurrentSubroutineMatchesLegalAction(
+  state: GameState,
+  iceDefinition: CardDefinition,
+  subroutineIndex: number,
+  legalAction: LegalAction,
+): NonNullable<CardDefinition["subroutines"]>[number] {
+  const subroutine = subroutinesForCurrentEncounter(
+    state,
+    iceDefinition,
+  )[subroutineIndex];
+  if (!subroutine) throw new Error("Subroutine existiert nicht mehr.");
+  const expectedSubroutineId =
+    typeof legalAction.payload?.subroutineId === "string"
+      ? legalAction.payload.subroutineId
+      : undefined;
+  if (expectedSubroutineId && subroutine.id !== expectedSubroutineId)
+    throw new Error("Subroutine-Ziel ist nicht mehr gueltig.");
+  return subroutine;
 }
 
 function resolvePileDriverBreakSubroutinesAction(
@@ -8120,6 +8158,15 @@ function performAction(
         recordDupreBreakUsage(state, breakerId);
         return;
       }
+      if (!state.run?.encounteredIceId)
+        throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
+      const iceDefinition = definitionFor(state, state.run.encounteredIceId);
+      assertCurrentSubroutineMatchesLegalAction(
+        state,
+        iceDefinition,
+        Number(legalAction.payload?.subroutineIndex),
+        legalAction,
+      );
       spendRunnerRunCredits(
         state,
         legalAction.costs[0]?.credits ?? 1,
@@ -10424,6 +10471,7 @@ function appendResolvedSubroutineEffect(
   damageSummary?: DamageSummary,
 ): void {
   if (!legalAction) return;
+  const dynamicAttribution = dynamicSubroutineAttributionFor(subroutine);
   legalAction.resolvedEffects = [
     ...(legalAction.resolvedEffects ?? []),
     {
@@ -10436,6 +10484,12 @@ function appendResolvedSubroutineEffect(
       sourceTitle: definition.title,
       subroutineIndex,
       subroutineType: subroutine.type,
+      ...(dynamicAttribution
+        ? {
+            cardDefinitionId: dynamicAttribution.sourceDefinitionId,
+            cardTitle: dynamicAttribution.sourceTitle,
+          }
+        : {}),
       ...(damageSummary
         ? {
             damageType: damageSummary.damageType,
@@ -10514,11 +10568,12 @@ function resolveBlinkBreakSubroutineAction(
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Blink-Subroutinenziel ist ungueltig.");
   const iceDefinition = definitionFor(state, encounteredIceId);
-  const subroutine = subroutinesForCurrentEncounter(
+  assertCurrentSubroutineMatchesLegalAction(
     state,
     iceDefinition,
-  )[subroutineIndex];
-  if (!subroutine) throw new Error("Blink-Subroutine existiert nicht.");
+    subroutineIndex,
+    legalAction,
+  );
   if (
     run.brokenSubroutineIndexes.includes(subroutineIndex) ||
     run.resolvedSubroutineIndexes.includes(subroutineIndex)
@@ -21037,6 +21092,8 @@ function makeActionId(
   if (payload?.iceId) parts.push(String(payload.iceId));
   if (payload?.subroutineIndex !== undefined)
     parts.push(String(payload.subroutineIndex));
+  if (payload?.subroutineId !== undefined)
+    parts.push(String(payload.subroutineId));
   if (payload?.subroutineIndexes !== undefined)
     parts.push(String(payload.subroutineIndexes));
   if (payload?.proteusVariableRez !== undefined)

@@ -7986,6 +7986,13 @@ describe("V1.6.2 Mechanikpaket B", () => {
         )
         .map((action) => Number(action.payload?.subroutineIndex))
         .sort((a, b) => a - b);
+    const encoderInstanceId = (state: GameState): CardInstanceId => {
+      const match = Object.entries(state.cardInstances).find(
+        ([, instance]) => instance.definitionId === "onr_v1_320_encoder-inc",
+      );
+      if (!match) throw new Error("Missing Encoder, Inc. instance.");
+      return match[0] as CardInstanceId;
+    };
 
     const withEncoder = approachIce(
       "v162-encoder-additional-subroutine",
@@ -8000,6 +8007,26 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(withEncoder, action) === "simple_decoder",
     );
     expect(decoderBreakIndexes(pumpedWithEncoder)).toEqual([0, 1, 2, 3]);
+    const breakActions = getLegalActions(pumpedWithEncoder, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(pumpedWithEncoder, action) === "simple_decoder",
+    );
+    expect(breakActions.map((action) => action.payload?.subroutineId)).toEqual([
+      "onr_v1_230_cortical_scanner_etr_1",
+      "onr_v1_230_cortical_scanner_etr_2",
+      "onr_v1_230_cortical_scanner_etr_3",
+      "card_implementation.onr_v1_320_encoder-inc.additional_subroutine.1.end_the_run",
+    ]);
+    expect(breakActions[3]?.payload).toMatchObject({
+      dynamicSourceDefinitionId: "onr_v1_320_encoder-inc",
+      dynamicSourceTitle: "Encoder, Inc.",
+      dynamicSourceKind: "additional_subroutine",
+      dynamicSubroutineKind: "end_the_run",
+    });
+    expect(JSON.stringify(breakActions[3]?.payload)).not.toContain(
+      encoderInstanceId(pumpedWithEncoder),
+    );
     expect(
       mustAction(
         pumpedWithEncoder,
@@ -8010,6 +8037,61 @@ describe("V1.6.2 Mechanikpaket B", () => {
       unbrokenSubroutineCount: 4,
       encounterWillEndRun: true,
     });
+
+    const printedBreakState = apply(
+      pumpedWithEncoder,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.subroutineIndex === 0,
+    );
+    expect(printedBreakState.run?.brokenSubroutineIndexes).toContain(0);
+    expect(printedBreakState.run?.brokenSubroutineIndexes).not.toContain(3);
+
+    const dynamicBreakOnlyState = apply(
+      pumpedWithEncoder,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.subroutineIndex === 3,
+    );
+    expect(dynamicBreakOnlyState.run?.brokenSubroutineIndexes).toContain(3);
+    expect(dynamicBreakOnlyState.run?.brokenSubroutineIndexes).not.toContain(0);
+
+    let staleBreakState = approachIce(
+      "v162-encoder-additional-subroutine-stale-break",
+      "onr_v1_230_cortical-scanner",
+      true,
+    );
+    staleBreakState = apply(
+      staleBreakState,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(staleBreakState, action) === "simple_decoder",
+    );
+    const staleBreakAction = mustAction(
+      staleBreakState,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.subroutineIndex === 3,
+    );
+    const staleEncoderId = encoderInstanceId(staleBreakState);
+    staleBreakState.cardInstances[staleEncoderId] = {
+      ...staleBreakState.cardInstances[staleEncoderId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    const staleCreditsBefore = staleBreakState.runner.credits;
+    expect(() =>
+      apply(
+        staleBreakState,
+        "runner",
+        (action) => action.actionId === staleBreakAction.actionId,
+      ),
+    ).toThrow();
+    expect(staleBreakState.runner.credits).toBe(staleCreditsBefore);
 
     let addedSubroutineUnbroken = pumpedWithEncoder;
     for (const subroutineIndex of [0, 1, 2]) {
@@ -8035,9 +8117,14 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinitionId: "onr_v1_230_cortical-scanner",
         subroutineIndex: 3,
         subroutineType: "end_the_run",
+        cardDefinitionId: "onr_v1_320_encoder-inc",
+        cardTitle: "Encoder, Inc.",
         endedRun: true,
       }),
     ]);
+    expect(
+      JSON.stringify(addedSubroutineUnbroken.eventLog.at(-1)?.publicPayload),
+    ).not.toContain(encoderInstanceId(addedSubroutineUnbroken));
 
     let addedSubroutineBroken = approachIce(
       "v162-encoder-additional-subroutine-broken",
