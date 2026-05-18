@@ -12,9 +12,9 @@ V1.3.0 ist kein Public-Format-, Ranked- oder Turnierrelease. Formatprofile sind 
 ## Quellenbasis
 
 - `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
-- `docs/derived/MVP_0.6_DETAILED_PLAN.md`
-- `docs/derived/DECK_VALIDATION_0.6_SPEC.md`
-- `docs/derived/MATCH_SETUP_0.6_SPEC.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/plan.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/deck-validation-spec.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/match-setup-spec.md`
 - `docs/derived/LOCAL_FILE_DECK_LIBRARY_2026_05_07.md`
 - `docs/releases/v1/v1-2-3-mechanic-unlock-card-release-1/requirements-review.md`
 - bestehende Deck-, Catalog-, Matchstart-, Storage-, Visibility-, Replay- und E2E-Artefakte

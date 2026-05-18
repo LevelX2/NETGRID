@@ -32,7 +32,7 @@ Der Proteus-spezifische Purge-Vertrag soll vom vorhandenen V0.99-Main-Action-Pur
 ## Kontext und Quellen
 
 - `docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md`
-- `docs/derived/VIRUS_PURGE_0.99_SPEC.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
 - `docs/source/Netrunner Errata 1.70.md`
 
 ## Scope

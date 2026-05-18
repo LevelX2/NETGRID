@@ -594,7 +594,7 @@ Audit findings:
 
 - README was stale and has been updated from V0.7/V0.8 planning to V0.99/S01 current state.
 - `vitest.config.ts` now includes `app/**/*.test.ts`, so `apps/web/app/chronicle.test.ts` runs in the normal Web package test command.
-- `docs/derived/MECHANICS_COMPLETION_PLAN.md` is now historical for M0 to M10; V0.94 to V0.99 are complete.
+- `docs/releases/mvp/roadmaps/mechanics-completion-plan.md` is now historical for M0 to M10; V0.94 to V0.99 are complete.
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md` was the current V0.99 matrix at this audit point and is now normalized through V1.1.3 with V1.2.0/V1.2.1 foundation updates; the current machine-readable companion is `data/rules/mechanics-coverage-1.2.1.json`.
 - Local private O:NR-v1 data under ignored `data/local/` and `data/local-assets/` is present on this machine. It remains private/local and not versioned.
 - O:NR-v1 playable test access is accepted for private local use. Engine harness, Web overlay, server deck revalidation, AI/multiplayer smokes and manifest/review checks are covered for the private local scope.
@@ -648,16 +648,16 @@ Gate flow:
 
 Derived docs:
 
-- `docs/derived/MVP_0.1_REQUIREMENTS.md`
-- `docs/derived/ENGINE_API_SPEC.md`
-- `docs/derived/GAME_STATE_MODEL.md`
-- `docs/derived/TIMING_AND_RUN_MODEL.md`
-- `docs/derived/DEVIATION_REGISTRY.md`
-- `docs/derived/ACCEPTANCE_CRITERIA.md`
-- `docs/derived/TEST_MATRIX.md`
-- `docs/derived/OPEN_QUESTIONS.md`
-- `docs/derived/CONFLICT_MATRIX.md`
-- `docs/derived/REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-1-local-core/requirements.md`
+- `docs/releases/mvp/mvp-0-1-local-core/engine-api-spec.md`
+- `docs/releases/mvp/mvp-0-1-local-core/game-state-model.md`
+- `docs/releases/mvp/mvp-0-1-local-core/timing-and-run-model.md`
+- `docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md`
+- `docs/releases/mvp/mvp-0-1-local-core/acceptance-criteria.md`
+- `docs/releases/mvp/mvp-0-1-local-core/test-matrix.md`
+- `docs/releases/mvp/mvp-0-1-local-core/open-questions.md`
+- `docs/releases/mvp/mvp-0-1-local-core/conflict-matrix.md`
+- `docs/releases/mvp/mvp-0-1-local-core/requirements-review.md`
 
 Data artifacts:
 
@@ -665,7 +665,7 @@ Data artifacts:
 - `data/cards/demo-cards.json`
 - `data/decks/demo-decks.json`
 - `data/manifests/card-implementation-manifest.json`
-- historische Abweichungsdokumentation, später konsolidiert in `docs/derived/DEVIATION_REGISTRY.md`
+- historische Abweichungsdokumentation, später konsolidiert in `docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md`
 - `data/scenarios/runner-steals-rd-agenda.json`
 - `data/scenarios/runner-breaks-ice-and-accesses-rd.json`
 - `data/scenarios/runner-fails-on-end-the-run.json`
@@ -719,8 +719,8 @@ Docs:
 
 ## Phase 3 files created or updated
 
-- `docs/derived/MVP_0.1_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.2_READINESS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-1-local-core/final-review.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/readiness-review.md`
 - `apps/web/app/api/game/route.ts`
 - `apps/web/app/page.tsx`
 - `tests/specs/visibility-contract.test.ts`
@@ -742,14 +742,14 @@ High-severity finding fixed: browser UI no longer imports the Engine or stores f
 
 ## MVP 0.2 Requirements files created or updated
 
-- `docs/derived/MVP_0.2_REQUIREMENTS.md`
-- `docs/derived/MULTIPLAYER_API_SPEC.md`
-- `docs/derived/WEBSOCKET_PROTOCOL_SPEC.md`
-- `docs/derived/STORAGE_SCHEMA.md`
-- `docs/derived/TOKEN_AND_SESSION_SECURITY.md`
-- `docs/derived/RECONNECT_AND_UNDO_SPEC.md`
-- `docs/derived/MULTIPLAYER_TEST_MATRIX.md`
-- `docs/derived/MVP_0.2_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/requirements.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/multiplayer-api-spec.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/websocket-protocol-spec.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/storage-schema.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/token-and-session-security.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/reconnect-and-undo-spec.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/multiplayer-test-matrix.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/requirements-review.md`
 - `data/rules/rules-baseline-0.2.json`
 - `data/scenarios/multiplayer-create-join-action.json`
 - `data/scenarios/multiplayer-reconnect-during-run.json`
@@ -783,7 +783,7 @@ Implementation has started and remains constrained to the private multiplayer sc
 - `apps/web/app/globals.css`
 - `tests/specs/visibility-contract.test.ts`
 - `tests/specs/multiplayer-acceptance-tests.todo.md`
-- `docs/derived/MVP_0.2_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/implementation-review.md`
 - `README.md`
 - `.gitignore`
 - `pnpm-lock.yaml`
@@ -807,7 +807,7 @@ Phase 3 has validated and hardened MVP 0.2.
 
 ## MVP 0.2 Final Review files created or updated
 
-- `docs/derived/MVP_0.2_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-2-private-multiplayer/final-review.md`
 - `apps/server/src/http-server.ts`
 - `apps/server/src/multiplayer.ts`
 - `apps/server/src/multiplayer.test.ts`
@@ -831,9 +831,9 @@ Phase 3 has validated and hardened MVP 0.2.
 
 ## Post-MVP 0.2 roadmap planning files created or updated
 
-- `docs/derived/POST_MVP_0.2_ROADMAP.md`
-- `docs/derived/MVP_0.3_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.4_DETAILED_PLAN.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-2-roadmap.md`
+- `docs/releases/mvp/mvp-0-3-ai-simulation/plan.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/plan.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.2.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Projektueberblick.md`
@@ -855,10 +855,10 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 ## MVP 0.3 Requirements files created or updated
 
-- `docs/derived/MVP_0.3_REQUIREMENTS.md`
+- `docs/releases/mvp/mvp-0-3-ai-simulation/requirements.md`
 - `docs/derived/AI_CONTROLLER_SPEC.md`
 - `docs/derived/AI_SIMULATION_TEST_MATRIX.md`
-- `docs/derived/MVP_0.3_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-3-ai-simulation/requirements-review.md`
 - `data/rules/rules-baseline-0.3.json`
 - `data/scenarios/ai-runner-steals-rd-agenda.json`
 - `data/scenarios/ai-corp-scores-remote-agenda.json`
@@ -878,8 +878,8 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 - `apps/web/app/api/game/route.ts`
 - `apps/web/app/page.tsx`
 - `apps/web/app/globals.css`
-- `docs/derived/MVP_0.3_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.3_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-3-ai-simulation/implementation-review.md`
+- `docs/releases/mvp/mvp-0-3-ai-simulation/final-review.md`
 
 ## MVP 0.3 Final checks
 
@@ -898,17 +898,17 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 ## MVP 0.4 Requirements files created or updated
 
-- `docs/derived/MVP_0.4_REQUIREMENTS.md`
-- `docs/derived/CARD_POOL_0.4_SPEC.md`
-- `docs/derived/RULE_MECHANICS_0.4_SPEC.md`
-- `docs/derived/DECK_VALIDATION_0.4_SPEC.md`
-- `docs/derived/MVP_0.4_TEST_MATRIX.md`
-- `docs/derived/MVP_0.4_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/requirements.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/card-pool-spec.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/rule-mechanics-spec.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/deck-validation-spec.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/test-matrix.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/requirements-review.md`
 - `data/rules/rules-baseline-0.4.json`
 - `data/cards/demo-cards-0.4.json`
 - `data/decks/demo-decks-0.4.json`
 - `data/manifests/card-implementation-manifest-0.4.json`
-- historische Abweichungsdokumentation, später konsolidiert in `docs/derived/DEVIATION_REGISTRY.md`
+- historische Abweichungsdokumentation, später konsolidiert in `docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md`
 - `data/scenarios/v04-safe-card-batch-smoke.json`
 - `data/scenarios/v04-tag-runner-and-remove-tag.json`
 - `data/scenarios/v04-tag-punishment-blocked-when-untagged.json`
@@ -926,8 +926,8 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 - `apps/web/app/page.tsx`
 - `apps/web/app/globals.css`
 - `tests/specs/phase1-artifacts.test.ts`
-- `docs/derived/MVP_0.4_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.4_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/implementation-review.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/final-review.md`
 
 ## MVP 0.4 Final checks
 
@@ -946,12 +946,12 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 
 ## MVP 0.5 Requirements files created or updated
 
-- `docs/derived/MVP_0.5_REQUIREMENTS.md`
-- `docs/derived/CARD_IMPORT_0.5_SPEC.md`
-- `docs/derived/CARD_CATALOG_0.5_SPEC.md`
-- `docs/derived/CARD_STATUS_0.5_SPEC.md`
-- `docs/derived/MVP_0.5_TEST_MATRIX.md`
-- `docs/derived/MVP_0.5_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/requirements.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/card-import-spec.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/card-catalog-spec.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/card-status-spec.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/test-matrix.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/requirements-review.md`
 - `data/card-import/source-registry-0.5.json`
 - `data/card-import/card-snapshot-0.5.json`
 - `data/card-import/card-snapshot-0.5.hash`
@@ -990,7 +990,7 @@ V0.5 uses only local versioned demo/project data and fiktive local catalog fixtu
 - `apps/web/app/globals.css`
 - `apps/web/package.json`
 - `tests/specs/visibility-contract.test.ts`
-- `docs/derived/MVP_0.5_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/implementation-review.md`
 - `pnpm-lock.yaml`
 - updated V0.5 snapshot hash and derived catalog artifacts after German UI text cleanup
 
@@ -1015,8 +1015,8 @@ The implementation preserves the V0.5 safety boundary: catalog data is read-only
 
 ## MVP 0.5 Final Review files created or updated
 
-- `docs/derived/MVP_0.5_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.5_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/final-review.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/implementation-review.md`
 - `README.md`
 - `tests/specs/card-import-0.5-acceptance-tests.todo.md`
 - `docs/codex/CODEX_STATUS.md`
@@ -1040,13 +1040,13 @@ The implementation preserves the V0.5 safety boundary: catalog data is read-only
 
 ## MVP 0.6 Requirements files created or updated
 
-- `docs/derived/MVP_0.6_REQUIREMENTS.md`
-- `docs/derived/DECK_EDITOR_0.6_SPEC.md`
-- `docs/derived/DECK_VALIDATION_0.6_SPEC.md`
-- `docs/derived/MATCH_SETUP_0.6_SPEC.md`
-- `docs/derived/DECK_STORAGE_0.6_SPEC.md`
-- `docs/derived/MVP_0.6_TEST_MATRIX.md`
-- `docs/derived/MVP_0.6_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/requirements.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/deck-editor-spec.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/deck-validation-spec.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/match-setup-spec.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/deck-storage-spec.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/test-matrix.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/requirements-review.md`
 - `data/decks/deck-format-profiles-0.6.json`
 - `data/decks/deck-templates-0.6.json`
 - `data/decks/deck-snapshots-0.6.json`
@@ -1083,7 +1083,7 @@ V0.6 starts from V0.5 catalog status and versioned demo decks. The requirements 
 - `apps/web/app/globals.css`
 - `tests/specs/visibility-contract.test.ts`
 - `tests/specs/deck-editor-0.6-acceptance-tests.todo.md`
-- `docs/derived/MVP_0.6_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/implementation-review.md`
 - `pnpm-lock.yaml`
 
 ## MVP 0.6 Implementation checks
@@ -1113,8 +1113,8 @@ V0.6 now supports local deck models, validation v2, deterministic snapshots, ser
 
 ## MVP 0.6 Final files created or updated
 
-- `docs/derived/MVP_0.6_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.6_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/final-review.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/implementation-review.md`
 - `tests/specs/deck-editor-0.6-acceptance-tests.todo.md`
 - `README.md`
 - `docs/codex/CODEX_STATUS.md`
@@ -1146,13 +1146,13 @@ Checks from the original QA pass: `corepack pnpm install --frozen-lockfile`, `co
 
 ## MVP 0.7 Requirements files created or updated
 
-- `docs/derived/MVP_0.7_REQUIREMENTS.md`
-- `docs/derived/UI_REDESIGN_0.7_SPEC.md`
-- `docs/derived/RUN_ENCOUNTER_UI_0.7_SPEC.md`
-- `docs/derived/CARD_VIEW_0.7_SPEC.md`
-- `docs/derived/ACCESSIBILITY_0.7_SPEC.md`
-- `docs/derived/MVP_0.7_TEST_MATRIX.md`
-- `docs/derived/MVP_0.7_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/requirements.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/ui-redesign-spec.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/run-encounter-ui-spec.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/card-view-spec.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/accessibility-spec.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/test-matrix.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/requirements-review.md`
 - `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
@@ -1179,7 +1179,7 @@ V0.7 is frozen as a UI redesign/design phase. Design C is the main structure, De
 - `apps/web/app/globals.css`
 - `tests/specs/visibility-contract.test.ts`
 - `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
-- `docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/implementation-review.md`
 - `README.md`
 
 ## MVP 0.7 Implementation checks
@@ -1199,8 +1199,8 @@ V0.7 now has a light Design-C-oriented shell, Entry preflight, Card Display sett
 
 ## MVP 0.7 Final files created or updated
 
-- `docs/derived/MVP_0.7_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.7_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/final-review.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/implementation-review.md`
 - `tests/specs/ui-redesign-0.7-acceptance-tests.todo.md`
 - `README.md`
 - `docs/codex/CODEX_STATUS.md`
@@ -1228,12 +1228,12 @@ Next gate: V0.8 Implementation for the frozen local starter slice. V0.8 remains 
 
 ## MVP 0.8 Requirements files created or updated
 
-- `docs/derived/MVP_0.8_REQUIREMENTS.md`
-- `docs/derived/PLAYABLE_CARD_SLICE_0.8_SPEC.md`
-- `docs/derived/RULE_MECHANICS_0.8_SPEC.md`
-- `docs/derived/CARD_IMPLEMENTATION_0.8_SPEC.md`
-- `docs/derived/MVP_0.8_TEST_MATRIX.md`
-- `docs/derived/MVP_0.8_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/requirements.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/playable-card-slice-spec.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/rule-mechanics-spec.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/card-implementation-spec.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/test-matrix.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/requirements-review.md`
 - `data/cards/demo-cards-0.8.json`
 - `data/decks/demo-decks-0.8.json`
 - `data/manifests/card-implementation-manifest-0.8.json`
@@ -1278,13 +1278,13 @@ V0.8 is frozen as a small local/fictitious playable starter slice. The slice con
 - `data/decks/deck-format-profiles-0.8.json`
 - `data/decks/deck-templates-0.8.json`
 - `data/decks/deck-snapshots-0.8.json`
-- historische Abweichungsdokumentation, später konsolidiert in `docs/derived/DEVIATION_REGISTRY.md`
+- historische Abweichungsdokumentation, später konsolidiert in `docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md`
 - `data/manifests/deck-validation-manifest-0.8.json`
 - `data/rules/rules-baseline-0.8.json`
 - `tests/specs/phase1-artifacts.test.ts`
 - `tests/specs/visibility-contract.test.ts`
 - `tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md`
-- `docs/derived/MVP_0.8_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/implementation-review.md`
 
 ## MVP 0.8 Implementation checks
 
@@ -1309,8 +1309,8 @@ V0.8 now provides a playable local/fictitious starter slice with 14 new cards, e
 
 ## MVP 0.8 Final files created or updated
 
-- `docs/derived/MVP_0.8_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.8_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/final-review.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/implementation-review.md`
 - `tests/specs/playable-card-slice-0.8-acceptance-tests.todo.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1337,8 +1337,8 @@ Next gate: V0.9 Requirements for stronger AI. V0.9 remains constrained to LegalA
 
 ## MVP 0.8 Detailed Planning files created or updated
 
-- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
-- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/plan.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
 - `KI-Wissen-NETGRID/03 Betrieb/Log.md`
@@ -1348,8 +1348,8 @@ V0.8 remains a future gated phase after V0.7. This planning update does not impl
 
 ## MVP 0.9 Detailed Planning files created or updated
 
-- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
-- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/plan.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
@@ -1362,13 +1362,13 @@ The V0.9 detailed plan was later refined for requirements-freeze readiness with 
 
 ## MVP 0.9 Requirements files created or updated
 
-- `docs/derived/MVP_0.9_REQUIREMENTS.md`
-- `docs/derived/AI_HEURISTICS_0.9_SPEC.md`
-- `docs/derived/AI_DIFFICULTY_0.9_SPEC.md`
-- `docs/derived/AI_EXPLANATION_0.9_SPEC.md`
-- `docs/derived/AI_SOAK_TEST_0.9_SPEC.md`
-- `docs/derived/MVP_0.9_TEST_MATRIX.md`
-- `docs/derived/MVP_0.9_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/requirements.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/ai-heuristics-spec.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/ai-difficulty-spec.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/ai-explanation-spec.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/ai-soak-test-spec.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/test-matrix.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/requirements-review.md`
 - `data/ai/card-role-manifest-0.9.json`
 - `data/ai/deck-role-profiles-0.9.json`
 - `data/ai/ai-profiles-0.9.json`
@@ -1397,7 +1397,7 @@ V0.9 is frozen as a stronger-AI phase on the completed V0.8 starter slice. It ma
 - `packages/shared/src/index.ts`
 - `apps/server/src/multiplayer.ts`
 - `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`
-- `docs/derived/MVP_0.9_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/implementation-review.md`
 
 ## MVP 0.9 Implementation checks
 
@@ -1417,8 +1417,8 @@ V0.9 now has role-aware Runner and Corp scorers, difficulty profiles, side-safe 
 
 ## MVP 0.9 Final files created or updated
 
-- `docs/derived/MVP_0.9_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.9_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/final-review.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/implementation-review.md`
 - `tests/specs/ai-quality-0.9-acceptance-tests.todo.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1440,8 +1440,8 @@ Next recommended scope: later V1.0/stabilization/operations decision. V1.0, V0.1
 
 ## MVP 0.91 Detailed Planning files created or updated
 
-- `docs/derived/MVP_0.91_DETAILED_PLAN.md`
-- `docs/derived/POST_MVP_0.4_ROADMAP.md`
+- `docs/releases/mvp/mvp-0-91-card-images/plan.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
@@ -1452,12 +1452,12 @@ V0.91 remains a future gated phase after V0.9. This planning update does not imp
 
 ## MVP 0.91 Requirements files created or updated
 
-- `docs/derived/MVP_0.91_REQUIREMENTS.md`
-- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
-- `docs/derived/CARD_IMAGE_IMPORT_0.91_SPEC.md`
-- `docs/derived/CARD_IMAGE_DISPLAY_0.91_SPEC.md`
-- `docs/derived/MVP_0.91_TEST_MATRIX.md`
-- `docs/derived/MVP_0.91_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-91-card-images/requirements.md`
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-import-spec.md`
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-display-spec.md`
+- `docs/releases/mvp/mvp-0-91-card-images/test-matrix.md`
+- `docs/releases/mvp/mvp-0-91-card-images/requirements-review.md`
 - `data/card-assets/card-image-source-registry-0.91.json`
 - `data/card-assets/card-image-policy-0.91.json`
 - `docs/codex/CODEX_STATUS.md`
@@ -1476,13 +1476,13 @@ The technical and hidden-info requirements are testable, and every Must requirem
 
 ## MVP 0.92 Requirements and final gate files created or updated
 
-- `docs/derived/MVP_0.92_REQUIREMENTS.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/mechanics-coverage-0.92.json`
-- `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`
-- `docs/derived/MECHANIC_M1_TEST_MATRIX.md`
-- `docs/derived/MVP_0.92_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.92_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements-review.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/final-review.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1498,12 +1498,12 @@ V0.92 normalizes the current mechanics inventory after V0.9/S01, adds a versione
 
 ## MVP 0.93 Requirements, implementation and final gate files created or updated
 
-- `docs/derived/MVP_0.93_REQUIREMENTS.md`
-- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
-- `docs/derived/MVP_0.93_TEST_MATRIX.md`
-- `docs/derived/MVP_0.93_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.93_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.93_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/requirements.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/test-matrix.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/requirements-review.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/implementation-review.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/final-review.md`
 - `packages/shared/src/index.ts`
 - `packages/engine/src/index.ts`
 - `packages/engine/src/index.test.ts`
@@ -1543,9 +1543,9 @@ Checks:
 
 ## MVP 0.94/V0.95 Detailed Planning files created or updated
 
-- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
-- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
+- `docs/releases/mvp/roadmaps/mvp-0-94-to-0-95-assumption-review.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/plan.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/plan.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
@@ -1561,10 +1561,10 @@ The assumption review confirms the existing sequence with one sharpening: V0.94 
 
 ## MVP 0.94 Requirements Freeze files created or updated
 
-- `docs/derived/MVP_0.94_REQUIREMENTS.md`
-- `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
-- `docs/derived/MVP_0.94_TEST_MATRIX.md`
-- `docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/requirements.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/damage-flatline-spec.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/test-matrix.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/requirements-review.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
@@ -1580,8 +1580,8 @@ V0.94 is frozen as a narrow Damage/Flatline gate. Net and Meat Damage are in sco
 
 ## MVP 0.94 Final files created or updated
 
-- `docs/derived/MVP_0.94_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.94_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/implementation-review.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/final-review.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/rules-baseline-0.94.json`
 - `data/cards/demo-cards-0.94.json`
@@ -1630,10 +1630,10 @@ Checks:
 
 ## MVP 0.95 Requirements Freeze files created or updated
 
-- `docs/derived/MVP_0.95_REQUIREMENTS.md`
-- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`
-- `docs/derived/MVP_0.95_TEST_MATRIX.md`
-- `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/requirements.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/test-matrix.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/requirements-review.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1650,8 +1650,8 @@ V0.95 is frozen as a narrow Runner Resource and tag-interaction gate. It adds a 
 
 ## MVP 0.95 Final files created or updated
 
-- `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.95_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/implementation-review.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/final-review.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/rules-baseline-0.95.json`
 - `data/cards/demo-cards-0.95.json`
@@ -1701,10 +1701,10 @@ Checks:
 
 ## MVP 0.96 Requirements Freeze files created or updated
 
-- `docs/derived/MVP_0.96_REQUIREMENTS.md`
-- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
-- `docs/derived/MVP_0.96_TEST_MATRIX.md`
-- `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/test-matrix.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements-review.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1721,8 +1721,8 @@ V0.96 is frozen as a narrow Trace/Link/Bidding gate. The CR v26.03 reference che
 
 ## MVP 0.96 Final files created or updated
 
-- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.96_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/final-review.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/rules-baseline-0.96.json`
 - `data/cards/demo-cards-0.96.json`
@@ -1771,10 +1771,10 @@ Checks:
 
 ## MVP 0.97 Requirements Freeze files created or updated
 
-- `docs/derived/MVP_0.97_REQUIREMENTS.md`
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
-- `docs/derived/MVP_0.97_TEST_MATRIX.md`
-- `docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/requirements.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/test-matrix.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/requirements-review.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1791,8 +1791,8 @@ V0.97 is frozen as a narrow Run/Jack-out/Breach/Multiaccess gate. The CR v26.03 
 
 ## MVP 0.97 Final files created or updated
 
-- `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.97_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/implementation-review.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/final-review.md`
 - `data/rules/rules-baseline-0.97.json`
 - `data/cards/demo-cards-0.97.json`
 - `data/decks/demo-decks-0.97.json`
@@ -1836,11 +1836,11 @@ Checks:
 
 ## MVP 0.98 Requirements Freeze files created or updated
 
-- `docs/derived/MVP_0.98_REQUIREMENTS.md`
-- `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`
-- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`
-- `docs/derived/MVP_0.98_TEST_MATRIX.md`
-- `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/requirements.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/identity-modifiers-spec.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/hidden-zone-tools-spec.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/test-matrix.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/requirements-review.md`
 - `tests/specs/phase1-artifacts.test.ts`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1857,8 +1857,8 @@ V0.98 is frozen as a two-step Identity/Hidden-Zone gate. V0.98a may implement lo
 
 ## MVP 0.98 Final files created or updated
 
-- `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.98_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/implementation-review.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/final-review.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/rules-baseline-0.98.json`
 - `data/cards/demo-cards-0.98.json`
@@ -1902,14 +1902,14 @@ Checks:
 
 ## MVP 0.99 Final files created or updated
 
-- `docs/derived/MVP_0.99_REQUIREMENTS.md`
-- `docs/derived/COUNTER_HOSTING_0.99_SPEC.md`
-- `docs/derived/VIRUS_PURGE_0.99_SPEC.md`
-- `docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md`
-- `docs/derived/MVP_0.99_TEST_MATRIX.md`
-- `docs/derived/MVP_0.99_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.99_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/counter-hosting-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/recurring-bad-publicity-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/test-matrix.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements-review.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/implementation-review.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/final-review.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `data/rules/rules-baseline-0.99.json`
 - `data/cards/demo-cards-0.99.json`
@@ -2194,8 +2194,8 @@ Detailed planning and completion artifacts available:
 - `docs/releases/v1/v1-6-0-tutorial-rule-help/implementation-review.md`
 - `docs/releases/v1/v1-6-0-tutorial-rule-help/final-review.md`
 - `docs/releases/v1/v1-6-0-tutorial-rule-help/rule-help-glossary.md`
-- `docs/derived/POST_MVP_0.4_ROADMAP.md`
-- `docs/derived/MVP_0.5_DETAILED_PLAN.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/plan.md`
 - `docs/releases/v1/v1-0-deck-match-stabilization/plan.md`
 - `docs/releases/v1/v1-0-deck-match-stabilization/final-review.md`
 - `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`
@@ -2253,66 +2253,66 @@ Detailed planning and completion artifacts available:
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/requirements-review.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
-- `docs/derived/MVP_0.6_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.7_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.91_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.91_REQUIREMENTS.md`
-- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
-- `docs/derived/MVP_0.92_REQUIREMENTS.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/plan.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/plan.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/plan.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/plan.md`
+- `docs/releases/mvp/mvp-0-91-card-images/plan.md`
+- `docs/releases/mvp/mvp-0-91-card-images/requirements.md`
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
-- `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`
-- `docs/derived/MECHANIC_M1_TEST_MATRIX.md`
-- `docs/derived/MVP_0.92_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.93_REQUIREMENTS.md`
-- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
-- `docs/derived/MVP_0.93_FINAL_REVIEW.md`
-- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`
-- `docs/derived/MVP_0.94_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.95_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`
-- `docs/derived/MVP_0.96_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.97_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.98_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.99_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.95_REQUIREMENTS.md`
-- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`
-- `docs/derived/MVP_0.95_TEST_MATRIX.md`
-- `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.95_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/final-review.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/requirements.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/final-review.md`
+- `docs/releases/mvp/roadmaps/mvp-0-94-to-0-95-assumption-review.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/plan.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/plan.md`
+- `docs/releases/mvp/roadmaps/mvp-0-94-to-0-99-planning-review.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/plan.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/plan.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/plan.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/plan.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/requirements.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/test-matrix.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/requirements-review.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/implementation-review.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/final-review.md`
 - `data/rules/mechanics-coverage-0.95.json`
-- `docs/derived/MVP_0.96_REQUIREMENTS.md`
-- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
-- `docs/derived/MVP_0.96_TEST_MATRIX.md`
-- `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.96_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/test-matrix.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements-review.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/final-review.md`
 - `data/rules/mechanics-coverage-0.96.json`
-- `docs/derived/MVP_0.97_REQUIREMENTS.md`
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
-- `docs/derived/MVP_0.97_TEST_MATRIX.md`
-- `docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.97_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/requirements.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/test-matrix.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/requirements-review.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/implementation-review.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/final-review.md`
 - `data/rules/mechanics-coverage-0.97.json`
-- `docs/derived/MVP_0.98_REQUIREMENTS.md`
-- `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`
-- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`
-- `docs/derived/MVP_0.98_TEST_MATRIX.md`
-- `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.98_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/requirements.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/identity-modifiers-spec.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/hidden-zone-tools-spec.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/test-matrix.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/requirements-review.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/implementation-review.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/final-review.md`
 - `data/rules/mechanics-coverage-0.98.json`
-- `docs/derived/MVP_0.99_REQUIREMENTS.md`
-- `docs/derived/COUNTER_HOSTING_0.99_SPEC.md`
-- `docs/derived/VIRUS_PURGE_0.99_SPEC.md`
-- `docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md`
-- `docs/derived/MVP_0.99_TEST_MATRIX.md`
-- `docs/derived/MVP_0.99_REQUIREMENTS_REVIEW.md`
-- `docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/MVP_0.99_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/counter-hosting-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/recurring-bad-publicity-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/test-matrix.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements-review.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/implementation-review.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/final-review.md`
 - `data/rules/mechanics-coverage-0.99.json`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/final-review.md`
 - `data/rules/mechanics-coverage-1.2.1.json`

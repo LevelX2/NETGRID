@@ -58,10 +58,10 @@ V0.3 soll liefern:
 
 ## Wichtige Dokumente
 
-- `docs/derived/POST_MVP_0.2_ROADMAP.md`
-- `docs/derived/POST_MVP_0.4_ROADMAP.md`
-- `docs/derived/MVP_0.3_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.4_DETAILED_PLAN.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-2-roadmap.md`
+- `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`
+- `docs/releases/mvp/mvp-0-3-ai-simulation/plan.md`
+- `docs/releases/mvp/mvp-0-4-card-pool-rules/plan.md`
 - `docs/codex/CODEX_STATUS.md`
 
 ## V0.4-Kern
@@ -84,4 +84,4 @@ V0.4 verwendet weiterhin interne fiktive Demo-Karten. Offizielle Karten, externe
 
 MVP 0.3 und MVP 0.4 sind inzwischen abgeschlossen. Die UI- und Design-Neugestaltung wird bewusst nach V0.7 gelegt, weil dazu noch Analysen laufen. V0.5 fokussiert Kartenimport und Kartenkatalog; V0.6 legt Deckeditor- und Match-Setup-Fundamente.
 
-Nächster gate-basierter Schritt ist **MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog**. Dabei sollen aus `docs/derived/POST_MVP_0.4_ROADMAP.md` ausführbare Anforderungen für Import-Schema, lokale Snapshots, Kartenkatalog, Manifest-Abgleich und Importvalidierung abgeleitet werden.
+Nächster gate-basierter Schritt ist **MVP 0.5 Requirements Freeze: Kartenimport und Kartenkatalog**. Dabei sollen aus `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md` ausführbare Anforderungen für Import-Schema, lokale Snapshots, Kartenkatalog, Manifest-Abgleich und Importvalidierung abgeleitet werden.

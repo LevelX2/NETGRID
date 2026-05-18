@@ -39,9 +39,9 @@ V1.1.0 ist damit kein allgemeiner UI-Polish-Release. Die UI-Arbeit ist nur in de
 
 Primäre Quellen für diesen Plan:
 
-- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
-- `docs/derived/MVP_0.93_REQUIREMENTS.md`
-- `docs/derived/MVP_0.93_FINAL_REVIEW.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/requirements.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/final-review.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/codex/CODEX_STATUS.md`
 - aktuelle NETGRID-Anforderungssammlung aus dem Chat vom 2026-05-07

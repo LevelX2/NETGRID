@@ -1,0 +1,11 @@
+# MVP 0.7 UI-Redesign  ## Artefakte
+- `accessibility-spec.md`
+- `card-view-spec.md`
+- `final-review.md`
+- `implementation-review.md`
+- `plan.md`
+- `requirements-review.md`
+- `requirements.md`
+- `run-encounter-ui-spec.md`
+- `test-matrix.md`
+- `ui-redesign-spec.md`

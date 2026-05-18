@@ -16,12 +16,12 @@ Keine Aussage in diesem Dokument schaltet Proteus-Karten frei. Die Proteus-Daten
 - `data/card-import/proteus-card-basis-2026-05-17.json`
 - `docs/source/Proteusspoiler.txt`
 - `docs/source/Netrunner Errata 1.70.md`
-- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`
-- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`
-- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
+- `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/hidden-zone-tools-spec.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
 - `docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md`
-- `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/damage-flatline-spec.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/full-archives-access-spec.md`
 
 ## Proteus-Zielgruppe

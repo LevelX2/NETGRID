@@ -15,9 +15,9 @@ V1.3.1 ist kein Kartenfreigabe-, Mechanik-, KI-Strategie- oder Public-Asset-Rele
 - `docs/releases/v1/v1-3-0-format-deckbuilding-foundation/final-review.md`
 - `docs/releases/v1/v1-3-0-format-deckbuilding-foundation/spec.md`
 - `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`
-- `docs/derived/MVP_0.5_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.91_REQUIREMENTS.md`
-- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/plan.md`
+- `docs/releases/mvp/mvp-0-91-card-images/requirements.md`
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`
 - bestehende Catalog-, Deck-, Manifest-, AI-Rollen- und Runtime-Gate-Daten
 
 ## Scope

@@ -13,8 +13,8 @@ Pflichtkontext:
 3. Lies die NETGRID-Wissensbasis-Einstiegsdateien.
 4. Lies diese Artefakte:
    - docs/derived/CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md
-   - docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md
-   - docs/derived/CARD_IMAGE_DISPLAY_0.91_SPEC.md
+   - docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md
+   - docs/releases/mvp/mvp-0-91-card-images/card-image-display-spec.md
    - docs/releases/v1/v1-0-6-ui-resource-clarity/resource-card-display-spec.md
    - docs/releases/v1/v1-0-7-browser-e2e-visual-qa/test-matrix.md
 

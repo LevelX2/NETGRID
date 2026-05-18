@@ -21,7 +21,7 @@ Der Scope ist bewusst eng: V1.0.5 verbessert die Lesbarkeit laufender Partien, n
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/spec.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/requirements.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/final-review.md`
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
 - `docs/codex/CODEX_STATUS.md`
 - `apps/web/app/page.tsx`
 - `apps/web/app/chronicle.ts`

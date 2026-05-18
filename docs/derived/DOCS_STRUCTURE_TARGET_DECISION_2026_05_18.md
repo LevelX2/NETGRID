@@ -61,7 +61,7 @@ Die nächsten Schritte sollen klein und prüfbar bleiben:
 2. Backend 0.5 als Pilotfamilie nach `docs/releases/backend-ops/backend-0-5/` migrieren. Status 2026-05-18: erledigt.
 3. `docs/abilityEngine/` nach `docs/architecture/ability-engine/` überführen. Status 2026-05-18: erledigt.
 4. `docs/activities/done/` für Mai 2026 in einem Rollup verdichten. Status 2026-05-18: erledigt als `docs/activities/done/ROLLUP_2026_05.md`; Einzeldateien bleiben bis zu separater Linkmigration erhalten.
-5. Danach erst größere Blöcke schneiden. Status 2026-05-18: S01 ist nach `docs/releases/special/s01/` migriert; die V1.0- bis V1.9.22-Familien sind nach `docs/releases/v1/` migriert; V2.x-Plattformverträge sind nach `docs/releases/v2/` migriert; Originalset-Spotcheck-Evidence liegt unter `docs/reviews/originalset-spotchecks/`, erledigte Jobfiles unter `docs/archive/originalset-spotcheck-jobs/2026-05/`. MVP-Altbestand, Proteus- und AI-Querschnittsartefakte bleiben offen.
+5. Danach erst größere Blöcke schneiden. Status 2026-05-18: S01 ist nach `docs/releases/special/s01/` migriert; die historische MVP-0.x-Kette ist nach `docs/releases/mvp/` migriert; die V1.0- bis V1.9.22-Familien sind nach `docs/releases/v1/` migriert; V2.x-Plattformverträge sind nach `docs/releases/v2/` migriert; Originalset-Spotcheck-Evidence liegt unter `docs/reviews/originalset-spotchecks/`, erledigte Jobfiles unter `docs/archive/originalset-spotcheck-jobs/2026-05/`. Proteus- und AI-Querschnittsartefakte bleiben offen.
 
 ## Nicht entschieden
 

@@ -32,9 +32,9 @@ Dieses Dokument war ursprünglich ein Planungsartefakt. Der P0-Regel- und Dokume
 
 ### Lokale NETGRID-Spezifikation
 
-- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
-- `docs/derived/MVP_0.96_REQUIREMENTS.md`
-- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`
 - `data/rules/mechanics-coverage-0.96.json`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/final-review.md`
@@ -315,7 +315,7 @@ Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann pla
 
 1. Erledigt: Die aktuelle Trace-Policy ist in diesem Artefakt und in `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md` festgehalten.
 2. Erledigt: `TRACE_LINK_BIDDING_0.96_SPEC.md` bleibt führendes Grundmodell und wird durch den V1.9.14-Status ergänzt.
-3. Erledigt: `docs/derived/DEVIATION_REGISTRY.md` ordnet DEV-007 als historische MVP-Abweichung ein und benennt die Trace-Normalisierung.
+3. Erledigt: `docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md` ordnet DEV-007 als historische MVP-Abweichung ein und benennt die Trace-Normalisierung.
 4. Erledigt: Der Spotcheck-Job `trace-link-post-bid-resolvers` ist abgeschlossen und beschreibt moderne post-bid Trace-Link-Choices.
 5. Offen als Folgearbeit: Kartenkatalogtexte für weitere freigeschaltete Trace-/Link-Karten normalisieren.
 

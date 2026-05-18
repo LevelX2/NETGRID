@@ -1,0 +1,11 @@
+# MVP 0.9 AI Difficulty  ## Artefakte
+- `ai-difficulty-spec.md`
+- `ai-explanation-spec.md`
+- `ai-heuristics-spec.md`
+- `ai-soak-test-spec.md`
+- `final-review.md`
+- `implementation-review.md`
+- `plan.md`
+- `requirements-review.md`
+- `requirements.md`
+- `test-matrix.md`

@@ -12,9 +12,9 @@ Lokale Quellen:
 - `data/card-import/proteus-card-basis-2026-05-17.json`
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
 - `docs/derived/PROTEUS_MECHANICS_COVERAGE_ANALYSIS.md`
-- `docs/derived/COUNTER_HOSTING_0.99_SPEC.md`
-- `docs/derived/VIRUS_PURGE_0.99_SPEC.md`
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/counter-hosting-spec.md`
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
 - `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md`
 - `docs/derived/PROTEUS_PURGE_ACTION_DEBT_CONTRACT.md`
 - `docs/source/Netrunner Errata 1.70.md`

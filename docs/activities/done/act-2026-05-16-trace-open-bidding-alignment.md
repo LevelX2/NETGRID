@@ -15,7 +15,7 @@ blockedBy: []
 resultArtifacts:
   - docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md
   - docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md
-  - docs/derived/DEVIATION_REGISTRY.md
+  - docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md
   - data/rules/mechanics-coverage-1.9.14.json
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
   - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
@@ -32,9 +32,9 @@ Die moderne, offene Trace-Sequenz soll als verbindliche NETGRID-Regel sauber dok
 
 ## Kontext und Quellen
 
-- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`
-- `docs/derived/MVP_0.96_REQUIREMENTS.md`
-- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements.md`
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`
 - `data/rules/mechanics-coverage-0.96.json`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/final-review.md`

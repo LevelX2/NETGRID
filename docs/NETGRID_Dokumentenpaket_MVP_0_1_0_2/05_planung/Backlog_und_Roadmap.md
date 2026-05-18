@@ -195,7 +195,7 @@ Nicht einplanen:
 
 ## 9. Erweiterungsroadmap nach MVP 0.2
 
-Aktueller konsolidierter Stand: `docs/derived/POST_MVP_0.2_ROADMAP.md` ist die führende abgeleitete Roadmap für die Zeit nach MVP 0.2. Die frühere Idee, V0.3 direkt als Kartenpool- und Regelbreite-Stufe zu führen, wurde nach dem MVP-0.2-Finalstand umsortiert.
+Aktueller konsolidierter Stand: `docs/releases/mvp/roadmaps/post-mvp-0-2-roadmap.md` ist die führende abgeleitete Roadmap für die Zeit nach MVP 0.2. Die frühere Idee, V0.3 direkt als Kartenpool- und Regelbreite-Stufe zu führen, wurde nach dem MVP-0.2-Finalstand umsortiert.
 
 Begründung: Vor einer Kartenpool-Erweiterung soll V0.3 zuerst KI-vs-KI, Runner-KI, verbesserte Corp-KI, Erklärmodus und Simulationstests liefern. Dadurch entsteht eine stärkere Regressionsbasis für neue Karten und Mechaniken.
 
@@ -216,7 +216,7 @@ Voraussetzung: Die KI darf nur PlayerViews, LegalActions, side-gefilterte Events
 
 ### 9.2 MVP 0.4 – Kartenpool und Regelbreite
 
-Der detaillierte V0.4-Plan liegt in `docs/derived/MVP_0.4_DETAILED_PLAN.md`.
+Der detaillierte V0.4-Plan liegt in `docs/releases/mvp/mvp-0-4-card-pool-rules/plan.md`.
 
 Mögliche Themen:
 

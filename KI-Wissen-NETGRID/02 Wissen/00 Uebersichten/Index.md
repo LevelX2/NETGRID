@@ -166,70 +166,70 @@
 - `docs/codex/CODEX_STATUS.md`: aktueller Codex-Setup- und Phasenstand.
 - `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`: Codex-Runbook für Setup, MVP 0.1 und MVP 0.2.
 - `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`: führende konsolidierte Release-Roadmap ab V1.1.3.
-- `docs/derived/MVP_0.9_DETAILED_PLAN.md`: detaillierte spätere V0.9-Planung für bessere KI nach V0.8.
-- `docs/derived/MVP_0.91_DETAILED_PLAN.md`: detaillierte spätere V0.91-Planung für Kartenbild-Asset-Gate und Bild-Import nach V0.9.
-- `docs/derived/MVP_0.91_REQUIREMENTS.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
-- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für Kartenbilder.
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/plan.md`: detaillierte spätere V0.9-Planung für bessere KI nach V0.8.
+- `docs/releases/mvp/mvp-0-91-card-images/plan.md`: detaillierte spätere V0.91-Planung für Kartenbild-Asset-Gate und Bild-Import nach V0.9.
+- `docs/releases/mvp/mvp-0-91-card-images/requirements.md`: eingefrorene V0.91-Anforderungen; private lokale Scan-/Asset-Nutzung ist nur als Anzeige-Artefakt erlaubt.
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`: Quellen-, Nutzungs- und Asset-Policy-Grenzen für Kartenbilder.
 - `docs/derived/CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md`: Zwei-Stufen-Plan für Kartenbild-Performance, zentrale Bildarchitektur, Cache-/Thumbnail-Pfad und Klärung selbst generierter NETGRID-Rückseiten als erlaubte generische Platzhalter.
 - `docs/derived/CARD_IMAGE_PERFORMANCE_STAGE_1_IMPLEMENTATION_PROMPT.md`: ausführbarer Umsetzungsprompt für den ersten Kartenbild-Performance-Slice mit Bildroute-Cache, serverseitigem Lookup, Lazy-/Tooltip-Härtung und Hidden-Info-Gates.
-- `docs/derived/MVP_0.92_REQUIREMENTS.md`: eingefrorene V0.92-Anforderungen für Mechanik-Inventar und M1-Gate.
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`: eingefrorene V0.92-Anforderungen für Mechanik-Inventar und M1-Gate.
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`: normalisierte Mechanik-Coverage nach V1.1.3/V1.1.2K, aktualisiert nach V1.2.0/V1.2.1/V1.2.2; aktueller maschinenlesbarer JSON-Stand ist `data/rules/mechanics-coverage-1.2.2.json`.
-- `docs/derived/MECHANIC_M1_EFFECT_TIMING_SPEC.md`: Spezifikation für V0.93 Effects, Abilities, Timing, Choices und Eventklassifikation.
-- `docs/derived/MVP_0.93_REQUIREMENTS.md`: umgesetzte V0.93-Anforderungen für das M1-Engine-Fundament und M2 als Requirements-only Scope.
-- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`: M2-Spezifikation für Setup, Mulligan, Siegwerte, Deckout/Flatline-Vorbereitung, Identity Setup und Archives/facedown.
-- `docs/derived/MVP_0.93_FINAL_REVIEW.md`: Final Review für V0.93 mit Checkliste, Grenzen und Gate-Ergebnis.
-- `docs/derived/MVP_0.94_0.95_ASSUMPTION_REVIEW.md`: Annahmenprüfung und Reihenfolgeentscheidung für Damage/Flatline und Resources.
-- `docs/derived/MVP_0.94_DETAILED_PLAN.md`: detaillierte Planung für V0.94 Damage und Flatline.
-- `docs/derived/MVP_0.94_REQUIREMENTS.md`: eingefrorene V0.94-Anforderungen für Damage und Flatline.
-- `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`: V0.94-Spezifikation für Damage, Random Grip-Trash, Flatline und Sichtbarkeit.
-- `docs/derived/MVP_0.94_TEST_MATRIX.md`: V0.94-Testmatrix für Damage/Flatline.
-- `docs/derived/MVP_0.94_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.94.
-- `docs/derived/MVP_0.94_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.94-Damage-/Flatline-Slice.
-- `docs/derived/MVP_0.94_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.94.
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`: Spezifikation für V0.93 Effects, Abilities, Timing, Choices und Eventklassifikation.
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/requirements.md`: umgesetzte V0.93-Anforderungen für das M1-Engine-Fundament und M2 als Requirements-only Scope.
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`: M2-Spezifikation für Setup, Mulligan, Siegwerte, Deckout/Flatline-Vorbereitung, Identity Setup und Archives/facedown.
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/final-review.md`: Final Review für V0.93 mit Checkliste, Grenzen und Gate-Ergebnis.
+- `docs/releases/mvp/roadmaps/mvp-0-94-to-0-95-assumption-review.md`: Annahmenprüfung und Reihenfolgeentscheidung für Damage/Flatline und Resources.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/plan.md`: detaillierte Planung für V0.94 Damage und Flatline.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/requirements.md`: eingefrorene V0.94-Anforderungen für Damage und Flatline.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/damage-flatline-spec.md`: V0.94-Spezifikation für Damage, Random Grip-Trash, Flatline und Sichtbarkeit.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/test-matrix.md`: V0.94-Testmatrix für Damage/Flatline.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/requirements-review.md`: Requirements Review und Implementierungsfreigabe für V0.94.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/implementation-review.md`: Implementation Review für den umgesetzten V0.94-Damage-/Flatline-Slice.
+- `docs/releases/mvp/mvp-0-94-damage-flatline/final-review.md`: Final Review und Gate-Ergebnis für V0.94.
 - `data/rules/mechanics-coverage-0.94.json`: maschinenlesbare Coverage nach V0.94; Damage/Flatline ist `implemented_limited`, V0.95+-Mechaniken bleiben offen.
-- `docs/derived/MVP_0.95_DETAILED_PLAN.md`: detaillierte Planung für V0.95 Resources und Tag-Interaktion.
-- `docs/derived/MVP_0.95_REQUIREMENTS.md`: eingefrorene V0.95-Anforderungen für Runner-Resources und tag-basiertes Resource-Trash.
-- `docs/derived/RESOURCE_TAG_INTERACTION_0.95_SPEC.md`: V0.95-Spezifikation für Resource-Install, Corp-Resource-Trash, Sichtbarkeit, Events und No-Scope-Grenzen.
-- `docs/derived/MVP_0.95_TEST_MATRIX.md`: V0.95-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
-- `docs/derived/MVP_0.95_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.95.
-- `docs/derived/MVP_0.95_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.95-Resource-/Tag-Slice.
-- `docs/derived/MVP_0.95_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.95.
+- `docs/releases/mvp/mvp-0-95-resources-tags/plan.md`: detaillierte Planung für V0.95 Resources und Tag-Interaktion.
+- `docs/releases/mvp/mvp-0-95-resources-tags/requirements.md`: eingefrorene V0.95-Anforderungen für Runner-Resources und tag-basiertes Resource-Trash.
+- `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`: V0.95-Spezifikation für Resource-Install, Corp-Resource-Trash, Sichtbarkeit, Events und No-Scope-Grenzen.
+- `docs/releases/mvp/mvp-0-95-resources-tags/test-matrix.md`: V0.95-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/releases/mvp/mvp-0-95-resources-tags/requirements-review.md`: Requirements Review und Implementierungsfreigabe für V0.95.
+- `docs/releases/mvp/mvp-0-95-resources-tags/implementation-review.md`: Implementation Review für den umgesetzten V0.95-Resource-/Tag-Slice.
+- `docs/releases/mvp/mvp-0-95-resources-tags/final-review.md`: Final Review und Gate-Ergebnis für V0.95.
 - `data/rules/mechanics-coverage-0.95.json`: maschinenlesbare Coverage nach V0.95; Resources sind `implemented_limited`, V0.96+-Mechaniken bleiben offen.
-- `docs/derived/MVP_0.94_0.99_PLANNING_REVIEW.md`: historischer Planungsreview für die spätere V0.94- bis V0.99-Mechanikfolge.
-- `docs/derived/MVP_0.96_DETAILED_PLAN.md`: historischer Detailplan für V0.96 Trace, Link und Bidding.
-- `docs/derived/MVP_0.96_REQUIREMENTS.md`: eingefrorene V0.96-Anforderungen für Trace, Link und Bidding.
-- `docs/derived/TRACE_LINK_BIDDING_0.96_SPEC.md`: V0.96-Spezifikation für Trace-Start, Corp-Bid, Runner-Bid, Ergebnis, Sichtbarkeit und No-Scope-Grenzen.
-- `docs/derived/MVP_0.96_TEST_MATRIX.md`: V0.96-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
-- `docs/derived/MVP_0.96_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.96.
-- `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.96-Trace-/Link-/Bidding-Slice.
-- `docs/derived/MVP_0.96_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.96.
+- `docs/releases/mvp/roadmaps/mvp-0-94-to-0-99-planning-review.md`: historischer Planungsreview für die spätere V0.94- bis V0.99-Mechanikfolge.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/plan.md`: historischer Detailplan für V0.96 Trace, Link und Bidding.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements.md`: eingefrorene V0.96-Anforderungen für Trace, Link und Bidding.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`: V0.96-Spezifikation für Trace-Start, Corp-Bid, Runner-Bid, Ergebnis, Sichtbarkeit und No-Scope-Grenzen.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/test-matrix.md`: V0.96-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/requirements-review.md`: Requirements Review und Implementierungsfreigabe für V0.96.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`: Implementation Review für den umgesetzten V0.96-Trace-/Link-/Bidding-Slice.
+- `docs/releases/mvp/mvp-0-96-trace-link-bidding/final-review.md`: Final Review und Gate-Ergebnis für V0.96.
 - `data/rules/mechanics-coverage-0.96.json`: maschinenlesbare Coverage nach V0.96; Trace/Link/Bidding ist `implemented_limited`, V0.97+-Mechaniken bleiben offen.
-- `docs/derived/MVP_0.97_DETAILED_PLAN.md`: historischer Detailplan für V0.97 Run, Jack-out, Breach und Multiaccess.
-- `docs/derived/MVP_0.97_REQUIREMENTS.md`: eingefrorene V0.97-Anforderungen für Run, Jack-out, Breach und Multiaccess.
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`: V0.97-Spezifikation für Jack-out-Fenster, Breach-State, Access-Queue und Multiaccess-Sichtbarkeit.
-- `docs/derived/MVP_0.97_TEST_MATRIX.md`: V0.97-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
-- `docs/derived/MVP_0.97_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.97.
-- `docs/derived/MVP_0.97_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.97-Run-/Breach-/Multiaccess-Slice.
-- `docs/derived/MVP_0.97_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.97.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/plan.md`: historischer Detailplan für V0.97 Run, Jack-out, Breach und Multiaccess.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/requirements.md`: eingefrorene V0.97-Anforderungen für Run, Jack-out, Breach und Multiaccess.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`: V0.97-Spezifikation für Jack-out-Fenster, Breach-State, Access-Queue und Multiaccess-Sichtbarkeit.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/test-matrix.md`: V0.97-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/requirements-review.md`: Requirements Review und Implementierungsfreigabe für V0.97.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/implementation-review.md`: Implementation Review für den umgesetzten V0.97-Run-/Breach-/Multiaccess-Slice.
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/final-review.md`: Final Review und Gate-Ergebnis für V0.97.
 - `data/rules/mechanics-coverage-0.97.json`: maschinenlesbare Coverage nach V0.97; Run/Jack-out/Breach/Multiaccess ist `implemented_limited`, V0.98+-Mechaniken bleiben offen.
-- `docs/derived/MVP_0.98_DETAILED_PLAN.md`: historischer Detailplan für V0.98 Identity/Modifier und Hidden-Zone-Tools.
-- `docs/derived/MVP_0.98_REQUIREMENTS.md`: eingefrorene V0.98-Anforderungen für Identity/Modifier und Hidden-Zone-Tools.
-- `docs/derived/IDENTITY_MODIFIERS_0.98_SPEC.md`: V0.98a-Spezifikation für Identity-Fähigkeiten, Setup-Marker und statische Modifier.
-- `docs/derived/HIDDEN_ZONE_TOOLS_0.98_SPEC.md`: V0.98b-Spezifikation für Search, Reveal, Expose, Arrange, Shuffle und Swap.
-- `docs/derived/MVP_0.98_TEST_MATRIX.md`: V0.98-Testmatrix für Identity-, Hidden-Zone-, Visibility-, Replay/StateHash-, AI- und Multiplayer-Smokes.
-- `docs/derived/MVP_0.98_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.98a.
-- `docs/derived/MVP_0.98_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.98-Identity-/Hidden-Zone-Slice.
-- `docs/derived/MVP_0.98_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.98.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/plan.md`: historischer Detailplan für V0.98 Identity/Modifier und Hidden-Zone-Tools.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/requirements.md`: eingefrorene V0.98-Anforderungen für Identity/Modifier und Hidden-Zone-Tools.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/identity-modifiers-spec.md`: V0.98a-Spezifikation für Identity-Fähigkeiten, Setup-Marker und statische Modifier.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/hidden-zone-tools-spec.md`: V0.98b-Spezifikation für Search, Reveal, Expose, Arrange, Shuffle und Swap.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/test-matrix.md`: V0.98-Testmatrix für Identity-, Hidden-Zone-, Visibility-, Replay/StateHash-, AI- und Multiplayer-Smokes.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/requirements-review.md`: Requirements Review und Implementierungsfreigabe für V0.98a.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/implementation-review.md`: Implementation Review für den umgesetzten V0.98-Identity-/Hidden-Zone-Slice.
+- `docs/releases/mvp/mvp-0-98-identities-hidden-zones/final-review.md`: Final Review und Gate-Ergebnis für V0.98.
 - `data/rules/mechanics-coverage-0.98.json`: maschinenlesbare Coverage nach V0.98; Identity/Modifier und Hidden-Zone-Tools sind `implemented_limited`, V0.99 war zu diesem Zeitpunkt noch offen.
-- `docs/derived/MVP_0.99_DETAILED_PLAN.md`: historischer Detailplan für V0.99 Hosting, Viren, Purge und Counter-Familien.
-- `docs/derived/MVP_0.99_REQUIREMENTS.md`: eingefrorene V0.99-Anforderungen für Counter, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
-- `docs/derived/COUNTER_HOSTING_0.99_SPEC.md`: V0.99a/b-Spezifikation für Counter-Felder, `hostedOn`, Hosting-Choice, Host-Trash-Kaskade und Sichtbarkeit.
-- `docs/derived/VIRUS_PURGE_0.99_SPEC.md`: V0.99c-Spezifikation für Virus-Counter und Corp-`purge_virus_counters`.
-- `docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md`: V0.99d-Spezifikation für Recurring Credits und Bad Publicity.
-- `docs/derived/MVP_0.99_TEST_MATRIX.md`: V0.99-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
-- `docs/derived/MVP_0.99_REQUIREMENTS_REVIEW.md`: Requirements Review und Implementierungsfreigabe für V0.99a bis V0.99d.
-- `docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md`: Implementation Review für den umgesetzten V0.99-Hosting-/Counter-Slice.
-- `docs/derived/MVP_0.99_FINAL_REVIEW.md`: Final Review und Gate-Ergebnis für V0.99.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/plan.md`: historischer Detailplan für V0.99 Hosting, Viren, Purge und Counter-Familien.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements.md`: eingefrorene V0.99-Anforderungen für Counter, Hosting, Viren, Purge, Recurring Credits und Bad Publicity.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/counter-hosting-spec.md`: V0.99a/b-Spezifikation für Counter-Felder, `hostedOn`, Hosting-Choice, Host-Trash-Kaskade und Sichtbarkeit.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/virus-purge-spec.md`: V0.99c-Spezifikation für Virus-Counter und Corp-`purge_virus_counters`.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/recurring-bad-publicity-spec.md`: V0.99d-Spezifikation für Recurring Credits und Bad Publicity.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/test-matrix.md`: V0.99-Testmatrix für Requirements, Engine, Visibility, Replay/StateHash, AI und Multiplayer-Smokes.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements-review.md`: Requirements Review und Implementierungsfreigabe für V0.99a bis V0.99d.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/implementation-review.md`: Implementation Review für den umgesetzten V0.99-Hosting-/Counter-Slice.
+- `docs/releases/mvp/mvp-0-99-hosting-virus-counters/final-review.md`: Final Review und Gate-Ergebnis für V0.99.
 - `data/rules/mechanics-coverage-0.99.json`: maschinenlesbare Coverage nach V0.99; Hosting, Viren, Purge, Counter-Familien, Recurring Credits und Bad Publicity sind `implemented_limited`, M11+-Mechaniken bleiben offen.
 - `docs/releases/special/s01/requirements.md`: eingefrorene S01-Anforderungen für Ergebnisfenster, sichere Statistik, Spielziel-Auswahl, private Matchserie und Audio.
 - `docs/releases/special/s01/match-series-spec.md`: Spezifikation der privaten Zwei-Spiel-Serie mit Seitenwechsel.

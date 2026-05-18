@@ -44,10 +44,10 @@ Gelesen und ausgewertet wurden unter anderem:
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/plan.md`
 - `docs/releases/v1/v1-0-1-join-deck-handshake/plan.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
-- `docs/derived/MVP_0.91_REQUIREMENTS.md`
-- `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`
-- `docs/derived/MVP_0.92_REQUIREMENTS.md`
-- `docs/derived/SETUP_GAME_END_0.93_SPEC.md`
+- `docs/releases/mvp/mvp-0-91-card-images/requirements.md`
+- `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`
+- `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`
+- `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`
 - relevante V0.94 bis V0.99 Requirements, Testmatrizen und Final Reviews nach Bedarf.
 
 ### Code- und Teststand
