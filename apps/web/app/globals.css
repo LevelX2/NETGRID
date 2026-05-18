@@ -6572,6 +6572,39 @@ select {
   gap: 8px;
 }
 
+.gameStandingStrip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid rgb(216 189 95 / 0.28);
+  border-radius: 8px;
+  background: rgb(216 189 95 / 0.08);
+}
+
+.gameStandingStrip div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.gameStandingStrip span {
+  font-weight: 800;
+}
+
+.gameStandingStrip small,
+.gameStandingScore {
+  color: var(--muted);
+}
+
+.gameStandingScore {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 12px;
+}
+
 .seriesStrip {
   display: flex;
   justify-content: space-between;
@@ -9284,6 +9317,7 @@ select,
     margin-left: 0;
   }
 
+  .gameStandingStrip,
   .seriesStrip {
     flex-direction: column;
   }
@@ -9293,6 +9327,7 @@ select,
     width: 100%;
   }
 
+  .gameStandingScore,
   .seriesScore {
     justify-content: flex-start;
   }
