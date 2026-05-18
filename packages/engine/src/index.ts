@@ -63,6 +63,9 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "./ability-engine/cost-pipeline";
 export { quoteCorpRezCost } from "./ability-engine/cost-pipeline";
+import { executeCardImplementationEffects } from "./card-implementations/effect-interpreter";
+import { cardImplementationForDefinitionId } from "./card-implementations/registry";
+import type { OnPlayCardAbilityImplementation } from "./card-implementations/types";
 import {
   ACTION_ASSET_CARD_IDS,
   COUNTER_ASSET_CARD_IDS,
@@ -933,28 +936,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       );
     },
   },
-  "onr_v1_097_livewires-contacts": {
-    name: "onr_runner_event_gain_credits_3",
-    resolve: (state, legalAction) => {
-      state.runner.credits += 3;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedCredits: 3,
-        runnerCreditsAfter: state.runner.credits,
-      };
-    },
-  },
-  onr_v1_108_score: {
-    name: "onr_runner_event_gain_credits_9",
-    resolve: (state, legalAction) => {
-      state.runner.credits += 9;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedCredits: 9,
-        runnerCreditsAfter: state.runner.credits,
-      };
-    },
-  },
   [TERRORIST_REPRISAL_ID]: {
     name: "onr_runner_event_terrorist_reprisal_hq_random_discard",
     canPlay: (state) => corpScoredBlackOpsAgendaLastTurn(state),
@@ -1315,17 +1296,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       state.corp.badPublicity += 1;
     },
   },
-  "onr_v1_281_accounts-receivable": {
-    name: "onr_corp_operation_gain_credits_9",
-    resolve: (state, legalAction) => {
-      state.corp.credits += 9;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedCredits: 9,
-        corpCreditsAfter: state.corp.credits,
-      };
-    },
-  },
   "onr_v1_282_annual-reviews": {
     name: "onr_corp_operation_draw_3",
     resolve: (state, legalAction) => {
@@ -1449,17 +1419,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         ...(legalAction.payload ?? {}),
         drawnCards: 2,
         gainedCredits: 1,
-        corpCreditsAfter: state.corp.credits,
-      };
-    },
-  },
-  "onr_v1_290_efficiency-experts": {
-    name: "onr_corp_operation_gain_credits_3",
-    resolve: (state, legalAction) => {
-      state.corp.credits += 3;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedCredits: 3,
         corpCreditsAfter: state.corp.credits,
       };
     },
@@ -4358,9 +4317,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state.runner.credits >= (definition.cost ?? 0)
     ) {
       const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
-      if (!resolver) continue;
-      if (resolver.canPlay && !resolver.canPlay(state)) continue;
-      if (resolver.requiresServer) {
+      if (!resolver && !hasPrintedCostOnPlayImplementation(definition)) continue;
+      if (resolver?.canPlay && !resolver.canPlay(state)) continue;
+      if (resolver?.requiresServer) {
         for (const server of state.corp.servers) {
           if (
             resolver.canPlayForServer &&
@@ -9049,8 +9008,11 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
     zone: { side: "runner", zone: "heap" },
   };
   const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
-  if (!resolver) throw new Error(`Kein Event-Resolver fuer ${definition.id}.`);
-  resolver.resolve(state, legalAction);
+  if (resolver) {
+    resolver.resolve(state, legalAction);
+    return;
+  }
+  executeOnPlayCardImplementationAbility(state, legalAction, definition, cardId);
 }
 
 function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
@@ -24223,12 +24185,50 @@ function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   return patch >= 0;
 }
 
+function printedCostOnPlayImplementation(
+  definition: CardDefinition,
+): OnPlayCardAbilityImplementation | undefined {
+  return cardImplementationForDefinitionId(definition.id)?.abilities?.find(
+    (ability): ability is OnPlayCardAbilityImplementation =>
+      ability.kind === "on_play" && ability.costs === "printed",
+  );
+}
+
+function hasPrintedCostOnPlayImplementation(definition: CardDefinition): boolean {
+  return Boolean(printedCostOnPlayImplementation(definition));
+}
+
+function executeOnPlayCardImplementationAbility(
+  state: GameState,
+  legalAction: LegalAction,
+  definition: CardDefinition,
+  cardId: CardInstanceId,
+): void {
+  const ability = printedCostOnPlayImplementation(definition);
+  if (!ability)
+    throw new Error(`Kein On-Play-Implementation-Resolver fuer ${definition.id}.`);
+  const result = executeCardImplementationEffects(
+    state,
+    {
+      sourceCardId: cardId,
+      sourceDefinitionId: definition.id,
+      controller: mustInstance(state.cardInstances, cardId).controller,
+    },
+    ability.effects,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...result.publicPayload,
+  };
+}
+
 function canPlayCorpOperation(
   state: GameState,
   definition: CardDefinition,
 ): boolean {
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
-  return Boolean(resolver && (resolver.canPlay?.(state) ?? true));
+  if (resolver) return resolver.canPlay?.(state) ?? true;
+  return hasPrintedCostOnPlayImplementation(definition);
 }
 
 function resolveCorpOperation(
@@ -24237,9 +24237,15 @@ function resolveCorpOperation(
   legalAction: LegalAction,
 ): void {
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
-  if (!resolver)
-    throw new Error(`Kein Operation-Resolver fuer ${definition.id}.`);
-  resolver.resolve(state, legalAction);
+  if (resolver) {
+    resolver.resolve(state, legalAction);
+    return;
+  }
+  const cardId =
+    typeof legalAction.payload?.cardId === "string"
+      ? (legalAction.payload.cardId as CardInstanceId)
+      : "";
+  executeOnPlayCardImplementationAbility(state, legalAction, definition, cardId);
 }
 
 function createInstance(

@@ -1,9 +1,11 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { onrV1RezCostModifierImplementations } from "./onr-v1/rez-cost-modifiers";
+import { onrV1SimpleGainCreditsImplementations } from "./onr-v1/simple-gain-credits";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
   ...onrV1RezCostModifierImplementations,
+  ...onrV1SimpleGainCreditsImplementations,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

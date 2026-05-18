@@ -18,14 +18,40 @@ export type CardImplementationCoverageEntry = {
 const IMPLEMENTED_REZ_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/rez-cost-modifiers.ts";
 
-const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
-  CARD_IMPLEMENTATIONS.map((implementation) => ({
+const IMPLEMENTED_SIMPLE_GAIN_CREDITS_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/simple-gain-credits.ts";
+
+function implementedCoverageFor(
+  implementation: (typeof CARD_IMPLEMENTATIONS)[number],
+): CardImplementationCoverageEntry {
+  const reasons: string[] = [];
+  const currentLocations = new Set<string>();
+
+  if (implementation.modifiers?.some((modifier) => modifier.kind === "rez_cost")) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive Corp rez-cost modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_REZ_COST_MODIFIER_LOCATION);
+  }
+  if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for printed-cost on-play gain-credit behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_SIMPLE_GAIN_CREDITS_LOCATION);
+  }
+
+  return {
     cardDefinitionId: implementation.cardDefinitionId,
     status: "implemented",
     reason:
-      "Engine-local CardImplementationDefinition exists for passive Corp rez-cost modifier behavior.",
-    currentLocations: [IMPLEMENTED_REZ_COST_MODIFIER_LOCATION],
-  }));
+      reasons.join(" ") ||
+      "Engine-local CardImplementationDefinition exists for card behavior.",
+    currentLocations: [...currentLocations],
+  };
+}
+
+const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
+  CARD_IMPLEMENTATIONS.map(implementedCoverageFor);
 
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [

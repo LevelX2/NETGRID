@@ -18,6 +18,7 @@ import {
   validateGameState,
 } from "./index";
 import { collectActiveModifiers } from "./ability-engine/active-modifiers";
+import { executeCardImplementationEffects } from "./card-implementations/effect-interpreter";
 import {
   CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
   CARD_IMPLEMENTATION_COVERAGE_OVERRIDES,
@@ -6987,6 +6988,79 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
   });
 
+  it("describes simple credit cards through typed on-play effects", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_281_accounts-receivable",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 9,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_290_efficiency-experts",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_097_livewires-contacts",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_108_score")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 9,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+  });
+
   it("requires implementation coverage for every demo card", () => {
     const duplicateIds = (ids: string[]): string[] =>
       ids.filter((id, index) => ids.indexOf(id) !== index);
@@ -7031,6 +7105,88 @@ describe("V1.6.2 Mechanikpaket B", () => {
         implementation.cardDefinitionId,
       ).toBe("implemented");
     }
+  });
+
+  it("executes typed gain_credits card effects", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-gain-credits" });
+    state.runner.credits = 5;
+    state.corp.credits = 5;
+
+    executeCardImplementationEffects(
+      state,
+      { sourceCardId: state.runner.identity, controller: "runner" },
+      [
+        {
+          kind: "gain_credits",
+          recipient: "runner",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    );
+    expect(state.runner.credits).toBe(7);
+
+    executeCardImplementationEffects(
+      state,
+      { sourceCardId: state.corp.identity, controller: "corp" },
+      [
+        {
+          kind: "gain_credits",
+          recipient: "corp",
+          amount: 3,
+          visibility: "public",
+        },
+      ],
+    );
+    expect(state.corp.credits).toBe(8);
+
+    const result = executeCardImplementationEffects(
+      state,
+      { sourceCardId: state.runner.identity, controller: "runner" },
+      [
+        {
+          kind: "gain_credits",
+          recipient: "controller",
+          amount: 4,
+          visibility: "public",
+        },
+      ],
+    );
+    expect(state.runner.credits).toBe(11);
+    expect(result.publicPayload).toMatchObject({
+      gainedCredits: 4,
+      runnerCreditsAfter: 11,
+    });
+    expect(result.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "gain_credits",
+        visibility: "public",
+        side: "runner",
+        amount: 4,
+      }),
+    ]);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.runner.identity, controller: "runner" },
+        [
+          {
+            kind: "gain_credits",
+            recipient: "runner",
+            amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.runner.identity, controller: "runner" },
+        [{ kind: "unknown_effect", visibility: "public" } as never],
+      ),
+    ).toThrow(/Unsupported card implementation effect/);
   });
 
   it("applies Data Masons rez/strength modifiers and score-based Security Net strength", () => {
