@@ -18630,6 +18630,30 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
+    setCardCounterForTest(state, firmId, "recurring_credit", 4);
+    const creditsBeforeTurnStartDrain = state.corp.credits;
+    const startTurnInitial = structuredClone(state);
+    const startTurnReplayStart = state.eventLog.length;
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(creditsBeforeTurnStartDrain + 1);
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(3);
+    expect(state.corp.archives).not.toContain(firmId);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        effectId: expect.stringContaining("corp.start.investment_firm"),
+        kind: "gain_credits",
+        amount: 1,
+        sourceDefinitionId: "onr_v1_329_investment-firm",
+      }),
+    );
+    const startTurnReplay = replayEvents(
+      startTurnInitial,
+      state.eventLog.slice(startTurnReplayStart),
+    );
+    expect(startTurnReplay.ok).toBe(true);
+    expect(hashState(startTurnReplay.state)).toBe(hashState(state));
+
     let multi = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1917-investment-firm-multiple",
     );
@@ -18751,6 +18775,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       };
       if (definitionId === "onr_v1_311_braindance-campaign")
         setCardCounterForTest(state, assetId, "bit", 12);
+      if (definitionId === "onr_v1_329_investment-firm")
+        setCardCounterForTest(state, assetId, "recurring_credit", 1);
     }
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -18766,6 +18792,16 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
             state.cardInstances[cardId]?.definitionId ===
               "onr_v1_311_braindance-campaign" &&
             cardCounterAmount(state, cardId, "bit") === 10,
+        ),
+      ),
+    ).toBe(true);
+    expect(
+      state.corp.servers.some((server) =>
+        server.root.some(
+          (cardId) =>
+            state.cardInstances[cardId]?.definitionId ===
+              "onr_v1_329_investment-firm" &&
+            cardCounterAmount(state, cardId, "recurring_credit") === 0,
         ),
       ),
     ).toBe(true);

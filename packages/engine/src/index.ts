@@ -13618,6 +13618,21 @@ function applyCorpStartOfTurnEffects(
         trashCorpInstalledCardToArchives(state, cardId);
       continue;
     }
+    if (definitionId === INVESTMENT_FIRM_ASSET_CARD_ID) {
+      if (cardCounter(state, cardId, "recurring_credit") > 0) {
+        spendCardCounter(state, cardId, "recurring_credit", 1);
+        credits(state, "corp", 1);
+        effects?.push(
+          automaticGainCreditsEffect(
+            `corp.start.investment_firm.${cardId}`,
+            "corp",
+            1,
+            definitionId,
+          ),
+        );
+      }
+      continue;
+    }
     if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId)) {
       credits(state, "corp", 1);
       effects?.push(

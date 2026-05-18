@@ -59,6 +59,8 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
   hidden: "Verdeckt"
 };
 
+const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
+
 type EffectSummary = {
   category?: ChronicleCategory;
   suffix?: string;
@@ -900,8 +902,10 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
 }
 
 export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
-  return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects)
+  const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
+  return effects
     .filter((effect) => !shouldMergePlayEffect(event, effect))
+    .filter((effect) => !shouldHideBraindanceCampaignBitDrainEffect(effect, effects))
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
 }
 
@@ -955,11 +959,19 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   }
 
   switch (effect.kind) {
-    case "gain_credits":
+    case "gain_credits": {
+      const braindanceTurnDrain =
+        sourceDefinitionId === BRAINDANCE_CAMPAIGN_ID && effect.reason === "start_of_turn";
       category = "economy";
-      title = phrase(subject, `${creditText(amount)}${through} erhalten`);
+      title = phrase(
+        subject,
+        braindanceTurnDrain
+          ? `${creditText(amount)} von ${sourceTitle ?? "Braindance Campaign"} genommen`
+          : `${creditText(amount)}${through} erhalten`
+      );
       chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
       break;
+    }
     case "draw_cards":
       category = "card";
       title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
@@ -995,9 +1007,15 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     case "counter_change": {
       const counterText = counterLabel(effect.counterType);
       const added = numberValue(effect.addedCounterAmount) ?? 0;
+      const removed = numberValue(effect.removedCounterAmount) ?? 0;
       category = "card";
-      title = phrase(subject, `${counterText} auf ${sourceTitle ?? cardTitle ?? "einer Karte"} aufgefrischt`);
-      chips.push(counterText, `${amount} bereit`, ...(added > 0 ? [`+${added}`] : []), "Automatisch");
+      if (removed > 0) {
+        title = phrase(subject, `${removed} ${counterText} von ${sourceTitle ?? cardTitle ?? "einer Karte"} entfernt`);
+        chips.push(counterText, `${removed} entfernt`, `${amount} übrig`, "Automatisch");
+      } else {
+        title = phrase(subject, `${counterText} auf ${sourceTitle ?? cardTitle ?? "einer Karte"} aufgefrischt`);
+        chips.push(counterText, `${amount} bereit`, ...(added > 0 ? [`+${added}`] : []), "Automatisch");
+      }
       break;
     }
     case "gain_actions":
@@ -1070,6 +1088,22 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
+}
+
+function shouldHideBraindanceCampaignBitDrainEffect(effect: ResolvedGameEffect, effects: ResolvedGameEffect[]): boolean {
+  if (effect.kind !== "counter_change") return false;
+  if (stringValue(effect.sourceDefinitionId) !== BRAINDANCE_CAMPAIGN_ID) return false;
+  if (effect.counterType !== "bit") return false;
+  const removed = numberValue(effect.removedCounterAmount);
+  if (!removed || removed <= 0) return false;
+  return effects.some((candidate) => {
+    if (candidate === effect) return false;
+    if (candidate.kind !== "gain_credits") return false;
+    if (stringValue(candidate.sourceDefinitionId) !== BRAINDANCE_CAMPAIGN_ID) return false;
+    if (sideValue(candidate.side) !== sideValue(effect.side)) return false;
+    if (candidate.reason !== effect.reason) return false;
+    return numberValue(candidate.amount) === removed;
+  });
 }
 
 function chronicleEffectVisibility(effect: ResolvedGameEffect, viewerSide: Side): ChronicleVisibility {

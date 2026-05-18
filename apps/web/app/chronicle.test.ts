@@ -1521,6 +1521,47 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
   });
 
+  it("shows Braindance Campaign turn-start drain as one credit message", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "corp.start.braindance_campaign.card_311",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 2,
+            sourceDefinitionId: "onr_v1_311_braindance-campaign",
+            sourceTitle: "Braindance Campaign",
+            reason: "start_of_turn"
+          },
+          {
+            effectId: "corp.start.braindance_campaign.bits.card_311",
+            kind: "counter_change",
+            visibility: "public",
+            side: "corp",
+            amount: 2,
+            counterType: "bit",
+            removedCounterAmount: 2,
+            remainingCounters: 2,
+            sourceDefinitionId: "onr_v1_311_braindance-campaign",
+            sourceTitle: "Braindance Campaign",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "corp"
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toBe("Du hast 2 Credits von Braindance Campaign genommen.");
+    expect(items[0]?.category).toBe("economy");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "Automatisch"]));
+    expect(JSON.stringify(items)).not.toContain("aufgefrischt");
+    expect(JSON.stringify(items)).not.toContain("bereit");
+  });
+
   it("shows delayed agenda steals from automatic start-of-turn effects", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
