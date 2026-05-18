@@ -100,6 +100,7 @@ describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
     delete DEMO_CARDS_BY_ID.test_hidden_runner_resource_harness;
     delete DEMO_CARDS_BY_ID.test_planless_corp_operation;
+    delete DEMO_CARDS_BY_ID.test_planless_runner_resource;
   });
 
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -1093,6 +1094,122 @@ describe("MVP 0.3 AI controller contract", () => {
       choiceId: choice.choiceId,
       selectedOptionIds: ["a_option"],
     });
+  });
+
+  it("adds Runner rig-builder doctrine and planfit to discard keep values", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-rig-builder",
+      ["rig_builder"],
+      { build_rig: 24, pressure_hq: -4 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_run_event"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_score:base",
+        "discard_score:planfit",
+        "discard_score:doctrinefit",
+        "discard_keep:build_rig",
+        "discard_keep:doctrine_rig_builder",
+      ]),
+    );
+  });
+
+  it("keeps Runner central-pressure cards above off-plan economy when doctrine supports pressure", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-hq-pressure",
+      ["hq_pressure"],
+      { pressure_hq: 24, build_rig: 2 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_run_event", "simple_economy_event"],
+      rig: ["simple_fracter"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_economy_event_1"],
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_keep:pressure_hq",
+        "discard_keep:doctrine_hq_pressure",
+      ]),
+    );
+  });
+
+  it("keeps discard safety above doctrine pressure bias under Runner credit stress", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-pressure-safety",
+      ["hq_pressure"],
+      { pressure_hq: 24 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 1,
+      cards: ["simple_economy_event", "simple_run_event"],
+      rig: ["simple_fracter"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+  });
+
+  it("adds Corp glacier doctrine and score-next-turn planfit to discard keep values", () => {
+    DEMO_CARDS_BY_ID.test_planless_corp_operation = {
+      id: "test_planless_corp_operation",
+      title: "Planless Corp Operation",
+      side: "corp",
+      type: "operation",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      cost: 1,
+      rulesText: "Discard doctrine fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const doctrine = corpDoctrineForTest(
+      "discard-glacier",
+      ["glacier"],
+      { score_next_turn: 18, build_scoring_remote: 24 },
+    );
+    const input = discardDecisionInputForTest("corp", {
+      credits: 4,
+      cards: ["simple_agenda", "simple_barrier_ice", "simple_upgrade", "test_planless_corp_operation"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseCorpAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_planless_corp_operation_3"],
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_score:base",
+        "discard_score:planfit",
+        "discard_score:doctrinefit",
+        "discard_keep:score_next_turn",
+        "discard_keep:doctrine_glacier",
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
   });
 
   it("keeps V0.95 Resource trash decisions LegalActions-only and side-safe", () => {
@@ -8725,7 +8842,13 @@ function visibleCard(definitionId: string, instanceId: string): VisibleCard {
 
 function discardDecisionInputForTest(
   side: Side,
-  config: { credits: number; cards: string[]; discardCount?: number },
+  config: {
+    credits: number;
+    cards: string[];
+    discardCount?: number;
+    ownDeckDoctrine?: AiDeckDoctrineProfile;
+    rig?: string[];
+  },
 ): AiDecisionInput {
   const state =
     side === "runner"
@@ -8737,6 +8860,9 @@ function discardDecisionInputForTest(
   });
   const hand = config.cards.map((definitionId, index) =>
     discardVisibleCardForTest(definitionId, `discard_${definitionId}_${index}`),
+  );
+  const rig = config.rig?.map((definitionId, index) =>
+    discardVisibleCardForTest(definitionId, `rig_${definitionId}_${index}`),
   );
   const discardCount = config.discardCount ?? 1;
   const choice: ChoiceRequest = {
@@ -8777,10 +8903,12 @@ function discardDecisionInputForTest(
         ...base.playerView.own,
         credits: config.credits,
         gripOrHq: hand,
+        ...(rig ? { rig } : {}),
       },
       pendingChoice: choice,
     },
     legalActions: [resolveChoice],
+    ...(config.ownDeckDoctrine ? { ownDeckDoctrine: config.ownDeckDoctrine } : {}),
   };
 }
 
@@ -8879,6 +9007,27 @@ function runnerDoctrineForTest(
     deckSnapshotId,
     deckHash: `test:${deckSnapshotId}`,
     side: "runner",
+    confidence: 0.95,
+    archetypeTags,
+    roleCounts: {},
+    roleDensity: {},
+    planWeights,
+    mulliganWeights: {},
+    riskFlags: [],
+    evidence: [],
+  };
+}
+
+function corpDoctrineForTest(
+  deckSnapshotId: string,
+  archetypeTags: string[],
+  planWeights: Record<string, number>,
+): AiDeckDoctrineProfile {
+  return {
+    schemaVersion: "ai-deck-doctrine-v1",
+    deckSnapshotId,
+    deckHash: `test:${deckSnapshotId}`,
+    side: "corp",
     confidence: 0.95,
     archetypeTags,
     roleCounts: {},

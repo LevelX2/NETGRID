@@ -1,19 +1,21 @@
 ---
 activityId: act-2026-05-18-ai-discard-plan-doctrine-fit
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-18
-startedAt:
-completedAt:
+startedAt: 2026-05-18
+completedAt: 2026-05-18
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-18-ai-discard-keep-value-baseline
-resultArtifacts: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
 checks:
   - corepack pnpm --filter @netgrid/ai test -- -t "discard|plan|doctrine"
   - corepack pnpm --filter @netgrid/ai typecheck
@@ -68,13 +70,13 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline`. 
 
 ## Akzeptanzkriterien
 
-- [ ] Der Discard-Score enthält getrennt nachvollziehbare Beiträge für Basiswert, situativen Planfit und Deck-Doctrine-Fit.
-- [ ] Runner-Test: Ein `rig_builder` hält Setup/Breaker/Memory eher als ein off-plan Run-Event.
-- [ ] Runner-Test: Bei aktivem sichtbarem Zentralserverdruck hält die KI passende Pressure-/Breaker-/Economy-Karten höher.
-- [ ] Korp-Test: Eine `glacier`- oder Remote-orientierte Corp hält ICE/Economy/Remote-Schutz eher als off-plan Bait.
-- [ ] Korp-Test: Bei erkennbarem `score_next_turn`-Kontext hält die KI Score-/Remote-Unterstützung höher.
-- [ ] Doctrine-Bonus ist schwach genug, dass ein klarer Sicherheits- oder Spielbarkeitsbedarf aus Paket 1 nicht überstimmt wird.
-- [ ] Debug-/Evidence-Ausgaben bleiben side-sicher und enthalten keine gegnerischen verdeckten Informationen.
+- [x] Der Discard-Score enthält getrennt nachvollziehbare Beiträge für Basiswert, situativen Planfit und Deck-Doctrine-Fit.
+- [x] Runner-Test: Ein `rig_builder` hält Setup/Breaker/Memory eher als ein off-plan Run-Event.
+- [x] Runner-Test: Bei aktivem sichtbarem Zentralserverdruck hält die KI passende Pressure-/Breaker-/Economy-Karten höher.
+- [x] Korp-Test: Eine `glacier`- oder Remote-orientierte Corp hält ICE/Economy/Remote-Schutz eher als off-plan Bait.
+- [x] Korp-Test: Bei erkennbarem `score_next_turn`-Kontext hält die KI Score-/Remote-Unterstützung höher.
+- [x] Doctrine-Bonus ist schwach genug, dass ein klarer Sicherheits- oder Spielbarkeitsbedarf aus Paket 1 nicht überstimmt wird.
+- [x] Debug-/Evidence-Ausgaben bleiben side-sicher und enthalten keine gegnerischen verdeckten Informationen.
 
 ## Umsetzungshinweise
 
@@ -85,4 +87,4 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline`. 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der Discard-Keep-Value ist jetzt in `baseValue`, `planFit` und `doctrineFit` getrennt. Der Planfit wird aus Discard-spezifischen, side-sicheren Board-/Hand-Signalen und `ownDeckDoctrine.planWeights` abgeleitet, ohne die Action-Phase-Planwähler in der Discard-Phase aufzurufen. Doctrine-Boni sind bewusst gedeckelt und schwächer als Basissicherheit. Evidence bleibt abstrakt (`discard_score:*`, `discard_keep:*`) und nennt keine Handkarten oder verdeckten Gegnerdaten. Tests decken Runner-`rig_builder`, Runner-`hq_pressure`, Korp-`glacier`/`score_next_turn`, Safety-Dominanz bei Runner-Creditmangel und side-safe Debugdaten ab.
