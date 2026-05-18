@@ -128,6 +128,7 @@ import {
   cuePositionStyle,
   groupRunnerRigCards,
   hasLegalAction,
+  orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
@@ -2483,7 +2484,9 @@ export default function Page() {
   const selectedPanelContextActions = selectedPanelContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedPanelContext)) : [];
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
-    return legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+    return orderedCardContextActions(
+      legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }))
+    );
   };
   const runActionForServer = (serverId: string): LegalAction | null => {
     const serverContext = { kind: "server" as const, id: serverId, label: serverDisplayLabel(serverId) };

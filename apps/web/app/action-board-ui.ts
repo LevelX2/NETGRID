@@ -260,6 +260,17 @@ export function contextualCardActionLabel(action: LegalAction): string {
   }
 }
 
+export function orderedCardContextActions(actions: LegalAction[]): LegalAction[] {
+  return actions
+    .map((action, index) => ({ action, index }))
+    .sort((left, right) => {
+      const leftNewRemoteIce = isNewRemoteIceInstallAction(left.action) ? 1 : 0;
+      const rightNewRemoteIce = isNewRemoteIceInstallAction(right.action) ? 1 : 0;
+      return leftNewRemoteIce - rightNewRemoteIce || left.index - right.index;
+    })
+    .map(({ action }) => action);
+}
+
 function triggerAbilityActionLabel(action: LegalAction, compact = false): string {
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
@@ -379,6 +390,7 @@ function installContextLabel(action: LegalAction): string {
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
+  if (isNewRemoteIceInstallAction(action)) return "Neues Fort erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
   if (
@@ -388,6 +400,10 @@ function installContextLabel(action: LegalAction): string {
     return `In ${serverLabel} (Node ersetzen)`;
   if (action.payload?.placement === "root") return `In ${serverLabel}`;
   return `Installieren: ${serverLabel}`;
+}
+
+function isNewRemoteIceInstallAction(action: Pick<LegalAction, "type" | "payload">): boolean {
+  return action.type === "install_card" && action.payload?.serverId === "new_remote" && action.payload?.placement === "ice";
 }
 
 function playEventContextLabel(action: LegalAction): string {

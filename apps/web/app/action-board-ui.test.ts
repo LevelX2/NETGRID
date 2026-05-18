@@ -24,6 +24,7 @@ import {
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
+  orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
   runAwareActionButtonLabel,
@@ -543,7 +544,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Vor neuem Fort");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Fort erstellen");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Fort");
     expect(
       contextualCardActionLabel(
@@ -584,6 +585,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
         ),
       ),
     ).toBe("Auf Fort 1 ausrichten");
+  });
+
+  it("keeps new-fort ICE installs as the last card-context action", () => {
+    const newRemoteIce = legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" });
+    const hqIce = legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" });
+    const rdIce = legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" });
+
+    expect(orderedCardContextActions([newRemoteIce, hqIce, rdIce])).toEqual([hqIce, rdIce, newRemoteIce]);
   });
 
   it("moves rig icebreaker actions to their card context", () => {
