@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-17-runner-ai-remote-trash-affordability
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-17
-startedAt:
-completedAt:
+startedAt: 2026-05-18
+completedAt: 2026-05-18
 branch:
 releaseTarget: runner AI / remote run valuation
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-plans.ts
+  - packages/ai/src/index.test.ts
+  - docs/codex/CODEX_STATUS.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/ai test -- index.test.ts -t "Krash.*BBS|unknown remote root|post-ICE trash"
+  - corepack pnpm --filter @netgrid/ai test -- index.test.ts -t "Krash|visible.*run|blocked remote|remote contest"
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test
 ---
 
 # Runner-KI: Remote-Run nur bewerten, wenn Trash nach ICE-Kosten bezahlbar ist
@@ -78,4 +86,8 @@ Offensichtlich sinnlose Aktionen sollen vermieden werden; bei verdeckten Karten 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-18. `contest_remote` bewertet bekannte sichtbare Asset-/Upgrade-Remote-Ziele jetzt nach sichtbaren ETR-Break-Kosten: `Krash` mit 4 Credits gegen rezzed `Data Wall` vor rezzed `BBS Whispering Campaign` verliert gegen Economy, weil nach dem Break nur 2 Credits für 4 Trashkosten bleiben. Mit 6 Credits bleibt der Remote-Contest möglich. Verdeckte Remote-Roots erzeugen nur eine Deferred-Evidence und keinen Trashkosten-No-Value-Guard vor der rechtmäßigen Aufdeckung.
+
+Checks: `corepack pnpm --filter @netgrid/ai test -- index.test.ts -t "Krash.*BBS|unknown remote root|post-ICE trash"`, `corepack pnpm --filter @netgrid/ai test -- index.test.ts -t "Krash|visible.*run|blocked remote|remote contest"`, `corepack pnpm --filter @netgrid/ai typecheck`, `corepack pnpm --filter @netgrid/ai test`.
+
+Offene Folgepunkte: keine innerhalb dieses Pakets.

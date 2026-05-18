@@ -4284,6 +4284,135 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(urgentDecision.debug.planKind).toBe("contest_remote");
   });
 
+  it("recovers economy when Krash can pass Data Wall but cannot afford a known BBS trash afterward", () => {
+    const input = krashDataWallBbsRemoteInput(
+      "ai-v141-krash-bbs-trash-unaffordable",
+      4,
+      true,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing Krash/BBS remote fixture actions");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    const recoverCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "recover_economy",
+    );
+    expect(contestCandidate).toBeDefined();
+    expect(recoverCandidate).toBeDefined();
+    if (!contestCandidate || !recoverCandidate)
+      throw new Error("Missing Krash/BBS fixture candidates");
+
+    const runCost = estimateRunCost(input, contestCandidate);
+    const access = evaluateServerAccessValue(input, contestCandidate);
+    const contestScore = evaluateRunnerPlan(input, contestCandidate);
+    const recoverScore = evaluateRunnerPlan(input, recoverCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gain],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(runCost.evidence).toContain("visible_etr_break_cost:2");
+    expect(access.reasons).toContain(
+      "known_remote_root_trash_unaffordable_after_ice",
+    );
+    expect(access.evidence).toContain("known_remote_root_trash_cost:4");
+    expect(access.evidence).toContain("known_remote_root_visible_break_cost:2");
+    expect(access.evidence).toContain("known_remote_root_credits_after_ice:2");
+    expect(contestScore.score).toBeLessThan(recoverScore.score);
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("keeps known remote contest viable when Krash can still afford BBS trash after Data Wall", () => {
+    const input = krashDataWallBbsRemoteInput(
+      "ai-v141-krash-bbs-trash-affordable",
+      6,
+      true,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing affordable Krash/BBS fixture actions");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing affordable Krash/BBS contest candidate");
+
+    const access = evaluateServerAccessValue(input, contestCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gain],
+    });
+
+    expect(access.reasons).toContain(
+      "known_remote_root_trash_affordable_after_ice",
+    );
+    expect(access.evidence).toContain("known_remote_root_credits_after_ice:4");
+    expect(decision.actionId).toBe(remoteRun.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.contest_remote");
+  });
+
+  it("does not apply the post-ICE trash guard to an unknown remote root before access", () => {
+    const input = krashDataWallBbsRemoteInput(
+      "ai-v141-krash-hidden-bbs-no-pretrash-guard",
+      4,
+      false,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(remoteRun).toBeDefined();
+    if (!remoteRun) throw new Error("Missing hidden BBS remote fixture action");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing hidden BBS contest candidate");
+
+    const access = evaluateServerAccessValue(input, contestCandidate);
+    const selectedRunOnly = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun],
+    });
+
+    expect(access.reasons).toContain(
+      "known_remote_root_affordability_deferred_for_unknown_root",
+    );
+    expect(access.reasons).not.toContain(
+      "known_remote_root_trash_unaffordable_after_ice",
+    );
+    expect(access.evidence).toContain("known_remote_root_unknown_count:1");
+    expect(selectedRunOnly.reasonCode).toBe("runner.plan.contest_remote");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
   it("penalizes immediate repeated remote contest", () => {
     const input = runnerActionPhaseInput("ai-v141-repeated-remote", (state) => {
       ensureRemoteServer(state, "remote_1");
@@ -7675,6 +7804,63 @@ function krashFilterEncounterState(seed: string): GameState {
       action.type === "rez_ice" &&
       sourceDefinition(state, action) === "onr_v1_244_filter",
   );
+}
+
+function krashDataWallBbsRemoteInput(
+  seed: string,
+  runnerCredits: number,
+  bbsKnown: boolean,
+): ReturnType<typeof buildAiDecisionInput> {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_2_3_CORP_DECK,
+        cards: [
+          ...ONR_V1_2_3_CORP_DECK.cards,
+          { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 10;
+  state.corp.credits = 10;
+  moveRunnerCardToGrip(state, "onr_v1_039_krash");
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === "onr_v1_039_krash",
+  );
+  ensureRemoteServer(state, "remote_1");
+  const dataWallId = putCorpIceOnServer(
+    state,
+    "remote_1",
+    "onr_v1_237_data-wall",
+  );
+  state.cardInstances[dataWallId] = {
+    ...state.cardInstances[dataWallId]!,
+    faceup: true,
+    rezzed: true,
+  };
+  const bbsId = putCorpRootInRemote(
+    state,
+    "onr_v1_309_bbs-whispering-campaign",
+    0,
+  );
+  state.cardInstances[bbsId] = {
+    ...state.cardInstances[bbsId]!,
+    faceup: bbsKnown,
+    rezzed: bbsKnown,
+  };
+  state.runner.credits = runnerCredits;
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
 }
 
 function weakFracterBarrierEncounterState(seed: string): GameState {

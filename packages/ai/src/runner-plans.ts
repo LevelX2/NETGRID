@@ -632,6 +632,7 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
   const staleHqPenalty =
     target === "hq" && (candidate.kind === "pressure_hq" || candidate.kind === "safe_probe_run") && lowValueKnownHq ? (candidate.kind === "pressure_hq" ? 430 : 230) : 0;
   const recentCentralPenalty = recentCentralPressurePenalty(input, candidate, target);
+  const remoteRootAffordabilityPenalty = knownRemoteRootTrashAffordabilityPenalty(input, candidate, target, features);
   evidence.push(`recent_central_penalty:${recentCentralPenalty}`);
   const score =
     candidate.kind === "pressure_rnd"
@@ -639,7 +640,7 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
     : candidate.kind === "pressure_hq"
         ? 110 + Math.max(0, 5 - input.playerView.opponent.handCount) * 4 + history * 8 - staleHqPenalty - recentCentralPenalty
       : candidate.kind === "contest_remote"
-          ? 90 + (server?.rootCount ?? 0) * 55 + (server?.advancedRootCount ?? 0) * 35
+          ? 90 + (server?.rootCount ?? 0) * 55 + (server?.advancedRootCount ?? 0) * 35 - remoteRootAffordabilityPenalty.penalty
       : candidate.kind === "trash_asset"
         ? 150
       : candidate.kind === "safe_probe_run"
@@ -650,13 +651,67 @@ export function evaluateServerAccessValue(input: AiDecisionInput, candidate: Run
     ...(staleRndPenalty > 0 ? ["known_rnd_top_not_fresh"] : []),
     ...(staleHqPenalty > 0 ? ["known_hq_hand_low_value"] : []),
     ...(recentCentralPenalty > 0 ? ["recent_central_pressure_repeated"] : []),
-    ...(staleArchivesPenalty > 0 ? ["known_archives_access_not_fresh"] : [])
+    ...(staleArchivesPenalty > 0 ? ["known_archives_access_not_fresh"] : []),
+    ...remoteRootAffordabilityPenalty.reasons
   ];
   return {
     score,
     reasons,
-    evidence
+    evidence: [...evidence, ...remoteRootAffordabilityPenalty.evidence]
   };
+}
+
+function knownRemoteRootTrashAffordabilityPenalty(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+  target: string | undefined,
+  features: RunnerFeatures
+): { penalty: number; reasons: string[]; evidence: string[] } {
+  if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_")) return { penalty: 0, reasons: [], evidence: [] };
+  const server = input.playerView.servers.find((candidateServer) => candidateServer.id === target);
+  if (!server || server.root.length === 0) return { penalty: 0, reasons: [], evidence: [] };
+  const unknownRootCount = server.root.filter((card) => !card.known).length;
+  if (unknownRootCount > 0) {
+    return {
+      penalty: 0,
+      reasons: ["known_remote_root_affordability_deferred_for_unknown_root"],
+      evidence: [`known_remote_root_unknown_count:${unknownRootCount}`]
+    };
+  }
+  const trashableRoots = server.root.filter((card) => isTrashableKnownRemoteRoot(card));
+  if (trashableRoots.length === 0) return { penalty: 0, reasons: [], evidence: [] };
+  if (server.root.some((card) => card.type === "agenda" || (card.advancementCounters ?? 0) > 0)) {
+    return {
+      penalty: 0,
+      reasons: ["known_remote_root_other_access_value"],
+      evidence: [`known_remote_root_trashable_count:${trashableRoots.length}`]
+    };
+  }
+  const trashCosts = trashableRoots.map((card) => remoteRootTrashCost(card)).filter((cost): cost is number => cost !== undefined);
+  if (trashCosts.length === 0) return { penalty: 0, reasons: [], evidence: [] };
+  const cheapestTrashCost = Math.min(...trashCosts);
+  const visibleBreakCost = features.visibleRunBreakCosts.get(target) ?? 0;
+  const creditsAfterVisibleIce = input.playerView.own.credits - visibleBreakCost;
+  const affordable = creditsAfterVisibleIce >= cheapestTrashCost;
+  return {
+    penalty: affordable ? 0 : 780,
+    reasons: [affordable ? "known_remote_root_trash_affordable_after_ice" : "known_remote_root_trash_unaffordable_after_ice"],
+    evidence: [
+      `known_remote_root_trash_cost:${cheapestTrashCost}`,
+      `known_remote_root_visible_break_cost:${visibleBreakCost}`,
+      `known_remote_root_credits_after_ice:${creditsAfterVisibleIce}`,
+      `known_remote_root_trash_affordable:${affordable}`
+    ]
+  };
+}
+
+function isTrashableKnownRemoteRoot(card: VisibleCard): boolean {
+  return card.known && (card.type === "asset" || card.type === "upgrade") && remoteRootTrashCost(card) !== undefined;
+}
+
+function remoteRootTrashCost(card: VisibleCard): number | undefined {
+  if (!card.known || !card.definitionId) return undefined;
+  return card.trashCost ?? RUNTIME_CARDS[card.definitionId]?.numeric.trashCost ?? DEMO_CARDS_BY_ID[card.definitionId]?.trashCost;
 }
 
 function staleKnownRndPlanPenalty(candidate: RunnerPlanCandidate, target: string | undefined, freshness: RndTopFreshnessMemory | undefined): number {
