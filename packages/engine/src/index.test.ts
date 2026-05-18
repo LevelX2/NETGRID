@@ -14798,6 +14798,61 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(regionInstall.payload?.iceInstallReduction).toBeUndefined();
   });
 
+  it("does not apply Fortress Architects install-cost modifier to Runner installs", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1920-fortress-install-cost-runner-install",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.runner.credits = 20;
+    putCorpRootInRemote(state, "onr_v1_324_fortress-architects");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_324_fortress-architects",
+    );
+    state = toRunnerTurnFromCorpMain(state);
+    const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+    const legal = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === decoderId,
+    );
+    expect(legal.costs[0]).toMatchObject({ clicks: 1, credits: 3 });
+    expect(legal.payload?.iceInstallReduction).toBeUndefined();
+    expect(legal.payload?.iceInstallReductionSourceDefinitionIds).toBeUndefined();
+    expect(legal.payload?.iceInstallTotalCost).toBeUndefined();
+
+    const creditsBefore = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === legal.actionId,
+    );
+    expect(state.runner.credits).toBe(creditsBefore - 3);
+    expect(state.runner.rig.programs).toContain(decoderId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      cardDefinitionId: "simple_decoder",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "iceInstallReduction",
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "iceInstallReductionSourceDefinitionIds",
+    );
+  });
+
   it("projects V1.9.20 scored-agenda handlimit modifiers through PlayerViews", () => {
     let state = apply(
       createGameAfterSetup({
