@@ -196,6 +196,29 @@ describe("deriveOpponentActionCues", () => {
     expect(
       turnStartAudioCue({
         matchId: "match_1",
+        stateVersion: 9,
+        activeSide: "corp",
+        phase: "corp_draw_phase"
+      }, { ...previous, phase: "setup" })
+    ).toEqual({ key: "match_1:9:corp", side: "corp", sound: "corp_turn" });
+
+    expect(
+      turnStartAudioCue({
+        matchId: "match_1",
+        stateVersion: 10,
+        activeSide: "corp",
+        phase: "corp_action_phase"
+      }, {
+        matchId: "match_1",
+        stateVersion: 9,
+        activeSide: "corp",
+        phase: "corp_draw_phase"
+      })
+    ).toBeNull();
+
+    expect(
+      turnStartAudioCue({
+        matchId: "match_1",
         stateVersion: 10,
         activeSide: "runner",
         phase: "runner_action_phase"

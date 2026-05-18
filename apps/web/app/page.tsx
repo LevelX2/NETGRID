@@ -12314,13 +12314,21 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
       ];
     case "runner_turn":
       return [
-        { frequency: 523, duration: 0.08, gain: 0.075, type: "triangle" },
-        { frequency: 784, duration: 0.12, gain: 0.06, type: "sine" }
+        { frequency: 392, duration: 0.13, gain: 0.1, type: "triangle" },
+        { frequency: 523, duration: 0.14, gain: 0.09, type: "sine" },
+        { frequency: 659, duration: 0.15, gain: 0.09, type: "sine" },
+        { frequency: 880, duration: 0.17, gain: 0.085, type: "triangle" },
+        { frequency: 1175, duration: 0.22, gain: 0.075, type: "sine" },
+        { frequency: 1568, duration: 0.19, gain: 0.045, type: "sine" }
       ];
     case "corp_turn":
       return [
-        { frequency: 220, duration: 0.09, gain: 0.08, type: "sawtooth" },
-        { frequency: 147, duration: 0.13, gain: 0.055, type: "triangle" }
+        { frequency: 262, duration: 0.14, gain: 0.11, type: "sawtooth" },
+        { frequency: 196, duration: 0.16, gain: 0.1, type: "square" },
+        { frequency: 147, duration: 0.18, gain: 0.095, type: "sawtooth" },
+        { frequency: 98, duration: 0.23, gain: 0.085, type: "triangle" },
+        { frequency: 131, duration: 0.17, gain: 0.075, type: "square" },
+        { frequency: 87, duration: 0.24, gain: 0.065, type: "triangle" }
       ];
     case "turn":
     default:
