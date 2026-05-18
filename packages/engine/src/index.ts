@@ -13622,6 +13622,7 @@ function applyCorpStartOfTurnEffects(
       if (cardCounter(state, cardId, "recurring_credit") > 0) {
         spendCardCounter(state, cardId, "recurring_credit", 1);
         credits(state, "corp", 1);
+        const remainingCounters = cardCounter(state, cardId, "recurring_credit");
         effects?.push(
           automaticGainCreditsEffect(
             `corp.start.investment_firm.${cardId}`,
@@ -13630,6 +13631,19 @@ function applyCorpStartOfTurnEffects(
             definitionId,
           ),
         );
+        effects?.push({
+          effectId: `corp.start.investment_firm.counter.${cardId}`,
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: remainingCounters,
+          reason: "start_of_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters,
+          sourceDefinitionId: definitionId,
+          sourceTitle: publicCardTitle(definitionId),
+        });
       }
       continue;
     }

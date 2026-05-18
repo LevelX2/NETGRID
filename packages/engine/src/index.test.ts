@@ -18637,14 +18637,13 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    setCardCounterForTest(state, firmId, "recurring_credit", 4);
     const creditsBeforeTurnStartDrain = state.corp.credits;
     const startTurnInitial = structuredClone(state);
     const startTurnReplayStart = state.eventLog.length;
     state = toRunnerTurnFromCorpMain(state);
     state = apply(state, "runner", (action) => action.type === "end_turn");
     expect(state.corp.credits).toBe(creditsBeforeTurnStartDrain + 1);
-    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(3);
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(1);
     expect(state.corp.archives).not.toContain(firmId);
     expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
       expect.objectContaining({
@@ -18654,12 +18653,58 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         sourceDefinitionId: "onr_v1_329_investment-firm",
       }),
     );
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        effectId: expect.stringContaining("corp.start.investment_firm.counter"),
+        kind: "counter_change",
+        counterType: "recurring_credit",
+        removedCounterAmount: 1,
+        remainingCounters: 1,
+        sourceDefinitionId: "onr_v1_329_investment-firm",
+      }),
+    );
     const startTurnReplay = replayEvents(
       startTurnInitial,
       state.eventLog.slice(startTurnReplayStart),
     );
     expect(startTurnReplay.ok).toBe(true);
     expect(hashState(startTurnReplay.state)).toBe(hashState(state));
+
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const creditsBeforeSecondTurnStartDrain = state.corp.credits;
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(creditsBeforeSecondTurnStartDrain + 1);
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        effectId: expect.stringContaining("corp.start.investment_firm.counter"),
+        kind: "counter_change",
+        counterType: "recurring_credit",
+        removedCounterAmount: 1,
+        remainingCounters: 0,
+        sourceDefinitionId: "onr_v1_329_investment-firm",
+      }),
+    );
+
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const creditsBeforeEmptyFirmTurnStart = state.corp.credits;
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(creditsBeforeEmptyFirmTurnStart);
+    expect(cardCounterAmount(state, firmId, "recurring_credit")).toBe(0);
+    const emptyFirmTurnStartEffects = (state.eventLog.at(-1)?.publicPayload
+      .resolvedEffects ?? []) as Array<{
+      kind?: string;
+      sourceDefinitionId?: string;
+    }>;
+    expect(
+      emptyFirmTurnStartEffects.some(
+        (effect) =>
+          effect.sourceDefinitionId === "onr_v1_329_investment-firm" &&
+          effect.kind === "gain_credits",
+      ),
+    ).toBe(false);
 
     let multi = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "v1917-investment-firm-multiple",
