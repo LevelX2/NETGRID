@@ -29,6 +29,7 @@ const ACTION_TYPES = [
   "return_from_set_aside",
   "change_card_control",
   "end_turn",
+  "time_expired",
   "game_created"
 ] as const;
 
@@ -45,6 +46,23 @@ describe("formatChronicleEvent", () => {
       expect(serialized).not.toContain("corp.play_operation");
       expect(serialized).not.toContain("idempotencyKey");
     }
+  });
+
+  it("formats player-clock time expiry as a critical public chronicle item", () => {
+    const item = formatChronicleEvent(
+      makeEvent("time_expired", {
+        actor: "corp",
+        winnerSide: "runner",
+        loserSide: "corp",
+        label: "Korp verliert durch Zeitablauf."
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Korp verliert durch Zeitablauf.");
+    expect(item.category).toBe("danger");
+    expect(item.importance).toBe("critical");
+    expect(item.chips).toContain("Spielerzeit");
   });
 
   it("redacts hidden Corp installs from the Runner perspective", () => {

@@ -1375,6 +1375,103 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(advanceAfterForfeit.error.code).toBe("match_not_active");
   });
 
+  it("tracks player clock grace, reconnect snapshots and terminal time expiry without changing Engine win state", async () => {
+    const startMs = Date.parse("2026-05-19T08:00:00.000Z");
+    let nowMs = startMs;
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "player-clock-grace",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
+      publicServerBaseUrl: "http://127.0.0.1:8787",
+      now: () => new Date(nowMs).toISOString()
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "player-clock-grace",
+      settings: { playerClock: { mode: "player_clock", startingTimeMs: 120_000, gracePeriodMs: 5_000 } }
+    });
+    expect(created.joinUrl).toBeTruthy();
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    await forceSetupComplete(service, created.matchId);
+
+    const before = await bootstrap(service, created.matchId, corp);
+    const beforeHash = hashState((await service.loadForTest(created.matchId))!.gameState);
+    expect(before.playerClock).toMatchObject({
+      schemaVersion: "player-clock-v1",
+      mode: "player_clock",
+      decisionOwnerSide: "corp",
+      remainingMs: { runner: 120_000, corp: 120_000 },
+      gracePeriodMs: 5_000,
+      warningLevel: "grace"
+    });
+    const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
+
+    nowMs = startMs + 7_000;
+    const reconnected = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.playerClock).toMatchObject({
+      mode: "player_clock",
+      decisionOwnerSide: "corp",
+      remainingMs: { runner: 120_000, corp: 118_000 },
+      graceRemainingMs: 0,
+      warningLevel: "charging"
+    });
+    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
+
+    nowMs = startMs + 126_000;
+    const expired = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: reconnected.sessionToken,
+      actionId: mandatoryDraw.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "player-clock-expire"
+    });
+    expect(expired.ok).toBe(false);
+    if (expired.ok) throw new Error("Expected time expiry");
+    expect(expired.error.code).toBe("time_expired");
+    const payload = expectSidePayload(expired.payload);
+    expect(payload.matchStatus).toBe("finished");
+    expect(payload.playerClock).toMatchObject({ mode: "player_clock", expiredSide: "corp", warningLevel: "expired" });
+    expect(payload.resultSummary).toMatchObject({
+      reason: "time_expired",
+      winner: "runner",
+      winnerSide: "runner",
+      loserSide: "corp",
+      finalEngineStateHash: beforeHash
+    });
+    expect(payload.eventTail.at(-1)?.publicPayload.type).toBe("time_expired");
+    expectLifecyclePayloadSafe(payload);
+    expect((await service.loadForTest(created.matchId))?.gameState.winner).toBeFalsy();
+    expect((await service.replayMatch(created.matchId)).finalStateHash).toBe(beforeHash);
+  });
+
+  it("keeps matches without player clock free of timer payloads and time-expiry losses", async () => {
+    const { service, matchId, corp } = await joinedMatch("player-clock-none");
+    const before = await bootstrap(service, matchId, corp);
+    expect(before.playerClock).toBeUndefined();
+    const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
+
+    const submitted = await service.submitAction({
+      matchId,
+      side: "corp",
+      sessionToken: corp.sessionToken,
+      actionId: mandatoryDraw.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "player-clock-none-action"
+    });
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) throw new Error(submitted.error.message);
+    expect(submitted.actorPayload.playerClock).toBeUndefined();
+    expect(submitted.actorPayload.matchStatus).toBe("active");
+    expect(submitted.actorPayload.resultSummary).toBeUndefined();
+  });
+
   it("recreates V1.0.4 matches with new identity, links, seed and tokens while old tokens stop working", async () => {
     const pending = await pendingDeckMatch("v104-recreate-pending");
     const oldStored = await pending.service.loadForTest(pending.created.matchId);

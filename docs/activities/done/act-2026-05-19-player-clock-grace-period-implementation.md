@@ -1,19 +1,33 @@
 ---
 activityId: act-2026-05-19-player-clock-grace-period-implementation
-status: inbox
+status: done
 kind: fix
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-19
-startedAt:
-completedAt:
+startedAt: 2026-05-19
+completedAt: 2026-05-19
 branch:
 releaseTarget: player clock / time controls
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/api-contracts.ts
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/http-server.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/chronicle.ts
+  - apps/web/app/match-start-storage.ts
+checks:
+  - corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts -t "player clock"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web test -- chronicle.test.ts match-start-storage.test.ts
+  - git diff --check
 relatedActivities:
   - act-2026-05-19-player-clock-grace-period-contract
   - act-2026-05-17-timer-ui-only-clock
@@ -125,4 +139,4 @@ Nach abgeschlossenem Vertrag soll NETGRID optionale Spielerzeit mit Grundfrist u
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt: optionale serverautorisierte Spielerzeit mit Grundfrist, Matchstart-Presets, Reconnect-Snapshot, Zeitablauf als Lifecycle-Ende `time_expired`, ResultSummary/Chronik/UI-Texte und Zeitbalken unter der Statusleiste. Der finale Engine-StateHash bleibt beim Zeitablauf der letzte echte Engine-StateHash; Timer-Payloads enthalten nur die Clock-Snapshot-Daten.

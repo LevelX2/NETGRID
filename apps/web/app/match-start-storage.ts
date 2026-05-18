@@ -5,6 +5,9 @@ export type MatchStartDeckSource = "snapshot" | "local";
 export type MatchStartAiDifficulty = "easy" | "normal" | "hard";
 export type MatchStartAiDeckPolicy = "fixed" | "selected" | "seeded_random";
 export type MatchStartCountdownSeconds = 3 | 5 | 10;
+export type MatchStartPlayerClockMode = "none" | "player_clock";
+export type MatchStartPlayerClockMinutes = 5 | 10 | 15 | 20 | 30 | 45;
+export type MatchStartPlayerClockGraceSeconds = 0 | 5 | 10 | 15 | 30;
 
 export type MatchStartStorageSettings = {
   mode: MatchStartMode;
@@ -17,6 +20,9 @@ export type MatchStartStorageSettings = {
   aiDeckPolicy: MatchStartAiDeckPolicy;
   testSetupMode: boolean;
   countdownSeconds: MatchStartCountdownSeconds;
+  playerClockMode: MatchStartPlayerClockMode;
+  playerClockMinutes: MatchStartPlayerClockMinutes;
+  playerClockGraceSeconds: MatchStartPlayerClockGraceSeconds;
   seed: string;
   runnerDeckSource: MatchStartDeckSource;
   corpDeckSource: MatchStartDeckSource;
@@ -58,6 +64,9 @@ export function parseMatchStartSettingsFromStorage(raw: string | null): Partial<
     if (isMatchStartAiDeckPolicy(parsed.aiDeckPolicy)) next.aiDeckPolicy = parsed.aiDeckPolicy;
     if (typeof parsed.testSetupMode === "boolean") next.testSetupMode = parsed.testSetupMode;
     if (isMatchStartCountdownSeconds(parsed.countdownSeconds)) next.countdownSeconds = parsed.countdownSeconds;
+    if (isMatchStartPlayerClockMode(parsed.playerClockMode)) next.playerClockMode = parsed.playerClockMode;
+    if (isMatchStartPlayerClockMinutes(parsed.playerClockMinutes)) next.playerClockMinutes = parsed.playerClockMinutes;
+    if (isMatchStartPlayerClockGraceSeconds(parsed.playerClockGraceSeconds)) next.playerClockGraceSeconds = parsed.playerClockGraceSeconds;
     if (typeof parsed.seed === "string") next.seed = parsed.seed;
     if (isMatchStartDeckSource(parsed.runnerDeckSource)) next.runnerDeckSource = parsed.runnerDeckSource;
     if (isMatchStartDeckSource(parsed.corpDeckSource)) next.corpDeckSource = parsed.corpDeckSource;
@@ -107,6 +116,18 @@ function isMatchStartAiDeckPolicy(value: unknown): value is MatchStartAiDeckPoli
 
 function isMatchStartCountdownSeconds(value: unknown): value is MatchStartCountdownSeconds {
   return value === 3 || value === 5 || value === 10;
+}
+
+function isMatchStartPlayerClockMode(value: unknown): value is MatchStartPlayerClockMode {
+  return value === "none" || value === "player_clock";
+}
+
+function isMatchStartPlayerClockMinutes(value: unknown): value is MatchStartPlayerClockMinutes {
+  return value === 5 || value === 10 || value === 15 || value === 20 || value === 30 || value === 45;
+}
+
+function isMatchStartPlayerClockGraceSeconds(value: unknown): value is MatchStartPlayerClockGraceSeconds {
+  return value === 0 || value === 5 || value === 10 || value === 15 || value === 30;
 }
 
 function isMatchStartDeckSource(value: unknown): value is MatchStartDeckSource {

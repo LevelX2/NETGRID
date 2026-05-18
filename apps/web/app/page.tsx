@@ -68,6 +68,7 @@ import type {
   ApiMatchFormat,
   ApiMatchStartLobbyPayload,
   ApiMatchStatus,
+  ApiPlayerClockSnapshot,
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
@@ -169,7 +170,7 @@ import {
   type PlayMode
 } from "./match-start";
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
-import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage } from "./match-start-storage";
+import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import {
   CATALOG_RARITY_FILTERS,
@@ -1687,6 +1688,9 @@ export default function Page() {
   const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
   const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
+  const [playerClockMode, setPlayerClockMode] = useState<MatchStartPlayerClockMode>("none");
+  const [playerClockMinutes, setPlayerClockMinutes] = useState<MatchStartPlayerClockMinutes>(10);
+  const [playerClockGraceSeconds, setPlayerClockGraceSeconds] = useState<MatchStartPlayerClockGraceSeconds>(10);
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
@@ -1870,6 +1874,9 @@ export default function Page() {
       if (storedMatchStartSettings.humanSideSelection) setHumanSideSelection(storedMatchStartSettings.humanSideSelection);
       if (storedMatchStartSettings.humanAiSideSelection) setHumanAiSideSelection(storedMatchStartSettings.humanAiSideSelection);
       if (storedMatchStartSettings.matchFormat) setMatchFormat(storedMatchStartSettings.matchFormat);
+      if (storedMatchStartSettings.playerClockMode) setPlayerClockMode(storedMatchStartSettings.playerClockMode);
+      if (storedMatchStartSettings.playerClockMinutes) setPlayerClockMinutes(storedMatchStartSettings.playerClockMinutes);
+      if (storedMatchStartSettings.playerClockGraceSeconds !== undefined) setPlayerClockGraceSeconds(storedMatchStartSettings.playerClockGraceSeconds);
       if (storedMatchStartSettings.runnerDifficulty) setRunnerDifficulty(storedMatchStartSettings.runnerDifficulty);
       if (storedMatchStartSettings.corpDifficulty) setCorpDifficulty(storedMatchStartSettings.corpDifficulty);
       if (storedMatchStartSettings.aiDeckPolicy) setAiDeckPolicy(storedMatchStartSettings.aiDeckPolicy);
@@ -2176,6 +2183,9 @@ export default function Page() {
         humanSideSelection,
         humanAiSideSelection,
         matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+        playerClockMode,
+        playerClockMinutes,
+        playerClockGraceSeconds,
         runnerDifficulty,
         corpDifficulty,
         aiDeckPolicy,
@@ -2203,6 +2213,9 @@ export default function Page() {
     humanSideSelection,
     humanAiSideSelection,
     matchFormat,
+    playerClockMode,
+    playerClockMinutes,
+    playerClockGraceSeconds,
     runnerDifficulty,
     corpDifficulty,
     aiDeckPolicy,
@@ -2411,7 +2424,7 @@ export default function Page() {
     humanAiSideSelection,
     aiDeckPolicy,
     testSetupMode
-  });
+  }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
   const joinMatchIdTrimmed = joinMatchId.trim();
@@ -2800,7 +2813,15 @@ export default function Page() {
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
           matchFormat,
-          agendaPointsToWin: effectiveAgendaTarget
+          agendaPointsToWin: effectiveAgendaTarget,
+          playerClock:
+            playerClockMode === "player_clock"
+              ? {
+                  mode: "player_clock",
+                  startingTimeMs: playerClockMinutes * 60_000,
+                  gracePeriodMs: playerClockGraceSeconds * 1000
+                }
+              : { mode: "none" }
         },
         ...deckPayload
       });
@@ -3856,6 +3877,7 @@ export default function Page() {
                   matchVersion: message.payload.matchVersion,
                   side,
                   playerView: message.payload.playerView,
+                  ...(message.payload.playerClock ? { playerClock: message.payload.playerClock } : {}),
                   legalActions: [],
                   eventTail: [],
                   opponentStatus: currentLobby?.opponentStatus ?? { side: side === "runner" ? "corp" : "runner", connected: false }
@@ -3867,7 +3889,8 @@ export default function Page() {
           ...current,
           matchStatus: message.payload.matchStatus,
           matchVersion: message.payload.matchVersion,
-          playerView: message.payload.playerView
+          playerView: message.payload.playerView,
+          ...(message.payload.playerClock ? { playerClock: message.payload.playerClock } : {})
         };
         const nextWithUndo = message.payload.pendingUndo ? { ...next, pendingUndo: message.payload.pendingUndo } : removePendingUndo(next);
         if (message.payload.playerView.winner) return { ...next, winner: message.payload.playerView.winner };
@@ -4248,6 +4271,34 @@ export default function Page() {
                         In LAN-Liste sichtbar
                       </label>
                     ) : null}
+                    <label>
+                      Spielerzeit
+                      <select value={playerClockMode} onChange={(event) => setPlayerClockMode(event.target.value as MatchStartPlayerClockMode)}>
+                        <option value="none">Keine Zeitbegrenzung</option>
+                        <option value="player_clock">Zeitbegrenzung aktiv</option>
+                      </select>
+                    </label>
+                    <label>
+                      Zeit pro Seite
+                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockMode === "none"}>
+                        <option value={5}>5 Minuten</option>
+                        <option value={10}>10 Minuten</option>
+                        <option value={15}>15 Minuten</option>
+                        <option value={20}>20 Minuten</option>
+                        <option value={30}>30 Minuten</option>
+                        <option value={45}>45 Minuten</option>
+                      </select>
+                    </label>
+                    <label>
+                      Kulanz je Entscheidung
+                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockMode === "none"}>
+                        <option value={0}>0 Sekunden</option>
+                        <option value={5}>5 Sekunden</option>
+                        <option value={10}>10 Sekunden</option>
+                        <option value={15}>15 Sekunden</option>
+                        <option value={30}>30 Sekunden</option>
+                      </select>
+                    </label>
                     <label>
                       Seed
                       <input value={seed} onChange={(event) => setSeed(event.target.value)} />
@@ -4765,6 +4816,7 @@ export default function Page() {
               <small>Orientierung</small>
             </div>
           ) : null}
+          {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
           {activeView.side === "corp" ? (
             <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
               <RunnerRigStrip
@@ -5972,6 +6024,7 @@ function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "flatline") return "Der Runner wurde flatlined.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
   if (reason === "forfeit") return "Das Spiel wurde durch Aufgabe beendet.";
+  if (reason === "time_expired") return "Das Spiel wurde durch abgelaufene Spielerzeit beendet.";
   return "Das Spiel wurde abgeschlossen.";
 }
 
@@ -5979,6 +6032,7 @@ function terminalLobbyTitle(status: MatchStatus, result?: LifecycleResultSummary
   if (status === "cancelled") return "Match abgebrochen";
   if (status === "abandoned") return "Lobby verlassen";
   if (status === "forfeited") return result?.loserSide ? `${sideLabel(result.loserSide)} hat aufgegeben` : "Spiel aufgegeben";
+  if (status === "finished" && result?.reason === "time_expired") return result.loserSide ? `${sideLabel(result.loserSide)} verliert auf Zeit` : "Spielerzeit abgelaufen";
   if (status === "finished") return "Spiel abgeschlossen";
   return "Match nicht mehr aktiv";
 }
@@ -5987,6 +6041,7 @@ function terminalLobbyMessage(status: MatchStatus, result?: LifecycleResultSumma
   if (status === "cancelled") return "Der Host hat dieses Match beendet. Der alte Join-Link und die alten Tokens sind ungültig.";
   if (status === "abandoned") return "Die Gegenseite hat die Lobby verlassen. Dieses Match springt nicht in die Bereitschaftslobby zurück.";
   if (status === "forfeited") return result?.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch Aufgabe. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch Aufgabe beendet.";
+  if (status === "finished" && result?.reason === "time_expired") return result.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch abgelaufene Spielerzeit. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch abgelaufene Spielerzeit beendet.";
   if (status === "finished") return "Das Spiel wurde regelgerecht beendet.";
   return "Dieser Matchzustand kann nicht fortgesetzt werden.";
 }
@@ -12161,6 +12216,47 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
   );
 }
 
+function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapshot; nowMs: number }) {
+  const runnerRemainingMs = playerClockLiveRemaining(snapshot, "runner", nowMs);
+  const corpRemainingMs = playerClockLiveRemaining(snapshot, "corp", nowMs);
+  const ownerLabel = snapshot.expiredSide
+    ? `${sideLabel(snapshot.expiredSide)} abgelaufen`
+    : snapshot.decisionOwnerSide
+      ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
+      : "Wartet";
+  return (
+    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label="Spielerzeit" data-testid="player-clock">
+      <span className="matchClockIcon" aria-hidden="true">
+        <Clock size={15} />
+      </span>
+      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
+        <strong>Runner</strong> {formatPlayerClockDuration(runnerRemainingMs)}
+      </span>
+      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
+        <strong>Korp</strong> {formatPlayerClockDuration(corpRemainingMs)}
+      </span>
+      <small>{ownerLabel}</small>
+    </div>
+  );
+}
+
+function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
+  let remainingMs = snapshot.remainingMs?.[side] ?? 0;
+  if (snapshot.expiredSide === side) return 0;
+  if (snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined || snapshot.gracePeriodMs === undefined) return remainingMs;
+  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const liveChargeableMs = Math.max(0, elapsedMs - snapshot.gracePeriodMs);
+  const serverChargeableMs = snapshot.chargeableElapsedMs ?? 0;
+  return Math.max(0, remainingMs - Math.max(0, liveChargeableMs - serverChargeableMs));
+}
+
+function formatPlayerClockDuration(valueMs: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(valueMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
   if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
   const winner = response.winner ?? response.playerView.winner;
@@ -12174,6 +12270,7 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
     eventTail: response.playerView.publicEvents,
     opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" }
   };
+  if (response.playerClock) payload.playerClock = response.playerClock;
   if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
@@ -12196,6 +12293,7 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     eventTail: response.eventTail ?? response.playerView.publicEvents,
     opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
   };
+  if (response.playerClock) payload.playerClock = response.playerClock;
   if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
   if (response.pendingUndo) payload.pendingUndo = response.pendingUndo;
   if (winner) payload.winner = winner;

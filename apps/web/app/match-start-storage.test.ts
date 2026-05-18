@@ -12,6 +12,9 @@ const settings: MatchStartStorageSettings = {
   aiDeckPolicy: "selected",
   testSetupMode: true,
   countdownSeconds: 10,
+  playerClockMode: "player_clock",
+  playerClockMinutes: 20,
+  playerClockGraceSeconds: 15,
   seed: "seed-v1",
   runnerDeckSource: "local",
   corpDeckSource: "snapshot",
@@ -49,6 +52,9 @@ describe("match start local settings storage", () => {
         playMode: "human_vs_ai",
         humanAiSideSelection: "runner",
         matchFormat: "invalid",
+        playerClockMode: "player_clock",
+        playerClockMinutes: 99,
+        playerClockGraceSeconds: 30,
         aiDeckPolicy: "seeded_random",
         countdownSeconds: 7,
         selectedRunnerLocalDeckId: 42,
@@ -61,6 +67,8 @@ describe("match start local settings storage", () => {
       mode: "join",
       playMode: "human_vs_ai",
       humanAiSideSelection: "runner",
+      playerClockMode: "player_clock",
+      playerClockGraceSeconds: 30,
       aiDeckPolicy: "seeded_random",
       selectedCorpLocalDeckId: "corp_local_ok"
     });

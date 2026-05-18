@@ -115,6 +115,12 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const chips = [...baseChipList];
 
   switch (actionType) {
+    case "time_expired":
+      category = "danger";
+      importance = "critical";
+      title = label ?? `${actor ? sideLabel(actor) : "Eine Seite"} verliert durch Zeitablauf.`;
+      chips.push("Spielerzeit");
+      break;
     case "game_created":
       category = "system";
       visibility = "system";

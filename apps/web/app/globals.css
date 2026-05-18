@@ -7796,6 +7796,60 @@ select,
   color: var(--chronicle-system);
 }
 
+.playerClockStrip {
+  display: grid;
+  grid-template-columns: auto minmax(96px, 1fr) minmax(96px, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel), var(--corp) 6%);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.playerClockSide {
+  display: inline-flex;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 20%);
+  border-radius: 6px;
+  background: var(--panel-soft);
+  white-space: nowrap;
+}
+
+.playerClockSide strong {
+  color: var(--text);
+  font-weight: 800;
+}
+
+.playerClockSide.active {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 35%);
+  background: color-mix(in srgb, var(--runner), transparent 88%);
+}
+
+.playerClockStrip.charging .playerClockSide.active,
+.playerClockStrip.critical .playerClockSide.active,
+.playerClockStrip.expired .playerClockSide.active {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 24%);
+  background: color-mix(in srgb, var(--danger), transparent 88%);
+}
+
+.playerClockStrip.critical .playerClockSide.active,
+.playerClockStrip.expired .playerClockSide.active {
+  color: var(--danger);
+}
+
+.playerClockStrip small {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
 .boardHeader {
   display: flex;
   align-items: end;
@@ -9315,6 +9369,14 @@ select,
 
   .matchClockStrip small {
     margin-left: 0;
+  }
+
+  .playerClockStrip {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .playerClockStrip small {
+    grid-column: 1 / -1;
   }
 
   .gameStandingStrip,

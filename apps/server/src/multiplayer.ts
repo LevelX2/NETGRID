@@ -31,6 +31,8 @@ import {
   type ApiSeriesStatus,
   type ApiServicePayload,
   type ApiSidePayload,
+  type ApiPlayerClockConfig,
+  type ApiPlayerClockSnapshot,
   type ApiPendingUndoRequest,
   type AiDifficulty,
   type DeckPublicMetadata,
@@ -95,6 +97,7 @@ export type ConnectionQuality = ApiConnectionQuality;
 export type MatchSettings = {
   agendaPointsToWin: number;
   matchFormat: MatchFormat;
+  playerClock?: ApiPlayerClockConfig;
 };
 
 const RULE_AGENDA_POINTS_TO_WIN = 7;
@@ -187,10 +190,27 @@ export type MatchRecord = {
     protectedAt?: string;
     protectedBySide?: Side;
   };
+  playerClock?: PlayerClockState;
   createdAt: string;
   updatedAt: string;
   winner?: Side | "draw";
 };
+
+export type PlayerClockState = {
+  mode: "player_clock";
+  startingTimeMs: number;
+  gracePeriodMs: number;
+  remainingMs: { runner: number; corp: number };
+  activity?: {
+    key: string;
+    decisionOwnerSide: Side;
+    startedAtMs: number;
+    chargedMs: number;
+  };
+  expiredSide?: Side;
+};
+
+type EnabledPlayerClockConfig = ApiPlayerClockConfig & { mode: "player_clock"; startingTimeMs: number; gracePeriodMs: number };
 
 export type SessionRecord = {
   sessionId: string;
@@ -426,6 +446,7 @@ export type JoinMatchResult = {
   pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: PendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: AiTurnPresentationState;
+  playerClock?: ApiPlayerClockSnapshot;
   winner?: Side | "draw";
   finalStateHash?: string;
   resultSummary?: GameResultSummary;
@@ -629,6 +650,7 @@ export class MultiplayerService {
     const hostReconnectToken = generateToken();
     const joinToken = mode === "human_vs_human" ? generateToken() : undefined;
     const matchFormat = normalizeMatchFormat(input.settings?.matchFormat);
+    const playerClockConfig = normalizePlayerClockConfig(input.settings?.playerClock);
     const countdownSeconds = normalizeCountdownSeconds(input.countdownSeconds);
     const pendingDeckHandshake = mode === "human_vs_human" && Boolean(input.participantADecks) && !input.participantBDecks;
     if (pendingDeckHandshake) {
@@ -655,7 +677,8 @@ export class MultiplayerService {
           baseline: MVP_0_2_BASELINE,
           settings: {
             agendaPointsToWin: pendingAgendaPointsToWin,
-            matchFormat
+            matchFormat,
+            ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
           },
           deckSetup: {
             runnerSnapshotId: hostDeckPair.runnerSnapshot.deckSnapshotId,
@@ -736,7 +759,8 @@ export class MultiplayerService {
     const deckSetup = deckSetupForParticipants(participantDecks, { runnerPlayer, corpPlayer });
     const settings: MatchSettings = {
       agendaPointsToWin: agendaPointsToWinFor(matchFormat, input.settings?.agendaPointsToWin),
-      matchFormat
+      matchFormat,
+      ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
     };
     const baseline = baselineForMode(mode, deckSetup);
     const controllers = controllersForMode(mode, hostSide, {
@@ -814,6 +838,7 @@ export class MultiplayerService {
                   }
             }
           : {}),
+        ...(playerClockConfig.mode === "player_clock" ? { playerClock: initialPlayerClockState(playerClockConfig as EnabledPlayerClockConfig) } : {}),
         createdAt: now,
         updatedAt: now
       },
@@ -836,6 +861,7 @@ export class MultiplayerService {
     };
 
     this.maybeRunAiAfterTransition(record);
+    this.syncPlayerClock(record, now);
     await this.storage.save(record);
     const payload = this.payloadFor(record, hostSide);
     return {
@@ -852,6 +878,7 @@ export class MultiplayerService {
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
       ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(payload.winner ? { winner: payload.winner } : {}),
       ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
@@ -1013,6 +1040,7 @@ export class MultiplayerService {
       legalActions: payload.legalActions,
       matchVersion: record.match.matchVersion,
       ...(payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(payload.winner ? { winner: payload.winner } : {}),
       ...(payload.finalStateHash ? { finalStateHash: payload.finalStateHash } : {}),
@@ -1046,6 +1074,7 @@ export class MultiplayerService {
     );
     record.tokens.push(this.tokenRecord(matchId, input.side, "session", sessionToken, now));
     record.tokens.push(this.tokenRecord(matchId, input.side, "reconnect", reconnectToken, now));
+    this.syncPlayerClock(record, now);
     record.match.matchVersion += 1;
     record.match.updatedAt = now;
     await this.storage.save(record);
@@ -1064,6 +1093,7 @@ export class MultiplayerService {
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby ? { lobby: payload.startLobby } : {}),
       ...(isSidePayload(payload) && payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
+      ...(isSidePayload(payload) && payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.pendingUndo ? { pendingUndo: payload.pendingUndo } : {}),
       ...(isSidePayload(payload) && payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(isSidePayload(payload) && payload.winner ? { winner: payload.winner } : {}),
@@ -1080,6 +1110,7 @@ export class MultiplayerService {
     const session = this.authenticate(record, side, sessionToken);
     if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
     session.lastSeenAt = this.now();
+    this.syncPlayerClock(record);
     await this.storage.save(record);
     if (this.shouldUseLobbyPayload(record)) {
       const lobby = this.lobbyPayloadFor(record, side);
@@ -1095,6 +1126,7 @@ export class MultiplayerService {
     if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
     session.connected = connected;
     session.lastSeenAt = this.now();
+    this.syncPlayerClock(record);
     if (!connected && record.match.status === "countdown" && record.startLobby) {
       this.cancelCountdownFor(record, side);
     }
@@ -1304,6 +1336,7 @@ export class MultiplayerService {
       record.match.matchVersion += 1;
       record.match.updatedAt = this.now();
       this.maybeRunAiAfterTransition(record);
+      this.syncPlayerClock(record);
       await this.storage.save(record);
       return this.lobbyResultFor(record, record.sessions[0]?.side ?? "runner", true);
     });
@@ -1328,6 +1361,14 @@ export class MultiplayerService {
         return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
       }
       if (!record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match wartet noch auf vollständige Deckauswahl.") };
+      if (this.syncPlayerClock(record)) {
+        await this.storage.save(record);
+        return {
+          ok: false,
+          error: safeError("time_expired", "Die Spielerzeit ist abgelaufen.", record.gameState, input.side),
+          payload: this.payloadFor(record, input.side)
+        };
+      }
 
       const duplicate = record.actionReceipts.find((receipt) => receipt.side === input.side && receipt.idempotencyKey === input.idempotencyKey);
       if (duplicate) {
@@ -1395,6 +1436,7 @@ export class MultiplayerService {
         this.finalizeFinishedMatch(record);
       }
       this.maybeRunAiAfterTransition(record);
+      this.syncPlayerClock(record);
       await this.storage.save(record);
       const success: SubmitActionResult = {
         ok: true,
@@ -1423,6 +1465,10 @@ export class MultiplayerService {
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
       if (this.isAiSide(record, input.side)) return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI fortsetzen.") };
       if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
+      if (this.syncPlayerClock(record)) {
+        await this.storage.save(record);
+        return { ok: false, error: safeError("time_expired", "Die Spielerzeit ist abgelaufen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
       const activeAiSide = this.aiControllableSide(record);
       if (!activeAiSide) {
         return { ok: false, error: safeError("ai_not_active", "Aktuell ist keine KI am Zug.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
@@ -1853,6 +1899,11 @@ export class MultiplayerService {
     record.match.baseline = baseline;
     record.match.status = "ready_check";
     record.match.settings = { ...record.match.settings, agendaPointsToWin, matchFormat };
+    if (record.match.settings.playerClock?.mode === "player_clock") {
+      record.match.playerClock = initialPlayerClockState(record.match.settings.playerClock as EnabledPlayerClockConfig);
+    } else {
+      delete record.match.playerClock;
+    }
     record.match.deckSetup = {
       runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
       corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
@@ -1883,7 +1934,118 @@ export class MultiplayerService {
     record.stateSnapshots = [];
   }
 
+  private syncPlayerClock(record: StoredMatch, nowIso = this.now()): boolean {
+    const clock = record.match.playerClock;
+    if (!clock || record.match.status !== "active" || !record.gameState || record.gameState.winner || clock.expiredSide) return false;
+    const nowMs = Date.parse(nowIso);
+    if (!Number.isFinite(nowMs)) return false;
+    const owner = this.playerClockDecisionOwner(record);
+    if (!owner) {
+      delete clock.activity;
+      return false;
+    }
+    const key = this.playerClockActivityKey(record, owner);
+    if (!clock.activity || clock.activity.key !== key || clock.activity.decisionOwnerSide !== owner) {
+      clock.activity = { key, decisionOwnerSide: owner, startedAtMs: nowMs, chargedMs: 0 };
+      return false;
+    }
+    const elapsedMs = Math.max(0, nowMs - clock.activity.startedAtMs);
+    const chargeableMs = Math.max(0, elapsedMs - clock.gracePeriodMs - clock.activity.chargedMs);
+    if (chargeableMs <= 0) return false;
+    clock.remainingMs[owner] = Math.max(0, clock.remainingMs[owner] - chargeableMs);
+    clock.activity.chargedMs += chargeableMs;
+    if (clock.remainingMs[owner] <= 0) {
+      this.terminalizeTimeExpired(record, owner, nowIso);
+      return true;
+    }
+    return false;
+  }
+
+  private playerClockDecisionOwner(record: StoredMatch): Side | undefined {
+    if (!record.gameState || record.match.status !== "active") return undefined;
+    const runnerActions = getLegalActions(record.gameState, "runner");
+    const corpActions = getLegalActions(record.gameState, "corp");
+    if (runnerActions.length > 0 && corpActions.length === 0) return "runner";
+    if (corpActions.length > 0 && runnerActions.length === 0) return "corp";
+    const pendingChoiceSide = record.gameState.pendingChoice?.side;
+    if (pendingChoiceSide === "runner" || pendingChoiceSide === "corp") return pendingChoiceSide;
+    if (runnerActions.length > 0 && record.gameState.activeSide === "runner") return "runner";
+    if (corpActions.length > 0 && record.gameState.activeSide === "corp") return "corp";
+    return undefined;
+  }
+
+  private playerClockActivityKey(record: StoredMatch, owner: Side): string {
+    const state = record.gameState;
+    const actions = state ? getLegalActions(state, owner).map((action) => action.actionId).sort().join(",") : "";
+    const choice = state?.pendingChoice ? `${state.pendingChoice.choiceId}:${state.pendingChoice.side}:${state.pendingChoice.stateVersion}` : "none";
+    return [state?.stateVersion ?? "no_state", owner, state?.phase ?? "unknown", state?.timingPoint ?? "unknown", choice, actions].join("|");
+  }
+
+  private terminalizeTimeExpired(record: StoredMatch, expiredSide: Side, nowIso: string): void {
+    if (!record.gameState || record.match.status !== "active") return;
+    const winnerSide = opposite(expiredSide);
+    const finalEngineStateHash = hashState(record.gameState);
+    record.match.status = "finished";
+    record.match.winner = winnerSide;
+    record.match.matchVersion += 1;
+    record.match.updatedAt = nowIso;
+    if (record.match.playerClock) record.match.playerClock.expiredSide = expiredSide;
+    record.lifecycleResult = {
+      status: "finished",
+      reason: "time_expired",
+      occurredAt: nowIso,
+      actorSide: expiredSide,
+      winnerSide,
+      loserSide: expiredSide,
+      finalEngineStateHash
+    };
+    delete record.pendingUndo;
+    record.eventLog.push(timeExpiredEventRecord(record, expiredSide, winnerSide, nowIso, finalEngineStateHash));
+    this.revokeAllTokens(record, nowIso);
+  }
+
+  private playerClockSnapshotFor(record: StoredMatch, nowIso = this.now()): ApiPlayerClockSnapshot | undefined {
+    const clock = record.match.playerClock;
+    if (!clock) return undefined;
+    const nowMs = Date.parse(nowIso);
+    const activity = clock.activity;
+    const elapsedActivityMs = activity && Number.isFinite(nowMs) ? Math.max(0, nowMs - activity.startedAtMs) : undefined;
+    const chargeableElapsedMs = activity && elapsedActivityMs !== undefined ? Math.max(0, elapsedActivityMs - clock.gracePeriodMs) : undefined;
+    const graceRemainingMs = activity && elapsedActivityMs !== undefined ? Math.max(0, clock.gracePeriodMs - elapsedActivityMs) : undefined;
+    const decisionOwnerSide = activity?.decisionOwnerSide;
+    const effectiveRemaining = { ...clock.remainingMs };
+    if (decisionOwnerSide && chargeableElapsedMs !== undefined && activity) {
+      effectiveRemaining[decisionOwnerSide] = Math.max(0, effectiveRemaining[decisionOwnerSide] - Math.max(0, chargeableElapsedMs - activity.chargedMs));
+    }
+    const activeRemaining = decisionOwnerSide ? effectiveRemaining[decisionOwnerSide] : undefined;
+    const criticalThresholdMs = Math.min(60_000, clock.startingTimeMs);
+    const warningLevel: ApiPlayerClockSnapshot["warningLevel"] = clock.expiredSide
+      ? "expired"
+      : activeRemaining !== undefined && activeRemaining < criticalThresholdMs
+        ? "critical"
+        : chargeableElapsedMs !== undefined && chargeableElapsedMs > 0
+          ? "charging"
+          : graceRemainingMs !== undefined && graceRemainingMs > 0
+            ? "grace"
+            : "none";
+    return {
+      schemaVersion: "player-clock-v1",
+      mode: "player_clock",
+      remainingMs: effectiveRemaining,
+      startingTimeMs: clock.startingTimeMs,
+      gracePeriodMs: clock.gracePeriodMs,
+      ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
+      ...(activity ? { activityStartedAtMs: activity.startedAtMs } : {}),
+      ...(elapsedActivityMs !== undefined ? { elapsedActivityMs } : {}),
+      ...(graceRemainingMs !== undefined ? { graceRemainingMs } : {}),
+      ...(chargeableElapsedMs !== undefined ? { chargeableElapsedMs } : {}),
+      warningLevel,
+      ...(clock.expiredSide ? { expiredSide: clock.expiredSide } : {})
+    };
+  }
+
   private payloadFor(record: StoredMatch, side: Side): SidePayload {
+    const playerClockSnapshot = this.playerClockSnapshotFor(record);
     return buildSidePayload(record, side, {
       isAiSide: (candidateSide) => this.isAiSide(record, candidateSide),
       safeDisplayNameFor: (candidateSide) =>
@@ -1893,6 +2055,7 @@ export class MultiplayerService {
       resultSummaryFor: (candidateSide, finalStateHash) =>
         resultSummaryFor(record, candidateSide, finalStateHash),
       retentionProtectionPayload: retentionProtectionPayload(record),
+      ...(playerClockSnapshot ? { playerClockSnapshot } : {}),
     });
   }
 
@@ -2318,6 +2481,57 @@ function normalizeMatchFormat(matchFormat: MatchFormat | undefined): MatchFormat
   return "rules_match";
 }
 
+function normalizePlayerClockConfig(config: ApiPlayerClockConfig | undefined): ApiPlayerClockConfig {
+  if (!config || config.mode !== "player_clock") return { mode: "none" };
+  const startingTimeMs = boundedWholeNumber(config.startingTimeMs, 5 * 60_000, 60_000, 120 * 60_000);
+  const gracePeriodMs = boundedWholeNumber(config.gracePeriodMs, 10_000, 0, 60_000);
+  return { mode: "player_clock", startingTimeMs, gracePeriodMs };
+}
+
+function initialPlayerClockState(config: Required<Pick<ApiPlayerClockConfig, "mode" | "startingTimeMs" | "gracePeriodMs">>): PlayerClockState {
+  return {
+    mode: "player_clock",
+    startingTimeMs: config.startingTimeMs,
+    gracePeriodMs: config.gracePeriodMs,
+    remainingMs: { runner: config.startingTimeMs, corp: config.startingTimeMs }
+  };
+}
+
+function timeExpiredEventRecord(record: StoredMatch, expiredSide: Side, winnerSide: Side, occurredAt: string, finalStateHash: string): EventRecord {
+  const stateVersion = record.gameState?.stateVersion ?? 0;
+  const event: PublicGameEvent = {
+    eventId: `time_expired_${record.match.matchVersion}`,
+    type: "time_expired",
+    stateVersionBefore: stateVersion,
+    stateVersionAfter: stateVersion,
+    stateHashAfter: finalStateHash,
+    publicPayload: {
+      type: "time_expired",
+      actionType: "time_expired",
+      actor: expiredSide,
+      winnerSide,
+      loserSide: expiredSide,
+      occurredAt,
+      label: `${expiredSide === "runner" ? "Runner" : "Korp"} verliert durch Zeitablauf.`
+    }
+  };
+  return {
+    eventId: event.eventId,
+    matchId: record.match.matchId,
+    stateVersionBefore: stateVersion,
+    stateVersionAfter: stateVersion,
+    stateHashAfter: finalStateHash,
+    publicPayload: event,
+    privatePayloadLocalOnly: false,
+    hiddenInfoBarrier: false
+  };
+}
+
+function boundedWholeNumber(value: unknown, fallback: number, min: number, max: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.max(min, Math.min(max, Math.floor(value)));
+}
+
 function agendaPointsToWinFor(_matchFormat: MatchFormat, explicit: number | undefined): number {
   if (typeof explicit === "number" && Number.isFinite(explicit) && explicit > 0) return Math.floor(explicit);
   return RULE_AGENDA_POINTS_TO_WIN;
@@ -2645,7 +2859,7 @@ function isHiddenInfoBarrier(event: GameEvent): boolean {
 
 function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash: string): GameResultSummary | undefined {
   const state = record.gameState;
-  const winner = record.match.status === "forfeited" ? record.lifecycleResult?.winnerSide : state?.winner;
+  const winner = record.lifecycleResult?.winnerSide ?? (record.match.status === "forfeited" ? record.lifecycleResult?.winnerSide : state?.winner);
   if (!winner) return undefined;
   const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
   const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
@@ -2656,7 +2870,7 @@ function resultSummaryFor(record: StoredMatch, viewerSide: Side, finalStateHash:
     ...(record.lifecycleResult?.winnerSide ? { winnerSide: record.lifecycleResult.winnerSide } : {}),
     ...(record.lifecycleResult?.loserSide ? { loserSide: record.lifecycleResult.loserSide } : {}),
     viewerOutcome: winner === "draw" ? "draw" : winner === viewerSide ? "won" : "lost",
-    reason: record.lifecycleResult?.reason === "forfeit" ? "forfeit" : resultReason(state, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
+    reason: record.lifecycleResult?.reason === "forfeit" || record.lifecycleResult?.reason === "time_expired" ? record.lifecycleResult.reason : resultReason(state, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin),
     matchFormat: record.match.settings.matchFormat,
     agendaPointsToWin: record.match.settings.agendaPointsToWin,
     runnerAgendaPoints,
