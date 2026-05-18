@@ -13004,6 +13004,28 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       rezCostReductionAmount: 2,
     });
 
+    const manipulatedSourceResult = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: oliviaRez.actionId.replace(oliviaId, "fake_olivia_source"),
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "olivia-manipulated-source",
+    });
+    expect(manipulatedSourceResult.ok).toBe(false);
+
+    const alreadyUsedThisRun = structuredClone(state);
+    alreadyUsedThisRun.run = {
+      ...alreadyUsedThisRun.run!,
+      oliviaSalazarUsedSourceIdsThisRun: [oliviaId],
+    };
+    expect(
+      getLegalActions(alreadyUsedThisRun, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.oliviaSalazarRezSourceCardId === oliviaId,
+      ),
+    ).toBe(false);
+
     const sourceDrift = structuredClone(state);
     sourceDrift.cardInstances[oliviaId] = {
       ...sourceDrift.cardInstances[oliviaId]!,
