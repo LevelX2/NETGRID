@@ -689,6 +689,27 @@ describe("formatChronicleEvent", () => {
     expect(aardvark.chips).toEqual(expect.arrayContaining(["Aardvark", "Rez", "Worm Trash"]));
   });
 
+  it("names the ICE rezzed by Priority Requisition", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v162_priority_requisition_free_rez",
+        priorityRequisitionFreeRez: true,
+        priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
+        rezCostPaid: 0
+      }),
+      "corp",
+      { cardTitle: "Cortical Scanner" }
+    );
+
+    expect(item.title).toBe("Du hast Cortical Scanner durch Priority Requisition kostenlos gerezzt.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_230_cortical-scanner");
+    expect(item.chips).toEqual(expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]));
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {

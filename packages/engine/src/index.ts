@@ -16340,7 +16340,24 @@ function visibleChoiceCardForOption(
   const isSneakHeapChoice = choice.source.startsWith(
     "v1911.sneak_preview_heap_install",
   );
-  if (!isStackChoice && !isSneakHeapChoice) return undefined;
+  const isPriorityRequisitionChoice = choice.source.startsWith(
+    "v162.priority_requisition",
+  );
+  if (!isStackChoice && !isSneakHeapChoice && !isPriorityRequisitionChoice)
+    return undefined;
+  if (isPriorityRequisitionChoice) {
+    const instance = state.cardInstances[cardId];
+    if (
+      !instance ||
+      instance.owner !== "corp" ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce" ||
+      instance.rezzed ||
+      definitionFor(state, cardId).type !== "ice"
+    )
+      return undefined;
+    return visibleOwnCard(state, cardId);
+  }
   if (isStackChoice && !state.runner.stack.includes(cardId)) return undefined;
   if (isSneakHeapChoice && !state.runner.heap.includes(cardId)) return undefined;
   const instance = state.cardInstances[cardId];

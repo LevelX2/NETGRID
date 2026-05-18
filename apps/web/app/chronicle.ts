@@ -251,6 +251,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Data Fort", `${installedCount} Install`, `${installedIceCount} ICE`, `${temporaryCreditsProvided} Temp-Credits`);
         break;
       }
+      if (hiddenZoneAction === "v162_priority_requisition_free_rez") {
+        const targetDefinitionId = stringValue(payload.priorityRequisitionTargetDefinitionId);
+        const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = targetDefinitionId ?? cardDefinitionId;
+        title = phrase(subject, `${cardTitle ?? "ein ICE"} durch Priority Requisition kostenlos gerezzt`);
+        description = `Priority Requisition hat die Rez-Kosten auf ${creditText(rezCostPaid)} gesetzt.`;
+        chips.push("Priority Requisition", "Rez", `${rezCostPaid} ${creditLabel(rezCostPaid)}`);
+        break;
+      }
       if (isDataFortReclamationRezPayload(payload)) {
         const rezzedCount = numberValue(payload.rezzedCount) ?? 0;
         const rezzedIceCount = numberValue(payload.rezzedIceCount) ?? 0;

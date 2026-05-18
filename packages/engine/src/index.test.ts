@@ -2872,6 +2872,13 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       minSelections: 0,
       maxSelections: 1,
     });
+    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    expect(corpChoice?.options.map((option) => option.card?.title)).toEqual([
+      "Cortical Scanner",
+      "Crystal Wall",
+    ]);
+    expect(corpChoice?.options.every((option) => option.card?.known)).toBe(true);
+    expect(corpChoice?.options.every((option) => option.card?.type === "ice")).toBe(true);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Cortical Scanner",

@@ -1024,7 +1024,11 @@ function catalogNumericLabel(key: string, label: string, value: number | null | 
 }
 
 function revealedEventCardId(event: PublicGameEvent): string | null {
-  const cardId = event.publicPayload.cardDefinitionId ?? event.publicPayload.sourceDefinitionId ?? event.publicPayload.targetCardDefinitionId;
+  const cardId =
+    event.publicPayload.cardDefinitionId ??
+    event.publicPayload.sourceDefinitionId ??
+    event.publicPayload.targetCardDefinitionId ??
+    event.publicPayload.priorityRequisitionTargetDefinitionId;
   return typeof cardId === "string" ? cardId : null;
 }
 
@@ -7353,19 +7357,20 @@ function LegalActionsPanel({
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
     if (shouldUseCardChoicePanel(genericChoice)) {
+      const cardChoice = enrichVisibleChoiceCardsFromView(genericChoice, view);
       if (connection !== "online") {
         return (
           <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="card-choice-paused-panel">
             <h2>
               <Search size={16} />
-              {cardChoiceTitle(genericChoice)}
+              {cardChoiceTitle(cardChoice)}
             </h2>
-            <p className="meta">{genericChoice.prompt}</p>
+            <p className="meta">{cardChoice.prompt}</p>
             <p className="meta">Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.</p>
           </section>
         );
       }
-      return <CardChoicePanel choice={genericChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
+      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
     }
     return (
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
@@ -7438,6 +7443,40 @@ function LegalActionsPanel({
       </div>
     </section>
   );
+}
+
+function enrichVisibleChoiceCardsFromView(choice: VisibleChoice, view: PlayerView): VisibleChoice {
+  if (choice.options.every((option) => option.card || typeof option.value !== "string")) return choice;
+  const visibleCards = visibleCardsByInstanceId(view);
+  let changed = false;
+  const options = choice.options.map((option) => {
+    if (option.card || typeof option.value !== "string") return option;
+    const card = visibleCards.get(option.value);
+    if (!card?.known) return option;
+    changed = true;
+    return { ...option, card };
+  });
+  return changed ? { ...choice, options } : choice;
+}
+
+function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
+  const cards = [
+    view.own.identity,
+    ...view.own.gripOrHq,
+    ...view.own.heapOrArchives,
+    ...view.own.scoreArea,
+    ...(view.own.rig ?? []),
+    view.opponent.identity,
+    ...(view.opponent.discardCards ?? []),
+    ...view.opponent.scoreArea,
+    ...(view.opponent.rig ?? []),
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.specialZones?.setAside ?? []),
+    ...(view.specialZones?.removedFromGame ?? []),
+    ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
+    ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
+  ];
+  return new Map(cards.map((card) => [card.instanceId, card]));
 }
 
 function CardChoicePanel({
