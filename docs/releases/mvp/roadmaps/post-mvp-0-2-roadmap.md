@@ -20,7 +20,7 @@ Gesicherter Stand:
 Quellenkonflikt:
 
 - `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md` nennt V0.3 als "Beide Seiten gegen KI spielbar" mit Runner-KI, verbesserter Corp-KI, KI-vs-KI, Erklärmodus und Simulationstests.
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/05_planung/Backlog_und_Roadmap.md` nennt V0.3 als "Kartenpool und Regelbreite" mit weiteren ICE-/Breaker-Varianten, Assets/Upgrades, Tags, Damage, größeren Demo-Decks und eingeschränkter Deckvalidierung.
+- `docs/archive/mvp-0-1-0-2-document-package/05_planung/Backlog_und_Roadmap.md` nennt V0.3 als "Kartenpool und Regelbreite" mit weiteren ICE-/Breaker-Varianten, Assets/Upgrades, Tags, Damage, größeren Demo-Decks und eingeschränkter Deckvalidierung.
 
 Entscheidung:
 

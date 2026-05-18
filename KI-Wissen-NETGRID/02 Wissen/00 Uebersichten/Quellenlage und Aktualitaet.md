@@ -32,12 +32,12 @@ Diese Ordner sind bewusst ignoriert und enthalten private lokale O:NR-v1-/O:NR-1
 
 ## Ergänzende Quellen im Repository
 
-- `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/README_Dokumentenpaket.md`
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/`
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/03_tests/`
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/04_betrieb/`
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/05_planung/`
+- `docs/archive/mvp-0-1-0-2-detailed-test-concept.md`
+- `docs/archive/mvp-0-1-0-2-document-package/README_Dokumentenpaket.md`
+- `docs/archive/mvp-0-1-0-2-document-package/02_spezifikationen/`
+- `docs/archive/mvp-0-1-0-2-document-package/03_tests/`
+- `docs/archive/mvp-0-1-0-2-document-package/04_betrieb/`
+- `docs/archive/mvp-0-1-0-2-document-package/05_planung/`
 
 Diese Dokumente sind als ergänzende Arbeitsgrundlagen relevant, dürfen aber die Quellenpriorität aus `AGENTS.md` nicht stillschweigend überschreiben.
 

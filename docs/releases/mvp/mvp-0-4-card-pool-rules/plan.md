@@ -615,9 +615,9 @@ Read:
 - docs/releases/mvp/roadmaps/post-mvp-0-2-roadmap.md
 - docs/releases/mvp/mvp-0-3-ai-simulation/plan.md
 - docs/releases/mvp/mvp-0-4-card-pool-rules/plan.md
-- docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Kartenimplementierungsleitfaden.md
-- docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Rules_Engine_Spezifikation.md
-- docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md
+- docs/archive/mvp-0-1-0-2-document-package/02_spezifikationen/Kartenimplementierungsleitfaden.md
+- docs/archive/mvp-0-1-0-2-document-package/02_spezifikationen/Rules_Engine_Spezifikation.md
+- docs/archive/mvp-0-1-0-2-detailed-test-concept.md
 - data/cards/demo-cards.json
 - data/decks/demo-decks.json
 - data/manifests/card-implementation-manifest.json

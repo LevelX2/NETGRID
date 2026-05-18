@@ -14,7 +14,6 @@ Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefak
 - `codex/`: aktueller Codex-Status, Runbooks und Arbeitsnotizen mit Projektsteuerungsbezug.
 - `KI-Player/`: KI-bezogene Briefings und Planungsunterlagen.
 - `ui-designsets/`: UI-/Branding-Explorationen und zugehörige Designartefakte.
-- `NETGRID_Dokumentenpaket_MVP_0_1_0_2/`: historisches Dokumentenpaket für die frühe MVP-Phase.
 
 ## Zielstruktur
 
@@ -27,4 +26,4 @@ Weitere Strukturpakete führen diese Zielbereiche schrittweise ein, sobald ein k
 
 ## Grundregel
 
-Neue lose Arbeitspakete starten in `activities/inbox/`. Erst wenn daraus ein formaler Plan, eine Spezifikation, ein Review oder ein dauerhaftes Nachweisdokument entsteht, wird ein passendes Artefakt angelegt. Für bestehende historische Pfade bleibt `derived/` zunächst kanonisch; neue oder migrierte Dauerartefakte sollen nach der Zielstruktur einsortiert werden.
+Neue lose Arbeitspakete starten in `activities/inbox/`. Erst wenn daraus ein formaler Plan, eine Spezifikation, ein Review oder ein dauerhaftes Nachweisdokument entsteht, wird ein passendes Artefakt angelegt. Migrierte Dauerartefakte sollen nach der Zielstruktur einsortiert werden; `derived/` bleibt nur noch als Übergangshinweis bestehen.

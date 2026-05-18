@@ -598,8 +598,8 @@ Read:
 - docs/releases/mvp/mvp-0-3-ai-simulation/plan.md
 - docs/releases/mvp/mvp-0-2-private-multiplayer/final-review.md
 - docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md
-- docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/02_spezifikationen/Kartenimplementierungsleitfaden.md
-- docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md
+- docs/archive/mvp-0-1-0-2-document-package/02_spezifikationen/Kartenimplementierungsleitfaden.md
+- docs/archive/mvp-0-1-0-2-detailed-test-concept.md
 - packages/ai/src/index.ts
 - packages/ai/src/index.test.ts
 

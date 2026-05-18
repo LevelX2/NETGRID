@@ -2,7 +2,7 @@
 
 Status: implemented-follow-up
 
-Follow-up 2026-05-18: Der Link-Migrationsplan wurde umgesetzt. Die Bare-Filename-Referenzen in `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/README_Dokumentenpaket.md` und `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md` wurden auf `docs/source/` beziehungsweise den verbleibenden Root-Testkonzeptpfad präzisiert. Die vier Root-Duplikate wurden entfernt:
+Follow-up 2026-05-18: Der Link-Migrationsplan wurde umgesetzt. Die Bare-Filename-Referenzen in `docs/archive/mvp-0-1-0-2-document-package/README_Dokumentenpaket.md` und `docs/archive/mvp-0-1-0-2-detailed-test-concept.md` wurden auf `docs/source/` beziehungsweise den Archivpfad des Testkonzepts präzisiert. Die vier Root-Duplikate wurden entfernt:
 
 - `docs/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
 - `docs/NETGRID_MVP_0.2_Plan.md`
@@ -59,8 +59,8 @@ Explizite Root-Pfad-Referenzen:
 
 Bare-Filename-Referenzen:
 
-- `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/README_Dokumentenpaket.md` nennt die frühen Quellen mit Dateinamen ohne Pfad. Das ist historisch lesbar, aber vor Entfernung der Root-Duplikate sollte es auf `docs/source/` präzisiert werden.
-- `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md` nennt dieselben frühen Quellen ohne Pfad. Auch hier sollte vor Entfernung der Root-Duplikate auf `docs/source/` präzisiert werden.
+- `docs/archive/mvp-0-1-0-2-document-package/README_Dokumentenpaket.md` nennt die frühen Quellen mit Dateinamen ohne Pfad. Das ist historisch lesbar, aber vor Entfernung der Root-Duplikate sollte es auf `docs/source/` präzisiert werden.
+- `docs/archive/mvp-0-1-0-2-detailed-test-concept.md` nennt dieselben frühen Quellen ohne Pfad. Auch hier sollte vor Entfernung der Root-Duplikate auf `docs/source/` präzisiert werden.
 - Die beiden Runbook-Dateien enthalten interne Quelllisten mit Bare-Filenames; maßgeblich ist die `docs/codex/`-Fassung, die weiter unten bereits `docs/source/` und `docs/codex/` als führende Pfade nennt.
 
 ## Dateiempfehlungen
@@ -80,8 +80,8 @@ Bare-Filename-Referenzen:
 
 Vor einem separaten Entfernen der vier Root-Dateien:
 
-1. `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/README_Dokumentenpaket.md` auf konkrete Pfade zu `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`, `docs/source/NETGRID_MVP_0.2_Plan.md`, `docs/source/Erstes Testdeck.txt` und `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` präzisieren.
-2. `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md` in der Testbasis-Zeile analog auf `docs/source/` präzisieren.
+1. `docs/archive/mvp-0-1-0-2-document-package/README_Dokumentenpaket.md` auf konkrete Pfade zu `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`, `docs/source/NETGRID_MVP_0.2_Plan.md`, `docs/source/Erstes Testdeck.txt` und `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` präzisieren.
+2. `docs/archive/mvp-0-1-0-2-detailed-test-concept.md` in der Testbasis-Zeile analog auf `docs/source/` präzisieren.
 3. Bei Bedarf `docs/README.md` um einen kurzen Hinweis ergänzen, dass frühe Primärquellen ausschließlich unter `docs/source/` liegen und Codex-Runbooks unter `docs/codex/`.
 4. Danach die vier Root-Duplikate entfernen:
    - `docs/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`

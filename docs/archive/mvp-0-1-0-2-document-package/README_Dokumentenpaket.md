@@ -13,7 +13,7 @@ Die Dokumente beziehen sich auf folgende vorhandene Arbeitsgrundlagen:
 
 - `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
 - `docs/source/NETGRID_MVP_0.2_Plan.md`
-- `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`
+- `docs/archive/mvp-0-1-0-2-detailed-test-concept.md`
 - `docs/source/Erstes Testdeck.txt`
 - `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
