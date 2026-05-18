@@ -4925,7 +4925,7 @@ export default function Page() {
                                     <div className="corpHqHandHead">
                                       <span>Handkarten</span>
                                     </div>
-                                    <div className="cards fixedZoneCards corpHqHandCards" style={handCardsStyle}>
+                                    <HandCardsRow className="corpHqHandCards" style={handCardsStyle} count={activeView.own.gripOrHq.length}>
                                       {activeView.own.gripOrHq.map((card) => {
                                         const displayCard = enrichCard(card);
                                         const discardOption = discardOptionForCard(card);
@@ -4953,7 +4953,7 @@ export default function Page() {
                                           />
                                         );
                                       })}
-                                    </div>
+                                    </HandCardsRow>
                                   </div>
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
@@ -5060,7 +5060,7 @@ export default function Page() {
                   collapsed={boardZoneCollapsedFor("runner:grip")}
                   onToggleCollapse={() => toggleBoardZoneCollapsed("runner:grip")}
                 >
-                  <div className="cards fixedZoneCards" style={handCardsStyle}>
+                  <HandCardsRow style={handCardsStyle} count={activeView.own.gripOrHq.length}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
                       const discardOption = discardOptionForCard(card);
@@ -5088,7 +5088,7 @@ export default function Page() {
                         />
                       );
                     })}
-                  </div>
+                  </HandCardsRow>
                 </SideZoneFrame>
                 <SideZoneFrame
                   side="runner"
@@ -12036,6 +12036,59 @@ function SideZoneFrame({
         </div>
       </div>
       {hasBody ? <div className="sideZoneBody">{children}</div> : null}
+    </div>
+  );
+}
+
+function HandCardsRow({ className = "", style, count, children }: { className?: string; style?: CSSProperties; count: number; children: ReactNode }) {
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const [overlapOffset, setOverlapOffset] = useState<string | null>(null);
+
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row || count <= 1) {
+      setOverlapOffset(null);
+      return;
+    }
+
+    const syncOverlap = () => {
+      const computedStyle = window.getComputedStyle(row);
+      const cardWidth = Number.parseFloat(computedStyle.getPropertyValue("--cards-min-width")) || CARD_DISPLAY_BASE_MIN_WIDTH;
+      const cardGap = Number.parseFloat(computedStyle.columnGap) || 0;
+      const availableWidth = row.clientWidth;
+      if (cardWidth <= 0 || availableWidth <= 0) {
+        setOverlapOffset(null);
+        return;
+      }
+
+      const defaultOverlapRatio = 0.42;
+      const defaultOffset = cardWidth * defaultOverlapRatio;
+      const defaultRowWidth = cardWidth * count + (cardGap - defaultOffset) * (count - 1);
+      const requiredOffset = (cardWidth * count + cardGap * (count - 1) - availableWidth) / (count - 1);
+      const maxOffset = Math.max(defaultOffset, cardWidth + cardGap - 10);
+      const nextOffsetWidth = defaultRowWidth <= availableWidth ? defaultOffset : Math.min(Math.max(requiredOffset, defaultOffset), maxOffset);
+      const nextOffset = `${Math.round(nextOffsetWidth) * -1}px`;
+      setOverlapOffset((current) => (current === nextOffset ? current : nextOffset));
+    };
+
+    syncOverlap();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncOverlap);
+    observer?.observe(row);
+    window.addEventListener("resize", syncOverlap);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", syncOverlap);
+    };
+  }, [count, style]);
+
+  const rowStyle = useMemo(() => {
+    if (!overlapOffset) return style;
+    return { ...style, "--cards-overlap-offset": overlapOffset } as CSSProperties;
+  }, [overlapOffset, style]);
+
+  return (
+    <div ref={rowRef} className={`cards fixedZoneCards handCardsRow ${className}`.trim()} style={rowStyle}>
+      {children}
     </div>
   );
 }

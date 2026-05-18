@@ -4063,9 +4063,9 @@ select {
 }
 
 .corpHqHandPanel {
-  flex: 1 1 460px;
+  flex: 1 1 680px;
   min-width: 0;
-  max-width: min(62vw, 560px);
+  max-width: min(74vw, 820px);
 }
 
 .corpHqHandHead {
@@ -4086,8 +4086,7 @@ select {
   width: 100%;
   max-width: 100%;
   min-height: calc(var(--cards-min-width, 108px) * 1.4);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   padding-bottom: 2px;
 }
 
@@ -5170,10 +5169,11 @@ select {
 }
 
 .lane .strengthBoostBadge {
-  min-width: calc(46px * var(--lane-card-scale, 1));
-  min-height: calc(20px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(7px * var(--lane-card-scale, 1));
-  font-size: calc(11px * var(--lane-card-scale, 1));
+  right: calc(-7px * var(--lane-card-scale, 1));
+  top: calc(50% - calc(23px * var(--lane-card-scale, 1)));
+  min-height: calc(12px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
+  font-size: calc(7px * var(--lane-card-scale, 1));
 }
 
 .lane .brokerStoredCreditsBadge,
@@ -5609,29 +5609,30 @@ select {
 
 .strengthBoostBadge {
   position: absolute;
-  left: 6%;
-  bottom: 7%;
+  right: -7px;
+  top: calc(50% - 23px);
   z-index: 42;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 46px;
-  min-height: 20px;
-  padding: 2px 7px;
+  min-height: 13px;
+  padding: 1px 5px;
   border: 1px solid color-mix(in srgb, var(--runner), white 35%);
   border-radius: 999px;
   background:
     radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.5), transparent 32%),
     linear-gradient(135deg, color-mix(in srgb, var(--runner), white 18%), color-mix(in srgb, var(--runner), black 18%));
   color: white;
-  font-size: 11px;
-  font-weight: 900;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   line-height: 1;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.45);
   box-shadow:
-    0 4px 8px rgb(0 0 0 / 0.32),
-    inset 0 1px 1px rgb(255 255 255 / 0.42),
-    inset 0 -2px 3px rgb(0 0 0 / 0.22);
+    0 1px 4px rgb(0 0 0 / 0.26),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  transform: translateY(-50%);
+  white-space: nowrap;
   pointer-events: none;
 }
 
@@ -6808,6 +6809,10 @@ select {
   overflow: visible;
 }
 
+.fixedZoneCards.handCardsRow {
+  overflow: visible;
+}
+
 .fixedZoneCards .cardSlot {
   flex: 0 0 var(--cards-min-width, 108px);
   width: var(--cards-min-width, 108px);
@@ -6816,7 +6821,7 @@ select {
 }
 
 .fixedZoneCards .cardSlot + .cardSlot {
-  margin-left: calc(var(--cards-min-width, 108px) * -0.42);
+  margin-left: var(--cards-overlap-offset, calc(var(--cards-min-width, 108px) * -0.42));
 }
 
 .fixedZoneCards .cardSlot:hover,
@@ -9154,6 +9159,10 @@ select,
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 3px;
+  }
+
+  .fixedZoneCards.handCardsRow {
+    overflow: visible;
   }
 
   .opponentRunnerBoardStrip .runnerRigStrip {
