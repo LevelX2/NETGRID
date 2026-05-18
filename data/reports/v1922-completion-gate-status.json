@@ -28,24 +28,24 @@
     "confirmedPartialSources": [
       "docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md",
       "docs/releases/v1/card-releases/v1-0-5k-card-release/implementation-review.md",
-      "docs/derived/V1_9_22_RUNNER_PROGRAM_READINESS_REVIEW.md",
-      "docs/derived/V1_9_22_RUNNER_EVENT_READINESS_REVIEW.md",
-      "docs/derived/V1_9_22_CORP_LONGTAIL_READINESS_REVIEW.md",
-      "docs/derived/V1_9_10_TO_V1_9_XX_CARD_FUNCTION_MATRIX.md",
-      "docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/runner-program-readiness-review.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/runner-event-readiness-review.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/corp-longtail-readiness-review.md",
+      "docs/releases/v1/v1-9-originalset-completion/completion-planning/card-function-matrix.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/resolver-contract-matrix.md",
       "data/rules/v1922-resolver-contracts.json"
     ],
     "removalCondition": "Add or identify a local source that provides a full per-card resolver contract, not only type surfaces or effect summaries."
   },
   "latestAutomationScan": {
     "searchedAt": "2026-05-13T19:09:00+02:00",
-    "reviewRef": "docs/derived/V1_9_22_SOURCE_SCAN_REVIEW.md",
+    "reviewRef": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/source-scan-review.md",
     "result": "no_complete_resolver_contract_found",
     "decision": "no_runtime_catalog_or_ai_promotion"
   },
   "latestContractMatrix": {
     "createdAt": "2026-05-13T19:25:00+02:00",
-    "docRef": "docs/derived/V1_9_22_RESOLVER_CONTRACT_MATRIX.md",
+    "docRef": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/resolver-contract-matrix.md",
     "dataRef": "data/rules/v1922-resolver-contracts.json",
     "cardCount": 47,
     "readyForPromotionCount": 47,
@@ -54,7 +54,7 @@
   },
   "latestLocalWorkingBasis": {
     "createdAt": "2026-05-13T19:58:00+02:00",
-    "docRef": "docs/derived/V1_9_22_LOCAL_RESOLVER_WORKING_BASIS.md",
+    "docRef": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/local-resolver-working-basis.md",
     "dataRef": "data/rules/v1922-local-resolver-working-basis.json",
     "readyForNarrowResolverImplementationCount": 2,
     "readyCandidates": [
@@ -65,7 +65,7 @@
   },
   "latestLocalCardFacts": {
     "createdAt": "2026-05-13T20:20:00+02:00",
-    "docRef": "docs/derived/V1_9_22_LOCAL_CARD_FACTS_WORKING_BASIS.md",
+    "docRef": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/local-card-facts-working-basis.md",
     "dataRef": "data/rules/v1922-local-card-facts.json",
     "cardCount": 47,
     "localFactsAvailableCount": 47,
@@ -159,14 +159,14 @@
   "latestPreflightReviews": {
     "createdAt": "2026-05-14T01:05:00+02:00",
     "docs": [
-      "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
-      "docs/derived/V1_9_22_RUNNER_PROGRAM_IMPLEMENTATION_PREFLIGHT.md",
-      "docs/derived/V1_9_22_DATA_FORT_RECLAMATION_RUNTIME_CONTRACT.md",
-      "docs/derived/V1_9_22_ZETATECH_OVERLAY_RUNTIME_CONTRACT.md",
-      "docs/derived/V1_9_22_NEWSGROUP_FILTER_SLICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md"
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/security-purge-slice-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/remaining-corp-longtail-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/runner-program-implementation-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/data-fort-reclamation-runtime-contract.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/zetatech-overlay-runtime-contract.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/newsgroup-filter-slice-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/remaining-corp-ice-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/remaining-runner-program-preflight.md"
     ],
     "nextCodeCandidates": [
       {
@@ -220,8 +220,8 @@
   "latestErrataSourceReview": {
     "reviewedAt": "2026-05-14T01:45:00+02:00",
     "source": "docs/source/Netrunner_Errata_v1.70.pdf",
-    "docRef": "docs/derived/V1_9_22_ERRATA_1_70_SOURCE_REVIEW.md",
-    "breakerContractRef": "docs/derived/V1_9_22_BREAKER_CONTRACT_PREFLIGHT.md",
+    "docRef": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/errata-1-70-source-review.md",
+    "breakerContractRef": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/breaker-contract-preflight.md",
     "userConfirmedCards": [
       "onr_v1_027_flak",
       "onr_v1_031_hammer",
@@ -251,12 +251,12 @@
     "reviewedAt": "2026-05-14T19:43:00+02:00",
     "status": "all_47_runtime_wips_present_release_gates_open",
     "reviewedRefs": [
-      "docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md",
-      "docs/derived/V1_9_22_IMPLEMENTATION_REVIEW.md",
-      "docs/derived/V1_9_22_SECURITY_PURGE_SLICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_CORP_LONGTAIL_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_CORP_ICE_PREFLIGHT.md",
-      "docs/derived/V1_9_22_REMAINING_RUNNER_PROGRAM_PREFLIGHT.md",
+      "docs/releases/v1/v1-9-originalset-completion/automation/state.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/implementation-review.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/security-purge-slice-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/remaining-corp-longtail-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/remaining-corp-ice-preflight.md",
+      "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/remaining-runner-program-preflight.md",
       "data/rules/v1922-local-card-facts.json",
       "data/rules/v1922-local-resolver-working-basis.json"
     ],
@@ -267,7 +267,7 @@
   "blockingGates": [],
   "completion": {
     "status": "complete",
-    "finalReview": "docs/derived/V1_9_22_FINAL_REVIEW.md",
+    "finalReview": "docs/releases/v1/v1-9-originalset-completion/v1-9-22-per-card-longtail/final-review.md",
     "aiArtifacts": [
       "data/ai/ai-card-hints-active.json",
       "data/manifests/deck-legal-ai-approval-v1922-manifest.json",

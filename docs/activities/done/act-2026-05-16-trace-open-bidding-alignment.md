@@ -14,7 +14,7 @@ releaseTarget:
 blockedBy: []
 resultArtifacts:
   - docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md
-  - docs/derived/V1_9_14_TRACE_TAG_RESOURCE_SPEC.md
+  - docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md
   - docs/derived/DEVIATION_REGISTRY.md
   - data/rules/mechanics-coverage-1.9.14.json
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
@@ -36,8 +36,8 @@ Die moderne, offene Trace-Sequenz soll als verbindliche NETGRID-Regel sauber dok
 - `docs/derived/MVP_0.96_REQUIREMENTS.md`
 - `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
 - `data/rules/mechanics-coverage-0.96.json`
-- `docs/derived/V1_9_14_TRACE_TAG_RESOURCE_SPEC.md`
-- `docs/derived/V1_9_14_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md`
+- `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/final-review.md`
 - `data/rules/mechanics-coverage-1.9.14.json`
 - `docs/source/Netrunner Errata 1.70.md`
 - `docs/source/Runnerspoiler 1.0.txt`

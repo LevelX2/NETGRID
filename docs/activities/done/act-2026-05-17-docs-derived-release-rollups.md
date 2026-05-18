@@ -34,7 +34,7 @@ Die vielen releaseweisen Einzelartefakte unter `docs/derived/` sollen in eine le
 - Strukturreview vom 2026-05-17: `docs/derived/` enthält 712 getrackte Dateien; 669 liegen flach im Root.
 - Auffällige Reihen:
   - `docs/derived/MVP_*.md`
-  - `docs/derived/V1_0_*.md` bis `docs/derived/V1_9_*.md`
+  - ehemalige V1.0- bis V1.9-Derived-Release-Rollups, seit Doku-Migration unter `docs/releases/v1/`
   - `docs/derived/V2_*.md`
   - `docs/releases/special/s01/`
   - `docs/derived/BACKEND_0_5_*.md`

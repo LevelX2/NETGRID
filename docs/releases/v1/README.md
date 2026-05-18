@@ -39,7 +39,4 @@ Dieser Bereich bündelt migrierte V1-Releasefamilien. Die Migration erfolgt schr
 - `v1-7-2-mechanikpaket-f/`: Mechanikpaket F.
 - `v1-8-0-mechanikpaket-g/`: Mechanikpaket G.
 - `v1-8-1-mechanikpaket-h/`: Mechanikpaket H.
-
-## Bewusst nicht enthalten
-
-- V1.9+ bleibt bis zu eigenen Linkaudits in `docs/derived/`.
+- `v1-9-originalset-completion/`: V1.9.0 bis V1.9.22 Originalset-Completion inklusive Mechanikpaketen, Completion-Planning, Automation und Per-Card-Longtail.

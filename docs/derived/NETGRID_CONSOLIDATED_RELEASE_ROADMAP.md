@@ -1112,7 +1112,7 @@ Geplanter Erst-Release für noch nicht spielbare Karten (Stand 2026-05-09):
 
 ## Verbindliche Anschlusslinie V1.9.1 bis V1.9.8
 
-Planentscheid vom 2026-05-10: Die bisherige Grobplanung `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md` ist als gleichberechtigter und verpflichtender Teil dieser Roadmap übernommen.
+Planentscheid vom 2026-05-10: Die bisherige Grobplanung `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md` ist als gleichberechtigter und verpflichtender Teil dieser Roadmap übernommen.
 
 Damit gilt:
 
