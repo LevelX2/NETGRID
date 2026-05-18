@@ -207,6 +207,7 @@
 
 ## Wichtige Grenzen
 
+- Normaler lokaler Betrieb startet über [scripts/start-netgrid.ps1](C:/Projekte/NETGRID/scripts/start-netgrid.ps1). Das Script ist die führende lokale Startautorität für Webclient und Multiplayer-Backend, weil es LAN-IP, öffentliche Hostangabe, Server-/Web-Base-URLs und Origin-Allowlist konsistent setzt. Direkte `pnpm`-/`tsx`-/`next dev`-Starts sind nur für isolierte Tests oder Diagnose zulässig und müssen danach wieder auf den Script-Startpfad zurückgeführt werden.
 - MVP 0.1 und MVP 0.2 sind abgeschlossen; spätere Änderungen dürfen deren Gates nicht durch Scope-Ausweitung aufweichen.
 - MVP 0.2 bleibt auf privaten Multiplayer begrenzt; öffentliche Plattformfunktionen brauchen eine spätere explizite Scope-Entscheidung.
 - MVP 0.3 erweitert keine Karten und keine offiziellen Mechaniken; KI darf nur aus `LegalActions`, PlayerViews und side-gefilterten Events entscheiden.
