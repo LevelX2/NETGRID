@@ -16,7 +16,7 @@ blockedBy:
   - act-2026-05-18-ai-discard-plan-doctrine-fit
 resultArtifacts:
   - packages/ai/src/index.test.ts
-  - docs/derived/AI_DISCARD_REGRESSION_REVIEW_2026_05_18.md
+  - docs/reviews/ai/discard-regression-review-2026-05-18.md
 checks:
   - corepack pnpm --filter @netgrid/ai test -- --run
   - corepack pnpm --filter @netgrid/ai typecheck
@@ -39,7 +39,7 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline` u
 - Vorgängerpakete definieren die neue Discard-Auswahl und deren Plan-/Doctrine-Boni.
 - `packages/ai/src/index.test.ts`: vorhandene AI-Regressionen inklusive V1.1.1-Discard.
 - `tests/specs/visibility-contract.test.ts`: projektweiter Hidden-Info-Gate.
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`: KI-Qualität soll messbar und side-sicher verbessert werden.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`: KI-Qualität soll messbar und side-sicher verbessert werden.
 - Bestehende abgeschlossene Activities als Referenz: `act-2026-05-17-ai-match-progression-benchmark`, `act-2026-05-17-ai-input-positive-dto`, `act-2026-05-17-decisiondebug-schema-redaction-snapshots`.
 
 ## Scope
@@ -89,4 +89,4 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline` u
 
 ## Ergebnisnotiz
 
-Regressionen wurden um Determinismus, Tie-Break, abstrakte Evidence/Debug-Ausgaben und qualitative Runner-/Korp-Szenarien gegen die alte stabile Erstoption erweitert. Der fokussierte Discard-/Plan-/Doctrine-Filter, der vollständige AI-Testlauf, Typecheck, Visibility-Contract und Whitespace-Check sind grün. Die Review-Notiz `docs/derived/AI_DISCARD_REGRESSION_REVIEW_2026_05_18.md` dokumentiert Nachweise und Grenzen: keine Vollplanung, keine gegnerische Hidden Info, keine Engine-Regeländerung und nur normale `resolve_choice`-Discard-Entscheidungen.
+Regressionen wurden um Determinismus, Tie-Break, abstrakte Evidence/Debug-Ausgaben und qualitative Runner-/Korp-Szenarien gegen die alte stabile Erstoption erweitert. Der fokussierte Discard-/Plan-/Doctrine-Filter, der vollständige AI-Testlauf, Typecheck, Visibility-Contract und Whitespace-Check sind grün. Die Review-Notiz `docs/reviews/ai/discard-regression-review-2026-05-18.md` dokumentiert Nachweise und Grenzen: keine Vollplanung, keine gegnerische Hidden Info, keine Engine-Regeländerung und nur normale `resolve_choice`-Discard-Entscheidungen.

@@ -13,7 +13,7 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/AI_LIVE_DOCTRINE_INPUT_PATH_AUDIT_2026_05_17.md
+  - docs/reviews/ai/live-doctrine-input-path-audit-2026-05-17.md
   - docs/codex/CODEX_STATUS.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
 checks:
@@ -28,7 +28,7 @@ Alle produktiven und testnahen AI-Eingangspfade sollen daraufhin geprüft werden
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, offene Frage `Live-Endpunkte ohne Doctrine`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, offene Frage `Live-Endpunkte ohne Doctrine`.
 - Die Analyse stellt fest: Multiplayer speist eigene Decksnapshots ein; einige einfache Web/API-Smoke-Pfade bauen AI-Inputs offenbar ohne eigene Deck Doctrine.
 - Betroffene Konzeptbereiche: `buildDeckDoctrineProfile`, AI-Input-Erzeugung, Multiplayer-AI-Runner und Web/API-Smoke-Fixtures.
 
@@ -66,4 +66,4 @@ Alle produktiven und testnahen AI-Eingangspfade sollen daraufhin geprüft werden
 
 ## Ergebnisnotiz
 
-Abgeschlossen mit `docs/derived/AI_LIVE_DOCTRINE_INPUT_PATH_AUDIT_2026_05_17.md`. Der produktive private Multiplayer-`advance_ai`-Pfad nutzt eigene `privateDeckSnapshots` als Doctrine-Quelle; doctrine-lose Treffer sind als Legacy-/Demo-Pfade, Baseline-Controller oder isolierte Testfixtures klassifiziert. Empfohlene Nachläufe: Server-Invariant-Test für private Decksnapshots, Legacy-Demo-Grenzentscheidung und Simulation-Doctrine-Modusvertrag. Keine KI-Strategie, Hints, Deckdaten oder Runtime-Pfade wurden geändert.
+Abgeschlossen mit `docs/reviews/ai/live-doctrine-input-path-audit-2026-05-17.md`. Der produktive private Multiplayer-`advance_ai`-Pfad nutzt eigene `privateDeckSnapshots` als Doctrine-Quelle; doctrine-lose Treffer sind als Legacy-/Demo-Pfade, Baseline-Controller oder isolierte Testfixtures klassifiziert. Empfohlene Nachläufe: Server-Invariant-Test für private Decksnapshots, Legacy-Demo-Grenzentscheidung und Simulation-Doctrine-Modusvertrag. Keine KI-Strategie, Hints, Deckdaten oder Runtime-Pfade wurden geändert.

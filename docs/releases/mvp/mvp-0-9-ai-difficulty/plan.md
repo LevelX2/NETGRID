@@ -850,18 +850,20 @@ Ein lokales privates Entwickler-Debug-Bundle mit FullState wäre eine separate s
 
 ## 13. Vorgeschlagene Artefakte
 
-Derived Docs:
+Historisch vorgeschlagene Dokumentationsartefakte:
 
 - `docs/releases/mvp/mvp-0-9-ai-difficulty/requirements.md`
-- `docs/derived/AI_STRATEGY_0.9_SPEC.md`
-- `docs/derived/AI_ROLE_MODEL_0.9_SPEC.md`
-- `docs/derived/AI_RISK_SCORING_0.9_SPEC.md`
-- `docs/derived/AI_EXPLANATIONS_0.9_SPEC.md`
-- `docs/derived/AI_CONTROLLER_LIFECYCLE_0.9_SPEC.md`
-- `docs/derived/AI_OBSERVED_FACTS_0.9_SPEC.md`
-- `docs/derived/AI_TUNING_AND_GOLDEN_SUMMARY_0.9_SPEC.md`
-- `docs/derived/AI_SIMULATION_0.9_TEST_MATRIX.md`
+- AI strategy spec
+- AI role model spec
+- AI risk scoring spec
+- AI explanations spec
+- AI controller lifecycle spec
+- AI observed facts spec
+- AI tuning and golden summary
+- AI simulation test matrix
 - `docs/releases/mvp/mvp-0-9-ai-difficulty/requirements-review.md`
+
+Falls diese Einzelartefakte später wieder benötigt werden, gehören sie nach heutiger Zielstruktur je nach Funktion unter `docs/architecture/ai/`, `docs/reviews/ai/` oder `docs/releases/ai/`, nicht mehr unter `docs/derived/`.
 
 Daten:
 

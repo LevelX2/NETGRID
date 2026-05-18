@@ -12,7 +12,7 @@ Geprüft wurden:
 - `docs/releases/v1/v1-4-2-belief-state-opponent-model/spec.md`
 - `docs/releases/v1/v1-4-2-belief-state-opponent-model/test-matrix.md`
 - `docs/releases/v1/v1-4-2-belief-state-opponent-model/planning-review-to-v1-6-0.md`
-- `docs/derived/RUNNER_AI_RND_REPEAT_ACCESS_OBSERVATION_2026_05_08.md`
+- `docs/reviews/ai/runner-rnd-repeat-access-observation-2026-05-08.md`
 
 ## Ergebnis
 

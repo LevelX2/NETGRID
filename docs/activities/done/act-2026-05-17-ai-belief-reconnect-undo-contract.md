@@ -33,7 +33,7 @@ Der KI-Belief-State soll für Reconnect und Undo einen klaren, getesteten Vertra
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P0: Belief Reconnect/Undo Contract` und `Offene Fragen / nicht belegte Annahmen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P0: Belief Reconnect/Undo Contract` und `Offene Fragen / nicht belegte Annahmen`.
 - Betroffene Bereiche laut Analyse: `packages/ai/src/belief-state.ts`, `packages/ai/src/index.test.ts` und Server-Reconnect-Testpfade.
 - Die Analyse bewertet den Belief State als fair, aber flach; das Sicherheitsziel ist zuerst Vertragssicherheit, nicht stärkere Strategie.
 

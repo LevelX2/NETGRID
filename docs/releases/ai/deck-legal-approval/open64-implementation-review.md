@@ -15,7 +15,7 @@ Die Open64-Freigabe ist vollständig umgesetzt und verifiziert.
 ## Artefakte
 
 - Plan:
-  - `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_EXECUTION_PLAN.md`
+  - `docs/releases/ai/deck-legal-approval/open64-execution-plan.md`
 - AI-Hints:
   - `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`
   - `data/ai/ai-card-hints-deck-legal-legacy-open64.json`

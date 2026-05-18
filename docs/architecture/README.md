@@ -5,6 +5,7 @@
 ## Bereiche
 
 - `ability-engine/`: Kartenlogik, CardDefinition-/Ability-DSL-Zielbild und inkrementeller Refactoring-Plan für die Engine-Migration.
+- `ai/`: KI-Controller, Simulationstestmatrix, AI-Hints-Struktur und side-sichere Coaching-Grenzen.
 
 ## Regeln
 

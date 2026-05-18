@@ -30,7 +30,7 @@ Die sichtbare Runanalyse der KI soll alle aktuell `ai_supported` Runtime-ICE und
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P0: Runtime-Kartenabdeckung für sichtbare Runanalyse prüfen`, `Runner-Analyse` und `Offene Fragen / nicht belegte Annahmen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P0: Runtime-Kartenabdeckung für sichtbare Runanalyse prüfen`, `Runner-Analyse` und `Offene Fragen / nicht belegte Annahmen`.
 - Genannter Startpunkt: `packages/ai/src/visible-run-analysis.ts`.
 - Offene Frage aus der Analyse: Prüfen, ob `DEMO_CARDS_BY_ID` für die aktive O:NR-Kartenlage ausreicht oder ob die Runanalyse Runtime-Definitionen nutzen muss.
 

@@ -12,6 +12,7 @@
 ## Aktive Pilotstruktur
 
 - `backend-ops/backend-0-5/`: privater Backend-/Ops-Schnitt für Storage-Maintenance.
+- `ai/`: abgeschlossene KI-Doctrine- und Deck-Legal-Approval-Spuren.
 - `mvp/`: historische MVP-0.x-Releasekette von MVP 0.1 bis MVP 0.99.
 - `proteus/`: planning-only Proteus-Import-, Coverage-, Slicing- und Mechanikvertragsartefakte ohne Kartenpromotion.
 - `special/s01/`: abgeschlossene Sonderphase für Spielende, Ergebnisfenster, private Matchserie und opt-in Audio.

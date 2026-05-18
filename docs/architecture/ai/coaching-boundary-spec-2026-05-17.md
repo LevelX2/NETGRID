@@ -14,7 +14,7 @@ Diese Spezifikation führt keine Coach-UI, keine LLM-Integration, keine Server-A
 
 ## Quellenbasis
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitt `P2: Side-sicheres AI-Coaching`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitt `P2: Side-sicheres AI-Coaching`.
 - `docs/activities/done/act-2026-05-17-ai-input-nested-payload-allowlist.md`: AI-Input-DTO rekonstruiert verschachtelte Payloads über positive Allowlists.
 - `docs/activities/done/act-2026-05-17-decisiondebug-schema-redaction-snapshots.md`: `DecisionDebug` ist über `ai-decision-debug-v1` versioniert und side-sicher redigiert.
 - Globale NETGRID-Prinzipien aus `AGENTS.md`: Engine-Korrektheit zuerst, Rules Engine als einzige Regelautorität, Hidden-Info-Schutz für PlayerViews, PublicEvents, KI-Inputs, WebSocket, Reconnect, Undo, öffentliche Replays, Logs und Fehler.

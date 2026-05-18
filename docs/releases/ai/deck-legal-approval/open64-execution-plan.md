@@ -30,7 +30,7 @@ Alle 64 aktuell `human_playable` aber noch nicht `ai_supported` O:NR-v1-Karten w
 - AI-Hints unter `data/ai/ai-card-hints-*.json`
 - Batch-Manifest unter `data/manifests/deck-legal-ai-approval-*-manifest.json`
 - Batch-Szenario-Smokes unter `data/scenarios/ai-deck-legal-*-smokes.json`
-- Implementation Review unter `docs/derived/DECK_LEGAL_AI_APPROVAL_*_IMPLEMENTATION_REVIEW.md`
+- Implementation Review unter dem passenden `*-implementation-review.md` in diesem Ordner
 
 ## Freigaberegel je Karte
 

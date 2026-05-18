@@ -13,7 +13,7 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/AI_HINTS_ROLE_GAP_REPORT_2026_05_17.md
+  - docs/reviews/ai/ai-hints-role-gap-report-2026-05-17.md
   - docs/codex/CODEX_STATUS.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
 checks:
@@ -28,7 +28,7 @@ Die aktiven AI-Hints, Rollen und Szenarioreferenzen sollen so ausgewertet werden
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P1: AI-Hints Role Gap Report`, `Deck-/Karten-/Hint-Analyse` und `Offene Fragen / nicht belegte Annahmen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P1: AI-Hints Role Gap Report`, `Deck-/Karten-/Hint-Analyse` und `Offene Fragen / nicht belegte Annahmen`.
 - Genannte Datenquellen: `data/ai/ai-card-hints-active.json`, `data/ai/card-role-manifest-0.9.json`, Catalog-Gate-Daten und aktuelle Runtime-/AI-Freigaben.
 - Offene Zahlendifferenz aus der Analyse: aktive Hint-Zahlen und Release-Zielkarten müssen in künftigen Berichten sauber getrennt werden.
 
@@ -66,4 +66,4 @@ Die aktiven AI-Hints, Rollen und Szenarioreferenzen sollen so ausgewertet werden
 
 ## Ergebnisnotiz
 
-Abgeschlossen mit `docs/derived/AI_HINTS_ROLE_GAP_REPORT_2026_05_17.md`. Der Report trennt aktive Hint-Einträge, `ai_supported`, `hinted_only`, Runtime-Karten, Catalog-AI-Approvals und V1.9.22-Zielkarten. Benannte Folgepakete: Breaker/ICE-Rollen, Runner-Economy-/Draw-Smokes, Korp-Remote-Scoring-Rollen, `hinted_only`-Harness-Entscheidung und Zahlen-/Gate-Kontrakt. Keine Hints, Runtime-Karten, Freigaben oder Decklegalität wurden geändert.
+Abgeschlossen mit `docs/reviews/ai/ai-hints-role-gap-report-2026-05-17.md`. Der Report trennt aktive Hint-Einträge, `ai_supported`, `hinted_only`, Runtime-Karten, Catalog-AI-Approvals und V1.9.22-Zielkarten. Benannte Folgepakete: Breaker/ICE-Rollen, Runner-Economy-/Draw-Smokes, Korp-Remote-Scoring-Rollen, `hinted_only`-Harness-Entscheidung und Zahlen-/Gate-Kontrakt. Keine Hints, Runtime-Karten, Freigaben oder Decklegalität wurden geändert.

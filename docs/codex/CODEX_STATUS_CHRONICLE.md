@@ -145,16 +145,16 @@ Latest V1.9.2 implementation/final artifacts: `docs/releases/v1/v1-9-originalset
 Latest V1.9.1-to-V1.9.4 sequential execution audit artifact: `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/sequential-execution-audit-to-v1-9-4.md`.
 Latest V1.9.3 gate blocker artifact: `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/gate-blocker-report.md`.
 Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/releases/v1/v1-3-1-card-data-pipeline-v2/implementation-handoff-to-v1-4-1.md`.
-Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
-Latest Deck-Legal AI Approval Open64 artifacts: `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_EXECUTION_PLAN.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`, `data/ai/ai-card-hints-deck-legal-legacy-open64.json`, `data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json`, `data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json`, `data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json` and `data/scenarios/ai-deck-legal-legacy-open64-smokes.json`.
-Latest Deck-Legal AI Approval V1.9.0 artifacts: `docs/derived/DECK_LEGAL_AI_APPROVAL_V190_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-v190.json`, `data/manifests/deck-legal-ai-approval-v190-manifest.json` and `data/scenarios/ai-deck-legal-v190-smokes.json`.
+Latest King of the Road AI approval artifacts: `docs/releases/ai/deck-legal-approval/king-of-the-road-slice-plan.md`, `docs/releases/ai/deck-legal-approval/king-of-the-road-implementation-review.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
+Latest Deck-Legal AI Approval Open64 artifacts: `docs/releases/ai/deck-legal-approval/open64-execution-plan.md`, `docs/releases/ai/deck-legal-approval/open64-implementation-review.md`, `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`, `data/ai/ai-card-hints-deck-legal-legacy-open64.json`, `data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json`, `data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json`, `data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json` and `data/scenarios/ai-deck-legal-legacy-open64-smokes.json`.
+Latest Deck-Legal AI Approval V1.9.0 artifacts: `docs/releases/ai/deck-legal-approval/v190-implementation-review.md`, `data/ai/ai-card-hints-deck-legal-v190.json`, `data/manifests/deck-legal-ai-approval-v190-manifest.json` and `data/scenarios/ai-deck-legal-v190-smokes.json`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`.
 Latest consolidated release roadmap artifact: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.9.0 Mechanikpaket I, Deck-Legal AI Approval V1.9.0 und die Sequenz V1.9.1 bis V1.9.4 sind abgeschlossen und lokal verifiziert (`docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/final-review.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_V190_IMPLEMENTATION_REVIEW.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-4-mechanikpaket-m/final-review.md`). Nächster Umsetzungsscope bleibt die verbindliche Fortsetzung V1.9.5 bis V1.9.8 gemäß `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`; V2.x bleibt nachgelagert bis V1.9.8 grün abgeschlossen ist.
+Current selected next scope: V1.9.0 Mechanikpaket I, Deck-Legal AI Approval V1.9.0 und die Sequenz V1.9.1 bis V1.9.4 sind abgeschlossen und lokal verifiziert (`docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/final-review.md`, `docs/releases/ai/deck-legal-approval/v190-implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-4-mechanikpaket-m/final-review.md`). Nächster Umsetzungsscope bleibt die verbindliche Fortsetzung V1.9.5 bis V1.9.8 gemäß `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`; V2.x bleibt nachgelagert bis V1.9.8 grün abgeschlossen ist.
 
 
 ## Status
@@ -856,8 +856,8 @@ V0.4 remains limited to internal fictional demo cards. Official card pools, exte
 ## MVP 0.3 Requirements files created or updated
 
 - `docs/releases/mvp/mvp-0-3-ai-simulation/requirements.md`
-- `docs/derived/AI_CONTROLLER_SPEC.md`
-- `docs/derived/AI_SIMULATION_TEST_MATRIX.md`
+- `docs/architecture/ai/ai-controller-spec.md`
+- `docs/architecture/ai/ai-simulation-test-matrix.md`
 - `docs/releases/mvp/mvp-0-3-ai-simulation/requirements-review.md`
 - `data/rules/rules-baseline-0.3.json`
 - `data/scenarios/ai-runner-steals-rd-agenda.json`

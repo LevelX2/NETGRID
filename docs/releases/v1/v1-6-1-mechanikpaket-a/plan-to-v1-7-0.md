@@ -29,7 +29,7 @@ Pflichtquellen und relevante Planungs-/Matrixartefakte:
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/local/card-import/onr-v1-limited/onr-v1-effect-logic-priority.local.md`
 - `data/local/card-import/onr-v1-limited/onr-v1-open-card-review.local.md`
-- `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_PLAN.md`
+- `docs/releases/ai/deck-legal-approval/batch-plan.md`
 - `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`
 
 ## 1) Ist-Stand (vor V1.6.1)

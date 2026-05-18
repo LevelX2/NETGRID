@@ -38,7 +38,7 @@ Dieses Paket ist abhängig von `act-2026-05-18-ai-discard-keep-value-baseline`. 
 - `packages/ai/src/corp-plans.ts`: Korp-Planarten wie `score_now`, `score_next_turn`, `build_scoring_remote`, `protect_hq`, `recover_economy`.
 - `packages/ai/src/runner-plans.ts`: Runner-Planarten wie `build_rig`, `recover_economy`, `draw_for_answers`, `pressure_hq`, `pressure_rnd`, `contest_remote`.
 - `packages/ai/src/deck-doctrine.ts`: `ownDeckDoctrine` mit Archetype-Tags, Rollenverteilung und Planweights.
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`: KI ist LegalActions-/PlayerView-gebunden und nutzt Planlogik, Belief State und Deck Doctrine side-sicher.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`: KI ist LegalActions-/PlayerView-gebunden und nutzt Planlogik, Belief State und Deck Doctrine side-sicher.
 
 ## Scope
 

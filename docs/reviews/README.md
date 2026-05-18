@@ -5,6 +5,7 @@
 ## Enthaltene Bereiche
 
 - `originalset-spotchecks/`: Register, Rollup und Detailberichte der Originalset-Karten-Spotchecks. Abgeschlossene Arbeitsjobfiles dazu liegen unter `docs/archive/originalset-spotcheck-jobs/2026-05/`.
+- `ai/`: KI-Audits, Benchmarks, Gap-Reports, Regression-Reviews und historische Runner-KI-Beobachtungen.
 
 ## Regel
 

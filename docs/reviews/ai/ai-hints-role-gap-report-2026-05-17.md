@@ -14,7 +14,7 @@ Geprüfte Quellen:
 - `data/ai/card-role-manifest-0.9.json`
 - `packages/catalog/src/index.ts`
 - `packages/catalog/src/catalog-gates.ts`
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`
 - relevante Rollennutzung in `packages/ai/src/index.ts`, `packages/ai/src/runner-plans.ts` und `packages/ai/src/corp-plans.ts`
 
 Maschinenlesbare Zählung vom 2026-05-17:

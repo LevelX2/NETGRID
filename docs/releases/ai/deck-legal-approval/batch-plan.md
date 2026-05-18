@@ -35,7 +35,7 @@ Das Supplemental-Artefakt enthaelt nur deckbau-erlaubte Karten ohne vorherigen H
 
 ### Batch A: Runner Rig Low Risk
 
-Status: umgesetzt und lokal verifiziert in `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_A_IMPLEMENTATION_REVIEW.md`.
+Status: umgesetzt und lokal verifiziert in `docs/releases/ai/deck-legal-approval/batch-a-implementation-review.md`.
 
 Ziel: Runner-KI kann weitere bereits decklegale Breaker und Memory-Hardware sinnvoll installieren und fuer sichere Probe-Runs einordnen.
 

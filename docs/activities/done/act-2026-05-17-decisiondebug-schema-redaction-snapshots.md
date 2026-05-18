@@ -37,7 +37,7 @@ checks:
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitt `P1: DecisionDebug Schema und Redaction-Snapshots`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitt `P1: DecisionDebug Schema und Redaction-Snapshots`.
 - Verwandtes erledigtes Paket: `docs/activities/done/act-2026-05-17-event-projection-contract.md` trennt EngineEvents, ServerEventRecords und PublicGameEvents und prüft AI-Debug-Side-Safety.
 - Dieses Follow-up fokussiert das Debugschema selbst, nicht die Event-Projektion.
 

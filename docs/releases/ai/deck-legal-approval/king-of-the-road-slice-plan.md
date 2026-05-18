@@ -110,7 +110,7 @@ Aktuelle Blocker:
 - Versionierter Runner-Snapshot fuer `King of the Road`.
 - Runner-KI-Smoke-/Szenariodaten fuer Rig-Aufbau, Economy, Draw, Run-Pressure und Negativlauf.
 - Testabdeckung in `packages/ai`, `packages/catalog`, `packages/decks` und `apps/server`.
-- Implementation Review, z. B. `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`.
+- Implementation Review, z. B. `docs/releases/ai/deck-legal-approval/king-of-the-road-implementation-review.md`.
 - Optional: Final Review, wenn der Slice als eigenes Gate abgeschlossen wird.
 
 ## Testmatrix

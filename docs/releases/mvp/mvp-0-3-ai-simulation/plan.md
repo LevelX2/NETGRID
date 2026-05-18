@@ -454,8 +454,8 @@ Mindestempfehlung:
 Ergebnisse:
 
 - `docs/releases/mvp/mvp-0-3-ai-simulation/requirements.md`
-- `docs/derived/AI_CONTROLLER_SPEC.md`
-- `docs/derived/AI_SIMULATION_TEST_MATRIX.md`
+- `docs/architecture/ai/ai-controller-spec.md`
+- `docs/architecture/ai/ai-simulation-test-matrix.md`
 - `docs/releases/mvp/mvp-0-3-ai-simulation/requirements-review.md`
 - `data/rules/rules-baseline-0.3.json`
 - AI-/Simulation-Szenario-Fixtures
@@ -608,8 +608,8 @@ Derive executable MVP 0.3 requirements for the AI and simulation phase. Do not i
 
 Create or update:
 - docs/releases/mvp/mvp-0-3-ai-simulation/requirements.md
-- docs/derived/AI_CONTROLLER_SPEC.md
-- docs/derived/AI_SIMULATION_TEST_MATRIX.md
+- docs/architecture/ai/ai-controller-spec.md
+- docs/architecture/ai/ai-simulation-test-matrix.md
 - docs/releases/mvp/mvp-0-3-ai-simulation/requirements-review.md
 - data/rules/rules-baseline-0.3.json
 - data/scenarios/ai-runner-steals-rd-agenda.json

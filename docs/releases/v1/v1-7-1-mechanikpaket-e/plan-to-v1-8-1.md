@@ -31,7 +31,7 @@ Pflichtquellen und relevante Planungs-/Matrixartefakte:
 - `docs/releases/v1/v1-6-1-mechanikpaket-a/plan-to-v1-7-0.md`
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/local/card-import/onr-v1-limited/onr-v1-effect-logic-priority.local.md`
-- `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_PLAN.md`
+- `docs/releases/ai/deck-legal-approval/batch-plan.md`
 
 ## 1) Ist-Stand nach V1.7.0
 

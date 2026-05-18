@@ -26,10 +26,10 @@ Status: Corp-MVP, Runner-Plananbindung, Runner-Setup-Mulligan, Early-Turn-Doctri
 - Economy-Stall zählt neue Planstarts bei niedriger Creditreserve, nimmt laufende Runner-Run-Folgeaktionen aber aus, damit Pump, Break, Continue, Access und Steal nicht als neue Planungsfehler erscheinen.
 - Ein Doctrine-Quality-Benchmark vergleicht Baseline und aktuellen Kandidaten auf denselben Seeds und liefert Doctrine- sowie Safety-Deltas.
 - Der Simulationspfad speist eigene Decksnapshots nur für den aktuellen Kandidaten in die KI ein; historische Benchmark-Profile bleiben ohne diese neue Doctrine-Information.
-- Ein erster Benchmark-Report liegt unter `docs/derived/AI_DECK_DOCTRINE_QUALITY_BENCHMARK_REPORT_2026_05_15.md`.
-- Ein Holdout-Benchmark-Report liegt unter `docs/derived/AI_DECK_DOCTRINE_HOLDOUT_BENCHMARK_REPORT_2026_05_15.md`.
-- Ein längerer Selfplay-/Soak-Report liegt unter `docs/derived/AI_DECK_DOCTRINE_SELFPLAY_SOAK_REPORT_2026_05_15.md`.
-- Eine redaktionssichere Fallanalyse für Doctrine-Metriken liegt unter `docs/derived/AI_DECK_DOCTRINE_QUALITY_CASE_ANALYSIS_2026_05_15.md`.
+- Ein erster Benchmark-Report liegt unter `docs/releases/ai/deck-doctrine/quality-benchmark-report-2026-05-15.md`.
+- Ein Holdout-Benchmark-Report liegt unter `docs/releases/ai/deck-doctrine/holdout-benchmark-report-2026-05-15.md`.
+- Ein längerer Selfplay-/Soak-Report liegt unter `docs/releases/ai/deck-doctrine/selfplay-soak-report-2026-05-15.md`.
+- Eine redaktionssichere Fallanalyse für Doctrine-Metriken liegt unter `docs/releases/ai/deck-doctrine/quality-case-analysis-2026-05-15.md`.
 - Multiplayer-Server übergibt beim KI-Zug nur den privaten Snapshot der aktiven KI-Seite an `buildAiDecisionInput`.
 - `DecisionDebug` enthält nur aggregierte Doktrin-Tags, Confidence, Risk Flags und Evidenz, keine Deckliste oder Deckreihenfolge.
 
@@ -44,10 +44,10 @@ Status: Corp-MVP, Runner-Plananbindung, Runner-Setup-Mulligan, Early-Turn-Doctri
 - `packages/ai/src/runner-plans.ts`: zusätzlich Early-Turn-Doctrine-Scoring für Runner-Setup-, Economy- und Druckprioritäten.
 - `packages/shared/src/index.ts`: gemeinsamer Doctrine-Typ und optionaler KI-Input.
 - `apps/server/src/multiplayer.ts`: Snapshot-Übergabe für die aktive KI-Seite.
-- `docs/derived/AI_DECK_DOCTRINE_QUALITY_BENCHMARK_REPORT_2026_05_15.md`: erster reproduzierbarer Doctrine-Quality-Report.
-- `docs/derived/AI_DECK_DOCTRINE_HOLDOUT_BENCHMARK_REPORT_2026_05_15.md`: Holdout-Nachweis für Doctrine-Fehlerklassen und Safety-Deltas.
-- `docs/derived/AI_DECK_DOCTRINE_SELFPLAY_SOAK_REPORT_2026_05_15.md`: längerer 9-Seed-/80-Action-Selfplay-Nachweis über alle Benchmark-Profile.
-- `docs/derived/AI_DECK_DOCTRINE_QUALITY_CASE_ANALYSIS_2026_05_15.md`: Beispiele pro Doctrine-Fehlerklasse.
+- `docs/releases/ai/deck-doctrine/quality-benchmark-report-2026-05-15.md`: erster reproduzierbarer Doctrine-Quality-Report.
+- `docs/releases/ai/deck-doctrine/holdout-benchmark-report-2026-05-15.md`: Holdout-Nachweis für Doctrine-Fehlerklassen und Safety-Deltas.
+- `docs/releases/ai/deck-doctrine/selfplay-soak-report-2026-05-15.md`: längerer 9-Seed-/80-Action-Selfplay-Nachweis über alle Benchmark-Profile.
+- `docs/releases/ai/deck-doctrine/quality-case-analysis-2026-05-15.md`: Beispiele pro Doctrine-Fehlerklasse.
 - `packages/ai/src/index.test.ts`: Regressionen für Profilgenerator, Corp-/Runner-Plan-Gewichtung, Agenda-Schutz, Runner-Blocker-Schutz, Corp-/Runner-Mulligan, Doctrine-Qualitätsmetriken und Benchmark-Deltas.
 
 ## Verifikation
