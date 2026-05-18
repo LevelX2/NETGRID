@@ -3,16 +3,20 @@ import type {
   CardDefinitionId,
   CardInstanceId,
   Cost,
+  CorpServer,
   GameState,
   LegalAction,
   ServerId,
 } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
-import type { CardRezCostModifierImplementation } from "./definition-types";
+import type {
+  CardInstallCostModifierImplementation,
+  CardRezCostModifierImplementation,
+} from "./definition-types";
 import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../mechanics/agenda-operation-effects";
 
-export type CostPurpose = "corp_rez";
+export type CostPurpose = "corp_rez" | "corp_install";
 
 export type CorpRezCostOptions = {
   oliviaSalazarSourceCardId?: CardInstanceId;
@@ -42,6 +46,17 @@ type ActiveCorpRezCostModifier = {
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
   modifier: CardRezCostModifierImplementation;
+};
+
+type ActiveCorpInstallCostModifier = {
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  modifier: CardInstallCostModifierImplementation;
+};
+
+export type CorpInstallCostOptions = {
+  additionalCredits?: number;
+  legacyReduction?: number;
 };
 
 export function costQuoteToLegalActionCosts(quote: CostQuote): Cost[] {
@@ -182,6 +197,40 @@ function activeCorpRezCostModifiersForIce(
   return matches;
 }
 
+function corpInstallCostModifierAppliesToCard(
+  modifier: CardInstallCostModifierImplementation,
+  definition: CardDefinition,
+): boolean {
+  if (
+    modifier.operation !== "reduce" ||
+    modifier.activeWhile !== "rezzed" ||
+    modifier.sourceZone !== "corp_root" ||
+    modifier.visibility !== "public"
+  )
+    return false;
+  if (modifier.appliesTo.side !== "corp") return false;
+  return definition.type === modifier.appliesTo.cardType;
+}
+
+function activeCorpInstallCostModifiersForCard(
+  state: GameState,
+  definition: CardDefinition,
+): ActiveCorpInstallCostModifier[] {
+  const matches: ActiveCorpInstallCostModifier[] = [];
+  for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
+    const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
+    const sourceImplementation =
+      cardImplementationForDefinitionId(sourceDefinitionId);
+    for (const modifier of sourceImplementation?.modifiers ?? []) {
+      if (modifier.kind !== "install_cost") continue;
+      if (!corpInstallCostModifierAppliesToCard(modifier, definition))
+        continue;
+      matches.push({ sourceCardInstanceId, sourceDefinitionId, modifier });
+    }
+  }
+  return matches;
+}
+
 function iceRezCostReductionFor(
   state: GameState,
   iceId: CardInstanceId,
@@ -225,6 +274,74 @@ function corpRezCostModifierQuoteForMatch(
     label: sourceDefinition?.title ?? sourceDefinitionId,
     amount: modifier.amount,
     kind: "reduction",
+  };
+}
+
+function corpInstallCostModifierQuoteForMatch(
+  match: ActiveCorpInstallCostModifier,
+): CostModifierQuote {
+  const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
+  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  return {
+    sourceCardInstanceId,
+    sourceDefinitionId,
+    label: sourceDefinition?.title ?? sourceDefinitionId,
+    amount: modifier.amount,
+    kind: "reduction",
+  };
+}
+
+export function quoteCorpIceInstallCost(
+  state: GameState,
+  cardId: CardInstanceId,
+  server: CorpServer,
+  options: CorpInstallCostOptions = {},
+): CostQuote {
+  const definition = definitionFor(state, cardId);
+  const baseCredits = Math.max(0, server.ice.length);
+  const additionalCredits = Math.max(0, Math.floor(options.additionalCredits ?? 0));
+  const legacyReduction = Math.max(0, Math.floor(options.legacyReduction ?? 0));
+  const modifierMatches =
+    definition.type === "ice"
+      ? activeCorpInstallCostModifiersForCard(state, definition)
+      : [];
+  const modifierReduction = modifierMatches.reduce(
+    (sum, match) => sum + match.modifier.amount,
+    0,
+  );
+  const totalReduction = legacyReduction + modifierReduction;
+  const finalCredits = Math.max(
+    0,
+    baseCredits + additionalCredits - totalReduction,
+  );
+  const publicPayload: NonNullable<LegalAction["payload"]> = {
+    cardId,
+    serverId: server.id,
+    placement: "ice",
+    iceInstallBaseCost: baseCredits,
+    iceInstallAdditionalCost: additionalCredits,
+    iceInstallReduction: totalReduction,
+    iceInstallTotalCost: finalCredits,
+  };
+  const sourceDefinitionIds = modifierMatches.map(
+    (match) => match.sourceDefinitionId,
+  );
+  if (sourceDefinitionIds.length > 0)
+    publicPayload.iceInstallReductionSourceDefinitionIds =
+      sourceDefinitionIds.join(",");
+
+  return {
+    purpose: "corp_install",
+    side: "corp",
+    targetCardId: cardId,
+    baseCredits,
+    finalCredits,
+    costs: [{ credits: finalCredits }],
+    modifiers: modifierMatches.map((match) =>
+      corpInstallCostModifierQuoteForMatch(match),
+    ),
+    canPay: state.corp.credits >= finalCredits,
+    publicPayload,
   };
 }
 

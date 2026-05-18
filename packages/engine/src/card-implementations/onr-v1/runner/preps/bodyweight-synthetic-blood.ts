@@ -1,5 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
+// card name: Bodyweight Synthetic Blood
+// text: Draw five cards.
 export const bodyweightSyntheticBloodImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
   abilities: [

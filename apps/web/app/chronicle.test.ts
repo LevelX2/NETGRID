@@ -6,6 +6,7 @@ const ACTION_TYPES = [
   "mandatory_draw",
   "gain_credit",
   "draw_card",
+  "activated_card_ability",
   "install_card",
   "play_event",
   "play_operation",
@@ -958,6 +959,69 @@ describe("formatChronicleEvent", () => {
     expect(serialized).toContain("3 Karten");
     expect(serialized).not.toContain("Score!");
     expect(serialized).not.toContain("Livewire");
+    expect(effects).toEqual([]);
+  });
+
+  it("merges activated card implementation credit effects with card context", () => {
+    const event = makeEvent("activated_card_ability", {
+      actor: "runner",
+      title: "Newsgroup Filter",
+      cardDefinitionId: "onr_v1_045_newsgroup-filter",
+      cardImplementationAbility: "activated",
+      gainedCredits: 2,
+      runnerCreditsAfter: 7,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_045_newsgroup-filter.effect.0.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceTitle: "Newsgroup Filter",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Du hast Newsgroup Filter genutzt und 2 Credits erhalten.");
+    expect(item.category).toBe("economy");
+    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+2 Credits"]));
+    expect(effects).toEqual([]);
+  });
+
+  it("merges activated card implementation draw effects without revealing drawn cards", () => {
+    const event = makeEvent("activated_card_ability", {
+      actor: "corp",
+      title: "ESA Contract",
+      cardDefinitionId: "onr_v1_321_esa-contract",
+      cardImplementationAbility: "activated",
+      drawnCards: 2,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_321_esa-contract.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_321_esa-contract",
+          sourceTitle: "ESA Contract",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner");
+    const effects = formatChronicleEffectItems(event, "runner");
+    const serialized = JSON.stringify(item);
+
+    expect(item.title).toBe("Die Korp hat ESA Contract genutzt und 2 Karten gezogen.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "2 Karten"]));
+    expect(serialized).not.toContain("simple_agenda");
+    expect(serialized).not.toContain("simple_economy_operation");
     expect(effects).toEqual([]);
   });
 

@@ -94,7 +94,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
-  const mergedPlayEffect = mergedCardResolverPlayEffect(event);
+  const mergedCardResolverEffect = mergedCardResolverEventEffect(event);
   const agendaAbility = stringValue(payload.agendaAbility);
   const hiddenZoneAction = stringValue(payload.hiddenZoneAction);
   const abilityId = payloadAbilityId(payload);
@@ -362,6 +362,22 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, `${possessiveFor(subject)} Pflichtkarte gezogen`);
       chips.push("Pflichtkarte", ...(turnChip ? [turnChip] : []));
       break;
+    case "activated_card_ability":
+      if (mergedCardResolverEffect) {
+        const cardResolverEffect = mergedCardResolverEffect;
+        category = cardResolverEffect.category ?? "card";
+        title = phrase(
+          subject,
+          `${cardTitle ?? cardResolverEffect.sourceTitle ?? "eine Karte"} genutzt${cardResolverEffect.suffix ? ` und ${cardResolverEffect.suffix}` : ""}`,
+        );
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        chips.push("Ability", ...cardResolverEffect.chips);
+        break;
+      }
+      category = "card";
+      title = phrase(subject, `${cardTitle ?? "eine Karte"} genutzt`);
+      chips.push("Ability");
+      break;
     case "gain_credit":
       if (abilityId === "fang_2_0_pay_to_run") {
         const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
@@ -544,7 +560,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         break;
       }
-      const playEffect = mergedPlayEffect ?? effect;
+      const playEffect = mergedCardResolverEffect ?? effect;
       category = playEffect.category ?? category;
       title = phrase(subject, `${cardTitle ?? playEffect.sourceTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
       chips.push(actionType === "play_event" ? "Event" : "Operation", ...playEffect.chips);
@@ -902,7 +918,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
 
 export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): ChronicleItem[] {
   return resolvedEffectsFromPayload(event.publicPayload.resolvedEffects)
-    .filter((effect) => !shouldMergePlayEffect(event, effect))
+    .filter((effect) => !shouldMergeCardResolverEffect(event, effect))
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
 }
 
@@ -1190,9 +1206,9 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   return { chips: [] };
 }
 
-function mergedCardResolverPlayEffect(event: PublicGameEvent): EffectSummary | undefined {
+function mergedCardResolverEventEffect(event: PublicGameEvent): EffectSummary | undefined {
   const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
-  if (effects.length === 0 || !effects.every((effect) => shouldMergePlayEffect(event, effect))) return undefined;
+  if (effects.length === 0 || !effects.every((effect) => shouldMergeCardResolverEffect(event, effect))) return undefined;
   const parts = effects.map(cardResolverPlayEffectPart).filter((part): part is EffectSummary => Boolean(part));
   if (parts.length !== effects.length) return undefined;
   const suffix = joinChronicleParts(parts.map((part) => part.suffix).filter((value): value is string => Boolean(value)));
@@ -1218,11 +1234,19 @@ function joinChronicleParts(parts: string[]): string | undefined {
   return `${parts.slice(0, -1).join(", ")} und ${parts[parts.length - 1]}`;
 }
 
-function shouldMergePlayEffect(event: PublicGameEvent, effect: ResolvedGameEffect | undefined): boolean {
+function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedGameEffect | undefined): boolean {
   if (!effect) return false;
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
-  if (actionType !== "play_event" && actionType !== "play_operation") return false;
+  const activatedCardAbility =
+    actionType === "activated_card_ability" &&
+    stringValue(payload.cardImplementationAbility) === "activated";
+  if (
+    actionType !== "play_event" &&
+    actionType !== "play_operation" &&
+    !activatedCardAbility
+  )
+    return false;
   if (!["draw_cards", "gain_credits"].includes(effect.kind) || effect.visibility !== "public") return false;
   if (effect.reason !== "card_resolver") return false;
   const actor = sideValue(payload.actor);

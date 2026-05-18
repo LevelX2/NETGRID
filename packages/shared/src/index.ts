@@ -83,6 +83,7 @@ export type ActionType =
   | "mandatory_draw"
   | "gain_credit"
   | "draw_card"
+  | "activated_card_ability"
   | "install_card"
   | "play_event"
   | "play_operation"

@@ -6942,7 +6942,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       expect.objectContaining({
         kind: "rez_cost",
         operation: "reduce",
-        amount: 2,
+        amount: 1,
         appliesTo: { cardType: "ice", subtype: "code_gate" },
       }),
     );
@@ -6964,10 +6964,10 @@ describe("V1.6.2 Mechanikpaket B", () => {
       )?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
-        kind: "rez_cost",
+        kind: "install_cost",
         operation: "reduce",
         amount: 1,
-        appliesTo: { cardType: "ice" },
+        appliesTo: { side: "corp", cardType: "ice" },
       }),
     );
     expect(
@@ -6978,7 +6978,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       expect.objectContaining({
         kind: "rez_cost",
         operation: "reduce",
-        amount: 9,
+        amount: 2,
         appliesTo: {
           cardType: "ice",
           subtype: "wall",
@@ -6986,6 +6986,29 @@ describe("V1.6.2 Mechanikpaket B", () => {
         },
       }),
     );
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_317_data-masons")
+        ?.status,
+    ).toBe("partial_implementation");
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_320_encoder-inc")
+        ?.reason,
+    ).toMatch(/additional.*subroutine/i);
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_341_skalderviken-sa-beta-test-site",
+      )?.status,
+    ).toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_324_fortress-architects",
+      )?.status,
+    ).toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_360_jerusalem-city-grid",
+      )?.reason,
+    ).toMatch(/region/i);
   });
 
   it("describes simple credit cards through typed on-play effects", () => {
@@ -7160,6 +7183,59 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
   });
 
+  it("describes activated main-action card abilities without callbacks", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_045_newsgroup-filter",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "activated",
+        timing: "runner_main",
+        costs: [{ kind: "action", amount: 1 }],
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_321_esa-contract")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "activated",
+        timing: "corp_main",
+        costs: [{ kind: "action", amount: 1 }],
+        effects: [
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+
+    const containsFunction = (value: unknown): boolean => {
+      if (typeof value === "function") return true;
+      if (!value || typeof value !== "object") return false;
+      return Object.values(value as Record<string, unknown>).some(
+        containsFunction,
+      );
+    };
+
+    for (const implementation of CARD_IMPLEMENTATIONS) {
+      expect(containsFunction(implementation), implementation.cardDefinitionId).toBe(
+        false,
+      );
+    }
+  });
+
   it("requires implementation coverage for every demo card", () => {
     const duplicateIds = (ids: string[]): string[] =>
       ids.filter((id, index) => ids.indexOf(id) !== index);
@@ -7189,9 +7265,21 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
 
     for (const entry of CARD_IMPLEMENTATION_COVERAGE_ENTRIES) {
-      if (entry.status !== "implemented") continue;
+      if (
+        entry.status !== "implemented" &&
+        entry.status !== "partial_implementation"
+      )
+        continue;
+      const implementation =
+        CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[entry.cardDefinitionId];
+      if (entry.status === "partial_implementation") {
+        expect(entry.reason, entry.cardDefinitionId).toMatch(
+          /missing|fehlt|removed|no generic/i,
+        );
+        if (!implementation) continue;
+      }
       expect(
-        CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[entry.cardDefinitionId],
+        implementation,
         entry.cardDefinitionId,
       ).toBeDefined();
     }
@@ -7202,7 +7290,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
           implementation.cardDefinitionId,
         )?.status,
         implementation.cardDefinitionId,
-      ).toBe("implemented");
+      ).toMatch(/^(implemented|partial_implementation)$/);
     }
   });
 
@@ -7592,12 +7680,12 @@ describe("V1.6.2 Mechanikpaket B", () => {
         action.type === "rez_ice" &&
         sourceDefinition(encoder, action) === "onr_v1_230_cortical-scanner",
     );
-    expect(codeGateRez.costs[0]?.credits).toBe(5);
+    expect(codeGateRez.costs[0]?.credits).toBe(6);
     expect(quoteCorpRezCost(encoder, codeGateId).modifiers).toEqual([
       expect.objectContaining({
         sourceCardInstanceId: encoderId,
         sourceDefinitionId: "onr_v1_320_encoder-inc",
-        amount: 2,
+        amount: 1,
         kind: "reduction",
       }),
     ]);
@@ -14541,12 +14629,20 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
   });
 
-  it("applies rezzed V1.9.20 global ICE rez-cost modifiers from public root sources", () => {
+  it("applies Fortress Architects as a Corp ICE install-cost modifier", () => {
+    const corpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      cards: [
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "simple_code_gate_ice", quantity: 1 },
+      ],
+    };
     let state = apply(
       createGameAfterSetup({
-        seed: "v1920-global-ice-cost",
+        seed: "v1920-fortress-install-cost",
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        corpDeck,
         agendaPointsToWin: 7,
       }),
       "corp",
@@ -14554,8 +14650,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     state.corp.credits = 20;
     state.corp.maxHandSize = 100;
-    putCorpRootInRemote(state, "onr_v1_324_fortress-architects");
-    putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+    const fortressId = putCorpRootInRemote(
+      state,
+      "onr_v1_324_fortress-architects",
+    );
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(
@@ -14565,41 +14665,137 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "onr_v1_324_fortress-architects",
     );
-    state = apply(state, "corp", (action) => action.type === "end_turn");
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "rd",
-    );
-
-    const wallRez = mustAction(
+    const iceId = moveCorpCardToHq(state, "onr_v1_232_crystal-wall");
+    const legal = mustAction(
       state,
       "corp",
       (action) =>
-        action.type === "rez_ice" &&
-        sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
+        action.type === "install_card" &&
+        action.source === iceId &&
+        action.payload?.serverId === "rd",
     );
-    expect(wallRez.costs[0]?.credits).toBe(3);
-    expect(wallRez.payload).toMatchObject({
-      rezCostPaid: 3,
-      rezCostReductionAmount: 1,
+    expect(legal.costs[0]?.credits).toBe(1);
+    expect(legal.payload).toMatchObject({
+      iceInstallBaseCost: 2,
+      iceInstallAdditionalCost: 0,
+      iceInstallReduction: 1,
+      iceInstallTotalCost: 1,
+      iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
     });
-    expect(String(wallRez.payload?.rezCostReductionSourceDefinitionIds)).toContain(
-      "onr_v1_324_fortress-architects",
-    );
+
+    const stale = structuredClone(state);
+    stale.cardInstances[fortressId] = {
+      ...stale.cardInstances[fortressId]!,
+      rezzed: false,
+    };
+    const rejected = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "v1920-fortress-install-cost-stale",
+    });
+    expect(rejected.ok).toBe(false);
+
+    const creditsBefore = state.corp.credits;
     state = apply(
       state,
       "corp",
-      (action) => action.actionId === wallRez.actionId,
+      (action) => action.actionId === legal.actionId,
     );
-    expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
+    expect(state.corp.credits).toBe(creditsBefore - 1);
+    expect(state.corp.servers.find((server) => server.id === "rd")?.ice).toContain(
+      iceId,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "install_card",
+      iceInstallBaseCost: 2,
+      iceInstallReduction: 1,
+      iceInstallTotalCost: 1,
+      iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
+    });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Agenda"|"Simple Economy Operation"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("does not apply Fortress Architects install-cost modifier when inactive or for non-ICE installs", () => {
+    const corpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      cards: [
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "simple_code_gate_ice", quantity: 1 },
+      ],
+    };
+    let unrezzed = apply(
+      createGameAfterSetup({
+        seed: "v1920-fortress-install-cost-unrezzed",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    unrezzed.corp.credits = 20;
+    putCorpRootInRemote(unrezzed, "onr_v1_324_fortress-architects");
+    putCorpIceOnServer(unrezzed, "rd", "simple_barrier_ice");
+    putCorpIceOnServer(unrezzed, "rd", "simple_code_gate_ice");
+    const unrezzedIceId = moveCorpCardToHq(
+      unrezzed,
+      "onr_v1_232_crystal-wall",
+    );
+    const unrezzedInstall = mustAction(
+      unrezzed,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === unrezzedIceId &&
+        action.payload?.serverId === "rd",
+    );
+    expect(unrezzedInstall.costs[0]?.credits).toBe(2);
+    expect(unrezzedInstall.payload?.iceInstallReduction).toBe(0);
+    expect(
+      unrezzedInstall.payload?.iceInstallReductionSourceDefinitionIds,
+    ).toBeUndefined();
+
+    let nonIce = apply(
+      createGameAfterSetup({
+        seed: "v1920-fortress-install-cost-non-ice",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    nonIce.corp.credits = 20;
+    putCorpRootInRemote(nonIce, "onr_v1_324_fortress-architects");
+    nonIce = apply(
+      nonIce,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(nonIce, action) === "onr_v1_324_fortress-architects",
+    );
+    const regionId = moveCorpCardToHq(
+      nonIce,
+      "onr_v1_360_jerusalem-city-grid",
+    );
+    const regionInstall = mustAction(
+      nonIce,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === regionId &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(regionInstall.costs[0]?.credits).toBe(2);
+    expect(regionInstall.payload?.iceInstallReduction).toBeUndefined();
   });
 
   it("projects V1.9.20 scored-agenda handlimit modifiers through PlayerViews", () => {
@@ -15058,10 +15254,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) => action.type === "rez_ice",
     );
-    expect(ownServerRez.costs[0]?.credits).toBe(0);
+    expect(ownServerRez.costs[0]?.credits).toBe(2);
     expect(ownServerRez.payload).toMatchObject({
-      rezCostPaid: 0,
-      rezCostReductionAmount: 4,
+      rezCostPaid: 2,
+      rezCostReductionAmount: 2,
     });
     expect(ownServerRez.payload?.rezCostReductionSourceDefinitionIds).toContain(
       "onr_v1_360_jerusalem-city-grid",
@@ -18815,7 +19011,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     ).toBe("playable_mvp");
   });
 
-  it("keeps generic V1.9.17 asset install, rez, access and trash side-safe", () => {
+  it("keeps ESA Contract install, rez, activated draw, access and trash side-safe", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-generic-asset-install-rez-access");
     state.corp.credits = 10;
     state.runner.credits = 10;
@@ -18830,6 +19026,21 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         action.payload?.serverId === "new_remote" &&
         action.payload?.placement === "root",
     );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbility === "activated" &&
+          action.payload?.cardId === assetId,
+      ),
+    ).toBe(false);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.cardImplementationAbility === "activated",
+      ),
+    ).toBe(false);
     state = apply(
       state,
       "corp",
@@ -18849,22 +19060,52 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         ?.root.find((card) => card.instanceId === assetId)?.definitionId,
     ).toBe("onr_v1_321_esa-contract");
 
+    putCorpCardOnTopOfRd(state, "simple_agenda");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
     const creditsBeforeAbility = state.corp.credits;
+    const clicksBeforeAbility = state.corp.clicks;
+    const hqBeforeAbility = state.corp.hq.length;
+    const rdBeforeAbility = state.corp.rd.length;
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.cardImplementationAbility === "activated",
+      ),
+    ).toBe(false);
     state = apply(
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "gain_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === assetId,
     );
-    expect(state.corp.credits).toBe(creditsBeforeAbility + 2);
+    expect(state.corp.hq.length).toBe(hqBeforeAbility + 2);
+    expect(state.corp.rd.length).toBe(rdBeforeAbility - 2);
+    expect(state.corp.credits).toBe(creditsBeforeAbility);
+    expect(state.corp.clicks).toBe(clicksBeforeAbility - 1);
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_321_esa-contract",
-      amount: 2,
+      cardImplementationAbility: "activated",
+      sourceDefinitionId: "onr_v1_321_esa-contract",
+      drawnCards: 2,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_321_esa-contract",
+          sourceTitle: "ESA Contract",
+          reason: "card_resolver",
+        }),
+      ],
     });
+    expect(
+      JSON.stringify(state.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
 
     let accessState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-generic-asset-access-trash"),
@@ -18948,7 +19189,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
   it("offers the public V1.9.17 economy asset action for every scoped economy asset", () => {
     const economyAssets = [
       "onr_v1_311_braindance-campaign",
-      "onr_v1_321_esa-contract",
       "onr_v1_326_holovid-campaign",
       "onr_v1_337_rockerboy-promotion",
     ] as const;
@@ -24208,9 +24448,23 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1922RunnerProgramAbility === "newsgroup_filter_gain_2",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        action.payload?.cardId === action.source,
     );
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.cardImplementationAbility === "activated",
+      ),
+    ).toBe(false);
+    expect(legal.payload).toMatchObject({
+      cardId: legal.source,
+      cardImplementationAbility: "activated",
+      cardImplementationAbilityIndex: 0,
+      cardImplementationAbilityTiming: "runner_main",
+    });
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
@@ -24237,18 +24491,31 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1922RunnerProgramAbility === "newsgroup_filter_gain_2",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        action.payload?.cardId === legal.source,
     );
 
     expect(state.runner.credits).toBe(7);
     expect(state.runner.clicks).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       amount: 2,
-      v1922RunnerProgramAbility: "newsgroup_filter_gain_2",
+      cardDefinitionId: "onr_v1_045_newsgroup-filter",
+      cardImplementationAbility: "activated",
+      sourceDefinitionId: "onr_v1_045_newsgroup-filter",
       gainedCredits: 2,
       runnerCreditsAfter: 7,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "runner",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_045_newsgroup-filter",
+          sourceTitle: "Newsgroup Filter",
+          reason: "card_resolver",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
@@ -33054,13 +33321,15 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1922RunnerProgramAbility ===
-          "newsgroup_filter_gain_2",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        action.payload?.cardId === filterId,
     );
     expect(legal.payload).toMatchObject({
       cardId: filterId,
-      gainCreditsAmount: 2,
+      cardImplementationAbility: "activated",
+      cardImplementationAbilityIndex: 0,
+      cardImplementationAbilityTiming: "runner_main",
     });
     const removedSource = structuredClone(state);
     removeEverywhere(removedSource, filterId);
@@ -33089,8 +33358,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
-          action.payload?.v1922RunnerProgramAbility ===
-          "newsgroup_filter_gain_2",
+          action.payload?.cardImplementationAbility === "activated" &&
+          action.payload?.cardId === filterId,
       ),
     ).toBe(false);
   });
@@ -34228,7 +34497,10 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         state,
         "corp",
         (action) =>
-          action.type === "gain_credit" &&
+          action.type ===
+            (definitionId === "onr_v1_321_esa-contract"
+              ? "activated_card_ability"
+              : "gain_credit") &&
           action.payload?.cardId === assetId,
       );
       state = apply(state, "corp", (action) => action.actionId === ability.actionId);
@@ -34307,8 +34579,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       (action) => action.type === "rez_ice" && action.source === codeGateId,
     );
     expect(rezCodeGate.payload).toMatchObject({
-      rezCostReductionAmount: 2,
-      rezCostPaid: 5,
+      rezCostReductionAmount: 1,
+      rezCostPaid: 6,
     });
     expect(String(rezCodeGate.payload?.rezCostReductionSourceDefinitionIds)).toContain(
       "onr_v1_320_encoder-inc",

@@ -1,5 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
+// card name: Skälderviken SA Beta Test Site
+// text: Cost to rez black ice is reduced by [2].
 export const skaldervikenSaBetaTestSiteImplementation: CardImplementationDefinition =
   {
     cardDefinitionId: "onr_v1_341_skalderviken-sa-beta-test-site",

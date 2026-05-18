@@ -1,5 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
+// card name: Night Shift
+// text: Gain [2] and draw one card.
 export const nightShiftImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_295_night-shift",
   abilities: [

@@ -58,6 +58,7 @@ import {
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
   oliviaSalazarRezSourcesForRunIce,
+  quoteCorpIceInstallCost,
   quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
@@ -67,7 +68,10 @@ import {
   executeCardImplementationEffects,
   type CardEffectDrawCardsResult,
 } from "./ability-engine/effect-interpreter";
-import type { OnPlayCardAbilityImplementation } from "./ability-engine/definition-types";
+import type {
+  ActivatedCardAbilityImplementation,
+  OnPlayCardAbilityImplementation,
+} from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
 import {
   ACTION_ASSET_CARD_IDS,
@@ -163,7 +167,6 @@ import {
   MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
   MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
   NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
-  NEWSGROUP_FILTER_CREDIT_PROGRAM_ID,
   OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
   PANDORAS_DECK_LINK_HARDWARE_ID,
   POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID,
@@ -3036,8 +3039,14 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
       for (const server of state.corp.servers) {
-        const { baseCost, additionalCost, reduction, totalCost } =
-          corpIceInstallTotalCost(state, server);
+        const {
+          baseCost,
+          additionalCost,
+          reduction,
+          reductionSourceDefinitionIds,
+          totalCost,
+        } =
+          corpIceInstallTotalCost(state, id, server);
         if (state.corp.credits < totalCost) continue;
         actions.push(
           action(
@@ -3054,6 +3063,12 @@ function corpMainActions(state: GameState): LegalAction[] {
               iceInstallBaseCost: baseCost,
               iceInstallAdditionalCost: additionalCost,
               iceInstallReduction: reduction,
+              ...(reductionSourceDefinitionIds
+                ? {
+                    iceInstallReductionSourceDefinitionIds:
+                      reductionSourceDefinitionIds,
+                  }
+                : {}),
               iceInstallTotalCost: totalCost,
             },
           ),
@@ -3204,6 +3219,13 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   for (const assetId of rezzedCorpRootCardIds(state).sort()) {
     const definition = definitionFor(state, assetId);
+    pushActivatedCardImplementationActions(
+      state,
+      actions,
+      "corp",
+      assetId,
+      definition,
+    );
     if (TRACE_ASSET_CARD_IDS.has(definition.id)) {
       actions.push(
         action(
@@ -4426,23 +4448,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (definition.id === NEWSGROUP_FILTER_CREDIT_PROGRAM_ID) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: 2 Credits`,
-            cardId,
-            [{ clicks: 1 }],
-            {
-              cardId,
-              v1922RunnerProgramAbility: "newsgroup_filter_gain_2",
-              gainCreditsAmount: 2,
-            },
-          ),
-        );
-      }
+      pushActivatedCardImplementationActions(
+        state,
+        actions,
+        "runner",
+        cardId,
+        definition,
+      );
       if (
         definition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID &&
         topHostedProgramOnMicrotech(state, cardId)
@@ -5186,22 +5198,65 @@ function chesterMixIceInstallReduction(
 
 function corpIceInstallTotalCost(
   state: GameState,
+  cardId: CardInstanceId,
   server: CorpServer,
 ): {
   baseCost: number;
   additionalCost: number;
   reduction: number;
+  reductionSourceDefinitionIds?: string;
   totalCost: number;
 } {
-  const baseCost = corpIceInstallBaseCost(server);
   const additionalCost = corpIceInstallAdditionalCost(state, server.id);
-  const reduction = chesterMixIceInstallReduction(state, server.id);
+  const legacyReduction = chesterMixIceInstallReduction(state, server.id);
+  const quote = quoteCorpIceInstallCost(state, cardId, server, {
+    additionalCredits: additionalCost,
+    legacyReduction,
+  });
   return {
-    baseCost,
+    baseCost: quote.baseCredits,
     additionalCost,
-    reduction,
-    totalCost: Math.max(0, baseCost + additionalCost - reduction),
+    reduction:
+      legacyReduction +
+      quote.modifiers.reduce((sum, modifier) => sum + modifier.amount, 0),
+    reductionSourceDefinitionIds: quote.modifiers
+      .map((modifier) => modifier.sourceDefinitionId)
+      .join(","),
+    totalCost: quote.finalCredits,
   };
+}
+
+function assertCorpIceInstallCostValid(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+) {
+  if (
+    legalAction.side !== "corp" ||
+    legalAction.type !== "install_card" ||
+    legalAction.payload?.placement !== "ice"
+  )
+    return undefined;
+  if (definition.type !== "ice")
+    throw new Error("Corp-ICE-Installkosten gelten nur fuer ICE.");
+  const serverId = legalAction.payload?.serverId;
+  if (serverId === "new_remote") {
+    if ((legalAction.costs[0]?.credits ?? 0) !== 0)
+      throw new Error("Corp-ICE-Installkosten sind nicht mehr gueltig.");
+    return undefined;
+  }
+  const server = mustServer(state, String(serverId));
+  const additionalCost = corpIceInstallAdditionalCost(state, server.id);
+  const legacyReduction = chesterMixIceInstallReduction(state, server.id);
+  const quote = quoteCorpIceInstallCost(state, cardId, server, {
+    additionalCredits: additionalCost,
+    legacyReduction,
+  });
+  if (!quote.canPay) throw new Error("Corp kann die Installkosten nicht zahlen.");
+  if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
+    throw new Error("Corp-ICE-Installkosten sind nicht mehr gueltig.");
+  return quote;
 }
 
 function rezzedRootCardIdOnServer(
@@ -6893,6 +6948,10 @@ function performAction(
       state.timingPoint = "corp_action.main";
       state.activeSide = "corp";
       return;
+    case "activated_card_ability":
+      if (!resolveActivatedCardImplementationAbility(state, legalAction))
+        throw new Error("Die aktivierte Kartenfaehigkeit ist nicht gueltig.");
+      return;
     case "gain_credit":
       spendClick(state, legalAction.side);
       if (shouldOpenInvestmentFirmCreditChoice(state, legalAction)) {
@@ -7512,33 +7571,6 @@ function performAction(
           randomPurpose,
           v1921DieRoll: dieRoll,
           randomCounterAfter: state.randomCounter,
-        };
-        return;
-      }
-      if (
-        legalAction.payload?.v1922RunnerProgramAbility ===
-        "newsgroup_filter_gain_2"
-      ) {
-        if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf Newsgroup Filter nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.runner.rig.programs.includes(sourceCardId))
-          throw new Error("Newsgroup Filter ist nicht installiert.");
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== NEWSGROUP_FILTER_CREDIT_PROGRAM_ID)
-          throw new Error(
-            "Die V1.9.22-Programm-Faehigkeit passt nicht zu Newsgroup Filter.",
-          );
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 2)
-          throw new Error(
-            "Newsgroup Filter gewaehrt in diesem Scope genau 2 Credits.",
-          );
-        credits(state, "runner", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: gainAmount,
-          runnerCreditsAfter: state.runner.credits,
         };
         return;
       }
@@ -9057,6 +9089,12 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       "Eine Unique-Karte mit diesem Namen ist bereits installiert.",
     );
   }
+  const corpIceInstallQuote = assertCorpIceInstallCostValid(
+    state,
+    cardId,
+    definition,
+    legalAction,
+  );
   spendClick(state, legalAction.side);
   if (legalAction.side === "corp") expireCorporateRetreatInstallCreditAbilities(state);
   if (legalAction.side === "runner") {
@@ -9344,7 +9382,17 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       legalAction.payload?.serverId === "new_remote"
         ? createRemote(state)
         : mustServer(state, String(legalAction.payload?.serverId));
-    spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
+    if (corpIceInstallQuote) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        ...costQuotePublicPayload(corpIceInstallQuote),
+      };
+    }
+    spendCredits(
+      state,
+      "corp",
+      corpIceInstallQuote?.finalCredits ?? legalAction.costs[0]?.credits ?? 0,
+    );
     server.ice.push(cardId);
     state.cardInstances[cardId] = {
       ...mustInstance(state.cardInstances, cardId),
@@ -16003,6 +16051,7 @@ function action(
     type === "score_agenda" ||
     type === "trash_resource" ||
     payload?.v1917AssetAbility ||
+    payload?.cardImplementationAbility ||
     payload?.resourceAbility ||
     payload?.runnerAbility ||
     payload?.acmeSavingsAndLoanAbility ||
@@ -21005,6 +21054,14 @@ function makeActionId(
     parts.push(String(payload.variableRezValue));
   if (payload?.removeTagAmount !== undefined)
     parts.push(String(payload.removeTagAmount));
+  if (payload?.cardImplementationAbility)
+    parts.push(String(payload.cardImplementationAbility));
+  if (payload?.cardImplementationAbilityIndex !== undefined)
+    parts.push(String(payload.cardImplementationAbilityIndex));
+  if (payload?.iceInstallTotalCost !== undefined)
+    parts.push(String(payload.iceInstallTotalCost));
+  if (payload?.iceInstallReductionSourceDefinitionIds)
+    parts.push(String(payload.iceInstallReductionSourceDefinitionIds));
   for (const entry of legacyAbilityPayloadEntries(
     payload,
     ACTION_ID_ABILITY_PAYLOAD_FIELDS,
@@ -21273,6 +21330,7 @@ function publicContextForAction(
       "iceInstallBaseCost",
       "iceInstallAdditionalCost",
       "iceInstallReduction",
+      "iceInstallReductionSourceDefinitionIds",
       "iceInstallTotalCost",
       "recurringCreditsLoaded",
       "rootReplacement",
@@ -21413,6 +21471,17 @@ function publicContextForAction(
     }
   } else if (legalAction.type === "draw_card") {
     context.amount = 1;
+  } else if (legalAction.type === "activated_card_ability") {
+    const payload = legalAction.payload ?? {};
+    if (Number.isInteger(payload.gainedCredits)) {
+      context.amount = Number(payload.gainedCredits);
+    } else if (Number.isInteger(payload.drawnCards)) {
+      context.amount = Number(payload.drawnCards);
+    } else if (Number.isInteger(payload.drawnCount)) {
+      context.amount = Number(payload.drawnCount);
+    }
+    if (typeof payload.sourceDefinitionId === "string")
+      context.sourceDefinitionId = payload.sourceDefinitionId;
   } else if (legalAction.type === "gain_credit") {
     if (Number.isInteger(legalAction.payload?.gainCreditsAmount)) {
       context.amount = Number(legalAction.payload?.gainCreditsAmount);
@@ -22014,6 +22083,24 @@ function publicContextForAction(
   }
   if (typeof legalAction.payload?.gainedActions === "number")
     context.gainedActions = legalAction.payload.gainedActions;
+  if (typeof legalAction.payload?.cardImplementationAbility === "string") {
+    context.cardImplementationAbility =
+      legalAction.payload.cardImplementationAbility;
+    for (const key of [
+      "cardImplementationAbilityIndex",
+      "cardImplementationAbilityTiming",
+      "sourceDefinitionId",
+      "gainedCredits",
+      "drawnCards",
+      "drawnCount",
+      "runnerCreditsAfter",
+      "corpCreditsAfter",
+      "runnerGripAfter",
+    ]) {
+      const value = legalAction.payload[key];
+      if (value !== undefined) context[key] = value;
+    }
+  }
   if (typeof legalAction.payload?.v1917AssetAbility === "string") {
     context.v1917AssetAbility = legalAction.payload.v1917AssetAbility;
     for (const key of [
@@ -22632,6 +22719,7 @@ function revealForPublicEvent(
       hasLegacyAbilityPayload(legalAction.payload, "v1920AssetAbility")) ||
     (legalAction.type === "gain_credit" &&
       legalAction.payload?.traceStarted === true) ||
+    legalAction.type === "activated_card_ability" ||
     (legalAction.type === "gain_credit" &&
       hasLegacyAbilityPayload(legalAction.payload, "agendaAbility", [
         "v1922_political_overthrow",
@@ -24146,6 +24234,179 @@ function printedCostOnPlayImplementation(
 
 function hasPrintedCostOnPlayImplementation(definition: CardDefinition): boolean {
   return Boolean(printedCostOnPlayImplementation(definition));
+}
+
+function activatedCardImplementationAbilitiesForTiming(
+  definition: CardDefinition,
+  timing: ActivatedCardAbilityImplementation["timing"],
+): Array<{ ability: ActivatedCardAbilityImplementation; index: number }> {
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  return (
+    implementation?.abilities
+      ?.map((ability, index) => ({ ability, index }))
+      .filter(
+        (
+          entry,
+        ): entry is {
+          ability: ActivatedCardAbilityImplementation;
+          index: number;
+        } => entry.ability.kind === "activated" && entry.ability.timing === timing,
+      ) ?? []
+  );
+}
+
+function actionCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): number {
+  const actionCosts = ability.costs.filter((cost) => cost.kind === "action");
+  if (
+    ability.costs.length !== 1 ||
+    actionCosts.length !== 1 ||
+    !Number.isInteger(actionCosts[0]?.amount) ||
+    (actionCosts[0]?.amount ?? 0) <= 0
+  ) {
+    throw new Error("Activated CardImplementation ability supports exactly one positive action cost.");
+  }
+  return actionCosts[0]!.amount;
+}
+
+function activatedAbilityPayload(
+  cardId: CardInstanceId,
+  ability: ActivatedCardAbilityImplementation,
+  abilityIndex: number,
+): Record<string, string | number | boolean> {
+  return {
+    cardId,
+    cardImplementationAbility: "activated",
+    cardImplementationAbilityIndex: abilityIndex,
+    cardImplementationAbilityTiming: ability.timing,
+    ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
+  };
+}
+
+function pushActivatedCardImplementationActions(
+  state: GameState,
+  actions: LegalAction[],
+  side: Side,
+  sourceCardId: CardInstanceId,
+  definition: CardDefinition,
+): void {
+  if (mustInstance(state.cardInstances, sourceCardId).controller !== side)
+    return;
+  const timing = side === "corp" ? "corp_main" : "runner_main";
+  for (const { ability, index } of activatedCardImplementationAbilitiesForTiming(
+    definition,
+    timing,
+  )) {
+    const actionCost = actionCostForActivatedAbility(ability);
+    actions.push(
+      action(
+        state,
+        side,
+        "activated_card_ability",
+        ability.label ?? `${definition.title}: Fähigkeit nutzen`,
+        sourceCardId,
+        [{ clicks: actionCost }],
+        activatedAbilityPayload(sourceCardId, ability, index),
+      ),
+    );
+  }
+}
+
+function activatedAbilityForLegalAction(
+  state: GameState,
+  legalAction: LegalAction,
+): {
+  cardId: CardInstanceId;
+  definition: CardDefinition;
+  ability: ActivatedCardAbilityImplementation;
+  abilityIndex: number;
+} | undefined {
+  if (legalAction.payload?.cardImplementationAbility !== "activated")
+    return undefined;
+  const cardId = legalAction.payload.cardId;
+  if (typeof cardId !== "string" || !state.cardInstances[cardId])
+    throw new Error("Die aktivierte Kartenfaehigkeit hat keine gueltige Quelle.");
+  const definition = definitionFor(state, cardId);
+  const abilityIndex = Number(legalAction.payload.cardImplementationAbilityIndex);
+  if (!Number.isInteger(abilityIndex) || abilityIndex < 0)
+    throw new Error("Die aktivierte Kartenfaehigkeit hat keinen gueltigen Index.");
+  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.[
+    abilityIndex
+  ];
+  if (!ability || ability.kind !== "activated")
+    throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zur Karte.");
+  return { cardId, definition, ability, abilityIndex };
+}
+
+function validateActivatedCardImplementationAbility(
+  state: GameState,
+  legalAction: LegalAction,
+  match: {
+    cardId: CardInstanceId;
+    definition: CardDefinition;
+    ability: ActivatedCardAbilityImplementation;
+    abilityIndex: number;
+  },
+): void {
+  const { cardId, ability } = match;
+  if (mustInstance(state.cardInstances, cardId).controller !== legalAction.side)
+    throw new Error("Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.");
+  const actionCost = actionCostForActivatedAbility(ability);
+  if (legalAction.costs[0]?.clicks !== actionCost)
+    throw new Error("Die aktivierte Kartenfaehigkeit hat andere Aktionskosten.");
+  if (
+    legalAction.payload?.cardImplementationAbilityTiming !== ability.timing ||
+    legalAction.payload?.cardImplementationAbilityIndex !== match.abilityIndex
+  )
+    throw new Error("Die aktivierte Kartenfaehigkeit passt nicht zum Profil.");
+  if (ability.timing === "runner_main") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.");
+    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+      throw new Error("Diese aktivierte Kartenfaehigkeit ist nur in der Runner-Aktionsphase nutzbar.");
+    if (!runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    return;
+  }
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
+  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
+    throw new Error("Diese aktivierte Kartenfaehigkeit ist nur in der Korp-Aktionsphase nutzbar.");
+  if (!rezzedCorpRootCardIds(state).includes(cardId))
+    throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht rezzed installiert.");
+}
+
+function resolveActivatedCardImplementationAbility(
+  state: GameState,
+  legalAction: LegalAction,
+): boolean {
+  const match = activatedAbilityForLegalAction(state, legalAction);
+  if (!match) return false;
+  validateActivatedCardImplementationAbility(state, legalAction, match);
+  const actionCost = actionCostForActivatedAbility(match.ability);
+  for (let spentClicks = 0; spentClicks < actionCost; spentClicks += 1) {
+    spendClick(state, legalAction.side);
+  }
+  const result = executeCardImplementationEffects(
+    state,
+    {
+      sourceCardId: match.cardId,
+      sourceDefinitionId: match.definition.id,
+      sourceTitle: match.definition.title,
+      controller: mustInstance(state.cardInstances, match.cardId).controller,
+      drawCards: (side, amount) =>
+        drawCardsForCardImplementationEffect(state, side, amount),
+    },
+    match.ability.effects,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: match.definition.id,
+    ...result.publicPayload,
+  };
+  appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+  return true;
 }
 
 function executeOnPlayCardImplementationAbility(

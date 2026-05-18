@@ -4,6 +4,7 @@ import { CARD_IMPLEMENTATIONS } from "./registry";
 
 export type CardImplementationCoverageStatus =
   | "implemented"
+  | "partial_implementation"
   | "legacy_engine_special_case"
   | "no_engine_behavior_required"
   | "pending_implementation";
@@ -18,12 +19,20 @@ export type CardImplementationCoverageEntry = {
 const IMPLEMENTED_REZ_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ON_PLAY_EFFECT_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
+const IMPLEMENTED_ACTIVATED_ABILITY_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
+  "onr_v1_045_newsgroup-filter":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
   "onr_v1_095_jack-n-joe":
@@ -46,6 +55,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_320_encoder-inc":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/encoder-inc.ts",
+  "onr_v1_321_esa-contract":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/esa-contract.ts",
   "onr_v1_324_fortress-architects":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
   "onr_v1_341_skalderviken-sa-beta-test-site":
@@ -66,11 +77,27 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_REZ_COST_MODIFIER_LOCATION);
   }
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "install_cost")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive Corp install-cost modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION);
+  }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for printed-cost on-play effect behavior.",
     );
     currentLocations.add(IMPLEMENTED_ON_PLAY_EFFECT_LOCATION);
+  }
+  if (
+    implementation.abilities?.some((ability) => ability.kind === "activated")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for activated main-action ability behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ACTIVATED_ABILITY_LOCATION);
   }
 
   return {
@@ -92,6 +119,33 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
+    {
+      cardDefinitionId: "onr_v1_317_data-masons",
+      status: "partial_implementation",
+      reason:
+        "Engine-local CardImplementationDefinition covers the printed wall rez-cost reduction. Missing printed text: all walls have +1 strength.",
+      currentLocations: [
+        "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
+      ],
+    },
+    {
+      cardDefinitionId: "onr_v1_320_encoder-inc",
+      status: "partial_implementation",
+      reason:
+        "Engine-local CardImplementationDefinition covers the printed code-gate rez-cost reduction. Missing printed text: all code gates gain an additional '*End the run' subroutine.",
+      currentLocations: [
+        "packages/engine/src/card-implementations/onr-v1/corp/assets/encoder-inc.ts",
+      ],
+    },
+    {
+      cardDefinitionId: "onr_v1_360_jerusalem-city-grid",
+      status: "partial_implementation",
+      reason:
+        "Engine-local CardImplementationDefinition covers the same-server wall rez-cost reduction. Missing printed text: walls on this fort have +1 strength and region install/replacement rules.",
+      currentLocations: [
+        "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+      ],
+    },
     {
       cardDefinitionId: "onr_v1_363_olivia-salazar",
       status: "legacy_engine_special_case",

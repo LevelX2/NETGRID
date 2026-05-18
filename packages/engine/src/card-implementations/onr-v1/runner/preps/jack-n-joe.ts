@@ -1,5 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
+// card name: Jack 'n' Joe
+// text: Draw three cards.
 export const jackNJoeImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_095_jack-n-joe",
   abilities: [

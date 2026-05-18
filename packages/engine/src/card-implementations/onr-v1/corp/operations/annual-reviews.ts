@@ -1,5 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
+// card name: Annual Reviews
+// text: Draw three cards.
 export const annualReviewsImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_282_annual-reviews",
   abilities: [

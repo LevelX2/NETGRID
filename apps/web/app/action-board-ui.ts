@@ -41,6 +41,7 @@ const ACTION_GROUP_LABELS: Record<LegalAction["type"], string> = {
   mandatory_draw: "Karten ziehen",
   gain_credit: "Credits",
   draw_card: "Karten ziehen",
+  activated_card_ability: "Kartenfähigkeit",
   install_card: "Installieren",
   play_event: "Spielen",
   play_operation: "Spielen",
@@ -163,6 +164,7 @@ export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[],
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
   if (action.type === "rez_ice" && cardRefsForAction(action).length > 0 && !action.timingPoint.startsWith("run.")) return true;
+  if (action.type === "activated_card_ability" && cardRefsForAction(action).length > 0) return true;
   if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
   if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
@@ -192,6 +194,8 @@ export function actionButtonLabel(action: LegalAction): string {
       return action.source === "basic_action" ? "Credit nehmen" : normalizeVisibleTerms(action.label);
     case "draw_card":
       return "Karte ziehen";
+    case "activated_card_ability":
+      return withActionCostPrefix(action, normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen"));
     case "jack_out":
       return "Run abbrechen (Jack-out)";
     case "decline_rez":
@@ -223,6 +227,8 @@ export function contextualCardActionLabel(action: LegalAction): string {
   switch (action.type) {
     case "gain_credit":
       return scoredAgendaAbilityContextLabel(action) ?? installedCardAbilityContextLabel(action) ?? actionButtonLabel(action);
+    case "activated_card_ability":
+      return stripActionSourcePrefix(action.label || actionButtonLabel(action));
     case "install_card":
       return installContextLabel(action);
     case "play_event":
