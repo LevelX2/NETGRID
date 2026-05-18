@@ -14,7 +14,7 @@ DEV-007 ist für den historischen MVP-0.1-Demo-Scope weiterhin korrekt: Tags, Tr
 - V1.9.14 führt Trace-/Link-Karten über das bestehende side-sichere Bid-Fenster fort.
 - Die verbindliche NETGRID-Regel ist offen: Korp-Gebot zuerst, danach Runner-Gebot mit sichtbarer Trace-Stärke.
 - Öffentlich sichtbare Korp-Gebote sind kein Hidden-Info-Leak; private Runner-Choice-Daten bleiben runner-privat.
-- `docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md` dokumentiert den aktuellen Policy-Abgleich.
+- `docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md` dokumentiert den aktuellen Policy-Abgleich.
 
 ## Abweichungen
 

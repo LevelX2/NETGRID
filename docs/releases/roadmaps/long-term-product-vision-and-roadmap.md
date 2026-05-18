@@ -8,7 +8,7 @@ Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen 
 
 Nachtrag 2026-05-07: Die Anschlussplanung nach V1.1.2 ist in `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md` neu geschnitten. V1.1.2 bleibt unverändert. Danach liegt der Schwerpunkt auf fehlenden Spielmechaniken, mechanikgebundener Kartenfreigabe und kontinuierlicher KI-Weiterentwicklung je Mechanik- und Kartenrelease. Die ältere isolierte Zeile `V1.7.0 AI v2` ist dadurch als alleinstehender später KI-Schnitt überholt; KI-Unterstützung wird ab Post-V1.1.2 laufend mitgeführt.
 
-Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Planung sind in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` zusammengeführt. Dieses Dokument bleibt als Produktvision und historische Gate-Begründung relevant; bei konkreter Releaseplanung ab V1.1.3 führt die konsolidierte Roadmap.
+Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Planung sind in `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md` zusammengeführt. Dieses Dokument bleibt als Produktvision und historische Gate-Begründung relevant; bei konkreter Releaseplanung ab V1.1.3 führt die konsolidierte Roadmap.
 
 ## Kurzfazit
 
@@ -36,14 +36,14 @@ Gelesen und ausgewertet wurden unter anderem:
 - `KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md`
 - `docs/codex/CODEX_STATUS.md`
 - `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
-- `docs/derived/RELEASE_PLANNING_2026-05-05.md`
+- `docs/releases/roadmaps/release-planning-2026-05-05.md`
 - `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`
 - `docs/releases/v1/v1-0-5-action-board-ux/plan.md`
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/plan.md`
 - `docs/releases/v1/v1-0-1-join-deck-handshake/plan.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `docs/releases/mvp/mvp-0-91-card-images/requirements.md`
 - `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`

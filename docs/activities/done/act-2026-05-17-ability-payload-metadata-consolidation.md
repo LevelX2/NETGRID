@@ -31,7 +31,7 @@ Ability-Payload-Schlüssel und PublicPayload-Metadaten sollen weniger pro Releas
 
 ## Kontext und Quellen
 
-- Analyse: `docs/derived/CARD_EFFECT_GENERIC_RESOLVER_ANALYSIS_2026_05_17.md`.
+- Analyse: `docs/architecture/card-rules/card-effect-generic-resolver-analysis-2026-05-17.md`.
 - Hotspot: `packages/engine/src/index.ts` sammelt viele `v1917AssetAbility`, `v1918UpgradeAbility`, `v1919AssetAbility`, `v1920AssetAbility` usw. separat in Action-ID- und PublicPayload-Kontexten.
 
 ## Scope

@@ -27,7 +27,7 @@ Pflichtquellen und relevante Planungs-/Matrixartefakte:
 - `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
 - `docs/codex/CODEX_STATUS.md`
 - `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-6-1-mechanikpaket-a/plan-to-v1-7-0.md`
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/local/card-import/onr-v1-limited/onr-v1-effect-logic-priority.local.md`

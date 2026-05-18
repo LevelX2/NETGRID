@@ -3,8 +3,8 @@
 Stand: 2026-05-17
 Status: Planungsvertrag, keine Implementierungsfreigabe
 Quelle:
-- `docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md`
-- `docs/derived/TIMER_SERVER_SYNC_CONTRACT_2026_05_17.md`
+- `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md`
+- `docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md`
 
 ## Zweck
 

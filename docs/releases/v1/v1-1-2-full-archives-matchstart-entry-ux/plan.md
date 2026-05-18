@@ -18,7 +18,7 @@ Track B darf Track A fachlich nicht verwässern: keine Engine-Regeln, keine Serv
 
 Verbindliche Vorplanung:
 
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`: V1.1.2 ist `Full Archives Access`.
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`: V1.1.2 ist `Full Archives Access`.
 - `docs/releases/v1/v1-1-0-setup-game-end-m2/plan.md`: V1.1.0 hat nur die Archives-facedown-Grundlage gelegt; vollständiger Archives-Access bleibt V1.1.2.
 - `docs/releases/v1/v1-1-0-setup-game-end-m2/requirements.md`: `V110-MUST-015` schützt die Grundlage, erweitert aber keinen Full-Archives-Access.
 - `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/plan.md`: V1.1.1 schließt Discard/Handlimit/Core Damage; Full Archives Access bleibt danach V1.1.2.
@@ -341,7 +341,7 @@ Bereite V1.1.2 Full Archives Access und Matchstart Entry UX als kombinierten Rel
 Lies zuerst:
 - AGENTS.md
 - docs/codex/CODEX_STATUS.md
-- docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md
+- docs/releases/roadmaps/long-term-product-vision-and-roadmap.md
 - docs/releases/v1/v1-1-0-setup-game-end-m2/final-review.md
 - docs/releases/v1/v1-1-1-discard-handlimit-core-damage/requirements.md
 - docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/plan.md

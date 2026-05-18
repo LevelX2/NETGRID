@@ -14,7 +14,7 @@ Der Release implementiert nur eine eng testbare Replacement-Pipeline und höchst
 - `docs/releases/v1/v1-2-0-event-modification/plan.md`
 - `docs/releases/v1/v1-2-0-event-modification/spec.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`
 - bestehende Specs für Damage, Access/Breach, Trash/Steal, Visibility, Replay, StateHash und KI-Inputs
 

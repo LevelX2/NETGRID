@@ -10,7 +10,7 @@ V1.9.0 ist der letzte Mechanik-/Karten-Schritt vor V2.x und schließt determinis
 
 ## Verbindliche Eingaben
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/codex/CODEX_STATUS.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/release-assignment-preflight.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/requirements.md`

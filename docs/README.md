@@ -1,6 +1,6 @@
 # NETGRID-Dokumentation
 
-Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefakte. Die Zielstruktur für die laufende Aufräumung ist in `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` festgelegt.
+Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefakte. Die Zielstruktur für die laufende Aufräumung ist in `docs/decisions/docs-structure-target-decision-2026-05-18.md` festgelegt.
 
 ## Ordner
 

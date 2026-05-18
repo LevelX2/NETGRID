@@ -60,7 +60,7 @@ V0.92 sollte diese neuen oder aktualisierten Artefakte erzeugen:
 | Artefakt | Pflicht | Zweck |
 |---|---:|---|
 | `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md` | ja | Exekutable Must/Should/Could-Anforderungen für M0 und M1. |
-| `docs/derived/MECHANICS_COVERAGE_MATRIX.md` | ja | Menschlich lesbares Mechanik-Inventar mit Status, Risiko, Quellen und Folgegate. |
+| `docs/architecture/card-rules/mechanics-coverage-matrix.md` | ja | Menschlich lesbares Mechanik-Inventar mit Status, Risiko, Quellen und Folgegate. |
 | `data/rules/mechanics-coverage-0.92.json` | empfohlen | Maschinenlesbare Matrix für spätere Coverage- und Statuschecks. |
 | `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md` | ja | Detailkonzept für Timing-, Ability-, Effect-, Cost-, Target- und Choice-Grundlage. |
 | `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md` | ja | V0.93-Testplan mit Unit-, Szenario-, Visibility-, Replay-, AI- und Multiplayer-Gates. |

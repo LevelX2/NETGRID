@@ -6,6 +6,10 @@
 
 - `ability-engine/`: Kartenlogik, CardDefinition-/Ability-DSL-Zielbild und inkrementeller Refactoring-Plan für die Engine-Migration.
 - `ai/`: KI-Controller, Simulationstestmatrix, AI-Hints-Struktur und side-sichere Coaching-Grenzen.
+- `card-images/`: Kartenbild-Performance, Bildroute, Cache-/Thumbnail-Pfad und Anzeigegrenzen.
+- `card-rules/`: Regel-, Resolver-, Timing-, Trace- und Coverage-Artefakte.
+- `deck-library/`: lokale Deckbibliothek und Datei-/Storage-Konzept.
+- `live-match/`: Timer-, Audio-Cue- und Live-Match-Synchronisationskonzepte.
 
 ## Regeln
 

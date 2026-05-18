@@ -10,7 +10,7 @@ Geprüft wurden:
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/requirements.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/test-matrix.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/card-releases/v1-1-2k-card-release/implementation-review.md`
 - `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`
 

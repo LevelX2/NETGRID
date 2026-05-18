@@ -14,7 +14,7 @@ parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/ROOT_SOURCE_DUPLICATES_CLEANUP_REVIEW_2026_05_17.md
+  - docs/reviews/docs-cleanup/root-source-duplicates-cleanup-review-2026-05-17.md
 checks:
   - SHA-256 duplicate check via Get-FileHash
   - Runbook diff via git diff --no-index
@@ -69,4 +69,4 @@ Bitgleiche oder nahezu gleiche Dokumente im `docs/`-Root und in Unterordnern sol
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/ROOT_SOURCE_DUPLICATES_CLEANUP_REVIEW_2026_05_17.md` belegt die drei bitgleichen Root-/Source-Rohquellen per SHA-256, ordnet die sieben Zeilen Differenz zwischen Root- und `docs/codex/`-Runbook bewusst zugunsten des führenden `docs/codex/`-Pfads ein, dokumentiert die Referenzsuche und empfiehlt `docs/source/*` sowie `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` als `keep-source`. Die vier Root-Duplikate sind als `git-remove-after-condense` eingestuft, aber in diesem Paket nicht entfernt; der Review enthält einen Link-Migrationsplan für ein separates Folgecleanup.
+Erledigt. `docs/reviews/docs-cleanup/root-source-duplicates-cleanup-review-2026-05-17.md` belegt die drei bitgleichen Root-/Source-Rohquellen per SHA-256, ordnet die sieben Zeilen Differenz zwischen Root- und `docs/codex/`-Runbook bewusst zugunsten des führenden `docs/codex/`-Pfads ein, dokumentiert die Referenzsuche und empfiehlt `docs/source/*` sowie `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` als `keep-source`. Die vier Root-Duplikate sind als `git-remove-after-condense` eingestuft, aber in diesem Paket nicht entfernt; der Review enthält einen Link-Migrationsplan für ein separates Folgecleanup.

@@ -13,7 +13,7 @@ Geprueft wurden:
 - `docs/releases/v1/v1-2-3-mechanic-unlock-card-release-1/test-matrix.md`
 - `docs/releases/v1/v1-2-2-special-zones-ownership-control/requirements-review.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 
 ## Ergebnis
 

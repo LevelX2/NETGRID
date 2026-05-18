@@ -13,13 +13,13 @@ branch: codex/activity-worker-4
 parallelWorker: worker-4
 releaseTarget:
 blockedBy:
-  - docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md
+  - docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md
   - docs/activities/done/act-2026-05-17-timer-server-sync-contract.md
 resultArtifacts:
-  - docs/derived/ENGINE_HARD_TIMEOUT_CONTRACT_2026_05_17.md
+  - docs/architecture/card-rules/engine-hard-timeout-contract-2026-05-17.md
 checks:
-  - rg -n "TimeoutPolicy|ServerTimeoutResolution|deadlineId|stateVersion|Replay|StateHash|Hidden-Info|Reconnect|Undo|Disconnect|AIInput|DecisionDebug" docs/derived/ENGINE_HARD_TIMEOUT_CONTRACT_2026_05_17.md docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md docs/derived/TIMER_SERVER_SYNC_CONTRACT_2026_05_17.md
-  - rg -n "auto_decline|auto_pass|end_turn|forfeit|privatePayload|cardInstances|FullState|Token|Deck" docs/derived/ENGINE_HARD_TIMEOUT_CONTRACT_2026_05_17.md
+  - rg -n "TimeoutPolicy|ServerTimeoutResolution|deadlineId|stateVersion|Replay|StateHash|Hidden-Info|Reconnect|Undo|Disconnect|AIInput|DecisionDebug" docs/architecture/card-rules/engine-hard-timeout-contract-2026-05-17.md docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md
+  - rg -n "auto_decline|auto_pass|end_turn|forfeit|privatePayload|cardInstances|FullState|Token|Deck" docs/architecture/card-rules/engine-hard-timeout-contract-2026-05-17.md
   - git diff --check
 ---
 
@@ -31,7 +31,7 @@ Harte Timerfolgen sollen erst als enginevalidierter Vertrag geschnitten werden, 
 
 ## Kontext und Quellen
 
-- `docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md`
+- `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md`
 - NETGRID-Prinzipien: Engine-Korrektheit, LegalAction-only, Replay/StateHash-Determinismus und Hidden-Info-Schutz.
 
 ## Scope
@@ -63,7 +63,7 @@ Harte Timerfolgen sollen erst als enginevalidierter Vertrag geschnitten werden, 
 
 ## Ergebnisnotiz
 
-Abgeschlossen. Der Planungsvertrag `docs/derived/ENGINE_HARD_TIMEOUT_CONTRACT_2026_05_17.md` definiert harte Timeout-Auflösungen als enginevalidierte, servergenerierte `ServerTimeoutResolution` auf Basis einer von der Engine veröffentlichten `EngineTimeoutPolicy`.
+Abgeschlossen. Der Planungsvertrag `docs/architecture/card-rules/engine-hard-timeout-contract-2026-05-17.md` definiert harte Timeout-Auflösungen als enginevalidierte, servergenerierte `ServerTimeoutResolution` auf Basis einer von der Engine veröffentlichten `EngineTimeoutPolicy`.
 
 Der erste spätere Umsetzungsschnitt ist bewusst eng: zulässig sind nur `auto_decline` für optionale kostenfreie Reaktionsfenster ohne Ziel-/Choiceauswahl und `auto_pass` für explizite Pass-Fenster mit enginebekannter Fallbackaction. Mandatory Choices mit verdeckten Karten, mehreren privaten Optionen, Setup/Mulligan, Discard/Handlimit, Access-Auswahl, Hidden-Zone Search/Reorder, globale Partiezeit, Chat, Disconnect und kompetitiver Forfeit bleiben außerhalb des ersten harten Slices.
 

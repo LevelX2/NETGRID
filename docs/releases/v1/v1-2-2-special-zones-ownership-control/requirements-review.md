@@ -12,7 +12,7 @@ Geprueft wurden:
 - `docs/releases/v1/v1-2-2-special-zones-ownership-control/spec.md`
 - `docs/releases/v1/v1-2-2-special-zones-ownership-control/test-matrix.md`
 - `docs/releases/v1/v1-2-1-replacement-effects/final-review.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 
 ## Ergebnis
 

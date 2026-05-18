@@ -16,7 +16,7 @@ Arbeitsbasis:
 
 ## 1. Kurzentscheidung
 
-Aktualisierung 2026-05-04: Dieser Plan hat seinen ursprünglichen Zweck erfüllt. Die hier geplante Sequenz M0 bis M10 wurde in V0.92 bis V0.99 umgesetzt und dokumentiert. Der Plan bleibt als historische Begründung der Gate-Reihenfolge erhalten. Für aktuelle Anschlussentscheidungen gilt `docs/derived/BESTANDSAUFNAHME_2026-05-04.md` zusammen mit `docs/derived/MECHANICS_COVERAGE_MATRIX.md`.
+Aktualisierung 2026-05-04: Dieser Plan hat seinen ursprünglichen Zweck erfüllt. Die hier geplante Sequenz M0 bis M10 wurde in V0.92 bis V0.99 umgesetzt und dokumentiert. Der Plan bleibt als historische Begründung der Gate-Reihenfolge erhalten. Für aktuelle Anschlussentscheidungen gilt `docs/releases/roadmaps/bestandsaufnahme-2026-05-04.md` zusammen mit `docs/architecture/card-rules/mechanics-coverage-matrix.md`.
 
 Nach V0.9 ist die spielbare Engine stabil genug, um die noch fehlenden Regelmechaniken geplant und in kleinen Gates nachzuziehen. V0.91 ist ein getrenntes Kartenbild-Asset-Gate und darf nicht mit Mechanikarbeit vermischt werden.
 
@@ -106,7 +106,7 @@ Den aktuellen Mechanikstand eindeutig machen, bevor neue Requirements entstehen.
 Planungsaufgaben:
 
 - `CODEX_STATUS.md`, Roadmap und V0.91-Requirements auf einen konsistenten Asset-Gate-Stand bringen.
-- Neues Artefakt `docs/derived/MECHANICS_COVERAGE_MATRIX.md` planen.
+- Neues Artefakt `docs/architecture/card-rules/mechanics-coverage-matrix.md` planen.
 - Optionales Datenartefakt `data/rules/mechanics-coverage-0.92.json` planen.
 - Alte Deviations aus `DEVIATION_REGISTRY.md` gegen V0.4/V0.8/V0.9 markieren: `resolved`, `partial`, `open`, `superseded`.
 - Jede Mechanik mit Quelle, Status, Risiko, Abhängigkeiten, benötigten Tests und möglichen Beispielkarten erfassen.
@@ -480,8 +480,8 @@ Die wichtigste Abschlussregel: Es darf keine Karte `playable` oder `deck_legal` 
 
 Die früher in diesem Abschnitt empfohlenen V0.94-/V0.95-Schritte sind erledigt. Aktueller Anschluss nach der Bestandsaufnahme 2026-05-04:
 
-- `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/releases/roadmaps/bestandsaufnahme-2026-05-04.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/final-review.md`
 - `docs/releases/special/s01/requirements.md`
 
@@ -506,7 +506,7 @@ Lies:
 - docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf
 
 Erstelle:
-- docs/derived/MECHANICS_COVERAGE_MATRIX.md
+- docs/architecture/card-rules/mechanics-coverage-matrix.md
 - docs/derived/MECHANIC_M1_REQUIREMENTS.md
 - docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md
 - docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md

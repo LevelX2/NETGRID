@@ -13,7 +13,7 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md
+  - docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md
   - docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md
   - docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md
   - data/rules/mechanics-coverage-1.9.14.json

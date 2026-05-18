@@ -14,7 +14,7 @@ V0.98a darf mit Identity-/Modifier-Piloten beginnen. V0.98b darf erst beginnen, 
 - `docs/releases/mvp/mvp-0-98-identities-hidden-zones/plan.md` aus dem lokalen Planungsstand.
 - `docs/releases/mvp/roadmaps/mvp-0-94-to-0-99-planning-review.md` aus dem lokalen Planungsstand.
 - `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`
 - `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`
 - CR v26.03 Abschnitte 1.6, 1.21, 8.7, 8.8, 9.4 und 10.2.

@@ -13,8 +13,8 @@ Geprueft wurden:
 - `docs/releases/v1/v1-3-0-format-deckbuilding-foundation/test-matrix.md`
 - `docs/releases/mvp/mvp-0-6-deck-match-setup/deck-validation-spec.md`
 - `docs/releases/mvp/mvp-0-6-deck-match-setup/match-setup-spec.md`
-- `docs/derived/LOCAL_FILE_DECK_LIBRARY_2026_05_07.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/architecture/deck-library/local-file-deck-library-2026-05-07.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 
 ## Ergebnis
 

@@ -24,7 +24,7 @@ Pflichtstart und Projektsteuerung:
 - `KI-Wissen-NETGRID/02 Wissen/Prozesse/Arbeitsworkflow Wissenspflege und Projektanfragen.md`
 - `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
 - `docs/codex/CODEX_STATUS.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 
 Geprüfte AI-Codepfade:
 
@@ -80,7 +80,7 @@ Relevante abgeleitete Artefakte:
 - `docs/reviews/ai/runner-rnd-repeat-access-observation-2026-05-08.md`
 - `docs/reviews/ai/runner-hq-repeat-access-observation-2026-05-12.md`
 - `docs/reviews/ai/runner-archives-repeat-access-observation-2026-05-13.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`
 
 Kompakte Belegmatrix:
 

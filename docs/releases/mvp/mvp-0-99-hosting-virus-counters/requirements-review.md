@@ -15,7 +15,7 @@ V0.99a darf mit der generischen Counter-Basis beginnen. V0.99b, V0.99c und V0.99
 - `docs/releases/mvp/roadmaps/mvp-0-94-to-0-99-planning-review.md` aus dem lokalen Planungsstand.
 - `docs/releases/mvp/mvp-0-98-identities-hidden-zones/final-review.md`
 - `docs/releases/mvp/roadmaps/mvp-0-94-to-0-95-assumption-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/mechanics-coverage-0.98.json`
 - CR v26.03 Abschnitte 1.9, 1.10.4, 1.10.5, 1.13, 5.2.6, 10.1.2 und 10.6.
 

@@ -86,7 +86,7 @@ Lokale ignorierte Artefakte:
 - `README.md` war fachlich veraltet: Es endete bei MVP 0.7/V0.8 als nächstem Schritt, obwohl Code und Status bis V0.99/S01 reichen.
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Roadmap nach MVP 0.4.md` nannte V0.5 bis V0.9 als abgeschlossen, aber V0.94 bis V0.99/S01 und O:NR nicht als aktuellen Anschluss.
 - `docs/releases/mvp/roadmaps/mechanics-completion-plan.md` war eine historische Planungsfassung und nannte als nächsten Schritt noch V0.94 Requirements, obwohl V0.94 bis V0.99 abgeschlossen sind.
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md` trug den Titel 0.99, beschrieb im Zweck aber noch "nach V0.96".
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md` trug den Titel 0.99, beschrieb im Zweck aber noch "nach V0.96".
 - In älteren Quellen ist "kein Deckbuilder" als MVP-0.1/0.2-Nichtziel korrekt. Der aktuelle lokale Deckeditor ist ein späterer V0.6-Scope und daher kein Widerspruch, muss aber sprachlich klar von einem freien öffentlichen Deckbuilder getrennt bleiben.
 - O:NR ist post-V0.91 als private lokale Nutzung plausibel eingeordnet, aber die aktuelle spielbare Engine-Harness-Schicht geht über reine Bildanzeige hinaus. Das braucht eine eigene bewusste Scope-Entscheidung.
 

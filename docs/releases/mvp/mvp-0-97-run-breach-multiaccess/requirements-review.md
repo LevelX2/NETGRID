@@ -6,7 +6,7 @@ Stand: 2026-05-04
 ## Review-Basis
 
 - `docs/releases/mvp/roadmaps/mechanics-completion-plan.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/mechanics-coverage-0.96.json`
 - `docs/releases/mvp/mvp-0-96-trace-link-bidding/final-review.md`
 - `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/plan.md` aus dem ursprünglichen Arbeitsbaum als read-only Arbeitsbasis

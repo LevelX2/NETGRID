@@ -12,7 +12,7 @@ Pflichtkontext:
 2. Gib die aktive Agentenvorgabe aus: release-implementation-agent.
 3. Lies die NETGRID-Wissensbasis-Einstiegsdateien.
 4. Lies diese Artefakte:
-   - docs/derived/CARD_IMAGE_PERFORMANCE_ARCHITECTURE_REQUIREMENTS.md
+   - docs/architecture/card-images/card-image-performance-architecture-requirements.md
    - docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md
    - docs/releases/mvp/mvp-0-91-card-images/card-image-display-spec.md
    - docs/releases/v1/v1-0-6-ui-resource-clarity/resource-card-display-spec.md
@@ -61,7 +61,7 @@ Pflichtchecks:
 - git diff --check
 
 Dokumentation:
-- Erstelle docs/derived/CARD_IMAGE_PERFORMANCE_STAGE_1_IMPLEMENTATION_REVIEW.md mit:
+- Erstelle docs/architecture/card-images/card-image-performance-stage-1-implementation-review.md mit:
   - umgesetztem Scope,
   - Architekturentscheidung,
   - geänderten Dateien,

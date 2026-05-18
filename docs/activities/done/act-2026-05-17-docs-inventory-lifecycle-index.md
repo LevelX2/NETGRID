@@ -14,7 +14,7 @@ parallelWorker: worker-5
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/DOCS_INVENTORY_LIFECYCLE_INDEX_2026_05_17.md
+  - docs/reviews/docs-cleanup/docs-inventory-lifecycle-index-2026-05-17.md
 checks:
   - git ls-files -- docs
   - git ls-files -- docs/derived
@@ -76,7 +76,7 @@ Für `docs/` soll ein belastbarer Inventar-Index entstehen, der Dateien nach Ver
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/DOCS_INVENTORY_LIFECYCLE_INDEX_2026_05_17.md` ordnet den aktuellen getrackten `docs/`-Bestand zum Stichtag 2026-05-17 nach Pfadgruppen, Dateitypen, Release-/Themenbezug, vermutetem Dokumenttyp, Lebenszyklus-Kategorie und Rollup-/Nachfolgerkandidaten ein.
+Abgeschlossen. `docs/reviews/docs-cleanup/docs-inventory-lifecycle-index-2026-05-17.md` ordnet den aktuellen getrackten `docs/`-Bestand zum Stichtag 2026-05-17 nach Pfadgruppen, Dateitypen, Release-/Themenbezug, vermutetem Dokumenttyp, Lebenszyklus-Kategorie und Rollup-/Nachfolgerkandidaten ein.
 
 Der neue Stichtagsbefund lautet: 948 getrackte Dateien unter `docs/`, davon 749 unter `docs/derived/`; ungetrackte `docs/`-Dateien wurden im Worker-Worktree nicht festgestellt. Root-/Source-Duplikate, `docs/derived/`, `docs/activities/`, `docs/source/`, `docs/codex/`, `docs/ui-designsets/` und das historische Dokumentenpaket sind sichtbar eingeordnet. Die bewusst mögliche ungetrackte `activities/inbox/` ist als Arbeitsboard-Modell dokumentiert, nicht als Problem.
 

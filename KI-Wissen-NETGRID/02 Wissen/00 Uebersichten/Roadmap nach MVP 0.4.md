@@ -49,7 +49,7 @@ V0.91 ist für private lokale O:NR-1996-Frontbilder als Anzeige-Artefakte freige
 
 Wichtige Arbeitsgrundlage: `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`.
 
-Aktuelle Bestandsaufnahme: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
+Aktuelle Bestandsaufnahme: `docs/releases/roadmaps/bestandsaufnahme-2026-05-04.md`.
 
 Detailpläne:
 

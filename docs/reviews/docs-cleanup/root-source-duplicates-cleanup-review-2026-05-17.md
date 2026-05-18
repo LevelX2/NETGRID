@@ -37,7 +37,7 @@ Betroffene Dateien:
 
 Diff-Befund: `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md` enthält sieben zusätzliche Zeilen:
 
-- Vorranghinweis vom 2026-05-08: aktueller Release-Stand und Anschlussplanung laufen über `docs/codex/CODEX_STATUS.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
+- Vorranghinweis vom 2026-05-08: aktueller Release-Stand und Anschlussplanung laufen über `docs/codex/CODEX_STATUS.md` und `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`.
 - Releaseübergreifender Abschluss-Gate ab V1.x: sichtbare Webclient-Version muss auf den Zielrelease-Stand angehoben und im Final Review dokumentiert werden.
 - Abschluss-Template-Feld `webclient_release_version_updated`.
 

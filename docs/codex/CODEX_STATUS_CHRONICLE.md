@@ -12,7 +12,7 @@
 
 > Aus `CODEX_STATUS.md` am 2026-05-17 ausgelagerter ehemaliger Latest-/Next-Scope-Block. Die neuere Statusautorität bleibt der Schnellstatus plus aktuelle Wissensbasis.
 
-Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
+Latest audit artifact: `docs/releases/roadmaps/bestandsaufnahme-2026-05-04.md`.
 Latest deck/match planning artifact: `docs/releases/v1/v1-0-deck-match-stabilization/plan.md`.
 Latest V1.0 final review artifact: `docs/releases/v1/v1-0-deck-match-stabilization/final-review.md`.
 Latest V1.0.1 planning artifact: `docs/releases/v1/v1-0-1-join-deck-handshake/plan.md`.
@@ -26,7 +26,7 @@ Latest V1.0.2 final review artifact: `docs/releases/v1/v1-0-2-opponent-action-pr
 Latest V1.0.3 planning artifact: `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`.
 Latest V1.0.3 final review artifact: `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`.
 Latest V1.0.4 candidate backlog artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`.
-Latest historical general release planning artifact: `docs/derived/RELEASE_PLANNING_2026-05-05.md`.
+Latest historical general release planning artifact: `docs/releases/roadmaps/release-planning-2026-05-05.md`.
 Latest V1.0.4 planning artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`.
 Latest V1.0.4 requirements artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/requirements.md`.
 Latest V1.0.4 implementation review artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/implementation-review.md`.
@@ -149,12 +149,12 @@ Latest King of the Road AI approval artifacts: `docs/releases/ai/deck-legal-appr
 Latest Deck-Legal AI Approval Open64 artifacts: `docs/releases/ai/deck-legal-approval/open64-execution-plan.md`, `docs/releases/ai/deck-legal-approval/open64-implementation-review.md`, `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`, `data/ai/ai-card-hints-deck-legal-legacy-open64.json`, `data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json`, `data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json`, `data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json` and `data/scenarios/ai-deck-legal-legacy-open64-smokes.json`.
 Latest Deck-Legal AI Approval V1.9.0 artifacts: `docs/releases/ai/deck-legal-approval/v190-implementation-review.md`, `data/ai/ai-card-hints-deck-legal-v190.json`, `data/manifests/deck-legal-ai-approval-v190-manifest.json` and `data/scenarios/ai-deck-legal-v190-smokes.json`.
 Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`.
-Latest consolidated release roadmap artifact: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
-Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
-Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
-Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
+Latest consolidated release roadmap artifact: `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`.
+Latest card rule text formatting artifact: `docs/architecture/card-rules/card-rule-text-formatting-spec.md`.
+Latest long-term product vision artifact: `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`.
+Latest long-term executive summary artifact: `docs/releases/roadmaps/long-term-product-vision-executive-summary.md`.
 
-Current selected next scope: V1.9.0 Mechanikpaket I, Deck-Legal AI Approval V1.9.0 und die Sequenz V1.9.1 bis V1.9.4 sind abgeschlossen und lokal verifiziert (`docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/final-review.md`, `docs/releases/ai/deck-legal-approval/v190-implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-4-mechanikpaket-m/final-review.md`). Nächster Umsetzungsscope bleibt die verbindliche Fortsetzung V1.9.5 bis V1.9.8 gemäß `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`; V2.x bleibt nachgelagert bis V1.9.8 grün abgeschlossen ist.
+Current selected next scope: V1.9.0 Mechanikpaket I, Deck-Legal AI Approval V1.9.0 und die Sequenz V1.9.1 bis V1.9.4 sind abgeschlossen und lokal verifiziert (`docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/final-review.md`, `docs/releases/ai/deck-legal-approval/v190-implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-4-mechanikpaket-m/final-review.md`). Nächster Umsetzungsscope bleibt die verbindliche Fortsetzung V1.9.5 bis V1.9.8 gemäß `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md` und `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`; V2.x bleibt nachgelagert bis V1.9.8 grün abgeschlossen ist.
 
 
 ## Status
@@ -595,7 +595,7 @@ Audit findings:
 - README was stale and has been updated from V0.7/V0.8 planning to V0.99/S01 current state.
 - `vitest.config.ts` now includes `app/**/*.test.ts`, so `apps/web/app/chronicle.test.ts` runs in the normal Web package test command.
 - `docs/releases/mvp/roadmaps/mechanics-completion-plan.md` is now historical for M0 to M10; V0.94 to V0.99 are complete.
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md` was the current V0.99 matrix at this audit point and is now normalized through V1.1.3 with V1.2.0/V1.2.1 foundation updates; the current machine-readable companion is `data/rules/mechanics-coverage-1.2.1.json`.
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md` was the current V0.99 matrix at this audit point and is now normalized through V1.1.3 with V1.2.0/V1.2.1 foundation updates; the current machine-readable companion is `data/rules/mechanics-coverage-1.2.1.json`.
 - Local private O:NR-v1 data under ignored `data/local/` and `data/local-assets/` is present on this machine. It remains private/local and not versioned.
 - O:NR-v1 playable test access is accepted for private local use. Engine harness, Web overlay, server deck revalidation, AI/multiplayer smokes and manifest/review checks are covered for the private local scope.
 - Deck Editor and Match Setup are functional for versioned V0.8 snapshots and private local O:NR runtime cards. V1.0 adds player-owned Runner/Corp deck pairs for private series and explicit KI deck policy.
@@ -1477,7 +1477,7 @@ The technical and hidden-info requirements are testable, and every Must requirem
 ## MVP 0.92 Requirements and final gate files created or updated
 
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/mechanics-coverage-0.92.json`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md`
@@ -1582,7 +1582,7 @@ V0.94 is frozen as a narrow Damage/Flatline gate. Net and Meat Damage are in sco
 
 - `docs/releases/mvp/mvp-0-94-damage-flatline/implementation-review.md`
 - `docs/releases/mvp/mvp-0-94-damage-flatline/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/rules-baseline-0.94.json`
 - `data/cards/demo-cards-0.94.json`
 - `data/decks/demo-decks-0.94.json`
@@ -1652,7 +1652,7 @@ V0.95 is frozen as a narrow Runner Resource and tag-interaction gate. It adds a 
 
 - `docs/releases/mvp/mvp-0-95-resources-tags/implementation-review.md`
 - `docs/releases/mvp/mvp-0-95-resources-tags/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/rules-baseline-0.95.json`
 - `data/cards/demo-cards-0.95.json`
 - `data/decks/demo-decks-0.95.json`
@@ -1723,7 +1723,7 @@ V0.96 is frozen as a narrow Trace/Link/Bidding gate. The CR v26.03 reference che
 
 - `docs/releases/mvp/mvp-0-96-trace-link-bidding/implementation-review.md`
 - `docs/releases/mvp/mvp-0-96-trace-link-bidding/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/rules-baseline-0.96.json`
 - `data/cards/demo-cards-0.96.json`
 - `data/decks/demo-decks-0.96.json`
@@ -1807,7 +1807,7 @@ V0.97 is frozen as a narrow Run/Jack-out/Breach/Multiaccess gate. The CR v26.03 
 - `packages/ai/src/index.test.ts`
 - `apps/server/src/multiplayer.test.ts`
 - `tests/specs/phase1-artifacts.test.ts`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 
 ## MVP 0.97 Final gate
 
@@ -1859,7 +1859,7 @@ V0.98 is frozen as a two-step Identity/Hidden-Zone gate. V0.98a may implement lo
 
 - `docs/releases/mvp/mvp-0-98-identities-hidden-zones/implementation-review.md`
 - `docs/releases/mvp/mvp-0-98-identities-hidden-zones/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/rules-baseline-0.98.json`
 - `data/cards/demo-cards-0.98.json`
 - `data/decks/demo-decks-0.98.json`
@@ -1910,7 +1910,7 @@ Checks:
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/requirements-review.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/implementation-review.md`
 - `docs/releases/mvp/mvp-0-99-hosting-virus-counters/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/rules-baseline-0.99.json`
 - `data/cards/demo-cards-0.99.json`
 - `data/decks/demo-decks-0.99.json`
@@ -2207,7 +2207,7 @@ Detailed planning and completion artifacts available:
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements-review.md`
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/implementation-review.md`
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/final-review.md`
-- `docs/derived/RELEASE_PLANNING_2026-05-05.md`
+- `docs/releases/roadmaps/release-planning-2026-05-05.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/requirements.md`
@@ -2251,8 +2251,8 @@ Detailed planning and completion artifacts available:
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/matchstart-entry-ux-spec.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/test-matrix.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/requirements-review.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`
+- `docs/releases/roadmaps/long-term-product-vision-executive-summary.md`
 - `docs/releases/mvp/mvp-0-6-deck-match-setup/plan.md`
 - `docs/releases/mvp/mvp-0-7-ui-redesign/plan.md`
 - `docs/releases/mvp/mvp-0-8-playable-card-slice/plan.md`
@@ -2261,7 +2261,7 @@ Detailed planning and completion artifacts available:
 - `docs/releases/mvp/mvp-0-91-card-images/requirements.md`
 - `docs/releases/mvp/mvp-0-91-card-images/card-image-asset-gate-spec.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/final-review.md`

@@ -19,7 +19,7 @@ Die V0.95-Requirements sind ausreichend eng, testbar und an die bestehende Mecha
 - `docs/releases/mvp/mvp-0-95-resources-tags/requirements.md`
 - `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`
 - `docs/releases/mvp/mvp-0-95-resources-tags/test-matrix.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/mechanics-coverage-0.94.json`
 - `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 

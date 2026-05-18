@@ -2,7 +2,7 @@
 
 Stand: 2026-05-17
 Status: Architekturvertrag für einen späteren kleinen Server-/Shared-Slice
-Quelle: `docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md`
+Quelle: `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md`
 
 ## Zweck
 

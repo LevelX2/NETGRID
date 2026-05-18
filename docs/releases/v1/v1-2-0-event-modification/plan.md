@@ -12,10 +12,10 @@ Replacement Effects sind ausdrücklich nicht Teil von V1.2.0.
 ## Quellenbasis
 
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/final-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`
 - bestehende Mechanikgates für Damage, Tags, Run/Breach, PendingChoice, Visibility, Replay und StateHash
 

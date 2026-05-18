@@ -29,8 +29,8 @@ Die V2.x-Planung soll gegen den aktuellen Projektstand neu einsortiert werden: W
 
 ## Kontext und Quellen
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`, Abschnitt `V2.x Geschlossene Community und öffentliche Multiplayer-Basis`.
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`, Abschnitt `Langfristig: öffentlich nutzbarer Multiplayer`.
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`, Abschnitt `V2.x Geschlossene Community und öffentliche Multiplayer-Basis`.
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`, Abschnitt `Langfristig: öffentlich nutzbarer Multiplayer`.
 - `docs/codex/CODEX_STATUS.md` meldet inzwischen V1.9.22 als abgeschlossen; V2.x bleibt separate Gate-Folge.
 - `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-final-review.md` bestätigt den LAN-Open-Lobby-Mini-Slice als abgeschlossen, aber ohne Public-Lobby-/Account-/Moderationsumfang.
 

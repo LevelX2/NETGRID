@@ -16,7 +16,7 @@ V0.92 ist abgeschlossen. Das Mechanik-Inventar liegt als Markdown- und JSON-Arte
 Erstellt:
 
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/requirements.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/mechanics-coverage-0.92.json`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-effect-timing-spec.md`
 - `docs/releases/mvp/mvp-0-92-mechanics-inventory/mechanic-m1-test-matrix.md`

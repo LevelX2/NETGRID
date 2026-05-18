@@ -7,7 +7,7 @@
 **Wichtig:** Dieses Dokument ist ein Runbook. Es ersetzt nicht die Fachkonzepte, sondern übersetzt sie in eine Codex-taugliche Arbeitsweise.
 **Namensstand 2026-05-08:** NETGRID ist der aktive App- und Projektname. NETGRID bleibt in diesem Runbook als fachliche Spiel-, Regel- und Quellenreferenz erhalten.
 
-**Aktueller Vorranghinweis 2026-05-08:** Dieses Runbook bleibt für MVP 0.1, MVP 0.2 und den grundsätzlichen Codex-Workflow gültig. Für den aktuellen Release-Stand und alle Anschlussplanungen ab V1.1.3 sind `docs/codex/CODEX_STATUS.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` maßgeblich. Die konsolidierte Roadmap hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
+**Aktueller Vorranghinweis 2026-05-08:** Dieses Runbook bleibt für MVP 0.1, MVP 0.2 und den grundsätzlichen Codex-Workflow gültig. Für den aktuellen Release-Stand und alle Anschlussplanungen ab V1.1.3 sind `docs/codex/CODEX_STATUS.md` und `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md` maßgeblich. Die konsolidierte Roadmap hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
 
 ---
 

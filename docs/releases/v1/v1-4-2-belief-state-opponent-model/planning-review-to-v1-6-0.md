@@ -16,7 +16,7 @@ Die Roadmap nennt V1.5.x und V1.6.x als Releasefamilien. Für die nächste konkr
 
 ## Geprüfte Quellen
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/codex/CODEX_STATUS.md`
 - `docs/releases/v1/v1-4-1-plan-based-runner-ai/final-review.md`
 - `docs/releases/ai/deck-legal-approval/batch-plan.md`

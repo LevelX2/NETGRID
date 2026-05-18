@@ -14,10 +14,10 @@ Diese Entscheidung legt die Zielstruktur für `docs/` fest. Sie ersetzt keine be
 
 Vorarbeiten liegen bereits vor:
 
-- `docs/derived/DOCS_INVENTORY_LIFECYCLE_INDEX_2026_05_17.md`
-- `docs/derived/ROOT_SOURCE_DUPLICATES_CLEANUP_REVIEW_2026_05_17.md`
+- `docs/reviews/docs-cleanup/docs-inventory-lifecycle-index-2026-05-17.md`
+- `docs/reviews/docs-cleanup/root-source-duplicates-cleanup-review-2026-05-17.md`
 - `docs/releases/backend-ops/backend-0-5/README.md`
-- `docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md`
+- `docs/reviews/docs-cleanup/docs-derived-backend-0-5-link-audit-move-plan.md`
 - `docs/reviews/originalset-spotchecks/README.md`
 - `docs/activities/README.md`
 
@@ -61,13 +61,13 @@ Die nächsten Schritte sollen klein und prüfbar bleiben:
 2. Backend 0.5 als Pilotfamilie nach `docs/releases/backend-ops/backend-0-5/` migrieren. Status 2026-05-18: erledigt.
 3. `docs/abilityEngine/` nach `docs/architecture/ability-engine/` überführen. Status 2026-05-18: erledigt.
 4. `docs/activities/done/` für Mai 2026 in einem Rollup verdichten. Status 2026-05-18: erledigt als `docs/activities/done/ROLLUP_2026_05.md`; Einzeldateien bleiben bis zu separater Linkmigration erhalten.
-5. Danach erst größere Blöcke schneiden. Status 2026-05-18: S01 ist nach `docs/releases/special/s01/` migriert; AI-Architektur, AI-Reviews und AI-Release-/Approval-Spuren liegen unter `docs/architecture/ai/`, `docs/reviews/ai/` und `docs/releases/ai/`; die historische MVP-0.x-Kette ist nach `docs/releases/mvp/` migriert; Proteus-Planungsartefakte liegen unter `docs/releases/proteus/`; die V1.0- bis V1.9.22-Familien sind nach `docs/releases/v1/` migriert; V2.x-Plattformverträge sind nach `docs/releases/v2/` migriert; Originalset-Spotcheck-Evidence liegt unter `docs/reviews/originalset-spotchecks/`, erledigte Jobfiles unter `docs/archive/originalset-spotcheck-jobs/2026-05/`.
+5. Danach erst größere Blöcke schneiden. Status 2026-05-18: S01 ist nach `docs/releases/special/s01/` migriert; AI-Architektur, AI-Reviews und AI-Release-/Approval-Spuren liegen unter `docs/architecture/ai/`, `docs/reviews/ai/` und `docs/releases/ai/`; die historische MVP-0.x-Kette ist nach `docs/releases/mvp/` migriert; Proteus-Planungsartefakte liegen unter `docs/releases/proteus/`; die V1.0- bis V1.9.22-Familien sind nach `docs/releases/v1/` migriert; V2.x-Plattformverträge sind nach `docs/releases/v2/` migriert; Roadmaps liegen unter `docs/releases/roadmaps/`; Regel-, Kartenbild-, Deckbibliotheks- und Live-Match-Architektur liegt unter `docs/architecture/`; Querschnittsreviews liegen unter `docs/reviews/`; Entscheidungen liegen unter `docs/decisions/`; Originalset-Spotcheck-Evidence liegt unter `docs/reviews/originalset-spotchecks/`, erledigte Jobfiles unter `docs/archive/originalset-spotcheck-jobs/2026-05/`. `docs/derived/` enthält nur noch den Übergangshinweis.
 
 ## Nicht entschieden
 
 - Ob alte Pfade grundsätzlich Redirect-Stubs behalten oder vollständig umgelinkt werden.
 - Ob große historische Bild- und Designserien langfristig im Arbeitsbaum bleiben oder nur über Git-Historie erhalten werden.
-- Ob alle existierenden `docs/derived/`-Artefakte irgendwann migriert werden oder ob ein kleiner historischer Rest dort verbleibt.
+- Ob `docs/derived/README.md` dauerhaft als Übergangshinweis bleibt oder nach einer längeren Stabilisierungsphase entfernt wird.
 
 ## Akzeptanz
 

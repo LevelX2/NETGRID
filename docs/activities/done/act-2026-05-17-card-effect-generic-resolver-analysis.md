@@ -13,7 +13,7 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/CARD_EFFECT_GENERIC_RESOLVER_ANALYSIS_2026_05_17.md
+  - docs/architecture/card-rules/card-effect-generic-resolver-analysis-2026-05-17.md
   - docs/activities/inbox/act-2026-05-17-generic-economy-action-resolver.md
   - docs/activities/inbox/act-2026-05-17-generic-counter-credit-pool-resolver.md
   - docs/activities/inbox/act-2026-05-17-generic-scored-agenda-action-resolver.md
@@ -91,7 +91,7 @@ Die Kartenimplementierung soll darauf geprüft werden, ob vergleichbare Effekte 
 
 ## Ergebnisnotiz
 
-Abgeschlossen. Die Analyse liegt in `docs/derived/CARD_EFFECT_GENERIC_RESOLVER_ANALYSIS_2026_05_17.md`. Sie bestätigt Umsetzungsbedarf, priorisiert aber kleine, familienbezogene Schnitte statt eines breiten Engine-Umbaus.
+Abgeschlossen. Die Analyse liegt in `docs/architecture/card-rules/card-effect-generic-resolver-analysis-2026-05-17.md`. Sie bestätigt Umsetzungsbedarf, priorisiert aber kleine, familienbezogene Schnitte statt eines breiten Engine-Umbaus.
 
 Angelegte Folgepakete:
 

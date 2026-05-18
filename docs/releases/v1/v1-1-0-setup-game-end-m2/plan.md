@@ -42,7 +42,7 @@ Primäre Quellen für diesen Plan:
 - `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md`
 - `docs/releases/mvp/mvp-0-93-m1-engine-foundation/requirements.md`
 - `docs/releases/mvp/mvp-0-93-m1-engine-foundation/final-review.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`
 - `docs/codex/CODEX_STATUS.md`
 - aktuelle NETGRID-Anforderungssammlung aus dem Chat vom 2026-05-07
 

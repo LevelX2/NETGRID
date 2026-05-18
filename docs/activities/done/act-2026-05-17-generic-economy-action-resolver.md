@@ -31,7 +31,7 @@ Einfache Kartenfähigkeiten, die Aktionen/Klicks gegen Credits oder Credit-Repla
 
 ## Kontext und Quellen
 
-- Analyse: `docs/derived/CARD_EFFECT_GENERIC_RESOLVER_ANALYSIS_2026_05_17.md`.
+- Analyse: `docs/architecture/card-rules/card-effect-generic-resolver-analysis-2026-05-17.md`.
 - Hotspots: `packages/engine/src/index.ts` bei rezzed Corp Asset/Node LegalActions und `gain_credit`-Resolverzweigen.
 - Musterkarten: einfache Corp Economy Assets, `Investment Firm`, `South African Mining Corp`.
 

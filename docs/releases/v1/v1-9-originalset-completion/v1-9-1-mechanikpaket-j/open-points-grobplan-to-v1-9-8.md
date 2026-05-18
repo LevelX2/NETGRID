@@ -18,7 +18,7 @@ Leitlinien:
 
 - `docs/codex/CODEX_STATUS.md` (V1.9.0 abgeschlossen am 2026-05-10)
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/manifests/card-implementation-manifest-*.json`
 

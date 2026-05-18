@@ -7,7 +7,7 @@ Status: abgeschlossen (Planungsfreeze-Eingang)
 
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/local/card-import/onr-v1-limited/card-snapshot-onr-v1-limited.local.json`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-8-1-mechanikpaket-h/final-review.md`
 - `docs/codex/CODEX_STATUS.md`
 

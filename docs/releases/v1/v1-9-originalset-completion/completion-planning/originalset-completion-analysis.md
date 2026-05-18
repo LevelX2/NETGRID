@@ -20,7 +20,7 @@ Dieses Dokument rekonstruiert den Kartenstand nach V1.9.9 und schneidet die rest
 - `docs/codex/CODEX_STATUS.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-9-pre-sprint/final-review.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-5-to-v1-9-8-deferred-sprint/deferred-register.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `data/local/card-import/onr-v1-limited/card-snapshot-onr-v1-limited.local.json`
 - `data/local/card-import/onr-v1-limited/catalog-index-onr-v1-limited.local.json`
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`

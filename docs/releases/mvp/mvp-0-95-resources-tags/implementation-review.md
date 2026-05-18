@@ -36,7 +36,7 @@ V0.95 implementiert den engen Resource-/Tag-Slice aus dem Requirements Freeze:
 - `data/rules/mechanics-coverage-0.95.json`
 - `data/scenarios/v095-resource-tag.json`
 - `data/scenarios/v095-multiplayer-resource-smoke.json`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 
 ## Review-Befund
 

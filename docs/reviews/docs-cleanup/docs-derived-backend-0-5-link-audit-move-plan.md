@@ -10,7 +10,7 @@ Die Backend-0.5-Artefakte wurden nach der Zielstrukturentscheidung vom 2026-05-1
 
 Begründung:
 
-- `docs/releases/` ist durch `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` als Zielbereich akzeptiert.
+- `docs/releases/` ist durch `docs/decisions/docs-structure-target-decision-2026-05-18.md` als Zielbereich akzeptiert.
 - Backend 0.5 ist klein, abgeschlossen und fachlich von Karten-/Mechanikreleases getrennt.
 - Die harten Pfadlinks sind überschaubar und wurden auf die neuen Zielpfade migriert.
 - Variante A aus der Stub-Strategie wurde gewählt: vollständige Linkmigration ohne Redirect-Stubs.

@@ -19,7 +19,7 @@ Keine Aussage in diesem Dokument schaltet Proteus-Karten frei. Die Proteus-Daten
 - `docs/releases/mvp/mvp-0-95-resources-tags/resource-tag-interaction-spec.md`
 - `docs/releases/mvp/mvp-0-98-identities-hidden-zones/hidden-zone-tools-spec.md`
 - `docs/releases/mvp/mvp-0-96-trace-link-bidding/trace-link-bidding-spec.md`
-- `docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md`
+- `docs/architecture/card-rules/trace-open-bidding-alignment-plan-2026-05-16.md`
 - `docs/releases/mvp/mvp-0-94-damage-flatline/damage-flatline-spec.md`
 - `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/full-archives-access-spec.md`

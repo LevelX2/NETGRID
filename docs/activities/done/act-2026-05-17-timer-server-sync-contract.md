@@ -12,12 +12,12 @@ completedAt: 2026-05-17
 branch: codex/activity-worker-5
 releaseTarget:
 blockedBy:
-  - docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md
+  - docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md
 resultArtifacts:
-  - docs/derived/TIMER_SERVER_SYNC_CONTRACT_2026_05_17.md
+  - docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md
 checks:
-  - rg -n "timerSnapshot|ApiTimerSnapshot|timer_snapshot|hardLimitMs|deadlineId|AIInput|DecisionDebug|StateHash|Reconnect|WebSocket" docs/derived/TIMER_SERVER_SYNC_CONTRACT_2026_05_17.md docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md packages/shared/src/api-contracts.ts
-  - rg -n "sessionToken|reconnectToken|joinToken|tokenHash|deckHash|privateDeckSnapshots|privatePayload|cardInstances|FullState|AIInput|DecisionDebug" docs/derived/TIMER_SERVER_SYNC_CONTRACT_2026_05_17.md
+  - rg -n "timerSnapshot|ApiTimerSnapshot|timer_snapshot|hardLimitMs|deadlineId|AIInput|DecisionDebug|StateHash|Reconnect|WebSocket" docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md packages/shared/src/api-contracts.ts
+  - rg -n "sessionToken|reconnectToken|joinToken|tokenHash|deckHash|privateDeckSnapshots|privatePayload|cardInstances|FullState|AIInput|DecisionDebug" docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md
   - git diff --check
 ---
 
@@ -29,7 +29,7 @@ Vor harten Timerfolgen soll ein side-sicherer Server-/WebSocket-/Reconnect-Vertr
 
 ## Kontext und Quellen
 
-- `docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md`
+- `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md`
 - bestehende Multiplayer-, Reconnect- und API-Verträge unter `packages/shared/src/api-contracts.ts`
 
 ## Scope
@@ -61,6 +61,6 @@ Vor harten Timerfolgen soll ein side-sicherer Server-/WebSocket-/Reconnect-Vertr
 
 ## Ergebnisnotiz
 
-Abgeschlossen. Der Architekturvertrag `docs/derived/TIMER_SERVER_SYNC_CONTRACT_2026_05_17.md` definiert `ApiTimerSnapshot`, Scope-/Warnstufen, Serverzeit-/Drift-/Periodikregeln, WebSocket- und Reconnect-Verhalten, Redaction-Grenzen für Hidden Info, Tokens, Deckdaten, Replay, StateHash, `AIInput` und `DecisionDebug` sowie eine 20-Punkte-Testmatrix.
+Abgeschlossen. Der Architekturvertrag `docs/architecture/live-match/timer-server-sync-contract-2026-05-17.md` definiert `ApiTimerSnapshot`, Scope-/Warnstufen, Serverzeit-/Drift-/Periodikregeln, WebSocket- und Reconnect-Verhalten, Redaction-Grenzen für Hidden Info, Tokens, Deckdaten, Replay, StateHash, `AIInput` und `DecisionDebug` sowie eine 20-Punkte-Testmatrix.
 
 Es wurde bewusst keine Engine-Timeout-Implementierung, kein Auto-Pass/Forfeit, keine UI-Detailumsetzung und keine Chat-Retention beschrieben oder umgesetzt. Offene Umsetzungspunkte sind im Vertragsartefakt als Handoff-Risiken benannt: Speicherung von Match-/Scope-Startzeiten, Tick-Scheduler-Lifecycle, Disconnect-/Grace-Produktentscheidung und Warnschwellen-Feature-Flag.

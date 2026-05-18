@@ -10,7 +10,7 @@ Ziel ist ein deterministischer, gate-konformer Kernrelease für Counter-/Virus-/
 
 ## Verbindliche Eingaben
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-7-1-mechanikpaket-e/plan-to-v1-8-1.md`
 - `docs/releases/v1/v1-8-1-mechanikpaket-h/release-assignment-preflight.md`
 - `docs/releases/v1/v1-8-1-mechanikpaket-h/requirements.md`
