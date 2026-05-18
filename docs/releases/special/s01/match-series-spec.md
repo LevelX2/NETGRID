@@ -36,13 +36,44 @@ Die private Zwei-Spiel-Serie nutzt die Original-Netrunner-nahe Matchpunktwertung
 
 Diese Serienwertung ist eine private Produktregel für NETGRID und ist bewusst so geschnitten, dass sie später auch für Serien mit mehr als zwei geplanten Spielen erweitert werden kann. Sie bleibt getrennt von offizieller öffentlicher Turnierlogik und verändert nicht den Engine-Vertrag für einzelne Spiele.
 
+## Einzelspiel-Aufgabe innerhalb einer Serie
+
+Ein `forfeit` in einer privaten Matchserie beendet nur das aktuell laufende Einzelspiel. Die Serie selbst wird dadurch nicht automatisch abgebrochen, solange noch geplante Serienspiele offen sind. Eine komplette Serienaufgabe oder ein Serienabbruch ist ein eigener, separater Vertrag und gehört nicht zur bestehenden `forfeitMatch`-Semantik.
+
+Für ein aufgegebenes Serienspiel gilt derselbe Lifecycle-Vertrag wie bei einem normalen Einzelspiel:
+
+- die aufgebende menschliche Seite ist `loserSide`;
+- die Gegenseite ist `winnerSide`;
+- `reason` ist `forfeit`;
+- `finalEngineStateHash` ist der letzte echte Engine-StateHash vor der Aufgabe;
+- das Engine-`GameState.winner` wird nicht künstlich gesetzt;
+- Replay und StateHash enthalten nur die bis dahin echten Engine-Ereignisse.
+
+Das aufgegebene Einzelspiel wird trotzdem als Serienergebnis in `series.results` aufgenommen. Der Gewinner erhält für dieses Serienspiel 10 Matchpunkte. Der Verlierer erhält die bis zur Aufgabe tatsächlich erzielten eigenen Agenda-Punkte. Diese Wertung entspricht der normalen Serienwertung für einen Einzelspielsieg und verhindert, dass eine Aufgabe automatisch die gesamte Serie entscheidet.
+
+Nach einer Einzelspiel-Aufgabe bleibt `series-next` verfügbar, wenn:
+
+- die Serie noch nicht alle geplanten Spiele abgeschlossen hat;
+- für das nächste Spiel noch kein `nextMatchId` existiert;
+- der anfragende Spieler mit gültiger Session authentifiziert ist;
+- das aufgegebene Spiel einen side-sicheren terminalen Matchstatus und `series.results`-Eintrag besitzt.
+
+Nach dem letzten geplanten Spiel schließt die Serie auch dann regulär ab, wenn dieses letzte Spiel per `forfeit` endet. Die Serienentscheidung verwendet dieselbe Matchpunkt-Summe wie bei regulär beendeten Einzelspielen.
+
+UI-Texte müssen im Serienkontext zwischen Einzelspiel und Serie trennen:
+
+- `Spiel aufgeben` bedeutet: nur dieses Serienspiel wird aufgegeben.
+- Bestätigungstext muss ausdrücklich sagen, dass die Matchserie fortgesetzt werden kann, sofern noch ein Folgespiel offen ist.
+- `Matchserie abbrechen` oder `Serie aufgeben` darf nicht als Synonym für `forfeitMatch` verwendet werden.
+- Ein späterer kompletter Serienabbruch braucht eigenen Serververtrag, eigene UI-Texte und eigene Tests.
+
 ## Folgespiel
 
 Das Folgespiel wird über `POST /api/matches/:matchId/series-next` erstellt.
 
 Voraussetzungen:
 
-- das aktuelle Spiel ist beendet,
+- das aktuelle Spiel ist regulär beendet oder im Serienkontext als Einzelspiel aufgegeben,
 - es ist eine private Serie,
 - es gibt noch kein bereits erzeugtes Folgespiel,
 - der anfragende Spieler ist per Session-Token authentifiziert.
@@ -52,6 +83,7 @@ Das neue Spiel nutzt dieselben Deck-Snapshots und Matchsettings, aber die Seite 
 ## Sicherheitsgrenzen
 
 - Die Engine entscheidet weiterhin nur das Einzelspielende.
+- Einzelspiel-Aufgabe bleibt Match-/Server-Lifecycle und erzeugt keinen Engine-Sieg.
 - Serie, Ergebnisgrafik und Audio gehen nicht in Replay oder StateHash ein.
 - `GameResultSummary.series` enthält nur Aggregationen und Referenzen, keine Decklisten, Tokens, `cardInstances` oder private Payloads.
 - Verdeckte Kartendaten bleiben ausschließlich server-/storage-intern.
@@ -63,5 +95,7 @@ Die Umsetzung ist über Server-Tests und Visibility-Vertrag abgedeckt:
 - Spiel 1 einer Serie endet mit side-sicherem Serienstand.
 - Serienergebnisse werden per 10-Punkte-Siegwertung plus Verlierer-Agenda-Punkten entschieden.
 - `series-next` erstellt Spiel 2 mit Seitenwechsel.
+- Aufgabe in Spiel 1 einer Serie erzeugt ein Einzelspiel-Forfeit-Resultat und hält `series-next` verfügbar.
+- Aufgabe im letzten Serienspiel schließt die Serie über die normale Matchpunktwertung ab.
 - doppeltes Erstellen des Folgespiels wird abgelehnt.
 - UI-Vertrag enthält private Matchserie, Folgespiel-Aktion und keine verbotenen ResultSummary-Felder.
