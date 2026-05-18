@@ -8,7 +8,7 @@ import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
-import { CARD_ROLES_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
+import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, creditsToBreakEndTheRunSubroutinesWithBreaker, endTheRunSubroutineCount, iceHasEndTheRun } from "./visible-run-analysis";
 import { buildAiDecisionInputDto } from "./input-dto";
 import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
@@ -366,6 +366,7 @@ const SOAK_SEEDS_143 = soakSeeds143Data as {
   };
 };
 const EXPLOIT_FIXTURES_143 = exploitFixtures143Data as { version: "1.4.3"; fixtures: V143ExploitFixture[] };
+const AI_HINTS = createAiHintsByCard();
 
 export type AiSimulationConfig = {
   seed?: string;
@@ -1527,15 +1528,7 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {
-    const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
-    const selected = choice.options
-      .slice()
-      .sort((left, right) => {
-        const labelCompare = left.label.localeCompare(right.label, "de");
-        return labelCompare !== 0 ? labelCompare : left.id.localeCompare(right.id);
-      })
-      .slice(0, count)
-      .map((option) => option.id);
+    const selected = selectedDiscardChoiceOptionIds(input, choice, selectableOptions);
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
   if (choice.kind === "select_cards" && choice.source.startsWith("v1912.shell_traders_start_turn")) {
@@ -1600,6 +1593,93 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
   }
   const selected = bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
   return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function selectedDiscardChoiceOptionIds(
+  input: AiDecisionInput,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  selectableOptions: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"]
+): string[] {
+  const count = boundedSelectionCount(choice.minSelections, choice.maxSelections, selectableOptions.length);
+  if (count <= 0) return [];
+  const handByInstanceId = new Map(input.playerView.own.gripOrHq.filter((card) => card.known).map((card) => [card.instanceId, card]));
+  const scored = selectableOptions.map((option) => {
+    const instanceId = discardOptionInstanceId(option);
+    const card = instanceId ? handByInstanceId.get(instanceId) : undefined;
+    if (!card || !card.definitionId) return undefined;
+    return { option, keepValue: discardKeepValue(input, card) };
+  });
+  if (scored.some((entry) => !entry)) return stableDiscardChoiceOptionIds(selectableOptions, count);
+  return scored
+    .filter((entry): entry is { option: (typeof selectableOptions)[number]; keepValue: number } => Boolean(entry))
+    .sort((left, right) => left.keepValue - right.keepValue || left.option.label.localeCompare(right.option.label, "de") || left.option.id.localeCompare(right.option.id))
+    .slice(0, count)
+    .map((entry) => entry.option.id);
+}
+
+function stableDiscardChoiceOptionIds(
+  selectableOptions: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"],
+  count: number
+): string[] {
+  return selectableOptions
+    .slice()
+    .sort((left, right) => left.label.localeCompare(right.label, "de") || left.id.localeCompare(right.id))
+    .slice(0, count)
+    .map((option) => option.id);
+}
+
+function discardOptionInstanceId(option: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"][number]): string | undefined {
+  if (typeof option.value === "string") return option.value;
+  if (option.card?.instanceId) return option.card.instanceId;
+  return option.id.startsWith("card_") ? option.id.slice("card_".length) : undefined;
+}
+
+function discardKeepValue(input: AiDecisionInput, card: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"][number]["card"]): number {
+  if (!card?.definitionId) return 0;
+  const roles = discardRolesForCardId(card.definitionId);
+  const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
+  const cost = discardVisibleCardCost(card);
+  const duplicateCount = input.playerView.own.gripOrHq.filter((candidate) => candidate.definitionId === card.definitionId).length;
+  let value = 100;
+
+  if (input.side === "corp") {
+    if (type === "agenda") value += 330;
+    if (type === "ice" || card.definitionId.includes("_ice") || roles.some((role) => role.endsWith("_ice") || role === "etr_ice")) value += 320;
+    const economyRole = roles.some((role) => role.includes("economy")) || card.definitionId.includes("economy");
+    if (type === "operation") value += economyRole ? 120 : 40;
+    if (economyRole) value += input.playerView.own.credits < 5 ? 135 : 55;
+    if (roles.some((role) => role.includes("score") || role.includes("remote"))) value += 70;
+  } else {
+    if (roles.some((role) => role.startsWith("breaker_"))) {
+      const installedSameBreakerRole = roles.some((role) => role.startsWith("breaker_") && (input.playerView.own.rig ?? []).some((rigCard) => discardRolesForCardId(rigCard.definitionId).includes(role)));
+      value += installedSameBreakerRole ? 95 : 210;
+    }
+    if (roles.some((role) => role.includes("economy") || role === "tempo")) value += input.playerView.own.credits < 4 ? 170 : 65;
+    if (roles.includes("memory") || roles.includes("setup") || roles.includes("build_rig")) value += 80;
+    if (roles.includes("draw")) value += 55;
+    if (roles.includes("run_pressure")) value += input.playerView.own.credits < 4 ? 20 : 90;
+  }
+
+  if (input.legalActions.some((action) => action.source === card.instanceId && action.type !== "resolve_choice")) value += 90;
+  if (duplicateCount > 1 && type !== "agenda") value -= 75 * (duplicateCount - 1);
+  if (cost > input.playerView.own.credits + 3 && type !== "agenda") value -= 70;
+  if (roles.length === 0 && type !== "agenda") value -= 60;
+  return value;
+}
+
+function discardRolesForCardId(cardId: string | undefined): string[] {
+  if (!cardId) return [];
+  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
+  const hint = AI_HINTS.get(cardId);
+  return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? [])]);
+}
+
+function discardVisibleCardCost(card: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"][number]["card"]): number {
+  if (!card) return 0;
+  const direct = card.installCost ?? card.cost ?? card.rezCost;
+  if (typeof direct === "number" && Number.isFinite(direct)) return Math.max(0, direct);
+  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  return Math.max(0, definition?.installCost ?? definition?.cost ?? definition?.rezCost ?? 0);
 }
 
 function selectedSearchChoiceOptionIds(
@@ -1709,6 +1789,8 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
           ? "Der Runner nutzt nach offen gelegten Trace-Bids eine legale Link-Faehigkeit."
           : "Der Runner beantwortet eine sichtbare legale Choice.";
         evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+        if (input.playerView.pendingChoice?.source === "discard_phase")
+          evidence.push("choice_source:discard_phase", "discard_selection:keep_value");
       }
       break;
     case "steal_agenda":
@@ -1874,6 +1956,8 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
         reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "corp.trace.bid_visible_amount" : "corp.choice.resolve";
         explanation = "Die Corp beantwortet eine sichtbare legale Choice.";
         evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+        if (input.playerView.pendingChoice?.source === "discard_phase")
+          evidence.push("choice_source:discard_phase", "discard_selection:keep_value");
       }
       break;
     case "mandatory_draw":

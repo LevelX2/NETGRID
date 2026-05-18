@@ -83,6 +83,7 @@ import {
 } from "./visible-run-analysis";
 import type {
   AiDeckDoctrineProfile,
+  AiDecisionInput,
   CardDefinition,
   CardInstanceId,
   ChoiceRequest,
@@ -98,6 +99,7 @@ import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
     delete DEMO_CARDS_BY_ID.test_hidden_runner_resource_harness;
+    delete DEMO_CARDS_BY_ID.test_planless_corp_operation;
   });
 
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -974,13 +976,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
     const decision = chooseCorpAction(input);
-    const sortedFirst = input.playerView.pendingChoice?.options
-      .slice()
-      .sort(
-        (left, right) =>
-          left.label.localeCompare(right.label, "de") ||
-          left.id.localeCompare(right.id),
-      )[0]?.id;
+    const selectableOptionIds = input.playerView.pendingChoice?.options.map((option) => option.id) ?? [];
     const serializedRunner = JSON.stringify(
       buildAiDecisionInput(state, "runner", { difficulty: "normal" }),
     );
@@ -991,13 +987,112 @@ describe("MVP 0.3 AI controller contract", () => {
     ]);
     expect(decision.selectedChoices).toEqual({
       choiceId: state.pendingChoice?.choiceId,
-      selectedOptionIds: [sortedFirst],
+      selectedOptionIds: [expect.any(String)],
     });
+    const selectedDiscardChoices = decision.selectedChoices as
+      | { selectedOptionIds: string[] }
+      | undefined;
+    const selectedDiscardOptionId = selectedDiscardChoices?.selectedOptionIds[0];
+    expect(typeof selectedDiscardOptionId).toBe("string");
+    expect(selectableOptionIds).toContain(selectedDiscardOptionId);
+    expect(decision.evidence).toContain("discard_selection:keep_value");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
     expect(serializedRunner).not.toContain(
       input.playerView.pendingChoice?.options[0]?.label ?? "not-present",
     );
     expect(serializedRunner).not.toContain("cardInstances");
+  });
+
+  it("uses discard keep values for Runner breaker and economy preservation", () => {
+    const breakerInput = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: [
+        "simple_fracter",
+        "simple_run_event",
+        "simple_run_event",
+      ],
+    });
+    const breakerDecision = chooseRunnerAction(breakerInput);
+    const breakerSelectedChoices = breakerDecision.selectedChoices as
+      | { selectedOptionIds: string[] }
+      | undefined;
+
+    expect(breakerSelectedChoices?.selectedOptionIds).toHaveLength(1);
+    expect(breakerSelectedChoices?.selectedOptionIds[0]).not.toBe(
+      "card_discard_simple_fracter_0",
+    );
+    expect(breakerDecision.evidence).toContain("discard_selection:keep_value");
+
+    const lowCreditInput = discardDecisionInputForTest("runner", {
+      credits: 1,
+      cards: ["simple_economy_event", "simple_run_event"],
+    });
+    const lowCreditDecision = chooseRunnerAction(lowCreditInput);
+
+    expect(lowCreditDecision.selectedChoices).toEqual({
+      choiceId: lowCreditInput.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+  });
+
+  it("uses discard keep values for Corp agenda, ICE and economy preservation", () => {
+    DEMO_CARDS_BY_ID.test_planless_corp_operation = {
+      id: "test_planless_corp_operation",
+      title: "Planless Corp Operation",
+      side: "corp",
+      type: "operation",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      cost: 1,
+      rulesText: "Discard baseline fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("corp", {
+      credits: 2,
+      cards: [
+        "simple_agenda",
+        "simple_barrier_ice",
+        "simple_economy_operation",
+        "test_planless_corp_operation",
+      ],
+    });
+    const decision = chooseCorpAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_planless_corp_operation_3"],
+    });
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+    delete DEMO_CARDS_BY_ID.test_planless_corp_operation;
+  });
+
+  it("falls back to stable discard order when choice options do not map to own hand", () => {
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_economy_event"],
+    });
+    const choice = input.playerView.pendingChoice;
+    if (!choice) throw new Error("Missing discard choice fixture");
+    const fallbackInput = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        pendingChoice: {
+          ...choice,
+          options: [
+            { id: "z_option", label: "Zeta", value: "missing_z" },
+            { id: "a_option", label: "Alpha", value: "missing_a" },
+          ],
+        },
+      },
+    };
+
+    expect(chooseRunnerAction(fallbackInput).selectedChoices).toEqual({
+      choiceId: choice.choiceId,
+      selectedOptionIds: ["a_option"],
+    });
   });
 
   it("keeps V0.95 Resource trash decisions LegalActions-only and side-safe", () => {
@@ -8626,6 +8721,88 @@ function subtypeKeyForTest(subtype: string): string {
 
 function visibleCard(definitionId: string, instanceId: string): VisibleCard {
   return { instanceId, definitionId, known: true, title: definitionId };
+}
+
+function discardDecisionInputForTest(
+  side: Side,
+  config: { credits: number; cards: string[]; discardCount?: number },
+): AiDecisionInput {
+  const state =
+    side === "runner"
+      ? toRunnerTurn(createGameAfterSetup({ seed: `ai-discard-${side}` }))
+      : createGameAfterSetup({ seed: `ai-discard-${side}` });
+  const base = buildAiDecisionInput(state, side, {
+    difficulty: "normal",
+    profileId: `${side}-ai-v1.4.2-normal`,
+  });
+  const hand = config.cards.map((definitionId, index) =>
+    discardVisibleCardForTest(definitionId, `discard_${definitionId}_${index}`),
+  );
+  const discardCount = config.discardCount ?? 1;
+  const choice: ChoiceRequest = {
+    choiceId: `discard_${side}_test`,
+    side,
+    source: "discard_phase",
+    prompt: side === "corp" ? "Korp-Discard wählen" : "Runner-Discard wählen",
+    kind: "select_cards",
+    options: hand.map((card) => ({
+      id: `card_${card.instanceId}`,
+      label: card.title ?? card.definitionId ?? card.instanceId,
+      publicLabel: "Handkarte",
+      value: card.instanceId,
+    })),
+    minSelections: discardCount,
+    maxSelections: discardCount,
+    stateVersion: base.playerView.stateVersion,
+    visibility: "hidden_info_barrier",
+  };
+  const resolveChoice: LegalAction = {
+    actionId: `${side}.resolve_choice.discard_test`,
+    side,
+    type: "resolve_choice",
+    label: "Discard wählen",
+    source: "game_rule",
+    timingPoint: base.playerView.timingPoint,
+    costs: [],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: base.playerView.stateVersion + 1,
+  };
+  return {
+    ...base,
+    playerView: {
+      ...base.playerView,
+      phase: side === "corp" ? "corp_discard_phase" : "runner_discard_phase",
+      own: {
+        ...base.playerView.own,
+        credits: config.credits,
+        gripOrHq: hand,
+      },
+      pendingChoice: choice,
+    },
+    legalActions: [resolveChoice],
+  };
+}
+
+function discardVisibleCardForTest(
+  definitionId: string,
+  instanceId: string,
+): VisibleCard {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  expect(definition, definitionId).toBeDefined();
+  if (!definition) throw new Error(`Missing ${definitionId}`);
+  return {
+    instanceId,
+    definitionId,
+    known: true,
+    title: definition.title,
+    type: definition.type,
+    subtypes: definition.subtypes,
+    ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
+    ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
+    ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
+    ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
+  };
 }
 
 function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {

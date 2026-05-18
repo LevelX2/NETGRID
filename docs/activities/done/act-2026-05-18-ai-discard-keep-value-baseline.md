@@ -1,18 +1,20 @@
 ---
 activityId: act-2026-05-18-ai-discard-keep-value-baseline
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: normal
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-18
-startedAt:
-completedAt:
+startedAt: 2026-05-18
+completedAt: 2026-05-18
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
 checks:
   - corepack pnpm --filter @netgrid/ai test -- -t "discard"
   - corepack pnpm --filter @netgrid/ai typecheck
@@ -60,13 +62,13 @@ Dieses Paket ist der erste Schritt der Discard-Verbesserung und hat keine vorgel
 
 ## Akzeptanzkriterien
 
-- [ ] Discard-Choices werden über einen eigenen Keep-Value-Pfad entschieden, nicht mehr nur über Label-/ID-Erstoption.
-- [ ] Runner-Test: Bei Überhand hält die KI den einzigen relevanten Breaker oder Economy-Anker und wirft eine klar redundante oder planlose Karte ab.
-- [ ] Runner-Test: Bei Creditmangel hält die KI Economy höher als ein situatives Run-Event ohne realistische Run-Linie.
-- [ ] Korp-Test: Bei Überhand hält die KI eine wichtige Agenda-/ICE-/Economy-Karte höher als eine redundante teure oder aktuell nicht nutzbare Karte.
-- [ ] Fallback-Test: Wenn Choice-Optionen nicht auf eigene Handkarten gemappt werden können, bleibt die Auswahl stabil deterministisch.
-- [ ] Side-Safety-Test: Gegnerische AI-Inputs enthalten keine Discard-Kandidaten, keine konkreten gegnerischen Handtitel und keine privaten Debugdaten.
-- [ ] Bestehende AI-Discard-Tests werden angepasst statt gelöscht und bleiben deterministisch.
+- [x] Discard-Choices werden über einen eigenen Keep-Value-Pfad entschieden, nicht mehr nur über Label-/ID-Erstoption.
+- [x] Runner-Test: Bei Überhand hält die KI den einzigen relevanten Breaker oder Economy-Anker und wirft eine klar redundante oder planlose Karte ab.
+- [x] Runner-Test: Bei Creditmangel hält die KI Economy höher als ein situatives Run-Event ohne realistische Run-Linie.
+- [x] Korp-Test: Bei Überhand hält die KI eine wichtige Agenda-/ICE-/Economy-Karte höher als eine redundante teure oder aktuell nicht nutzbare Karte.
+- [x] Fallback-Test: Wenn Choice-Optionen nicht auf eigene Handkarten gemappt werden können, bleibt die Auswahl stabil deterministisch.
+- [x] Side-Safety-Test: Gegnerische AI-Inputs enthalten keine Discard-Kandidaten, keine konkreten gegnerischen Handtitel und keine privaten Debugdaten.
+- [x] Bestehende AI-Discard-Tests werden angepasst statt gelöscht und bleiben deterministisch.
 
 ## Umsetzungshinweise
 
@@ -77,4 +79,4 @@ Dieses Paket ist der erste Schritt der Discard-Verbesserung und hat keine vorgel
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der AI-Discard nutzt jetzt einen side-sicheren Keep-Value-Pfad aus `PlayerView` und `LegalActions`. Choice-Optionen werden deterministisch auf sichtbare eigene Handkarten gemappt; Rollen aus AI-Hints, Runtime-Kartendaten, sichtbare Kosten, Duplikate, Creditlage und abstrakte LegalAction-Nutzbarkeit fließen in die Bewertung ein. Bei Mapping-Unsicherheit fällt die Auswahl auf die bisherige stabile Label-/ID-Sortierung zurück. Tests decken Runner-Breaker, Runner-Economy bei Creditmangel, Korp-Agenda/ICE/Economy, Fallback-Verhalten und side-sichere Discard-Inputs ab.
