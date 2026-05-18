@@ -5,7 +5,7 @@ import type {
   ResolvedGameEffect,
   Side,
 } from "@netgrid/shared";
-import type { CardEffectImplementation } from "./types";
+import type { CardEffectImplementation } from "./definition-types";
 
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;

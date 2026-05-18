@@ -1,11 +1,25 @@
 import type { CardDefinitionId } from "@netgrid/shared";
-import { onrV1RezCostModifierImplementations } from "./onr-v1/rez-cost-modifiers";
-import { onrV1SimpleGainCreditsImplementations } from "./onr-v1/simple-gain-credits";
+import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
+import { encoderIncImplementation } from "./onr-v1/corp/assets/encoder-inc";
+import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
+import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/skalderviken-sa-beta-test-site";
+import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
+import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/efficiency-experts";
+import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
+import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
+import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
-  ...onrV1RezCostModifierImplementations,
-  ...onrV1SimpleGainCreditsImplementations,
+  livewiresContactsImplementation,
+  scoreImplementation,
+  accountsReceivableImplementation,
+  efficiencyExpertsImplementation,
+  dataMasonsHostingImplementation,
+  encoderIncImplementation,
+  skaldervikenSaBetaTestSiteImplementation,
+  fortressArchitectsImplementation,
+  jerusalemCityGridImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

@@ -18,7 +18,7 @@ import {
   validateGameState,
 } from "./index";
 import { collectActiveModifiers } from "./ability-engine/active-modifiers";
-import { executeCardImplementationEffects } from "./card-implementations/effect-interpreter";
+import { executeCardImplementationEffects } from "./ability-engine/effect-interpreter";
 import {
   CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
   CARD_IMPLEMENTATION_COVERAGE_OVERRIDES,

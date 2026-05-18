@@ -16,10 +16,33 @@ export type CardImplementationCoverageEntry = {
 };
 
 const IMPLEMENTED_REZ_COST_MODIFIER_LOCATION =
-  "packages/engine/src/card-implementations/onr-v1/rez-cost-modifiers.ts";
+  "packages/engine/src/card-implementations/onr-v1";
 
 const IMPLEMENTED_SIMPLE_GAIN_CREDITS_LOCATION =
-  "packages/engine/src/card-implementations/onr-v1/simple-gain-credits.ts";
+  "packages/engine/src/card-implementations/onr-v1";
+
+const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
+  Record<CardDefinitionId, string>
+> = {
+  "onr_v1_097_livewires-contacts":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
+  onr_v1_108_score:
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_281_accounts-receivable":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
+  "onr_v1_290_efficiency-experts":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/efficiency-experts.ts",
+  "onr_v1_317_data-masons":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
+  "onr_v1_320_encoder-inc":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/encoder-inc.ts",
+  "onr_v1_324_fortress-architects":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
+  "onr_v1_341_skalderviken-sa-beta-test-site":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/skalderviken-sa-beta-test-site.ts",
+  "onr_v1_360_jerusalem-city-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+};
 
 function implementedCoverageFor(
   implementation: (typeof CARD_IMPLEMENTATIONS)[number],
@@ -46,7 +69,11 @@ function implementedCoverageFor(
     reason:
       reasons.join(" ") ||
       "Engine-local CardImplementationDefinition exists for card behavior.",
-    currentLocations: [...currentLocations],
+    currentLocations: [
+      IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID[
+        implementation.cardDefinitionId
+      ] ?? [...currentLocations][0],
+    ].filter((location): location is string => Boolean(location)),
   };
 }
 

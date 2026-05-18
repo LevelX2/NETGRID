@@ -9,7 +9,7 @@ import type {
 } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
-import type { CardRezCostModifierImplementation } from "../card-implementations/types";
+import type { CardRezCostModifierImplementation } from "./definition-types";
 import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../mechanics/agenda-operation-effects";
 
 export type CostPurpose = "corp_rez";
