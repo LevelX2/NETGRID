@@ -6552,6 +6552,13 @@ select {
 
 .gameOverHero {
   display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 210px);
+  align-items: center;
+  gap: 18px;
+}
+
+.gameOverHeroCopy {
+  display: grid;
   gap: 7px;
 }
 
@@ -6564,6 +6571,149 @@ select {
 .gameOverHero p:last-child {
   margin: 0;
   color: var(--muted);
+}
+
+.resultWinnerMotif {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid rgb(255 255 255 / 0.14);
+  border-radius: 8px;
+  background: rgb(255 255 255 / 0.06);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.resultMotifFrame {
+  position: relative;
+  width: min(170px, 100%);
+  aspect-ratio: 1.5;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.18);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px),
+    linear-gradient(180deg, rgb(255 255 255 / 0.07) 1px, transparent 1px),
+    rgb(11 16 21 / 0.72);
+  background-size: 18px 18px;
+}
+
+.resultMotifCore,
+.resultMotifTrack {
+  position: absolute;
+  display: block;
+}
+
+.resultMotifCore {
+  inset: 18px 42px;
+  border: 2px solid currentColor;
+  border-radius: 999px 999px 10px 10px;
+}
+
+.resultMotifTrack {
+  height: 2px;
+  background: currentColor;
+  opacity: 0.8;
+}
+
+.resultMotifTrack.one {
+  right: 18px;
+  bottom: 25px;
+  width: 64px;
+  transform: rotate(-18deg);
+}
+
+.resultMotifTrack.two {
+  right: 30px;
+  bottom: 45px;
+  width: 44px;
+  transform: rotate(14deg);
+}
+
+.resultMotifTrack.three {
+  left: 22px;
+  bottom: 23px;
+  width: 52px;
+  transform: rotate(23deg);
+}
+
+.resultWinnerMotif.runner {
+  color: var(--runner);
+}
+
+.resultWinnerMotif.runner .resultMotifCore {
+  inset: 20px 58px 26px 34px;
+  border-radius: 40% 52% 22% 40%;
+  transform: skewX(-12deg);
+}
+
+.resultWinnerMotif.runner .resultMotifFrame::before {
+  content: "";
+  position: absolute;
+  left: 70px;
+  top: 38px;
+  width: 46px;
+  height: 2px;
+  background: currentColor;
+  box-shadow: 18px 14px 0 currentColor, -22px 22px 0 currentColor;
+}
+
+.resultWinnerMotif.corp {
+  color: var(--corp);
+}
+
+.resultWinnerMotif.corp .resultMotifCore {
+  inset: 18px 52px 16px;
+  border-radius: 6px;
+}
+
+.resultWinnerMotif.corp .resultMotifFrame::before,
+.resultWinnerMotif.corp .resultMotifFrame::after {
+  content: "";
+  position: absolute;
+  bottom: 18px;
+  width: 18px;
+  height: 54px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 4px 4px 0 0;
+}
+
+.resultWinnerMotif.corp .resultMotifFrame::before {
+  left: 28px;
+}
+
+.resultWinnerMotif.corp .resultMotifFrame::after {
+  right: 28px;
+}
+
+.resultWinnerMotif.draw {
+  color: var(--agenda);
+}
+
+.resultWinnerMotif.draw .resultMotifCore {
+  inset: 22px 42px;
+  border-radius: 999px;
+}
+
+.resultWinnerMotif.draw .resultMotifTrack.one,
+.resultWinnerMotif.draw .resultMotifTrack.two {
+  left: 50%;
+  right: auto;
+  bottom: 35px;
+  width: 68px;
+  transform-origin: left center;
+}
+
+.resultWinnerMotif.draw .resultMotifTrack.one {
+  transform: rotate(24deg);
+}
+
+.resultWinnerMotif.draw .resultMotifTrack.two {
+  transform: rotate(156deg);
 }
 
 .gameOverStats {
@@ -6660,6 +6810,12 @@ select {
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.gameOverActions .seriesExitButton {
+  margin-left: 10px;
+  border-color: rgb(255 255 255 / 0.16);
+  color: var(--muted);
 }
 
 .boardSection {
@@ -9590,8 +9746,24 @@ select,
     font-size: 24px;
   }
 
+  .gameOverHero {
+    grid-template-columns: 1fr;
+  }
+
+  .resultWinnerMotif {
+    justify-self: stretch;
+  }
+
+  .resultMotifFrame {
+    width: min(220px, 100%);
+  }
+
   .gameOverActions {
     justify-content: stretch;
+  }
+
+  .gameOverActions .seriesExitButton {
+    margin-left: 0;
   }
 
   .gameOverActions .button {

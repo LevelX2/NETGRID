@@ -172,6 +172,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
+import { resultExitButtonUi, resultWinnerMotifFor, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -5843,14 +5844,29 @@ function GameOverModal({
         : "Das Spiel endet unentschieden.";
   const seriesText = result.series ? seriesStatusText(result.series) : null;
   const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
+  const winnerMotif = resultWinnerMotifFor(result.winner);
+  const retentionUi = retentionProtectionUi(retentionProtected);
+  const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
+  const handleNewMatch = () => {
+    if (
+      exitUi.needsConfirmation &&
+      !window.confirm("Matchserie verlassen? Das nächste Serienspiel wird nicht gestartet und diese lokale Sitzung wird entfernt.")
+    ) {
+      return;
+    }
+    onNewMatch();
+  };
   return (
     <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
       <div className="gameOverBackdrop" aria-hidden="true" />
       <section className="gameOverPanel">
         <div className="gameOverHero">
-          <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
-          <h2 id="game-over-title">{outcomeText}</h2>
-          <p>{resultReasonLabel(result.reason)}</p>
+          <div className="gameOverHeroCopy">
+            <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
+            <h2 id="game-over-title">{outcomeText}</h2>
+            <p>{resultReasonLabel(result.reason)}</p>
+          </div>
+          <ResultWinnerMotif motif={winnerMotif} />
         </div>
         {gameStanding ? (
           <div className="gameStandingStrip" aria-label="Spielwertung">
@@ -5897,9 +5913,9 @@ function GameOverModal({
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">
-            <button className="button" onClick={() => onRetentionProtection(!retentionProtected)}>
+            <button className="button" onClick={() => onRetentionProtection(!retentionProtected)} title={retentionUi.title} aria-label={retentionUi.title}>
               <Save size={15} />
-              {retentionProtected ? "Nicht mehr aufheben" : "Spiel aufheben"}
+              {retentionUi.label}
             </button>
             <button className="button" onClick={onDismiss}>
               Board ansehen
@@ -5909,12 +5925,27 @@ function GameOverModal({
                 {nextSeriesPending ? "Erstelle..." : "Nächstes Serienspiel"}
               </button>
             ) : null}
-            <button className="button primary" onClick={onNewMatch}>
-              Zurück zum Startbildschirm
+            <button className={`button ${onNextSeriesGame ? "seriesExitButton" : "primary"}`} onClick={handleNewMatch} title={exitUi.title}>
+              {exitUi.label}
             </button>
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
+  const label = motif === "runner" ? "Runner-Sieg" : motif === "corp" ? "Korp-Sieg" : "Unentschieden";
+  return (
+    <div className={`resultWinnerMotif ${motif}`} aria-label={label} role="img">
+      <div className="resultMotifFrame">
+        <span className="resultMotifCore" />
+        <span className="resultMotifTrack one" />
+        <span className="resultMotifTrack two" />
+        <span className="resultMotifTrack three" />
+      </div>
+      <span>{label}</span>
     </div>
   );
 }
