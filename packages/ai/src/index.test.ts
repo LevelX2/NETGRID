@@ -2940,6 +2940,40 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("uses installed Corp economy payouts before the basic credit action", () => {
+    const input = installedCorpBbsEconomyInput("ai-corp-installed-bbs-economy");
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsTake).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!bbsTake || !basicCredit)
+      throw new Error("Missing installed BBS economy fixture actions");
+    expect(bbsTake.payload?.gainCreditsAmount).toBe(2);
+    expect(bbsTake.payload?.removeCounterAmount).toBe(2);
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, bbsTake],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(bbsTake.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(debugText).toContain("installed_corp_economy:true");
+    expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
+    expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
+    expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
   it("recovers economy before low-reserve central ICE protection without urgent pressure", () => {
     const input = corpActionPhaseInput(
       "ai-v140-low-reserve-central-protect",
@@ -8159,6 +8193,55 @@ function corpActionPhaseInput(
   let state = createGameAfterSetup({ seed });
   state = apply(state, "corp", (action) => action.type === "mandatory_draw");
   mutate(state);
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
+function installedCorpBbsEconomyInput(seed: string) {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: {
+      id: `installed_corp_bbs_runner_${seed}`,
+      name: "Installed Corp BBS Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "simple_fracter", quantity: 2 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `installed_corp_bbs_corp_${seed}`,
+      name: "Installed Corp BBS Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+        { id: "simple_agenda", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 2 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  ensureRemoteServer(state, "remote_1");
+  const bbsId = putCorpRootInRemote(
+    state,
+    "onr_v1_309_bbs-whispering-campaign",
+    0,
+  );
+  state.cardInstances[bbsId] = {
+    ...state.cardInstances[bbsId]!,
+    faceup: true,
+    rezzed: true,
+    counters: { bit: 16 },
+  };
+  state.corp.credits = 2;
+  state.corp.clicks = 3;
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",

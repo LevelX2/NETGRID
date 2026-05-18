@@ -110,6 +110,17 @@ type CorpPlanFeatures = {
   ownAgendaPressure: number;
 };
 
+type CorpInstalledEconomyActionKind = "direct_payout" | "pool_payout" | "side_economy";
+
+type CorpInstalledEconomyActionAssessment = {
+  kind: CorpInstalledEconomyActionKind;
+  immediateGain: number;
+  netCredits: number;
+  storedCredits: number;
+  futurePoolAfter: number;
+  ability: string;
+};
+
 type RemoteIntentMemory = {
   remoteInstallSignals: number;
   remoteAdvanceSignals: number;
@@ -152,7 +163,7 @@ export type CorpEvaluationContext = {
 
 const AI_HINTS = createAiHintsByCard();
 const CORP_PLAN_PROFILES = corpPlanProfilesData.profiles as CorpPlanProfile[];
-const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["score_agenda", "advance_card", "install_card", "play_operation", "gain_credit", "draw_card", "end_turn"]);
+const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["score_agenda", "advance_card", "install_card", "play_operation", "gain_credit", "draw_card", "trigger_ability", "end_turn"]);
 
 function createCorpEvaluationContext(input: AiDecisionInput, beliefState: BeliefState = reconstructBeliefState(input)): CorpEvaluationContext {
   return {
@@ -278,7 +289,7 @@ export function generateCorpPlanCandidates(input: AiDecisionInput, context: Corp
     buildCandidate(
       input,
       "recover_economy",
-      actions.filter((action) => action.type === "gain_credit" || action.type === "draw_card" || (action.type === "play_operation" && rolesForAction(input, action).some((role) => role.includes("economy") || role.includes("draw"))))
+      actions.filter((action) => action.type === "gain_credit" || action.type === "draw_card" || (action.type === "play_operation" && rolesForAction(input, action).some((role) => role.includes("economy") || role.includes("draw"))) || Boolean(classifyCorpInstalledEconomyAction(input, action)))
     ),
     buildCandidate(
       input,
@@ -302,6 +313,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const scoringHorizon = evaluateRemoteScoreHorizon(input, candidate, context);
   const remoteRezReserve = evaluateRemoteRezReserve(input, candidate, context);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
+  const installedEconomy = evaluateCorpInstalledEconomyActions(input, candidate);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const score =
@@ -316,6 +328,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     runnerContest.score +
     scoringHorizon.score +
     remoteRezReserve.score +
+    installedEconomy.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(input, candidate, profile.riskTolerance, context) -
@@ -328,6 +341,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     ...scoringHorizon.evidence,
     ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
+    ...installedEconomy.evidence,
     ...agendaRisk.evidence,
     ...serverThreat.evidence,
     ...economyReserve.evidence,
@@ -344,7 +358,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons, ...installedEconomy.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -453,6 +467,74 @@ export function evaluateEconomyReserve(input: AiDecisionInput, candidate: CorpPl
     score,
     reasons: sortedUnique([lowCredits ? "credit_reserve_low" : "credit_reserve_stable", ...(centralProtectPenalty > 0 ? ["central_protect_credit_reserve_low"] : [])]),
     evidence: [`credits:${features.credits}`, `clicks:${features.clicks}`, `economy_role:${hasEconomyRole}`, `central_protect_penalty:${centralProtectPenalty}`]
+  };
+}
+
+function evaluateCorpInstalledEconomyActions(input: AiDecisionInput, candidate: CorpPlanCandidate): CorpPlanEvaluatorResult {
+  if (candidate.kind !== "recover_economy") return { score: 0, reasons: [], evidence: [] };
+  const assessments = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .map((action) => (action ? classifyCorpInstalledEconomyAction(input, action) : undefined))
+    .filter((assessment): assessment is CorpInstalledEconomyActionAssessment => Boolean(assessment));
+  if (assessments.length === 0) return { score: 0, reasons: [], evidence: ["installed_corp_economy:false"] };
+
+  const best = assessments
+    .slice()
+    .sort((left, right) => right.netCredits - left.netCredits || right.immediateGain - left.immediateGain || left.ability.localeCompare(right.ability))[0]!;
+  const acuteNeed = input.playerView.own.credits < 5;
+  const score = 95 + Math.max(0, best.netCredits - 1) * 55 + (acuteNeed ? 110 : 40);
+  return {
+    score,
+    reasons: [best.kind === "pool_payout" ? "installed_corp_economy_pool_payout" : "installed_corp_economy_direct_payout"],
+    evidence: [
+      "installed_corp_economy:true",
+      `installed_corp_economy_kind:${best.kind}`,
+      `installed_corp_economy_immediate_gain:${best.immediateGain}`,
+      `installed_corp_economy_net_credits:${best.netCredits}`,
+      `installed_corp_economy_stored_credits:${best.storedCredits}`,
+      `installed_corp_economy_future_pool_after:${best.futurePoolAfter}`,
+      `corp_credit_need:${acuteNeed ? "acute" : "stable"}`
+    ]
+  };
+}
+
+function classifyCorpInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): CorpInstalledEconomyActionAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp") return undefined;
+  if (action.source === "basic_action" || action.source === "game_rule") return undefined;
+  if (action.type !== "gain_credit" && action.type !== "trigger_ability") return undefined;
+  const sourceCard = findVisibleCard(input, action.source);
+  if (!sourceCard || sourceCard.rezzed !== true) return undefined;
+  const installedInServer = input.playerView.servers.some((server) =>
+    server.root.some((card) => card.instanceId === sourceCard.instanceId && card.known),
+  );
+  if (!installedInServer) return undefined;
+  const ability = [
+    action.payload?.v1917AssetAbility,
+    action.payload?.v1919AssetAbility,
+    action.payload?.v1920AssetAbility,
+    action.payload?.resourceAbility,
+    action.payload?.abilityId,
+  ].find((value): value is string => typeof value === "string") ?? "";
+  const immediateGain = Math.max(0, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"));
+  const removedCounters = Math.max(0, numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"), numberPayload(action, "removedCounterAmount"));
+  const storedCredits = Math.max(0, sourceCard.counters?.bit ?? sourceCard.counters?.power ?? sourceCard.counters?.recurring_credit ?? 0);
+  const netCredits = immediateGain - actionCreditCost(action);
+  if (immediateGain <= 0 && netCredits <= 0) return undefined;
+  const futurePoolAfter = Math.max(0, storedCredits - Math.max(removedCounters, immediateGain));
+  const roles = rolesForCardId(sourceCard.definitionId);
+  const kind: CorpInstalledEconomyActionKind =
+    storedCredits > 0 || removedCounters > 0
+      ? "pool_payout"
+      : roles.some((role) => role.includes("economy"))
+        ? "direct_payout"
+        : "side_economy";
+  return {
+    kind,
+    immediateGain,
+    netCredits,
+    storedCredits,
+    futurePoolAfter,
+    ability: ability || "corp_installed_credit_payout"
   };
 }
 
@@ -927,6 +1009,7 @@ function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: Lega
   if ((kind === "protect_hq" || kind === "protect_rnd") && action.type === "install_card" && action.payload?.placement === "ice") return 85;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
   if (kind === "recover_economy" && action.type === "draw_card" && shouldCorpDrawForScoring(input)) return 78;
+  if (kind === "recover_economy" && (action.type === "gain_credit" || action.type === "trigger_ability") && classifyCorpInstalledEconomyAction(input, action)) return corpInstalledEconomyPriority(input, action);
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "build_scoring_remote" && action.type === "install_card" && action.payload?.placement === "ice" && isRemoteServerId(action.payload?.serverId)) return 82;
   if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action, context) + boundedScoreHorizonActionBonus(input, action, context);
@@ -934,6 +1017,12 @@ function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: Lega
   if (action.type === "draw_card") return 45;
   if (action.type === "end_turn") return 5;
   return 20;
+}
+
+function corpInstalledEconomyPriority(input: AiDecisionInput, action: LegalAction): number {
+  const assessment = classifyCorpInstalledEconomyAction(input, action);
+  if (!assessment) return 20;
+  return 86 + Math.max(0, assessment.netCredits - 1) * 10 + (input.playerView.own.credits < 5 ? 12 : 0);
 }
 
 function shouldCorpDrawForScoring(input: AiDecisionInput): boolean {
@@ -1005,6 +1094,15 @@ function rolesForCardId(cardId: string | undefined): string[] {
   const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
   const hint = AI_HINTS.get(cardId);
   return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? [])]);
+}
+
+function actionCreditCost(action: LegalAction): number {
+  return action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.credits) ? cost.credits ?? 0 : 0), 0);
+}
+
+function numberPayload(action: LegalAction, key: string): number {
+  const value = action.payload?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function isAiSupportedCard(cardId: string | undefined): boolean {
