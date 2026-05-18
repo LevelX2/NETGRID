@@ -3360,6 +3360,125 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(duplicate.error.code).toBe("series_next_exists");
   });
 
+  it("treats forfeit in game 1 of a private series as a single-game result and keeps series-next available", async () => {
+    const match = await joinedMatch("series-forfeit-game-1", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
+    const beforeRecord = await match.service.loadForTest(match.matchId);
+    if (!beforeRecord?.gameState) throw new Error("Missing series game state");
+    const beforeHash = hashState(beforeRecord.gameState);
+
+    const forfeited = await match.service.forfeitMatch({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken
+    });
+    expect(forfeited.ok).toBe(true);
+    if (!forfeited.ok) throw new Error(forfeited.error.message);
+    const runnerPayload = expectSidePayload(forfeited.actorPayload);
+    expect(runnerPayload.matchStatus).toBe("forfeited");
+    expect(runnerPayload.resultSummary).toMatchObject({
+      reason: "forfeit",
+      winnerSide: "corp",
+      loserSide: "runner",
+      finalEngineStateHash: beforeHash,
+      series: {
+        status: "between_games",
+        gameNumber: 1,
+        gamesPlanned: 2,
+        viewerWins: 0,
+        opponentWins: 1,
+        viewerMatchPoints: 0,
+        opponentMatchPoints: 10,
+        viewerSeriesOutcome: "lost",
+        nextAvailable: true
+      }
+    });
+
+    const stored = await match.service.loadForTest(match.matchId);
+    expect(stored?.gameState.winner).toBeFalsy();
+    expect(stored?.match.series?.results[0]).toMatchObject({
+      matchId: match.matchId,
+      gameNumber: 1,
+      winner: "corp",
+      reason: "forfeit",
+      finalStateHash: beforeHash
+    });
+    expect((await match.service.replayMatch(match.matchId)).finalStateHash).toBe(beforeHash);
+
+    const next = await match.service.startNextSeriesGame(match.matchId, {
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      displayName: "Runner nach Aufgabe"
+    });
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    expect(next.hostSide).toBe("corp");
+    expect(next.matchId).not.toBe(match.matchId);
+    expect((await match.service.loadForTest(match.matchId))?.match.series?.nextMatchId).toBe(next.matchId);
+  });
+
+  it("closes a private series when the last planned game ends by forfeit", async () => {
+    const match = await joinedMatch("series-forfeit-final-game", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
+    const record = await match.service.loadForTest(match.matchId);
+    if (!record?.gameState || !record.match.series) throw new Error("Missing active series record");
+    record.match.series = {
+      ...record.match.series,
+      gameNumber: 2,
+      results: [
+        {
+          matchId: "series-forfeit-final-game-1",
+          gameNumber: 1,
+          winner: "corp",
+          reason: "agenda_points",
+          runnerPlayer: record.match.series.runnerPlayer,
+          corpPlayer: record.match.series.corpPlayer,
+          runnerAgendaPoints: 0,
+          corpAgendaPoints: 2,
+          finishedAt: "2026-05-19T08:00:00.000Z",
+          finalStateHash: "fnv1a:game1"
+        }
+      ]
+    };
+    await (match.service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+
+    const beforeHash = hashState(record.gameState);
+    const forfeited = await match.service.forfeitMatch({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken
+    });
+    expect(forfeited.ok).toBe(true);
+    if (!forfeited.ok) throw new Error(forfeited.error.message);
+    const corpPayload = expectSidePayload(forfeited.actorPayload);
+    expect(corpPayload.resultSummary).toMatchObject({
+      reason: "forfeit",
+      winnerSide: "runner",
+      loserSide: "corp",
+      finalEngineStateHash: beforeHash,
+      series: {
+        status: "finished",
+        gameNumber: 2,
+        gamesPlanned: 2,
+        viewerWins: 1,
+        opponentWins: 1,
+        viewerMatchPoints: 10,
+        opponentMatchPoints: 10,
+        viewerSeriesOutcome: "draw",
+        seriesDecision: "draw",
+        nextAvailable: false
+      }
+    });
+    const stored = await match.service.loadForTest(match.matchId);
+    expect(stored?.match.series?.status).toBe("finished");
+    expect(stored?.match.series?.results).toHaveLength(2);
+    const next = await match.service.startNextSeriesGame(match.matchId, {
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken
+    });
+    expect("error" in next).toBe(true);
+    if (!("error" in next)) throw new Error("Expected finished series rejection");
+    expect(next.error.code).toBe("series_finished");
+  });
+
   it("uses 10-point game wins and loser agenda points for private series scoring", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "series-agenda-tiebreak" });

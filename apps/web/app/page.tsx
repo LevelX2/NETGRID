@@ -3408,7 +3408,7 @@ export default function Page() {
     if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
     setConfirmationDialog({
       title: "Spiel aufgeben?",
-      message: "Diese Aufgabe beendet das Match für beide Seiten. Der Engine-State bleibt der letzte echte Spielzustand.",
+      message: "Diese Aufgabe beendet nur dieses Spiel. In einer Matchserie kann ein offenes Folgespiel danach weiter gestartet werden. Der Engine-State bleibt der letzte echte Spielzustand.",
       confirmLabel: "Aufgeben",
       tone: "danger",
       onConfirm: forfeitMatch

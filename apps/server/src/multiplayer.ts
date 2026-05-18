@@ -109,6 +109,7 @@ export type SeriesGameResult = {
   matchId: string;
   gameNumber: number;
   winner: Side | "draw";
+  reason?: GameResultReason;
   runnerPlayer: SeriesPlayerSlot;
   corpPlayer: SeriesPlayerSlot;
   runnerAgendaPoints: number;
@@ -899,7 +900,7 @@ export class MultiplayerService {
       if (!series || record.match.settings.matchFormat !== "two_game_side_swap") {
         return { error: safeError("series_not_available", "Für dieses Match ist keine private Matchserie aktiv.") };
       }
-      if (record.match.status !== "finished" || !record.gameState?.winner) {
+      if (!isSeriesGameCompleteForNext(record)) {
         return { error: safeError("series_game_not_finished", "Das nächste Serienspiel ist erst nach Spielende verfügbar.") };
       }
 
@@ -1254,6 +1255,7 @@ export class MultiplayerService {
         finalEngineStateHash
       };
       delete record.pendingUndo;
+      this.finalizeSeriesGame(record);
       await this.storage.save(record);
       return this.lifecycleResultFor(record, input.side);
     });
@@ -2226,16 +2228,22 @@ export class MultiplayerService {
   private finalizeSeriesGame(record: StoredMatch): void {
     const series = record.match.series;
     const state = record.gameState;
-    const winner = state?.winner;
+    const winner = record.lifecycleResult?.winnerSide ?? state?.winner;
     if (!series || !state || !winner) return;
-    const finalStateHash = hashState(state);
+    const finalStateHash = record.lifecycleResult?.finalEngineStateHash ?? hashState(state);
     if (!series.results.some((result) => result.matchId === record.match.matchId)) {
       const runnerAgendaPoints = getPlayerView(state, "runner").own.agendaPoints;
       const corpAgendaPoints = getPlayerView(state, "corp").own.agendaPoints;
+      const lifecycleReason = record.lifecycleResult?.reason;
+      const reason: GameResultReason =
+        lifecycleReason === "forfeit" || lifecycleReason === "time_expired"
+          ? lifecycleReason
+          : resultReason(state, winner, runnerAgendaPoints, corpAgendaPoints, record.match.settings.agendaPointsToWin);
       series.results.push({
         matchId: record.match.matchId,
         gameNumber: series.gameNumber,
         winner,
+        reason,
         runnerPlayer: series.runnerPlayer,
         corpPlayer: series.corpPlayer,
         runnerAgendaPoints,
@@ -2466,6 +2474,12 @@ function retentionProtectionPayload(record: StoredMatch): { retentionProtected: 
 
 function isTerminalStatus(status: MatchStatus): boolean {
   return status === "cancelled" || status === "abandoned" || status === "forfeited" || status === "finished";
+}
+
+function isSeriesGameCompleteForNext(record: StoredMatch): boolean {
+  if (!record.gameState) return false;
+  if (record.match.status === "finished" && Boolean(record.gameState.winner)) return true;
+  return record.match.status === "forfeited" && record.lifecycleResult?.reason === "forfeit" && Boolean(record.lifecycleResult.winnerSide);
 }
 
 function isCancellableLobbyStatus(status: MatchStatus): boolean {

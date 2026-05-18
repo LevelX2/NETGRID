@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-05-19-series-single-game-forfeit-implementation
-status: inbox
+status: done
 kind: fix
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-19
-startedAt:
-completedAt:
+startedAt: 2026-05-19
+completedAt: 2026-05-19
 branch:
 releaseTarget: private match series lifecycle
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts -t "single-game result|last planned game"
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 relatedActivities:
   - act-2026-05-19-series-single-game-forfeit-concept
 ---
@@ -83,4 +90,4 @@ Nach abgeschlossenem Konzept soll die App erlauben, ein einzelnes laufendes Spie
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt: `forfeitMatch` finalisiert in privaten Serien ein Einzelspiel-Serienresultat mit `reason: forfeit`, letztem echtem Engine-StateHash und normaler Matchpunktwertung. `series-next` akzeptiert danach ein forfeit-terminales Serienspiel, solange weitere Spiele offen sind; nach dem letzten Serienspiel wird die Serie abgeschlossen. Der UI-Bestätigungstext trennt aktuelles Spiel und Matchserie klarer.
