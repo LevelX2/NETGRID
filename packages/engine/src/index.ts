@@ -24172,6 +24172,7 @@ function executeOnPlayCardImplementationAbility(
     ...(legalAction.payload ?? {}),
     ...result.publicPayload,
   };
+  appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
 }
 
 function drawCardsForCardImplementationEffect(

@@ -39,6 +39,15 @@ function gainCredits(state: GameState, side: Side, amount: number): void {
   else state.runner.credits += amount;
 }
 
+function publicEffectId(
+  context: CardEffectExecutionContext,
+  index: number,
+  kind: string,
+): string {
+  const source = context.sourceDefinitionId ?? "card_implementation";
+  return `${source}.effect.${index}.${kind}`;
+}
+
 function assertPositiveIntegerAmount(kind: string, amount: number): void {
   if (!Number.isInteger(amount) || amount <= 0)
     throw new Error(`${kind} effect amount must be a positive integer.`);
@@ -87,11 +96,12 @@ export function executeCardImplementationEffects(
           side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
         ] = side === "corp" ? state.corp.credits : state.runner.credits;
         resolvedEffects.push({
-          effectId: `${context.sourceCardId}.effect.${index}.gain_credits`,
+          effectId: publicEffectId(context, index, "gain_credits"),
           kind: "gain_credits",
           visibility: effect.visibility,
           side,
           amount: effect.amount,
+          reason: "card_resolver",
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -109,11 +119,12 @@ export function executeCardImplementationEffects(
         const drawResult = context.drawCards(side, effect.amount);
         mergePublicPayload(publicPayload, drawResult.publicPayload);
         resolvedEffects.push({
-          effectId: `${context.sourceCardId}.effect.${index}.draw_cards`,
+          effectId: publicEffectId(context, index, "draw_cards"),
           kind: "draw_cards",
           visibility: effect.visibility,
           side,
           amount: drawResult.drawnCount,
+          reason: "card_resolver",
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

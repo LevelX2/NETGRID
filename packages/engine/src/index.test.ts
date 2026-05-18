@@ -7262,6 +7262,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         visibility: "public",
         side: "runner",
         amount: 4,
+        reason: "card_resolver",
       }),
     ]);
 
@@ -7344,6 +7345,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
         visibility: "public",
         side: "runner",
         amount: 2,
+        reason: "card_resolver",
       }),
     ]);
 
@@ -30164,6 +30166,18 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       cardDefinitionId: "onr_v1_097_livewires-contacts",
       gainedCredits: 3,
       runnerCreditsAfter: runnerState.runner.credits,
+      resolvedEffects: [
+        expect.objectContaining({
+          effectId:
+            "onr_v1_097_livewires-contacts.effect.0.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_097_livewires-contacts",
+        }),
+      ],
     });
     expect(
       JSON.stringify(runnerState.eventLog.at(-1)?.publicPayload),
@@ -30231,6 +30245,18 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       cardDefinitionId: "onr_v1_290_efficiency-experts",
       gainedCredits: 3,
       corpCreditsAfter: corpState.corp.credits,
+      resolvedEffects: [
+        expect.objectContaining({
+          effectId:
+            "onr_v1_290_efficiency-experts.effect.0.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_290_efficiency-experts",
+        }),
+      ],
     });
     expect(
       JSON.stringify(corpState.eventLog.at(-1)?.publicPayload),
@@ -30303,6 +30329,18 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
         drawnCount: expectedDrawn,
         runnerGripAfter: state.runner.grip.length,
+        resolvedEffects: [
+          expect.objectContaining({
+            effectId:
+              "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+            kind: "draw_cards",
+            visibility: "public",
+            side: "runner",
+            amount: expectedDrawn,
+            reason: "card_resolver",
+            sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+          }),
+        ],
       });
       const publicPayload = JSON.stringify(state.eventLog.at(-1)?.publicPayload);
       expect(publicPayload).not.toMatch(
@@ -33512,6 +33550,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
       cardDefinitionId: "onr_v1_281_accounts-receivable",
       gainedCredits: 9,
       corpCreditsAfter: state.corp.credits,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 9,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_281_accounts-receivable",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -33529,6 +33576,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_282_annual-reviews",
       drawnCards: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "corp",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_282_annual-reviews",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -33550,6 +33606,22 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
       drawnCards: 2,
       gainedCredits: 1,
       corpCreditsAfter: state.corp.credits,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "corp",
+          amount: 2,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_288_day-shift",
+        }),
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 1,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_288_day-shift",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -33900,6 +33972,22 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       gainedCredits: 2,
       drawnCards: 1,
       corpCreditsAfter: state.corp.credits,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 2,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_295_night-shift",
+        }),
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "corp",
+          amount: 1,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_295_night-shift",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -34707,6 +34795,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
       cardDefinitionId: "onr_v1_108_score",
       gainedCredits: 9,
       runnerCreditsAfter: score.runner.credits,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "runner",
+          amount: 9,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_108_score",
+        }),
+      ],
     });
     expect(replayEvents(scoreInitial, score.eventLog.slice(scoreReplayStart)).ok).toBe(true);
 
@@ -35177,6 +35274,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     expect(jack.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_095_jack-n-joe",
       drawnCount: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "runner",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+        }),
+      ],
     });
     expect(replayEvents(jackInitial, jack.eventLog.slice(jackReplayStart)).ok).toBe(true);
 
