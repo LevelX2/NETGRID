@@ -822,6 +822,88 @@ describe("MVP 0.3 AI controller contract", () => {
     });
   });
 
+  it("plans installed The Shell Traders as build-rig progress before basic economy", () => {
+    const input = runnerShellTradersInput("ai-shell-traders-build-rig", (state) => {
+      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 1);
+      moveRunnerCardToGrip(state, "simple_fracter");
+      moveRunnerCardToGrip(state, "simple_setup_hardware");
+      state.runner.credits = 0;
+      state.runner.clicks = 3;
+    });
+    const prepare = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(prepare).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!prepare || !gainCredit) throw new Error("Missing Shell Traders fixture actions");
+
+    const buildCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "build_rig",
+    );
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gainCredit, prepare],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(buildCandidate?.legalActionIds).toContain(prepare.actionId);
+    expect(decision.actionId).toBe(prepare.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders:true");
+    expect(debugText).toContain("shell_traders_kind:prepare");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("uses The Shell Traders remove-counter actions to finish delayed installs", () => {
+    let state = runnerShellTradersState("ai-shell-traders-finish-install");
+    moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+    const fracterId = moveRunnerCardToGrip(state, "simple_fracter");
+    state.runner.credits = 2;
+    state.runner.clicks = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === fracterId,
+    );
+    setShellCountersForTest(state, fracterId, 1);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remove = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "remove_shell_counter",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remove).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remove || !gainCredit) throw new Error("Missing Shell-counter removal actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gainCredit, remove],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(remove.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders_kind:remove_counter");
+    expect(debugText).toContain("shell_traders_immediate_install:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
   it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
     const corpState = createGameAfterSetup({ seed: "ai-v199-aardvark-choice" });
     corpState.pendingChoice = {
@@ -8095,6 +8177,51 @@ function runnerActionPhaseInput(
   });
 }
 
+function runnerShellTradersState(seed: string): GameState {
+  return toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: {
+        id: `ai_shell_traders_runner_${seed}`,
+        name: "AI Shell Traders Runner",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_176_the-shell-traders", quantity: 2 },
+          { id: "simple_fracter", quantity: 2 },
+          { id: "simple_setup_hardware", quantity: 1 },
+          { id: "simple_economy_event", quantity: 8 },
+        ],
+      },
+      corpDeck: {
+        id: `ai_shell_traders_corp_${seed}`,
+        name: "AI Shell Traders Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 4 },
+          { id: "simple_economy_operation", quantity: 6 },
+          { id: "simple_barrier_ice", quantity: 2 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+}
+
+function runnerShellTradersInput(
+  seed: string,
+  mutate: (state: GameState) => void,
+) {
+  const state = runnerShellTradersState(seed);
+  mutate(state);
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
+}
+
 function installedRunnerEconomyInput(
   seed: string,
   options: {
@@ -8813,6 +8940,30 @@ function moveRunnerResourceToRig(
   return id;
 }
 
+function moveRunnerResourceCopyToRig(
+  state: GameState,
+  definitionId: string,
+  copyIndex: number,
+): CardInstanceId {
+  const ids = Object.entries(state.cardInstances)
+    .filter(([, card]) => card.definitionId === definitionId)
+    .map(([id]) => id)
+    .filter((id) => !state.runner.rig.resources.includes(id))
+    .sort();
+  const id = ids[copyIndex] ?? ids[0];
+  expect(id).toBeDefined();
+  if (!id) throw new Error(`Missing ${definitionId} copy ${copyIndex}`);
+  removeEverywhere(state, id);
+  state.runner.rig.resources.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
 function setPowerCountersForTest(
   state: GameState,
   id: CardInstanceId,
@@ -8823,6 +8974,20 @@ function setPowerCountersForTest(
     counters: {
       ...(state.cardInstances[id]?.counters ?? {}),
       power: amount,
+    },
+  };
+}
+
+function setShellCountersForTest(
+  state: GameState,
+  id: CardInstanceId,
+  amount: number,
+): void {
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    counters: {
+      ...(state.cardInstances[id]?.counters ?? {}),
+      shell: amount,
     },
   };
 }

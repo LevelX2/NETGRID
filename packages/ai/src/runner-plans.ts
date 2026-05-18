@@ -138,12 +138,22 @@ type InstalledEconomyActionAssessment = {
   ability: string;
 };
 
+type ShellTradersActionKind = "prepare" | "remove_counter";
+
+type ShellTradersActionAssessment = {
+  kind: ShellTradersActionKind;
+  shellCounters: number;
+  targetRoles: string[];
+  immediateInstall: boolean;
+  sourceVisible: boolean;
+};
+
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
 
 export function hasRunnerPlanAction(input: AiDecisionInput): boolean {
-  return input.side === "runner" && input.legalActions.some((action) => PLAN_ACTION_TYPES.has(action.type) && (action.type !== "trigger_ability" || Boolean(classifyInstalledEconomyAction(input, action))));
+  return input.side === "runner" && input.legalActions.some((action) => PLAN_ACTION_TYPES.has(action.type) && (action.type !== "trigger_ability" || Boolean(classifyInstalledEconomyAction(input, action)) || Boolean(classifyShellTradersAction(input, action))));
 }
 
 export function chooseRunnerPlanAction(input: AiDecisionInput, fallbackDecision: AiDecision, options: { timeBudgetMs?: number } = {}): AiDecision {
@@ -244,7 +254,11 @@ export function generateRunnerPlanCandidates(input: AiDecisionInput): RunnerPlan
     buildCandidate(
       input,
       "build_rig",
-      actions.filter((action) => action.type === "install_card" && rolesForAction(input, action).some((role) => role.startsWith("breaker_") || role === "memory" || role === "setup" || role === "build_rig"))
+      actions.filter(
+        (action) =>
+          (action.type === "install_card" && rolesForAction(input, action).some((role) => role.startsWith("breaker_") || role === "memory" || role === "setup" || role === "build_rig")) ||
+          Boolean(classifyShellTradersAction(input, action))
+      )
     ),
     buildCandidate(
       input,
@@ -286,6 +300,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
   const twoTurnIntent = evaluateRunnerTwoTurnRunIntent(input, candidate);
   const installedEconomy = evaluateInstalledEconomyActions(input, candidate);
+  const shellTraders = evaluateShellTradersActions(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
@@ -299,14 +314,15 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     corpThreat.score * profile.weights.corpScoringThreat +
     breakerPlan.score +
     twoTurnIntent.score +
-    installedEconomy.score -
+    installedEconomy.score +
+    shellTraders.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
     easyRunPenalty;
   return {
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...installedEconomy.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -314,6 +330,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
       ...candidate.visibleBenefits,
       ...installedEconomy.evidence,
+      ...shellTraders.evidence,
       ...twoTurnIntent.evidence,
       ...rig.evidence,
       ...runCost.evidence,
@@ -967,6 +984,85 @@ function evaluateInstalledEconomyActions(input: AiDecisionInput, candidate: Runn
   };
 }
 
+function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+  if (candidate.kind !== "build_rig") return { score: 0, reasons: [], evidence: [] };
+  const assessments = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .map((action) => (action ? classifyShellTradersAction(input, action) : undefined))
+    .filter((assessment): assessment is ShellTradersActionAssessment => Boolean(assessment));
+  if (assessments.length === 0) return { score: 0, reasons: [], evidence: ["shell_traders:false"] };
+
+  const prepare = assessments
+    .filter((assessment) => assessment.kind === "prepare")
+    .sort((left, right) => shellTradersTargetValue(right) - shellTradersTargetValue(left) || left.shellCounters - right.shellCounters)[0];
+  const remove = assessments
+    .filter((assessment) => assessment.kind === "remove_counter")
+    .sort((left, right) => Number(right.immediateInstall) - Number(left.immediateInstall) || left.shellCounters - right.shellCounters)[0];
+  const best = remove?.immediateInstall ? remove : prepare ?? remove ?? assessments[0]!;
+
+  let score = 0;
+  const reasons: string[] = [];
+  if (prepare) {
+    score += 165 + shellTradersTargetValue(prepare) + Math.max(0, 4 - input.playerView.own.credits) * 20;
+    reasons.push("shell_traders_prepare_build_rig");
+  }
+  if (remove) {
+    score += remove.immediateInstall ? 210 : 115;
+    reasons.push(remove.immediateInstall ? "shell_traders_finish_install" : "shell_traders_progress_counter");
+  }
+
+  return {
+    score,
+    reasons,
+    evidence: [
+      "shell_traders:true",
+      `shell_traders_kind:${best.kind}`,
+      `shell_traders_prepare_actions:${assessments.filter((assessment) => assessment.kind === "prepare").length}`,
+      `shell_traders_remove_actions:${assessments.filter((assessment) => assessment.kind === "remove_counter").length}`,
+      `shell_traders_target_roles:${best.targetRoles.slice(0, 3).join(",") || "unknown"}`,
+      `shell_traders_shell_counters:${best.shellCounters}`,
+      `shell_traders_immediate_install:${best.immediateInstall}`,
+      `shell_traders_source_visible:${best.sourceVisible}`
+    ]
+  };
+}
+
+function classifyShellTradersAction(input: AiDecisionInput, action: LegalAction): ShellTradersActionAssessment | undefined {
+  if (input.side !== "runner" || action.side !== "runner" || action.type !== "trigger_ability") return undefined;
+  if (action.source === "basic_action" || action.source === "game_rule") return undefined;
+  const ability = action.payload?.shellTradersAbility;
+  if (ability !== "set_aside_from_grip" && ability !== "remove_shell_counter") return undefined;
+  const sourceCard = findVisibleCard(input, action.source);
+  const sourceVisible = Boolean(sourceCard && input.playerView.own.rig?.some((card) => card.instanceId === sourceCard.instanceId && card.known));
+  if (!sourceVisible) return undefined;
+
+  const targetCardId = typeof action.payload?.targetCardId === "string" ? action.payload.targetCardId : "";
+  const targetDefinitionId =
+    typeof action.payload?.targetCardDefinitionId === "string"
+      ? action.payload.targetCardDefinitionId
+      : findVisibleCard(input, targetCardId)?.definitionId;
+  const targetRoles = rolesForCardId(targetDefinitionId);
+  const shellCounters = Math.max(0, numberPayload(action, "shellCounterAmount"), numberPayload(action, "remainingCountersBefore"), numberPayload(action, "remainingCounters"));
+  const immediateInstall = ability === "remove_shell_counter" && shellCounters <= 1;
+  return {
+    kind: ability === "set_aside_from_grip" ? "prepare" : "remove_counter",
+    shellCounters,
+    targetRoles,
+    immediateInstall,
+    sourceVisible
+  };
+}
+
+function shellTradersTargetValue(assessment: ShellTradersActionAssessment): number {
+  let value = 0;
+  if (assessment.targetRoles.some((role) => role.startsWith("breaker_"))) value += 105;
+  if (assessment.targetRoles.includes("memory") || assessment.targetRoles.includes("memory_support")) value += 55;
+  if (assessment.targetRoles.includes("setup") || assessment.targetRoles.includes("build_rig")) value += 45;
+  if (assessment.targetRoles.includes("economy") || assessment.targetRoles.includes("tempo")) value += 20;
+  value += Math.min(60, assessment.shellCounters * 10);
+  return value;
+}
+
 function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): InstalledEconomyActionAssessment | undefined {
   if (input.side !== "runner" || action.side !== "runner" || action.type !== "trigger_ability") return undefined;
   if (action.source === "basic_action" || action.source === "game_rule") return undefined;
@@ -1043,6 +1139,7 @@ function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDeci
   if (kind === "safe_probe_run" && action.type === "continue_run") return reachedAccessMovement ? 92 : 70;
   if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement ? 30 : 88;
   if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
+  if (kind === "build_rig" && action.type === "trigger_ability") return runnerShellTradersPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
   if (kind === "recover_economy" && action.type === "trigger_ability") return runnerInstalledEconomyPriority(input, action);
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
@@ -1154,6 +1251,15 @@ function runnerInstalledEconomyPriority(input: AiDecisionInput, action: LegalAct
   if (assessment.kind === "direct_payout") return 84 + Math.max(0, assessment.netCredits - 1) * 7;
   if (assessment.kind === "pool_build") return input.playerView.own.credits < 4 ? 42 : 68 + Math.min(20, assessment.futurePoolAfter * 2);
   return input.playerView.own.credits < 4 ? 35 : 58;
+}
+
+function runnerShellTradersPriority(input: AiDecisionInput, action: LegalAction): number {
+  const assessment = classifyShellTradersAction(input, action);
+  if (!assessment) return 10;
+  if (assessment.kind === "remove_counter") {
+    return assessment.immediateInstall ? 132 : 86 + Math.max(0, 4 - assessment.shellCounters) * 5;
+  }
+  return 96 + Math.min(35, shellTradersTargetValue(assessment) / 5) + Math.max(0, 4 - input.playerView.own.credits) * 5;
 }
 
 function assessVisibleBreakerPressure(input: AiDecisionInput): VisibleBreakerPressure {

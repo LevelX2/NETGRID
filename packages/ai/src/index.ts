@@ -480,7 +480,11 @@ export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
 
 export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
   const baselineDecision = chooseRunnerBaselineAction(input);
-  return hasRunnerPlanAction(input) && !isRunnerReactiveBaselineDecision(baselineDecision) ? chooseRunnerPlanAction(input, baselineDecision) : baselineDecision;
+  return hasRunnerPlanAction(input) &&
+    (!isRunnerReactiveBaselineDecision(baselineDecision) ||
+      baselineShellTradersPlanIsVisible(input, baselineDecision))
+    ? chooseRunnerPlanAction(input, baselineDecision)
+    : baselineDecision;
 }
 
 export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
@@ -515,6 +519,33 @@ function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "runner.tag.clear_visible_tag" ||
     decision.reasonCode === "runner.shell_traders.prepare_install" ||
     decision.reasonCode === "runner.shell_traders.remove_counter"
+  );
+}
+
+function baselineShellTradersPlanIsVisible(
+  input: AiDecisionInput,
+  decision: AiDecision,
+): boolean {
+  if (
+    decision.reasonCode !== "runner.shell_traders.prepare_install" &&
+    decision.reasonCode !== "runner.shell_traders.remove_counter"
+  )
+    return false;
+  const action = input.legalActions.find(
+    (candidate) => candidate.actionId === decision.actionId,
+  );
+  if (!action || action.type !== "trigger_ability") return false;
+  if (
+    action.payload?.shellTradersAbility !== "set_aside_from_grip" &&
+    action.payload?.shellTradersAbility !== "remove_shell_counter"
+  )
+    return false;
+  if (action.source === "basic_action" || action.source === "game_rule")
+    return false;
+  return Boolean(
+    input.playerView.own.rig?.some(
+      (card) => card.known && card.instanceId === action.source,
+    ),
   );
 }
 
