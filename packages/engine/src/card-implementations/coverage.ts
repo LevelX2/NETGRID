@@ -22,6 +22,9 @@ const IMPLEMENTED_REZ_COST_MODIFIER_LOCATION =
 const IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ON_PLAY_EFFECT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -78,6 +81,14 @@ function implementedCoverageFor(
     currentLocations.add(IMPLEMENTED_REZ_COST_MODIFIER_LOCATION);
   }
   if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "ice_strength")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive Corp ICE-strength modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION);
+  }
+  if (
     implementation.modifiers?.some((modifier) => modifier.kind === "install_cost")
   ) {
     reasons.push(
@@ -120,15 +131,6 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
     {
-      cardDefinitionId: "onr_v1_317_data-masons",
-      status: "partial_implementation",
-      reason:
-        "Engine-local CardImplementationDefinition covers the printed wall rez-cost reduction. Missing printed text: all walls have +1 strength.",
-      currentLocations: [
-        "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
-      ],
-    },
-    {
       cardDefinitionId: "onr_v1_320_encoder-inc",
       status: "partial_implementation",
       reason:
@@ -141,7 +143,7 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
       cardDefinitionId: "onr_v1_360_jerusalem-city-grid",
       status: "partial_implementation",
       reason:
-        "Engine-local CardImplementationDefinition covers the same-server wall rez-cost reduction. Missing printed text: walls on this fort have +1 strength and region install/replacement rules.",
+        "Engine-local CardImplementationDefinition covers the same-server wall rez-cost reduction and same-server wall strength increase. Missing printed text: region install/replacement rules.",
       currentLocations: [
         "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
       ],

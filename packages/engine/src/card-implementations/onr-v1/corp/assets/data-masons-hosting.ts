@@ -14,5 +14,18 @@ export const dataMasonsHostingImplementation: CardImplementationDefinition = {
       visibility: "public",
       appliesTo: { cardType: "ice", subtype: "wall" },
     },
+    {
+      kind: "ice_strength",
+      operation: "increase",
+      amount: 1,
+      activeWhile: "rezzed",
+      sourceZone: "corp_root",
+      visibility: "public",
+      appliesTo: {
+        side: "corp",
+        cardType: "ice",
+        subtype: "wall",
+      },
+    },
   ],
 };

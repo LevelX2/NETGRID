@@ -68,6 +68,7 @@ import {
   executeCardImplementationEffects,
   type CardEffectDrawCardsResult,
 } from "./ability-engine/effect-interpreter";
+import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import type {
   ActivatedCardAbilityImplementation,
   OnPlayCardAbilityImplementation,
@@ -106,7 +107,6 @@ import {
 } from "./mechanics/agenda-operation-effects";
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
-  DATA_MASONS_HOSTING_ASSET_CARD_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
   KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
@@ -145,7 +145,6 @@ import {
   HACKER_TRACKER_CENTRAL_RUN_LOCK_ASSET_ID,
   ICE_TRANSMUTATION_AGENDA_ID,
   I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
-  JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID,
   MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
   NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
 } from "./mechanics/global-modifiers";
@@ -4976,21 +4975,9 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   for (const sourceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinition = definitionFor(state, sourceId);
     if (
-      sourceDefinition.id === DATA_MASONS_HOSTING_ASSET_CARD_ID &&
-      cardHasSubtype(iceDefinition, "wall")
-    )
-      bonus += 1;
-    if (
       sourceDefinition.id === "onr_v1_350_antiquated-interface-routines" &&
       iceServerId &&
       corpServerIdForInstalledCard(state, sourceId) === iceServerId
-    )
-      bonus += 1;
-    if (
-      sourceDefinition.id === JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID &&
-      iceServerId &&
-      corpServerIdForInstalledCard(state, sourceId) === iceServerId &&
-      cardHasSubtype(iceDefinition, "wall")
     )
       bonus += 1;
   }
@@ -5018,6 +5005,7 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
     )
       bonus += 2;
   }
+  bonus += iceStrengthModifierBonusFor(state, iceId);
   bonus += cardCounter(state, iceId, "mark");
   return bonus;
 }

@@ -2,7 +2,8 @@ import type { CardType, EventVisibilityClass, Side } from "@netgrid/shared";
 
 export type CardModifierImplementation =
   | CardRezCostModifierImplementation
-  | CardInstallCostModifierImplementation;
+  | CardInstallCostModifierImplementation
+  | CardIceStrengthModifierImplementation;
 
 export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
@@ -69,5 +70,20 @@ export type CardInstallCostModifierImplementation = {
   appliesTo: {
     side: Extract<Side, "corp">;
     cardType: Extract<CardType, "ice">;
+  };
+};
+
+export type CardIceStrengthModifierImplementation = {
+  kind: "ice_strength";
+  operation: "increase";
+  amount: number;
+  activeWhile: "rezzed";
+  sourceZone: "corp_root";
+  visibility: EventVisibilityClass;
+  appliesTo: {
+    side: Extract<Side, "corp">;
+    cardType: Extract<CardType, "ice">;
+    subtype?: string;
+    sameServerAsSource?: boolean;
   };
 };

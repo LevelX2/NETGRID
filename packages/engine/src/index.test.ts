@@ -6937,6 +6937,16 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
+      cardImplementationForDefinitionId("onr_v1_317_data-masons")?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "ice_strength",
+        operation: "increase",
+        amount: 1,
+        appliesTo: { side: "corp", cardType: "ice", subtype: "wall" },
+      }),
+    );
+    expect(
       cardImplementationForDefinitionId("onr_v1_320_encoder-inc")?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
@@ -6987,9 +6997,26 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_360_jerusalem-city-grid",
+      )?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "ice_strength",
+        operation: "increase",
+        amount: 1,
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          subtype: "wall",
+          sameServerAsSource: true,
+        },
+      }),
+    );
+    expect(
       cardImplementationCoverageForDefinitionId("onr_v1_317_data-masons")
         ?.status,
-    ).toBe("partial_implementation");
+    ).toBe("implemented");
     expect(
       cardImplementationCoverageForDefinitionId("onr_v1_320_encoder-inc")
         ?.reason,
@@ -7642,6 +7669,87 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(
       getPlayerView(securityNet, "runner").run?.encounteredIce?.strength,
     ).toBe(3);
+  });
+
+  it("applies Data Masons ICE-strength modifiers only to rezzed walls", () => {
+    const approachIce = (
+      seed: string,
+      serverId: "hq" | "rd",
+      iceDefinitionId: string,
+      rezzedDataMasons: boolean,
+    ): GameState => {
+      let state = v162CardReleaseGame(seed);
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.corp.credits = 30;
+      const dataMasonsId = putCorpRootInRemote(
+        state,
+        "onr_v1_317_data-masons",
+      );
+      state.cardInstances[dataMasonsId] = {
+        ...state.cardInstances[dataMasonsId]!,
+        faceup: rezzedDataMasons,
+        rezzed: rezzedDataMasons,
+      };
+      putCorpIceOnServer(state, serverId, iceDefinitionId);
+      state = toRunnerTurnFromCorpMain(state);
+      state.runner.credits = 20;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === serverId,
+      );
+      return apply(state, "corp", (action) => action.type === "rez_ice");
+    };
+
+    expect(
+      getPlayerView(
+        approachIce(
+          "v162-data-masons-rd-wall-strength",
+          "rd",
+          "onr_v1_232_crystal-wall",
+          true,
+        ),
+        "runner",
+      ).run?.encounteredIce?.strength,
+    ).toBe((DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
+    expect(
+      getPlayerView(
+        approachIce(
+          "v162-data-masons-hq-wall-strength",
+          "hq",
+          "onr_v1_232_crystal-wall",
+          true,
+        ),
+        "runner",
+      ).run?.encounteredIce?.strength,
+    ).toBe((DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1);
+    expect(
+      getPlayerView(
+        approachIce(
+          "v162-data-masons-non-wall-strength",
+          "rd",
+          "onr_v1_230_cortical-scanner",
+          true,
+        ),
+        "runner",
+      ).run?.encounteredIce?.strength,
+    ).toBe(DEMO_CARDS_BY_ID["onr_v1_230_cortical-scanner"]?.strength);
+    expect(
+      getPlayerView(
+        approachIce(
+          "v162-data-masons-unrezzed-strength",
+          "rd",
+          "onr_v1_232_crystal-wall",
+          false,
+        ),
+        "runner",
+      ).run?.encounteredIce?.strength,
+    ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_317_data-masons")
+        ?.status,
+    ).toBe("implemented");
   });
 
   it("reduces code-gate and black-ice rez costs and resolves Priority Requisition free rez deterministically", () => {
@@ -15256,15 +15364,22 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   });
 
   it("keeps Jerusalem City Grid wall modifiers server-bound", () => {
-    const approachWall = (
+    const approachIce = (
       seed: string,
       iceServerId: "rd" | "remote_1",
+      iceDefinitionId = "onr_v1_232_crystal-wall",
     ): GameState => {
       let state = apply(
         createGameAfterSetup({
           seed,
           runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
-          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            cards: [
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+              { id: "simple_code_gate_ice", quantity: 1 },
+            ],
+          },
           agendaPointsToWin: 7,
         }),
         "corp",
@@ -15280,7 +15395,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         faceup: true,
         rezzed: true,
       };
-      putCorpIceOnServer(state, iceServerId, "onr_v1_232_crystal-wall");
+      putCorpIceOnServer(state, iceServerId, iceDefinitionId);
       state = toRunnerTurnFromCorpMain(state);
       state.runner.credits = 20;
       state.runner.clicks = 4;
@@ -15291,13 +15406,18 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           action.type === "start_run" && action.payload?.serverId === iceServerId,
       );
     };
-    const ownServerState = approachWall(
+    const ownServerState = approachIce(
       "spotcheck-jerusalem-city-grid-own",
       "remote_1",
     );
-    const otherServerState = approachWall(
+    const otherServerState = approachIce(
       "spotcheck-jerusalem-city-grid-other",
       "rd",
+    );
+    const sameServerNonWallState = approachIce(
+      "spotcheck-jerusalem-city-grid-non-wall",
+      "remote_1",
+      "simple_code_gate_ice",
     );
     const ownServerRez = mustAction(
       ownServerState,
@@ -15306,6 +15426,11 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
     const otherServerRez = mustAction(
       otherServerState,
+      "corp",
+      (action) => action.type === "rez_ice",
+    );
+    const sameServerNonWallRez = mustAction(
+      sameServerNonWallState,
       "corp",
       (action) => action.type === "rez_ice",
     );
@@ -15321,6 +15446,72 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       otherServerRez.payload?.rezCostReductionSourceDefinitionIds,
     ).toBeUndefined();
+    const ownServerAfterRez = apply(
+      ownServerState,
+      "corp",
+      (action) => action.actionId === ownServerRez.actionId,
+    );
+    expect(getPlayerView(ownServerAfterRez, "runner").run?.encounteredIce?.strength).toBe(
+      (DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength ?? 0) + 1,
+    );
+    const otherServerAfterRez = apply(
+      otherServerState,
+      "corp",
+      (action) => action.actionId === otherServerRez.actionId,
+    );
+    expect(
+      getPlayerView(otherServerAfterRez, "runner").run?.encounteredIce?.strength,
+    ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    const sameServerNonWallAfterRez = apply(
+      sameServerNonWallState,
+      "corp",
+      (action) => action.actionId === sameServerNonWallRez.actionId,
+    );
+    expect(
+      getPlayerView(sameServerNonWallAfterRez, "runner").run?.encounteredIce
+        ?.strength,
+    ).toBe(DEMO_CARDS_BY_ID.simple_code_gate_ice?.strength);
+    const unrezzedGrid = approachIce(
+      "spotcheck-jerusalem-city-grid-unrezzed",
+      "remote_1",
+    );
+    const gridId = unrezzedGrid.corp.servers
+      .find((server) => server.id === "remote_1")
+      ?.root.find(
+        (cardId) =>
+          unrezzedGrid.cardInstances[cardId]?.definitionId ===
+          "onr_v1_360_jerusalem-city-grid",
+      );
+    if (gridId) {
+      unrezzedGrid.cardInstances[gridId] = {
+        ...unrezzedGrid.cardInstances[gridId]!,
+        rezzed: false,
+      };
+    }
+    const unrezzedGridRez = mustAction(
+      unrezzedGrid,
+      "corp",
+      (action) => action.type === "rez_ice",
+    );
+    const unrezzedGridAfterRez = apply(
+      unrezzedGrid,
+      "corp",
+      (action) => action.actionId === unrezzedGridRez.actionId,
+    );
+    expect(
+      getPlayerView(unrezzedGridAfterRez, "runner").run?.encounteredIce
+        ?.strength,
+    ).toBe(DEMO_CARDS_BY_ID["onr_v1_232_crystal-wall"]?.strength);
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_360_jerusalem-city-grid",
+      )?.status,
+    ).toBe("partial_implementation");
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_360_jerusalem-city-grid",
+      )?.reason,
+    ).toContain("region install/replacement rules");
   });
 
   it("applies City Surveillance draw tax only from rezzed public assets", () => {
