@@ -127,12 +127,23 @@ type RunnerTwoTurnRunIntent = {
   stateKey: string;
 };
 
+type InstalledEconomyActionKind = "direct_payout" | "pool_build" | "pool_payout" | "side_economy";
+
+type InstalledEconomyActionAssessment = {
+  kind: InstalledEconomyActionKind;
+  immediateGain: number;
+  netCredits: number;
+  storedCredits: number;
+  futurePoolAfter: number;
+  ability: string;
+};
+
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
-const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "gain_credit", "draw_card", "trash_accessed_card"]);
+const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
 
 export function hasRunnerPlanAction(input: AiDecisionInput): boolean {
-  return input.side === "runner" && input.legalActions.some((action) => PLAN_ACTION_TYPES.has(action.type));
+  return input.side === "runner" && input.legalActions.some((action) => PLAN_ACTION_TYPES.has(action.type) && (action.type !== "trigger_ability" || Boolean(classifyInstalledEconomyAction(input, action))));
 }
 
 export function chooseRunnerPlanAction(input: AiDecisionInput, fallbackDecision: AiDecision, options: { timeBudgetMs?: number } = {}): AiDecision {
@@ -238,7 +249,12 @@ export function generateRunnerPlanCandidates(input: AiDecisionInput): RunnerPlan
     buildCandidate(
       input,
       "recover_economy",
-      actions.filter((action) => action.type === "gain_credit" || (action.type === "play_event" && rolesForAction(input, action).some((role) => role === "economy" || role === "tempo")))
+      actions.filter(
+        (action) =>
+          action.type === "gain_credit" ||
+          (action.type === "play_event" && rolesForAction(input, action).some((role) => role === "economy" || role === "tempo")) ||
+          Boolean(classifyInstalledEconomyAction(input, action))
+      )
     ),
     buildCandidate(
       input,
@@ -269,6 +285,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
   const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
   const twoTurnIntent = evaluateRunnerTwoTurnRunIntent(input, candidate);
+  const installedEconomy = evaluateInstalledEconomyActions(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const easyRunPenalty = input.difficulty === "easy" && isRunPlan(candidate.kind) ? 260 : 0;
   const score =
@@ -281,20 +298,22 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     remote.score * profile.weights.remoteThreat +
     corpThreat.score * profile.weights.corpScoringThreat +
     breakerPlan.score +
-    twoTurnIntent.score -
+    twoTurnIntent.score +
+    installedEconomy.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
     easyRunPenalty;
   return {
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...installedEconomy.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
       `doctrine_plan_weight:${doctrinePlanWeight}`,
       ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
       ...candidate.visibleBenefits,
+      ...installedEconomy.evidence,
       ...twoTurnIntent.evidence,
       ...rig.evidence,
       ...runCost.evidence,
@@ -902,6 +921,91 @@ export function runnerPlanUsesOnlyAiSupportedCards(input: AiDecisionInput, candi
   });
 }
 
+function evaluateInstalledEconomyActions(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
+  if (candidate.kind !== "recover_economy") return { score: 0, reasons: [], evidence: [] };
+  const assessments = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .map((action) => (action ? classifyInstalledEconomyAction(input, action) : undefined))
+    .filter((assessment): assessment is InstalledEconomyActionAssessment => Boolean(assessment));
+  if (assessments.length === 0) return { score: 0, reasons: [], evidence: ["installed_economy:false"] };
+  let score = 0;
+  const reasons: string[] = [];
+  const payout = assessments
+    .filter((assessment) => assessment.kind === "direct_payout" || assessment.kind === "pool_payout")
+    .sort((left, right) => right.netCredits - left.netCredits || right.immediateGain - left.immediateGain || left.ability.localeCompare(right.ability))[0];
+  const poolBuild = assessments
+    .filter((assessment) => assessment.kind === "pool_build")
+    .sort((left, right) => right.futurePoolAfter - left.futurePoolAfter || left.ability.localeCompare(right.ability))[0];
+
+  if (payout) {
+    score += 90 + Math.max(0, payout.netCredits - 1) * 45 + (input.playerView.own.credits < 4 ? 120 : 35);
+    reasons.push(payout.kind === "pool_payout" ? "installed_economy_pool_payout" : "installed_economy_direct_payout");
+  }
+  if (poolBuild) {
+    if (input.playerView.own.credits < 4) {
+      score -= 80;
+      reasons.push("installed_economy_pool_build_deferred_for_credit_need");
+    } else {
+      score += 45 + Math.min(80, poolBuild.futurePoolAfter * 8);
+      reasons.push("installed_economy_pool_build_future_value");
+    }
+  }
+
+  const best = payout ?? poolBuild ?? assessments[0]!;
+  return {
+    score,
+    reasons,
+    evidence: [
+      "installed_economy:true",
+      `installed_economy_kind:${best.kind}`,
+      `installed_economy_immediate_gain:${best.immediateGain}`,
+      `installed_economy_net_credits:${best.netCredits}`,
+      `installed_economy_stored_credits:${best.storedCredits}`,
+      `installed_economy_future_pool_after:${best.futurePoolAfter}`,
+      `economy_need:${input.playerView.own.credits < 4 ? "acute" : "stable"}`
+    ]
+  };
+}
+
+function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): InstalledEconomyActionAssessment | undefined {
+  if (input.side !== "runner" || action.side !== "runner" || action.type !== "trigger_ability") return undefined;
+  if (action.source === "basic_action" || action.source === "game_rule") return undefined;
+  const sourceCard = findVisibleCard(input, action.source);
+  if (!sourceCard || !input.playerView.own.rig?.some((card) => card.instanceId === sourceCard.instanceId && card.known)) return undefined;
+  const ability = typeof action.payload?.resourceAbility === "string" ? action.payload.resourceAbility : "";
+  const roles = rolesForCardId(sourceCard.definitionId);
+  const immediateGain = Math.max(0, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removePowerCounterAmount"));
+  const addedCounters = Math.max(0, numberPayload(action, "addCounterAmount"), numberPayload(action, "addedCounterAmount"));
+  const removedCounters = Math.max(0, numberPayload(action, "removePowerCounterAmount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removedCounterAmount"));
+  const storedCredits = Math.max(0, sourceCard.counters?.power ?? sourceCard.counters?.bit ?? sourceCard.counters?.recurring_credit ?? 0);
+  const futurePoolAfter = Math.max(storedCredits, storedCredits + addedCounters - removedCounters);
+  const netCredits = immediateGain - actionCreditCost(action);
+
+  if (ability === "broker_load_credits") {
+    return { kind: "pool_build", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability };
+  }
+  if (ability === "broker_take_credits") {
+    const brokerGain = Math.max(immediateGain, storedCredits);
+    return { kind: "pool_payout", immediateGain: brokerGain, netCredits: brokerGain - actionCreditCost(action), storedCredits, futurePoolAfter: 0, ability };
+  }
+  if (ability === "short_term_contract_take_credits") {
+    return { kind: "direct_payout", immediateGain, netCredits, storedCredits, futurePoolAfter: Math.max(0, storedCredits - Math.max(removedCounters, immediateGain)), ability };
+  }
+  if (immediateGain > 0 && (removedCounters > 0 || storedCredits > 0)) {
+    return { kind: "pool_payout", immediateGain, netCredits, storedCredits, futurePoolAfter: Math.max(0, futurePoolAfter), ability: ability || "counter_payout" };
+  }
+  if (immediateGain > 0) {
+    return { kind: "direct_payout", immediateGain, netCredits, storedCredits, futurePoolAfter, ability: ability || "credit_payout" };
+  }
+  if (addedCounters > 0 && (ability || roles.some((role) => role.includes("economy")))) {
+    return { kind: "pool_build", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability: ability || "counter_build" };
+  }
+  if (roles.some((role) => role.includes("economy")) && ability) {
+    return { kind: "side_economy", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability };
+  }
+  return undefined;
+}
+
 function buildCandidate(input: AiDecisionInput, kind: RunnerPlanKind, actions: LegalAction[]): RunnerPlanCandidate | null {
   const legalActions = actions.filter((action) => action.side === "runner" && PLAN_ACTION_TYPES.has(action.type));
   if (legalActions.length === 0) return null;
@@ -940,6 +1044,7 @@ function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDeci
   if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement ? 30 : 88;
   if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
+  if (kind === "recover_economy" && action.type === "trigger_ability") return runnerInstalledEconomyPriority(input, action);
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "draw_for_answers" && action.type === "play_event") return 70;
   if (kind === "draw_for_answers" && action.type === "draw_card") return 60;
@@ -1042,6 +1147,15 @@ function runnerInstallPriority(input: AiDecisionInput, action: LegalAction): num
   return priority;
 }
 
+function runnerInstalledEconomyPriority(input: AiDecisionInput, action: LegalAction): number {
+  const assessment = classifyInstalledEconomyAction(input, action);
+  if (!assessment) return 10;
+  if (assessment.kind === "pool_payout") return 88 + Math.max(0, assessment.netCredits - 1) * 8;
+  if (assessment.kind === "direct_payout") return 84 + Math.max(0, assessment.netCredits - 1) * 7;
+  if (assessment.kind === "pool_build") return input.playerView.own.credits < 4 ? 42 : 68 + Math.min(20, assessment.futurePoolAfter * 2);
+  return input.playerView.own.credits < 4 ? 35 : 58;
+}
+
 function assessVisibleBreakerPressure(input: AiDecisionInput): VisibleBreakerPressure {
   const rigCards = input.playerView.own.rig ?? [];
   const gripCards = input.playerView.own.gripOrHq.filter((card) => card.known && card.definitionId);
@@ -1083,6 +1197,11 @@ function isStrategicBreakerTarget(server: AiDecisionInput["playerView"]["servers
 
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.credits) ? cost.credits ?? 0 : 0), 0);
+}
+
+function numberPayload(action: LegalAction, key: string): number {
+  const value = action.payload?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function isAiSupportedCard(cardId: string | undefined): boolean {

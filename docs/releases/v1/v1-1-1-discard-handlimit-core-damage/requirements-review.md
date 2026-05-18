@@ -16,7 +16,7 @@ Status: ready
 - `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/test-matrix.md`
 - `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/plan.md`
 - `docs/releases/v1/v1-1-0-setup-game-end-m2/final-review.md`
-- `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
+- `docs/releases/mvp/mvp-0-94-damage-flatline/damage-flatline-spec.md`
 - `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 ## Befund

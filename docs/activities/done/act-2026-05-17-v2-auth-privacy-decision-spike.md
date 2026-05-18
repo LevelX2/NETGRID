@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.0
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md
+  - docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md
   - docs/activities/inbox/act-2026-05-17-v2-account-session-auth-contract.md
   - docs/activities/inbox/act-2026-05-17-v2-account-session-foundation.md
   - docs/activities/inbox/act-2026-05-17-v2-privacy-export-delete-contract.md
@@ -68,6 +68,6 @@ Vor einer Account-Implementierung soll der kleinste tragfähige V2.0-Entscheidun
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md` empfiehlt für V2.0 geschlossene private Accounts mit Allowlist/Invite und Passkey-first Auth, ohne OAuth-Provider, Passwortdatenbank oder öffentliche Registrierung im ersten Slice. Account-Sessions werden getrennt von bestehenden Match-Join-/Session-/Reconnect-Tokens als widerrufbare Schicht mit `HttpOnly Secure` Cookie-Zielmodell geplant; lokaler Gast-/Privatmodus bleibt erhalten.
+Erledigt. `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md` empfiehlt für V2.0 geschlossene private Accounts mit Allowlist/Invite und Passkey-first Auth, ohne OAuth-Provider, Passwortdatenbank oder öffentliche Registrierung im ersten Slice. Account-Sessions werden getrennt von bestehenden Match-Join-/Session-/Reconnect-Tokens als widerrufbare Schicht mit `HttpOnly Secure` Cookie-Zielmodell geplant; lokaler Gast-/Privatmodus bleibt erhalten.
 
 Datenexport, Löschung, Session-Revocation, Redaction-Grenzen, Browser-Storage-Risiken und accountfreie KI-Verträge sind dokumentiert. Drei Folgeactivities sind geschnitten: Account-/Session-/Passkey-Vertrag, Account-Session-Foundation und Export-/Löschvertrag. Verifikation: Quellenprüfung der bestehenden Roadmap-, Server-, Storage-, Web-Session- und Replay-Flächen sowie `git diff --check`.

@@ -12,10 +12,10 @@ completedAt: 2026-05-17
 branch: codex/activity-worker-1
 releaseTarget: V2.2
 blockedBy:
-  - docs/derived/V2_2_CHAT_DATA_CONTRACT.md
+  - docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
 resultArtifacts:
-  - docs/derived/V2_2_CHAT_REDACTION_BOUNDARY_TEST_PLAN.md
-  - docs/derived/V2_2_CHAT_DATA_CONTRACT.md
+  - docs/releases/v2/v2-2-chat-safety/chat-redaction-boundary-test-plan.md
+  - docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
 checks:
   - git status --short --branch
   - rg --files docs/derived | rg "CHAT|VISIBILITY|V2_2|TEST_MATRIX|CONTRACT|REPLAY|AI|LOG"
@@ -32,9 +32,9 @@ Vor Chat-Erweiterungen soll ein kleiner Testvertrag festlegen, wie Chatdaten geg
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_2_CHAT_DATA_CONTRACT.md`
+- `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md`
 - `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 
@@ -64,6 +64,6 @@ Vor Chat-Erweiterungen soll ein kleiner Testvertrag festlegen, wie Chatdaten geg
 
 ## Ergebnisnotiz
 
-Erledigt. Erstellt wurde `docs/derived/V2_2_CHAT_REDACTION_BOUNDARY_TEST_PLAN.md` als konkreter Testvertrag mit Reconnect-, WebSocket-, Server-Payload-, Replay-/StateHash-, AIInput-/DecisionDebug-, Log- und Moderation-Evidence-Gates. `docs/derived/V2_2_CHAT_DATA_CONTRACT.md` verweist nun auf diesen Testplan.
+Erledigt. Erstellt wurde `docs/releases/v2/v2-2-chat-safety/chat-redaction-boundary-test-plan.md` als konkreter Testvertrag mit Reconnect-, WebSocket-, Server-Payload-, Replay-/StateHash-, AIInput-/DecisionDebug-, Log- und Moderation-Evidence-Gates. `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md` verweist nun auf diesen Testplan.
 
 Offene Folgepunkte: Der Plan ist absichtlich ein Test-/Vertragsartefakt ohne Chat-Implementierung. V22-CHAT-T016 wird erst mit dem späteren Report-/Moderation-Evidence-Slice vollständig implementierbar.

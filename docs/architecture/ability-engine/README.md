@@ -18,6 +18,6 @@ Dieser Bereich bündelt die releaseübergreifenden Architekturartefakte zur Kart
 
 ## Migrationsnotiz
 
-Die drei Dateien lagen vorher unter `docs/abilityEngine/` und wurden am 2026-05-18 nach der Zielstrukturentscheidung `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` nach `docs/architecture/ability-engine/` verschoben.
+Die drei Dateien lagen vorher unter `docs/abilityEngine/` und wurden am 2026-05-18 nach der Zielstrukturentscheidung `docs/decisions/docs-structure-target-decision-2026-05-18.md` nach `docs/architecture/ability-engine/` verschoben.
 
 Der Linkaudit war eng begrenzt: Es gab einen internen Dokumentlink auf den alten Ordner, der aktualisiert wurde. Die übrigen Treffer auf `packages/engine/src/ability-engine/*` sind technische Zielpfade im Code und bleiben unverändert.

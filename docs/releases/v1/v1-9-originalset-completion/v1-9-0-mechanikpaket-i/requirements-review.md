@@ -7,7 +7,7 @@ Status: pass
 
 Geprüft wurden:
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/release-assignment-preflight.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/requirements.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/spec.md`

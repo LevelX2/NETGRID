@@ -26,7 +26,7 @@ Quellenpriorität:
 3. `docs/source/Erstes Testdeck.txt`
 4. `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf` als Regelreferenz, nicht als Scope-Erweiterung
 5. `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
-6. ergänzende Dokumente unter `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/` und `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`
+6. ergänzende Dokumente unter `docs/archive/mvp-0-1-0-2-document-package/` und `docs/archive/mvp-0-1-0-2-detailed-test-concept.md`
 
 Bei Abweichungen zwischen älterer Dokumentation und aktuellem Workspace-Stand wird der Konflikt sichtbar gemacht statt stillschweigend geglättet.
 

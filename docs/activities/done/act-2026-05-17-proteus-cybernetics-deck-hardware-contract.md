@@ -13,10 +13,10 @@ branch: codex/activity-worker-2
 releaseTarget: Proteus planning
 blockedBy: []
 resultArtifacts:
-  - docs/derived/PROTEUS_CYBERNETICS_DECK_HARDWARE_CONTRACT.md
+  - docs/releases/proteus/cybernetics-deck-hardware-contract.md
 checks:
-  - rg -n "cybernetics_deck_hardware|Cortical Cybermodem|Cortical Stimulators|Deck, The|Sunburst Cranial Interface" docs/derived/PROTEUS_CYBERNETICS_DECK_HARDWARE_CONTRACT.md data/rules/proteus-mechanics-coverage-2026-05-17.json docs/source/Proteusspoiler.txt
-  - rg -n "Runtime-Implementierung|Decklegalität|AI-Unterstützung|planning-only|noRuntimeImplementation|noDeckLegality|noAiHints" docs/derived/PROTEUS_CYBERNETICS_DECK_HARDWARE_CONTRACT.md data/rules/proteus-mechanics-coverage-2026-05-17.json
+  - rg -n "cybernetics_deck_hardware|Cortical Cybermodem|Cortical Stimulators|Deck, The|Sunburst Cranial Interface" docs/releases/proteus/cybernetics-deck-hardware-contract.md data/rules/proteus-mechanics-coverage-2026-05-17.json docs/source/Proteusspoiler.txt
+  - rg -n "Runtime-Implementierung|Decklegalität|AI-Unterstützung|planning-only|noRuntimeImplementation|noDeckLegality|noAiHints" docs/releases/proteus/cybernetics-deck-hardware-contract.md data/rules/proteus-mechanics-coverage-2026-05-17.json
   - git diff --check
   - git diff --cached --check
 ---
@@ -52,4 +52,4 @@ Proteus-Hardware mit Deck-/Cybernetics-Regeln soll vor einer Umsetzung als eigen
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/PROTEUS_CYBERNETICS_DECK_HARDWARE_CONTRACT.md` beschreibt den planning-only Vertrag für `cybernetics_deck_hardware`: Deck-Einzigkeit mit deterministischem Trash älterer Decks, MU-/Handgrößenmodifier, zweckgebundene Icebreaker-Bits mit Sunburst-Noisy-Ausschluss, Runner-Start-of-turn-Refresh, Visibility-/UI-/AI-Grenzen und einen kleinsten nicht promotenden Harness-Slice. Tests für Memory, Handgröße, zweckgebundene Bits, Refresh und Trash alter Decks sind skizziert. Keine Runtime-Implementierung, keine Decklegalität und keine AI-Unterstützung wurden eingeführt.
+Erledigt. `docs/releases/proteus/cybernetics-deck-hardware-contract.md` beschreibt den planning-only Vertrag für `cybernetics_deck_hardware`: Deck-Einzigkeit mit deterministischem Trash älterer Decks, MU-/Handgrößenmodifier, zweckgebundene Icebreaker-Bits mit Sunburst-Noisy-Ausschluss, Runner-Start-of-turn-Refresh, Visibility-/UI-/AI-Grenzen und einen kleinsten nicht promotenden Harness-Slice. Tests für Memory, Handgröße, zweckgebundene Bits, Refresh und Trash alter Decks sind skizziert. Keine Runtime-Implementierung, keine Decklegalität und keine AI-Unterstützung wurden eingeführt.

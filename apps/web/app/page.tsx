@@ -116,6 +116,7 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
   breachProgressLabel,
@@ -127,6 +128,7 @@ import {
   cuePositionStyle,
   groupRunnerRigCards,
   hasLegalAction,
+  orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
@@ -219,6 +221,8 @@ const DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
 const LEGACY_DECK_TABLE_VIEW_SETTINGS_STORAGE_KEY = "netgrid.deckTableViewSettings.v1";
 const CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
 const LEGACY_CARD_DISPLAY_MODE_STORAGE_KEY = "netgrid.cardDisplayMode.v1";
+const CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
+const LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY = "netgrid.chronicleDetailMode.v1";
 const CARD_PREVIEW_COLLAPSED_STORAGE_PREFIX = "netgrid.cardPreviewCollapsed.v1";
 const AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
 const LEGACY_AI_PACING_MODE_STORAGE_KEY = "netgrid.aiPacingMode.v1";
@@ -268,6 +272,7 @@ type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
 type AiPacingMode = ApiAiPacingMode;
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
+type ChronicleDetailMode = "simple" | "medium" | "full";
 type ColorScheme = "black" | "white";
 type EntryTab = "play" | "catalog" | "decks" | "options";
 type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "options";
@@ -326,6 +331,7 @@ type SeriesResultSummary = ApiSeriesResultSummary;
 type GameResultSummary = ApiGameResultSummary;
 type LifecycleResultSummary = ApiLifecycleResultSummary;
 type ClientPayload = ApiSidePayload;
+const SERIES_WIN_MATCH_POINTS = 10;
 type LocalMatchClockAnchor = {
   matchId: string;
   matchStartedAtMs: number;
@@ -725,6 +731,10 @@ function normalizeCardDisplayMode(value: unknown): CardDisplayMode {
   return value === "placeholder" || value === "text-card" || value === "compact" ? value : "placeholder";
 }
 
+function normalizeChronicleDetailMode(value: unknown): ChronicleDetailMode {
+  return value === "simple" || value === "medium" || value === "full" ? value : "full";
+}
+
 function normalizeAiPacingMode(value: unknown): AiPacingMode {
   return value === "manual" || value === "paced" || value === "fast" ? value : "paced";
 }
@@ -1022,7 +1032,11 @@ function catalogNumericLabel(key: string, label: string, value: number | null | 
 }
 
 function revealedEventCardId(event: PublicGameEvent): string | null {
-  const cardId = event.publicPayload.cardDefinitionId ?? event.publicPayload.sourceDefinitionId ?? event.publicPayload.targetCardDefinitionId;
+  const cardId =
+    event.publicPayload.cardDefinitionId ??
+    event.publicPayload.sourceDefinitionId ??
+    event.publicPayload.targetCardDefinitionId ??
+    event.publicPayload.priorityRequisitionTargetDefinitionId;
   return typeof cardId === "string" ? cardId : null;
 }
 
@@ -1759,6 +1773,8 @@ export default function Page() {
   const [localAiPacingMode, setLocalAiPacingMode] = useState<AiPacingMode>("paced");
   const [aiPacingModeLoaded, setAiPacingModeLoaded] = useState(false);
   const [cardDisplayModeLoaded, setCardDisplayModeLoaded] = useState(false);
+  const [chronicleDetailMode, setChronicleDetailMode] = useState<ChronicleDetailMode>("full");
+  const [chronicleDetailModeLoaded, setChronicleDetailModeLoaded] = useState(false);
 
   const boardZoneCollapsedFor = (key: string): boolean => Boolean(boardZoneCollapsed[key]);
   const toggleBoardZoneCollapsed = (key: string) => {
@@ -1776,6 +1792,7 @@ export default function Page() {
   const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] = useState(false);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
+  const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] = useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
@@ -1815,6 +1832,7 @@ export default function Page() {
   const lastTurnStartAudioCueKeyRef = useRef<string | null>(null);
   const locallyPlayedActionSoundKeysRef = useRef<Set<string>>(new Set());
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
+  const autoCorpMandatoryDrawSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
@@ -1983,6 +2001,16 @@ export default function Page() {
   }, [cardDisplayModeLoaded, cardDisplayMode]);
 
   useEffect(() => {
+    setChronicleDetailMode(normalizeChronicleDetailMode(readLocalStorageWithLegacy(CHRONICLE_DETAIL_MODE_STORAGE_KEY, LEGACY_CHRONICLE_DETAIL_MODE_STORAGE_KEY)));
+    setChronicleDetailModeLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!chronicleDetailModeLoaded) return;
+    window.localStorage.setItem(CHRONICLE_DETAIL_MODE_STORAGE_KEY, chronicleDetailMode);
+  }, [chronicleDetailModeLoaded, chronicleDetailMode]);
+
+  useEffect(() => {
     if (!cardPreviewCollapsedStorageKey) {
       setCardPreviewCollapsed(false);
       return;
@@ -2092,7 +2120,8 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; topbarStickyEnabled?: unknown };
+        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; topbarStickyEnabled?: unknown };
+        if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean") setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
         if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
         if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
@@ -2105,8 +2134,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled }));
-  }, [gameplaySettingsLoaded, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled }));
+  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -2479,7 +2508,9 @@ export default function Page() {
   const selectedPanelContextActions = selectedPanelContext ? legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, selectedPanelContext)) : [];
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
-    return legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
+    return orderedCardContextActions(
+      legalActionSplit.contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }))
+    );
   };
   const runActionForServer = (serverId: string): LegalAction | null => {
     const serverContext = { kind: "server" as const, id: serverId, label: serverDisplayLabel(serverId) };
@@ -3205,6 +3236,15 @@ export default function Page() {
     );
     return true;
   };
+
+  useEffect(() => {
+    if (!autoCorpMandatoryDrawEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
+    const action = automaticCorpMandatoryDrawAction(payload.playerView, payload.legalActions, session.side);
+    if (!action) return;
+    const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
+    if (autoCorpMandatoryDrawSubmittedKeyRef.current === key) return;
+    if (submitAction(action, { immediateAudio: false })) autoCorpMandatoryDrawSubmittedKeyRef.current = key;
+  }, [autoCorpMandatoryDrawEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
 
   useEffect(() => {
     if (!autoEndTurnEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
@@ -4436,6 +4476,7 @@ export default function Page() {
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
               automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+              autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               topbarStickyEnabled={topbarStickyEnabled}
@@ -4450,12 +4491,14 @@ export default function Page() {
               cardBoardScalePercent={cardBoardScalePercent}
               cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
+              chronicleDetailMode={chronicleDetailMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
               aiPacingMode={localAiPacingMode}
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
               onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+              onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onTopbarStickyEnabled={setTopbarStickyEnabled}
@@ -4470,6 +4513,7 @@ export default function Page() {
               onCardBoardScalePercent={setCardBoardScalePercent}
               onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
+              onChronicleDetailMode={setChronicleDetailMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
               onAiPacingMode={updateLocalAiPacingMode}
@@ -4882,7 +4926,7 @@ export default function Page() {
                                     <div className="corpHqHandHead">
                                       <span>Handkarten</span>
                                     </div>
-                                    <div className="cards fixedZoneCards corpHqHandCards" style={handCardsStyle}>
+                                    <HandCardsRow className="corpHqHandCards" style={handCardsStyle} count={activeView.own.gripOrHq.length}>
                                       {activeView.own.gripOrHq.map((card) => {
                                         const displayCard = enrichCard(card);
                                         const discardOption = discardOptionForCard(card);
@@ -4910,7 +4954,7 @@ export default function Page() {
                                           />
                                         );
                                       })}
-                                    </div>
+                                    </HandCardsRow>
                                   </div>
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
@@ -5017,7 +5061,7 @@ export default function Page() {
                   collapsed={boardZoneCollapsedFor("runner:grip")}
                   onToggleCollapse={() => toggleBoardZoneCollapsed("runner:grip")}
                 >
-                  <div className="cards fixedZoneCards" style={handCardsStyle}>
+                  <HandCardsRow style={handCardsStyle} count={activeView.own.gripOrHq.length}>
                     {activeView.own.gripOrHq.map((card) => {
                       const displayCard = enrichCard(card);
                       const discardOption = discardOptionForCard(card);
@@ -5045,7 +5089,7 @@ export default function Page() {
                         />
                       );
                     })}
-                  </div>
+                  </HandCardsRow>
                 </SideZoneFrame>
                 <SideZoneFrame
                   side="runner"
@@ -5129,6 +5173,7 @@ export default function Page() {
                 side={payload.side}
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
+                detailMode={chronicleDetailMode}
                 onFocusCard={focusCard}
               />
               <section className="section">
@@ -5202,6 +5247,7 @@ export default function Page() {
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
               automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+              autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               topbarStickyEnabled={topbarStickyEnabled}
@@ -5216,6 +5262,7 @@ export default function Page() {
               cardBoardScalePercent={cardBoardScalePercent}
               cardRigScalePercent={cardRigScalePercent}
               cardDisplayMode={cardDisplayMode}
+              chronicleDetailMode={chronicleDetailMode}
               colorScheme={colorScheme}
               cuePosition={cuePosition}
               aiPacingMode={localAiPacingMode}
@@ -5223,6 +5270,7 @@ export default function Page() {
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
               onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+              onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onTopbarStickyEnabled={setTopbarStickyEnabled}
@@ -5237,6 +5285,7 @@ export default function Page() {
               onCardBoardScalePercent={setCardBoardScalePercent}
               onCardRigScalePercent={setCardRigScalePercent}
               onCardDisplayMode={setCardDisplayMode}
+              onChronicleDetailMode={setChronicleDetailMode}
               onColorScheme={setColorScheme}
               onCuePosition={setCuePosition}
               onAiPacingMode={updateLocalAiPacingMode}
@@ -5276,6 +5325,7 @@ export default function Page() {
             actionCueAutoDismissMs={actionCueAutoDismissMs}
             actionCuesEnabled={actionCuesEnabled}
             automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+            autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
             autoDiscardEnabled={autoDiscardEnabled}
             autoEndTurnEnabled={autoEndTurnEnabled}
             topbarStickyEnabled={topbarStickyEnabled}
@@ -5290,6 +5340,7 @@ export default function Page() {
             cardBoardScalePercent={cardBoardScalePercent}
             cardRigScalePercent={cardRigScalePercent}
             cardDisplayMode={cardDisplayMode}
+            chronicleDetailMode={chronicleDetailMode}
             colorScheme={colorScheme}
             cuePosition={cuePosition}
             aiPacingMode={localAiPacingMode}
@@ -5298,6 +5349,7 @@ export default function Page() {
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
             onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+            onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
             onAutoDiscardEnabled={setAutoDiscardEnabled}
             onAutoEndTurnEnabled={setAutoEndTurnEnabled}
             onTopbarStickyEnabled={setTopbarStickyEnabled}
@@ -5312,6 +5364,7 @@ export default function Page() {
             onCardBoardScalePercent={setCardBoardScalePercent}
             onCardRigScalePercent={setCardRigScalePercent}
             onCardDisplayMode={setCardDisplayMode}
+            onChronicleDetailMode={setChronicleDetailMode}
             onColorScheme={setColorScheme}
             onCuePosition={setCuePosition}
             onAiPacingMode={updateLocalAiPacingMode}
@@ -5737,6 +5790,7 @@ function GameOverModal({
         ? "Du hast das Spiel verloren."
         : "Das Spiel endet unentschieden.";
   const seriesText = result.series ? seriesStatusText(result.series) : null;
+  const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
   return (
     <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
       <div className="gameOverBackdrop" aria-hidden="true" />
@@ -5746,6 +5800,18 @@ function GameOverModal({
           <h2 id="game-over-title">{outcomeText}</h2>
           <p>{resultReasonLabel(result.reason)}</p>
         </div>
+        {gameStanding ? (
+          <div className="gameStandingStrip" aria-label="Spielwertung">
+            <div>
+              <span>Spielwertung</span>
+              <small>{gameStanding.summary}</small>
+            </div>
+            <div className="gameStandingScore">
+              <span>Du {gameStanding.viewerMatchPoints} MP</span>
+              <span>Gegenseite {gameStanding.opponentMatchPoints} MP</span>
+            </div>
+          </div>
+        ) : null}
         <div className="gameOverStats">
           <Stat label="Agenda" value={`${result.runnerAgendaPoints} / ${result.agendaPointsToWin}`} unit="Runner" icon={<AgendaIcon size={14} />} />
           <Stat label="Agenda" value={`${result.corpAgendaPoints} / ${result.agendaPointsToWin}`} unit="Korp" icon={<AgendaIcon size={14} />} />
@@ -5799,6 +5865,43 @@ function GameOverModal({
       </section>
     </div>
   );
+}
+
+function gameStandingForResult(result: GameResultSummary, viewerSide: Side): { summary: string; viewerMatchPoints: number; opponentMatchPoints: number } {
+  const opponentSide = oppositeSide(viewerSide);
+  if (result.winner === "draw") {
+    return {
+      summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
+      viewerMatchPoints: agendaPointsForResultSide(result, viewerSide),
+      opponentMatchPoints: agendaPointsForResultSide(result, opponentSide)
+    };
+  }
+
+  const winnerSide = result.winner;
+  const loserSide = oppositeSide(winnerSide);
+  const loserAgendaPoints = agendaPointsForResultSide(result, loserSide);
+  const winnerLabel = winnerSide === viewerSide ? "Du" : "Gegenseite";
+  const loserLabel = loserSide === viewerSide ? "Du" : "Gegenseite";
+  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, viewerSide);
+  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, opponentSide);
+
+  return {
+    summary: `${winnerLabel}: ${SERIES_WIN_MATCH_POINTS} Matchpunkte. ${loserLabel}: ${loserAgendaPoints} Agenda-Punkte aus ${agendaPointSourceLabel(loserSide)} Agendas.`,
+    viewerMatchPoints,
+    opponentMatchPoints
+  };
+}
+
+function agendaPointsForResultSide(result: GameResultSummary, side: Side): number {
+  return side === "runner" ? result.runnerAgendaPoints : result.corpAgendaPoints;
+}
+
+function agendaPointSourceLabel(side: Side): string {
+  return side === "runner" ? "gestohlenen" : "gescorten";
+}
+
+function oppositeSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
 }
 
 function ConfirmationDialog({
@@ -5909,6 +6012,7 @@ function OptionsPanel({
   actionCueAutoDismissMs,
   actionCuesEnabled,
   automaticEffectCuesEnabled,
+  autoCorpMandatoryDrawEnabled,
   autoDiscardEnabled,
   autoEndTurnEnabled,
   topbarStickyEnabled,
@@ -5923,6 +6027,7 @@ function OptionsPanel({
   cardBoardScalePercent,
   cardRigScalePercent,
   cardDisplayMode,
+  chronicleDetailMode,
   colorScheme,
   cuePosition,
   aiPacingMode,
@@ -5931,6 +6036,7 @@ function OptionsPanel({
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
   onAutomaticEffectCuesEnabled,
+  onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
@@ -5945,6 +6051,7 @@ function OptionsPanel({
   onCardBoardScalePercent,
   onCardRigScalePercent,
   onCardDisplayMode,
+  onChronicleDetailMode,
   onColorScheme,
   onCuePosition,
   onAiPacingMode,
@@ -5954,6 +6061,7 @@ function OptionsPanel({
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
   automaticEffectCuesEnabled: boolean;
+  autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
@@ -5968,6 +6076,7 @@ function OptionsPanel({
   cardBoardScalePercent: number;
   cardRigScalePercent: number;
   cardDisplayMode: CardDisplayMode;
+  chronicleDetailMode: ChronicleDetailMode;
   colorScheme: ColorScheme;
   cuePosition: CuePositionPreference;
   aiPacingMode: AiPacingMode;
@@ -5976,6 +6085,7 @@ function OptionsPanel({
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
   onAutomaticEffectCuesEnabled(value: boolean): void;
+  onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
@@ -5990,6 +6100,7 @@ function OptionsPanel({
   onCardBoardScalePercent(value: number): void;
   onCardRigScalePercent(value: number): void;
   onCardDisplayMode(value: CardDisplayMode): void;
+  onChronicleDetailMode(value: ChronicleDetailMode): void;
   onColorScheme(value: ColorScheme): void;
   onCuePosition(value: CuePositionPreference): void;
   onAiPacingMode(value: AiPacingMode): void;
@@ -6011,6 +6122,7 @@ function OptionsPanel({
         {session ? <SessionAccessSettings session={session} onCopyReconnectLink={onCopyReconnectLink} onDiscardLocalSession={onDiscardLocalSession} /> : null}
         <ColorSchemeSettings scheme={colorScheme} onChange={onColorScheme} />
         <CardDisplaySettings mode={cardDisplayMode} onChange={onCardDisplayMode} />
+        <ChronicleDetailSettings mode={chronicleDetailMode} onChange={onChronicleDetailMode} />
         <CardTooltipSettings mode={cardTooltipMode} hoverOpenDelayMs={cardTooltipHoverDelayMs} onMode={onCardTooltipMode} onHoverOpenDelayMs={onCardTooltipHoverDelayMs} />
         <CardSizeSettings
           tooltipPercent={cardTooltipScalePercent}
@@ -6027,9 +6139,11 @@ function OptionsPanel({
           onRigPercent={onCardRigScalePercent}
         />
         <GameplaySettings
+          autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
           autoDiscardEnabled={autoDiscardEnabled}
           autoEndTurnEnabled={autoEndTurnEnabled}
           topbarStickyEnabled={topbarStickyEnabled}
+          onAutoCorpMandatoryDrawEnabled={onAutoCorpMandatoryDrawEnabled}
           onAutoDiscardEnabled={onAutoDiscardEnabled}
           onAutoEndTurnEnabled={onAutoEndTurnEnabled}
           onTopbarStickyEnabled={onTopbarStickyEnabled}
@@ -6179,6 +6293,28 @@ function CardDisplayModeSelector({ mode, onChange, iconOnly = false }: { mode: C
   );
 }
 
+function ChronicleDetailSettings({ mode, onChange }: { mode: ChronicleDetailMode; onChange(value: ChronicleDetailMode): void }) {
+  return (
+    <div className="chronicleDetailSettings">
+      <div>
+        <span className="settingsTitle">Chronik</span>
+        <span className="meta">Lokale Detailtiefe, kein Match-State</span>
+      </div>
+      <div className="segmented chronicleDetailSelector" role="group" aria-label="Detailgrad der Chronik">
+        <button className={mode === "simple" ? "active" : ""} onClick={() => onChange("simple")} type="button" title="Nur Basistext">
+          Einfach
+        </button>
+        <button className={mode === "medium" ? "active" : ""} onClick={() => onChange("medium")} type="button" title="Basistext mit Chips ohne Regeltext">
+          Mittel
+        </button>
+        <button className={mode === "full" ? "active" : ""} onClick={() => onChange("full")} type="button" title="Basistext, Chips und Regeltext">
+          Alles
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function CardTooltipSettings({
   mode,
   hoverOpenDelayMs,
@@ -6292,16 +6428,20 @@ function CardSizeSliderRow({
 }
 
 function GameplaySettings({
+  autoCorpMandatoryDrawEnabled,
   autoDiscardEnabled,
   autoEndTurnEnabled,
   topbarStickyEnabled,
+  onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled
 }: {
+  autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
+  onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
@@ -6314,6 +6454,10 @@ function GameplaySettings({
           <span className="meta">Lokale Komfortoption, kein Match-State</span>
         </div>
         <div className="settingsToggleGroup">
+          <label className={`settingsToggle ${autoCorpMandatoryDrawEnabled ? "checked" : ""}`}>
+            <input type="checkbox" checked={autoCorpMandatoryDrawEnabled} onChange={(event) => onAutoCorpMandatoryDrawEnabled(event.target.checked)} />
+            Korp-Startziehen
+          </label>
           <label className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}>
             <input type="checkbox" checked={autoEndTurnEnabled} onChange={(event) => onAutoEndTurnEnabled(event.target.checked)} />
             Auto-Zugende
@@ -6328,7 +6472,7 @@ function GameplaySettings({
           </label>
         </div>
       </div>
-      <p className="settingsHelp">Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar.</p>
+      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar.</p>
     </div>
   );
 }
@@ -7317,19 +7461,20 @@ function LegalActionsPanel({
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
     if (shouldUseCardChoicePanel(genericChoice)) {
+      const cardChoice = enrichVisibleChoiceCardsFromView(genericChoice, view);
       if (connection !== "online") {
         return (
           <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="card-choice-paused-panel">
             <h2>
               <Search size={16} />
-              {cardChoiceTitle(genericChoice)}
+              {cardChoiceTitle(cardChoice)}
             </h2>
-            <p className="meta">{genericChoice.prompt}</p>
+            <p className="meta">{cardChoice.prompt}</p>
             <p className="meta">Die Kartenwahl wird wieder geöffnet, sobald die Verbindung steht.</p>
           </section>
         );
       }
-      return <CardChoicePanel choice={genericChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
+      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
     }
     return (
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
@@ -7402,6 +7547,40 @@ function LegalActionsPanel({
       </div>
     </section>
   );
+}
+
+function enrichVisibleChoiceCardsFromView(choice: VisibleChoice, view: PlayerView): VisibleChoice {
+  if (choice.options.every((option) => option.card || typeof option.value !== "string")) return choice;
+  const visibleCards = visibleCardsByInstanceId(view);
+  let changed = false;
+  const options = choice.options.map((option) => {
+    if (option.card || typeof option.value !== "string") return option;
+    const card = visibleCards.get(option.value);
+    if (!card?.known) return option;
+    changed = true;
+    return { ...option, card };
+  });
+  return changed ? { ...choice, options } : choice;
+}
+
+function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
+  const cards = [
+    view.own.identity,
+    ...view.own.gripOrHq,
+    ...view.own.heapOrArchives,
+    ...view.own.scoreArea,
+    ...(view.own.rig ?? []),
+    view.opponent.identity,
+    ...(view.opponent.discardCards ?? []),
+    ...view.opponent.scoreArea,
+    ...(view.opponent.rig ?? []),
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.specialZones?.setAside ?? []),
+    ...(view.specialZones?.removedFromGame ?? []),
+    ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
+    ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
+  ];
+  return new Map(cards.map((card) => [card.instanceId, card]));
 }
 
 function CardChoicePanel({
@@ -7771,6 +7950,7 @@ function ChroniclePanel({
   side,
   cardDetailsById,
   displayMode,
+  detailMode,
   onFocusCard
 }: {
   events: PublicGameEvent[];
@@ -7778,30 +7958,23 @@ function ChroniclePanel({
   side: Side;
   cardDetailsById: Record<string, CatalogCardDetail>;
   displayMode: CardDisplayMode;
+  detailMode: ChronicleDetailMode;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById);
-  const entries = events
-    .flatMap((event) => {
-      const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
-      const items = [eventItem, ...formatChronicleEffectItems(event, side)];
-      return items.map((item) => {
-        const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
-        return { card, item };
-      });
-    })
-    .reverse();
-  const groupedEntries: { label: string; entries: typeof entries }[] = [];
+  const entries = chronicleEntriesWithRunGroups(events, side, contextByEventId, cardDetailsById).reverse();
+  const groupedEntries: { label: string; kind: ChronicleGroupKind; entries: typeof entries }[] = [];
   for (const entry of entries) {
-    const label = chronicleGroupLabel(entry.item);
+    const label = entry.groupLabel;
     const currentGroup = groupedEntries[groupedEntries.length - 1];
     if (currentGroup?.label === label) {
       currentGroup.entries.push(entry);
     } else {
-      groupedEntries.push({ label, entries: [entry] });
+      groupedEntries.push({ label, kind: entry.groupKind, entries: [entry] });
     }
   }
+  const shownChronicleGroupLabels = new Set<string>();
 
   return (
     <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`} data-testid="chronicle">
@@ -7825,9 +7998,9 @@ function ChroniclePanel({
           {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
           {groupedEntries.map((group) => (
             <div className="chronicleGroupBlock" key={`${group.label}-${group.entries[0]?.item.id ?? "empty"}`}>
-              <div className="chronicleGroup">{group.label}</div>
+              {chronicleGroupShouldRender(group.label, shownChronicleGroupLabels) ? <div className={`chronicleGroup ${group.kind}`}>{group.label}</div> : null}
               {group.entries.map((entry) => (
-                <ChronicleEntry key={entry.item.id} item={entry.item} card={entry.card} displayMode={displayMode} onFocusCard={onFocusCard} />
+                <ChronicleEntry key={entry.item.id} item={entry.item} card={entry.card} displayMode={displayMode} detailMode={detailMode} groupKind={entry.groupKind} onFocusCard={onFocusCard} />
               ))}
             </div>
           ))}
@@ -7837,21 +8010,121 @@ function ChroniclePanel({
   );
 }
 
+function chronicleGroupShouldRender(label: string, shownLabels: Set<string>): boolean {
+  if (!chronicleDeduplicatedGroupLabel(label)) return true;
+  if (shownLabels.has(label)) return false;
+  shownLabels.add(label);
+  return true;
+}
+
+function chronicleDeduplicatedGroupLabel(label: string): boolean {
+  return /^(Korp|Runner)-Zug(?:\s+\d+)?$/.test(label) || /^Run auf .+/.test(label);
+}
+
+type ChronicleGroupKind = "corp" | "runner" | "run" | "system" | "neutral";
+
+function chronicleEntriesWithRunGroups(
+  events: PublicGameEvent[],
+  side: Side,
+  contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
+  cardDetailsById: Record<string, CatalogCardDetail>
+): Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind }> {
+  const entries: Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind }> = [];
+  let activeRunGroupLabel: string | null = null;
+  let runEndPending = false;
+
+  for (const event of events) {
+    const actionType = payloadString(event.publicPayload, "actionType") ?? event.type;
+    const actor = payloadSide(event.publicPayload, "actor");
+    const turnNumber = contextByEventId[event.eventId]?.turnNumber ?? null;
+    const turnGroup = actor ? { label: `${actor === "corp" ? "Korp" : "Runner"}-Zug${turnNumber ? ` ${turnNumber}` : ""}`, kind: actor } : null;
+    if (runEndPending && !chronicleActionContinuesCompletedRun(actionType)) {
+      activeRunGroupLabel = null;
+      runEndPending = false;
+    }
+    const startedRunGroupLabel = chronicleRunGroupLabelFromEvent(event);
+    if (startedRunGroupLabel) {
+      activeRunGroupLabel = startedRunGroupLabel;
+      runEndPending = false;
+    }
+
+    const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
+    const items = [eventItem, ...formatChronicleEffectItems(event, side)];
+    const eventGroupLabel = activeRunGroupLabel && chronicleEventBelongsToActiveRun(actionType, items) ? activeRunGroupLabel : null;
+    for (const item of items) {
+      const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
+      const groupLabel = eventGroupLabel ?? turnGroup?.label ?? chronicleGroupLabel(item);
+      const groupKind = eventGroupLabel ? "run" : turnGroup?.kind ?? chronicleGroupKindFromItem(item);
+      entries.push({ card, item, groupLabel, groupKind });
+    }
+
+    if (chronicleActionCompletesRun(event, actionType)) runEndPending = true;
+  }
+
+  return entries;
+}
+
+function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
+  if (item.groupLabel.startsWith("Run")) return "run";
+  if (item.actor === "corp" || item.groupLabel.startsWith("Korp")) return "corp";
+  if (item.actor === "runner" || item.groupLabel.startsWith("Runner")) return "runner";
+  if (item.category === "system") return "system";
+  return "neutral";
+}
+
+function chronicleRunGroupLabelFromEvent(event: PublicGameEvent): string | null {
+  const actionType = payloadString(event.publicPayload, "actionType") ?? event.type;
+  if (actionType !== "start_run") return null;
+  const serverLabel = payloadString(event.publicPayload, "serverLabel");
+  const label = payloadString(event.publicPayload, "label");
+  const target = serverLabel ? serverDisplayLabel(serverLabel) : chronicleRunTargetFromLabel(label);
+  return `Run auf ${target}`;
+}
+
+function chronicleRunTargetFromLabel(label: string | null): string {
+  const match = label?.match(/Run auf (.+)$/i);
+  return match?.[1]?.trim() ? serverDisplayLabel(match[1].trim()) : "einen Server";
+}
+
+function chronicleEventBelongsToActiveRun(actionType: string, items: ChronicleItem[]): boolean {
+  if (actionType === "end_turn" || actionType === "mandatory_draw") return false;
+  return chronicleRunContextActionTypes.has(actionType) || items.some((item) => chronicleGroupLabel(item).startsWith("Run") || item.category === "run");
+}
+
+const chronicleRunContextActionTypes = new Set(["start_run", "rez_ice", "decline_rez", "pump_breaker", "break_subroutine", "continue_run", "jack_out", "access_card", "trash_accessed_card", "steal_agenda", "decline_trash"]);
+
+function chronicleActionContinuesCompletedRun(actionType: string): boolean {
+  return actionType === "access_card" || actionType === "trash_accessed_card" || actionType === "steal_agenda" || actionType === "decline_trash";
+}
+
+function chronicleActionCompletesRun(event: PublicGameEvent, actionType: string): boolean {
+  if (actionType === "jack_out" || actionType === "access_card" || actionType === "trash_accessed_card" || actionType === "steal_agenda" || actionType === "decline_trash") return true;
+  if (actionType === "continue_run") return payloadString(event.publicPayload, "result") === "ended" || event.publicPayload.rioRunEnded === true;
+  return false;
+}
+
 function ChronicleEntry({
   item,
   card,
   displayMode,
+  detailMode,
+  groupKind,
   onFocusCard
 }: {
   item: ChronicleItem;
   card: CatalogCardDetail | null;
   displayMode: CardDisplayMode;
+  detailMode: ChronicleDetailMode;
+  groupKind: ChronicleGroupKind;
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const titleContainsCard = Boolean(item.cardTitle && item.title.includes(item.cardTitle));
   const previewCard = card ? visibleCardFromCatalogDetail(card) : null;
+  const showSupportingText = detailMode !== "simple";
+  const showChips = detailMode !== "simple";
+  const showRuleText = detailMode === "full";
   return (
-    <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility}`}>
+    <article className={`chronicleEntry chronicle-${item.category} importance-${item.importance} visibility-${item.visibility} detail-${detailMode} group-${groupKind}`}>
       <div className="chronicleRail" aria-hidden={!item.actionUse}>
         <span className="chronicleRailIcon">
           <ChronicleIcon category={item.category} />
@@ -7870,17 +8143,17 @@ function ChronicleEntry({
           <strong>
             <ChronicleTitle item={item} card={card} previewCard={previewCard} displayMode={displayMode} onFocusCard={onFocusCard} />
           </strong>
-          <span className="chronicleCategory">{CHRONICLE_CATEGORY_LABELS[item.category]}</span>
+          {detailMode !== "simple" ? <span className="chronicleCategory">{CHRONICLE_CATEGORY_LABELS[item.category]}</span> : null}
         </div>
-        {item.description ? <p className="chronicleDescription">{item.description}</p> : null}
-        {item.chips.length > 0 ? (
+        {showSupportingText && item.description ? <p className="chronicleDescription">{item.description}</p> : null}
+        {showChips && item.chips.length > 0 ? (
           <div className="chronicleChips">
             {item.chips.map((chip) => (
               <span key={chip}>{chip}</span>
             ))}
           </div>
         ) : null}
-        {item.cardTitle && !titleContainsCard ? (
+        {showSupportingText && item.cardTitle && !titleContainsCard ? (
           <ChronicleCardTrigger
             className="chronicleCardLine"
             card={card}
@@ -7893,7 +8166,7 @@ function ChronicleEntry({
             Karte: {item.cardTitle}
           </ChronicleCardTrigger>
         ) : null}
-        {item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
+        {showRuleText && item.cardText ? <p className="chronicleEffect">Effekt: {item.cardText}</p> : null}
       </div>
     </article>
   );
@@ -7977,6 +8250,7 @@ function ChronicleCardTrigger({
   const hasGeneratedImage = hasGeneratedCardArt(card?.catalogCardId);
   const showHardwareOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isHardwareCardType(cardType) && hasGeneratedImage;
   const showOperationOverlay = Boolean(imageUrl) && displayMode === "placeholder" && isOperationCardType(cardType) && hasGeneratedImage;
+  const cardTypeClassName = chronicleCardTypeClassName(card?.type);
   const tooltipStats = card
     ? [
         card.numeric.cost !== null ? { icon: "¢", label: "Kosten", value: String(card.numeric.cost) } : null,
@@ -8081,7 +8355,7 @@ function ChronicleCardTrigger({
   return (
     <button
       ref={triggerRef}
-      className={className}
+      className={`${className}${cardTypeClassName ? ` ${cardTypeClassName}` : ""}`}
       type="button"
       disabled={disabled}
       onClick={onClick}
@@ -8173,6 +8447,11 @@ function ChronicleCardTrigger({
       ) : null}
     </button>
   );
+}
+
+function chronicleCardTypeClassName(type: string | null | undefined): string {
+  const normalized = type?.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return normalized ? `chronicleCardType-${normalized}` : "";
 }
 
 function ChronicleIcon({ category }: { category: ChronicleCategory }) {
@@ -11812,6 +12091,59 @@ function SideZoneFrame({
   );
 }
 
+function HandCardsRow({ className = "", style, count, children }: { className?: string; style?: CSSProperties; count: number; children: ReactNode }) {
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const [overlapOffset, setOverlapOffset] = useState<string | null>(null);
+
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row || count <= 1) {
+      setOverlapOffset(null);
+      return;
+    }
+
+    const syncOverlap = () => {
+      const computedStyle = window.getComputedStyle(row);
+      const cardWidth = Number.parseFloat(computedStyle.getPropertyValue("--cards-min-width")) || CARD_DISPLAY_BASE_MIN_WIDTH;
+      const cardGap = Number.parseFloat(computedStyle.columnGap) || 0;
+      const availableWidth = row.clientWidth;
+      if (cardWidth <= 0 || availableWidth <= 0) {
+        setOverlapOffset(null);
+        return;
+      }
+
+      const defaultOverlapRatio = 0.42;
+      const defaultOffset = cardWidth * defaultOverlapRatio;
+      const defaultRowWidth = cardWidth * count + (cardGap - defaultOffset) * (count - 1);
+      const requiredOffset = (cardWidth * count + cardGap * (count - 1) - availableWidth) / (count - 1);
+      const maxOffset = Math.max(defaultOffset, cardWidth + cardGap - 10);
+      const nextOffsetWidth = defaultRowWidth <= availableWidth ? defaultOffset : Math.min(Math.max(requiredOffset, defaultOffset), maxOffset);
+      const nextOffset = `${Math.round(nextOffsetWidth) * -1}px`;
+      setOverlapOffset((current) => (current === nextOffset ? current : nextOffset));
+    };
+
+    syncOverlap();
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(syncOverlap);
+    observer?.observe(row);
+    window.addEventListener("resize", syncOverlap);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener("resize", syncOverlap);
+    };
+  }, [count, style]);
+
+  const rowStyle = useMemo(() => {
+    if (!overlapOffset) return style;
+    return { ...style, "--cards-overlap-offset": overlapOffset } as CSSProperties;
+  }, [overlapOffset, style]);
+
+  return (
+    <div ref={rowRef} className={`cards fixedZoneCards handCardsRow ${className}`.trim()} style={rowStyle}>
+      {children}
+    </div>
+  );
+}
+
 function ZoneCollapseButton({ side, label, collapsed, onToggle }: { side: Side; label: string; collapsed: boolean; onToggle: () => void }) {
   const actionLabel = `${label} ${collapsed ? "ausklappen" : "einklappen"}`;
   return (
@@ -12239,13 +12571,21 @@ function actionSoundPattern(kind: ActionSoundKind): Array<{ frequency: number; d
       ];
     case "runner_turn":
       return [
-        { frequency: 523, duration: 0.08, gain: 0.075, type: "triangle" },
-        { frequency: 784, duration: 0.12, gain: 0.06, type: "sine" }
+        { frequency: 392, duration: 0.13, gain: 0.1, type: "triangle" },
+        { frequency: 523, duration: 0.14, gain: 0.09, type: "sine" },
+        { frequency: 659, duration: 0.15, gain: 0.09, type: "sine" },
+        { frequency: 880, duration: 0.17, gain: 0.085, type: "triangle" },
+        { frequency: 1175, duration: 0.22, gain: 0.075, type: "sine" },
+        { frequency: 1568, duration: 0.19, gain: 0.045, type: "sine" }
       ];
     case "corp_turn":
       return [
-        { frequency: 220, duration: 0.09, gain: 0.08, type: "sawtooth" },
-        { frequency: 147, duration: 0.13, gain: 0.055, type: "triangle" }
+        { frequency: 262, duration: 0.14, gain: 0.11, type: "sawtooth" },
+        { frequency: 196, duration: 0.16, gain: 0.1, type: "square" },
+        { frequency: 147, duration: 0.18, gain: 0.095, type: "sawtooth" },
+        { frequency: 98, duration: 0.23, gain: 0.085, type: "triangle" },
+        { frequency: 131, duration: 0.17, gain: 0.075, type: "square" },
+        { frequency: 87, duration: 0.24, gain: 0.065, type: "triangle" }
       ];
     case "turn":
     default:

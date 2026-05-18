@@ -8,7 +8,7 @@ import { chooseCorpPlanAction, hasCorpPlanAction } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
-import { CARD_ROLES_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
+import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, creditsToBreakEndTheRunSubroutinesWithBreaker, endTheRunSubroutineCount, iceHasEndTheRun } from "./visible-run-analysis";
 import { buildAiDecisionInputDto } from "./input-dto";
 import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
@@ -366,6 +366,15 @@ const SOAK_SEEDS_143 = soakSeeds143Data as {
   };
 };
 const EXPLOIT_FIXTURES_143 = exploitFixtures143Data as { version: "1.4.3"; fixtures: V143ExploitFixture[] };
+const AI_HINTS = createAiHintsByCard();
+
+type DiscardCandidateScore = {
+  total: number;
+  baseValue: number;
+  planFit: number;
+  doctrineFit: number;
+  evidence: string[];
+};
 
 export type AiSimulationConfig = {
   seed?: string;
@@ -1527,15 +1536,7 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
   if (choice.kind === "select_cards" && choice.source === "discard_phase") {
-    const count = Math.max(choice.minSelections, Math.min(choice.maxSelections, choice.maxSelections));
-    const selected = choice.options
-      .slice()
-      .sort((left, right) => {
-        const labelCompare = left.label.localeCompare(right.label, "de");
-        return labelCompare !== 0 ? labelCompare : left.id.localeCompare(right.id);
-      })
-      .slice(0, count)
-      .map((option) => option.id);
+    const selected = selectedDiscardChoiceOptionIds(input, choice, selectableOptions);
     return { choiceId: choice.choiceId, selectedOptionIds: selected };
   }
   if (choice.kind === "select_cards" && choice.source.startsWith("v1912.shell_traders_start_turn")) {
@@ -1600,6 +1601,203 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
   }
   const selected = bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
   return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function selectedDiscardChoiceOptionIds(
+  input: AiDecisionInput,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  selectableOptions: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"]
+): string[] {
+  const count = boundedSelectionCount(choice.minSelections, choice.maxSelections, selectableOptions.length);
+  if (count <= 0) return [];
+  const handByInstanceId = new Map(input.playerView.own.gripOrHq.filter((card) => card.known).map((card) => [card.instanceId, card]));
+  const scored = selectableOptions.map((option) => {
+    const instanceId = discardOptionInstanceId(option);
+    const card = instanceId ? handByInstanceId.get(instanceId) : undefined;
+    if (!card || !card.definitionId) return undefined;
+    return { option, score: discardKeepScore(input, card) };
+  });
+  if (scored.some((entry) => !entry)) return stableDiscardChoiceOptionIds(selectableOptions, count);
+  return scored
+    .filter((entry): entry is { option: (typeof selectableOptions)[number]; score: DiscardCandidateScore } => Boolean(entry))
+    .sort((left, right) => left.score.total - right.score.total || left.option.label.localeCompare(right.option.label, "de") || left.option.id.localeCompare(right.option.id))
+    .slice(0, count)
+    .map((entry) => entry.option.id);
+}
+
+function stableDiscardChoiceOptionIds(
+  selectableOptions: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"],
+  count: number
+): string[] {
+  return selectableOptions
+    .slice()
+    .sort((left, right) => left.label.localeCompare(right.label, "de") || left.id.localeCompare(right.id))
+    .slice(0, count)
+    .map((option) => option.id);
+}
+
+function discardOptionInstanceId(option: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"][number]): string | undefined {
+  if (typeof option.value === "string") return option.value;
+  if (option.card?.instanceId) return option.card.instanceId;
+  return option.id.startsWith("card_") ? option.id.slice("card_".length) : undefined;
+}
+
+function discardKeepScore(
+  input: AiDecisionInput,
+  card: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"][number]["card"]
+): DiscardCandidateScore {
+  if (!card?.definitionId) {
+    return {
+      total: 0,
+      baseValue: 0,
+      planFit: 0,
+      doctrineFit: 0,
+      evidence: ["discard_score:base"]
+    };
+  }
+  const roles = discardRolesForCardId(card.definitionId);
+  const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
+  const cost = discardVisibleCardCost(card);
+  const duplicateCount = input.playerView.own.gripOrHq.filter((candidate) => candidate.definitionId === card.definitionId).length;
+  let baseValue = 100;
+
+  if (input.side === "corp") {
+    if (type === "agenda") baseValue += 330;
+    if (type === "ice" || card.definitionId.includes("_ice") || roles.some((role) => role.endsWith("_ice") || role === "etr_ice")) baseValue += 320;
+    const economyRole = roles.some((role) => role.includes("economy")) || card.definitionId.includes("economy");
+    if (type === "operation") baseValue += economyRole ? 120 : 40;
+    if (economyRole) baseValue += input.playerView.own.credits < 5 ? 135 : 55;
+    if (roles.some((role) => role.includes("score") || role.includes("remote"))) baseValue += 70;
+  } else {
+    if (roles.some((role) => role.startsWith("breaker_"))) {
+      const installedSameBreakerRole = roles.some((role) => role.startsWith("breaker_") && (input.playerView.own.rig ?? []).some((rigCard) => discardRolesForCardId(rigCard.definitionId).includes(role)));
+      baseValue += installedSameBreakerRole ? 95 : 210;
+    }
+    if (roles.some((role) => role.includes("economy") || role === "tempo")) baseValue += input.playerView.own.credits < 4 ? 170 : 65;
+    if (roles.includes("memory") || roles.includes("setup") || roles.includes("build_rig")) baseValue += 80;
+    if (roles.includes("draw")) baseValue += 55;
+    if (roles.includes("run_pressure")) baseValue += input.playerView.own.credits < 4 ? 20 : 90;
+  }
+
+  if (input.legalActions.some((action) => action.source === card.instanceId && action.type !== "resolve_choice")) baseValue += 90;
+  if (duplicateCount > 1 && type !== "agenda") baseValue -= 75 * (duplicateCount - 1);
+  if (cost > input.playerView.own.credits + 3 && type !== "agenda") baseValue -= 70;
+  if (roles.length === 0 && type !== "agenda") baseValue -= 60;
+
+  const planFit = discardPlanFitBonus(input, roles, type);
+  const doctrineFit = discardDoctrineFitBonus(input, roles, type, cost);
+  return {
+    total: baseValue + planFit + doctrineFit,
+    baseValue,
+    planFit,
+    doctrineFit,
+    evidence: sortedUnique([
+      "discard_score:base",
+      ...(planFit > 0 ? ["discard_score:planfit"] : []),
+      ...(doctrineFit > 0 ? ["discard_score:doctrinefit"] : []),
+    ])
+  };
+}
+
+function discardPlanFitBonus(
+  input: AiDecisionInput,
+  roles: string[],
+  type: string | undefined
+): number {
+  const plan = discardCurrentPlanKind(input);
+  const doctrineWeight = plan ? Math.max(0, Math.min(15, Math.round((input.ownDeckDoctrine?.planWeights[plan] ?? 0) / 2))) : 0;
+  let bonus = doctrineWeight;
+
+  if (input.side === "runner") {
+    if (plan === "build_rig" && discardRolesMatch(roles, ["breaker_", "memory", "setup", "build_rig", "runner_program"])) bonus += 42;
+    if (plan === "recover_economy" && discardRolesMatch(roles, ["economy", "tempo"])) bonus += 42;
+    if ((plan === "pressure_hq" || plan === "pressure_rnd" || plan === "contest_remote") && discardRolesMatch(roles, ["run_pressure", plan, "multiaccess", "breaker_", "economy"])) bonus += 36;
+    if (plan === "draw_for_answers" && discardRolesMatch(roles, ["draw", "setup", "breaker_"])) bonus += 30;
+  } else {
+    if ((plan === "score_now" || plan === "score_next_turn" || plan === "build_scoring_remote") && (type === "agenda" || discardRolesMatch(roles, ["score", "remote", "advance", "economy", "ice"]))) bonus += 42;
+    if ((plan === "protect_hq" || plan === "protect_rnd") && discardRolesMatch(roles, ["ice", "etr_ice", "taxing_ice", "corp_rez_ice", "corp_install_ice"])) bonus += 38;
+    if (plan === "recover_economy" && discardRolesMatch(roles, ["economy"])) bonus += 42;
+    if (plan === "bait_runner" && discardRolesMatch(roles, ["asset", "upgrade", "remote_support"])) bonus += 24;
+  }
+
+  return Math.max(0, Math.min(55, bonus));
+}
+
+function discardDoctrineFitBonus(
+  input: AiDecisionInput,
+  roles: string[],
+  type: string | undefined,
+  cost: number
+): number {
+  const tags = input.ownDeckDoctrine?.archetypeTags ?? [];
+  let bonus = 0;
+  if (input.side === "runner") {
+    if (tags.includes("rig_builder") && discardRolesMatch(roles, ["breaker_", "memory", "setup", "build_rig", "runner_program"])) bonus += 30;
+    if (tags.includes("hq_pressure") && discardRolesMatch(roles, ["pressure_hq", "run_pressure", "multiaccess", "breaker_", "economy"])) bonus += 26;
+    if (tags.includes("rnd_pressure") && discardRolesMatch(roles, ["pressure_rnd", "run_pressure", "multiaccess", "breaker_", "economy"])) bonus += 26;
+    if (tags.includes("economy_dense") && discardRolesMatch(roles, ["economy", "tempo"])) bonus += 24;
+  } else {
+    if (tags.includes("glacier") && (type === "ice" || discardRolesMatch(roles, ["ice", "etr_ice", "taxing_ice", "remote", "economy"]))) bonus += 30;
+    if (tags.includes("rush") && (type === "agenda" || cost <= 3 || discardRolesMatch(roles, ["score", "ice", "tempo", "advance"]))) bonus += 24;
+    if (tags.includes("asset_remote") && (type === "asset" || type === "upgrade" || discardRolesMatch(roles, ["asset", "upgrade", "remote", "economy"]))) bonus += 26;
+  }
+  return Math.max(0, Math.min(35, bonus));
+}
+
+function discardCurrentPlanKind(input: AiDecisionInput): string | undefined {
+  const hand = input.playerView.own.gripOrHq;
+  if (input.side === "runner") {
+    if (input.playerView.own.credits < 4) return "recover_economy";
+    const hasInstalledBreaker = (input.playerView.own.rig ?? []).some((card) => discardRolesForCardId(card.definitionId).some((role) => role.startsWith("breaker_")));
+    if (!hasInstalledBreaker && hand.some((card) => discardRolesForCardId(card.definitionId).some((role) => role.startsWith("breaker_") || role === "memory" || role === "setup"))) return "build_rig";
+  } else {
+    const hasAgenda = hand.some((card) => (card.type ?? (card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId]?.type : undefined)) === "agenda");
+    const hasRemoteSupport = hand.some((card) => {
+      const roles = discardRolesForCardId(card.definitionId);
+      const type = card.type ?? (card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId]?.type : undefined);
+      return type === "ice" || roles.some((role) => role.includes("remote") || role.includes("ice") || role.includes("economy"));
+    });
+    if (hasAgenda && hasRemoteSupport) return "score_next_turn";
+    if (input.playerView.own.credits < 5) return "recover_economy";
+  }
+  return discardStrongestDoctrinePlan(input);
+}
+
+function discardStrongestDoctrinePlan(input: AiDecisionInput): string | undefined {
+  return Object.entries(input.ownDeckDoctrine?.planWeights ?? {})
+    .filter(([, weight]) => weight > 0)
+    .sort((left, right) => right[1] - left[1] || left[0].localeCompare(right[0]))[0]?.[0];
+}
+
+function discardRolesMatch(roles: string[], needles: string[]): boolean {
+  return needles.some((needle) => roles.some((role) => role === needle || role.includes(needle) || role.startsWith(needle)));
+}
+
+function discardEvidenceForInput(input: AiDecisionInput): string[] {
+  const evidence = ["discard_score:base"];
+  const plan = discardCurrentPlanKind(input);
+  if (plan) evidence.push("discard_score:planfit", `discard_keep:${plan}`);
+  const tags = input.ownDeckDoctrine?.archetypeTags ?? [];
+  if (tags.length > 0) {
+    evidence.push("discard_score:doctrinefit");
+    for (const tag of tags.slice(0, 3)) evidence.push(`discard_keep:doctrine_${tag}`);
+  }
+  return sortedUnique(evidence);
+}
+
+function discardRolesForCardId(cardId: string | undefined): string[] {
+  if (!cardId) return [];
+  const roleRecord = CARD_ROLES_BY_CARD.get(cardId);
+  const hint = AI_HINTS.get(cardId);
+  return sortedUnique([...(roleRecord?.roles ?? []), ...(hint?.roles ?? []), ...(hint?.planRoles ?? [])]);
+}
+
+function discardVisibleCardCost(card: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"][number]["card"]): number {
+  if (!card) return 0;
+  const direct = card.installCost ?? card.cost ?? card.rezCost;
+  if (typeof direct === "number" && Number.isFinite(direct)) return Math.max(0, direct);
+  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  return Math.max(0, definition?.installCost ?? definition?.cost ?? definition?.rezCost ?? 0);
 }
 
 function selectedSearchChoiceOptionIds(
@@ -1709,6 +1907,8 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
           ? "Der Runner nutzt nach offen gelegten Trace-Bids eine legale Link-Faehigkeit."
           : "Der Runner beantwortet eine sichtbare legale Choice.";
         evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+        if (input.playerView.pendingChoice?.source === "discard_phase")
+          evidence.push("choice_source:discard_phase", "discard_selection:keep_value", ...discardEvidenceForInput(input));
       }
       break;
     case "steal_agenda":
@@ -1874,6 +2074,8 @@ function scoreCorpAction(input: AiDecisionInput, features: AiFeatures, action: L
         reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "corp.trace.bid_visible_amount" : "corp.choice.resolve";
         explanation = "Die Corp beantwortet eine sichtbare legale Choice.";
         evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+        if (input.playerView.pendingChoice?.source === "discard_phase")
+          evidence.push("choice_source:discard_phase", "discard_selection:keep_value", ...discardEvidenceForInput(input));
       }
       break;
     case "mandatory_draw":

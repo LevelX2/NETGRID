@@ -13,7 +13,7 @@ branch: codex/activity-worker-4
 releaseTarget: Proteus planning
 blockedBy: []
 resultArtifacts:
-  - docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md
+  - docs/releases/proteus/virus-antibody-counter-contract.md
   - docs/activities/inbox/act-2026-05-17-proteus-purge-action-debt-contract.md
 checks:
   - rg -n "virus_antibody_counter_family|Viral Breeding Ground|Bel-Digmo Antibody|Doppelganger Antibody|Pattel Antibody|Stereogram Antibody|Armageddon|Crumble|Garbage In|Highlighter|Scaldan|Taxman|Vienna 22|Viral Pipeline" docs data packages
@@ -53,4 +53,4 @@ Proteus-spezifische Virus- und Antibody-Karten sollen in kleine Counter- und Tim
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/PROTEUS_VIRUS_ANTIBODY_COUNTER_CONTRACT.md` trennt die 13 Proteus-Clusterkarten in Antibody-Access, Viral-Breeding-Ground, erfolgreiche Run-Counter, Access-Modifikatoren, Start-of-turn-/Random-Penalties und Proteus-Purge/Action-Debt. Das Artefakt grenzt Advancement-, Antibody- und purgefähige Runner-Virus-Counter ab, benennt PublicPayload-/Hidden-Info-Grenzen für R&D/HQ/Archives/Access/installierte Karten und skizziert Replay-/StateHash-/Visibility-Tests. Als Folgepaket wurde `docs/activities/inbox/act-2026-05-17-proteus-purge-action-debt-contract.md` angelegt, weil Proteus-Purge nicht sauber mit dem vorhandenen V0.99-Main-Action-Purge gleichgesetzt werden darf.
+Erledigt. `docs/releases/proteus/virus-antibody-counter-contract.md` trennt die 13 Proteus-Clusterkarten in Antibody-Access, Viral-Breeding-Ground, erfolgreiche Run-Counter, Access-Modifikatoren, Start-of-turn-/Random-Penalties und Proteus-Purge/Action-Debt. Das Artefakt grenzt Advancement-, Antibody- und purgefähige Runner-Virus-Counter ab, benennt PublicPayload-/Hidden-Info-Grenzen für R&D/HQ/Archives/Access/installierte Karten und skizziert Replay-/StateHash-/Visibility-Tests. Als Folgepaket wurde `docs/activities/inbox/act-2026-05-17-proteus-purge-action-debt-contract.md` angelegt, weil Proteus-Purge nicht sauber mit dem vorhandenen V0.99-Main-Action-Purge gleichgesetzt werden darf.

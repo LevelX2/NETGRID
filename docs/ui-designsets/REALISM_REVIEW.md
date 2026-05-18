@@ -46,9 +46,9 @@ Diese Bestandteile fehlen in allen Sets noch als verbindlicher Umsetzungsentwurf
 
 Dateien:
 
-- [Einstieg](01-design-a-dark-tactical/entry.png)
-- [Runner](01-design-a-dark-tactical/runner.png)
-- [Corp](01-design-a-dark-tactical/corp.png)
+- [Einstieg](archive/exploration/design-a-dark-tactical/entry.png)
+- [Runner](archive/exploration/design-a-dark-tactical/runner.png)
+- [Corp](archive/exploration/design-a-dark-tactical/corp.png)
 
 ### Stärken
 
@@ -87,9 +87,9 @@ Design A bleibt als dunkle taktische Variante sinnvoll, wenn:
 
 Dateien:
 
-- [Einstieg](02-design-b-operations-dashboard/entry.png)
-- [Runner](02-design-b-operations-dashboard/runner.png)
-- [Corp](02-design-b-operations-dashboard/corp.png)
+- [Einstieg](archive/exploration/design-b-operations-dashboard/entry.png)
+- [Runner](archive/exploration/design-b-operations-dashboard/runner.png)
+- [Corp](archive/exploration/design-b-operations-dashboard/corp.png)
 
 ### Stärken
 
@@ -129,12 +129,12 @@ Design B wird zu einer Debug-Schicht:
 
 Dateien:
 
-- [Einstieg](03-design-c-clean-high-contrast/entry.png)
-- [Runner, korrigiert](03-design-c-clean-high-contrast/runner-corrected.png)
-- [Corp](03-design-c-clean-high-contrast/corp.png)
-- [Einstieg, kartenbildfreundlich](03-design-c-clean-high-contrast/entry-card-images.png)
-- [Runner, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/runner-card-images-corrected.png)
-- [Corp, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/corp-card-images-corrected.png)
+- [Einstieg](active/design-c/entry.png)
+- [Runner, korrigiert](active/design-c/runner-corrected.png)
+- [Corp](active/design-c/corp.png)
+- [Einstieg, kartenbildfreundlich](active/design-c/entry-card-images.png)
+- [Runner, kartenbildfreundlich korrigiert](active/design-c/runner-card-images-corrected.png)
+- [Corp, kartenbildfreundlich korrigiert](active/design-c/corp-card-images-corrected.png)
 
 ### Stärken
 
@@ -184,9 +184,9 @@ Design C wird zur Haupt-UI:
 
 Dateien:
 
-- [Einstieg](04-design-d-cinematic-dark/entry.png)
-- [Runner, korrigiert](04-design-d-cinematic-dark/runner-corrected.png)
-- [Corp, korrigiert](04-design-d-cinematic-dark/corp-corrected.png)
+- [Einstieg](active/design-d-run-focus/entry.png)
+- [Runner, korrigiert](active/design-d-run-focus/runner-corrected.png)
+- [Corp, korrigiert](active/design-d-run-focus/corp-corrected.png)
 
 ### Stärken
 

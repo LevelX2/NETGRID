@@ -12,7 +12,7 @@ Geprüft wurden:
 - `docs/releases/v1/v1-4-1-plan-based-runner-ai/spec.md`
 - `docs/releases/v1/v1-4-1-plan-based-runner-ai/test-matrix.md`
 - `docs/releases/v1/v1-4-0-plan-based-corp-ai/spec.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - bestehende Runner-KI-, Run-, Breach-, Access- und Pacing-Artefakte
 
 ## Ergebnis

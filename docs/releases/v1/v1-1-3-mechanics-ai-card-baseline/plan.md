@@ -12,12 +12,12 @@ V1.1.3 implementiert keinen Engine-, Server-, Web-, KI- oder Test-Code und gibt 
 ## Quellenbasis
 
 - `docs/codex/CODEX_STATUS.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/final-review.md`
 - `docs/releases/v1/card-releases/v1-1-2k-card-release/implementation-review.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
-- `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
+- `docs/releases/roadmaps/ai-releaseplanning-codex-briefing-2026-05-07.md`
 - `data/manifests/card-implementation-manifest-1.0.5k.json`
 - `data/manifests/card-implementation-manifest-1.0.6k.json`
 - `data/manifests/card-implementation-manifest-1.1.2k.json`

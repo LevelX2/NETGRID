@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.x
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md
+  - docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md
   - docs/codex/CODEX_STATUS.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
 checks:
@@ -29,10 +29,10 @@ Die V2.x-Planung soll gegen den aktuellen Projektstand neu einsortiert werden: W
 
 ## Kontext und Quellen
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`, Abschnitt `V2.x Geschlossene Community und öffentliche Multiplayer-Basis`.
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`, Abschnitt `Langfristig: öffentlich nutzbarer Multiplayer`.
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`, Abschnitt `V2.x Geschlossene Community und öffentliche Multiplayer-Basis`.
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`, Abschnitt `Langfristig: öffentlich nutzbarer Multiplayer`.
 - `docs/codex/CODEX_STATUS.md` meldet inzwischen V1.9.22 als abgeschlossen; V2.x bleibt separate Gate-Folge.
-- `docs/derived/V2_3A_FINAL_REVIEW.md` bestätigt den LAN-Open-Lobby-Mini-Slice als abgeschlossen, aber ohne Public-Lobby-/Account-/Moderationsumfang.
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-final-review.md` bestätigt den LAN-Open-Lobby-Mini-Slice als abgeschlossen, aber ohne Public-Lobby-/Account-/Moderationsumfang.
 
 ## Scope
 
@@ -64,6 +64,6 @@ Die V2.x-Planung soll gegen den aktuellen Projektstand neu einsortiert werden: W
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md` ordnet V2.0 bis V2.8 nach aktuellem Stand: V2.0 ist nur für den Account-Session-Foundation-Slice bereit; V2.1, V2.2, V2.4, V2.6, V2.7 und V2.8 sind Analyse-/Vertragsslices; V2.3 Public Lobby bleibt trotz erledigtem V2.3a-LAN-Slice blockiert; V2.5 Matchmaking bleibt später.
+Erledigt. `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md` ordnet V2.0 bis V2.8 nach aktuellem Stand: V2.0 ist nur für den Account-Session-Foundation-Slice bereit; V2.1, V2.2, V2.4, V2.6, V2.7 und V2.8 sind Analyse-/Vertragsslices; V2.3 Public Lobby bleibt trotz erledigtem V2.3a-LAN-Slice blockiert; V2.5 Matchmaking bleibt später.
 
 Die nächsten kleinsten sinnvollen Pakete sind bestätigt: Account-Session-Foundation, Privacy Export/Delete, Cloud-Deck-Boundary, Observability-Redaction, Moderation-RBAC-Tests und Public-Replay-Policy. V2.x bleibt ausdrücklich hinter Auth-, Datenschutz-, Moderations-, Betriebs-, Public-Replay-/Spectator- und Rechts-/Asset-Gates. Verifikation: Quellenprüfung und `git diff --check`.

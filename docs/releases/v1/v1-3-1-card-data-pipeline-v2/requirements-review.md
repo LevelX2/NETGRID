@@ -11,7 +11,7 @@ Geprüft wurden:
 - `docs/releases/v1/v1-3-1-card-data-pipeline-v2/requirements.md`
 - `docs/releases/v1/v1-3-1-card-data-pipeline-v2/spec.md`
 - `docs/releases/v1/v1-3-1-card-data-pipeline-v2/test-matrix.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-3-0-format-deckbuilding-foundation/final-review.md`
 - bestehende Catalog-, Deck-, Manifest- und AI-Rollen-Strukturen
 

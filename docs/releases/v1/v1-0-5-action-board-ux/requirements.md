@@ -18,8 +18,8 @@ V1.0.5 ist ein UI-/Präsentations- und Regression-Release. Die Phase verbessert 
 - `docs/releases/v1/v1-0-2-opponent-action-presentation/final-review.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/requirements.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/final-review.md`
-- `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/releases/mvp/mvp-0-97-run-breach-multiaccess/run-breach-multiaccess-spec.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `apps/web/app/action-cues.ts`
 - `apps/web/app/page.tsx`
 - `apps/web/app/chronicle.ts`

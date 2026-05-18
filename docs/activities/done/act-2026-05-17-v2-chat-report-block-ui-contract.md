@@ -14,12 +14,12 @@ releaseTarget: V2.2
 blockedBy: []
 outcome: completed
 resultArtifacts:
-  - docs/derived/V2_2_CHAT_REPORT_BLOCK_UI_CONTRACT.md
+  - docs/releases/v2/v2-2-chat-safety/chat-report-block-ui-contract.md
   - docs/codex/CODEX_STATUS.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
 checks:
-  - rg -n "V2_2_CHAT_REPORT_BLOCK_UI_CONTRACT|chat_message|blocked_by_self|evidenceRefs|globaler/öffentlicher Chat|Engine, Replay, StateHash" docs/derived/V2_2_CHAT_REPORT_BLOCK_UI_CONTRACT.md docs/codex/CODEX_STATUS.md "KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md"
-  - rg -n "GameState|GameEvent|PublicGameEvent|Replay|StateHash|LegalAction|PlayerAction|AIInput|DecisionDebug|FullState|privatePayload|cardInstances" docs/derived/V2_2_CHAT_REPORT_BLOCK_UI_CONTRACT.md
+  - rg -n "V2_2_CHAT_REPORT_BLOCK_UI_CONTRACT|chat_message|blocked_by_self|evidenceRefs|globaler/öffentlicher Chat|Engine, Replay, StateHash" docs/releases/v2/v2-2-chat-safety/chat-report-block-ui-contract.md docs/codex/CODEX_STATUS.md "KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md"
+  - rg -n "GameState|GameEvent|PublicGameEvent|Replay|StateHash|LegalAction|PlayerAction|AIInput|DecisionDebug|FullState|privatePayload|cardInstances" docs/releases/v2/v2-2-chat-safety/chat-report-block-ui-contract.md
   - git diff --check
   - git diff --cached --check
 ---
@@ -32,8 +32,8 @@ Vor Match- oder Lobbychat-Erweiterungen soll klar sein, wie Nutzer Chatnachricht
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_2_CHAT_DATA_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 - V2.2-Roadmap: Chat nur mit Report-/Block-/Retention-Modell.
 
 ## Scope
@@ -65,6 +65,6 @@ Vor Match- oder Lobbychat-Erweiterungen soll klar sein, wie Nutzer Chatnachricht
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_2_CHAT_REPORT_BLOCK_UI_CONTRACT.md` beschreibt Reportziele (`chat_message`, `user`, `match`, `lobby`), Block-Semantik ohne Engine-/Matchwirkung, sichere UI-Zustände und Texte für Melden, Blockieren, Entblocken und gemeldete Nachrichten sowie den Moderationshandoff über Evidence-Referenzen. `docs/codex/CODEX_STATUS.md` und der Wiki-Index verweisen auf den neuen Vertrag. Keine UI-Implementierung, Moderationskonsole, globale Chatfreigabe, LLM-Sanktion oder Engine-/Replay-/StateHash-/KI-Änderung.
+Abgeschlossen. `docs/releases/v2/v2-2-chat-safety/chat-report-block-ui-contract.md` beschreibt Reportziele (`chat_message`, `user`, `match`, `lobby`), Block-Semantik ohne Engine-/Matchwirkung, sichere UI-Zustände und Texte für Melden, Blockieren, Entblocken und gemeldete Nachrichten sowie den Moderationshandoff über Evidence-Referenzen. `docs/codex/CODEX_STATUS.md` und der Wiki-Index verweisen auf den neuen Vertrag. Keine UI-Implementierung, Moderationskonsole, globale Chatfreigabe, LLM-Sanktion oder Engine-/Replay-/StateHash-/KI-Änderung.
 
 Checks: Referenz- und Scope-`rg`-Prüfungen, `git diff --check` und `git diff --cached --check` grün. Offene Folgeentscheidungen bleiben Retentionwerte, finales Reportkategorienschema, Kontextfenster, Session-only Blocking, Multi-User-Lobby-Zustellung, Appeals/Nutzerkommunikation und Abuse-Rate-Limits.

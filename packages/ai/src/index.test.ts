@@ -83,6 +83,7 @@ import {
 } from "./visible-run-analysis";
 import type {
   AiDeckDoctrineProfile,
+  AiDecisionInput,
   CardDefinition,
   CardInstanceId,
   ChoiceRequest,
@@ -98,6 +99,11 @@ import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
     delete DEMO_CARDS_BY_ID.test_hidden_runner_resource_harness;
+    delete DEMO_CARDS_BY_ID.test_planless_corp_operation;
+    delete DEMO_CARDS_BY_ID.test_planless_runner_resource;
+    delete DEMO_CARDS_BY_ID.test_alpha_planless_runner_resource;
+    delete DEMO_CARDS_BY_ID.test_zeta_planless_runner_resource;
+    delete DEMO_CARDS_BY_ID.test_zeta_planless_corp_operation;
   });
 
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -974,13 +980,7 @@ describe("MVP 0.3 AI controller contract", () => {
 
     const input = buildAiDecisionInput(state, "corp", { difficulty: "normal" });
     const decision = chooseCorpAction(input);
-    const sortedFirst = input.playerView.pendingChoice?.options
-      .slice()
-      .sort(
-        (left, right) =>
-          left.label.localeCompare(right.label, "de") ||
-          left.id.localeCompare(right.id),
-      )[0]?.id;
+    const selectableOptionIds = input.playerView.pendingChoice?.options.map((option) => option.id) ?? [];
     const serializedRunner = JSON.stringify(
       buildAiDecisionInput(state, "runner", { difficulty: "normal" }),
     );
@@ -991,13 +991,367 @@ describe("MVP 0.3 AI controller contract", () => {
     ]);
     expect(decision.selectedChoices).toEqual({
       choiceId: state.pendingChoice?.choiceId,
-      selectedOptionIds: [sortedFirst],
+      selectedOptionIds: [expect.any(String)],
     });
+    const selectedDiscardChoices = decision.selectedChoices as
+      | { selectedOptionIds: string[] }
+      | undefined;
+    const selectedDiscardOptionId = selectedDiscardChoices?.selectedOptionIds[0];
+    expect(typeof selectedDiscardOptionId).toBe("string");
+    expect(selectableOptionIds).toContain(selectedDiscardOptionId);
+    expect(decision.evidence).toContain("discard_selection:keep_value");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
     expect(serializedRunner).not.toContain(
       input.playerView.pendingChoice?.options[0]?.label ?? "not-present",
     );
     expect(serializedRunner).not.toContain("cardInstances");
+  });
+
+  it("uses discard keep values for Runner breaker and economy preservation", () => {
+    const breakerInput = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: [
+        "simple_fracter",
+        "simple_run_event",
+        "simple_run_event",
+      ],
+    });
+    const breakerDecision = chooseRunnerAction(breakerInput);
+    const breakerSelectedChoices = breakerDecision.selectedChoices as
+      | { selectedOptionIds: string[] }
+      | undefined;
+
+    expect(breakerSelectedChoices?.selectedOptionIds).toHaveLength(1);
+    expect(breakerSelectedChoices?.selectedOptionIds[0]).not.toBe(
+      "card_discard_simple_fracter_0",
+    );
+    expect(breakerDecision.evidence).toContain("discard_selection:keep_value");
+
+    const lowCreditInput = discardDecisionInputForTest("runner", {
+      credits: 1,
+      cards: ["simple_economy_event", "simple_run_event"],
+    });
+    const lowCreditDecision = chooseRunnerAction(lowCreditInput);
+
+    expect(lowCreditDecision.selectedChoices).toEqual({
+      choiceId: lowCreditInput.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+  });
+
+  it("uses discard keep values for Corp agenda, ICE and economy preservation", () => {
+    DEMO_CARDS_BY_ID.test_planless_corp_operation = {
+      id: "test_planless_corp_operation",
+      title: "Planless Corp Operation",
+      side: "corp",
+      type: "operation",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      cost: 1,
+      rulesText: "Discard baseline fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("corp", {
+      credits: 2,
+      cards: [
+        "simple_agenda",
+        "simple_barrier_ice",
+        "simple_economy_operation",
+        "test_planless_corp_operation",
+      ],
+    });
+    const decision = chooseCorpAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_planless_corp_operation_3"],
+    });
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+    delete DEMO_CARDS_BY_ID.test_planless_corp_operation;
+  });
+
+  it("falls back to stable discard order when choice options do not map to own hand", () => {
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_economy_event"],
+    });
+    const choice = input.playerView.pendingChoice;
+    if (!choice) throw new Error("Missing discard choice fixture");
+    const fallbackInput = {
+      ...input,
+      playerView: {
+        ...input.playerView,
+        pendingChoice: {
+          ...choice,
+          options: [
+            { id: "z_option", label: "Zeta", value: "missing_z" },
+            { id: "a_option", label: "Alpha", value: "missing_a" },
+          ],
+        },
+      },
+    };
+
+    expect(chooseRunnerAction(fallbackInput).selectedChoices).toEqual({
+      choiceId: choice.choiceId,
+      selectedOptionIds: ["a_option"],
+    });
+  });
+
+  it("adds Runner rig-builder doctrine and planfit to discard keep values", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-rig-builder",
+      ["rig_builder"],
+      { build_rig: 24, pressure_hq: -4 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_run_event"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_score:base",
+        "discard_score:planfit",
+        "discard_score:doctrinefit",
+        "discard_keep:build_rig",
+        "discard_keep:doctrine_rig_builder",
+      ]),
+    );
+  });
+
+  it("keeps Runner central-pressure cards above off-plan economy when doctrine supports pressure", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-hq-pressure",
+      ["hq_pressure"],
+      { pressure_hq: 24, build_rig: 2 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_run_event", "simple_economy_event"],
+      rig: ["simple_fracter"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_economy_event_1"],
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_keep:pressure_hq",
+        "discard_keep:doctrine_hq_pressure",
+      ]),
+    );
+  });
+
+  it("keeps discard safety above doctrine pressure bias under Runner credit stress", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-pressure-safety",
+      ["hq_pressure"],
+      { pressure_hq: 24 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 1,
+      cards: ["simple_economy_event", "simple_run_event"],
+      rig: ["simple_fracter"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+  });
+
+  it("adds Corp glacier doctrine and score-next-turn planfit to discard keep values", () => {
+    DEMO_CARDS_BY_ID.test_planless_corp_operation = {
+      id: "test_planless_corp_operation",
+      title: "Planless Corp Operation",
+      side: "corp",
+      type: "operation",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      cost: 1,
+      rulesText: "Discard doctrine fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const doctrine = corpDoctrineForTest(
+      "discard-glacier",
+      ["glacier"],
+      { score_next_turn: 18, build_scoring_remote: 24 },
+    );
+    const input = discardDecisionInputForTest("corp", {
+      credits: 4,
+      cards: ["simple_agenda", "simple_barrier_ice", "simple_upgrade", "test_planless_corp_operation"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseCorpAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_planless_corp_operation_3"],
+    });
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_score:base",
+        "discard_score:planfit",
+        "discard_score:doctrinefit",
+        "discard_keep:score_next_turn",
+        "discard_keep:doctrine_glacier",
+      ]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("keeps discard choices deterministic for repeated Runner doctrine inputs", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-determinism",
+      ["rig_builder"],
+      { build_rig: 24 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_run_event"],
+      ownDeckDoctrine: doctrine,
+    });
+
+    const first = chooseRunnerAction(input);
+    const second = chooseRunnerAction(input);
+
+    expect(second.selectedChoices).toEqual(first.selectedChoices);
+    expect(second.evidence).toEqual(first.evidence);
+  });
+
+  it("keeps discard tie-break stable when mapped cards have equal keep values", () => {
+    DEMO_CARDS_BY_ID.test_alpha_planless_runner_resource = {
+      id: "test_alpha_planless_runner_resource",
+      title: "Alpha Planless Runner Resource",
+      side: "runner",
+      type: "resource",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      installCost: 1,
+      rulesText: "Discard tie fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    DEMO_CARDS_BY_ID.test_zeta_planless_runner_resource = {
+      id: "test_zeta_planless_runner_resource",
+      title: "Zeta Planless Runner Resource",
+      side: "runner",
+      type: "resource",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      installCost: 1,
+      rulesText: "Discard tie fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: [
+        "test_zeta_planless_runner_resource",
+        "test_alpha_planless_runner_resource",
+      ],
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_alpha_planless_runner_resource_1"],
+    });
+  });
+
+  it("keeps discard evidence and debug output abstract and side-safe", () => {
+    const doctrine = runnerDoctrineForTest(
+      "discard-redaction",
+      ["hq_pressure"],
+      { pressure_hq: 24 },
+    );
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_run_event", "simple_economy_event"],
+      rig: ["simple_fracter"],
+      ownDeckDoctrine: doctrine,
+    });
+    const decision = chooseRunnerAction(input);
+
+    expect(JSON.stringify(decision.evidence)).not.toMatch(
+      /simple_|cardInstances|privatePayload|fullGameState/i,
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "discard_score:base",
+        "discard_score:planfit",
+        "discard_score:doctrinefit",
+      ]),
+    );
+  });
+
+  it("shows Runner discard quality improves over stable first-option selection", () => {
+    const input = discardDecisionInputForTest("runner", {
+      credits: 5,
+      cards: ["simple_fracter", "simple_run_event"],
+    });
+    const stableFirst = input.playerView.pendingChoice?.options
+      .slice()
+      .sort(
+        (left, right) =>
+          left.label.localeCompare(right.label, "de") ||
+          left.id.localeCompare(right.id),
+      )[0]?.id;
+    const decision = chooseRunnerAction(input);
+
+    expect(stableFirst).toBe("card_discard_simple_fracter_0");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_1"],
+    });
+  });
+
+  it("shows Corp discard quality improves over stable first-option selection", () => {
+    DEMO_CARDS_BY_ID.test_zeta_planless_corp_operation = {
+      id: "test_zeta_planless_corp_operation",
+      title: "Zeta Planless Corp Operation",
+      side: "corp",
+      type: "operation",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      cost: 1,
+      rulesText: "Discard regression fixture with no AI roles.",
+      mechanics: ["test_fixture"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("corp", {
+      credits: 4,
+      cards: ["simple_agenda", "test_zeta_planless_corp_operation"],
+    });
+    const stableFirst = input.playerView.pendingChoice?.options
+      .slice()
+      .sort(
+        (left, right) =>
+          left.label.localeCompare(right.label, "de") ||
+          left.id.localeCompare(right.id),
+      )[0]?.id;
+    const decision = chooseCorpAction(input);
+
+    expect(stableFirst).toBe("card_discard_simple_agenda_0");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_test_zeta_planless_corp_operation_1"],
+    });
   });
 
   it("keeps V0.95 Resource trash decisions LegalActions-only and side-safe", () => {
@@ -4967,6 +5321,138 @@ describe("V1.4.1 plan-based Runner AI", () => {
     ).toBe("draw_for_answers");
   });
 
+  it("uses installed Runner economy payouts before the basic credit action", () => {
+    const shortTermInput = installedRunnerEconomyInput(
+      "ai-v141-installed-short-term",
+      { shortTermCounters: 10, credits: 1 },
+    );
+    const shortTermTake = shortTermInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility ===
+          "short_term_contract_take_credits",
+    );
+    const shortTermBasicCredit = shortTermInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(shortTermTake).toBeDefined();
+    expect(shortTermBasicCredit).toBeDefined();
+    expect(shortTermTake?.payload?.gainCreditsAmount).toBe(2);
+    if (!shortTermTake || !shortTermBasicCredit)
+      throw new Error("Missing Short-Term Contract economy fixture actions");
+
+    const shortTermDecision = chooseRunnerAction({
+      ...shortTermInput,
+      legalActions: [shortTermTake, shortTermBasicCredit],
+    });
+
+    expect(shortTermDecision.actionId).toBe(shortTermTake.actionId);
+    expect(shortTermDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(shortTermDecision.evidence).toContain(
+      "installed_economy_kind:direct_payout",
+    );
+    expect(JSON.stringify(shortTermDecision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+    expect(assertAiInputIsSideSafe(shortTermInput)).toBe(true);
+  });
+
+  it("separates Broker pool loading from visible pool payout", () => {
+    const payoutInput = installedRunnerEconomyInput(
+      "ai-v141-installed-broker-take",
+      { brokerCounters: 3, credits: 1 },
+    );
+    const brokerTake = payoutInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_take_credits",
+    );
+    const payoutBasicCredit = payoutInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(brokerTake).toBeDefined();
+    expect(payoutBasicCredit).toBeDefined();
+    expect(brokerTake?.payload?.gainCreditsAmount).toBe(3);
+    if (!brokerTake || !payoutBasicCredit)
+      throw new Error("Missing Broker payout fixture actions");
+
+    const payoutDecision = chooseRunnerAction({
+      ...payoutInput,
+      legalActions: [brokerTake, payoutBasicCredit],
+    });
+
+    expect(payoutDecision.actionId).toBe(brokerTake.actionId);
+    expect(payoutDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(payoutDecision.evidence).toContain(
+      "installed_economy_kind:pool_payout",
+    );
+    expect(payoutDecision.evidence).toContain(
+      "installed_economy_stored_credits:3",
+    );
+
+    const lowCreditLoadInput = installedRunnerEconomyInput(
+      "ai-v141-installed-broker-load-low",
+      { brokerCounters: 0, credits: 1 },
+    );
+    const lowCreditBrokerLoad = lowCreditLoadInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits",
+    );
+    const lowCreditBasicCredit = lowCreditLoadInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(lowCreditBrokerLoad).toBeDefined();
+    expect(lowCreditBasicCredit).toBeDefined();
+    if (!lowCreditBrokerLoad || !lowCreditBasicCredit)
+      throw new Error("Missing Broker low-credit fixture actions");
+
+    const lowCreditDecision = chooseRunnerAction({
+      ...lowCreditLoadInput,
+      legalActions: [lowCreditBrokerLoad, lowCreditBasicCredit],
+    });
+
+    expect(lowCreditDecision.actionId).toBe(lowCreditBasicCredit.actionId);
+    expect(lowCreditDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(lowCreditDecision.evidence).toContain(
+      "installed_economy_kind:pool_build",
+    );
+    expect(lowCreditDecision.evidence).toContain("economy_need:acute");
+
+    const stableLoadInput = installedRunnerEconomyInput(
+      "ai-v141-installed-broker-load-stable",
+      { brokerCounters: 0, credits: 6 },
+    );
+    const stableBrokerLoad = stableLoadInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits",
+    );
+    const stableBasicCredit = stableLoadInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(stableBrokerLoad).toBeDefined();
+    expect(stableBasicCredit).toBeDefined();
+    if (!stableBrokerLoad || !stableBasicCredit)
+      throw new Error("Missing Broker stable-credit fixture actions");
+
+    const stableDecision = chooseRunnerAction({
+      ...stableLoadInput,
+      legalActions: [stableBrokerLoad, stableBasicCredit],
+    });
+
+    expect(stableDecision.actionId).toBe(stableBrokerLoad.actionId);
+    expect(stableDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(stableDecision.evidence).toContain("economy_need:stable");
+    expect(JSON.stringify(stableDecision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("avoids bad King of the Road runs into visible stoppers", () => {
     const state = kingOfTheRoadRunnerTurn("ai-kotr-negative-run");
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
@@ -7609,6 +8095,62 @@ function runnerActionPhaseInput(
   });
 }
 
+function installedRunnerEconomyInput(
+  seed: string,
+  options: {
+    brokerCounters?: number;
+    shortTermCounters?: number;
+    credits: number;
+  },
+) {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `installed_runner_economy_${seed}`,
+        name: "Installed Runner Economy Fixture",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_154_broker", quantity: 1 },
+          { id: "onr_v1_178_short-term-contract", quantity: 1 },
+          { id: "simple_economy_event", quantity: 6 },
+          { id: "simple_fracter", quantity: 2 },
+        ],
+      },
+      corpDeck: {
+        id: `installed_runner_economy_corp_${seed}`,
+        name: "Installed Runner Economy Corp Fixture",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_economy_operation", quantity: 4 },
+          { id: "simple_barrier_ice", quantity: 2 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  if (options.brokerCounters !== undefined) {
+    const brokerId = moveRunnerResourceToRig(state, "onr_v1_154_broker");
+    setPowerCountersForTest(state, brokerId, options.brokerCounters);
+  }
+  if (options.shortTermCounters !== undefined) {
+    const shortTermId = moveRunnerResourceToRig(
+      state,
+      "onr_v1_178_short-term-contract",
+    );
+    setPowerCountersForTest(state, shortTermId, options.shortTermCounters);
+  }
+  state.runner.credits = options.credits;
+  state.runner.clicks = 3;
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
+}
+
 function runnerJackOutInput(seed: string) {
   let state = toRunnerTurn(
     createGameAfterSetup({
@@ -8271,6 +8813,20 @@ function moveRunnerResourceToRig(
   return id;
 }
 
+function setPowerCountersForTest(
+  state: GameState,
+  id: CardInstanceId,
+  amount: number,
+): void {
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    counters: {
+      ...(state.cardInstances[id]?.counters ?? {}),
+      power: amount,
+    },
+  };
+}
+
 function moveCorpCardToHq(
   state: GameState,
   definitionId: string,
@@ -8426,6 +8982,99 @@ function visibleCard(definitionId: string, instanceId: string): VisibleCard {
   return { instanceId, definitionId, known: true, title: definitionId };
 }
 
+function discardDecisionInputForTest(
+  side: Side,
+  config: {
+    credits: number;
+    cards: string[];
+    discardCount?: number;
+    ownDeckDoctrine?: AiDeckDoctrineProfile;
+    rig?: string[];
+  },
+): AiDecisionInput {
+  const state =
+    side === "runner"
+      ? toRunnerTurn(createGameAfterSetup({ seed: `ai-discard-${side}` }))
+      : createGameAfterSetup({ seed: `ai-discard-${side}` });
+  const base = buildAiDecisionInput(state, side, {
+    difficulty: "normal",
+    profileId: `${side}-ai-v1.4.2-normal`,
+  });
+  const hand = config.cards.map((definitionId, index) =>
+    discardVisibleCardForTest(definitionId, `discard_${definitionId}_${index}`),
+  );
+  const rig = config.rig?.map((definitionId, index) =>
+    discardVisibleCardForTest(definitionId, `rig_${definitionId}_${index}`),
+  );
+  const discardCount = config.discardCount ?? 1;
+  const choice: ChoiceRequest = {
+    choiceId: `discard_${side}_test`,
+    side,
+    source: "discard_phase",
+    prompt: side === "corp" ? "Korp-Discard wählen" : "Runner-Discard wählen",
+    kind: "select_cards",
+    options: hand.map((card) => ({
+      id: `card_${card.instanceId}`,
+      label: card.title ?? card.definitionId ?? card.instanceId,
+      publicLabel: "Handkarte",
+      value: card.instanceId,
+    })),
+    minSelections: discardCount,
+    maxSelections: discardCount,
+    stateVersion: base.playerView.stateVersion,
+    visibility: "hidden_info_barrier",
+  };
+  const resolveChoice: LegalAction = {
+    actionId: `${side}.resolve_choice.discard_test`,
+    side,
+    type: "resolve_choice",
+    label: "Discard wählen",
+    source: "game_rule",
+    timingPoint: base.playerView.timingPoint,
+    costs: [],
+    targetRequirements: [],
+    visibility: "private_to_actor",
+    expiresAtStateVersion: base.playerView.stateVersion + 1,
+  };
+  return {
+    ...base,
+    playerView: {
+      ...base.playerView,
+      phase: side === "corp" ? "corp_discard_phase" : "runner_discard_phase",
+      own: {
+        ...base.playerView.own,
+        credits: config.credits,
+        gripOrHq: hand,
+        ...(rig ? { rig } : {}),
+      },
+      pendingChoice: choice,
+    },
+    legalActions: [resolveChoice],
+    ...(config.ownDeckDoctrine ? { ownDeckDoctrine: config.ownDeckDoctrine } : {}),
+  };
+}
+
+function discardVisibleCardForTest(
+  definitionId: string,
+  instanceId: string,
+): VisibleCard {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  expect(definition, definitionId).toBeDefined();
+  if (!definition) throw new Error(`Missing ${definitionId}`);
+  return {
+    instanceId,
+    definitionId,
+    known: true,
+    title: definition.title,
+    type: definition.type,
+    subtypes: definition.subtypes,
+    ...(definition.cost !== undefined ? { cost: definition.cost } : {}),
+    ...(definition.installCost !== undefined ? { installCost: definition.installCost } : {}),
+    ...(definition.rezCost !== undefined ? { rezCost: definition.rezCost } : {}),
+    ...(definition.memoryCost !== undefined ? { memoryCost: definition.memoryCost } : {}),
+  };
+}
+
 function keepOnlyCorpHqCard(state: GameState, id: CardInstanceId): void {
   for (const cardId of state.corp.hq.filter((candidate) => candidate !== id)) {
     state.corp.rd.push(cardId);
@@ -8500,6 +9149,27 @@ function runnerDoctrineForTest(
     deckSnapshotId,
     deckHash: `test:${deckSnapshotId}`,
     side: "runner",
+    confidence: 0.95,
+    archetypeTags,
+    roleCounts: {},
+    roleDensity: {},
+    planWeights,
+    mulliganWeights: {},
+    riskFlags: [],
+    evidence: [],
+  };
+}
+
+function corpDoctrineForTest(
+  deckSnapshotId: string,
+  archetypeTags: string[],
+  planWeights: Record<string, number>,
+): AiDeckDoctrineProfile {
+  return {
+    schemaVersion: "ai-deck-doctrine-v1",
+    deckSnapshotId,
+    deckHash: `test:${deckSnapshotId}`,
+    side: "corp",
     confidence: 0.95,
     archetypeTags,
     roleCounts: {},

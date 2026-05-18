@@ -39,13 +39,13 @@ checks:
 
 ## Ziel
 
-Der Bad-Publicity-7+-Game-End-Vertrag aus `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md` soll durch einen engen Engine-Harness abgesichert werden, ohne Proteus-Karten zu promoten.
+Der Bad-Publicity-7+-Game-End-Vertrag aus `docs/releases/proteus/bad-publicity-loss-gate-contract.md` soll durch einen engen Engine-Harness abgesichert werden, ohne Proteus-Karten zu promoten.
 
 ## Kontext und Quellen
 
-- Vertragsartefakt: `docs/derived/PROTEUS_BAD_PUBLICITY_LOSS_GATE_CONTRACT.md`
+- Vertragsartefakt: `docs/releases/proteus/bad-publicity-loss-gate-contract.md`
 - Proteus-Cluster: `bad_publicity_loss_gate` in `data/rules/proteus-mechanics-coverage-2026-05-17.json`
-- Bestehende Basis: `docs/derived/RECURRING_BAD_PUBLICITY_0.99_SPEC.md`, `docs/releases/v1/v1-1-0-setup-game-end-m2/test-matrix.md`
+- Bestehende Basis: `docs/releases/mvp/mvp-0-99-hosting-virus-counters/recurring-bad-publicity-spec.md`, `docs/releases/v1/v1-1-0-setup-game-end-m2/test-matrix.md`
 
 ## Scope
 

@@ -15,7 +15,7 @@ blockedBy: []
 resultArtifacts:
   - apps/server/src/internet-hardening.ts
   - apps/server/src/observability-redaction.test.ts
-  - docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md
+  - docs/releases/v2/v2-7-observability/observability-redaction-baseline.md
 checks:
   - corepack pnpm --filter @netgrid/server test -- observability-redaction.test.ts
   - corepack pnpm --filter @netgrid/server typecheck

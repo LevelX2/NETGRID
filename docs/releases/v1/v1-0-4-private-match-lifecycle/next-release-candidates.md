@@ -8,11 +8,11 @@ V1.0.4 ist als kleiner UX-Haertungsschritt nach V1.0.3 vorgesehen. Der Release s
 
 Nach Abgleich mit dem Planungsbranch liegen zusätzlich vor:
 
-- `docs/derived/RELEASE_PLANNING_2026-05-05.md`
+- `docs/releases/roadmaps/release-planning-2026-05-05.md`
 - `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`
 - `docs/releases/v1/v1-0-5-action-board-ux/plan.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`
+- `docs/releases/roadmaps/long-term-product-vision-executive-summary.md`
 
 Empfohlene Reihenfolge: zuerst V1.0.4 Private Match Lifecycle und Session Recovery, danach V1.0.5 Action Board UX und Board-Klarheit.
 

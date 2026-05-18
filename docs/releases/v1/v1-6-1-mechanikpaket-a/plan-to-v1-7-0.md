@@ -23,14 +23,14 @@ Pflichtquellen und relevante Planungs-/Matrixartefakte:
 - `KI-Wissen-NETGRID/00 Steuerung/Regeldatei KI-Wissenspflege.md`
 - `docs/codex/CODEX_STATUS.md`
 - `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/rules/mechanics-coverage-1.2.2.json`
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/local/card-import/onr-v1-limited/onr-v1-effect-logic-priority.local.md`
 - `data/local/card-import/onr-v1-limited/onr-v1-open-card-review.local.md`
-- `docs/derived/DECK_LEGAL_AI_APPROVAL_BATCH_PLAN.md`
-- `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`
+- `docs/releases/ai/deck-legal-approval/batch-plan.md`
+- `docs/releases/roadmaps/ai-releaseplanning-codex-briefing-2026-05-07.md`
 
 ## 1) Ist-Stand (vor V1.6.1)
 

@@ -12,7 +12,7 @@ Das `K` steht projektintern für Kartenfreigabe. V1.0.5K ist kein neues großes 
 ## Quellen
 
 - `docs/releases/v1/v1-0-5-action-board-ux/requirements.md`
-- `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
+- `docs/architecture/card-rules/mechanics-coverage-matrix.md`
 - `data/manifests/card-implementation-manifest.json`
 - Private lokale Textkontrolle unter `data/local/card-import/onr-v1-limited/text-review-galleries/`
 - Private lokale Mapping-Notiz unter `data/local/card-import/onr-v1-limited/scan-mapping-fix.local.md`

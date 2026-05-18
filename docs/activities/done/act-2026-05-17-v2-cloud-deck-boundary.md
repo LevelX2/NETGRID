@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.0
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_0_CLOUD_DECK_BOUNDARY_CONTRACT.md
+  - docs/releases/v2/v2-0-auth-privacy-cloud-decks/cloud-deck-boundary-contract.md
 checks:
   - git diff --check
 ---
@@ -59,4 +59,4 @@ Für V2.0 soll vorab geklärt werden, wie optionale private Cloud-Decks sauber v
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_0_CLOUD_DECK_BOUNDARY_CONTRACT.md` trennt lokale Decks, Cloud-Deck-Drafts und Match-Snapshots, dokumentiert verbotene Deckdaten in Lobby-, Invite-, Replay-, Gegner- und KI-Payloads, bestätigt serverseitige Matchstart-Revalidierung und benennt die kleinen Umsetzungsschnitte `cloud-deck-schema-storage`, `cloud-deck-import-api` und `cloud-deck-matchstart-handoff` samt Blockern.
+Abgeschlossen. `docs/releases/v2/v2-0-auth-privacy-cloud-decks/cloud-deck-boundary-contract.md` trennt lokale Decks, Cloud-Deck-Drafts und Match-Snapshots, dokumentiert verbotene Deckdaten in Lobby-, Invite-, Replay-, Gegner- und KI-Payloads, bestätigt serverseitige Matchstart-Revalidierung und benennt die kleinen Umsetzungsschnitte `cloud-deck-schema-storage`, `cloud-deck-import-api` und `cloud-deck-matchstart-handoff` samt Blockern.

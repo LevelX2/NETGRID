@@ -47,15 +47,15 @@ Nächster gate-basierter Schritt ist eine **Scope-Entscheidung nach V0.99/S01**:
 
 V0.91 ist für private lokale O:NR-1996-Frontbilder als Anzeige-Artefakte freigegeben, aber nicht für öffentliche Distribution oder Gameplay-Einfluss.
 
-Wichtige Arbeitsgrundlage: `docs/derived/POST_MVP_0.4_ROADMAP.md`.
+Wichtige Arbeitsgrundlage: `docs/releases/mvp/roadmaps/post-mvp-0-4-roadmap.md`.
 
-Aktuelle Bestandsaufnahme: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
+Aktuelle Bestandsaufnahme: `docs/releases/roadmaps/bestandsaufnahme-2026-05-04.md`.
 
 Detailpläne:
 
-- `docs/derived/MVP_0.5_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.6_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.7_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.8_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.9_DETAILED_PLAN.md`
-- `docs/derived/MVP_0.91_DETAILED_PLAN.md`
+- `docs/releases/mvp/mvp-0-5-card-import-catalog/plan.md`
+- `docs/releases/mvp/mvp-0-6-deck-match-setup/plan.md`
+- `docs/releases/mvp/mvp-0-7-ui-redesign/plan.md`
+- `docs/releases/mvp/mvp-0-8-playable-card-slice/plan.md`
+- `docs/releases/mvp/mvp-0-9-ai-difficulty/plan.md`
+- `docs/releases/mvp/mvp-0-91-card-images/plan.md`

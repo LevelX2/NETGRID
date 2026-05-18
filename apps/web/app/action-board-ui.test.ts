@@ -12,6 +12,7 @@ import {
   activeRunIceInstanceId,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
@@ -23,6 +24,7 @@ import {
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
+  orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
   runAwareActionButtonLabel,
@@ -110,6 +112,19 @@ describe("V1.0.5 action board UI helpers", () => {
       )
     ).toBeUndefined();
     expect(automaticEndTurnAction({ ...board, activeSide: "runner" }, [endTurn], "corp")).toBeUndefined();
+  });
+
+  it("only offers automatic Corp mandatory draw when no other Corp action is available", () => {
+    const board = view("corp", { activeSide: "corp" });
+    const mandatoryDraw = legalAction("corp", "mandatory_draw", "game_rule", "Korp Pflichtkarte ziehen", {}, "corp_draw.mandatory_draw");
+    const scoreAgenda = legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" }, "corp_draw.mandatory_draw");
+    const rezIce = legalAction("corp", "rez_ice", "ice_1", "ICE rezzen", { cardId: "ice_1" }, "corp_draw.mandatory_draw");
+
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw], "corp")).toBe(mandatoryDraw);
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw, scoreAgenda], "corp")).toBeUndefined();
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw, rezIce], "corp")).toBeUndefined();
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw], "runner")).toBeUndefined();
+    expect(automaticCorpMandatoryDrawAction({ ...board, pendingChoice: choice("corp") }, [mandatoryDraw], "corp")).toBeUndefined();
   });
 
   it("maps RunTimeline state, active target and server labels without raw V1.0.5 labels", () => {
@@ -474,7 +489,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
   });
 
-  it("maps BBS stored bit counters to the existing card credit badge pattern", () => {
+  it("maps campaign stored bit counters to the existing card credit badge pattern", () => {
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
       definitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -484,6 +499,11 @@ describe("V1.0.6 resource and card-display helpers", () => {
       ...bbsUnderTen,
       instanceId: "bbs_2",
       counters: { bit: 10 }
+    };
+    const braindanceTenPlus: VisibleCard = {
+      ...card("braindance_1", "Braindance Campaign", "asset"),
+      definitionId: "onr_v1_311_braindance-campaign",
+      counters: { bit: 12 }
     };
     const unknownPowerCard: VisibleCard = {
       ...card("unknown_1", "Unknown Power Counter Card", "asset"),
@@ -503,7 +523,22 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
+    expect(storedCreditSourceLabel(braindanceTenPlus)).toBe("Braindance Campaign");
+    expect(storedCreditAmount(braindanceTenPlus)).toBe(12);
+    expect(cardCreditCounterVisual(storedCreditAmount(braindanceTenPlus))).toMatchObject({
+      safeAmount: 12,
+      showCount: true,
+      iconCount: 1
+    });
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
+  });
+
+  it("renders low credit-counter amounts as separate icons", () => {
+    expect(cardCreditCounterVisual(2)).toMatchObject({
+      safeAmount: 2,
+      showCount: false,
+      iconCount: 2
+    });
   });
 
   it("keeps contextual card action labels distinct for server-targeted events", () => {
@@ -517,7 +552,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Vor neuem Fort");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Fort erstellen");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Fort");
     expect(
       contextualCardActionLabel(
@@ -558,6 +593,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
         ),
       ),
     ).toBe("Auf Fort 1 ausrichten");
+  });
+
+  it("keeps new-fort ICE installs as the last card-context action", () => {
+    const newRemoteIce = legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" });
+    const hqIce = legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" });
+    const rdIce = legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" });
+
+    expect(orderedCardContextActions([newRemoteIce, hqIce, rdIce])).toEqual([hqIce, rdIce, newRemoteIce]);
   });
 
   it("moves rig icebreaker actions to their card context", () => {
@@ -860,6 +903,21 @@ function publicEvent(eventId: string, type: string, publicPayload: Record<string
     stateVersionAfter: 1,
     stateHashAfter: `${eventId}_hash`,
     publicPayload
+  };
+}
+
+function choice(side: Side): NonNullable<PlayerView["pendingChoice"]> {
+  return {
+    choiceId: "choice_1",
+    side,
+    source: "test",
+    prompt: "Wählen",
+    kind: "confirm",
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: 1,
+    visibility: "public",
+    options: []
   };
 }
 

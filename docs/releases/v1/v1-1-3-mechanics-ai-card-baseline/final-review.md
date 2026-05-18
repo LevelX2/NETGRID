@@ -30,7 +30,7 @@ V1.2.0 und V1.2.1 werden hier nicht neu umgesetzt. Sie werden als bereits umgese
 | `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/test-matrix.md` | dokumentarische Prüfgates V113-T001 bis V113-T014 und harte Folgegates. |
 | `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/requirements-review.md` | Requirements Review mit `ready_for_implementation: false` und nicht blockierenden Restpunkten. |
 | `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/implementation-handoff-to-v1-2-1.md` | Handoff mit Reihenfolge V1.2.0 vor V1.2.1, Folgeprompt und Ready-Status. |
-| `docs/derived/MECHANICS_COVERAGE_MATRIX.md` | menschliche Mechanik-Coverage mit V1.1.3-Normalisierung und V1.2.1-Update. |
+| `docs/architecture/card-rules/mechanics-coverage-matrix.md` | menschliche Mechanik-Coverage mit V1.1.3-Normalisierung und V1.2.1-Update. |
 | `data/rules/mechanics-coverage-1.2.1.json` | aktueller maschinenlesbarer Mechanik-Coverage-Stand nach V1.2.0/V1.2.1. |
 | `docs/releases/v1/v1-2-0-event-modification/final-review.md` | Beleg, dass V1.2.0 Event Modification Foundation umgesetzt und lokal verifiziert wurde. |
 | `docs/releases/v1/v1-2-1-replacement-effects/final-review.md` | Beleg, dass V1.2.1 Replacement Effects umgesetzt und lokal verifiziert wurde. |

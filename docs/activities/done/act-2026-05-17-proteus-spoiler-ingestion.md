@@ -19,7 +19,7 @@ resultArtifacts:
   - data/card-import/proteus-card-basis-2026-05-17.json
   - data/card-import/source-registry-proteus-2026-05-17.json
   - data/reports/proteus-spoiler-import-report-2026-05-17.json
-  - docs/derived/PROTEUS_SPOILER_IMPORT_REPORT.md
+  - docs/releases/proteus/spoiler-import-report.md
 checks:
   - corepack pnpm --filter @netgrid/catalog test
   - corepack pnpm --filter @netgrid/catalog typecheck

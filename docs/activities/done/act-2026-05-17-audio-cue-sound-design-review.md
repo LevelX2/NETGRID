@@ -13,7 +13,7 @@ branch:
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/AUDIO_CUE_SOUND_MATRIX_2026_05_17.md
+  - docs/architecture/live-match/audio-cue-sound-matrix-2026-05-17.md
   - apps/web/app/action-cues.ts
   - apps/web/app/action-cues.test.ts
   - apps/web/app/page.tsx

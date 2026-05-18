@@ -39,7 +39,7 @@ Diese Familie lag vorher flach unter `docs/derived/`:
 - `BACKEND_0_5_TEST_MATRIX.md`
 - `BACKEND_0_5_PRIVATE_STORAGE_MAINTENANCE_PLAN.md`
 
-Der Move nach `docs/releases/backend-ops/backend-0-5/` wurde am 2026-05-18 nach der Zielstrukturentscheidung `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` durchgeführt. Die Linkaudit-Vorarbeit liegt in `docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md`.
+Der Move nach `docs/releases/backend-ops/backend-0-5/` wurde am 2026-05-18 nach der Zielstrukturentscheidung `docs/decisions/docs-structure-target-decision-2026-05-18.md` durchgeführt. Die Linkaudit-Vorarbeit liegt in `docs/reviews/docs-cleanup/docs-derived-backend-0-5-link-audit-move-plan.md`.
 
 ## Regeln aus dem Pilot
 

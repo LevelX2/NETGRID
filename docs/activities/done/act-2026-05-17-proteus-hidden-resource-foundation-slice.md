@@ -34,7 +34,7 @@ Der erste kleine Runtime-Slice soll den verdeckten installierten Runner-Resource
 
 ## Kontext und Quellen
 
-- `docs/derived/PROTEUS_HIDDEN_RUNNER_RESOURCES_CONTRACT_2026_05_17.md`
+- `docs/releases/proteus/hidden-runner-resources-contract-2026-05-17.md`
 - `data/rules/proteus-mechanics-coverage-2026-05-17.json`
 - Cluster `hidden_runner_resources`
 - Bestehende Grundlagen: `RESOURCE_TAG_INTERACTION_0.95_SPEC.md`, `HIDDEN_ZONE_TOOLS_0.98_SPEC.md`

@@ -4063,9 +4063,9 @@ select {
 }
 
 .corpHqHandPanel {
-  flex: 1 1 460px;
+  flex: 1 1 680px;
   min-width: 0;
-  max-width: min(62vw, 560px);
+  max-width: min(74vw, 820px);
 }
 
 .corpHqHandHead {
@@ -4086,8 +4086,7 @@ select {
   width: 100%;
   max-width: 100%;
   min-height: calc(var(--cards-min-width, 108px) * 1.4);
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: visible;
   padding-bottom: 2px;
 }
 
@@ -5069,7 +5068,7 @@ select {
   content: "UNGEREZZT";
   position: absolute;
   left: 6px;
-  bottom: 6px;
+  bottom: 26px;
   z-index: 4;
   display: inline-flex;
   align-items: center;
@@ -5108,10 +5107,6 @@ select {
   min-height: calc(12px * var(--lane-card-scale, 1));
   padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
   left: calc(5px * var(--lane-card-scale, 1));
-  bottom: calc(5px * var(--lane-card-scale, 1));
-}
-
-.lane .card.unrezzedInstalled.hasActions::after {
   bottom: calc(26px * var(--lane-card-scale, 1));
 }
 
@@ -5174,16 +5169,21 @@ select {
 }
 
 .lane .strengthBoostBadge {
-  min-width: calc(46px * var(--lane-card-scale, 1));
-  min-height: calc(20px * var(--lane-card-scale, 1));
-  padding: calc(2px * var(--lane-card-scale, 1)) calc(7px * var(--lane-card-scale, 1));
-  font-size: calc(11px * var(--lane-card-scale, 1));
+  right: calc(-7px * var(--lane-card-scale, 1));
+  top: calc(50% - calc(23px * var(--lane-card-scale, 1)));
+  min-height: calc(12px * var(--lane-card-scale, 1));
+  padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
+  font-size: calc(7px * var(--lane-card-scale, 1));
 }
 
 .lane .brokerStoredCreditsBadge,
 .lane .recurringCreditBadge {
   top: calc(5px * var(--lane-card-scale, 1));
   right: calc(5px * var(--lane-card-scale, 1));
+}
+
+.lane .card.withImage .brokerStoredCreditsBadge {
+  top: calc(29px * var(--lane-card-scale, 1));
 }
 
 .lane .dataRavenCounterBadge {
@@ -5423,14 +5423,13 @@ select {
 .cardActionButton {
   position: relative;
   height: auto;
-  min-height: 46px;
+  min-height: 34px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) auto;
   column-gap: 7px;
-  row-gap: 4px;
   align-items: center;
-  justify-items: center;
-  padding: 7px 28px 8px;
+  justify-items: stretch;
+  padding: 6px 10px 6px 30px;
   border-color: var(--primary-border);
   background: var(--primary-bg);
   color: var(--primary-text);
@@ -5456,19 +5455,19 @@ select {
   font-size: 14px;
   font-weight: 700;
   line-height: 1.15;
-  overflow: hidden;
+  overflow: visible;
   overflow-wrap: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  text-overflow: clip;
+  white-space: normal;
   word-break: normal;
 }
 
 .cardActionButton .costChips {
-  grid-column: 1;
-  grid-row: 2;
+  grid-column: 2;
+  grid-row: 1;
   flex-basis: auto;
-  justify-content: center;
-  margin-left: 0;
+  justify-content: flex-end;
+  margin-left: 6px;
 }
 
 .cardActionButton .costChip {
@@ -5610,29 +5609,30 @@ select {
 
 .strengthBoostBadge {
   position: absolute;
-  left: 6%;
-  bottom: 7%;
+  right: -7px;
+  top: calc(50% - 23px);
   z-index: 42;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 46px;
-  min-height: 20px;
-  padding: 2px 7px;
+  min-height: 13px;
+  padding: 1px 5px;
   border: 1px solid color-mix(in srgb, var(--runner), white 35%);
   border-radius: 999px;
   background:
     radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.5), transparent 32%),
     linear-gradient(135deg, color-mix(in srgb, var(--runner), white 18%), color-mix(in srgb, var(--runner), black 18%));
   color: white;
-  font-size: 11px;
-  font-weight: 900;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
   line-height: 1;
-  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.45);
   box-shadow:
-    0 4px 8px rgb(0 0 0 / 0.32),
-    inset 0 1px 1px rgb(255 255 255 / 0.42),
-    inset 0 -2px 3px rgb(0 0 0 / 0.22);
+    0 1px 4px rgb(0 0 0 / 0.26),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  transform: translateY(-50%);
+  white-space: nowrap;
   pointer-events: none;
 }
 
@@ -5653,6 +5653,10 @@ select {
 
 .brokerStoredCreditsBadge {
   top: 6px;
+}
+
+.card.withImage .brokerStoredCreditsBadge {
+  top: 30px;
 }
 
 .recurringCreditBadge {
@@ -5966,20 +5970,34 @@ select {
 }
 
 .chronicleGroup {
+  --chronicle-group-accent: var(--muted);
   position: sticky;
   top: 0;
   z-index: 2;
   width: fit-content;
   max-width: 100%;
   padding: 3px 8px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--chronicle-group-accent), var(--line) 45%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--panel), var(--panel-soft) 70%);
-  color: var(--muted);
+  background: color-mix(in srgb, var(--chronicle-group-accent), var(--panel) 86%);
+  color: color-mix(in srgb, var(--chronicle-group-accent), white 32%);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.chronicleGroup.corp {
+  --chronicle-group-accent: var(--corp-status-accent);
+}
+
+.chronicleGroup.runner,
+.chronicleGroup.run {
+  --chronicle-group-accent: var(--runner-zone-accent);
+}
+
+.chronicleGroup.system {
+  --chronicle-group-accent: var(--chronicle-system);
 }
 
 .chronicleEntry {
@@ -6033,6 +6051,21 @@ select {
 .chronicleEntry.importance-important,
 .chronicleEntry.importance-critical {
   border-color: color-mix(in srgb, var(--chronicle-accent), var(--line));
+}
+
+.chronicleEntry.group-corp {
+  border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 58%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 84%), color-mix(in srgb, var(--corp-status-accent), transparent 84%)),
+    color-mix(in srgb, var(--panel), var(--chronicle-accent) 5%);
+}
+
+.chronicleEntry.group-runner,
+.chronicleEntry.group-run {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 58%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--runner-zone-accent), transparent 84%), color-mix(in srgb, var(--runner-zone-accent), transparent 84%)),
+    color-mix(in srgb, var(--panel), var(--chronicle-accent) 5%);
 }
 
 .chronicleRail {
@@ -6128,15 +6161,39 @@ select {
   overflow-wrap: anywhere;
 }
 
+.chronicleEntry.detail-simple {
+  padding-block: 6px;
+}
+
+.chronicleEntry.detail-simple .chronicleTopLine strong {
+  font-size: 12px;
+  line-height: 1.22;
+}
+
+.chronicleEntry.detail-simple .chronicleRail {
+  width: 26px;
+}
+
+.chronicleEntry.detail-simple .chronicleRailIcon {
+  width: 26px;
+  height: 26px;
+}
+
+.chronicleEntry.detail-simple .chronicleRailIcon svg {
+  width: 13px;
+  height: 13px;
+}
+
 .chronicleCardName {
+  --chronicle-card-type-accent: var(--chronicle-card);
   position: relative;
   display: inline-block;
   max-width: 100%;
   padding: 1px 5px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 35%);
+  border: 1px solid color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 35%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 88%);
-  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 46%);
+  background: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-bg) 88%);
+  color: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-text) 46%);
   font: inherit;
   font-weight: inherit;
   line-height: 1.25;
@@ -6145,6 +6202,46 @@ select {
   appearance: none;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
+}
+
+.chronicleCardType-agenda {
+  --chronicle-card-type-accent: #3f9fff;
+}
+
+.chronicleCardType-upgrade {
+  --chronicle-card-type-accent: #9aa5b1;
+}
+
+.chronicleCardType-asset {
+  --chronicle-card-type-accent: #4fd07c;
+}
+
+.chronicleCardType-ice {
+  --chronicle-card-type-accent: #8f7dff;
+}
+
+.chronicleCardType-operation {
+  --chronicle-card-type-accent: #f0a34a;
+}
+
+.chronicleCardType-event {
+  --chronicle-card-type-accent: #43c7d8;
+}
+
+.chronicleCardType-hardware {
+  --chronicle-card-type-accent: #d7b85f;
+}
+
+.chronicleCardType-resource {
+  --chronicle-card-type-accent: #d783b7;
+}
+
+.chronicleCardType-program {
+  --chronicle-card-type-accent: #63c6ff;
+}
+
+.chronicleCardType-identity {
+  --chronicle-card-type-accent: #e7d36b;
 }
 
 .chronicleCardName.hasDetail {
@@ -6204,15 +6301,16 @@ select {
 }
 
 .chronicleCardLine {
+  --chronicle-card-type-accent: var(--chronicle-card);
   position: relative;
   width: fit-content;
   max-width: 100%;
   padding: 5px 7px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-card), var(--line) 55%);
+  border: 1px solid color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 55%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-card), var(--accent-mix-bg) 93%);
+  background: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-bg) 93%);
   cursor: help;
-  color: color-mix(in srgb, var(--chronicle-card), var(--accent-mix-text) 46%);
+  color: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-text) 46%);
   font: inherit;
   font-size: 12px;
   line-height: 1.35;
@@ -6474,6 +6572,39 @@ select {
   gap: 8px;
 }
 
+.gameStandingStrip {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid rgb(216 189 95 / 0.28);
+  border-radius: 8px;
+  background: rgb(216 189 95 / 0.08);
+}
+
+.gameStandingStrip div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.gameStandingStrip span {
+  font-weight: 800;
+}
+
+.gameStandingStrip small,
+.gameStandingScore {
+  color: var(--muted);
+}
+
+.gameStandingScore {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  font-size: 12px;
+}
+
 .seriesStrip {
   display: flex;
   justify-content: space-between;
@@ -6711,6 +6842,10 @@ select {
   overflow: visible;
 }
 
+.fixedZoneCards.handCardsRow {
+  overflow: visible;
+}
+
 .fixedZoneCards .cardSlot {
   flex: 0 0 var(--cards-min-width, 108px);
   width: var(--cards-min-width, 108px);
@@ -6719,7 +6854,7 @@ select {
 }
 
 .fixedZoneCards .cardSlot + .cardSlot {
-  margin-left: calc(var(--cards-min-width, 108px) * -0.42);
+  margin-left: var(--cards-overlap-offset, calc(var(--cards-min-width, 108px) * -0.42));
 }
 
 .fixedZoneCards .cardSlot:hover,
@@ -7178,6 +7313,7 @@ select,
 
 .colorSchemeSettings,
 .cardDisplaySettings,
+.chronicleDetailSettings,
 .cardTooltipSettings,
 .cardSizeSettings,
 .gameplaySettings,
@@ -7193,7 +7329,8 @@ select,
 }
 
 .colorSchemeSettings,
-.cardDisplaySettings {
+.cardDisplaySettings,
+.chronicleDetailSettings {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -9057,6 +9194,10 @@ select,
     padding-bottom: 3px;
   }
 
+  .fixedZoneCards.handCardsRow {
+    overflow: visible;
+  }
+
   .opponentRunnerBoardStrip .runnerRigStrip {
     flex-basis: 100%;
     width: 100%;
@@ -9176,6 +9317,7 @@ select,
     margin-left: 0;
   }
 
+  .gameStandingStrip,
   .seriesStrip {
     flex-direction: column;
   }
@@ -9185,6 +9327,7 @@ select,
     width: 100%;
   }
 
+  .gameStandingScore,
   .seriesScore {
     justify-content: flex-start;
   }

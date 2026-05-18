@@ -18,7 +18,7 @@ Diese Scope-Grenze gilt weiterhin für den Rollup selbst. Der spätere Strukturm
 
 ## Umsetzung 2026-05-18
 
-Nach der Zielstrukturentscheidung `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` wurde der ursprünglich konservative No-Move-Vorschlag als begrenzter Release-Move umgesetzt:
+Nach der Zielstrukturentscheidung `docs/decisions/docs-structure-target-decision-2026-05-18.md` wurde der ursprünglich konservative No-Move-Vorschlag als begrenzter Release-Move umgesetzt:
 
 - V1.0.2 liegt unter `docs/releases/v1/v1-0-2-opponent-action-presentation/`.
 - V1.0.4 liegt unter `docs/releases/v1/v1-0-4-private-match-lifecycle/`.
@@ -122,7 +122,7 @@ Der ursprüngliche Vorschlag bewegte keine Dateien. Der umgesetzte Move vom 2026
 Risiken bei späteren Moves oder Umbenennungen:
 
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md` verlinkt und erwähnt V1.0.x-Artefakte direkt.
-- `docs/derived/RELEASE_PLANNING_2026-05-05.md` und andere spätere Planungsartefakte können historische V1.0.4-/V1.0.5-Bezüge enthalten.
+- `docs/releases/roadmaps/release-planning-2026-05-05.md` und andere spätere Planungsartefakte können historische V1.0.4-/V1.0.5-Bezüge enthalten.
 - Activity-Dateien und Final Reviews können alte Dateinamen als Auditnachweis verwenden.
 - Externe Thread- oder Commit-Historie verweist nur auf die bestehenden Pfade.
 

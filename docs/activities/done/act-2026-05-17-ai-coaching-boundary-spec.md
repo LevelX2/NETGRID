@@ -16,7 +16,7 @@ blockedBy:
   - act-2026-05-17-ai-input-nested-payload-allowlist
   - act-2026-05-17-decisiondebug-schema-redaction-snapshots
 resultArtifacts:
-  - docs/derived/AI_COACHING_BOUNDARY_SPEC_2026_05_17.md
+  - docs/architecture/ai/coaching-boundary-spec-2026-05-17.md
 checks:
   - git diff --check
 ---
@@ -29,7 +29,7 @@ Für spätere Lern-, Review- oder Coaching-Funktionen soll ein klarer Sicherheit
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P2: Side-sicheres AI-Coaching` und `Offene Fragen / nicht belegte Annahmen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P2: Side-sicheres AI-Coaching` und `Offene Fragen / nicht belegte Annahmen`.
 - Die Analyse nennt LLM-Coaching als offene Produktidee mit klarer Grenze: kein Live-Regelakteur und keine Hidden-Info-KI.
 - Bestehende NETGRID-Prinzipien: Rules Engine ist einzige Regelautorität; UI, Server, menschliche Spieler und KI reichen nur aus LegalActions abgeleitete PlayerActions ein.
 
@@ -74,7 +74,7 @@ Für spätere Lern-, Review- oder Coaching-Funktionen soll ein klarer Sicherheit
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/AI_COACHING_BOUNDARY_SPEC_2026_05_17.md` definiert AI-Coaching als reine Erklärungsschicht ohne Regel-, LegalAction- oder Aktionsautorität. Die Spezifikation grenzt erlaubte Coach-Inputs auf seitengebundene `PlayerView`, aktuelle `LegalActions`, side-sichere `PublicEvents`, eigene Perspektivdaten und optional versionierte, side-sichere `DecisionDebug`-Auszüge ein. Verboten bleiben FullState, gegnerische Hidden-Zonen, gegnerische Decklisten, Replay-PrivatePayload, Tokens/Sessions, unredigiertes `AIInput`/`DecisionDebug` und freie Regelentscheidung durch LLM.
+Abgeschlossen. `docs/architecture/ai/coaching-boundary-spec-2026-05-17.md` definiert AI-Coaching als reine Erklärungsschicht ohne Regel-, LegalAction- oder Aktionsautorität. Die Spezifikation grenzt erlaubte Coach-Inputs auf seitengebundene `PlayerView`, aktuelle `LegalActions`, side-sichere `PublicEvents`, eigene Perspektivdaten und optional versionierte, side-sichere `DecisionDebug`-Auszüge ein. Verboten bleiben FullState, gegnerische Hidden-Zonen, gegnerische Decklisten, Replay-PrivatePayload, Tokens/Sessions, unredigiertes `AIInput`/`DecisionDebug` und freie Regelentscheidung durch LLM.
 
 Enthalten sind Runner-, Korp- und Replay-Beispiele, rote Hidden-Info-Fixtures sowie Folgepaket-Empfehlungen mit eigenen Gates für `CoachInputV1`, Response-Contract, UI-Privacy und Replay-Review. Keine UI, keine LLM-Integration und keine Codeänderung wurden vorgenommen.
 

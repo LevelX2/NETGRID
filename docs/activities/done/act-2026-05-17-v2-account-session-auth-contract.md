@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.0
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md
+  - docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-auth-contract.md
   - docs/activities/inbox/act-2026-05-17-v2-account-session-foundation.md
   - docs/codex/CODEX_STATUS.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
@@ -30,7 +30,7 @@ Vor Auth-Code soll ein enger Account- und Session-Vertrag entstehen: geschlossen
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
 - Bestehende Match-Tokens in `apps/server/src/multiplayer.ts`
 - Browser-Recovery in `apps/web/app/session-recovery.ts`
 - Internet-Hardening in `apps/server/src/internet-hardening.ts`
@@ -67,6 +67,6 @@ Vor Auth-Code soll ein enger Account- und Session-Vertrag entstehen: geschlossen
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md` friert den V2.0-Account-/Session-/Passkey-Vertrag ein: Account-, Credential-, Account-Session- und Invite-Modelle, `ng_account_session` als `HttpOnly Secure` Cookie-Ziel, Same-Site-/Reverse-Proxy-Blocker, CSRF über `X-NETGRID-CSRF`, Passkey/WebAuthn-Challenge-Regeln, Revocation-Fälle und eine 18-Punkte-Testmatrix.
+Erledigt. `docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-auth-contract.md` friert den V2.0-Account-/Session-/Passkey-Vertrag ein: Account-, Credential-, Account-Session- und Invite-Modelle, `ng_account_session` als `HttpOnly Secure` Cookie-Ziel, Same-Site-/Reverse-Proxy-Blocker, CSRF über `X-NETGRID-CSRF`, Passkey/WebAuthn-Challenge-Regeln, Revocation-Fälle und eine 18-Punkte-Testmatrix.
 
 Match-Join-/Session-/Reconnect-Tokens bleiben per-match Capabilities; ein Account allein darf keine PlayerActions ausführen. Lokaler Gast-/Privatmodus bleibt erhalten, und Account-IDs dürfen nicht in Gegnerpayloads, PlayerViews, PublicEvents, `AIInput` oder `DecisionDebug` erscheinen. Der vorbereitete Foundation-Slice `act-2026-05-17-v2-account-session-foundation` verweist nun auf den Vertrag und hat keinen aktiven Blocker mehr. Verifikation: Quellenprüfung und `git diff --check`.

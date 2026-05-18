@@ -14,15 +14,15 @@ parallelWorker: worker-4
 releaseTarget: V2.3
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_3_PUBLIC_ALPHA_ROLLBACK_OPERABILITY_CONTRACT_2026_05_17.md
-  - docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md
+  - docs/releases/v2/v2-3-public-lobby-alpha/public-alpha-rollback-operability-contract-2026-05-17.md
+  - docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
   - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
   - docs/codex/CODEX_STATUS.md
 checks:
   - rg -n "V2_3_PUBLIC_ALPHA_ROLLBACK_OPERABILITY_CONTRACT|ready_for_public_alpha|Kill-Switch|Safe Mode|redigierte Health" docs/derived KI-Wissen-NETGRID docs/codex docs/activities
-  - rg -n "sessionToken|reconnectToken|joinToken|tokenHash|deckHash|AIInput|DecisionDebug|privatePayload|cardInstances|FullState|Hidden Cards" docs/derived/V2_3_PUBLIC_ALPHA_ROLLBACK_OPERABILITY_CONTRACT_2026_05_17.md
+  - rg -n "sessionToken|reconnectToken|joinToken|tokenHash|deckHash|AIInput|DecisionDebug|privatePayload|cardInstances|FullState|Hidden Cards" docs/releases/v2/v2-3-public-lobby-alpha/public-alpha-rollback-operability-contract-2026-05-17.md
   - git diff --check
 ---
 
@@ -34,10 +34,10 @@ Eine spätere Public-Lobby-Alpha soll nur starten, wenn Abschaltung, Rollback, H
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md`
-- `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md`
-- `docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md`
+- `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`
+- `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md`
 - `docs/releases/v1/v1-0-9-private-internet-hardening/private-deployment-ops-spec.md`
 
 ## Scope
@@ -63,7 +63,7 @@ Eine spätere Public-Lobby-Alpha soll nur starten, wenn Abschaltung, Rollback, H
 
 ## Ergebnisnotiz
 
-Abgeschlossen. Der neue planning-only Vertrag `docs/derived/V2_3_PUBLIC_ALPHA_ROLLBACK_OPERABILITY_CONTRACT_2026_05_17.md` definiert serverwirksame Kill-Switches für Public-Liste, UI-Einstieg und Public-Join-Adapter, Rollbackpfade für Listen-API, UI, Join und laufende Matches, redigierte Health-/Metrics-/Alerting-Signale, Safe-Mode-Stufen und P0/P1/P2-Incident-Grenzen.
+Abgeschlossen. Der neue planning-only Vertrag `docs/releases/v2/v2-3-public-lobby-alpha/public-alpha-rollback-operability-contract-2026-05-17.md` definiert serverwirksame Kill-Switches für Public-Liste, UI-Einstieg und Public-Join-Adapter, Rollbackpfade für Listen-API, UI, Join und laufende Matches, redigierte Health-/Metrics-/Alerting-Signale, Safe-Mode-Stufen und P0/P1/P2-Incident-Grenzen.
 
 Public Alpha bleibt ausdrücklich blockiert: `ready_for_public_alpha: false` und `ready_for_implementation_slice: false`, bis der Vertrag in Code, Tests, Runbook und Final Review nachgewiesen ist. Es wurde keine Implementierung, keine Infrastrukturentscheidung, keine Public-Lobby-Freigabe, keine Moderationskonsole und keine Engine-/Replay-/StateHash-/KI-Änderung vorgenommen.
 

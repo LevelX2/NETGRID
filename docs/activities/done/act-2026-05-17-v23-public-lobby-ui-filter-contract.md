@@ -14,7 +14,7 @@ parallelWorker: worker-1
 releaseTarget: V2.3
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_3_PUBLIC_LOBBY_UI_FILTER_CONTRACT.md
+  - docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-ui-filter-contract.md
 checks:
   - "Test-Path references for V2.3 Public-Lobby UI/filter contract sources"
   - "rg reference check for V2_3_PUBLIC_LOBBY_UI_FILTER_CONTRACT"
@@ -30,11 +30,11 @@ Vor einer Public-Lobby-Alpha soll ein UI-/Filtervertrag festlegen, welche Filter
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md`
-- `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 
@@ -60,4 +60,4 @@ Vor einer Public-Lobby-Alpha soll ein UI-/Filtervertrag festlegen, welche Filter
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_3_PUBLIC_LOBBY_UI_FILTER_CONTRACT.md` definiert die erlaubten Public-Lobby-Filter, Listenmetadaten, sicheren UI-Zustände, verbotenen Felder und verbotenen Korrelationen für V2.3 Public Lobby Alpha. Das Artefakt bestätigt weiterhin, dass V2.3 blockiert bleibt und keine UI-, API-, Matchmaking-, Chat-, Spectator-, Replay-, Account-, Moderations-, KI-, Karten- oder Asset-Freigabe erhält. Handoff an spätere UI- und API-Slices ist im Vertrag getrennt beschrieben.
+Abgeschlossen. `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-ui-filter-contract.md` definiert die erlaubten Public-Lobby-Filter, Listenmetadaten, sicheren UI-Zustände, verbotenen Felder und verbotenen Korrelationen für V2.3 Public Lobby Alpha. Das Artefakt bestätigt weiterhin, dass V2.3 blockiert bleibt und keine UI-, API-, Matchmaking-, Chat-, Spectator-, Replay-, Account-, Moderations-, KI-, Karten- oder Asset-Freigabe erhält. Handoff an spätere UI- und API-Slices ist im Vertrag getrennt beschrieben.

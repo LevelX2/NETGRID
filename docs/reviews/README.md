@@ -5,6 +5,9 @@
 ## Enthaltene Bereiche
 
 - `originalset-spotchecks/`: Register, Rollup und Detailberichte der Originalset-Karten-Spotchecks. Abgeschlossene Arbeitsjobfiles dazu liegen unter `docs/archive/originalset-spotcheck-jobs/2026-05/`.
+- `ai/`: KI-Audits, Benchmarks, Gap-Reports, Regression-Reviews und historische Runner-KI-Beobachtungen.
+- `docs-cleanup/`: Inventare, Linkaudits und Review-Artefakte zur Docs-Struktur.
+- `onr-v1/`: Quellen-, Spoiler-, Karten- und Supportdatenreviews zur lokalen O:NR-v1-Basis.
 
 ## Regel
 

@@ -35,11 +35,11 @@ Die vielen releaseweisen Einzelartefakte unter `docs/derived/` sollen in eine le
 - Auffällige Reihen:
   - `docs/derived/MVP_*.md`
   - ehemalige V1.0- bis V1.9-Derived-Release-Rollups, seit Doku-Migration unter `docs/releases/v1/`
-  - `docs/derived/V2_*.md`
+  - V2.x-Verträge, seit Doku-Migration unter `docs/releases/v2/`
   - `docs/releases/special/s01/`
   - `docs/derived/BACKEND_0_5_*.md`
 - Führende Orientierung:
-  - `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+  - `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
   - `docs/codex/CODEX_STATUS.md`
   - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 

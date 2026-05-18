@@ -44,7 +44,7 @@ Die S01-Familie lag vorher flach unter `docs/derived/`:
 - `S01_AUDIO_SPEC.md`
 - `S01_DETAILED_PLAN.md`
 
-Der Move nach `docs/releases/special/s01/` wurde am 2026-05-18 nach der Zielstrukturentscheidung `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` durchgeführt. Grundlage war das frühere S01-Rollup mit Linkbruchrisiken; die Move-Variante ist vollständige Linkmigration ohne Redirect-Stubs.
+Der Move nach `docs/releases/special/s01/` wurde am 2026-05-18 nach der Zielstrukturentscheidung `docs/decisions/docs-structure-target-decision-2026-05-18.md` durchgeführt. Grundlage war das frühere S01-Rollup mit Linkbruchrisiken; die Move-Variante ist vollständige Linkmigration ohne Redirect-Stubs.
 
 ## Regeln aus dem Pilot
 

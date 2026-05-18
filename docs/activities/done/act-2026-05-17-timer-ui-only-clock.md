@@ -12,7 +12,7 @@ completedAt: 2026-05-17
 branch: codex/activity-worker-5
 releaseTarget:
 blockedBy:
-  - docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md
+  - docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md
 resultArtifacts:
   - apps/web/app/page.tsx
   - apps/web/app/globals.css
@@ -32,7 +32,7 @@ Im Spielbereich soll eine kompakte sichtbare Uhr erscheinen, die Matchlaufzeit u
 
 ## Kontext und Quellen
 
-- `docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md`
+- `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md`
 
 ## Scope
 

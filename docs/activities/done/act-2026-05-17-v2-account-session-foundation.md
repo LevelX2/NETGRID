@@ -15,7 +15,7 @@ blockedBy: []
 resultArtifacts:
   - apps/server/src/account-session.ts
   - apps/server/src/account-session.test.ts
-  - docs/derived/V2_0_ACCOUNT_SESSION_FOUNDATION_IMPLEMENTATION_REVIEW.md
+  - docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-foundation-implementation-review.md
 checks:
   - corepack pnpm --filter @netgrid/server test -- account-session.test.ts
   - corepack pnpm --filter @netgrid/server typecheck
@@ -30,8 +30,8 @@ Nach Vertragsfreeze soll ein kleiner, nicht-öffentlicher Foundation-Slice für 
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
-- `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-auth-contract.md`
 
 ## Scope
 

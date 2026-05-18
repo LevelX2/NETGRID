@@ -15,7 +15,7 @@ blockedBy:
   - act-2026-05-17-proteus-spoiler-ingestion
 resultArtifacts:
   - data/rules/proteus-mechanics-coverage-2026-05-17.json
-  - docs/derived/PROTEUS_MECHANICS_COVERAGE_ANALYSIS.md
+  - docs/releases/proteus/mechanics-coverage-analysis.md
   - docs/activities/inbox/act-2026-05-17-proteus-variable-ice-contracts.md
   - docs/activities/inbox/act-2026-05-17-proteus-hidden-resources-contract.md
   - docs/activities/inbox/act-2026-05-17-proteus-bad-publicity-loss-gate.md
@@ -66,7 +66,7 @@ Für alle Proteus-Karten soll geprüft werden, welche Karten bereits durch vorha
 ## Umsetzungshinweise
 
 - Primärer Folgeagent: `card-enablement-ai-knowledge-agent`.
-- Gute Ergebnisform: `docs/derived/PROTEUS_MECHANICS_COVERAGE_ANALYSIS.md` plus ggf. maschinenlesbare Matrix.
+- Gute Ergebnisform: `docs/releases/proteus/mechanics-coverage-analysis.md` plus ggf. maschinenlesbare Matrix.
 - Keine Textparser-Autorität: Kartentext bleibt Quelle für Planung, Runtime braucht eigene Resolververträge.
 
 ## Ergebnisnotiz

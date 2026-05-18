@@ -15,7 +15,7 @@ releaseTarget: Proteus planning
 blockedBy:
   - act-2026-05-17-proteus-mechanics-coverage-analysis
 resultArtifacts:
-  - docs/derived/PROTEUS_RELEASE_SLICING_PLAN.md
+  - docs/releases/proteus/release-slicing-plan.md
   - docs/activities/inbox/act-2026-05-17-proteus-visible-baseline-card-slice.md
   - docs/activities/inbox/act-2026-05-17-proteus-bad-publicity-engine-harness.md
   - docs/activities/inbox/act-2026-05-17-proteus-variable-ice-harness-slice.md
@@ -25,7 +25,7 @@ resultArtifacts:
   - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
 checks:
   - "rg -n \"PROTEUS_RELEASE_SLICING_PLAN|proteus-visible-baseline|Proteus-Release-Slicing\" docs KI-Wissen-NETGRID"
-  - "Test-Path docs/derived/PROTEUS_RELEASE_SLICING_PLAN.md"
+  - "Test-Path docs/releases/proteus/release-slicing-plan.md"
   - "git diff --check"
 ---
 
@@ -71,7 +71,7 @@ Aus der Proteus-Coverage-Analyse soll eine konkrete, kleine bis mittlere Umsetzu
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/PROTEUS_RELEASE_SLICING_PLAN.md` schneidet die Proteus-Umsetzung in priorisierte kleine/mittlere Slices: sichtbare Baseline-Karten, Bad-Publicity-7+-Harness, variable ICE-Foundation, Hidden-Runner-Resource-Foundation, einfache Runner-/Agenda-/Access-Slices, Cybernetics-/Deck-Hardware, Virus-/Antibody-/Purge und Random-/Longtail-Familien. Der Plan trennt `human_playable`, Decklegalität und `ai_supported` ausdrücklich und hält Hidden-Info-, LegalAction-, Replay- und StateHash-Gates als Stop-Kriterien.
+Erledigt. `docs/releases/proteus/release-slicing-plan.md` schneidet die Proteus-Umsetzung in priorisierte kleine/mittlere Slices: sichtbare Baseline-Karten, Bad-Publicity-7+-Harness, variable ICE-Foundation, Hidden-Runner-Resource-Foundation, einfache Runner-/Agenda-/Access-Slices, Cybernetics-/Deck-Hardware, Virus-/Antibody-/Purge und Random-/Longtail-Familien. Der Plan trennt `human_playable`, Decklegalität und `ai_supported` ausdrücklich und hält Hidden-Info-, LegalAction-, Replay- und StateHash-Gates als Stop-Kriterien.
 
 Als neues erstes Folgepaket wurde `docs/activities/inbox/act-2026-05-17-proteus-visible-baseline-card-slice.md` angelegt. Die bereits vorhandenen Inbox-Pakete für Bad-Publicity-Harness, variable ICE-Harness und Hidden-Resource-Foundation werden im Plan als weitere erste Umsetzungspakete referenziert. Status, Wissensindex und Projektlog wurden mit dem planning-only Stand nachgezogen.
 

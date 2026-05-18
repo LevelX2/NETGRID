@@ -13,7 +13,7 @@ branch: codex/activity-worker-5
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md
+  - docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md
   - docs/activities/inbox/act-2026-05-17-timer-ui-only-clock.md
   - docs/activities/inbox/act-2026-05-17-timer-server-sync-contract.md
   - docs/activities/inbox/act-2026-05-17-engine-hard-timeout-contract.md
@@ -59,7 +59,7 @@ Für NETGRID soll ein sichtbares Zeit-/Timer-System konzipiert werden, bevor Eng
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/VISIBLE_MATCH_TIMER_SYSTEM_CONCEPT_2026_05_17.md` bewertet Partie/global, Spieler, Zug, Run, Entscheidungsphase, Aktion und Chat-Cooldown. Der empfohlene Schnitt ist zuerst eine UI-only-Uhr ohne Regelwirkung, danach ein Server-/WebSocket-/Reconnect-Sync-Vertrag und erst anschließend ein harter Engine-Timeout-Vertrag.
+Abgeschlossen. `docs/architecture/live-match/visible-match-timer-system-concept-2026-05-17.md` bewertet Partie/global, Spieler, Zug, Run, Entscheidungsphase, Aktion und Chat-Cooldown. Der empfohlene Schnitt ist zuerst eine UI-only-Uhr ohne Regelwirkung, danach ein Server-/WebSocket-/Reconnect-Sync-Vertrag und erst anschließend ein harter Engine-Timeout-Vertrag.
 
 Das Konzept hält fest: Serverzeit ist für Multiplayer-Snapshots führend; die UI darf nur anzeigen und lokal interpolieren; harte Folgen wie Auto-Pass, Aktionsverlust oder Spielverlust bleiben blockiert, bis sie als enginevalidierte Timeout-Auflösung mit Replay-/StateHash-Stabilität spezifiziert sind. Timerdaten dürfen keine Hidden-Info, Tokens, Deckdaten, `AIInput` oder `DecisionDebug` leaken und bleiben bei UI-only/Sync aus GameEvents, Replay und StateHash heraus.
 

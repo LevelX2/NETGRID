@@ -7,7 +7,7 @@
 **Wichtig:** Dieses Dokument ist ein Runbook. Es ersetzt nicht die Fachkonzepte, sondern übersetzt sie in eine Codex-taugliche Arbeitsweise.
 **Namensstand 2026-05-08:** NETGRID ist der aktive App- und Projektname. NETGRID bleibt in diesem Runbook als fachliche Spiel-, Regel- und Quellenreferenz erhalten.
 
-**Aktueller Vorranghinweis 2026-05-08:** Dieses Runbook bleibt für MVP 0.1, MVP 0.2 und den grundsätzlichen Codex-Workflow gültig. Für den aktuellen Release-Stand und alle Anschlussplanungen ab V1.1.3 sind `docs/codex/CODEX_STATUS.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` maßgeblich. Die konsolidierte Roadmap hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
+**Aktueller Vorranghinweis 2026-05-08:** Dieses Runbook bleibt für MVP 0.1, MVP 0.2 und den grundsätzlichen Codex-Workflow gültig. Für den aktuellen Release-Stand und alle Anschlussplanungen ab V1.1.3 sind `docs/codex/CODEX_STATUS.md` und `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md` maßgeblich. Die konsolidierte Roadmap hält die Post-V1.1.2-Grundlinie aufrecht, integriert die ältere V2/V3/V4-Produktvision und ersetzt die ältere Idee eines isolierten späten `V1.7 AI v2` durch eine laufende Mechanik-/Karten-/KI-Spur.
 
 ---
 
@@ -461,7 +461,7 @@ Create or verify:
 - /data/cards
 - /data/decks
 - /data/manifests
-- /docs/derived/DEVIATION_REGISTRY.md
+- /docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md
 - /data/scenarios
 - /packages/shared
 - /packages/engine
@@ -540,20 +540,20 @@ Subagent F – Test strategy:
 Read the 0.1 concept. Extract unit, integration, scenario, visibility, replay, AI, card, and regression test requirements. Return a test matrix proposal.
 
 After all subagents return, create or update:
-- /docs/derived/MVP_0.1_REQUIREMENTS.md
-- /docs/derived/ENGINE_API_SPEC.md
-- /docs/derived/GAME_STATE_MODEL.md
-- /docs/derived/TIMING_AND_RUN_MODEL.md
-- /docs/derived/DEVIATION_REGISTRY.md
-- /docs/derived/ACCEPTANCE_CRITERIA.md
-- /docs/derived/TEST_MATRIX.md
-- /docs/derived/OPEN_QUESTIONS.md
-- /docs/derived/CONFLICT_MATRIX.md
+- /docs/releases/mvp/mvp-0-1-local-core/requirements.md
+- /docs/releases/mvp/mvp-0-1-local-core/engine-api-spec.md
+- /docs/releases/mvp/mvp-0-1-local-core/game-state-model.md
+- /docs/releases/mvp/mvp-0-1-local-core/timing-and-run-model.md
+- /docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md
+- /docs/releases/mvp/mvp-0-1-local-core/acceptance-criteria.md
+- /docs/releases/mvp/mvp-0-1-local-core/test-matrix.md
+- /docs/releases/mvp/mvp-0-1-local-core/open-questions.md
+- /docs/releases/mvp/mvp-0-1-local-core/conflict-matrix.md
 - /data/rules/rules-baseline.json
 - /data/cards/demo-cards.json
 - /data/decks/demo-decks.json
 - /data/manifests/card-implementation-manifest.json
-- /docs/derived/DEVIATION_REGISTRY.md
+- /docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md
 - /data/scenarios/runner-steals-rd-agenda.json
 - /data/scenarios/runner-breaks-ice-and-accesses-rd.json
 - /data/scenarios/runner-fails-on-end-the-run.json
@@ -603,7 +603,7 @@ Check whether every Must requirement, every playable_mvp card, every deviation, 
 
 After all subagents return:
 - Update derived artifacts if needed.
-- Create or update /docs/derived/REQUIREMENTS_REVIEW.md.
+- Create or update /docs/releases/mvp/mvp-0-1-local-core/requirements-review.md.
 - Update /docs/codex/CODEX_STATUS.md.
 
 Final response:
@@ -625,13 +625,13 @@ Read:
 - AGENTS.md
 - /docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md
 - /docs/codex/CODEX_STATUS.md
-- /docs/derived/MVP_0.1_REQUIREMENTS.md
-- /docs/derived/ENGINE_API_SPEC.md
-- /docs/derived/GAME_STATE_MODEL.md
-- /docs/derived/TIMING_AND_RUN_MODEL.md
-- /docs/derived/DEVIATION_REGISTRY.md
-- /docs/derived/ACCEPTANCE_CRITERIA.md
-- /docs/derived/TEST_MATRIX.md
+- /docs/releases/mvp/mvp-0-1-local-core/requirements.md
+- /docs/releases/mvp/mvp-0-1-local-core/engine-api-spec.md
+- /docs/releases/mvp/mvp-0-1-local-core/game-state-model.md
+- /docs/releases/mvp/mvp-0-1-local-core/timing-and-run-model.md
+- /docs/releases/mvp/mvp-0-1-local-core/deviation-registry.md
+- /docs/releases/mvp/mvp-0-1-local-core/acceptance-criteria.md
+- /docs/releases/mvp/mvp-0-1-local-core/test-matrix.md
 - /data/rules/rules-baseline.json
 - /data/cards/demo-cards.json
 - /data/decks/demo-decks.json
@@ -707,8 +707,8 @@ Subagent D – Build and DX reviewer:
 Inspect package scripts, README, startup flow, and local dev commands.
 
 Root agent must fix critical issues, update /docs/codex/CODEX_STATUS.md, and create:
-- /docs/derived/MVP_0.1_FINAL_REVIEW.md
-- /docs/derived/MVP_0.2_READINESS_REVIEW.md
+- /docs/releases/mvp/mvp-0-1-local-core/final-review.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/readiness-review.md
 
 Do not start MVP 0.2 implementation.
 
@@ -750,7 +750,7 @@ Create or continue a persistent goal named "MVP 0.2 multiplayer requirements".
 Read:
 - AGENTS.md
 - /docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md
-- /docs/derived/MVP_0.2_READINESS_REVIEW.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/readiness-review.md
 - /docs/source/NETGRID_MVP_0.2_Plan.md
 - relevant MVP 0.1 derived artifacts and implementation files
 
@@ -778,14 +778,14 @@ Subagent F – UI and E2E tests:
 Extract create-match UI, join UI, two-player board, waiting states, connection state, undo UI, debug state, and E2E scenario coverage.
 
 After all subagents return, create or update:
-- /docs/derived/MVP_0.2_REQUIREMENTS.md
-- /docs/derived/MULTIPLAYER_API_SPEC.md
-- /docs/derived/WEBSOCKET_PROTOCOL_SPEC.md
-- /docs/derived/STORAGE_SCHEMA.md
-- /docs/derived/TOKEN_AND_SESSION_SECURITY.md
-- /docs/derived/RECONNECT_AND_UNDO_SPEC.md
-- /docs/derived/MULTIPLAYER_TEST_MATRIX.md
-- /docs/derived/MVP_0.2_REQUIREMENTS_REVIEW.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/requirements.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/multiplayer-api-spec.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/websocket-protocol-spec.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/storage-schema.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/token-and-session-security.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/reconnect-and-undo-spec.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/multiplayer-test-matrix.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/requirements-review.md
 - /data/rules/rules-baseline-0.2.json
 - /data/scenarios/multiplayer-create-join-action.json
 - /data/scenarios/multiplayer-reconnect-during-run.json
@@ -820,13 +820,13 @@ Create or continue a persistent goal named "MVP 0.2 multiplayer implementation".
 Read:
 - AGENTS.md
 - /docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md
-- /docs/derived/MVP_0.2_REQUIREMENTS.md
-- /docs/derived/MULTIPLAYER_API_SPEC.md
-- /docs/derived/WEBSOCKET_PROTOCOL_SPEC.md
-- /docs/derived/STORAGE_SCHEMA.md
-- /docs/derived/TOKEN_AND_SESSION_SECURITY.md
-- /docs/derived/RECONNECT_AND_UNDO_SPEC.md
-- /docs/derived/MULTIPLAYER_TEST_MATRIX.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/requirements.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/multiplayer-api-spec.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/websocket-protocol-spec.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/storage-schema.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/token-and-session-security.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/reconnect-and-undo-spec.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/multiplayer-test-matrix.md
 - /data/rules/rules-baseline-0.2.json
 - /data/scenarios/multiplayer-*.json
 
@@ -898,7 +898,7 @@ Subagent D – E2E and deployment audit:
 Run or inspect E2E scenario, start scripts, README, environment variables, private deployment instructions, and Docker if present.
 
 Root agent fixes critical issues and creates:
-- /docs/derived/MVP_0.2_FINAL_REVIEW.md
+- /docs/releases/mvp/mvp-0-2-private-multiplayer/final-review.md
 - updated /docs/codex/CODEX_STATUS.md
 
 Final response:

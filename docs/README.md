@@ -1,6 +1,6 @@
 # NETGRID-Dokumentation
 
-Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefakte. Die Zielstruktur für die laufende Aufräumung ist in `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` festgelegt.
+Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefakte. Die Zielstruktur für die laufende Aufräumung ist in `docs/decisions/docs-structure-target-decision-2026-05-18.md` festgelegt.
 
 ## Ordner
 
@@ -12,9 +12,7 @@ Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefak
 - `archive/`: historische, nicht mehr führende Artefakte, die bewusst im Arbeitsbaum bleiben.
 - `derived/`: bestehender Übergangs- und Bestandsbereich für abgeleitete Artefakte wie Releasepläne, Requirements, Specs, Testmatrizen, Implementation Reviews, Final Reviews und größere Analyseberichte.
 - `codex/`: aktueller Codex-Status, Runbooks und Arbeitsnotizen mit Projektsteuerungsbezug.
-- `KI-Player/`: KI-bezogene Briefings und Planungsunterlagen.
-- `ui-designsets/`: UI-/Branding-Explorationen und zugehörige Designartefakte.
-- `NETGRID_Dokumentenpaket_MVP_0_1_0_2/`: historisches Dokumentenpaket für die frühe MVP-Phase.
+- `ui-designsets/`: kuratierte UI-/Branding-Referenzen mit aktiven Designrichtungen, Branding und archivierten Explorationen.
 
 ## Zielstruktur
 
@@ -23,8 +21,8 @@ Weitere Strukturpakete führen diese Zielbereiche schrittweise ein, sobald ein k
 - `decisions/`: kleine Projekt-, Produkt-, Asset-, Git- und Dokumentationsentscheidungen.
 - `runbooks/`: wiederholbare Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
 - `operations/`: ops-nahe Dauerartefakte zu Deployment, Maintenance, Observability und Incidents.
-- `design/`: spätere kuratierte Designsystem- und Branding-Struktur, falls `ui-designsets/` migriert wird.
+- `design/`: spätere echte Designsystem-Struktur, falls aus Mockups später Komponentenmodelle, Tokens und Designentscheidungen entstehen.
 
 ## Grundregel
 
-Neue lose Arbeitspakete starten in `activities/inbox/`. Erst wenn daraus ein formaler Plan, eine Spezifikation, ein Review oder ein dauerhaftes Nachweisdokument entsteht, wird ein passendes Artefakt angelegt. Für bestehende historische Pfade bleibt `derived/` zunächst kanonisch; neue oder migrierte Dauerartefakte sollen nach der Zielstruktur einsortiert werden.
+Neue lose Arbeitspakete starten in `activities/inbox/`. Erst wenn daraus ein formaler Plan, eine Spezifikation, ein Review oder ein dauerhaftes Nachweisdokument entsteht, wird ein passendes Artefakt angelegt. Migrierte Dauerartefakte sollen nach der Zielstruktur einsortiert werden; `derived/` bleibt nur noch als Übergangshinweis bestehen.

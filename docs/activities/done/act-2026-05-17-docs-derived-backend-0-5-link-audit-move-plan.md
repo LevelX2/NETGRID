@@ -14,7 +14,7 @@ parallelWorker: worker-1
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md
+  - docs/reviews/docs-cleanup/docs-derived-backend-0-5-link-audit-move-plan.md
   - docs/releases/backend-ops/backend-0-5/README.md
 checks:
   - rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Maintenance" .
@@ -61,6 +61,6 @@ Vor jedem Move mindestens `rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Mai
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/DOCS_DERIVED_BACKEND_0_5_LINK_AUDIT_MOVE_PLAN.md` dokumentiert den vollständigen Backend-0.5-Linkaudit, trennt harte Pfadlinks von unkritischen Textreferenzen und entscheidet konservativ `decision-no-move`: Die bestehenden `docs/derived/BACKEND_0_5_*`-Pfade bleiben vorerst kanonisch, es werden keine Redirect-Stubs angelegt und keine Gate-Nachweise bewegt. Das Rollup `docs/releases/backend-ops/backend-0-5/README.md` verweist auf diese Entscheidung. Da keine Dateien bewegt wurden, war keine Linkmigration nötig; spätere Move-Voraussetzungen und Stub-Optionen sind dokumentiert. Pflichtchecks `rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Maintenance" .` und `git diff --check` sind ausgeführt, `git diff --check` ist grün.
+Abgeschlossen. `docs/reviews/docs-cleanup/docs-derived-backend-0-5-link-audit-move-plan.md` dokumentiert den vollständigen Backend-0.5-Linkaudit, trennt harte Pfadlinks von unkritischen Textreferenzen und entscheidet konservativ `decision-no-move`: Die bestehenden `docs/derived/BACKEND_0_5_*`-Pfade bleiben vorerst kanonisch, es werden keine Redirect-Stubs angelegt und keine Gate-Nachweise bewegt. Das Rollup `docs/releases/backend-ops/backend-0-5/README.md` verweist auf diese Entscheidung. Da keine Dateien bewegt wurden, war keine Linkmigration nötig; spätere Move-Voraussetzungen und Stub-Optionen sind dokumentiert. Pflichtchecks `rg -n "BACKEND_0_5_|Backend 0\\.5|Private Storage Maintenance" .` und `git diff --check` sind ausgeführt, `git diff --check` ist grün.
 
-Nachtrag 2026-05-18: Die damalige Zwischenentscheidung wurde nach der Zielstrukturentscheidung `docs/derived/DOCS_STRUCTURE_TARGET_DECISION_2026_05_18.md` umgesetzt fortgeschrieben. Backend 0.5 liegt jetzt ohne Redirect-Stubs unter `docs/releases/backend-ops/backend-0-5/`; der Linkaudit steht auf `implemented-move`.
+Nachtrag 2026-05-18: Die damalige Zwischenentscheidung wurde nach der Zielstrukturentscheidung `docs/decisions/docs-structure-target-decision-2026-05-18.md` umgesetzt fortgeschrieben. Backend 0.5 liegt jetzt ohne Redirect-Stubs unter `docs/releases/backend-ops/backend-0-5/`; der Linkaudit steht auf `implemented-move`.

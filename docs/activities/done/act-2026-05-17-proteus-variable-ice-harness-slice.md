@@ -27,7 +27,7 @@ checks:
 
 ## Ziel
 
-Den planning-only Vertrag `docs/derived/PROTEUS_VARIABLE_ICE_CONTRACT.md` als kleinsten nicht-promotenden Engine-Harness-Slice fuer genau `Digiconda` und `Food Fight` vorbereiten.
+Den planning-only Vertrag `docs/releases/proteus/variable-ice-contract.md` als kleinsten nicht-promotenden Engine-Harness-Slice fuer genau `Digiconda` und `Food Fight` vorbereiten.
 
 ## Scope
 

@@ -1,0 +1,11 @@
+# MVP 0.6 Decks und Matchsetup  ## Artefakte
+- `deck-editor-spec.md`
+- `deck-storage-spec.md`
+- `deck-validation-spec.md`
+- `final-review.md`
+- `implementation-review.md`
+- `match-setup-spec.md`
+- `plan.md`
+- `requirements-review.md`
+- `requirements.md`
+- `test-matrix.md`

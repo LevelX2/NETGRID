@@ -8,7 +8,7 @@ Status: abgeschlossen (Requirements-Freeze Eingang)
 - `data/local/card-import/onr-v1-limited/onr-v1-basisset-mechanics-release-matrix.local.csv`
 - `data/local/card-import/onr-v1-limited/card-snapshot-onr-v1-limited.local.json`
 - `docs/releases/v1/v1-7-1-mechanikpaket-e/plan-to-v1-8-1.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 
 ## Ergebnis
 

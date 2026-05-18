@@ -1,0 +1,12 @@
+# MVP 0.1 Local Core  ## Artefakte
+- `acceptance-criteria.md`
+- `conflict-matrix.md`
+- `deviation-registry.md`
+- `engine-api-spec.md`
+- `final-review.md`
+- `game-state-model.md`
+- `open-questions.md`
+- `requirements-review.md`
+- `requirements.md`
+- `test-matrix.md`
+- `timing-and-run-model.md`

@@ -12,13 +12,13 @@ completedAt: 2026-05-17
 branch: codex/activity-worker-1
 releaseTarget: V2.2
 blockedBy:
-  - docs/derived/V2_2_CHAT_DATA_CONTRACT.md
+  - docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
 resultArtifacts:
-  - docs/derived/V2_2_CHAT_DATA_CONTRACT.md
+  - docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
 checks:
-  - rg -n "^## (Chatdatenmodell V2\\.2|Retention-Vertrag|Export- und Löschvertrag|Architekturgrenzen für Implementierungsslices)|chatMessageId|retentionClass|reported_chat_evidence|deleted_chat_pointer|Account-Self-Export|StateHash|AIInput|DecisionDebug" docs/derived/V2_2_CHAT_DATA_CONTRACT.md
-  - rg -n "GameState|GameEvent|PublicGameEvent|ReplayView|StateHash|AIInput|DecisionDebug|FullState|privatePayload|cardInstances|Roh-Tokens|Token-Hashes" docs/derived/V2_2_CHAT_DATA_CONTRACT.md
-  - rg -n "Retention|Export|Löschung|Backups|Audit|Moderation|Evidence|V2\\.0|V2\\.6" docs/derived/V2_2_CHAT_DATA_CONTRACT.md
+  - rg -n "^## (Chatdatenmodell V2\\.2|Retention-Vertrag|Export- und Löschvertrag|Architekturgrenzen für Implementierungsslices)|chatMessageId|retentionClass|reported_chat_evidence|deleted_chat_pointer|Account-Self-Export|StateHash|AIInput|DecisionDebug" docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
+  - rg -n "GameState|GameEvent|PublicGameEvent|ReplayView|StateHash|AIInput|DecisionDebug|FullState|privatePayload|cardInstances|Roh-Tokens|Token-Hashes" docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
+  - rg -n "Retention|Export|Löschung|Backups|Audit|Moderation|Evidence|V2\\.0|V2\\.6" docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
   - git diff --check
 ---
 
@@ -30,9 +30,9 @@ Chatnachrichten brauchen vor jeder Erweiterung einen knappen Datenmodell-, Reten
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_2_CHAT_DATA_CONTRACT.md`
-- `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 
@@ -62,6 +62,6 @@ Chatnachrichten brauchen vor jeder Erweiterung einen knappen Datenmodell-, Reten
 
 ## Ergebnisnotiz
 
-V2.2-Chatdatenmodell, Referenzgrenzen, Retentionklassen, Account-Self-Export, Account-Löschung, Chatlöschung, Backup-Auslauf und Moderationsretention wurden in `docs/derived/V2_2_CHAT_DATA_CONTRACT.md` konkretisiert. Chat bleibt ausdrücklich außerhalb von Engine-State, Replay, StateHash, `AIInput` und `DecisionDebug`.
+V2.2-Chatdatenmodell, Referenzgrenzen, Retentionklassen, Account-Self-Export, Account-Löschung, Chatlöschung, Backup-Auslauf und Moderationsretention wurden in `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md` konkretisiert. Chat bleibt ausdrücklich außerhalb von Engine-State, Replay, StateHash, `AIInput` und `DecisionDebug`.
 
 Offen bleiben konkrete Retention-Fristen, UI-Texte für Export-/Löschstatus, Report-/Block-Modell und spätere Redaction-/Boundary-Tests.

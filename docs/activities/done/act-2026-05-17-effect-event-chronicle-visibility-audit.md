@@ -14,7 +14,7 @@ parallelWorker: worker-3
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/EFFECT_EVENT_CHRONICLE_VISIBILITY_AUDIT_2026_05_17.md
+  - docs/architecture/card-rules/effect-event-chronicle-visibility-audit-2026-05-17.md
   - apps/web/app/chronicle.ts
   - apps/web/app/chronicle.test.ts
 checks:
@@ -60,4 +60,4 @@ Wichtige Effekte sollen nicht nur intern korrekt passieren, sondern einheitlich 
 
 ## Ergebnisnotiz
 
-Abgeschlossen. Der gemeinsame Event-/Chronik-/Cue-Vertrag wurde auditiert; Ergebnis und Hidden-Info-Textmuster sind in `docs/derived/EFFECT_EVENT_CHRONICLE_VISIBILITY_AUDIT_2026_05_17.md` festgehalten. Als kleiner gemeinsamer Fix redigiert `formatChronicleEffectItems` automatische `resolvedEffects` jetzt side-bewusst, bevor Titel oder Kartenfelder aus `cardTitle`, `sourceTitle` oder Definition-IDs entstehen. Der neue Regressionstest deckt `hidden_info_barrier` und fremde `private_to_side`-Trash-Effekte ab. Betroffene Chronik-/Cue-Tests sind grün; der separate alte `visibility-contract.test.ts` bleibt wegen bestehenden String-Contract-Abweichungen in `apps/web/app/page.tsx` rot und wurde nicht im Scope repariert.
+Abgeschlossen. Der gemeinsame Event-/Chronik-/Cue-Vertrag wurde auditiert; Ergebnis und Hidden-Info-Textmuster sind in `docs/architecture/card-rules/effect-event-chronicle-visibility-audit-2026-05-17.md` festgehalten. Als kleiner gemeinsamer Fix redigiert `formatChronicleEffectItems` automatische `resolvedEffects` jetzt side-bewusst, bevor Titel oder Kartenfelder aus `cardTitle`, `sourceTitle` oder Definition-IDs entstehen. Der neue Regressionstest deckt `hidden_info_barrier` und fremde `private_to_side`-Trash-Effekte ab. Betroffene Chronik-/Cue-Tests sind grün; der separate alte `visibility-contract.test.ts` bleibt wegen bestehenden String-Contract-Abweichungen in `apps/web/app/page.tsx` rot und wurde nicht im Scope repariert.

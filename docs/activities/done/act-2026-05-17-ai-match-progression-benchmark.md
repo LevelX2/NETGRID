@@ -15,7 +15,7 @@ blockedBy: []
 resultArtifacts:
   - packages/ai/src/index.ts
   - packages/ai/src/index.test.ts
-  - docs/derived/AI_MATCH_PROGRESSION_BENCHMARK_2026_05_17.md
+  - docs/reviews/ai/match-progression-benchmark-2026-05-17.md
   - docs/codex/CODEX_STATUS.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
 checks:
@@ -32,7 +32,7 @@ Die KI-Qualität soll nicht nur über Safety und lokale Einzelentscheidungen bew
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P0: Matchprogression-Benchmark statt nur Safety-Gate`, `Simulation, Soaks, Benchmarks und Exploit-Regression` und `Größte Schwächen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P0: Matchprogression-Benchmark statt nur Safety-Gate`, `Simulation, Soaks, Benchmarks und Exploit-Regression` und `Größte Schwächen`.
 - Die Analyse nennt Action-Limit-Stagnation als stärkstes Signal, dass die KI zwar fair, aber strategisch noch schwach ist.
 - Bestehende Datenanker laut Analyse: `data/ai/ai-benchmark-profiles-1.4.3.json` und AI-Tests/Reports.
 
@@ -71,4 +71,4 @@ Die KI-Qualität soll nicht nur über Safety und lokale Einzelentscheidungen bew
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `runMatchProgressionBenchmark` und `formatMatchProgressionBenchmarkReport` erzeugen einen diagnostischen Baseline-vs-Candidate-Report mit Action-Limit-Rate, Agenda-Punkten, Score-/Steal-Aktionen, Zentral-/Remote-Druck, Remote-Install-/Advance-Signalen und Safety-Metriken. Der erste Report liegt unter `docs/derived/AI_MATCH_PROGRESSION_BENCHMARK_2026_05_17.md` und bestätigt: Baseline und aktueller Candidate bleiben sicher, stagnieren im kurzen Diagnosefenster aber vollständig im Action-Limit.
+Abgeschlossen. `runMatchProgressionBenchmark` und `formatMatchProgressionBenchmarkReport` erzeugen einen diagnostischen Baseline-vs-Candidate-Report mit Action-Limit-Rate, Agenda-Punkten, Score-/Steal-Aktionen, Zentral-/Remote-Druck, Remote-Install-/Advance-Signalen und Safety-Metriken. Der erste Report liegt unter `docs/reviews/ai/match-progression-benchmark-2026-05-17.md` und bestätigt: Baseline und aktueller Candidate bleiben sicher, stagnieren im kurzen Diagnosefenster aber vollständig im Action-Limit.

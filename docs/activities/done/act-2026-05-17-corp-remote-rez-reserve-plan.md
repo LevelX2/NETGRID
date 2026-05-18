@@ -34,7 +34,7 @@ Die Korp-KI soll geschützte Scoring-Remote-Linien kohärenter verfolgen: erst I
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P1: Corp Remote-Rez-Reserve-Plan`, `Corp-Analyse` und `Größte Schwächen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P1: Corp Remote-Rez-Reserve-Plan`, `Corp-Analyse` und `Größte Schwächen`.
 - Bestehende Härtung laut Status: Corp-KI berücksichtigt bereits geschützte Remotes und nackte Agenda-Risiken. Dieses Paket soll daraus eine stabilere mehrschrittige Rezreserve-Linie machen.
 
 ## Scope

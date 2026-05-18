@@ -23,7 +23,7 @@ Verbindliche Leitlinien:
 ## Gepruefte Quellen
 
 - `docs/codex/CODEX_STATUS.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/plan.md`
 - `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/requirements.md`

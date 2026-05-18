@@ -460,6 +460,9 @@ const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const BBS_WHISPERING_CAMPAIGN_ID = "onr_v1_309_bbs-whispering-campaign";
 const BBS_WHISPERING_CAMPAIGN_STARTING_BITS = 16;
+const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
+const BRAINDANCE_CAMPAIGN_STARTING_BITS = 12;
+const BRAINDANCE_CAMPAIGN_TURN_DRAIN = 2;
 const HOLOVID_CAMPAIGN_ID = "onr_v1_326_holovid-campaign";
 const HOLOVID_CAMPAIGN_STARTING_BITS = 12;
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
@@ -9904,6 +9907,23 @@ function rezCard(
       };
     }
   }
+  if (definition.id === BRAINDANCE_CAMPAIGN_ID) {
+    setCardCounter(
+      state,
+      cardId as CardInstanceId,
+      "bit",
+      BRAINDANCE_CAMPAIGN_STARTING_BITS,
+    );
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: BRAINDANCE_CAMPAIGN_ID,
+        counterType: "bit",
+        addedCounterAmount: BRAINDANCE_CAMPAIGN_STARTING_BITS,
+        remainingCounters: BRAINDANCE_CAMPAIGN_STARTING_BITS,
+      };
+    }
+  }
   if (definition.id === HOLOVID_CAMPAIGN_ID) {
     setCardCounter(
       state,
@@ -13556,6 +13576,39 @@ function applyCorpStartOfTurnEffects(
       }
       continue;
     }
+    if (definitionId === BRAINDANCE_CAMPAIGN_ID) {
+      const availableBits = cardCounter(state, cardId, "bit");
+      if (availableBits > 0) {
+        const drainedBits = Math.min(BRAINDANCE_CAMPAIGN_TURN_DRAIN, availableBits);
+        spendCardCounter(state, cardId, "bit", drainedBits);
+        credits(state, "corp", drainedBits);
+        const remainingCounters = cardCounter(state, cardId, "bit");
+        effects?.push(
+          automaticGainCreditsEffect(
+            `corp.start.braindance_campaign.${cardId}`,
+            "corp",
+            drainedBits,
+            definitionId,
+          ),
+        );
+        effects?.push({
+          effectId: `corp.start.braindance_campaign.bits.${cardId}`,
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: remainingCounters,
+          reason: "start_of_turn",
+          counterType: "bit",
+          removedCounterAmount: drainedBits,
+          remainingCounters,
+          sourceDefinitionId: definitionId,
+          sourceTitle: publicCardTitle(definitionId),
+        });
+      }
+      if (cardCounter(state, cardId, "bit") <= 0)
+        trashCorpInstalledCardToArchives(state, cardId);
+      continue;
+    }
     if (definitionId === HOLOVID_CAMPAIGN_ID) {
       if (cardCounter(state, cardId, "bit") > 0) {
         spendCardCounter(state, cardId, "bit", 1);
@@ -13571,6 +13624,35 @@ function applyCorpStartOfTurnEffects(
       }
       if (cardCounter(state, cardId, "bit") <= 0)
         trashCorpInstalledCardToArchives(state, cardId);
+      continue;
+    }
+    if (definitionId === INVESTMENT_FIRM_ASSET_CARD_ID) {
+      if (cardCounter(state, cardId, "recurring_credit") > 0) {
+        spendCardCounter(state, cardId, "recurring_credit", 1);
+        credits(state, "corp", 1);
+        const remainingCounters = cardCounter(state, cardId, "recurring_credit");
+        effects?.push(
+          automaticGainCreditsEffect(
+            `corp.start.investment_firm.${cardId}`,
+            "corp",
+            1,
+            definitionId,
+          ),
+        );
+        effects?.push({
+          effectId: `corp.start.investment_firm.counter.${cardId}`,
+          kind: "counter_change",
+          visibility: "public",
+          side: "corp",
+          amount: remainingCounters,
+          reason: "start_of_turn",
+          counterType: "recurring_credit",
+          removedCounterAmount: 1,
+          remainingCounters,
+          sourceDefinitionId: definitionId,
+          sourceTitle: publicCardTitle(definitionId),
+        });
+      }
       continue;
     }
     if (CORP_RECURRING_ASSET_CARD_IDS.has(definitionId)) {
@@ -16281,7 +16363,24 @@ function visibleChoiceCardForOption(
   const isSneakHeapChoice = choice.source.startsWith(
     "v1911.sneak_preview_heap_install",
   );
-  if (!isStackChoice && !isSneakHeapChoice) return undefined;
+  const isPriorityRequisitionChoice = choice.source.startsWith(
+    "v162.priority_requisition",
+  );
+  if (!isStackChoice && !isSneakHeapChoice && !isPriorityRequisitionChoice)
+    return undefined;
+  if (isPriorityRequisitionChoice) {
+    const instance = state.cardInstances[cardId];
+    if (
+      !instance ||
+      instance.owner !== "corp" ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce" ||
+      instance.rezzed ||
+      definitionFor(state, cardId).type !== "ice"
+    )
+      return undefined;
+    return visibleOwnCard(state, cardId);
+  }
   if (isStackChoice && !state.runner.stack.includes(cardId)) return undefined;
   if (isSneakHeapChoice && !state.runner.heap.includes(cardId)) return undefined;
   const instance = state.cardInstances[cardId];

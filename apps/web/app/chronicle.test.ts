@@ -690,6 +690,27 @@ describe("formatChronicleEvent", () => {
     expect(aardvark.chips).toEqual(expect.arrayContaining(["Aardvark", "Rez", "Worm Trash"]));
   });
 
+  it("names the ICE rezzed by Priority Requisition", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v162_priority_requisition_free_rez",
+        priorityRequisitionFreeRez: true,
+        priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
+        rezCostPaid: 0
+      }),
+      "corp",
+      { cardTitle: "Cortical Scanner" }
+    );
+
+    expect(item.title).toBe("Du hast Cortical Scanner durch Priority Requisition kostenlos gerezzt.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_230_cortical-scanner");
+    expect(item.chips).toEqual(expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]));
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
@@ -1695,6 +1716,47 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.title).toBe("Du hast Recurring Credits auf The Shell Traders aufgefrischt.");
     expect(items[0]?.category).toBe("card");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
+  });
+
+  it("shows Braindance Campaign turn-start drain as one credit message", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "corp.start.braindance_campaign.card_311",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 2,
+            sourceDefinitionId: "onr_v1_311_braindance-campaign",
+            sourceTitle: "Braindance Campaign",
+            reason: "start_of_turn"
+          },
+          {
+            effectId: "corp.start.braindance_campaign.bits.card_311",
+            kind: "counter_change",
+            visibility: "public",
+            side: "corp",
+            amount: 2,
+            counterType: "bit",
+            removedCounterAmount: 2,
+            remainingCounters: 2,
+            sourceDefinitionId: "onr_v1_311_braindance-campaign",
+            sourceTitle: "Braindance Campaign",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "corp"
+    );
+
+    expect(items).toHaveLength(1);
+    expect(items[0]?.title).toBe("Du hast 2 Credits von Braindance Campaign genommen.");
+    expect(items[0]?.category).toBe("economy");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "Automatisch"]));
+    expect(JSON.stringify(items)).not.toContain("aufgefrischt");
+    expect(JSON.stringify(items)).not.toContain("bereit");
   });
 
   it("shows delayed agenda steals from automatic start-of-turn effects", () => {

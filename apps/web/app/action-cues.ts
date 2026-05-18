@@ -282,12 +282,13 @@ export function actionSoundForActionType(actionType: string, visibility: Chronic
 
 export function turnStartAudioCue(current: TurnStartAudioState, previous?: TurnStartAudioState | null): TurnStartAudioCue | null {
   if (!previous || previous.matchId !== current.matchId) return null;
-  if (previous.activeSide === current.activeSide) return null;
-  if (!isActionPhaseForSide(current.phase, current.activeSide)) return null;
+  const currentTurnSide = turnPhaseSide(current.phase);
+  if (!currentTurnSide || currentTurnSide !== current.activeSide) return null;
+  if (turnPhaseSide(previous.phase) === currentTurnSide) return null;
   return {
-    key: `${current.matchId}:${current.stateVersion}:${current.activeSide}`,
-    side: current.activeSide,
-    sound: current.activeSide === "runner" ? "runner_turn" : "corp_turn"
+    key: `${current.matchId}:${current.stateVersion}:${currentTurnSide}`,
+    side: currentTurnSide,
+    sound: currentTurnSide === "runner" ? "runner_turn" : "corp_turn"
   };
 }
 
@@ -301,8 +302,10 @@ function isForcedPublicEffectCue(actionType: string, payload: Record<string, unk
   return actionType === "continue_run" && payload.v1921UpgradeAbility === "rio_de_janeiro_passed_ice";
 }
 
-function isActionPhaseForSide(phase: PlayerView["phase"], side: Side): boolean {
-  return (side === "runner" && phase === "runner_action_phase") || (side === "corp" && phase === "corp_action_phase");
+function turnPhaseSide(phase: PlayerView["phase"]): Side | null {
+  if (phase === "corp_draw_phase" || phase === "corp_action_phase") return "corp";
+  if (phase === "runner_action_phase" || phase === "run") return "runner";
+  return null;
 }
 
 function visibleCardsByDefinition(view: PlayerView): Map<string, VisibleCard> {

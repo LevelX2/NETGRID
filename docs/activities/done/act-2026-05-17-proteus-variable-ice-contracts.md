@@ -13,11 +13,11 @@ branch: codex/activity-worker-3
 releaseTarget: Proteus planning
 blockedBy: []
 resultArtifacts:
-  - docs/derived/PROTEUS_VARIABLE_ICE_CONTRACT.md
+  - docs/releases/proteus/variable-ice-contract.md
   - docs/activities/inbox/act-2026-05-17-proteus-variable-ice-harness-slice.md
 checks:
   - rg -n "Proteus Variable ICE Contract|proteus-variable-ice-harness-slice|act-2026-05-17-proteus-variable-ice-contracts" docs/derived docs/activities
-  - rg -n "human_playable|deck_legal|ai_supported|format_legal|runtime implementation|Proteus-Kartenpromotion" docs/derived/PROTEUS_VARIABLE_ICE_CONTRACT.md docs/activities/inbox/act-2026-05-17-proteus-variable-ice-harness-slice.md
+  - rg -n "human_playable|deck_legal|ai_supported|format_legal|runtime implementation|Proteus-Kartenpromotion" docs/releases/proteus/variable-ice-contract.md docs/activities/inbox/act-2026-05-17-proteus-variable-ice-harness-slice.md
   - git diff --check
 ---
 
@@ -55,6 +55,6 @@ Für Proteus-ICE mit variablen Rez-Zusatzkosten, dynamischer Stärke, dynamische
 
 ## Ergebnisnotiz
 
-Abgeschlossen am 2026-05-17. `docs/derived/PROTEUS_VARIABLE_ICE_CONTRACT.md` listet alle betroffenen Proteus-ICE-Familien und schneidet als kleinsten nicht-promotenden ersten Harness-Slice genau `Digiconda` und `Food Fight`: `Digiconda` deckt `X` als persistente Rez-Stärke ab, `Food Fight` deckt dynamische `End the run`-Subroutinen je 2 Zusatzcredits ab. Der Vertrag beschreibt LegalAction-/`applyAction`-Revalidierung, persistente StateHash-relevante Werte, PublicPayload, PlayerView/Reconnect, Replay und Tests fuer Subtyp-Wechsler, Homing Missile, relative ICE-Zählung, Pass-Trigger und Repositionierung als Folgefamilien.
+Abgeschlossen am 2026-05-17. `docs/releases/proteus/variable-ice-contract.md` listet alle betroffenen Proteus-ICE-Familien und schneidet als kleinsten nicht-promotenden ersten Harness-Slice genau `Digiconda` und `Food Fight`: `Digiconda` deckt `X` als persistente Rez-Stärke ab, `Food Fight` deckt dynamische `End the run`-Subroutinen je 2 Zusatzcredits ab. Der Vertrag beschreibt LegalAction-/`applyAction`-Revalidierung, persistente StateHash-relevante Werte, PublicPayload, PlayerView/Reconnect, Replay und Tests fuer Subtyp-Wechsler, Homing Missile, relative ICE-Zählung, Pass-Trigger und Repositionierung als Folgefamilien.
 
 Als Folgepaket wurde `docs/activities/inbox/act-2026-05-17-proteus-variable-ice-harness-slice.md` angelegt. Es ist bewusst nur ein späterer Umsetzungsschnitt fuer den nicht-promotenden Digiconda-/Food-Fight-Harness; keine Runtime-Implementierung, keine Proteus-Kartenpromotion, keine Decklegalität und keine AI-Hints wurden vorgenommen.

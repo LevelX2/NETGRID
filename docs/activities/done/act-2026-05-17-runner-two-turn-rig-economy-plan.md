@@ -33,7 +33,7 @@ Die Runner-KI soll erkennbare Zielserver nicht sofort unprofitabel anlaufen, son
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitte `P1: Runner Zwei-Zug-Rig/Economy-Plan`, `Runner-Analyse` und `Größte Schwächen`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitte `P1: Runner Zwei-Zug-Rig/Economy-Plan`, `Runner-Analyse` und `Größte Schwächen`.
 - Verwandtes erledigtes Paket: `docs/activities/done/act-2026-05-17-runner-ai-repeat-rd-run.md` hat nur den wirkungslosen Repeat-R&D-Spezialfall behoben.
 - Dieses Paket ist die nächste bewusst kleine Planhorizont-Erweiterung, nicht eine komplette Runner-KI-Neuschreibung.
 

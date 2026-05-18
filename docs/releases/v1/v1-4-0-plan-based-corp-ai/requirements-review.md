@@ -11,7 +11,7 @@ Geprüft wurden:
 - `docs/releases/v1/v1-4-0-plan-based-corp-ai/requirements.md`
 - `docs/releases/v1/v1-4-0-plan-based-corp-ai/spec.md`
 - `docs/releases/v1/v1-4-0-plan-based-corp-ai/test-matrix.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-3-1-card-data-pipeline-v2/spec.md`
 - bestehende `packages/ai`-Heuristiken, AI-Profile und Rollenmanifeste
 

@@ -31,7 +31,7 @@ Der bestehende positive AI-Input-DTO soll gegen neue oder verschachtelte Hidden-
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitt `P0: AI-Input-Redaction-Allowlist`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitt `P0: AI-Input-Redaction-Allowlist`.
 - Verwandtes erledigtes Paket: `docs/activities/done/act-2026-05-17-ai-input-positive-dto.md`.
 - Die erledigte DTO-Arbeit hat den positiven Builder eingeführt. Dieses Follow-up fokussiert die nächste Schicht: verschachtelte Payloadformen, neue Mechanikfelder und Debug-Anreicherungen, die innerhalb erlaubter Top-Level-Objekte liegen können.
 

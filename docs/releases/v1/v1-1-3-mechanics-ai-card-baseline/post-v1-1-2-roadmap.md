@@ -1,12 +1,12 @@
 # Post V1.1.2 Mechanik-, Karten- und KI-Roadmap
 
-Status: historische Anschlussplanung; in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` konsolidiert
+Status: historische Anschlussplanung; in `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md` konsolidiert
 Stand: 2026-05-07
 Startpunkt: nach Umsetzung und Final Gate von V1.1.2
 
 ## Verbindlichkeit
 
-Dieses Dokument war die maßgebliche Anschlussroadmap für die Releaseplanung nach V1.1.2. Seit 2026-05-08 ist es in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` aufgegangen. Die fachliche Grundlinie bleibt erhalten, aber die konsolidierte Roadmap ist ab V1.1.3 die führende Planung.
+Dieses Dokument war die maßgebliche Anschlussroadmap für die Releaseplanung nach V1.1.2. Seit 2026-05-08 ist es in `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md` aufgegangen. Die fachliche Grundlinie bleibt erhalten, aber die konsolidierte Roadmap ist ab V1.1.3 die führende Planung.
 
 Es ersetzt nicht die eingefrorene V1.1.2-Planung. V1.1.2 wird unverändert umgesetzt.
 
@@ -367,9 +367,9 @@ Lies:
 - AGENTS.md
 - docs/codex/CODEX_STATUS.md
 - docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/final-review.md
-- docs/derived/MECHANICS_COVERAGE_MATRIX.md
+- docs/architecture/card-rules/mechanics-coverage-matrix.md
 - docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md
-- docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md
+- docs/releases/roadmaps/ai-releaseplanning-codex-briefing-2026-05-07.md
 
 Aufgabe:
 Aktualisiere den Mechanik-, Karten- und KI-Planungsstand nach V1.1.2. Implementiere keinen Engine-, Server-, Web- oder AI-Code.

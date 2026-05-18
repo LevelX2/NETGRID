@@ -31,7 +31,7 @@ Scored Agenda-Aktionen mit einfachen Kosten und Effekten sollen als begrenzte Pr
 
 ## Kontext und Quellen
 
-- Analyse: `docs/derived/CARD_EFFECT_GENERIC_RESOLVER_ANALYSIS_2026_05_17.md`.
+- Analyse: `docs/architecture/card-rules/card-effect-generic-resolver-analysis-2026-05-17.md`.
 - Vorhandener Ansatz: `resolveAgendaCounterOperation` und Agenda-ID-Sets in `packages/engine/src/mechanics/agenda-scoring.ts`.
 - Betroffene Muster: Creditgain, Trace starten, Counter entfernen/ausgeben, einfache scored Agenda-Fähigkeiten.
 

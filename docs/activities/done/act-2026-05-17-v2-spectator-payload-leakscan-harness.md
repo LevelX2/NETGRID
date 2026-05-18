@@ -31,7 +31,7 @@ Vor Spectator-UI oder Spectator-Link-API soll ein enger Server-Testharness beleg
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_4_SPECTATOR_PROJECTION_SPIKE_2026_05_17.md`
+- `docs/releases/v2/v2-4-spectator/spectator-projection-spike-2026-05-17.md`
 - V2.4 Gate: Private Spectator Links und delayed public view bleiben blockiert, bis Projection, Delay, Consent, Linkschutz und Reconnect testbar sind.
 - Bestehende Bausteine: `apps/server/src/event-projection.ts`, `apps/server/src/multiplayer-payload.ts`, `apps/server/src/multiplayer.test.ts`.
 

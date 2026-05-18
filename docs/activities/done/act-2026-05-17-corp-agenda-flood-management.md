@@ -31,7 +31,7 @@ Die Korp-KI soll auf eine hohe eigene HQ-Agenda-Last besser reagieren, ohne vers
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitt `P1: Agenda-Flood-Management`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitt `P1: Agenda-Flood-Management`.
 - Die Analyse nennt Agenda-Flood als eigene P1-Schwäche neben Remote-Rezreserve.
 - Dieses Paket hängt fachlich an stabiler Remote-/Rezreserve-Planung, weil Flood-Management sonst nur riskanteres Installieren erzeugt.
 

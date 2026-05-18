@@ -12,7 +12,7 @@ V1.2.2 ist kein Kartenrelease. Es darf nur test-only Harnesses oder nicht promot
 ## Quellenbasis
 
 - `docs/codex/CODEX_STATUS.md`
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`
 - `docs/releases/v1/v1-2-0-event-modification/final-review.md`
 - `docs/releases/v1/v1-2-1-replacement-effects/final-review.md`

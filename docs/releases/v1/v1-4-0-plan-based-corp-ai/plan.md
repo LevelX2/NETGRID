@@ -11,7 +11,7 @@ V1.4.0 ist kein Runner-KI-, Belief-State-, FullState-Simulations-, Kartenfreigab
 
 ## Quellenbasis
 
-- `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`
+- `docs/releases/roadmaps/netgrid-consolidated-release-roadmap.md`
 - `docs/releases/v1/v1-3-1-card-data-pipeline-v2/requirements-review.md`
 - `docs/releases/v1/v1-3-1-card-data-pipeline-v2/spec.md`
 - `data/ai/card-role-manifest-0.9.json`

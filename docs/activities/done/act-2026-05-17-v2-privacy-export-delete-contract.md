@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.0
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md
+  - docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md
 checks:
   - git diff --check
 ---
@@ -26,7 +26,7 @@ Für V2.0 soll ein konkreter Export-, Lösch- und Retention-Vertrag entstehen, b
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
 - Bestehende private Replay-Exports in `apps/server/src/multiplayer.ts`
 - Bestehende Storage-/Maintenance-Redaction in `apps/server/src/storage-sqlite.ts`
 
@@ -60,4 +60,4 @@ Für V2.0 soll ein konkreter Export-, Lösch- und Retention-Vertrag entstehen, b
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md` definiert Exportmatrix, Exportverbote, Lösch-/Anonymisierungssemantik, Retention-Vorschläge und Review-/Testchecks. Der Vertrag bestätigt, dass Account-Löschung Account- und Metadaten behandelt, aber historische Engine-Events, Replay-StateHash, `AIInput` und `DecisionDebug` nicht verändert oder exportiert.
+Abgeschlossen. `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md` definiert Exportmatrix, Exportverbote, Lösch-/Anonymisierungssemantik, Retention-Vorschläge und Review-/Testchecks. Der Vertrag bestätigt, dass Account-Löschung Account- und Metadaten behandelt, aber historische Engine-Events, Replay-StateHash, `AIInput` und `DecisionDebug` nicht verändert oder exportiert.

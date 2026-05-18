@@ -5,7 +5,7 @@ Status: implemented
 
 ## Scope
 
-V1.1.0 setzt den M2-Setup-/Game-End-Vertrag aus `docs/derived/SETUP_GAME_END_0.93_SPEC.md` produktiv um und integriert die NETGRID-Statusklarheit aus `docs/releases/v1/v1-1-0-setup-game-end-m2/plan.md`.
+V1.1.0 setzt den M2-Setup-/Game-End-Vertrag aus `docs/releases/mvp/mvp-0-93-m1-engine-foundation/setup-game-end-spec.md` produktiv um und integriert die NETGRID-Statusklarheit aus `docs/releases/v1/v1-1-0-setup-game-end-m2/plan.md`.
 
 ## Must-Anforderungen
 

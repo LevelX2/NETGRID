@@ -17,7 +17,7 @@ Wenn Track A in der Umsetzung zusätzliche Risiken oder Blocker zeigt, hat Track
 ## Quellenbasis
 
 - `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/plan.md`
-- `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
+- `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`
 - `docs/releases/v1/v1-1-0-setup-game-end-m2/plan.md`
 - `docs/releases/v1/v1-1-0-setup-game-end-m2/requirements.md`
 - `docs/releases/v1/v1-1-0-setup-game-end-m2/final-review.md`

@@ -117,7 +117,8 @@ type StoredCreditCounterType = "power" | "bit";
 const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
   "onr_v1_154_broker": { label: "Broker", counter: "power" },
   "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "power" },
-  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" }
+  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" },
+  "onr_v1_311_braindance-campaign": { label: "Braindance Campaign", counter: "bit" }
 };
 
 export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {
@@ -159,6 +160,14 @@ export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[],
   const endTurn = ownActions.find((action) => action.type === "end_turn");
   if (!endTurn) return undefined;
   return ownActions.every((action) => action.type === "end_turn") ? endTurn : undefined;
+}
+
+export function automaticCorpMandatoryDrawAction(view: PlayerView, actions: LegalAction[], side: Side): LegalAction | undefined {
+  if (side !== "corp" || view.winner || view.pendingChoice || view.activeSide !== "corp") return undefined;
+  const ownActions = actions.filter((action) => action.side === side);
+  const mandatoryDraw = ownActions.find((action) => action.type === "mandatory_draw");
+  if (!mandatoryDraw) return undefined;
+  return ownActions.every((action) => action.type === "mandatory_draw") ? mandatoryDraw : undefined;
 }
 
 export function isContextualLegalAction(action: LegalAction): boolean {
@@ -255,6 +264,17 @@ export function contextualCardActionLabel(action: LegalAction): string {
     default:
       return actionButtonLabel(action);
   }
+}
+
+export function orderedCardContextActions(actions: LegalAction[]): LegalAction[] {
+  return actions
+    .map((action, index) => ({ action, index }))
+    .sort((left, right) => {
+      const leftNewRemoteIce = isNewRemoteIceInstallAction(left.action) ? 1 : 0;
+      const rightNewRemoteIce = isNewRemoteIceInstallAction(right.action) ? 1 : 0;
+      return leftNewRemoteIce - rightNewRemoteIce || left.index - right.index;
+    })
+    .map(({ action }) => action);
 }
 
 function triggerAbilityActionLabel(action: LegalAction, compact = false): string {
@@ -376,6 +396,7 @@ function installContextLabel(action: LegalAction): string {
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
+  if (isNewRemoteIceInstallAction(action)) return "Neues Fort erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
   if (
@@ -385,6 +406,10 @@ function installContextLabel(action: LegalAction): string {
     return `In ${serverLabel} (Node ersetzen)`;
   if (action.payload?.placement === "root") return `In ${serverLabel}`;
   return `Installieren: ${serverLabel}`;
+}
+
+function isNewRemoteIceInstallAction(action: Pick<LegalAction, "type" | "payload">): boolean {
+  return action.type === "install_card" && action.payload?.serverId === "new_remote" && action.payload?.placement === "ice";
 }
 
 function playEventContextLabel(action: LegalAction): string {

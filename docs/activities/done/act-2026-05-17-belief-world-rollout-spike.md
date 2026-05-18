@@ -29,7 +29,7 @@ Prüfen, ob die KI langfristig mehrere hypothetische Welten aus ihrem Belief Sta
 
 ## Kontext und Quellen
 
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, Abschnitt `P2: Faire Belief-World-Rollouts`.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, Abschnitt `P2: Faire Belief-World-Rollouts`.
 - Die Analyse bewertet diesen Weg als strategisch nützlich, aber wegen Cheating- und Komplexitätsrisiko ausdrücklich P2.
 - `docs/activities/done/act-2026-05-17-ai-belief-reconnect-undo-contract.md` belegt inzwischen, dass Belief-Rekonstruktion aus side-sicheren Eventprojektionen, `PlayerView` und `LegalActions` signaturstabil bleibt und `Replay.privatePayload` nicht verwendet.
 - `docs/activities/done/act-2026-05-17-ai-match-progression-benchmark.md` belegt einen diagnostischen Benchmark, aber auch vollständige Action-Limit-Stagnation im kurzen Fenster.
@@ -58,8 +58,8 @@ Risiko: Ein Live-Controller, der Sample-Welten bewertet, kann versehentlich echt
 Fundstellen:
 
 - `packages/ai/AGENTS.md`: AI darf nie Full GameState erhalten und muss nur LegalActions wählen.
-- `docs/derived/AI_CAPABILITY_DEEP_ANALYSIS_2026_05_17.md`, `P2: Faire Belief-World-Rollouts`: Nutzen strategisch, Risiko sehr hoch; No-Cheat-Gate ohne FullState, echte verdeckte Kartenidentitäten oder gegnerische Decklisten.
-- `docs/derived/AI_MATCH_PROGRESSION_BENCHMARK_2026_05_17.md`: aktuelle Candidate- und Baseline-Profile stagnieren im Diagnosefenster vollständig im Action-Limit. Rollouts würden derzeit eher schwache Basisheuristiken amplifizieren als belastbar bessere Strategie messen.
+- `docs/reviews/ai/capability-deep-analysis-2026-05-17.md`, `P2: Faire Belief-World-Rollouts`: Nutzen strategisch, Risiko sehr hoch; No-Cheat-Gate ohne FullState, echte verdeckte Kartenidentitäten oder gegnerische Decklisten.
+- `docs/reviews/ai/match-progression-benchmark-2026-05-17.md`: aktuelle Candidate- und Baseline-Profile stagnieren im Diagnosefenster vollständig im Action-Limit. Rollouts würden derzeit eher schwache Basisheuristiken amplifizieren als belastbar bessere Strategie messen.
 
 Empfehlung: Kein Go für produktive oder matchaktive Rollout-KI. Rollouts dürfen vorerst nur als explizit experimentelles Analyse- oder Benchmarkwerkzeug mit eigenen Safety-Gates geplant werden.
 
