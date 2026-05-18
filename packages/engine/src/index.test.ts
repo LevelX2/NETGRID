@@ -6911,6 +6911,66 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_254_liche"]).toBeDefined();
   });
 
+  it("describes passive Corp rez-cost modifiers on card definitions", () => {
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_317_data-masons"]?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "rez_cost",
+        operation: "reduce",
+        amount: 2,
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        visibility: "public",
+        appliesTo: { cardType: "ice", subtype: "wall" },
+      }),
+    );
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "rez_cost",
+        operation: "reduce",
+        amount: 2,
+        appliesTo: { cardType: "ice", subtype: "code_gate" },
+      }),
+    );
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"]?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "rez_cost",
+        operation: "reduce",
+        amount: 2,
+        appliesTo: { cardType: "ice", subtype: "black_ice" },
+      }),
+    );
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_324_fortress-architects"]?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "rez_cost",
+        operation: "reduce",
+        amount: 1,
+        appliesTo: { cardType: "ice" },
+      }),
+    );
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_360_jerusalem-city-grid"]?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "rez_cost",
+        operation: "reduce",
+        amount: 9,
+        appliesTo: {
+          cardType: "ice",
+          subtype: "wall",
+          sameServerAsSource: true,
+        },
+      }),
+    );
+  });
+
   it("applies Data Masons rez/strength modifiers and score-based Security Net strength", () => {
     let dataMasons = v162CardReleaseGame("v162-data-masons");
     dataMasons = apply(

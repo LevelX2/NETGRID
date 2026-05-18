@@ -2,6 +2,7 @@ import type {
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
+  CardRezCostModifierDefinition,
   Cost,
   GameState,
   LegalAction,
@@ -9,15 +10,6 @@ import type {
 } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../mechanics/agenda-operation-effects";
-import { DATA_MASONS_HOSTING_ASSET_CARD_ID } from "../mechanics/asset-node-effects";
-import {
-  FORTRESS_ARCHITECTS_REZ_COST_ASSET_ID,
-  JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID,
-} from "../mechanics/global-modifiers";
-
-const ENCODER_INC_REZ_COST_ASSET_ID = "onr_v1_320_encoder-inc";
-const SKALDERVIKEN_SA_BETA_TEST_SITE_REZ_COST_ASSET_ID =
-  "onr_v1_341_skalderviken-sa-beta-test-site";
 
 export type CostPurpose = "corp_rez";
 
@@ -45,59 +37,11 @@ export type CostQuote = {
   publicPayload: NonNullable<LegalAction["payload"]>;
 };
 
-type CorpRezCostModifierRule = {
-  sourceDefinitionId: CardDefinitionId;
-  amount: number;
-  kind: "reduction";
-  appliesTo: {
-    cardType: "ice";
-    subtype?: string;
-    sameServerAsSource?: boolean;
-  };
-};
-
-type ActiveCorpRezCostModifierRule = {
+type ActiveCorpRezCostModifier = {
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
-  rule: CorpRezCostModifierRule;
+  modifier: CardRezCostModifierDefinition;
 };
-
-const CORP_REZ_COST_MODIFIER_RULES: readonly CorpRezCostModifierRule[] = [
-  {
-    sourceDefinitionId: DATA_MASONS_HOSTING_ASSET_CARD_ID,
-    amount: 2,
-    kind: "reduction",
-    appliesTo: { cardType: "ice", subtype: "wall" },
-  },
-  {
-    sourceDefinitionId: ENCODER_INC_REZ_COST_ASSET_ID,
-    amount: 2,
-    kind: "reduction",
-    appliesTo: { cardType: "ice", subtype: "code_gate" },
-  },
-  {
-    sourceDefinitionId: SKALDERVIKEN_SA_BETA_TEST_SITE_REZ_COST_ASSET_ID,
-    amount: 2,
-    kind: "reduction",
-    appliesTo: { cardType: "ice", subtype: "black_ice" },
-  },
-  {
-    sourceDefinitionId: FORTRESS_ARCHITECTS_REZ_COST_ASSET_ID,
-    amount: 1,
-    kind: "reduction",
-    appliesTo: { cardType: "ice" },
-  },
-  {
-    sourceDefinitionId: JERUSALEM_CITY_GRID_REZ_COST_UPGRADE_ID,
-    amount: 9,
-    kind: "reduction",
-    appliesTo: {
-      cardType: "ice",
-      subtype: "wall",
-      sameServerAsSource: true,
-    },
-  },
-];
 
 export function costQuoteToLegalActionCosts(quote: CostQuote): Cost[] {
   return quote.costs.map((cost) => ({ ...cost }));
@@ -179,20 +123,20 @@ function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
   return ids;
 }
 
-function corpRezCostModifierRuleAppliesToIce(
+function corpRezCostModifierAppliesToIce(
   state: GameState,
-  rule: CorpRezCostModifierRule,
+  modifier: CardRezCostModifierDefinition,
   sourceCardInstanceId: CardInstanceId,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): boolean {
-  if (iceDefinition.type !== rule.appliesTo.cardType) return false;
+  if (iceDefinition.type !== modifier.appliesTo.cardType) return false;
   if (
-    rule.appliesTo.subtype &&
-    !cardHasSubtype(iceDefinition, rule.appliesTo.subtype)
+    modifier.appliesTo.subtype &&
+    !cardHasSubtype(iceDefinition, modifier.appliesTo.subtype)
   )
     return false;
-  if (rule.appliesTo.sameServerAsSource) {
+  if (modifier.appliesTo.sameServerAsSource) {
     const iceServerId = corpServerIdForInstalledCard(state, iceId);
     return (
       Boolean(iceServerId) &&
@@ -202,29 +146,29 @@ function corpRezCostModifierRuleAppliesToIce(
   return true;
 }
 
-function activeCorpRezCostModifierRulesForIce(
+function activeCorpRezCostModifiersForIce(
   state: GameState,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
-): ActiveCorpRezCostModifierRule[] {
-  const matches: ActiveCorpRezCostModifierRule[] = [];
+): ActiveCorpRezCostModifier[] {
+  const matches: ActiveCorpRezCostModifier[] = [];
   for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
-    const rule = CORP_REZ_COST_MODIFIER_RULES.find(
-      (candidate) => candidate.sourceDefinitionId === sourceDefinitionId,
-    );
-    if (
-      !rule ||
-      !corpRezCostModifierRuleAppliesToIce(
-        state,
-        rule,
-        sourceCardInstanceId,
-        iceId,
-        iceDefinition,
+    const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+    for (const modifier of sourceDefinition?.modifiers ?? []) {
+      if (modifier.kind !== "rez_cost") continue;
+      if (
+        !corpRezCostModifierAppliesToIce(
+          state,
+          modifier,
+          sourceCardInstanceId,
+          iceId,
+          iceDefinition,
+        )
       )
-    )
-      continue;
-    matches.push({ sourceCardInstanceId, sourceDefinitionId, rule });
+        continue;
+      matches.push({ sourceCardInstanceId, sourceDefinitionId, modifier });
+    }
   }
   return matches;
 }
@@ -234,8 +178,8 @@ function iceRezCostReductionFor(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): number {
-  return activeCorpRezCostModifierRulesForIce(state, iceId, iceDefinition).reduce(
-    (sum, match) => sum + match.rule.amount,
+  return activeCorpRezCostModifiersForIce(state, iceId, iceDefinition).reduce(
+    (sum, match) => sum + match.modifier.amount,
     0,
   );
 }
@@ -245,7 +189,7 @@ export function rezCostReductionSourceDefinitionIdsFor(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): CardDefinitionId[] {
-  return activeCorpRezCostModifierRulesForIce(state, iceId, iceDefinition).map(
+  return activeCorpRezCostModifiersForIce(state, iceId, iceDefinition).map(
     (match) => match.sourceDefinitionId,
   );
 }
@@ -262,16 +206,16 @@ export function rezCostForCard(
 }
 
 function corpRezCostModifierQuoteForMatch(
-  match: ActiveCorpRezCostModifierRule,
+  match: ActiveCorpRezCostModifier,
 ): CostModifierQuote {
-  const { sourceCardInstanceId, sourceDefinitionId, rule } = match;
+  const { sourceCardInstanceId, sourceDefinitionId, modifier } = match;
   const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
   return {
     sourceCardInstanceId,
     sourceDefinitionId,
     label: sourceDefinition?.title ?? sourceDefinitionId,
-    amount: rule.amount,
-    kind: rule.kind,
+    amount: modifier.amount,
+    kind: "reduction",
   };
 }
 
@@ -285,7 +229,7 @@ export function quoteCorpRezCost(
   const regularFinalCredits = rezCostForCard(state, iceId);
   const existingModifierMatches =
     definition.type === "ice"
-      ? activeCorpRezCostModifierRulesForIce(state, iceId, definition)
+      ? activeCorpRezCostModifiersForIce(state, iceId, definition)
       : [];
   const existingSourceDefinitionIds =
     existingModifierMatches.map((match) => match.sourceDefinitionId);
