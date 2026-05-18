@@ -25,6 +25,9 @@ const IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION =
 const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ON_PLAY_EFFECT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -96,6 +99,16 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION);
   }
+  if (
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "additional_subroutine",
+    )
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive additional-subroutine modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION);
+  }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for printed-cost on-play effect behavior.",
@@ -130,15 +143,6 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
-    {
-      cardDefinitionId: "onr_v1_320_encoder-inc",
-      status: "partial_implementation",
-      reason:
-        "Engine-local CardImplementationDefinition covers the printed code-gate rez-cost reduction. Missing printed text: all code gates gain an additional '*End the run' subroutine.",
-      currentLocations: [
-        "packages/engine/src/card-implementations/onr-v1/corp/assets/encoder-inc.ts",
-      ],
-    },
     {
       cardDefinitionId: "onr_v1_360_jerusalem-city-grid",
       status: "partial_implementation",

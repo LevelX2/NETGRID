@@ -6957,6 +6957,20 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
+      cardImplementationForDefinitionId("onr_v1_320_encoder-inc")?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "additional_subroutine",
+        append: "after_existing",
+        appliesTo: { side: "corp", cardType: "ice", subtype: "code_gate" },
+        subroutine: {
+          kind: "end_the_run",
+          text: "*End the run.",
+          visibility: "public",
+        },
+      }),
+    );
+    expect(
       cardImplementationForDefinitionId(
         "onr_v1_341_skalderviken-sa-beta-test-site",
       )?.modifiers,
@@ -7019,8 +7033,8 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("implemented");
     expect(
       cardImplementationCoverageForDefinitionId("onr_v1_320_encoder-inc")
-        ?.reason,
-    ).toMatch(/additional.*subroutine/i);
+        ?.status,
+    ).toBe("implemented");
     expect(
       cardImplementationCoverageForDefinitionId(
         "onr_v1_341_skalderviken-sa-beta-test-site",
@@ -7913,6 +7927,177 @@ describe("V1.6.2 Mechanikpaket B", () => {
       priorityRequisitionTargetDefinitionId: "onr_v1_230_cortical-scanner",
       rezCostPaid: 0,
     });
+  });
+
+  it("adds Encoder, Inc. end-the-run subroutines to rezzed code gates", () => {
+    const approachIce = (
+      seed: string,
+      iceDefinitionId: string,
+      rezzedEncoder: boolean,
+    ): GameState => {
+      let state = createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_6_2_RUNNER_DECK,
+          cards: [
+            ...ONR_V1_6_2_RUNNER_DECK.cards,
+            { id: "simple_decoder", quantity: 1 },
+          ],
+        },
+        corpDeck: ONR_V1_6_2_CORP_DECK,
+        agendaPointsToWin: 7,
+      });
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.corp.credits = 30;
+      state.runner.credits = 20;
+      const encoderId = putCorpRootInRemote(state, "onr_v1_320_encoder-inc");
+      state.cardInstances[encoderId] = {
+        ...state.cardInstances[encoderId]!,
+        faceup: rezzedEncoder,
+        rezzed: rezzedEncoder,
+      };
+      putCorpIceOnServer(state, "rd", iceDefinitionId);
+      state = toRunnerTurnFromCorpMain(state);
+      state.runner.credits = 20;
+      const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          action.source === decoderId,
+      );
+      state.runner.credits = 20;
+      state.runner.clicks = 4;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      return apply(state, "corp", (action) => action.type === "rez_ice");
+    };
+    const decoderBreakIndexes = (state: GameState): number[] =>
+      getLegalActions(state, "runner")
+        .filter(
+          (action) =>
+            action.type === "break_subroutine" &&
+            sourceDefinition(state, action) === "simple_decoder",
+        )
+        .map((action) => Number(action.payload?.subroutineIndex))
+        .sort((a, b) => a - b);
+
+    const withEncoder = approachIce(
+      "v162-encoder-additional-subroutine",
+      "onr_v1_230_cortical-scanner",
+      true,
+    );
+    const pumpedWithEncoder = apply(
+      withEncoder,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(withEncoder, action) === "simple_decoder",
+    );
+    expect(decoderBreakIndexes(pumpedWithEncoder)).toEqual([0, 1, 2, 3]);
+    expect(
+      mustAction(
+        pumpedWithEncoder,
+        "runner",
+        (action) => action.type === "continue_run",
+      ).payload,
+    ).toMatchObject({
+      unbrokenSubroutineCount: 4,
+      encounterWillEndRun: true,
+    });
+
+    let addedSubroutineUnbroken = pumpedWithEncoder;
+    for (const subroutineIndex of [0, 1, 2]) {
+      addedSubroutineUnbroken = apply(
+        addedSubroutineUnbroken,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.subroutineIndex === subroutineIndex,
+      );
+    }
+    addedSubroutineUnbroken = apply(
+      addedSubroutineUnbroken,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(addedSubroutineUnbroken.run).toBeUndefined();
+    expect(
+      addedSubroutineUnbroken.eventLog.at(-1)?.publicPayload.resolvedEffects,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: "onr_v1_230_cortical-scanner",
+        subroutineIndex: 3,
+        subroutineType: "end_the_run",
+        endedRun: true,
+      }),
+    ]);
+
+    let addedSubroutineBroken = approachIce(
+      "v162-encoder-additional-subroutine-broken",
+      "onr_v1_230_cortical-scanner",
+      true,
+    );
+    addedSubroutineBroken = apply(
+      addedSubroutineBroken,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(addedSubroutineBroken, action) === "simple_decoder",
+    );
+    for (const subroutineIndex of [0, 1, 2, 3]) {
+      addedSubroutineBroken = apply(
+        addedSubroutineBroken,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          action.payload?.subroutineIndex === subroutineIndex,
+      );
+    }
+    addedSubroutineBroken = apply(
+      addedSubroutineBroken,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(addedSubroutineBroken.run?.phase).toBe("access");
+
+    const unrezzedEncoder = approachIce(
+      "v162-encoder-unrezzed-no-additional-subroutine",
+      "onr_v1_230_cortical-scanner",
+      false,
+    );
+    const pumpedUnrezzedEncoder = apply(
+      unrezzedEncoder,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(unrezzedEncoder, action) === "simple_decoder",
+    );
+    expect(decoderBreakIndexes(pumpedUnrezzedEncoder)).toEqual([0, 1, 2]);
+    expect(
+      mustAction(
+        pumpedUnrezzedEncoder,
+        "runner",
+        (action) => action.type === "continue_run",
+      ).payload?.unbrokenSubroutineCount,
+    ).toBe(3);
+
+    const nonCodeGate = approachIce(
+      "v162-encoder-non-code-gate-no-additional-subroutine",
+      "onr_v1_231_cortical-scrub",
+      true,
+    );
+    expect(decoderBreakIndexes(nonCodeGate)).toEqual([]);
+    expect(
+      mustAction(nonCodeGate, "runner", (action) => action.type === "continue_run")
+        .payload?.unbrokenSubroutineCount,
+    ).toBe(2);
   });
 });
 

@@ -14,5 +14,18 @@ export const encoderIncImplementation: CardImplementationDefinition = {
       visibility: "public",
       appliesTo: { cardType: "ice", subtype: "code_gate" },
     },
+    {
+      kind: "additional_subroutine",
+      activeWhile: "rezzed",
+      sourceZone: "corp_root",
+      visibility: "public",
+      appliesTo: { side: "corp", cardType: "ice", subtype: "code_gate" },
+      append: "after_existing",
+      subroutine: {
+        kind: "end_the_run",
+        text: "*End the run.",
+        visibility: "public",
+      },
+    },
   ],
 };

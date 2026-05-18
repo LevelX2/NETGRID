@@ -64,6 +64,7 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "./ability-engine/cost-pipeline";
 export { quoteCorpRezCost } from "./ability-engine/cost-pipeline";
+import { additionalSubroutinesForIce } from "./ability-engine/additional-subroutine-modifiers";
 import {
   executeCardImplementationEffects,
   type CardEffectDrawCardsResult,
@@ -6316,6 +6317,7 @@ function subroutinesForCurrentEncounter(
         });
       }
     }
+    subroutines.push(...additionalSubroutinesForIce(state, run.encounteredIceId));
   }
   return subroutines;
 }
@@ -10512,7 +10514,10 @@ function resolveBlinkBreakSubroutineAction(
   if (!Number.isInteger(subroutineIndex) || subroutineIndex < 0)
     throw new Error("Blink-Subroutinenziel ist ungueltig.");
   const iceDefinition = definitionFor(state, encounteredIceId);
-  const subroutine = iceDefinition.subroutines?.[subroutineIndex];
+  const subroutine = subroutinesForCurrentEncounter(
+    state,
+    iceDefinition,
+  )[subroutineIndex];
   if (!subroutine) throw new Error("Blink-Subroutine existiert nicht.");
   if (
     run.brokenSubroutineIndexes.includes(subroutineIndex) ||
