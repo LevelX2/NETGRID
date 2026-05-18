@@ -6384,7 +6384,6 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       ),
     ).toEqual([
       expect.objectContaining({
-        sourceCardInstanceId: krashId,
         sourceDefinitionId: "onr_v1_039_krash",
         side: "runner",
         amount: 3,

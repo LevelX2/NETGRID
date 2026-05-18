@@ -7,7 +7,7 @@ import {
   type Side,
 } from "@netgrid/shared";
 
-const VIRIZZ_BREAK_COST_MODIFIER_ICE_ID = "onr_v1_277_virizz";
+const VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID = "onr_v1_277_virizz";
 
 export type ActiveModifierDuration =
   | "encounter"
@@ -81,9 +81,10 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
     const amount = positiveInteger(rawAmount);
     const instance = state.cardInstances[breakerId];
     if (amount <= 0 || !instance) continue;
+    // Existing RunState records the affected breaker, not a distinct source instance.
+    // Current writers use self-source breakers such as Krash/Grubb; keep the target explicit.
     modifiers.push({
       id: `run.breaker_strength.${breakerId}`,
-      sourceCardInstanceId: breakerId,
       sourceDefinitionId: instance.definitionId,
       kind: "breaker_strength",
       side: "runner",
@@ -97,8 +98,8 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
   const breakCostAmount = positiveInteger(run.breakSubroutineAdditionalCost);
   if (breakCostAmount > 0) {
     modifiers.push({
-      id: `run.break_subroutine_cost.${VIRIZZ_BREAK_COST_MODIFIER_ICE_ID}`,
-      sourceDefinitionId: VIRIZZ_BREAK_COST_MODIFIER_ICE_ID,
+      id: `run.break_subroutine_cost.${VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID}`,
+      sourceDefinitionId: VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID,
       kind: "break_subroutine_cost",
       side: "runner",
       amount: breakCostAmount,
