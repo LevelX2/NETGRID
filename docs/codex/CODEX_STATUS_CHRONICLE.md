@@ -13,148 +13,148 @@
 > Aus `CODEX_STATUS.md` am 2026-05-17 ausgelagerter ehemaliger Latest-/Next-Scope-Block. Die neuere Statusautorität bleibt der Schnellstatus plus aktuelle Wissensbasis.
 
 Latest audit artifact: `docs/derived/BESTANDSAUFNAHME_2026-05-04.md`.
-Latest deck/match planning artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`.
-Latest V1.0 final review artifact: `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`.
-Latest V1.0.1 planning artifact: `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`.
-Latest V1.0.2 planning artifact: `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`.
-Latest V1.0.2 requirements artifact: `docs/derived/V1_0_2_REQUIREMENTS.md`.
-Latest V1.0.2 presentation spec artifact: `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`.
-Latest V1.0.2 test matrix artifact: `docs/derived/V1_0_2_TEST_MATRIX.md`.
-Latest V1.0.2 requirements review artifact: `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`.
-Latest V1.0.2 implementation review artifact: `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.2 final review artifact: `docs/derived/V1_0_2_FINAL_REVIEW.md`.
-Latest V1.0.3 planning artifact: `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`.
-Latest V1.0.3 final review artifact: `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`.
-Latest V1.0.4 candidate backlog artifact: `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`.
+Latest deck/match planning artifact: `docs/releases/v1/v1-0-deck-match-stabilization/plan.md`.
+Latest V1.0 final review artifact: `docs/releases/v1/v1-0-deck-match-stabilization/final-review.md`.
+Latest V1.0.1 planning artifact: `docs/releases/v1/v1-0-1-join-deck-handshake/plan.md`.
+Latest V1.0.2 planning artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/plan.md`.
+Latest V1.0.2 requirements artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements.md`.
+Latest V1.0.2 presentation spec artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/spec.md`.
+Latest V1.0.2 test matrix artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/test-matrix.md`.
+Latest V1.0.2 requirements review artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements-review.md`.
+Latest V1.0.2 implementation review artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/implementation-review.md`.
+Latest V1.0.2 final review artifact: `docs/releases/v1/v1-0-2-opponent-action-presentation/final-review.md`.
+Latest V1.0.3 planning artifact: `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`.
+Latest V1.0.3 final review artifact: `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`.
+Latest V1.0.4 candidate backlog artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`.
 Latest historical general release planning artifact: `docs/derived/RELEASE_PLANNING_2026-05-05.md`.
-Latest V1.0.4 planning artifact: `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`.
-Latest V1.0.4 requirements artifact: `docs/derived/V1_0_4_REQUIREMENTS.md`.
-Latest V1.0.4 implementation review artifact: `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.4 final review artifact: `docs/derived/V1_0_4_FINAL_REVIEW.md`.
-Latest V1.0.4 two-tab smoke artifact: `docs/derived/V1_0_4_TWO_TAB_SMOKE.md`.
-Latest V1.0.5 planning artifact: `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`.
-Latest V1.0.5 requirements artifact: `docs/derived/V1_0_5_REQUIREMENTS.md`.
-Latest V1.0.5 action-board UX spec artifact: `docs/derived/ACTION_BOARD_UX_1_0_5_SPEC.md`.
-Latest V1.0.5 board/run UI spec artifact: `docs/derived/BOARD_RUN_UI_1_0_5_SPEC.md`.
-Latest V1.0.5 test matrix artifact: `docs/derived/V1_0_5_TEST_MATRIX.md`.
-Latest V1.0.5 requirements review artifact: `docs/derived/V1_0_5_REQUIREMENTS_REVIEW.md`.
-Latest V1.0.5 browser/playtest smoke artifact: `docs/derived/V1_0_5_BROWSER_PLAYTEST_SMOKE.md`.
-Latest V1.0.5K card-release requirements artifact: `docs/derived/V1_0_5K_CARD_RELEASE_REQUIREMENTS.md`.
-Latest V1.0.5K card-release implementation review artifact: `docs/derived/V1_0_5K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.6 planning artifact: `docs/derived/V1_0_6_UI_RESOURCE_CLARITY_PLAN.md`.
-Latest V1.0.6 requirements artifact: `docs/derived/V1_0_6_REQUIREMENTS.md`.
-Latest V1.0.6 resource/card-display spec artifact: `docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md`.
-Latest V1.0.6 test matrix artifact: `docs/derived/V1_0_6_TEST_MATRIX.md`.
-Latest V1.0.6 requirements review artifact: `docs/derived/V1_0_6_REQUIREMENTS_REVIEW.md`.
-Latest V1.0.6 browser/playtest smoke artifact: `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`.
-Latest V1.0.6 implementation review artifact: `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.6 final review artifact: `docs/derived/V1_0_6_FINAL_REVIEW.md`.
-Latest V1.0.6K card-release requirements artifact: `docs/derived/V1_0_6K_CARD_RELEASE_REQUIREMENTS.md`.
-Latest V1.0.6K card-release implementation review artifact: `docs/derived/V1_0_6K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.7 planning artifact: `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`.
-Latest V1.0.7 requirements artifact: `docs/derived/V1_0_7_REQUIREMENTS.md`.
-Latest V1.0.7 browser E2E/Visual QA spec artifact: `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`.
-Latest V1.0.7 test matrix artifact: `docs/derived/V1_0_7_TEST_MATRIX.md`.
-Latest V1.0.7 requirements review artifact: `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`.
-Latest V1.0.7 implementation review artifact: `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.7 final review artifact: `docs/derived/V1_0_7_FINAL_REVIEW.md`.
-Latest V1.0.8 planning artifact: `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`.
-Latest V1.0.8 requirements artifact: `docs/derived/V1_0_8_REQUIREMENTS.md`.
-Latest V1.0.8 SQLite storage spec artifact: `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`.
-Latest V1.0.8 backup/recovery spec artifact: `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`.
-Latest V1.0.8 test matrix artifact: `docs/derived/V1_0_8_TEST_MATRIX.md`.
-Latest V1.0.8 requirements review artifact: `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`.
-Latest V1.0.8 implementation review artifact: `docs/derived/V1_0_8_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.8 final review artifact: `docs/derived/V1_0_8_FINAL_REVIEW.md`.
-Latest V1.0.9 planning artifact: `docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md`.
-Latest V1.0.9 requirements artifact: `docs/derived/V1_0_9_REQUIREMENTS.md`.
-Latest V1.0.9 private internet security spec artifact: `docs/derived/PRIVATE_INTERNET_SECURITY_1_0_9_SPEC.md`.
-Latest V1.0.9 private deployment ops spec artifact: `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`.
-Latest V1.0.9 test matrix artifact: `docs/derived/V1_0_9_TEST_MATRIX.md`.
-Latest V1.0.9 requirements review artifact: `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`.
-Latest V1.0.9 implementation review artifact: `docs/derived/V1_0_9_IMPLEMENTATION_REVIEW.md`.
-Latest V1.0.9 final review artifact: `docs/derived/V1_0_9_FINAL_REVIEW.md`.
-Latest V1.1.0 Setup/Game-End M2 planning artifact: `docs/derived/V1_1_0_SETUP_GAME_END_M2_DETAILED_PLAN.md`.
-Latest V1.1.0 requirements artifact: `docs/derived/V1_1_0_REQUIREMENTS.md`.
-Latest V1.1.0 test matrix artifact: `docs/derived/V1_1_0_TEST_MATRIX.md`.
-Latest V1.1.0 implementation review artifact: `docs/derived/V1_1_0_IMPLEMENTATION_REVIEW.md`.
-Latest V1.1.0 final review artifact: `docs/derived/V1_1_0_FINAL_REVIEW.md`.
-Latest V1.1.1 Discard/Handlimit/Core Damage planning artifact: `docs/derived/V1_1_1_DISCARD_HANDLIMIT_CORE_DAMAGE_PLAN.md`.
-Latest V1.1.1 requirements artifact: `docs/derived/V1_1_1_REQUIREMENTS.md`.
-Latest V1.1.1 mechanics spec artifact: `docs/derived/DISCARD_HANDLIMIT_CORE_DAMAGE_1_1_1_SPEC.md`.
-Latest V1.1.1 test matrix artifact: `docs/derived/V1_1_1_TEST_MATRIX.md`.
-Latest V1.1.1 requirements review artifact: `docs/derived/V1_1_1_REQUIREMENTS_REVIEW.md`.
-Latest V1.1.1 implementation review artifact: `docs/derived/V1_1_1_IMPLEMENTATION_REVIEW.md`.
-Latest V1.1.1 final review artifact: `docs/derived/V1_1_1_FINAL_REVIEW.md`.
-Latest V1.1.2 integrated planning artifact: `docs/derived/V1_1_2_FULL_ARCHIVES_AND_MATCHSTART_ENTRY_UX_PLAN.md`.
-Latest V1.1.2 requirements artifact: `docs/derived/V1_1_2_REQUIREMENTS.md`.
-Latest V1.1.2 Full Archives spec artifact: `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`.
-Latest V1.1.2 Matchstart Entry UX spec artifact: `docs/derived/MATCHSTART_ENTRY_UX_1_1_2_SPEC.md`.
-Latest V1.1.2 test matrix artifact: `docs/derived/V1_1_2_TEST_MATRIX.md`.
-Latest V1.1.2 requirements review artifact: `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md`.
-Latest V1.1.2 implementation review artifact: `docs/derived/V1_1_2_IMPLEMENTATION_REVIEW.md`.
-Latest V1.1.2 final review artifact: `docs/derived/V1_1_2_FINAL_REVIEW.md`.
-Latest V1.1.2K card-release plan artifact: `docs/derived/V1_1_2K_CARD_RELEASE_PLAN.md`.
-Latest V1.1.2K card-release implementation review artifact: `docs/derived/V1_1_2K_CARD_RELEASE_IMPLEMENTATION_REVIEW.md`.
-Latest V1.1.3 baseline plan artifact: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md`.
-Latest V1.1.3 baseline requirements artifact: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_REQUIREMENTS.md`.
-Latest V1.1.3 baseline test matrix artifact: `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_TEST_MATRIX.md`.
-Latest V1.1.3 requirements review artifact: `docs/derived/V1_1_3_REQUIREMENTS_REVIEW.md`.
-Latest V1.1.3 final review artifact: `docs/derived/V1_1_3_FINAL_REVIEW.md`.
-Latest V1.2.0 event modification plan artifact: `docs/derived/V1_2_0_EVENT_MODIFICATION_DETAILED_PLAN.md`.
-Latest V1.2.0 requirements artifact: `docs/derived/V1_2_0_REQUIREMENTS.md`.
-Latest V1.2.0 event modification spec artifact: `docs/derived/EVENT_MODIFICATION_1_2_0_SPEC.md`.
-Latest V1.2.0 test matrix artifact: `docs/derived/V1_2_0_TEST_MATRIX.md`.
-Latest V1.2.0 requirements review artifact: `docs/derived/V1_2_0_REQUIREMENTS_REVIEW.md`.
-Latest V1.2.0 implementation review artifact: `docs/derived/V1_2_0_IMPLEMENTATION_REVIEW.md`.
-Latest V1.2.0 final review artifact: `docs/derived/V1_2_0_FINAL_REVIEW.md`.
-Latest V1.2.1 replacement effects plan artifact: `docs/derived/V1_2_1_REPLACEMENT_EFFECTS_DETAILED_PLAN.md`.
-Latest V1.2.1 requirements artifact: `docs/derived/V1_2_1_REQUIREMENTS.md`.
-Latest V1.2.1 replacement effects spec artifact: `docs/derived/REPLACEMENT_EFFECTS_1_2_1_SPEC.md`.
-Latest V1.2.1 test matrix artifact: `docs/derived/V1_2_1_TEST_MATRIX.md`.
-Latest V1.2.1 requirements review artifact: `docs/derived/V1_2_1_REQUIREMENTS_REVIEW.md`.
-Latest V1.2.1 implementation review artifact: `docs/derived/V1_2_1_IMPLEMENTATION_REVIEW.md`.
-Latest V1.2.1 final review artifact: `docs/derived/V1_2_1_FINAL_REVIEW.md`.
-Latest V1.2.3 card-release preflight artifact: `docs/derived/V1_2_3_IMPLEMENTATION_PREFLIGHT.md`.
-Latest V1.2.3 card-release implementation review artifact: `docs/derived/V1_2_3_IMPLEMENTATION_REVIEW.md`.
-Latest V1.2.3 card-release final review artifact: `docs/derived/V1_2_3_FINAL_REVIEW.md`.
+Latest V1.0.4 planning artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`.
+Latest V1.0.4 requirements artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/requirements.md`.
+Latest V1.0.4 implementation review artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/implementation-review.md`.
+Latest V1.0.4 final review artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/final-review.md`.
+Latest V1.0.4 two-tab smoke artifact: `docs/releases/v1/v1-0-4-private-match-lifecycle/two-tab-smoke.md`.
+Latest V1.0.5 planning artifact: `docs/releases/v1/v1-0-5-action-board-ux/plan.md`.
+Latest V1.0.5 requirements artifact: `docs/releases/v1/v1-0-5-action-board-ux/requirements.md`.
+Latest V1.0.5 action-board UX spec artifact: `docs/releases/v1/v1-0-5-action-board-ux/action-board-ux-spec.md`.
+Latest V1.0.5 board/run UI spec artifact: `docs/releases/v1/v1-0-5-action-board-ux/board-run-ui-spec.md`.
+Latest V1.0.5 test matrix artifact: `docs/releases/v1/v1-0-5-action-board-ux/test-matrix.md`.
+Latest V1.0.5 requirements review artifact: `docs/releases/v1/v1-0-5-action-board-ux/requirements-review.md`.
+Latest V1.0.5 browser/playtest smoke artifact: `docs/releases/v1/v1-0-5-action-board-ux/browser-playtest-smoke.md`.
+Latest V1.0.5K card-release requirements artifact: `docs/releases/v1/card-releases/v1-0-5k-card-release/requirements.md`.
+Latest V1.0.5K card-release implementation review artifact: `docs/releases/v1/card-releases/v1-0-5k-card-release/implementation-review.md`.
+Latest V1.0.6 planning artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/plan.md`.
+Latest V1.0.6 requirements artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/requirements.md`.
+Latest V1.0.6 resource/card-display spec artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/resource-card-display-spec.md`.
+Latest V1.0.6 test matrix artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/test-matrix.md`.
+Latest V1.0.6 requirements review artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/requirements-review.md`.
+Latest V1.0.6 browser/playtest smoke artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/browser-playtest-smoke.md`.
+Latest V1.0.6 implementation review artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/implementation-review.md`.
+Latest V1.0.6 final review artifact: `docs/releases/v1/v1-0-6-ui-resource-clarity/final-review.md`.
+Latest V1.0.6K card-release requirements artifact: `docs/releases/v1/card-releases/v1-0-6k-card-release/requirements.md`.
+Latest V1.0.6K card-release implementation review artifact: `docs/releases/v1/card-releases/v1-0-6k-card-release/implementation-review.md`.
+Latest V1.0.7 planning artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/plan.md`.
+Latest V1.0.7 requirements artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/requirements.md`.
+Latest V1.0.7 browser E2E/Visual QA spec artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/browser-e2e-visual-qa-spec.md`.
+Latest V1.0.7 test matrix artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/test-matrix.md`.
+Latest V1.0.7 requirements review artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/requirements-review.md`.
+Latest V1.0.7 implementation review artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/implementation-review.md`.
+Latest V1.0.7 final review artifact: `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/final-review.md`.
+Latest V1.0.8 planning artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/plan.md`.
+Latest V1.0.8 requirements artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/requirements.md`.
+Latest V1.0.8 SQLite storage spec artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/storage-sqlite-spec.md`.
+Latest V1.0.8 backup/recovery spec artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/backup-recovery-spec.md`.
+Latest V1.0.8 test matrix artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/test-matrix.md`.
+Latest V1.0.8 requirements review artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/requirements-review.md`.
+Latest V1.0.8 implementation review artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/implementation-review.md`.
+Latest V1.0.8 final review artifact: `docs/releases/v1/v1-0-8-storage-backup-hardening/final-review.md`.
+Latest V1.0.9 planning artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/plan.md`.
+Latest V1.0.9 requirements artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/requirements.md`.
+Latest V1.0.9 private internet security spec artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/private-internet-security-spec.md`.
+Latest V1.0.9 private deployment ops spec artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/private-deployment-ops-spec.md`.
+Latest V1.0.9 test matrix artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/test-matrix.md`.
+Latest V1.0.9 requirements review artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/requirements-review.md`.
+Latest V1.0.9 implementation review artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/implementation-review.md`.
+Latest V1.0.9 final review artifact: `docs/releases/v1/v1-0-9-private-internet-hardening/final-review.md`.
+Latest V1.1.0 Setup/Game-End M2 planning artifact: `docs/releases/v1/v1-1-0-setup-game-end-m2/plan.md`.
+Latest V1.1.0 requirements artifact: `docs/releases/v1/v1-1-0-setup-game-end-m2/requirements.md`.
+Latest V1.1.0 test matrix artifact: `docs/releases/v1/v1-1-0-setup-game-end-m2/test-matrix.md`.
+Latest V1.1.0 implementation review artifact: `docs/releases/v1/v1-1-0-setup-game-end-m2/implementation-review.md`.
+Latest V1.1.0 final review artifact: `docs/releases/v1/v1-1-0-setup-game-end-m2/final-review.md`.
+Latest V1.1.1 Discard/Handlimit/Core Damage planning artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/plan.md`.
+Latest V1.1.1 requirements artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/requirements.md`.
+Latest V1.1.1 mechanics spec artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/spec.md`.
+Latest V1.1.1 test matrix artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/test-matrix.md`.
+Latest V1.1.1 requirements review artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/requirements-review.md`.
+Latest V1.1.1 implementation review artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/implementation-review.md`.
+Latest V1.1.1 final review artifact: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/final-review.md`.
+Latest V1.1.2 integrated planning artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/plan.md`.
+Latest V1.1.2 requirements artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/requirements.md`.
+Latest V1.1.2 Full Archives spec artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/full-archives-access-spec.md`.
+Latest V1.1.2 Matchstart Entry UX spec artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/matchstart-entry-ux-spec.md`.
+Latest V1.1.2 test matrix artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/test-matrix.md`.
+Latest V1.1.2 requirements review artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/requirements-review.md`.
+Latest V1.1.2 implementation review artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/implementation-review.md`.
+Latest V1.1.2 final review artifact: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/final-review.md`.
+Latest V1.1.2K card-release plan artifact: `docs/releases/v1/card-releases/v1-1-2k-card-release/plan.md`.
+Latest V1.1.2K card-release implementation review artifact: `docs/releases/v1/card-releases/v1-1-2k-card-release/implementation-review.md`.
+Latest V1.1.3 baseline plan artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md`.
+Latest V1.1.3 baseline requirements artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/requirements.md`.
+Latest V1.1.3 baseline test matrix artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/test-matrix.md`.
+Latest V1.1.3 requirements review artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/requirements-review.md`.
+Latest V1.1.3 final review artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/final-review.md`.
+Latest V1.2.0 event modification plan artifact: `docs/releases/v1/v1-2-0-event-modification/plan.md`.
+Latest V1.2.0 requirements artifact: `docs/releases/v1/v1-2-0-event-modification/requirements.md`.
+Latest V1.2.0 event modification spec artifact: `docs/releases/v1/v1-2-0-event-modification/spec.md`.
+Latest V1.2.0 test matrix artifact: `docs/releases/v1/v1-2-0-event-modification/test-matrix.md`.
+Latest V1.2.0 requirements review artifact: `docs/releases/v1/v1-2-0-event-modification/requirements-review.md`.
+Latest V1.2.0 implementation review artifact: `docs/releases/v1/v1-2-0-event-modification/implementation-review.md`.
+Latest V1.2.0 final review artifact: `docs/releases/v1/v1-2-0-event-modification/final-review.md`.
+Latest V1.2.1 replacement effects plan artifact: `docs/releases/v1/v1-2-1-replacement-effects/plan.md`.
+Latest V1.2.1 requirements artifact: `docs/releases/v1/v1-2-1-replacement-effects/requirements.md`.
+Latest V1.2.1 replacement effects spec artifact: `docs/releases/v1/v1-2-1-replacement-effects/spec.md`.
+Latest V1.2.1 test matrix artifact: `docs/releases/v1/v1-2-1-replacement-effects/test-matrix.md`.
+Latest V1.2.1 requirements review artifact: `docs/releases/v1/v1-2-1-replacement-effects/requirements-review.md`.
+Latest V1.2.1 implementation review artifact: `docs/releases/v1/v1-2-1-replacement-effects/implementation-review.md`.
+Latest V1.2.1 final review artifact: `docs/releases/v1/v1-2-1-replacement-effects/final-review.md`.
+Latest V1.2.3 card-release preflight artifact: `docs/releases/v1/v1-2-3-mechanic-unlock-card-release-1/implementation-preflight.md`.
+Latest V1.2.3 card-release implementation review artifact: `docs/releases/v1/v1-2-3-mechanic-unlock-card-release-1/implementation-review.md`.
+Latest V1.2.3 card-release final review artifact: `docs/releases/v1/v1-2-3-mechanic-unlock-card-release-1/final-review.md`.
 Latest V1.2.3 card-release manifest artifact: `data/manifests/card-implementation-manifest-1.2.3.json`.
 Latest V1.2.3 card-release scenario artifact: `data/scenarios/v123-card-release-smoke.json`.
-Latest V1.2.2 special zones implementation review artifact: `docs/derived/V1_2_2_IMPLEMENTATION_REVIEW.md`.
-Latest V1.2.2 special zones final review artifact: `docs/derived/V1_2_2_FINAL_REVIEW.md`.
+Latest V1.2.2 special zones implementation review artifact: `docs/releases/v1/v1-2-2-special-zones-ownership-control/implementation-review.md`.
+Latest V1.2.2 special zones final review artifact: `docs/releases/v1/v1-2-2-special-zones-ownership-control/final-review.md`.
 Latest V1.2.2 mechanics coverage artifact: `data/rules/mechanics-coverage-1.2.2.json`.
-Latest V1.1.3-to-V1.2.1 implementation handoff artifact: `docs/derived/V1_1_3_TO_V1_2_1_IMPLEMENTATION_HANDOFF.md`.
-Latest V1.3.1 planning artifacts: `docs/derived/V1_3_1_CARD_DATA_PIPELINE_V2_DETAILED_PLAN.md`, `docs/derived/V1_3_1_REQUIREMENTS.md`, `docs/derived/CARD_DATA_PIPELINE_1_3_1_SPEC.md`, `docs/derived/V1_3_1_TEST_MATRIX.md`, `docs/derived/V1_3_1_REQUIREMENTS_REVIEW.md`.
-Latest V1.3.1 implementation/final artifacts: `docs/derived/V1_3_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_3_1_FINAL_REVIEW.md`, `data/card-import/source-registry-1.3.1.json`, `data/card-import/card-pipeline-snapshot-1.3.1.json`, `data/card-import/card-pipeline-snapshot-1.3.1.hash`, `data/manifests/card-support-manifest-1.3.1.json`, `data/ai/ai-card-hints-1.3.1.json`, `data/ai/ai-card-hints-report-1.3.1.json` and `data/reports/card-pipeline-report-1.3.1.json`.
-Latest V1.4.0 planning artifacts: `docs/derived/V1_4_0_PLAN_BASED_CORP_AI_DETAILED_PLAN.md`, `docs/derived/V1_4_0_REQUIREMENTS.md`, `docs/derived/PLAN_BASED_CORP_AI_1_4_0_SPEC.md`, `docs/derived/V1_4_0_TEST_MATRIX.md`, `docs/derived/V1_4_0_REQUIREMENTS_REVIEW.md`.
-Latest V1.4.1 planning artifacts: `docs/derived/V1_4_1_PLAN_BASED_RUNNER_AI_DETAILED_PLAN.md`, `docs/derived/V1_4_1_REQUIREMENTS.md`, `docs/derived/PLAN_BASED_RUNNER_AI_1_4_1_SPEC.md`, `docs/derived/V1_4_1_TEST_MATRIX.md`, `docs/derived/V1_4_1_REQUIREMENTS_REVIEW.md`.
-Latest V1.4.3 implementation/final artifacts: `docs/derived/V1_4_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_4_3_FINAL_REVIEW.md`, `data/ai/ai-benchmark-profiles-1.4.3.json`, `data/ai/ai-soak-seeds-1.4.3.json`, `data/scenarios/ai-v143-exploit-regression-fixtures.json`.
-Latest V1.5.0 implementation/final artifacts: `docs/derived/V1_5_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_5_0_FINAL_REVIEW.md`, `apps/web/app/replays/page.tsx`, `docs/derived/artifacts/v1_5_0_replay_smoke.json`, `docs/derived/artifacts/v1_5_0_replay_smoke.png`.
-Latest V1.6.0 implementation/final artifacts: `docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_0_FINAL_REVIEW.md`, `docs/derived/V1_6_0_RULE_HELP_GLOSSARY.md`, `apps/web/app/tutorial.ts`, `apps/web/app/tutorial/page.tsx`, `apps/web/app/tutorial.test.ts`, `data/scenarios/tutorial-v160-scenarios.json`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.json`, `docs/derived/artifacts/v1_6_0_tutorial_smoke.png`.
-Latest V1.6.1 implementation/final artifacts: `docs/derived/V1_6_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_1_FINAL_REVIEW.md`, `docs/derived/V1_6_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_A_1_6_1_SPEC.md`, `docs/derived/V1_6_1_TEST_MATRIX.md`, `docs/derived/V1_6_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.1.json`, `data/rules/mechanics-coverage-1.6.1.json`, `data/scenarios/v161-card-release-smoke.json`.
-Latest V1.6.2 implementation/final artifacts: `docs/derived/V1_6_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_2_FINAL_REVIEW.md`, `docs/derived/V1_6_2_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_2_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_B_1_6_2_SPEC.md`, `docs/derived/V1_6_2_TEST_MATRIX.md`, `docs/derived/V1_6_2_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.2.json`, `data/rules/mechanics-coverage-1.6.2.json`, `data/scenarios/v162-card-release-smoke.json`.
-Latest V1.6.3 implementation/final artifacts: `docs/derived/V1_6_3_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_6_3_FINAL_REVIEW.md`, `docs/derived/V1_6_3_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_6_3_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_C_1_6_3_SPEC.md`, `docs/derived/V1_6_3_TEST_MATRIX.md`, `docs/derived/V1_6_3_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.6.3.json`, `data/rules/mechanics-coverage-1.6.3.json`, `data/scenarios/v163-card-release-smoke.json`.
-Latest V1.7.0 implementation/final artifacts: `docs/derived/V1_7_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_7_0_FINAL_REVIEW.md`, `docs/derived/V1_7_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_7_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_D_1_7_0_SPEC.md`, `docs/derived/V1_7_0_TEST_MATRIX.md`, `docs/derived/V1_7_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.7.0.json`, `data/rules/mechanics-coverage-1.7.0.json`, `data/scenarios/v170-card-release-smoke.json`.
-Latest V1.7.1 implementation/final artifacts: `docs/derived/V1_7_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_7_1_FINAL_REVIEW.md`, `docs/derived/V1_7_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_7_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_E_1_7_1_SPEC.md`, `docs/derived/V1_7_1_TEST_MATRIX.md`, `docs/derived/V1_7_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.7.1.json`, `data/rules/mechanics-coverage-1.7.1.json`, `data/scenarios/v171-card-release-smoke.json`.
-Latest V1.7.2 implementation/final artifacts: `docs/derived/V1_7_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_7_2_FINAL_REVIEW.md`, `docs/derived/V1_7_2_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_7_2_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_F_1_7_2_SPEC.md`, `docs/derived/V1_7_2_TEST_MATRIX.md`, `docs/derived/V1_7_2_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.7.2.json`, `data/rules/mechanics-coverage-1.7.2.json`, `data/scenarios/v172-card-release-smoke.json`.
-Latest V1.8.0 implementation/final artifacts: `docs/derived/V1_8_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_8_0_FINAL_REVIEW.md`, `docs/derived/V1_8_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_8_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_G_1_8_0_SPEC.md`, `docs/derived/V1_8_0_TEST_MATRIX.md`, `docs/derived/V1_8_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.8.0.json`, `data/rules/mechanics-coverage-1.8.0.json`, `data/scenarios/v180-card-release-smoke.json`.
-Latest V1.8.1 implementation/final artifacts: `docs/derived/V1_8_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_8_1_FINAL_REVIEW.md`, `docs/derived/V1_8_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_8_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_H_1_8_1_SPEC.md`, `docs/derived/V1_8_1_TEST_MATRIX.md`, `docs/derived/V1_8_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.8.1.json`, `data/rules/mechanics-coverage-1.8.1.json`, `data/scenarios/v181-card-release-smoke.json`.
-Latest V1.9.0 implementation/final artifacts: `docs/derived/V1_9_0_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_0_FINAL_REVIEW.md`, `docs/derived/V1_9_0_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_0_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_I_1_9_0_SPEC.md`, `docs/derived/V1_9_0_TEST_MATRIX.md`, `docs/derived/V1_9_0_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.0.json`, `data/rules/mechanics-coverage-1.9.0.json`, `data/scenarios/v190-card-release-smoke.json`.
-Latest V1.9.1 implementation/final artifacts: `docs/derived/V1_9_1_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_1_FINAL_REVIEW.md`, `docs/derived/V1_9_1_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_1_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_J_1_9_1_SPEC.md`, `docs/derived/V1_9_1_TEST_MATRIX.md`, `docs/derived/V1_9_1_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.1.json`, `data/rules/mechanics-coverage-1.9.1.json`, `data/scenarios/v191-card-release-smoke.json`.
-Latest V1.9.2 implementation/final artifacts: `docs/derived/V1_9_2_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`, `docs/derived/V1_9_2_RELEASE_ASSIGNMENT_PREFLIGHT.md`, `docs/derived/V1_9_2_REQUIREMENTS.md`, `docs/derived/MECHANIKPAKET_K_1_9_2_SPEC.md`, `docs/derived/V1_9_2_TEST_MATRIX.md`, `docs/derived/V1_9_2_REQUIREMENTS_REVIEW.md`, `data/manifests/card-implementation-manifest-1.9.2.json`, `data/rules/mechanics-coverage-1.9.2.json`, `data/scenarios/v192-card-release-smoke.json`.
-Latest V1.9.1-to-V1.9.4 sequential execution audit artifact: `docs/derived/V1_9_1_TO_V1_9_4_SEQUENTIAL_EXECUTION_AUDIT.md`.
-Latest V1.9.3 gate blocker artifact: `docs/derived/V1_9_3_GATE_BLOCKER_REPORT.md`.
-Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/derived/V1_3_1_TO_V1_4_1_IMPLEMENTATION_HANDOFF.md`.
+Latest V1.1.3-to-V1.2.1 implementation handoff artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/implementation-handoff-to-v1-2-1.md`.
+Latest V1.3.1 planning artifacts: `docs/releases/v1/v1-3-1-card-data-pipeline-v2/plan.md`, `docs/releases/v1/v1-3-1-card-data-pipeline-v2/requirements.md`, `docs/releases/v1/v1-3-1-card-data-pipeline-v2/spec.md`, `docs/releases/v1/v1-3-1-card-data-pipeline-v2/test-matrix.md`, `docs/releases/v1/v1-3-1-card-data-pipeline-v2/requirements-review.md`.
+Latest V1.3.1 implementation/final artifacts: `docs/releases/v1/v1-3-1-card-data-pipeline-v2/implementation-review.md`, `docs/releases/v1/v1-3-1-card-data-pipeline-v2/final-review.md`, `data/card-import/source-registry-1.3.1.json`, `data/card-import/card-pipeline-snapshot-1.3.1.json`, `data/card-import/card-pipeline-snapshot-1.3.1.hash`, `data/manifests/card-support-manifest-1.3.1.json`, `data/ai/ai-card-hints-1.3.1.json`, `data/ai/ai-card-hints-report-1.3.1.json` and `data/reports/card-pipeline-report-1.3.1.json`.
+Latest V1.4.0 planning artifacts: `docs/releases/v1/v1-4-0-plan-based-corp-ai/plan.md`, `docs/releases/v1/v1-4-0-plan-based-corp-ai/requirements.md`, `docs/releases/v1/v1-4-0-plan-based-corp-ai/spec.md`, `docs/releases/v1/v1-4-0-plan-based-corp-ai/test-matrix.md`, `docs/releases/v1/v1-4-0-plan-based-corp-ai/requirements-review.md`.
+Latest V1.4.1 planning artifacts: `docs/releases/v1/v1-4-1-plan-based-runner-ai/plan.md`, `docs/releases/v1/v1-4-1-plan-based-runner-ai/requirements.md`, `docs/releases/v1/v1-4-1-plan-based-runner-ai/spec.md`, `docs/releases/v1/v1-4-1-plan-based-runner-ai/test-matrix.md`, `docs/releases/v1/v1-4-1-plan-based-runner-ai/requirements-review.md`.
+Latest V1.4.3 implementation/final artifacts: `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/implementation-review.md`, `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/final-review.md`, `data/ai/ai-benchmark-profiles-1.4.3.json`, `data/ai/ai-soak-seeds-1.4.3.json`, `data/scenarios/ai-v143-exploit-regression-fixtures.json`.
+Latest V1.5.0 implementation/final artifacts: `docs/releases/v1/v1-5-0-private-replay-analysis-learning/implementation-review.md`, `docs/releases/v1/v1-5-0-private-replay-analysis-learning/final-review.md`, `apps/web/app/replays/page.tsx`, `docs/releases/v1/v1-5-0-private-replay-analysis-learning/artifacts/replay-smoke.json`, `docs/releases/v1/v1-5-0-private-replay-analysis-learning/artifacts/replay-smoke.png`.
+Latest V1.6.0 implementation/final artifacts: `docs/releases/v1/v1-6-0-tutorial-rule-help/implementation-review.md`, `docs/releases/v1/v1-6-0-tutorial-rule-help/final-review.md`, `docs/releases/v1/v1-6-0-tutorial-rule-help/rule-help-glossary.md`, `apps/web/app/tutorial.ts`, `apps/web/app/tutorial/page.tsx`, `apps/web/app/tutorial.test.ts`, `data/scenarios/tutorial-v160-scenarios.json`, `docs/releases/v1/v1-6-0-tutorial-rule-help/artifacts/tutorial-smoke.json`, `docs/releases/v1/v1-6-0-tutorial-rule-help/artifacts/tutorial-smoke.png`.
+Latest V1.6.1 implementation/final artifacts: `docs/releases/v1/v1-6-1-mechanikpaket-a/implementation-review.md`, `docs/releases/v1/v1-6-1-mechanikpaket-a/final-review.md`, `docs/releases/v1/v1-6-1-mechanikpaket-a/release-assignment-preflight.md`, `docs/releases/v1/v1-6-1-mechanikpaket-a/requirements.md`, `docs/releases/v1/v1-6-1-mechanikpaket-a/spec.md`, `docs/releases/v1/v1-6-1-mechanikpaket-a/test-matrix.md`, `docs/releases/v1/v1-6-1-mechanikpaket-a/requirements-review.md`, `data/manifests/card-implementation-manifest-1.6.1.json`, `data/rules/mechanics-coverage-1.6.1.json`, `data/scenarios/v161-card-release-smoke.json`.
+Latest V1.6.2 implementation/final artifacts: `docs/releases/v1/v1-6-2-mechanikpaket-b/implementation-review.md`, `docs/releases/v1/v1-6-2-mechanikpaket-b/final-review.md`, `docs/releases/v1/v1-6-2-mechanikpaket-b/release-assignment-preflight.md`, `docs/releases/v1/v1-6-2-mechanikpaket-b/requirements.md`, `docs/releases/v1/v1-6-2-mechanikpaket-b/spec.md`, `docs/releases/v1/v1-6-2-mechanikpaket-b/test-matrix.md`, `docs/releases/v1/v1-6-2-mechanikpaket-b/requirements-review.md`, `data/manifests/card-implementation-manifest-1.6.2.json`, `data/rules/mechanics-coverage-1.6.2.json`, `data/scenarios/v162-card-release-smoke.json`.
+Latest V1.6.3 implementation/final artifacts: `docs/releases/v1/v1-6-3-mechanikpaket-c/implementation-review.md`, `docs/releases/v1/v1-6-3-mechanikpaket-c/final-review.md`, `docs/releases/v1/v1-6-3-mechanikpaket-c/release-assignment-preflight.md`, `docs/releases/v1/v1-6-3-mechanikpaket-c/requirements.md`, `docs/releases/v1/v1-6-3-mechanikpaket-c/spec.md`, `docs/releases/v1/v1-6-3-mechanikpaket-c/test-matrix.md`, `docs/releases/v1/v1-6-3-mechanikpaket-c/requirements-review.md`, `data/manifests/card-implementation-manifest-1.6.3.json`, `data/rules/mechanics-coverage-1.6.3.json`, `data/scenarios/v163-card-release-smoke.json`.
+Latest V1.7.0 implementation/final artifacts: `docs/releases/v1/v1-7-0-mechanikpaket-d/implementation-review.md`, `docs/releases/v1/v1-7-0-mechanikpaket-d/final-review.md`, `docs/releases/v1/v1-7-0-mechanikpaket-d/release-assignment-preflight.md`, `docs/releases/v1/v1-7-0-mechanikpaket-d/requirements.md`, `docs/releases/v1/v1-7-0-mechanikpaket-d/spec.md`, `docs/releases/v1/v1-7-0-mechanikpaket-d/test-matrix.md`, `docs/releases/v1/v1-7-0-mechanikpaket-d/requirements-review.md`, `data/manifests/card-implementation-manifest-1.7.0.json`, `data/rules/mechanics-coverage-1.7.0.json`, `data/scenarios/v170-card-release-smoke.json`.
+Latest V1.7.1 implementation/final artifacts: `docs/releases/v1/v1-7-1-mechanikpaket-e/implementation-review.md`, `docs/releases/v1/v1-7-1-mechanikpaket-e/final-review.md`, `docs/releases/v1/v1-7-1-mechanikpaket-e/release-assignment-preflight.md`, `docs/releases/v1/v1-7-1-mechanikpaket-e/requirements.md`, `docs/releases/v1/v1-7-1-mechanikpaket-e/spec.md`, `docs/releases/v1/v1-7-1-mechanikpaket-e/test-matrix.md`, `docs/releases/v1/v1-7-1-mechanikpaket-e/requirements-review.md`, `data/manifests/card-implementation-manifest-1.7.1.json`, `data/rules/mechanics-coverage-1.7.1.json`, `data/scenarios/v171-card-release-smoke.json`.
+Latest V1.7.2 implementation/final artifacts: `docs/releases/v1/v1-7-2-mechanikpaket-f/implementation-review.md`, `docs/releases/v1/v1-7-2-mechanikpaket-f/final-review.md`, `docs/releases/v1/v1-7-2-mechanikpaket-f/release-assignment-preflight.md`, `docs/releases/v1/v1-7-2-mechanikpaket-f/requirements.md`, `docs/releases/v1/v1-7-2-mechanikpaket-f/spec.md`, `docs/releases/v1/v1-7-2-mechanikpaket-f/test-matrix.md`, `docs/releases/v1/v1-7-2-mechanikpaket-f/requirements-review.md`, `data/manifests/card-implementation-manifest-1.7.2.json`, `data/rules/mechanics-coverage-1.7.2.json`, `data/scenarios/v172-card-release-smoke.json`.
+Latest V1.8.0 implementation/final artifacts: `docs/releases/v1/v1-8-0-mechanikpaket-g/implementation-review.md`, `docs/releases/v1/v1-8-0-mechanikpaket-g/final-review.md`, `docs/releases/v1/v1-8-0-mechanikpaket-g/release-assignment-preflight.md`, `docs/releases/v1/v1-8-0-mechanikpaket-g/requirements.md`, `docs/releases/v1/v1-8-0-mechanikpaket-g/spec.md`, `docs/releases/v1/v1-8-0-mechanikpaket-g/test-matrix.md`, `docs/releases/v1/v1-8-0-mechanikpaket-g/requirements-review.md`, `data/manifests/card-implementation-manifest-1.8.0.json`, `data/rules/mechanics-coverage-1.8.0.json`, `data/scenarios/v180-card-release-smoke.json`.
+Latest V1.8.1 implementation/final artifacts: `docs/releases/v1/v1-8-1-mechanikpaket-h/implementation-review.md`, `docs/releases/v1/v1-8-1-mechanikpaket-h/final-review.md`, `docs/releases/v1/v1-8-1-mechanikpaket-h/release-assignment-preflight.md`, `docs/releases/v1/v1-8-1-mechanikpaket-h/requirements.md`, `docs/releases/v1/v1-8-1-mechanikpaket-h/spec.md`, `docs/releases/v1/v1-8-1-mechanikpaket-h/test-matrix.md`, `docs/releases/v1/v1-8-1-mechanikpaket-h/requirements-review.md`, `data/manifests/card-implementation-manifest-1.8.1.json`, `data/rules/mechanics-coverage-1.8.1.json`, `data/scenarios/v181-card-release-smoke.json`.
+Latest V1.9.0 implementation/final artifacts: `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/release-assignment-preflight.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/requirements.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/spec.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/test-matrix.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/requirements-review.md`, `data/manifests/card-implementation-manifest-1.9.0.json`, `data/rules/mechanics-coverage-1.9.0.json`, `data/scenarios/v190-card-release-smoke.json`.
+Latest V1.9.1 implementation/final artifacts: `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/release-assignment-preflight.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/requirements.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/spec.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/test-matrix.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/requirements-review.md`, `data/manifests/card-implementation-manifest-1.9.1.json`, `data/rules/mechanics-coverage-1.9.1.json`, `data/scenarios/v191-card-release-smoke.json`.
+Latest V1.9.2 implementation/final artifacts: `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/implementation-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/release-assignment-preflight.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/requirements.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/spec.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/test-matrix.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/requirements-review.md`, `data/manifests/card-implementation-manifest-1.9.2.json`, `data/rules/mechanics-coverage-1.9.2.json`, `data/scenarios/v192-card-release-smoke.json`.
+Latest V1.9.1-to-V1.9.4 sequential execution audit artifact: `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/sequential-execution-audit-to-v1-9-4.md`.
+Latest V1.9.3 gate blocker artifact: `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/gate-blocker-report.md`.
+Latest V1.3.1-to-V1.4.1 implementation handoff artifact: `docs/releases/v1/v1-3-1-card-data-pipeline-v2/implementation-handoff-to-v1-4-1.md`.
 Latest King of the Road AI approval artifacts: `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_SLICE_PLAN.md`, `docs/derived/KING_OF_THE_ROAD_AI_APPROVAL_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-king-of-the-road-ai-approval.json`, `data/manifests/king-of-the-road-ai-approval-manifest.json`, `data/scenarios/ai-kotr-runner-approval-smokes.json` and `data/decks/deck-snapshots-0.8.json`.
 Latest Deck-Legal AI Approval Open64 artifacts: `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_EXECUTION_PLAN.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_OPEN64_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-v171-v181-open64.json`, `data/ai/ai-card-hints-deck-legal-legacy-open64.json`, `data/manifests/deck-legal-ai-approval-v171-v181-open64-manifest.json`, `data/manifests/deck-legal-ai-approval-legacy-open64-manifest.json`, `data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json` and `data/scenarios/ai-deck-legal-legacy-open64-smokes.json`.
 Latest Deck-Legal AI Approval V1.9.0 artifacts: `docs/derived/DECK_LEGAL_AI_APPROVAL_V190_IMPLEMENTATION_REVIEW.md`, `data/ai/ai-card-hints-deck-legal-v190.json`, `data/manifests/deck-legal-ai-approval-v190-manifest.json` and `data/scenarios/ai-deck-legal-v190-smokes.json`.
-Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md`.
+Latest post-V1.1.2 mechanics/AI/card roadmap artifact: `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`.
 Latest consolidated release roadmap artifact: `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`.
 Latest card rule text formatting artifact: `docs/derived/CARD_RULE_TEXT_FORMATTING_SPEC.md`.
 Latest long-term product vision artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`.
 Latest long-term executive summary artifact: `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`.
 
-Current selected next scope: V1.9.0 Mechanikpaket I, Deck-Legal AI Approval V1.9.0 und die Sequenz V1.9.1 bis V1.9.4 sind abgeschlossen und lokal verifiziert (`docs/derived/V1_9_0_FINAL_REVIEW.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_V190_IMPLEMENTATION_REVIEW.md`, `docs/derived/V1_9_1_FINAL_REVIEW.md`, `docs/derived/V1_9_2_FINAL_REVIEW.md`, `docs/derived/V1_9_3_FINAL_REVIEW.md`, `docs/derived/V1_9_4_FINAL_REVIEW.md`). Nächster Umsetzungsscope bleibt die verbindliche Fortsetzung V1.9.5 bis V1.9.8 gemäß `docs/derived/V1_9_1_TO_V1_9_8_OPEN_POINTS_GROBPLAN.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`; V2.x bleibt nachgelagert bis V1.9.8 grün abgeschlossen ist.
+Current selected next scope: V1.9.0 Mechanikpaket I, Deck-Legal AI Approval V1.9.0 und die Sequenz V1.9.1 bis V1.9.4 sind abgeschlossen und lokal verifiziert (`docs/releases/v1/v1-9-originalset-completion/v1-9-0-mechanikpaket-i/final-review.md`, `docs/derived/DECK_LEGAL_AI_APPROVAL_V190_IMPLEMENTATION_REVIEW.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-2-mechanikpaket-k/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-3-mechanikpaket-l/final-review.md`, `docs/releases/v1/v1-9-originalset-completion/v1-9-4-mechanikpaket-m/final-review.md`). Nächster Umsetzungsscope bleibt die verbindliche Fortsetzung V1.9.5 bis V1.9.8 gemäß `docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md` und `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md`; V2.x bleibt nachgelagert bis V1.9.8 grün abgeschlossen ist.
 
 
 ## Status
@@ -579,7 +579,7 @@ Current verification after V1.0.4 implementation:
 - `corepack pnpm --filter @netgrid/web test`: pass, 14 tests.
 - `corepack pnpm --filter @netgrid/server test`: pass, 34 tests.
 - `corepack pnpm exec vitest run tests/specs/visibility-contract.test.ts`: pass, 11 tests.
-- Full final gate commands are recorded in `docs/derived/V1_0_4_FINAL_REVIEW.md`.
+- Full final gate commands are recorded in `docs/releases/v1/v1-0-4-private-match-lifecycle/final-review.md`.
 - V1.0.4 gate: `V1_0_4_private_match_lifecycle_done: true`.
 
 Last code verification baseline from V1.0.1 Deckbibliothek und Join-Deck-Handshake:
@@ -1947,10 +1947,10 @@ Checks before final workspace-wide gates:
 
 ## V1.0.2 Requirements Freeze files created or updated
 
-- `docs/derived/V1_0_2_REQUIREMENTS.md`
-- `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`
-- `docs/derived/V1_0_2_TEST_MATRIX.md`
-- `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/spec.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/test-matrix.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements-review.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -1974,8 +1974,8 @@ V1.0.2 is frozen as a presentation/orchestration release. Implementation may add
 - `apps/server/src/http-server.ts`
 - `apps/server/src/multiplayer.test.ts`
 - `tests/specs/visibility-contract.test.ts`
-- `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_0_2_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/implementation-review.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/final-review.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -2012,8 +2012,8 @@ Checks:
 - `apps/server/src/http-server.ts`
 - `apps/server/src/multiplayer.test.ts`
 - `tests/specs/visibility-contract.test.ts`
-- `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`
-- `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`
+- `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`
 - `docs/codex/CODEX_STATUS.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md`
 - `KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md`
@@ -2037,13 +2037,13 @@ Checks:
 
 ## S01 Requirements and implementation files created or updated
 
-- `docs/derived/S01_DETAILED_PLAN.md`
-- `docs/derived/S01_REQUIREMENTS.md`
-- `docs/derived/S01_RESULT_MODAL_SPEC.md`
-- `docs/derived/S01_MATCH_SERIES_SPEC.md`
-- `docs/derived/S01_AUDIO_SPEC.md`
-- `docs/derived/S01_TEST_MATRIX.md`
-- `docs/derived/S01_REQUIREMENTS_REVIEW.md`
+- `docs/releases/special/s01/detailed-plan.md`
+- `docs/releases/special/s01/requirements.md`
+- `docs/releases/special/s01/result-modal-spec.md`
+- `docs/releases/special/s01/match-series-spec.md`
+- `docs/releases/special/s01/audio-spec.md`
+- `docs/releases/special/s01/test-matrix.md`
+- `docs/releases/special/s01/requirements-review.md`
 - `apps/server/src/multiplayer.ts`
 - `apps/server/src/http-server.ts`
 - `apps/server/src/multiplayer.test.ts`
@@ -2149,11 +2149,11 @@ The post-MVP-0.4 roadmap through V1.0 and current post-V1.0 stabilization path a
 
 Current gate: V1.1.3/V1.2.0/V1.2.1 are complete. V1.1.3 is planning-only and has `ready_for_implementation: false`; `ready_for_next_release_implementation: true` is confirmed by the completed V1.2.0/V1.2.1 follow-up releases. V1.2.0 Event Modification Foundation and V1.2.1 Replacement Effects are implemented and locally verified. V1.1.2K kleines Kartenrelease implementation and final verification are complete. V1.1.2 Full Archives Access und Matchstart Entry UX, V1.1.1 Discard/Handlimit/Core Damage, V1.1.0 Setup/Game-End M2, V1.0.9 Private Internet Hardening, V1.0.8 Storage/Backup-Härtung and V1.0.7 Browser-E2E und Visual QA are complete and locally verified. Damage/Flatline, Resources, Trace/Link/Bidding, Jack-out/Breach/Multiaccess, Identity/Modifier, Hidden-Zone-Tools, Hosting, Viruses, Purge, Counter families, Recurring Credits, Bad Publicity, Core Damage, Event Modification and Replacement are playable only in their narrow gated scopes.
 
-V1.1.0 final review: `docs/derived/V1_1_0_FINAL_REVIEW.md` documents the completed Setup/Game-End M2 scope after V1.0.9. It confirms explicit setup, private mulligan, 7-point agenda normalization, game-end reason contract, Archives-facedown foundation, identity setup, visible spelling `Korp`, Lucide role icons, project/dossier-style agenda icon in agenda blue, tag icon, side-safe Setup UI and Browser-E2E regression.
+V1.1.0 final review: `docs/releases/v1/v1-1-0-setup-game-end-m2/final-review.md` documents the completed Setup/Game-End M2 scope after V1.0.9. It confirms explicit setup, private mulligan, 7-point agenda normalization, game-end reason contract, Archives-facedown foundation, identity setup, visible spelling `Korp`, Lucide role icons, project/dossier-style agenda icon in agenda blue, tag icon, side-safe Setup UI and Browser-E2E regression.
 
-V1.1.1 final review: `docs/derived/V1_1_1_FINAL_REVIEW.md` documents the completed Discard/Handlimit/Core Damage scope. It confirms Korp-/Runner-Discard-Phases, side-private Discard choices, Engine handlimit values, Runner Core Damage, negative-handlimit Flatline, Hidden-Info safety, Replay/StateHash determinism, Multiplayer/Reconnect/Undo coverage, deterministic AI discard and Web UI status.
+V1.1.1 final review: `docs/releases/v1/v1-1-1-discard-handlimit-core-damage/final-review.md` documents the completed Discard/Handlimit/Core Damage scope. It confirms Korp-/Runner-Discard-Phases, side-private Discard choices, Engine handlimit values, Runner Core Damage, negative-handlimit Flatline, Hidden-Info safety, Replay/StateHash determinism, Multiplayer/Reconnect/Undo coverage, deterministic AI discard and Web UI status.
 
-V1.1.2 final review: `docs/derived/V1_1_2_FINAL_REVIEW.md` documents the completed Full Archives Access and Matchstart Entry UX scope. It confirms full Runner access over mixed Korp Archives, Archives-specific hidden-card visibility, side-safe PlayerViews/Reconnect payloads, deterministic Archives queue progress, Trash from Archives without duplicate entries, Replay/StateHash determinism, Multiplayer/Reconnect/Undo/Idempotency coverage and the NETGRID start console with play-mode cards, format cards, Join-Link entry, folded advanced options and side-safe start summary.
+V1.1.2 final review: `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/final-review.md` documents the completed Full Archives Access and Matchstart Entry UX scope. It confirms full Runner access over mixed Korp Archives, Archives-specific hidden-card visibility, side-safe PlayerViews/Reconnect payloads, deterministic Archives queue progress, Trash from Archives without duplicate entries, Replay/StateHash determinism, Multiplayer/Reconnect/Undo/Idempotency coverage and the NETGRID start console with play-mode cards, format cards, Join-Link entry, folded advanced options and side-safe start summary.
 
 Next scope decision:
 
@@ -2168,89 +2168,89 @@ Card Data Pipeline v2, planbasierte Corp-KI, planbasierte Runner-KI, Belief Stat
 
 Detailed planning and completion artifacts available:
 
-- `docs/derived/V1_7_1_TO_V1_8_1_DETAILED_PLAN.md`
-- `docs/derived/V1_4_2_TO_V1_6_0_PLANNING_REVIEW.md`
-- `docs/derived/V1_4_2_TO_V1_6_0_IMPLEMENTATION_HANDOFF.md`
-- `docs/derived/V1_4_2_BELIEF_STATE_OPPONENT_MODEL_DETAILED_PLAN.md`
-- `docs/derived/V1_4_2_REQUIREMENTS.md`
-- `docs/derived/BELIEF_STATE_OPPONENT_MODEL_1_4_2_SPEC.md`
-- `docs/derived/V1_4_2_TEST_MATRIX.md`
-- `docs/derived/V1_4_2_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_4_3_SIMULATION_SELFPLAY_EXPLOIT_REGRESSION_DETAILED_PLAN.md`
-- `docs/derived/V1_4_3_REQUIREMENTS.md`
-- `docs/derived/SIMULATION_SELFPLAY_EXPLOIT_REGRESSION_1_4_3_SPEC.md`
-- `docs/derived/V1_4_3_TEST_MATRIX.md`
-- `docs/derived/V1_4_3_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_5_0_PRIVATE_REPLAY_ANALYSIS_LEARNING_DETAILED_PLAN.md`
-- `docs/derived/V1_5_0_REQUIREMENTS.md`
-- `docs/derived/PRIVATE_REPLAY_ANALYSIS_LEARNING_1_5_0_SPEC.md`
-- `docs/derived/V1_5_0_TEST_MATRIX.md`
-- `docs/derived/V1_5_0_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_6_0_TUTORIAL_RULE_HELP_DETAILED_PLAN.md`
-- `docs/derived/V1_6_0_REQUIREMENTS.md`
-- `docs/derived/TUTORIAL_RULE_HELP_1_6_0_SPEC.md`
-- `docs/derived/V1_6_0_TEST_MATRIX.md`
-- `docs/derived/V1_6_0_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_6_0_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_6_0_FINAL_REVIEW.md`
-- `docs/derived/V1_6_0_RULE_HELP_GLOSSARY.md`
+- `docs/releases/v1/v1-7-1-mechanikpaket-e/plan-to-v1-8-1.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/planning-review-to-v1-6-0.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/implementation-handoff-to-v1-6-0.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/plan.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/requirements.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/spec.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/test-matrix.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/requirements-review.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/plan.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/requirements.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/spec.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/test-matrix.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/requirements-review.md`
+- `docs/releases/v1/v1-5-0-private-replay-analysis-learning/plan.md`
+- `docs/releases/v1/v1-5-0-private-replay-analysis-learning/requirements.md`
+- `docs/releases/v1/v1-5-0-private-replay-analysis-learning/spec.md`
+- `docs/releases/v1/v1-5-0-private-replay-analysis-learning/test-matrix.md`
+- `docs/releases/v1/v1-5-0-private-replay-analysis-learning/requirements-review.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/plan.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/requirements.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/spec.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/test-matrix.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/requirements-review.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/implementation-review.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/final-review.md`
+- `docs/releases/v1/v1-6-0-tutorial-rule-help/rule-help-glossary.md`
 - `docs/derived/POST_MVP_0.4_ROADMAP.md`
 - `docs/derived/MVP_0.5_DETAILED_PLAN.md`
-- `docs/derived/V1_0_DECK_MATCH_STABILIZATION_PLAN.md`
-- `docs/derived/V1_0_DECK_MATCH_STABILIZATION_FINAL_REVIEW.md`
-- `docs/derived/V1_0_3_MATCHSTART_UX_PLAN.md`
-- `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`
-- `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`
-- `docs/derived/V1_0_2_REQUIREMENTS.md`
-- `docs/derived/OPPONENT_ACTION_PRESENTATION_SPEC.md`
-- `docs/derived/V1_0_2_TEST_MATRIX.md`
-- `docs/derived/V1_0_2_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_0_2_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_0_2_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-0-deck-match-stabilization/plan.md`
+- `docs/releases/v1/v1-0-deck-match-stabilization/final-review.md`
+- `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`
+- `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/plan.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/spec.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/test-matrix.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/requirements-review.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/implementation-review.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/final-review.md`
 - `docs/derived/RELEASE_PLANNING_2026-05-05.md`
-- `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`
-- `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`
-- `docs/derived/V1_0_4_REQUIREMENTS.md`
-- `docs/derived/V1_0_4_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_0_4_FINAL_REVIEW.md`
-- `docs/derived/V1_0_4_TWO_TAB_SMOKE.md`
-- `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`
-- `docs/derived/V1_0_6_UI_RESOURCE_CLARITY_PLAN.md`
-- `docs/derived/V1_0_6_REQUIREMENTS.md`
-- `docs/derived/RESOURCE_CARD_DISPLAY_1_0_6_SPEC.md`
-- `docs/derived/V1_0_6_TEST_MATRIX.md`
-- `docs/derived/V1_0_6_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_0_6_BROWSER_PLAYTEST_SMOKE.md`
-- `docs/derived/V1_0_6_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_0_6_FINAL_REVIEW.md`
-- `docs/derived/V1_0_7_BROWSER_E2E_VISUAL_QA_PLAN.md`
-- `docs/derived/V1_0_7_REQUIREMENTS.md`
-- `docs/derived/BROWSER_E2E_VISUAL_QA_1_0_7_SPEC.md`
-- `docs/derived/V1_0_7_TEST_MATRIX.md`
-- `docs/derived/V1_0_7_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_0_7_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_0_7_FINAL_REVIEW.md`
-- `docs/derived/V1_0_8_STORAGE_BACKUP_HARDENING_PLAN.md`
-- `docs/derived/V1_0_8_REQUIREMENTS.md`
-- `docs/derived/STORAGE_SQLITE_1_0_8_SPEC.md`
-- `docs/derived/BACKUP_RECOVERY_1_0_8_SPEC.md`
-- `docs/derived/V1_0_8_TEST_MATRIX.md`
-- `docs/derived/V1_0_8_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_0_8_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_0_8_FINAL_REVIEW.md`
-- `docs/derived/V1_0_9_PRIVATE_INTERNET_HARDENING_PLAN.md`
-- `docs/derived/V1_0_9_REQUIREMENTS.md`
-- `docs/derived/PRIVATE_INTERNET_SECURITY_1_0_9_SPEC.md`
-- `docs/derived/PRIVATE_DEPLOYMENT_OPS_1_0_9_SPEC.md`
-- `docs/derived/V1_0_9_TEST_MATRIX.md`
-- `docs/derived/V1_0_9_REQUIREMENTS_REVIEW.md`
-- `docs/derived/V1_1_0_SETUP_GAME_END_M2_DETAILED_PLAN.md`
-- `docs/derived/V1_1_2_FULL_ARCHIVES_AND_MATCHSTART_ENTRY_UX_PLAN.md`
-- `docs/derived/V1_1_2_REQUIREMENTS.md`
-- `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`
-- `docs/derived/MATCHSTART_ENTRY_UX_1_1_2_SPEC.md`
-- `docs/derived/V1_1_2_TEST_MATRIX.md`
-- `docs/derived/V1_1_2_REQUIREMENTS_REVIEW.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/requirements.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/implementation-review.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/final-review.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/two-tab-smoke.md`
+- `docs/releases/v1/v1-0-5-action-board-ux/plan.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/plan.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/requirements.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/resource-card-display-spec.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/test-matrix.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/requirements-review.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/browser-playtest-smoke.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/implementation-review.md`
+- `docs/releases/v1/v1-0-6-ui-resource-clarity/final-review.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/plan.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/requirements.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/browser-e2e-visual-qa-spec.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/test-matrix.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/requirements-review.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/implementation-review.md`
+- `docs/releases/v1/v1-0-7-browser-e2e-visual-qa/final-review.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/plan.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/requirements.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/storage-sqlite-spec.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/backup-recovery-spec.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/test-matrix.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/requirements-review.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/implementation-review.md`
+- `docs/releases/v1/v1-0-8-storage-backup-hardening/final-review.md`
+- `docs/releases/v1/v1-0-9-private-internet-hardening/plan.md`
+- `docs/releases/v1/v1-0-9-private-internet-hardening/requirements.md`
+- `docs/releases/v1/v1-0-9-private-internet-hardening/private-internet-security-spec.md`
+- `docs/releases/v1/v1-0-9-private-internet-hardening/private-deployment-ops-spec.md`
+- `docs/releases/v1/v1-0-9-private-internet-hardening/test-matrix.md`
+- `docs/releases/v1/v1-0-9-private-internet-hardening/requirements-review.md`
+- `docs/releases/v1/v1-1-0-setup-game-end-m2/plan.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/plan.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/requirements.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/full-archives-access-spec.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/matchstart-entry-ux-spec.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/test-matrix.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/requirements-review.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_AND_ROADMAP.md`
 - `docs/derived/LONG_TERM_PRODUCT_VISION_EXECUTIVE_SUMMARY.md`
 - `docs/derived/MVP_0.6_DETAILED_PLAN.md`
@@ -2314,7 +2314,7 @@ Detailed planning and completion artifacts available:
 - `docs/derived/MVP_0.99_IMPLEMENTATION_REVIEW.md`
 - `docs/derived/MVP_0.99_FINAL_REVIEW.md`
 - `data/rules/mechanics-coverage-0.99.json`
-- `docs/derived/V1_1_3_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/final-review.md`
 - `data/rules/mechanics-coverage-1.2.1.json`
 
 UI design exploration artifacts available:
@@ -2338,8 +2338,8 @@ Verifikation:
 - `corepack pnpm typecheck` grün.
 
 Führende Artefakte:
-- `docs/derived/V1_9_5_TO_V1_9_8_SEQUENTIAL_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_9_5_TO_V1_9_8_DEFERRED_REGISTER.md`
+- `docs/releases/v1/v1-9-originalset-completion/v1-9-5-to-v1-9-8-deferred-sprint/sequential-implementation-review.md`
+- `docs/releases/v1/v1-9-originalset-completion/v1-9-5-to-v1-9-8-deferred-sprint/deferred-register.md`
 - `data/manifests/onr-v1-9-5-to-v1-9-8-core-implementation-manifest.json`
 - `data/scenarios/onr-v1-9-5-to-v1-9-8-core-smokes.json`
 

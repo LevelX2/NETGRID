@@ -3950,6 +3950,10 @@ select {
   align-items: stretch;
 }
 
+.serverCollapsed .serverLayout {
+  grid-template-columns: auto;
+}
+
 .serverLead {
   display: flex;
   flex-direction: column;
@@ -3962,12 +3966,26 @@ select {
   align-self: stretch;
 }
 
+.serverCollapsed .serverLead {
+  padding-right: 0;
+  border-right: 0;
+}
+
 .serverLeadTop {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: auto;
   align-items: start;
   gap: 2px;
+}
+
+.serverLeadBottom,
+.sideZoneLeadBottom {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  margin-top: auto;
 }
 
 .sideZoneLeadTop {
@@ -3988,15 +4006,6 @@ select {
   border-radius: 6px;
   color: var(--muted);
   background: color-mix(in srgb, var(--panel), transparent 8%);
-}
-
-.serverLead > .zoneIdentityIcon {
-  align-self: center;
-}
-
-.sideZoneLead .zoneIdentityIcon {
-  align-self: flex-start;
-  margin-left: -1px;
 }
 
 .zoneIdentityIcon.runnerZoneSideLabel {
@@ -4023,14 +4032,25 @@ select {
 }
 
 .corpHqServer {
-  flex: 1 0 720px;
-  width: 720px;
+  flex: 0 1 auto;
+  width: fit-content;
   max-width: 100%;
+}
+
+.server.serverCollapsed,
+.corpHqServer.serverCollapsed {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: fit-content;
 }
 
 .corpHqServer .serverLayout,
 .corpHqServer .serverBody {
   width: 100%;
+}
+
+.corpHqServer.serverCollapsed .serverLayout {
+  width: auto;
 }
 
 .corpHqComposite {
@@ -4043,9 +4063,9 @@ select {
 }
 
 .corpHqHandPanel {
-  flex: 1 1 320px;
+  flex: 1 1 460px;
   min-width: 0;
-  max-width: min(48vw, 410px);
+  max-width: min(62vw, 560px);
 }
 
 .corpHqHandHead {
@@ -4069,22 +4089,6 @@ select {
   overflow-x: auto;
   overflow-y: hidden;
   padding-bottom: 2px;
-}
-
-.corpHqConnector {
-  position: relative;
-  flex: 0 0 18px;
-  align-self: stretch;
-  min-height: calc(185px * var(--lane-card-scale, 1));
-}
-
-.corpHqConnector::before {
-  content: "";
-  position: absolute;
-  top: calc(34px + 76px * var(--lane-card-scale, 1));
-  left: 2px;
-  right: 2px;
-  border-top: 2px solid color-mix(in srgb, var(--corp-zone-accent), var(--line) 36%);
 }
 
 .corpHqServerLanes {
@@ -6591,6 +6595,7 @@ select {
 
 .sideZoneFrameCountOnly {
   grid-template-columns: auto;
+  min-height: calc(151px * var(--zone-card-scale, 1) + 14px);
 }
 
 .sideZoneFrameCountOnly .sideZoneLead {
@@ -8339,6 +8344,12 @@ select,
   min-width: min(100%, 360px);
 }
 
+.opponentRunnerBoardStrip .runnerRigStrip.rigCollapsed {
+  flex: 0 0 auto;
+  width: fit-content;
+  min-width: 0;
+}
+
 .runnerOpponentZonesStrip {
   flex: 0 1 auto;
   display: flex;
@@ -8514,6 +8525,16 @@ select,
   background: color-mix(in srgb, var(--section-bg), transparent 5%);
 }
 
+.rigBoardSection.rigCollapsed {
+  width: fit-content;
+  max-width: fit-content;
+}
+
+.runnerRigStrip.rigCollapsed {
+  width: fit-content;
+  max-width: fit-content;
+}
+
 .rigSectionLayout {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -8525,6 +8546,11 @@ select,
   gap: 9px;
 }
 
+.rigSectionLayoutCollapsed {
+  grid-template-columns: auto;
+  min-height: calc(151px * var(--zone-card-scale, 1) + 14px);
+}
+
 .rigSectionLead {
   display: flex;
   flex-direction: column;
@@ -8534,6 +8560,19 @@ select,
   min-width: 24px;
   padding-right: 3px;
   border-right: 1px solid color-mix(in srgb, var(--line), transparent 32%);
+}
+
+.rigSectionLayoutCollapsed .rigSectionLead {
+  padding-right: 0;
+  border-right: 0;
+}
+
+.rigSectionLeadBottom {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 4px;
+  margin-top: auto;
 }
 
 .rigSectionLeadCompact {
@@ -9045,10 +9084,6 @@ select,
 
   .corpHqHandCards {
     max-width: 100%;
-  }
-
-  .corpHqConnector {
-    display: none;
   }
 
   .runnerHeapOverlapRow .cardSlot {

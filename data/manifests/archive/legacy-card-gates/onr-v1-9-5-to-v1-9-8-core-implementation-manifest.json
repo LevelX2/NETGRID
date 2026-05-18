@@ -32,6 +32,6 @@
       "verification": ["corepack pnpm test", "corepack pnpm typecheck"]
     }
   ],
-  "deferredRegister": "docs/derived/V1_9_5_TO_V1_9_8_DEFERRED_REGISTER.md",
-  "review": "docs/derived/V1_9_5_TO_V1_9_8_SEQUENTIAL_IMPLEMENTATION_REVIEW.md"
+  "deferredRegister": "docs/releases/v1/v1-9-originalset-completion/v1-9-5-to-v1-9-8-deferred-sprint/deferred-register.md",
+  "review": "docs/releases/v1/v1-9-originalset-completion/v1-9-5-to-v1-9-8-deferred-sprint/sequential-implementation-review.md"
 }

@@ -72,6 +72,13 @@ Eine kompakte Rollenübersicht liegt in `agents/README.md`.
 - Remote `origin` ist konfiguriert; Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf Nutzerwunsch oder über die dafür vorgesehenen Abschluss-/GitHub-Workflows.
 - Lokale Laufzeitdaten, SQLite-Dateien, temporäre Daten, Build-Artefakte, Caches und Secrets werden nicht versioniert.
 
+## Lokaler Start- und Serverbetrieb
+
+- Lokale NETGRID-App, Webclient und Multiplayer-Backend werden standardmäßig über `scripts/start-netgrid.ps1` gestartet.
+- Agenten starten Server oder Webclient nicht direkt über rohe `pnpm`, `tsx`, `next dev` oder eigene `Start-Process`-Kommandos, wenn das Ziel der normale lokale Betrieb ist.
+- Das Startscript setzt die verbindlichen LAN-/Origin-/URL-Umgebungsvariablen, insbesondere `NETGRID_PUBLIC_HOST`, `NETGRID_WEB_BASE_URL`, `NETGRID_SERVER_BASE_URL`, `NETGRID_ALLOWED_ORIGINS` und `NEXT_PUBLIC_NETGRID_SERVER_URL`.
+- Direkte Prozessstarts sind nur für isolierte Tests, gezielte Diagnose oder bewusst abweichende Experimente zulässig; dann müssen sie im Chat ausdrücklich als Abweichung benannt und danach wieder auf den Script-Startpfad zurückgeführt werden.
+
 ## Abschlusskommandos
 
 Wenn der Nutzer `Finito`, `Ende`, `Finale` oder `Endfinale` schreibt, gelten die globalen Abschlusskommandos aus dem Skill `abschlusskommandos`.

@@ -56,18 +56,18 @@ Geprüfte Daten:
 
 Relevante abgeleitete Artefakte:
 
-- `docs/derived/PLAN_BASED_CORP_AI_1_4_0_SPEC.md`
-- `docs/derived/V1_4_0_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_4_0_FINAL_REVIEW.md`
-- `docs/derived/PLAN_BASED_RUNNER_AI_1_4_1_SPEC.md`
-- `docs/derived/V1_4_1_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_4_1_FINAL_REVIEW.md`
-- `docs/derived/BELIEF_STATE_OPPONENT_MODEL_1_4_2_SPEC.md`
-- `docs/derived/V1_4_2_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_4_2_FINAL_REVIEW.md`
-- `docs/derived/SIMULATION_SELFPLAY_EXPLOIT_REGRESSION_1_4_3_SPEC.md`
-- `docs/derived/V1_4_3_IMPLEMENTATION_REVIEW.md`
-- `docs/derived/V1_4_3_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-4-0-plan-based-corp-ai/spec.md`
+- `docs/releases/v1/v1-4-0-plan-based-corp-ai/implementation-review.md`
+- `docs/releases/v1/v1-4-0-plan-based-corp-ai/final-review.md`
+- `docs/releases/v1/v1-4-1-plan-based-runner-ai/spec.md`
+- `docs/releases/v1/v1-4-1-plan-based-runner-ai/implementation-review.md`
+- `docs/releases/v1/v1-4-1-plan-based-runner-ai/final-review.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/spec.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/implementation-review.md`
+- `docs/releases/v1/v1-4-2-belief-state-opponent-model/final-review.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/spec.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/implementation-review.md`
+- `docs/releases/v1/v1-4-3-simulation-selfplay-exploit-regression/final-review.md`
 - `docs/derived/AI_DECK_DOCTRINE_DETAILED_PLAN_2026_05_15.md`
 - `docs/derived/AI_DECK_DOCTRINE_REQUIREMENTS.md`
 - `docs/derived/AI_DECK_DOCTRINE_IMPLEMENTATION_REVIEW_2026_05_15.md`

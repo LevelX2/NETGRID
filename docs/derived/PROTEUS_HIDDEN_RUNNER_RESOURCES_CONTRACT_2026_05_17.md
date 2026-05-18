@@ -22,7 +22,7 @@ Keine Aussage in diesem Dokument schaltet Proteus-Karten frei. Die Proteus-Daten
 - `docs/derived/TRACE_OPEN_BIDDING_ALIGNMENT_PLAN_2026_05_16.md`
 - `docs/derived/DAMAGE_FLATLINE_0.94_SPEC.md`
 - `docs/derived/RUN_BREACH_MULTIACCESS_0.97_SPEC.md`
-- `docs/derived/FULL_ARCHIVES_ACCESS_1_1_2_SPEC.md`
+- `docs/releases/v1/v1-1-2-full-archives-matchstart-entry-ux/full-archives-access-spec.md`
 
 ## Proteus-Zielgruppe
 

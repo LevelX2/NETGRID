@@ -36,8 +36,8 @@ Dieses Dokument war ursprünglich ein Planungsartefakt. Der P0-Regel- und Dokume
 - `docs/derived/MVP_0.96_REQUIREMENTS.md`
 - `docs/derived/MVP_0.96_IMPLEMENTATION_REVIEW.md`
 - `data/rules/mechanics-coverage-0.96.json`
-- `docs/derived/V1_9_14_TRACE_TAG_RESOURCE_SPEC.md`
-- `docs/derived/V1_9_14_FINAL_REVIEW.md`
+- `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md`
+- `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/final-review.md`
 - `data/rules/mechanics-coverage-1.9.14.json`
 
 ### Originalquellen als Abgleichsmaterial
@@ -313,7 +313,7 @@ Kurzfristig Option A beibehalten und sauber dokumentieren. Option B nur dann pla
 
 ## Dokumentationsbedarf
 
-1. Erledigt: Die aktuelle Trace-Policy ist in diesem Artefakt und in `docs/derived/V1_9_14_TRACE_TAG_RESOURCE_SPEC.md` festgehalten.
+1. Erledigt: Die aktuelle Trace-Policy ist in diesem Artefakt und in `docs/releases/v1/v1-9-originalset-completion/v1-9-14-trace-tag-resource/spec.md` festgehalten.
 2. Erledigt: `TRACE_LINK_BIDDING_0.96_SPEC.md` bleibt führendes Grundmodell und wird durch den V1.9.14-Status ergänzt.
 3. Erledigt: `docs/derived/DEVIATION_REGISTRY.md` ordnet DEV-007 als historische MVP-Abweichung ein und benennt die Trace-Normalisierung.
 4. Erledigt: Der Spotcheck-Job `trace-link-post-bid-resolvers` ist abgeschlossen und beschreibt moderne post-bid Trace-Link-Choices.

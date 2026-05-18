@@ -14,12 +14,12 @@ parallelWorker: worker-1
 releaseTarget:
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_ARCHIVE_ROLLUP_2026_05_17.md
-  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md
-  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md
-  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md
-  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_PROMPT.md
-  - docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_REPORT.md
+  - docs/releases/v1/v1-9-originalset-completion/automation/archive-rollup-2026-05-17.md
+  - docs/releases/v1/v1-9-originalset-completion/automation/controller-plan.md
+  - docs/releases/v1/v1-9-originalset-completion/automation/prompt.md
+  - docs/releases/v1/v1-9-originalset-completion/automation/state.md
+  - docs/releases/v1/v1-9-originalset-completion/automation/watchdog-prompt.md
+  - docs/releases/v1/v1-9-originalset-completion/automation/watchdog-report.md
   - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
   - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
   - docs/codex/CODEX_STATUS.md
@@ -40,11 +40,11 @@ Abgeschlossene Automationspläne, Prompts, Watchdog-Berichte und State-Dateien u
 ## Kontext und Quellen
 
 - Strukturreview vom 2026-05-17:
-  - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_CONTROLLER_PLAN.md`
-  - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_PROMPT.md`
-  - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md`
-  - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_PROMPT.md`
-  - `docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_WATCHDOG_REPORT.md`
+  - `docs/releases/v1/v1-9-originalset-completion/automation/controller-plan.md`
+  - `docs/releases/v1/v1-9-originalset-completion/automation/prompt.md`
+  - `docs/releases/v1/v1-9-originalset-completion/automation/state.md`
+  - `docs/releases/v1/v1-9-originalset-completion/automation/watchdog-prompt.md`
+  - `docs/releases/v1/v1-9-originalset-completion/automation/watchdog-report.md`
 - `V1_9_10_TO_V1_9_22_AUTOMATION_STATE.md` steht auf `Status: complete`.
 
 ## Scope
@@ -80,7 +80,7 @@ Abgeschlossene Automationspläne, Prompts, Watchdog-Berichte und State-Dateien u
 
 Erledigt am 2026-05-17. Alle Automationsartefakte unter `docs/derived/` wurden identifiziert: Controller-Plan, Controller-Prompt, State, Watchdog-Prompt und Watchdog-Report. Der State steht auf `complete`; es wurde kein aktives V1.9.10-bis-V1.9.22-Automationsartefakt gefunden.
 
-`docs/derived/V1_9_10_TO_V1_9_22_AUTOMATION_ARCHIVE_ROLLUP_2026_05_17.md` trennt `keep-evidence`, `archive` und den aktuell nicht empfohlenen `git-remove-after-condense`-Pfad. Die Prompts, der Controller-Plan, der State und der Watchdog-Report sind als historische Evidence markiert; `docs/codex/CODEX_STATUS.md`, der Wissensindex und das Monatslog wurden nachgezogen. Es wurden keine Automationskonfigurationen geändert, keine Cron-/Heartbeat-Einstellungen angepasst, keine Gate-Nachweise gelöscht und keine Automationsartefakte verschoben.
+`docs/releases/v1/v1-9-originalset-completion/automation/archive-rollup-2026-05-17.md` trennt `keep-evidence`, `archive` und den aktuell nicht empfohlenen `git-remove-after-condense`-Pfad. Die Prompts, der Controller-Plan, der State und der Watchdog-Report sind als historische Evidence markiert; `docs/codex/CODEX_STATUS.md`, der Wissensindex und das Monatslog wurden nachgezogen. Es wurden keine Automationskonfigurationen geändert, keine Cron-/Heartbeat-Einstellungen angepasst, keine Gate-Nachweise gelöscht und keine Automationsartefakte verschoben.
 
 Linkbruchrisiken vor einem späteren Move sind im Rollup dokumentiert: Wissensindex, `CODEX_STATUS.md`, Monatslog, `data/reports/v1922-completion-gate-status.json` und Querverweise innerhalb der Automationsartefakte.
 

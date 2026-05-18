@@ -9,7 +9,7 @@ import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import { beliefDebugSummary, reconstructBeliefState } from "./belief-state";
 import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpeningHand, type AiDeckDoctrineDeckSnapshot } from "./deck-doctrine";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS } from "./ai-hints";
-import { canBreakerDefinitionBreakIce, iceHasEndTheRun } from "./visible-run-analysis";
+import { canBreakerDefinitionBreakIce, creditsToBreakEndTheRunSubroutinesWithBreaker, endTheRunSubroutineCount, iceHasEndTheRun } from "./visible-run-analysis";
 import { buildAiDecisionInputDto } from "./input-dto";
 import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
@@ -2221,12 +2221,38 @@ function pumpCanLeadToBreak(input: AiDecisionInput, action: LegalAction): boolea
   )
     return false;
 
+  const endTheRunCount = endTheRunSubroutineCount(encounteredIce.definitionId);
+  if (endTheRunCount > 0 && encounterContinue?.payload?.encounterWillEndRun === true) {
+    const pumpCost = creditCostForAiAction(action);
+    const remainingCreditsAfterPump = input.playerView.own.credits - pumpCost;
+    if (remainingCreditsAfterPump < 0) return false;
+    const strengthAfterThisPump = (breaker.strength ?? 0) + pumpStrengthAmountForAction(action, breaker.definitionId);
+    const postPumpBreakAssessment = creditsToBreakEndTheRunSubroutinesWithBreaker(
+      breaker,
+      encounteredIce,
+      endTheRunCount,
+      strengthAfterThisPump,
+    );
+    if (!postPumpBreakAssessment) return false;
+    if (postPumpBreakAssessment.cost > remainingCreditsAfterPump) return false;
+  }
+
   return true;
 }
 
 function breakerIdForEncounterAction(action: LegalAction): string | undefined {
   if (typeof action.payload?.breakerId === "string") return action.payload.breakerId;
   return action.source === "basic_action" || action.source === "game_rule" ? undefined : action.source;
+}
+
+function creditCostForAiAction(action: LegalAction): number {
+  return action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.credits) ? cost.credits ?? 0 : 0), 0);
+}
+
+function pumpStrengthAmountForAction(action: LegalAction, breakerDefinitionId: string): number {
+  if (typeof action.payload?.pumpStrengthAmount === "number") return action.payload.pumpStrengthAmount;
+  const pumpAbility = DEMO_CARDS_BY_ID[breakerDefinitionId]?.abilities?.find((ability) => ability.type === "pump_strength");
+  return Math.max(0, pumpAbility?.amount ?? 1);
 }
 
 function scoreCorpRootInstall(roles: string[], action: LegalAction, features: AiFeatures, profile: Record<string, number>): number {

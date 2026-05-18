@@ -1,6 +1,13 @@
 # Root-/Source-Duplikate Cleanup Review 2026-05-17
 
-Status: documentation-cleanup-review
+Status: implemented-follow-up
+
+Follow-up 2026-05-18: Der Link-Migrationsplan wurde umgesetzt. Die Bare-Filename-Referenzen in `docs/NETGRID_Dokumentenpaket_MVP_0_1_0_2/README_Dokumentenpaket.md` und `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md` wurden auf `docs/source/` beziehungsweise den verbleibenden Root-Testkonzeptpfad präzisiert. Die vier Root-Duplikate wurden entfernt:
+
+- `docs/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
+- `docs/NETGRID_MVP_0.2_Plan.md`
+- `docs/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
+- `docs/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
 
 Dieser Review bewertet die bekannten Duplikate im `docs/`-Root gegen die führenden Ablagen `docs/source/` und `docs/codex/`. Rohquelleninhalte wurden nicht verändert; die Root-Duplikate wurden in diesem Paket noch nicht entfernt.
 

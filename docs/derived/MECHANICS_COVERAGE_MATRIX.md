@@ -8,7 +8,7 @@ Maschinenlesbar: `data/rules/mechanics-coverage-1.2.1.json` ist der aktuelle ver
 
 Diese Matrix normalisiert den aktuellen Mechanikstand nach V1.1.2K/V1.1.3 und hält die nachfolgenden V1.2.0-/V1.2.1-Foundation-Ergebnisse konsistent fest. Sie ersetzt keine Regelreferenz, sondern ist das Gate-Artefakt, das spätere Mechanikarbeit vor verdeckten Alt-Deviations schützt.
 
-Hinweis zum Kartenstatus: Das Mapping der 52 O:NR-v1-Runtime-Karten auf `listed`, `engine_supported`, `human_playable` und nicht `ai_supported` ist derzeit dokumentarisch in `docs/derived/V1_1_3_MECHANICS_AI_CARD_BASELINE_PLAN.md` und im V1.1.3-Final-Review festgehalten. Es existiert kein zusätzliches maschinenlesbares Card-Support-Manifest.
+Hinweis zum Kartenstatus: Das Mapping der 52 O:NR-v1-Runtime-Karten auf `listed`, `engine_supported`, `human_playable` und nicht `ai_supported` ist derzeit dokumentarisch in `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/plan.md` und im V1.1.3-Final-Review festgehalten. Es existiert kein zusätzliches maschinenlesbares Card-Support-Manifest.
 
 Hinweis nach Bestandsaufnahme 2026-05-04: Der lokale private O:NR-v1-Testzugang nutzt vorhandene Mechaniken in einem Engine-Harness und über lokale ignorierte Web-Overlay-Daten. Er erweitert diese Matrix nicht automatisch zu einem vollständigen offiziellen Kartenpool. Für reguläre Matchstart-Spielbarkeit braucht O:NR einen eigenen Gate- oder Stabilisierungsscope.
 

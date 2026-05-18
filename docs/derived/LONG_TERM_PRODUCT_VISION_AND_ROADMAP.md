@@ -6,7 +6,7 @@ Scope: langfristige Produktvision, Roadmap, Gates und Idealarchitektur für ein 
 
 Nachtrag 2026-05-06: Die kurzfristige V1.x-Linie wurde durch den tatsächlichen Projektverlauf fortgeschrieben. V1.0.4, V1.0.5K, V1.0.6, V1.0.6K und V1.0.7 sind inzwischen umgesetzt bzw. verifiziert; V1.0.8 Storage/Backup-Härtung ist requirements-frozen und bevorzugt SQLite als privaten lokalen Storage-Pfad. Die ursprünglich skizzierte V1.0.6-Position "Private Lobby Comfort" wurde faktisch durch V1.0.6 Aktionen, Credits und Kartenanzeige ersetzt; verbleibende Lobby-Politur ist kein aktiver V1.0.8-Scope.
 
-Nachtrag 2026-05-07: Die Anschlussplanung nach V1.1.2 ist in `docs/derived/POST_V1_1_2_MECHANICS_AI_CARD_ROADMAP.md` neu geschnitten. V1.1.2 bleibt unverändert. Danach liegt der Schwerpunkt auf fehlenden Spielmechaniken, mechanikgebundener Kartenfreigabe und kontinuierlicher KI-Weiterentwicklung je Mechanik- und Kartenrelease. Die ältere isolierte Zeile `V1.7.0 AI v2` ist dadurch als alleinstehender später KI-Schnitt überholt; KI-Unterstützung wird ab Post-V1.1.2 laufend mitgeführt.
+Nachtrag 2026-05-07: Die Anschlussplanung nach V1.1.2 ist in `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md` neu geschnitten. V1.1.2 bleibt unverändert. Danach liegt der Schwerpunkt auf fehlenden Spielmechaniken, mechanikgebundener Kartenfreigabe und kontinuierlicher KI-Weiterentwicklung je Mechanik- und Kartenrelease. Die ältere isolierte Zeile `V1.7.0 AI v2` ist dadurch als alleinstehender später KI-Schnitt überholt; KI-Unterstützung wird ab Post-V1.1.2 laufend mitgeführt.
 
 Nachtrag 2026-05-08: Die langfristige Produktvision und die Post-V1.1.2-Planung sind in `docs/derived/NETGRID_CONSOLIDATED_RELEASE_ROADMAP.md` zusammengeführt. Dieses Dokument bleibt als Produktvision und historische Gate-Begründung relevant; bei konkreter Releaseplanung ab V1.1.3 führt die konsolidierte Roadmap.
 
@@ -37,12 +37,12 @@ Gelesen und ausgewertet wurden unter anderem:
 - `docs/codex/CODEX_STATUS.md`
 - `docs/codex/CODEX_RUNBOOK_NETGRID_MVP_0_1_0_2.md`
 - `docs/derived/RELEASE_PLANNING_2026-05-05.md`
-- `docs/derived/V1_0_3_MATCHSTART_UX_FINAL_REVIEW.md`
-- `docs/derived/V1_0_4_NEXT_RELEASE_CANDIDATES.md`
-- `docs/derived/V1_0_4_PRIVATE_MATCH_LIFECYCLE_PLAN.md`
-- `docs/derived/V1_0_5_ACTION_BOARD_UX_PLAN.md`
-- `docs/derived/V1_0_2_OPPONENT_ACTION_PRESENTATION_PLAN.md`
-- `docs/derived/V1_0_1_JOIN_DECK_HANDSHAKE_PLAN.md`
+- `docs/releases/v1/v1-0-3-matchstart-ux/final-review.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/next-release-candidates.md`
+- `docs/releases/v1/v1-0-4-private-match-lifecycle/plan.md`
+- `docs/releases/v1/v1-0-5-action-board-ux/plan.md`
+- `docs/releases/v1/v1-0-2-opponent-action-presentation/plan.md`
+- `docs/releases/v1/v1-0-1-join-deck-handshake/plan.md`
 - `docs/derived/MECHANICS_COVERAGE_MATRIX.md`
 - `docs/derived/MVP_0.91_REQUIREMENTS.md`
 - `docs/derived/CARD_IMAGE_ASSET_GATE_0.91_SPEC.md`

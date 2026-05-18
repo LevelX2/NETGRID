@@ -11,11 +11,11 @@ Dieses Dokumentenpaket ergänzt das konsolidierte MVP-0.1-Konzept, den MVP-0.2-P
 
 Die Dokumente beziehen sich auf folgende vorhandene Arbeitsgrundlagen:
 
-- `NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
-- `NETGRID_MVP_0.2_Plan.md`
-- `NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`
-- `Erstes Testdeck.txt`
-- `Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
+- `docs/source/NETGRID_MVP_0.1_Konsolidiertes_Konzept_geprueft.md`
+- `docs/source/NETGRID_MVP_0.2_Plan.md`
+- `docs/NETGRID_Detailliertes_Testkonzept_MVP_0_1_0_2.md`
+- `docs/source/Erstes Testdeck.txt`
+- `docs/source/Null_Signal_Games_NETGRID_Comprehensive_Rules_v26.03.pdf`
 
 Die Comprehensive Rules v26.03 werden als Regelreferenz verwendet. Der MVP bildet daraus bewusst nur einen kleinen, dokumentierten Ausschnitt ab. Die internen Demo-Karten sind technische Testkarten und keine offiziellen, turnierlegalen Decklisten.
 

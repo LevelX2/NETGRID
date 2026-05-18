@@ -2180,6 +2180,51 @@ describe("MVP 0.3 Runner AI", () => {
     });
   });
 
+  it("does not pump Krash when Keeper remains unbreakable afterward", () => {
+    const state = krashKeeperHqEncounterState("ai-krash-keeper-useless-pump");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const pump = input.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_039_krash",
+    );
+    const breakAction = input.legalActions.find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_039_krash",
+    );
+    const continueRun = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(pump).toBeDefined();
+    expect(breakAction).toBeUndefined();
+    expect(selected?.type).not.toBe("pump_breaker");
+    expect(continueRun).toBeDefined();
+    if (!pump || !continueRun) throw new Error("Missing Krash/Keeper fixture actions");
+
+    const baselineDecision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    const baselineSelected = input.legalActions.find(
+      (action) => action.actionId === baselineDecision.actionId,
+    );
+    expect(baselineSelected?.type).toBe("continue_run");
+    expect(baselineDecision.reasonCode).toBe("runner.encounter.continue");
+  });
+
   it("continues into R&D access after passing the last ICE instead of jacking out", () => {
     let state = krashFilterEncounterState("ai-krash-filter-access-after-pass");
     state = apply(
@@ -7803,6 +7848,51 @@ function krashFilterEncounterState(seed: string): GameState {
     (action) =>
       action.type === "rez_ice" &&
       sourceDefinition(state, action) === "onr_v1_244_filter",
+  );
+}
+
+function krashKeeperHqEncounterState(seed: string): GameState {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: batchARunnerDeck(),
+      corpDeck: {
+        id: "ai_krash_keeper_corp",
+        name: "AI Krash Keeper Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_252_keeper", quantity: 1 },
+          { id: "simple_economy_operation", quantity: 4 },
+          { id: "simple_agenda", quantity: 3 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 2;
+  state.corp.credits = 5;
+  moveRunnerCardToGrip(state, "onr_v1_039_krash");
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === "onr_v1_039_krash",
+  );
+  putCorpIceOnServer(state, "hq", "onr_v1_252_keeper");
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+  );
+  return apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" &&
+      sourceDefinition(state, action) === "onr_v1_252_keeper",
   );
 }
 
