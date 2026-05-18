@@ -12,6 +12,7 @@ import {
   activeRunIceInstanceId,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
@@ -110,6 +111,19 @@ describe("V1.0.5 action board UI helpers", () => {
       )
     ).toBeUndefined();
     expect(automaticEndTurnAction({ ...board, activeSide: "runner" }, [endTurn], "corp")).toBeUndefined();
+  });
+
+  it("only offers automatic Corp mandatory draw when no other Corp action is available", () => {
+    const board = view("corp", { activeSide: "corp" });
+    const mandatoryDraw = legalAction("corp", "mandatory_draw", "game_rule", "Korp Pflichtkarte ziehen", {}, "corp_draw.mandatory_draw");
+    const scoreAgenda = legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" }, "corp_draw.mandatory_draw");
+    const rezIce = legalAction("corp", "rez_ice", "ice_1", "ICE rezzen", { cardId: "ice_1" }, "corp_draw.mandatory_draw");
+
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw], "corp")).toBe(mandatoryDraw);
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw, scoreAgenda], "corp")).toBeUndefined();
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw, rezIce], "corp")).toBeUndefined();
+    expect(automaticCorpMandatoryDrawAction(board, [mandatoryDraw], "runner")).toBeUndefined();
+    expect(automaticCorpMandatoryDrawAction({ ...board, pendingChoice: choice("corp") }, [mandatoryDraw], "corp")).toBeUndefined();
   });
 
   it("maps RunTimeline state, active target and server labels without raw V1.0.5 labels", () => {
@@ -872,6 +886,21 @@ function publicEvent(eventId: string, type: string, publicPayload: Record<string
     stateVersionAfter: 1,
     stateHashAfter: `${eventId}_hash`,
     publicPayload
+  };
+}
+
+function choice(side: Side): NonNullable<PlayerView["pendingChoice"]> {
+  return {
+    choiceId: "choice_1",
+    side,
+    source: "test",
+    prompt: "Wählen",
+    kind: "confirm",
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: 1,
+    visibility: "public",
+    options: []
   };
 }
 

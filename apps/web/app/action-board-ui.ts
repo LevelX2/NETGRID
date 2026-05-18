@@ -161,6 +161,14 @@ export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[],
   return ownActions.every((action) => action.type === "end_turn") ? endTurn : undefined;
 }
 
+export function automaticCorpMandatoryDrawAction(view: PlayerView, actions: LegalAction[], side: Side): LegalAction | undefined {
+  if (side !== "corp" || view.winner || view.pendingChoice || view.activeSide !== "corp") return undefined;
+  const ownActions = actions.filter((action) => action.side === side);
+  const mandatoryDraw = ownActions.find((action) => action.type === "mandatory_draw");
+  if (!mandatoryDraw) return undefined;
+  return ownActions.every((action) => action.type === "mandatory_draw") ? mandatoryDraw : undefined;
+}
+
 export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "start_run" && serverRefsForAction(action).length > 0) return true;
   if (action.type === "rez_ice" && cardRefsForAction(action).length > 0 && !action.timingPoint.startsWith("run.")) return true;

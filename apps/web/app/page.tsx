@@ -116,6 +116,7 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
   breachProgressLabel,
@@ -1776,6 +1777,7 @@ export default function Page() {
   const [automaticEffectCuesEnabled, setAutomaticEffectCuesEnabled] = useState(false);
   const [actionCueSettingsLoaded, setActionCueSettingsLoaded] = useState(false);
   const [autoEndTurnEnabled, setAutoEndTurnEnabled] = useState(false);
+  const [autoCorpMandatoryDrawEnabled, setAutoCorpMandatoryDrawEnabled] = useState(false);
   const [autoDiscardEnabled, setAutoDiscardEnabled] = useState(false);
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
@@ -1815,6 +1817,7 @@ export default function Page() {
   const lastTurnStartAudioCueKeyRef = useRef<string | null>(null);
   const locallyPlayedActionSoundKeysRef = useRef<Set<string>>(new Set());
   const autoEndTurnSubmittedKeyRef = useRef<string | null>(null);
+  const autoCorpMandatoryDrawSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
@@ -2092,7 +2095,8 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; topbarStickyEnabled?: unknown };
+        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; topbarStickyEnabled?: unknown };
+        if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean") setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
         if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
         if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
@@ -2105,8 +2109,8 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled }));
-  }, [gameplaySettingsLoaded, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled }));
+  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, topbarStickyEnabled]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -3205,6 +3209,15 @@ export default function Page() {
     );
     return true;
   };
+
+  useEffect(() => {
+    if (!autoCorpMandatoryDrawEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
+    const action = automaticCorpMandatoryDrawAction(payload.playerView, payload.legalActions, session.side);
+    if (!action) return;
+    const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
+    if (autoCorpMandatoryDrawSubmittedKeyRef.current === key) return;
+    if (submitAction(action, { immediateAudio: false })) autoCorpMandatoryDrawSubmittedKeyRef.current = key;
+  }, [autoCorpMandatoryDrawEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
 
   useEffect(() => {
     if (!autoEndTurnEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
@@ -4436,6 +4449,7 @@ export default function Page() {
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
               automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+              autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               topbarStickyEnabled={topbarStickyEnabled}
@@ -4456,6 +4470,7 @@ export default function Page() {
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
               onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+              onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onTopbarStickyEnabled={setTopbarStickyEnabled}
@@ -5202,6 +5217,7 @@ export default function Page() {
               actionCueAutoDismissMs={actionCueAutoDismissMs}
               actionCuesEnabled={actionCuesEnabled}
               automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+              autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
               autoDiscardEnabled={autoDiscardEnabled}
               autoEndTurnEnabled={autoEndTurnEnabled}
               topbarStickyEnabled={topbarStickyEnabled}
@@ -5223,6 +5239,7 @@ export default function Page() {
               onActionCueAutoDismissMs={setActionCueAutoDismissMs}
               onActionCuesEnabled={setActionCuesEnabled}
               onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+              onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
               onAutoDiscardEnabled={setAutoDiscardEnabled}
               onAutoEndTurnEnabled={setAutoEndTurnEnabled}
               onTopbarStickyEnabled={setTopbarStickyEnabled}
@@ -5276,6 +5293,7 @@ export default function Page() {
             actionCueAutoDismissMs={actionCueAutoDismissMs}
             actionCuesEnabled={actionCuesEnabled}
             automaticEffectCuesEnabled={automaticEffectCuesEnabled}
+            autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
             autoDiscardEnabled={autoDiscardEnabled}
             autoEndTurnEnabled={autoEndTurnEnabled}
             topbarStickyEnabled={topbarStickyEnabled}
@@ -5298,6 +5316,7 @@ export default function Page() {
             onActionCueAutoDismissMs={setActionCueAutoDismissMs}
             onActionCuesEnabled={setActionCuesEnabled}
             onAutomaticEffectCuesEnabled={setAutomaticEffectCuesEnabled}
+            onAutoCorpMandatoryDrawEnabled={setAutoCorpMandatoryDrawEnabled}
             onAutoDiscardEnabled={setAutoDiscardEnabled}
             onAutoEndTurnEnabled={setAutoEndTurnEnabled}
             onTopbarStickyEnabled={setTopbarStickyEnabled}
@@ -5909,6 +5928,7 @@ function OptionsPanel({
   actionCueAutoDismissMs,
   actionCuesEnabled,
   automaticEffectCuesEnabled,
+  autoCorpMandatoryDrawEnabled,
   autoDiscardEnabled,
   autoEndTurnEnabled,
   topbarStickyEnabled,
@@ -5931,6 +5951,7 @@ function OptionsPanel({
   onActionCueAutoDismissMs,
   onActionCuesEnabled,
   onAutomaticEffectCuesEnabled,
+  onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
@@ -5954,6 +5975,7 @@ function OptionsPanel({
   actionCueAutoDismissMs: CueAutoDismissMs;
   actionCuesEnabled: boolean;
   automaticEffectCuesEnabled: boolean;
+  autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
@@ -5976,6 +5998,7 @@ function OptionsPanel({
   onActionCueAutoDismissMs(value: CueAutoDismissMs): void;
   onActionCuesEnabled(value: boolean): void;
   onAutomaticEffectCuesEnabled(value: boolean): void;
+  onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
@@ -6027,9 +6050,11 @@ function OptionsPanel({
           onRigPercent={onCardRigScalePercent}
         />
         <GameplaySettings
+          autoCorpMandatoryDrawEnabled={autoCorpMandatoryDrawEnabled}
           autoDiscardEnabled={autoDiscardEnabled}
           autoEndTurnEnabled={autoEndTurnEnabled}
           topbarStickyEnabled={topbarStickyEnabled}
+          onAutoCorpMandatoryDrawEnabled={onAutoCorpMandatoryDrawEnabled}
           onAutoDiscardEnabled={onAutoDiscardEnabled}
           onAutoEndTurnEnabled={onAutoEndTurnEnabled}
           onTopbarStickyEnabled={onTopbarStickyEnabled}
@@ -6292,16 +6317,20 @@ function CardSizeSliderRow({
 }
 
 function GameplaySettings({
+  autoCorpMandatoryDrawEnabled,
   autoDiscardEnabled,
   autoEndTurnEnabled,
   topbarStickyEnabled,
+  onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled
 }: {
+  autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
   autoEndTurnEnabled: boolean;
   topbarStickyEnabled: boolean;
+  onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
@@ -6314,6 +6343,10 @@ function GameplaySettings({
           <span className="meta">Lokale Komfortoption, kein Match-State</span>
         </div>
         <div className="settingsToggleGroup">
+          <label className={`settingsToggle ${autoCorpMandatoryDrawEnabled ? "checked" : ""}`}>
+            <input type="checkbox" checked={autoCorpMandatoryDrawEnabled} onChange={(event) => onAutoCorpMandatoryDrawEnabled(event.target.checked)} />
+            Korp-Startziehen
+          </label>
           <label className={`settingsToggle ${autoEndTurnEnabled ? "checked" : ""}`}>
             <input type="checkbox" checked={autoEndTurnEnabled} onChange={(event) => onAutoEndTurnEnabled(event.target.checked)} />
             Auto-Zugende
@@ -6328,7 +6361,7 @@ function GameplaySettings({
           </label>
         </div>
       </div>
-      <p className="settingsHelp">Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar.</p>
+      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar.</p>
     </div>
   );
 }
