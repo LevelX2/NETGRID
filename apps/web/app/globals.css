@@ -5182,6 +5182,10 @@ select {
   right: calc(5px * var(--lane-card-scale, 1));
 }
 
+.lane .card.withImage .brokerStoredCreditsBadge {
+  top: calc(29px * var(--lane-card-scale, 1));
+}
+
 .lane .dataRavenCounterBadge {
   top: calc(5px * var(--lane-card-scale, 1));
   right: calc(5px * var(--lane-card-scale, 1));
@@ -5648,6 +5652,10 @@ select {
 
 .brokerStoredCreditsBadge {
   top: 6px;
+}
+
+.card.withImage .brokerStoredCreditsBadge {
+  top: 30px;
 }
 
 .recurringCreditBadge {
