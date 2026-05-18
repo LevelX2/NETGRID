@@ -940,9 +940,10 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
       continue;
     }
 
+    numbers[event.eventId] = activeTurnNumber;
+
     if (actionType === "end_turn") {
       if (activeSide !== actor) activeSide = actor;
-      numbers[event.eventId] = activeTurnNumber;
       activeSide = actor === "corp" ? "runner" : "corp";
       activeTurnNumber += 1;
     }

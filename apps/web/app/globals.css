@@ -5969,20 +5969,34 @@ select {
 }
 
 .chronicleGroup {
+  --chronicle-group-accent: var(--muted);
   position: sticky;
   top: 0;
   z-index: 2;
   width: fit-content;
   max-width: 100%;
   padding: 3px 8px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--chronicle-group-accent), var(--line) 45%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--panel), var(--panel-soft) 70%);
-  color: var(--muted);
+  background: color-mix(in srgb, var(--chronicle-group-accent), var(--panel) 86%);
+  color: color-mix(in srgb, var(--chronicle-group-accent), white 32%);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
+}
+
+.chronicleGroup.corp {
+  --chronicle-group-accent: var(--corp-status-accent);
+}
+
+.chronicleGroup.runner,
+.chronicleGroup.run {
+  --chronicle-group-accent: var(--runner-zone-accent);
+}
+
+.chronicleGroup.system {
+  --chronicle-group-accent: var(--chronicle-system);
 }
 
 .chronicleEntry {
@@ -6036,6 +6050,21 @@ select {
 .chronicleEntry.importance-important,
 .chronicleEntry.importance-critical {
   border-color: color-mix(in srgb, var(--chronicle-accent), var(--line));
+}
+
+.chronicleEntry.group-corp {
+  border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 58%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 84%), color-mix(in srgb, var(--corp-status-accent), transparent 84%)),
+    color-mix(in srgb, var(--panel), var(--chronicle-accent) 5%);
+}
+
+.chronicleEntry.group-runner,
+.chronicleEntry.group-run {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 58%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--runner-zone-accent), transparent 84%), color-mix(in srgb, var(--runner-zone-accent), transparent 84%)),
+    color-mix(in srgb, var(--panel), var(--chronicle-accent) 5%);
 }
 
 .chronicleRail {
@@ -6131,15 +6160,39 @@ select {
   overflow-wrap: anywhere;
 }
 
+.chronicleEntry.detail-simple {
+  padding-block: 6px;
+}
+
+.chronicleEntry.detail-simple .chronicleTopLine strong {
+  font-size: 12px;
+  line-height: 1.22;
+}
+
+.chronicleEntry.detail-simple .chronicleRail {
+  width: 26px;
+}
+
+.chronicleEntry.detail-simple .chronicleRailIcon {
+  width: 26px;
+  height: 26px;
+}
+
+.chronicleEntry.detail-simple .chronicleRailIcon svg {
+  width: 13px;
+  height: 13px;
+}
+
 .chronicleCardName {
+  --chronicle-card-type-accent: var(--chronicle-card);
   position: relative;
   display: inline-block;
   max-width: 100%;
   padding: 1px 5px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-accent), var(--line) 35%);
+  border: 1px solid color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 35%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-bg) 88%);
-  color: color-mix(in srgb, var(--chronicle-accent), var(--accent-mix-text) 46%);
+  background: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-bg) 88%);
+  color: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-text) 46%);
   font: inherit;
   font-weight: inherit;
   line-height: 1.25;
@@ -6148,6 +6201,46 @@ select {
   appearance: none;
   -webkit-box-decoration-break: clone;
   box-decoration-break: clone;
+}
+
+.chronicleCardType-agenda {
+  --chronicle-card-type-accent: #3f9fff;
+}
+
+.chronicleCardType-upgrade {
+  --chronicle-card-type-accent: #9aa5b1;
+}
+
+.chronicleCardType-asset {
+  --chronicle-card-type-accent: #4fd07c;
+}
+
+.chronicleCardType-ice {
+  --chronicle-card-type-accent: #8f7dff;
+}
+
+.chronicleCardType-operation {
+  --chronicle-card-type-accent: #f0a34a;
+}
+
+.chronicleCardType-event {
+  --chronicle-card-type-accent: #43c7d8;
+}
+
+.chronicleCardType-hardware {
+  --chronicle-card-type-accent: #d7b85f;
+}
+
+.chronicleCardType-resource {
+  --chronicle-card-type-accent: #d783b7;
+}
+
+.chronicleCardType-program {
+  --chronicle-card-type-accent: #63c6ff;
+}
+
+.chronicleCardType-identity {
+  --chronicle-card-type-accent: #e7d36b;
 }
 
 .chronicleCardName.hasDetail {
@@ -6207,15 +6300,16 @@ select {
 }
 
 .chronicleCardLine {
+  --chronicle-card-type-accent: var(--chronicle-card);
   position: relative;
   width: fit-content;
   max-width: 100%;
   padding: 5px 7px;
-  border: 1px solid color-mix(in srgb, var(--chronicle-card), var(--line) 55%);
+  border: 1px solid color-mix(in srgb, var(--chronicle-card-type-accent), var(--line) 55%);
   border-radius: 6px;
-  background: color-mix(in srgb, var(--chronicle-card), var(--accent-mix-bg) 93%);
+  background: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-bg) 93%);
   cursor: help;
-  color: color-mix(in srgb, var(--chronicle-card), var(--accent-mix-text) 46%);
+  color: color-mix(in srgb, var(--chronicle-card-type-accent), var(--accent-mix-text) 46%);
   font: inherit;
   font-size: 12px;
   line-height: 1.35;
@@ -7181,6 +7275,7 @@ select,
 
 .colorSchemeSettings,
 .cardDisplaySettings,
+.chronicleDetailSettings,
 .cardTooltipSettings,
 .cardSizeSettings,
 .gameplaySettings,
@@ -7196,7 +7291,8 @@ select,
 }
 
 .colorSchemeSettings,
-.cardDisplaySettings {
+.cardDisplaySettings,
+.chronicleDetailSettings {
   display: flex;
   align-items: center;
   justify-content: space-between;

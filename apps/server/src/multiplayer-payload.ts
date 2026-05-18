@@ -12,6 +12,8 @@ import type {
   StoredMatch,
 } from "./multiplayer";
 
+const SIDE_PAYLOAD_EVENT_TAIL_LIMIT = 80;
+
 export type SidePayloadBuilderDeps = {
   isAiSide: (side: Side) => boolean;
   safeDisplayNameFor: (side: Side) => string | undefined;
@@ -70,7 +72,7 @@ export function buildSidePayload(
     legalActions:
       record.match.status === "active" ? getLegalActions(record.gameState, side) : [],
     eventTail: record.eventLog
-      .slice(-20)
+      .slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)
       .map((event) => redactPublicEventForSide(event.publicPayload, side)),
     opponentStatus: {
       side: opponentSide,
