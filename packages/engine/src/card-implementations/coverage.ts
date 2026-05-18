@@ -18,20 +18,30 @@ export type CardImplementationCoverageEntry = {
 const IMPLEMENTED_REZ_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
-const IMPLEMENTED_SIMPLE_GAIN_CREDITS_LOCATION =
+const IMPLEMENTED_ON_PLAY_EFFECT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
+  "onr_v1_079_bodyweight-synthetic-blood":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
+  "onr_v1_095_jack-n-joe":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
   "onr_v1_097_livewires-contacts":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
   "onr_v1_281_accounts-receivable":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
+  "onr_v1_282_annual-reviews":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/annual-reviews.ts",
+  "onr_v1_288_day-shift":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/day-shift.ts",
   "onr_v1_290_efficiency-experts":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/efficiency-experts.ts",
+  "onr_v1_295_night-shift":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/night-shift.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_320_encoder-inc":
@@ -58,9 +68,9 @@ function implementedCoverageFor(
   }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(
-      "Engine-local CardImplementationDefinition exists for printed-cost on-play gain-credit behavior.",
+      "Engine-local CardImplementationDefinition exists for printed-cost on-play effect behavior.",
     );
-    currentLocations.add(IMPLEMENTED_SIMPLE_GAIN_CREDITS_LOCATION);
+    currentLocations.add(IMPLEMENTED_ON_PLAY_EFFECT_LOCATION);
   }
 
   return {

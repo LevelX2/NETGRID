@@ -11,11 +11,20 @@ export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
   controller: Side;
+  drawCards?: (
+    side: Side,
+    amount: number,
+  ) => CardEffectDrawCardsResult;
 };
 
 export type CardEffectExecutionResult = {
   publicPayload: Record<string, string | number | boolean>;
   resolvedEffects: ResolvedGameEffect[];
+};
+
+export type CardEffectDrawCardsResult = {
+  drawnCount: number;
+  publicPayload?: Record<string, string | number | boolean>;
 };
 
 function recipientSide(
@@ -30,6 +39,34 @@ function gainCredits(state: GameState, side: Side, amount: number): void {
   else state.runner.credits += amount;
 }
 
+function assertPositiveIntegerAmount(kind: string, amount: number): void {
+  if (!Number.isInteger(amount) || amount <= 0)
+    throw new Error(`${kind} effect amount must be a positive integer.`);
+}
+
+function assertPublicVisibility(kind: string, visibility: string): void {
+  if (visibility !== "public")
+    throw new Error(`${kind} effect visibility must be public.`);
+}
+
+function mergePublicPayload(
+  target: Record<string, string | number | boolean>,
+  next: Record<string, string | number | boolean> | undefined,
+): void {
+  if (!next) return;
+  for (const [key, value] of Object.entries(next)) {
+    if (
+      (key === "drawnCards" || key === "drawnCount" || key === "gainedCredits") &&
+      typeof value === "number" &&
+      typeof target[key] === "number"
+    ) {
+      target[key] = Number(target[key]) + value;
+    } else {
+      target[key] = value;
+    }
+  }
+}
+
 export function executeCardImplementationEffects(
   state: GameState,
   context: CardEffectExecutionContext,
@@ -41,8 +78,7 @@ export function executeCardImplementationEffects(
   effects.forEach((effect, index) => {
     switch (effect.kind) {
       case "gain_credits": {
-        if (!Number.isInteger(effect.amount) || effect.amount <= 0)
-          throw new Error("gain_credits effect amount must be a positive integer.");
+        assertPositiveIntegerAmount("gain_credits", effect.amount);
         const side = recipientSide(context, effect.recipient);
         gainCredits(state, side, effect.amount);
         publicPayload.gainedCredits =
@@ -56,6 +92,28 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: effect.amount,
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+        });
+        return;
+      }
+      case "draw_cards": {
+        assertPositiveIntegerAmount("draw_cards", effect.amount);
+        assertPublicVisibility("draw_cards", effect.visibility);
+        if (!context.drawCards)
+          throw new Error(
+            "draw_cards effect requires a drawCards execution context.",
+          );
+        const side = recipientSide(context, effect.recipient);
+        const drawResult = context.drawCards(side, effect.amount);
+        mergePublicPayload(publicPayload, drawResult.publicPayload);
+        resolvedEffects.push({
+          effectId: `${context.sourceCardId}.effect.${index}.draw_cards`,
+          kind: "draw_cards",
+          visibility: effect.visibility,
+          side,
+          amount: drawResult.drawnCount,
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

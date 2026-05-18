@@ -10,10 +10,19 @@ export type OnPlayCardAbilityImplementation = {
   effects: CardEffectImplementation[];
 };
 
-export type CardEffectImplementation = GainCreditsEffectImplementation;
+export type CardEffectImplementation =
+  | GainCreditsEffectImplementation
+  | DrawCardsEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
+  recipient: "controller" | "runner" | "corp";
+  amount: number;
+  visibility: EventVisibilityClass;
+};
+
+export type DrawCardsEffectImplementation = {
+  kind: "draw_cards";
   recipient: "controller" | "runner" | "corp";
   amount: number;
   visibility: EventVisibilityClass;

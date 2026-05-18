@@ -7061,6 +7061,105 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
   });
 
+  it("describes simple draw and ordered mixed cards through typed on-play effects", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_282_annual-reviews",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_288_day-shift")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          }),
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_295_night-shift")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          }),
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_079_bodyweight-synthetic-blood",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 5,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_095_jack-n-joe")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        effects: [
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+  });
+
   it("requires implementation coverage for every demo card", () => {
     const duplicateIds = (ids: string[]): string[] =>
       ids.filter((id, index) => ids.indexOf(id) !== index);
@@ -7187,6 +7286,143 @@ describe("V1.6.2 Mechanikpaket B", () => {
         [{ kind: "unknown_effect", visibility: "public" } as never],
       ),
     ).toThrow(/Unsupported card implementation effect/);
+  });
+
+  it("executes typed draw_cards card effects in declared order", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-draw-cards" });
+    state.runner.credits = 5;
+    state.corp.credits = 5;
+
+    const drawCards = (
+      side: "runner" | "corp",
+      amount: number,
+    ): { drawnCount: number; publicPayload: Record<string, number> } => {
+      const source = side === "runner" ? state.runner.stack : state.corp.rd;
+      const target = side === "runner" ? state.runner.grip : state.corp.hq;
+      let drawnCount = 0;
+      for (let index = 0; index < amount; index += 1) {
+        const cardId = source.shift();
+        if (!cardId) break;
+        target.push(cardId);
+        state.cardInstances[cardId] = {
+          ...state.cardInstances[cardId]!,
+          zone: side === "runner"
+            ? { side: "runner", zone: "grip" }
+            : { side: "corp", zone: "hq" },
+        };
+        drawnCount += 1;
+      }
+      return {
+        drawnCount,
+        publicPayload:
+          side === "runner" ? { drawnCount } : { drawnCards: drawnCount },
+      };
+    };
+
+    const runnerGripBefore = state.runner.grip.length;
+    const runnerResult = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.runner.identity,
+        controller: "runner",
+        drawCards,
+      },
+      [
+        {
+          kind: "draw_cards",
+          recipient: "runner",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    );
+    expect(state.runner.grip.length).toBe(runnerGripBefore + 2);
+    expect(runnerResult.publicPayload).toMatchObject({ drawnCount: 2 });
+    expect(runnerResult.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "draw_cards",
+        visibility: "public",
+        side: "runner",
+        amount: 2,
+      }),
+    ]);
+
+    const corpHqBefore = state.corp.hq.length;
+    const corpResult = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        controller: "corp",
+        drawCards,
+      },
+      [
+        {
+          kind: "draw_cards",
+          recipient: "corp",
+          amount: 3,
+          visibility: "public",
+        },
+      ],
+    );
+    expect(state.corp.hq.length).toBe(corpHqBefore + 3);
+    expect(corpResult.publicPayload).toMatchObject({ drawnCards: 3 });
+
+    const order: string[] = [];
+    executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        controller: "corp",
+        drawCards: (side, amount) => {
+          order.push(`${side}-draw-after-${state.corp.credits}`);
+          return drawCards(side, amount);
+        },
+      },
+      [
+        {
+          kind: "gain_credits",
+          recipient: "controller",
+          amount: 2,
+          visibility: "public",
+        },
+        {
+          kind: "draw_cards",
+          recipient: "controller",
+          amount: 1,
+          visibility: "public",
+        },
+      ],
+    );
+    expect(order).toEqual(["corp-draw-after-7"]);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.runner.identity, controller: "runner", drawCards },
+        [
+          {
+            kind: "draw_cards",
+            recipient: "runner",
+            amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.runner.identity, controller: "runner", drawCards },
+        [
+          {
+            kind: "draw_cards",
+            recipient: "runner",
+            amount: 1,
+            visibility: "private_to_side",
+          },
+        ],
+      ),
+    ).toThrow(/visibility must be public/);
   });
 
   it("applies Data Masons rez/strength modifiers and score-based Security Net strength", () => {

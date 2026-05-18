@@ -63,7 +63,10 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "./ability-engine/cost-pipeline";
 export { quoteCorpRezCost } from "./ability-engine/cost-pipeline";
-import { executeCardImplementationEffects } from "./ability-engine/effect-interpreter";
+import {
+  executeCardImplementationEffects,
+  type CardEffectDrawCardsResult,
+} from "./ability-engine/effect-interpreter";
 import type { OnPlayCardAbilityImplementation } from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
 import {
@@ -909,33 +912,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_079_bodyweight-synthetic-blood": {
-    name: "onr_runner_event_draw_5",
-    resolve: (state, legalAction) => {
-      const stackBefore = state.runner.stack.length;
-      const drawSummary = drawRunnerCards(state, 5);
-      const drawnCount = stackBefore - state.runner.stack.length;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        drawnCount,
-        runnerGripAfter: state.runner.grip.length,
-      };
-      applyRunnerDrawSummaryPayload(state, legalAction, {
-        ...drawSummary,
-        drawnCount,
-      });
-    },
-  },
-  "onr_v1_095_jack-n-joe": {
-    name: "onr_runner_event_draw_3",
-    resolve: (state, legalAction) => {
-      applyRunnerDrawSummaryPayload(
-        state,
-        legalAction,
-        drawRunnerCards(state, 3),
-      );
-    },
-  },
   [TERRORIST_REPRISAL_ID]: {
     name: "onr_runner_event_terrorist_reprisal_hq_random_discard",
     canPlay: (state) => corpScoredBlackOpsAgendaLastTurn(state),
@@ -1296,16 +1272,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       state.corp.badPublicity += 1;
     },
   },
-  "onr_v1_282_annual-reviews": {
-    name: "onr_corp_operation_draw_3",
-    resolve: (state, legalAction) => {
-      drawCorpCards(state, 3);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        drawnCards: 3,
-      };
-    },
-  },
   "onr_v1_283_audit-of-call-records": {
     name: "onr_corp_operation_trace_5_after_two_run_attempts",
     canPlay: (state) => runnerRunAttemptsLastTurn(state) >= 2,
@@ -1410,19 +1376,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  "onr_v1_288_day-shift": {
-    name: "onr_corp_operation_draw_2_gain_1",
-    resolve: (state, legalAction) => {
-      drawCorpCards(state, 2);
-      state.corp.credits += 1;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        drawnCards: 2,
-        gainedCredits: 1,
-        corpCreditsAfter: state.corp.credits,
-      };
-    },
-  },
   [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
     name: "onr_v1922_corp_operation_private_archives_to_hq",
     canPlay: (state) => state.corp.archives.length > 0,
@@ -1485,19 +1438,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       requireRunnerTagged(state);
       state.runner.tags += 1;
       state.corp.credits += 1;
-    },
-  },
-  "onr_v1_295_night-shift": {
-    name: "onr_corp_operation_gain_2_draw_1",
-    resolve: (state, legalAction) => {
-      state.corp.credits += 2;
-      drawCorpCard(state);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedCredits: 2,
-        drawnCards: 1,
-        corpCreditsAfter: state.corp.credits,
-      };
     },
   },
   "onr_v1_301_punitive-counterstrike": {
@@ -1727,6 +1667,16 @@ function applyRunnerDrawSummaryPayload(
   if (summary.drawnCount <= 0) return;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
+    ...runnerDrawSummaryPublicPayload(state, summary),
+  };
+}
+
+function runnerDrawSummaryPublicPayload(
+  state: GameState,
+  summary: RunnerDrawSummary,
+): Record<string, string | number | boolean> {
+  if (summary.drawnCount <= 0) return {};
+  return {
     drawnCount: summary.drawnCount,
     ...(summary.citySurveillanceSourceCount > 0
       ? {
@@ -24213,12 +24163,41 @@ function executeOnPlayCardImplementationAbility(
       sourceCardId: cardId,
       sourceDefinitionId: definition.id,
       controller: mustInstance(state.cardInstances, cardId).controller,
+      drawCards: (side, amount) =>
+        drawCardsForCardImplementationEffect(state, side, amount),
     },
     ability.effects,
   );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     ...result.publicPayload,
+  };
+}
+
+function drawCardsForCardImplementationEffect(
+  state: GameState,
+  side: Side,
+  amount: number,
+): CardEffectDrawCardsResult {
+  if (side === "corp") {
+    const rdBefore = state.corp.rd.length;
+    drawCorpCards(state, amount);
+    const drawnCount = rdBefore - state.corp.rd.length;
+    return {
+      drawnCount,
+      publicPayload: drawnCount > 0 ? { drawnCards: drawnCount } : {},
+    };
+  }
+
+  const summary = drawRunnerCards(state, amount);
+  return {
+    drawnCount: summary.drawnCount,
+    publicPayload: {
+      ...runnerDrawSummaryPublicPayload(state, summary),
+      ...(summary.drawnCount > 0
+        ? { runnerGripAfter: state.runner.grip.length }
+        : {}),
+    },
   };
 }
 
