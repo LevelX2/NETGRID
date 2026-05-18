@@ -5,6 +5,7 @@
 ## Enthaltene Artefakte
 
 - `audio-cue-sound-matrix-2026-05-17.md`
+- `player-clock-grace-period-contract-2026-05-19.md`
 - `timer-server-sync-contract-2026-05-17.md`
 - `visible-match-timer-system-concept-2026-05-17.md`
 
