@@ -4967,6 +4967,138 @@ describe("V1.4.1 plan-based Runner AI", () => {
     ).toBe("draw_for_answers");
   });
 
+  it("uses installed Runner economy payouts before the basic credit action", () => {
+    const shortTermInput = installedRunnerEconomyInput(
+      "ai-v141-installed-short-term",
+      { shortTermCounters: 10, credits: 1 },
+    );
+    const shortTermTake = shortTermInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility ===
+          "short_term_contract_take_credits",
+    );
+    const shortTermBasicCredit = shortTermInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(shortTermTake).toBeDefined();
+    expect(shortTermBasicCredit).toBeDefined();
+    expect(shortTermTake?.payload?.gainCreditsAmount).toBe(2);
+    if (!shortTermTake || !shortTermBasicCredit)
+      throw new Error("Missing Short-Term Contract economy fixture actions");
+
+    const shortTermDecision = chooseRunnerAction({
+      ...shortTermInput,
+      legalActions: [shortTermTake, shortTermBasicCredit],
+    });
+
+    expect(shortTermDecision.actionId).toBe(shortTermTake.actionId);
+    expect(shortTermDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(shortTermDecision.evidence).toContain(
+      "installed_economy_kind:direct_payout",
+    );
+    expect(JSON.stringify(shortTermDecision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+    expect(assertAiInputIsSideSafe(shortTermInput)).toBe(true);
+  });
+
+  it("separates Broker pool loading from visible pool payout", () => {
+    const payoutInput = installedRunnerEconomyInput(
+      "ai-v141-installed-broker-take",
+      { brokerCounters: 3, credits: 1 },
+    );
+    const brokerTake = payoutInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_take_credits",
+    );
+    const payoutBasicCredit = payoutInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(brokerTake).toBeDefined();
+    expect(payoutBasicCredit).toBeDefined();
+    expect(brokerTake?.payload?.gainCreditsAmount).toBe(3);
+    if (!brokerTake || !payoutBasicCredit)
+      throw new Error("Missing Broker payout fixture actions");
+
+    const payoutDecision = chooseRunnerAction({
+      ...payoutInput,
+      legalActions: [brokerTake, payoutBasicCredit],
+    });
+
+    expect(payoutDecision.actionId).toBe(brokerTake.actionId);
+    expect(payoutDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(payoutDecision.evidence).toContain(
+      "installed_economy_kind:pool_payout",
+    );
+    expect(payoutDecision.evidence).toContain(
+      "installed_economy_stored_credits:3",
+    );
+
+    const lowCreditLoadInput = installedRunnerEconomyInput(
+      "ai-v141-installed-broker-load-low",
+      { brokerCounters: 0, credits: 1 },
+    );
+    const lowCreditBrokerLoad = lowCreditLoadInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits",
+    );
+    const lowCreditBasicCredit = lowCreditLoadInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(lowCreditBrokerLoad).toBeDefined();
+    expect(lowCreditBasicCredit).toBeDefined();
+    if (!lowCreditBrokerLoad || !lowCreditBasicCredit)
+      throw new Error("Missing Broker low-credit fixture actions");
+
+    const lowCreditDecision = chooseRunnerAction({
+      ...lowCreditLoadInput,
+      legalActions: [lowCreditBrokerLoad, lowCreditBasicCredit],
+    });
+
+    expect(lowCreditDecision.actionId).toBe(lowCreditBasicCredit.actionId);
+    expect(lowCreditDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(lowCreditDecision.evidence).toContain(
+      "installed_economy_kind:pool_build",
+    );
+    expect(lowCreditDecision.evidence).toContain("economy_need:acute");
+
+    const stableLoadInput = installedRunnerEconomyInput(
+      "ai-v141-installed-broker-load-stable",
+      { brokerCounters: 0, credits: 6 },
+    );
+    const stableBrokerLoad = stableLoadInput.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.resourceAbility === "broker_load_credits",
+    );
+    const stableBasicCredit = stableLoadInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(stableBrokerLoad).toBeDefined();
+    expect(stableBasicCredit).toBeDefined();
+    if (!stableBrokerLoad || !stableBasicCredit)
+      throw new Error("Missing Broker stable-credit fixture actions");
+
+    const stableDecision = chooseRunnerAction({
+      ...stableLoadInput,
+      legalActions: [stableBrokerLoad, stableBasicCredit],
+    });
+
+    expect(stableDecision.actionId).toBe(stableBrokerLoad.actionId);
+    expect(stableDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(stableDecision.evidence).toContain("economy_need:stable");
+    expect(JSON.stringify(stableDecision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("avoids bad King of the Road runs into visible stoppers", () => {
     const state = kingOfTheRoadRunnerTurn("ai-kotr-negative-run");
     const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
@@ -7609,6 +7741,62 @@ function runnerActionPhaseInput(
   });
 }
 
+function installedRunnerEconomyInput(
+  seed: string,
+  options: {
+    brokerCounters?: number;
+    shortTermCounters?: number;
+    credits: number;
+  },
+) {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `installed_runner_economy_${seed}`,
+        name: "Installed Runner Economy Fixture",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_154_broker", quantity: 1 },
+          { id: "onr_v1_178_short-term-contract", quantity: 1 },
+          { id: "simple_economy_event", quantity: 6 },
+          { id: "simple_fracter", quantity: 2 },
+        ],
+      },
+      corpDeck: {
+        id: `installed_runner_economy_corp_${seed}`,
+        name: "Installed Runner Economy Corp Fixture",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_economy_operation", quantity: 4 },
+          { id: "simple_barrier_ice", quantity: 2 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  if (options.brokerCounters !== undefined) {
+    const brokerId = moveRunnerResourceToRig(state, "onr_v1_154_broker");
+    setPowerCountersForTest(state, brokerId, options.brokerCounters);
+  }
+  if (options.shortTermCounters !== undefined) {
+    const shortTermId = moveRunnerResourceToRig(
+      state,
+      "onr_v1_178_short-term-contract",
+    );
+    setPowerCountersForTest(state, shortTermId, options.shortTermCounters);
+  }
+  state.runner.credits = options.credits;
+  state.runner.clicks = 3;
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
+}
+
 function runnerJackOutInput(seed: string) {
   let state = toRunnerTurn(
     createGameAfterSetup({
@@ -8269,6 +8457,20 @@ function moveRunnerResourceToRig(
     rezzed: true,
   };
   return id;
+}
+
+function setPowerCountersForTest(
+  state: GameState,
+  id: CardInstanceId,
+  amount: number,
+): void {
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    counters: {
+      ...(state.cardInstances[id]?.counters ?? {}),
+      power: amount,
+    },
+  };
 }
 
 function moveCorpCardToHq(

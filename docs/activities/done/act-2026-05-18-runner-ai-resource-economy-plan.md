@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-05-18-runner-ai-resource-economy-plan
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-18
-startedAt:
-completedAt:
+startedAt: 2026-05-18
+completedAt: 2026-05-18
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-plans.ts
+  - packages/ai/src/input-dto.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai test -- -t "installed Runner economy"
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # Runner-KI: Installierte Resource-Economy allgemein planen
@@ -62,17 +68,17 @@ Die Runner-KI soll installierte Economy-Karten allgemein besser nutzen, statt nu
 
 ## Akzeptanzkriterien
 
-- [ ] Analyse dokumentiert, wo installierte `trigger_ability`-Economy aktuell aus `recover_economy` herausfällt.
-- [ ] Es gibt eine generische Klassifikation installierter Economy-LegalActions nach direkter Auszahlung, Pool-Aufbau, Pool-Auszahlung und Neben-Economy.
-- [ ] Direkte Economy-Aktionen werden nach sichtbarem Netto-Creditgewinn und Kosten gegenüber normalem `gain_credit` bewertet.
-- [ ] Pool-Aufbau-Aktionen werden nicht als Sofort-Creditgewinn bewertet und verdrängen bei akutem Creditbedarf keine direkte Economy.
-- [ ] Pool-Auszahlung wird nach sichtbarem gespeicherten Wert bewertet; bei ausreichend hohem Auszahlungwert schlägt sie in einem Economy-Fixture normales `gain_credit`.
-- [ ] `Short-Term Contract` wird als konkrete Regression für direkte Resource-Auszahlung abgedeckt.
-- [ ] `Broker take` wird als konkrete Regression für Pool-Auszahlung abgedeckt; bei 3 oder mehr gespeicherten Credits schlägt es in einem Economy-Fixture normales `gain_credit`.
-- [ ] `Broker load` wird als konkrete Regression für Pool-Aufbau abgedeckt; die KI lädt Broker nur, wenn kein akuter Creditbedarf besteht oder ein klarer zukünftiger Economy-Plan greift.
-- [ ] Source-Bindung bleibt über vorhandene LegalActions gewahrt; die KI nutzt keine nicht legale zweite Aktion derselben Quelle im selben Timingfenster.
-- [ ] Debug/Evidence ist side-sicher und nennt keine versteckten Zoneninhalte.
-- [ ] Bestehende Runner-KI-Regressionsfälle für Breaker-/Zwei-Zug-Economy, R&D-Repeat und Krash-Pump bleiben grün.
+- [x] Analyse dokumentiert, wo installierte `trigger_ability`-Economy aktuell aus `recover_economy` herausfällt.
+- [x] Es gibt eine generische Klassifikation installierter Economy-LegalActions nach direkter Auszahlung, Pool-Aufbau, Pool-Auszahlung und Neben-Economy.
+- [x] Direkte Economy-Aktionen werden nach sichtbarem Netto-Creditgewinn und Kosten gegenüber normalem `gain_credit` bewertet.
+- [x] Pool-Aufbau-Aktionen werden nicht als Sofort-Creditgewinn bewertet und verdrängen bei akutem Creditbedarf keine direkte Economy.
+- [x] Pool-Auszahlung wird nach sichtbarem gespeicherten Wert bewertet; bei ausreichend hohem Auszahlungwert schlägt sie in einem Economy-Fixture normales `gain_credit`.
+- [x] `Short-Term Contract` wird als konkrete Regression für direkte Resource-Auszahlung abgedeckt.
+- [x] `Broker take` wird als konkrete Regression für Pool-Auszahlung abgedeckt; bei 3 oder mehr gespeicherten Credits schlägt es in einem Economy-Fixture normales `gain_credit`.
+- [x] `Broker load` wird als konkrete Regression für Pool-Aufbau abgedeckt; die KI lädt Broker nur, wenn kein akuter Creditbedarf besteht oder ein klarer zukünftiger Economy-Plan greift.
+- [x] Source-Bindung bleibt über vorhandene LegalActions gewahrt; die KI nutzt keine nicht legale zweite Aktion derselben Quelle im selben Timingfenster.
+- [x] Debug/Evidence ist side-sicher und nennt keine versteckten Zoneninhalte.
+- [x] Bestehende Runner-KI-Regressionsfälle für Breaker-/Zwei-Zug-Economy, R&D-Repeat und Krash-Pump bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -97,4 +103,8 @@ Die Runner-KI soll installierte Economy-Karten allgemein besser nutzen, statt nu
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt in `packages/ai/src/runner-plans.ts`: `recover_economy` berücksichtigt jetzt installierte, sichtbare Runner-`trigger_ability`-LegalActions mit Economy-Payloads. Die bisherige Lücke war, dass der Runner-Planfilter nur `gain_credit` und Economy-/Tempo-Events in den Economy-Plan aufnahm; generische installierte Kartenfähigkeiten blieben dadurch nur niedrig bewertete Baseline-Trigger. Die neue Klassifikation unterscheidet direkte Auszahlung, Pool-Aufbau, Pool-Auszahlung und Neben-Economy anhand von LegalAction-Payload, Kosten und sichtbaren Countern aus dem eigenen Rig.
+
+`packages/ai/src/input-dto.ts` erlaubt die bereits öffentlichen Economy-Payload-Felder auch im AI-LegalAction-DTO, damit die KI nicht über Labels raten muss. `packages/ai/src/index.test.ts` deckt Short-Term Contract als direkte Auszahlung, Broker Take als Pool-Auszahlung ab 3 gespeicherten Credits und Broker Load als Pool-Aufbau ab. Bei akutem Creditbedarf verdrängt Broker Load die normale 1-Credit-Aktion nicht; bei stabiler Economy kann Broker Load als Investment-Aktion gewählt werden. Debug/Evidence bleibt abstrakt (`installed_economy_*`, `economy_need`) und enthält keine versteckten Zoneninhalte.
+
+Checks: `corepack pnpm --filter @netgrid/ai test -- -t "installed Runner economy"` lief grün und führte lokal die komplette `@netgrid/ai`-Testsuite mit 154 Tests aus; `corepack pnpm --filter @netgrid/ai typecheck` und `git diff --check` waren ebenfalls grün.
