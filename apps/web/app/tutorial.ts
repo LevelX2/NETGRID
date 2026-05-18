@@ -128,7 +128,7 @@ const TUTORIAL_GLOSSARY: TutorialGlossaryEntry[] = [
   { term: "Klick", definition: "Aktionspunkt pro Zug, mit dem Du legale Aktionen ausführst." },
   { term: "Credit", definition: "Ressource zum Bezahlen von Aktionen, Rezzing und Fähigkeiten." },
   { term: "HQ", definition: "Hand der Korp." },
-  { term: "F&E (R&D)", definition: "Nachziehstapel der Korp." },
+  { term: "R&D", definition: "Nachziehstapel der Korp." },
   { term: "Archive", definition: "Ablagebereich der Korp." },
   { term: "Fort", definition: "Von der Korp erstellter Remote-Server für Assets, Upgrades oder Agenden." },
   { term: "Run", definition: "Angriff des Runners auf einen Server." },
