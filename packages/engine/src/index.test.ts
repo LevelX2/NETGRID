@@ -7661,14 +7661,45 @@ describe("V1.6.2 Mechanikpaket B", () => {
             "onr_v1_215_security-net-optimization",
       );
     }
+    const securityNetAgendaId = Object.entries(securityNet.cardInstances).find(
+      ([, instance]) =>
+        instance.definitionId === "onr_v1_215_security-net-optimization" &&
+        instance.zone.side === "corp" &&
+        instance.zone.zone === "serverRoot",
+    )?.[0] as CardInstanceId | undefined;
+    expect(securityNetAgendaId).toBeDefined();
+    const securityNetAgendaZone =
+      securityNet.cardInstances[securityNetAgendaId!]?.zone;
+    expect(securityNetAgendaZone).toMatchObject({ zone: "serverRoot" });
+    const securityNetAgendaServerId =
+      securityNetAgendaZone?.zone === "serverRoot"
+        ? securityNetAgendaZone.serverId
+        : undefined;
+    expect(securityNetAgendaServerId).not.toBe("rd");
+    const securityNetScoreActions = getLegalActions(securityNet, "corp").filter(
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(securityNet, action) ===
+          "onr_v1_215_security-net-optimization",
+    );
+    expect(securityNetScoreActions).toHaveLength(
+      securityNet.corp.servers.length,
+    );
+    expect(
+      securityNetScoreActions.map((action) => action.payload?.selectedServerId),
+    ).toEqual(expect.arrayContaining(["rd", securityNetAgendaServerId]));
     securityNet = apply(
       securityNet,
       "corp",
       (action) =>
         action.type === "score_agenda" &&
         sourceDefinition(securityNet, action) ===
-          "onr_v1_215_security-net-optimization",
+          "onr_v1_215_security-net-optimization" &&
+        action.payload?.selectedServerId === "rd",
     );
+    expect(
+      securityNet.cardInstances[securityNetAgendaId!]?.selectedServerId,
+    ).toBe("rd");
     securityNet = apply(
       securityNet,
       "corp",
@@ -7689,7 +7720,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
     expect(
       getPlayerView(securityNet, "runner").run?.encounteredIce?.strength,
-    ).toBe(3);
+    ).toBe(4);
   });
 
   it("applies Data Masons ICE-strength modifiers only to rezzed walls", () => {

@@ -2873,22 +2873,36 @@ function corpMainActions(state: GameState): LegalAction[] {
         effectiveAgendaDifficulty(state, id) <=
           mustInstance(state.cardInstances, id).advancementCounters
       ) {
-        actions.push(
-          action(
-            state,
-            "corp",
-            "score_agenda",
-            `Agenda in ${server.label} scoren`,
-            id,
-            [],
-            {
-              cardId: id,
-              ...(definition.id === SECURITY_NET_OPTIMIZATION_ID
-                ? { selectedServerId: server.id }
-                : {}),
-            },
-          ),
-        );
+        if (definition.id === SECURITY_NET_OPTIMIZATION_ID) {
+          for (const targetServer of state.corp.servers) {
+            actions.push(
+              action(
+                state,
+                "corp",
+                "score_agenda",
+                `Security Net Optimization scoren und ${serverChoiceDisplayLabel(
+                  state,
+                  targetServer.id,
+                )} wählen`,
+                id,
+                [],
+                { cardId: id, selectedServerId: targetServer.id },
+              ),
+            );
+          }
+        } else {
+          actions.push(
+            action(
+              state,
+              "corp",
+              "score_agenda",
+              `Agenda in ${server.label} scoren`,
+              id,
+              [],
+              { cardId: id },
+            ),
+          );
+        }
       }
     }
   }
