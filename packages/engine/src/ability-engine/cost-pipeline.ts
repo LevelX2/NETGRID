@@ -6,15 +6,23 @@ import type {
   CorpServer,
   GameState,
   LegalAction,
-  ServerId,
 } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
-import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import {
+  activeCardImplementationModifiersForCorpRoot,
+  cardDefinitionForInstance,
+  cardMatchesModifierAppliesTo,
+  corpServerIdForInstalledCard,
+  isPublicRezzedCorpRootModifier,
+  sameServerAsSourceApplies,
+} from "./card-implementation-modifiers";
 import type {
   CardInstallCostModifierImplementation,
   CardRezCostModifierImplementation,
 } from "./definition-types";
 import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../mechanics/agenda-operation-effects";
+
+export { corpServerIdForInstalledCard } from "./card-implementation-modifiers";
 
 export type CostPurpose = "corp_rez" | "corp_install";
 
@@ -69,15 +77,6 @@ export function costQuotePublicPayload(
   return { ...quote.publicPayload };
 }
 
-function mustInstance<T>(
-  collection: Record<CardInstanceId, T>,
-  id: CardInstanceId,
-): T {
-  const value = collection[id];
-  if (!value) throw new Error(`Unknown card instance: ${id}`);
-  return value;
-}
-
 function mustRun(state: GameState): NonNullable<GameState["run"]> {
   if (!state.run) throw new Error("Kein aktiver Run.");
   return state.run;
@@ -96,47 +95,7 @@ function definitionFor(
   state: GameState,
   id: CardInstanceId,
 ): CardDefinition {
-  const instance = mustInstance(state.cardInstances, id);
-  const definition = DEMO_CARDS_BY_ID[instance.definitionId];
-  if (!definition) throw new Error(`Unknown card definition: ${instance.definitionId}`);
-  return definition;
-}
-
-function normalizeSubtypeLabel(subtype: string): string {
-  return subtype
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "_")
-    .replace(/^_+|_+$/g, "");
-}
-
-function cardHasSubtype(definition: CardDefinition, subtype: string): boolean {
-  const target = normalizeSubtypeLabel(subtype);
-  return definition.subtypes.some(
-    (candidate) => normalizeSubtypeLabel(candidate) === target,
-  );
-}
-
-export function corpServerIdForInstalledCard(
-  state: GameState,
-  cardId: CardInstanceId,
-): Exclude<ServerId, "new_remote"> | undefined {
-  const zone = mustInstance(state.cardInstances, cardId).zone;
-  if (
-    zone.side === "corp" &&
-    (zone.zone === "serverIce" || zone.zone === "serverRoot")
-  )
-    return zone.serverId;
-  return undefined;
-}
-
-function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
-  const ids: CardInstanceId[] = [];
-  for (const server of state.corp.servers) {
-    for (const cardId of server.root) {
-      if (mustInstance(state.cardInstances, cardId).rezzed) ids.push(cardId);
-    }
-  }
-  return ids;
+  return cardDefinitionForInstance(state, id);
 }
 
 function corpRezCostModifierAppliesToIce(
@@ -148,25 +107,17 @@ function corpRezCostModifierAppliesToIce(
 ): boolean {
   if (
     modifier.operation !== "reduce" ||
-    modifier.activeWhile !== "rezzed" ||
-    modifier.sourceZone !== "corp_root" ||
-    modifier.visibility !== "public"
+    !isPublicRezzedCorpRootModifier(modifier)
   )
     return false;
-  if (iceDefinition.type !== modifier.appliesTo.cardType) return false;
-  if (
-    modifier.appliesTo.subtype &&
-    !cardHasSubtype(iceDefinition, modifier.appliesTo.subtype)
-  )
+  if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
     return false;
-  if (modifier.appliesTo.sameServerAsSource) {
-    const iceServerId = corpServerIdForInstalledCard(state, iceId);
-    return (
-      Boolean(iceServerId) &&
-      corpServerIdForInstalledCard(state, sourceCardInstanceId) === iceServerId
-    );
-  }
-  return true;
+  return sameServerAsSourceApplies(
+    state,
+    sourceCardInstanceId,
+    iceId,
+    modifier.appliesTo.sameServerAsSource,
+  );
 }
 
 function activeCorpRezCostModifiersForIce(
@@ -175,24 +126,21 @@ function activeCorpRezCostModifiersForIce(
   iceDefinition: CardDefinition,
 ): ActiveCorpRezCostModifier[] {
   const matches: ActiveCorpRezCostModifier[] = [];
-  for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
-    const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
-    const sourceImplementation =
-      cardImplementationForDefinitionId(sourceDefinitionId);
-    for (const modifier of sourceImplementation?.modifiers ?? []) {
-      if (modifier.kind !== "rez_cost") continue;
-      if (
-        !corpRezCostModifierAppliesToIce(
-          state,
-          modifier,
-          sourceCardInstanceId,
-          iceId,
-          iceDefinition,
-        )
+  for (const match of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "rez_cost",
+  )) {
+    if (
+      !corpRezCostModifierAppliesToIce(
+        state,
+        match.modifier,
+        match.sourceCardInstanceId,
+        iceId,
+        iceDefinition,
       )
-        continue;
-      matches.push({ sourceCardInstanceId, sourceDefinitionId, modifier });
-    }
+    )
+      continue;
+    matches.push(match);
   }
   return matches;
 }
@@ -203,13 +151,11 @@ function corpInstallCostModifierAppliesToCard(
 ): boolean {
   if (
     modifier.operation !== "reduce" ||
-    modifier.activeWhile !== "rezzed" ||
-    modifier.sourceZone !== "corp_root" ||
-    modifier.visibility !== "public"
+    !isPublicRezzedCorpRootModifier(modifier)
   )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
-  return definition.type === modifier.appliesTo.cardType;
+  return cardMatchesModifierAppliesTo(definition, modifier.appliesTo);
 }
 
 function activeCorpInstallCostModifiersForCard(
@@ -217,16 +163,13 @@ function activeCorpInstallCostModifiersForCard(
   definition: CardDefinition,
 ): ActiveCorpInstallCostModifier[] {
   const matches: ActiveCorpInstallCostModifier[] = [];
-  for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
-    const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
-    const sourceImplementation =
-      cardImplementationForDefinitionId(sourceDefinitionId);
-    for (const modifier of sourceImplementation?.modifiers ?? []) {
-      if (modifier.kind !== "install_cost") continue;
-      if (!corpInstallCostModifierAppliesToCard(modifier, definition))
-        continue;
-      matches.push({ sourceCardInstanceId, sourceDefinitionId, modifier });
-    }
+  for (const match of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "install_cost",
+  )) {
+    if (!corpInstallCostModifierAppliesToCard(match.modifier, definition))
+      continue;
+    matches.push(match);
   }
   return matches;
 }
@@ -459,8 +402,8 @@ export function assertCorpRezCostQuoteValid(
       ? (legalAction.payload.oliviaSalazarRezSourceCardId as CardInstanceId)
       : undefined;
   if (oliviaSalazarSourceCardId) {
-    const sourceInstance = state.cardInstances[oliviaSalazarSourceCardId];
-    if (!sourceInstance) throw new Error("Olivia-Salazar-Quelle fehlt.");
+    if (!state.cardInstances[oliviaSalazarSourceCardId])
+      throw new Error("Olivia-Salazar-Quelle fehlt.");
     const availableSources = oliviaSalazarRezSourcesForRunIce(state, iceId);
     if (!availableSources.includes(oliviaSalazarSourceCardId))
       throw new Error("Olivia Salazar ist fuer dieses ICE nicht aktiv.");
