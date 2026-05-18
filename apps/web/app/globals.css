@@ -5069,7 +5069,7 @@ select {
   content: "UNGEREZZT";
   position: absolute;
   left: 6px;
-  bottom: 6px;
+  bottom: 26px;
   z-index: 4;
   display: inline-flex;
   align-items: center;
@@ -5108,10 +5108,6 @@ select {
   min-height: calc(12px * var(--lane-card-scale, 1));
   padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
   left: calc(5px * var(--lane-card-scale, 1));
-  bottom: calc(5px * var(--lane-card-scale, 1));
-}
-
-.lane .card.unrezzedInstalled.hasActions::after {
   bottom: calc(26px * var(--lane-card-scale, 1));
 }
 
