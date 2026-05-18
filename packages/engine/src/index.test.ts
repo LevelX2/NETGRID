@@ -18,7 +18,16 @@ import {
   validateGameState,
 } from "./index";
 import { collectActiveModifiers } from "./ability-engine/active-modifiers";
-import { cardImplementationForDefinitionId } from "./card-implementations/registry";
+import {
+  CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
+  CARD_IMPLEMENTATION_COVERAGE_OVERRIDES,
+  cardImplementationCoverageForDefinitionId,
+} from "./card-implementations/coverage";
+import {
+  CARD_IMPLEMENTATIONS,
+  CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
+  cardImplementationForDefinitionId,
+} from "./card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import {
   MECHANIC_SMOKE_CARD_IDS,
@@ -6976,6 +6985,52 @@ describe("V1.6.2 Mechanikpaket B", () => {
         },
       }),
     );
+  });
+
+  it("requires implementation coverage for every demo card", () => {
+    const duplicateIds = (ids: string[]): string[] =>
+      ids.filter((id, index) => ids.indexOf(id) !== index);
+
+    const implementationIds = CARD_IMPLEMENTATIONS.map(
+      (implementation) => implementation.cardDefinitionId,
+    );
+    expect(duplicateIds(implementationIds)).toEqual([]);
+    const coverageIds = CARD_IMPLEMENTATION_COVERAGE_ENTRIES.map(
+      (entry) => entry.cardDefinitionId,
+    );
+    expect(duplicateIds(coverageIds)).toEqual([]);
+    expect(
+      duplicateIds(
+        CARD_IMPLEMENTATION_COVERAGE_OVERRIDES.map(
+          (entry) => entry.cardDefinitionId,
+        ),
+      ),
+    ).toEqual([]);
+
+    for (const definitionId of Object.keys(DEMO_CARDS_BY_ID)) {
+      const coverage =
+        cardImplementationCoverageForDefinitionId(definitionId);
+      expect(coverage, definitionId).toBeDefined();
+      expect(coverage?.cardDefinitionId).toBe(definitionId);
+      expect(coverage?.reason.trim(), definitionId).not.toBe("");
+    }
+
+    for (const entry of CARD_IMPLEMENTATION_COVERAGE_ENTRIES) {
+      if (entry.status !== "implemented") continue;
+      expect(
+        CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[entry.cardDefinitionId],
+        entry.cardDefinitionId,
+      ).toBeDefined();
+    }
+
+    for (const implementation of CARD_IMPLEMENTATIONS) {
+      expect(
+        cardImplementationCoverageForDefinitionId(
+          implementation.cardDefinitionId,
+        )?.status,
+        implementation.cardDefinitionId,
+      ).toBe("implemented");
+    }
   });
 
   it("applies Data Masons rez/strength modifiers and score-based Security Net strength", () => {

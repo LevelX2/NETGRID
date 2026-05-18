@@ -2,7 +2,7 @@ import type { CardDefinitionId } from "@netgrid/shared";
 import { onrV1RezCostModifierImplementations } from "./onr-v1/rez-cost-modifiers";
 import type { CardImplementationDefinition } from "./types";
 
-const CARD_IMPLEMENTATIONS = [
+export const CARD_IMPLEMENTATIONS = [
   ...onrV1RezCostModifierImplementations,
 ] as const satisfies readonly CardImplementationDefinition[];
 
