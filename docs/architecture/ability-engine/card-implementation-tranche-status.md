@@ -1,8 +1,8 @@
 # CardImplementation Tranche Status
 
-Stand: 2026-05-18
+Stand: 2026-05-19, nach P2.13a
 
-Dieses Dokument beschreibt den aktuellen Zwischenstand der Ability-Engine-Tranche auf dem Branch `refactor/card-definition-rez-cost-modifiers`. Es ist kein Zielbild-Ersatz, sondern ein Arbeitsstand für Folge-Threads.
+Dieses Dokument beschreibt den aktuellen Zwischenstand der Ability-Engine-Tranche auf dem Branch `refactor/card-definition-rez-cost-modifiers`. Es ist kein Zielbild-Ersatz, sondern der technische Arbeitsstand für Folge-Threads.
 
 ## 1. Aktueller Architekturstand
 
@@ -13,142 +13,198 @@ packages/shared
 = CardDefinition / Katalog / Deckbau / Anzeige
 
 packages/engine/src/card-implementations
-= konkrete 1:1-Kartenimplementationen nach Set/Side/Kartentyp/Kartenidentität
+= konkrete Kartenimplementationen nach Set/Side/Kartentyp/Kartenidentität
 
 packages/engine/src/ability-engine
 = generische Ability-/Effect-/Modifier-/Interpreter-Bibliothek
 
 apps/web/app/chronicle.ts
-= formatiert Chronik aus Event-Kontext + ResolvedGameEffects
+= Chronikformatierung aus Event-Kontext + resolvedEffects
+
+packages/engine/src/index.ts
+= Koordination von LegalActions, Kosten, Zonenbewegung, Revalidation und Legacy-Resten
 ```
 
-`packages/shared/src/index.ts` bleibt Katalog- und Deckbauquelle. Ausführbare Engine-Semantik wie Abilities, Effects, Modifier und Interpreter liegt dort nicht.
+`packages/shared/src/index.ts` bleibt Katalog-, Deckbau- und Anzeigequelle. Neue ausführbare Ability-/Effect-/Modifier-Implementation wird nicht in normalen `CardDefinition`s abgelegt.
 
-`packages/engine/src/card-implementations` enthält konkrete Kartenumsetzungen. Eine Datei beschreibt genau eine Karte und bindet diese über `cardDefinitionId` an die Katalogkarte.
+`packages/engine/src/card-implementations` enthält die konkrete 1:1-Umsetzung einzelner Karten. Eine Datei beschreibt genau eine Karte, nennt `cardDefinitionId` und enthält einen `// card name:` / `// text:`-Kommentar mit gedrucktem Kartentext.
 
-`packages/engine/src/ability-engine` enthält die generische Sprache und Ausführungsschicht. Sie kennt keine set-spezifischen Karten und keine konkreten Pilotkarten-IDs.
+`packages/engine/src/ability-engine` enthält die generische Sprache und Ausführungsschicht. Neue POC-Bausteine wie `gain_credits`, `draw_cards`, `rez_cost`, `install_cost`, `ice_strength` und `additional_subroutine` werden dort typisiert, abgefragt oder interpretiert. Die generischen Pipelines sollen keine neuen konkreten Karten-IDs für migrierte Karten enthalten.
 
-`apps/web/app/chronicle.ts` darf typisierte `ResolvedGameEffect`s auswerten, muss aber den Kartenbezug aus Event-Kontext, `sourceDefinitionId` oder `sourceTitle` herstellen.
+`apps/web/app/chronicle.ts` formatiert Chronikzeilen aus Event-Kontext und `ResolvedGameEffect`s. CardImplementation-Karten sollen mit Kartenbezug dargestellt werden, nicht als isolierter Effekt.
+
+`packages/engine/src/index.ts` bleibt aktuell Orchestrierungspunkt für Play-/Install-/Rez-/Encounter-Actions und enthält weiterhin Legacy-Sonderfälle. Das ist kein Zielbild für neue Kartenlogik. Neue Karten sollen, wenn möglich, über `CardImplementationDefinition` plus Ability-Engine-Bausteine umgesetzt werden.
 
 ## 2. Nicht mehr erwünschte Muster
 
 Diese Muster sollen in neuen Migrationen vermieden werden:
 
-- neue Engine-Sonderfälle in `packages/engine/src/index.ts`, wenn eine `CardImplementationDefinition` möglich ist
-- konkrete Karten-IDs in generischen Ability-, Effect-, Modifier- oder Cost-Pipelines
 - Mechanik-Sammeldateien wie `simple-gain-credits.ts`, `simple-draw-cards.ts`, `mixed-effects.ts` oder `rez-cost-modifiers.ts`
+- neue Engine-Sonderfälle in `index.ts`, wenn eine `CardImplementationDefinition` möglich ist
+- konkrete Karten-IDs in generischen Ability-, Effect-, Cost-, Modifier- oder Subroutine-Pipelines
 - `CardImplementationDefinition`s mit Callbacks, Resolver-Funktionen oder direkter State-Mutation
 - ausführbare Engine-Logik in `packages/shared/src/index.ts`
 - Chroniktexte in Kartendateien
-- Chronikzeilen, die nur isolierte Effekte ohne Kartenbezug darstellen, zum Beispiel nur "Runner erhält 3 Credits"
+- Chronikzeilen ohne Kartenbezug, zum Beispiel nur "Runner erhält 3 Credits"
 - doppelte Wirkung durch Legacy-Resolver plus neue CardImplementation
 - doppelte Chronik durch Payload-Fallback plus `ResolvedGameEffect`-Formatierung
 
-## 3. Migrierte Karten
+## 3. Vollständig implementierte Karten
 
-### Passive Rez-Cost-Modifier
+### On-play gain
 
-- Data Masons Hosting
-- Encoder Inc
-- Skålderviken SA Beta Test Site
-- Fortress Architects
-- Jerusalem City Grid
+- Accounts Receivable: `on_play`, `costs: "printed"`, `gain_credits 9`
+- Efficiency Experts: `on_play`, `costs: "printed"`, `gain_credits 3`
+- Livewire's Contacts: `on_play`, `costs: "printed"`, `gain_credits 3`
+- Score!: `on_play`, `costs: "printed"`, `gain_credits 9`
 
-Diese Karten beschreiben deklarative `rez_cost`-Modifier in engine-lokalen CardImplementation-Dateien. Die Cost-Pipeline liest sie generisch aus der CardImplementation-Registry.
+### On-play draw
 
-### Gain-only On-Play
+- Annual Reviews: `on_play`, `costs: "printed"`, `draw_cards 3`
+- Bodyweight Synthetic Blood: `on_play`, `costs: "printed"`, `draw_cards 5`
+- Jack 'n' Joe: `on_play`, `costs: "printed"`, `draw_cards 3`
 
-- Accounts Receivable
-- Efficiency Experts
-- Livewire's Contacts
-- Score!
-
-Diese Karten nutzen `on_play`, `costs: "printed"` und einen `gain_credits`-Effect mit `recipient: "controller"`.
-
-### Draw-only On-Play
-
-- Annual Reviews
-- Bodyweight Synthetic Blood
-- Jack 'n' Joe
-
-Diese Karten nutzen `on_play`, `costs: "printed"` und einen `draw_cards`-Effect mit `recipient: "controller"`.
-
-### Mixed Ordered Effects
+### Mixed ordered effects
 
 - Day Shift: `draw_cards 2`, then `gain_credits 1`
 - Night Shift: `gain_credits 2`, then `draw_cards 1`
 
-Die Reihenfolge wird durch die Reihenfolge der `effects` in der CardImplementation bestimmt und im `resolvedEffects`-Array erhalten.
+Die Reihenfolge ist die Reihenfolge der `effects`-Liste und bleibt im `resolvedEffects`-Array erhalten.
 
-## 4. Bestehende generische Bausteine
+### Activated abilities
+
+- Newsgroup Filter: `activated_card_ability`, `runner_main`, eine Aktion, `gain_credits 2`
+- ESA Contract: `activated_card_ability`, `corp_main`, eine Aktion, `draw_cards 2`
+
+Der ActionType ist bewusst neutral: `activated_card_ability`, nicht `gain_credit`.
+
+### Passive modifier cards
+
+- Data Masons: `rez_cost` reduce 2 für Walls, `ice_strength` increase 1 für Walls
+- Encoder, Inc.: `rez_cost` reduce 1 für Code Gates, `additional_subroutine` public `end_the_run` after existing für Code Gates
+- Skälderviken SA Beta Test Site: `rez_cost` reduce 2 für Black ICE
+- Fortress Architects: `install_cost` reduce 1 für Corp-ICE-Installation
+
+## 4. Partial und Legacy
+
+### Partial
+
+- Jerusalem City Grid
+  - implemented: `rez_cost` reduce 2 für Walls auf demselben Fort
+  - implemented: `ice_strength` increase 1 für Walls auf demselben Fort
+  - offen: Region-Install-/Replacement-Regeln
+
+### Legacy / anderer Scope
+
+- Olivia Salazar: Legacy-Sonderfall. Später als Ability mit Timing, Source-Validation, once-per-run und temporary derez modellieren.
+- Startup Immolator: Legacy-Sonderfall. Später möglicher Trigger-/pass-ice-Pilot.
+- Loan from Chiba: Legacy-Sonderfall. Später eventuell `on_install`, `start_of_turn`, `leave_play`, lose-game condition und optionale Trash-/Lifecycle-Effekte.
+- Corporate Negotiating Center: Legacy-/Reveal-/Chronik-Scope.
+- Restrictive Net Zoning: Legacy-/Target-Binding-Scope.
+- MRAM / Militech MRAM: Legacy-/ActiveModifier-Query-Stand für Handgrößenmodifier.
+- Krash / Virizz: Legacy-/ActiveModifier-Query-Stand für Run- bzw. Breakkostenmodifier. Diese Query-Rekonstruktion ist Übergang, nicht finales Ability-Engine-Zielbild.
+
+## 5. Bestehende generische Bausteine
 
 Aktuell vorhanden:
 
 - `CardImplementationDefinition`
 - `CardAbilityImplementation`
+- `OnPlayCardAbilityImplementation`
+- `ActivatedCardAbilityImplementation`
+- `CardAbilityCostImplementation`
 - `CardEffectImplementation`
 - `GainCreditsEffectImplementation`
 - `DrawCardsEffectImplementation`
 - `CardRezCostModifierImplementation`
+- `CardInstallCostModifierImplementation`
+- `CardIceStrengthModifierImplementation`
+- `CardAdditionalSubroutineModifierImplementation`
+- `CardSubroutineImplementation`
 - `executeCardImplementationEffects`
 - CardImplementation-Registry
 - CardImplementation-Coverage
-- Cost-Pipeline-Anbindung an CardImplementationDefinitions für passive Corp-Rez-Cost-Modifier
+- gemeinsame Modifier-Query-Helfer in `card-implementation-modifiers.ts`
+- Cost-Pipeline-Anbindung für `rez_cost` und `install_cost`
+- ICE-Strength-Auswertung für `ice_strength`
+- Additional-Subroutine-Auswertung für `additional_subroutine`
 - Play-Pfad-Anbindung für `on_play` + `costs: "printed"`
-- Chronikformatierung für `card_resolver`-`ResolvedGameEffect`s mit Kartenbezug
+- Activated-Ability-Anbindung für `activated_card_ability`
+- `ResolvedGameEffect`s mit `sourceDefinitionId` und `sourceTitle`
+- Chronikformatierung für `card_resolver`-Effects mit Kartenbezug
 
-`executeCardImplementationEffects` interpretiert `gain_credits` und `draw_cards`. `draw_cards` nutzt eine Engine-Host-Primitive, damit bestehende Draw-Nebenwirkungen wie City Surveillance erhalten bleiben und nicht in der Ability Engine dupliziert werden.
+`executeCardImplementationEffects` interpretiert aktuell `gain_credits` und `draw_cards`. `draw_cards` nutzt eine Engine-Host-Primitive, damit bestehende Draw-Nebenwirkungen erhalten bleiben und keine gezogenen Kartenidentitäten öffentlich leaken.
 
-CardImplementation-Effects erzeugen zusätzlich kompatible Payload-Felder und typisierte `ResolvedGameEffect`s. Für `card_resolver`-Effects sind `kind`, `visibility`, `side`, `amount`, `reason`, `sourceDefinitionId` und `sourceTitle` relevant.
+`additional_subroutine` unterstützt aktuell nur öffentliche `end_the_run`-Subroutinen mit `append: "after_existing"`. Dynamische Subroutinen tragen intern eine Attribution mit `sourceCardInstanceId`; öffentliche IDs und Payloads verwenden redigierte Source-Informationen ohne Instance-ID.
 
-## 5. Regeln für neue Kartenmigrationen
+## 6. Regeln für neue Kartenmigrationen
 
 Für neue CardImplementation-Migrationen gelten diese Regeln:
 
 - Jede migrierte Karte bekommt eine konkrete Datei nach `set / side / card type / card identity`.
 - Jede Kartendatei beschreibt genau eine Karte.
+- Jede Kartendatei enthält `// card name:` und `// text:` als Review-Hilfe.
 - Eine Karte beschreibt ihre Engine-Wirkung deklarativ über Abilities, Effects oder Modifiers.
+- `CardImplementationDefinition`s bleiben callback-frei.
 - Die Ability Engine interpretiert generisch und kennt keine konkrete Karte.
 - Gedruckte Kosten werden nicht in der Implementation dupliziert; `costs: "printed"` verweist auf die normale `CardDefinition`.
+- Keine ausführbare Engine-Logik in Shared/CardDefinition.
 - Bestehende PublicPayload-Felder bleiben kompatibel, solange Web, Replay oder Tests sie nutzen.
-- `ResolvedGameEffect`s sollen die strukturierte Grundlage für Chronik, AI und spätere PublicEvent-Auswertung bilden.
-- Chronik muss den Bezug zur gespielten Karte enthalten.
-- Draw-Effekte dürfen keine gezogenen Kartenidentitäten leaken.
+- `ResolvedGameEffect`s sind die strukturierte Grundlage für Chronik, AI und spätere PublicEvent-Auswertung.
+- Chronik muss den Kartenbezug enthalten.
+- Hidden-Info-Leaks müssen explizit getestet werden, besonders bei Draw, Reveal, Search und dynamischen Quellen.
 - CardImplementation-Coverage muss aktualisiert werden.
 - Alte Resolver müssen entfernt oder sauber umgangen werden, damit keine Doppeleffekte entstehen.
-- Registry- und Coverage-Konsistenztests müssen weiterhin doppelte IDs und fehlende Coverage sichtbar machen.
+- Registry- und Coverage-Konsistenztests müssen doppelte IDs und fehlende Coverage sichtbar machen.
+- Neue Mechanik nur als kleiner POC mit fokussierten Tests.
 
-## 6. Offene Legacy-Bereiche
+## 7. Known Risks und Follow-ups
 
-Diese Bereiche sind bewusst noch nicht migriert:
+- Legacy-Reste in `ability-engine`: Virizz wird noch in `active-modifiers.ts` rekonstruiert; Olivia Salazar hängt noch an `cost-pipeline.ts` und `index.ts`.
+- Registry-Duplicate-Schutz ist aktuell testbasiert; später ist ein Runtime-/Build-Time-Guard beim Registry-Aufbau sinnvoll.
+- Corp-ICE-Installkostenquote ist in der Cost-Pipeline gebündelt, aber die vollständige Install-Action-Revalidation bleibt vorerst in `index.ts`, weil die Install-Action selbst dort orchestriert wird.
+- Dynamische Subroutine-Attribution ist vorbereitet, aber die Chronik nutzt die Modifier-Quelle noch nicht vollständig als Satzbestandteil.
+- `additional_subroutine` unterstützt aktuell nur public `end_the_run` after existing.
+- `card-implementation-modifiers.ts` ist bewusst auf rezzed Corp-Root-Modifier zugeschnitten.
+- Region-Regeln sind noch nicht modelliert.
+- Trigger Registry ist noch nicht produktiv.
+- Target Binding ist noch nicht ausgebaut.
+- ActiveModifier ist noch kein vollständiges produktives Zielsystem für neue CardImplementation-Modifier.
+- `index.ts` bleibt ein großer Legacy-Orchestrator und sollte nicht weiter mit vermeidbaren Karten-Sonderfällen wachsen.
 
-- Olivia Salazar
-- Startup Immolator
-- Loan from Chiba
-- Corporate Negotiating Center
-- Restrictive Net Zoning
-- MRAM / Militech MRAM
-- Krash
-- Virizz
-- weitere Karten mit Targets, Choices, Triggern, Damage, Trash, Reveal, Search oder Conditional Effects
+## 8. Nächste sinnvolle Optionen
 
-Diese Karten oder Mechaniken können erst migriert werden, wenn die jeweils nötigen generischen Bausteine vorhanden sind. Unsichere Fälle sollen in Coverage konservativ als `pending_implementation` oder `legacy_engine_special_case` sichtbar bleiben.
+Option A: Region-Regeln für Jerusalem City Grid.
 
-## 7. Nächste sinnvolle technische Optionen
+- Vorteil: macht eine `partial_implementation` vollständig.
+- Risiko: Server-/Region-Installregeln, Replacement und Trash older region berühren Target-/Install-/Replacement-Grenzen.
 
-Option A: Weitere einfache On-Play-Karten migrieren, wenn sie ausschließlich aus vorhandenen Bausteinen bestehen.
+Option B: Olivia Salazar.
 
-Option B: Einen neuen kleinen Effect-Baustein hinzufügen, zum Beispiel `lose_credits`, `damage`, `trash_card`, `add_counter` oder `remove_tag`.
+- Vorteil: wichtiger Legacy-Fall im Rez-Kostenbereich.
+- Risiko: Timing, Source-Validation, once-per-run und temporary derez sind komplexer als passive Modifier.
 
-Option C: Chronik und `ResolvedGameEffect`s weiter stabilisieren, insbesondere für gemischte oder mehrere öffentliche Effekte.
+Option C: Startup Immolator.
 
-Option D: Einen Legacy-Sonderfall wie Loan from Chiba auf CardImplementationDefinition migrieren, wenn dafür nur vorhandene oder sehr kleine neue Bausteine nötig sind.
+- Vorteil: guter Trigger-/pass-ice-Pilot.
+- Risiko: Timing windows, vollständig gebrochene Subroutinen, Ziel-ICE und Rez-Kostenbezug.
 
-Option E: Olivia Salazar später als Ability mit Timing, Source-Validation, Limit und temporary derez modellieren.
+Option D: Loan from Chiba.
 
-Keine dieser Optionen sollte verdeckt P3, Trigger Registry, Target Binding oder produktive ActiveModifier-Nutzung starten.
+- Vorteil: deckt Lifecycle-Fähigkeiten wie `on_install`, `start_of_turn` und `leave_play` ab.
+- Risiko: mehrere Trigger/Lifecycle-Effekte, lose-game condition und optionale Trash-/State-Regeln.
 
-## 8. Tests und Qualitätssicherung
+Option E: weiterer einfacher activated/on-play Effect-Baustein.
+
+- Vorteil: niedriges Risiko und gute Wiederholung des bestehenden Musters.
+- Risiko: bringt weniger neue Architekturfläche.
+
+Option F: additional_subroutine-Folgekarte.
+
+- Vorteil: nutzt den neuen Baustein und testet dynamische Subroutine-Attribution weiter.
+- Risiko: Tesseract/Tutor haben komplexere Semantik als Encoder, Inc. und können schnell neue Subroutine-Arten oder Trigger brauchen.
+
+## 9. Tests und Qualitätssicherung
 
 Für neue Migrationen werden erwartet:
 
@@ -161,8 +217,9 @@ Für neue Migrationen werden erwartet:
 - Tests gegen Doppeleffekte durch Legacy-Resolver plus neue CardImplementation
 - Tests für kompatible PublicPayload-Felder
 - Tests für `resolvedEffects`-Reihenfolge bei geordneten Effektsequenzen
-- Replay- und StateHash-Checks, wenn der produktive Play- oder Resolve-Pfad betroffen ist
+- Tests für stale LegalActions bei Kosten-, Timing-, Source- und dynamischer Subroutine-Revalidation
+- Replay- und StateHash-Checks, wenn produktive Resolve-Pfade betroffen sind
 
-## 9. Aktuelle Arbeitsregel für Folge-Threads
+## 10. Aktuelle Arbeitsregel für Folge-Threads
 
 Folge-Threads sollen den Nettozustand dieses Branches als gültige Zwischenarchitektur behandeln. Neue Migrationen sollen die Schichtgrenze respektieren und lieber klein bleiben als zusätzliche generische Pipeline-Sonderfälle einzuführen.

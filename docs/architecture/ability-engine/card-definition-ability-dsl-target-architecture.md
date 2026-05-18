@@ -1,5 +1,7 @@
 # NETGRID CardDefinition / Ability DSL Target Architecture
 
+Hinweis zum aktuellen Umsetzungsstand nach P2.13a: Die neue Kartenlogik liegt derzeit bewusst engine-lokal in `packages/engine/src/card-implementations` und `packages/engine/src/ability-engine`. Die normale Shared-`CardDefinition` bleibt Katalog-, Deckbau- und Anzeigequelle. Der detaillierte Arbeitsstand steht in `card-implementation-tranche-status.md`.
+
 ## 1. Zielbild
 
 NETGRID-Karten sollen langfristig nicht durch verstreute Engine-Sonderfälle umgesetzt werden, sondern ihre Spielwirkung möglichst vollständig über CardDefinition-nahe, maschinenlesbare Datenstrukturen beschreiben.
@@ -62,23 +64,26 @@ Aktuelle Einordnung:
 
 - P1 Cost-Pipeline: Level 1. Corp-ICE-Rez-Kosten haben eine zentrale Quote-Schicht, enthalten aber noch kartennahe Übergangslogik.
 - P2 ActiveModifier Query: Vorbereitung für Level 3/4. `collectActiveModifiers(state)` rekonstruiert bestehende Modifier rein lesend, ohne produktive Berechnungspfade umzustellen.
-- P2.1 Corp-Rez-Cost-Modifikatoren als lokale Regeltabelle: Level 2. Betrag, Source und Geltungsbedingung passiver Corp-Rez-Kostenmodifier sind zentraler beschrieben, aber noch engine-lokal.
-- Ziel für passive Modifier: Level 3. Passive Modifier sollen nahe an der `CardDefinition` beschrieben und von generischen Query-/Cost-Pipelines gelesen werden.
+- P2.1 Corp-Rez-Cost-Modifikatoren als lokale Regeltabelle: historischer Level-2-Zwischenschritt.
+- P2.2 bis P2.13a CardImplementation-Tranche: Level 2/3. Konkrete Karten liegen jetzt in engine-lokalen `CardImplementationDefinition`s; generische Ability-/Effect-/Modifier-Bausteine liegen in `ability-engine`.
+- Ziel für passive Modifier: Level 3/4. Passive Modifier sollen deklarativ in CardImplementation-/Ability-Daten beschrieben und von generischen Query-/Cost-/Modifier-Pipelines gelesen werden.
 - Ziel für komplexe Fähigkeiten wie Olivia Salazar: später Level 3/4 über Ability-, Trigger-, Cost- und Effect-Strukturen.
 
 ## 5. Beispiel: passiver Rez-Cost-Modifier
 
-Zielbeispiel für Fortress Architects:
+Aktueller engine-lokaler Beispielstil für Data Masons:
 
 ```ts
 {
-  id: "onr_v1_324_fortress-architects",
+  cardDefinitionId: "onr_v1_317_data-masons",
   modifiers: [
     {
       kind: "rez_cost",
-      amount: -1,
+      operation: "reduce",
+      amount: 2,
       appliesTo: {
-        cardType: "ice"
+        cardType: "ice",
+        subtype: "wall"
       },
       activeWhile: "rezzed",
       sourceZone: "corp_root",
@@ -92,11 +97,12 @@ Zielbeispiel für Jerusalem City Grid:
 
 ```ts
 {
-  id: "onr_v1_360_jerusalem-city-grid",
+  cardDefinitionId: "onr_v1_360_jerusalem-city-grid",
   modifiers: [
     {
       kind: "rez_cost",
-      amount: -9,
+      operation: "reduce",
+      amount: 2,
       appliesTo: {
         cardType: "ice",
         subtype: "wall",
@@ -110,7 +116,9 @@ Zielbeispiel für Jerusalem City Grid:
 }
 ```
 
-In diesem Zielzustand braucht `cost-pipeline.ts` keine konkrete Kenntnis von Fortress Architects oder Jerusalem City Grid mehr. Die Pipeline sammelt generisch aktive `rez_cost`-Modifier, prüft deren `appliesTo`-Bedingungen gegen das Ziel-ICE und erzeugt daraus `CostModifierQuote`, LegalAction-Kosten und kompatible öffentliche Payload-Felder.
+In diesem Zielzustand braucht `cost-pipeline.ts` keine konkrete Kenntnis von Data Masons, Encoder, Inc., Skälderviken SA Beta Test Site oder Jerusalem City Grid mehr. Die Pipeline sammelt generisch aktive `rez_cost`-Modifier, prüft deren `appliesTo`-Bedingungen gegen das Ziel-ICE und erzeugt daraus `CostModifierQuote`, LegalAction-Kosten und kompatible öffentliche Payload-Felder.
+
+Fortress Architects ist inzwischen kein Rez-Cost-Beispiel mehr, sondern ein `install_cost`-POC für Corp-ICE-Installation.
 
 ## 6. Beispiel: optionale Fähigkeit
 
@@ -191,13 +199,15 @@ Ein Refactoring ist verdächtig, wenn:
 
 ## 9. Konkrete nächste technische Ableitung
 
-Der nächste sinnvolle technische Schritt nach P2.1 ist:
+Der ursprüngliche nächste Schritt nach P2.1 war:
 
 ```text
 P2.2: Passive Corp-Rez-Cost-Modifier aus der lokalen Regelstruktur in CardDefinition-nahe Modifier-Daten verschieben.
 ```
 
-Dabei soll `cost-pipeline.ts` danach nicht mehr direkt wissen, welche Karte Data Masons Hosting, Encoder Inc, Skålderviken SA Beta Test Site, Fortress Architects oder Jerusalem City Grid ist.
+Dieser Schritt ist inzwischen als engine-lokale CardImplementation-Tranche umgesetzt und weiter ausgebaut. Der aktuelle Stand umfasst zusätzlich `on_play`, `activated_card_ability`, `gain_credits`, `draw_cards`, ordered effect sequences, `resolvedEffects`, Chronik mit Kartenbezug, `install_cost`, `ice_strength`, `additional_subroutine`, dynamische Subroutine-Attribution und gemeinsame Modifier-Query-Helfer.
+
+Dabei soll `cost-pipeline.ts` nicht mehr direkt wissen, welche Karte Data Masons, Encoder, Inc., Skälderviken SA Beta Test Site oder Jerusalem City Grid ist. Fortress Architects ist als `install_cost`-POC eingeordnet.
 
 Die Pipeline soll nur noch generisch:
 
@@ -206,6 +216,8 @@ Die Pipeline soll nur noch generisch:
 - `appliesTo`-Bedingungen auswerten
 - `CostModifierQuote` erzeugen
 - `PublicPayload` kompatibel halten
+
+Für die nächsten konkreten Optionen siehe `card-implementation-tranche-status.md`.
 
 ## 10. Offene Fragen
 
