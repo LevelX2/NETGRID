@@ -5,6 +5,7 @@
 ## Enthaltene Artefakte
 
 - `netgrid-consolidated-release-roadmap.md`
+- `ai-releaseplanning-codex-briefing-2026-05-07.md`
 - `long-term-product-vision-and-roadmap.md`
 - `long-term-product-vision-executive-summary.md`
 - `release-planning-2026-05-05.md`

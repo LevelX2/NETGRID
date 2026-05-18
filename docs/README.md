@@ -12,7 +12,6 @@ Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefak
 - `archive/`: historische, nicht mehr führende Artefakte, die bewusst im Arbeitsbaum bleiben.
 - `derived/`: bestehender Übergangs- und Bestandsbereich für abgeleitete Artefakte wie Releasepläne, Requirements, Specs, Testmatrizen, Implementation Reviews, Final Reviews und größere Analyseberichte.
 - `codex/`: aktueller Codex-Status, Runbooks und Arbeitsnotizen mit Projektsteuerungsbezug.
-- `KI-Player/`: KI-bezogene Briefings und Planungsunterlagen.
 - `ui-designsets/`: UI-/Branding-Explorationen und zugehörige Designartefakte.
 
 ## Zielstruktur

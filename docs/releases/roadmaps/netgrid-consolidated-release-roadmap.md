@@ -13,7 +13,7 @@ Es konsolidiert:
 
 - die aktive Anschlussplanung `docs/releases/v1/v1-1-3-mechanics-ai-card-baseline/post-v1-1-2-roadmap.md`,
 - die langfristige Produktvision `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`,
-- das KI-Briefing `docs/KI-Player/NETGRID_KI_Releaseplanung_Codex_Briefing.md`,
+- das KI-Briefing `docs/releases/roadmaps/ai-releaseplanning-codex-briefing-2026-05-07.md`,
 - die historischen Roadmaps nach MVP 0.2, MVP 0.4 und V1.0.x,
 - den Mechanik-Komplettierungsplan und die Mechanik-Coverage-Matrix.
 
