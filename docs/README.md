@@ -12,7 +12,7 @@ Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefak
 - `archive/`: historische, nicht mehr führende Artefakte, die bewusst im Arbeitsbaum bleiben.
 - `derived/`: bestehender Übergangs- und Bestandsbereich für abgeleitete Artefakte wie Releasepläne, Requirements, Specs, Testmatrizen, Implementation Reviews, Final Reviews und größere Analyseberichte.
 - `codex/`: aktueller Codex-Status, Runbooks und Arbeitsnotizen mit Projektsteuerungsbezug.
-- `ui-designsets/`: UI-/Branding-Explorationen und zugehörige Designartefakte.
+- `ui-designsets/`: kuratierte UI-/Branding-Referenzen mit aktiven Designrichtungen, Branding und archivierten Explorationen.
 
 ## Zielstruktur
 
@@ -21,7 +21,7 @@ Weitere Strukturpakete führen diese Zielbereiche schrittweise ein, sobald ein k
 - `decisions/`: kleine Projekt-, Produkt-, Asset-, Git- und Dokumentationsentscheidungen.
 - `runbooks/`: wiederholbare Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
 - `operations/`: ops-nahe Dauerartefakte zu Deployment, Maintenance, Observability und Incidents.
-- `design/`: spätere kuratierte Designsystem- und Branding-Struktur, falls `ui-designsets/` migriert wird.
+- `design/`: spätere echte Designsystem-Struktur, falls aus Mockups später Komponentenmodelle, Tokens und Designentscheidungen entstehen.
 
 ## Grundregel
 

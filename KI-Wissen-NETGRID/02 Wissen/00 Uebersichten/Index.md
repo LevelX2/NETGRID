@@ -316,4 +316,4 @@
 - `docs/architecture/card-rules/card-rule-text-formatting-spec.md`: verbindliches Konzept für normalisierten Kartentext, semantische Symbol-Tokens, Renderingregeln und die Trennung von Anzeige-Text und Engine-Vertrag.
 - `docs/releases/roadmaps/long-term-product-vision-and-roadmap.md`: langfristige Produktvision mit privaten, Internet-, Public- und Endprodukt-Gates.
 - `docs/releases/roadmaps/long-term-product-vision-executive-summary.md`: Kurzfassung der langfristigen Produktvision und Gate-Reihenfolge.
-- `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: vorläufige Branding-Entscheidung für den Client-Namen `NETGRID` und die ausgewählten Logo-/Icon-Referenzen.
+- `docs/ui-designsets/branding/BRANDING_DECISION.md`: vorläufige Branding-Entscheidung für den Client-Namen `NETGRID` und die ausgewählten Logo-/Icon-Referenzen.

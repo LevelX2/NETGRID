@@ -8,7 +8,7 @@ Empfohlener Phasenname: `MVP 0.7 UI redesign and visual design requirements`
 
 MVP 0.7 ist die bewusste UI-Neugestaltungs- und Designphase.
 
-Die Phase orientiert sich primär am Designset `docs/ui-designsets/03-design-c-clean-high-contrast/`. Das Design C wird als Hauptstruktur übernommen, weil es lesbar, side-sicher, hell, gut scanbar und mit der bestehenden Next.js/React-Oberfläche realistisch umsetzbar ist.
+Die Phase orientiert sich primär am Designset `docs/ui-designsets/active/design-c/`. Das Design C wird als Hauptstruktur übernommen, weil es lesbar, side-sicher, hell, gut scanbar und mit der bestehenden Next.js/React-Oberfläche realistisch umsetzbar ist.
 
 Kernformel:
 
@@ -33,15 +33,15 @@ Danach soll die Anwendung:
 
 Primäre Referenz:
 
-- `docs/ui-designsets/03-design-c-clean-high-contrast/entry.png`
-- `docs/ui-designsets/03-design-c-clean-high-contrast/runner-corrected.png`
-- `docs/ui-designsets/03-design-c-clean-high-contrast/corp.png`
+- `docs/ui-designsets/active/design-c/entry.png`
+- `docs/ui-designsets/active/design-c/runner-corrected.png`
+- `docs/ui-designsets/active/design-c/corp.png`
 
 Kartenbildfreundliche Zusatzreferenz:
 
-- `docs/ui-designsets/03-design-c-clean-high-contrast/entry-card-images.png`
-- `docs/ui-designsets/03-design-c-clean-high-contrast/runner-card-images-corrected.png`
-- `docs/ui-designsets/03-design-c-clean-high-contrast/corp-card-images-corrected.png`
+- `docs/ui-designsets/active/design-c/entry-card-images.png`
+- `docs/ui-designsets/active/design-c/runner-card-images-corrected.png`
+- `docs/ui-designsets/active/design-c/corp-card-images-corrected.png`
 
 Diese Zusatzbilder ersetzen die ursprüngliche Design-C-Entscheidung nicht, sondern konkretisieren den Kartenanzeige-Teil: Bildmodus, kompakte Karten, Zoom, Text-Fallback und Card Preview werden als V0.7-Planungsbausteine aufgenommen.
 

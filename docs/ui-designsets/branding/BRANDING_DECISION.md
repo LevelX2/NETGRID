@@ -8,7 +8,7 @@ Der bevorzugte Programmname ist vorläufig:
 
 `NETGRID`
 
-Als bevorzugter Schriftzug gilt der rechte obere `NETGRID`-Lockup aus der Datei [wordmark-lockups.png](wordmark-lockups.png).
+Als bevorzugter Schriftzug gilt der rechte obere `NETGRID`-Lockup aus der historischen Ideentafel [wordmark-lockups.png](../archive/exploration/logo-ideas/wordmark-lockups.png).
 
 Aus diesem Lockup dürfen die zugehörigen Symbole links und rechts vom Schriftzug vorläufig als textlose Tool-Icons verwendet werden.
 

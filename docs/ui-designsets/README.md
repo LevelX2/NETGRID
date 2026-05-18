@@ -1,8 +1,16 @@
 # UI-Designsets
 
-Diese Bilder sind explorative UI-Mockups für den privaten NETGRID-Client. Sie sind keine verbindliche Implementierungsvorgabe, sondern visuelle Richtungen für spätere UI-Entscheidungen.
+Diese Bilder sind explorative UI-Mockups für den privaten NETGRID-Client. Sie sind keine verbindliche Implementierungsvorgabe, sondern kuratierte visuelle Referenzen für spätere UI-Entscheidungen.
 
 Eine gesonderte Bewertung der Umsetzungsrealistik liegt hier: [Realismusprüfung](REALISM_REVIEW.md).
+
+## Aktiver Stand
+
+- Primärreferenz: Design C unter `active/design-c/`.
+- Ergänzung: Design D für Run-/Encounter-Fokus unter `active/design-d-run-focus/`.
+- Branding: vorläufige NETGRID-Richtung unter `branding/`.
+- Archiv: alte Explorationen und ersetzte Drafts unter `archive/`.
+- Asset-Gate: keine offiziellen Logos, Card Frames, Card Backs, offiziellen Artworks oder externen Kartendatenbank-Stile; Kartenbilder nur nach eigenem Asset-/Rechts-Gate.
 
 ## Gemeinsame Anforderungen
 
@@ -15,53 +23,34 @@ Eine gesonderte Bewertung der Umsetzungsrealistik liegt hier: [Realismusprüfung
 
 ## Struktur
 
-### Basisentwürfe
+- `active/design-c/`: aktive Hauptreferenz für die helle, lesbare und side-sichere UI-Struktur.
+- `active/design-d-run-focus/`: aktive Ergänzung für Run-/Encounter-Fokus.
+- `branding/`: vorläufige NETGRID-Branding-Entscheidung und ausgewählte Referenzassets.
+- `archive/exploration/`: historische Basisentwürfe, Design A, Design B und Logo-Ideentafeln.
+- `archive/replaced-drafts/`: Drafts mit korrigierten Nachfolgern.
 
-- [Design A: Dark Tactical](00-basisentwuerfe/design-a-dark-tactical-overview.png)
-- [Design B: Operations Dashboard](00-basisentwuerfe/design-b-operations-dashboard-overview.png)
-- [Design C: Clean Readable](00-basisentwuerfe/design-c-clean-readable-overview.png)
-- [Design D: Cinematic Run](00-basisentwuerfe/design-d-cinematic-run-overview.png)
+### Design C, aktive Hauptreferenz
 
-### Set 1: Design A, Dark Tactical
+- [Einstieg](active/design-c/entry.png)
+- [Runner, korrigiert](active/design-c/runner-corrected.png)
+- [Corp](active/design-c/corp.png)
+- [Einstieg, kartenbildfreundlich](active/design-c/entry-card-images.png)
+- [Runner, kartenbildfreundlich korrigiert](active/design-c/runner-card-images-corrected.png)
+- [Corp, kartenbildfreundlich korrigiert](active/design-c/corp-card-images-corrected.png)
 
-- [Einstieg](01-design-a-dark-tactical/entry.png)
-- [Runner](01-design-a-dark-tactical/runner.png)
-- [Corp](01-design-a-dark-tactical/corp.png)
+### Design D, Run-/Encounter-Fokus
 
-### Set 2: Design B, Operations Dashboard
+- [Einstieg](active/design-d-run-focus/entry.png)
+- [Runner, korrigiert](active/design-d-run-focus/runner-corrected.png)
+- [Corp, korrigiert](active/design-d-run-focus/corp-corrected.png)
 
-- [Einstieg](02-design-b-operations-dashboard/entry.png)
-- [Runner](02-design-b-operations-dashboard/runner.png)
-- [Corp](02-design-b-operations-dashboard/corp.png)
+### Branding
 
-### Set 3: Design C, Clean High Contrast
-
-- [Einstieg](03-design-c-clean-high-contrast/entry.png)
-- [Runner, Entwurf](03-design-c-clean-high-contrast/runner-draft.png)
-- [Runner, korrigiert](03-design-c-clean-high-contrast/runner-corrected.png)
-- [Corp](03-design-c-clean-high-contrast/corp.png)
-- [Einstieg, kartenbildfreundlich](03-design-c-clean-high-contrast/entry-card-images.png)
-- [Runner, kartenbildfreundlich](03-design-c-clean-high-contrast/runner-card-images.png)
-- [Runner, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/runner-card-images-corrected.png)
-- [Corp, kartenbildfreundlich](03-design-c-clean-high-contrast/corp-card-images.png)
-- [Corp, kartenbildfreundlich korrigiert](03-design-c-clean-high-contrast/corp-card-images-corrected.png)
-
-### Set 4: Design D, Cinematic Dark
-
-- [Einstieg](04-design-d-cinematic-dark/entry.png)
-- [Runner, Entwurf](04-design-d-cinematic-dark/runner-draft.png)
-- [Runner, korrigiert](04-design-d-cinematic-dark/runner-corrected.png)
-- [Corp, Entwurf](04-design-d-cinematic-dark/corp-draft.png)
-- [Corp, korrigiert](04-design-d-cinematic-dark/corp-corrected.png)
-
-### Logo-Exploration
-
-- [Übersicht](05-logo-exploration/README.md)
-- [Vorläufige Branding-Entscheidung: NETGRID](05-logo-exploration/BRANDING_DECISION.md)
-- [Logo-Marken](05-logo-exploration/logo-mark-exploration.png)
-- [Wordmark-Lockups](05-logo-exploration/wordmark-lockups.png)
-- [App-Icons](05-logo-exploration/app-icon-exploration.png)
+- [Branding-Übersicht](branding/README.md)
+- [Vorläufige Branding-Entscheidung: NETGRID](branding/BRANDING_DECISION.md)
+- [Ausgewählter NETGRID-Lockup](branding/selected-netgrid/netgrid-lockup-selected.png)
+- [Neu gezeichnetes rechtes NETGRID-Kachel-Icon, SVG](branding/selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg)
 
 ## Hinweis zur Bewertung
 
-Bei Set 3 und Set 4 sind die korrigierten Varianten vorzuziehen, weil die Prompts dort stärker auf MVP-Scope, generische Demo-Karten und ausgeschlossene Mechaniken eingeschränkt wurden.
+Design C ist die führende Hauptstruktur. Design D ist nur als Run-/Encounter-Ergänzung zu lesen. Archivierte Explorationen und ersetzte Drafts sind nicht mehr als aktive UI-Vorgabe gedacht.

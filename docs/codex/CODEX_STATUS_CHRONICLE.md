@@ -2321,7 +2321,7 @@ UI design exploration artifacts available:
 
 - `docs/ui-designsets/README.md`
 - `docs/ui-designsets/REALISM_REVIEW.md`
-- `docs/ui-designsets/05-logo-exploration/BRANDING_DECISION.md`: current provisional client name is `NETGRID`; selected clean icon references live under `docs/ui-designsets/05-logo-exploration/selected-netgrid/`.
+- `docs/ui-designsets/branding/BRANDING_DECISION.md`: current provisional client name is `NETGRID`; selected clean icon references live under `docs/ui-designsets/branding/selected-netgrid/`.
 
 ## 2026-05-11 - V1.9.5 bis V1.9.8 Kernimplementierung
 

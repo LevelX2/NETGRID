@@ -60,7 +60,7 @@ Der Paketkontext nannte noch 819 getrackte `docs/`-Dateien und 712 unter `docs/d
 | `docs/reviews/originalset-spotchecks/` | 42 | Markdown | Originalset-Spotchecks | Register, Rollup und Detailberichte | `keep-active` für Register/Rollup, `keep-evidence` für Detailberichte | Am 2026-05-18 aus `docs/derived/ORIGINALSET_CARD_SPOTCHECK_*` migriert; kanonischer Einstieg ist `docs/reviews/originalset-spotchecks/README.md`. |
 | `docs/archive/originalset-spotcheck-jobs/2026-05/` | 39 | Markdown | Originalset-Spotchecks | abgeschlossene Einzeljob-Nachweise | `archive`, später optional `git-remove-after-condense` | Bestehender Bezug: `act-2026-05-17-docs-spotcheck-evidence-rollup`; die Jobs sind nach Rollup und Linkcheck archiviert und bleiben für Commit-/Arbeitsnachweise auffindbar. |
 | ehemalige `docs/derived/*_IMPLEMENTATION_REVIEW.md`, `*_FINAL_REVIEW.md`, `*_TEST_MATRIX.md`, `*_REQUIREMENTS.md`, `*_SPEC.md` | viele | Markdown | releaseübergreifend | formale Dauerartefakte | `keep-evidence` | Der pauschale Sammelbereich ist aufgelöst; formale Artefakte liegen je nach Funktion unter `docs/releases/`, `docs/architecture/`, `docs/reviews/` oder `docs/decisions/`. |
-| `docs/ui-designsets/` | 35 | Markdown, PNG, SVG | UI-/Branding-Exploration, Logo-Referenzen | Design-Exploration und Bildbelege | `keep-evidence`, teilweise `needs-decision` | Bestehender Folgehinweis: `act-2026-05-17-docs-designsets-curation`. Asset-/Rechtsgate bleibt vor öffentlicher Nutzung maßgeblich. |
+| `docs/ui-designsets/` | 35 | Markdown, PNG, SVG | UI-/Branding-Exploration, Logo-Referenzen | kuratierte Design-Referenzen und Bildbelege | `keep-evidence` | Am 2026-05-18 in `active/design-c/`, `active/design-d-run-focus/`, `branding/`, `archive/exploration/` und `archive/replaced-drafts/` kuratiert. Asset-/Rechtsgate bleibt vor öffentlicher Nutzung maßgeblich. |
 
 ## Doppelte Root-/Source-Dateien
 
@@ -80,7 +80,7 @@ Stichtagsbefund in diesem Worktree: `git ls-files --others --exclude-standard --
 2. `docs/activities/done/` monatlich oder thematisch rollupen; Einzelpakete erst danach auf Retention prüfen.
 3. `docs/derived/` zuerst entlang bestehender Releaseketten verdichten: MVP-0.x ist seit 2026-05-18 nach `docs/releases/mvp/` migriert; Proteus ist seit 2026-05-18 nach `docs/releases/proteus/` migriert; AI ist seit 2026-05-18 nach `docs/architecture/ai/`, `docs/reviews/ai/` und `docs/releases/ai/` migriert; V2-Plattformverträge sind seit 2026-05-18 nach `docs/releases/v2/` migriert.
 4. Root-/Source-Duplikate erst nach Linkprüfung behandeln.
-5. `docs/ui-designsets/` nur nach Asset-/Rechts- und Produktentscheid kuratieren; Bilddateien nicht pauschal entfernen.
+5. `docs/ui-designsets/` ist seit 2026-05-18 kuratiert; Bilddateien bleiben erhalten und sind nach aktiver Referenz, Branding, historischer Exploration und ersetztem Draft getrennt.
 
 ## Benannte Folgepakete
 

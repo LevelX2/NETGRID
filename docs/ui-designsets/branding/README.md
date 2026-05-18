@@ -1,18 +1,21 @@
-# Logo-Exploration
+# Branding
 
-Explorative Logo-Entwürfe für das private NETGRID-Tool. Diese Dateien sind Bildkonzepte, noch keine finalen SVG-/Icon-Assets.
+Vorläufige Branding-Referenzen für das private NETGRID-Tool. Diese Dateien sind Bildkonzepte und Auswahlstände, noch keine finalen Markenassets.
 
 Aktuelle Auswahl: [Vorläufige Branding-Entscheidung: NETGRID](BRANDING_DECISION.md).
 
-## Dateien
+## Aktive Referenzen
 
-- [Logo-Marken](logo-mark-exploration.png): zwölf reine Symbolideen.
-- [Wordmark-Lockups](wordmark-lockups.png): acht Kombinationen aus Icon und Platzhalter-Produktnamen.
-- [App-Icons](app-icon-exploration.png): sechzehn quadratische Icon-Ideen für PWA, Favicon oder Toolbar.
 - [Ausgewählter NETGRID-Lockup](selected-netgrid/netgrid-lockup-selected.png): bevorzugter rechter oberer NETGRID-Schriftzug.
 - [NETGRID Icon links](selected-netgrid/netgrid-icon-left-mark-clean.png): textloser Icon-Kandidat aus dem linken Symbol des Lockups.
 - [NETGRID Icon rechts](selected-netgrid/netgrid-icon-right-tile-clean.png): textloser Icon-Kandidat aus dem rechten Symbol des Lockups.
 - [NETGRID Icon rechts, neu gezeichnet](selected-netgrid/netgrid-icon-right-tile-redraw-v2.svg): aktuelles Client- und Desktop-Icon mit transparentem Außenbereich.
+
+## Historische Ideentafeln
+
+- [Logo-Marken](../archive/exploration/logo-ideas/logo-mark-exploration.png): zwölf reine Symbolideen.
+- [Wordmark-Lockups](../archive/exploration/logo-ideas/wordmark-lockups.png): acht Kombinationen aus Icon und Platzhalter-Produktnamen.
+- [App-Icons](../archive/exploration/logo-ideas/app-icon-exploration.png): sechzehn quadratische Icon-Ideen für PWA, Favicon oder Toolbar.
 
 ## Bewertung
 
