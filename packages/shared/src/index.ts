@@ -268,42 +268,16 @@ export type AbilityKind =
   | "future_interrupt"
   | "future_replacement";
 
-export type IdentityModifierKind =
-  | "base_link"
-  | "memory_limit"
-  | "starting_credits";
+export type ModifierKind = "base_link" | "memory_limit" | "starting_credits";
 
-export type CardRezCostModifierDefinition = {
+export type ModifierDefinition = {
   modifierId: string;
-  kind: "rez_cost";
-  operation: "reduce";
-  amount: number;
-  activeWhile: "rezzed";
-  sourceZone: "corp_root";
-  visibility: "public";
-  appliesTo: {
-    cardType: "ice";
-    subtype?: string;
-    sameServerAsSource?: boolean;
-  };
-};
-
-export type IdentityModifierDefinition = {
-  modifierId: string;
-  kind: IdentityModifierKind;
+  kind: ModifierKind;
   side: Side;
   amount: number;
   duration: "setup" | "static";
   sourceAbilityId?: string;
 };
-
-export type ModifierDefinition =
-  | IdentityModifierDefinition
-  | CardRezCostModifierDefinition;
-
-export type ModifierKind =
-  | IdentityModifierKind
-  | CardRezCostModifierDefinition["kind"];
 
 export type AbilityRef = {
   sourceCardInstanceId: CardInstanceId;
@@ -6147,18 +6121,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     trashCost: 3,
     rulesText:
       "Rezzed asset with global ICE install and server-building modifier surfaces. Server effects remain explicit and public.",
-    modifiers: [
-      {
-        modifierId: "onr_v1_324_fortress_architects_rez_cost",
-        kind: "rez_cost",
-        operation: "reduce",
-        amount: 1,
-        activeWhile: "rezzed",
-        sourceZone: "corp_root",
-        visibility: "public",
-        appliesTo: { cardType: "ice" },
-      },
-    ],
     mechanics: [
       "install_remote",
       "rez_card",
@@ -6357,22 +6319,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     trashCost: 5,
     rulesText:
       "Cost to rez walls on this fort is reduced by 9. All walls on this fort have +1 strength. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
-    modifiers: [
-      {
-        modifierId: "onr_v1_360_jerusalem_city_grid_wall_rez_cost",
-        kind: "rez_cost",
-        operation: "reduce",
-        amount: 9,
-        activeWhile: "rezzed",
-        sourceZone: "corp_root",
-        visibility: "public",
-        appliesTo: {
-          cardType: "ice",
-          subtype: "wall",
-          sameServerAsSource: true,
-        },
-      },
-    ],
     mechanics: [
       "install_remote",
       "rez_card",
@@ -6395,18 +6341,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     trashCost: 1,
     rulesText:
       "Walls cost 2 less to rez and get +1 strength while Data Masons is rezzed.",
-    modifiers: [
-      {
-        modifierId: "onr_v1_317_data_masons_wall_rez_cost",
-        kind: "rez_cost",
-        operation: "reduce",
-        amount: 2,
-        activeWhile: "rezzed",
-        sourceZone: "corp_root",
-        visibility: "public",
-        appliesTo: { cardType: "ice", subtype: "wall" },
-      },
-    ],
     mechanics: [
       "install_remote",
       "rez_card",
@@ -6427,18 +6361,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 1,
     rulesText: "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
-    modifiers: [
-      {
-        modifierId: "onr_v1_320_encoder_inc_code_gate_rez_cost",
-        kind: "rez_cost",
-        operation: "reduce",
-        amount: 2,
-        activeWhile: "rezzed",
-        sourceZone: "corp_root",
-        visibility: "public",
-        appliesTo: { cardType: "ice", subtype: "code_gate" },
-      },
-    ],
     mechanics: [
       "install_remote",
       "rez_card",
@@ -6458,18 +6380,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 2,
     rulesText: "Black ice costs 2 less to rez while this asset is rezzed.",
-    modifiers: [
-      {
-        modifierId: "onr_v1_341_skalderviken_black_ice_rez_cost",
-        kind: "rez_cost",
-        operation: "reduce",
-        amount: 2,
-        activeWhile: "rezzed",
-        sourceZone: "corp_root",
-        visibility: "public",
-        appliesTo: { cardType: "ice", subtype: "black_ice" },
-      },
-    ],
     mechanics: [
       "install_remote",
       "rez_card",

@@ -18,6 +18,7 @@ import {
   validateGameState,
 } from "./index";
 import { collectActiveModifiers } from "./ability-engine/active-modifiers";
+import { cardImplementationForDefinitionId } from "./card-implementations/registry";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import {
   MECHANIC_SMOKE_CARD_IDS,
@@ -6911,9 +6912,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(DEMO_CARDS_BY_ID["onr_v1_254_liche"]).toBeDefined();
   });
 
-  it("describes passive Corp rez-cost modifiers on card definitions", () => {
+  it("describes passive Corp rez-cost modifiers through card implementations", () => {
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_317_data-masons"]?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_317_data-masons")?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "rez_cost",
@@ -6926,7 +6927,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_320_encoder-inc"]?.modifiers,
+      cardImplementationForDefinitionId("onr_v1_320_encoder-inc")?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "rez_cost",
@@ -6936,7 +6937,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_341_skalderviken-sa-beta-test-site"]?.modifiers,
+      cardImplementationForDefinitionId(
+        "onr_v1_341_skalderviken-sa-beta-test-site",
+      )?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "rez_cost",
@@ -6946,7 +6949,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_324_fortress-architects"]?.modifiers,
+      cardImplementationForDefinitionId(
+        "onr_v1_324_fortress-architects",
+      )?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "rez_cost",
@@ -6956,7 +6961,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
       }),
     );
     expect(
-      DEMO_CARDS_BY_ID["onr_v1_360_jerusalem-city-grid"]?.modifiers,
+      cardImplementationForDefinitionId(
+        "onr_v1_360_jerusalem-city-grid",
+      )?.modifiers,
     ).toContainEqual(
       expect.objectContaining({
         kind: "rez_cost",

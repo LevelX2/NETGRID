@@ -2,13 +2,14 @@ import type {
   CardDefinition,
   CardDefinitionId,
   CardInstanceId,
-  CardRezCostModifierDefinition,
   Cost,
   GameState,
   LegalAction,
   ServerId,
 } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
+import type { CardRezCostModifierImplementation } from "../card-implementations/types";
 import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../mechanics/agenda-operation-effects";
 
 export type CostPurpose = "corp_rez";
@@ -40,7 +41,7 @@ export type CostQuote = {
 type ActiveCorpRezCostModifier = {
   sourceCardInstanceId: CardInstanceId;
   sourceDefinitionId: CardDefinitionId;
-  modifier: CardRezCostModifierDefinition;
+  modifier: CardRezCostModifierImplementation;
 };
 
 export function costQuoteToLegalActionCosts(quote: CostQuote): Cost[] {
@@ -125,11 +126,18 @@ function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
 
 function corpRezCostModifierAppliesToIce(
   state: GameState,
-  modifier: CardRezCostModifierDefinition,
+  modifier: CardRezCostModifierImplementation,
   sourceCardInstanceId: CardInstanceId,
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): boolean {
+  if (
+    modifier.operation !== "reduce" ||
+    modifier.activeWhile !== "rezzed" ||
+    modifier.sourceZone !== "corp_root" ||
+    modifier.visibility !== "public"
+  )
+    return false;
   if (iceDefinition.type !== modifier.appliesTo.cardType) return false;
   if (
     modifier.appliesTo.subtype &&
@@ -154,8 +162,9 @@ function activeCorpRezCostModifiersForIce(
   const matches: ActiveCorpRezCostModifier[] = [];
   for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
     const sourceDefinitionId = definitionFor(state, sourceCardInstanceId).id;
-    const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
-    for (const modifier of sourceDefinition?.modifiers ?? []) {
+    const sourceImplementation =
+      cardImplementationForDefinitionId(sourceDefinitionId);
+    for (const modifier of sourceImplementation?.modifiers ?? []) {
       if (modifier.kind !== "rez_cost") continue;
       if (
         !corpRezCostModifierAppliesToIce(

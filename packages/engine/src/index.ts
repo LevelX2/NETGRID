@@ -37,7 +37,7 @@ import {
   type SpecialZoneKind,
   type SpecialZoneState,
   type SpecialZoneVisibility,
-  type IdentityModifierKind,
+  type ModifierKind,
   type ServerId,
   type SetupState,
   type Side,
@@ -20915,8 +20915,8 @@ function applyIdentitySetupAbilities(state: GameState): void {
     const identity = identityDefinition(state, side);
     for (const modifier of identity.modifiers ?? []) {
       if (
-        modifier.kind !== "starting_credits" ||
         modifier.duration !== "setup" ||
+        modifier.kind !== "starting_credits" ||
         modifier.side !== side
       )
         continue;
@@ -20931,15 +20931,15 @@ function applyIdentitySetupAbilities(state: GameState): void {
 function identityModifierAmount(
   state: GameState,
   side: Side,
-  kind: IdentityModifierKind,
+  kind: ModifierKind,
   duration: "setup" | "static",
 ): number {
   const identity = identityDefinition(state, side);
   return (identity.modifiers ?? [])
     .filter(
       (modifier) =>
-        modifier.kind === kind &&
         modifier.side === side &&
+        modifier.kind === kind &&
         modifier.duration === duration,
     )
     .reduce((sum, modifier) => {
