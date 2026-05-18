@@ -312,6 +312,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const runnerContest = evaluateRemoteScoringContest(input, candidate, context);
   const scoringHorizon = evaluateRemoteScoreHorizon(input, candidate, context);
   const remoteRezReserve = evaluateRemoteRezReserve(input, candidate, context);
+  const recentRemoteAgendaLoss = evaluateRecentRemoteAgendaLoss(input, candidate, context);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const installedEconomy = evaluateCorpInstalledEconomyActions(input, candidate);
   const base = baseScoreForPlan(candidate.kind);
@@ -328,6 +329,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     runnerContest.score +
     scoringHorizon.score +
     remoteRezReserve.score +
+    recentRemoteAgendaLoss.score +
     installedEconomy.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
@@ -337,6 +339,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     `plan:${candidate.kind}`,
     `difficulty:${input.difficulty}`,
     `doctrine_plan_weight:${doctrinePlanWeight}`,
+    ...recentRemoteAgendaLoss.evidence,
     ...runnerContest.evidence,
     ...scoringHorizon.evidence,
     ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
@@ -358,7 +361,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons, ...installedEconomy.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons, ...recentRemoteAgendaLoss.reasons, ...installedEconomy.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -724,6 +727,61 @@ export function evaluateRemoteRezReserve(input: AiDecisionInput, candidate: Corp
   return best;
 }
 
+function evaluateRecentRemoteAgendaLoss(input: AiDecisionInput, candidate: CorpPlanCandidate, context: CorpEvaluationContext): CorpPlanEvaluatorResult {
+  if (candidate.kind !== "score_next_turn" && candidate.kind !== "build_scoring_remote") {
+    return { score: 0, reasons: [], evidence: [] };
+  }
+  const recentLossServers = recentRemoteAgendaLossServerIds(input);
+  if (recentLossServers.length === 0) {
+    return { score: 0, reasons: [], evidence: ["recent_remote_agenda_loss:false"] };
+  }
+  const agendaSetupActions = actionsForCandidate(input, candidate).filter((action) => isRemoteAgendaSetupAction(input, action));
+  if (agendaSetupActions.length === 0) {
+    return { score: 0, reasons: [], evidence: [`recent_remote_agenda_loss:${recentLossServers.join(",")}`, "recent_remote_agenda_repeat:false"] };
+  }
+  const riskyActions = agendaSetupActions.filter((action) => isRiskyRemoteAgendaSetupAction(input, action, context));
+  const riskyRepeat = riskyActions.length > 0;
+  return {
+    score: riskyRepeat ? -240 : -45,
+    reasons: [riskyRepeat ? "recent_remote_agenda_loss_risky_repeat" : "recent_remote_agenda_loss_cautious_repeat"],
+    evidence: [
+      `recent_remote_agenda_loss:${recentLossServers.join(",")}`,
+      `recent_remote_agenda_repeat:${riskyRepeat ? "risky" : "bounded"}`,
+      `remote_bluff_budget:${riskyRepeat ? "blocked" : "cautious"}`
+    ]
+  };
+}
+
+function recentRemoteAgendaLossServerIds(input: AiDecisionInput): string[] {
+  const recentEvents = input.eventTail.slice(-16);
+  return sortedUnique(
+    recentEvents
+      .filter((event) => event.type === "steal_agenda" || event.publicPayload.actionType === "steal_agenda")
+      .map((event) => serverIdFromEvent(event))
+      .filter((serverId): serverId is string => Boolean(serverId?.startsWith("remote_")))
+  );
+}
+
+function isRemoteAgendaSetupAction(input: AiDecisionInput, action: LegalAction): boolean {
+  if (action.type !== "install_card" && action.type !== "advance_card") return false;
+  const serverId = remoteServerIdForAction(input, action);
+  if (!serverId?.startsWith("remote_")) return false;
+  const card = findVisibleCard(input, action.source);
+  return Boolean(card?.definitionId && isAgendaDefinition(card.definitionId));
+}
+
+function isRiskyRemoteAgendaSetupAction(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): boolean {
+  const serverId = remoteServerIdForAction(input, action);
+  if (!serverId?.startsWith("remote_")) return true;
+  const server = input.playerView.servers.find((candidate) => candidate.id === serverId);
+  if (!server || server.ice.length <= 0) return true;
+  if (server.ice.some((ice) => ice.rezzed === true)) return false;
+  const reserve = remoteRezReserveNeedForServer(input, serverId, context);
+  const creditsAfterAction = creditsAfterCorpPlanAction(input, action);
+  if (reserve && reserve.reserveTarget > 0 && creditsAfterAction < reserve.reserveTarget) return true;
+  return evaluateRunnerContestCapacity(input, serverId, context).capacity === "high";
+}
+
 function remoteRezReserveForAction(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): CorpPlanEvaluatorResult | undefined {
   if (action.type !== "install_card" && action.type !== "advance_card" && action.type !== "score_agenda") return undefined;
   const features = extractCorpPlanFeatures(input);
@@ -797,9 +855,14 @@ function hasRemoteScoringLegalAction(input: AiDecisionInput, context: CorpEvalua
 }
 
 function creditsAfterCorpPlanAction(input: AiDecisionInput, action: LegalAction): number {
-  const credits = input.playerView.own.credits;
-  if (action.type === "gain_credit") return credits + 1;
-  return credits;
+  const creditsAfterCosts = input.playerView.own.credits - actionCreditCost(action);
+  if (action.type === "gain_credit") {
+    return creditsAfterCosts + Math.max(1, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"));
+  }
+  if (action.type === "trigger_ability") {
+    return creditsAfterCosts + Math.max(0, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"));
+  }
+  return creditsAfterCosts;
 }
 
 function remoteScoreHorizonForAction(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): RemoteScoreHorizon | undefined {
@@ -1286,7 +1349,15 @@ function remoteRootActionSecurityScore(input: AiDecisionInput, action: LegalActi
   const rezzedIceBonus = server.ice.some((ice) => ice.rezzed === true) ? 35 : 0;
   const contestCapacity = evaluateRunnerContestCapacity(input, serverId, context);
   const contestSecurity = contestCapacity.capacity === "low" ? 55 : contestCapacity.capacity === "medium" ? 0 : -120;
-  return cacheRemoteRootSecurity(context, action, 90 + Math.min(server.ice.length, 3) * 20 + rezzedIceBonus + contestSecurity);
+  const reserve = remoteRezReserveNeedForServer(input, serverId, context);
+  const creditsAfterAction = creditsAfterCorpPlanAction(input, action);
+  const reserveSecurity =
+    reserve && reserve.reserveTarget > 0
+      ? creditsAfterAction >= reserve.reserveTarget
+        ? 25
+        : -180 - Math.max(0, reserve.reserveTarget - creditsAfterAction) * 20
+      : 0;
+  return cacheRemoteRootSecurity(context, action, 90 + Math.min(server.ice.length, 3) * 20 + rezzedIceBonus + contestSecurity + reserveSecurity);
 }
 
 function cacheRemoteRootSecurity(context: CorpEvaluationContext, action: LegalAction, score: number): number {

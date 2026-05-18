@@ -3389,13 +3389,16 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
     const decision = chooseCorpPlanDecision(scopedInput);
 
-    expect(scoreCandidate).toBeDefined();
     expect(economyCandidate).toBeDefined();
-    if (!scoreCandidate || !economyCandidate)
+    if (!economyCandidate)
       throw new Error("Missing remote rez reserve candidates");
-    expect(
-      evaluateRemoteRezReserve(scopedInput, scoreCandidate).reasons,
-    ).toContain("remote_rez_reserve_missing_before_score_line");
+    expect(scoreCandidate).toBeUndefined();
+    expect(evaluateAgendaRisk(scopedInput, economyCandidate).evidence).toEqual(
+      expect.arrayContaining([
+        "protectedRemoteAvailable:false",
+        "rezReserveAvailable:false",
+      ]),
+    );
     expect(
       evaluateRemoteRezReserve(scopedInput, economyCandidate).reasons,
     ).toContain("remote_rez_reserve_building");
@@ -3944,12 +3947,15 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
     const decision = chooseCorpPlanDecision(scopedInput);
 
-    expect(scoreCandidate).toBeDefined();
     expect(economyCandidate).toBeDefined();
-    if (!scoreCandidate || !economyCandidate)
+    if (!economyCandidate)
       throw new Error("Missing missing-reserve agenda-flood candidates");
-    expect(evaluateAgendaRisk(scopedInput, scoreCandidate).evidence).toContain(
-      "rezReserveAvailable:false",
+    expect(scoreCandidate).toBeUndefined();
+    expect(evaluateAgendaRisk(scopedInput, economyCandidate).evidence).toEqual(
+      expect.arrayContaining([
+        "protectedRemoteAvailable:false",
+        "rezReserveAvailable:false",
+      ]),
     );
     expect(
       evaluateRemoteRezReserve(scopedInput, economyCandidate).reasons,
@@ -3958,6 +3964,118 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.selectedActionId).toBe(gain.actionId);
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_agenda|simple_priority_agenda/,
+    );
+  });
+
+  it("penalizes repeating an advanced remote agenda after a recent steal without rez reserve", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-recent-remote-agenda-loss",
+      (state) => {
+        state.corp.credits = 2;
+        state.runner.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing recent remote agenda loss fixture actions");
+
+    const eventTail: PublicGameEvent[] = [
+      ...input.eventTail,
+      {
+        eventId: "test-recent-remote-agenda-steal",
+        type: "steal_agenda",
+        stateVersionBefore: input.actionNumber - 1,
+        stateVersionAfter: input.actionNumber,
+        stateHashAfter: "test-hash",
+        publicPayload: {
+          actionType: "steal_agenda",
+          serverId: "remote_1",
+        },
+      },
+    ];
+    const scopedInput = {
+      ...input,
+      eventTail,
+      legalActions: [advance, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    if (!scoreCandidate)
+      throw new Error("Missing recent-loss score-next-turn candidate");
+    const score = evaluateCorpPlan(scopedInput, scoreCandidate);
+    expect(score.reasons).toContain("recent_remote_agenda_loss_risky_repeat");
+    expect(score.evidence).toEqual(
+      expect.arrayContaining([
+        "recent_remote_agenda_loss:remote_1",
+        "recent_remote_agenda_repeat:risky",
+        "remote_bluff_budget:blocked",
+      ]),
+    );
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+    expect(JSON.stringify(score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("rezzes affordable remote ICE before an advanced root agenda access", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-corp-rez-advanced-remote-root" }));
+    state.corp.credits = 3;
+    state.runner.credits = 5;
+    ensureRemoteServer(state, "remote_1");
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    putCorpRootInRemote(state, "simple_agenda", 1);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const rez = input.legalActions.find(
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const decline = input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    );
+
+    expect(rez).toBeDefined();
+    expect(decline).toBeDefined();
+    if (!rez || !decline)
+      throw new Error("Missing remote root rez fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [decline, rez],
+    });
+
+    expect(decision.actionId).toBe(rez.actionId);
+    expect(decision.reasonCode).toBe("corp.rez.defensive_card");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["run_window", "runner_credits:5"]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
     );
   });
 
