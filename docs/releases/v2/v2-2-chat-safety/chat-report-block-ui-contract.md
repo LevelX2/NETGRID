@@ -6,7 +6,7 @@ Zielrelease: V2.2 Minimal Chat Gate
 
 ## Zweck und Grenze
 
-Dieser Vertrag konkretisiert den Report-, Block- und UI-Zustandspfad für späteren berechtigungsgebundenen Lobby- oder Matchchat. Er ergänzt `docs/derived/V2_2_CHAT_DATA_CONTRACT.md` und bindet den Moderationshandoff an die Evidence-Grenzen aus `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md` sowie `docs/derived/V2_6_MODERATION_EVIDENCE_EXPORT_CONTRACT.md`.
+Dieser Vertrag konkretisiert den Report-, Block- und UI-Zustandspfad für späteren berechtigungsgebundenen Lobby- oder Matchchat. Er ergänzt `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md` und bindet den Moderationshandoff an die Evidence-Grenzen aus `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md` sowie `docs/releases/v2/v2-6-moderation/evidence-export-contract.md`.
 
 Der Vertrag gibt keinen globalen oder öffentlichen Chat frei. Er führt keine Moderationskonsole, keine automatisierte Sanktion, keine LLM-Moderation und keine UI-Implementierung ein. Chat-, Report- und Blockdaten bleiben außerhalb von Engine, `GameState`, `GameEvent`, `PublicGameEvent`, Replay, StateHash, `LegalAction`, `PlayerAction`, `AIInput` und `DecisionDebug`.
 

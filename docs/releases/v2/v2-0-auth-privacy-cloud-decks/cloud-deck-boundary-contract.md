@@ -22,7 +22,7 @@ Empfehlung: Cloud-Decks bleiben bearbeitbare Account-Drafts. Beim Matchstart ent
 
 Betroffene Anker:
 
-- V2.0 Datenschutzvertrag: `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md`
+- V2.0 Datenschutzvertrag: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md`
 - Bestehende Deck-Redaction: `DeckPublicMetadata` ohne `cards`
 - Bestehende AI-Doctrine: nur eigener `privateDeckSnapshots?.[side]`-Pfad
 

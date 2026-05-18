@@ -49,9 +49,9 @@ Der Slice bleibt bewusst ohne Engine-, Karten- oder Plattformerweiterungen.
 
 ## Daten- und Artefakte
 
-- `docs/derived/V2_3A_REQUIREMENTS.md`
-- `docs/derived/V2_3A_TEST_MATRIX.md`
-- `docs/derived/V2_3A_LAN_OPEN_LOBBY_MINI_PLAN.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-requirements.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-test-matrix.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-plan.md`
 - `tests/specs/visibility-contract.test.ts`
 - `apps/server/src/multiplayer.test.ts`
 - `apps/web/app/match-start.test.ts`

@@ -14,10 +14,10 @@ parallelWorker: worker-1
 releaseTarget: V2.3
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_3_PUBLIC_LOBBY_REDACTION_RATE_LIMIT_TEST_MATRIX.md
+  - docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-redaction-rate-limit-test-matrix.md
 checks:
-  - "Test-Path docs/derived/V2_3_PUBLIC_LOBBY_REDACTION_RATE_LIMIT_TEST_MATRIX.md"
-  - "Select-String required acceptance terms in docs/derived/V2_3_PUBLIC_LOBBY_REDACTION_RATE_LIMIT_TEST_MATRIX.md"
+  - "Test-Path docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-redaction-rate-limit-test-matrix.md"
+  - "Select-String required acceptance terms in docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-redaction-rate-limit-test-matrix.md"
   - "git diff --check"
 ---
 
@@ -29,10 +29,10 @@ Die Public-Lobby-Alpha braucht vor Codefreigabe eine Testmatrix für Lobby-Metad
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3A_TEST_MATRIX.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-test-matrix.md`
 - `tests/specs/visibility-contract.test.ts`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 
@@ -56,4 +56,4 @@ Die Public-Lobby-Alpha braucht vor Codefreigabe eine Testmatrix für Lobby-Metad
 
 ## Ergebnisnotiz
 
-Erledigt am 2026-05-17. Das neue Derived-Artefakt `docs/derived/V2_3_PUBLIC_LOBBY_REDACTION_RATE_LIMIT_TEST_MATRIX.md` definiert erlaubte D0-Public-Lobby-Metadaten, verbotene Token-/Deck-/PII-/Hidden-Info-/KI-Debug-Muster, Redaction-Tests, Rate-Limit-/Spam-/Enumeration-/Stale-Entry-Fälle mit Status- und Audit-Erwartungen sowie ein Mindest-Testset für einen späteren Umsetzungsslice. Keine Test- oder API-Implementierung wurde vorgenommen. Offene Folgepunkte bleiben die spätere technische Umsetzung hinter den V2.3-Public-Gates und die getrennten Rollback-/Operability- und UI-/Filterverträge.
+Erledigt am 2026-05-17. Das neue Derived-Artefakt `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-redaction-rate-limit-test-matrix.md` definiert erlaubte D0-Public-Lobby-Metadaten, verbotene Token-/Deck-/PII-/Hidden-Info-/KI-Debug-Muster, Redaction-Tests, Rate-Limit-/Spam-/Enumeration-/Stale-Entry-Fälle mit Status- und Audit-Erwartungen sowie ein Mindest-Testset für einen späteren Umsetzungsslice. Keine Test- oder API-Implementierung wurde vorgenommen. Offene Folgepunkte bleiben die spätere technische Umsetzung hinter den V2.3-Public-Gates und die getrennten Rollback-/Operability- und UI-/Filterverträge.

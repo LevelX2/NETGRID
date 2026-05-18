@@ -10,7 +10,7 @@ Zielrelease: V2.0 Closed Accounts Alpha
 
 Betroffene Anker:
 
-- `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
 - `apps/server/src/multiplayer.ts` mit side-sicheren Replay-Exports und gesperrter `local_analysis`-Exportperspektive
 - `apps/server/src/storage-sqlite.ts` mit redigierten Maintenance-Teilnehmer- und Größendaten
 
@@ -23,7 +23,7 @@ Empfehlung: V2.0-Export nutzt nur eigene Accountdaten, eigene Cloud-Daten und si
 Betroffene Anker:
 
 - Account-Entscheidung: Accountdaten bleiben getrennt von `GameState`, `PlayerView`, `LegalAction`, `PublicGameEvent`, Replay-StateHash, `AIInput` und `DecisionDebug`.
-- `docs/derived/V2_0_ACCOUNT_SESSION_FOUNDATION_IMPLEMENTATION_REVIEW.md`: Account-Session-Schicht ist bisher isoliert.
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-foundation-implementation-review.md`: Account-Session-Schicht ist bisher isoliert.
 
 Risiko: Nachträgliche Löschung darf keine deterministische Matchhistorie brechen. Gleichzeitig dürfen Account-Links und personenbezogene Anzeigenamen nicht unnötig in Metadaten weiterleben.
 

@@ -12,15 +12,15 @@ Der Vertrag gibt keine Public-Lobby-API, keine UI-Implementierung, kein Matchmak
 
 ## Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3_PUBLIC_LOBBY_REDACTION_RATE_LIMIT_TEST_MATRIX.md`
-- `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md`
-- `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
-- `docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md`
-- `docs/derived/V2_8_PUBLIC_REPLAY_POLICY_PROJECTION.md`
-- `docs/derived/V2_3A_IMPLEMENTATION_REVIEW.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-redaction-rate-limit-test-matrix.md`
+- `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
+- `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md`
+- `docs/releases/v2/v2-8-public-replay/public-replay-policy-projection.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-implementation-review.md`
 
 ## Ausgangslage
 

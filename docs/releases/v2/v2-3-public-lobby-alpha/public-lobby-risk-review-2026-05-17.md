@@ -12,14 +12,14 @@ Eine Public Alpha darf erst starten, wenn Identität, Datenschutz, Moderation, R
 
 ## Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md`
-- `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md`
-- `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_RBAC_REDACTION_TEST_MATRIX.md`
-- `docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md`
-- `docs/derived/V2_8_PUBLIC_REPLAY_POLICY_PROJECTION.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-auth-contract.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
+- `docs/releases/v2/v2-6-moderation/rbac-redaction-test-matrix.md`
+- `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md`
+- `docs/releases/v2/v2-8-public-replay/public-replay-policy-projection.md`
 
 ## Schutzgüter
 
@@ -109,7 +109,7 @@ V2.3a ist keine Public-Freigabe:
 | Paket | Status | Zweck |
 | --- | --- | --- |
 | `act-2026-05-17-v23-public-lobby-redaction-rate-limit-matrix` | bestätigt, liegt in `docs/activities/inbox/` | Testmatrix für erlaubte/verbotene Public-Lobby-Felder, Rate Limits, Abuse-Events und redigierte Audit-Signale |
-| `act-2026-05-17-v23-public-alpha-rollback-operability-contract` | abgeschlossen; Vertrag liegt unter `docs/derived/V2_3_PUBLIC_ALPHA_ROLLBACK_OPERABILITY_CONTRACT_2026_05_17.md` | Kill-Switch, Rollback, Health, Alerting, Safe Mode und Incident-Grenzen |
+| `act-2026-05-17-v23-public-alpha-rollback-operability-contract` | abgeschlossen; Vertrag liegt unter `docs/releases/v2/v2-3-public-lobby-alpha/public-alpha-rollback-operability-contract-2026-05-17.md` | Kill-Switch, Rollback, Health, Alerting, Safe Mode und Incident-Grenzen |
 | `act-2026-05-17-v23-public-lobby-ui-filter-contract` | neu angelegt in `docs/activities/inbox/` | UI-/Filtervertrag für erlaubte Filter, Statusanzeigen, leere/error Zustände, Sichtbarkeitsklassen und Metadaten-Redaction |
 
 ## Handoff

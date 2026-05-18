@@ -13,7 +13,7 @@ branch: codex/activity-worker-5
 releaseTarget: V2.2
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_2_CHAT_DATA_CONTRACT.md
+  - docs/releases/v2/v2-2-chat-safety/chat-data-contract.md
   - docs/activities/inbox/act-2026-05-17-v2-chat-redaction-boundary-tests.md
   - docs/activities/inbox/act-2026-05-17-v2-chat-data-model-retention-policy.md
   - docs/activities/inbox/act-2026-05-17-v2-chat-report-block-ui-contract.md
@@ -62,7 +62,7 @@ Der bestehende private Lobbychat und die V2.2-Roadmap sollen zu einem kleinen Ch
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_2_CHAT_DATA_CONTRACT.md` definiert Chat als berechtigungsgebundene UGC-Schicht außerhalb von `GameState`, `GameEvent`, `PublicGameEvent`, Replay, StateHash, `PlayerAction`, `LegalAction`, `AIInput` und `DecisionDebug`.
+Abgeschlossen. `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md` definiert Chat als berechtigungsgebundene UGC-Schicht außerhalb von `GameState`, `GameEvent`, `PublicGameEvent`, Replay, StateHash, `PlayerAction`, `LegalAction`, `AIInput` und `DecisionDebug`.
 
 Offene Entscheidungen zu Retention, Export/Löschung, Reportmodell, Block-Semantik, Moderationszugriff, Hidden-Info in Chat, Rate Limits, UI-Meldung und LLM-Moderation sind dokumentiert. Der V1.0.3-Lobbychat bleibt ausdrücklich private Zwei-Personen-Startlobby und wird nicht zu globalem oder öffentlichem Chat umgedeutet.
 

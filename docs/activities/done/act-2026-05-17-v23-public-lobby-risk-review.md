@@ -18,12 +18,12 @@ blockedBy:
   - act-2026-05-17-v2-observability-redaction-baseline
   - act-2026-05-17-v2-moderation-rbac-redaction-tests
 resultArtifacts:
-  - docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md
+  - docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md
   - docs/activities/inbox/act-2026-05-17-v23-public-lobby-redaction-rate-limit-matrix.md
   - docs/activities/inbox/act-2026-05-17-v23-public-alpha-rollback-operability-contract.md
   - docs/activities/inbox/act-2026-05-17-v23-public-lobby-ui-filter-contract.md
 checks:
-  - Test-Path docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md
+  - Test-Path docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md
   - Test-Path docs/activities/inbox/act-2026-05-17-v23-public-lobby-ui-filter-contract.md
   - rg --files docs/activities | rg "v23-public-lobby-(risk-review|redaction-rate-limit-matrix|ui-filter-contract)|v23-public-alpha-rollback"
   - git diff --check
@@ -37,10 +37,10 @@ Vor einer Public-Lobby-Alpha soll ein Public Platform Risk Review die Bedrohungs
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md`
-- `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-auth-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 
@@ -65,4 +65,4 @@ Vor einer Public-Lobby-Alpha soll ein Public Platform Risk Review die Bedrohungs
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md` dokumentiert Schutzgüter, Bedrohungsmodell, Eintrittspunkte, konkrete Startverbote, Mindestgates und die enge V2.3a-Reuse-Einordnung als reine technische Basis ohne Public-Freigabe. Die vorhandenen Folgepakete für Redaction-/Rate-Limit-Testmatrix und Rollback-/Operability-Vertrag wurden bestätigt; das fehlende Folgepaket `act-2026-05-17-v23-public-lobby-ui-filter-contract` wurde neu in `docs/activities/inbox/` angelegt. Keine Implementierung, keine Public-Lobby-Freigabe, kein Matchmaking, keine Accounts-/Moderationsimplementierung und keine Replay-, Spectator-, KI-, Karten- oder Asset-Freigabe.
+Abgeschlossen. `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md` dokumentiert Schutzgüter, Bedrohungsmodell, Eintrittspunkte, konkrete Startverbote, Mindestgates und die enge V2.3a-Reuse-Einordnung als reine technische Basis ohne Public-Freigabe. Die vorhandenen Folgepakete für Redaction-/Rate-Limit-Testmatrix und Rollback-/Operability-Vertrag wurden bestätigt; das fehlende Folgepaket `act-2026-05-17-v23-public-lobby-ui-filter-contract` wurde neu in `docs/activities/inbox/` angelegt. Keine Implementierung, keine Public-Lobby-Freigabe, kein Matchmaking, keine Accounts-/Moderationsimplementierung und keine Replay-, Spectator-, KI-, Karten- oder Asset-Freigabe.

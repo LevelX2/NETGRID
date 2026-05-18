@@ -6,7 +6,7 @@ Zielrelease: V2.6 Moderation Console
 
 ## Zweck und Grenze
 
-Dieser Vertrag legt fest, welche Daten ein späterer Moderations-Evidence-Export enthalten darf, welche Daten nur redigiert erscheinen dürfen und welche Daten immer ausgeschlossen bleiben. Er ergänzt `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md` und ersetzt weder den V2.0 Account-Datenexport noch eine spätere V2.8 Public-Replay-Freigabe.
+Dieser Vertrag legt fest, welche Daten ein späterer Moderations-Evidence-Export enthalten darf, welche Daten nur redigiert erscheinen dürfen und welche Daten immer ausgeschlossen bleiben. Er ergänzt `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md` und ersetzt weder den V2.0 Account-Datenexport noch eine spätere V2.8 Public-Replay-Freigabe.
 
 Evidence-Export ist ein reportbezogener Moderationsvorgang. Er dient der nachvollziehbaren Bearbeitung, Review oder Übergabe eines konkreten Reports. Er ist kein Debug-Export, kein Datenschutz-Self-Export, kein Public Replay und keine FullState-Ansicht.
 

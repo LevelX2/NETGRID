@@ -8,7 +8,7 @@ Zielrelease: V2.6 Moderation Console
 
 Dieses Runbook beschreibt den manuellen Zielablauf für spätere Moderatorhandlungen in V2.6. Es konkretisiert den Moderation-/Evidence-/RBAC-Vertrag, ohne eine Moderationskonsole, Report-API, Sanktionsarten oder rechtliche Endfassung vorwegzunehmen.
 
-Führende Grundlage: `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`.
+Führende Grundlage: `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`.
 
 ## Rollen und Grundregeln
 

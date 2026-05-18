@@ -22,8 +22,8 @@ Empfehlung: Public Replay braucht eine eigene Projektion, z. B. `public_sanitize
 
 Betroffene Anker:
 
-- V2.0 Datenschutzvertrag: `docs/derived/V2_0_PRIVACY_EXPORT_DELETE_CONTRACT.md`
-- V2.6 Moderation/RBAC: `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- V2.0 Datenschutzvertrag: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/privacy-export-delete-contract.md`
+- V2.6 Moderation/RBAC: `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 Risiko: Öffentliche Replays sind account- und moderationsempfindlich, selbst wenn sie keine Hidden Cards zeigen. Match-ID, Anzeige-Namen, Ergebnis, Zeitstempel und Spielstil können personenbezogen wirken.
 

@@ -22,7 +22,7 @@ Ziel ist eine deterministische, legal-action-basierte Grundierung dieser Familie
 - `V1.9.4`-Preflight/Kernkorb und offene Deferred-Menge sind bekannt und in Folgeplanung übergeben.  
   [Grobplan](C:/Projekte/NETGRID/docs/releases/v1/v1-9-originalset-completion/v1-9-1-mechanikpaket-j/open-points-grobplan-to-v1-9-8.md)
 - Kein V2.x-Gate darf vor `V1.9.8` geöffnet werden.  
-  [V2.x-Limitation](C:/Projekte/NETGRID/docs/derived/V2_3A_REQUIREMENTS.md), [CODEX Status](C:/Projekte/NETGRID/docs/codex/CODEX_STATUS.md)
+  [V2.x-Limitation](C:/Projekte/NETGRID/docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-requirements.md), [CODEX Status](C:/Projekte/NETGRID/docs/codex/CODEX_STATUS.md)
 
 ## 3) In-Scope / Out-of-Scope
 

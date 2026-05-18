@@ -52,7 +52,7 @@ Diese Stellen enthalten `Backend 0.5`, aber keinen Dateipfad auf die Releasearte
 | Runtime-Code | `apps/server/src/storage-sqlite.ts`, `apps/web/app/maintenance.ts` | Kein Pfadbruch; Versions-/Labeltexte bleiben unverändert. |
 | Tests | `apps/server/src/multiplayer.test.ts`, `apps/web/app/maintenance.test.ts` | Kein Pfadbruch; Testnamen und Assertions bleiben unverändert. |
 | UI | `apps/web/app/maintenance/page.tsx` | Kein Pfadbruch; sichtbare Backend-Ops-Version bleibt fachlicher Text. |
-| Status/Planung | `docs/codex/CODEX_STATUS.md`, `docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md`, abgeschlossene Activities | Kein direkter Pfadbruch, aber bei späterer Move-Kommunikation als Kontext zu beachten. |
+| Status/Planung | `docs/codex/CODEX_STATUS.md`, `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md`, abgeschlossene Activities | Kein direkter Pfadbruch, aber bei späterer Move-Kommunikation als Kontext zu beachten. |
 
 ## Zielstruktur
 

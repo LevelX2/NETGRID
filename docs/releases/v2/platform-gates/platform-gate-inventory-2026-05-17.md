@@ -11,9 +11,9 @@ V2.3a ist abgeschlossen, aber nur als privater LAN-Open-Lobby-Mini-Slice. Der Fi
 
 Neue tragfähige V2-Vorarbeiten vom 2026-05-17:
 
-- `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
-- `docs/derived/V2_0_ACCOUNT_SESSION_AUTH_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
+- `docs/releases/v2/v2-0-auth-privacy-cloud-decks/account-session-auth-contract.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Readiness-Tabelle
 

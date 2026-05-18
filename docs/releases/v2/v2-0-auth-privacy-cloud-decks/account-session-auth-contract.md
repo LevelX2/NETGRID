@@ -2,7 +2,7 @@
 
 Stand: 2026-05-17  
 Status: Vertragsfreeze vor Implementierung  
-Quelle: `docs/derived/V2_0_AUTH_PRIVACY_DECISION_SPIKE.md`
+Quelle: `docs/releases/v2/v2-0-auth-privacy-cloud-decks/auth-privacy-decision-spike.md`
 
 ## Scope
 

@@ -13,10 +13,10 @@ branch: codex/activity-worker-4
 releaseTarget: V2.6
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_6_MODERATOR_RUNBOOK_DRAFT.md
+  - docs/releases/v2/v2-6-moderation/moderator-runbook-draft.md
 checks:
   - rg -n "V2\\.6|Moderator|Moderation|Report|Appeal|Appeals|Break-Glass|Sanktion|FullState|Hidden-Info|Audit" docs KI-Wissen-NETGRID -g "*.md"
-  - rg -n "automatisierte LLM|FullState-Standardzugriff|Hidden-Info-Veröffentlichung|Break-Glass|Vier-Augen|Appeals|Review" docs/derived/V2_6_MODERATOR_RUNBOOK_DRAFT.md docs/activities/done/act-2026-05-17-v2-moderator-runbook-draft.md
+  - rg -n "automatisierte LLM|FullState-Standardzugriff|Hidden-Info-Veröffentlichung|Break-Glass|Vier-Augen|Appeals|Review" docs/releases/v2/v2-6-moderation/moderator-runbook-draft.md docs/activities/done/act-2026-05-17-v2-moderator-runbook-draft.md
   - git diff --check
   - git diff --cached --check
 ---
@@ -29,7 +29,7 @@ Ein erster Moderator-Runbook-Entwurf soll klären, wie Reports bearbeitet, Evide
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 
@@ -59,6 +59,6 @@ Ein erster Moderator-Runbook-Entwurf soll klären, wie Reports bearbeitet, Evide
 
 ## Ergebnisnotiz
 
-Abgeschlossen mit `docs/derived/V2_6_MODERATOR_RUNBOOK_DRAFT.md`. Der Entwurf beschreibt Reporteingang, Triage, Evidence-Sichtung, Entscheidung, Audit, Abschluss, Break-Glass mit Vier-Augen-Freigabe und Appeals/Review als offene Produktentscheidung. Die No-Go-Liste schließt automatisierte LLM-/KI-Sanktionen, FullState-Standardzugriff, Hidden-Info-Veröffentlichung, KI-Debug als Standard-Evidence sowie Engine-/Replay-/StateHash-/LegalAction-Änderungen aus.
+Abgeschlossen mit `docs/releases/v2/v2-6-moderation/moderator-runbook-draft.md`. Der Entwurf beschreibt Reporteingang, Triage, Evidence-Sichtung, Entscheidung, Audit, Abschluss, Break-Glass mit Vier-Augen-Freigabe und Appeals/Review als offene Produktentscheidung. Die No-Go-Liste schließt automatisierte LLM-/KI-Sanktionen, FullState-Standardzugriff, Hidden-Info-Veröffentlichung, KI-Debug als Standard-Evidence sowie Engine-/Replay-/StateHash-/LegalAction-Änderungen aus.
 
 Checks: `rg`-Kontextsuche zu V2.6/Moderation/Break-Glass/Hidden-Info, fokussierte `rg`-Pflichtbegriffsuche im neuen Runbook und Activity-Abschluss, `git diff --check`, `git diff --cached --check`.

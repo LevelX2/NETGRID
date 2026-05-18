@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.6
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md
+  - docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md
   - docs/activities/inbox/act-2026-05-17-v2-moderation-rbac-redaction-tests.md
   - docs/activities/inbox/act-2026-05-17-v2-moderation-evidence-export-contract.md
   - docs/activities/inbox/act-2026-05-17-v2-moderator-runbook-draft.md
@@ -65,6 +65,6 @@ Vor Public-Lobby-, Chat- oder Replay-Ausbau soll ein kleines Moderations-Grundpa
 
 ## Ergebnisnotiz
 
-Erledigt. `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md` definiert Rollenmodell, Datenklassen `D0` bis `D7`, Zugriffsmatrix, Evidence-Quellen, Default-Deny für FullState/Hidden-Daten/Decklisten/`AIInput`/`DecisionDebug`, Break-Glass-Policy, Auditpflichten, Retention-Vorschläge und Umsetzungsgates.
+Erledigt. `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md` definiert Rollenmodell, Datenklassen `D0` bis `D7`, Zugriffsmatrix, Evidence-Quellen, Default-Deny für FullState/Hidden-Daten/Decklisten/`AIInput`/`DecisionDebug`, Break-Glass-Policy, Auditpflichten, Retention-Vorschläge und Umsetzungsgates.
 
 Drei Folgeactivities sind angelegt: RBAC-/Redaction-Tests, Evidence-Export-Vertrag und Moderator-Runbook-Entwurf. Bestehende angrenzende Pakete zu Observability-Redaction, Public Replay, Chat-Preflight und V2.x-Gate-Inventar bleiben passend. Verifikation: Quellenprüfung und `git diff --check`.

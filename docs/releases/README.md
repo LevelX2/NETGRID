@@ -13,4 +13,5 @@
 
 - `backend-ops/backend-0-5/`: privater Backend-/Ops-Schnitt für Storage-Maintenance.
 - `special/s01/`: abgeschlossene Sonderphase für Spielende, Ergebnisfenster, private Matchserie und opt-in Audio.
-- `v1/`: schrittweise migrierte V1-Releasefamilien; aktuell V1.0.2 und V1.0.4.
+- `v1/`: migrierte V1-Releasefamilien von V1.0 bis V1.9.22.
+- `v2/`: aktive V2-Plattform-, Datenschutz-, Public-Lobby-, Moderations- und Replay-Verträge.

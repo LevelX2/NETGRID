@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.8
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_8_PUBLIC_REPLAY_POLICY_PROJECTION.md
+  - docs/releases/v2/v2-8-public-replay/public-replay-policy-projection.md
 checks:
   - git diff --check
 ---
@@ -60,4 +60,4 @@ Für V2.8 soll vor einer Implementierung geklärt werden, welche öffentlichen R
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_8_PUBLIC_REPLAY_POLICY_PROJECTION.md` trennt Public Replay von privaten Runner-/Korp-Replays, `local_analysis` und Spectator. Der minimal denkbare Pfad ist eine neue `public_sanitized_timeline_v1`-Projektion nach Consent-, Unlisting-, Moderations-, Redaction- und Asset-Gates. Folgepakete sind benannt: `public-replay-redaction-harness`, `public-replay-consent-unlisting-contract`, `public-sanitized-replay-projection-builder`.
+Abgeschlossen. `docs/releases/v2/v2-8-public-replay/public-replay-policy-projection.md` trennt Public Replay von privaten Runner-/Korp-Replays, `local_analysis` und Spectator. Der minimal denkbare Pfad ist eine neue `public_sanitized_timeline_v1`-Projektion nach Consent-, Unlisting-, Moderations-, Redaction- und Asset-Gates. Folgepakete sind benannt: `public-replay-redaction-harness`, `public-replay-consent-unlisting-contract`, `public-sanitized-replay-projection-builder`.

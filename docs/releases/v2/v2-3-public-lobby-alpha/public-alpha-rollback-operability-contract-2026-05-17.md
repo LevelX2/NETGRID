@@ -12,10 +12,10 @@ Dieser Vertrag gibt keine Public Lobby, kein Matchmaking, keine öffentliche Reg
 
 ## Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md`
-- `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md`
-- `docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md`
+- `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`
+- `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md`
 - `docs/releases/v1/v1-0-9-private-internet-hardening/private-deployment-ops-spec.md`
 
 ## Zielbild

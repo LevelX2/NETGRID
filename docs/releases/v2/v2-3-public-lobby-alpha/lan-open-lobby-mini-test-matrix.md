@@ -62,4 +62,4 @@ Status: requirements_freeze_testmatrix
 
 ## Requirements-Coverage
 
-Alle Must-Anforderungen aus `docs/derived/V2_3A_REQUIREMENTS.md` haben mindestens eine Testspur in dieser Matrix.
+Alle Must-Anforderungen aus `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-requirements.md` haben mindestens eine Testspur in dieser Matrix.

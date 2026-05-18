@@ -15,7 +15,7 @@ blockedBy: []
 resultArtifacts:
   - apps/server/src/moderation-rbac.ts
   - apps/server/src/moderation-rbac.test.ts
-  - docs/derived/V2_6_MODERATION_RBAC_REDACTION_TEST_MATRIX.md
+  - docs/releases/v2/v2-6-moderation/rbac-redaction-test-matrix.md
 checks:
   - corepack pnpm --filter @netgrid/server test -- moderation-rbac.test.ts
   - corepack pnpm --filter @netgrid/server typecheck
@@ -30,7 +30,7 @@ Für spätere Moderationsslices soll eine fokussierte RBAC-/Redaction-Testbasis 
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
 
 ## Scope
 

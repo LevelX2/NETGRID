@@ -12,12 +12,12 @@ Die Matrix gibt keine Public Lobby, keine Public-Lobby-API, keine Testimplementi
 
 ## Quellen
 
-- `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3_PUBLIC_LOBBY_RISK_REVIEW_2026_05_17.md`
-- `docs/derived/V2_3A_TEST_MATRIX.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_RBAC_REDACTION_TEST_MATRIX.md`
-- `docs/derived/V2_7_OBSERVABILITY_REDACTION_BASELINE.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-risk-review-2026-05-17.md`
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-test-matrix.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
+- `docs/releases/v2/v2-6-moderation/rbac-redaction-test-matrix.md`
+- `docs/releases/v2/v2-7-observability/observability-redaction-baseline.md`
 - `tests/specs/visibility-contract.test.ts`
 
 ## Testobjekte

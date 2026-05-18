@@ -13,7 +13,7 @@ branch:
 releaseTarget: V2.3
 blockedBy: []
 resultArtifacts:
-  - docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md
+  - docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md
   - docs/activities/inbox/act-2026-05-17-v23-public-lobby-risk-review.md
   - docs/activities/inbox/act-2026-05-17-v23-public-lobby-redaction-rate-limit-matrix.md
   - docs/activities/inbox/act-2026-05-17-v23-public-alpha-rollback-operability-contract.md
@@ -29,7 +29,7 @@ Der abgeschlossene V2.3a-LAN-Open-Lobby-Slice soll gezielt gegen V2.3 Public Lob
 
 ## Kontext und Quellen
 
-- `docs/derived/V2_3A_FINAL_REVIEW.md`: LAN Open Lobby Mini Slice ist abgeschlossen.
+- `docs/releases/v2/v2-3-public-lobby-alpha/lan-open-lobby-mini-final-review.md`: LAN Open Lobby Mini Slice ist abgeschlossen.
 - V2.3 Roadmap: öffentliche Casual-Lobbies, Filter, kein Ranked, kein automatisches Matchmaking, Public Platform Risk Review, Spam-/Rate-Limit-Gates, Moderations- und Abuse-Pfade, Health/Observability, Rollback-Plan.
 - V2.3a war ausdrücklich keine öffentliche Lobby und kein Matchmaking.
 
@@ -61,4 +61,4 @@ Der abgeschlossene V2.3a-LAN-Open-Lobby-Slice soll gezielt gegen V2.3 Public Lob
 
 ## Ergebnisnotiz
 
-Abgeschlossen. `docs/derived/V2_3_PUBLIC_LOBBY_GAP_REVIEW_2026_05_17.md` trennt V2.3a-Reuse von echten Public-Gates und bestätigt V2.3 weiter als blockiert. Drei konkrete Folgeactivities sind angelegt und wegen der vorgelagerten Auth-, Datenschutz-, Moderations- und Observability-Gates blockiert: `act-2026-05-17-v23-public-lobby-risk-review`, `act-2026-05-17-v23-public-lobby-redaction-rate-limit-matrix` und `act-2026-05-17-v23-public-alpha-rollback-operability-contract`.
+Abgeschlossen. `docs/releases/v2/v2-3-public-lobby-alpha/public-lobby-gap-review-2026-05-17.md` trennt V2.3a-Reuse von echten Public-Gates und bestätigt V2.3 weiter als blockiert. Drei konkrete Folgeactivities sind angelegt und wegen der vorgelagerten Auth-, Datenschutz-, Moderations- und Observability-Gates blockiert: `act-2026-05-17-v23-public-lobby-risk-review`, `act-2026-05-17-v23-public-lobby-redaction-rate-limit-matrix` und `act-2026-05-17-v23-public-alpha-rollback-operability-contract`.

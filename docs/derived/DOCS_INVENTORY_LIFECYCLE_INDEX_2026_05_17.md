@@ -48,7 +48,7 @@ Der Paketkontext nannte noch 819 getrackte `docs/`-Dateien und 712 unter `docs/d
 | `docs/derived/README.md` | 1 | Markdown | abgeleitete Artefakte | Ordnerbeschreibung | `keep-active` | Bleibt kurze Ordnerregel; dieses Inventar ergänzt die Retention-Sicht. |
 | `docs/derived/MVP_0.*`, frühe `MVP`-Spezifikationen und `data/rules/mechanics-coverage-0.*`-Referenzen in Markdown | ca. 101 | Markdown | MVP 0.5 bis 0.99, M1/M2, Mechanikgrundlagen | Pläne, Requirements, Specs, Testmatrizen, Reviews | `keep-evidence`, zusätzlich `condense` | Kandidat für MVP-0.x-Phasenrollup mit Linkliste auf führende Gate-Dokumente. |
 | `docs/releases/v1/` mit ehemaligen `docs/derived/V1_0_*` bis `V1_9_*` | mehrere Dutzend | Markdown | Stabilisierung, UX, Storage, Hardening, Setup, Archives, Mechanics-AI-Baseline, Event/Replacement, Special Zones, Format, Card Data Pipeline, KI, Belief, Simulation, Replay, Tutorial, Mechanikpakete, Originalset-Completion | Releasepläne, Requirements, Specs, Reviews, Smokes, Automationsartefakte | `keep-evidence`, teilweise `condense` | V1.0 bis V1.9.22 ist seit 2026-05-18 nach `docs/releases/v1/` migriert; kanonischer Einstieg ist `docs/releases/v1/README.md`. |
-| `docs/derived/V2_*` | mehrere Verträge und Reviews | Markdown | Auth, Datenschutz, Cloud-Decks, Public Lobby, Chat, Moderation, Replay, Observability | Plattform- und Datenschutzverträge | `keep-active` | `docs/derived/V2_X_PLATFORM_GATE_INVENTORY_2026_05_17.md` ist aktueller Rollup-Kandidat; einzelne Verträge bleiben bis Umsetzung führend. |
+| `docs/releases/v2/` mit ehemaligen V2-Derived-Dateien | mehrere Verträge und Reviews | Markdown | Auth, Datenschutz, Cloud-Decks, Public Lobby, Chat, Moderation, Replay, Observability | Plattform- und Datenschutzverträge | `keep-active` | V2.x ist seit 2026-05-18 nach `docs/releases/v2/` migriert; kanonischer Einstieg ist `docs/releases/v2/README.md`, Gate-Rollup `docs/releases/v2/platform-gates/platform-gate-inventory-2026-05-17.md`. |
 | `docs/derived/PROTEUS_*` | 8 | Markdown | Proteus-Import und Mechanikplanung | Importberichte, Verträge, Coverage-Analysen | `keep-active` oder `keep-evidence` | Proteus-Coverage-/Mechanikrollup nach Entscheidung über variable ICE, Hidden Resources, Bad Publicity und Counter-Verträge. |
 | `docs/derived/AI_*` und KI-bezogene Reports | ca. 20 | Markdown | AI-Hints, Doctrine, Benchmarks, DecisionDebug, Visible Run | Analyse- und Reviewberichte | `keep-evidence`, aktuelle Diagnosepfade `keep-active` | AI-Rollen-/Benchmark-Rollup; keine Hidden-Info- oder Live-KI-Vertragsänderung aus diesem Inventar. |
 | `docs/releases/special/s01/` | 8 | Markdown | Spielende, Ergebnisfenster, Matchserie, Audio | Release-Index plus Sonderphasenartefakte | `keep-evidence`, später gezielt `condense` | Am 2026-05-18 aus sieben `docs/derived/S01_*`-Artefakten plus Rollup migriert; kanonischer Einstieg ist `docs/releases/special/s01/README.md`. |
@@ -74,7 +74,7 @@ Stichtagsbefund in diesem Worktree: `git ls-files --others --exclude-standard --
 
 1. `docs/codex/CODEX_STATUS.md` und `docs/codex/GOAL_HISTORY.md` chronologisch und thematisch trennen, bevor weitere Statusblöcke wachsen.
 2. `docs/activities/done/` monatlich oder thematisch rollupen; Einzelpakete erst danach auf Retention prüfen.
-3. `docs/derived/` zuerst entlang bestehender Releaseketten verdichten: MVP-0.x, V2-Plattform, Proteus, AI.
+3. `docs/derived/` zuerst entlang bestehender Releaseketten verdichten: MVP-0.x, Proteus, AI. V2-Plattformverträge sind seit 2026-05-18 nach `docs/releases/v2/` migriert.
 4. Root-/Source-Duplikate erst nach Linkprüfung behandeln.
 5. `docs/ui-designsets/` nur nach Asset-/Rechts- und Produktentscheid kuratieren; Bilddateien nicht pauschal entfernen.
 
@@ -92,7 +92,7 @@ Bestehende Pakete decken die wichtigsten Folgeschritte bereits ab:
 Neu sichtbar, aber noch nicht als Paket angelegt:
 
 - `docs-derived-v1-9-originalset-rollup`: führenden Rollup für V1.9.10 bis V1.9.22 nach Abschluss der Kette schneiden.
-- `docs-derived-v2-contract-index`: V2-Verträge nach Auth/Datenschutz/Cloud/Public/Social/Ops sortieren und mit Blockerstatus spiegeln.
+- `docs-derived-v2-contract-index`: erledigt durch Migration nach `docs/releases/v2/` mit `README.md` und Gate-Inventar.
 - `docs-activities-done-retention-rollup-2026-05`: erledigte Activity-Pakete des Monats Mai 2026 in einen Retention-Rollup überführen.
 
 Diese Folgepakete sind Empfehlungen aus dem Inventar. Sie verändern keine Engine-, Hidden-Info-, LegalAction-, Replay- oder StateHash-Verträge.

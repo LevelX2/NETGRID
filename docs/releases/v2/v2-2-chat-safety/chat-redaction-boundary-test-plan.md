@@ -6,16 +6,16 @@ Zielrelease: V2.2 Minimal Chat Gate
 
 ## Zweck
 
-Dieser Testplan konkretisiert den Redaction- und Boundary-Vertrag aus `docs/derived/V2_2_CHAT_DATA_CONTRACT.md`. Er legt fest, welche späteren Implementierungstests beweisen müssen, dass Chatdaten von Engine, Replay, StateHash, KI, DecisionDebug, Server-Payloads und Logs getrennt bleiben.
+Dieser Testplan konkretisiert den Redaction- und Boundary-Vertrag aus `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md`. Er legt fest, welche späteren Implementierungstests beweisen müssen, dass Chatdaten von Engine, Replay, StateHash, KI, DecisionDebug, Server-Payloads und Logs getrennt bleiben.
 
 Der Testplan erweitert keine Produktfreigabe: Er erlaubt keinen globalen Chat, keine Moderationskonsole, keine Public-Chat-Funktion, keine LLM-Moderation und keine Engine-/Replay-/KI-Nutzung von Chattexten.
 
 ## Quellenanker
 
-- `docs/derived/V2_2_CHAT_DATA_CONTRACT.md`
+- `docs/releases/v2/v2-2-chat-safety/chat-data-contract.md`
 - `docs/releases/v1/v1-0-3-matchstart-ux/plan.md`
-- `docs/derived/V2_6_MODERATION_EVIDENCE_RBAC_CONTRACT.md`
-- `docs/derived/V2_6_MODERATION_RBAC_REDACTION_TEST_MATRIX.md`
+- `docs/releases/v2/v2-6-moderation/evidence-rbac-contract.md`
+- `docs/releases/v2/v2-6-moderation/rbac-redaction-test-matrix.md`
 - Bestehende enge Lobbychat-Form: `ApiLobbyChatMessage` und `ApiMatchStartLobbyPayload.chatMessages`
 
 ## Bestehender V1.0.3-Lobbychat
