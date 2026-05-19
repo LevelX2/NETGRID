@@ -17,7 +17,12 @@ import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks 
 import { FixedWindowRateLimiter, createRateLimiter, loadDeploymentConfig, redactSensitiveText, redactedJoinUrl, type DeploymentConfig } from "./internet-hardening";
 import { InMemoryMatchStorage, MultiplayerService, type EventRecord, type JoinMatchResult, type MatchSettings, type MultiplayerStorage, type SidePayload, type StateSnapshot, type StoredMatch } from "./multiplayer";
 import { SqliteMatchStorage, StorageError, inspectSqliteStorage, restoreSqliteStorageBackup } from "./storage-sqlite";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, MVP_0_99_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, type CardInstanceId, type ChoiceRequest, type DeckDefinition, type GameEvent, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+
+function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
+  expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
+  expect(state.baseline.engineSchemaVersion).toBe(CURRENT_RULES_BASELINE.engineSchemaVersion);
+}
 
 describe("V1.0.9 private internet hardening", () => {
   it("uses a LAN-capable default bind address for direct server starts", async () => {
@@ -4089,6 +4094,7 @@ describe("MVP 0.2 multiplayer service", () => {
     if (!record) throw new Error("Missing stored match");
 
     let gameState = createGameAfterSetup({ matchId: created.matchId, seed: "server-runner-ai-rez-window" });
+    expectCurrentRulesBaseline(gameState);
     gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
     gameState = applyEngineAction(gameState, "corp", (action) => action.type === "end_turn");
     if (gameState.pendingChoice?.source === "discard_phase") gameState = applyEngineChoice(gameState, "corp", [String(gameState.pendingChoice.options[0]?.id)]);
@@ -4195,12 +4201,13 @@ describe("MVP 0.2 multiplayer service", () => {
       createGameAfterSetup({
         matchId: created.matchId,
         seed: "server-runner-ai-krash-filter-access-engine",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck,
         corpDeck,
         agendaPointsToWin: 7
       })
     );
+    expectCurrentRulesBaseline(gameState);
     gameState.runner.credits = 5;
     gameState.corp.credits = 5;
     moveRunnerCardToGripForTest(gameState, "onr_v1_039_krash");

@@ -94,7 +94,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_94_BASELINE, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
@@ -2363,10 +2363,10 @@ describe("MVP 0.3 Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
-  it("does not repeat a stale legacy Archives access on the same known operation", () => {
+  it("does not take a current-baseline Archives run when visible Archives cards are low value", () => {
     const requiredCorpCards = [
       "onr_v1_281_accounts-receivable",
-      "onr_v1_208_on-call-solo-team",
+      "onr_v1_282_annual-reviews",
     ];
     const corpDeckCards = [
       ...ONR_V1_1_2K_CORP_DECK.cards,
@@ -2381,10 +2381,13 @@ describe("MVP 0.3 Runner AI", () => {
         seed: "ai-runner-stale-legacy-archives",
         corpDeck: { ...ONR_V1_1_2K_CORP_DECK, cards: corpDeckCards },
         agendaPointsToWin: 7,
-        baseline: MVP_0_94_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
       }),
     );
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
+    expect(state.baseline.engineSchemaVersion).toBe(
+      CURRENT_RULES_BASELINE.engineSchemaVersion,
+    );
     const accountsId = moveCorpCardToArchives(
       state,
       "onr_v1_281_accounts-receivable",
@@ -2392,19 +2395,10 @@ describe("MVP 0.3 Runner AI", () => {
     );
     const hiddenId = moveCorpCardToArchives(
       state,
-      "onr_v1_208_on-call-solo-team",
+      "onr_v1_282_annual-reviews",
       true,
     );
     keepOnlyCorpArchivesCards(state, [accountsId, hiddenId]);
-
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "archives",
-    );
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.run).toBeUndefined();
 
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
@@ -2420,7 +2414,7 @@ describe("MVP 0.3 Runner AI", () => {
     expect(archivesRun).toBeDefined();
     expect(gain).toBeDefined();
     if (!archivesRun || !gain)
-      throw new Error("Missing legacy Archives fixture actions");
+      throw new Error("Missing current Archives fixture actions");
 
     const safeProbeCandidate = generateRunnerPlanCandidates(input).find(
       (candidate) => candidate.kind === "safe_probe_run",
@@ -2433,16 +2427,10 @@ describe("MVP 0.3 Runner AI", () => {
       ...input,
       legalActions: [archivesRun, gain],
     });
-    const baselineDecision = chooseRunnerBaselineAction({
-      ...input,
-      legalActions: [archivesRun, gain],
-    });
 
     expect(safeProbeScore.reasons).toContain("known_archives_access_not_fresh");
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
-    expect(baselineDecision.actionId).toBe(gain.actionId);
-    expect(baselineDecision.reasonCode).toBe("runner.economy.basic_credit");
   });
 
   it("does not pump or repeat a remote run when the visible breaker cannot break the rezzed ICE", () => {

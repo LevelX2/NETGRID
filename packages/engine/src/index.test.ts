@@ -177,7 +177,7 @@ import {
   removeEverywhere,
 } from "./test-fixtures/mechanic-smoke-fixtures";
 import {
-  MVP_0_96_BASELINE,
+  CURRENT_RULES_BASELINE,
   MVP_0_99_BASELINE,
   type CardDefinition,
   type CardInstanceId,
@@ -188,6 +188,13 @@ import {
   type LegalAction,
   type Side,
 } from "@netgrid/shared";
+
+function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
+  expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
+  expect(state.baseline.engineSchemaVersion).toBe(
+    CURRENT_RULES_BASELINE.engineSchemaVersion,
+  );
+}
 
 describe("MVP 0.1 engine foundation", () => {
   it("normalizes legacy ability payloads into side-safe public ability schema", () => {
@@ -28812,20 +28819,17 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
-  it("creates V0.97 games with explicit demo decks on the current baseline and keeps explicit legacy run behavior gated", () => {
+  it("creates V0.97 games with explicit demo decks on the current baseline and keeps default runs on the current baseline", () => {
     const state = createGameAfterSetup({
       seed: "v097-baseline",
       runnerDeckId: "demo_runner_097",
       corpDeckId: "demo_corp_097",
     });
-    const legacy = toRunnerTurn(
-      createGameAfterSetup({
-        seed: "v097-legacy-gate",
-        baseline: MVP_0_96_BASELINE,
-      }),
+    const defaultRun = toRunnerTurn(
+      createGameAfterSetup({ seed: "v097-current-default-gate" }),
     );
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expectCurrentRulesBaseline(state);
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.97",
     );
@@ -28836,18 +28840,16 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
       ),
     ).toBe(true);
 
-    let oldRun = legacy;
-    oldRun = apply(
-      oldRun,
+    expectCurrentRulesBaseline(defaultRun);
+    let currentRun = defaultRun;
+    currentRun = apply(
+      currentRun,
       "runner",
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    expect(oldRun.timingPoint).toBe("access.resolve_card");
-    expect(oldRun.run?.breach).toBeUndefined();
-    expect(
-      getLegalActions(oldRun, "runner").map((action) => action.type),
-    ).not.toContain("jack_out");
+    expect(getLegalActions(currentRun, "runner").map((action) => action.type)).toContain("access_card");
+    expect(currentRun.timingPoint).toBe("access.resolve_card");
   });
 
   it("offers a public jack-out window after passing ICE", () => {
