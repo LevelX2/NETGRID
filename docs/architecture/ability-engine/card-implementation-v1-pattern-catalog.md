@@ -4,15 +4,15 @@ Stand: 2026-05-19. Dieses Dokument beschreibt die wiederkehrenden Muster im V1-K
 
 ## A. Simple on_play effects
 
-Vorhanden: `on_play`, `costs: "printed"`, `gain_credits`, `draw_cards`, ordered effect sequences, `ResolvedGameEffect` mit Kartenbezug.
+Vorhanden: `on_play`, `costs: "printed"`, `gain_credits`, `draw_cards`, `lose_credits`, `runner_is_tagged` conditions, ordered effect sequences, `ResolvedGameEffect` mit Kartenbezug.
 
-Fehlend: `lose_credits`, `give_tag`, `remove_tag`, `damage`, `trash_card`, `install_card`, `make_run`, access replacement, reveal/expose/search/look-at-top.
+Fehlend: `give_tag`, `remove_tag`, `damage`, `trash_card`, `install_card`, `make_run`, access replacement, reveal/expose/search/look-at-top.
 
-Beispiele: umgesetzt sind Accounts Receivable, Efficiency Experts, Livewire's Contacts, Score!, Annual Reviews, Bodyweight Synthetic Blood, Jack 'n' Joe, Day Shift und Night Shift. Weitere on-play/economy/draw/zahlungsähnliche Kandidaten aus dem Inventar: Arasaka Owns You (onr_v1_078_arasaka-owns-you); Bodyweight™ Synthetic Blood (onr_v1_079_bodyweight-synthetic-blood); Core Command: Jettison Ice (onr_v1_080_core-command-jettison-ice); Edited Shipping Manifests (onr_v1_084_edited-shipping-manifests); Jack ’n’ Joe (onr_v1_095_jack-n-joe); Livewire’s Contacts (onr_v1_097_livewires-contacts); Lucidrine™ Booster Drug (onr_v1_098_lucidrine-booster-drug); misc.for-sale (onr_v1_100_misc-for-sale); MIT West Tier (onr_v1_101_mit-west-tier); Open-Ended® Mileage Program (onr_v1_102_open-ended-mileage-program); Organ Donor (onr_v1_103_organ-donor); Playful AI (onr_v1_104_playful-ai).
+Beispiele: umgesetzt sind Accounts Receivable, Efficiency Experts, Livewire's Contacts, Score!, Annual Reviews, Bodyweight Synthetic Blood, Jack 'n' Joe, Day Shift, Night Shift und Closed Accounts. Weitere on-play/economy/draw/zahlungsähnliche Kandidaten aus dem Inventar: Arasaka Owns You (onr_v1_078_arasaka-owns-you); Bodyweight™ Synthetic Blood (onr_v1_079_bodyweight-synthetic-blood); Core Command: Jettison Ice (onr_v1_080_core-command-jettison-ice); Edited Shipping Manifests (onr_v1_084_edited-shipping-manifests); Jack ’n’ Joe (onr_v1_095_jack-n-joe); Livewire’s Contacts (onr_v1_097_livewires-contacts); Lucidrine™ Booster Drug (onr_v1_098_lucidrine-booster-drug); misc.for-sale (onr_v1_100_misc-for-sale); MIT West Tier (onr_v1_101_mit-west-tier); Open-Ended® Mileage Program (onr_v1_102_open-ended-mileage-program); Organ Donor (onr_v1_103_organ-donor); Playful AI (onr_v1_104_playful-ai).
 
 Komplexität: niedrig, solange keine Targets, Choices, Hidden-Info oder Trigger beteiligt sind.
 
-Empfohlener POC: ein einzelner eindeutig formulierter `lose_credits`- oder `remove_tag`-Effekt, nicht mehrere neue Effekte gleichzeitig.
+Empfohlener POC: nach dem erledigten `lose_credits`-Pilot ein einzelner eindeutig formulierter `give_tag`-, `remove_tag`- oder damage-Effekt, nicht mehrere neue Effekte gleichzeitig.
 
 Tests: printed cost, exact effect amount, resolvedEffects order, compatible payload fields, Chronik with card context, no Legacy+CardImplementation double effect, Hidden-Info guards bei Draw/Reveal/Search.
 

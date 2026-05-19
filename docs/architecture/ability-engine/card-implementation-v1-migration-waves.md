@@ -12,9 +12,11 @@ Tests: Coverage/Registry-Konsistenz, keine doppelten CardDefinitionIds, card nam
 
 ## Welle 1: Weitere einfache on_play Karten
 
-Pilotkarten: eine eindeutige lose-credit Operation/Prep, eine eindeutige remove-tag Karte, eine simple damage Karte nur als separater Damage-POC.
+Erledigter Pilot: Closed Accounts deckt eine eindeutige `lose_credits`-Operation mit `runner_is_tagged`-Bedingung ab.
 
-Bausteine: vorhandene gain/draw/ordered effects; fehlend lose_credits, tags, damage, trash/reveal/search.
+Nächste Pilotkarten: eine eindeutige tag-Karte oder eine simple damage Karte nur als separater Damage-POC.
+
+Bausteine: vorhandene gain/draw/ordered effects, `lose_credits` und `runner_is_tagged`; fehlend tags, damage, trash/reveal/search.
 
 Nicht mitmachen: targets, reveal/search, run replacement, triggers.
 
@@ -80,6 +82,7 @@ Bausteine: depends on W4-W9 primitives and deterministic replay support.
 |---|---|---|---|
 | gain_credits | simple economy cards, Newsgroup Filter | effect-interpreter | vorhanden |
 | draw_cards | draw cards, ESA Contract | draw host primitive, hidden-info redaction | vorhanden |
+| lose_credits | Closed Accounts and future credit-loss cards | effect-interpreter | vorhanden |
 | ordered effects | mixed on_play cards | effect aggregation | vorhanden |
 | activated_card_ability | installed action abilities | LegalAction generation/revalidation | vorhanden für action cost |
 | rez_cost | Data Masons, Encoder, Skälderviken, Jerusalem | rezzed corp-root modifier query | vorhanden |

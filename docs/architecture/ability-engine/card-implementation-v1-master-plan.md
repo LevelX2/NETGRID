@@ -1,6 +1,6 @@
 # V1 CardImplementation Master Plan
 
-Stand: 2026-05-19, nach P2.13a und Dokumentationsupdate.
+Stand: 2026-05-19, nach P2.13a, Dokumentationsupdate und Closed-Accounts-Synchronisierung.
 
 Dieses Dokument ist der zentrale Plan für die Migration des vollständigen Originalset-V1-Kartenpools auf die engine-lokale NETGRID-CardImplementation-Architektur. Es ist ein Planungsartefakt, keine Umsetzungsfreigabe für alle Karten gleichzeitig.
 
@@ -47,10 +47,10 @@ Die Inventartabelle in `card-implementation-v1-card-inventory.md` umfasst alle 3
 
 | Status | Anzahl | Bedeutung |
 |---|---:|---|
-| implemented | 15 | Vollständige aktuell relevante Kartenwirkung ist über CardImplementationDefinition abgebildet. |
+| implemented | 16 | Vollständige aktuell relevante Kartenwirkung ist über CardImplementationDefinition abgebildet. |
 | partial_implementation | 1 | Eine echte CardImplementationDefinition bildet einen klar benannten Teil ab; offene gedruckte Textteile sind dokumentiert. |
 | legacy_engine_special_case | 9 | Die Karte läuft noch über alte Engine-Sonderlogik oder alte Modifier-Rekonstruktion. |
-| pending_implementation | 349 | Karte ist bekannt, aber noch nicht belastbar in CardImplementation-Architektur eingeordnet. |
+| pending_implementation | 348 | Karte ist bekannt, aber noch nicht belastbar in CardImplementation-Architektur eingeordnet. |
 | no_engine_behavior_required | 0 | Derzeit keine Karte so markiert; dieser Status braucht immer explizite Begründung. |
 
 Kartentypverteilung:
@@ -88,6 +88,10 @@ Kartentypverteilung:
 
 - Day Shift: `draw_cards 2`, then `gain_credits 1`
 - Night Shift: `gain_credits 2`, then `draw_cards 1`
+
+### Conditional on-play lose
+
+- Closed Accounts: `on_play`, `costs: "printed"`, condition `runner_is_tagged`, `lose_credits all` for Runner
 
 ### Activated abilities
 
@@ -147,7 +151,7 @@ Die Wellen stehen in `card-implementation-v1-migration-waves.md`. Kurzfassung:
 7. MRAM / Militech MRAM: passive hand_size modifier; Risiko Shared-Feld-Migration und ActiveModifier-Grenze.
 8. Krash / Virizz: run-duration modifier migration; Risiko duration cleanup and break-cost/strength semantics.
 9. Tesseract Fort Construction / Tutor: additional_subroutine Folgekarte; Risiko komplexere Subroutine-Semantik als Encoder, Inc.
-10. Eine einfache pending Prep/Operation mit nur `lose_credits`, tag oder damage: niedriger Scope für neuen Effect-Pilot, falls Text eindeutig ist.
+10. Eine einfache pending Prep/Operation mit tag oder damage: niedriger Scope für den nächsten Effect-Pilot, nachdem `lose_credits` mit Closed Accounts bereits abgedeckt ist.
 
 ## 10. Coverage-Zielbild
 
