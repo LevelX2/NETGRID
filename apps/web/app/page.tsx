@@ -5841,7 +5841,6 @@ function GameOverModal({
   const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
-  const resultPanelStyle = winnerMotifUi.imageSrc ? ({ "--result-panel-bg": `url(${winnerMotifUi.imageSrc})` } as CSSProperties) : undefined;
   const retentionUi = retentionProtectionUi(retentionProtected);
   const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
   const handleNewMatch = () => {
@@ -5856,14 +5855,14 @@ function GameOverModal({
   return (
     <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
       <div className="gameOverBackdrop" aria-hidden="true" />
-      <section className={`gameOverPanel ${winnerMotifUi.imageSrc ? "withMotifBackground" : ""}`} style={resultPanelStyle}>
-        <div className={`gameOverHero ${winnerMotifUi.imageSrc ? "backgroundOnly" : ""}`}>
+      <section className={`gameOverPanel ${winnerMotifUi.imageSrc ? "withMotifHero" : ""}`}>
+        <div className={`gameOverHero ${winnerMotifUi.imageSrc ? "withVisualMotif" : ""}`}>
           <div className="gameOverHeroCopy">
             <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
             <h2 id="game-over-title">{outcomeText}</h2>
             <p>{resultReasonLabel(result.reason)}</p>
           </div>
-          {winnerMotifUi.imageSrc ? null : <ResultWinnerMotif motif={winnerMotif} />}
+          <ResultWinnerMotif motif={winnerMotif} />
         </div>
         {gameStanding ? (
           <div className="gameStandingStrip" aria-label="Spielwertung">

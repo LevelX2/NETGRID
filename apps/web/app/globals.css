@@ -6577,14 +6577,10 @@ select {
   z-index: 0;
 }
 
-.gameOverPanel.withMotifBackground::before {
+.gameOverPanel.withMotifHero::before {
   background:
-    linear-gradient(90deg, rgb(18 25 30 / 0.92) 0%, rgb(18 25 30 / 0.8) 44%, rgb(18 25 30 / 0.52) 100%),
-    linear-gradient(180deg, rgb(18 25 30 / 0.22), rgb(18 25 30 / 0.88)),
-    var(--result-panel-bg);
-  background-position: center;
-  background-size: cover;
-  opacity: 0.68;
+    linear-gradient(135deg, rgb(66 200 163 / 0.12), transparent 38%),
+    linear-gradient(315deg, rgb(240 106 91 / 0.11), transparent 42%);
 }
 
 .gameOverPanel > * {
@@ -6599,10 +6595,10 @@ select {
   gap: 18px;
 }
 
-.gameOverHero.backgroundOnly {
-  grid-template-columns: minmax(0, 1fr);
-  min-height: 150px;
-  align-items: end;
+.gameOverHero.withVisualMotif {
+  grid-template-columns: minmax(190px, 0.78fr) minmax(360px, 1.55fr);
+  align-items: stretch;
+  min-height: 186px;
 }
 
 .gameOverHeroCopy {
@@ -6622,6 +6618,7 @@ select {
 }
 
 .resultWinnerMotif {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 8px;
@@ -6633,6 +6630,28 @@ select {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
+}
+
+.gameOverHero.withVisualMotif .resultWinnerMotif {
+  align-self: stretch;
+  min-height: 186px;
+  padding: 0;
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(7 12 16 / 0.7);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.28), 0 14px 38px rgb(0 0 0 / 0.26);
+}
+
+.gameOverHero.withVisualMotif .resultWinnerMotif > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
 }
 
 .resultMotifFrame {
@@ -6647,6 +6666,16 @@ select {
     linear-gradient(180deg, rgb(255 255 255 / 0.07) 1px, transparent 1px),
     rgb(11 16 21 / 0.72);
   background-size: 18px 18px;
+}
+
+.gameOverHero.withVisualMotif .resultMotifFrame {
+  width: 100%;
+  height: 100%;
+  min-height: 186px;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 8px;
+  background: rgb(7 12 16 / 0.88);
 }
 
 .resultWinnerMotif.bitmap .resultMotifFrame {
@@ -6664,6 +6693,14 @@ select {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.resultWinnerMotif.runner .resultMotifFrame img {
+  object-position: 74% center;
+}
+
+.resultWinnerMotif.corp .resultMotifFrame img {
+  object-position: 68% center;
 }
 
 .resultMotifCore,
@@ -6779,6 +6816,11 @@ select {
 
 .resultWinnerMotif.draw .resultMotifTrack.two {
   transform: rotate(156deg);
+}
+
+.resultWinnerMotif.bitmap .resultMotifFrame::before,
+.resultWinnerMotif.bitmap .resultMotifFrame::after {
+  content: none;
 }
 
 .gameOverStats {
@@ -9850,12 +9892,25 @@ select,
     grid-template-columns: 1fr;
   }
 
+  .gameOverHero.withVisualMotif {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
   .resultWinnerMotif {
     justify-self: stretch;
   }
 
+  .gameOverHero.withVisualMotif .resultWinnerMotif {
+    min-height: clamp(150px, 38vw, 220px);
+  }
+
   .resultMotifFrame {
     width: min(220px, 100%);
+  }
+
+  .gameOverHero.withVisualMotif .resultMotifFrame {
+    min-height: clamp(150px, 38vw, 220px);
   }
 
   .gameOverActions {
