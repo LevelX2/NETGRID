@@ -2871,7 +2871,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time.",
+      "At the start of each of your turns, you may trash one of your other installed cards to gain 2 credits.\nOnly one unique card of a particular name can be in play at a time.",
     mechanics: [
       "install_resource",
       "unique_card",

@@ -8985,6 +8985,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
     expect(
       smithState.pendingChoice?.source.startsWith("v170.smiths_pawnshop"),
     ).toBe(true);
+    expect(smithState.pendingChoice?.prompt).toContain("2 Credits");
     const forceShieldOption =
       smithState.pendingChoice?.options.find(
         (option) =>
@@ -9000,7 +9001,16 @@ describe("V1.7.0 Mechanikpaket D", () => {
           "onr_v1_028_force-shield",
       ),
     ).toBe(true);
-    expect(smithState.runner.credits).toBe(14);
+    expect(smithState.runner.credits).toBe(15);
+    expect(smithState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+      smithsPawnshopTriggered: true,
+      trashedCardDefinitionId: "onr_v1_028_force-shield",
+      trashedCardTitle: "Force Shield",
+      creditsGained: 2,
+      gainedCredits: 2,
+    });
   });
 });
 

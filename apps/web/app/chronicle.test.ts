@@ -352,6 +352,26 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Corporate Negotiating Center", "HQ Reveal", "2 Agenden", "+2 Credits", "Start-of-turn"]));
   });
 
+  it("shows Smith's Pawnshop choices with the corrected 2-credit gain", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+        smithsPawnshopTriggered: true,
+        trashedCardDefinitionId: "onr_v1_028_force-shield",
+        trashedCardTitle: "Force Shield",
+        creditsGained: 2,
+        gainedCredits: 2
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Force Shield mit Smith's Pawnshop getrasht und 2 Credits erhalten.");
+    expect(item.category).toBe("economy");
+    expect(item.chips).toEqual(expect.arrayContaining(["Smith's Pawnshop", "+2 Credits", "Trash"]));
+    expect(JSON.stringify(item)).not.toContain("1 Credit");
+  });
+
   it("does not claim a stack-search program was installed when the engine reports failure", () => {
     const failed = formatChronicleEvent(
       makeEvent("resolve_choice", {

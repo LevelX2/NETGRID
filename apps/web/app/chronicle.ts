@@ -142,6 +142,23 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("The Shell Traders", "Installiert", "0 Kosten");
         break;
       }
+      if (payload.smithsPawnshopTriggered === true) {
+        const gainedCredits = numberValue(payload.creditsGained) ?? numberValue(payload.gainedCredits) ?? 0;
+        const trashedTitle = stringValue(payload.trashedCardTitle) ?? targetCardTitleFromPayload(payload) ?? "eine andere installierte Karte";
+        category = "economy";
+        importance = "important";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, `${trashedTitle} mit Smith's Pawnshop getrasht und ${creditText(gainedCredits)} erhalten`);
+        chips.push("Smith's Pawnshop", `+${gainedCredits} ${creditLabel(gainedCredits)}`, "Trash");
+        break;
+      }
+      if (payload.smithsPawnshopTriggered === false) {
+        category = "card";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, "Smith's Pawnshop nicht genutzt");
+        chips.push("Smith's Pawnshop", "Pass");
+        break;
+      }
       if (abilityId === "playful_ai_dice_loop") {
         const gainedCredits = numberValue(payload.playfulAiGainedCredits) ?? 0;
         const setAsideDice = numberValue(payload.playfulAiSetAsideDice) ?? 0;

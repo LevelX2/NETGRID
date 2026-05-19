@@ -14256,7 +14256,7 @@ function startSmithsPawnshopChoice(
     side: "runner",
     source: `v170.smiths_pawnshop:${pawnshopId}:${state.stateVersion + 1}`,
     prompt:
-      "Smith's Pawnshop: Eine andere installierte Karte trashen und 1 Credit nehmen?",
+      "Smith's Pawnshop: Eine andere installierte Karte trashen und 2 Credits nehmen?",
     kind: "select_option",
     options: [
       { id: "pass", label: "Nein" },
@@ -19827,20 +19827,26 @@ function resolveSmithsPawnshopChoice(
       throw new Error("Smith's Pawnshop kann sich nicht selbst trashen.");
     if (!runnerInstalledCardIds(state).includes(cardId))
       throw new Error("Die gewaehlte Karte ist nicht mehr installiert.");
+    const trashedDefinition = definitionFor(state, cardId);
     trashRunnerInstalledCardToHeap(state, cardId);
-    credits(state, "runner", 1);
+    credits(state, "runner", 2);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       smithsPawnshopTriggered: true,
       smithsPawnshopCardId: pawnshopId,
+      sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
       trashedCardId: cardId,
-      creditsGained: 1,
+      trashedCardDefinitionId: trashedDefinition.id,
+      trashedCardTitle: trashedDefinition.title,
+      creditsGained: 2,
+      gainedCredits: 2,
     };
   } else {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       smithsPawnshopTriggered: false,
       smithsPawnshopCardId: pawnshopId,
+      sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
     };
   }
   delete state.pendingChoice;
@@ -22141,6 +22147,10 @@ function publicContextForAction(
       "trashedCardType",
       "trashedCount",
       "damageCannotBePrevented",
+      "smithsPawnshopTriggered",
+      "smithsPawnshopCardId",
+      "trashedCardTitle",
+      "creditsGained",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
