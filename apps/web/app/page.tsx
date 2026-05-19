@@ -4885,6 +4885,7 @@ export default function Page() {
                             viewerSide={activeView.side}
                             visibleCards={lane.cards}
                             totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
+                            emptyLabel={lane.label}
                             collapsed={false}
                             displayMode={cardDisplayMode}
                             selectedContext={selectedActionContext}
@@ -4900,7 +4901,7 @@ export default function Page() {
                       if (lane.cards.length === 0) {
                         return (
                           <span className="laneEmptyPlaceholder" aria-label={`${lane.label} leer`}>
-                            Leer
+                            {lane.label}
                           </span>
                         );
                       }
@@ -4979,9 +4980,6 @@ export default function Page() {
                               {isOwnCorpHq ? (
                                 <>
                                   <div className={`corpHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
-                                    <div className="corpHqHandHead">
-                                      <span>Handkarten</span>
-                                    </div>
                                     <HandCardsRow className="corpHqHandCards" style={handCardsStyle} count={activeView.own.gripOrHq.length}>
                                       {activeView.own.gripOrHq.map((card) => {
                                         const displayCard = enrichCard(card);
@@ -5015,9 +5013,6 @@ export default function Page() {
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
                                       <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                        <div className="laneLabel">
-                                          <span>{lane.label}</span>
-                                        </div>
                                         <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
                                           {renderLaneCards(lane)}
                                         </div>
@@ -5028,9 +5023,6 @@ export default function Page() {
                               ) : (
                                 lanes.map((lane) => (
                                   <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                    <div className="laneLabel">
-                                      <span>{lane.label}</span>
-                                    </div>
                                     <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
                                       {renderLaneCards(lane)}
                                     </div>
@@ -11154,6 +11146,7 @@ function ArchivesDualStackLane({
   viewerSide,
   visibleCards,
   totalArchivesCount,
+  emptyLabel = "Leer",
   collapsed,
   displayMode,
   selectedContext,
@@ -11167,6 +11160,7 @@ function ArchivesDualStackLane({
   viewerSide: Side;
   visibleCards: VisibleCard[];
   totalArchivesCount: number;
+  emptyLabel?: string;
   collapsed: boolean;
   displayMode: CardDisplayMode;
   selectedContext: ActionContext | null;
@@ -11193,7 +11187,7 @@ function ArchivesDualStackLane({
   if (faceupCards.length === 0 && facedownCount === 0) {
     return (
       <span className="laneEmptyPlaceholder archiveEmptyPlaceholder" style={archiveCardsStyle}>
-        Leer
+        {emptyLabel}
       </span>
     );
   }

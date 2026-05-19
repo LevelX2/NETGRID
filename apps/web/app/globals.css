@@ -4078,20 +4078,6 @@ select {
   background: var(--board-corp-lane-bg);
 }
 
-.corpHqHandHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 4px 0 3px;
-}
-
-.corpHqHandHead span {
-  text-transform: uppercase;
-}
-
 .fixedZoneCards.corpHqHandCards {
   width: 100%;
   max-width: 100%;
@@ -4416,16 +4402,6 @@ select {
 .iceLane .iceCardSlot.actionMenuOpen,
 .iceLane .iceCardSlot.runPositionActiveSlot {
   z-index: 38;
-}
-
-.laneLabel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 4px 0 3px;
 }
 
 .pairedServerLanes {
@@ -8387,11 +8363,29 @@ select,
 
 .server {
   min-height: 0;
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 52%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 84%), color-mix(in srgb, var(--corp-status-accent), transparent 84%)),
+    color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 78%);
 }
 
 .lane {
   border-color: var(--lane-border);
   background: var(--lane-bg);
+}
+
+.server .lane {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--lane-border) 55%);
+  background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 82%);
+}
+
+.server .serverLead {
+  border-right-color: color-mix(in srgb, var(--corp-zone-accent), transparent 56%);
+}
+
+.corpHqHandPanel {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 52%);
+  background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 82%);
 }
 
 .cards {
@@ -9100,11 +9094,10 @@ select,
   width: fit-content;
   min-width: 0;
   max-width: 100%;
-  padding: 0 8px;
-  border-top: 0;
-  border-bottom: 0;
-  border-radius: 0;
-  background: color-mix(in srgb, var(--section-bg), transparent 6%);
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 60%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 84%);
 }
 
 .rigGroupHorizontal .rigGroupSideLabel {
@@ -9173,7 +9166,6 @@ select,
 .sideZoneTitle,
 .sideZoneCount,
 .serverCount,
-.laneLabel,
 .cardTooltipStat,
 .strengthBoostBadge {
   cursor: default;
