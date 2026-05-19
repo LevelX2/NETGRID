@@ -7303,6 +7303,69 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("implemented");
   });
 
+  it("describes P3.2 tagged Corp Operations through on-play card effects", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_293_netwatch-credit-voucher",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        condition: { kind: "runner_is_tagged" },
+        effects: [
+          expect.objectContaining({
+            kind: "add_tags",
+            recipient: "runner",
+            amount: 1,
+            visibility: "public",
+          }),
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+
+    for (const [definitionId, amount] of [
+      ["onr_v1_301_punitive-counterstrike", 2],
+      ["onr_v1_302_scorched-earth", 4],
+      ["onr_v1_307_urban-renewal", 5],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+        expect.objectContaining({
+          kind: "on_play",
+          costs: "printed",
+          condition: { kind: "runner_is_tagged" },
+          effects: [
+            expect.objectContaining({
+              kind: "damage",
+              recipient: "runner",
+              damageType: "meat",
+              amount,
+              preventable: true,
+              visibility: "public",
+            }),
+          ],
+        }),
+      );
+    }
+
+    for (const definitionId of [
+      "onr_v1_293_netwatch-credit-voucher",
+      "onr_v1_301_punitive-counterstrike",
+      "onr_v1_302_scorched-earth",
+      "onr_v1_307_urban-renewal",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -7637,6 +7700,114 @@ describe("V1.6.2 Mechanikpaket B", () => {
             kind: "add_tags",
             recipient: "runner",
             amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
+  });
+
+  it("executes typed damage card effects through the host damage primitive", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-damage" });
+    const calls: Array<{ damageType: string; amount: number }> = [];
+
+    const result = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+        sourceTitle: "Punitive Counterstrike",
+        controller: "corp",
+        damageRunner: (damageType, amount) => {
+          calls.push({ damageType, amount });
+          return {
+            resolved: true,
+            damageType,
+            amount,
+            cardsTrashed: amount,
+            flatline: false,
+            publicPayload: {
+              damageResolved: true,
+              damageType,
+              damageAmount: amount,
+              cardsTrashed: amount,
+              flatline: false,
+            },
+          };
+        },
+      },
+      [
+        {
+          kind: "damage",
+          recipient: "runner",
+          damageType: "meat",
+          amount: 2,
+          preventable: true,
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(calls).toEqual([{ damageType: "meat", amount: 2 }]);
+    expect(result.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 2,
+      cardsTrashed: 2,
+      flatline: false,
+    });
+    expect(result.resolvedEffects).toEqual([
+      expect.objectContaining({
+        effectId: "onr_v1_301_punitive-counterstrike.effect.0.damage",
+        kind: "damage",
+        visibility: "public",
+        side: "runner",
+        amount: 2,
+        damageType: "meat",
+        cardsTrashed: 2,
+        reason: "card_resolver",
+        sourceDefinitionId: "onr_v1_301_punitive-counterstrike",
+        sourceTitle: "Punitive Counterstrike",
+      }),
+    ]);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: "meat",
+            amount: 2,
+            preventable: true,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/requires a damageRunner/);
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        {
+          sourceCardId: state.corp.identity,
+          controller: "corp",
+          damageRunner: (damageType, amount) => ({
+            resolved: true,
+            damageType,
+            amount,
+            cardsTrashed: 0,
+            flatline: false,
+          }),
+        },
+        [
+          {
+            kind: "damage",
+            recipient: "runner",
+            damageType: "meat",
+            amount: 0,
+            preventable: true,
             visibility: "public",
           },
         ],
@@ -31645,6 +31816,179 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         cardDefinitionId: spec.definitionId,
       });
       spec.assertAfter(state);
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("migrates P3.2 tagged Corp Operations without legacy double effects", () => {
+    for (const spec of [
+      {
+        definitionId: "onr_v1_293_netwatch-credit-voucher",
+        cost: 0,
+        assertAfter: (state: GameState, creditsBefore: number) => {
+          expect(state.runner.tags).toBe(2);
+          expect(state.corp.credits).toBe(creditsBefore + 1);
+          expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+            tagsAdded: 1,
+            runnerTagsAfter: 2,
+            gainedCredits: 1,
+            corpCreditsAfter: creditsBefore + 1,
+            resolvedEffects: [
+              expect.objectContaining({
+                effectId:
+                  "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+                kind: "add_tags",
+                visibility: "public",
+                side: "runner",
+                amount: 1,
+                runnerTagsAfter: 2,
+                reason: "card_resolver",
+                sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+                sourceTitle: "Netwatch Credit Voucher",
+              }),
+              expect.objectContaining({
+                effectId:
+                  "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+                kind: "gain_credits",
+                visibility: "public",
+                side: "corp",
+                amount: 1,
+                reason: "card_resolver",
+                sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+                sourceTitle: "Netwatch Credit Voucher",
+              }),
+            ],
+          });
+        },
+      },
+      {
+        definitionId: "onr_v1_301_punitive-counterstrike",
+        cost: 0,
+        damage: 2,
+      },
+      {
+        definitionId: "onr_v1_302_scorched-earth",
+        cost: 3,
+        damage: 4,
+      },
+      {
+        definitionId: "onr_v1_307_urban-renewal",
+        cost: 6,
+        damage: 5,
+      },
+    ] as const) {
+      let noTagState = createGameAfterSetup({
+        seed: `p32-no-tag-${spec.definitionId}`,
+        runnerDeck: ONR_V1_RUNNER_DECK,
+        corpDeck: ONR_V1_CORP_DECK,
+        agendaPointsToWin: 7,
+      });
+      noTagState = apply(
+        noTagState,
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      noTagState.corp.credits = 20;
+      noTagState.corp.clicks = 3;
+      noTagState.runner.tags = 0;
+      noTagState.runner.credits = 7;
+      moveCorpCardToHq(noTagState, spec.definitionId);
+      expect(
+        getLegalActions(noTagState, "corp").some(
+          (action) =>
+            action.type === "play_operation" &&
+            sourceDefinition(noTagState, action) === spec.definitionId,
+        ),
+      ).toBe(false);
+
+      let state = structuredClone(noTagState);
+      state.runner.tags = 1;
+      const action = mustAction(
+        state,
+        "corp",
+        (candidate) =>
+          candidate.type === "play_operation" &&
+          sourceDefinition(state, candidate) === spec.definitionId,
+      );
+      expect(action.costs[0]).toMatchObject({
+        clicks: 1,
+        credits: spec.cost,
+      });
+
+      const tagDrift = structuredClone(state);
+      tagDrift.runner.tags = 0;
+      const tagDriftCorpCredits = tagDrift.corp.credits;
+      const tagDriftCorpClicks = tagDrift.corp.clicks;
+      const tagDriftRunnerCredits = tagDrift.runner.credits;
+      const tagDriftRunnerTags = tagDrift.runner.tags;
+      const tagDriftRunnerGripLength = tagDrift.runner.grip.length;
+      const tagDriftRunnerHeapLength = tagDrift.runner.heap.length;
+      expect(
+        applyAction(tagDrift, {
+          matchId: tagDrift.matchId,
+          side: "corp",
+          actionId: action.actionId,
+          clientKnownStateVersion: tagDrift.stateVersion,
+          idempotencyKey: `p32-${spec.definitionId}-tag-drift`,
+        }).ok,
+      ).toBe(false);
+      expect(tagDrift.corp.credits).toBe(tagDriftCorpCredits);
+      expect(tagDrift.corp.clicks).toBe(tagDriftCorpClicks);
+      expect(tagDrift.runner.credits).toBe(tagDriftRunnerCredits);
+      expect(tagDrift.runner.tags).toBe(tagDriftRunnerTags);
+      expect(tagDrift.runner.grip).toHaveLength(tagDriftRunnerGripLength);
+      expect(tagDrift.runner.heap).toHaveLength(tagDriftRunnerHeapLength);
+
+      const creditsBefore = state.corp.credits;
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(
+        state,
+        "corp",
+        (candidate) => candidate.actionId === action.actionId,
+      );
+      expect(
+        state.corp.archives.some(
+          (id) => state.cardInstances[id]?.definitionId === spec.definitionId,
+        ),
+      ).toBe(true);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "play_operation",
+        cardDefinitionId: spec.definitionId,
+      });
+
+      if ("assertAfter" in spec) {
+        spec.assertAfter(state, creditsBefore);
+      } else {
+        expect(state.corp.credits).toBe(creditsBefore - spec.cost);
+        expect(state.runner.heap).toHaveLength(spec.damage);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          damageResolved: true,
+          damageType: "meat",
+          damageAmount: spec.damage,
+          cardsTrashed: spec.damage,
+          flatline: false,
+          resolvedEffects: [
+            expect.objectContaining({
+              effectId: `${spec.definitionId}.effect.0.damage`,
+              kind: "damage",
+              visibility: "public",
+              side: "runner",
+              amount: spec.damage,
+              damageType: "meat",
+              cardsTrashed: spec.damage,
+              reason: "card_resolver",
+              sourceDefinitionId: spec.definitionId,
+            }),
+          ],
+        });
+        expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+          /runner_|grip|stack|cardInstances|privatePayload/,
+        );
+      }
+
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));

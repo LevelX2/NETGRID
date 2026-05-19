@@ -1110,6 +1110,91 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges ordered Netwatch Credit Voucher tag and credit effects into the played card entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Netwatch Credit Voucher",
+      cardDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+      tagsAdded: 1,
+      runnerTagsAfter: 2,
+      gainedCredits: 1,
+      corpCreditsAfter: 6,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_293_netwatch-credit-voucher.effect.0.add_tags",
+          kind: "add_tags",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          runnerTagsAfter: 2,
+          sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+          sourceTitle: "Netwatch Credit Voucher",
+          reason: "card_resolver"
+        },
+        {
+          effectId: "onr_v1_293_netwatch-credit-voucher.effect.1.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_293_netwatch-credit-voucher",
+          sourceTitle: "Netwatch Credit Voucher",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", { cardTitle: "Netwatch Credit Voucher" });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Netwatch Credit Voucher gespielt und Runner erhält 1 Tag und Korp erhält 1 Credit.");
+    expect(item.title.indexOf("Runner erhält 1 Tag")).toBeLessThan(item.title.indexOf("Korp erhält 1 Credit"));
+    expect(item.category).toBe("danger");
+    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "+1 Tag", "+1 Credit"]));
+    expect(effects).toEqual([]);
+  });
+
+  it("merges tagged Corp Operation damage effects into the played card entry", () => {
+    for (const [title, cardDefinitionId, amount] of [
+      ["Punitive Counterstrike", "onr_v1_301_punitive-counterstrike", 2],
+      ["Scorched Earth", "onr_v1_302_scorched-earth", 4],
+      ["Urban Renewal", "onr_v1_307_urban-renewal", 5],
+    ] as const) {
+      const event = makeEvent("play_operation", {
+        actor: "corp",
+        title,
+        cardDefinitionId,
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: amount,
+        cardsTrashed: amount,
+        resolvedEffects: [
+          {
+            effectId: `${cardDefinitionId}.effect.0.damage`,
+            kind: "damage",
+            visibility: "public",
+            side: "runner",
+            amount,
+            damageType: "meat",
+            cardsTrashed: amount,
+            sourceDefinitionId: cardDefinitionId,
+            sourceTitle: title,
+            reason: "card_resolver"
+          }
+        ]
+      });
+
+      const item = formatChronicleEvent(event, "runner", { cardTitle: title });
+      const effects = formatChronicleEffectItems(event, "runner");
+
+      expect(item.title).toBe(`Die Korp hat ${title} gespielt und Runner erleidet ${amount} Meat Damage.`);
+      expect(item.category).toBe("danger");
+      expect(item.chips).toEqual(expect.arrayContaining(["Operation", `${amount} Meat Damage`]));
+      expect(JSON.stringify(item)).not.toMatch(/grip|stack|cardInstances|privatePayload/);
+      expect(effects).toEqual([]);
+    }
+  });
+
   it("merges ordered Day Shift card resolver effects into the played card entry", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",

@@ -10,7 +10,11 @@ import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-ac
 import { datapoolByZetatechImplementation } from "./onr-v1/corp/operations/datapool-by-zetatech";
 import { dayShiftImplementation } from "./onr-v1/corp/operations/day-shift";
 import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/efficiency-experts";
+import { netwatchCreditVoucherImplementation } from "./onr-v1/corp/operations/netwatch-credit-voucher";
 import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
+import { punitiveCounterstrikeImplementation } from "./onr-v1/corp/operations/punitive-counterstrike";
+import { scorchedEarthImplementation } from "./onr-v1/corp/operations/scorched-earth";
+import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
 import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
@@ -31,7 +35,11 @@ export const CARD_IMPLEMENTATIONS = [
   datapoolByZetatechImplementation,
   dayShiftImplementation,
   efficiencyExpertsImplementation,
+  netwatchCreditVoucherImplementation,
   nightShiftImplementation,
+  punitiveCounterstrikeImplementation,
+  scorchedEarthImplementation,
+  urbanRenewalImplementation,
   dataMasonsHostingImplementation,
   encoderIncImplementation,
   esaContractImplementation,

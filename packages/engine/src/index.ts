@@ -70,6 +70,7 @@ import {
 } from "./ability-engine/additional-subroutine-modifiers";
 import {
   executeCardImplementationEffects,
+  type CardEffectDamageResult,
   type CardEffectDrawCardsResult,
 } from "./ability-engine/effect-interpreter";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
@@ -1416,43 +1417,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  "onr_v1_293_netwatch-credit-voucher": {
-    name: "onr_corp_operation_tag_runner_gain_1",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state) => {
-      requireRunnerTagged(state);
-      state.runner.tags += 1;
-      state.corp.credits += 1;
-    },
-  },
-  "onr_v1_301_punitive-counterstrike": {
-    name: "onr_corp_operation_meat_damage_2",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      resolveDamageOperation(
-        state,
-        legalAction,
-        "meat",
-        2,
-        "onr_v1_301_punitive-counterstrike",
-      );
-    },
-  },
-  "onr_v1_302_scorched-earth": {
-    name: "onr_corp_operation_meat_damage_4",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      resolveDamageOperation(
-        state,
-        legalAction,
-        "meat",
-        4,
-        "onr_v1_302_scorched-earth",
-      );
-    },
-  },
   "onr_v1_306_trojan-horse": {
     name: "onr_corp_operation_trojan_horse_tag",
     canPlay: (state) => runnerStoleAgendaLastTurn(state),
@@ -1465,20 +1429,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         tagsAdded: 1,
         runnerTagsAfter: state.runner.tags,
       };
-    },
-  },
-  "onr_v1_307_urban-renewal": {
-    name: "onr_corp_operation_meat_damage_5",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      resolveDamageOperation(
-        state,
-        legalAction,
-        "meat",
-        5,
-        "onr_v1_307_urban-renewal",
-      );
     },
   },
   "onr_v1_297_overtime-incentives": {
@@ -24970,6 +24920,14 @@ function resolveActivatedCardImplementationAbility(
       controller: mustInstance(state.cardInstances, match.cardId).controller,
       drawCards: (side, amount) =>
         drawCardsForCardImplementationEffect(state, side, amount),
+      damageRunner: (damageType, amount) =>
+        damageRunnerForCardImplementationEffect(
+          state,
+          legalAction,
+          match.definition.id,
+          damageType,
+          amount,
+        ),
     },
     match.ability.effects,
   );
@@ -25001,6 +24959,14 @@ function executeOnPlayCardImplementationAbility(
       controller: mustInstance(state.cardInstances, cardId).controller,
       drawCards: (side, amount) =>
         drawCardsForCardImplementationEffect(state, side, amount),
+      damageRunner: (damageType, amount) =>
+        damageRunnerForCardImplementationEffect(
+          state,
+          legalAction,
+          definition.id,
+          damageType,
+          amount,
+        ),
     },
     ability.effects,
   );
@@ -25035,6 +25001,69 @@ function drawCardsForCardImplementationEffect(
         ? { runnerGripAfter: state.runner.grip.length }
         : {}),
     },
+  };
+}
+
+function damageRunnerForCardImplementationEffect(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceDefinitionId: CardDefinitionId,
+  damageType: Extract<DamageType, "meat">,
+  amount: number,
+): CardEffectDamageResult {
+  const request = {
+    damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}`,
+    damageType,
+    amount,
+    source: `operation:${sourceDefinitionId}`,
+  };
+  const event = createDamageImminentEvent(state, request);
+  if (
+    openReplacementWindow(state, event, legalAction) ||
+    openEventModificationWindow(state, event, legalAction)
+  ) {
+    return {
+      resolved: false,
+      damageType,
+      amount: 0,
+      cardsTrashed: 0,
+      flatline: false,
+      publicPayload: legalAction.payload ?? {},
+    };
+  }
+
+  const summary = resolveDamageImminentEvent(state, event);
+  const publicPayload = damageSummaryPublicPayload(summary);
+  if (typeof event.payload.baseDamageAmount === "number")
+    publicPayload.baseDamageAmount = event.payload.baseDamageAmount;
+  if (typeof event.payload.bioweaponsEngineeringModifier === "number")
+    publicPayload.bioweaponsEngineeringModifier =
+      event.payload.bioweaponsEngineeringModifier;
+  return {
+    resolved: true,
+    damageType: summary.damageType,
+    amount: summary.amount,
+    cardsTrashed: summary.cardsTrashed,
+    flatline: summary.flatline,
+    publicPayload,
+  };
+}
+
+function damageSummaryPublicPayload(
+  summary: DamageSummary,
+): Record<string, string | number | boolean> {
+  return {
+    damageResolved: true,
+    damageType: summary.damageType,
+    damageAmount: summary.amount,
+    cardsTrashed: summary.cardsTrashed,
+    flatline: summary.flatline,
+    ...(summary.coreDamageAfter !== undefined
+      ? { coreDamageAfter: summary.coreDamageAfter }
+      : {}),
+    ...(summary.runnerMaxHandSizeAfter !== undefined
+      ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
+      : {}),
   };
 }
 

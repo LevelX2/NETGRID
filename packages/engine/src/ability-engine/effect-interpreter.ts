@@ -1,6 +1,7 @@
 import type {
   CardDefinitionId,
   CardInstanceId,
+  DamageType,
   GameState,
   ResolvedGameEffect,
   Side,
@@ -16,6 +17,10 @@ export type CardEffectExecutionContext = {
     side: Side,
     amount: number,
   ) => CardEffectDrawCardsResult;
+  damageRunner?: (
+    damageType: Extract<DamageType, "meat">,
+    amount: number,
+  ) => CardEffectDamageResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -25,6 +30,15 @@ export type CardEffectExecutionResult = {
 
 export type CardEffectDrawCardsResult = {
   drawnCount: number;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectDamageResult = {
+  resolved: boolean;
+  damageType: DamageType;
+  amount: number;
+  cardsTrashed: number;
+  flatline: boolean;
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -86,7 +100,9 @@ function mergePublicPayload(
         key === "drawnCards" ||
         key === "drawnCount" ||
         key === "gainedCredits" ||
-        key === "creditsLost"
+        key === "creditsLost" ||
+        key === "damageAmount" ||
+        key === "cardsTrashed"
       ) &&
       typeof value === "number" &&
       typeof target[key] === "number"
@@ -207,6 +223,41 @@ export function executeCardImplementationEffects(
           amount: effect.amount,
           reason: "card_resolver",
           runnerTagsAfter: state.runner.tags,
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "damage": {
+        assertPositiveIntegerAmount("damage", effect.amount);
+        assertPublicVisibility("damage", effect.visibility);
+        if ((effect as { recipient?: string }).recipient !== "runner")
+          throw new Error("damage effect recipient must be runner.");
+        if ((effect as { damageType?: string }).damageType !== "meat")
+          throw new Error("damage effect damageType must be meat.");
+        if ((effect as { preventable?: boolean }).preventable !== true)
+          throw new Error("damage effect must be preventable.");
+        if (!context.damageRunner)
+          throw new Error(
+            "damage effect requires a damageRunner execution context.",
+          );
+        const damageResult = context.damageRunner(
+          effect.damageType,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, damageResult.publicPayload);
+        if (!damageResult.resolved) return;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "damage"),
+          kind: "damage",
+          visibility: effect.visibility,
+          side: "runner",
+          amount: damageResult.amount,
+          damageType: damageResult.damageType,
+          cardsTrashed: damageResult.cardsTrashed,
+          reason: "card_resolver",
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

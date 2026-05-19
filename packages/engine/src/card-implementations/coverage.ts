@@ -59,8 +59,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/day-shift.ts",
   "onr_v1_290_efficiency-experts":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/efficiency-experts.ts",
+  "onr_v1_293_netwatch-credit-voucher":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/netwatch-credit-voucher.ts",
   "onr_v1_295_night-shift":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/night-shift.ts",
+  "onr_v1_301_punitive-counterstrike":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/punitive-counterstrike.ts",
+  "onr_v1_302_scorched-earth":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+  "onr_v1_307_urban-renewal":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_320_encoder-inc":

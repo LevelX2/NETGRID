@@ -1,4 +1,9 @@
-import type { CardType, EventVisibilityClass, Side } from "@netgrid/shared";
+import type {
+  CardType,
+  DamageType,
+  EventVisibilityClass,
+  Side,
+} from "@netgrid/shared";
 
 export type CardModifierImplementation =
   | CardRezCostModifierImplementation
@@ -38,7 +43,8 @@ export type CardEffectImplementation =
   | GainCreditsEffectImplementation
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
-  | AddTagsEffectImplementation;
+  | AddTagsEffectImplementation
+  | DamageEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -66,6 +72,15 @@ export type AddTagsEffectImplementation = {
   kind: "add_tags";
   recipient: "runner";
   amount: number;
+  visibility: EventVisibilityClass;
+};
+
+export type DamageEffectImplementation = {
+  kind: "damage";
+  recipient: "runner";
+  damageType: Extract<DamageType, "meat">;
+  amount: number;
+  preventable: true;
   visibility: EventVisibilityClass;
 };
 
