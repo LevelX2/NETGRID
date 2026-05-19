@@ -10,6 +10,7 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  advancementCounterDisplay,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   armoredFridgeAblativeCounterBadge,
@@ -577,6 +578,28 @@ describe("V1.0.6 resource and card-display helpers", () => {
         counters: { power: 3 }
       })
     ).toBeNull();
+  });
+
+  it("keeps hidden Corp advancement counters neutral at five counters", () => {
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 5 })).toEqual({
+      amount: 5,
+      ariaLabel: "5 öffentliche Advancement-Counter",
+      visibleGemCount: 5,
+      overflowLabel: null
+    });
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 10 })).toEqual({
+      amount: 10,
+      ariaLabel: "10 öffentliche Advancement-Counter",
+      visibleGemCount: 9,
+      overflowLabel: "x10"
+    });
+    expect(advancementCounterDisplay({ known: true, advancementCounters: 5 })).toEqual({
+      amount: 5,
+      ariaLabel: "5 Entwicklungen",
+      visibleGemCount: 4,
+      overflowLabel: "x5"
+    });
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 0 })).toBeNull();
   });
 
   it("renders low credit-counter amounts as separate icons", () => {

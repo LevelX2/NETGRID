@@ -117,6 +117,7 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  advancementCounterDisplay,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   armoredFridgeAblativeCounterBadge,
@@ -152,6 +153,7 @@ import {
   storedCreditAmount,
   storedCreditSourceLabel,
   currentRunTimelineStep,
+  type AdvancementCounterDisplay,
   type ActionContext,
   type CuePositionPreference,
   type CuePositionPreset
@@ -11358,8 +11360,9 @@ function CardView({
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
-  const advancementCount = showAdvancementCounters && !preview ? Math.max(0, Math.floor(card.advancementCounters ?? 0)) : 0;
-  const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
+  const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
+  const advancementCount = advancementDisplay?.amount ?? 0;
+  const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const scoredAgendaCreditSource = showScoreStateBadges ? scoredAgendaCreditCounterSource(card.definitionId) : null;
@@ -11711,7 +11714,7 @@ function CardView({
             ))}
           </span>
         ) : null}
-        {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
+        {advancementDisplay ? <AdvancementGems card={card} display={advancementDisplay} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {storedCredits > 0 && storedCreditSource ? <StoredCreditsBadge amount={storedCredits} sourceLabel={storedCreditSource} /> : null}
         {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
@@ -11893,14 +11896,13 @@ function compactCardActionMenuLabel(action: LegalAction, label: string): string 
   return label.replace(/\s+\([^)]*\)$/, "");
 }
 
-function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: number }) {
-  const visibleGemCount = Math.min(count, 4);
+function AdvancementGems({ card, display }: { card: DisplayVisibleCard; display: AdvancementCounterDisplay }) {
   return (
     <span className="advancementGems" aria-hidden="true">
-      {Array.from({ length: visibleGemCount }, (_, index) => (
+      {Array.from({ length: display.visibleGemCount }, (_, index) => (
         <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index)} />
       ))}
-      {count > visibleGemCount ? <span className="advancementGemCount">x{count}</span> : null}
+      {display.overflowLabel ? <span className="advancementGemCount">{display.overflowLabel}</span> : null}
     </span>
   );
 }

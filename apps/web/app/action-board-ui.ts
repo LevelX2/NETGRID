@@ -120,6 +120,13 @@ export type CardCounterBadgeView = {
   testId: string;
 };
 
+export type AdvancementCounterDisplay = {
+  amount: number;
+  ariaLabel: string;
+  visibleGemCount: number;
+  overflowLabel: string | null;
+};
+
 type StoredCreditCounterType = "power" | "bit";
 
 const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
@@ -151,6 +158,22 @@ export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "defin
     ariaLabel: `${safeAmount} Ablative Counter`,
     shortLabel: `${safeAmount} Ablative`,
     testId: "ablative-counter-badge"
+  };
+}
+
+export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "advancementCounters">): AdvancementCounterDisplay | null {
+  const amount = card.advancementCounters ?? 0;
+  const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  if (safeAmount <= 0) return null;
+  const hiddenCard = card.known === false;
+  const visibleGemCount = hiddenCard ? Math.min(safeAmount, 9) : Math.min(safeAmount, 4);
+  return {
+    amount: safeAmount,
+    ariaLabel: hiddenCard
+      ? `${safeAmount} öffentliche Advancement-Counter`
+      : `${safeAmount} ${safeAmount === 1 ? "Entwicklung" : "Entwicklungen"}`,
+    visibleGemCount,
+    overflowLabel: safeAmount > visibleGemCount ? `x${safeAmount}` : null
   };
 }
 

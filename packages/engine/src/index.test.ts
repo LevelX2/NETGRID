@@ -3955,8 +3955,13 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     moveCorpCardToArchives(state, "simple_economy_operation");
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpRootInRemote(state, "simple_economy_asset");
+    const advancedAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    if (!state.cardInstances[advancedAgendaId])
+      throw new Error("Missing advanced hidden agenda fixture");
+    state.cardInstances[advancedAgendaId].advancementCounters = 5;
 
     const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
     const serialized = JSON.stringify(runnerView);
     const knownRunnerCard = runnerView.own.gripOrHq.find(
       (card) => card.definitionId === "simple_run_event",
@@ -3973,6 +3978,31 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     expect(serialized).not.toContain(
       "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
     );
+    const runnerHiddenAdvancedRoot = runnerView.servers
+      .flatMap((server) => server.root)
+      .find((card) => card.advancementCounters === 5);
+    expect(runnerHiddenAdvancedRoot).toMatchObject({
+      known: false,
+      rezzed: false,
+      advancementCounters: 5,
+    });
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("title");
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("type");
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty(
+      "advancementRequirement",
+    );
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("agendaPoints");
+    expect(
+      corpView.servers
+        .flatMap((server) => server.root)
+        .find((card) => card.instanceId === advancedAgendaId),
+    ).toMatchObject({
+      known: true,
+      title: "Simple Agenda",
+      advancementCounters: 5,
+      advancementRequirement: 3,
+      agendaPoints: 2,
+    });
     expect(runnerView.opponent.handCount).toBe(state.corp.hq.length);
     expect(runnerView.opponent.deckCount).toBe(state.corp.rd.length);
     expect(runnerView.opponent.discardCount).toBe(state.corp.archives.length);
