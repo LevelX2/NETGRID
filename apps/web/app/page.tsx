@@ -83,6 +83,7 @@ import type {
 import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
+  chronicleActionUseByEventId,
   chronicleTurnNumberByEventId,
   formatChronicleEvent,
   formatChronicleEffectItems,
@@ -1658,6 +1659,7 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
 
 function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
+  const actionUseByEventId = chronicleActionUseByEventId(events);
   return Object.fromEntries(
     events.map((event) => {
       const card = eventCardDetail(event, detailsById);
@@ -1669,7 +1671,8 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
           cardType: card?.type ?? null,
           cardDetailLines: card ? catalogDetailLines(card) : [],
           agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null,
-          turnNumber: turnNumberByEventId[event.eventId] ?? null
+          turnNumber: turnNumberByEventId[event.eventId] ?? null,
+          actionUse: actionUseByEventId[event.eventId] ?? null
         }
       ];
     })

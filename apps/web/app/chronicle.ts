@@ -21,6 +21,7 @@ export type ChronicleContext = {
   cardDetailLines?: string[];
   agendaPoints?: number | null;
   turnNumber?: number | null;
+  actionUse?: ChronicleActionUse | null;
 };
 
 export type ChronicleItem = {
@@ -84,7 +85,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
   const turnNumber = positiveIntegerValue(context.turnNumber);
   const turnChip = turnLabel(actor, turnNumber);
-  const actionUse = actionUseFromPayload(payload);
+  const actionUse = context.actionUse ?? actionUseFromPayload(payload);
   const label = stringValue(payload.label);
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
@@ -1059,6 +1060,35 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
   }
 
   return numbers;
+}
+
+export function chronicleActionUseByEventId(events: PublicGameEvent[]): Record<string, ChronicleActionUse> {
+  const spentBySide: Partial<Record<Side, number>> = {};
+  const result: Record<string, ChronicleActionUse> = {};
+
+  for (const event of events) {
+    const payload = event.publicPayload ?? {};
+    const actionType = stringValue(payload.actionType) ?? event.type;
+    const actor = sideValue(payload.actor);
+    if (!actor) continue;
+
+    const clicks = positiveIntegerValue(payload.actionCostClicks);
+    if (clicks !== undefined) {
+      const runningStart = (spentBySide[actor] ?? 0) + 1;
+      const payloadStart = positiveIntegerValue(payload.turnActionOrdinalStart);
+      const start = Math.max(runningStart, payloadStart ?? 0);
+      const payloadEnd = positiveIntegerValue(payload.turnActionOrdinalEnd);
+      const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
+      const label = start === end ? String(start) : `${start}-${end}`;
+      const title = start === end ? `${start}. Aktion in diesem Zug` : `Aktionen ${start} bis ${end} in diesem Zug`;
+      result[event.eventId] = { label, title, clicks, start, end };
+      spentBySide[actor] = end;
+    }
+
+    if (actionType === "end_turn") spentBySide[actor] = 0;
+  }
+
+  return result;
 }
 
 function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffect, index: number, side: Side): ChronicleItem {
