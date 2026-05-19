@@ -1,4 +1,5 @@
 import {
+  CURRENT_RULES_BASELINE,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
   type ActionType,
@@ -48,7 +49,6 @@ import {
   type Winner,
 } from "@netgrid/shared";
 import {
-  baselineForCardPoolVersion,
   cardPoolVersionForDecks,
   metadataForDeck,
 } from "./card-pool";
@@ -268,17 +268,7 @@ export {
   DEMO_CARDS,
   DEMO_CARDS_BY_ID,
   DEMO_DECKS,
-  MVP_0_1_BASELINE,
-  MVP_0_2_BASELINE,
-  MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_8_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_95_BASELINE,
-  MVP_0_96_BASELINE,
-  MVP_0_97_BASELINE,
-  MVP_0_98_BASELINE,
-  MVP_0_99_BASELINE,
+  CURRENT_RULES_BASELINE,
 } from "@netgrid/shared";
 
 export type {
@@ -1780,7 +1770,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
 
   const state: GameState = {
     matchId: config.matchId ?? "local-demo-match",
-    baseline: config.baseline ?? baselineForCardPoolVersion(cardPoolVersion),
+    baseline: config.baseline ?? CURRENT_RULES_BASELINE,
     stateVersion: 0,
     seed,
     randomCounter: random.counter,

@@ -94,7 +94,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, sanitizeAiDecisionDebug } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
@@ -4170,7 +4170,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
   it("loads post-V1.9.9 AI hints into Corp plan roles", () => {
     let state = createGameAfterSetup({
       seed: "ai-v1922-hints-in-plan",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: V1911_RUNNER_DECK,
       corpDeck: {
         id: "ai_v1922_hint_corp",
@@ -4249,7 +4249,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
   it("allows newly approved legacy cards in Corp strategic plan roles via legal actions", () => {
     let state = createGameAfterSetup({
       seed: "ai-v140-unsupported-card",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: ONR_V1_2_3_RUNNER_DECK,
       corpDeck: ONR_V1_2_3_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4275,7 +4275,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
   it("uses tag-enabling ICE pressure without hidden-info leakage", () => {
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-ice-pressure",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4320,7 +4320,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_243_fetch-4-0-1"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-unreleased-ice-pressure",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4374,7 +4374,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-positive",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4442,7 +4442,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-negative",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4471,7 +4471,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_306_trojan-horse"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-trojan-positive",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -5060,7 +5060,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-bartmoss-remote-declined-rez",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck,
         corpDeck,
         agendaPointsToWin: 7,
@@ -6802,7 +6802,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-hq-known-low-value-repeat",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_2_3_RUNNER_DECK,
         corpDeck: ONR_V1_2_3_CORP_DECK,
         agendaPointsToWin: 7,
@@ -6877,7 +6877,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-hq-known-hand-memory",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_2_3_RUNNER_DECK,
         corpDeck: ONR_V1_2_3_CORP_DECK,
         agendaPointsToWin: 7,
@@ -7997,7 +7997,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-v123-human-only-mit",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_2_3_RUNNER_DECK,
         corpDeck: ONR_V1_2_3_CORP_DECK,
         agendaPointsToWin: 7,
@@ -8037,7 +8037,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       maxActions: 140,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.4.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -8059,7 +8059,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     );
 
     for (const summary of summaries) {
-      expect(summary.cardPoolVersion).toBe("0.8.0");
+      expect(summary.cardPoolVersion).toBe("0.99.0");
       expect(summary.errors).toEqual([]);
       expect(summary.replayOk).toBe(true);
       expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -8080,7 +8080,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       maxActions: 180,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.97.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -8096,7 +8096,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       maxActions: 180,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.98.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -8132,7 +8132,7 @@ describe("MVP 0.9 stronger AI", () => {
       maxActions: 160,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.8.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.metrics.illegalActions).toBe(0);
@@ -8506,7 +8506,7 @@ function corpActionPhaseInput(
 function installedCorpBbsEconomyInput(seed: string) {
   let state = createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: {
       id: `installed_corp_bbs_runner_${seed}`,
       name: "Installed Corp BBS Runner",
@@ -8568,7 +8568,7 @@ function runnerShellTradersState(seed: string): GameState {
   return toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: {
         id: `ai_shell_traders_runner_${seed}`,
         name: "AI Shell Traders Runner",
@@ -8865,7 +8865,7 @@ function krashFilterEncounterState(seed: string): GameState {
   let state = toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: batchARunnerDeck(),
       corpDeck: {
         id: "ai_krash_filter_corp",
@@ -8911,7 +8911,7 @@ function krashKeeperHqEncounterState(seed: string): GameState {
   let state = toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: batchARunnerDeck(),
       corpDeck: {
         id: "ai_krash_keeper_corp",
@@ -9067,7 +9067,7 @@ function kingOfTheRoadRunnerTurn(seed: string): GameState {
   return toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: kingOfTheRoadRunnerDeck(),
       corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
       agendaPointsToWin: 7,
@@ -9083,7 +9083,7 @@ function batchARunnerTurn(seed: string): GameState {
   return toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: batchARunnerDeck(),
       corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
       agendaPointsToWin: 7,

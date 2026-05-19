@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  CURRENT_RULES_BASELINE,
-  MVP_0_1_BASELINE,
-  MVP_0_99_BASELINE,
-} from "./baselines";
+import { CURRENT_RULES_BASELINE } from "./baselines";
 import { LEGACY_ABILITY_PAYLOAD_FIELDS } from "./ability-payload";
 import {
   CORE_DEMO_DECK_IDS,
@@ -15,7 +11,6 @@ import {
   CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   LEGACY_ABILITY_PAYLOAD_FIELDS as INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS,
-  MVP_0_99_BASELINE as INDEX_MVP_0_99_BASELINE,
 } from "./index";
 
 describe("legacy ability payload compatibility registry", () => {
@@ -72,12 +67,9 @@ describe("demo deck fixture registry", () => {
 });
 
 describe("rules baseline registry", () => {
-  it("keeps version baselines in a dedicated shared module and re-exports them", () => {
-    expect(MVP_0_1_BASELINE.engineSchemaVersion).toBe("0.1.0");
-    expect(MVP_0_99_BASELINE.cardTextSnapshotId).toBe("mvp-0.99-demo");
-    expect(MVP_0_99_BASELINE.simulationSchemaVersion).toBe("0.99.0");
-    expect(CURRENT_RULES_BASELINE).toBe(MVP_0_99_BASELINE);
+  it("keeps the current rules baseline in a dedicated shared module and re-exports it", () => {
+    expect(CURRENT_RULES_BASELINE.cardTextSnapshotId).toBe("mvp-0.99-demo");
+    expect(CURRENT_RULES_BASELINE.simulationSchemaVersion).toBe("0.99.0");
     expect(INDEX_CURRENT_RULES_BASELINE).toBe(CURRENT_RULES_BASELINE);
-    expect(INDEX_MVP_0_99_BASELINE).toBe(MVP_0_99_BASELINE);
   });
 });

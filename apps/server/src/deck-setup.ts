@@ -137,17 +137,6 @@ function deckInputForPlayer(
   return selected;
 }
 
-export function setupUsesExpandedRules(setup: ResolvedDeckSetup): boolean {
-  return setupUsesMvp08Rules(setup) || setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.4" || setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.4";
-}
-
-export function setupUsesMvp08Rules(setup: ResolvedDeckSetup): boolean {
-  return (
-    setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.8" ||
-    setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.8"
-  );
-}
-
 export function defaultAgendaPointsToWin(_setup: ResolvedDeckSetup): number {
   return 7;
 }

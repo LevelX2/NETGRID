@@ -40,17 +40,6 @@ export {
 export { DEMO_DECKS } from "./demo-decks";
 export {
   CURRENT_RULES_BASELINE,
-  MVP_0_1_BASELINE,
-  MVP_0_2_BASELINE,
-  MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_8_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_95_BASELINE,
-  MVP_0_96_BASELINE,
-  MVP_0_97_BASELINE,
-  MVP_0_98_BASELINE,
-  MVP_0_99_BASELINE,
   type RulesBaseline,
 } from "./baselines";
 import type { RulesBaseline } from "./baselines";

@@ -1,7 +1,7 @@
 import { applyAction, createGameAfterSetup, getLegalActions } from "../index";
 import {
   DEMO_CARDS_BY_ID,
-  MVP_0_99_BASELINE,
+  CURRENT_RULES_BASELINE,
   type CardInstanceId,
   type ChoiceRequest,
   type CounterType,
@@ -1751,7 +1751,7 @@ export function v112kCardReleaseGame(seed: string): GameState {
 export function v123CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_2_3_RUNNER_DECK,
     corpDeck: ONR_V1_2_3_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1761,7 +1761,7 @@ export function v123CardReleaseGame(seed: string): GameState {
 export function v161CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_6_1_RUNNER_DECK,
     corpDeck: ONR_V1_6_1_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1771,7 +1771,7 @@ export function v161CardReleaseGame(seed: string): GameState {
 export function v162CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_6_2_RUNNER_DECK,
     corpDeck: ONR_V1_6_2_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1781,7 +1781,7 @@ export function v162CardReleaseGame(seed: string): GameState {
 export function v163CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_6_3_RUNNER_DECK,
     corpDeck: ONR_V1_6_3_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1791,7 +1791,7 @@ export function v163CardReleaseGame(seed: string): GameState {
 export function v170CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_7_0_RUNNER_DECK,
     corpDeck: ONR_V1_7_0_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1801,7 +1801,7 @@ export function v170CardReleaseGame(seed: string): GameState {
 export function v171CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_7_1_RUNNER_DECK,
     corpDeck: ONR_V1_7_1_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1811,7 +1811,7 @@ export function v171CardReleaseGame(seed: string): GameState {
 export function v172CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_7_2_RUNNER_DECK,
     corpDeck: ONR_V1_7_2_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1821,7 +1821,7 @@ export function v172CardReleaseGame(seed: string): GameState {
 export function v180CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_8_0_RUNNER_DECK,
     corpDeck: ONR_V1_8_0_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1831,7 +1831,7 @@ export function v180CardReleaseGame(seed: string): GameState {
 export function v181CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_8_1_RUNNER_DECK,
     corpDeck: ONR_V1_8_1_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1841,7 +1841,7 @@ export function v181CardReleaseGame(seed: string): GameState {
 export function v190CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_0_RUNNER_DECK,
     corpDeck: ONR_V1_9_0_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1851,7 +1851,7 @@ export function v190CardReleaseGame(seed: string): GameState {
 export function v191CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_1_RUNNER_DECK,
     corpDeck: ONR_V1_9_1_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1861,7 +1861,7 @@ export function v191CardReleaseGame(seed: string): GameState {
 export function v192CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_2_RUNNER_DECK,
     corpDeck: ONR_V1_9_2_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1871,7 +1871,7 @@ export function v192CardReleaseGame(seed: string): GameState {
 export function v193CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_3_RUNNER_DECK,
     corpDeck: ONR_V1_9_3_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1881,7 +1881,7 @@ export function v193CardReleaseGame(seed: string): GameState {
 export function v194CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_4_RUNNER_DECK,
     corpDeck: ONR_V1_9_4_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1891,7 +1891,7 @@ export function v194CardReleaseGame(seed: string): GameState {
 export function v195CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_5_RUNNER_DECK,
     corpDeck: ONR_V1_9_5_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1901,7 +1901,7 @@ export function v195CardReleaseGame(seed: string): GameState {
 export function v196CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_6_RUNNER_DECK,
     corpDeck: ONR_V1_9_6_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1911,7 +1911,7 @@ export function v196CardReleaseGame(seed: string): GameState {
 export function v197CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_7_RUNNER_DECK,
     corpDeck: ONR_V1_9_7_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1921,7 +1921,7 @@ export function v197CardReleaseGame(seed: string): GameState {
 export function v198CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_8_RUNNER_DECK,
     corpDeck: ONR_V1_9_8_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1931,7 +1931,7 @@ export function v198CardReleaseGame(seed: string): GameState {
 export function v199CardReleaseGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_9_RUNNER_DECK,
     corpDeck: ONR_V1_9_9_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1941,7 +1941,7 @@ export function v199CardReleaseGame(seed: string): GameState {
 export function v1911HiddenZoneGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_RUNNER_DECK,
     corpDeck: ONR_V1_9_11_HIDDEN_ZONE_WIP_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1951,7 +1951,7 @@ export function v1911HiddenZoneGame(seed: string): GameState {
 export function v1912CounterRecurringGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_RUNNER_DECK,
     corpDeck: ONR_V1_9_12_COUNTER_RECURRING_WIP_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1961,7 +1961,7 @@ export function v1912CounterRecurringGame(seed: string): GameState {
 export function v1913DamagePreventionGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_RUNNER_DECK,
     corpDeck: ONR_V1_9_13_DAMAGE_PREVENTION_WIP_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1971,7 +1971,7 @@ export function v1913DamagePreventionGame(seed: string): GameState {
 export function v1914TraceTagResourceGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_RUNNER_DECK,
     corpDeck: ONR_V1_9_14_TRACE_TAG_RESOURCE_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1981,7 +1981,7 @@ export function v1914TraceTagResourceGame(seed: string): GameState {
 export function v1915RunAccessGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_15_RUN_ACCESS_RUNNER_DECK,
     corpDeck: ONR_V1_9_15_RUN_ACCESS_CORP_DECK,
     agendaPointsToWin: 7,
@@ -1991,7 +1991,7 @@ export function v1915RunAccessGame(seed: string): GameState {
 export function v1916ProgramSubtypeGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_RUNNER_DECK,
     corpDeck: ONR_V1_9_16_PROGRAM_SUBTYPE_CORP_DECK,
     agendaPointsToWin: 7,
@@ -2001,7 +2001,7 @@ export function v1916ProgramSubtypeGame(seed: string): GameState {
 export function v1917GenericAssetGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_17_GENERIC_ASSET_RUNNER_DECK,
     corpDeck: ONR_V1_9_17_GENERIC_ASSET_CORP_DECK,
     agendaPointsToWin: 7,
@@ -2011,7 +2011,7 @@ export function v1917GenericAssetGame(seed: string): GameState {
 export function v1919AgendaOveradvanceGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_RUNNER_DECK,
     corpDeck: ONR_V1_9_19_AGENDA_OVERADVANCE_CORP_DECK,
     agendaPointsToWin: 7,
@@ -2151,7 +2151,7 @@ export function installedResourceCorpTurn(seed: string): GameState {
 export function originalsetReorderCounterRunlockGame(seed: string): GameState {
   return createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: {
       id: "originalset_spotcheck_reorder_counter_runlock_runner",
       name: "Originalset Spotcheck Reorder Counter Runlock Runner",
