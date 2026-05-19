@@ -1334,19 +1334,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  "onr_v1_287_datapool-by-zetatech": {
-    name: "onr_corp_operation_give_two_tags",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      state.runner.tags += 2;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        tagsAdded: 2,
-        runnerTagsAfter: state.runner.tags,
-      };
-    },
-  },
   "onr_v1_299_power-grid-overload": {
     name: "onr_corp_operation_tagged_runner_trash_hardware",
     canPlay: (state) =>

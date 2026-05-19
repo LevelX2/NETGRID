@@ -1079,6 +1079,37 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges simple play add_tags effects into the played card entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Datapool® by Zetatech",
+      cardDefinitionId: "onr_v1_287_datapool-by-zetatech",
+      tagsAdded: 2,
+      runnerTagsAfter: 3,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+          kind: "add_tags",
+          visibility: "public",
+          side: "runner",
+          amount: 2,
+          runnerTagsAfter: 3,
+          sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
+          sourceTitle: "Datapool® by Zetatech",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", { cardTitle: "Datapool® by Zetatech" });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Datapool® by Zetatech gespielt und Runner erhält 2 Tags.");
+    expect(item.category).toBe("danger");
+    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "+2 Tags"]));
+    expect(effects).toEqual([]);
+  });
+
   it("merges ordered Day Shift card resolver effects into the played card entry", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",

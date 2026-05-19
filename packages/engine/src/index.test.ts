@@ -7276,6 +7276,33 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("implemented");
   });
 
+  it("describes Datapool by Zetatech through a tagged on-play add_tags effect", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_287_datapool-by-zetatech",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        condition: { kind: "runner_is_tagged" },
+        effects: [
+          expect.objectContaining({
+            kind: "add_tags",
+            recipient: "runner",
+            amount: 2,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_287_datapool-by-zetatech",
+      )?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -7558,6 +7585,63 @@ describe("V1.6.2 Mechanikpaket B", () => {
         ],
       ),
     ).toThrow(/visibility must be public/);
+  });
+
+  it("executes typed add_tags card effects", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-add-tags" });
+    state.runner.tags = 1;
+
+    const result = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
+        sourceTitle: "Datapool® by Zetatech",
+        controller: "corp",
+      },
+      [
+        {
+          kind: "add_tags",
+          recipient: "runner",
+          amount: 2,
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(state.runner.tags).toBe(3);
+    expect(result.publicPayload).toMatchObject({
+      tagsAdded: 2,
+      runnerTagsAfter: 3,
+    });
+    expect(result.resolvedEffects).toEqual([
+      expect.objectContaining({
+        effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+        kind: "add_tags",
+        visibility: "public",
+        side: "runner",
+        amount: 2,
+        reason: "card_resolver",
+        runnerTagsAfter: 3,
+        sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
+        sourceTitle: "Datapool® by Zetatech",
+      }),
+    ]);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "add_tags",
+            recipient: "runner",
+            amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
   });
 
   it("executes typed draw_cards card effects in declared order", () => {
@@ -31453,6 +31537,19 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
             tagsAdded: 2,
             runnerTagsAfter: 3,
+            resolvedEffects: [
+              expect.objectContaining({
+                effectId: "onr_v1_287_datapool-by-zetatech.effect.0.add_tags",
+                kind: "add_tags",
+                visibility: "public",
+                side: "runner",
+                amount: 2,
+                reason: "card_resolver",
+                runnerTagsAfter: 3,
+                sourceDefinitionId: "onr_v1_287_datapool-by-zetatech",
+                sourceTitle: "Datapool® by Zetatech",
+              }),
+            ],
           });
         },
       },
@@ -31524,6 +31621,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       const tagDriftCorpCredits = tagDrift.corp.credits;
       const tagDriftCorpClicks = tagDrift.corp.clicks;
       const tagDriftRunnerCredits = tagDrift.runner.credits;
+      const tagDriftRunnerTags = tagDrift.runner.tags;
       expect(
         applyAction(tagDrift, {
           matchId: tagDrift.matchId,
@@ -31536,6 +31634,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       expect(tagDrift.corp.credits).toBe(tagDriftCorpCredits);
       expect(tagDrift.corp.clicks).toBe(tagDriftCorpClicks);
       expect(tagDrift.runner.credits).toBe(tagDriftRunnerCredits);
+      expect(tagDrift.runner.tags).toBe(tagDriftRunnerTags);
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;

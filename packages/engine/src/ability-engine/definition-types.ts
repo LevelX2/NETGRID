@@ -37,7 +37,8 @@ export type CardAbilityCostImplementation = {
 export type CardEffectImplementation =
   | GainCreditsEffectImplementation
   | DrawCardsEffectImplementation
-  | LoseCreditsEffectImplementation;
+  | LoseCreditsEffectImplementation
+  | AddTagsEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -58,6 +59,13 @@ export type LoseCreditsEffectImplementation = {
   recipient: "controller" | "runner" | "corp";
   amount?: number;
   mode?: "amount" | "all";
+  visibility: EventVisibilityClass;
+};
+
+export type AddTagsEffectImplementation = {
+  kind: "add_tags";
+  recipient: "runner";
+  amount: number;
   visibility: EventVisibilityClass;
 };
 

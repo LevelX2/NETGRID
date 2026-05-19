@@ -51,6 +51,11 @@ function loseCredits(state: GameState, side: Side, amount: number): void {
   else state.runner.credits = Math.max(0, state.runner.credits - amount);
 }
 
+function addRunnerTags(state: GameState, amount: number): void {
+  if (amount <= 0) return;
+  state.runner.tags += amount;
+}
+
 function publicEffectId(
   context: CardEffectExecutionContext,
   index: number,
@@ -178,6 +183,30 @@ export function executeCardImplementationEffects(
           side,
           amount: amountToLose,
           reason: "card_resolver",
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "add_tags": {
+        assertPositiveIntegerAmount("add_tags", effect.amount);
+        assertPublicVisibility("add_tags", effect.visibility);
+        if ((effect as { recipient?: string }).recipient !== "runner")
+          throw new Error("add_tags effect recipient must be runner.");
+        addRunnerTags(state, effect.amount);
+        publicPayload.tagsAdded =
+          Number(publicPayload.tagsAdded ?? 0) + effect.amount;
+        publicPayload.runnerTagsAfter = state.runner.tags;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_tags"),
+          kind: "add_tags",
+          visibility: effect.visibility,
+          side: "runner",
+          amount: effect.amount,
+          reason: "card_resolver",
+          runnerTagsAfter: state.runner.tags,
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

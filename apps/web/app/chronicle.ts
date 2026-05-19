@@ -1352,6 +1352,7 @@ function cardResolverPlayEffectPart(effect: ResolvedGameEffect): EffectSummary |
   if (effect.kind === "draw_cards") return { category: "card", suffix: `${cardCountText(amount)} gezogen`, chips: [amount === 1 ? "Karte ziehen" : `${amount} Karten`] };
   if (effect.kind === "gain_credits") return { category: "economy", suffix: `${creditText(amount)} erhalten`, chips: [`+${amount} ${creditLabel(amount)}`] };
   if (effect.kind === "lose_credits") return { category: "danger", suffix: `${sideLabel(effect.side)} verliert ${creditText(amount)}`, chips: [`${sideLabel(effect.side)} -${amount} ${creditLabel(amount)}`] };
+  if (effect.kind === "add_tags") return { category: "danger", suffix: `${sideLabel(effect.side)} erhält ${amount} Tag${amount === 1 ? "" : "s"}`, chips: [`+${amount} Tag${amount === 1 ? "" : "s"}`] };
   return undefined;
 }
 
@@ -1374,10 +1375,10 @@ function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedG
     !activatedCardAbility
   )
     return false;
-  if (!["draw_cards", "gain_credits", "lose_credits"].includes(effect.kind) || effect.visibility !== "public") return false;
+  if (!["draw_cards", "gain_credits", "lose_credits", "add_tags"].includes(effect.kind) || effect.visibility !== "public") return false;
   if (effect.reason !== "card_resolver") return false;
   const actor = sideValue(payload.actor);
-  if (effect.kind !== "lose_credits" && actor && effect.side && actor !== effect.side) return false;
+  if (!["lose_credits", "add_tags"].includes(effect.kind) && actor && effect.side && actor !== effect.side) return false;
   const amount = numberValue(effect.amount);
   if (amount === undefined || amount < 0) return false;
   if (effect.kind !== "lose_credits" && amount <= 0) return false;

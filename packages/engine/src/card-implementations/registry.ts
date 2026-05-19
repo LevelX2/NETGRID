@@ -7,6 +7,7 @@ import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/s
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
 import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
+import { datapoolByZetatechImplementation } from "./onr-v1/corp/operations/datapool-by-zetatech";
 import { dayShiftImplementation } from "./onr-v1/corp/operations/day-shift";
 import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/efficiency-experts";
 import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
@@ -27,6 +28,7 @@ export const CARD_IMPLEMENTATIONS = [
   accountsReceivableImplementation,
   annualReviewsImplementation,
   closedAccountsImplementation,
+  datapoolByZetatechImplementation,
   dayShiftImplementation,
   efficiencyExpertsImplementation,
   nightShiftImplementation,
