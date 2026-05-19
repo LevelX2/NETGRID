@@ -46,6 +46,7 @@ const AMOUNT_KEYS = [
   "gainedActions",
   "gainedCredits",
   "gainCreditsAmount",
+  "creditsLost",
   "damageAmount",
   "baseDamageAmount",
   "preventedAmount",
@@ -207,6 +208,8 @@ function inferEffectKind(
   if (payload.hiddenZoneBarrier === true) return "hidden_zone";
   if (abilityId?.includes("reveal") || abilityId?.includes("search"))
     return "hidden_zone";
+  if (abilityId?.includes("lose") || typeof payload.creditsLost === "number")
+    return "lose_credits";
   if (abilityId?.includes("gain") || actionType === "gain_credit")
     return "gain_credits";
   if (abilityId?.includes("trash") || actionType === "trash_accessed_card")

@@ -206,6 +206,7 @@ export type EventVisibilityClass =
 export type ResolvedGameEffectKind =
   | "gain_credits"
   | "draw_cards"
+  | "lose_credits"
   | "rez_card"
   | "steal_agenda"
   | "trash_card"

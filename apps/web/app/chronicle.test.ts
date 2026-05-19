@@ -871,6 +871,36 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges simple play lose-credit effects into the played card entry", () => {
+    const event = makeEvent("play_operation", {
+      actor: "corp",
+      title: "Closed Accounts",
+      cardDefinitionId: "onr_v1_285_closed-accounts",
+      creditsLost: 7,
+      runnerCreditsAfter: 0,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_285_closed-accounts.effect.0.lose_credits",
+          kind: "lose_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 7,
+          sourceDefinitionId: "onr_v1_285_closed-accounts",
+          sourceTitle: "Closed Accounts",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", { cardTitle: "Closed Accounts" });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Closed Accounts gespielt und Runner verliert 7 Credits.");
+    expect(item.category).toBe("danger");
+    expect(item.chips).toEqual(expect.arrayContaining(["Operation", "Runner -7 Credits"]));
+    expect(effects).toEqual([]);
+  });
+
   it("merges ordered Day Shift card resolver effects into the played card entry", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",

@@ -6,6 +6,7 @@ import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-
 import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/skalderviken-sa-beta-test-site";
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
+import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
 import { dayShiftImplementation } from "./onr-v1/corp/operations/day-shift";
 import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/efficiency-experts";
 import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
@@ -25,6 +26,7 @@ export const CARD_IMPLEMENTATIONS = [
   scoreImplementation,
   accountsReceivableImplementation,
   annualReviewsImplementation,
+  closedAccountsImplementation,
   dayShiftImplementation,
   efficiencyExpertsImplementation,
   nightShiftImplementation,

@@ -40,6 +40,17 @@ function gainCredits(state: GameState, side: Side, amount: number): void {
   else state.runner.credits += amount;
 }
 
+function creditsForSide(state: GameState, side: Side): number {
+  return side === "corp" ? state.corp.credits : state.runner.credits;
+}
+
+function loseCredits(state: GameState, side: Side, amount: number): void {
+  if (amount <= 0) return;
+  if (side === "corp")
+    state.corp.credits = Math.max(0, state.corp.credits - amount);
+  else state.runner.credits = Math.max(0, state.runner.credits - amount);
+}
+
 function publicEffectId(
   context: CardEffectExecutionContext,
   index: number,
@@ -66,7 +77,12 @@ function mergePublicPayload(
   if (!next) return;
   for (const [key, value] of Object.entries(next)) {
     if (
-      (key === "drawnCards" || key === "drawnCount" || key === "gainedCredits") &&
+      (
+        key === "drawnCards" ||
+        key === "drawnCount" ||
+        key === "gainedCredits" ||
+        key === "creditsLost"
+      ) &&
       typeof value === "number" &&
       typeof target[key] === "number"
     ) {
@@ -126,6 +142,41 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: drawResult.drawnCount,
+          reason: "card_resolver",
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "lose_credits": {
+        assertPublicVisibility("lose_credits", effect.visibility);
+        const mode = effect.mode ?? "amount";
+        if (mode !== "amount" && mode !== "all")
+          throw new Error("lose_credits effect mode must be amount or all.");
+        if (mode === "amount") {
+          if (effect.amount === undefined)
+            throw new Error("lose_credits amount mode requires an amount.");
+          assertPositiveIntegerAmount("lose_credits", effect.amount);
+        }
+        const side = recipientSide(context, effect.recipient);
+        const amountToLose =
+          mode === "all"
+            ? creditsForSide(state, side)
+            : Math.min(creditsForSide(state, side), effect.amount ?? 0);
+        loseCredits(state, side, amountToLose);
+        publicPayload.creditsLost =
+          Number(publicPayload.creditsLost ?? 0) + amountToLose;
+        publicPayload[
+          side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
+        ] = creditsForSide(state, side);
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "lose_credits"),
+          kind: "lose_credits",
+          visibility: effect.visibility,
+          side,
+          amount: amountToLose,
           reason: "card_resolver",
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }

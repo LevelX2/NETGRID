@@ -51,6 +51,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
   "onr_v1_282_annual-reviews":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/annual-reviews.ts",
+  "onr_v1_285_closed-accounts":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
   "onr_v1_288_day-shift":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/day-shift.ts",
   "onr_v1_290_efficiency-experts":

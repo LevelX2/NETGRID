@@ -7231,6 +7231,33 @@ describe("V1.6.2 Mechanikpaket B", () => {
     );
   });
 
+  it("describes Closed Accounts through a tagged on-play lose_credits effect", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_285_closed-accounts",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        costs: "printed",
+        condition: { kind: "runner_is_tagged" },
+        effects: [
+          expect.objectContaining({
+            kind: "lose_credits",
+            recipient: "runner",
+            mode: "all",
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_285_closed-accounts",
+      )?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -7423,6 +7450,96 @@ describe("V1.6.2 Mechanikpaket B", () => {
         [{ kind: "unknown_effect", visibility: "public" } as never],
       ),
     ).toThrow(/Unsupported card implementation effect/);
+  });
+
+  it("executes typed lose_credits card effects", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-lose-credits" });
+    state.runner.credits = 7;
+    state.corp.credits = 5;
+
+    const runnerResult = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "onr_v1_285_closed-accounts",
+        sourceTitle: "Closed Accounts",
+        controller: "corp",
+      },
+      [
+        {
+          kind: "lose_credits",
+          recipient: "runner",
+          mode: "all",
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(state.runner.credits).toBe(0);
+    expect(runnerResult.publicPayload).toMatchObject({
+      creditsLost: 7,
+      runnerCreditsAfter: 0,
+    });
+    expect(runnerResult.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "lose_credits",
+        visibility: "public",
+        side: "runner",
+        amount: 7,
+        reason: "card_resolver",
+        sourceDefinitionId: "onr_v1_285_closed-accounts",
+        sourceTitle: "Closed Accounts",
+      }),
+    ]);
+
+    const corpResult = executeCardImplementationEffects(
+      state,
+      { sourceCardId: state.corp.identity, controller: "corp" },
+      [
+        {
+          kind: "lose_credits",
+          recipient: "controller",
+          mode: "amount",
+          amount: 9,
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(state.corp.credits).toBe(0);
+    expect(corpResult.publicPayload).toMatchObject({
+      creditsLost: 5,
+      corpCreditsAfter: 0,
+    });
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "lose_credits",
+            recipient: "runner",
+            mode: "amount",
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/requires an amount/);
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "lose_credits",
+            recipient: "runner",
+            mode: "all",
+            visibility: "private_to_side",
+          },
+        ],
+      ),
+    ).toThrow(/visibility must be public/);
   });
 
   it("executes typed draw_cards card effects in declared order", () => {
@@ -31251,6 +31368,18 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
             creditsLost: 7,
             runnerCreditsAfter: 0,
+            resolvedEffects: [
+              expect.objectContaining({
+                effectId: "onr_v1_285_closed-accounts.effect.0.lose_credits",
+                kind: "lose_credits",
+                visibility: "public",
+                side: "runner",
+                amount: 7,
+                reason: "card_resolver",
+                sourceDefinitionId: "onr_v1_285_closed-accounts",
+                sourceTitle: "Closed Accounts",
+              }),
+            ],
           });
         },
       },
@@ -31330,6 +31459,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
       ).toBe(false);
       const tagDrift = structuredClone(state);
       tagDrift.runner.tags = 0;
+      const tagDriftCorpCredits = tagDrift.corp.credits;
+      const tagDriftCorpClicks = tagDrift.corp.clicks;
+      const tagDriftRunnerCredits = tagDrift.runner.credits;
       expect(
         applyAction(tagDrift, {
           matchId: tagDrift.matchId,
@@ -31339,6 +31471,9 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
           idempotencyKey: `spotcheck-${spec.definitionId}-tag-drift`,
         }).ok,
       ).toBe(false);
+      expect(tagDrift.corp.credits).toBe(tagDriftCorpCredits);
+      expect(tagDrift.corp.clicks).toBe(tagDriftCorpClicks);
+      expect(tagDrift.runner.credits).toBe(tagDriftRunnerCredits);
 
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;

@@ -75,6 +75,7 @@ import {
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import type {
   ActivatedCardAbilityImplementation,
+  CardConditionImplementation,
   OnPlayCardAbilityImplementation,
 } from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
@@ -1309,20 +1310,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         5,
         legalAction,
       );
-    },
-  },
-  "onr_v1_285_closed-accounts": {
-    name: "onr_corp_operation_closed_accounts",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      const creditsLost = state.runner.credits;
-      state.runner.credits = 0;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        creditsLost,
-        runnerCreditsAfter: state.runner.credits,
-      };
     },
   },
   "onr_v1_286_corporate-detective-agency": {
@@ -4295,7 +4282,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state.runner.credits >= (definition.cost ?? 0)
     ) {
       const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
-      if (!resolver && !hasPrintedCostOnPlayImplementation(definition)) continue;
+      if (!resolver && !canPlayPrintedCostOnPlayImplementation(state, definition)) continue;
       if (resolver?.canPlay && !resolver.canPlay(state)) continue;
       if (resolver?.requiresServer) {
         for (const server of state.corp.servers) {
@@ -7948,6 +7935,14 @@ function performAction(
       playRunnerEvent(state, legalAction);
       return;
     case "play_operation":
+      if (!legalAction.payload?.cardId)
+        throw new Error("Die Operation hat keine gueltige Karte.");
+      {
+        const cardId = String(legalAction.payload.cardId);
+        const definition = definitionFor(state, cardId);
+        if (!canPlayCorpOperation(state, definition))
+          throw new Error("Diese Operation ist im aktuellen Zustand nicht spielbar.");
+      }
       spendClick(state, "corp");
       spendCredits(state, "corp", legalAction.costs[0]?.credits ?? 0);
       if (legalAction.payload?.cardId) {
@@ -24381,8 +24376,49 @@ function printedCostOnPlayImplementation(
   );
 }
 
-function hasPrintedCostOnPlayImplementation(definition: CardDefinition): boolean {
-  return Boolean(printedCostOnPlayImplementation(definition));
+function cardImplementationConditionMet(
+  state: GameState,
+  condition: CardConditionImplementation,
+): boolean {
+  switch (condition.kind) {
+    case "runner_is_tagged":
+      return state.runner.tags > 0;
+    default: {
+      const unknownCondition = condition as { kind?: string };
+      throw new Error(
+        `Unsupported card implementation condition: ${
+          unknownCondition.kind ?? "unknown"
+        }`,
+      );
+    }
+  }
+}
+
+function canResolveOnPlayCardImplementationAbility(
+  state: GameState,
+  ability: OnPlayCardAbilityImplementation,
+): boolean {
+  return ability.condition
+    ? cardImplementationConditionMet(state, ability.condition)
+    : true;
+}
+
+function canPlayPrintedCostOnPlayImplementation(
+  state: GameState,
+  definition: CardDefinition,
+): boolean {
+  const ability = printedCostOnPlayImplementation(definition);
+  return ability ? canResolveOnPlayCardImplementationAbility(state, ability) : false;
+}
+
+function assertOnPlayCardImplementationAbilityCanResolve(
+  state: GameState,
+  ability: OnPlayCardAbilityImplementation,
+): void {
+  if (canResolveOnPlayCardImplementationAbility(state, ability)) return;
+  if (ability.condition?.kind === "runner_is_tagged")
+    throw new Error("Der Runner muss getaggt sein.");
+  throw new Error("Die On-Play-Kartenbedingung ist nicht erfuellt.");
 }
 
 function activatedCardImplementationAbilitiesForTiming(
@@ -24567,6 +24603,7 @@ function executeOnPlayCardImplementationAbility(
   const ability = printedCostOnPlayImplementation(definition);
   if (!ability)
     throw new Error(`Kein On-Play-Implementation-Resolver fuer ${definition.id}.`);
+  assertOnPlayCardImplementationAbilityCanResolve(state, ability);
   const result = executeCardImplementationEffects(
     state,
     {
@@ -24619,7 +24656,7 @@ function canPlayCorpOperation(
 ): boolean {
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
   if (resolver) return resolver.canPlay?.(state) ?? true;
-  return hasPrintedCostOnPlayImplementation(definition);
+  return canPlayPrintedCostOnPlayImplementation(state, definition);
 }
 
 function resolveCorpOperation(

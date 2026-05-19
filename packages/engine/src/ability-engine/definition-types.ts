@@ -13,7 +13,12 @@ export type CardAbilityImplementation =
 export type OnPlayCardAbilityImplementation = {
   kind: "on_play";
   costs: "printed";
+  condition?: CardConditionImplementation;
   effects: CardEffectImplementation[];
+};
+
+export type CardConditionImplementation = {
+  kind: "runner_is_tagged";
 };
 
 export type ActivatedCardAbilityImplementation = {
@@ -31,7 +36,8 @@ export type CardAbilityCostImplementation = {
 
 export type CardEffectImplementation =
   | GainCreditsEffectImplementation
-  | DrawCardsEffectImplementation;
+  | DrawCardsEffectImplementation
+  | LoseCreditsEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -44,6 +50,14 @@ export type DrawCardsEffectImplementation = {
   kind: "draw_cards";
   recipient: "controller" | "runner" | "corp";
   amount: number;
+  visibility: EventVisibilityClass;
+};
+
+export type LoseCreditsEffectImplementation = {
+  kind: "lose_credits";
+  recipient: "controller" | "runner" | "corp";
+  amount?: number;
+  mode?: "amount" | "all";
   visibility: EventVisibilityClass;
 };
 

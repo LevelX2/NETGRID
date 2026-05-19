@@ -1002,6 +1002,11 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
       break;
     }
+    case "lose_credits":
+      category = "danger";
+      title = phrase(subject, `${creditText(amount)}${through} verloren`);
+      chips.push(`-${amount} ${creditLabel(amount)}`, "Automatisch");
+      break;
     case "draw_cards":
       category = "card";
       title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
@@ -1261,7 +1266,11 @@ function mergedCardResolverEventEffect(event: PublicGameEvent): EffectSummary | 
   const suffix = joinChronicleParts(parts.map((part) => part.suffix).filter((value): value is string => Boolean(value)));
   const sourceTitle = stringValue(effects[0]?.sourceTitle);
   return {
-    category: parts.some((part) => part.category === "economy") ? "economy" : "card",
+    category: parts.some((part) => part.category === "danger")
+      ? "danger"
+      : parts.some((part) => part.category === "economy")
+        ? "economy"
+        : "card",
     chips: parts.flatMap((part) => part.chips),
     ...(suffix ? { suffix } : {}),
     ...(sourceTitle ? { sourceTitle } : {}),
@@ -1272,6 +1281,7 @@ function cardResolverPlayEffectPart(effect: ResolvedGameEffect): EffectSummary |
   const amount = numberValue(effect.amount) ?? 0;
   if (effect.kind === "draw_cards") return { category: "card", suffix: `${cardCountText(amount)} gezogen`, chips: [amount === 1 ? "Karte ziehen" : `${amount} Karten`] };
   if (effect.kind === "gain_credits") return { category: "economy", suffix: `${creditText(amount)} erhalten`, chips: [`+${amount} ${creditLabel(amount)}`] };
+  if (effect.kind === "lose_credits") return { category: "danger", suffix: `${sideLabel(effect.side)} verliert ${creditText(amount)}`, chips: [`${sideLabel(effect.side)} -${amount} ${creditLabel(amount)}`] };
   return undefined;
 }
 
@@ -1294,12 +1304,13 @@ function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedG
     !activatedCardAbility
   )
     return false;
-  if (!["draw_cards", "gain_credits"].includes(effect.kind) || effect.visibility !== "public") return false;
+  if (!["draw_cards", "gain_credits", "lose_credits"].includes(effect.kind) || effect.visibility !== "public") return false;
   if (effect.reason !== "card_resolver") return false;
   const actor = sideValue(payload.actor);
-  if (actor && effect.side && actor !== effect.side) return false;
+  if (effect.kind !== "lose_credits" && actor && effect.side && actor !== effect.side) return false;
   const amount = numberValue(effect.amount);
-  if (!amount || amount <= 0) return false;
+  if (amount === undefined || amount < 0) return false;
+  if (effect.kind !== "lose_credits" && amount <= 0) return false;
   const playedDefinitionId = stringValue(payload.cardDefinitionId);
   const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
   if (playedDefinitionId && sourceDefinitionId && playedDefinitionId !== sourceDefinitionId) return false;
