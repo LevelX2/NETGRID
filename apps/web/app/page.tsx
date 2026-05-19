@@ -172,7 +172,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { resultExitButtonUi, resultWinnerMotifFor, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -5909,7 +5909,7 @@ function GameOverModal({
         ) : null}
         <div className="gameOverFooter">
           <div>
-            <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : `${opponentName ?? "Gegenseite"} gewinnt`}</span>
+            <span>{resultFooterOutcomeLabel(result.winner, side, opponentName)}</span>
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">
@@ -5936,16 +5936,22 @@ function GameOverModal({
 }
 
 function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
-  const label = motif === "runner" ? "Runner-Sieg" : motif === "corp" ? "Korp-Sieg" : "Unentschieden";
+  const motifUi = resultWinnerMotifUi(motif);
   return (
-    <div className={`resultWinnerMotif ${motif}`} aria-label={label} role="img">
+    <div className={`resultWinnerMotif ${motif} ${motifUi.imageSrc ? "bitmap" : "neutral"}`} aria-label={motifUi.ariaLabel} role="img">
       <div className="resultMotifFrame">
-        <span className="resultMotifCore" />
-        <span className="resultMotifTrack one" />
-        <span className="resultMotifTrack two" />
-        <span className="resultMotifTrack three" />
+        {motifUi.imageSrc ? (
+          <img src={motifUi.imageSrc} alt="" aria-hidden="true" />
+        ) : (
+          <>
+            <span className="resultMotifCore" />
+            <span className="resultMotifTrack one" />
+            <span className="resultMotifTrack two" />
+            <span className="resultMotifTrack three" />
+          </>
+        )}
       </div>
-      <span>{label}</span>
+      <span>{motifUi.caption}</span>
     </div>
   );
 }
@@ -6087,8 +6093,8 @@ function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
 
 function seriesStatusText(series: SeriesResultSummary): string {
   if (series.status === "finished") {
-    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Du hast die Matchserie nach Matchpunkten gewonnen." : "Du hast die Matchserie gewonnen.";
-    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Du hast die Matchserie nach Matchpunkten verloren." : "Du hast die Matchserie verloren.";
+    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Du vorne." : "Matchserie abgeschlossen: Du vorne.";
+    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Gegenseite vorne." : "Matchserie abgeschlossen: Gegenseite vorne.";
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
