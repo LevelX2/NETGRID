@@ -671,12 +671,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
       cardId: "shell_traders_1",
       shellTradersAbility: "set_aside_from_grip",
       targetCardId: "simple_fracter_1",
+      targetCardDefinitionId: "simple_fracter",
       shellCounterAmount: 2
     });
     const remove = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: 1 Shell-Counter entfernen", {
       cardId: "shell_traders_1",
       shellTradersAbility: "remove_shell_counter",
       targetCardId: "simple_fracter_1",
+      targetCardDefinitionId: "simple_fracter",
       counterType: "shell",
       removeCounterAmount: 1
     });
@@ -686,10 +688,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.primaryActions).toEqual([]);
     expect(split.contextualActions).toEqual([prepare, remove]);
     expect(actionMatchesContext(prepare, { kind: "card", id: "shell_traders_1", label: "The Shell Traders" })).toBe(true);
-    expect(actionButtonLabel(prepare)).toBe("Karte vorbereiten");
-    expect(actionButtonLabel(remove)).toBe("Shell-Counter entfernen");
-    expect(contextualCardActionLabel(prepare)).toBe("Karte vorbereiten");
-    expect(contextualCardActionLabel(remove)).toBe("Shell-Counter entfernen");
+    expect(actionButtonLabel(prepare)).toBe("Simple Fracter zur Seite legen");
+    expect(actionButtonLabel(remove)).toBe("Shell-Counter von Simple Fracter entfernen");
+    expect(contextualCardActionLabel(prepare)).toBe("Simple Fracter zur Seite legen");
+    expect(contextualCardActionLabel(remove)).toBe("Shell-Counter von Simple Fracter entfernen");
+  });
+
+  it("keeps parallel Shell Traders prepare actions distinguishable by target", () => {
+    const fracter = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Simple Fracter vorbereiten", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardId: "simple_fracter_1",
+      targetCardDefinitionId: "simple_fracter"
+    });
+    const decoder = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Simple Decoder vorbereiten", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardId: "simple_decoder_1",
+      targetCardDefinitionId: "simple_decoder"
+    });
+
+    expect([actionButtonLabel(fracter), actionButtonLabel(decoder)]).toEqual([
+      "Simple Fracter zur Seite legen",
+      "Simple Decoder zur Seite legen"
+    ]);
   });
 
   it("labels Short-Term Contract take-credit actions on the installed resource overlay", () => {

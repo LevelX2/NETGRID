@@ -259,6 +259,36 @@ describe("formatChronicleEvent", () => {
     expect(remove.chips).toContain("Installiert");
   });
 
+  it("prefers Shell Traders target card names over the source title for counter removal", () => {
+    const paid = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "The Shell Traders: Shell-Counter entfernen",
+        title: "The Shell Traders",
+        shellTradersAbility: "remove_shell_counter",
+        targetCardDefinitionId: "simple_fracter",
+        remainingCounters: 1
+      }),
+      "runner"
+    );
+    const startTurn = formatChronicleEvent(
+      makeEvent("end_turn", {
+        actor: "runner",
+        label: "The Shell Traders: 1 Shell-Counter entfernen",
+        title: "The Shell Traders",
+        shellTradersAbility: "start_turn_remove_shell_counter",
+        targetCardDefinitionId: "simple_decoder",
+        remainingCounters: 0,
+        installedFromSpecialZone: true
+      }),
+      "runner"
+    );
+
+    expect(paid.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
+    expect(startTurn.title).toBe("Du hast 1 Shell-Counter von Simple Decoder entfernt; Karte kostenlos installiert.");
+    expect(JSON.stringify([paid, startTurn])).not.toContain("von The Shell Traders entfernt");
+  });
+
   it("names generic card abilities from their public action label", () => {
     const item = formatChronicleEvent(
       makeEvent("trigger_ability", {

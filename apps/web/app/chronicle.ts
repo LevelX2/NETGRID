@@ -1,4 +1,4 @@
-import type { PublicGameEvent, ResolvedGameEffect, Side } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type PublicGameEvent, type ResolvedGameEffect, type Side } from "@netgrid/shared";
 import {
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
@@ -103,6 +103,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
   const shellTradersAbility = stringValue(payload.shellTradersAbility);
+  const shellTradersTargetTitle =
+    shellTradersAbility === "set_aside_from_grip" ||
+    shellTradersAbility === "remove_shell_counter" ||
+    shellTradersAbility === "start_turn_remove_shell_counter" ||
+    shellTradersAbility === "auto_install_after_memory_choice"
+      ? targetCardTitleFromPayload(payload) ?? cardTitle
+      : undefined;
   const v1922RunnerProgramAbility = stringValue(payload.v1922RunnerProgramAbility);
 
   const baseChipList = baseChips(actor, isAi);
@@ -787,7 +794,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const installed = payload.installedFromSpecialZone === true;
         category = "card";
         importance = "important";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
+        title = phrase(subject, `${shellTradersTargetTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
         chips.push("The Shell Traders", "Set Aside", `${counters} Shell`);
         break;
       }
@@ -799,7 +806,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = installed || pendingMemory ? "important" : "normal";
         title = phrase(
           subject,
-          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+          `1 Shell-Counter von ${shellTradersTargetTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
         );
         chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
         break;
@@ -807,7 +814,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       if (shellTradersAbility === "auto_install_after_memory_choice") {
         category = "card";
         importance = "important";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
+        title = phrase(subject, `${shellTradersTargetTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
         chips.push("The Shell Traders", "Installiert", "0 Kosten");
         break;
       }
@@ -856,7 +863,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = installed || pendingMemory ? "important" : "normal";
         title = phrase(
           subject,
-          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+          `1 Shell-Counter von ${shellTradersTargetTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
         );
         chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
         break;
@@ -1488,6 +1495,11 @@ function extractCardTitleFromLabel(actionType: string, label: string | undefined
 function sourceTitleFromActionLabel(label: string | undefined): string | undefined {
   const title = label?.match(/^(.+?):\s+.+$/)?.[1]?.trim();
   return title && !isGenericCardLabel(title) ? title : undefined;
+}
+
+function targetCardTitleFromPayload(payload: Record<string, unknown>): string | undefined {
+  const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+  return targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
 }
 
 function abilityTextFromLabel(label: string | undefined, cardTitle: string | undefined): string {
