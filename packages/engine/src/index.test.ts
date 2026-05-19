@@ -2759,8 +2759,10 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     );
     const politicalActions = getLegalActions(political, "corp").filter(
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_political_overthrow",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        sourceDefinition(political, action) ===
+          "onr_v1_210_political-overthrow",
     );
     expect(politicalActions.map((action) => action.payload?.cardId).sort()).toEqual(
       [firstPolitical, secondPolitical].sort(),
@@ -7409,6 +7411,64 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("describes P3.4 activated economy and draw abilities", () => {
+    for (const [definitionId, actionCost, amount] of [
+      ["onr_v1_206_marine-arcology", 2, 3],
+      ["onr_v1_210_political-overthrow", 1, 3],
+      ["onr_v1_343_south-african-mining-corp", 3, 6],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+        expect.objectContaining({
+          kind: "activated",
+          timing: "corp_main",
+          costs: [{ kind: "action", amount: actionCost }],
+          effects: [
+            expect.objectContaining({
+              kind: "gain_credits",
+              recipient: "controller",
+              amount,
+              visibility: "public",
+            }),
+          ],
+        }),
+      );
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_179_silicon-saloon-franchise",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "activated",
+        timing: "runner_main",
+        costs: [{ kind: "action", amount: 1 }],
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+          expect.objectContaining({
+            kind: "draw_cards",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_179_silicon-saloon-franchise",
+      )?.status,
+    ).toBe("implemented");
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -9976,8 +10036,7 @@ describe("V1.7.2 Mechanikpaket F", () => {
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.resourceAbility === "silicon_saloon_franchise" &&
+        action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === siliconId,
     );
     expect(state.runner.credits).toBe(creditsBeforeSilicon + 1);
@@ -16038,7 +16097,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
   });
 
-  it("resolves South African Mining Corp as 3-action rezzed self-trash economy", () => {
+  it("resolves South African Mining Corp as a 3-action CardImplementation economy ability", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "spotcheck-south-african-mining",
@@ -16058,8 +16117,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.payload?.v1920AssetAbility ===
-          "south_african_mining_corp_gain_6_trash",
+          action.type === "activated_card_ability" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_343_south-african-mining-corp",
       ),
     ).toBe(false);
     state.cardInstances[assetId] = {
@@ -16071,8 +16131,9 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       state,
       "corp",
       (action) =>
-        action.payload?.v1920AssetAbility ===
-        "south_african_mining_corp_gain_6_trash",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_343_south-african-mining-corp",
     );
     expect(legal.costs).toEqual([{ clicks: 3 }]);
     const unrezzed = structuredClone(state);
@@ -16108,12 +16169,23 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
     expect(state.corp.credits).toBe(11);
     expect(state.corp.clicks).toBe(0);
-    expect(state.corp.archives).toContain(assetId);
+    expect(state.corp.archives).not.toContain(assetId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1920AssetAbility: "south_african_mining_corp_gain_6_trash",
+      actionType: "activated_card_ability",
+      cardDefinitionId: "onr_v1_343_south-african-mining-corp",
+      cardImplementationAbility: "activated",
       gainedCredits: 6,
-      selfTrashed: true,
       corpCreditsAfter: 11,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 6,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_343_south-african-mining-corp",
+          sourceTitle: "South African Mining Corp",
+        }),
+      ],
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -26400,6 +26472,14 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
       );
     }
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_210_political-overthrow",
+      ),
+    ).toBe(false);
     state = apply(
       state,
       "corp",
@@ -26412,9 +26492,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_political_overthrow",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
     );
+    expect(legal.costs).toEqual([{ clicks: 1 }]);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -26443,17 +26524,27 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_political_overthrow",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_210_political-overthrow",
     );
 
     expect(state.corp.credits).toBe(creditsBeforeAbility + 3);
     expect(state.corp.clicks).toBe(clicksBeforeAbility - 1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_210_political-overthrow",
-      agendaAbility: "v1922_political_overthrow",
+      cardImplementationAbility: "activated",
       gainedCredits: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_210_political-overthrow",
+          sourceTitle: "Political Overthrow",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -26503,6 +26594,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
       );
     }
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
+      ),
+    ).toBe(false);
     state = apply(
       state,
       "corp",
@@ -26515,9 +26613,10 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_marine_arcology",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
     );
+    expect(legal.costs).toEqual([{ clicks: 2 }]);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -26538,6 +26637,18 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
+    const lowClicks = structuredClone(state);
+    lowClicks.corp.clicks = 1;
+    const lowClickResult = applyAction(lowClicks, {
+      matchId: lowClicks.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: lowClicks.stateVersion,
+      idempotencyKey: "v1922-marine-arcology-low-clicks",
+    });
+    expect(lowClickResult.ok).toBe(false);
+    expect(lowClicks.corp.credits).toBe(state.corp.credits);
+
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     const creditsBeforeAbility = state.corp.credits;
@@ -26546,17 +26657,27 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_marine_arcology",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_206_marine-arcology",
     );
 
     expect(state.corp.credits).toBe(creditsBeforeAbility + 3);
     expect(state.corp.clicks).toBe(clicksBeforeAbility - 2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_206_marine-arcology",
-      agendaAbility: "v1922_marine_arcology",
+      cardImplementationAbility: "activated",
       gainedCredits: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_206_marine-arcology",
+          sourceTitle: "Marine Arcology",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -36338,8 +36459,9 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       silicon,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.resourceAbility === "silicon_saloon_franchise",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(silicon, action) ===
+          "onr_v1_179_silicon-saloon-franchise",
     );
     const removedSilicon = structuredClone(silicon);
     removeEverywhere(removedSilicon, siliconId);
@@ -36359,10 +36481,31 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     expect(silicon.runner.credits).toBe(siliconCreditsBefore + 1);
     expect(silicon.runner.grip.length).toBe(siliconGripBefore + 1);
     expect(silicon.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_179_silicon-saloon-franchise",
-      resourceAbility: "silicon_saloon_franchise",
+      cardImplementationAbility: "activated",
       gainedCredits: 1,
       drawnCount: 1,
+      runnerCreditsAfter: silicon.runner.credits,
+      runnerGripAfter: silicon.runner.grip.length,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "runner",
+          amount: 1,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceTitle: "Silicon Saloon Franchise",
+        }),
+        expect.objectContaining({
+          kind: "draw_cards",
+          side: "runner",
+          amount: 1,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceTitle: "Silicon Saloon Franchise",
+        }),
+      ],
     });
     expect(JSON.stringify(silicon.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -36510,8 +36653,8 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       marine,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1922_marine_arcology",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(marine, action) === "onr_v1_206_marine-arcology",
     );
     const marineRemoved = structuredClone(marine);
     removeEverywhere(marineRemoved, marineId);
@@ -36529,9 +36672,20 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     marine = apply(marine, "corp", (action) => action.actionId === marineAction.actionId);
     expect(marine.corp.credits).toBe(marineCreditsBefore + 3);
     expect(marine.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_206_marine-arcology",
-      agendaAbility: "v1922_marine_arcology",
+      cardImplementationAbility: "activated",
       gainedCredits: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 3,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_206_marine-arcology",
+          sourceTitle: "Marine Arcology",
+        }),
+      ],
     });
     expect(JSON.stringify(marine.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,

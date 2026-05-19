@@ -167,13 +167,11 @@ import {
   FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
   FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
   JAPANESE_WATER_TORTURE_BREAKER_ID,
-  MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID,
   MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
   MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
   NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
   OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
   PANDORAS_DECK_LINK_HARDWARE_ID,
-  POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID,
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
   SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
@@ -3611,42 +3609,6 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (definition.id === POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 3 Credits`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1922_political_overthrow",
-            gainCreditsAmount: 3,
-          },
-        ),
-      );
-      continue;
-    }
-    if (definition.id === MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 3 Credits`,
-          agendaId,
-          [{ clicks: 2 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1922_marine_arcology",
-            gainCreditsAmount: 3,
-          },
-        ),
-      );
-      continue;
-    }
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
   actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
@@ -4639,23 +4601,6 @@ function runnerMainActions(state: GameState): LegalAction[] {
             ),
           );
         }
-      }
-      if (definition.id === "onr_v1_179_silicon-saloon-franchise") {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "gain_credit",
-            `${definition.title}: 1 Credit und 1 Karte ziehen`,
-            resourceId,
-            [{ clicks: 1 }],
-            {
-              cardId: resourceId,
-              resourceAbility: "silicon_saloon_franchise",
-              drawCardAfter: true,
-            },
-          ),
-        );
       }
     }
   }
@@ -7643,61 +7588,7 @@ function performAction(
         };
         return;
       }
-      if (legalAction.payload?.resourceAbility === "silicon_saloon_franchise") {
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.runner.rig.resources.includes(sourceCardId))
-          throw new Error("Silicon Saloon Franchise ist nicht installiert.");
-        if (definitionFor(state, sourceCardId).id !== "onr_v1_179_silicon-saloon-franchise")
-          throw new Error("Die Silicon-Saloon-Faehigkeit passt nicht zur Karte.");
-      }
       if (resolveScoredAgendaCounterCreditAction(state, legalAction)) {
-        return;
-      }
-      if (legalAction.payload?.agendaAbility === "v1922_political_overthrow") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Political Overthrow nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Political Overthrow ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== POLITICAL_OVERTHROW_AP_COUNTER_AGENDA_ID)
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zu Political Overthrow.",
-          );
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 3)
-          throw new Error(
-            "Political Overthrow gewaehrt in diesem Scope genau 3 Credits.",
-          );
-        credits(state, "corp", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: gainAmount,
-          corpCreditsAfter: state.corp.credits,
-        };
-        return;
-      }
-      if (legalAction.payload?.agendaAbility === "v1922_marine_arcology") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Marine Arcology nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Marine Arcology ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== MARINE_ARCOLOGY_REPLACE_COUNTERS_AGENDA_ID)
-          throw new Error("Die Agenda-Aktion passt nicht zu Marine Arcology.");
-        const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 3)
-          throw new Error(
-            "Marine Arcology gewaehrt in diesem Scope genau 3 Credits.",
-          );
-        spendClick(state, "corp");
-        credits(state, "corp", gainAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: gainAmount,
-          corpCreditsAfter: state.corp.credits,
-        };
         return;
       }
       if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
@@ -7833,13 +7724,6 @@ function performAction(
           legalAction,
           drawRunnerCard(state),
         );
-      }
-      if (legalAction.payload?.resourceAbility === "silicon_saloon_franchise") {
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          gainedCredits: 1,
-          runnerCreditsAfter: state.runner.credits,
-        };
       }
       return;
     case "draw_card":
@@ -22427,11 +22311,7 @@ function publicContextForAction(
     context.onScoreLostAllCredits = true;
   if (typeof legalAction.payload?.corpCreditsAfter === "number")
     context.corpCreditsAfter = legalAction.payload.corpCreditsAfter;
-  if (
-    legalAction.payload?.agendaAbility === "v1922_political_overthrow" ||
-    legalAction.payload?.agendaAbility === "v1922_marine_arcology" ||
-    legalAction.payload?.agendaAbility === "v1922_corporate_retreat"
-  ) {
+  if (legalAction.payload?.agendaAbility === "v1922_corporate_retreat") {
     context.agendaAbility = legalAction.payload.agendaAbility;
     if (typeof legalAction.payload.gainedCredits === "number")
       context.gainedCredits = legalAction.payload.gainedCredits;
@@ -23095,8 +22975,6 @@ function revealForPublicEvent(
     legalAction.type === "activated_card_ability" ||
     (legalAction.type === "gain_credit" &&
       hasLegacyAbilityPayload(legalAction.payload, "agendaAbility", [
-        "v1922_political_overthrow",
-        "v1922_marine_arcology",
         "v1922_corporate_retreat",
       ])) ||
     (legalAction.side === "runner" &&

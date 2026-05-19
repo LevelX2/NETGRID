@@ -47,8 +47,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_179_silicon-saloon-franchise":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/silicon-saloon-franchise.ts",
+  "onr_v1_206_marine-arcology":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
   "onr_v1_208_on-call-solo-team":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
+  "onr_v1_210_political-overthrow":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
   "onr_v1_217_strike-force-kali":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
   "onr_v1_281_accounts-receivable":
@@ -85,6 +91,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/skalderviken-sa-beta-test-site.ts",
   "onr_v1_342_solo-squad":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/solo-squad.ts",
+  "onr_v1_343_south-african-mining-corp":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/south-african-mining-corp.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
 };

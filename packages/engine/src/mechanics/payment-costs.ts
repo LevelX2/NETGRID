@@ -26,8 +26,6 @@ export type EconomyActionProfile = {
 };
 
 const SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID = "onr_v1_344_spinn-public-relations";
-const SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID = "onr_v1_343_south-african-mining-corp";
-
 export const CORP_INSTALLED_ECONOMY_ACTION_PROFILES: EconomyActionProfile[] = [
   ...[...CORP_ECONOMY_ASSET_CARD_IDS]
     .filter((sourceDefinitionId) => sourceDefinitionId !== SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID)
@@ -41,17 +39,6 @@ export const CORP_INSTALLED_ECONOMY_ACTION_PROFILES: EconomyActionProfile[] = [
       creditCost: 0,
       creditGain: 2,
     })),
-  {
-    profileId: "v1920.south_african_mining_corp_gain_6_trash",
-    sourceDefinitionId: SOUTH_AFRICAN_MINING_CORP_ACTION_ASSET_ID,
-    side: "corp",
-    abilityPayloadKey: "v1920AssetAbility",
-    abilityPayloadValue: "south_african_mining_corp_gain_6_trash",
-    clickCost: 3,
-    creditCost: 0,
-    creditGain: 6,
-    trashSource: true,
-  },
 ];
 
 export function corpInstalledEconomyActionProfileForDefinition(

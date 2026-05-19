@@ -1413,6 +1413,91 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("merges activated economy ability effects with card context", () => {
+    for (const [title, cardDefinitionId, amount] of [
+      ["Marine Arcology", "onr_v1_206_marine-arcology", 3],
+      ["Political Overthrow", "onr_v1_210_political-overthrow", 3],
+      ["South African Mining Corp", "onr_v1_343_south-african-mining-corp", 6],
+    ] as const) {
+      const event = makeEvent("activated_card_ability", {
+        actor: "corp",
+        title,
+        cardDefinitionId,
+        cardImplementationAbility: "activated",
+        gainedCredits: amount,
+        corpCreditsAfter: 10 + amount,
+        resolvedEffects: [
+          {
+            effectId: `${cardDefinitionId}.effect.0.gain_credits`,
+            kind: "gain_credits",
+            visibility: "public",
+            side: "corp",
+            amount,
+            sourceDefinitionId: cardDefinitionId,
+            sourceTitle: title,
+            reason: "card_resolver"
+          }
+        ]
+      });
+
+      const item = formatChronicleEvent(event, "runner", { cardTitle: title });
+      const effects = formatChronicleEffectItems(event, "runner");
+
+      expect(item.title).toBe(`Die Korp hat ${title} genutzt und ${amount} Credits erhalten.`);
+      expect(item.title).not.toContain("gespielt");
+      expect(item.chips).toEqual(expect.arrayContaining(["Ability", `+${amount} Credits`]));
+      expect(effects).toEqual([]);
+    }
+  });
+
+  it("merges Silicon Saloon Franchise ordered gain and draw effects without revealing drawn cards", () => {
+    const event = makeEvent("activated_card_ability", {
+      actor: "runner",
+      title: "Silicon Saloon Franchise",
+      cardDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+      cardImplementationAbility: "activated",
+      gainedCredits: 1,
+      runnerCreditsAfter: 6,
+      drawnCount: 1,
+      runnerGripAfter: 5,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_179_silicon-saloon-franchise.effect.0.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceTitle: "Silicon Saloon Franchise",
+          reason: "card_resolver"
+        },
+        {
+          effectId: "onr_v1_179_silicon-saloon-franchise.effect.1.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_179_silicon-saloon-franchise",
+          sourceTitle: "Silicon Saloon Franchise",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "corp", {
+      cardTitle: "Silicon Saloon Franchise"
+    });
+    const effects = formatChronicleEffectItems(event, "corp");
+    const serialized = JSON.stringify(item);
+
+    expect(item.title).toBe("Der Runner hat Silicon Saloon Franchise genutzt und 1 Credit erhalten und eine Karte gezogen.");
+    expect(item.title).not.toContain("gespielt");
+    expect(item.title.indexOf("1 Credit erhalten")).toBeLessThan(item.title.indexOf("eine Karte gezogen"));
+    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+1 Credit", "Karte ziehen"]));
+    expect(serialized).not.toMatch(/grip|stack|cardInstances|privatePayload|drawnCardDefinitionId/);
+    expect(effects).toEqual([]);
+  });
+
   it("shows Loan from Chiba install credit gains as a public economy effect", () => {
     const items = formatChronicleEffectItems(
       makeEvent("install_card", {
