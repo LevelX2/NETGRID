@@ -10,7 +10,7 @@ import profilesData08 from "../../../data/decks/deck-format-profiles-0.8.json";
 import { beliefStateInvariantSignature, buildAiDecisionInputDto, reconstructBeliefState } from "@netgrid/ai";
 import { createRuntimeCardsById } from "@netgrid/catalog";
 import { createDeckSnapshot, type DeckFormatProfile, type DeckSnapshot, type EditableDeck } from "@netgrid/decks";
-import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, DEMO_CARDS_BY_ID, getLegalActions, hashState } from "@netgrid/engine";
+import { applyAction, applyEffectCommands, checkWinConditions, createGameAfterSetup, DEMO_CARDS_BY_ID, DEMO_DECKS, getLegalActions, hashState } from "@netgrid/engine";
 import type { ConnectionAuditEvent } from "./connection-audit";
 import { createConfiguredStorage, createNetgridHttpServer, isMaintenanceClientAddressAllowed, startNetgridServer } from "./http-server";
 import { assertInviteLobbyPayloadRedacted, findInviteLobbyPayloadRedactionLeaks } from "./invite-lobby-redaction.test-helper";
@@ -2601,6 +2601,67 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(blocked.error)).not.toContain("Simple Agenda");
   });
 
+  it("handles Off-Site Backups Archives-to-HQ choices through submit and reconnect without hidden leaks", async () => {
+    const match = await joinedOffSiteBackupsMatch("mp-off-site-backups");
+    const before = await bootstrap(match.service, match.matchId, match.corp);
+    const operation = mustAction(before, (action) => action.type === "play_operation" && action.label.includes("Off-Site Backups"));
+
+    const started = await match.service.submitAction({
+      matchId: match.matchId,
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken,
+      actionId: operation.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "off-site-backups-start"
+    });
+
+    expect(started.ok).toBe(true);
+    if (!started.ok) throw new Error(started.error.message);
+    expect(started.publicEvent?.visibilityClass).toBe("hidden_info_barrier");
+    expect(started.actorPayload.pendingChoice?.source).toContain("v1922.corp_archives_to_hq");
+    expect(started.actorPayload.pendingChoice?.options.map((option) => option.label).sort()).toEqual(["Simple Agenda", "Simple Economy Operation"]);
+    expect(started.actorPayload.legalActions.some((action) => action.type === "resolve_choice")).toBe(true);
+    expect(started.opponentPayload.pendingChoice).toBeUndefined();
+    expect(JSON.stringify(started.opponentPayload)).not.toContain("Simple Agenda");
+    expect(JSON.stringify(started.publicEvent?.publicPayload)).not.toMatch(/Simple Agenda|cardInstances|privatePayload/);
+
+    const reconnected = await match.service.reconnectMatch(match.matchId, {
+      side: "corp",
+      reconnectToken: match.corp.reconnectToken
+    });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.pendingChoice?.options.some((option) => option.label === "Simple Agenda")).toBe(true);
+
+    const choiceAction = reconnected.legalActions.find((action) => action.type === "resolve_choice");
+    const agendaOption = reconnected.pendingChoice?.options.find((option) => option.label === "Simple Agenda");
+    expect(choiceAction).toBeDefined();
+    expect(agendaOption).toBeDefined();
+    if (!choiceAction || !agendaOption) throw new Error("Missing Off-Site Backups Archives option");
+    const resolved = await match.service.submitAction({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: reconnected.sessionToken,
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: reconnected.playerView.stateVersion,
+      selectedChoices: { choiceId: reconnected.pendingChoice?.choiceId, selectedOptionIds: [agendaOption.id] },
+      idempotencyKey: "off-site-backups-resolve"
+    });
+
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) throw new Error(resolved.error.message);
+    expect(resolved.actorPayload.pendingChoice).toBeUndefined();
+    expect(resolved.actorPayload.playerView.own.gripOrHq.some((card) => card.definitionId === "simple_agenda")).toBe(true);
+    expect(resolved.actorPayload.playerView.own.heapOrArchives).toHaveLength(2);
+    expect(resolved.opponentPayload.playerView.opponent.handCount).toBe(resolved.actorPayload.playerView.own.gripOrHq.length);
+    expect(JSON.stringify(resolved.opponentPayload)).not.toContain("Simple Agenda");
+    expect(resolved.publicEvent?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "v1922_corp_archives_to_hq"
+    });
+    expect(JSON.stringify(resolved.publicEvent?.publicPayload)).not.toMatch(/Simple Agenda|cardInstances|privatePayload/);
+  });
+
   it("handles V0.98 Hidden-Zone Search through submit, idempotency, reconnect and undo barrier", async () => {
     const match = await joinedV098HiddenSearchMatch("mp-v098-hidden-search");
     const before = await bootstrap(match.service, match.matchId, match.runner);
@@ -5188,6 +5249,65 @@ async function joinedV112ArchivesMatch(seed: string) {
   record.match.settings.agendaPointsToWin = 7;
   record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
   record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_v112_archives_ready")];
+  record.actionReceipts = [];
+  record.undoSnapshots = [];
+  delete record.pendingUndo;
+  await storage.save(record);
+
+  return {
+    service,
+    matchId: created.matchId,
+    corp: { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+    runner: { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken }
+  };
+}
+
+async function joinedOffSiteBackupsMatch(seed: string) {
+  const storage = new InMemoryMatchStorage();
+  const service = new MultiplayerService(storage, {
+    tokenSalt: `test-salt-${seed}`,
+    publicWebBaseUrl: "http://127.0.0.1:3100",
+    publicServerBaseUrl: "http://127.0.0.1:8787"
+  });
+  const created = await service.createMatch({ hostSide: "corp", seed });
+  if (!created.joinUrl) throw new Error("Missing join URL");
+  const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+  if (!joinToken) throw new Error("Missing join token");
+  const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+  expect("error" in joined).toBe(false);
+  if ("error" in joined) throw new Error(joined.error.message);
+
+  const record = await storage.load(created.matchId);
+  if (!record) throw new Error("Missing stored match");
+  const corpDeck: DeckDefinition = {
+    ...DEMO_DECKS.demo_corp_097,
+    id: "server_off_site_backups_fixture",
+    name: "Server Off-Site Backups Fixture",
+    cards: [
+      { id: "onr_v1_296_off-site-backups", quantity: 1 },
+      ...DEMO_DECKS.demo_corp_097.cards
+    ]
+  };
+  let gameState = createGameAfterSetup({
+    matchId: created.matchId,
+    seed,
+    runnerDeckId: "demo_runner_097",
+    corpDeck,
+    agendaPointsToWin: 7
+  });
+  gameState = applyEngineAction(gameState, "corp", (action) => action.type === "mandatory_draw");
+  gameState.corp.credits = 10;
+  gameState.corp.clicks = 10;
+  gameState.corp.maxHandSize = 100;
+  moveCorpCardToHqForTest(gameState, "onr_v1_296_off-site-backups");
+  const faceupOperation = moveCorpCardToArchivesForTest(gameState, "simple_economy_operation", true);
+  const facedownAgenda = moveCorpCardToArchivesForTest(gameState, "simple_agenda", false);
+  keepOnlyCorpArchivesCardsForTest(gameState, [faceupOperation, facedownAgenda]);
+  record.gameState = gameState;
+  record.match.baseline = gameState.baseline;
+  record.match.settings.agendaPointsToWin = 7;
+  record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+  record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_off_site_backups_ready")];
   record.actionReceipts = [];
   record.undoSnapshots = [];
   delete record.pendingUndo;
