@@ -337,6 +337,12 @@ describe("MVP 0.1 engine foundation", () => {
     expect(state.phase).toBe("setup");
     expect(state.timingPoint).toBe("setup.mulligan.corp");
     expect(state.setup?.resolved.runner).toBe("keep");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      setupStep: "mulligan",
+      setupSide: "runner",
+      setupDecision: "keep",
+    });
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(
       getPlayerView(state, "corp").pendingChoice?.options.map(
@@ -351,6 +357,12 @@ describe("MVP 0.1 engine foundation", () => {
     expect(state.setup).toMatchObject({
       status: "complete",
       resolved: { runner: "keep", corp: "keep" },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      setupStep: "mulligan",
+      setupSide: "corp",
+      setupDecision: "keep",
     });
     expect(
       getLegalActions(state, "corp").some(
@@ -368,6 +380,12 @@ describe("MVP 0.1 engine foundation", () => {
     expect(state.runner.grip).not.toEqual(initialGrip);
     expect(state.setup?.resolved.runner).toBe("mulligan");
     expect(state.setup?.mulligansTaken.runner).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      setupStep: "mulligan",
+      setupSide: "runner",
+      setupDecision: "mulligan",
+    });
     expect(
       state.randomDrawRecords.some(
         (record) => record.purpose === "setup.shuffle.runner.mulligan",

@@ -190,10 +190,15 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       if (payload.setupStep === "mulligan") {
+        const setupSide = sideValue(payload.setupSide);
+        const setupDecision = stringValue(payload.setupDecision);
+        const setupDecisionKnown = setupDecision === "keep" || setupDecision === "mulligan";
         category = "system";
         visibility = "system";
-        title = `${sideLabel(sideValue(payload.setupSide))} hat die Setup-Entscheidung abgeschlossen`;
-        chips.push("Setup", "Starthand");
+        title = setupDecisionKnown
+          ? `${sideLabel(setupSide)} hat ${setupDecision === "keep" ? "die Starthand behalten" : "einen Mulligan genommen"}`
+          : `${sideLabel(setupSide)} hat die Mulligan-Entscheidung abgeschlossen`;
+        chips.push("Setup", "Starthand", setupDecision === "keep" ? "Behalten" : setupDecision === "mulligan" ? "Mulligan" : "Entscheidung");
         break;
       }
       if (payload.traceStep === "corp_bid") {

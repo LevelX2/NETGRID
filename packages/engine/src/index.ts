@@ -17533,6 +17533,7 @@ function resolveSetupMulliganChoice(
     ...(legalAction.payload ?? {}),
     setupStep: "mulligan",
     setupSide: side,
+    setupDecision: selected,
     setupDecisionPublic: "resolved",
     hiddenZoneBarrier: true,
     hiddenZoneAction: "setup_mulligan",
@@ -22042,6 +22043,7 @@ function publicContextForAction(
     if (legalAction.payload?.setupStep === "mulligan") {
       context.setupStep = "mulligan";
       context.setupSide = legalAction.payload.setupSide;
+      context.setupDecision = legalAction.payload.setupDecision;
       context.setupStatus = state.setup?.status ?? "complete";
     }
     if (legalAction.payload?.choiceVisibility === "public")

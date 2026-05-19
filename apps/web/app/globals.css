@@ -6548,6 +6548,30 @@ select {
   border-radius: 8px;
   background: rgb(18 25 30 / 0.94);
   box-shadow: 0 24px 80px rgb(0 0 0 / 0.42);
+  overflow: hidden;
+}
+
+.gameOverPanel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.gameOverPanel.withMotifBackground::before {
+  background:
+    linear-gradient(90deg, rgb(18 25 30 / 0.92) 0%, rgb(18 25 30 / 0.8) 44%, rgb(18 25 30 / 0.52) 100%),
+    linear-gradient(180deg, rgb(18 25 30 / 0.22), rgb(18 25 30 / 0.88)),
+    var(--result-panel-bg);
+  background-position: center;
+  background-size: cover;
+  opacity: 0.68;
+}
+
+.gameOverPanel > * {
+  position: relative;
+  z-index: 1;
 }
 
 .gameOverHero {
@@ -6555,6 +6579,12 @@ select {
   grid-template-columns: minmax(0, 1fr) minmax(150px, 210px);
   align-items: center;
   gap: 18px;
+}
+
+.gameOverHero.backgroundOnly {
+  grid-template-columns: minmax(0, 1fr);
+  min-height: 150px;
+  align-items: end;
 }
 
 .gameOverHeroCopy {
