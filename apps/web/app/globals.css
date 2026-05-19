@@ -8222,6 +8222,8 @@ select,
 .runActionButton .actionButtonLabel {
   min-width: 0;
   white-space: normal;
+  overflow-wrap: normal;
+  word-break: normal;
   line-height: 1.25;
 }
 

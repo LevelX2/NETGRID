@@ -7214,21 +7214,30 @@ function RunTimelineOverlay({
         </div>
         {runActions.length > 0 ? (
           <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
-            {runActions.map((action) => (
-              <button
-                className="button primary actionButton runActionButton"
-                key={action.actionId}
-                onClick={() => onAction(action)}
-                disabled={actionDisabled}
-                type="button"
-                data-testid="run-action-button"
-                data-action-type={action.type}
-              >
-                <ActionLeadIcon action={action} size={14} />
-                <span className="actionButtonLabel">{runWindowActionButtonLabel(view, action)}</span>
-                <CostChips action={action} />
-              </button>
-            ))}
+            {runActions.map((action) => {
+              const compactLabel = runWindowActionButtonLabel(view, action);
+              const fullLabel =
+                compactLabel.startsWith("SMC:") && action.label
+                  ? normalizeVisibleTerms(action.label)
+                  : runAwareActionButtonLabel(view, action);
+              return (
+                <button
+                  className="button primary actionButton runActionButton"
+                  key={action.actionId}
+                  onClick={() => onAction(action)}
+                  disabled={actionDisabled}
+                  type="button"
+                  title={fullLabel}
+                  aria-label={fullLabel}
+                  data-testid="run-action-button"
+                  data-action-type={action.type}
+                >
+                  <ActionLeadIcon action={action} size={14} />
+                  <span className="actionButtonLabel">{compactLabel}</span>
+                  <CostChips action={action} />
+                </button>
+              );
+            })}
           </div>
         ) : jackOutAvailable ? (
           <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
@@ -7259,8 +7268,8 @@ function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string 
   if (view.run?.phase !== "encounter_ice") return null;
   const breakerActions = encounterBreakerActions(view, actions);
   if (breakerActions.length === 0) return "Kein passender Eisbrecher für dieses ICE verfügbar.";
-  const labels = Array.from(new Set(breakerActions.map((action) => runAwareActionButtonLabel(view, action)))).slice(0, 2);
-  return `Eisbrecher möglich: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
+  const labels = Array.from(new Set(breakerActions.map((action) => runWindowActionButtonLabel(view, action)))).slice(0, 2);
+  return `Eisbrecher: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
 }
 
 function ScoredAgendaOverlay({

@@ -725,10 +725,37 @@ export function runWindowActions(view: PlayerView, actions: LegalAction[]): Lega
 }
 
 export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction): string {
+  const activeIceId = activeRunIceInstanceId(view);
   if (isSelfModifyingCodeAction(action)) {
-    return `${sourceCardTitleForAction(view, action) ?? "Self-Modifying Code"} trashen: Programm suchen`;
+    return "SMC: Programm suchen";
+  }
+  if (action.type === "continue_run" && view.run?.phase === "encounter_ice") {
+    const base = actionButtonLabel(action);
+    if (/^Subroutinen auslösen\b/i.test(base)) return base;
+  }
+  if (
+    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    activeIceId &&
+    action.payload?.iceId === activeIceId
+  ) {
+    return compactRunWindowBreakerLabel(view, action);
   }
   return runAwareActionButtonLabel(view, action);
+}
+
+function compactRunWindowBreakerLabel(view: PlayerView, action: LegalAction): string {
+  const breakerTitle = sourceCardTitleForAction(view, action);
+  const costPrefix = actionCostText(action);
+  const prefix = costPrefix ? `${costPrefix} - ` : "";
+  if (action.type === "pump_breaker") {
+    return `${prefix}${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
+  }
+  const rawIndex = action.payload?.subroutineIndex;
+  const subroutineLabel =
+    typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0
+      ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
+      : "Subroutine brechen";
+  return `${prefix}${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {

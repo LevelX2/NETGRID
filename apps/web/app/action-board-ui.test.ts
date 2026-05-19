@@ -779,8 +779,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.primaryActions).toEqual([continueRun]);
     expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
     expect(mirrored).toEqual([searchInstall, pump, continueRun]);
-    expect(runWindowActionButtonLabel(running, searchInstall)).toBe("Self-Modifying Code trashen: Programm suchen");
-    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Stärke +1 (Simple Decoder) gegen Data Wall (ICE 1)");
+    expect(runWindowActionButtonLabel(running, searchInstall)).toBe("SMC: Programm suchen");
+    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Simple Decoder +1 Stärke");
     const breakAction = legalAction(
       "runner",
       "break_subroutine",
@@ -789,9 +789,45 @@ describe("V1.0.6 resource and card-display helpers", () => {
       { breakerId: "breaker_1", iceId: "ice_1", subroutineIndex: 0 },
       "run.encounter_ice"
     );
-    expect(runWindowActionButtonLabel(running, breakAction)).toBe("Subroutine 1 brechen (Simple Decoder) gegen Data Wall (ICE 1)");
+    expect(runWindowActionButtonLabel(running, breakAction)).toBe("Simple Decoder: Subroutine 1 brechen");
+    const resolveSubroutines = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "Subroutinen auslösen (Run endet)",
+      { encounterContinue: true, unbrokenSubroutineCount: 1 },
+      "run.encounter_ice"
+    );
+    expect(runWindowActionButtonLabel(running, resolveSubroutines)).toBe("Subroutinen auslösen (Run endet)");
     expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
+  });
+
+  it("keeps long run-window breaker examples compact while preserving cost and effect", () => {
+    const krash = card("krash_1", "Krash", "program");
+    const running = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [krash]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Fire Wall", "ice"),
+        successful: false
+      }
+    });
+    const pump: LegalAction = {
+      ...legalAction("runner", "pump_breaker", "krash_1", "Krash: Stärke +1", { breakerId: "krash_1", iceId: "ice_1" }, "run.encounter_ice"),
+      costs: [{ credits: 2 }]
+    };
+
+    const label = runWindowActionButtonLabel(running, pump);
+
+    expect(label).toBe("2 Credits - Krash +1 Stärke");
+    expect(label).not.toContain("gegen Fire Wall");
+    expect(label).not.toContain("(ICE 1)");
   });
 
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {
