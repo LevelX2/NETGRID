@@ -13345,9 +13345,12 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.runner.stack).not.toContain(targetProgramId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
+      sourceDefinitionId: "onr_v1_059_self-modifying-code",
       hiddenZoneAction: "self_modifying_code_install_program",
       publicRevealDefinitionId: "simple_decoder",
+      installedProgramDefinitionId: "simple_decoder",
       searchDestination: "runner_rig",
+      installed: true,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

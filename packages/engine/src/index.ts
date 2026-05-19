@@ -17804,6 +17804,7 @@ function resolveSelfModifyingCodeStackChoice(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
+      sourceDefinitionId: SELF_MODIFYING_CODE_ID,
       hiddenZoneAction: "self_modifying_code_install_program",
       publicRevealKind: "reveal",
       publicRevealDefinitionId: definition.id,
@@ -17811,6 +17812,7 @@ function resolveSelfModifyingCodeStackChoice(
       searchDestination: "install_program",
       shuffled: true,
       installDeferredForMemory: opened,
+      installed: false,
     };
     if (!opened) delete state.pendingChoice;
     return;
@@ -17825,6 +17827,7 @@ function resolveSelfModifyingCodeStackChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
+    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
     hiddenZoneAction: "self_modifying_code_install_program",
     publicRevealKind: "reveal",
     publicRevealDefinitionId: definition.id,
@@ -17876,7 +17879,10 @@ function resolveSelfModifyingCodeFreeMuChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
+    sourceDefinitionId: SELF_MODIFYING_CODE_ID,
     hiddenZoneAction: "self_modifying_code_free_mu",
+    publicRevealKind: "reveal",
+    publicRevealDefinitionId: definitionFor(state, selectedProgramId).id,
     trashedCount: uniqueTrashIds.length,
     trashedCardDefinitionIds: trashedDefinitionIds.join(","),
     installed: true,
@@ -22357,12 +22363,16 @@ function publicContextForAction(
     for (const key of [
       "sourceTrashed",
       "shuffled",
+      "installed",
+      "installDeferredForMemory",
       "muTrashChoiceOpened",
       "muTrashChoiceResolved",
     ]) {
       const value = legalAction.payload[key];
       if (typeof value === "boolean") context[key] = value;
     }
+    if (typeof legalAction.payload.installBlockedReason === "string")
+      context.installBlockedReason = legalAction.payload.installBlockedReason;
     for (const key of [
       "installCostPaid",
       "runnerMemoryUsedAfter",
@@ -22375,6 +22385,9 @@ function publicContextForAction(
     if (typeof legalAction.payload.trashedForMemoryDefinitionIds === "string")
       context.trashedForMemoryDefinitionIds =
         legalAction.payload.trashedForMemoryDefinitionIds;
+    if (typeof legalAction.payload.trashedCardDefinitionIds === "string")
+      context.trashedCardDefinitionIds =
+        legalAction.payload.trashedCardDefinitionIds;
     if (typeof legalAction.payload.returnedCount === "number")
       context.returnedCount = legalAction.payload.returnedCount;
     if (typeof legalAction.payload.returnedCardDefinitionIds === "string")

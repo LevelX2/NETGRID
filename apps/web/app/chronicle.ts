@@ -355,6 +355,41 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "self_modifying_code_install_program") {
+        const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
+        const installed = payload.installed === true || searchDestination === "runner_rig";
+        const deferredForMemory = payload.installDeferredForMemory === true;
+        const blockedReason = installBlockedReasonLabel(stringValue(payload.installBlockedReason));
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title = deferredForMemory
+          ? phrase(subject, `${programTitle} aus dem Stack vorgezeigt; MU muss freigemacht werden`)
+          : installed
+            ? phrase(subject, `${programTitle} aus dem Stack vorgezeigt und im Rig installiert`)
+            : phrase(subject, `${programTitle} aus dem Stack vorgezeigt, aber nicht installiert`);
+        description = !installed && !deferredForMemory && blockedReason ? `Grund: ${blockedReason}.` : undefined;
+        chips.push("Self-Modifying Code", "Stack", "Vorgezeigt", deferredForMemory ? "MU freimachen" : installed ? "Installiert" : "Nicht installiert", ...(payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
+      if (hiddenZoneAction === "self_modifying_code_free_mu") {
+        const installedTitle =
+          titleForDefinitionId(stringValue(payload.installedProgramDefinitionId)) ??
+          publicRevealTitleFromPayload(payload) ??
+          cardTitle ??
+          "das gewählte Programm";
+        const trashedTitles = titlesForDefinitionIds(stringValue(payload.trashedCardDefinitionIds));
+        const trashedCount = numberValue(payload.trashedCount) ?? trashedTitles.length;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.installedProgramDefinitionId) ?? stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title = phrase(subject, `${installedTitle} nach MU-Auswahl im Rig installiert`);
+        description = trashedTitles.length > 0 ? `Für MU getrasht: ${trashedTitles.join(", ")}.` : undefined;
+        chips.push("Self-Modifying Code", "MU freigemacht", "Installiert", ...(trashedCount > 0 ? [`${trashedCount} Trash`] : []));
+        break;
+      }
       if (hiddenZoneAction === "sneak_preview_install_program") {
         const installPendingMemoryTrash = payload.installPendingMemoryTrash === true;
         const sourceLabel = stringValue(payload.searchSource) === "runner_heap" ? "Heap" : "Stack";
@@ -1517,6 +1552,29 @@ function sourceTitleFromActionLabel(label: string | undefined): string | undefin
 function targetCardTitleFromPayload(payload: Record<string, unknown>): string | undefined {
   const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
   return targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
+}
+
+function publicRevealTitleFromPayload(payload: Record<string, unknown>): string | undefined {
+  return titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+}
+
+function titleForDefinitionId(definitionId: string | undefined): string | undefined {
+  return definitionId ? DEMO_CARDS_BY_ID[definitionId]?.title : undefined;
+}
+
+function titlesForDefinitionIds(value: string | undefined): string[] {
+  return value
+    ? value
+        .split(",")
+        .map((definitionId) => titleForDefinitionId(definitionId.trim()))
+        .filter((title): title is string => Boolean(title))
+    : [];
+}
+
+function installBlockedReasonLabel(reason: string | undefined): string | undefined {
+  if (reason === "insufficient_credits") return "nicht genug Credits";
+  if (reason === "unique_already_installed") return "Unique bereits installiert";
+  return undefined;
 }
 
 function abilityTextFromLabel(label: string | undefined, cardTitle: string | undefined): string {

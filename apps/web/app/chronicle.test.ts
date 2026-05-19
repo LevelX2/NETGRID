@@ -403,6 +403,80 @@ describe("formatChronicleEvent", () => {
     expect(installed.title).toBe("Du hast Worm aus dem Stack vorgezeigt und im Rig installiert.");
   });
 
+  it("shows Self-Modifying Code stack choices with the selected program", () => {
+    const activated = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        title: "Self-Modifying Code",
+        sourceDefinitionId: "onr_v1_059_self-modifying-code",
+        label: "Self-Modifying Code: trashen und Programm aus Stack installieren"
+      }),
+      "runner"
+    );
+    const installed = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_install_program",
+        publicRevealDefinitionId: "simple_decoder",
+        installedProgramDefinitionId: "simple_decoder",
+        searchDestination: "runner_rig",
+        installed: true,
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(activated.title).toBe("Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.");
+    expect(installed.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt und im Rig installiert.");
+    expect(installed.chips).toEqual(expect.arrayContaining(["Self-Modifying Code", "Vorgezeigt", "Installiert", "Shuffle"]));
+    expect(installed.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
+    const blocked = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_install_program",
+        publicRevealDefinitionId: "simple_decoder",
+        searchDestination: "runner_stack",
+        installed: false,
+        installBlockedReason: "insufficient_credits",
+        shuffled: true
+      }),
+      "runner"
+    );
+    const memoryPending = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_install_program",
+        publicRevealDefinitionId: "simple_decoder",
+        searchDestination: "install_program",
+        installDeferredForMemory: true,
+        installed: false,
+        shuffled: true
+      }),
+      "runner"
+    );
+    const memoryResolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_free_mu",
+        publicRevealDefinitionId: "simple_decoder",
+        installedProgramDefinitionId: "simple_decoder",
+        trashedCount: 1,
+        trashedCardDefinitionIds: "simple_fracter",
+        installed: true
+      }),
+      "runner"
+    );
+
+    expect(blocked.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt, aber nicht installiert.");
+    expect(blocked.description).toBe("Grund: nicht genug Credits.");
+    expect(memoryPending.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt; MU muss freigemacht werden.");
+    expect(memoryResolved.title).toBe("Du hast Simple Decoder nach MU-Auswahl im Rig installiert.");
+    expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
+  });
+
   it("shows Playful AI die results and follow-up choices in the chronicle", () => {
     const played = formatChronicleEvent(
       makeEvent("play_event", {
