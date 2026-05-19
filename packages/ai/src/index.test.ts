@@ -5071,6 +5071,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-bartmoss-remote-declined-rez",
+        baseline: MVP_0_99_BASELINE,
         runnerDeck,
         corpDeck,
         agendaPointsToWin: 7,
@@ -5108,7 +5109,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     const startInput = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
-      profileId: "runner-ai-v1.4.2-normal",
+      profileId: "runner-ai-v0.9-normal",
     });
     const startDecision = chooseRunnerAction(startInput);
     const startSelected = startInput.legalActions.find(
@@ -5132,10 +5133,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     state = apply(state, "corp", (action) => action.type === "decline_rez");
 
     const selectedTypes: LegalAction["type"][] = [];
-    for (let step = 0; step < 6; step += 1) {
+    for (let step = 0; step < 8; step += 1) {
       const input = buildAiDecisionInput(state, "runner", {
         difficulty: "normal",
-        profileId: "runner-ai-v1.4.2-normal",
+        profileId: "runner-ai-v0.9-normal",
         decisionId: `ai-bartmoss-remote-declined-rez:${step}`,
         actionNumber: step,
       });
@@ -5157,9 +5158,11 @@ describe("V1.4.1 plan-based Runner AI", () => {
     }
 
     expect(selectedTypes).toEqual([
+      "continue_run",
       "pump_breaker",
       "pump_breaker",
       "break_subroutine",
+      "continue_run",
       "continue_run",
       "access_card",
     ]);
