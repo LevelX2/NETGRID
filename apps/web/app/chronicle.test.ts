@@ -65,6 +65,42 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("Spielerzeit");
   });
 
+  it("formats setup mulligan choices with the public decision", () => {
+    const runnerKeep = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        setupStep: "mulligan",
+        setupSide: "runner",
+        setupDecision: "keep"
+      }),
+      "runner"
+    );
+    const corpMulligan = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        setupStep: "mulligan",
+        setupSide: "corp",
+        setupDecision: "mulligan"
+      }),
+      "runner"
+    );
+    const legacy = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        setupStep: "mulligan",
+        setupSide: "runner"
+      }),
+      "runner"
+    );
+
+    expect(runnerKeep.title).toBe("Runner hat die Starthand behalten.");
+    expect(runnerKeep.chips).toEqual(expect.arrayContaining(["Setup", "Starthand", "Behalten"]));
+    expect(corpMulligan.title).toBe("Korp hat einen Mulligan genommen.");
+    expect(corpMulligan.chips).toEqual(expect.arrayContaining(["Setup", "Starthand", "Mulligan"]));
+    expect(legacy.title).toBe("Runner hat die Mulligan-Entscheidung abgeschlossen.");
+    expect(legacy.title).not.toContain("Setup-Entscheidung");
+  });
+
   it("redacts hidden Corp installs from the Runner perspective", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {
