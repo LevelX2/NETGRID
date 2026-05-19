@@ -47,6 +47,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_208_on-call-solo-team":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
+  "onr_v1_217_strike-force-kali":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
   "onr_v1_281_accounts-receivable":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
   "onr_v1_282_annual-reviews":
@@ -79,6 +83,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
   "onr_v1_341_skalderviken-sa-beta-test-site":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/skalderviken-sa-beta-test-site.ts",
+  "onr_v1_342_solo-squad":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/solo-squad.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
 };

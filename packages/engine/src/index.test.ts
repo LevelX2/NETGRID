@@ -1718,7 +1718,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "on_call_solo_team" &&
+        action.type === "activated_card_ability" &&
         action.payload?.cardId === onCallId,
     );
     const tagDrift = structuredClone(state);
@@ -1736,6 +1736,19 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     const gripBefore = state.runner.grip.length;
     state = apply(state, "corp", (action) => action.actionId === onCallAction.actionId);
     expect(state.runner.grip.length).toBeLessThan(gripBefore);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      cardDefinitionId: "onr_v1_208_on-call-solo-team",
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 1,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "damage",
+          sourceDefinitionId: "onr_v1_208_on-call-solo-team",
+        }),
+      ],
+    });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
@@ -7366,6 +7379,36 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("describes P3.3 tagged activated meat-damage abilities", () => {
+    for (const [definitionId, amount] of [
+      ["onr_v1_342_solo-squad", 1],
+      ["onr_v1_208_on-call-solo-team", 1],
+      ["onr_v1_217_strike-force-kali", 2],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+        expect.objectContaining({
+          kind: "activated",
+          timing: "corp_main",
+          costs: [{ kind: "action", amount: 1 }],
+          condition: { kind: "runner_is_tagged" },
+          effects: [
+            expect.objectContaining({
+              kind: "damage",
+              recipient: "runner",
+              damageType: "meat",
+              amount,
+              preventable: true,
+              visibility: "public",
+            }),
+          ],
+        }),
+      );
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -12609,9 +12652,9 @@ describe("V1.9.4 Mechanikpaket M", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinition(state, action) === "onr_v1_208_on-call-solo-team" &&
-        action.payload?.agendaAbility === "on_call_solo_team",
+        action.payload?.cardId === onCallAgendaId,
     );
     expect(state.runner.grip.length).toBeLessThan(gripBeforeOnCall);
 
@@ -12620,9 +12663,9 @@ describe("V1.9.4 Mechanikpaket M", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinition(state, action) === "onr_v1_217_strike-force-kali" &&
-        action.payload?.agendaAbility === "strike_force_kali",
+        action.payload?.cardId === kaliAgendaId,
     );
     expect(state.runner.grip.length).toBeLessThan(gripBeforeKali);
 
@@ -12630,8 +12673,9 @@ describe("V1.9.4 Mechanikpaket M", () => {
     const actionTypes = getLegalActions(state, "corp")
       .filter(
         (action) =>
-          action.payload?.agendaAbility === "on_call_solo_team" ||
-          action.payload?.agendaAbility === "strike_force_kali",
+          action.type === "activated_card_ability" &&
+          (action.payload?.cardId === onCallAgendaId ||
+            action.payload?.cardId === kaliAgendaId),
       )
       .map((action) => action.type);
     expect(actionTypes).toEqual([]);
@@ -20921,8 +20965,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.type === "gain_credit" &&
-          action.payload?.v1917AssetAbility === "meat_damage_1",
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === soloSquadId,
       ),
     ).toBe(false);
     state.runner.tags = 1;
@@ -20933,8 +20977,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "meat_damage_1",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === soloSquadId,
     );
     const tagDrift = structuredClone(state);
     tagDrift.runner.tags = 0;
@@ -20951,8 +20995,8 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "meat_damage_1",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === soloSquadId,
     );
 
     expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
@@ -20960,6 +21004,12 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       damageResolved: true,
       damageType: "meat",
       damageAmount: 1,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "damage",
+          sourceDefinitionId: "onr_v1_342_solo-squad",
+        }),
+      ],
     });
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -31989,6 +32039,255 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         );
       }
 
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok).toBe(true);
+      expect(hashState(replay.state)).toBe(hashState(state));
+    }
+  });
+
+  it("migrates P3.3 tagged activated meat-damage abilities", () => {
+    const assertNoDamageOrCost = (
+      state: GameState,
+      before: { clicks: number; grip: number; heap: number },
+    ): void => {
+      expect(state.corp.clicks).toBe(before.clicks);
+      expect(state.runner.grip).toHaveLength(before.grip);
+      expect(state.runner.heap).toHaveLength(before.heap);
+    };
+
+    let solo = MECHANIC_SMOKE_GAMES.assetNodeEffects("p33-solo-squad");
+    solo = apply(solo, "corp", (action) => action.type === "mandatory_draw");
+    solo.corp.credits = 20;
+    solo.corp.clicks = 5;
+    solo.runner.tags = 1;
+    const soloId = moveCorpCardToHq(solo, "onr_v1_342_solo-squad");
+    solo = apply(
+      solo,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === soloId &&
+        action.payload?.serverId === "new_remote",
+    );
+    expect(
+      getLegalActions(solo, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === soloId,
+      ),
+    ).toBe(false);
+    solo = apply(
+      solo,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(solo, action) === "onr_v1_342_solo-squad",
+    );
+    const soloAction = mustAction(
+      solo,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === soloId,
+    );
+    expect(soloAction.costs[0]).toMatchObject({ clicks: 1 });
+    const soloTagDrift = structuredClone(solo);
+    soloTagDrift.runner.tags = 0;
+    const soloTagBefore = {
+      clicks: soloTagDrift.corp.clicks,
+      grip: soloTagDrift.runner.grip.length,
+      heap: soloTagDrift.runner.heap.length,
+    };
+    expect(
+      applyAction(soloTagDrift, {
+        matchId: soloTagDrift.matchId,
+        side: "corp",
+        actionId: soloAction.actionId,
+        clientKnownStateVersion: soloTagDrift.stateVersion,
+        idempotencyKey: "p33-solo-tag-drift",
+      }).ok,
+    ).toBe(false);
+    assertNoDamageOrCost(soloTagDrift, soloTagBefore);
+
+    const soloSourceDrift = structuredClone(solo);
+    soloSourceDrift.cardInstances[soloId] = {
+      ...soloSourceDrift.cardInstances[soloId]!,
+      rezzed: false,
+    };
+    const soloSourceBefore = {
+      clicks: soloSourceDrift.corp.clicks,
+      grip: soloSourceDrift.runner.grip.length,
+      heap: soloSourceDrift.runner.heap.length,
+    };
+    expect(
+      applyAction(soloSourceDrift, {
+        matchId: soloSourceDrift.matchId,
+        side: "corp",
+        actionId: soloAction.actionId,
+        clientKnownStateVersion: soloSourceDrift.stateVersion,
+        idempotencyKey: "p33-solo-unrezzed-source",
+      }).ok,
+    ).toBe(false);
+    assertNoDamageOrCost(soloSourceDrift, soloSourceBefore);
+
+    const soloRemoved = structuredClone(solo);
+    removeEverywhere(soloRemoved, soloId);
+    const soloRemovedBefore = {
+      clicks: soloRemoved.corp.clicks,
+      grip: soloRemoved.runner.grip.length,
+      heap: soloRemoved.runner.heap.length,
+    };
+    expect(
+      applyAction(soloRemoved, {
+        matchId: soloRemoved.matchId,
+        side: "corp",
+        actionId: soloAction.actionId,
+        clientKnownStateVersion: soloRemoved.stateVersion,
+        idempotencyKey: "p33-solo-removed-source",
+      }).ok,
+    ).toBe(false);
+    assertNoDamageOrCost(soloRemoved, soloRemovedBefore);
+
+    const soloInitial = structuredClone(solo);
+    const soloReplayStart = solo.eventLog.length;
+    const soloClicksBefore = solo.corp.clicks;
+    solo = apply(solo, "corp", (action) => action.actionId === soloAction.actionId);
+    expect(solo.corp.clicks).toBe(soloClicksBefore - 1);
+    expect(solo.runner.heap).toHaveLength(1);
+    expect(solo.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      cardDefinitionId: "onr_v1_342_solo-squad",
+      cardImplementationAbility: "activated",
+      damageResolved: true,
+      damageType: "meat",
+      damageAmount: 1,
+      cardsTrashed: 1,
+      resolvedEffects: [
+        expect.objectContaining({
+          effectId: "onr_v1_342_solo-squad.effect.0.damage",
+          kind: "damage",
+          side: "runner",
+          amount: 1,
+          damageType: "meat",
+          cardsTrashed: 1,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_342_solo-squad",
+          sourceTitle: "Solo Squad",
+        }),
+      ],
+    });
+    expect(JSON.stringify(solo.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /runner_|grip|stack|cardInstances|privatePayload/,
+    );
+    const soloReplay = replayEvents(soloInitial, solo.eventLog.slice(soloReplayStart));
+    expect(soloReplay.ok).toBe(true);
+    expect(hashState(soloReplay.state)).toBe(hashState(solo));
+
+    const corpDeckWith = (definitionId: string): DeckDefinition => ({
+      ...ONR_V1_CORP_DECK,
+      id: `p33_${definitionId}_corp`,
+      name: `P3.3 ${definitionId} Corp`,
+      cards: [{ id: definitionId, quantity: 1 }, ...ONR_V1_CORP_DECK.cards],
+    });
+
+    for (const [definitionId, expectedDamage] of [
+      ["onr_v1_208_on-call-solo-team", 1],
+      ["onr_v1_217_strike-force-kali", 2],
+    ] as const) {
+      let state = createGameAfterSetup({
+        seed: `p33-${definitionId}`,
+        runnerDeck: ONR_V1_RUNNER_DECK,
+        corpDeck: corpDeckWith(definitionId),
+        agendaPointsToWin: 7,
+      });
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.corp.credits = 20;
+      state.corp.clicks = 5;
+      state.runner.tags = 1;
+      const hqAgendaId = moveCorpCardToHq(state, definitionId);
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) =>
+            action.type === "activated_card_ability" &&
+            action.payload?.cardId === hqAgendaId,
+        ),
+      ).toBe(false);
+      const agendaId = scoreCorpAgendaForTest(state, definitionId);
+      expect(
+        getLegalActions(state, "runner").some(
+          (action) =>
+            action.type === "activated_card_ability" &&
+            action.payload?.cardId === agendaId,
+        ),
+      ).toBe(false);
+      const runnerTurn = apply(
+        structuredClone(state),
+        "corp",
+        (action) => action.type === "end_turn",
+      );
+      expect(
+        getLegalActions(runnerTurn, "corp").some(
+          (action) =>
+            action.type === "activated_card_ability" &&
+            action.payload?.cardId === agendaId,
+        ),
+      ).toBe(false);
+      const action = mustAction(
+        state,
+        "corp",
+        (candidate) =>
+          candidate.type === "activated_card_ability" &&
+          candidate.payload?.cardId === agendaId,
+      );
+      expect(action.costs[0]).toMatchObject({ clicks: 1 });
+      const tagDrift = structuredClone(state);
+      tagDrift.runner.tags = 0;
+      const tagBefore = {
+        clicks: tagDrift.corp.clicks,
+        grip: tagDrift.runner.grip.length,
+        heap: tagDrift.runner.heap.length,
+      };
+      expect(
+        applyAction(tagDrift, {
+          matchId: tagDrift.matchId,
+          side: "corp",
+          actionId: action.actionId,
+          clientKnownStateVersion: tagDrift.stateVersion,
+          idempotencyKey: `p33-${definitionId}-tag-drift`,
+        }).ok,
+      ).toBe(false);
+      assertNoDamageOrCost(tagDrift, tagBefore);
+
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      const clicksBefore = state.corp.clicks;
+      state = apply(state, "corp", (candidate) => candidate.actionId === action.actionId);
+      expect(state.corp.clicks).toBe(clicksBefore - 1);
+      expect(state.runner.heap).toHaveLength(expectedDamage);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "activated_card_ability",
+        cardDefinitionId: definitionId,
+        cardImplementationAbility: "activated",
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: expectedDamage,
+        cardsTrashed: expectedDamage,
+        resolvedEffects: [
+          expect.objectContaining({
+            effectId: `${definitionId}.effect.0.damage`,
+            kind: "damage",
+            side: "runner",
+            amount: expectedDamage,
+            damageType: "meat",
+            cardsTrashed: expectedDamage,
+            reason: "card_resolver",
+            sourceDefinitionId: definitionId,
+          }),
+        ],
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        /runner_|grip|stack|cardInstances|privatePayload/,
+      );
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));

@@ -116,7 +116,6 @@ import {
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
   KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  SOLO_SQUAD_DAMAGE_ASSET_CARD_ID,
   SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID,
   TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "./mechanics/asset-node-effects";
@@ -413,9 +412,7 @@ const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
-const ON_CALL_SOLO_TEAM_ID = "onr_v1_208_on-call-solo-team";
 const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
-const STRIKE_FORCE_KALI_ID = "onr_v1_217_strike-force-kali";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -3234,28 +3231,6 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (
-      definition.id === SOLO_SQUAD_DAMAGE_ASSET_CARD_ID &&
-      state.runner.tags > 0 &&
-      state.runner.grip.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 1 Meat Damage`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1917AssetAbility: "meat_damage_1",
-            damageType: "meat",
-            damageAmount: 1,
-          },
-        ),
-      );
-    }
     if (definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID) {
       for (const targetCardId of runnerInstalledCardIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
@@ -3502,6 +3477,13 @@ function corpMainActions(state: GameState): LegalAction[] {
   }
   for (const agendaId of state.corp.scoreArea.slice().sort()) {
     const definition = definitionFor(state, agendaId);
+    pushActivatedCardImplementationActions(
+      state,
+      actions,
+      "corp",
+      agendaId,
+      definition,
+    );
     if (
       definition.id === NETWATCH_OPERATIONS_OFFICE_ID ||
       definition.id === PRIVATE_CYBERNET_POLICE_ID
@@ -3523,33 +3505,6 @@ function corpMainActions(state: GameState): LegalAction[] {
                 ? "netwatch_operations_office"
                 : "private_cybernet_police",
             traceStrength,
-          },
-        ),
-      );
-      continue;
-    }
-    if (
-      definition.id === ON_CALL_SOLO_TEAM_ID ||
-      definition.id === STRIKE_FORCE_KALI_ID
-    ) {
-      if (state.runner.tags <= 0) continue;
-      const damageAmount = definition.id === ON_CALL_SOLO_TEAM_ID ? 1 : 2;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: ${damageAmount} Meat Damage`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility:
-              definition.id === ON_CALL_SOLO_TEAM_ID
-                ? "on_call_solo_team"
-                : "strike_force_kali",
-            damageType: "meat",
-            damageAmount,
           },
         ),
       );
@@ -7221,34 +7176,6 @@ function performAction(
         startCorpAssetRdTopReorderChoice(state, sourceCardId, legalAction);
         return;
       }
-      if (legalAction.payload?.v1917AssetAbility === "meat_damage_1") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf V1.9.17-Damage-Assets nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.17-Damage-Asset-Faehigkeit ist nicht rezzed installiert.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== SOLO_SQUAD_DAMAGE_ASSET_CARD_ID)
-          throw new Error(
-            "Die V1.9.17-Damage-Faehigkeit passt nicht zur Karte.",
-          );
-        const damageAmount = Number(legalAction.payload?.damageAmount ?? 0);
-        if (!Number.isInteger(damageAmount) || damageAmount !== 1)
-          throw new Error(
-            "Solo Squad nutzt in diesem V1.9.17-WIP genau 1 Meat Damage.",
-          );
-        requireRunnerTagged(state);
-        resolveDamageOperation(
-          state,
-          legalAction,
-          "meat",
-          damageAmount,
-          definition.id,
-        );
-        return;
-      }
       if (
         legalAction.payload?.v1917AssetAbility === "trash_installed_runner_card"
       ) {
@@ -7875,42 +7802,6 @@ function performAction(
           definition.id,
           traceStrength,
           legalAction,
-        );
-        return;
-      }
-      if (
-        legalAction.payload?.agendaAbility === "on_call_solo_team" ||
-        legalAction.payload?.agendaAbility === "strike_force_kali"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf diese Agenda-Aktion nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Die gewaehlte Damage-Agenda ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        const expectedDefinitionId =
-          legalAction.payload?.agendaAbility === "on_call_solo_team"
-            ? ON_CALL_SOLO_TEAM_ID
-            : STRIKE_FORCE_KALI_ID;
-        if (definition.id !== expectedDefinitionId)
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zur ausgewaehlten Damage-Agenda.",
-          );
-        requireRunnerTagged(state);
-        const damageAmount = Number(legalAction.payload?.damageAmount ?? 0);
-        const expectedDamageAmount =
-          definition.id === ON_CALL_SOLO_TEAM_ID ? 1 : 2;
-        if (
-          !Number.isInteger(damageAmount) ||
-          damageAmount !== expectedDamageAmount
-        )
-          throw new Error("Die Damage-Menge der Agenda-Aktion ist ungueltig.");
-        resolveDamageOperation(
-          state,
-          legalAction,
-          "meat",
-          damageAmount,
-          definition.id,
         );
         return;
       }
@@ -24741,6 +24632,15 @@ function canResolveOnPlayCardImplementationAbility(
     : true;
 }
 
+function canResolveActivatedCardImplementationAbility(
+  state: GameState,
+  ability: ActivatedCardAbilityImplementation,
+): boolean {
+  return ability.condition
+    ? cardImplementationConditionMet(state, ability.condition)
+    : true;
+}
+
 function canPlayPrintedCostOnPlayImplementation(
   state: GameState,
   definition: CardDefinition,
@@ -24757,6 +24657,16 @@ function assertOnPlayCardImplementationAbilityCanResolve(
   if (ability.condition?.kind === "runner_is_tagged")
     throw new Error("Der Runner muss getaggt sein.");
   throw new Error("Die On-Play-Kartenbedingung ist nicht erfuellt.");
+}
+
+function assertActivatedCardImplementationAbilityCanResolve(
+  state: GameState,
+  ability: ActivatedCardAbilityImplementation,
+): void {
+  if (canResolveActivatedCardImplementationAbility(state, ability)) return;
+  if (ability.condition?.kind === "runner_is_tagged")
+    throw new Error("Der Runner muss getaggt sein.");
+  throw new Error("Die aktivierte Kartenbedingung ist nicht erfuellt.");
 }
 
 function activatedCardImplementationAbilitiesForTiming(
@@ -24821,6 +24731,7 @@ function pushActivatedCardImplementationActions(
     definition,
     timing,
   )) {
+    if (!canResolveActivatedCardImplementationAbility(state, ability)) continue;
     const actionCost = actionCostForActivatedAbility(ability);
     actions.push(
       action(
@@ -24834,6 +24745,15 @@ function pushActivatedCardImplementationActions(
       ),
     );
   }
+}
+
+function corpActivatedCardImplementationSourceIsAvailable(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): boolean {
+  if (definition.type === "agenda") return state.corp.scoreArea.includes(cardId);
+  return rezzedCorpRootCardIds(state).includes(cardId);
 }
 
 function activatedAbilityForLegalAction(
@@ -24890,14 +24810,22 @@ function validateActivatedCardImplementationAbility(
       throw new Error("Diese aktivierte Kartenfaehigkeit ist nur in der Runner-Aktionsphase nutzbar.");
     if (!runnerInstalledCardIds(state).includes(cardId))
       throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(state, ability);
     return;
   }
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf diese aktivierte Kartenfaehigkeit nutzen.");
   if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
     throw new Error("Diese aktivierte Kartenfaehigkeit ist nur in der Korp-Aktionsphase nutzbar.");
-  if (!rezzedCorpRootCardIds(state).includes(cardId))
-    throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht rezzed installiert.");
+  if (
+    !corpActivatedCardImplementationSourceIsAvailable(
+      state,
+      cardId,
+      match.definition,
+    )
+  )
+    throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
+  assertActivatedCardImplementationAbilityCanResolve(state, ability);
 }
 
 function resolveActivatedCardImplementationAbility(

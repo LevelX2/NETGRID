@@ -1195,6 +1195,49 @@ describe("formatChronicleEvent", () => {
     }
   });
 
+  it("merges tagged activated meat-damage abilities into the ability entry", () => {
+    for (const [title, cardDefinitionId, amount] of [
+      ["Solo Squad", "onr_v1_342_solo-squad", 1],
+      ["On-Call Solo Team", "onr_v1_208_on-call-solo-team", 1],
+      ["Strike Force Kali", "onr_v1_217_strike-force-kali", 2],
+    ] as const) {
+      const event = makeEvent("activated_card_ability", {
+        actor: "corp",
+        title,
+        cardDefinitionId,
+        cardImplementationAbility: "activated",
+        damageResolved: true,
+        damageType: "meat",
+        damageAmount: amount,
+        cardsTrashed: amount,
+        resolvedEffects: [
+          {
+            effectId: `${cardDefinitionId}.effect.0.damage`,
+            kind: "damage",
+            visibility: "public",
+            side: "runner",
+            amount,
+            damageType: "meat",
+            cardsTrashed: amount,
+            sourceDefinitionId: cardDefinitionId,
+            sourceTitle: title,
+            reason: "card_resolver"
+          }
+        ]
+      });
+
+      const item = formatChronicleEvent(event, "runner", { cardTitle: title });
+      const effects = formatChronicleEffectItems(event, "runner");
+
+      expect(item.title).toBe(`Die Korp hat ${title} genutzt und Runner erleidet ${amount} Meat Damage.`);
+      expect(item.title).not.toContain("gespielt");
+      expect(item.category).toBe("danger");
+      expect(item.chips).toEqual(expect.arrayContaining(["Ability", `${amount} Meat Damage`]));
+      expect(JSON.stringify(item)).not.toMatch(/grip|stack|cardInstances|privatePayload/);
+      expect(effects).toEqual([]);
+    }
+  });
+
   it("merges ordered Day Shift card resolver effects into the played card entry", () => {
     const event = makeEvent("play_operation", {
       actor: "corp",

@@ -30,6 +30,7 @@ export type ActivatedCardAbilityImplementation = {
   kind: "activated";
   timing: "runner_main" | "corp_main";
   costs: readonly CardAbilityCostImplementation[];
+  condition?: CardConditionImplementation;
   effects: readonly CardEffectImplementation[];
   label?: string;
 };
