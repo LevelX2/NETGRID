@@ -44,5 +44,5 @@ export const COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID = "onr_v1_032_i-spy";
 
 export const STACK_TOP_REORDER_RESOURCE_CARD_ID = "onr_v1_175_ronin-around";
 
-export const STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID =
+export const SHORT_CIRCUIT_RESOURCE_CARD_ID =
   "onr_v1_177_the-short-circuit";

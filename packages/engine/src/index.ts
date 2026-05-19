@@ -139,8 +139,8 @@ import {
   RUNNER_STACK_TOP5_EVENT_CARD_ID,
   SERVER_EXPOSE_PROGRAM_CARD_IDS,
   SERVER_ICE_SWAP_UPGRADE_CARD_ID,
+  SHORT_CIRCUIT_RESOURCE_CARD_ID,
   STACK_SEARCH_PROGRAM_CARD_IDS,
-  STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID,
   STACK_TOP_REORDER_RESOURCE_CARD_ID,
   STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
 } from "./mechanics/hidden-zone";
@@ -4336,6 +4336,8 @@ function runnerMainActions(state: GameState): LegalAction[] {
       if (
         STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
+        (definition.id !== SHORT_CIRCUIT_RESOURCE_CARD_ID ||
+          state.runner.credits >= 1) &&
         state.runner.stack.some(
           (id) => definitionFor(state, id).type === "program",
         )
@@ -4347,7 +4349,14 @@ function runnerMainActions(state: GameState): LegalAction[] {
             "gain_credit",
             `${definition.title}: Stack nach Programm durchsuchen`,
             cardId,
-            [{ clicks: 1 }],
+            [
+              {
+                clicks: 1,
+                ...(definition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+                  ? { credits: 1 }
+                  : {}),
+              },
+            ],
             { cardId, v1911HiddenZoneAbility: "search_stack_program_to_grip" },
           ),
         );
@@ -17902,10 +17911,9 @@ function resolveRunnerStackSearchChoice(
       !shortCircuitSourceId ||
       !state.runner.rig.resources.includes(shortCircuitSourceId) ||
       definitionFor(state, shortCircuitSourceId).id !==
-        STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
+        SHORT_CIRCUIT_RESOURCE_CARD_ID
     )
       throw new Error("The Short Circuit ist nicht mehr installiert.");
-    trashRunnerInstalledCardToHeap(state, shortCircuitSourceId);
   }
   shuffleRunnerStack(state, `v098_search_stack:${choice.choiceId}:shuffle`);
   delete state.pendingChoice;
@@ -17920,10 +17928,10 @@ function resolveRunnerStackSearchChoice(
     shuffled: true,
     ...(shortCircuitSourceId
       ? {
+          sourceDefinitionId: SHORT_CIRCUIT_RESOURCE_CARD_ID,
+          cardDefinitionId: definitionFor(state, cardId).id,
           publicRevealDefinitionId: definitionFor(state, cardId).id,
           publicRevealKind: "reveal",
-          trashOnUse: true,
-          trashedCardDefinitionId: STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID,
         }
       : {}),
   };
@@ -20340,12 +20348,13 @@ function resolveV1911RunnerHiddenZoneAbility(
   if (ability === "search_stack_program_to_grip") {
     if (!STACK_SEARCH_PROGRAM_CARD_IDS.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
+    spendCredits(state, "runner", creditCostForAction(legalAction));
     startRunnerStackSearchChoice(
       state,
-      sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
+      sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
         ? `v1911.short_circuit_search:${sourceCardId}`
         : "v1911.search_stack",
-      sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
+      sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
         ? "v1911_short_circuit_search"
         : "v1911_search_stack",
     );
@@ -20354,7 +20363,7 @@ function resolveV1911RunnerHiddenZoneAbility(
       hiddenZoneBarrier: true,
       sourceDefinitionId: sourceDefinition.id,
       hiddenZoneAction:
-        sourceDefinition.id === STACK_SEARCH_TRASH_ON_USE_RESOURCE_CARD_ID
+        sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
           ? "v1911_short_circuit_search"
           : "v1911_search_stack",
     };

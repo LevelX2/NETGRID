@@ -360,6 +360,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "v1911_short_circuit_search") {
+        const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
+        const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "The Short Circuit";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title = phrase(subject, `${source} genutzt, ${programTitle} der Korp gezeigt und in die Hand genommen`);
+        description = payload.shuffled === true ? "Der Stack wurde danach gemischt." : undefined;
+        chips.push(source, "Stack", "Vorgezeigt", "Hand", ...(payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       if (hiddenZoneAction === "self_modifying_code_install_program") {
         const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
         const installed = payload.installed === true || searchDestination === "runner_rig";
@@ -505,6 +517,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `${cardTitle ?? "eine gescorte Agenda"} genutzt`);
         chips.push("Agenda-Aktion");
+        break;
+      }
+      if (hiddenZoneAction === "v1911_short_circuit_search") {
+        const source = titleForDefinitionId(sourceDefinitionId) ?? cardTitle ?? "The Short Circuit";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, `${source} genutzt und eine Stack-Suche geöffnet`);
+        chips.push(source, "Stack-Suche");
         break;
       }
       if (

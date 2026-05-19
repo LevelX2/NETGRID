@@ -468,6 +468,36 @@ describe("formatChronicleEvent", () => {
     expect(installed.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows The Short Circuit activation and selected program concretely", () => {
+    const activated = formatChronicleEvent(
+      makeEvent("gain_credit", {
+        actor: "runner",
+        hiddenZoneAction: "v1911_short_circuit_search",
+        sourceDefinitionId: "onr_v1_177_the-short-circuit"
+      }),
+      "runner"
+    );
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "v1911_short_circuit_search",
+        sourceDefinitionId: "onr_v1_177_the-short-circuit",
+        publicRevealDefinitionId: "simple_decoder",
+        cardDefinitionId: "simple_decoder",
+        searchDestination: "runner_grip",
+        shuffled: true
+      }),
+      "corp"
+    );
+
+    expect(activated.title).toBe("Du hast The Short Circuit genutzt und eine Stack-Suche geöffnet.");
+    expect(activated.chips).toEqual(expect.arrayContaining(["The Short Circuit", "Stack-Suche"]));
+    expect(resolved.title).toBe("Der Runner hat The Short Circuit genutzt, Simple Decoder der Korp gezeigt und in die Hand genommen.");
+    expect(resolved.description).toBe("Der Stack wurde danach gemischt.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["The Short Circuit", "Vorgezeigt", "Hand", "Shuffle"]));
+    expect(resolved.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
     const blocked = formatChronicleEvent(
       makeEvent("resolve_choice", {

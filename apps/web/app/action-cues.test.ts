@@ -135,6 +135,29 @@ describe("deriveOpponentActionCues", () => {
     expect(cues).toHaveLength(0);
   });
 
+  it("shows The Short Circuit program reveal in opponent action cues", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event("evt_short_circuit", "resolve_choice", {
+          actor: "runner",
+          hiddenZoneAction: "v1911_short_circuit_search",
+          sourceDefinitionId: "onr_v1_177_the-short-circuit",
+          publicRevealDefinitionId: "simple_decoder",
+          cardDefinitionId: "simple_decoder",
+          searchDestination: "runner_grip",
+          shuffled: true
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Der Runner hat The Short Circuit genutzt, Simple Decoder der Korp gezeigt und in die Hand genommen.");
+    expect(cues[0]?.description).toBe("Der Stack wurde danach gemischt.");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("keeps automatic system cues behind the local option", () => {
     const systemEvent = event("evt_auto_credit", "gain_credit", { amount: 2 });
 

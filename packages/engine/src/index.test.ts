@@ -28585,7 +28585,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 1);
   });
 
-  it("uses The Short Circuit as a trash-on-use private stack tutor", () => {
+  it("uses The Short Circuit as a repeatable paid private stack tutor", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-short-circuit"));
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_177_the-short-circuit");
@@ -28602,6 +28602,15 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         "onr_v1_177_the-short-circuit",
     );
     expect(shortCircuitId).toBeDefined();
+    const creditsBeforeAbility = state.runner.credits;
+    const shortCircuitAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "search_stack_program_to_grip" &&
+        action.source === shortCircuitId,
+    );
+    expect(shortCircuitAction?.costs).toEqual([{ clicks: 1, credits: 1 }]);
     state = apply(
       state,
       "runner",
@@ -28611,6 +28620,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
           "search_stack_program_to_grip" &&
         sourceDefinition(state, action) === "onr_v1_177_the-short-circuit",
     );
+    expect(state.runner.credits).toBe(creditsBeforeAbility - 1);
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
       (option) => option.value === targetProgramId,
@@ -28618,12 +28628,19 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.grip).toContain(targetProgramId);
-    if (shortCircuitId) expect(state.runner.heap).toContain(shortCircuitId);
+    if (shortCircuitId) {
+      expect(state.runner.rig.resources).toContain(shortCircuitId);
+      expect(state.runner.heap).not.toContain(shortCircuitId);
+    }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1911_short_circuit_search",
+      sourceDefinitionId: "onr_v1_177_the-short-circuit",
       cardDefinitionId: "simple_decoder",
-      trashedCardDefinitionId: "onr_v1_177_the-short-circuit",
+      publicRevealDefinitionId: "simple_decoder",
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "trashOnUse",
+    );
   });
 
   it("enforces Bodyweight Data Creche install cost, MU, deck replacement and bonus run", () => {
