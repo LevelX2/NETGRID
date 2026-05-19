@@ -89,6 +89,10 @@
   --chronicle-hidden: #8c98a3;
   --cue: #f4d56c;
   --cue-soft: #15231f;
+  --board-corp-zone-bg: color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 86%);
+  --board-corp-lane-bg: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 90%);
+  --board-runner-zone-bg: color-mix(in srgb, var(--chronicle-run), var(--section-bg) 86%);
+  --board-runner-lane-bg: color-mix(in srgb, var(--chronicle-run), var(--lane-bg) 90%);
 }
 
 * {
@@ -3938,9 +3942,11 @@ select {
   min-height: 0;
   box-sizing: border-box;
   padding: 6px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 66%);
   border-radius: 8px;
-  background: var(--section-bg);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    var(--board-corp-zone-bg);
 }
 
 .serverLayout {
@@ -4066,6 +4072,10 @@ select {
   flex: 1 1 680px;
   min-width: 0;
   max-width: min(74vw, 820px);
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 72%);
+  border-radius: 6px;
+  background: var(--board-corp-lane-bg);
 }
 
 .corpHqHandHead {
@@ -4377,6 +4387,7 @@ select {
   padding: 6px;
   border: 1px dashed var(--lane-border);
   border-radius: 6px;
+  background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 92%);
   overflow: visible;
 }
 
@@ -4872,6 +4883,10 @@ select {
   font-size: 11px;
   font-weight: 700;
   text-align: center;
+}
+
+.sideZoneFrame.runner .archivesPileEmpty {
+  background: var(--board-runner-lane-bg);
 }
 
 @media (max-width: 720px) {
@@ -7032,15 +7047,23 @@ select {
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .zoneBoardSection > .sideZoneFrame.corp {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    var(--board-corp-zone-bg);
 }
 
 .runnerGripHeapLayout .sideZoneFrame.corp {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    var(--board-corp-zone-bg);
 }
 
 .runnerGripZone {
@@ -7149,6 +7172,9 @@ select {
   display: grid;
   place-items: start center;
   min-height: calc(151px * var(--zone-card-scale, 1));
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--board-runner-lane-bg);
 }
 
 .runnerStackBack {
@@ -8749,9 +8775,11 @@ select,
   display: grid;
   gap: 6px;
   padding: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: var(--section-bg);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .opponentRunnerBoardStrip {
@@ -8794,7 +8822,9 @@ select,
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .runnerOpponentCountZone {
@@ -8945,7 +8975,9 @@ select,
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .rigBoardSection.rigCollapsed {
