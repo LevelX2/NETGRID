@@ -1,4 +1,4 @@
-import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type LegalAction, type PlayerView, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { actionHasAbility } from "./action-payload";
 
 export const ACTION_CUE_POSITION_STORAGE_KEY = "netgrid.actionCuePosition.v1";
@@ -337,8 +337,14 @@ function stripActionSourcePrefix(label: string): string {
 
 function resourceAbilityContextLabel(action: LegalAction): string | null {
   if (action.payload?.runnerAbility === "remove_data_raven_counter") return "Raven-Counter entfernen";
-  if (action.payload?.shellTradersAbility === "set_aside_from_grip") return "Karte vorbereiten";
-  if (action.payload?.shellTradersAbility === "remove_shell_counter") return "Shell-Counter entfernen";
+  if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+    const targetTitle = shellTradersTargetTitle(action);
+    return targetTitle ? `${targetTitle} zur Seite legen` : "Karte zur Seite legen";
+  }
+  if (action.payload?.shellTradersAbility === "remove_shell_counter") {
+    const targetTitle = shellTradersTargetTitle(action);
+    return targetTitle ? `Shell-Counter von ${targetTitle} entfernen` : "Shell-Counter entfernen";
+  }
   switch (action.payload?.resourceAbility) {
     case "broker_load_credits":
       return "3 Credits laden";
@@ -353,6 +359,17 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
     default:
       return null;
   }
+}
+
+function shellTradersTargetTitle(action: LegalAction): string | null {
+  const targetDefinitionId = typeof action.payload?.targetCardDefinitionId === "string" ? action.payload.targetCardDefinitionId : undefined;
+  const titleFromDefinition = targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
+  if (titleFromDefinition) return titleFromDefinition;
+  if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
+    const labelTarget = /^The Shell Traders:\s*(.+?)\s+(?:vorbereiten|beiseitelegen|zur Seite legen)$/i.exec(action.label.trim())?.[1]?.trim();
+    if (labelTarget) return normalizeVisibleTerms(labelTarget);
+  }
+  return null;
 }
 
 function pumpBreakerActionLabel(action: LegalAction): string {
@@ -622,7 +639,7 @@ export function breachProgressLabel(view: PlayerView): string | null {
   const breach = view.run?.breach;
   if (!breach) return null;
   const current = breach.currentIndex + 1;
-  const knownTotal = breach.completed ? breach.currentIndex + 1 : breach.currentIndex + 1 + breach.remainingCount;
+  const knownTotal = breach.completed ? current : breach.currentIndex + breach.remainingCount;
   return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
 }
 
@@ -708,10 +725,37 @@ export function runWindowActions(view: PlayerView, actions: LegalAction[]): Lega
 }
 
 export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction): string {
+  const activeIceId = activeRunIceInstanceId(view);
   if (isSelfModifyingCodeAction(action)) {
-    return `${sourceCardTitleForAction(view, action) ?? "Self-Modifying Code"} trashen: Programm suchen`;
+    return "SMC: Programm suchen";
+  }
+  if (action.type === "continue_run" && view.run?.phase === "encounter_ice") {
+    const base = actionButtonLabel(action);
+    if (/^Subroutinen auslösen\b/i.test(base)) return base;
+  }
+  if (
+    (action.type === "pump_breaker" || action.type === "break_subroutine") &&
+    activeIceId &&
+    action.payload?.iceId === activeIceId
+  ) {
+    return compactRunWindowBreakerLabel(view, action);
   }
   return runAwareActionButtonLabel(view, action);
+}
+
+function compactRunWindowBreakerLabel(view: PlayerView, action: LegalAction): string {
+  const breakerTitle = sourceCardTitleForAction(view, action);
+  const costPrefix = actionCostText(action);
+  const prefix = costPrefix ? `${costPrefix} - ` : "";
+  if (action.type === "pump_breaker") {
+    return `${prefix}${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
+  }
+  const rawIndex = action.payload?.subroutineIndex;
+  const subroutineLabel =
+    typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0
+      ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
+      : "Subroutine brechen";
+  return `${prefix}${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {

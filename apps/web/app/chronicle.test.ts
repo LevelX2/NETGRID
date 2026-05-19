@@ -29,6 +29,7 @@ const ACTION_TYPES = [
   "return_from_set_aside",
   "change_card_control",
   "end_turn",
+  "time_expired",
   "game_created"
 ] as const;
 
@@ -45,6 +46,23 @@ describe("formatChronicleEvent", () => {
       expect(serialized).not.toContain("corp.play_operation");
       expect(serialized).not.toContain("idempotencyKey");
     }
+  });
+
+  it("formats player-clock time expiry as a critical public chronicle item", () => {
+    const item = formatChronicleEvent(
+      makeEvent("time_expired", {
+        actor: "corp",
+        winnerSide: "runner",
+        loserSide: "corp",
+        label: "Korp verliert durch Zeitablauf."
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Korp verliert durch Zeitablauf.");
+    expect(item.category).toBe("danger");
+    expect(item.importance).toBe("critical");
+    expect(item.chips).toContain("Spielerzeit");
   });
 
   it("redacts hidden Corp installs from the Runner perspective", () => {
@@ -241,6 +259,36 @@ describe("formatChronicleEvent", () => {
     expect(remove.chips).toContain("Installiert");
   });
 
+  it("prefers Shell Traders target card names over the source title for counter removal", () => {
+    const paid = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        label: "The Shell Traders: Shell-Counter entfernen",
+        title: "The Shell Traders",
+        shellTradersAbility: "remove_shell_counter",
+        targetCardDefinitionId: "simple_fracter",
+        remainingCounters: 1
+      }),
+      "runner"
+    );
+    const startTurn = formatChronicleEvent(
+      makeEvent("end_turn", {
+        actor: "runner",
+        label: "The Shell Traders: 1 Shell-Counter entfernen",
+        title: "The Shell Traders",
+        shellTradersAbility: "start_turn_remove_shell_counter",
+        targetCardDefinitionId: "simple_decoder",
+        remainingCounters: 0,
+        installedFromSpecialZone: true
+      }),
+      "runner"
+    );
+
+    expect(paid.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
+    expect(startTurn.title).toBe("Du hast 1 Shell-Counter von Simple Decoder entfernt; Karte kostenlos installiert.");
+    expect(JSON.stringify([paid, startTurn])).not.toContain("von The Shell Traders entfernt");
+  });
+
   it("names generic card abilities from their public action label", () => {
     const item = formatChronicleEvent(
       makeEvent("trigger_ability", {
@@ -304,6 +352,26 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Corporate Negotiating Center", "HQ Reveal", "2 Agenden", "+2 Credits", "Start-of-turn"]));
   });
 
+  it("shows Smith's Pawnshop choices with the corrected 2-credit gain", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+        smithsPawnshopTriggered: true,
+        trashedCardDefinitionId: "onr_v1_028_force-shield",
+        trashedCardTitle: "Force Shield",
+        creditsGained: 2,
+        gainedCredits: 2
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Force Shield mit Smith's Pawnshop getrasht und 2 Credits erhalten.");
+    expect(item.category).toBe("economy");
+    expect(item.chips).toEqual(expect.arrayContaining(["Smith's Pawnshop", "+2 Credits", "Trash"]));
+    expect(JSON.stringify(item)).not.toContain("1 Credit");
+  });
+
   it("does not claim a stack-search program was installed when the engine reports failure", () => {
     const failed = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -333,6 +401,80 @@ describe("formatChronicleEvent", () => {
     expect(failed.title).toBe("Du hast Worm aus dem Stack vorgezeigt, aber nicht installiert.");
     expect(failed.chips).toContain("Nicht installiert");
     expect(installed.title).toBe("Du hast Worm aus dem Stack vorgezeigt und im Rig installiert.");
+  });
+
+  it("shows Self-Modifying Code stack choices with the selected program", () => {
+    const activated = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        title: "Self-Modifying Code",
+        sourceDefinitionId: "onr_v1_059_self-modifying-code",
+        label: "Self-Modifying Code: trashen und Programm aus Stack installieren"
+      }),
+      "runner"
+    );
+    const installed = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_install_program",
+        publicRevealDefinitionId: "simple_decoder",
+        installedProgramDefinitionId: "simple_decoder",
+        searchDestination: "runner_rig",
+        installed: true,
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(activated.title).toBe("Du hast Self-Modifying Code aktiviert: trashen und Programm aus Stack installieren.");
+    expect(installed.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt und im Rig installiert.");
+    expect(installed.chips).toEqual(expect.arrayContaining(["Self-Modifying Code", "Vorgezeigt", "Installiert", "Shuffle"]));
+    expect(installed.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
+    const blocked = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_install_program",
+        publicRevealDefinitionId: "simple_decoder",
+        searchDestination: "runner_stack",
+        installed: false,
+        installBlockedReason: "insufficient_credits",
+        shuffled: true
+      }),
+      "runner"
+    );
+    const memoryPending = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_install_program",
+        publicRevealDefinitionId: "simple_decoder",
+        searchDestination: "install_program",
+        installDeferredForMemory: true,
+        installed: false,
+        shuffled: true
+      }),
+      "runner"
+    );
+    const memoryResolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "self_modifying_code_free_mu",
+        publicRevealDefinitionId: "simple_decoder",
+        installedProgramDefinitionId: "simple_decoder",
+        trashedCount: 1,
+        trashedCardDefinitionIds: "simple_fracter",
+        installed: true
+      }),
+      "runner"
+    );
+
+    expect(blocked.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt, aber nicht installiert.");
+    expect(blocked.description).toBe("Grund: nicht genug Credits.");
+    expect(memoryPending.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt; MU muss freigemacht werden.");
+    expect(memoryResolved.title).toBe("Du hast Simple Decoder nach MU-Auswahl im Rig installiert.");
+    expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
   it("shows Playful AI die results and follow-up choices in the chronicle", () => {

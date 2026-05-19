@@ -68,6 +68,7 @@ import type {
   ApiMatchFormat,
   ApiMatchStartLobbyPayload,
   ApiMatchStatus,
+  ApiPlayerClockSnapshot,
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
@@ -169,8 +170,9 @@ import {
   type PlayMode
 } from "./match-start";
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
-import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage } from "./match-start-storage";
+import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
+import { resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -1687,6 +1689,9 @@ export default function Page() {
   const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
   const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
   const [matchFormat, setMatchFormat] = useState<MatchFormat>("rules_match");
+  const [playerClockMode, setPlayerClockMode] = useState<MatchStartPlayerClockMode>("none");
+  const [playerClockMinutes, setPlayerClockMinutes] = useState<MatchStartPlayerClockMinutes>(10);
+  const [playerClockGraceSeconds, setPlayerClockGraceSeconds] = useState<MatchStartPlayerClockGraceSeconds>(10);
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
@@ -1870,6 +1875,9 @@ export default function Page() {
       if (storedMatchStartSettings.humanSideSelection) setHumanSideSelection(storedMatchStartSettings.humanSideSelection);
       if (storedMatchStartSettings.humanAiSideSelection) setHumanAiSideSelection(storedMatchStartSettings.humanAiSideSelection);
       if (storedMatchStartSettings.matchFormat) setMatchFormat(storedMatchStartSettings.matchFormat);
+      if (storedMatchStartSettings.playerClockMode) setPlayerClockMode(storedMatchStartSettings.playerClockMode);
+      if (storedMatchStartSettings.playerClockMinutes) setPlayerClockMinutes(storedMatchStartSettings.playerClockMinutes);
+      if (storedMatchStartSettings.playerClockGraceSeconds !== undefined) setPlayerClockGraceSeconds(storedMatchStartSettings.playerClockGraceSeconds);
       if (storedMatchStartSettings.runnerDifficulty) setRunnerDifficulty(storedMatchStartSettings.runnerDifficulty);
       if (storedMatchStartSettings.corpDifficulty) setCorpDifficulty(storedMatchStartSettings.corpDifficulty);
       if (storedMatchStartSettings.aiDeckPolicy) setAiDeckPolicy(storedMatchStartSettings.aiDeckPolicy);
@@ -2176,6 +2184,9 @@ export default function Page() {
         humanSideSelection,
         humanAiSideSelection,
         matchFormat: matchFormat === "two_game_side_swap" ? "two_game_side_swap" : "rules_match",
+        playerClockMode,
+        playerClockMinutes,
+        playerClockGraceSeconds,
         runnerDifficulty,
         corpDifficulty,
         aiDeckPolicy,
@@ -2203,6 +2214,9 @@ export default function Page() {
     humanSideSelection,
     humanAiSideSelection,
     matchFormat,
+    playerClockMode,
+    playerClockMinutes,
+    playerClockGraceSeconds,
     runnerDifficulty,
     corpDifficulty,
     aiDeckPolicy,
@@ -2411,7 +2425,7 @@ export default function Page() {
     humanAiSideSelection,
     aiDeckPolicy,
     testSetupMode
-  });
+  }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
   const joinMatchIdTrimmed = joinMatchId.trim();
@@ -2800,7 +2814,15 @@ export default function Page() {
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
           matchFormat,
-          agendaPointsToWin: effectiveAgendaTarget
+          agendaPointsToWin: effectiveAgendaTarget,
+          playerClock:
+            playerClockMode === "player_clock"
+              ? {
+                  mode: "player_clock",
+                  startingTimeMs: playerClockMinutes * 60_000,
+                  gracePeriodMs: playerClockGraceSeconds * 1000
+                }
+              : { mode: "none" }
         },
         ...deckPayload
       });
@@ -3387,7 +3409,7 @@ export default function Page() {
     if (!session || !payload || payload.matchStatus !== "active" || payload.winner) return;
     setConfirmationDialog({
       title: "Spiel aufgeben?",
-      message: "Diese Aufgabe beendet das Match für beide Seiten. Der Engine-State bleibt der letzte echte Spielzustand.",
+      message: "Diese Aufgabe beendet nur dieses Spiel. In einer Matchserie kann ein offenes Folgespiel danach weiter gestartet werden. Der Engine-State bleibt der letzte echte Spielzustand.",
       confirmLabel: "Aufgeben",
       tone: "danger",
       onConfirm: forfeitMatch
@@ -3856,6 +3878,7 @@ export default function Page() {
                   matchVersion: message.payload.matchVersion,
                   side,
                   playerView: message.payload.playerView,
+                  ...(message.payload.playerClock ? { playerClock: message.payload.playerClock } : {}),
                   legalActions: [],
                   eventTail: [],
                   opponentStatus: currentLobby?.opponentStatus ?? { side: side === "runner" ? "corp" : "runner", connected: false }
@@ -3867,7 +3890,8 @@ export default function Page() {
           ...current,
           matchStatus: message.payload.matchStatus,
           matchVersion: message.payload.matchVersion,
-          playerView: message.payload.playerView
+          playerView: message.payload.playerView,
+          ...(message.payload.playerClock ? { playerClock: message.payload.playerClock } : {})
         };
         const nextWithUndo = message.payload.pendingUndo ? { ...next, pendingUndo: message.payload.pendingUndo } : removePendingUndo(next);
         if (message.payload.playerView.winner) return { ...next, winner: message.payload.playerView.winner };
@@ -4248,6 +4272,34 @@ export default function Page() {
                         In LAN-Liste sichtbar
                       </label>
                     ) : null}
+                    <label>
+                      Spielerzeit
+                      <select value={playerClockMode} onChange={(event) => setPlayerClockMode(event.target.value as MatchStartPlayerClockMode)}>
+                        <option value="none">Keine Zeitbegrenzung</option>
+                        <option value="player_clock">Zeitbegrenzung aktiv</option>
+                      </select>
+                    </label>
+                    <label>
+                      Zeit pro Seite
+                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockMode === "none"}>
+                        <option value={5}>5 Minuten</option>
+                        <option value={10}>10 Minuten</option>
+                        <option value={15}>15 Minuten</option>
+                        <option value={20}>20 Minuten</option>
+                        <option value={30}>30 Minuten</option>
+                        <option value={45}>45 Minuten</option>
+                      </select>
+                    </label>
+                    <label>
+                      Kulanz je Entscheidung
+                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockMode === "none"}>
+                        <option value={0}>0 Sekunden</option>
+                        <option value={5}>5 Sekunden</option>
+                        <option value={10}>10 Sekunden</option>
+                        <option value={15}>15 Sekunden</option>
+                        <option value={30}>30 Sekunden</option>
+                      </select>
+                    </label>
                     <label>
                       Seed
                       <input value={seed} onChange={(event) => setSeed(event.target.value)} />
@@ -4765,6 +4817,7 @@ export default function Page() {
               <small>Orientierung</small>
             </div>
           ) : null}
+          {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
           {activeView.side === "corp" ? (
             <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
               <RunnerRigStrip
@@ -5791,14 +5844,29 @@ function GameOverModal({
         : "Das Spiel endet unentschieden.";
   const seriesText = result.series ? seriesStatusText(result.series) : null;
   const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
+  const winnerMotif = resultWinnerMotifFor(result.winner);
+  const retentionUi = retentionProtectionUi(retentionProtected);
+  const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
+  const handleNewMatch = () => {
+    if (
+      exitUi.needsConfirmation &&
+      !window.confirm("Matchserie verlassen? Das nächste Serienspiel wird nicht gestartet und diese lokale Sitzung wird entfernt.")
+    ) {
+      return;
+    }
+    onNewMatch();
+  };
   return (
     <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
       <div className="gameOverBackdrop" aria-hidden="true" />
       <section className="gameOverPanel">
         <div className="gameOverHero">
-          <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
-          <h2 id="game-over-title">{outcomeText}</h2>
-          <p>{resultReasonLabel(result.reason)}</p>
+          <div className="gameOverHeroCopy">
+            <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
+            <h2 id="game-over-title">{outcomeText}</h2>
+            <p>{resultReasonLabel(result.reason)}</p>
+          </div>
+          <ResultWinnerMotif motif={winnerMotif} />
         </div>
         {gameStanding ? (
           <div className="gameStandingStrip" aria-label="Spielwertung">
@@ -5841,13 +5909,13 @@ function GameOverModal({
         ) : null}
         <div className="gameOverFooter">
           <div>
-            <span>{result.winner === "draw" ? "Draw" : result.winner === side ? "Deine Seite gewinnt" : `${opponentName ?? "Gegenseite"} gewinnt`}</span>
+            <span>{resultFooterOutcomeLabel(result.winner, side, opponentName)}</span>
             <small>{shortDiagnosticsHash(result.finalStateHash)}</small>
           </div>
           <div className="gameOverActions">
-            <button className="button" onClick={() => onRetentionProtection(!retentionProtected)}>
+            <button className="button" onClick={() => onRetentionProtection(!retentionProtected)} title={retentionUi.title} aria-label={retentionUi.title}>
               <Save size={15} />
-              {retentionProtected ? "Nicht mehr aufheben" : "Spiel aufheben"}
+              {retentionUi.label}
             </button>
             <button className="button" onClick={onDismiss}>
               Board ansehen
@@ -5857,12 +5925,33 @@ function GameOverModal({
                 {nextSeriesPending ? "Erstelle..." : "Nächstes Serienspiel"}
               </button>
             ) : null}
-            <button className="button primary" onClick={onNewMatch}>
-              Zurück zum Startbildschirm
+            <button className={`button ${onNextSeriesGame ? "seriesExitButton" : "primary"}`} onClick={handleNewMatch} title={exitUi.title}>
+              {exitUi.label}
             </button>
           </div>
         </div>
       </section>
+    </div>
+  );
+}
+
+function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
+  const motifUi = resultWinnerMotifUi(motif);
+  return (
+    <div className={`resultWinnerMotif ${motif} ${motifUi.imageSrc ? "bitmap" : "neutral"}`} aria-label={motifUi.ariaLabel} role="img">
+      <div className="resultMotifFrame">
+        {motifUi.imageSrc ? (
+          <img src={motifUi.imageSrc} alt="" aria-hidden="true" />
+        ) : (
+          <>
+            <span className="resultMotifCore" />
+            <span className="resultMotifTrack one" />
+            <span className="resultMotifTrack two" />
+            <span className="resultMotifTrack three" />
+          </>
+        )}
+      </div>
+      <span>{motifUi.caption}</span>
     </div>
   );
 }
@@ -5972,6 +6061,7 @@ function resultReasonLabel(reason: GameResultSummary["reason"]): string {
   if (reason === "flatline") return "Der Runner wurde flatlined.";
   if (reason === "draw") return "Beide Seiten erreichen gleichzeitig das Ziel.";
   if (reason === "forfeit") return "Das Spiel wurde durch Aufgabe beendet.";
+  if (reason === "time_expired") return "Das Spiel wurde durch abgelaufene Spielerzeit beendet.";
   return "Das Spiel wurde abgeschlossen.";
 }
 
@@ -5979,6 +6069,7 @@ function terminalLobbyTitle(status: MatchStatus, result?: LifecycleResultSummary
   if (status === "cancelled") return "Match abgebrochen";
   if (status === "abandoned") return "Lobby verlassen";
   if (status === "forfeited") return result?.loserSide ? `${sideLabel(result.loserSide)} hat aufgegeben` : "Spiel aufgegeben";
+  if (status === "finished" && result?.reason === "time_expired") return result.loserSide ? `${sideLabel(result.loserSide)} verliert auf Zeit` : "Spielerzeit abgelaufen";
   if (status === "finished") return "Spiel abgeschlossen";
   return "Match nicht mehr aktiv";
 }
@@ -5987,6 +6078,7 @@ function terminalLobbyMessage(status: MatchStatus, result?: LifecycleResultSumma
   if (status === "cancelled") return "Der Host hat dieses Match beendet. Der alte Join-Link und die alten Tokens sind ungültig.";
   if (status === "abandoned") return "Die Gegenseite hat die Lobby verlassen. Dieses Match springt nicht in die Bereitschaftslobby zurück.";
   if (status === "forfeited") return result?.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch Aufgabe. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch Aufgabe beendet.";
+  if (status === "finished" && result?.reason === "time_expired") return result.winnerSide ? `${sideLabel(result.winnerSide)} gewinnt durch abgelaufene Spielerzeit. Der Engine-State bleibt unverändert.` : "Das Spiel wurde durch abgelaufene Spielerzeit beendet.";
   if (status === "finished") return "Das Spiel wurde regelgerecht beendet.";
   return "Dieser Matchzustand kann nicht fortgesetzt werden.";
 }
@@ -6001,8 +6093,8 @@ function shouldForgetRecoveryStatus(status: MatchStatus): boolean {
 
 function seriesStatusText(series: SeriesResultSummary): string {
   if (series.status === "finished") {
-    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Du hast die Matchserie nach Matchpunkten gewonnen." : "Du hast die Matchserie gewonnen.";
-    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Du hast die Matchserie nach Matchpunkten verloren." : "Du hast die Matchserie verloren.";
+    if (series.viewerSeriesOutcome === "won") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Du vorne." : "Matchserie abgeschlossen: Du vorne.";
+    if (series.viewerSeriesOutcome === "lost") return series.seriesDecision === "match_points" ? "Matchserie nach Matchpunkten entschieden: Gegenseite vorne." : "Matchserie abgeschlossen: Gegenseite vorne.";
     return "Die Matchserie endet unentschieden.";
   }
   return series.nextAvailable ? "Bereit für das nächste Spiel mit Seitenwechsel." : "Nächstes Serienspiel wurde bereits erstellt.";
@@ -7128,21 +7220,30 @@ function RunTimelineOverlay({
         </div>
         {runActions.length > 0 ? (
           <div className="runActionBar" aria-label="Run-Aktionen" data-testid="run-action-bar">
-            {runActions.map((action) => (
-              <button
-                className="button primary actionButton runActionButton"
-                key={action.actionId}
-                onClick={() => onAction(action)}
-                disabled={actionDisabled}
-                type="button"
-                data-testid="run-action-button"
-                data-action-type={action.type}
-              >
-                <ActionLeadIcon action={action} size={14} />
-                <span className="actionButtonLabel">{runWindowActionButtonLabel(view, action)}</span>
-                <CostChips action={action} />
-              </button>
-            ))}
+            {runActions.map((action) => {
+              const compactLabel = runWindowActionButtonLabel(view, action);
+              const fullLabel =
+                compactLabel.startsWith("SMC:") && action.label
+                  ? normalizeVisibleTerms(action.label)
+                  : runAwareActionButtonLabel(view, action);
+              return (
+                <button
+                  className="button primary actionButton runActionButton"
+                  key={action.actionId}
+                  onClick={() => onAction(action)}
+                  disabled={actionDisabled}
+                  type="button"
+                  title={fullLabel}
+                  aria-label={fullLabel}
+                  data-testid="run-action-button"
+                  data-action-type={action.type}
+                >
+                  <ActionLeadIcon action={action} size={14} />
+                  <span className="actionButtonLabel">{compactLabel}</span>
+                  <CostChips action={action} />
+                </button>
+              );
+            })}
           </div>
         ) : jackOutAvailable ? (
           <p className="runHint">Du kannst den Run jetzt abbrechen (Jack-out).</p>
@@ -7173,8 +7274,8 @@ function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string 
   if (view.run?.phase !== "encounter_ice") return null;
   const breakerActions = encounterBreakerActions(view, actions);
   if (breakerActions.length === 0) return "Kein passender Eisbrecher für dieses ICE verfügbar.";
-  const labels = Array.from(new Set(breakerActions.map((action) => runAwareActionButtonLabel(view, action)))).slice(0, 2);
-  return `Eisbrecher möglich: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
+  const labels = Array.from(new Set(breakerActions.map((action) => runWindowActionButtonLabel(view, action)))).slice(0, 2);
+  return `Eisbrecher: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
 }
 
 function ScoredAgendaOverlay({
@@ -12161,6 +12262,47 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
   );
 }
 
+function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapshot; nowMs: number }) {
+  const runnerRemainingMs = playerClockLiveRemaining(snapshot, "runner", nowMs);
+  const corpRemainingMs = playerClockLiveRemaining(snapshot, "corp", nowMs);
+  const ownerLabel = snapshot.expiredSide
+    ? `${sideLabel(snapshot.expiredSide)} abgelaufen`
+    : snapshot.decisionOwnerSide
+      ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
+      : "Wartet";
+  return (
+    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label="Spielerzeit" data-testid="player-clock">
+      <span className="matchClockIcon" aria-hidden="true">
+        <Clock size={15} />
+      </span>
+      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
+        <strong>Runner</strong> {formatPlayerClockDuration(runnerRemainingMs)}
+      </span>
+      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
+        <strong>Korp</strong> {formatPlayerClockDuration(corpRemainingMs)}
+      </span>
+      <small>{ownerLabel}</small>
+    </div>
+  );
+}
+
+function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
+  let remainingMs = snapshot.remainingMs?.[side] ?? 0;
+  if (snapshot.expiredSide === side) return 0;
+  if (snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined || snapshot.gracePeriodMs === undefined) return remainingMs;
+  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const liveChargeableMs = Math.max(0, elapsedMs - snapshot.gracePeriodMs);
+  const serverChargeableMs = snapshot.chargeableElapsedMs ?? 0;
+  return Math.max(0, remainingMs - Math.max(0, liveChargeableMs - serverChargeableMs));
+}
+
+function formatPlayerClockDuration(valueMs: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(valueMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
+}
+
 function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientPayload {
   if (!response.playerView) throw new Error("Match ist noch nicht aktiv.");
   const winner = response.winner ?? response.playerView.winner;
@@ -12174,6 +12316,7 @@ function fromInitialResponse(response: CreateMatchResponse, side: Side): ClientP
     eventTail: response.playerView.publicEvents,
     opponentStatus: { side: side === "runner" ? "corp" : "runner", connected: response.mode !== "human_vs_human" }
   };
+  if (response.playerClock) payload.playerClock = response.playerClock;
   if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
   if (winner) payload.winner = winner;
   if (response.finalStateHash) payload.finalStateHash = response.finalStateHash;
@@ -12196,6 +12339,7 @@ function fromJoinedResponse(response: JoinMatchResponse): ClientPayload {
     eventTail: response.eventTail ?? response.playerView.publicEvents,
     opponentStatus: { side: response.side === "runner" ? "corp" : "runner", connected: false }
   };
+  if (response.playerClock) payload.playerClock = response.playerClock;
   if (response.aiTurnPresentation) payload.aiTurnPresentation = response.aiTurnPresentation;
   if (response.pendingUndo) payload.pendingUndo = response.pendingUndo;
   if (winner) payload.winner = winner;

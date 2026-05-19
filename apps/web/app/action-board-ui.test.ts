@@ -264,7 +264,15 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("shows access progress only from PlayerView breach data", () => {
-    const running = view("runner", {
+    const firstAccess = view("runner", {
+      run: {
+        attackedServerId: "hq",
+        phase: "access",
+        successful: true,
+        breach: { breachId: "breach_1", serverId: "hq", currentIndex: 0, remainingCount: 2, completed: false }
+      }
+    });
+    const secondAccess = view("runner", {
       run: {
         attackedServerId: "hq",
         phase: "access",
@@ -273,8 +281,9 @@ describe("V1.0.5 action board UI helpers", () => {
       }
     });
 
-    expect(currentRunTimelineStep(running, [])).toBe("access");
-    expect(breachProgressLabel(running)).toBe("Zugriff 2 von 3");
+    expect(currentRunTimelineStep(secondAccess, [])).toBe("access");
+    expect(breachProgressLabel(firstAccess)).toBe("Zugriff 1 von 2");
+    expect(breachProgressLabel(secondAccess)).toBe("Zugriff 2 von 2");
   });
 
   it("groups public Runner rig cards without implying hidden cards", () => {
@@ -671,12 +680,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
       cardId: "shell_traders_1",
       shellTradersAbility: "set_aside_from_grip",
       targetCardId: "simple_fracter_1",
+      targetCardDefinitionId: "simple_fracter",
       shellCounterAmount: 2
     });
     const remove = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: 1 Shell-Counter entfernen", {
       cardId: "shell_traders_1",
       shellTradersAbility: "remove_shell_counter",
       targetCardId: "simple_fracter_1",
+      targetCardDefinitionId: "simple_fracter",
       counterType: "shell",
       removeCounterAmount: 1
     });
@@ -686,8 +697,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.primaryActions).toEqual([]);
     expect(split.contextualActions).toEqual([prepare, remove]);
     expect(actionMatchesContext(prepare, { kind: "card", id: "shell_traders_1", label: "The Shell Traders" })).toBe(true);
-    expect(contextualCardActionLabel(prepare)).toBe("Karte vorbereiten");
-    expect(contextualCardActionLabel(remove)).toBe("Shell-Counter entfernen");
+    expect(actionButtonLabel(prepare)).toBe("Simple Fracter zur Seite legen");
+    expect(actionButtonLabel(remove)).toBe("Shell-Counter von Simple Fracter entfernen");
+    expect(contextualCardActionLabel(prepare)).toBe("Simple Fracter zur Seite legen");
+    expect(contextualCardActionLabel(remove)).toBe("Shell-Counter von Simple Fracter entfernen");
+  });
+
+  it("keeps parallel Shell Traders prepare actions distinguishable by target", () => {
+    const fracter = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Simple Fracter vorbereiten", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardId: "simple_fracter_1",
+      targetCardDefinitionId: "simple_fracter"
+    });
+    const decoder = legalAction("runner", "trigger_ability", "shell_traders_1", "The Shell Traders: Simple Decoder vorbereiten", {
+      cardId: "shell_traders_1",
+      shellTradersAbility: "set_aside_from_grip",
+      targetCardId: "simple_decoder_1",
+      targetCardDefinitionId: "simple_decoder"
+    });
+
+    expect([actionButtonLabel(fracter), actionButtonLabel(decoder)]).toEqual([
+      "Simple Fracter zur Seite legen",
+      "Simple Decoder zur Seite legen"
+    ]);
   });
 
   it("labels Short-Term Contract take-credit actions on the installed resource overlay", () => {
@@ -755,8 +788,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.primaryActions).toEqual([continueRun]);
     expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
     expect(mirrored).toEqual([searchInstall, pump, continueRun]);
-    expect(runWindowActionButtonLabel(running, searchInstall)).toBe("Self-Modifying Code trashen: Programm suchen");
-    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Stärke +1 (Simple Decoder) gegen Data Wall (ICE 1)");
+    expect(runWindowActionButtonLabel(running, searchInstall)).toBe("SMC: Programm suchen");
+    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Simple Decoder +1 Stärke");
     const breakAction = legalAction(
       "runner",
       "break_subroutine",
@@ -765,9 +798,45 @@ describe("V1.0.6 resource and card-display helpers", () => {
       { breakerId: "breaker_1", iceId: "ice_1", subroutineIndex: 0 },
       "run.encounter_ice"
     );
-    expect(runWindowActionButtonLabel(running, breakAction)).toBe("Subroutine 1 brechen (Simple Decoder) gegen Data Wall (ICE 1)");
+    expect(runWindowActionButtonLabel(running, breakAction)).toBe("Simple Decoder: Subroutine 1 brechen");
+    const resolveSubroutines = legalAction(
+      "runner",
+      "continue_run",
+      "game_rule",
+      "Subroutinen auslösen (Run endet)",
+      { encounterContinue: true, unbrokenSubroutineCount: 1 },
+      "run.encounter_ice"
+    );
+    expect(runWindowActionButtonLabel(running, resolveSubroutines)).toBe("Subroutinen auslösen (Run endet)");
     expect(actionMatchesContext(searchInstall, { kind: "card", id: "smc_1", label: "Self-Modifying Code" })).toBe(true);
     expect(actionCostChips(searchInstall)).toEqual([]);
+  });
+
+  it("keeps long run-window breaker examples compact while preserving cost and effect", () => {
+    const krash = card("krash_1", "Krash", "program");
+    const running = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [krash]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: card("ice_1", "Fire Wall", "ice"),
+        successful: false
+      }
+    });
+    const pump: LegalAction = {
+      ...legalAction("runner", "pump_breaker", "krash_1", "Krash: Stärke +1", { breakerId: "krash_1", iceId: "ice_1" }, "run.encounter_ice"),
+      costs: [{ credits: 2 }]
+    };
+
+    const label = runWindowActionButtonLabel(running, pump);
+
+    expect(label).toBe("2 Credits - Krash +1 Stärke");
+    expect(label).not.toContain("gegen Fire Wall");
+    expect(label).not.toContain("(ICE 1)");
   });
 
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {

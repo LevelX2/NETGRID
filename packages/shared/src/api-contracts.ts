@@ -37,7 +37,31 @@ export type ApiGameResultReason =
   | "flatline"
   | "draw"
   | "forfeit"
+  | "time_expired"
   | "unknown";
+
+export type ApiPlayerClockMode = "none" | "player_clock";
+
+export type ApiPlayerClockConfig = {
+  mode: ApiPlayerClockMode;
+  startingTimeMs?: number;
+  gracePeriodMs?: number;
+};
+
+export type ApiPlayerClockSnapshot = {
+  schemaVersion: "player-clock-v1";
+  mode: ApiPlayerClockMode;
+  remainingMs?: { runner: number; corp: number };
+  startingTimeMs?: number;
+  gracePeriodMs?: number;
+  decisionOwnerSide?: Side;
+  activityStartedAtMs?: number;
+  elapsedActivityMs?: number;
+  graceRemainingMs?: number;
+  chargeableElapsedMs?: number;
+  warningLevel: "none" | "grace" | "charging" | "critical" | "expired";
+  expiredSide?: Side;
+};
 
 export type ApiSeriesResultSummary = {
   seriesId: string;
@@ -82,8 +106,8 @@ export type ApiGameResultSummary = {
 };
 
 export type ApiLifecycleResultSummary = {
-  status: Extract<ApiMatchStatus, "cancelled" | "abandoned" | "forfeited">;
-  reason: "cancel" | "leave" | "forfeit";
+  status: Extract<ApiMatchStatus, "cancelled" | "abandoned" | "forfeited" | "finished">;
+  reason: "cancel" | "leave" | "forfeit" | "time_expired";
   occurredAt: string;
   actorSide: Side;
   winnerSide?: Side;
@@ -156,6 +180,7 @@ export type ApiSidePayload = {
   pendingChoice?: PlayerView["pendingChoice"];
   pendingUndo?: ApiPendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: ApiAiTurnPresentationState;
+  playerClock?: ApiPlayerClockSnapshot;
   winner?: Winner;
   finalStateHash?: string;
   resultSummary?: ApiGameResultSummary;
@@ -177,6 +202,7 @@ export type ApiLobbyPayload = {
     message: string;
   };
   startLobby?: ApiMatchStartLobbyPayload;
+  playerClock?: ApiPlayerClockSnapshot;
   retentionProtected?: boolean;
   retentionProtectedAt?: string;
 };
@@ -190,6 +216,7 @@ export type ApiServerMessage =
         matchStatus: ApiMatchStatus;
         matchVersion: number;
         playerView: PlayerView;
+        playerClock?: ApiPlayerClockSnapshot;
         pendingUndo?: NonNullable<ApiSidePayload["pendingUndo"]> | null;
       };
     }
@@ -245,6 +272,7 @@ export type ApiCreateMatchResponse = {
   legalActions: LegalAction[];
   matchVersion: number;
   lobby?: ApiMatchStartLobbyPayload;
+  playerClock?: ApiPlayerClockSnapshot;
   aiTurnPresentation?: ApiAiTurnPresentationState;
   winner?: Winner;
   finalStateHash?: string;
@@ -266,6 +294,7 @@ export type ApiJoinMatchResponse = {
   matchStatus?: ApiMatchStatus;
   lobby?: ApiMatchStartLobbyPayload;
   eventTail?: PublicGameEvent[];
+  playerClock?: ApiPlayerClockSnapshot;
   pendingUndo?: ApiPendingUndoRequest & { needsResponse: boolean };
   aiTurnPresentation?: ApiAiTurnPresentationState;
   winner?: Winner;

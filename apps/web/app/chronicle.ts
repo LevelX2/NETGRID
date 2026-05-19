@@ -1,4 +1,4 @@
-import type { PublicGameEvent, ResolvedGameEffect, Side } from "@netgrid/shared";
+import { DEMO_CARDS_BY_ID, type PublicGameEvent, type ResolvedGameEffect, type Side } from "@netgrid/shared";
 import {
   isDataFortReclamationInstallPayload,
   isDataFortReclamationRezPayload,
@@ -103,6 +103,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
   const shellTradersAbility = stringValue(payload.shellTradersAbility);
+  const shellTradersTargetTitle =
+    shellTradersAbility === "set_aside_from_grip" ||
+    shellTradersAbility === "remove_shell_counter" ||
+    shellTradersAbility === "start_turn_remove_shell_counter" ||
+    shellTradersAbility === "auto_install_after_memory_choice"
+      ? targetCardTitleFromPayload(payload) ?? cardTitle
+      : undefined;
   const v1922RunnerProgramAbility = stringValue(payload.v1922RunnerProgramAbility);
 
   const baseChipList = baseChips(actor, isAi);
@@ -115,6 +122,12 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const chips = [...baseChipList];
 
   switch (actionType) {
+    case "time_expired":
+      category = "danger";
+      importance = "critical";
+      title = label ?? `${actor ? sideLabel(actor) : "Eine Seite"} verliert durch Zeitablauf.`;
+      chips.push("Spielerzeit");
+      break;
     case "game_created":
       category = "system";
       visibility = "system";
@@ -127,6 +140,23 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
         chips.push("The Shell Traders", "Installiert", "0 Kosten");
+        break;
+      }
+      if (payload.smithsPawnshopTriggered === true) {
+        const gainedCredits = numberValue(payload.creditsGained) ?? numberValue(payload.gainedCredits) ?? 0;
+        const trashedTitle = stringValue(payload.trashedCardTitle) ?? targetCardTitleFromPayload(payload) ?? "eine andere installierte Karte";
+        category = "economy";
+        importance = "important";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, `${trashedTitle} mit Smith's Pawnshop getrasht und ${creditText(gainedCredits)} erhalten`);
+        chips.push("Smith's Pawnshop", `+${gainedCredits} ${creditLabel(gainedCredits)}`, "Trash");
+        break;
+      }
+      if (payload.smithsPawnshopTriggered === false) {
+        category = "card";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, "Smith's Pawnshop nicht genutzt");
+        chips.push("Smith's Pawnshop", "Pass");
         break;
       }
       if (abilityId === "playful_ai_dice_loop") {
@@ -323,6 +353,41 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
               : phrase(subject, `${cardTitle ?? "ein Programm"} aus dem Stack vorgezeigt und ${searchDestination === "install_program" ? `im Rig installiert${temporaryInstall ? "; Rückkehr am Zugende" : ""}` : `in ${destinationLabel} genommen`}`)
             : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack in ${destinationLabel} genommen`);
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
+      if (hiddenZoneAction === "self_modifying_code_install_program") {
+        const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
+        const installed = payload.installed === true || searchDestination === "runner_rig";
+        const deferredForMemory = payload.installDeferredForMemory === true;
+        const blockedReason = installBlockedReasonLabel(stringValue(payload.installBlockedReason));
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title = deferredForMemory
+          ? phrase(subject, `${programTitle} aus dem Stack vorgezeigt; MU muss freigemacht werden`)
+          : installed
+            ? phrase(subject, `${programTitle} aus dem Stack vorgezeigt und im Rig installiert`)
+            : phrase(subject, `${programTitle} aus dem Stack vorgezeigt, aber nicht installiert`);
+        description = !installed && !deferredForMemory && blockedReason ? `Grund: ${blockedReason}.` : undefined;
+        chips.push("Self-Modifying Code", "Stack", "Vorgezeigt", deferredForMemory ? "MU freimachen" : installed ? "Installiert" : "Nicht installiert", ...(payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
+      if (hiddenZoneAction === "self_modifying_code_free_mu") {
+        const installedTitle =
+          titleForDefinitionId(stringValue(payload.installedProgramDefinitionId)) ??
+          publicRevealTitleFromPayload(payload) ??
+          cardTitle ??
+          "das gewählte Programm";
+        const trashedTitles = titlesForDefinitionIds(stringValue(payload.trashedCardDefinitionIds));
+        const trashedCount = numberValue(payload.trashedCount) ?? trashedTitles.length;
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.installedProgramDefinitionId) ?? stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title = phrase(subject, `${installedTitle} nach MU-Auswahl im Rig installiert`);
+        description = trashedTitles.length > 0 ? `Für MU getrasht: ${trashedTitles.join(", ")}.` : undefined;
+        chips.push("Self-Modifying Code", "MU freigemacht", "Installiert", ...(trashedCount > 0 ? [`${trashedCount} Trash`] : []));
         break;
       }
       if (hiddenZoneAction === "sneak_preview_install_program") {
@@ -781,7 +846,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const installed = payload.installedFromSpecialZone === true;
         category = "card";
         importance = "important";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
+        title = phrase(subject, `${shellTradersTargetTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
         chips.push("The Shell Traders", "Set Aside", `${counters} Shell`);
         break;
       }
@@ -793,7 +858,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = installed || pendingMemory ? "important" : "normal";
         title = phrase(
           subject,
-          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+          `1 Shell-Counter von ${shellTradersTargetTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
         );
         chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
         break;
@@ -801,7 +866,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       if (shellTradersAbility === "auto_install_after_memory_choice") {
         category = "card";
         importance = "important";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
+        title = phrase(subject, `${shellTradersTargetTitle ?? "eine Karte"} durch The Shell Traders kostenlos installiert`);
         chips.push("The Shell Traders", "Installiert", "0 Kosten");
         break;
       }
@@ -850,7 +915,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = installed || pendingMemory ? "important" : "normal";
         title = phrase(
           subject,
-          `1 Shell-Counter von ${cardTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
+          `1 Shell-Counter von ${shellTradersTargetTitle ?? "einer Karte"} entfernt${installed ? "; Karte kostenlos installiert" : pendingMemory ? "; MU muss freigemacht werden" : ""}`
         );
         chips.push("The Shell Traders", "Shell -1", `${remaining} übrig`, ...(installed ? ["Installiert"] : []), ...(pendingMemory ? ["MU freimachen"] : []));
         break;
@@ -1493,6 +1558,34 @@ function extractCardTitleFromLabel(actionType: string, label: string | undefined
 function sourceTitleFromActionLabel(label: string | undefined): string | undefined {
   const title = label?.match(/^(.+?):\s+.+$/)?.[1]?.trim();
   return title && !isGenericCardLabel(title) ? title : undefined;
+}
+
+function targetCardTitleFromPayload(payload: Record<string, unknown>): string | undefined {
+  const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+  return targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
+}
+
+function publicRevealTitleFromPayload(payload: Record<string, unknown>): string | undefined {
+  return titleForDefinitionId(stringValue(payload.publicRevealDefinitionId));
+}
+
+function titleForDefinitionId(definitionId: string | undefined): string | undefined {
+  return definitionId ? DEMO_CARDS_BY_ID[definitionId]?.title : undefined;
+}
+
+function titlesForDefinitionIds(value: string | undefined): string[] {
+  return value
+    ? value
+        .split(",")
+        .map((definitionId) => titleForDefinitionId(definitionId.trim()))
+        .filter((title): title is string => Boolean(title))
+    : [];
+}
+
+function installBlockedReasonLabel(reason: string | undefined): string | undefined {
+  if (reason === "insufficient_credits") return "nicht genug Credits";
+  if (reason === "unique_already_installed") return "Unique bereits installiert";
+  return undefined;
 }
 
 function abilityTextFromLabel(label: string | undefined, cardTitle: string | undefined): string {

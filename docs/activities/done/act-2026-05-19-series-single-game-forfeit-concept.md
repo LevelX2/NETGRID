@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-19-series-single-game-forfeit-concept
-status: inbox
+status: done
 kind: concept
 area: server
 priority: high
 primaryAgent: release-planning-agent
 requiresImplementation: true
 createdAt: 2026-05-19
-startedAt:
-completedAt:
+startedAt: 2026-05-19
+completedAt: 2026-05-19
 branch:
 releaseTarget: private match series lifecycle
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/releases/special/s01/match-series-spec.md
+  - docs/activities/inbox/act-2026-05-19-series-single-game-forfeit-implementation.md
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
+checks:
+  - Select-String series-forfeit contract markers
+  - git diff --check
 relatedActivities:
   - act-2026-05-19-series-single-game-forfeit-implementation
 ---
@@ -77,4 +82,4 @@ Für private Matchserien mit zwei oder mehr geplanten Spielen soll fachlich saub
 
 ## Ergebnisnotiz
 
-Noch offen.
+Konzept abgeschlossen: Serien-Forfeit ist als Einzelspiel-Aufgabe definiert, nicht als Serienabbruch. Das aufgegebene Spiel erzeugt ein Serienresultat mit Gewinner Gegenseite, `reason: forfeit`, letztem echten Engine-StateHash und normaler Matchpunktwertung. `series-next` bleibt verfügbar, solange weitere geplante Spiele offen sind. Das Umsetzungspaket ist entblockt und konkretisiert.

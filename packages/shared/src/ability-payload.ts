@@ -24,6 +24,7 @@ export const LEGACY_ABILITY_PAYLOAD_FIELDS = [
   "agendaAbility",
   "resourceAbility",
   "runnerAbility",
+  "shellTradersAbility",
   "acmeSavingsAndLoanAbility",
 ] as const;
 

@@ -1375,6 +1375,103 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(advanceAfterForfeit.error.code).toBe("match_not_active");
   });
 
+  it("tracks player clock grace, reconnect snapshots and terminal time expiry without changing Engine win state", async () => {
+    const startMs = Date.parse("2026-05-19T08:00:00.000Z");
+    let nowMs = startMs;
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "player-clock-grace",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
+      publicServerBaseUrl: "http://127.0.0.1:8787",
+      now: () => new Date(nowMs).toISOString()
+    });
+    const created = await service.createMatch({
+      hostSide: "corp",
+      seed: "player-clock-grace",
+      settings: { playerClock: { mode: "player_clock", startingTimeMs: 120_000, gracePeriodMs: 5_000 } }
+    });
+    expect(created.joinUrl).toBeTruthy();
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    await forceSetupComplete(service, created.matchId);
+
+    const before = await bootstrap(service, created.matchId, corp);
+    const beforeHash = hashState((await service.loadForTest(created.matchId))!.gameState);
+    expect(before.playerClock).toMatchObject({
+      schemaVersion: "player-clock-v1",
+      mode: "player_clock",
+      decisionOwnerSide: "corp",
+      remainingMs: { runner: 120_000, corp: 120_000 },
+      gracePeriodMs: 5_000,
+      warningLevel: "grace"
+    });
+    const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
+
+    nowMs = startMs + 7_000;
+    const reconnected = await service.reconnectMatch(created.matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.playerClock).toMatchObject({
+      mode: "player_clock",
+      decisionOwnerSide: "corp",
+      remainingMs: { runner: 120_000, corp: 118_000 },
+      graceRemainingMs: 0,
+      warningLevel: "charging"
+    });
+    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
+
+    nowMs = startMs + 126_000;
+    const expired = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: reconnected.sessionToken,
+      actionId: mandatoryDraw.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "player-clock-expire"
+    });
+    expect(expired.ok).toBe(false);
+    if (expired.ok) throw new Error("Expected time expiry");
+    expect(expired.error.code).toBe("time_expired");
+    const payload = expectSidePayload(expired.payload);
+    expect(payload.matchStatus).toBe("finished");
+    expect(payload.playerClock).toMatchObject({ mode: "player_clock", expiredSide: "corp", warningLevel: "expired" });
+    expect(payload.resultSummary).toMatchObject({
+      reason: "time_expired",
+      winner: "runner",
+      winnerSide: "runner",
+      loserSide: "corp",
+      finalEngineStateHash: beforeHash
+    });
+    expect(payload.eventTail.at(-1)?.publicPayload.type).toBe("time_expired");
+    expectLifecyclePayloadSafe(payload);
+    expect((await service.loadForTest(created.matchId))?.gameState.winner).toBeFalsy();
+    expect((await service.replayMatch(created.matchId)).finalStateHash).toBe(beforeHash);
+  });
+
+  it("keeps matches without player clock free of timer payloads and time-expiry losses", async () => {
+    const { service, matchId, corp } = await joinedMatch("player-clock-none");
+    const before = await bootstrap(service, matchId, corp);
+    expect(before.playerClock).toBeUndefined();
+    const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
+
+    const submitted = await service.submitAction({
+      matchId,
+      side: "corp",
+      sessionToken: corp.sessionToken,
+      actionId: mandatoryDraw.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      idempotencyKey: "player-clock-none-action"
+    });
+    expect(submitted.ok).toBe(true);
+    if (!submitted.ok) throw new Error(submitted.error.message);
+    expect(submitted.actorPayload.playerClock).toBeUndefined();
+    expect(submitted.actorPayload.matchStatus).toBe("active");
+    expect(submitted.actorPayload.resultSummary).toBeUndefined();
+  });
+
   it("recreates V1.0.4 matches with new identity, links, seed and tokens while old tokens stop working", async () => {
     const pending = await pendingDeckMatch("v104-recreate-pending");
     const oldStored = await pending.service.loadForTest(pending.created.matchId);
@@ -3261,6 +3358,125 @@ describe("MVP 0.2 multiplayer service", () => {
     expect("error" in duplicate).toBe(true);
     if (!("error" in duplicate)) throw new Error("Expected duplicate series-next rejection");
     expect(duplicate.error.code).toBe("series_next_exists");
+  });
+
+  it("treats forfeit in game 1 of a private series as a single-game result and keeps series-next available", async () => {
+    const match = await joinedMatch("series-forfeit-game-1", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
+    const beforeRecord = await match.service.loadForTest(match.matchId);
+    if (!beforeRecord?.gameState) throw new Error("Missing series game state");
+    const beforeHash = hashState(beforeRecord.gameState);
+
+    const forfeited = await match.service.forfeitMatch({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken
+    });
+    expect(forfeited.ok).toBe(true);
+    if (!forfeited.ok) throw new Error(forfeited.error.message);
+    const runnerPayload = expectSidePayload(forfeited.actorPayload);
+    expect(runnerPayload.matchStatus).toBe("forfeited");
+    expect(runnerPayload.resultSummary).toMatchObject({
+      reason: "forfeit",
+      winnerSide: "corp",
+      loserSide: "runner",
+      finalEngineStateHash: beforeHash,
+      series: {
+        status: "between_games",
+        gameNumber: 1,
+        gamesPlanned: 2,
+        viewerWins: 0,
+        opponentWins: 1,
+        viewerMatchPoints: 0,
+        opponentMatchPoints: 10,
+        viewerSeriesOutcome: "lost",
+        nextAvailable: true
+      }
+    });
+
+    const stored = await match.service.loadForTest(match.matchId);
+    expect(stored?.gameState.winner).toBeFalsy();
+    expect(stored?.match.series?.results[0]).toMatchObject({
+      matchId: match.matchId,
+      gameNumber: 1,
+      winner: "corp",
+      reason: "forfeit",
+      finalStateHash: beforeHash
+    });
+    expect((await match.service.replayMatch(match.matchId)).finalStateHash).toBe(beforeHash);
+
+    const next = await match.service.startNextSeriesGame(match.matchId, {
+      side: match.runner.side,
+      sessionToken: match.runner.sessionToken,
+      displayName: "Runner nach Aufgabe"
+    });
+    expect("error" in next).toBe(false);
+    if ("error" in next) throw new Error(next.error.message);
+    expect(next.hostSide).toBe("corp");
+    expect(next.matchId).not.toBe(match.matchId);
+    expect((await match.service.loadForTest(match.matchId))?.match.series?.nextMatchId).toBe(next.matchId);
+  });
+
+  it("closes a private series when the last planned game ends by forfeit", async () => {
+    const match = await joinedMatch("series-forfeit-final-game", { agendaPointsToWin: 7, matchFormat: "two_game_side_swap" });
+    const record = await match.service.loadForTest(match.matchId);
+    if (!record?.gameState || !record.match.series) throw new Error("Missing active series record");
+    record.match.series = {
+      ...record.match.series,
+      gameNumber: 2,
+      results: [
+        {
+          matchId: "series-forfeit-final-game-1",
+          gameNumber: 1,
+          winner: "corp",
+          reason: "agenda_points",
+          runnerPlayer: record.match.series.runnerPlayer,
+          corpPlayer: record.match.series.corpPlayer,
+          runnerAgendaPoints: 0,
+          corpAgendaPoints: 2,
+          finishedAt: "2026-05-19T08:00:00.000Z",
+          finalStateHash: "fnv1a:game1"
+        }
+      ]
+    };
+    await (match.service as unknown as { storage: MultiplayerStorage }).storage.save(record);
+
+    const beforeHash = hashState(record.gameState);
+    const forfeited = await match.service.forfeitMatch({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken
+    });
+    expect(forfeited.ok).toBe(true);
+    if (!forfeited.ok) throw new Error(forfeited.error.message);
+    const corpPayload = expectSidePayload(forfeited.actorPayload);
+    expect(corpPayload.resultSummary).toMatchObject({
+      reason: "forfeit",
+      winnerSide: "runner",
+      loserSide: "corp",
+      finalEngineStateHash: beforeHash,
+      series: {
+        status: "finished",
+        gameNumber: 2,
+        gamesPlanned: 2,
+        viewerWins: 1,
+        opponentWins: 1,
+        viewerMatchPoints: 10,
+        opponentMatchPoints: 10,
+        viewerSeriesOutcome: "draw",
+        seriesDecision: "draw",
+        nextAvailable: false
+      }
+    });
+    const stored = await match.service.loadForTest(match.matchId);
+    expect(stored?.match.series?.status).toBe("finished");
+    expect(stored?.match.series?.results).toHaveLength(2);
+    const next = await match.service.startNextSeriesGame(match.matchId, {
+      side: match.corp.side,
+      sessionToken: match.corp.sessionToken
+    });
+    expect("error" in next).toBe(true);
+    if (!("error" in next)) throw new Error("Expected finished series rejection");
+    expect(next.error.code).toBe("series_finished");
   });
 
   it("uses 10-point game wins and loser agenda points for private series scoring", async () => {

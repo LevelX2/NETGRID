@@ -5646,7 +5646,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "At the start of each of your turns, you may trash one of your other installed cards to gain 1 credit.\nOnly one unique card of a particular name can be in play at a time.",
+      "text": "At the start of each of your turns, you may trash one of your other installed cards to gain 2 credits.\nOnly one unique card of a particular name can be in play at a time.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

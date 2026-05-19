@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-19-series-single-game-forfeit-implementation
-status: inbox
+status: done
 kind: fix
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-19
-startedAt:
-completedAt:
+startedAt: 2026-05-19
+completedAt: 2026-05-19
 branch:
 releaseTarget: private match series lifecycle
-blockedBy:
-  - act-2026-05-19-series-single-game-forfeit-concept
-resultArtifacts: []
-checks: []
+blockedBy: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm --filter @netgrid/server test -- multiplayer.test.ts -t "single-game result|last planned game"
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 relatedActivities:
   - act-2026-05-19-series-single-game-forfeit-concept
 ---
@@ -28,8 +34,11 @@ Nach abgeschlossenem Konzept soll die App erlauben, ein einzelnes laufendes Spie
 ## Kontext und Quellen
 
 - Geblockt durch: `act-2026-05-19-series-single-game-forfeit-concept`.
+- Konzept abgeschlossen in `docs/releases/special/s01/match-series-spec.md`, Abschnitt `Einzelspiel-Aufgabe innerhalb einer Serie`.
 - Bestehender Vertrag aus S01: Eine Matchserie liegt oberhalb einzelner Spiele; jedes Spiel behält eigenen `GameState`, Replay und finalen StateHash.
 - Bestehender Lifecycle-Vertrag aus V1.0.4: Forfeit ist ein Server-/Match-Lifecycle-Ergebnis, kein Engine-Sieg und kein Engine-Event.
+- Konzeptentscheidung: `forfeitMatch` beendet in einer privaten Matchserie nur das aktuelle Einzelspiel; die Serie bleibt fortsetzbar, solange geplante Spiele offen sind.
+- Konzeptentscheidung: Gewinner erhält 10 Matchpunkte, Verlierer erhält die bis zur Aufgabe erzielten eigenen Agenda-Punkte; `finalEngineStateHash` bleibt der letzte echte Engine-StateHash.
 - Bestehende Code-Startpunkte laut Suchlauf:
   - `apps/server/src/multiplayer.ts`: Serienzustand, `series-next`, `forfeitMatch`, Serienresultat-Aggregation.
   - `packages/shared/src/api-contracts.ts`: API-Result-/Series-Summary-Verträge.
@@ -74,11 +83,11 @@ Nach abgeschlossenem Konzept soll die App erlauben, ein einzelnes laufendes Spie
 ## Umsetzungshinweise
 
 - Primärer Folgeagent: `release-implementation-agent`.
-- Vor Umsetzung zuerst das Konzeptpaket abschließen und dessen Entscheidung in diese Activity übertragen.
+- Konzeptpaket ist abgeschlossen; Umsetzung kann direkt claimen.
 - Wahrscheinlich muss die Serienaggregation Forfeit-Ergebnisse genauso wie Engine-Finished-Ergebnisse aufnehmen, aber mit `reason: "forfeit"` und dem letzten echten Engine-StateHash.
 - Besonders prüfen, ob bestehende Guards nur `record.match.status === "finished"` für `series-next` akzeptieren und ob `forfeited` als einzelspiel-terminaler Status im Serienkontext ebenfalls zulässig sein muss.
 - REST bleibt autoritativer Schreibpfad; WebSocket nur Broadcast.
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt: `forfeitMatch` finalisiert in privaten Serien ein Einzelspiel-Serienresultat mit `reason: forfeit`, letztem echtem Engine-StateHash und normaler Matchpunktwertung. `series-next` akzeptiert danach ein forfeit-terminales Serienspiel, solange weitere Spiele offen sind; nach dem letzten Serienspiel wird die Serie abgeschlossen. Der UI-Bestätigungstext trennt aktuelles Spiel und Matchserie klarer.

@@ -737,6 +737,14 @@ async function routeHttp(
         const nextSettings: Parameters<MultiplayerService["createMatch"]>[0]["settings"] = {};
         nextSettings.agendaPointsToWin = 7;
         if (settings.matchFormat === "rules_match" || settings.matchFormat === "two_game_side_swap") nextSettings.matchFormat = settings.matchFormat;
+        if (settings.playerClock && typeof settings.playerClock === "object") {
+          const playerClock = settings.playerClock as Record<string, unknown>;
+          nextSettings.playerClock = {
+            mode: playerClock.mode === "player_clock" ? "player_clock" : "none",
+            ...(typeof playerClock.startingTimeMs === "number" ? { startingTimeMs: playerClock.startingTimeMs } : {}),
+            ...(typeof playerClock.gracePeriodMs === "number" ? { gracePeriodMs: playerClock.gracePeriodMs } : {})
+          };
+        }
         if (Object.keys(nextSettings).length > 0) createInput.settings = nextSettings;
       }
       try {
@@ -1035,6 +1043,7 @@ function sendBootstrap(socket: WebSocket | undefined, payload: ServicePayload): 
       matchStatus: payload.matchStatus,
       matchVersion: payload.matchVersion,
       playerView: payload.playerView,
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       pendingUndo: payload.pendingUndo ?? null
     }
   });

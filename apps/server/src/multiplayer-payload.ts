@@ -5,6 +5,7 @@ import {
   redactPublicEventForSide,
 } from "@netgrid/engine";
 import type { Side } from "@netgrid/shared";
+import type { ApiPlayerClockSnapshot } from "@netgrid/shared";
 import type {
   AiTurnPresentationState,
   GameResultSummary,
@@ -26,6 +27,7 @@ export type SidePayloadBuilderDeps = {
     retentionProtected: boolean;
     retentionProtectedAt?: string;
   };
+  playerClockSnapshot?: ApiPlayerClockSnapshot;
 };
 
 export function buildSidePayload(
@@ -50,9 +52,10 @@ export function buildSidePayload(
     : undefined;
   const lifecycleFinalHash = record.lifecycleResult?.finalEngineStateHash;
   const terminalWinner =
-    record.match.status === "forfeited"
+    record.lifecycleResult?.winnerSide ??
+    (record.match.status === "forfeited"
       ? record.lifecycleResult?.winnerSide
-      : record.gameState.winner;
+      : record.gameState.winner);
   const finalStateHash = terminalWinner
     ? lifecycleFinalHash ?? hashState(record.gameState)
     : undefined;
@@ -82,6 +85,7 @@ export function buildSidePayload(
     ...(playerView.pendingChoice ? { pendingChoice: playerView.pendingChoice } : {}),
     ...(pendingUndo ? { pendingUndo } : {}),
     ...(aiTurnPresentation ? { aiTurnPresentation } : {}),
+    ...(deps.playerClockSnapshot ? { playerClock: deps.playerClockSnapshot } : {}),
     ...(terminalWinner && finalStateHash
       ? { winner: terminalWinner, finalStateHash }
       : {}),

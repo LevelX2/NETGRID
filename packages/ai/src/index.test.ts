@@ -822,6 +822,88 @@ describe("MVP 0.3 AI controller contract", () => {
     });
   });
 
+  it("plans installed The Shell Traders as build-rig progress before basic economy", () => {
+    const input = runnerShellTradersInput("ai-shell-traders-build-rig", (state) => {
+      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 1);
+      moveRunnerCardToGrip(state, "simple_fracter");
+      moveRunnerCardToGrip(state, "simple_setup_hardware");
+      state.runner.credits = 0;
+      state.runner.clicks = 3;
+    });
+    const prepare = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(prepare).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!prepare || !gainCredit) throw new Error("Missing Shell Traders fixture actions");
+
+    const buildCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "build_rig",
+    );
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gainCredit, prepare],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(buildCandidate?.legalActionIds).toContain(prepare.actionId);
+    expect(decision.actionId).toBe(prepare.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders:true");
+    expect(debugText).toContain("shell_traders_kind:prepare");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("uses The Shell Traders remove-counter actions to finish delayed installs", () => {
+    let state = runnerShellTradersState("ai-shell-traders-finish-install");
+    moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+    const fracterId = moveRunnerCardToGrip(state, "simple_fracter");
+    state.runner.credits = 2;
+    state.runner.clicks = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === fracterId,
+    );
+    setShellCountersForTest(state, fracterId, 1);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remove = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "remove_shell_counter",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remove).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remove || !gainCredit) throw new Error("Missing Shell-counter removal actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gainCredit, remove],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(remove.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders_kind:remove_counter");
+    expect(debugText).toContain("shell_traders_immediate_install:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
   it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
     const corpState = createGameAfterSetup({ seed: "ai-v199-aardvark-choice" });
     corpState.pendingChoice = {
@@ -2858,6 +2940,40 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("uses installed Corp economy payouts before the basic credit action", () => {
+    const input = installedCorpBbsEconomyInput("ai-corp-installed-bbs-economy");
+    const bbsTake = input.legalActions.find(
+      (action) =>
+        action.type === "gain_credit" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsTake).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!bbsTake || !basicCredit)
+      throw new Error("Missing installed BBS economy fixture actions");
+    expect(bbsTake.payload?.gainCreditsAmount).toBe(2);
+    expect(bbsTake.payload?.removeCounterAmount).toBe(2);
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [basicCredit, bbsTake],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(bbsTake.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(debugText).toContain("installed_corp_economy:true");
+    expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
+    expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
+    expect(debugText).toContain("installed_corp_economy_stored_credits:16");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
   it("recovers economy before low-reserve central ICE protection without urgent pressure", () => {
     const input = corpActionPhaseInput(
       "ai-v140-low-reserve-central-protect",
@@ -3273,13 +3389,16 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
     const decision = chooseCorpPlanDecision(scopedInput);
 
-    expect(scoreCandidate).toBeDefined();
     expect(economyCandidate).toBeDefined();
-    if (!scoreCandidate || !economyCandidate)
+    if (!economyCandidate)
       throw new Error("Missing remote rez reserve candidates");
-    expect(
-      evaluateRemoteRezReserve(scopedInput, scoreCandidate).reasons,
-    ).toContain("remote_rez_reserve_missing_before_score_line");
+    expect(scoreCandidate).toBeUndefined();
+    expect(evaluateAgendaRisk(scopedInput, economyCandidate).evidence).toEqual(
+      expect.arrayContaining([
+        "protectedRemoteAvailable:false",
+        "rezReserveAvailable:false",
+      ]),
+    );
     expect(
       evaluateRemoteRezReserve(scopedInput, economyCandidate).reasons,
     ).toContain("remote_rez_reserve_building");
@@ -3828,12 +3947,15 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
     const decision = chooseCorpPlanDecision(scopedInput);
 
-    expect(scoreCandidate).toBeDefined();
     expect(economyCandidate).toBeDefined();
-    if (!scoreCandidate || !economyCandidate)
+    if (!economyCandidate)
       throw new Error("Missing missing-reserve agenda-flood candidates");
-    expect(evaluateAgendaRisk(scopedInput, scoreCandidate).evidence).toContain(
-      "rezReserveAvailable:false",
+    expect(scoreCandidate).toBeUndefined();
+    expect(evaluateAgendaRisk(scopedInput, economyCandidate).evidence).toEqual(
+      expect.arrayContaining([
+        "protectedRemoteAvailable:false",
+        "rezReserveAvailable:false",
+      ]),
     );
     expect(
       evaluateRemoteRezReserve(scopedInput, economyCandidate).reasons,
@@ -3842,6 +3964,118 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(decision.selectedActionId).toBe(gain.actionId);
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_agenda|simple_priority_agenda/,
+    );
+  });
+
+  it("penalizes repeating an advanced remote agenda after a recent steal without rez reserve", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-recent-remote-agenda-loss",
+      (state) => {
+        state.corp.credits = 2;
+        state.runner.credits = 5;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 1);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing recent remote agenda loss fixture actions");
+
+    const eventTail: PublicGameEvent[] = [
+      ...input.eventTail,
+      {
+        eventId: "test-recent-remote-agenda-steal",
+        type: "steal_agenda",
+        stateVersionBefore: input.actionNumber - 1,
+        stateVersionAfter: input.actionNumber,
+        stateHashAfter: "test-hash",
+        publicPayload: {
+          actionType: "steal_agenda",
+          serverId: "remote_1",
+        },
+      },
+    ];
+    const scopedInput = {
+      ...input,
+      eventTail,
+      legalActions: [advance, gain],
+    };
+    const scoreCandidate = generateCorpPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "score_next_turn",
+    );
+    const decision = chooseCorpPlanDecision(scopedInput);
+
+    expect(scoreCandidate).toBeDefined();
+    if (!scoreCandidate)
+      throw new Error("Missing recent-loss score-next-turn candidate");
+    const score = evaluateCorpPlan(scopedInput, scoreCandidate);
+    expect(score.reasons).toContain("recent_remote_agenda_loss_risky_repeat");
+    expect(score.evidence).toEqual(
+      expect.arrayContaining([
+        "recent_remote_agenda_loss:remote_1",
+        "recent_remote_agenda_repeat:risky",
+        "remote_bluff_budget:blocked",
+      ]),
+    );
+    expect(decision.debug.planKind).toBe("recover_economy");
+    expect(decision.selectedActionId).toBe(gain.actionId);
+    expect(JSON.stringify(score.evidence)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
+    );
+  });
+
+  it("rezzes affordable remote ICE before an advanced root agenda access", () => {
+    let state = toRunnerTurn(createGameAfterSetup({ seed: "ai-corp-rez-advanced-remote-root" }));
+    state.corp.credits = 3;
+    state.runner.credits = 5;
+    ensureRemoteServer(state, "remote_1");
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    putCorpRootInRemote(state, "simple_agenda", 1);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const rez = input.legalActions.find(
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const decline = input.legalActions.find(
+      (action) => action.type === "decline_rez",
+    );
+
+    expect(rez).toBeDefined();
+    expect(decline).toBeDefined();
+    if (!rez || !decline)
+      throw new Error("Missing remote root rez fixture actions");
+
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [decline, rez],
+    });
+
+    expect(decision.actionId).toBe(rez.actionId);
+    expect(decision.reasonCode).toBe("corp.rez.defensive_card");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["run_window", "runner_credits:5"]),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|simple_agenda/,
     );
   });
 
@@ -8083,11 +8317,105 @@ function corpActionPhaseInput(
   });
 }
 
+function installedCorpBbsEconomyInput(seed: string) {
+  let state = createGameAfterSetup({
+    seed,
+    baseline: MVP_0_99_BASELINE,
+    runnerDeck: {
+      id: `installed_corp_bbs_runner_${seed}`,
+      name: "Installed Corp BBS Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "simple_fracter", quantity: 2 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `installed_corp_bbs_corp_${seed}`,
+      name: "Installed Corp BBS Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+        { id: "simple_agenda", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 2 },
+      ],
+    },
+    agendaPointsToWin: 7,
+  });
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  ensureRemoteServer(state, "remote_1");
+  const bbsId = putCorpRootInRemote(
+    state,
+    "onr_v1_309_bbs-whispering-campaign",
+    0,
+  );
+  state.cardInstances[bbsId] = {
+    ...state.cardInstances[bbsId]!,
+    faceup: true,
+    rezzed: true,
+    counters: { bit: 16 },
+  };
+  state.corp.credits = 2;
+  state.corp.clicks = 3;
+  return buildAiDecisionInput(state, "corp", {
+    difficulty: "normal",
+    profileId: "corp-ai-v1.4.0-normal",
+  });
+}
+
 function runnerActionPhaseInput(
   seed: string,
   mutate: (state: GameState) => void,
 ) {
   const state = toRunnerTurn(createGameAfterSetup({ seed }));
+  mutate(state);
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
+}
+
+function runnerShellTradersState(seed: string): GameState {
+  return toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: {
+        id: `ai_shell_traders_runner_${seed}`,
+        name: "AI Shell Traders Runner",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_v1_176_the-shell-traders", quantity: 2 },
+          { id: "simple_fracter", quantity: 2 },
+          { id: "simple_setup_hardware", quantity: 1 },
+          { id: "simple_economy_event", quantity: 8 },
+        ],
+      },
+      corpDeck: {
+        id: `ai_shell_traders_corp_${seed}`,
+        name: "AI Shell Traders Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 4 },
+          { id: "simple_economy_operation", quantity: 6 },
+          { id: "simple_barrier_ice", quantity: 2 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+}
+
+function runnerShellTradersInput(
+  seed: string,
+  mutate: (state: GameState) => void,
+) {
+  const state = runnerShellTradersState(seed);
   mutate(state);
   return buildAiDecisionInput(state, "runner", {
     difficulty: "normal",
@@ -8813,6 +9141,30 @@ function moveRunnerResourceToRig(
   return id;
 }
 
+function moveRunnerResourceCopyToRig(
+  state: GameState,
+  definitionId: string,
+  copyIndex: number,
+): CardInstanceId {
+  const ids = Object.entries(state.cardInstances)
+    .filter(([, card]) => card.definitionId === definitionId)
+    .map(([id]) => id)
+    .filter((id) => !state.runner.rig.resources.includes(id))
+    .sort();
+  const id = ids[copyIndex] ?? ids[0];
+  expect(id).toBeDefined();
+  if (!id) throw new Error(`Missing ${definitionId} copy ${copyIndex}`);
+  removeEverywhere(state, id);
+  state.runner.rig.resources.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
 function setPowerCountersForTest(
   state: GameState,
   id: CardInstanceId,
@@ -8823,6 +9175,20 @@ function setPowerCountersForTest(
     counters: {
       ...(state.cardInstances[id]?.counters ?? {}),
       power: amount,
+    },
+  };
+}
+
+function setShellCountersForTest(
+  state: GameState,
+  id: CardInstanceId,
+  amount: number,
+): void {
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    counters: {
+      ...(state.cardInstances[id]?.counters ?? {}),
+      shell: amount,
     },
   };
 }
