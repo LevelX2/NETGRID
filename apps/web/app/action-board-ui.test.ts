@@ -264,7 +264,15 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("shows access progress only from PlayerView breach data", () => {
-    const running = view("runner", {
+    const firstAccess = view("runner", {
+      run: {
+        attackedServerId: "hq",
+        phase: "access",
+        successful: true,
+        breach: { breachId: "breach_1", serverId: "hq", currentIndex: 0, remainingCount: 2, completed: false }
+      }
+    });
+    const secondAccess = view("runner", {
       run: {
         attackedServerId: "hq",
         phase: "access",
@@ -273,8 +281,9 @@ describe("V1.0.5 action board UI helpers", () => {
       }
     });
 
-    expect(currentRunTimelineStep(running, [])).toBe("access");
-    expect(breachProgressLabel(running)).toBe("Zugriff 2 von 3");
+    expect(currentRunTimelineStep(secondAccess, [])).toBe("access");
+    expect(breachProgressLabel(firstAccess)).toBe("Zugriff 1 von 2");
+    expect(breachProgressLabel(secondAccess)).toBe("Zugriff 2 von 2");
   });
 
   it("groups public Runner rig cards without implying hidden cards", () => {

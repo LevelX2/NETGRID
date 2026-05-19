@@ -639,7 +639,7 @@ export function breachProgressLabel(view: PlayerView): string | null {
   const breach = view.run?.breach;
   if (!breach) return null;
   const current = breach.currentIndex + 1;
-  const knownTotal = breach.completed ? breach.currentIndex + 1 : breach.currentIndex + 1 + breach.remainingCount;
+  const knownTotal = breach.completed ? current : breach.currentIndex + breach.remainingCount;
   return `Zugriff ${current} von ${Math.max(current, knownTotal)}`;
 }
 
