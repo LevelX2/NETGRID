@@ -94,7 +94,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_94_BASELINE, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
@@ -2381,6 +2381,7 @@ describe("MVP 0.3 Runner AI", () => {
         seed: "ai-runner-stale-legacy-archives",
         corpDeck: { ...ONR_V1_1_2K_CORP_DECK, cards: corpDeckCards },
         agendaPointsToWin: 7,
+        baseline: MVP_0_94_BASELINE,
       }),
     );
     expect(state.baseline.engineSchemaVersion).toBe("0.94.0");

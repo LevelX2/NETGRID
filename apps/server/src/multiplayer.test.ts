@@ -784,7 +784,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     const stored = await service.loadForTest(created.matchId);
 
-    expect(created.baseline.engineSchemaVersion).toBe("0.4.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.own.deckHash).toBe("fnv1a:b6bc479a");
     expect(created.playerView.deckMetadata?.opponent.deckHash).toBe("fnv1a:d77d0873");
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_004_snapshot_v0_6");
@@ -916,7 +916,7 @@ describe("MVP 0.2 multiplayer service", () => {
     });
     const stored = await service.loadForTest(created.matchId);
 
-    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.own.deckName).toBe("O:NR Runner Match Smoke");
     expect(created.playerView.deckMetadata?.opponent.deckName).toBe("O:NR Corp Match Smoke");
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe("local_onr_runner_match_smoke_snapshot");
@@ -1019,7 +1019,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const stored = await service.loadForTest(matchId);
 
     expect(stored?.match.status).toBe("active");
-    expect(stored?.match.baseline.multiplayerSchemaVersion).toBe("0.8.0");
+    expect(stored?.match.baseline.multiplayerSchemaVersion).toBe("0.99.0");
     expect(stored?.match.deckSetup.runnerSnapshotId).toBe("demo_runner_008_snapshot_v0_8");
     expect(stored?.match.deckSetup.corpSnapshotId).toBe("demo_corp_008_snapshot_v0_8");
     expect(stored?.tokens.every((token) => token.tokenHash.startsWith("sha256:"))).toBe(true);
@@ -2120,7 +2120,7 @@ describe("MVP 0.2 multiplayer service", () => {
       corpDeckSnapshotId: "demo_corp_123_snapshot_v1_2_3",
       settings: { agendaPointsToWin: 7, matchFormat: "rules_match" }
     });
-    expect(created.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(created.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(created.playerView.deckMetadata?.opponent.deckName).toBe("Runner Demo Deck 1.2.3 - Mechanic Unlock 1");
     expect(JSON.stringify(created)).not.toContain("onr_v1_101_mit-west-tier");
     expect(created.joinUrl).toBeTruthy();
@@ -4137,7 +4137,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(declined.ok).toBe(true);
     if (!declined.ok) throw new Error(declined.error.message);
     expect(declined.actorPayload.playerView.activeSide).toBe("runner");
-    expect(declined.actorPayload.playerView.timingPoint).toBe("access.resolve_card");
+    expect(declined.actorPayload.playerView.timingPoint).toBe("run.jack_out_window");
     expect(declined.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
     expect(declined.publicEvent?.publicPayload).toMatchObject({ actionType: "decline_rez" });
     expect(declined.publicEvent?.publicPayload).not.toHaveProperty("autoPacedPass");

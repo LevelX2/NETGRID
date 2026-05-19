@@ -39,6 +39,7 @@ export {
 } from "./demo-fixtures";
 export { DEMO_DECKS } from "./demo-decks";
 export {
+  CURRENT_RULES_BASELINE,
   MVP_0_1_BASELINE,
   MVP_0_2_BASELINE,
   MVP_0_3_BASELINE,

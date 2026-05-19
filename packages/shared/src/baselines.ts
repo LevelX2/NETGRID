@@ -212,3 +212,5 @@ export const MVP_0_99_BASELINE: RulesBaseline = {
   aiControllerSchemaVersion: "0.99.0",
   simulationSchemaVersion: "0.99.0",
 };
+
+export const CURRENT_RULES_BASELINE: RulesBaseline = MVP_0_99_BASELINE;

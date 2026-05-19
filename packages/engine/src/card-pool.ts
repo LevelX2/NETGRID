@@ -1,13 +1,5 @@
 import {
-  MVP_0_1_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_8_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_95_BASELINE,
-  MVP_0_96_BASELINE,
-  MVP_0_97_BASELINE,
-  MVP_0_98_BASELINE,
-  MVP_0_99_BASELINE,
+  CURRENT_RULES_BASELINE,
   type DeckDefinition,
   type DeckPublicMetadata,
   type RulesBaseline,
@@ -47,7 +39,7 @@ const EXPANDED_CARD_POOL_IDS = new Set([
 const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   {
     version: "0.99.0",
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.99",
     formatProfileId: "local-demo-v0.99",
     matchesDeck: (deck) =>
@@ -59,7 +51,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.98.0",
-    baseline: MVP_0_98_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.98",
     formatProfileId: "local-demo-v0.98",
     matchesDeck: (deck) =>
@@ -71,7 +63,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.97.0",
-    baseline: MVP_0_97_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.97",
     formatProfileId: "local-demo-v0.97",
     matchesDeck: (deck) =>
@@ -82,7 +74,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.96.0",
-    baseline: MVP_0_96_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.96",
     formatProfileId: "local-demo-v0.96",
     matchesDeck: (deck) =>
@@ -93,7 +85,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.95.0",
-    baseline: MVP_0_95_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.95",
     formatProfileId: "local-demo-v0.95",
     matchesDeck: (deck) =>
@@ -104,7 +96,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.94.0",
-    baseline: MVP_0_94_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.94",
     formatProfileId: "local-demo-v0.94",
     matchesDeck: (deck) =>
@@ -120,7 +112,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.8.0",
-    baseline: MVP_0_8_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.8",
     formatProfileId: "local-demo-v0.8",
     matchesDeck: (deck) =>
@@ -131,7 +123,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.4.0",
-    baseline: MVP_0_4_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "card-snapshot-0.5",
     formatProfileId: "local-demo-v0.6",
     matchesDeck: (deck) =>
@@ -141,7 +133,7 @@ const CARD_POOL_DESCRIPTORS: CardPoolDescriptor[] = [
   },
   {
     version: "0.1.0",
-    baseline: MVP_0_1_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     snapshotId: "mvp-0.1-demo",
     formatProfileId: "legacy-demo",
     matchesDeck: () => true,

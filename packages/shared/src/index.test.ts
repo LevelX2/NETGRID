@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CURRENT_RULES_BASELINE,
   MVP_0_1_BASELINE,
   MVP_0_99_BASELINE,
 } from "./baselines";
@@ -11,6 +12,7 @@ import {
 import { DEMO_DECKS } from "./demo-decks";
 import {
   DEMO_DECK_IDS,
+  CURRENT_RULES_BASELINE as INDEX_CURRENT_RULES_BASELINE,
   DEMO_DECKS as INDEX_DEMO_DECKS,
   LEGACY_ABILITY_PAYLOAD_FIELDS as INDEX_LEGACY_ABILITY_PAYLOAD_FIELDS,
   MVP_0_99_BASELINE as INDEX_MVP_0_99_BASELINE,
@@ -74,6 +76,8 @@ describe("rules baseline registry", () => {
     expect(MVP_0_1_BASELINE.engineSchemaVersion).toBe("0.1.0");
     expect(MVP_0_99_BASELINE.cardTextSnapshotId).toBe("mvp-0.99-demo");
     expect(MVP_0_99_BASELINE.simulationSchemaVersion).toBe("0.99.0");
+    expect(CURRENT_RULES_BASELINE).toBe(MVP_0_99_BASELINE);
+    expect(INDEX_CURRENT_RULES_BASELINE).toBe(CURRENT_RULES_BASELINE);
     expect(INDEX_MVP_0_99_BASELINE).toBe(MVP_0_99_BASELINE);
   });
 });

@@ -177,6 +177,7 @@ import {
   removeEverywhere,
 } from "./test-fixtures/mechanic-smoke-fixtures";
 import {
+  MVP_0_96_BASELINE,
   MVP_0_99_BASELINE,
   type CardDefinition,
   type CardInstanceId,
@@ -4359,7 +4360,7 @@ describe("MVP 0.94 Damage and Flatline", () => {
 });
 
 describe("O:NR v1 Limited local private test access", () => {
-  it("validates the secured O:NR harness decks against the current card registry", () => {
+  it("validates the secured O:NR harness decks against the current card registry and rules baseline", () => {
     const runnerValidation = validateDeckDefinition(ONR_V1_RUNNER_DECK, {
       expectedSide: "runner",
     });
@@ -4373,7 +4374,7 @@ describe("O:NR v1 Limited local private test access", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.94",
     );
@@ -4957,7 +4958,7 @@ describe("V1.0.5K Card Release", () => {
     });
   });
 
-  it("validates the V1.0.5K smoke decks and starts on the O:NR rules baseline", () => {
+  it("validates the V1.0.5K smoke decks and starts on the current rules baseline", () => {
     const runnerValidation = validateDeckDefinition(ONR_V1_0_5K_RUNNER_DECK, {
       expectedSide: "runner",
     });
@@ -4971,7 +4972,7 @@ describe("V1.0.5K Card Release", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.94",
     );
@@ -5437,7 +5438,7 @@ describe("V1.0.6K Card Release", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
     expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toBeDefined();
   });
@@ -5828,7 +5829,7 @@ describe("V1.1.2K Card Release", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
     expect(DEMO_CARDS_BY_ID["onr_v1_220_tycho-extension"]).toBeDefined();
   });
@@ -17352,7 +17353,7 @@ describe("MVP 0.95 Resources and tag interaction", () => {
         sourceDefinition(state, action) === "v095_safehouse_resource",
     );
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.95.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.runner.credits).toBe(4);
     expect(
       state.runner.rig.resources.map(
@@ -17743,7 +17744,7 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.96.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.kind).toBe("bid_amount");
     expect(state.trace).toMatchObject({
@@ -28811,17 +28812,20 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
-  it("creates V0.97 games with explicit demo decks and keeps old run behavior gated", () => {
+  it("creates V0.97 games with explicit demo decks on the current baseline and keeps explicit legacy run behavior gated", () => {
     const state = createGameAfterSetup({
       seed: "v097-baseline",
       runnerDeckId: "demo_runner_097",
       corpDeckId: "demo_corp_097",
     });
     const legacy = toRunnerTurn(
-      createGameAfterSetup({ seed: "v097-legacy-gate" }),
+      createGameAfterSetup({
+        seed: "v097-legacy-gate",
+        baseline: MVP_0_96_BASELINE,
+      }),
     );
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.97.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.97",
     );
@@ -29281,7 +29285,7 @@ describe("MVP 0.98a Identity and modifiers", () => {
     const second = v098IdentityGame("v098-identity-setup");
     const legacy = createGameAfterSetup({ seed: "v098-legacy-identity" });
 
-    expect(first.baseline.engineSchemaVersion).toBe("0.98.0");
+    expect(first.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(first.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.98",
     );
@@ -29299,7 +29303,7 @@ describe("MVP 0.98a Identity and modifiers", () => {
     expect(first.randomDrawRecords).toEqual(second.randomDrawRecords);
     expect(validateGameState(first).ok).toBe(true);
 
-    expect(legacy.baseline.engineSchemaVersion).toBe("0.1.0");
+    expect(legacy.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(legacy.runner.credits).toBe(5);
     expect(legacy.corp.credits).toBe(5);
     expect(legacy.runner.memoryLimit).toBe(4);
@@ -30154,7 +30158,9 @@ describe("MVP 0.4 controlled card pool and tags", () => {
     });
 
     expect(legacy.agendaPointsToWin).toBe(7);
+    expect(legacy.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(expanded.agendaPointsToWin).toBe(7);
+    expect(expanded.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
       Object.values(expanded.cardInstances).some(
         (card) => card.definitionId === "simple_setup_hardware",
@@ -30336,15 +30342,15 @@ describe("MVP 0.4 controlled card pool and tags", () => {
 });
 
 describe("MVP 0.8 playable starter slice", () => {
-  it("creates V0.8 games with explicit starter decks and baseline", () => {
+  it("creates V0.8 starter decks with current rules baseline and legacy metadata", () => {
     const state = createGameAfterSetup({
       seed: "v08-starter",
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
     });
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.8.0");
-    expect(state.baseline.cardImplementationVersion).toBe("0.8.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(state.baseline.cardImplementationVersion).toBe("0.99.0");
     expect(state.agendaPointsToWin).toBe(7);
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.8",

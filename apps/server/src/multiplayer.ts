@@ -6,12 +6,7 @@ import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
-  MVP_0_2_BASELINE,
-  MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_99_BASELINE,
-  MVP_0_8_BASELINE,
+  CURRENT_RULES_BASELINE,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -50,8 +45,6 @@ import {
   deckSetupForParticipants,
   resolveParticipantDeckSetup,
   resolveParticipantDeckPair,
-  setupUsesExpandedRules,
-  setupUsesMvp08Rules,
   type AiDeckPolicy,
   type MatchDeckSelectionInput,
   type ParticipantDeckPairInput,
@@ -675,7 +668,7 @@ export class MultiplayerService {
           mode,
           matchVersion: 1,
           seed,
-          baseline: MVP_0_2_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           settings: {
             agendaPointsToWin: pendingAgendaPointsToWin,
             matchFormat,
@@ -3077,25 +3070,8 @@ function deterministicHostSide(seed: string): Side {
   return value % 2 === 0 ? "runner" : "corp";
 }
 
-function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
-  if (setupUsesPrivateLocalOnrRules(deckSetup)) return MVP_0_99_BASELINE;
-  if (setupUsesMvp094Rules(deckSetup)) return MVP_0_94_BASELINE;
-  if (setupUsesMvp08Rules(deckSetup)) return MVP_0_8_BASELINE;
-  if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
-  return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
-}
-
-function setupUsesPrivateLocalOnrRules(setup: ResolvedDeckSetup): boolean {
-  return [setup.runnerSnapshot, setup.corpSnapshot].some(
-    (snapshot) => snapshot.cardPoolVersion === "private-local-onr-v1" || snapshot.publicMetadata.cardPoolVersion === "private-local-onr-v1"
-  );
-}
-
-function setupUsesMvp094Rules(setup: ResolvedDeckSetup): boolean {
-  return (
-    setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.94" ||
-    setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.94"
-  );
+function baselineForMode(_mode: MatchMode, _deckSetup: ResolvedDeckSetup): RulesBaseline {
+  return CURRENT_RULES_BASELINE;
 }
 
 function controllersForMode(
