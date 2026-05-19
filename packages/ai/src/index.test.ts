@@ -4272,6 +4272,119 @@ describe("V1.4.0 plan-based Corp AI", () => {
     ).toBe(true);
   });
 
+  it("does not play Overtime Incentives when extra actions only recover basic credits at a net loss", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-corp-overtime-basic-credit-loss",
+      baseline: CURRENT_RULES_BASELINE,
+      corpDeck: {
+        id: "ai_overtime_loss_corp",
+        name: "AI Overtime Loss Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_297_overtime-incentives", quantity: 1 },
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_barrier_ice", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 4;
+    state.corp.clicks = 1;
+    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const overtime = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_297_overtime-incentives",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(overtime).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!overtime || !basicCredit)
+      throw new Error("Missing Overtime loss fixture actions");
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [overtime, basicCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(debugText).toContain("basic_credit_followup_only:true");
+    expect(debugText).toContain("overtime_net_value:-2");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("can play Overtime Incentives when the extra actions open an immediate score window", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-corp-overtime-score-window",
+      baseline: CURRENT_RULES_BASELINE,
+      corpDeck: {
+        id: "ai_overtime_score_corp",
+        name: "AI Overtime Score Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_297_overtime-incentives", quantity: 1 },
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_barrier_ice", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 6;
+    state.corp.clicks = 1;
+    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    putCorpRootInRemote(state, "simple_agenda", 2);
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const overtime = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_297_overtime-incentives",
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(overtime).toBeDefined();
+    expect(advance).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!overtime || !advance || !basicCredit)
+      throw new Error("Missing Overtime score-window fixture actions");
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [overtime, advance, basicCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(overtime.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.score_next_turn");
+    expect(debugText).toContain("score_window_after_extra_actions:true");
+    expect(debugText).toContain("basic_credit_followup_only:false");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
   it("uses tag-enabling ICE pressure without hidden-info leakage", () => {
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-ice-pressure",

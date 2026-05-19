@@ -121,6 +121,15 @@ type CorpInstalledEconomyActionAssessment = {
   ability: string;
 };
 
+type CorpExtraActionOperationAssessment = {
+  gainedActions: number;
+  actionCost: number;
+  expectedFollowupValue: number;
+  netValue: number;
+  basicCreditFollowupOnly: boolean;
+  scoreWindowAfterExtraActions: boolean;
+};
+
 type RemoteIntentMemory = {
   remoteInstallSignals: number;
   remoteAdvanceSignals: number;
@@ -277,7 +286,7 @@ export function generateCorpPlanCandidates(input: AiDecisionInput, context: Corp
     buildCandidate(
       input,
       "score_next_turn",
-      actions.filter((action) => action.type === "advance_card" || (action.type === "install_card" && action.payload?.placement !== "ice" && isSafeScoringRootAction(input, action, context)))
+      actions.filter((action) => action.type === "advance_card" || (action.type === "play_operation" && Boolean(classifyCorpExtraActionOperation(input, action, context)?.scoreWindowAfterExtraActions)) || (action.type === "install_card" && action.payload?.placement !== "ice" && isSafeScoringRootAction(input, action, context)))
     ),
     buildCandidate(
       input,
@@ -289,7 +298,7 @@ export function generateCorpPlanCandidates(input: AiDecisionInput, context: Corp
     buildCandidate(
       input,
       "recover_economy",
-      actions.filter((action) => action.type === "gain_credit" || action.type === "draw_card" || (action.type === "play_operation" && rolesForAction(input, action).some((role) => role.includes("economy") || role.includes("draw"))) || Boolean(classifyCorpInstalledEconomyAction(input, action)))
+      actions.filter((action) => action.type === "gain_credit" || action.type === "draw_card" || (action.type === "play_operation" && (rolesForAction(input, action).some((role) => role.includes("economy") || role.includes("draw")) || Boolean(classifyCorpExtraActionOperation(input, action, context)))) || Boolean(classifyCorpInstalledEconomyAction(input, action)))
     ),
     buildCandidate(
       input,
@@ -315,6 +324,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
   const recentRemoteAgendaLoss = evaluateRecentRemoteAgendaLoss(input, candidate, context);
   const remoteIntent = evaluateRemoteIntentMemory(input, beliefState);
   const installedEconomy = evaluateCorpInstalledEconomyActions(input, candidate);
+  const extraActions = evaluateCorpExtraActionOperations(input, candidate, context);
   const base = baseScoreForPlan(candidate.kind);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
   const score =
@@ -331,6 +341,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     remoteRezReserve.score +
     recentRemoteAgendaLoss.score +
     installedEconomy.score +
+    extraActions.score +
     remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent +
     remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent -
     remoteRootExposurePenalty(input, candidate, profile.riskTolerance, context) -
@@ -345,6 +356,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     ...(input.ownDeckDoctrine ? [`doctrine:${input.ownDeckDoctrine.archetypeTags.slice(0, 3).join(",") || "neutral"}`] : ["doctrine:neutral"]),
     ...candidate.expectedBenefits,
     ...installedEconomy.evidence,
+    ...extraActions.evidence,
     ...agendaRisk.evidence,
     ...serverThreat.evidence,
     ...economyReserve.evidence,
@@ -361,7 +373,7 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons, ...recentRemoteAgendaLoss.reasons, ...installedEconomy.reasons]).slice(0, 6),
+    reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons, ...recentRemoteAgendaLoss.reasons, ...installedEconomy.reasons, ...extraActions.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
 }
@@ -501,6 +513,44 @@ function evaluateCorpInstalledEconomyActions(input: AiDecisionInput, candidate: 
   };
 }
 
+function evaluateCorpExtraActionOperations(input: AiDecisionInput, candidate: CorpPlanCandidate, context: CorpEvaluationContext): CorpPlanEvaluatorResult {
+  const assessments = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .map((action) => (action ? classifyCorpExtraActionOperation(input, action, context) : undefined))
+    .filter((assessment): assessment is CorpExtraActionOperationAssessment => Boolean(assessment));
+  if (assessments.length === 0) return { score: 0, reasons: [], evidence: ["extra_action_expected_value:none"] };
+
+  const best = assessments
+    .slice()
+    .sort((left, right) => Number(right.scoreWindowAfterExtraActions) - Number(left.scoreWindowAfterExtraActions) || right.netValue - left.netValue || right.expectedFollowupValue - left.expectedFollowupValue)[0]!;
+  const score = best.scoreWindowAfterExtraActions
+    ? 190
+    : best.basicCreditFollowupOnly && best.netValue < 0
+      ? -260
+      : best.netValue < 0
+        ? -130
+        : 40 + best.netValue * 35;
+  return {
+    score,
+    reasons: [
+      best.scoreWindowAfterExtraActions
+        ? "score_window_after_extra_actions"
+        : best.basicCreditFollowupOnly
+          ? "basic_credit_followup_only"
+          : best.netValue < 0
+            ? "extra_action_net_loss"
+            : "extra_action_positive_sequence"
+    ],
+    evidence: [
+      `extra_action_expected_value:${best.expectedFollowupValue}`,
+      `extra_action_cost:${best.actionCost}`,
+      `overtime_net_value:${best.netValue}`,
+      `score_window_after_extra_actions:${best.scoreWindowAfterExtraActions}`,
+      `basic_credit_followup_only:${best.basicCreditFollowupOnly}`
+    ]
+  };
+}
+
 function classifyCorpInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): CorpInstalledEconomyActionAssessment | undefined {
   if (input.side !== "corp" || action.side !== "corp") return undefined;
   if (action.source === "basic_action" || action.source === "game_rule") return undefined;
@@ -538,6 +588,46 @@ function classifyCorpInstalledEconomyAction(input: AiDecisionInput, action: Lega
     storedCredits,
     futurePoolAfter,
     ability: ability || "corp_installed_credit_payout"
+  };
+}
+
+function classifyCorpExtraActionOperation(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): CorpExtraActionOperationAssessment | undefined {
+  if (input.side !== "corp" || action.side !== "corp" || action.type !== "play_operation") return undefined;
+  const sourceCard = findVisibleCard(input, action.source);
+  const gainedActions = extraActionsForCard(sourceCard?.definitionId, action);
+  if (gainedActions <= 0) return undefined;
+
+  const actionCost = actionCreditCost(action);
+  const creditsAfterOperation = input.playerView.own.credits - actionCost;
+  const availableClicksAfterOperation = Math.max(0, input.playerView.own.clicks - actionClickCost(action) + gainedActions);
+  const followups = input.legalActions.filter((candidate) => candidate.actionId !== action.actionId && candidate.side === "corp");
+  const basicCreditFollowupAvailable = followups.some((candidate) => candidate.type === "gain_credit" && candidate.source === "basic_action");
+  const scoreWindowAfterExtraActions = availableClicksAfterOperation >= 2 && followups.some((candidate) => {
+    if (candidate.type !== "advance_card") return false;
+    if (creditsAfterOperation < actionCreditCost(candidate)) return false;
+    const horizon = remoteScoreHorizonForAction(input, candidate, context);
+    return Boolean(horizon && horizon.advancesRemainingAfterAction === 0);
+  });
+  const valuableFollowupAvailable = followups.some((candidate) => {
+    if (candidate.type === "score_agenda") return availableClicksAfterOperation >= 1;
+    if (candidate.type === "install_card" && candidate.payload?.placement !== "ice") return rolesForAction(input, candidate).some(isAgendaRole);
+    if (candidate.type === "advance_card") return Boolean(remoteScoreHorizonForAction(input, candidate, context));
+    return Boolean(classifyCorpInstalledEconomyAction(input, candidate));
+  });
+  const expectedFollowupValue = scoreWindowAfterExtraActions
+    ? actionCost + 4
+    : valuableFollowupAvailable
+      ? Math.max(3, gainedActions)
+      : basicCreditFollowupAvailable
+        ? gainedActions
+        : 0;
+  return {
+    gainedActions,
+    actionCost,
+    expectedFollowupValue,
+    netValue: expectedFollowupValue - actionCost,
+    basicCreditFollowupOnly: basicCreditFollowupAvailable && !valuableFollowupAvailable && !scoreWindowAfterExtraActions,
+    scoreWindowAfterExtraActions
   };
 }
 
@@ -1068,8 +1158,12 @@ function selectPlanAction(input: AiDecisionInput, candidate: CorpPlanCandidate, 
 
 function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: LegalAction, context: CorpEvaluationContext): number {
   if (kind === "score_now" && action.type === "score_agenda") return 100;
+  const extraActionOperation = classifyCorpExtraActionOperation(input, action, context);
+  if (kind === "score_next_turn" && extraActionOperation?.scoreWindowAfterExtraActions) return 125;
   if (kind === "score_next_turn" && action.type === "advance_card") return 90 + boundedScoreHorizonActionBonus(input, action, context);
   if ((kind === "protect_hq" || kind === "protect_rnd") && action.type === "install_card" && action.payload?.placement === "ice") return 85;
+  if (kind === "recover_economy" && extraActionOperation?.basicCreditFollowupOnly && extraActionOperation.netValue < 0) return 35;
+  if (kind === "recover_economy" && extraActionOperation) return extraActionOperation.scoreWindowAfterExtraActions ? 88 : 60 + Math.max(0, extraActionOperation.netValue) * 4;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
   if (kind === "recover_economy" && action.type === "draw_card" && shouldCorpDrawForScoring(input)) return 78;
   if (kind === "recover_economy" && (action.type === "gain_credit" || action.type === "trigger_ability") && classifyCorpInstalledEconomyAction(input, action)) return corpInstalledEconomyPriority(input, action);
@@ -1161,6 +1255,25 @@ function rolesForCardId(cardId: string | undefined): string[] {
 
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.credits) ? cost.credits ?? 0 : 0), 0);
+}
+
+function actionClickCost(action: LegalAction): number {
+  const explicitClicks = action.costs.reduce((sum, cost) => sum + (Number.isFinite(cost.clicks) ? cost.clicks ?? 0 : 0), 0);
+  return explicitClicks > 0 ? explicitClicks : action.type === "play_operation" ? 1 : 0;
+}
+
+function extraActionsForCard(cardId: string | undefined, action: LegalAction): number {
+  const payloadAmount = Math.max(0, numberPayload(action, "gainedActions"), numberPayload(action, "gainActionsAmount"));
+  if (payloadAmount > 0) return payloadAmount;
+  if (!cardId) return 0;
+  const runtimeCard = RUNTIME_CARDS[cardId];
+  const demoCard = DEMO_CARDS_BY_ID[cardId];
+  if (!demoCard?.mechanics?.includes("gain_actions") && !/\bgain\b.+\bactions?\b/i.test(runtimeCard?.text ?? "")) return 0;
+  const text = (runtimeCard?.text ?? demoCard?.rulesText ?? "").toLowerCase();
+  if (/\bthree\b|3/.test(text)) return 3;
+  if (/\btwo\b|2/.test(text)) return 2;
+  if (/\bone\b|1/.test(text)) return 1;
+  return 0;
 }
 
 function numberPayload(action: LegalAction, key: string): number {
