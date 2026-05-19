@@ -4445,7 +4445,7 @@ select {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 10px;
-  width: fit-content;
+  width: 100%;
   max-width: 100%;
 }
 
@@ -4453,10 +4453,14 @@ select {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 
 .archivesPileBody {
+  width: 100%;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -4499,27 +4503,37 @@ select {
 }
 
 .archivesOverlapRow {
-  display: flex;
+  --archive-card-width: calc(108px * var(--archive-card-scale, 1));
+  --archive-card-height: calc(151px * var(--archive-card-scale, 1));
+  --archive-card-step: calc(50px * var(--archive-card-scale, 1));
+  --archive-stack-width: calc(var(--archive-card-width) + (var(--archive-card-step) * 5));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--archive-card-step), var(--archive-card-step)));
+  grid-auto-rows: var(--archive-card-height);
+  gap: calc(8px * var(--archive-card-scale, 1)) 0;
   align-items: flex-start;
-  min-height: calc(151px * var(--archive-card-scale, 1));
-  padding-right: 6px;
-  overflow-x: auto;
+  width: min(100%, var(--archive-stack-width));
+  min-width: min(100%, var(--archive-card-width));
+  max-width: 100%;
+  min-height: var(--archive-card-height);
+  padding-right: calc(var(--archive-card-width) - var(--archive-card-step));
+  overflow-x: visible;
   overflow-y: visible;
 }
 
 .archivesOverlapRow .cardSlot {
-  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
-  width: calc(108px * var(--archive-card-scale, 1));
-  max-width: calc(108px * var(--archive-card-scale, 1));
+  width: var(--archive-card-width);
+  max-width: var(--archive-card-width);
   z-index: 1;
 }
 
 .archivesOverlapRow .cardSlot + .cardSlot {
-  margin-left: calc(-77px * var(--archive-card-scale, 1));
+  margin-left: 0;
 }
 
 .archivesOverlapRow .card {
-  height: calc(151px * var(--archive-card-scale, 1));
+  height: var(--archive-card-height);
 }
 
 .archivesOverlapRow .cardSlot:hover,
@@ -7155,25 +7169,32 @@ select {
 }
 
 .runnerHeapOverlapRow {
-  display: flex;
+  --zone-stack-card-width: calc(108px * var(--zone-card-scale, 1));
+  --zone-stack-card-height: calc(151px * var(--zone-card-scale, 1));
+  --zone-stack-card-step: calc(50px * var(--zone-card-scale, 1));
+  --zone-stack-width: calc(var(--zone-stack-card-width) + (var(--zone-stack-card-step) * 5));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--zone-stack-card-step), var(--zone-stack-card-step)));
+  grid-auto-rows: var(--zone-stack-card-height);
+  gap: calc(8px * var(--zone-card-scale, 1)) 0;
   align-items: flex-start;
-  width: fit-content;
+  width: min(100%, var(--zone-stack-width));
   max-width: 100%;
-  min-height: calc(151px * var(--zone-card-scale, 1));
-  padding-right: 4px;
-  overflow-x: auto;
+  min-height: var(--zone-stack-card-height);
+  padding-right: calc(var(--zone-stack-card-width) - var(--zone-stack-card-step));
+  overflow-x: visible;
   overflow-y: visible;
 }
 
 .runnerHeapOverlapRow .cardSlot {
-  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-  width: calc(108px * var(--zone-card-scale, 1));
-  max-width: calc(108px * var(--zone-card-scale, 1));
+  width: var(--zone-stack-card-width);
+  max-width: var(--zone-stack-card-width);
   z-index: 1;
 }
 
 .runnerHeapOverlapRow .cardSlot + .cardSlot {
-  margin-left: calc(-76px * var(--zone-card-scale, 1));
+  margin-left: 0;
 }
 
 .runnerHeapOverlapRow .cardSlot:hover,
@@ -8878,13 +8899,12 @@ select,
 }
 
 .runnerHeapCompactPreview .cardSlot {
-  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-  width: calc(108px * var(--zone-card-scale, 1));
-  max-width: calc(108px * var(--zone-card-scale, 1));
+  width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+  max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
 }
 
 .runnerHeapCompactPreview .cardSlot + .cardSlot {
-  margin-left: calc(-76px * var(--zone-card-scale, 1));
+  margin-left: 0;
 }
 
 .runnerOpponentZoneHeightShim {
@@ -9580,23 +9600,21 @@ select,
   }
 
   .runnerHeapOverlapRow .cardSlot {
-    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-    width: calc(108px * var(--zone-card-scale, 1));
-    max-width: calc(108px * var(--zone-card-scale, 1));
+    width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+    max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
   }
 
   .runnerHeapOverlapRow .cardSlot + .cardSlot {
-    margin-left: calc(-76px * var(--zone-card-scale, 1));
+    margin-left: 0;
   }
 
   .runnerHeapCompactPreview .cardSlot {
-    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-    width: calc(108px * var(--zone-card-scale, 1));
-    max-width: calc(108px * var(--zone-card-scale, 1));
+    width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+    max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
   }
 
   .runnerHeapCompactPreview .cardSlot + .cardSlot {
-    margin-left: calc(-76px * var(--zone-card-scale, 1));
+    margin-left: 0;
   }
 
   .specialZoneOverlapRow .cardSlot {
