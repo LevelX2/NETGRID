@@ -119,6 +119,7 @@ import {
   activeRunIceInstanceId,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
+  armoredFridgeAblativeCounterBadge,
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
@@ -11367,6 +11368,7 @@ function CardView({
   const recurringCredits = preview ? 0 : recurringCreditAmount(card);
   const shellCounters = preview ? 0 : shellCounterAmount(card);
   const dataRavenCounters = preview ? 0 : dataRavenCounterAmount(card);
+  const ablativeCounterBadge = preview ? null : armoredFridgeAblativeCounterBadge(card);
   const storedCreditSource = storedCreditSourceLabel(card);
   const storedCreditsAria =
     storedCredits > 0 && storedCreditSource
@@ -11375,7 +11377,8 @@ function CardView({
   const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
   const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
   const dataRavenCountersAria = dataRavenCounters > 0 ? `${dataRavenCounters} Data-Raven-Counter` : null;
-  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria].filter(Boolean).join(", ");
+  const ablativeCountersAria = ablativeCounterBadge?.ariaLabel ?? null;
+  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria, ablativeCountersAria].filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
@@ -11715,6 +11718,7 @@ function CardView({
         {scoredAgendaCredits > 0 && scoredAgendaCreditSource ? <ScoredAgendaCreditsBadge amount={scoredAgendaCredits} sourceLabel={scoredAgendaCreditSource} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
         {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
+        {ablativeCounterBadge ? <AblativeCounterBadge label={ablativeCounterBadge.shortLabel} ariaLabel={ablativeCounterBadge.ariaLabel} testId={ablativeCounterBadge.testId} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
       {discardShortcut ? (
@@ -11989,6 +11993,14 @@ function DataRavenCounterBadge({ amount }: { amount: number }) {
   );
 }
 
+function AblativeCounterBadge({ label, ariaLabel, testId }: { label: string; ariaLabel: string; testId: string }) {
+  return (
+    <span className="ablativeCounterBadge" aria-label={ariaLabel} data-testid={testId} title={ariaLabel}>
+      {label}
+    </span>
+  );
+}
+
 function advancementGemStyle(instanceId: string, index: number): CSSProperties {
   const seed = hashString(`${instanceId}:${index}`);
   const x = 18 + (seed % 58);
@@ -12027,7 +12039,8 @@ function cardDetailLines(card: VisibleCard): string[] {
     storedCreditsLabel(card),
     recurringCreditLabel(card),
     shellCounterLabel(card),
-    dataRavenCounterLabel(card)
+    dataRavenCounterLabel(card),
+    armoredFridgeAblativeCounterBadge(card)?.label ?? null
   ]
     .filter(Boolean)
     .join(" · ");

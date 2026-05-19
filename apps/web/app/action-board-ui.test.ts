@@ -12,6 +12,7 @@ import {
   activeRunIceInstanceId,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  armoredFridgeAblativeCounterBadge,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachProgressLabel,
@@ -540,6 +541,42 @@ describe("V1.0.6 resource and card-display helpers", () => {
       iconCount: 1
     });
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
+  });
+
+  it("maps only Armored Fridge power counters to an Ablative Counter badge", () => {
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("fridge_1", "Armored Fridge", "hardware"),
+        definitionId: "onr_v1_121_armored-fridge",
+        counters: { power: 7 }
+      })
+    ).toEqual({
+      amount: 7,
+      label: "7 Ablative Counter",
+      ariaLabel: "7 Ablative Counter",
+      shortLabel: "7 Ablative",
+      testId: "ablative-counter-badge"
+    });
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("fridge_1", "Armored Fridge", "hardware"),
+        definitionId: "onr_v1_121_armored-fridge",
+        counters: { power: 0 }
+      })
+    ).toBeNull();
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("data_raven_1", "Data Raven", "ice"),
+        definitionId: "onr_v1_236_data-raven",
+        counters: { power: 2 }
+      })
+    ).toBeNull();
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("unknown_power_1", "Unknown Power Card", "resource"),
+        counters: { power: 3 }
+      })
+    ).toBeNull();
   });
 
   it("renders low credit-counter amounts as separate icons", () => {

@@ -112,6 +112,14 @@ export type CardCreditCounterVisual = {
   iconColumns: number;
 };
 
+export type CardCounterBadgeView = {
+  amount: number;
+  label: string;
+  ariaLabel: string;
+  shortLabel: string;
+  testId: string;
+};
+
 type StoredCreditCounterType = "power" | "bit";
 
 const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
@@ -130,6 +138,20 @@ export function storedCreditAmount(card: Pick<VisibleCard, "definitionId" | "cou
   if (!source) return 0;
   const amount = card.counters?.[source.counter] ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "definitionId" | "counters">): CardCounterBadgeView | null {
+  if (card.definitionId !== "onr_v1_121_armored-fridge") return null;
+  const amount = card.counters?.power ?? 0;
+  const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  if (safeAmount <= 0) return null;
+  return {
+    amount: safeAmount,
+    label: `${safeAmount} Ablative Counter`,
+    ariaLabel: `${safeAmount} Ablative Counter`,
+    shortLabel: `${safeAmount} Ablative`,
+    testId: "ablative-counter-badge"
+  };
 }
 
 function storedCreditCounterSource(card: Pick<VisibleCard, "definitionId">): { label: string; counter: StoredCreditCounterType } | null {
