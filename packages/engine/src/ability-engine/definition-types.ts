@@ -15,6 +15,12 @@ export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
   | ActivatedCardAbilityImplementation;
 
+export type CardLifecycleImplementation = {
+  on_rez?: readonly CardEffectImplementation[];
+  on_install?: readonly CardEffectImplementation[];
+  on_score?: readonly CardEffectImplementation[];
+};
+
 export type OnPlayCardAbilityImplementation = {
   kind: "on_play";
   costs: "printed";
@@ -22,9 +28,9 @@ export type OnPlayCardAbilityImplementation = {
   effects: CardEffectImplementation[];
 };
 
-export type CardConditionImplementation = {
-  kind: "runner_is_tagged";
-};
+export type CardConditionImplementation =
+  | { kind: "runner_is_tagged" }
+  | { kind: "source_has_hosted_credits" };
 
 export type ActivatedCardAbilityImplementation = {
   kind: "activated";
@@ -45,7 +51,10 @@ export type CardEffectImplementation =
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
-  | DamageEffectImplementation;
+  | DamageEffectImplementation
+  | AddHostedCreditsEffectImplementation
+  | TakeHostedCreditsEffectImplementation
+  | TrashSourceWhenEmptyEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -82,6 +91,28 @@ export type DamageEffectImplementation = {
   damageType: Extract<DamageType, "meat">;
   amount: number;
   preventable: true;
+  visibility: EventVisibilityClass;
+};
+
+export type AddHostedCreditsEffectImplementation = {
+  kind: "add_hosted_credits";
+  target: "source";
+  amount: number;
+  visibility: EventVisibilityClass;
+};
+
+export type TakeHostedCreditsEffectImplementation = {
+  kind: "take_hosted_credits";
+  source: "source";
+  recipient: "controller";
+  amount: number;
+  mode?: "up_to_amount_if_available";
+  visibility: EventVisibilityClass;
+};
+
+export type TrashSourceWhenEmptyEffectImplementation = {
+  kind: "trash_source_when_empty";
+  source: "source";
   visibility: EventVisibilityClass;
 };
 

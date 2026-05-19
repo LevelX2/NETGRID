@@ -203,25 +203,38 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Olivia Salazar", "2 Credits", "Temporär", "Rez", "Begegnung"]));
   });
 
-  it("formats Coup agenda credits as card credits with the remaining amount", () => {
+  it("formats hosted Coup agenda credits with the remaining amount", () => {
     const item = formatChronicleEvent(
-      makeEvent("gain_credit", {
+      makeEvent("activated_card_ability", {
         actor: "corp",
-        label: "Political Coup: 3 Credits aus Coup-Counter",
+        label: "Political Coup: 3 Credits nehmen",
         cardDefinitionId: "onr_v1_209_political-coup",
         title: "Political Coup",
-        agendaAbility: "political_coup",
+        cardImplementationAbility: "activated",
         gainedCredits: 3,
-        spentPowerCounters: 3,
-        remainingPowerCounters: 9
+        hostedCreditsTaken: 3,
+        hostedCreditsAfter: 9,
+        resolvedEffects: [
+          {
+            effectId: "onr_v1_209_political-coup.effect.0.take_hosted_credits",
+            kind: "take_hosted_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 3,
+            remainingCounters: 9,
+            sourceDefinitionId: "onr_v1_209_political-coup",
+            sourceTitle: "Political Coup",
+            reason: "card_resolver"
+          }
+        ]
       }),
       "corp"
     );
 
-    expect(item.title).toBe("Du hast 3 Credits von Political Coup genommen.");
+    expect(item.title).toBe("Du hast Political Coup genutzt und 3 Credits von der Karte genommen.");
     expect(item.category).toBe("economy");
-    expect(item.importance).toBe("important");
-    expect(item.chips).toContain("+3 Credits");
+    expect(item.importance).toBe("normal");
+    expect(item.chips).toContain("Ability");
     expect(item.chips).toContain("3 Credits von Karte");
     expect(item.chips).toContain("9 Credits übrig");
   });
@@ -1495,6 +1508,201 @@ describe("formatChronicleEvent", () => {
     expect(item.title.indexOf("1 Credit erhalten")).toBeLessThan(item.title.indexOf("eine Karte gezogen"));
     expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+1 Credit", "Karte ziehen"]));
     expect(serialized).not.toMatch(/grip|stack|cardInstances|privatePayload|drawnCardDefinitionId/);
+    expect(effects).toEqual([]);
+  });
+
+  it("merges hosted-credit lifecycle effects into rez, install and score entries", () => {
+    for (const [actionType, actor, title, cardDefinitionId, amount, expectedTitle] of [
+      [
+        "rez_ice",
+        "corp",
+        "BBS Whispering Campaign",
+        "onr_v1_309_bbs-whispering-campaign",
+        16,
+        "Die Korp hat BBS Whispering Campaign gerezzt und 16 Credits auf die Karte gelegt."
+      ],
+      [
+        "rez_ice",
+        "corp",
+        "Rockerboy Promotion",
+        "onr_v1_337_rockerboy-promotion",
+        15,
+        "Die Korp hat Rockerboy Promotion gerezzt und 15 Credits auf die Karte gelegt."
+      ],
+      [
+        "install_card",
+        "runner",
+        "Short-Term Contract",
+        "onr_v1_178_short-term-contract",
+        12,
+        "Du hast Short-Term Contract im Rig installiert und 12 Credits auf die Karte gelegt."
+      ],
+      [
+        "score_agenda",
+        "corp",
+        "Corporate Coup",
+        "onr_v1_193_corporate-coup",
+        15,
+        "Die Korp hat Corporate Coup gescored und 15 Credits auf die Karte gelegt."
+      ],
+      [
+        "score_agenda",
+        "corp",
+        "Political Coup",
+        "onr_v1_209_political-coup",
+        12,
+        "Die Korp hat Political Coup gescored und 12 Credits auf die Karte gelegt."
+      ],
+    ] as const) {
+      const event = makeEvent(actionType, {
+        actor,
+        title,
+        cardDefinitionId,
+        hostedCreditsAdded: amount,
+        hostedCreditsAfter: amount,
+        resolvedEffects: [
+          {
+            effectId: `${cardDefinitionId}.lifecycle.add_hosted_credits`,
+            kind: "add_hosted_credits",
+            visibility: "public",
+            side: actor,
+            amount,
+            remainingCounters: amount,
+            sourceDefinitionId: cardDefinitionId,
+            sourceTitle: title,
+            reason: "card_resolver"
+          }
+        ]
+      });
+
+      const item = formatChronicleEvent(event, "runner", { cardTitle: title });
+      const effects = formatChronicleEffectItems(event, "runner");
+
+      expect(item.title).toBe(expectedTitle);
+      expect(item.chips).toEqual(expect.arrayContaining([`+${amount} Credits auf Karte`]));
+      expect(JSON.stringify(item)).not.toMatch(/"cardInstances"|"privatePayload"|"hq"|"rd"|"grip"|"stack"/);
+      expect(effects).toEqual([]);
+    }
+  });
+
+  it("merges hosted-credit take effects into activated ability entries", () => {
+    for (const [actor, title, cardDefinitionId, amount, remaining, expectedTitle] of [
+      [
+        "corp",
+        "BBS Whispering Campaign",
+        "onr_v1_309_bbs-whispering-campaign",
+        2,
+        14,
+        "Die Korp hat BBS Whispering Campaign genutzt und 2 Credits von der Karte genommen."
+      ],
+      [
+        "corp",
+        "Rockerboy Promotion",
+        "onr_v1_337_rockerboy-promotion",
+        3,
+        12,
+        "Die Korp hat Rockerboy Promotion genutzt und 3 Credits von der Karte genommen."
+      ],
+      [
+        "runner",
+        "Short-Term Contract",
+        "onr_v1_178_short-term-contract",
+        2,
+        10,
+        "Du hast Short-Term Contract genutzt und 2 Credits von der Karte genommen."
+      ],
+      [
+        "corp",
+        "Corporate Coup",
+        "onr_v1_193_corporate-coup",
+        3,
+        12,
+        "Die Korp hat Corporate Coup genutzt und 3 Credits von der Karte genommen."
+      ],
+      [
+        "corp",
+        "Political Coup",
+        "onr_v1_209_political-coup",
+        3,
+        9,
+        "Die Korp hat Political Coup genutzt und 3 Credits von der Karte genommen."
+      ],
+    ] as const) {
+      const event = makeEvent("activated_card_ability", {
+        actor,
+        title,
+        cardDefinitionId,
+        cardImplementationAbility: "activated",
+        hostedCreditsTaken: amount,
+        hostedCreditsAfter: remaining,
+        gainedCredits: amount,
+        resolvedEffects: [
+          {
+            effectId: `${cardDefinitionId}.effect.0.take_hosted_credits`,
+            kind: "take_hosted_credits",
+            visibility: "public",
+            side: actor,
+            amount,
+            remainingCounters: remaining,
+            sourceDefinitionId: cardDefinitionId,
+            sourceTitle: title,
+            reason: "card_resolver"
+          }
+        ]
+      });
+
+      const item = formatChronicleEvent(event, "runner", { cardTitle: title });
+      const effects = formatChronicleEffectItems(event, "runner");
+
+      expect(item.title).toBe(expectedTitle);
+      expect(item.title).not.toContain("gespielt");
+      expect(item.chips).toEqual(expect.arrayContaining(["Ability", `+${amount} Credits`, `${amount} Credits von Karte`, `${remaining} Credits übrig`]));
+      expect(effects).toEqual([]);
+    }
+  });
+
+  it("shows trash-on-empty for hosted-credit campaign and contract abilities", () => {
+    const event = makeEvent("activated_card_ability", {
+      actor: "runner",
+      title: "Short-Term Contract",
+      cardDefinitionId: "onr_v1_178_short-term-contract",
+      cardImplementationAbility: "activated",
+      hostedCreditsTaken: 1,
+      hostedCreditsAfter: 0,
+      gainedCredits: 1,
+      sourceTrashed: true,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_178_short-term-contract.effect.0.take_hosted_credits",
+          kind: "take_hosted_credits",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          remainingCounters: 0,
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceTitle: "Short-Term Contract",
+          reason: "card_resolver"
+        },
+        {
+          effectId: "onr_v1_178_short-term-contract.effect.1.trash_source_when_empty",
+          kind: "trash_source_when_empty",
+          visibility: "public",
+          side: "runner",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
+          sourceTitle: "Short-Term Contract",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "corp", {
+      cardTitle: "Short-Term Contract"
+    });
+    const effects = formatChronicleEffectItems(event, "corp");
+
+    expect(item.title).toBe("Der Runner hat Short-Term Contract genutzt und 1 Credit von der Karte genommen und Short-Term Contract getrasht.");
+    expect(item.chips).toEqual(expect.arrayContaining(["1 Credit von Karte", "0 Credits übrig", "Quelle getrasht"]));
     expect(effects).toEqual([]);
   });
 

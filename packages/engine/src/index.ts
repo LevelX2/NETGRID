@@ -72,11 +72,15 @@ import {
   executeCardImplementationEffects,
   type CardEffectDamageResult,
   type CardEffectDrawCardsResult,
+  type CardEffectHostedCreditsResult,
+  type CardEffectTrashSourceResult,
 } from "./ability-engine/effect-interpreter";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import type {
   ActivatedCardAbilityImplementation,
   CardConditionImplementation,
+  CardEffectImplementation,
+  CardLifecycleImplementation,
   OnPlayCardAbilityImplementation,
 } from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
@@ -406,7 +410,6 @@ const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 const LOAN_FROM_CHIBA_ID = "onr_v1_168_loan-from-chiba";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
-const SHORT_TERM_CONTRACT_ID = "onr_v1_178_short-term-contract";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
@@ -457,8 +460,6 @@ const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
 const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
-const BBS_WHISPERING_CAMPAIGN_ID = "onr_v1_309_bbs-whispering-campaign";
-const BBS_WHISPERING_CAMPAIGN_STARTING_BITS = 16;
 const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
 const BRAINDANCE_CAMPAIGN_STARTING_BITS = 12;
 const BRAINDANCE_CAMPAIGN_TURN_DRAIN = 2;
@@ -3424,29 +3425,6 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
       continue;
     }
-    if (
-      definition.id === BBS_WHISPERING_CAMPAIGN_ID &&
-      cardCounter(state, assetId, "bit") >= 2
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 2 Credits`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1917AssetAbility: "gain_credits",
-            counterType: "bit",
-            removeCounterAmount: 2,
-            gainCreditsAmount: 2,
-          },
-        ),
-      );
-      continue;
-    }
     const economyProfile = corpInstalledEconomyActionProfileForDefinition(
       definition.id,
     );
@@ -4412,28 +4390,6 @@ function runnerMainActions(state: GameState): LegalAction[] {
                 counterType: "power",
                 removePowerCounterAmount: storedCredits,
                 gainCreditsAmount: storedCredits,
-              },
-            ),
-          );
-        }
-      }
-      if (definition.id === SHORT_TERM_CONTRACT_ID) {
-        const storedCredits = cardCounter(state, resourceId, "power");
-        if (storedCredits >= 2) {
-          actions.push(
-            action(
-              state,
-              "runner",
-              "trigger_ability",
-              `${definition.title}: 2 Credits nehmen`,
-              resourceId,
-              [{ clicks: 1 }],
-              {
-                cardId: resourceId,
-                resourceAbility: "short_term_contract_take_credits",
-                counterType: "power",
-                removePowerCounterAmount: 2,
-                gainCreditsAmount: 2,
               },
             ),
           );
@@ -7029,9 +6985,6 @@ function performAction(
         };
         return;
       }
-      if (resolveBbsWhisperingCampaignCreditAction(state, legalAction)) {
-        return;
-      }
       if (resolveCorpInstalledEconomyAction(state, legalAction)) {
         return;
       }
@@ -8159,13 +8112,6 @@ function performAction(
       }
       if (
         legalAction.payload?.resourceAbility ===
-        "short_term_contract_take_credits"
-      ) {
-        resolveShortTermContractAbility(state, legalAction);
-        return;
-      }
-      if (
-        legalAction.payload?.resourceAbility ===
         "junkyard_bbs_return_top_heap"
       ) {
         resolveJunkyardBbsAbility(state, legalAction);
@@ -9054,49 +9000,6 @@ function resolveMicrotechBackupDriveReturnTopHosted(
   };
 }
 
-function resolveShortTermContractAbility(
-  state: GameState,
-  legalAction: LegalAction,
-): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Short-Term Contract nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Short-Term Contract ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== SHORT_TERM_CONTRACT_ID)
-    throw new Error("Die Short-Term-Contract-Faehigkeit passt nicht zur Karte.");
-
-  const removeAmount = Number(
-    legalAction.payload?.removePowerCounterAmount ?? 0,
-  );
-  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-  if (
-    !Number.isInteger(removeAmount) ||
-    removeAmount !== 2 ||
-    !Number.isInteger(gainAmount) ||
-    gainAmount !== 2
-  )
-    throw new Error("Short-Term Contract nimmt genau 2 Credits.");
-  if (cardCounter(state, sourceCardId, "power") < removeAmount)
-    throw new Error("Auf Short-Term Contract liegen nicht genug Credits.");
-
-  spendClick(state, "runner");
-  spendCardCounter(state, sourceCardId, "power", removeAmount);
-  credits(state, "runner", gainAmount);
-  const remainingCounters = cardCounter(state, sourceCardId, "power");
-  const shortTermContractTrashed = remainingCounters === 0;
-  if (shortTermContractTrashed)
-    trashRunnerInstalledCardToHeap(state, sourceCardId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    removedCounterAmount: removeAmount,
-    gainedCredits: gainAmount,
-    remainingCounters,
-    shortTermContractTrashed,
-    runnerCreditsAfter: state.runner.credits,
-  };
-}
-
 function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
   spendClick(state, "runner");
   spendCredits(state, "runner", legalAction.costs[0]?.credits ?? 0);
@@ -9408,15 +9311,6 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
-      if (definition.id === SHORT_TERM_CONTRACT_ID) {
-        setCardCounter(state, cardId, "power", 12);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          counterType: "power",
-          addedCounterAmount: 12,
-          remainingCounters: 12,
-        };
-      }
       if (definition.id === RIGGED_INVESTMENTS_ID) {
         setCardCounter(state, cardId, "bit", 6);
         legalAction.payload = {
@@ -9492,6 +9386,13 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     }
     if (definition.id === "v099_host_resource")
       startRunnerHostingChoice(state, cardId, legalAction);
+    executeCardImplementationLifecycleEffects(
+      state,
+      legalAction,
+      definition,
+      cardId,
+      "on_install",
+    );
     return;
   }
 
@@ -9566,6 +9467,13 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     rezzed: regionInstall,
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
+  executeCardImplementationLifecycleEffects(
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_install",
+  );
   if (regionInstall) {
     trashOlderRegionUpgradesInServer(state, server, cardId, legalAction);
   }
@@ -9970,23 +9878,6 @@ function rezCard(
       };
     }
   }
-  if (definition.id === BBS_WHISPERING_CAMPAIGN_ID) {
-    setCardCounter(
-      state,
-      cardId as CardInstanceId,
-      "bit",
-      BBS_WHISPERING_CAMPAIGN_STARTING_BITS,
-    );
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        sourceDefinitionId: BBS_WHISPERING_CAMPAIGN_ID,
-        counterType: "bit",
-        addedCounterAmount: BBS_WHISPERING_CAMPAIGN_STARTING_BITS,
-        remainingCounters: BBS_WHISPERING_CAMPAIGN_STARTING_BITS,
-      };
-    }
-  }
   if (definition.id === BRAINDANCE_CAMPAIGN_ID) {
     setCardCounter(
       state,
@@ -10021,6 +9912,14 @@ function rezCard(
       };
     }
   }
+  if (legalAction)
+    executeCardImplementationLifecycleEffects(
+      state,
+      legalAction,
+      definition,
+      cardId as CardInstanceId,
+      "on_rez",
+    );
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
   if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
@@ -15691,28 +15590,21 @@ function scoreAgenda(
       };
     }
   }
-  if (
-    definition.id === "onr_v1_193_corporate-coup" ||
-    definition.id === "onr_v1_209_political-coup" ||
-    definition.id === DETROIT_POLICE_CONTRACT_ID
-  ) {
-    const counterAmount =
-      definition.id === "onr_v1_193_corporate-coup"
-        ? 15
-        : definition.id === "onr_v1_209_political-coup"
-          ? 12
-          : 4;
+  executeCardImplementationLifecycleEffects(
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_score",
+  );
+  if (definition.id === DETROIT_POLICE_CONTRACT_ID) {
+    const counterAmount = 4;
     setCardCounter(state, cardId, "power", counterAmount);
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         powerCountersAdded: counterAmount,
-        agendaAbility:
-          definition.id === "onr_v1_193_corporate-coup"
-            ? "corporate_coup"
-            : definition.id === "onr_v1_209_political-coup"
-              ? "political_coup"
-              : "v1912_detroit_police_contract",
+        agendaAbility: "v1912_detroit_police_contract",
       };
     }
   }
@@ -16550,47 +16442,6 @@ function resolveCorpInstalledEconomyAction(
     sourceDefinitionId: profile.sourceDefinitionId,
     gainedCredits: profile.creditGain,
     ...(profile.trashSource ? { selfTrashed: true } : {}),
-    corpCreditsAfter: state.corp.credits,
-  };
-  return true;
-}
-
-function resolveBbsWhisperingCampaignCreditAction(
-  state: GameState,
-  legalAction: LegalAction,
-): boolean {
-  if (legalAction.payload?.v1917AssetAbility !== "gain_credits") return false;
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!sourceCardId || !state.cardInstances[sourceCardId]) return false;
-  const definition = definitionFor(state, sourceCardId);
-  if (definition.id !== BBS_WHISPERING_CAMPAIGN_ID) return false;
-  if (legalAction.side !== "corp")
-    throw new Error("Nur die Korp darf BBS Whispering Campaign nutzen.");
-  if (state.phase !== "corp_action_phase" || state.activeSide !== "corp")
-    throw new Error("BBS Whispering Campaign ist nur in der Korp-Aktionsphase nutzbar.");
-  if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-    throw new Error("BBS Whispering Campaign ist nicht rezzed installiert.");
-  const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
-  if (!Number.isInteger(removeAmount) || removeAmount !== 2)
-    throw new Error("BBS Whispering Campaign entfernt genau 2 Bits.");
-  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-  if (!Number.isInteger(gainAmount) || gainAmount !== 2)
-    throw new Error("BBS Whispering Campaign nimmt genau 2 Credits.");
-  const counterPayload = spendVisibleCardCounter(
-    state,
-    sourceCardId,
-    "bit",
-    removeAmount,
-  );
-  credits(state, "corp", gainAmount);
-  const selfTrashed = counterPayload.remainingCounters <= 0;
-  if (selfTrashed) trashCorpInstalledCardToArchives(state, sourceCardId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    sourceDefinitionId: BBS_WHISPERING_CAMPAIGN_ID,
-    ...counterPayload,
-    gainedCredits: gainAmount,
-    ...(selfTrashed ? { selfTrashed: true } : {}),
     corpCreditsAfter: state.corp.credits,
   };
   return true;
@@ -21651,6 +21502,8 @@ function publicContextForAction(
       "sourceDefinitionId",
       "counterType",
       "addedCounterAmount",
+      "hostedCreditsAdded",
+      "hostedCreditsAfter",
       "remainingCounters",
       "speedTrapSourceCardId",
       "rezzedCardDefinitionId",
@@ -22214,6 +22067,9 @@ function publicContextForAction(
     "addedCounterAmount",
     "removedCounterAmount",
     "remainingCounters",
+    "hostedCreditsAdded",
+    "hostedCreditsTaken",
+    "hostedCreditsAfter",
     "shortTermContractTrashed",
     "gainCreditsAmount",
     "removePowerCounterAmount",
@@ -22349,6 +22205,15 @@ function publicContextForAction(
       "runnerCreditsAfter",
       "corpCreditsAfter",
       "runnerGripAfter",
+      "counterType",
+      "addedCounterAmount",
+      "removedCounterAmount",
+      "remainingCounters",
+      "hostedCreditsAdded",
+      "hostedCreditsTaken",
+      "hostedCreditsAfter",
+      "sourceTrashed",
+      "trashedCardDefinitionId",
     ]) {
       const value = legalAction.payload[key];
       if (value !== undefined) context[key] = value;
@@ -24486,10 +24351,17 @@ function printedCostOnPlayImplementation(
 function cardImplementationConditionMet(
   state: GameState,
   condition: CardConditionImplementation,
+  sourceCardId?: CardInstanceId,
 ): boolean {
   switch (condition.kind) {
     case "runner_is_tagged":
       return state.runner.tags > 0;
+    case "source_has_hosted_credits":
+      return Boolean(
+        sourceCardId &&
+          state.cardInstances[sourceCardId] &&
+          cardCounter(state, sourceCardId, "bit") > 0,
+      );
     default: {
       const unknownCondition = condition as { kind?: string };
       throw new Error(
@@ -24513,9 +24385,10 @@ function canResolveOnPlayCardImplementationAbility(
 function canResolveActivatedCardImplementationAbility(
   state: GameState,
   ability: ActivatedCardAbilityImplementation,
+  sourceCardId?: CardInstanceId,
 ): boolean {
   return ability.condition
-    ? cardImplementationConditionMet(state, ability.condition)
+    ? cardImplementationConditionMet(state, ability.condition, sourceCardId)
     : true;
 }
 
@@ -24540,11 +24413,63 @@ function assertOnPlayCardImplementationAbilityCanResolve(
 function assertActivatedCardImplementationAbilityCanResolve(
   state: GameState,
   ability: ActivatedCardAbilityImplementation,
+  sourceCardId?: CardInstanceId,
 ): void {
-  if (canResolveActivatedCardImplementationAbility(state, ability)) return;
+  if (canResolveActivatedCardImplementationAbility(state, ability, sourceCardId))
+    return;
   if (ability.condition?.kind === "runner_is_tagged")
     throw new Error("Der Runner muss getaggt sein.");
+  if (ability.condition?.kind === "source_has_hosted_credits")
+    throw new Error("Auf der Quelle muessen Credits liegen.");
   throw new Error("Die aktivierte Kartenbedingung ist nicht erfuellt.");
+}
+
+function cardImplementationLifecycleEffects(
+  definition: CardDefinition,
+  lifecycle: keyof CardLifecycleImplementation,
+): readonly CardEffectImplementation[] {
+  return cardImplementationForDefinitionId(definition.id)?.lifecycle?.[
+    lifecycle
+  ] ?? [];
+}
+
+function executeCardImplementationLifecycleEffects(
+  state: GameState,
+  legalAction: LegalAction | undefined,
+  definition: CardDefinition,
+  cardId: CardInstanceId,
+  lifecycle: keyof CardLifecycleImplementation,
+): void {
+  const effects = cardImplementationLifecycleEffects(definition, lifecycle);
+  if (effects.length === 0) return;
+  const result = executeCardImplementationEffects(
+    state,
+    {
+      sourceCardId: cardId,
+      sourceDefinitionId: definition.id,
+      sourceTitle: definition.title,
+      controller: mustInstance(state.cardInstances, cardId).controller,
+      addHostedCredits: (sourceCardId, amount) =>
+        addHostedCreditsForCardImplementationEffect(state, sourceCardId, amount),
+      takeHostedCredits: (sourceCardId, side, amount) =>
+        takeHostedCreditsForCardImplementationEffect(
+          state,
+          sourceCardId,
+          side,
+          amount,
+        ),
+      trashSourceWhenEmpty: (sourceCardId) =>
+        trashSourceWhenEmptyForCardImplementationEffect(state, sourceCardId),
+    },
+    effects,
+  );
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: definition.id,
+    ...result.publicPayload,
+  };
+  appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
 }
 
 function activatedCardImplementationAbilitiesForTiming(
@@ -24609,7 +24534,8 @@ function pushActivatedCardImplementationActions(
     definition,
     timing,
   )) {
-    if (!canResolveActivatedCardImplementationAbility(state, ability)) continue;
+    if (!canResolveActivatedCardImplementationAbility(state, ability, sourceCardId))
+      continue;
     const actionCost = actionCostForActivatedAbility(ability);
     actions.push(
       action(
@@ -24688,7 +24614,7 @@ function validateActivatedCardImplementationAbility(
       throw new Error("Diese aktivierte Kartenfaehigkeit ist nur in der Runner-Aktionsphase nutzbar.");
     if (!runnerInstalledCardIds(state).includes(cardId))
       throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
-    assertActivatedCardImplementationAbilityCanResolve(state, ability);
+    assertActivatedCardImplementationAbilityCanResolve(state, ability, cardId);
     return;
   }
   if (legalAction.side !== "corp")
@@ -24703,7 +24629,7 @@ function validateActivatedCardImplementationAbility(
     )
   )
     throw new Error("Die aktivierte Korp-Kartenfaehigkeit ist nicht verfuegbar.");
-  assertActivatedCardImplementationAbilityCanResolve(state, ability);
+  assertActivatedCardImplementationAbilityCanResolve(state, ability, cardId);
 }
 
 function resolveActivatedCardImplementationAbility(
@@ -24734,6 +24660,17 @@ function resolveActivatedCardImplementationAbility(
           damageType,
           amount,
         ),
+      addHostedCredits: (sourceCardId, amount) =>
+        addHostedCreditsForCardImplementationEffect(state, sourceCardId, amount),
+      takeHostedCredits: (sourceCardId, side, amount) =>
+        takeHostedCreditsForCardImplementationEffect(
+          state,
+          sourceCardId,
+          side,
+          amount,
+        ),
+      trashSourceWhenEmpty: (sourceCardId) =>
+        trashSourceWhenEmptyForCardImplementationEffect(state, sourceCardId),
     },
     match.ability.effects,
   );
@@ -24773,6 +24710,17 @@ function executeOnPlayCardImplementationAbility(
           damageType,
           amount,
         ),
+      addHostedCredits: (sourceCardId, amount) =>
+        addHostedCreditsForCardImplementationEffect(state, sourceCardId, amount),
+      takeHostedCredits: (sourceCardId, side, amount) =>
+        takeHostedCreditsForCardImplementationEffect(
+          state,
+          sourceCardId,
+          side,
+          amount,
+        ),
+      trashSourceWhenEmpty: (sourceCardId) =>
+        trashSourceWhenEmptyForCardImplementationEffect(state, sourceCardId),
     },
     ability.effects,
   );
@@ -24870,6 +24818,85 @@ function damageSummaryPublicPayload(
     ...(summary.runnerMaxHandSizeAfter !== undefined
       ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
       : {}),
+  };
+}
+
+function addHostedCreditsForCardImplementationEffect(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  amount: number,
+): CardEffectHostedCreditsResult {
+  addCardCounter(state, sourceCardId, "bit", amount);
+  const hostedCreditsAfter = cardCounter(state, sourceCardId, "bit");
+  return {
+    amount,
+    hostedCreditsAfter,
+    publicPayload: {
+      counterType: "bit",
+      hostedCreditsAdded: amount,
+      hostedCreditsAfter,
+      addedCounterAmount: amount,
+      remainingCounters: hostedCreditsAfter,
+    },
+  };
+}
+
+function takeHostedCreditsForCardImplementationEffect(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  side: Side,
+  amount: number,
+): CardEffectHostedCreditsResult {
+  const available = cardCounter(state, sourceCardId, "bit");
+  if (available <= 0)
+    throw new Error("Auf der Quelle liegen keine Credits.");
+  const taken = Math.min(available, amount);
+  spendCardCounter(state, sourceCardId, "bit", taken);
+  credits(state, side, taken);
+  const hostedCreditsAfter = cardCounter(state, sourceCardId, "bit");
+  return {
+    amount: taken,
+    hostedCreditsAfter,
+    publicPayload: {
+      counterType: "bit",
+      hostedCreditsTaken: taken,
+      hostedCreditsAfter,
+      removedCounterAmount: taken,
+      remainingCounters: hostedCreditsAfter,
+      gainedCredits: taken,
+      [side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"]:
+        side === "corp" ? state.corp.credits : state.runner.credits,
+    },
+  };
+}
+
+function trashSourceWhenEmptyForCardImplementationEffect(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): CardEffectTrashSourceResult {
+  if (cardCounter(state, sourceCardId, "bit") > 0)
+    return { sourceTrashed: false };
+  const instance = mustInstance(state.cardInstances, sourceCardId);
+  const definition = definitionFor(state, sourceCardId);
+  if (
+    instance.controller === "corp" &&
+    (instance.zone.zone === "serverRoot" || state.corp.servers.some((server) => server.root.includes(sourceCardId)))
+  ) {
+    trashCorpInstalledCardToArchives(state, sourceCardId);
+  } else if (
+    instance.controller === "runner" &&
+    runnerInstalledCardIds(state).includes(sourceCardId)
+  ) {
+    trashRunnerInstalledCardToHeap(state, sourceCardId);
+  } else {
+    return { sourceTrashed: false };
+  }
+  return {
+    sourceTrashed: true,
+    publicPayload: {
+      sourceTrashed: true,
+      trashedCardDefinitionId: definition.id,
+    },
   };
 }
 

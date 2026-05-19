@@ -1348,7 +1348,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(
       getLegalActions(assetState, "corp").some(
         (action) =>
-          action.payload?.v1917AssetAbility === "gain_credits" &&
+          action.type === "activated_card_ability" &&
           action.payload?.cardId === bbsId,
       ),
     ).toBe(false);
@@ -1362,7 +1362,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       assetState,
       "corp",
       (action) =>
-        action.payload?.v1917AssetAbility === "gain_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === bbsId,
     );
     const removedSource = structuredClone(assetState);
@@ -1394,12 +1395,23 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         .find((card) => card.instanceId === bbsId)?.counters?.bit,
     ).toBe(14);
     expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
-      v1917AssetAbility: "gain_credits",
+      cardImplementationAbility: "activated",
       counterType: "bit",
       removedCounterAmount: 2,
       remainingCounters: 14,
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 14,
       gainedCredits: 2,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 2,
+          remainingCounters: 14,
+          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        }),
+      ],
     });
     expect(JSON.stringify(assetState.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -1418,7 +1430,13 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
       remainingCounters: 0,
-      selfTrashed: true,
+      sourceTrashed: true,
+      resolvedEffects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trash_source_when_empty",
+          sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        }),
+      ]),
     });
     assetState.cardInstances[omniId] = {
       ...assetState.cardInstances[omniId]!,
@@ -1664,24 +1682,25 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     state.corp.clicks = 10;
     state.corp.maxHandSize = 100;
     const coupId = scoreCorpAgendaForTest(state, "onr_v1_193_corporate-coup");
-    setCardCounterForTest(state, coupId, "power", 3);
+    setCardCounterForTest(state, coupId, "bit", 3);
     const coupAction = mustAction(
       state,
       "corp",
       (action) =>
-        action.payload?.agendaAbility === "corporate_coup" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === coupId,
     );
-    const noCounter = structuredClone(state);
-    setCardCounterForTest(noCounter, coupId, "power", 2);
-    const noCounterResult = applyAction(noCounter, {
-      matchId: noCounter.matchId,
+    const noHostedCredits = structuredClone(state);
+    setCardCounterForTest(noHostedCredits, coupId, "bit", 0);
+    const noHostedCreditsResult = applyAction(noHostedCredits, {
+      matchId: noHostedCredits.matchId,
       side: "corp",
       actionId: coupAction.actionId,
-      clientKnownStateVersion: noCounter.stateVersion,
-      idempotencyKey: "spotcheck-coup-no-counter",
+      clientKnownStateVersion: noHostedCredits.stateVersion,
+      idempotencyKey: "spotcheck-coup-no-hosted-credits",
     });
-    expect(noCounterResult.ok).toBe(false);
+    expect(noHostedCreditsResult.ok).toBe(false);
     const stolenCoup = structuredClone(state);
     removeEverywhere(stolenCoup, coupId);
     stolenCoup.runner.scoreArea.push(coupId);
@@ -1702,11 +1721,21 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     const creditsBefore = state.corp.credits;
     state = apply(state, "corp", (action) => action.actionId === coupAction.actionId);
     expect(state.corp.credits).toBe(creditsBefore + 3);
-    expect(cardCounterAmount(state, coupId, "power")).toBe(0);
+    expect(cardCounterAmount(state, coupId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      agendaAbility: "corporate_coup",
-      spentPowerCounters: 3,
+      actionType: "activated_card_ability",
+      cardImplementationAbility: "activated",
+      hostedCreditsTaken: 3,
+      hostedCreditsAfter: 0,
       gainedCredits: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 3,
+          remainingCounters: 0,
+          sourceDefinitionId: "onr_v1_193_corporate-coup",
+        }),
+      ],
     });
 
     const onCallId = scoreCorpAgendaForTest(
@@ -7469,6 +7498,68 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("implemented");
   });
 
+  it("describes P3.5 hosted-credit economy abilities", () => {
+    for (const [definitionId, lifecycle, startingCredits, takeAmount, timing] of [
+      [
+        "onr_v1_309_bbs-whispering-campaign",
+        "on_rez",
+        16,
+        2,
+        "corp_main",
+      ],
+      ["onr_v1_337_rockerboy-promotion", "on_rez", 15, 3, "corp_main"],
+      ["onr_v1_178_short-term-contract", "on_install", 12, 2, "runner_main"],
+      ["onr_v1_193_corporate-coup", "on_score", 15, 3, "corp_main"],
+      ["onr_v1_209_political-coup", "on_score", 12, 3, "corp_main"],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.lifecycle?.[lifecycle]).toEqual([
+        expect.objectContaining({
+          kind: "add_hosted_credits",
+          target: "source",
+          amount: startingCredits,
+          visibility: "public",
+        }),
+      ]);
+      expect(cardImplementationForDefinitionId(definitionId)?.abilities).toContainEqual(
+        expect.objectContaining({
+          kind: "activated",
+          timing,
+          costs: [{ kind: "action", amount: 1 }],
+          condition: { kind: "source_has_hosted_credits" },
+          effects: expect.arrayContaining([
+            expect.objectContaining({
+              kind: "take_hosted_credits",
+              source: "source",
+              recipient: "controller",
+              amount: takeAmount,
+              mode: "up_to_amount_if_available",
+              visibility: "public",
+            }),
+          ]),
+        }),
+      );
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+
+    for (const definitionId of [
+      "onr_v1_309_bbs-whispering-campaign",
+      "onr_v1_337_rockerboy-promotion",
+      "onr_v1_178_short-term-contract",
+    ] as const) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.abilities?.at(0)?.effects,
+      ).toContainEqual(
+        expect.objectContaining({
+          kind: "trash_source_when_empty",
+          source: "source",
+          visibility: "public",
+        }),
+      );
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -7808,6 +7899,150 @@ describe("V1.6.2 Mechanikpaket B", () => {
         ],
       ),
     ).toThrow(/positive integer/);
+  });
+
+  it("executes typed hosted-credit card effects through host primitives", () => {
+    const state = createGameAfterSetup({ seed: "card-effect-hosted-credits" });
+    const calls: string[] = [];
+
+    const loadResult = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        sourceTitle: "BBS Whispering Campaign",
+        controller: "corp",
+        addHostedCredits: (sourceCardId, amount) => {
+          calls.push(`add:${sourceCardId}:${amount}`);
+          return {
+            amount,
+            hostedCreditsAfter: 16,
+            publicPayload: {
+              hostedCreditsAdded: amount,
+              hostedCreditsAfter: 16,
+            },
+          };
+        },
+      },
+      [
+        {
+          kind: "add_hosted_credits",
+          target: "source",
+          amount: 16,
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(loadResult.publicPayload).toMatchObject({
+      hostedCreditsAdded: 16,
+      hostedCreditsAfter: 16,
+    });
+    expect(loadResult.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "add_hosted_credits",
+        visibility: "public",
+        amount: 16,
+        reason: "card_resolver",
+        sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        sourceTitle: "BBS Whispering Campaign",
+      }),
+    ]);
+
+    const takeResult = executeCardImplementationEffects(
+      state,
+      {
+        sourceCardId: state.corp.identity,
+        sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+        sourceTitle: "BBS Whispering Campaign",
+        controller: "corp",
+        takeHostedCredits: (sourceCardId, recipient, amount) => {
+          calls.push(`take:${sourceCardId}:${recipient}:${amount}`);
+          return {
+            amount: 2,
+            hostedCreditsAfter: 14,
+            publicPayload: {
+              hostedCreditsTaken: 2,
+              hostedCreditsAfter: 14,
+              gainedCredits: 2,
+              corpCreditsAfter: 7,
+            },
+          };
+        },
+        trashSourceWhenEmpty: (sourceCardId) => {
+          calls.push(`trash:${sourceCardId}`);
+          return { sourceTrashed: false };
+        },
+      },
+      [
+        {
+          kind: "take_hosted_credits",
+          source: "source",
+          recipient: "controller",
+          amount: 2,
+          mode: "up_to_amount_if_available",
+          visibility: "public",
+        },
+        {
+          kind: "trash_source_when_empty",
+          source: "source",
+          visibility: "public",
+        },
+      ],
+    );
+
+    expect(takeResult.publicPayload).toMatchObject({
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 14,
+      gainedCredits: 2,
+      corpCreditsAfter: 7,
+    });
+    expect(takeResult.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "take_hosted_credits",
+        visibility: "public",
+        amount: 2,
+        remainingCounters: 14,
+        reason: "card_resolver",
+        sourceDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      }),
+    ]);
+    expect(calls).toEqual([
+      `add:${state.corp.identity}:16`,
+      `take:${state.corp.identity}:corp:2`,
+      `trash:${state.corp.identity}`,
+    ]);
+
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "add_hosted_credits",
+            target: "source",
+            amount: 0,
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/positive integer/);
+    expect(() =>
+      executeCardImplementationEffects(
+        state,
+        { sourceCardId: state.corp.identity, controller: "corp" },
+        [
+          {
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            amount: 1,
+            mode: "up_to_amount_if_available",
+            visibility: "public",
+          },
+        ],
+      ),
+    ).toThrow(/takeHostedCredits execution context/);
   });
 
   it("executes typed damage card effects through the host damage primitive", () => {
@@ -10938,7 +11173,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     );
     expect(corporateCoupId).toBeDefined();
     if (corporateCoupId)
-      expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(15);
+      expect(state.cardInstances[corporateCoupId]?.counters?.bit).toBe(15);
 
     moveCorpCardToHq(state, "onr_v1_209_political-coup");
     state = apply(
@@ -10972,29 +11207,29 @@ describe("V1.8.1 Mechanikpaket H", () => {
     );
     expect(politicalCoupId).toBeDefined();
     if (politicalCoupId)
-      expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(12);
+      expect(state.cardInstances[politicalCoupId]?.counters?.bit).toBe(12);
 
     const creditsBefore = state.corp.credits;
     state = apply(
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "corporate_coup",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_193_corporate-coup",
     );
     expect(state.corp.credits).toBe(creditsBefore + 3);
     if (corporateCoupId)
-      expect(state.cardInstances[corporateCoupId]?.counters?.power).toBe(12);
+      expect(state.cardInstances[corporateCoupId]?.counters?.bit).toBe(12);
     state = apply(
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "political_coup",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_209_political-coup",
     );
     expect(state.corp.credits).toBe(creditsBefore + 6);
     if (politicalCoupId)
-      expect(state.cardInstances[politicalCoupId]?.counters?.power).toBe(9);
+      expect(state.cardInstances[politicalCoupId]?.counters?.bit).toBe(9);
   });
 
   it("resolves Ball/Canis run flags and enforces Fatal/Shock next-encounter penalties deterministically", () => {
@@ -18582,11 +18817,11 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         action.type === "install_card" &&
         String(action.payload?.cardId) === shortTermId,
     );
-    expect(cardCounterAmount(shortTermState, shortTermId, "power")).toBe(12);
+    expect(cardCounterAmount(shortTermState, shortTermId, "bit")).toBe(12);
     expect(
       getPlayerView(shortTermState, "runner").own.rig?.find(
         (card) => card.instanceId === shortTermId,
-      )?.counters?.power,
+      )?.counters?.bit,
     ).toBe(12);
 
     for (let use = 1; use <= 6; use += 1) {
@@ -18595,13 +18830,11 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         shortTermState,
         "runner",
         (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.resourceAbility ===
-            "short_term_contract_take_credits" &&
+          action.type === "activated_card_ability" &&
           String(action.payload?.cardId) === shortTermId,
       );
       expect(shortTermState.runner.credits).toBe(creditsBefore + 2);
-      expect(cardCounterAmount(shortTermState, shortTermId, "power")).toBe(
+      expect(cardCounterAmount(shortTermState, shortTermId, "bit")).toBe(
         Math.max(0, 12 - use * 2),
       );
     }
@@ -18609,10 +18842,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(shortTermState.runner.rig.resources).not.toContain(shortTermId);
     expect(shortTermState.runner.heap).toContain(shortTermId);
     expect(shortTermState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      resourceAbility: "short_term_contract_take_credits",
+      actionType: "activated_card_ability",
+      cardImplementationAbility: "activated",
       gainedCredits: 2,
       remainingCounters: 0,
-      shortTermContractTrashed: true,
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 0,
+      sourceTrashed: true,
     });
     const shortTermReplay = replayEvents(
       initial,
@@ -20265,7 +20501,6 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     const economyAssets = [
       "onr_v1_311_braindance-campaign",
       "onr_v1_326_holovid-campaign",
-      "onr_v1_337_rockerboy-promotion",
     ] as const;
     for (const definitionId of economyAssets) {
       let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(`v1917-economy-asset-${definitionId}`);
@@ -32973,24 +33208,33 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     coupState = apply(coupState, "corp", (action) => action.type === "mandatory_draw");
     const firstCoup = scoreCorpAgendaForTest(coupState, "onr_v1_209_political-coup");
     const secondCoup = scoreCorpAgendaForTest(coupState, "onr_v1_209_political-coup");
-    setCardCounterForTest(coupState, firstCoup, "power", 12);
-    setCardCounterForTest(coupState, secondCoup, "power", 12);
+    setCardCounterForTest(coupState, firstCoup, "bit", 12);
+    setCardCounterForTest(coupState, secondCoup, "bit", 12);
     const coup = mustAction(
       coupState,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "political_coup" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === secondCoup,
     );
     const coupInitial = structuredClone(coupState);
     coupState = apply(coupState, "corp", (action) => action.actionId === coup.actionId);
-    expect(cardCounterAmount(coupState, firstCoup, "power")).toBe(12);
-    expect(cardCounterAmount(coupState, secondCoup, "power")).toBe(9);
+    expect(cardCounterAmount(coupState, firstCoup, "bit")).toBe(12);
+    expect(cardCounterAmount(coupState, secondCoup, "bit")).toBe(9);
     expect(coupState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      agendaAbility: "political_coup",
-      spentPowerCounters: 3,
+      actionType: "activated_card_ability",
+      hostedCreditsTaken: 3,
+      hostedCreditsAfter: 9,
       gainedCredits: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 3,
+          remainingCounters: 9,
+          sourceDefinitionId: "onr_v1_209_political-coup",
+        }),
+      ],
     });
     expect(replayEvents(coupInitial, coupState.eventLog.slice(coupInitial.eventLog.length)).ok).toBe(true);
   });
@@ -35149,11 +35393,11 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "gain_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === rockerboyId,
     );
-    expect(ability.actionId.endsWith(".gain_credits")).toBe(true);
+    expect(ability.costs).toEqual([{ clicks: 1 }]);
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -35195,15 +35439,23 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     const replayStart = state.eventLog.length;
     const creditsBefore = state.corp.credits;
     state = apply(state, "corp", (action) => action.actionId === ability.actionId);
-    expect(state.corp.credits).toBe(creditsBefore + 2);
+    expect(state.corp.credits).toBe(creditsBefore + 3);
+    expect(cardCounterAmount(state, rockerboyId, "bit")).toBe(12);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_337_rockerboy-promotion",
-      v1917AssetAbility: "gain_credits",
-      abilityFamily: "payment-costs",
-      abilityId: "gain_credits",
-      effectKind: "gain_credits",
-      gainedCredits: 2,
+      cardImplementationAbility: "activated",
+      hostedCreditsTaken: 3,
+      hostedCreditsAfter: 12,
+      gainedCredits: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 3,
+          remainingCounters: 12,
+          sourceDefinitionId: "onr_v1_337_rockerboy-promotion",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -36373,13 +36625,14 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     expect(shortTermId).toBeDefined();
     if (!shortTermId) throw new Error("Missing Short-Term Contract");
-    expect(cardCounterAmount(state, shortTermId, "power")).toBe(12);
+    expect(cardCounterAmount(state, shortTermId, "bit")).toBe(12);
     const shortTermAction = mustAction(
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "short_term_contract_take_credits",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        action.payload?.cardId === shortTermId,
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -36419,12 +36672,22 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       (action) => action.actionId === shortTermAction.actionId,
     );
     expect(state.runner.credits).toBe(creditsBeforeShortTerm + 2);
-    expect(cardCounterAmount(state, shortTermId, "power")).toBe(10);
+    expect(cardCounterAmount(state, shortTermId, "bit")).toBe(10);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_178_short-term-contract",
-      resourceAbility: "short_term_contract_take_credits",
       gainedCredits: 2,
+      hostedCreditsTaken: 2,
+      hostedCreditsAfter: 10,
       remainingCounters: 10,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 2,
+          remainingCounters: 10,
+          sourceDefinitionId: "onr_v1_178_short-term-contract",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,

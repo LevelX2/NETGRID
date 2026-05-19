@@ -543,19 +543,23 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push(amount && amount > 1 ? `${amount} Karten` : "Karte ziehen");
       break;
     case "install_card":
+      {
+        const installEffect = mergedCardResolverEffect;
+        const installSuffix = installEffect?.suffix ? ` und ${installEffect.suffix}` : "";
       if (actor === "runner" && selectedServerLabel) {
         category = "card";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} auf ${selectedServerLabel} ausgerichtet installiert`);
-        chips.push("Install", "Resource", selectedServerLabel);
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} auf ${selectedServerLabel} ausgerichtet installiert${installSuffix}`);
+        chips.push("Install", "Resource", selectedServerLabel, ...(installEffect?.chips ?? []));
       } else if (actor === "corp" && (redactedKind || !cardTitle)) {
         category = "hidden";
         visibility = "redacted";
         title = phrase(subject, `eine verdeckte Karte${installLocation(serverLabel, zoneLabel, label)} installiert`);
         chips.push("Verdeckt", installAreaFromPayload(serverLabel, zoneLabel, label));
       } else {
-        category = "card";
-        title = phrase(subject, `${cardTitle ?? "eine Karte"}${installDestinationForTitle(actor, serverLabel, zoneLabel, label)} installiert`);
-        chips.push("Install", installAreaFromPayload(serverLabel, zoneLabel, label));
+        category = installEffect?.category ?? "card";
+        title = phrase(subject, `${cardTitle ?? "eine Karte"}${installDestinationForTitle(actor, serverLabel, zoneLabel, label)} installiert${installSuffix}`);
+        chips.push("Install", installAreaFromPayload(serverLabel, zoneLabel, label), ...(installEffect?.chips ?? []));
+      }
       }
       break;
     case "play_event":
@@ -668,8 +672,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       const points = agendaPointSuffix(agendaPoints);
-      title = phrase(subject, `${cardTitle ?? "eine Agenda"} gescored${points}`);
-      chips.push("Score", ...agendaPointChips(agendaPoints));
+      const scoreEffect = mergedCardResolverEffect;
+      category = scoreEffect?.category ?? category;
+      title = phrase(
+        subject,
+        `${cardTitle ?? "eine Agenda"} gescored${points}${scoreEffect?.suffix ? ` und ${scoreEffect.suffix}` : ""}`,
+      );
+      chips.push("Score", ...agendaPointChips(agendaPoints), ...(scoreEffect?.chips ?? []));
       break;
     }
     case "start_run": {
@@ -681,18 +690,21 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     }
     case "rez_ice":
-      category = context.cardType === "asset" || context.cardType === "upgrade" ? "card" : "run";
+      {
+      const rezEffect = mergedCardResolverEffect ?? effect;
+      category = rezEffect.category ?? (context.cardType === "asset" || context.cardType === "upgrade" ? "card" : "run");
       if (payload.oliviaSalazarTemporaryDerez === true) {
         const paid = numberValue(payload.rezCostPaid) ?? 0;
         const base = numberValue(payload.oliviaSalazarRezCostBase);
-        title = phrase(subject, `${cardTitle ?? "ein ICE"} mit Olivia Salazar für ${creditText(paid)} gerezzt${rezSuffix(context.cardType, effect)}`);
+        title = phrase(subject, `${cardTitle ?? "ein ICE"} mit Olivia Salazar für ${creditText(paid)} gerezzt${rezSuffix(context.cardType, rezEffect)}`);
         description = `Olivia Salazar reduziert die effektiven Rez-Kosten${base !== undefined ? ` von ${creditText(base)}` : ""} auf ${creditText(paid)}; das ICE wird am Runende derezzt.`;
         chips.push("Olivia Salazar", `${paid} ${creditLabel(paid)}`, "Temporär");
       } else {
-        title = phrase(subject, `${cardTitle ?? "eine Karte"} gerezzt${rezSuffix(context.cardType, effect)}`);
+        title = phrase(subject, `${cardTitle ?? "eine Karte"} gerezzt${rezSuffix(context.cardType, rezEffect)}`);
       }
-      chips.push("Rez", ...effect.chips);
+      chips.push("Rez", ...rezEffect.chips);
       if (context.cardType === "ice" || cardTitle?.includes("ICE")) chips.push("Begegnung");
+      }
       break;
     case "decline_rez":
       category = "run";
@@ -1365,6 +1377,9 @@ function cardResolverPlayEffectPart(
   if (effect.kind === "lose_credits") return { category: "danger", suffix: `${sideLabel(effect.side)} verliert ${creditText(amount)}`, chips: [`${sideLabel(effect.side)} -${amount} ${creditLabel(amount)}`] };
   if (effect.kind === "add_tags") return { category: "danger", suffix: `${sideLabel(effect.side)} erhält ${amount} Tag${amount === 1 ? "" : "s"}`, chips: [`+${amount} Tag${amount === 1 ? "" : "s"}`] };
   if (effect.kind === "damage") return { category: "danger", suffix: `${sideLabel(effect.side)} erleidet ${amount} ${damageTypeLabel(stringValue(effect.damageType))}`, chips: [`${amount} ${damageTypeLabel(stringValue(effect.damageType))}`] };
+  if (effect.kind === "add_hosted_credits") return { category: "economy", suffix: `${creditText(amount)} auf die Karte gelegt`, chips: [`+${amount} ${creditLabel(amount)} auf Karte`] };
+  if (effect.kind === "take_hosted_credits") return { category: "economy", suffix: `${creditText(amount)} von der Karte genommen`, chips: [`+${amount} ${creditLabel(amount)}`, `${amount} ${creditLabel(amount)} von Karte`, `${numberValue(effect.remainingCounters) ?? 0} ${creditLabel(numberValue(effect.remainingCounters) ?? 0)} übrig`] };
+  if (effect.kind === "trash_source_when_empty") return { category: "economy", suffix: `${stringValue(effect.sourceTitle) ?? "Quelle"} getrasht`, chips: ["Quelle getrasht"] };
   return undefined;
 }
 
@@ -1384,10 +1399,20 @@ function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedG
   if (
     actionType !== "play_event" &&
     actionType !== "play_operation" &&
+    actionType !== "rez_ice" &&
+    actionType !== "install_card" &&
+    actionType !== "score_agenda" &&
     !activatedCardAbility
   )
     return false;
-  if (!["draw_cards", "gain_credits", "lose_credits", "add_tags", "damage"].includes(effect.kind) || effect.visibility !== "public") return false;
+  if (
+    (actionType === "rez_ice" ||
+      actionType === "install_card" ||
+      actionType === "score_agenda") &&
+    effect.kind !== "add_hosted_credits"
+  )
+    return false;
+  if (!["draw_cards", "gain_credits", "lose_credits", "add_tags", "damage", "add_hosted_credits", "take_hosted_credits", "trash_source_when_empty"].includes(effect.kind) || effect.visibility !== "public") return false;
   if (effect.reason !== "card_resolver") return false;
   const actor = sideValue(payload.actor);
   if (!["lose_credits", "add_tags", "damage"].includes(effect.kind) && actor && effect.side && actor !== effect.side) return false;

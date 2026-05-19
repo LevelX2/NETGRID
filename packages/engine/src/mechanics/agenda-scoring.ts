@@ -66,28 +66,6 @@ export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] 
     creditGain: 1,
     label: "1 Credit aus Contract-Counter",
   },
-  {
-    profileId: "v1.corporate_coup_counter_credit",
-    sourceDefinitionId: "onr_v1_193_corporate-coup",
-    agendaAbility: "corporate_coup",
-    side: "corp",
-    clickCost: 1,
-    counterType: "power",
-    removeCounterAmount: 3,
-    creditGain: 3,
-    label: "3 Credits aus Coup-Counter",
-  },
-  {
-    profileId: "v1.political_coup_counter_credit",
-    sourceDefinitionId: "onr_v1_209_political-coup",
-    agendaAbility: "political_coup",
-    side: "corp",
-    clickCost: 1,
-    counterType: "power",
-    removeCounterAmount: 3,
-    creditGain: 3,
-    label: "3 Credits aus Coup-Counter",
-  },
 ];
 
 export function scoredAgendaCounterCreditProfileForDefinition(

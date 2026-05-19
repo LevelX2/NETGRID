@@ -47,12 +47,18 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_178_short-term-contract":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/short-term-contract.ts",
   "onr_v1_179_silicon-saloon-franchise":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/silicon-saloon-franchise.ts",
+  "onr_v1_193_corporate-coup":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
   "onr_v1_206_marine-arcology":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
   "onr_v1_208_on-call-solo-team":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
+  "onr_v1_209_political-coup":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-coup.ts",
   "onr_v1_210_political-overthrow":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
   "onr_v1_217_strike-force-kali":
@@ -79,6 +85,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
   "onr_v1_307_urban-renewal":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
+  "onr_v1_309_bbs-whispering-campaign":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/bbs-whispering-campaign.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_320_encoder-inc":
@@ -93,6 +101,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/solo-squad.ts",
   "onr_v1_343_south-african-mining-corp":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/south-african-mining-corp.ts",
+  "onr_v1_337_rockerboy-promotion":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/rockerboy-promotion.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
 };

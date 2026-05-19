@@ -21,6 +21,18 @@ export type CardEffectExecutionContext = {
     damageType: Extract<DamageType, "meat">,
     amount: number,
   ) => CardEffectDamageResult;
+  addHostedCredits?: (
+    sourceCardId: CardInstanceId,
+    amount: number,
+  ) => CardEffectHostedCreditsResult;
+  takeHostedCredits?: (
+    sourceCardId: CardInstanceId,
+    recipient: Side,
+    amount: number,
+  ) => CardEffectHostedCreditsResult;
+  trashSourceWhenEmpty?: (
+    sourceCardId: CardInstanceId,
+  ) => CardEffectTrashSourceResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -39,6 +51,17 @@ export type CardEffectDamageResult = {
   amount: number;
   cardsTrashed: number;
   flatline: boolean;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectHostedCreditsResult = {
+  amount: number;
+  hostedCreditsAfter: number;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectTrashSourceResult = {
+  sourceTrashed: boolean;
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -257,6 +280,106 @@ export function executeCardImplementationEffects(
           amount: damageResult.amount,
           damageType: damageResult.damageType,
           cardsTrashed: damageResult.cardsTrashed,
+          reason: "card_resolver",
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "add_hosted_credits": {
+        assertPositiveIntegerAmount("add_hosted_credits", effect.amount);
+        assertPublicVisibility("add_hosted_credits", effect.visibility);
+        if ((effect as { target?: string }).target !== "source")
+          throw new Error("add_hosted_credits effect target must be source.");
+        if (!context.addHostedCredits)
+          throw new Error(
+            "add_hosted_credits effect requires an addHostedCredits execution context.",
+          );
+        const addResult = context.addHostedCredits(
+          context.sourceCardId,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, addResult.publicPayload);
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_hosted_credits"),
+          kind: "add_hosted_credits",
+          visibility: effect.visibility,
+          side: context.controller,
+          amount: addResult.amount,
+          counterType: "bit",
+          addedCounterAmount: addResult.amount,
+          remainingCounters: addResult.hostedCreditsAfter,
+          reason: "card_resolver",
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "take_hosted_credits": {
+        assertPositiveIntegerAmount("take_hosted_credits", effect.amount);
+        assertPublicVisibility("take_hosted_credits", effect.visibility);
+        if ((effect as { source?: string }).source !== "source")
+          throw new Error("take_hosted_credits effect source must be source.");
+        if ((effect as { recipient?: string }).recipient !== "controller")
+          throw new Error(
+            "take_hosted_credits effect recipient must be controller.",
+          );
+        const mode = effect.mode ?? "up_to_amount_if_available";
+        if (mode !== "up_to_amount_if_available")
+          throw new Error(
+            "take_hosted_credits effect mode must be up_to_amount_if_available.",
+          );
+        if (!context.takeHostedCredits)
+          throw new Error(
+            "take_hosted_credits effect requires a takeHostedCredits execution context.",
+          );
+        const side = recipientSide(context, effect.recipient);
+        const takeResult = context.takeHostedCredits(
+          context.sourceCardId,
+          side,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, takeResult.publicPayload);
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "take_hosted_credits"),
+          kind: "take_hosted_credits",
+          visibility: effect.visibility,
+          side,
+          amount: takeResult.amount,
+          counterType: "bit",
+          removedCounterAmount: takeResult.amount,
+          remainingCounters: takeResult.hostedCreditsAfter,
+          reason: "card_resolver",
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "trash_source_when_empty": {
+        assertPublicVisibility("trash_source_when_empty", effect.visibility);
+        if ((effect as { source?: string }).source !== "source")
+          throw new Error(
+            "trash_source_when_empty effect source must be source.",
+          );
+        if (!context.trashSourceWhenEmpty)
+          throw new Error(
+            "trash_source_when_empty effect requires a trashSourceWhenEmpty execution context.",
+          );
+        const trashResult = context.trashSourceWhenEmpty(context.sourceCardId);
+        mergePublicPayload(publicPayload, trashResult.publicPayload);
+        if (!trashResult.sourceTrashed) return;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "trash_source_when_empty"),
+          kind: "trash_source_when_empty",
+          visibility: effect.visibility,
+          side: context.controller,
+          amount: 1,
           reason: "card_resolver",
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }

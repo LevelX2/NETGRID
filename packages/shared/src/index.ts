@@ -220,6 +220,9 @@ export type ResolvedGameEffectKind =
   | "remove_tags"
   | "bad_publicity"
   | "damage"
+  | "add_hosted_credits"
+  | "take_hosted_credits"
+  | "trash_source_when_empty"
   | "resolve_subroutine";
 
 export type ResolvedGameEffect = {
