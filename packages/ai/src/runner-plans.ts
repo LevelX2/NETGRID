@@ -913,7 +913,35 @@ function recentRemoteContestPenalty(input: AiDecisionInput, candidate: RunnerPla
   const last = history[lastSameRemoteRun];
   if (!last) return 0;
   const distance = input.playerView.stateVersion - eventVersion(last);
-  return distance <= 8 ? 180 : 0;
+  if (distance > 8) return 0;
+  return recentSameRemoteJackOutWithoutAccess(history, lastSameRemoteRun, target) ? 620 : 180;
+}
+
+function recentSameRemoteJackOutWithoutAccess(history: PublicGameEvent[], startIndex: number, target: string): boolean {
+  const afterStart = history.slice(startIndex + 1);
+  const jackOutIndex = afterStart.findIndex((event) => {
+    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+    if (actionType !== "jack_out") return false;
+    const eventServerId = serverIdFromEvent(event);
+    return eventServerId === undefined || eventServerId === target;
+  });
+  if (jackOutIndex < 0) return false;
+  const beforeJackOut = afterStart.slice(0, jackOutIndex);
+  if (beforeJackOut.some((event) => serverIdFromEvent(event) === target && event.publicPayload.actionType === "access_card")) return false;
+  return !afterStart.slice(jackOutIndex + 1).some((event) => eventMayRefreshRemoteRun(event, target));
+}
+
+function eventMayRefreshRemoteRun(event: PublicGameEvent, target: string): boolean {
+  const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+  if (actionType === "access_card" && serverIdFromEvent(event) === target) return true;
+  return (
+    actionType === "gain_credit" ||
+    actionType === "draw_card" ||
+    actionType === "install_card" ||
+    actionType === "play_event" ||
+    actionType === "trigger_ability" ||
+    actionType === "rez_ice"
+  );
 }
 
 export function evaluateCorpScoringThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {

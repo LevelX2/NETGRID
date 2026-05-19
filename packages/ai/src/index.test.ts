@@ -5046,6 +5046,200 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
+  it("runs the Bartmoss remote path after a declined rez and suppresses same-turn no-access repeats", () => {
+    const runnerDeck: DeckDefinition = {
+      id: "ai_bartmoss_remote_runner",
+      name: "AI Bartmoss Remote Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_005_bartmoss-memorial-icebreaker", quantity: 1 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    };
+    const corpDeck: DeckDefinition = {
+      id: "ai_bartmoss_remote_corp",
+      name: "AI Bartmoss Remote Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_279_wall-of-static", quantity: 2 },
+        { id: "simple_agenda", quantity: 3 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-bartmoss-remote-declined-rez",
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    moveRunnerProgramToRig(
+      state,
+      "onr_v1_005_bartmoss-memorial-icebreaker",
+    );
+    ensureRemoteServer(state, "remote_1");
+    const innerWall = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_279_wall-of-static",
+    );
+    const outerWall = putUnusedCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_279_wall-of-static",
+      new Set([innerWall]),
+    );
+    state.cardInstances[innerWall] = {
+      ...state.cardInstances[innerWall]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.cardInstances[outerWall] = {
+      ...state.cardInstances[outerWall]!,
+      faceup: false,
+      rezzed: false,
+    };
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    state.runner.credits = 3;
+    state.corp.credits = 3;
+
+    const startInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const startDecision = chooseRunnerAction(startInput);
+    const startSelected = startInput.legalActions.find(
+      (action) => action.actionId === startDecision.actionId,
+    );
+
+    expect(startSelected?.type).toBe("start_run");
+    expect(startSelected?.payload?.serverId).toBe("remote_1");
+    expect(startDecision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(assertAiInputIsSideSafe(startInput)).toBe(true);
+    expect(JSON.stringify(startInput)).not.toMatch(/simple_agenda/);
+    expect(JSON.stringify(startDecision.decisionDebug)).not.toMatch(
+      /simple_agenda|cardInstances|privatePayload/,
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === startSelected?.actionId,
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+
+    const selectedTypes: LegalAction["type"][] = [];
+    for (let step = 0; step < 6; step += 1) {
+      const input = buildAiDecisionInput(state, "runner", {
+        difficulty: "normal",
+        profileId: "runner-ai-v1.4.2-normal",
+        decisionId: `ai-bartmoss-remote-declined-rez:${step}`,
+        actionNumber: step,
+      });
+      const decision = chooseRunnerAction(input);
+      const selected = input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      );
+      expect(assertAiInputIsSideSafe(input)).toBe(true);
+      expect(JSON.stringify(input)).not.toMatch(/simple_agenda/);
+      expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+        /simple_agenda|cardInstances|privatePayload/,
+      );
+      expect(selected?.type).not.toBe("jack_out");
+      expect(selected).toBeDefined();
+      if (!selected) throw new Error("Missing Bartmoss run sequence action");
+      selectedTypes.push(selected.type);
+      if (selected.type === "access_card") break;
+      state = apply(state, "runner", (action) => action.actionId === selected.actionId);
+    }
+
+    expect(selectedTypes).toEqual([
+      "pump_breaker",
+      "pump_breaker",
+      "break_subroutine",
+      "continue_run",
+      "access_card",
+    ]);
+
+    const repeatRemoteRun = startInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = startInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(repeatRemoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!repeatRemoteRun || !gainCredit)
+      throw new Error("Missing Bartmoss repeat fixture actions");
+
+    const repeatedInput = {
+      ...startInput,
+      playerView: {
+        ...startInput.playerView,
+        stateVersion: startInput.playerView.stateVersion + 2,
+      },
+      eventTail: [
+        ...startInput.eventTail,
+        {
+          eventId: "ai-bartmoss-remote-run-started",
+          type: "run_started",
+          stateVersionBefore: startInput.playerView.stateVersion,
+          stateVersionAfter: startInput.playerView.stateVersion + 1,
+          stateHashAfter: "fnv1a:bartmossrun",
+          visibilityClass: "public",
+          publicPayload: {
+            actionType: "start_run",
+            serverId: "remote_1",
+          },
+        } satisfies PublicGameEvent,
+        {
+          eventId: "ai-bartmoss-remote-jack-out",
+          type: "jack_out",
+          stateVersionBefore: startInput.playerView.stateVersion + 1,
+          stateVersionAfter: startInput.playerView.stateVersion + 2,
+          stateHashAfter: "fnv1a:bartmossjack",
+          visibilityClass: "public",
+          publicPayload: {
+            actionType: "jack_out",
+            serverId: "remote_1",
+          },
+        } satisfies PublicGameEvent,
+      ],
+      legalActions: [repeatRemoteRun, gainCredit],
+    };
+    const repeatedPlanDecision = chooseRunnerAction(repeatedInput);
+    const repeatedPlanSelected = repeatedInput.legalActions.find(
+      (action) => action.actionId === repeatedPlanDecision.actionId,
+    );
+    const repeatedBaselineDecision = chooseRunnerBaselineAction(repeatedInput);
+    const repeatedBaselineSelected = repeatedInput.legalActions.find(
+      (action) => action.actionId === repeatedBaselineDecision.actionId,
+    );
+    const repeatedContestCandidate =
+      generateRunnerPlanCandidates(repeatedInput).find(
+        (candidate) => candidate.kind === "contest_remote",
+      );
+
+    expect(repeatedPlanSelected?.type).toBe("gain_credit");
+    expect(repeatedPlanDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(repeatedContestCandidate).toBeDefined();
+    if (!repeatedContestCandidate)
+      throw new Error("Missing repeated Bartmoss contest candidate");
+    expect(
+      evaluateRemoteThreat(repeatedInput, repeatedContestCandidate).reasons,
+    ).toContain(
+      "recent_remote_contest_repeated",
+    );
+    expect(repeatedBaselineSelected?.type).toBe("gain_credit");
+    expect(repeatedBaselineDecision.reasonCode).toBe(
+      "runner.economy.basic_credit",
+    );
+  });
+
   it("penalizes immediate repeated remote contest", () => {
     const input = runnerActionPhaseInput("ai-v141-repeated-remote", (state) => {
       ensureRemoteServer(state, "remote_1");
@@ -9077,6 +9271,40 @@ function putCorpIceOnServer(
   definitionId: string,
 ): CardInstanceId {
   const id = findCard(state, definitionId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  expect(server).toBeDefined();
+  if (!server) throw new Error("Missing server");
+  removeEverywhere(state, id);
+  server.ice.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: false,
+    rezzed: false,
+  };
+  return id;
+}
+
+function putUnusedCorpIceOnServer(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  definitionId: string,
+  excludedIds: Set<CardInstanceId> = new Set(),
+): CardInstanceId {
+  const usedServerCards = new Set(
+    state.corp.servers.flatMap((server) => [...server.ice, ...server.root]),
+  );
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === definitionId &&
+      !usedServerCards.has(id) &&
+      !excludedIds.has(id),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing unused ${definitionId}`);
+  const id = entry[0];
   const server = state.corp.servers.find(
     (candidate) => candidate.id === serverId,
   );
