@@ -199,7 +199,8 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
   return { primaryActions, contextualActions };
 }
 
-export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side): LegalAction | undefined {
+export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side, options: { accessRevealVisible?: boolean } = {}): LegalAction | undefined {
+  if (options.accessRevealVisible) return undefined;
   if (view.winner || view.pendingChoice || view.activeSide !== side) return undefined;
   const ownActions = actions.filter((action) => action.side === side);
   const endTurn = ownActions.find((action) => action.type === "end_turn");

@@ -3290,12 +3290,12 @@ export default function Page() {
 
   useEffect(() => {
     if (!autoEndTurnEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
-    const action = automaticEndTurnAction(payload.playerView, payload.legalActions, session.side);
+    const action = automaticEndTurnAction(payload.playerView, payload.legalActions, session.side, { accessRevealVisible: showAccessReveal });
     if (!action) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
     if (autoEndTurnSubmittedKeyRef.current === key) return;
     if (submitAction(action, { immediateAudio: false })) autoEndTurnSubmittedKeyRef.current = key;
-  }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
+  }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction, showAccessReveal]);
 
   const submitChoiceOption = (action: LegalAction, choiceId: string, selectedOptionId: string) => {
     if (!session || !payload || !ensureSocketConnected()) return;

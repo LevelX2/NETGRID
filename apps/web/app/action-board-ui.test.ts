@@ -91,6 +91,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const scoreAgenda = legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" });
 
     expect(automaticEndTurnAction(board, [endTurn], "corp")).toBe(endTurn);
+    expect(automaticEndTurnAction(board, [endTurn], "corp", { accessRevealVisible: true })).toBeUndefined();
     expect(automaticEndTurnAction(board, [endTurn, scoreAgenda], "corp")).toBeUndefined();
     expect(
       automaticEndTurnAction(
