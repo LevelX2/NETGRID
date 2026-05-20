@@ -195,6 +195,17 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   );
 }
 
+function continueRunAction(state: GameState): GameState {
+  return apply(state, "runner", (action) => action.type === "continue_run");
+}
+
+function continueRunThroughMovement(state: GameState): GameState {
+  const next = continueRunAction(state);
+  if (next.timingPoint === "run.jack_out_window")
+    return continueRunAction(next);
+  return next;
+}
+
 describe("MVP 0.1 engine foundation", () => {
   it("normalizes legacy ability payloads into side-safe public ability schema", () => {
     const context = buildPublicAbilitySchemaContext(
@@ -1201,6 +1212,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
             { id: "simple_barrier_ice", quantity: 1 },
             { id: "simple_code_gate_ice", quantity: 2 },
             { id: "simple_sentry_ice", quantity: 1 },
+            { id: "simple_tag_ice", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1209,17 +1221,23 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     state.runner.credits = 2;
     state.corp.credits = 5;
+    const hqServer = state.corp.servers.find((server) => server.id === "hq");
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    if (!hqServer || !rdServer) throw new Error("central servers missing");
+    hqServer.label = "Headquarter";
+    rdServer.label = "Research and Development";
     const rdIce = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
     putCorpIceCopyOnServer(state, "hq", "simple_code_gate_ice");
     state.corp.servers.push({
-      id: "remote_2",
+      id: "remote_1",
       kind: "remote",
-      label: "Remote 2",
+      label: "Remote 1",
       ice: [],
       root: [],
     });
-    putCorpIceOnServer(state, "remote_2", "simple_sentry_ice");
+    putCorpIceOnServer(state, "remote_1", "simple_sentry_ice");
+    putCorpIceOnServer(state, "remote_1", "simple_tag_ice");
     moveRunnerCardToGrip(state, "onr_v1_086_forged-activation-orders");
     state = apply(
       state,
@@ -1228,18 +1246,20 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         action.type === "play_event" &&
         sourceDefinition(state, action) === "onr_v1_086_forged-activation-orders",
     );
-    expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(state.pendingChoice?.options).toHaveLength(5);
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
-      "ICE 1 in HQ",
-      "ICE 2 in HQ",
-      "ICE 1 in R&D",
-      "ICE 1 in Remote 2",
+      "ICE 1 in Headquarter",
+      "ICE 2 in Headquarter",
+      "ICE 1 in Research and Development",
+      "ICE 1 in Remote 1",
+      "ICE 2 in Remote 1",
     ]);
     expect(state.pendingChoice?.options.map((option) => option.publicLabel)).toEqual([
-      "ICE 1 in HQ",
-      "ICE 2 in HQ",
-      "ICE 1 in R&D",
-      "ICE 1 in Remote 2",
+      "ICE 1 in Headquarter",
+      "ICE 2 in Headquarter",
+      "ICE 1 in Research and Development",
+      "ICE 1 in Remote 1",
+      "ICE 2 in Remote 1",
     ]);
     expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toMatch(
       /simple_barrier_ice|cardInstances/,
@@ -1276,8 +1296,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(state.corp.archives).toContain(rdIce);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       corpDecision: "trash_ice",
-      targetServerLabel: "R&D",
-      targetIcePositionLabel: "ICE 1 in R&D",
+      targetServerLabel: "Research and Development",
+      targetIcePositionLabel: "ICE 1 in Research and Development",
       trashedCount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -1910,8 +1930,10 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         action.type === "rez_ice" &&
         sourceDefinition(canisState, action) === "onr_v1_225_canis-major",
     );
-    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    canisState = continueRunAction(canisState);
     expect(canisState.run?.futureEncounterIceStrengthBonus).toBe(2);
+    expect(canisState.timingPoint).toBe("run.jack_out_window");
+    canisState = continueRunAction(canisState);
     canisState = apply(
       canisState,
       "corp",
@@ -1924,7 +1946,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.definitionId === "simple_code_gate_ice")?.strength,
     ).toBe((DEMO_CARDS_BY_ID.simple_code_gate_ice?.strength ?? 0) + 2);
-    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    canisState = continueRunThroughMovement(canisState);
     expect(canisState.run).toBeUndefined();
     const replay = replayEvents(initial, canisState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -3707,17 +3729,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
 
-    const accessActions = getLegalActions(state, "runner");
-    expect(state.timingPoint).toBe("access.resolve_card");
-    expect(accessActions.some((action) => action.type === "access_card")).toBe(
-      false,
-    );
-    expect(
-      accessActions.find((action) => action.type === "continue_run")?.label,
-    ).toBe("Zugriff abschließen");
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    state = continueRunAction(state);
     expect(state.randomDrawRecords).toHaveLength(randomDrawsBefore);
-
-    state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
@@ -3793,7 +3807,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       cardDefinitionId: "efficient_fracter",
       title: "Efficient Fracter",
     });
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -3862,7 +3876,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       "runner",
       (action) => action.type === "break_subroutine",
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     expect(state.run?.phase).toBe("encounter_ice");
     expect(state.run?.position).toEqual({
       kind: "ice",
@@ -3882,7 +3896,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       "runner",
       (action) => action.type === "break_subroutine",
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     expect(state.run?.phase).toBe("access");
     expect(state.run?.position).toEqual({ kind: "server", serverId: "rd" });
     expect(
@@ -4559,11 +4573,7 @@ describe("O:NR v1 Limited local private test access", () => {
         (action) => action.type === "continue_run",
       )?.label,
     ).toBe("ICE passieren");
-    codeGateState = apply(
-      codeGateState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    codeGateState = continueRunThroughMovement(codeGateState);
     codeGateState = apply(
       codeGateState,
       "runner",
@@ -4620,11 +4630,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) => action.type === "break_subroutine",
     );
-    sentryState = apply(
-      sentryState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    sentryState = continueRunThroughMovement(sentryState);
     sentryState = apply(
       sentryState,
       "runner",
@@ -5114,7 +5120,7 @@ describe("V1.0.5K Card Release", () => {
         sourceDefinition(state, action) === "onr_v1_052_raffles" &&
         action.payload?.subroutineIndex === 1,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -5602,11 +5608,7 @@ describe("V1.0.6K Card Release", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
     );
-    sentryRun = apply(
-      sentryRun,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    sentryRun = continueRunThroughMovement(sentryRun);
     sentryRun = apply(
       sentryRun,
       "runner",
@@ -5932,11 +5934,7 @@ describe("V1.1.2K Card Release", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
     );
-    codeGateState = apply(
-      codeGateState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    codeGateState = continueRunThroughMovement(codeGateState);
     codeGateState = apply(
       codeGateState,
       "runner",
@@ -5997,11 +5995,7 @@ describe("V1.1.2K Card Release", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
     );
-    sentryState = apply(
-      sentryState,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    sentryState = continueRunThroughMovement(sentryState);
     sentryState = apply(
       sentryState,
       "runner",
@@ -6496,7 +6490,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         String(action.payload?.breakerId) === krashId &&
         action.payload?.subroutineIndex === 0,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     state = apply(
       state,
       "corp",
@@ -6534,7 +6528,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         String(action.payload?.breakerId) === krashId &&
         action.payload?.subroutineIndex === 1,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       getPlayerView(state, "runner").own.rig?.find(
@@ -8380,11 +8374,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
           action.payload?.subroutineIndex === subroutineIndex,
       );
     }
-    addedSubroutineBroken = apply(
-      addedSubroutineBroken,
-      "runner",
-      (action) => action.type === "continue_run",
-    );
+    addedSubroutineBroken = continueRunThroughMovement(addedSubroutineBroken);
     expect(addedSubroutineBroken.run?.phase).toBe("access");
 
     const unrezzedEncoder = approachIce(
@@ -18008,7 +17998,7 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     });
     expect(isHiddenInfoBarrierEvent(state.eventLog.at(-1)!)).toBe(false);
 
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     expect(state.timingPoint).toBe("access.resolve_card");
   });
 
@@ -27160,6 +27150,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
+    state = continueRunAction(state);
 
     state = apply(
       state,
@@ -27316,6 +27307,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
+    state = continueRunAction(state);
 
     state = apply(
       state,
@@ -27374,7 +27366,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       collectActiveModifiers(state).some(
@@ -30864,7 +30856,7 @@ describe("MVP 0.8 playable starter slice", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(state, action) === "v08_steady_fracter",
     );
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = continueRunThroughMovement(state);
     const beforeAccessCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -32208,7 +32200,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         sourceDefinition(corridor, action) === "onr_v1_052_raffles" &&
         action.payload?.subroutineIndex === 1,
     );
-    corridor = apply(corridor, "runner", (action) => action.type === "continue_run");
+    corridor = continueRunThroughMovement(corridor);
     expect(corridor.run?.phase).toBe("access");
     const corridorReplay = replayEvents(
       corridorInitial,
