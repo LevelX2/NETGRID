@@ -3,6 +3,7 @@ import { copyFileSync, existsSync, mkdirSync, readFileSync, statSync, writeFileS
 import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
+import type { GameEvent, GameState } from "@netgrid/shared";
 import type { MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 1;
@@ -49,7 +50,7 @@ export type BackupManifest = {
   source: "default_sqlite" | "configured_sqlite" | "legacy_json_import" | "pre_restore_sqlite";
   files: Array<{ name: string; sizeBytes: number; sha256: string }>;
   matchCount?: number;
-  reason?: "manual" | "pre_migration" | "pre_restore" | "pre_cleanup";
+  reason?: "manual" | "pre_migration" | "pre_restore" | "pre_cleanup" | "pre_compaction";
 };
 
 export type StorageMaintenanceParticipant = {
@@ -192,6 +193,30 @@ export type StorageMaintenanceCleanupApplyResult = {
     beforeBytes: number;
     afterDeleteBytes: number;
     afterVacuumBytes?: number;
+  };
+};
+
+export type StorageMaintenanceSnapshotCompactionResult = {
+  backendOpsVersion: "Backend 0.5";
+  generatedAt: string;
+  backup: {
+    backupDir: string;
+    backupId: string;
+    createdAt: string;
+  };
+  backupCreated: true;
+  matchesScanned: number;
+  compactedMatchCount: number;
+  engineEventsBackfilled: number;
+  recordRowsCompacted: number;
+  gameStateRowsCompacted: number;
+  stateSnapshotRowsCompacted: number;
+  integrityCheck: "ok";
+  database: {
+    beforeBytes: number;
+    afterRewriteBytes: number;
+    beforePayloadBytes: number;
+    afterPayloadBytes: number;
   };
 };
 
@@ -470,6 +495,105 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     };
   }
 
+  async maintenanceCompactSnapshots(now = new Date()): Promise<StorageMaintenanceSnapshotCompactionResult> {
+    const generatedAt = now.toISOString();
+    const beforeBytes = this.databaseSizeBytes();
+    const beforePayloadBytes = this.compactionPayloadBytes();
+    const backup = await this.backup("pre_compaction");
+    const rows = this.db.prepare("SELECT match_id AS matchId, record_json AS recordJson FROM matches ORDER BY created_at ASC").all() as Array<{ matchId: string; recordJson: string }>;
+    const result = {
+      compactedMatchIds: new Set<string>(),
+      engineEventsBackfilled: 0,
+      recordRowsCompacted: 0,
+      gameStateRowsCompacted: 0,
+      stateSnapshotRowsCompacted: 0
+    };
+
+    this.transaction(() => {
+      const updateMatch = this.db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?");
+      const updateGameState = this.db.prepare("UPDATE game_states SET game_state_json = ? WHERE match_id = ?");
+      const updateSnapshot = this.db.prepare("UPDATE state_snapshots SET game_state_json = ? WHERE match_id = ? AND snapshot_id = ?");
+      const insertEngineEvent = this.db.prepare(
+        `INSERT OR IGNORE INTO engine_events (match_id, event_id, event_index, event_json)
+         VALUES (?, ?, ?, ?)`
+      );
+
+      for (const row of rows) {
+        const record = JSON.parse(row.recordJson) as StoredMatch;
+        const gameStateRow = this.db.prepare("SELECT game_state_json AS gameStateJson FROM game_states WHERE match_id = ?").get(row.matchId) as { gameStateJson?: string | null } | undefined;
+        const gameState = gameStateRow?.gameStateJson ? (JSON.parse(gameStateRow.gameStateJson) as GameState) : undefined;
+        const snapshotRows = this.db
+          .prepare("SELECT snapshot_id AS snapshotId, game_state_json AS gameStateJson FROM state_snapshots WHERE match_id = ? ORDER BY state_version ASC")
+          .all(row.matchId) as Array<{ snapshotId: string; gameStateJson: string }>;
+        const snapshots = snapshotRows.map((snapshot) => ({
+          snapshotId: snapshot.snapshotId,
+          gameState: JSON.parse(snapshot.gameStateJson) as GameState
+        }));
+
+        const engineEventCount = Number((this.db.prepare("SELECT COUNT(*) AS count FROM engine_events WHERE match_id = ?").get(row.matchId) as { count: number }).count);
+        if (engineEventCount === 0) {
+          const engineEvents = collectLegacyEngineEvents(record, gameState, snapshots.map((snapshot) => snapshot.gameState));
+          engineEvents.forEach((event, index) => {
+            insertEngineEvent.run(row.matchId, event.eventId, index, JSON.stringify(event));
+          });
+          result.engineEventsBackfilled += engineEvents.length;
+        }
+
+        const compactRecordJson = JSON.stringify(compactRecordForStorage(record));
+        if (compactRecordJson !== row.recordJson) {
+          updateMatch.run(compactRecordJson, row.matchId);
+          result.recordRowsCompacted += 1;
+          result.compactedMatchIds.add(row.matchId);
+        }
+
+        if (gameState && gameStateRow?.gameStateJson) {
+          const compactGameStateJson = JSON.stringify(gameStateForStorage(gameState));
+          if (compactGameStateJson !== gameStateRow.gameStateJson) {
+            updateGameState.run(compactGameStateJson, row.matchId);
+            result.gameStateRowsCompacted += 1;
+            result.compactedMatchIds.add(row.matchId);
+          }
+        }
+
+        for (const snapshot of snapshots) {
+          const original = snapshotRows.find((candidate) => candidate.snapshotId === snapshot.snapshotId);
+          const compactSnapshotJson = JSON.stringify(gameStateForStorage(snapshot.gameState));
+          if (original && compactSnapshotJson !== original.gameStateJson) {
+            updateSnapshot.run(compactSnapshotJson, row.matchId, snapshot.snapshotId);
+            result.stateSnapshotRowsCompacted += 1;
+            result.compactedMatchIds.add(row.matchId);
+          }
+        }
+      }
+    });
+
+    const integrityCheck = this.integrityCheck();
+    if (integrityCheck !== "ok") throw new StorageError("storage_corrupt", "Storage-Integritätsprüfung ist fehlgeschlagen.");
+    return {
+      backendOpsVersion: "Backend 0.5",
+      generatedAt,
+      backup: {
+        backupDir: backup.backupDir,
+        backupId: backup.manifest.backupId,
+        createdAt: backup.manifest.createdAt
+      },
+      backupCreated: true,
+      matchesScanned: rows.length,
+      compactedMatchCount: result.compactedMatchIds.size,
+      engineEventsBackfilled: result.engineEventsBackfilled,
+      recordRowsCompacted: result.recordRowsCompacted,
+      gameStateRowsCompacted: result.gameStateRowsCompacted,
+      stateSnapshotRowsCompacted: result.stateSnapshotRowsCompacted,
+      integrityCheck,
+      database: {
+        beforeBytes,
+        afterRewriteBytes: this.databaseSizeBytes(),
+        beforePayloadBytes,
+        afterPayloadBytes: this.compactionPayloadBytes()
+      }
+    };
+  }
+
   async maintenanceCleanupPolicy(): Promise<StorageMaintenanceCleanupPolicy> {
     return this.maintenanceCleanupPolicyInternal();
   }
@@ -651,6 +775,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, event_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE TABLE IF NOT EXISTS engine_events (
+          match_id TEXT NOT NULL,
+          event_id TEXT NOT NULL,
+          event_index INTEGER NOT NULL,
+          event_json TEXT NOT NULL,
+          PRIMARY KEY (match_id, event_id),
+          FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
+        );
         CREATE TABLE IF NOT EXISTS action_receipts (
           match_id TEXT NOT NULL,
           idempotency_key TEXT NOT NULL,
@@ -778,6 +910,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
   private hydrateRecordFromTables(matchId: string, record: StoredMatchWithStorageFlags, options: { includeStateSnapshots?: boolean } = {}): void {
     if (!this.tableExists("matches")) return;
+    let engineEventLog: GameEvent[] | undefined;
 
     if (this.tableExists("sessions")) {
       const sessions = this.db
@@ -833,6 +966,16 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       }
     }
 
+    if (this.tableExists("engine_events")) {
+      const events = this.db
+        .prepare("SELECT event_json AS eventJson FROM engine_events WHERE match_id = ? ORDER BY event_index ASC")
+        .all(matchId) as Array<{ eventJson: string }>;
+      if (events.length > 0) {
+        engineEventLog = events.map((event) => JSON.parse(event.eventJson) as GameEvent);
+        if (record.gameState) record.gameState.eventLog = engineEventLog;
+      }
+    }
+
     if (this.tableExists("action_receipts")) {
       record.actionReceipts = this.db
         .prepare("SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? ORDER BY state_version_after ASC")
@@ -874,7 +1017,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
             stateVersion: Number(row.stateVersion),
             matchVersion: Number(row.matchVersion),
             stateHash: row.stateHash,
-            gameState: JSON.parse(row.gameStateJson) as StoredMatch["stateSnapshots"][number]["gameState"],
+            gameState: hydrateSnapshotGameState(JSON.parse(row.gameStateJson) as StoredMatch["stateSnapshots"][number]["gameState"], engineEventLog),
             createdAt: row.createdAt,
             hiddenInfoBarrier: row.hiddenInfoBarrier === 1
           };
@@ -970,6 +1113,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     for (const table of [
       "sessions",
       "tokens",
+      "engine_events",
       "action_receipts",
       "undo_snapshots",
       "pending_undo",
@@ -1004,7 +1148,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
            state_hash = excluded.state_hash,
            game_state_json = excluded.game_state_json`
       )
-      .run(matchId, stateVersion, stateHash, toJson(record.gameState));
+      .run(matchId, stateVersion, stateHash, toJson(gameStateForStorage(record.gameState)));
 
     const insertEvent = this.db.prepare(
       `INSERT INTO events
@@ -1022,6 +1166,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     this.db.prepare("DELETE FROM events WHERE match_id = ? AND event_index >= ?").run(matchId, record.eventLog.length);
     record.eventLog.forEach((event, index) => {
       insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(event.publicPayload), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+    });
+
+    const insertEngineEvent = this.db.prepare(
+      `INSERT INTO engine_events (match_id, event_id, event_index, event_json)
+       VALUES (?, ?, ?, ?)`
+    );
+    record.gameState?.eventLog.forEach((event, index) => {
+      insertEngineEvent.run(matchId, event.eventId, index, JSON.stringify(event));
     });
 
     const insertReceipt = this.db.prepare(
@@ -1043,7 +1195,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     );
     for (const snapshot of record.stateSnapshots) {
       if (existingSnapshotIds.has(snapshot.snapshotId)) continue;
-      insertStateSnapshot.run(matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(snapshot.gameState), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+      insertStateSnapshot.run(matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(gameStateForStorage(snapshot.gameState)), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
     }
 
     const insertUndoSnapshot = this.db.prepare(
@@ -1253,6 +1405,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       { key: "state_snapshots", label: "State Snapshots", table: "state_snapshots", expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)" },
       { key: "game_states", label: "Aktuelle GameStates", table: "game_states", expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)" },
       { key: "events", label: "Events", table: "events", expression: "COALESCE(SUM(LENGTH(public_payload_json)), 0)" },
+      { key: "engine_events", label: "Engine Events", table: "engine_events", expression: "COALESCE(SUM(LENGTH(event_json)), 0)" },
       { key: "sessions", label: "Sessions (redigiert)", table: "sessions", expression: "COALESCE(SUM(LENGTH(display_name)), 0)" },
       { key: "action_receipts", label: "Action Receipts", table: "action_receipts", expression: "COALESCE(SUM(LENGTH(COALESCE(error_code, ''))), 0)" },
       { key: "undo_snapshots", label: "Undo Snapshots", table: "undo_snapshots", expression: "COUNT(*) * 64" },
@@ -1272,6 +1425,14 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           approximatePayloadBytes: Number(payload.bytes ?? 0)
         };
       });
+  }
+
+  private compactionPayloadBytes(): number {
+    const recordBytes = this.tableExists("matches") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(record_json)), 0) AS value FROM matches").get()) : 0;
+    const gameStateBytes = this.tableExists("game_states") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) AS value FROM game_states").get()) : 0;
+    const snapshotBytes = this.tableExists("state_snapshots") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) AS value FROM state_snapshots").get()) : 0;
+    const engineEventBytes = this.tableExists("engine_events") ? scalarNumber(this.db.prepare("SELECT COALESCE(SUM(LENGTH(event_json)), 0) AS value FROM engine_events").get()) : 0;
+    return recordBytes + gameStateBytes + snapshotBytes + engineEventBytes;
   }
 
   private maintenanceCleanupPreviewInternal(filters: StorageMaintenanceCleanupFilters, now: Date): StorageMaintenanceCleanupPreview {
@@ -1673,9 +1834,36 @@ function toJson(value: unknown): string | null {
   return value === undefined ? null : JSON.stringify(value);
 }
 
+function gameStateForStorage<T extends GameState | undefined>(state: T): T {
+  if (!state) return state;
+  return { ...state, eventLog: [] } as T;
+}
+
+function hydrateSnapshotGameState(state: GameState, eventLog: GameEvent[] | undefined): GameState {
+  if (!eventLog) return state;
+  return {
+    ...state,
+    eventLog: eventLog.filter((event) => event.stateVersionAfter <= state.stateVersion)
+  };
+}
+
+function collectLegacyEngineEvents(record: StoredMatch, gameState: GameState | undefined, snapshots: GameState[]): GameEvent[] {
+  const events = new Map<string, GameEvent>();
+  const add = (eventLog: GameEvent[] | undefined): void => {
+    for (const event of eventLog ?? []) {
+      if (typeof event.eventId === "string" && !events.has(event.eventId)) events.set(event.eventId, event);
+    }
+  };
+  add(record.gameState?.eventLog);
+  add(gameState?.eventLog);
+  for (const snapshot of snapshots) add(snapshot.eventLog);
+  return [...events.values()].sort((left, right) => left.stateVersionAfter - right.stateVersionAfter || left.eventId.localeCompare(right.eventId));
+}
+
 function compactRecordForStorage(record: StoredMatch): StoredMatch {
   return {
     ...record,
+    gameState: gameStateForStorage(record.gameState),
     eventLog: [],
     actionReceipts: [],
     undoSnapshots: [],
@@ -1685,4 +1873,9 @@ function compactRecordForStorage(record: StoredMatch): StoredMatch {
 
 function clone<T>(value: T): T {
   return structuredClone(value) as T;
+}
+
+function scalarNumber(row: unknown): number {
+  const value = (row as { value?: number | bigint | null } | undefined)?.value;
+  return Number(value ?? 0);
 }

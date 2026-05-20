@@ -720,6 +720,223 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     storage.close();
   });
 
+  it("keeps private replay events while storing SQLite game states without embedded event history", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-engine-events" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-engine-events" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    await forceSetupComplete(service, created.matchId);
+    await submit(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      (action) => action.type === "mandatory_draw",
+      "v108-sqlite-engine-events-mandatory"
+    );
+
+    const db = new DatabaseSync(dbPath, { readOnly: true });
+    const stored = db
+      .prepare(
+        `SELECT
+          (SELECT record_json FROM matches WHERE match_id = ?) AS recordJson,
+          (SELECT game_state_json FROM game_states WHERE match_id = ?) AS gameStateJson,
+          (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
+          (SELECT COUNT(*) FROM engine_events WHERE match_id = ? AND event_json LIKE '%privatePayload%') AS privateEngineEventCount,
+          (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents`
+      )
+      .get(created.matchId, created.matchId, created.matchId, created.matchId, created.matchId) as {
+      recordJson: string;
+      gameStateJson: string;
+      engineEventCount: number;
+      privateEngineEventCount: number;
+      snapshotsWithEmbeddedEvents: number;
+    };
+    expect((JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog).toEqual([]);
+    expect((JSON.parse(stored.gameStateJson) as GameState).eventLog).toEqual([]);
+    expect(Number(stored.engineEventCount)).toBeGreaterThan(1);
+    expect(Number(stored.privateEngineEventCount)).toBeGreaterThan(0);
+    expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
+    db.close();
+    service.closeStorage();
+
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const replayService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-engine-events" });
+    const reopened = await reopenedStorage.load(created.matchId);
+    expect(reopened?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
+    expect(reopened?.stateSnapshots.some((snapshot) => snapshot.gameState.eventLog.length > 0)).toBe(true);
+    const replay = await replayService.replayMatch(created.matchId);
+    expect(replay.ok).toBe(true);
+    replayService.closeStorage();
+  });
+
+  it("compacts legacy SQLite snapshots without losing private replay events, partial loads or undo", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-legacy-compaction" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-legacy-compaction" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    await forceSetupComplete(service, created.matchId);
+    const beforeMandatory = await storage.load(created.matchId);
+    if (!beforeMandatory) throw new Error("Missing pre-action SQLite match");
+    const mandatory = await submit(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      (action) => action.type === "mandatory_draw",
+      "v108-sqlite-legacy-compaction-mandatory"
+    );
+
+    const current = await storage.load(created.matchId);
+    if (!current) throw new Error("Missing current SQLite match");
+    const legacyRecord = structuredClone(current) as StoredMatch;
+    const replayBaseSnapshot = stateSnapshotForTest(created.matchId, beforeMandatory.gameState, beforeMandatory.match.matchVersion, `snap_before_${mandatory.receipt.stateVersionAfter}`);
+    const lastSnapshot = stateSnapshotForTest(created.matchId, current.gameState, current.match.matchVersion, "legacy_embedded_eventlog_current");
+    legacyRecord.stateSnapshots = [replayBaseSnapshot, lastSnapshot];
+    for (let index = 0; index < 3; index += 1) {
+      legacyRecord.stateSnapshots.push({
+        ...structuredClone(lastSnapshot),
+        snapshotId: `legacy_embedded_eventlog_${index}`,
+        createdAt: `2026-05-21T00:00:0${index}.000Z`
+      });
+    }
+    service.closeStorage();
+
+    const db = new DatabaseSync(dbPath);
+    try {
+      db.prepare("DELETE FROM engine_events WHERE match_id = ?").run(created.matchId);
+      db.prepare("UPDATE matches SET record_json = ? WHERE match_id = ?").run(JSON.stringify(legacyRecord), created.matchId);
+      db.prepare("UPDATE game_states SET game_state_json = ? WHERE match_id = ?").run(JSON.stringify(legacyRecord.gameState), created.matchId);
+      db.prepare("DELETE FROM state_snapshots WHERE match_id = ?").run(created.matchId);
+      const insertSnapshot = db.prepare(
+        `INSERT INTO state_snapshots
+          (match_id, snapshot_id, state_version, match_version, state_hash, game_state_json, created_at, hidden_info_barrier)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+      );
+      for (const snapshot of legacyRecord.stateSnapshots) {
+        insertSnapshot.run(created.matchId, snapshot.snapshotId, snapshot.stateVersion, snapshot.matchVersion, snapshot.stateHash, JSON.stringify(snapshot.gameState), snapshot.createdAt, snapshot.hiddenInfoBarrier ? 1 : 0);
+      }
+      const legacyStats = db
+        .prepare(
+          `SELECT
+            (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
+            (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS embeddedSnapshotCount,
+            (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes`
+        )
+        .get(created.matchId, created.matchId, created.matchId) as { engineEventCount: number; embeddedSnapshotCount: number; gameStateBytes: number };
+      expect(Number(legacyStats.engineEventCount)).toBe(0);
+      expect(Number(legacyStats.embeddedSnapshotCount)).toBe(legacyRecord.stateSnapshots.length);
+      expect(Number(legacyStats.gameStateBytes)).toBeGreaterThan(10_000);
+    } finally {
+      db.close();
+    }
+
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "v108-sqlite-legacy-compaction" });
+    const handle = createNetgridHttpServer(reopenedService, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/storage/maintenance/snapshot-compaction/apply`, { method: "POST" });
+      const result = (await response.json()) as {
+        backupCreated?: boolean;
+        backup?: { backupId?: string; backupDir?: string };
+        matchesScanned?: number;
+        compactedMatchCount?: number;
+        engineEventsBackfilled?: number;
+        gameStateRowsCompacted?: number;
+        stateSnapshotRowsCompacted?: number;
+        integrityCheck?: string;
+        database?: { beforePayloadBytes?: number; afterPayloadBytes?: number };
+      };
+      expect(response.status).toBe(200);
+      expect(result.backupCreated).toBe(true);
+      expect(result.backup?.backupId).toMatch(/^netgrid-storage-/);
+      expect(result.backup?.backupDir).toContain(backupDir);
+      expect(result.matchesScanned).toBe(1);
+      expect(result.compactedMatchCount).toBe(1);
+      expect(result.engineEventsBackfilled).toBeGreaterThan(0);
+      expect(result.gameStateRowsCompacted).toBe(1);
+      expect(result.stateSnapshotRowsCompacted).toBe(legacyRecord.stateSnapshots.length);
+      expect(result.integrityCheck).toBe("ok");
+      expect(result.database?.afterPayloadBytes).toBeLessThan(result.database?.beforePayloadBytes ?? 0);
+      expect(JSON.stringify(result)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|cardInstances|privatePayload|decklist|game_state_json/i);
+
+      const manifests = await listBackupManifests(backupDir);
+      expect(manifests[0]).toMatchObject({ reason: "pre_compaction" });
+
+      const rawDb = new DatabaseSync(dbPath, { readOnly: true });
+      try {
+        const stored = rawDb
+          .prepare(
+            `SELECT
+              (SELECT record_json FROM matches WHERE match_id = ?) AS recordJson,
+              (SELECT game_state_json FROM game_states WHERE match_id = ?) AS gameStateJson,
+              (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount,
+              (SELECT COUNT(*) FROM engine_events WHERE match_id = ? AND event_json LIKE '%privatePayload%') AS privateEngineEventCount,
+              (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents`
+          )
+          .get(created.matchId, created.matchId, created.matchId, created.matchId, created.matchId) as {
+          recordJson: string;
+          gameStateJson: string;
+          engineEventCount: number;
+          privateEngineEventCount: number;
+          snapshotsWithEmbeddedEvents: number;
+        };
+        expect((JSON.parse(stored.recordJson) as StoredMatch).gameState.eventLog).toEqual([]);
+        expect((JSON.parse(stored.recordJson) as StoredMatch).stateSnapshots).toEqual([]);
+        expect((JSON.parse(stored.gameStateJson) as GameState).eventLog).toEqual([]);
+        expect(Number(stored.engineEventCount)).toBeGreaterThan(0);
+        expect(Number(stored.privateEngineEventCount)).toBeGreaterThan(0);
+        expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
+      } finally {
+        rawDb.close();
+      }
+
+      const full = await reopenedStorage.load(created.matchId);
+      expect(full?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
+      expect(full?.stateSnapshots.length).toBe(legacyRecord.stateSnapshots.length);
+      expect(full?.stateSnapshots.some((snapshot) => snapshot.gameState.eventLog.length > 0)).toBe(true);
+      const partial = await reopenedStorage.load(created.matchId, { includeStateSnapshots: false });
+      expect(partial?.stateSnapshots).toEqual([]);
+      const replay = await reopenedService.replayMatch(created.matchId);
+      if (!replay.ok) throw new Error(replay.errors.join("\n"));
+      expect(replay.ok).toBe(true);
+
+      const undo = await reopenedService.requestUndo({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        targetEventId: `evt_${mandatory.receipt.stateVersionAfter}`,
+        reason: "Legacy compaction undo"
+      });
+      if (!undo.ok || !undo.undoRequest) throw new Error(`Expected undo request: ${JSON.stringify(undo)}`);
+      expect(undo.ok).toBe(true);
+      const accepted = await reopenedService.acceptUndo({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: joined.sessionToken,
+        undoRequestId: undo.undoRequest.undoRequestId
+      });
+      expect(accepted.ok).toBe(true);
+      if (!accepted.ok) throw new Error(accepted.error.message);
+      expect(accepted.requesterPayload.playerView.stateVersion).toBe(0);
+    } finally {
+      await handle.close();
+    }
+  });
+
   it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
     const legacyPath = join(dir, "netgrid.sqlite");

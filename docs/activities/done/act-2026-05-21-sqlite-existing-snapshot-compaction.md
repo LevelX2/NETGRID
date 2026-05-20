@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-05-21-sqlite-existing-snapshot-compaction
-status: in_progress
+status: done
 kind: cleanup
 area: server
 priority: high
@@ -8,12 +8,23 @@ primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
 startedAt: 2026-05-21
-completedAt:
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/storage-sqlite.ts
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/http-server.ts
+  - apps/server/src/multiplayer.test.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/state-hash.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server test
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
 ---
 
 # SQLite-Bestandssnapshots kompakt migrieren
@@ -46,11 +57,11 @@ Bestehende lokale SQLite-Matches sollen nach der Event-Historie-Auslagerung einm
 
 ## Akzeptanzkriterien
 
-- [ ] Der Wartungspfad erstellt vor Datenänderungen ein verwertbares Backup.
-- [ ] Alte Snapshot-Blobs werden kompakt neu geschrieben, ohne private Replay-Events zu verlieren.
-- [ ] Full-Load, Partial-Load, Replay-View und Undo funktionieren nach der Kompaktierung unverändert.
-- [ ] Ein Regressionstest deckt eine Legacy-ähnliche SQLite-Datei mit eingebetteter Event-Historie ab.
-- [ ] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
+- [x] Der Wartungspfad erstellt vor Datenänderungen ein verwertbares Backup.
+- [x] Alte Snapshot-Blobs werden kompakt neu geschrieben, ohne private Replay-Events zu verlieren.
+- [x] Full-Load, Partial-Load, Replay-View und Undo funktionieren nach der Kompaktierung unverändert.
+- [x] Ein Regressionstest deckt eine Legacy-ähnliche SQLite-Datei mit eingebetteter Event-Historie ab.
+- [x] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
 
 ## Umsetzungshinweise
 
@@ -60,4 +71,6 @@ Bestehende lokale SQLite-Matches sollen nach der Event-Historie-Auslagerung einm
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der private Wartungspfad `/api/storage/maintenance/snapshot-compaction/apply` erstellt vor der Umschreibung ein Backup, backfillt fehlende `engine_events` aus Legacy-Eventlogs und schreibt Matchrecord, aktuelle GameState-Zeile und StateSnapshots kompakt ohne eingebettete `eventLog` neu. Der Regressionstest stellt eine Legacy-ähnliche SQLite-Datei nach und prüft Backup, Event-Backfill, Full-Load, Partial-Load, Replay, Undo und redigierte HTTP-Antwort.
+
+Verifikation: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`, `corepack pnpm --filter @netgrid/engine typecheck`, `corepack pnpm --filter @netgrid/engine test`.

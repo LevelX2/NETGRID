@@ -1940,7 +1940,7 @@ export function applyAction(
   );
   if (choiceError) return fail(state, "ERR_INVALID_CHOICE", choiceError);
 
-  const next = cloneState(state);
+  const next = cloneGameStateForAction(state);
   const before = state.stateVersion;
 
   try {
@@ -23888,6 +23888,13 @@ function fail(
 
 function cloneState<T>(state: T): T {
   return structuredClone(state) as T;
+}
+
+function cloneGameStateForAction(state: GameState): GameState {
+  return {
+    ...cloneState({ ...state, eventLog: [] }),
+    eventLog: state.eventLog.slice(),
+  };
 }
 
 function isReplayAction(value: unknown): value is PlayerAction {
