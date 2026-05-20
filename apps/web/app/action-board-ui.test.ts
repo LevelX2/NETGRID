@@ -26,6 +26,7 @@ import {
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
+  iceModifierBadgesForServer,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
@@ -159,6 +160,31 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(legalAction("runner", "continue_run", "game_rule", "Subroutinen auslösen (Run endet)", undefined, "run.encounter_ice"))).toBe(
       "Subroutinen auslösen (Run endet)"
     );
+  });
+
+  it("marks ICE in a server with rezzed Tesseract Fort Construction", () => {
+    const tesseract = {
+      ...card("tesseract_1", "Tesseract Fort Construction", "upgrade", true),
+      definitionId: "onr_v1_370_tesseract-fort-construction"
+    };
+    const server = {
+      id: "remote_1" as const,
+      label: "Remote 1",
+      ice: [card("ice_1", "Wall of Static", "ice")],
+      root: [tesseract]
+    };
+
+    expect(iceModifierBadgesForServer(server)).toEqual([
+      {
+        key: "tesseract-additional-subroutine",
+        shortLabel: "+Sub",
+        ariaLabel: "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
+        tooltip: "Tesseract Fort Construction: zusätzliche Subroutine",
+        testId: "tesseract-ice-subroutine-badge"
+      }
+    ]);
+    expect(iceModifierBadgesForServer({ ...server, root: [{ ...tesseract, rezzed: false }] })).toEqual([]);
+    expect(iceModifierBadgesForServer({ ...server, root: [{ ...tesseract, known: false }] })).toEqual([]);
   });
 
   it("keeps card-sourced gain-credit actions on their specific labels", () => {
@@ -586,24 +612,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBeNull();
   });
 
-  it("keeps hidden Corp advancement counters neutral at five counters", () => {
+  it("keeps advancement counters as separate gems until ten counters", () => {
     expect(advancementCounterDisplay({ known: false, advancementCounters: 5 })).toEqual({
       amount: 5,
       ariaLabel: "5 öffentliche Advancement-Counter",
       visibleGemCount: 5,
       overflowLabel: null
     });
-    expect(advancementCounterDisplay({ known: false, advancementCounters: 10 })).toEqual({
-      amount: 10,
-      ariaLabel: "10 öffentliche Advancement-Counter",
-      visibleGemCount: 9,
-      overflowLabel: "x10"
-    });
     expect(advancementCounterDisplay({ known: true, advancementCounters: 5 })).toEqual({
       amount: 5,
       ariaLabel: "5 Entwicklungen",
-      visibleGemCount: 4,
-      overflowLabel: "x5"
+      visibleGemCount: 5,
+      overflowLabel: null
+    });
+    expect(advancementCounterDisplay({ known: true, advancementCounters: 9 })).toEqual({
+      amount: 9,
+      ariaLabel: "9 Entwicklungen",
+      visibleGemCount: 9,
+      overflowLabel: null
+    });
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 10 })).toEqual({
+      amount: 10,
+      ariaLabel: "10 öffentliche Advancement-Counter",
+      visibleGemCount: 1,
+      overflowLabel: "10"
     });
     expect(advancementCounterDisplay({ known: false, advancementCounters: 0 })).toBeNull();
   });

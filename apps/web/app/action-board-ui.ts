@@ -120,6 +120,14 @@ export type CardCounterBadgeView = {
   testId: string;
 };
 
+export type IceModifierBadgeView = {
+  key: string;
+  shortLabel: string;
+  ariaLabel: string;
+  tooltip: string;
+  testId: string;
+};
+
 export type AdvancementCounterDisplay = {
   amount: number;
   ariaLabel: string;
@@ -135,6 +143,25 @@ const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: St
   "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" },
   "onr_v1_311_braindance-campaign": { label: "Braindance Campaign", counter: "bit" }
 };
+
+const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
+
+export function iceModifierBadgesForServer(server: PlayerView["servers"][number]): IceModifierBadgeView[] {
+  if (!serverHasRezzedTesseractFortConstruction(server)) return [];
+  return [
+    {
+      key: "tesseract-additional-subroutine",
+      shortLabel: "+Sub",
+      ariaLabel: "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
+      tooltip: "Tesseract Fort Construction: zusätzliche Subroutine",
+      testId: "tesseract-ice-subroutine-badge"
+    }
+  ];
+}
+
+function serverHasRezzedTesseractFortConstruction(server: PlayerView["servers"][number]): boolean {
+  return server.root.some((card) => card.known && card.rezzed === true && card.definitionId === TESSERACT_FORT_CONSTRUCTION_ID);
+}
 
 export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {
   return storedCreditCounterSource(card)?.label ?? null;
@@ -166,14 +193,15 @@ export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "adv
   const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
   if (safeAmount <= 0) return null;
   const hiddenCard = card.known === false;
-  const visibleGemCount = hiddenCard ? Math.min(safeAmount, 9) : Math.min(safeAmount, 4);
+  const showCount = safeAmount >= 10;
+  const visibleGemCount = showCount ? 1 : Math.min(safeAmount, 9);
   return {
     amount: safeAmount,
     ariaLabel: hiddenCard
       ? `${safeAmount} öffentliche Advancement-Counter`
       : `${safeAmount} ${safeAmount === 1 ? "Entwicklung" : "Entwicklungen"}`,
     visibleGemCount,
-    overflowLabel: safeAmount > visibleGemCount ? `x${safeAmount}` : null
+    overflowLabel: showCount ? String(safeAmount) : null
   };
 }
 

@@ -17,7 +17,6 @@ import {
   CopyPlus,
   Download,
   Eye,
-  EyeOff,
   Fingerprint,
   FlaskConical,
   Award,
@@ -134,6 +133,7 @@ import {
   encounterBreakerActions,
   groupRunnerRigCards,
   hasLegalAction,
+  iceModifierBadgesForServer,
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
@@ -160,7 +160,8 @@ import {
   type AdvancementCounterDisplay,
   type ActionContext,
   type CuePositionPreference,
-  type CuePositionPreset
+  type CuePositionPreset,
+  type IceModifierBadgeView
 } from "./action-board-ui";
 import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-image-service";
 import {
@@ -4983,6 +4984,7 @@ export default function Page() {
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
                             {...(lane.kind === "ice" ? { slotClassName: iceStackSlotClass(card) } : {})}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
+                            {...(lane.kind === "ice" ? { modifierBadges: iceModifierBadgesForServer(server) } : {})}
                             runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
@@ -11338,6 +11340,7 @@ function CardView({
   actionLabelForAction = contextualCardActionLabel,
   slotClassName,
   positionBadge,
+  modifierBadges = [],
   runPositionActive = false,
   runPositionLabel,
   showAdvancementCounters = true,
@@ -11361,6 +11364,7 @@ function CardView({
   actionLabelForAction?: (action: LegalAction) => string;
   slotClassName?: string;
   positionBadge?: string;
+  modifierBadges?: IceModifierBadgeView[];
   runPositionActive?: boolean;
   runPositionLabel?: string | undefined;
   showAdvancementCounters?: boolean;
@@ -11430,7 +11434,6 @@ function CardView({
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
-  const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
   const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
@@ -11454,13 +11457,15 @@ function CardView({
   const ablativeCountersAria = ablativeCounterBadge?.ariaLabel ?? null;
   const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria, ablativeCountersAria].filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
+  const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
+  const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}`
+      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${cardStateAria}`
-      : "Verdeckte Karte";
+      ? `Karte ${card.title}${cardStateAria}${modifierBadgeAriaSuffix}`
+      : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
@@ -11714,7 +11719,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -11773,7 +11778,7 @@ function CardView({
         ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
-        {installedState && installedStateLabel ? <InstalledStateMark state={installedState} label={installedStateLabel} /> : null}
+        {modifierBadges.length > 0 ? <IceModifierBadges badges={modifierBadges} /> : null}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (
           <span className="cardRulesPreview">
@@ -11969,21 +11974,70 @@ function compactCardActionMenuLabel(action: LegalAction, label: string): string 
 }
 
 function AdvancementGems({ card, display }: { card: DisplayVisibleCard; display: AdvancementCounterDisplay }) {
+  if (display.overflowLabel) {
+    return (
+      <span className="advancementGems counted" aria-hidden="true">
+        <span className="advancementGemCount">
+          <span className="advancementGem advancementGemCountIcon" />
+          <span className="advancementGemCountAmount">{display.overflowLabel}</span>
+        </span>
+      </span>
+    );
+  }
+
   return (
-    <span className="advancementGems" aria-hidden="true">
+    <span className="advancementGems iconsOnly" aria-hidden="true">
       {Array.from({ length: display.visibleGemCount }, (_, index) => (
-        <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index)} />
+        <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index, display.visibleGemCount)} />
       ))}
-      {display.overflowLabel ? <span className="advancementGemCount">{display.overflowLabel}</span> : null}
     </span>
   );
 }
 
-function InstalledStateMark({ state, label }: { state: "hidden" | "unrezzed" | "rezzed" | "known"; label: string }) {
-  if (state === "known") return null;
+function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }) {
+  const [tooltipBadge, setTooltipBadge] = useState<IceModifierBadgeView | null>(null);
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("above");
+
+  const showBadgeTooltip = (element: HTMLElement, badge: IceModifierBadgeView) => {
+    const rect = element.getBoundingClientRect();
+    const width = Math.min(240, Math.max(160, window.innerWidth - 32));
+    const margin = 16;
+    const left = Math.max(margin, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - margin));
+    const estimatedHeight = 44;
+    const above = rect.top > estimatedHeight + margin;
+    setTooltipPlacement(above ? "above" : "below");
+    setTooltipStyle(
+      above
+        ? { left: `${left}px`, top: `${rect.top - 8}px`, width: `${width}px` }
+        : { left: `${left}px`, top: `${rect.bottom + 8}px`, width: `${width}px` }
+    );
+    setTooltipBadge(badge);
+  };
+
   return (
-    <span className={`installedStateMark ${state}`} aria-label={label} data-tooltip={label} data-testid="installed-state-mark">
-      {state === "rezzed" ? <span className="installedStateLetter" aria-hidden="true">R</span> : <EyeOff size={11} strokeWidth={2.4} aria-hidden="true" />}
+    <span className="iceModifierBadges" aria-hidden="true">
+      {badges.map((badge) => (
+        <span
+          className="iceModifierBadge"
+          key={badge.key}
+          data-testid={badge.testId}
+          onPointerEnter={(event) => showBadgeTooltip(event.currentTarget, badge)}
+          onPointerLeave={() => setTooltipBadge(null)}
+        >
+          <SubroutineIcon />
+          <span>{badge.shortLabel}</span>
+        </span>
+      ))}
+      {tooltipBadge && typeof document !== "undefined"
+        ? createPortal(
+            <span className={`cardTooltip iceModifierTooltip ${tooltipPlacement} visible`} role="tooltip" style={tooltipStyle}>
+              <strong>{tooltipBadge.shortLabel}</strong>
+              <span className="cardTooltipText">{tooltipBadge.tooltip}</span>
+            </span>,
+            document.body
+          )
+        : null}
     </span>
   );
 }
@@ -12075,17 +12129,42 @@ function AblativeCounterBadge({ label, ariaLabel, testId }: { label: string; ari
   );
 }
 
-function advancementGemStyle(instanceId: string, index: number): CSSProperties {
-  const seed = hashString(`${instanceId}:${index}`);
-  const x = 18 + (seed % 58);
-  const y = 14 + (Math.floor(seed / 7) % 45);
-  const rotation = (Math.floor(seed / 17) % 38) - 19;
-  const scale = 0.9 + ((Math.floor(seed / 31) % 18) / 100);
+const ADVANCEMENT_GEM_ANCHORS = [
+  { x: 24, y: 19 },
+  { x: 63, y: 16 },
+  { x: 78, y: 34 },
+  { x: 38, y: 36 },
+  { x: 18, y: 52 },
+  { x: 59, y: 50 },
+  { x: 32, y: 69 },
+  { x: 74, y: 65 },
+  { x: 49, y: 79 }
+];
+
+function advancementGemStyle(instanceId: string, index: number, count: number): CSSProperties {
+  const orderSeed = hashString(`${instanceId}:advancement-order`);
+  const anchor = advancementGemAnchor(orderSeed, index, count);
+  const seed = hashString(`${instanceId}:advancement:${index}`);
+  const xJitter = (seed % 9) - 4;
+  const yJitter = (Math.floor(seed / 11) % 9) - 4;
+  const x = Math.max(12, Math.min(82, anchor.x + xJitter));
+  const y = Math.max(12, Math.min(82, anchor.y + yJitter));
+  const rotation = (Math.floor(seed / 17) % 42) - 21;
+  const scale = 0.9 + ((Math.floor(seed / 31) % 16) / 100);
   return {
     left: `${x}%`,
     top: `${y}%`,
     transform: `rotate(${rotation}deg) scale(${scale})`
   };
+}
+
+function advancementGemAnchor(orderSeed: number, index: number, count: number): { x: number; y: number } {
+  const anchors = [...ADVANCEMENT_GEM_ANCHORS];
+  const fallback = ADVANCEMENT_GEM_ANCHORS[0] ?? { x: 49, y: 50 };
+  anchors.sort((a, b) => hashString(`${orderSeed}:${a.x}:${a.y}`) - hashString(`${orderSeed}:${b.x}:${b.y}`));
+  if (count <= 3) return anchors[(index * 3) % anchors.length] ?? fallback;
+  if (count <= 6) return anchors[(index * 2) % anchors.length] ?? fallback;
+  return anchors[index % anchors.length] ?? fallback;
 }
 
 function hashString(value: string): number {

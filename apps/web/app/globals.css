@@ -5207,33 +5207,6 @@ select {
     linear-gradient(180deg, rgb(7 12 17 / 0.18) 0%, rgb(7 12 17 / 0.38) 100%);
 }
 
-.card.unrezzedInstalled::after {
-  content: "UNGEREZZT";
-  position: absolute;
-  left: 6px;
-  bottom: 26px;
-  z-index: 4;
-  display: inline-flex;
-  align-items: center;
-  min-height: 13px;
-  padding: 1px 5px;
-  border: 1px solid color-mix(in srgb, var(--cue), white 20%);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 36% 26%, rgb(255 255 255 / 0.12), transparent 42%),
-    color-mix(in srgb, var(--cue), transparent 74%);
-  color: color-mix(in srgb, var(--text), var(--muted) 22%);
-  font-size: 8px;
-  font-weight: 800;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  box-shadow:
-    0 1px 4px rgb(0 0 0 / 0.26),
-    inset 0 0 0 1px rgb(255 255 255 / 0.04);
-  white-space: nowrap;
-  pointer-events: none;
-}
-
 .card.unrezzedInstalled .cardTitle,
 .card.unrezzedInstalled .cardMeta,
 .card.unrezzedInstalled .cardRulesPreview {
@@ -5243,14 +5216,6 @@ select {
 .card.unrezzedInstalled.withImage .cardImage,
 .card.unrezzedInstalled.withImage .hardwareImageOverlay {
   filter: saturate(0.86) brightness(0.84);
-}
-
-.lane .card.unrezzedInstalled::after {
-  font-size: calc(7px * var(--lane-card-scale, 1));
-  min-height: calc(12px * var(--lane-card-scale, 1));
-  padding: calc(1px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
-  left: calc(5px * var(--lane-card-scale, 1));
-  bottom: calc(26px * var(--lane-card-scale, 1));
 }
 
 .lane .cardPositionBadge {
@@ -5271,21 +5236,6 @@ select {
   height: calc(14px * var(--lane-card-scale, 1));
 }
 
-.lane .installedStateMark {
-  right: calc(-7px * var(--lane-card-scale, 1));
-  width: calc(18px * var(--lane-card-scale, 1));
-  height: calc(18px * var(--lane-card-scale, 1));
-}
-
-.lane .installedStateLetter {
-  font-size: calc(11px * var(--lane-card-scale, 1));
-}
-
-.lane .installedStateMark svg {
-  width: calc(11px * var(--lane-card-scale, 1));
-  height: calc(11px * var(--lane-card-scale, 1));
-}
-
 .lane .cardActionMarker {
   bottom: calc(4px * var(--lane-card-scale, 1));
   width: calc(20px * var(--lane-card-scale, 1));
@@ -5293,6 +5243,22 @@ select {
 }
 
 .lane .cardActionMarker svg {
+  width: calc(10px * var(--lane-card-scale, 1));
+  height: calc(10px * var(--lane-card-scale, 1));
+}
+
+.lane .iceModifierBadges {
+  top: calc(25px * var(--lane-card-scale, 1));
+  gap: calc(3px * var(--lane-card-scale, 1));
+}
+
+.lane .iceModifierBadge {
+  min-height: calc(17px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+  font-size: calc(8px * var(--lane-card-scale, 1));
+}
+
+.lane .iceModifierBadge .subroutineIcon {
   width: calc(10px * var(--lane-card-scale, 1));
   height: calc(10px * var(--lane-card-scale, 1));
 }
@@ -5305,10 +5271,19 @@ select {
 .lane .advancementGemCount {
   right: calc(6px * var(--lane-card-scale, 1));
   bottom: calc(6px * var(--lane-card-scale, 1));
-  min-width: calc(23px * var(--lane-card-scale, 1));
+  min-width: calc(30px * var(--lane-card-scale, 1));
   min-height: calc(20px * var(--lane-card-scale, 1));
-  padding: calc(1px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
-  font-size: calc(11px * var(--lane-card-scale, 1));
+  gap: calc(4px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1));
+}
+
+.lane .advancementGemCountIcon {
+  width: calc(9px * var(--lane-card-scale, 1));
+  height: calc(9px * var(--lane-card-scale, 1));
+}
+
+.lane .advancementGemCountAmount {
+  font-size: calc(10px * var(--lane-card-scale, 1));
 }
 
 .lane .strengthBoostBadge {
@@ -5369,89 +5344,56 @@ select {
   outline-offset: 2px;
 }
 
-.installedStateMark {
+.iceModifierBadges {
   position: absolute;
-  right: -7px;
-  top: 50%;
-  z-index: 75;
-  width: 18px;
-  height: 18px;
-  display: inline-grid;
-  place-items: center;
-  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 26%);
+  left: 50%;
+  top: 28px;
+  z-index: 44;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.iceModifierBadge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 18px;
+  padding: 2px 6px;
+  border: 1px solid color-mix(in srgb, var(--ice), white 26%);
   border-radius: 999px;
-  background: color-mix(in srgb, var(--panel), transparent 16%);
-  color: color-mix(in srgb, var(--text), var(--muted) 28%);
+  background:
+    radial-gradient(circle at 30% 20%, rgb(255 255 255 / 0.34), transparent 34%),
+    linear-gradient(135deg, color-mix(in srgb, var(--ice), #32e0c4 18%), color-mix(in srgb, var(--panel), var(--ice) 54%));
+  color: var(--text);
   box-shadow:
-    0 2px 8px rgb(0 0 0 / 0.34),
+    0 2px 7px rgb(0 0 0 / 0.34),
     inset 0 0 0 1px rgb(255 255 255 / 0.07);
-  transform: translateY(-50%);
+  font-size: 8px;
+  font-weight: 900;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
   pointer-events: auto;
 }
 
-.installedStateMark::before,
-.installedStateMark::after {
-  position: absolute;
-  opacity: 0;
-  visibility: hidden;
-  pointer-events: none;
-  transition:
-    opacity 120ms ease,
-    transform 120ms ease;
-}
-
-.installedStateMark::before {
-  content: "";
-  right: calc(100% + 2px);
-  top: 50%;
-  border-top: 5px solid transparent;
-  border-bottom: 5px solid transparent;
-  border-left: 6px solid color-mix(in srgb, var(--runner), var(--line));
-  transform: translateY(-50%) translateX(3px);
-}
-
-.installedStateMark::after {
-  content: attr(data-tooltip);
-  right: calc(100% + 8px);
-  top: 50%;
-  max-width: min(180px, calc(100vw - 32px));
-  padding: 6px 8px;
-  border: 1px solid color-mix(in srgb, var(--runner), var(--line));
-  border-radius: 6px;
-  background: var(--tooltip-bg);
-  color: var(--text);
-  font-size: 11px;
-  font-weight: 600;
-  line-height: 1.25;
-  box-shadow: var(--tooltip-shadow);
-  white-space: nowrap;
-  transform: translateY(-50%) translateX(3px);
-}
-
-.installedStateMark:hover::before,
-.installedStateMark:hover::after {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(-50%) translateX(0);
-}
-
-.installedStateMark.hidden,
-.installedStateMark.unrezzed {
-  border-color: color-mix(in srgb, var(--cue), var(--line) 35%);
-  background: color-mix(in srgb, var(--panel), var(--cue-soft) 32%);
-  color: color-mix(in srgb, var(--muted), var(--text) 18%);
-}
-
-.installedStateMark.rezzed {
-  border-color: color-mix(in srgb, var(--runner), white 22%);
-  background: color-mix(in srgb, var(--runner), var(--panel) 56%);
+.iceModifierBadge .subroutineIcon {
+  width: 10px;
+  height: 10px;
+  border-color: color-mix(in srgb, var(--text), var(--ice) 30%);
   color: var(--text);
 }
 
-.installedStateLetter {
-  font-size: 11px;
-  font-weight: 950;
-  line-height: 1;
+.iceModifierTooltip {
+  border-color: color-mix(in srgb, var(--ice), var(--line));
+}
+
+.iceModifierTooltip strong {
+  color: var(--text);
 }
 
 .cardActionMarker {
@@ -5739,18 +5681,38 @@ select {
   position: absolute;
   right: 6px;
   bottom: 6px;
-  min-width: 23px;
+  min-width: 30px;
   min-height: 20px;
-  display: inline-grid;
-  place-items: center;
-  padding: 1px 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 5px;
   border: 1px solid rgb(255 164 156 / 0.75);
   border-radius: 999px;
   color: var(--text);
-  background: rgb(85 12 25 / 0.82);
-  box-shadow: 0 2px 7px rgb(0 0 0 / 0.35);
-  font-size: 11px;
+  background:
+    radial-gradient(circle at 26% 20%, rgb(255 220 214 / 0.28), transparent 32%),
+    linear-gradient(135deg, rgb(92 15 28 / 0.96), rgb(30 11 18 / 0.96));
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(255 210 204 / 0.24);
   font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+}
+
+.advancementGemCountIcon {
+  position: static;
+  width: 9px;
+  height: 9px;
+  transform: none;
+}
+
+.advancementGemCountAmount {
+  color: rgb(255 222 216);
+  font-size: 10px;
+  font-weight: 900;
   line-height: 1;
 }
 
