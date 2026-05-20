@@ -18760,6 +18760,8 @@ function resolveCoreCommandJettisonIceChoice(
     );
   const definition = definitionFor(state, selectedId);
   const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  const icePositionLabel =
+    publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
   spendCredits(state, "runner", rezCost);
   trashCorpInstalledCardToArchives(state, selectedId);
   delete state.pendingChoice;
@@ -18771,6 +18773,7 @@ function resolveCoreCommandJettisonIceChoice(
     trashedCount: 1,
     targetCardDefinitionId: definition.id,
     targetServerLabel: serverLabel,
+    targetIcePositionLabel: icePositionLabel,
   };
 }
 
@@ -18791,11 +18794,11 @@ function startForgedActivationOrdersTargetChoice(
     prompt: "ICE für Rez-/Trash-Entscheidung wählen",
     kind: "select_cards",
     options: targets.map((cardId, index) => {
-      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      const iceLabel = publicIcePositionLabelForCard(state, cardId) ?? "Server";
       return {
         id: `ice_${index + 1}`,
-        label: `ICE in ${serverLabel}`,
-        publicLabel: `ICE in ${serverLabel}`,
+        label: `ICE in ${iceLabel}`,
+        publicLabel: `ICE in ${iceLabel}`,
         value: cardId,
       };
     }),
@@ -18825,6 +18828,8 @@ function resolveForgedActivationOrdersTargetChoice(
       "Das Forged-Activation-Orders-Ziel ist keine unrezzte installierte ICE.",
     );
   const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  const icePositionLabel =
+    publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
   state.pendingChoice = {
     choiceId: `v1922_forged_activation_orders_corp_${state.stateVersion + 1}`,
     side: "corp",
@@ -18858,6 +18863,7 @@ function resolveForgedActivationOrdersTargetChoice(
     ...(legalAction.payload ?? {}),
     v1922RunnerEventAbility: "force_rez_or_trash_ice",
     targetServerLabel: serverLabel,
+    targetIcePositionLabel: icePositionLabel,
     targetVisibility: "installed_ice_position",
   };
 }
@@ -18883,6 +18889,8 @@ function resolveForgedActivationOrdersCorpChoice(
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const definition = definitionFor(state, targetIceId);
   const serverLabel = publicServerLabelForCard(state, targetIceId) ?? "Server";
+  const icePositionLabel =
+    publicIcePositionLabelForCard(state, targetIceId) ?? serverLabel;
   if (selected === "rez_ice") {
     const rezCost = rezCostForCard(state, targetIceId);
     spendCredits(state, "corp", rezCost);
@@ -18899,6 +18907,7 @@ function resolveForgedActivationOrdersCorpChoice(
       rezCostPaid: rezCost,
       targetCardDefinitionId: definition.id,
       targetServerLabel: serverLabel,
+      targetIcePositionLabel: icePositionLabel,
     };
     return;
   }
@@ -18915,6 +18924,7 @@ function resolveForgedActivationOrdersCorpChoice(
     trashedCount: 1,
     targetCardDefinitionId: definition.id,
     targetServerLabel: serverLabel,
+    targetIcePositionLabel: icePositionLabel,
   };
 }
 
@@ -18935,11 +18945,11 @@ function startSecurityCodeWormChipTrashIceChoice(
     prompt: "Unrezzte ICE trashen",
     kind: "select_cards",
     options: targets.map((cardId, index) => {
-      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      const iceLabel = publicIcePositionLabelForCard(state, cardId) ?? "Server";
       return {
         id: `ice_${index + 1}`,
-        label: `ICE in ${serverLabel}`,
-        publicLabel: `ICE in ${serverLabel}`,
+        label: `ICE in ${iceLabel}`,
+        publicLabel: `ICE in ${iceLabel}`,
         value: cardId,
       };
     }),
@@ -23386,6 +23396,9 @@ function publicContextForAction(
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.targetServerLabel === "string")
       context.targetServerLabel = legalAction.payload.targetServerLabel;
+    if (typeof legalAction.payload.targetIcePositionLabel === "string")
+      context.targetIcePositionLabel =
+        legalAction.payload.targetIcePositionLabel;
     if (typeof legalAction.payload.targetVisibility === "string")
       context.targetVisibility = legalAction.payload.targetVisibility;
     if (typeof legalAction.payload.corpDecision === "string")
@@ -23568,6 +23581,20 @@ function publicServerLabelForCard(
   const zone = state.cardInstances[cardId]?.zone;
   const serverId = zone && "serverId" in zone ? zone.serverId : undefined;
   return publicServerLabel(state, serverId);
+}
+
+function publicIcePositionLabelForCard(
+  state: GameState,
+  cardId: string | undefined,
+): string | undefined {
+  if (!cardId) return undefined;
+  const zone = state.cardInstances[cardId]?.zone;
+  const serverId = zone && "serverId" in zone ? zone.serverId : undefined;
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const serverLabel = publicServerLabel(state, serverId);
+  if (!server || !serverLabel) return serverLabel;
+  const iceIndex = server.ice.indexOf(cardId);
+  return iceIndex >= 0 ? `${serverLabel} ${iceIndex + 1}` : serverLabel;
 }
 
 function revealForPublicEvent(

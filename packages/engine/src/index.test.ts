@@ -1199,7 +1199,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
           name: "Spotcheck Forged Multi Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
-            { id: "simple_code_gate_ice", quantity: 1 },
+            { id: "simple_code_gate_ice", quantity: 2 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1210,6 +1210,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     state.corp.credits = 5;
     const rdIce = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
+    putCorpIceCopyOnServer(state, "hq", "simple_code_gate_ice");
     moveRunnerCardToGrip(state, "onr_v1_086_forged-activation-orders");
     state = apply(
       state,
@@ -1218,7 +1219,17 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         action.type === "play_event" &&
         sourceDefinition(state, action) === "onr_v1_086_forged-activation-orders",
     );
-    expect(state.pendingChoice?.options).toHaveLength(2);
+    expect(state.pendingChoice?.options).toHaveLength(3);
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "ICE in HQ 1",
+      "ICE in HQ 2",
+      "ICE in R&D 1",
+    ]);
+    expect(state.pendingChoice?.options.map((option) => option.publicLabel)).toEqual([
+      "ICE in HQ 1",
+      "ICE in HQ 2",
+      "ICE in R&D 1",
+    ]);
     expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toMatch(
       /simple_barrier_ice|cardInstances/,
     );
@@ -1255,6 +1266,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       corpDecision: "trash_ice",
       targetServerLabel: "R&D",
+      targetIcePositionLabel: "R&D 1",
       trashedCount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -23260,6 +23272,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       v1922RunnerEventAbility: "force_rez_or_trash_ice",
       targetVisibility: "installed_ice_position",
       targetServerLabel: "R&D",
+      targetIcePositionLabel: "R&D 1",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"simple_barrier_ice"/,
@@ -23278,6 +23291,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpDecision: "rez_ice",
       targetCardDefinitionId: "simple_barrier_ice",
       targetServerLabel: "R&D",
+      targetIcePositionLabel: "R&D 1",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -23345,6 +23359,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpDecision: "trash_ice",
       trashedCount: 1,
       targetCardDefinitionId: "simple_barrier_ice",
+      targetIcePositionLabel: "HQ 1",
     });
   });
 

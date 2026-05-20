@@ -84,6 +84,7 @@ import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
   chronicleActionUseByEventId,
+  chronicleTurnSideByEventId,
   chronicleTurnNumberByEventId,
   formatChronicleEvent,
   formatChronicleEffectItems,
@@ -1665,6 +1666,7 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
 
 function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
+  const turnSideByEventId = chronicleTurnSideByEventId(events);
   const actionUseByEventId = chronicleActionUseByEventId(events);
   return Object.fromEntries(
     events.map((event) => {
@@ -1678,6 +1680,7 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
           cardDetailLines: card ? catalogDetailLines(card) : [],
           agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null,
           turnNumber: turnNumberByEventId[event.eventId] ?? null,
+          turnSide: turnSideByEventId[event.eventId] ?? null,
           actionUse: actionUseByEventId[event.eventId] ?? null
         }
       ];
@@ -8215,7 +8218,8 @@ function chronicleEntriesWithRunGroups(
     const actionType = payloadString(event.publicPayload, "actionType") ?? event.type;
     const actor = payloadSide(event.publicPayload, "actor");
     const turnNumber = contextByEventId[event.eventId]?.turnNumber ?? null;
-    const turnGroup = actor ? { label: `${actor === "corp" ? "Korp" : "Runner"}-Zug${turnNumber ? ` ${turnNumber}` : ""}`, kind: actor } : null;
+    const turnSide = contextByEventId[event.eventId]?.turnSide ?? actor;
+    const turnGroup = turnSide ? { label: `${turnSide === "corp" ? "Korp" : "Runner"}-Zug${turnNumber ? ` ${turnNumber}` : ""}`, kind: turnSide } : null;
     if (runEndPending && !chronicleActionContinuesCompletedRun(actionType)) {
       activeRunGroupLabel = null;
       runEndPending = false;

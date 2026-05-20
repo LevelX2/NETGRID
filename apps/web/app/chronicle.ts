@@ -21,6 +21,7 @@ export type ChronicleContext = {
   cardDetailLines?: string[];
   agendaPoints?: number | null;
   turnNumber?: number | null;
+  turnSide?: Side | null;
   actionUse?: ChronicleActionUse | null;
 };
 
@@ -85,6 +86,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const redactedKind = stringValue(payload.redactedKind);
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
   const turnNumber = positiveIntegerValue(context.turnNumber);
+  const turnSide = context.turnSide ?? undefined;
   const turnChip = turnLabel(actor, turnNumber);
   const actionUse = context.actionUse ?? actionUseFromPayload(payload);
   const label = stringValue(payload.label);
@@ -331,6 +333,43 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         title = phrase(subject, `${cardCountText(rezzedCount)} aus Data Fort Reclamation gerezzt`);
         description = `${rezzedIceCount} ICE und ${rezzedRootCount} Root-Karte${rezzedRootCount === 1 ? "" : "n"} wurden gerezzt; ${temporaryCreditsSpent} temporäre und ${corpCreditsSpent} normale Credits wurden ausgegeben.`;
         chips.push("Data Fort", `${rezzedCount} Rez`, `${temporaryCreditsSpent} Temp`, `${corpCreditsSpent} Credits`);
+        break;
+      }
+      if (abilityId === "force_rez_or_trash_ice") {
+        const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+        const targetTitle = titleForDefinitionId(targetDefinitionId);
+        const targetIceLabel =
+          displayServerLabel(stringValue(payload.targetIcePositionLabel)) ??
+          displayServerLabel(stringValue(payload.targetServerLabel)) ??
+          "einem Server";
+        const corpDecision = stringValue(payload.corpDecision);
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = targetDefinitionId ?? cardDefinitionId;
+        if (corpDecision === "rez_ice") {
+          const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
+          title = phrase(
+            subject,
+            `entschieden, ${targetTitle ?? "ICE"} in ${targetIceLabel} zu rezzen`,
+          );
+          description = `Rez-Kosten: ${creditText(rezCostPaid)}.`;
+          chips.push("Forged Activation Orders", "Rez", `${rezCostPaid} ${creditLabel(rezCostPaid)}`, targetIceLabel);
+          break;
+        }
+        if (corpDecision === "trash_ice") {
+          title = phrase(
+            subject,
+            `entschieden, ${targetTitle ?? "ICE"} in ${targetIceLabel} zu trashen`,
+          );
+          chips.push("Forged Activation Orders", "Trash", targetIceLabel);
+          break;
+        }
+        title = phrase(
+          subject,
+          `ICE in ${targetIceLabel} für Forged Activation Orders gewählt`,
+        );
+        chips.push("Forged Activation Orders", "Ziel", targetIceLabel);
         break;
       }
       if (hiddenZoneAction === "aardvark_rez_trash_worm") {
@@ -1038,7 +1077,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     ...(cardTitle && visibility !== "redacted" ? { cardTitle } : {}),
     ...(cardText && visibility !== "redacted" ? { cardText } : {}),
     cardDetailLines: visibility === "redacted" ? [] : cardDetailLines,
-    groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber)
+    groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber, turnSide)
   };
 }
 
@@ -1087,6 +1126,40 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
   }
 
   return numbers;
+}
+
+export function chronicleTurnSideByEventId(events: PublicGameEvent[]): Record<string, Side> {
+  const sides: Record<string, Side> = {};
+  let activeSide: Side = "corp";
+  let justEndedTurn: { side: Side } | null = null;
+
+  for (const event of events) {
+    const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+    const actor = sideValue(event.publicPayload.actor);
+    if (!actor) continue;
+
+    if (justEndedTurn && actor === justEndedTurn.side && isDiscardPhaseResolution(event)) {
+      sides[event.eventId] = justEndedTurn.side;
+      continue;
+    }
+    justEndedTurn = null;
+
+    if (actionType === "mandatory_draw" && actor === "corp") {
+      activeSide = "corp";
+      sides[event.eventId] = activeSide;
+      continue;
+    }
+
+    if (actionType === "end_turn" && activeSide !== actor) activeSide = actor;
+    sides[event.eventId] = activeSide;
+
+    if (actionType === "end_turn") {
+      justEndedTurn = { side: actor };
+      activeSide = actor === "corp" ? "runner" : "corp";
+    }
+  }
+
+  return sides;
 }
 
 function isDiscardPhaseResolution(event: PublicGameEvent): boolean {
@@ -1727,11 +1800,13 @@ function runPhaseLabel(phase: string): string {
   return labels[phase] ?? phase;
 }
 
-function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number): string {
+function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number, turnSide?: Side): string {
   if (category === "system") return "System";
   if (category === "run") return `Run${serverLabel ? ` auf ${serverLabel}` : label && /Run auf/i.test(label) ? ` auf ${runTargetFromLabel(label)}` : ""}`;
   if (category === "turn" && actor === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
   if (category === "turn" && actor === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
+  if (turnSide === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
+  if (turnSide === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
   if (actor === "corp") return "Korp-Zug";
   if (actor === "runner") return "Runner-Zug";
   return "Spiel";

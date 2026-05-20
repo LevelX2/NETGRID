@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
+import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -796,6 +796,54 @@ describe("formatChronicleEvent", () => {
     expect(item.importance).toBe("important");
     expect(item.cardDefinitionId).toBe("simple_barrier_ice");
     expect(item.chips).toEqual(["Runner", "Core Command", "Trash", "3 Credits", "R&D"]);
+  });
+
+  it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {
+    const runnerChoice = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+        targetServerLabel: "HQ",
+        targetIcePositionLabel: "HQ 2",
+        targetVisibility: "installed_ice_position"
+      }),
+      "runner"
+    );
+    const corpRez = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+        corpDecision: "rez_ice",
+        targetCardDefinitionId: "simple_barrier_ice",
+        targetServerLabel: "HQ",
+        targetIcePositionLabel: "HQ 2",
+        rezCostPaid: 3,
+        aiExplanation: "legal choice"
+      }),
+      "runner"
+    );
+    const corpTrash = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+        corpDecision: "trash_ice",
+        targetCardDefinitionId: "simple_barrier_ice",
+        targetServerLabel: "HQ",
+        targetIcePositionLabel: "HQ 2",
+        trashedCount: 1,
+        aiExplanation: "legal choice"
+      }),
+      "runner"
+    );
+
+    expect(runnerChoice.title).toBe("Du hast ICE in HQ 2 für Forged Activation Orders gewählt.");
+    expect(runnerChoice.title).not.toContain("Entscheidung beantwortet");
+    expect(runnerChoice.chips).toEqual(["Runner", "Forged Activation Orders", "Ziel", "HQ 2"]);
+    expect(corpRez.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE in HQ 2 zu rezzen.");
+    expect(corpRez.description).toBe("Rez-Kosten: 3 Credits.");
+    expect(corpRez.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Rez", "3 Credits", "HQ 2"]);
+    expect(corpTrash.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE in HQ 2 zu trashen.");
+    expect(corpTrash.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Trash", "HQ 2"]);
   });
 
   it("describes V1.8.1 Pattel and Pox run-success counters", () => {
@@ -1780,30 +1828,39 @@ describe("formatChronicleEvent", () => {
   });
 
   it("counts Korp and Runner turns as one shared sequence", () => {
-    const turnNumbers = chronicleTurnNumberByEventId([
+    const events = [
       makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_1" }),
       makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
       makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
       makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
+      makeEvent("play_event", { actor: "runner", eventId: "evt_runner_forged", cardDefinitionId: "onr_v1_086_forged-activation-orders" }),
+      makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_forged_response", v1922RunnerEventAbility: "force_rez_or_trash_ice" }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
       makeEvent("resolve_choice", { actor: "runner", eventId: "evt_runner_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
       makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_2" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" })
-    ]);
+    ];
+    const turnNumbers = chronicleTurnNumberByEventId(events);
+    const turnSides = chronicleTurnSideByEventId(events);
 
     expect(turnNumbers).toMatchObject({
       evt_corp_draw_1: 1,
       evt_corp_end_1: 1,
       evt_corp_discard_1: 1,
       evt_runner_draw_1: 2,
+      evt_runner_forged: 2,
+      evt_corp_forged_response: 2,
       evt_runner_end_1: 2,
       evt_runner_discard_1: 2,
       evt_corp_draw_2: 3,
       evt_corp_end_2: 3,
       evt_runner_end_2: 4
     });
+    expect(turnSides.evt_corp_forged_response).toBe("runner");
+
+    expect(turnSides.evt_runner_end_1).toBe("runner");
   });
 
   it("formats resolved automatic effects as separate chronicle items", () => {
