@@ -161,6 +161,30 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
       visibility: "public",
     });
   }
+  for (const active of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "agenda_difficulty",
+  )) {
+    if (!isPublicRezzedCorpRootModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `rezzed.agenda_difficulty.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "agenda_difficulty",
+      side: "corp",
+      amount: active.modifier.operation === "reduce" ? -amount : amount,
+      duration: "while_rezzed",
+      target: {
+        kind: active.modifier.appliesTo.sameServerAsSource ? "server" : "subtype",
+        ...(active.modifier.appliesTo.subtype
+          ? { subtype: active.modifier.appliesTo.subtype }
+          : {}),
+      },
+      visibility: "public",
+    });
+  }
 
   const run = state.run;
   if (!run) return modifiers;

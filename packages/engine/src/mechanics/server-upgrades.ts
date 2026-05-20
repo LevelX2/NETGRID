@@ -11,9 +11,6 @@ export const CRYBABY_ACCESS_COST_UPGRADE_ID = "onr_v1_354_crybaby";
 
 export const DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID = "onr_v1_358_dr-dreff";
 
-export const NEW_GALVESTON_TRASH_COST_UPGRADE_ID =
-  "onr_v1_362_new-galveston-city-grid";
-
 export const OMNI_KISMET_TAG_CONDITION_UPGRADE_ID =
   "onr_v1_364_omni-kismet-ph-d";
 

@@ -13,7 +13,8 @@ export type CardModifierImplementation =
   | CardAdditionalSubroutineModifierImplementation
   | CardHandSizeModifierImplementation
   | CardMemoryUnitsModifierImplementation
-  | CardAgendaDifficultyModifierImplementation;
+  | CardAgendaDifficultyModifierImplementation
+  | CardTrashCostModifierImplementation;
 
 export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
@@ -239,14 +240,29 @@ export type CardAgendaDifficultyModifierImplementation = {
   kind: "agenda_difficulty";
   operation: "increase" | "reduce";
   amount: number;
-  activeWhile: "scored";
-  sourceZone: "corp_scored_agenda";
+  activeWhile: "scored" | "rezzed";
+  sourceZone: "corp_scored_agenda" | "corp_root";
   side: "corp";
   visibility: EventVisibilityClass;
   appliesTo: {
     cardType: Extract<CardType, "agenda">;
     subtype?: string;
+    sameServerAsSource?: boolean;
   };
+};
+
+export type CardTrashCostModifierImplementation = {
+  kind: "trash_cost";
+  operation: "increase";
+  amount: number;
+  activeWhile: "rezzed";
+  sourceZone: "corp_root";
+  side: "corp";
+  visibility: EventVisibilityClass;
+  appliesTo: {
+    cardType: Extract<CardType, "asset" | "upgrade">;
+  };
+  sameServerAsSource: true;
 };
 
 export type CardSubroutineImplementation =

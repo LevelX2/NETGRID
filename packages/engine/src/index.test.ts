@@ -7329,8 +7329,8 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(
       cardImplementationCoverageForDefinitionId(
         "onr_v1_360_jerusalem-city-grid",
-      )?.reason,
-    ).toMatch(/region/i);
+      )?.status,
+    ).toBe("implemented");
   });
 
   it("describes simple credit cards through typed on-play effects", () => {
@@ -8263,6 +8263,65 @@ describe("V1.6.2 Mechanikpaket B", () => {
       cardImplementationCoverageForDefinitionId("onr_v1_366_red-herrings")
         ?.status,
     ).toBe("implemented");
+  });
+
+  it("describes P3.12 region city-grid modifiers", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_v1_374_washington-d-c-city-grid")
+        ?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "agenda_difficulty",
+        operation: "reduce",
+        amount: 1,
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        side: "corp",
+        visibility: "public",
+        appliesTo: {
+          cardType: "agenda",
+          sameServerAsSource: true,
+        },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_362_new-galveston-city-grid")
+        ?.modifiers,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "trash_cost",
+          operation: "increase",
+          amount: 2,
+          activeWhile: "rezzed",
+          sourceZone: "corp_root",
+          side: "corp",
+          visibility: "public",
+          appliesTo: { cardType: "asset" },
+          sameServerAsSource: true,
+        }),
+        expect.objectContaining({
+          kind: "trash_cost",
+          operation: "increase",
+          amount: 2,
+          activeWhile: "rezzed",
+          sourceZone: "corp_root",
+          side: "corp",
+          visibility: "public",
+          appliesTo: { cardType: "upgrade" },
+          sameServerAsSource: true,
+        }),
+      ]),
+    );
+    for (const definitionId of [
+      "onr_v1_360_jerusalem-city-grid",
+      "onr_v1_362_new-galveston-city-grid",
+      "onr_v1_374_washington-d-c-city-grid",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
   });
 
   it("describes activated main-action card abilities without callbacks", () => {
@@ -17594,12 +17653,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       cardImplementationCoverageForDefinitionId(
         "onr_v1_360_jerusalem-city-grid",
       )?.status,
-    ).toBe("partial_implementation");
-    expect(
-      cardImplementationCoverageForDefinitionId(
-        "onr_v1_360_jerusalem-city-grid",
-      )?.reason,
-    ).toContain("region install/replacement rules");
+    ).toBe("implemented");
   });
 
   it("applies City Surveillance draw tax only from rezzed public assets", () => {
@@ -29979,6 +30033,129 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(validateGameState(state).ok).toBe(true);
   });
 
+  it("applies the generic region install baseline for P3.12 city grids", () => {
+    const p312Ids = new Set([
+      "onr_v1_360_jerusalem-city-grid",
+      "onr_v1_362_new-galveston-city-grid",
+      "onr_v1_374_washington-d-c-city-grid",
+      "simple_upgrade",
+    ]);
+    let state = createGameAfterSetup({
+      seed: "p312-region-baseline",
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        id: "p312_region_baseline_corp",
+        name: "P3.12 Region Baseline Corp",
+        cards: [
+          { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
+          { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
+          { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
+          { id: "simple_upgrade", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+            (entry) => !p312Ids.has(entry.id),
+          ),
+        ],
+      },
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const jerusalemId = moveCorpCardToHq(
+      state,
+      "onr_v1_360_jerusalem-city-grid",
+    );
+    state.corp.credits = 1;
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === jerusalemId,
+      ),
+    ).toBe(false);
+
+    state.corp.credits = 2;
+    const installJerusalem = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === jerusalemId &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    expect(installJerusalem.costs).toEqual([{ clicks: 1, credits: 2 }]);
+    state = apply(state, "corp", (action) => action.actionId === installJerusalem.actionId);
+    expect(state.corp.credits).toBe(0);
+    expect(state.cardInstances[jerusalemId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+
+    const nonRegionId = moveCorpCardToHq(state, "simple_upgrade");
+    expect(
+      mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === nonRegionId &&
+          action.payload?.serverId === "remote_1",
+      ).costs,
+    ).toEqual([{ clicks: 1 }]);
+
+    state.corp.credits = 7;
+    const washingtonId = moveCorpCardToHq(
+      state,
+      "onr_v1_374_washington-d-c-city-grid",
+    );
+    const replaceWithWashington = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === washingtonId &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(replaceWithWashington.costs).toEqual([{ clicks: 1, credits: 7 }]);
+    expect(replaceWithWashington.payload?.regionReplacementWarning).toBe(true);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === replaceWithWashington.actionId,
+    );
+    expect(state.corp.archives).toContain(jerusalemId);
+    expect(state.cardInstances[washingtonId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+
+    state.corp.credits = 1;
+    const newGalvestonId = moveCorpCardToHq(
+      state,
+      "onr_v1_362_new-galveston-city-grid",
+    );
+    const installOtherFortRegion = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === newGalvestonId &&
+        action.payload?.serverId === "new_remote",
+    );
+    expect(installOtherFortRegion.payload?.regionReplacementWarning).toBeUndefined();
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === installOtherFortRegion.actionId,
+    );
+    expect(state.corp.archives).not.toContain(washingtonId);
+    expect(state.cardInstances[newGalvestonId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+    });
+  });
+
   it("covers V1.9.18 counter, tag-condition and hidden-zone upgrade actions", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-counter-tag-hidden-actions");
     state.corp.credits = 10;
@@ -30093,6 +30270,124 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(
       scoreActions.some((action) => action.payload?.cardId === agendaId),
+    ).toBe(false);
+  });
+
+  it("applies Washington D.C. City Grid as a same-fort agenda_difficulty modifier", () => {
+    const p312Ids = new Set([
+      "onr_v1_374_washington-d-c-city-grid",
+      "simple_agenda",
+    ]);
+    let state = createGameAfterSetup({
+      seed: "p312-washington-difficulty",
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        id: "p312_washington_corp",
+        name: "P3.12 Washington Corp",
+        cards: [
+          { id: "onr_v1_374_washington-d-c-city-grid", quantity: 1 },
+          { id: "simple_agenda", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+            (entry) => !p312Ids.has(entry.id),
+          ),
+        ],
+      },
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    const washingtonId = putCorpRootInRemote(
+      state,
+      "onr_v1_374_washington-d-c-city-grid",
+    );
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
+    const printedDifficulty =
+      DEMO_CARDS_BY_ID.simple_agenda?.advancementRequirement ?? 0;
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      advancementCounters: printedDifficulty - 1,
+    };
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "score_agenda" &&
+          action.payload?.cardId === agendaId,
+      ),
+    ).toBe(false);
+
+    state.cardInstances[washingtonId] = {
+      ...state.cardInstances[washingtonId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const scoreAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        action.payload?.cardId === agendaId,
+    );
+    expect(
+      getPlayerView(state, "corp")
+        .servers.flatMap((server) => server.root)
+        .find((card) => card.instanceId === agendaId)?.advancementRequirement,
+    ).toBe(printedDifficulty - 1);
+    expect(
+      collectActiveModifiers(state).filter(
+        (modifier) =>
+          modifier.kind === "agenda_difficulty" &&
+          modifier.sourceDefinitionId === "onr_v1_374_washington-d-c-city-grid",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          amount: -1,
+          duration: "while_rezzed",
+          visibility: "public",
+        }),
+      ]),
+    );
+
+    const stale = structuredClone(state);
+    stale.cardInstances[washingtonId] = {
+      ...stale.cardInstances[washingtonId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(stale, {
+        matchId: stale.matchId,
+        side: "corp",
+        actionId: scoreAction.actionId,
+        clientKnownStateVersion: stale.stateVersion,
+        idempotencyKey: "p312-washington-stale",
+      }).ok,
+    ).toBe(false);
+
+    const otherFort = structuredClone(state);
+    otherFort.corp.servers.push({
+      id: "remote_2",
+      kind: "remote",
+      label: "Remote 2",
+      ice: [],
+      root: [agendaId],
+    });
+    const remoteOne = otherFort.corp.servers.find(
+      (server) => server.id === "remote_1",
+    );
+    if (!remoteOne) throw new Error("remote_1 missing");
+    remoteOne.root = remoteOne.root.filter((id) => id !== agendaId);
+    otherFort.cardInstances[agendaId] = {
+      ...otherFort.cardInstances[agendaId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+    };
+    expect(
+      getLegalActions(otherFort, "corp").some(
+        (action) =>
+          action.type === "score_agenda" &&
+          action.payload?.cardId === agendaId,
+      ),
     ).toBe(false);
   });
 
@@ -30550,13 +30845,172 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) => action.type === "trash_accessed_card",
     );
     expect(trashAction.payload?.accessTrashCostModifier).toBe(2);
+    expect(trashAction.payload?.accessTrashCostSourceDefinitionIds).toBe(
+      "onr_v1_362_new-galveston-city-grid",
+    );
     state = apply(state, "runner", (action) => action.actionId === trashAction.actionId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       accessTrashCostModifier: 2,
+      accessTrashCostSourceDefinitionIds:
+        "onr_v1_362_new-galveston-city-grid",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"rd"|R&D|cardInstances/,
     );
+  });
+
+  it("limits New Galveston trash_cost to same-fort assets and upgrades", () => {
+    const p312Ids = new Set([
+      "onr_v1_362_new-galveston-city-grid",
+      "simple_agenda",
+      "simple_upgrade",
+    ]);
+    const newGalvestonGame = (seed: string) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: `${seed}_corp`,
+            name: `${seed} Corp`,
+            cards: [
+              { id: "onr_v1_362_new-galveston-city-grid", quantity: 1 },
+              { id: "simple_agenda", quantity: 1 },
+              { id: "simple_upgrade", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+                (entry) => !p312Ids.has(entry.id),
+              ),
+            ],
+          },
+        }),
+      );
+    let upgradeState = newGalvestonGame("p312-new-galveston-upgrade");
+    upgradeState.runner.credits = 20;
+    const upgradeId = putCorpRootInRemote(upgradeState, "simple_upgrade");
+    const gridId = putCorpRootInRemote(
+      upgradeState,
+      "onr_v1_362_new-galveston-city-grid",
+    );
+    const server = upgradeState.corp.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+    if (!server) throw new Error("remote missing");
+    server.root = [upgradeId, gridId];
+    upgradeState.cardInstances[upgradeId] = {
+      ...upgradeState.cardInstances[upgradeId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    upgradeState.cardInstances[gridId] = {
+      ...upgradeState.cardInstances[gridId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    upgradeState = apply(
+      upgradeState,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    upgradeState = apply(upgradeState, "runner", (action) => action.type === "access_card");
+    const trashUpgrade = mustAction(
+      upgradeState,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+    expect(trashUpgrade.costs).toEqual([{ credits: 6 }]);
+    expect(trashUpgrade.payload).toMatchObject({
+      accessTrashBaseCost: 4,
+      accessTrashCostModifier: 2,
+      accessTrashTotalCost: 6,
+      accessTrashCostSourceDefinitionIds:
+        "onr_v1_362_new-galveston-city-grid",
+    });
+
+    const stale = structuredClone(upgradeState);
+    stale.cardInstances[gridId] = {
+      ...stale.cardInstances[gridId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(stale, {
+        matchId: stale.matchId,
+        side: "runner",
+        actionId: trashUpgrade.actionId,
+        clientKnownStateVersion: stale.stateVersion,
+        idempotencyKey: "p312-new-galveston-stale",
+      }).ok,
+    ).toBe(false);
+
+    let otherFort = newGalvestonGame("p312-new-galveston-other-fort");
+    otherFort.runner.credits = 20;
+    const otherGridId = putCorpRootInRemote(
+      otherFort,
+      "onr_v1_362_new-galveston-city-grid",
+    );
+    otherFort.cardInstances[otherGridId] = {
+      ...otherFort.cardInstances[otherGridId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    otherFort.corp.servers.push({
+      id: "remote_2",
+      kind: "remote",
+      label: "Remote 2",
+      ice: [],
+      root: [],
+    });
+    const otherUpgradeId = findCard(otherFort, "simple_upgrade");
+    removeEverywhere(otherFort, otherUpgradeId);
+    otherFort.corp.servers.find((candidate) => candidate.id === "remote_2")?.root.push(otherUpgradeId);
+    otherFort.cardInstances[otherUpgradeId] = {
+      ...otherFort.cardInstances[otherUpgradeId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+      faceup: true,
+      rezzed: true,
+    };
+    otherFort = apply(
+      otherFort,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_2",
+    );
+    otherFort = apply(otherFort, "runner", (action) => action.type === "access_card");
+    expect(
+      mustAction(otherFort, "runner", (action) => action.type === "trash_accessed_card")
+        .costs,
+    ).toEqual([{ credits: 4 }]);
+
+    let agendaAccess = newGalvestonGame("p312-new-galveston-agenda");
+    agendaAccess.runner.credits = 20;
+    const agendaGridId = putCorpRootInRemote(
+      agendaAccess,
+      "onr_v1_362_new-galveston-city-grid",
+    );
+    const agendaId = putCorpRootInRemote(agendaAccess, "simple_agenda");
+    const agendaServer = agendaAccess.corp.servers.find(
+      (candidate) => candidate.id === "remote_1",
+    );
+    if (!agendaServer) throw new Error("agenda remote missing");
+    agendaServer.root = [agendaId, agendaGridId];
+    agendaAccess.cardInstances[agendaGridId] = {
+      ...agendaAccess.cardInstances[agendaGridId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    agendaAccess = apply(
+      agendaAccess,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    agendaAccess = apply(agendaAccess, "runner", (action) => action.type === "access_card");
+    expect(
+      mustAction(agendaAccess, "runner", (action) => action.type === "steal_agenda")
+        .costs,
+    ).toEqual([]);
   });
 });
 

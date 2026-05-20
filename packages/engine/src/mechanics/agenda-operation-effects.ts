@@ -51,6 +51,3 @@ export const OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID =
 
 export const ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID =
   "onr_v1_368_roving-submarine";
-
-export const WASHINGTON_DC_AGENDA_DIFFICULTY_UPGRADE_ID =
-  "onr_v1_374_washington-d-c-city-grid";

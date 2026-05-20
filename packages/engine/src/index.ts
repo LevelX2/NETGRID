@@ -85,6 +85,7 @@ import {
   type CardEffectTrashSourceResult,
 } from "./ability-engine/effect-interpreter";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
+import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
 import type {
   ActivatedCardAbilityImplementation,
   CardConditionImplementation,
@@ -124,7 +125,6 @@ import {
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
-  WASHINGTON_DC_AGENDA_DIFFICULTY_UPGRADE_ID,
 } from "./mechanics/agenda-operation-effects";
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
@@ -233,7 +233,6 @@ import {
   CRYBABY_ACCESS_COST_UPGRADE_ID,
   DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
   DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
-  NEW_GALVESTON_TRASH_COST_UPGRADE_ID,
   PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
   TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
 } from "./mechanics/server-upgrades";
@@ -6633,6 +6632,13 @@ function runnerAccessActions(state: GameState): LegalAction[] {
             accessTrashBaseCost: trashCost.baseCost,
             accessTrashCostModifier: trashCost.modifier,
             accessTrashTotalCost: trashCost.totalCost,
+            ...(trashCost.sourceDefinitionIds.length > 0
+              ? {
+                  accessTrashCostSourceDefinitionIds:
+                    trashCost.sourceDefinitionIds.join(","),
+                  accessTrashCostSourceTitles: trashCost.sourceTitles.join(","),
+                }
+              : {}),
             ...(scatterShotRecurringCreditsAvailable > 0 &&
             definition.type === "upgrade"
               ? {
@@ -6733,30 +6739,37 @@ function isCurrentAccessFromArchives(
 function effectiveAccessTrashCost(
   state: GameState,
   cardId: CardInstanceId,
-): { baseCost: number; modifier: number; totalCost: number } {
+): {
+  baseCost: number;
+  modifier: number;
+  totalCost: number;
+  sourceDefinitionIds: CardDefinitionId[];
+  sourceTitles: string[];
+} {
   const definition = definitionFor(state, cardId);
   const baseCost = definition.trashCost ?? 0;
-  let modifier = 0;
   const zone = mustInstance(state.cardInstances, cardId).zone;
   if (
     zone.side === "corp" &&
     zone.zone === "serverRoot" &&
-    (definition.type === "asset" || definition.type === "upgrade") &&
-    definition.id !== NEW_GALVESTON_TRASH_COST_UPGRADE_ID
+    (definition.type === "asset" || definition.type === "upgrade")
   ) {
-    const server = mustServer(state, zone.serverId);
-    const hasRezzedNewGalveston = server.root.some((rootId) => {
-      if (rootId === cardId) return false;
-      const rootInstance = state.cardInstances[rootId];
-      return (
-        rootInstance?.rezzed === true &&
-        definitionFor(state, rootId).id ===
-        NEW_GALVESTON_TRASH_COST_UPGRADE_ID
-      );
-    });
-    if (hasRezzedNewGalveston) modifier += 2;
+    const quote = quoteAccessTrashCost(state, cardId, definition, baseCost);
+    return {
+      ...quote,
+      sourceDefinitionIds: quote.modifiers.map(
+        (modifier) => modifier.sourceDefinitionId,
+      ),
+      sourceTitles: quote.modifiers.map((modifier) => modifier.sourceTitle),
+    };
   }
-  return { baseCost, modifier, totalCost: baseCost + modifier };
+  return {
+    baseCost,
+    modifier: 0,
+    totalCost: baseCost,
+    sourceDefinitionIds: [],
+    sourceTitles: [],
+  };
 }
 
 function scatterShotRecurringCreditSourceIds(
@@ -7141,30 +7154,6 @@ function performAction(
           ...(serverLabel ? { serverLabel } : {}),
           addedCounterAmount: addAmount,
           remainingCounters: cardCounter(state, sourceCardId, "power"),
-        };
-        return;
-      }
-      if (legalAction.payload?.v1918UpgradeAbility === "reveal_rd_top") {
-        if (legalAction.side !== "corp")
-          throw new Error(
-            "Nur die Korp darf V1.9.18-City-Grid-Reveals nutzen.",
-          );
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.18-City-Grid-Faehigkeit ist nicht rezzed installiert.",
-          );
-        if (
-          definitionFor(state, sourceCardId).id !==
-          NEW_GALVESTON_TRASH_COST_UPGRADE_ID
-        )
-          throw new Error(
-            "Die V1.9.18-City-Grid-Reveal-Faehigkeit passt nicht zur Karte.",
-          );
-        revealCorpRdTop(state, legalAction);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          hiddenZoneAction: "v1918_city_grid_reveal_rd_top",
         };
         return;
       }
@@ -12289,6 +12278,13 @@ function trashAccessedCard(
       accessTrashBaseCost: effectiveCost.baseCost,
       accessTrashCostModifier: effectiveCost.modifier,
       accessTrashTotalCost: trashCost,
+      ...(effectiveCost.sourceDefinitionIds.length > 0
+        ? {
+            accessTrashCostSourceDefinitionIds:
+              effectiveCost.sourceDefinitionIds.join(","),
+            accessTrashCostSourceTitles: effectiveCost.sourceTitles.join(","),
+          }
+        : {}),
       ...(scatterShotSpent > 0
         ? {
             v1922RunnerProgramAbility:
@@ -15143,7 +15139,11 @@ function effectiveAgendaDifficulty(
     throw new Error("Difficulty kann nur fuer Agenda-Karten berechnet werden.");
   let difficulty = definition.advancementRequirement ?? 0;
   if (runnerHasInstalledCorporateAlly(state)) difficulty += 1;
-  difficulty += cardImplementationAgendaDifficultyModifier(state, definition);
+  difficulty += cardImplementationAgendaDifficultyModifier(
+    state,
+    agendaId,
+    definition,
+  );
   difficulty += serverDifficultyIncreaseFromFaitAccompli(state, agendaId);
   difficulty -= serverDifficultyReductionFromUpgrades(state, agendaId);
   return Math.max(0, difficulty);
@@ -15151,9 +15151,10 @@ function effectiveAgendaDifficulty(
 
 function cardImplementationAgendaDifficultyModifier(
   state: GameState,
+  agendaId: CardInstanceId,
   agendaDefinition: CardDefinition,
 ): number {
-  return activeCardImplementationModifiersForScoredCorpAgendas(
+  const scoredModifier = activeCardImplementationModifiersForScoredCorpAgendas(
     state,
     "agenda_difficulty",
   ).reduce((sum, active) => {
@@ -15172,6 +15173,41 @@ function cardImplementationAgendaDifficultyModifier(
       sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
     );
   }, 0);
+  const rootModifier = activeCardImplementationModifiersForCorpRoot(
+    state,
+    "agenda_difficulty",
+  ).reduce((sum, active) => {
+    const modifier: CardAgendaDifficultyModifierImplementation =
+      active.modifier;
+    if (!isPublicRezzedCorpRootModifier(modifier)) return sum;
+    if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+      return sum;
+    if (
+      modifier.appliesTo.sameServerAsSource &&
+      !sameCorpServerAsSource(state, active.sourceCardInstanceId, agendaId)
+    )
+      return sum;
+    if (
+      typeof modifier.amount !== "number" ||
+      !Number.isInteger(modifier.amount) ||
+      modifier.amount <= 0
+    )
+      return sum;
+    return (
+      sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
+    );
+  }, 0);
+  return scoredModifier + rootModifier;
+}
+
+function sameCorpServerAsSource(
+  state: GameState,
+  sourceCardInstanceId: CardInstanceId,
+  targetCardInstanceId: CardInstanceId,
+): boolean {
+  const sourceServerId = corpServerIdForInstalledCard(state, sourceCardInstanceId);
+  const targetServerId = corpServerIdForInstalledCard(state, targetCardInstanceId);
+  return Boolean(sourceServerId) && sourceServerId === targetServerId;
 }
 
 function serverDifficultyIncreaseFromFaitAccompli(
@@ -21102,6 +21138,10 @@ function makeActionId(
     parts.push(String(payload.iceInstallTotalCost));
   if (payload?.iceInstallReductionSourceDefinitionIds)
     parts.push(String(payload.iceInstallReductionSourceDefinitionIds));
+  if (payload?.accessTrashTotalCost !== undefined)
+    parts.push(String(payload.accessTrashTotalCost));
+  if (payload?.accessTrashCostSourceDefinitionIds)
+    parts.push(String(payload.accessTrashCostSourceDefinitionIds));
   if (payload?.encounterSubroutineIds !== undefined)
     parts.push(String(payload.encounterSubroutineIds));
   if (payload?.payOrEndRunSubroutineIndexes !== undefined)
@@ -21961,6 +22001,12 @@ function publicContextForAction(
     const value = legalAction.payload?.[key];
     if (typeof value === "number") context[key] = value;
   }
+  if (typeof legalAction.payload?.accessTrashCostSourceDefinitionIds === "string")
+    context.accessTrashCostSourceDefinitionIds =
+      legalAction.payload.accessTrashCostSourceDefinitionIds;
+  if (typeof legalAction.payload?.accessTrashCostSourceTitles === "string")
+    context.accessTrashCostSourceTitles =
+      legalAction.payload.accessTrashCostSourceTitles;
   if (typeof legalAction.payload?.v1922RunnerProgramAbility === "string")
     context.v1922RunnerProgramAbility =
       legalAction.payload.v1922RunnerProgramAbility;

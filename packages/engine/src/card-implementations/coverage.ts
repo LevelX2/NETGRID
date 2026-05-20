@@ -25,6 +25,9 @@ const IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION =
 const IMPLEMENTED_STEAL_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_TRASH_COST_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -157,10 +160,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+  "onr_v1_362_new-galveston-city-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/new-galveston-city-grid.ts",
   "onr_v1_366_red-herrings":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
   "onr_v1_370_tesseract-fort-construction":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
+  "onr_v1_374_washington-d-c-city-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
 };
 
 function implementedCoverageFor(
@@ -233,6 +240,14 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
   }
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "trash_cost")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive access trash-cost modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_TRASH_COST_MODIFIER_LOCATION);
+  }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for printed-cost on-play effect behavior.",
@@ -267,15 +282,6 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
-    {
-      cardDefinitionId: "onr_v1_360_jerusalem-city-grid",
-      status: "partial_implementation",
-      reason:
-        "Engine-local CardImplementationDefinition covers the same-server wall rez-cost reduction and same-server wall strength increase. Missing printed text: region install/replacement rules.",
-      currentLocations: [
-        "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
-      ],
-    },
     {
       cardDefinitionId: "onr_v1_363_olivia-salazar",
       status: "legacy_engine_special_case",
