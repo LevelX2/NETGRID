@@ -3897,6 +3897,144 @@ select {
   margin-left: 0;
 }
 
+.actions > .actionButton,
+.selectedActionGroup > .actionButton,
+.runActionButton {
+  position: relative;
+  height: auto;
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  justify-items: stretch;
+  column-gap: 8px;
+  padding-block: 7px;
+  overflow: hidden;
+  flex-wrap: nowrap;
+}
+
+.actions > .actionButton > svg,
+.selectedActionGroup > .actionButton > svg,
+.runActionButton > svg {
+  grid-column: 1;
+  justify-self: end;
+  flex: 0 0 auto;
+}
+
+.actions > .actionButton .actionButtonLabel,
+.selectedActionGroup > .actionButton .actionButtonLabel,
+.runActionButton .actionButtonLabel {
+  grid-column: 2;
+  justify-self: center;
+  max-width: 100%;
+  display: -webkit-box;
+  overflow: hidden;
+  overflow-wrap: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: normal;
+}
+
+.actions > .actionButton .costChips,
+.selectedActionGroup > .actionButton .costChips,
+.runActionButton .costChips {
+  grid-column: 3;
+  justify-self: end;
+  max-width: 100%;
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  margin-left: 0;
+}
+
+.actions > .actionButton[data-tooltip],
+.selectedActionGroup > .actionButton[data-tooltip],
+.runActionButton[data-tooltip],
+.cardActionButton[data-tooltip] {
+  overflow: visible;
+}
+
+.actions > .actionButton[data-tooltip]::before,
+.actions > .actionButton[data-tooltip]::after,
+.selectedActionGroup > .actionButton[data-tooltip]::before,
+.selectedActionGroup > .actionButton[data-tooltip]::after,
+.runActionButton[data-tooltip]::before,
+.runActionButton[data-tooltip]::after,
+.cardActionButton[data-tooltip]::before,
+.cardActionButton[data-tooltip]::after {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.actions > .actionButton[data-tooltip]::before,
+.selectedActionGroup > .actionButton[data-tooltip]::before,
+.runActionButton[data-tooltip]::before,
+.cardActionButton[data-tooltip]::before {
+  content: "";
+  bottom: calc(100% + 3px);
+  z-index: 118;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid color-mix(in srgb, var(--runner), var(--panel) 38%);
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.42));
+  transform: translateX(-50%) translateY(-3px);
+}
+
+.actions > .actionButton[data-tooltip]::after,
+.selectedActionGroup > .actionButton[data-tooltip]::after,
+.runActionButton[data-tooltip]::after,
+.cardActionButton[data-tooltip]::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 10px);
+  z-index: 119;
+  width: max-content;
+  max-width: min(430px, calc(100vw - 28px));
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--runner), white 16%);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel), var(--runner) 13%), var(--tooltip-bg)),
+    var(--tooltip-bg);
+  color: color-mix(in srgb, var(--text), white 8%);
+  box-shadow:
+    0 16px 34px rgb(0 0 0 / 0.46),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  font-size: 12.5px;
+  font-weight: 750;
+  line-height: 1.38;
+  text-align: left;
+  white-space: normal;
+  transform: translateX(-50%) translateY(-3px);
+}
+
+.actions > .actionButton[data-tooltip]:hover::before,
+.actions > .actionButton[data-tooltip]:hover::after,
+.actions > .actionButton[data-tooltip]:focus-visible::before,
+.actions > .actionButton[data-tooltip]:focus-visible::after,
+.selectedActionGroup > .actionButton[data-tooltip]:hover::before,
+.selectedActionGroup > .actionButton[data-tooltip]:hover::after,
+.selectedActionGroup > .actionButton[data-tooltip]:focus-visible::before,
+.selectedActionGroup > .actionButton[data-tooltip]:focus-visible::after,
+.runActionButton[data-tooltip]:hover::before,
+.runActionButton[data-tooltip]:hover::after,
+.runActionButton[data-tooltip]:focus-visible::before,
+.runActionButton[data-tooltip]:focus-visible::after,
+.cardActionButton[data-tooltip]:hover::before,
+.cardActionButton[data-tooltip]:hover::after,
+.cardActionButton[data-tooltip]:focus-visible::before,
+.cardActionButton[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
 .selectedActionGroup {
   padding: 8px;
   border: 1px solid color-mix(in srgb, var(--runner), var(--line) 50%);
@@ -4855,10 +4993,13 @@ select {
 }
 
 .archivesPileEmpty {
+  --empty-zone-card-width: calc(108px * var(--zone-card-scale, 1));
+  --empty-zone-card-height: calc(151px * var(--zone-card-scale, 1));
   margin: 0;
-  width: calc(108px * var(--zone-card-scale, 1));
-  max-width: calc(108px * var(--zone-card-scale, 1));
-  min-height: calc(151px * var(--zone-card-scale, 1));
+  box-sizing: border-box;
+  width: var(--empty-zone-card-width);
+  max-width: var(--empty-zone-card-width);
+  min-height: var(--empty-zone-card-height);
   display: grid;
   place-items: center;
   padding: 6px;
@@ -5409,7 +5550,7 @@ select {
   border: 0;
   background: transparent;
   filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.34));
-  overflow-y: auto;
+  overflow: visible;
   transform-origin: top left;
   animation: cardActionPlateBelow 150ms cubic-bezier(0.2, 0.85, 0.24, 1);
 }
@@ -5453,11 +5594,14 @@ select {
   grid-row: 1;
   flex-basis: auto;
   max-width: 100%;
+  display: -webkit-box;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.15;
-  overflow: visible;
+  overflow: hidden;
   overflow-wrap: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   text-overflow: clip;
   white-space: normal;
   word-break: normal;
@@ -5467,6 +5611,7 @@ select {
   grid-column: 2;
   grid-row: 1;
   flex-basis: auto;
+  flex-wrap: nowrap;
   justify-content: flex-end;
   margin-left: 6px;
 }
@@ -6999,7 +7144,7 @@ select {
 
 .sideZoneFrameCountOnly {
   grid-template-columns: auto;
-  min-height: calc(151px * var(--zone-card-scale, 1) + 14px);
+  min-height: calc(151px * var(--zone-card-scale, 1) + 12px);
 }
 
 .sideZoneFrameCountOnly .sideZoneLead {
@@ -7112,6 +7257,17 @@ select {
   max-width: 100%;
 }
 
+.runnerRigZone {
+  flex: 0 0 auto;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.runnerRigZone .sideZoneBody {
+  width: fit-content;
+  max-width: 100%;
+}
+
 .fixedZoneCards {
   display: flex;
   flex-wrap: nowrap;
@@ -7167,8 +7323,9 @@ select {
 .runnerHeapOverlapRow {
   --zone-stack-card-width: calc(108px * var(--zone-card-scale, 1));
   --zone-stack-card-height: calc(151px * var(--zone-card-scale, 1));
-  --zone-stack-card-step: calc(50px * var(--zone-card-scale, 1));
-  --zone-stack-width: calc(var(--zone-stack-card-width) + (var(--zone-stack-card-step) * 5));
+  --zone-stack-card-step: calc(44px * var(--zone-card-scale, 1));
+  --zone-stack-visible-steps: 5;
+  --zone-stack-width: calc(var(--zone-stack-card-width) + (var(--zone-stack-card-step) * var(--zone-stack-visible-steps)));
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--zone-stack-card-step), var(--zone-stack-card-step)));
@@ -8050,12 +8207,23 @@ select,
   gap: 12px;
 }
 
+.clockCluster {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .matchClockStrip {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  flex: 1 1 220px;
   gap: 6px 10px;
   min-height: 34px;
+  min-width: min(100%, 220px);
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -8088,46 +8256,64 @@ select,
 }
 
 .playerClockStrip {
-  display: grid;
-  grid-template-columns: auto minmax(96px, 1fr) minmax(96px, 1fr) auto;
-  align-items: center;
-  gap: 8px;
-  min-height: 38px;
-  padding: 7px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--panel), var(--corp) 6%);
+  display: contents;
   color: var(--muted);
   font-size: 12px;
 }
 
 .playerClockSide {
   display: inline-flex;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-width: 0;
-  padding: 5px 8px;
-  border: 1px solid color-mix(in srgb, var(--line), transparent 20%);
-  border-radius: 6px;
+  flex: 1 1 220px;
+  min-width: min(100%, 160px);
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   background: var(--panel-soft);
   white-space: nowrap;
+}
+
+.playerClockSide.runner {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 15%);
+  background: color-mix(in srgb, var(--runner-zone-accent), transparent 90%);
+}
+
+.playerClockSide.corp {
+  border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 15%);
+  background: color-mix(in srgb, var(--corp-status-accent), transparent 90%);
 }
 
 .playerClockSide strong {
   color: var(--text);
   font-weight: 800;
+  line-height: 1;
 }
 
-.playerClockSide.active {
-  border-color: color-mix(in srgb, var(--runner), var(--line) 35%);
-  background: color-mix(in srgb, var(--runner), transparent 88%);
+.playerClockValue {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.playerClockSide.runner.active {
+  border-color: var(--runner-zone-accent);
+  background: color-mix(in srgb, var(--runner-zone-accent), transparent 84%);
+}
+
+.playerClockSide.corp.active {
+  border-color: var(--corp-status-accent);
+  background: color-mix(in srgb, var(--corp-status-accent), transparent 84%);
 }
 
 .playerClockStrip.charging .playerClockSide.active,
 .playerClockStrip.critical .playerClockSide.active,
 .playerClockStrip.expired .playerClockSide.active {
-  border-color: color-mix(in srgb, var(--danger), var(--line) 24%);
-  background: color-mix(in srgb, var(--danger), transparent 88%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger), transparent 35%);
 }
 
 .playerClockStrip.critical .playerClockSide.active,
@@ -8356,8 +8542,14 @@ select,
 
 .runActionButton .actionButtonLabel {
   min-width: 0;
-  white-space: normal;
+  max-width: 100%;
+  display: -webkit-box;
+  overflow: hidden;
   overflow-wrap: normal;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
   word-break: normal;
   line-height: 1.25;
 }
@@ -8853,8 +9045,11 @@ select,
 }
 
 .opponentRunnerBoardStrip .runnerRigStrip {
-  flex: 1 1 min(100%, 520px);
-  min-width: min(100%, 360px);
+  flex: 0 0 auto;
+  width: fit-content;
+  min-width: 0;
+  max-width: 100%;
+  padding: 6px;
 }
 
 .opponentRunnerBoardStrip .runnerRigStrip.rigCollapsed {
@@ -8864,7 +9059,7 @@ select,
 }
 
 .runnerOpponentZonesStrip {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-start;
@@ -8876,7 +9071,8 @@ select,
   background: transparent;
 }
 
-.runnerOpponentZonesStrip .sideZoneFrame {
+.runnerOpponentZonesStrip .sideZoneFrame,
+.opponentRunnerBoardStrip > .sideZoneFrame {
   box-sizing: border-box;
   flex: 0 1 auto;
   width: fit-content;
@@ -8896,6 +9092,7 @@ select,
 .runnerOpponentHeapCompact {
   flex: 0 1 auto;
   width: fit-content;
+  min-width: 0;
 }
 
 .runnerHeapCompactPreview {
@@ -9002,27 +9199,34 @@ select,
 
 .specialZoneOverlapRow {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-start;
-  min-height: 76px;
+  gap: var(--special-zone-card-gap, 6px);
+  min-height: calc(var(--special-zone-card-width, 140px) * 1.4);
   padding-right: 4px;
-  overflow-x: auto;
+  overflow-x: visible;
   overflow-y: visible;
 }
 
 .specialZoneOverlapRow .cardSlot {
-  flex: 0 0 56px;
-  width: 56px;
-  max-width: 56px;
+  flex: 0 0 var(--special-zone-card-width, 140px);
+  width: var(--special-zone-card-width, 140px);
+  max-width: var(--special-zone-card-width, 140px);
   z-index: 1;
 }
 
 .specialZoneOverlapRow .cardSlot + .cardSlot {
-  margin-left: -38px;
+  margin-left: 0;
 }
 
 .specialZoneOverlapRow .cardSlot:hover,
 .specialZoneOverlapRow .cardSlot:focus-within {
   z-index: 38;
+}
+
+.specialZoneOverlapRow .archivesOverflowBadge {
+  margin-left: 0;
+  margin-top: max(0px, calc(var(--special-zone-card-width, 140px) * 0.7 - 12px));
 }
 
 .rigGroups {
@@ -9051,6 +9255,15 @@ select,
   max-width: fit-content;
 }
 
+.opponentRunnerBoardStrip .rigSectionLayout {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.opponentRunnerBoardStrip .rigSectionLayout:not(.rigSectionLayoutCollapsed) {
+  min-height: calc(151px * var(--zone-card-scale, 1));
+}
+
 .rigSectionLayout {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -9064,7 +9277,7 @@ select,
 
 .rigSectionLayoutCollapsed {
   grid-template-columns: auto;
-  min-height: calc(151px * var(--zone-card-scale, 1) + 14px);
+  min-height: calc(151px * var(--zone-card-scale, 1) + 12px);
 }
 
 .rigSectionLead {
@@ -9138,6 +9351,23 @@ select,
   min-width: 0;
 }
 
+.rigEmptyPlaceholder {
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  width: var(--cards-min-width, var(--mini-cards-min-width, calc(108px * var(--zone-card-scale, 1))));
+  min-height: calc(var(--cards-min-width, var(--mini-cards-min-width, calc(108px * var(--zone-card-scale, 1)))) * 1.4);
+  padding: 6px;
+  border: 1px dashed color-mix(in srgb, var(--runner-zone-accent), var(--line) 50%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 88%);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
 .rigGroupsHorizontal {
   display: flex;
   align-items: stretch;
@@ -9145,7 +9375,12 @@ select,
   justify-content: flex-start;
   gap: 10px;
   overflow: visible;
-  padding-bottom: 2px;
+  padding-bottom: 0;
+}
+
+.runnerRigZoneGroups {
+  width: fit-content;
+  max-width: 100%;
 }
 
 .rigGroup {
@@ -9157,7 +9392,7 @@ select,
   grid-template-columns: auto minmax(0, 1fr);
   align-items: stretch;
   gap: 12px;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   width: fit-content;
   min-width: 0;
   max-width: 100%;
@@ -9259,6 +9494,16 @@ select,
   flex-wrap: wrap;
   justify-content: flex-start;
   gap: 8px;
+}
+
+.runnerRigZone .rigGroupHorizontal,
+.runnerRigStrip .rigGroupHorizontal {
+  max-width: 100%;
+}
+
+.runnerRigZone .rigGroupHorizontal .rigGroupCards,
+.runnerRigStrip .rigGroupHorizontal .rigGroupCards {
+  max-width: 100%;
 }
 
 .rigGroupCards .cardSlot {
@@ -9432,18 +9677,18 @@ select,
   }
 
   .opponentRunnerBoardStrip {
-    flex-direction: column;
-    flex-wrap: nowrap;
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 
   .opponentRunnerBoardStrip .runnerRigStrip {
-    width: 100%;
+    width: fit-content;
     min-width: 0;
   }
 
   .runnerOpponentZonesStrip {
-    flex-basis: 100%;
-    width: 100%;
+    flex-basis: auto;
+    width: auto;
   }
 
   .main.rightRailCollapsed {
@@ -9558,7 +9803,8 @@ select,
   .runnerGripHeapLayout .sideZoneFrame,
   .runnerGripZone,
   .runnerStackZone,
-  .runnerHeapZone {
+  .runnerHeapZone,
+  .runnerRigZone {
     width: 100%;
     max-width: 100%;
   }
@@ -9623,13 +9869,13 @@ select,
   }
 
   .specialZoneOverlapRow .cardSlot {
-    flex: 0 0 52px;
-    width: 52px;
-    max-width: 52px;
+    flex-basis: var(--special-zone-card-width, 140px);
+    width: var(--special-zone-card-width, 140px);
+    max-width: var(--special-zone-card-width, 140px);
   }
 
   .specialZoneOverlapRow .cardSlot + .cardSlot {
-    margin-left: -35px;
+    margin-left: 0;
   }
 
   .topbar,
@@ -9692,12 +9938,9 @@ select,
     margin-left: 0;
   }
 
-  .playerClockStrip {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .playerClockStrip small {
-    grid-column: 1 / -1;
+  .matchClockStrip,
+  .playerClockSide {
+    flex-basis: 100%;
   }
 
   .gameStandingStrip,

@@ -84,6 +84,7 @@ import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
   chronicleActionUseByEventId,
+  chronicleTurnSideByEventId,
   chronicleTurnNumberByEventId,
   formatChronicleEvent,
   formatChronicleEffectItems,
@@ -176,7 +177,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -338,7 +339,6 @@ type SeriesResultSummary = ApiSeriesResultSummary;
 type GameResultSummary = ApiGameResultSummary;
 type LifecycleResultSummary = ApiLifecycleResultSummary;
 type ClientPayload = ApiSidePayload;
-const SERIES_WIN_MATCH_POINTS = 10;
 type LocalMatchClockAnchor = {
   matchId: string;
   matchStartedAtMs: number;
@@ -349,7 +349,10 @@ type LocalMatchClockAnchor = {
 function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
   const presentation = payload?.aiTurnPresentation;
   if (!payload || !presentation?.activeAiSide) return presentation;
-  const aiHasCurrentControl = payload.playerView.activeSide === presentation.activeAiSide || payload.playerView.pendingChoice?.side === presentation.activeAiSide;
+  const aiHasCurrentControl =
+    payload.playerView.activeSide === presentation.activeAiSide ||
+    payload.playerView.pendingChoice?.side === presentation.activeAiSide ||
+    payload.playerClock?.decisionOwnerSide === presentation.activeAiSide;
   if (aiHasCurrentControl) return presentation;
   return { ...presentation, canAdvanceAi: false };
 }
@@ -690,6 +693,9 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
+const SPECIAL_ZONE_CARD_WIDTH_MIN = 56;
+const SPECIAL_ZONE_CARD_WIDTH_PREFERRED = 140;
+const SPECIAL_ZONE_CARD_GAP = 6;
 const SCORE_AREA_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 const DECK_TABLE_CARD_WIDTH_DEFAULT = 94;
@@ -1152,6 +1158,27 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   };
 }
 
+function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, eventId?: string): AccessReveal | null {
+  const accessedCard = view.run?.accessedCard;
+  if (!accessedCard?.known || !accessedCard.title) return null;
+  const actorSide: Side = "runner";
+  const serverLabel = serverDisplayLabel(view.run?.breach?.serverId ?? view.run?.attackedServerId ?? "einen Server");
+  const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  const card = enrichVisibleCard(accessedCard, detailsById);
+  return {
+    eventId: eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
+    actorSide,
+    viewerSide,
+    serverLabel,
+    serverTitleLabel: accessServerTitleLabel(serverLabel),
+    serverLocationPhrase: accessServerLocationPhrase(serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    card,
+    actions,
+    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
+  };
+}
+
 function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, title: string): DisplayVisibleCard {
   const card: DisplayVisibleCard = {
     instanceId: `access-${event.eventId}-${cardId}`,
@@ -1201,7 +1228,7 @@ function accessServerTitleLabel(serverLabel: string): string {
 function accessServerLocationPhrase(serverLabel: string): string {
   if (serverLabel === "HQ") return "im Hauptquartier (HQ)";
   if (serverLabel === "Archive") return "im Archiv";
-  if (/^Fort \d+$/.test(serverLabel)) return `im ${serverLabel}`;
+  if (/^Remote \d+$/.test(serverLabel)) return `in ${serverLabel}`;
   return `in ${serverLabel}`;
 }
 
@@ -1660,6 +1687,7 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
 
 function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
+  const turnSideByEventId = chronicleTurnSideByEventId(events);
   const actionUseByEventId = chronicleActionUseByEventId(events);
   return Object.fromEntries(
     events.map((event) => {
@@ -1673,6 +1701,7 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
           cardDetailLines: card ? catalogDetailLines(card) : [],
           agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null,
           turnNumber: turnNumberByEventId[event.eventId] ?? null,
+          turnSide: turnSideByEventId[event.eventId] ?? null,
           actionUse: actionUseByEventId[event.eventId] ?? null
         }
       ];
@@ -2511,7 +2540,9 @@ export default function Page() {
     });
   };
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
-  const accessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
+  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, accessRevealEvent?.eventId) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
+  const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
@@ -2524,7 +2555,8 @@ export default function Page() {
       ? {
           matchElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.matchStartedAtMs),
           decisionElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.decisionStartedAtMs),
-          scopeLabel: payload.winner ? "Spiel beendet" : matchTimerScopeLabel(activeView, payload.legalActions)
+          scopeLabel: payload.winner ? "Spiel beendet" : matchTimerScopeLabel(activeView, payload.legalActions),
+          graceLabel: playerClockGraceDisplay(payload.playerClock, matchClockNowMs)
         }
       : null;
   const activeMatchIsGame = activeMatchWorkspace === "game";
@@ -3284,12 +3316,12 @@ export default function Page() {
 
   useEffect(() => {
     if (!autoEndTurnEnabled || !gameplaySettingsLoaded || !session || !payload || connection !== "online") return;
-    const action = automaticEndTurnAction(payload.playerView, payload.legalActions, session.side);
+    const action = automaticEndTurnAction(payload.playerView, payload.legalActions, session.side, { accessRevealVisible: showAccessReveal });
     if (!action) return;
     const key = `${session.matchId}:${session.side}:${payload.playerView.stateVersion}:${action.actionId}`;
     if (autoEndTurnSubmittedKeyRef.current === key) return;
     if (submitAction(action, { immediateAudio: false })) autoEndTurnSubmittedKeyRef.current = key;
-  }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction]);
+  }, [autoEndTurnEnabled, gameplaySettingsLoaded, session, payload, connection, submitAction, showAccessReveal]);
 
   const submitChoiceOption = (action: LegalAction, choiceId: string, selectedOptionId: string) => {
     if (!session || !payload || !ensureSocketConnected()) return;
@@ -4830,35 +4862,40 @@ export default function Page() {
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
-          {matchClockDisplay ? (
-            <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
-              <span className="matchClockIcon" aria-hidden="true">
-                <Clock size={15} />
-              </span>
-              <span>
-                <strong>Match</strong> {matchClockDisplay.matchElapsed}
-              </span>
-              <span>
-                <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
-              </span>
-              <small>Orientierung</small>
+          {matchClockDisplay || payload.playerClock?.mode === "player_clock" ? (
+            <div className="clockCluster" aria-label="Uhrenbereich">
+              {matchClockDisplay ? (
+                <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
+                  <span className="matchClockIcon" aria-hidden="true">
+                    <Clock size={15} />
+                  </span>
+                  <span>
+                    <strong>Match</strong> {matchClockDisplay.matchElapsed}
+                  </span>
+                  <span>
+                    <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
+                  </span>
+                  {matchClockDisplay.graceLabel ? <small>{matchClockDisplay.graceLabel}</small> : null}
+                </div>
+              ) : null}
+              {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
             </div>
           ) : null}
-          {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
           {activeView.side === "corp" ? (
             <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
-              <RunnerRigStrip
+              <RunnerOpponentZonesStrip
                 view={activeView}
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
                 selectedContext={selectedActionContext}
                 contextualActions={legalActionSplit.contextualActions}
                 actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                highlightedZone={activeCueHighlight}
                 onFocus={focusCard}
                 onActionContext={selectActionCard}
                 onAction={submitAction}
               />
-              <RunnerOpponentZonesStrip
+              <RunnerRigStrip
                 view={activeView}
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
@@ -5063,62 +5100,6 @@ export default function Page() {
               ) : null
             )}
           </div>
-          {activeView.own.rig ? (
-            <section className={`section panel boardSection rigBoardSection ${boardZoneCollapsedFor("runner:rig") ? "rigCollapsed" : ""}`} style={zoneCardsStyle}>
-              <div className={`rigSectionLayout ${boardZoneCollapsedFor("runner:rig") ? "rigSectionLayoutCollapsed" : ""} ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
-                <div className="rigSectionLead">
-                  <div className="sideZoneLeadTop">
-                    <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
-                  </div>
-                  <div className="rigSectionLeadBottom">
-                    <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
-                    <ZoneCollapseButton
-                      side="runner"
-                      label="Rig"
-                      collapsed={boardZoneCollapsedFor("runner:rig")}
-                      onToggle={() => toggleBoardZoneCollapsed("runner:rig")}
-                    />
-                  </div>
-                </div>
-                {!boardZoneCollapsedFor("runner:rig") && ownRigGroups.length > 0 ? (
-                  <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
-                    {ownRigGroups.map((group) => (
-                      <div className="rigGroup rigGroupHorizontal" key={group.key} style={ownRigCardsStyle}>
-                        <div className="rigGroupLead">
-                          <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
-                          {group.key === "program" ? (
-                            <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${activeView.own.memoryUsed ?? 0} von ${activeView.own.memoryLimit ?? 0}`}>
-                              MU <strong>{activeView.own.memoryUsed ?? 0}/{activeView.own.memoryLimit ?? 0}</strong>
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className="cards rigGroupCards rigGroupCardsFull">
-                          {group.cards.map((card) => {
-                            const displayCard = enrichCard(card);
-                            return (
-                              <CardView
-                                key={card.instanceId}
-                                card={displayCard}
-                                displayMode={cardDisplayMode}
-                                selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                actions={cardActionsFor(card)}
-                                actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                onAction={submitAction}
-                                onFocus={focusCard}
-                                onActionContextSelect={selectActionCard}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : !boardZoneCollapsedFor("runner:rig") ? (
-                  <p className="meta">Keine installierten Runner-Karten.</p>
-                ) : null}
-              </div>
-            </section>
-          ) : null}
           <section className="section panel boardSection zoneBoardSection">
             {activeView.side === "runner" ? (
               <div className="runnerGripHeapLayout">
@@ -5165,6 +5146,27 @@ export default function Page() {
                 </SideZoneFrame>
                 <SideZoneFrame
                   side="runner"
+                  label="Stack"
+                  countLabel={formatCardCount(activeView.own.stackOrRdCount)}
+                  iconKind="stack"
+                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")}
+                  className="runnerStackZone"
+                  style={zoneCardsStyle}
+                  collapsed={boardZoneCollapsedFor("runner:stack")}
+                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:stack")}
+                >
+                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
+                    {activeView.own.stackOrRdCount > 0 ? (
+                      <div className="runnerStackBack" aria-hidden="true">
+                        <span />
+                      </div>
+                    ) : (
+                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                    )}
+                  </div>
+                </SideZoneFrame>
+                <SideZoneFrame
+                  side="runner"
                   label="Heap"
                   countLabel={formatCardCount(activeView.own.heapOrArchives.length)}
                   iconKind="heap"
@@ -5176,7 +5178,13 @@ export default function Page() {
                   collapseLabel="Heap"
                 >
                   {activeView.own.heapOrArchives.length > 0 ? (
-                    <div className="runnerHeapOverlapRow" style={zoneCardsStyle}>
+                    <div
+                      className="runnerHeapOverlapRow"
+                      style={{
+                        ...zoneCardsStyle,
+                        "--zone-stack-visible-steps": String(Math.max(0, Math.min(activeView.own.heapOrArchives.length, RUNNER_HEAP_PREVIEW_LIMIT) - 1))
+                      } as CSSProperties}
+                    >
                       {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
                         const displayCard = enrichCard(card);
                         return (
@@ -5200,27 +5208,61 @@ export default function Page() {
                     <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
                   )}
                 </SideZoneFrame>
-                <SideZoneFrame
-                  side="runner"
-                  label="Stack"
-                  countLabel={formatCardCount(activeView.own.stackOrRdCount)}
-                  iconKind="stack"
-                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")}
-                  className="runnerStackZone"
-                  style={zoneCardsStyle}
-                  collapsed={boardZoneCollapsedFor("runner:stack")}
-                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:stack")}
-                >
-                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
-                    {activeView.own.stackOrRdCount > 0 ? (
-                      <div className="runnerStackBack" aria-hidden="true">
-                        <span />
+                {activeView.own.rig ? (
+                  <SideZoneFrame
+                    side="runner"
+                    label="Rig"
+                    countLabel={formatCardCount(activeView.own.rig.length)}
+                    iconKind="rig"
+                    highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "rig")}
+                    className="runnerRigZone"
+                    style={zoneCardsStyle}
+                    collapsed={boardZoneCollapsedFor("runner:rig")}
+                    onToggleCollapse={() => toggleBoardZoneCollapsed("runner:rig")}
+                    collapseLabel="Rig"
+                  >
+                    {ownRigGroups.length > 0 ? (
+                      <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
+                        {ownRigGroups.map((group) => (
+                          <div
+                            className="rigGroup rigGroupHorizontal"
+                            key={group.key}
+                            style={ownRigCardsStyle}
+                          >
+                            <div className="rigGroupLead">
+                              <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                              {group.key === "program" ? (
+                                <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${activeView.own.memoryUsed ?? 0} von ${activeView.own.memoryLimit ?? 0}`}>
+                                  MU <strong>{activeView.own.memoryUsed ?? 0}/{activeView.own.memoryLimit ?? 0}</strong>
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className="cards rigGroupCards rigGroupCardsFull">
+                              {group.cards.map((card) => {
+                                const displayCard = enrichCard(card);
+                                return (
+                                  <CardView
+                                    key={card.instanceId}
+                                    card={displayCard}
+                                    displayMode={cardDisplayMode}
+                                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                    actions={cardActionsFor(card)}
+                                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                    onAction={submitAction}
+                                    onFocus={focusCard}
+                                    onActionContextSelect={selectActionCard}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                      <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Rig.</p>
                     )}
-                  </div>
-                </SideZoneFrame>
+                  </SideZoneFrame>
+                ) : null}
               </div>
             ) : (
               null
@@ -5862,7 +5904,7 @@ function GameOverModal({
         ? "Korp gewinnt."
         : "Das Spiel endet unentschieden.";
   const seriesText = result.series ? seriesStatusText(result.series) : null;
-  const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
+  const gameStanding = gameStandingForResult(result, side);
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
   const retentionUi = retentionProtectionUi(retentionProtected);
@@ -5974,43 +6016,6 @@ function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
       <span>{motifUi.caption}</span>
     </div>
   );
-}
-
-function gameStandingForResult(result: GameResultSummary, viewerSide: Side): { summary: string; viewerMatchPoints: number; opponentMatchPoints: number } {
-  const opponentSide = oppositeSide(viewerSide);
-  if (result.winner === "draw") {
-    return {
-      summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
-      viewerMatchPoints: agendaPointsForResultSide(result, viewerSide),
-      opponentMatchPoints: agendaPointsForResultSide(result, opponentSide)
-    };
-  }
-
-  const winnerSide = result.winner;
-  const loserSide = oppositeSide(winnerSide);
-  const loserAgendaPoints = agendaPointsForResultSide(result, loserSide);
-  const winnerLabel = winnerSide === viewerSide ? "Du" : "Gegenseite";
-  const loserLabel = loserSide === viewerSide ? "Du" : "Gegenseite";
-  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, viewerSide);
-  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, opponentSide);
-
-  return {
-    summary: `${winnerLabel}: ${SERIES_WIN_MATCH_POINTS} Matchpunkte. ${loserLabel}: ${loserAgendaPoints} Agenda-Punkte aus ${agendaPointSourceLabel(loserSide)} Agendas.`,
-    viewerMatchPoints,
-    opponentMatchPoints
-  };
-}
-
-function agendaPointsForResultSide(result: GameResultSummary, side: Side): number {
-  return side === "runner" ? result.runnerAgendaPoints : result.corpAgendaPoints;
-}
-
-function agendaPointSourceLabel(side: Side): string {
-  return side === "runner" ? "gestohlenen" : "gescorten";
-}
-
-function oppositeSide(side: Side): Side {
-  return side === "runner" ? "corp" : "runner";
 }
 
 function ConfirmationDialog({
@@ -6504,7 +6509,7 @@ function CardSizeSettings({
       <CardSizeSliderRow label="Handkarten" value={handPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onHandPercent} />
       <CardSizeSliderRow label="Archive" value={archivePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onArchivePercent} />
       <CardSizeSliderRow label="Stack/Heap" value={zonePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onZonePercent} />
-      <CardSizeSliderRow label="Spielfeld/Forts" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
+      <CardSizeSliderRow label="Spielfeld/Remotes" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
       <CardSizeSliderRow label="Rig" value={rigPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onRigPercent} />
     </div>
   );
@@ -6947,6 +6952,18 @@ function RunnerOpponentZonesStrip({
       />
       <SideZoneFrame
         side="runner"
+        label="Stack"
+        countLabel={stackCountLabel}
+        iconKind="stack"
+        highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
+        className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
+        style={zoneCardsStyle}
+        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
+        ariaLabel={`Runner-Stack ${stackCountLabel}`}
+        collapsed
+      />
+      <SideZoneFrame
+        side="runner"
         label="Heap"
         countLabel={heapCountLabel}
         iconKind="heap"
@@ -6960,7 +6977,13 @@ function RunnerOpponentZonesStrip({
         collapseLabel="Heap"
       >
         {heapCards.length > 0 ? (
-          <div className="runnerHeapCompactPreview runnerHeapOverlapRow" style={zoneCardsStyle}>
+          <div
+            className="runnerHeapCompactPreview runnerHeapOverlapRow"
+            style={{
+              ...zoneCardsStyle,
+              "--zone-stack-visible-steps": String(Math.max(0, Math.min(heapCards.length, RUNNER_HEAP_PREVIEW_LIMIT) - 1))
+            } as CSSProperties}
+          >
             {heapCards.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
               const displayCard = enrichVisibleCard(card, cardDetailsById);
               return (
@@ -6984,18 +7007,6 @@ function RunnerOpponentZonesStrip({
           <p className="archivesPileEmpty">Keine Karten im Heap.</p>
         )}
       </SideZoneFrame>
-      <SideZoneFrame
-        side="runner"
-        label="Stack"
-        countLabel={stackCountLabel}
-        iconKind="stack"
-        highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
-        className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
-        style={zoneCardsStyle}
-        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
-        ariaLabel={`Runner-Stack ${stackCountLabel}`}
-        collapsed
-      />
     </section>
   );
 }
@@ -7007,6 +7018,7 @@ function RunnerRigStrip({
   selectedContext,
   contextualActions,
   actionDisabled,
+  highlightedZone,
   onFocus,
   onActionContext,
   onAction
@@ -7017,15 +7029,20 @@ function RunnerRigStrip({
   selectedContext: ActionContext | null;
   contextualActions: LegalAction[];
   actionDisabled: boolean;
+  highlightedZone?: BoardHighlight | null;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
-  const { rigPercent } = useCardScaleSettings();
-  const opponentMiniCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, rigPercent / 100);
-  const opponentMiniCardsStyle = useMemo(
-    () => ({ "--mini-cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * opponentMiniCardScale)}px` } as CSSProperties),
-    [opponentMiniCardScale]
+  const { zonePercent } = useCardScaleSettings();
+  const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
+  const opponentRigStyle = useMemo(
+    () =>
+      ({
+        "--zone-card-scale": String(zoneCardScale),
+        "--mini-cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * zoneCardScale)}px`
+      } as CSSProperties),
+    [zoneCardScale]
   );
   const [rigCollapsed, setRigCollapsed] = useState(false);
   if (opponentSide(view.side) !== "runner") return null;
@@ -7037,55 +7054,64 @@ function RunnerRigStrip({
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
   };
   return (
-    <section className={`runnerRigStrip ${rigCollapsed ? "rigCollapsed" : ""}`} data-testid="runner-rig">
-      <div className={`rigSectionLayout rigSectionLayoutCompact ${rigCollapsed ? "rigSectionLayoutCollapsed" : ""}`}>
-        <div className="rigSectionLead rigSectionLeadCompact">
-          <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
-          <div className="rigSectionLeadBottom">
-            <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
-            <ZoneCollapseButton side="runner" label="Rig" collapsed={rigCollapsed} onToggle={() => setRigCollapsed((current) => !current)} />
-          </div>
-        </div>
-        {!rigCollapsed && groups.length > 0 ? (
-          <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
-            {groups.map((group) => (
-              <div className="rigGroup rigGroupHorizontal" key={group.key} style={opponentMiniCardsStyle}>
-                <div className="rigGroupLead">
-                  <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
-                  {group.key === "program" && memorySummary ? (
-                    <span className="zoneLimitBadge rigMemoryBadge" aria-label={memorySummary.ariaLabel}>
-                      MU <strong>{memorySummary.text}</strong>
-                    </span>
-                  ) : null}
-                </div>
-                <div className="cards rigGroupCards rigGroupCardsMini">
-                  {group.cards.map((card) => {
-                    const displayCard = enrichVisibleCard(card, cardDetailsById);
-                    return (
-                      <CardView
-                        key={card.instanceId}
-                        card={displayCard}
-                        compact
-                        displayMode={displayMode}
-                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
-                        actions={cardActionsForRig(card)}
-                        actionDisabled={actionDisabled}
-                        actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
-                        onFocus={onFocus}
-                        onActionContextSelect={onActionContext}
-                        onAction={onAction}
-                      />
-                    );
-                  })}
-                </div>
+    <SideZoneFrame
+      side="runner"
+      label="Rig"
+      countLabel={formatCardCount(runnerRig.length)}
+      iconKind="rig"
+      highlighted={zoneHighlighted(highlightedZone ?? null, "runner", "rig")}
+      className="runnerOpponentZone runnerOpponentRigZone runnerRigZone"
+      style={opponentRigStyle}
+      title="Rig: installierte Runner-Karten."
+      ariaLabel={`Runner-Rig ${formatCardCount(runnerRig.length)}`}
+      testId="runner-rig"
+      collapsed={rigCollapsed}
+      onToggleCollapse={() => setRigCollapsed((current) => !current)}
+      collapseLabel="Rig"
+    >
+      {groups.length > 0 ? (
+        <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
+          {groups.map((group) => (
+            <div
+              className="rigGroup rigGroupHorizontal"
+              key={group.key}
+              style={opponentRigStyle}
+            >
+              <div className="rigGroupLead">
+                <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                {group.key === "program" && memorySummary ? (
+                  <span className="zoneLimitBadge rigMemoryBadge" aria-label={memorySummary.ariaLabel}>
+                    MU <strong>{memorySummary.text}</strong>
+                  </span>
+                ) : null}
               </div>
-            ))}
-          </div>
-        ) : !rigCollapsed ? (
-          <p className="meta">Keine installierten Runner-Karten.</p>
-        ) : null}
-      </div>
-    </section>
+              <div className="cards rigGroupCards rigGroupCardsMini">
+                {group.cards.map((card) => {
+                  const displayCard = enrichVisibleCard(card, cardDetailsById);
+                  return (
+                    <CardView
+                      key={card.instanceId}
+                      card={displayCard}
+                      compact
+                      displayMode={displayMode}
+                      selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                      actions={cardActionsForRig(card)}
+                      actionDisabled={actionDisabled}
+                      actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                      onFocus={onFocus}
+                      onActionContextSelect={onActionContext}
+                      onAction={onAction}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="archivesPileEmpty" style={opponentRigStyle}>Keine Karten im Rig.</p>
+      )}
+    </SideZoneFrame>
   );
 }
 
@@ -7123,13 +7149,7 @@ function SpecialZonesStrip({
               <span>{group.count}</span>
             </div>
             {compact ? (
-              <div className="specialZoneOverlapRow">
-                {group.cards.slice(0, SPECIAL_ZONE_PREVIEW_LIMIT).map((card) => {
-                  const displayCard = enrichVisibleCard(card, cardDetailsById);
-                  return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
-                })}
-                {group.cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{group.cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}</span> : null}
-              </div>
+              <SpecialZoneOverlapRow cards={group.cards} cardDetailsById={cardDetailsById} displayMode={displayMode} {...(onFocus ? { onFocus } : {})} />
             ) : (
               <div className="cards miniCards">
                 {group.cards.map((card) => {
@@ -7142,6 +7162,63 @@ function SpecialZonesStrip({
         ))}
       </div>
     </section>
+  );
+}
+
+function SpecialZoneOverlapRow({
+  cards,
+  cardDetailsById,
+  displayMode,
+  onFocus
+}: {
+  cards: VisibleCard[];
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+  onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+}) {
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const previewCards = cards.slice(0, SPECIAL_ZONE_PREVIEW_LIMIT);
+  const previewCount = Math.max(1, previewCards.length);
+  const [cardWidth, setCardWidth] = useState(SPECIAL_ZONE_CARD_WIDTH_PREFERRED);
+
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+
+    const updateCardWidth = () => {
+      const availableWidth = row.clientWidth;
+      if (availableWidth <= 0) return;
+
+      const singleRowWidth = Math.floor((availableWidth - SPECIAL_ZONE_CARD_GAP * (previewCount - 1)) / previewCount);
+      const nextCardWidth = Math.max(SPECIAL_ZONE_CARD_WIDTH_MIN, Math.min(SPECIAL_ZONE_CARD_WIDTH_PREFERRED, singleRowWidth));
+      setCardWidth((current) => (current === nextCardWidth ? current : nextCardWidth));
+    };
+
+    updateCardWidth();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(updateCardWidth);
+      observer.observe(row);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", updateCardWidth);
+    return () => window.removeEventListener("resize", updateCardWidth);
+  }, [previewCount]);
+
+  const rowStyle = {
+    "--special-zone-card-width": `${cardWidth}px`,
+    "--special-zone-card-gap": `${SPECIAL_ZONE_CARD_GAP}px`
+  } as CSSProperties;
+
+  return (
+    <div ref={rowRef} className="specialZoneOverlapRow" style={rowStyle}>
+      {previewCards.map((card) => {
+        const displayCard = enrichVisibleCard(card, cardDetailsById);
+        return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
+      })}
+      {cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}</span> : null}
+    </div>
   );
 }
 
@@ -7253,7 +7330,7 @@ function RunTimelineOverlay({
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}
                   type="button"
-                  title={fullLabel}
+                  data-tooltip={fullLabel}
                   aria-label={fullLabel}
                   data-testid="run-action-button"
                   data-action-type={action.type}
@@ -7637,13 +7714,16 @@ function LegalActionsPanel({
         </div>
       </div>
       <div className="actions">
-        {primaryActions.map((action) => (
-          <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-            <ActionLeadIcon action={action} />
-            <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
-            <CostChips action={action} />
-          </button>
-        ))}
+        {primaryActions.map((action) => {
+          const label = runAwareActionButtonLabel(view, action);
+          return (
+            <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
+              <ActionLeadIcon action={action} />
+              <span className="actionButtonLabel">{label}</span>
+              <CostChips action={action} />
+            </button>
+          );
+        })}
         {selectedContext ? (
           <div className="actionGroup selectedActionGroup">
             <div className="selectedActionTitle">
@@ -7652,13 +7732,16 @@ function LegalActionsPanel({
                 <X size={14} />
               </button>
             </div>
-            {contextualActions.map((action) => (
-              <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-                <ActionLeadIcon action={action} />
-                <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
-                <CostChips action={action} />
-              </button>
-            ))}
+            {contextualActions.map((action) => {
+              const label = runAwareActionButtonLabel(view, action);
+              return (
+                <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
+                  <ActionLeadIcon action={action} />
+                  <span className="actionButtonLabel">{label}</span>
+                  <CostChips action={action} />
+                </button>
+              );
+            })}
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
           </div>
         ) : hasHiddenContextActions ? (
@@ -8158,7 +8241,8 @@ function chronicleEntriesWithRunGroups(
     const actionType = payloadString(event.publicPayload, "actionType") ?? event.type;
     const actor = payloadSide(event.publicPayload, "actor");
     const turnNumber = contextByEventId[event.eventId]?.turnNumber ?? null;
-    const turnGroup = actor ? { label: `${actor === "corp" ? "Korp" : "Runner"}-Zug${turnNumber ? ` ${turnNumber}` : ""}`, kind: actor } : null;
+    const turnSide = contextByEventId[event.eventId]?.turnSide ?? actor;
+    const turnGroup = turnSide ? { label: `${turnSide === "corp" ? "Korp" : "Runner"}-Zug${turnNumber ? ` ${turnNumber}` : ""}`, kind: turnSide } : null;
     if (runEndPending && !chronicleActionContinuesCompletedRun(actionType)) {
       activeRunGroupLabel = null;
       runEndPending = false;
@@ -8174,8 +8258,9 @@ function chronicleEntriesWithRunGroups(
     const eventGroupLabel = activeRunGroupLabel && chronicleEventBelongsToActiveRun(actionType, items) ? activeRunGroupLabel : null;
     for (const item of items) {
       const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
-      const groupLabel = eventGroupLabel ?? turnGroup?.label ?? chronicleGroupLabel(item);
-      const groupKind = eventGroupLabel ? "run" : turnGroup?.kind ?? chronicleGroupKindFromItem(item);
+      const startTurnEffectGroup = chronicleStartTurnEffectGroup(actionType, actor, turnNumber, item);
+      const groupLabel = eventGroupLabel ?? startTurnEffectGroup?.label ?? turnGroup?.label ?? chronicleGroupLabel(item);
+      const groupKind = eventGroupLabel ? "run" : startTurnEffectGroup?.kind ?? turnGroup?.kind ?? chronicleGroupKindFromItem(item);
       entries.push({ card, item, groupLabel, groupKind });
     }
 
@@ -8183,6 +8268,18 @@ function chronicleEntriesWithRunGroups(
   }
 
   return entries;
+}
+
+function chronicleStartTurnEffectGroup(
+  actionType: string,
+  eventActor: Side | null,
+  eventTurnNumber: number | null,
+  item: ChronicleItem
+): { label: string; kind: ChronicleGroupKind } | null {
+  if (actionType !== "end_turn" || !eventActor || !item.actor || item.actor === eventActor) return null;
+  if (!item.chips.includes("Automatisch")) return null;
+  const label = `${item.actor === "corp" ? "Korp" : "Runner"}-Zug${eventTurnNumber ? ` ${eventTurnNumber + 1}` : ""}`;
+  return { label, kind: item.actor };
 }
 
 function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
@@ -11895,9 +11992,10 @@ function CardActionsPopover({
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style} data-card-action-surface="true">
       {actions.map((action) => {
-        const label = compactCardActionMenuLabel(action, actionLabelForAction(action));
+        const fullLabel = actionLabelForAction(action);
+        const label = compactCardActionMenuLabel(action, fullLabel);
         return (
-          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
+          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" data-tooltip={fullLabel} aria-label={fullLabel} role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
             <ActionLeadIcon action={action} size={14} />
             <span className="actionButtonLabel">{label}</span>
             <CostChips action={action} />
@@ -12189,6 +12287,7 @@ function SideZoneFrame({
   style,
   title,
   ariaLabel,
+  testId,
   collapsed = false,
   onToggleCollapse,
   collapseLabel,
@@ -12203,6 +12302,7 @@ function SideZoneFrame({
   style?: CSSProperties;
   title?: string;
   ariaLabel?: string;
+  testId?: string;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   collapseLabel?: string;
@@ -12210,7 +12310,7 @@ function SideZoneFrame({
 }) {
   const hasBody = children !== undefined && children !== null && !collapsed;
   return (
-    <div className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`} style={style} title={title} aria-label={ariaLabel}>
+    <div className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`} style={style} title={title} aria-label={ariaLabel} data-testid={testId}>
       <div className="sideZoneLead">
         <div className="sideZoneLeadTop">
           <h2 className={`sideZoneTitle rigGroupSideLabel ${zoneSideClass(side)}`}>{label}</h2>
@@ -12305,19 +12405,34 @@ function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapsho
       ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
       : "Wartet";
   return (
-    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label="Spielerzeit" data-testid="player-clock">
-      <span className="matchClockIcon" aria-hidden="true">
-        <Clock size={15} />
+    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label={`Spielerzeit: ${ownerLabel}`} data-testid="player-clock">
+      <span className={`playerClockSide runner ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
+        <strong>Runner</strong>
+        <span className="playerClockValue">{formatPlayerClockDuration(runnerRemainingMs)}</span>
       </span>
-      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
-        <strong>Runner</strong> {formatPlayerClockDuration(runnerRemainingMs)}
+      <span className={`playerClockSide corp ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
+        <strong>Korp</strong>
+        <span className="playerClockValue">{formatPlayerClockDuration(corpRemainingMs)}</span>
       </span>
-      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
-        <strong>Korp</strong> {formatPlayerClockDuration(corpRemainingMs)}
-      </span>
-      <small>{ownerLabel}</small>
     </div>
   );
+}
+
+function playerClockGraceDisplay(snapshot: ApiPlayerClockSnapshot | undefined, nowMs: number): string | null {
+  if (!snapshot || snapshot.mode !== "player_clock" || snapshot.decisionOwnerSide === undefined || snapshot.expiredSide) return null;
+  const remainingMs = playerClockLiveGraceRemaining(snapshot, nowMs);
+  if (remainingMs === null) return null;
+  return remainingMs > 0 ? `Kulanz ${formatPlayerClockDuration(remainingMs)}` : "Kulanz vorbei";
+}
+
+function playerClockLiveGraceRemaining(snapshot: ApiPlayerClockSnapshot, nowMs: number): number | null {
+  if (snapshot.decisionOwnerSide === undefined) return null;
+  if (snapshot.activityStartedAtMs !== undefined && snapshot.gracePeriodMs !== undefined) {
+    const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+    return Math.max(0, snapshot.gracePeriodMs - elapsedMs);
+  }
+  if (snapshot.graceRemainingMs !== undefined) return Math.max(0, snapshot.graceRemainingMs);
+  return null;
 }
 
 function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {

@@ -199,7 +199,8 @@ export function splitLegalActions(actions: LegalAction[]): { primaryActions: Leg
   return { primaryActions, contextualActions };
 }
 
-export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side): LegalAction | undefined {
+export function automaticEndTurnAction(view: PlayerView, actions: LegalAction[], side: Side, options: { accessRevealVisible?: boolean } = {}): LegalAction | undefined {
+  if (options.accessRevealVisible) return undefined;
   if (view.winner || view.pendingChoice || view.activeSide !== side) return undefined;
   const ownActions = actions.filter((action) => action.side === side);
   const endTurn = ownActions.find((action) => action.type === "end_turn");
@@ -249,7 +250,7 @@ export function actionButtonLabel(action: LegalAction): string {
     case "draw_card":
       return "Karte ziehen";
     case "activated_card_ability":
-      return withActionCostPrefix(action, normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen"));
+      return normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen");
     case "jack_out":
       return "Run abbrechen (Jack-out)";
     case "decline_rez":
@@ -326,7 +327,7 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
-  return withActionCostPrefix(action, resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label));
+  return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
@@ -401,14 +402,22 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
       const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 2);
       return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
     }
+    case "junkyard_bbs_return_top_heap": {
+      const targetTitle = targetTitleFromDefinition(action);
+      return targetTitle ? `${targetTitle} aus dem Heap auf die Hand nehmen` : "Oberste Heap-Karte auf die Hand nehmen";
+    }
     default:
       return null;
   }
 }
 
-function shellTradersTargetTitle(action: LegalAction): string | null {
+function targetTitleFromDefinition(action: LegalAction): string | null {
   const targetDefinitionId = typeof action.payload?.targetCardDefinitionId === "string" ? action.payload.targetCardDefinitionId : undefined;
-  const titleFromDefinition = targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
+  return targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title ?? null : null;
+}
+
+function shellTradersTargetTitle(action: LegalAction): string | null {
+  const titleFromDefinition = targetTitleFromDefinition(action);
   if (titleFromDefinition) return titleFromDefinition;
   if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
     const labelTarget = /^The Shell Traders:\s*(.+?)\s+(?:vorbereiten|beiseitelegen|zur Seite legen)$/i.exec(action.label.trim())?.[1]?.trim();
@@ -419,8 +428,7 @@ function shellTradersTargetTitle(action: LegalAction): string | null {
 
 function pumpBreakerActionLabel(action: LegalAction): string {
   const breakerName = breakerNameFromActionLabel(action.label, "pumpen") ?? breakerNameFromActionLabel(action.label, "stärke \\+1");
-  const label = breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
-  return withActionCostPrefix(action, label);
+  return breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
 }
 
 function breakSubroutineActionLabel(action: LegalAction): string {
@@ -428,19 +436,7 @@ function breakSubroutineActionLabel(action: LegalAction): string {
   const hasIndex = typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0;
   const base = hasIndex ? `Subroutine ${Math.floor(rawIndex) + 1} brechen` : "Subroutine brechen";
   const breakerName = breakerNameFromActionLabel(action.label, "subroutine \\d+ brechen") ?? breakerNameFromActionLabel(action.label, "subroutine brechen");
-  const label = breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
-  return withActionCostPrefix(action, label);
-}
-
-function withActionCostPrefix(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>, label: string): string {
-  const costLabel = actionCostText(action);
-  return costLabel ? `${costLabel} - ${label}` : label;
-}
-
-function actionCostText(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>): string | null {
-  const chips = actionCostChips(action);
-  if (chips.length === 0) return null;
-  return chips.map((chip) => chip.label).join(" + ");
+  return breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
 }
 
 function breakerNameFromActionLabel(label: string | undefined, actionSuffixPattern: string): string | null {
@@ -458,7 +454,7 @@ function installContextLabel(action: LegalAction): string {
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
-  if (isNewRemoteIceInstallAction(action)) return "Neues Fort erstellen";
+  if (isNewRemoteIceInstallAction(action)) return "Neues Remote erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
   if (
@@ -598,8 +594,6 @@ export function normalizeVisibleTerms(value: string): string {
     .replace(/\bAccess abschließen\b/g, "Zugriff abschließen")
     .replace(/\bR&D\b/g, "R&D")
     .replace(/\bArchives\b/g, "Archive")
-    .replace(/\bRemote\s+(\d+)\b/g, "Fort $1")
-    .replace(/\bneuem Remote\b/g, "neuem Fort")
     .replace(/\bApproach\b/g, "Annäherung")
     .replace(/\bEncounter\b/g, "Begegnung")
     .replace(/\bAccess\b/g, "Zugriff")
@@ -611,9 +605,9 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ";
   if (serverIdOrLabel === "rd" || serverIdOrLabel === "R&D") return "R&D";
   if (serverIdOrLabel === "archives" || serverIdOrLabel === "Archives") return "Archive";
-  if (serverIdOrLabel === "new_remote") return "neuem Fort";
+  if (serverIdOrLabel === "new_remote") return "neuem Remote";
   const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
-  if (remote?.[1]) return `Fort ${remote[1]}`;
+  if (remote?.[1]) return `Remote ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
 }
 
@@ -632,15 +626,24 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
 }
 
 export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
+  const newerEvents: PublicGameEvent[] = [];
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event || event.eventId === dismissedEventId) return null;
-    if (event.publicPayload.actionType !== "access_card") continue;
-    if (typeof event.publicPayload.cardDefinitionId !== "string") continue;
-    if (typeof event.publicPayload.title !== "string") continue;
-    return event;
+    if (event.publicPayload.actionType !== "access_card") {
+      newerEvents.push(event);
+      continue;
+    }
+    if (typeof event.publicPayload.cardDefinitionId !== "string") return null;
+    if (typeof event.publicPayload.title !== "string") return null;
+    return newerEvents.every((newerEvent) => accessRevealCanBeRetainedPast(newerEvent, event)) ? event : null;
   }
   return null;
+}
+
+function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
+  if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
+  return newerEvent.publicPayload.actionType === "continue_run" || newerEvent.publicPayload.actionType === "end_turn";
 }
 
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
@@ -790,17 +793,15 @@ export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction
 
 function compactRunWindowBreakerLabel(view: PlayerView, action: LegalAction): string {
   const breakerTitle = sourceCardTitleForAction(view, action);
-  const costPrefix = actionCostText(action);
-  const prefix = costPrefix ? `${costPrefix} - ` : "";
   if (action.type === "pump_breaker") {
-    return `${prefix}${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
+    return `${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
   }
   const rawIndex = action.payload?.subroutineIndex;
   const subroutineLabel =
     typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0
       ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
       : "Subroutine brechen";
-  return `${prefix}${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
+  return `${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {

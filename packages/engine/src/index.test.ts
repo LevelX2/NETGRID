@@ -195,17 +195,25 @@ function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
   );
 }
 
+function continueRunAction(state: GameState): GameState {
+  return apply(state, "runner", (action) => action.type === "continue_run");
+}
+
+function continueRunThroughMovement(state: GameState): GameState {
+  const next = continueRunAction(state);
+  if (next.timingPoint === "run.jack_out_window")
+    return continueRunAction(next);
+  return next;
+}
+
 function continueRunThroughMovementWindow(state: GameState): GameState {
-  const next = apply(state, "runner", (action) => action.type === "continue_run");
-  if (next.timingPoint !== "run.jack_out_window" || next.run?.phase !== "movement")
-    return next;
-  return apply(next, "runner", (action) => action.type === "continue_run");
+  return continueRunThroughMovement(state);
 }
 
 function enterEncounterFromMovementWindow(state: GameState): GameState {
   if (state.timingPoint !== "run.jack_out_window" || state.run?.phase !== "movement")
     return state;
-  return apply(state, "runner", (action) => action.type === "continue_run");
+  return continueRunAction(state);
 }
 
 describe("MVP 0.1 engine foundation", () => {
@@ -1224,7 +1232,9 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
           name: "Spotcheck Forged Multi Corp",
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
-            { id: "simple_code_gate_ice", quantity: 1 },
+            { id: "simple_code_gate_ice", quantity: 2 },
+            { id: "simple_sentry_ice", quantity: 1 },
+            { id: "simple_tag_ice", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1233,8 +1243,23 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     state.runner.credits = 2;
     state.corp.credits = 5;
+    const hqServer = state.corp.servers.find((server) => server.id === "hq");
+    const rdServer = state.corp.servers.find((server) => server.id === "rd");
+    if (!hqServer || !rdServer) throw new Error("central servers missing");
+    hqServer.label = "Headquarter";
+    rdServer.label = "Research and Development";
     const rdIce = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
+    putCorpIceCopyOnServer(state, "hq", "simple_code_gate_ice");
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    putCorpIceOnServer(state, "remote_1", "simple_sentry_ice");
+    putCorpIceOnServer(state, "remote_1", "simple_tag_ice");
     moveRunnerCardToGrip(state, "onr_v1_086_forged-activation-orders");
     state = apply(
       state,
@@ -1243,7 +1268,21 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         action.type === "play_event" &&
         sourceDefinition(state, action) === "onr_v1_086_forged-activation-orders",
     );
-    expect(state.pendingChoice?.options).toHaveLength(2);
+    expect(state.pendingChoice?.options).toHaveLength(5);
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "ICE 1 in Headquarter",
+      "ICE 2 in Headquarter",
+      "ICE 1 in Research and Development",
+      "ICE 1 in Remote 1",
+      "ICE 2 in Remote 1",
+    ]);
+    expect(state.pendingChoice?.options.map((option) => option.publicLabel)).toEqual([
+      "ICE 1 in Headquarter",
+      "ICE 2 in Headquarter",
+      "ICE 1 in Research and Development",
+      "ICE 1 in Remote 1",
+      "ICE 2 in Remote 1",
+    ]);
     expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toMatch(
       /simple_barrier_ice|cardInstances/,
     );
@@ -1279,7 +1318,8 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(state.corp.archives).toContain(rdIce);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       corpDecision: "trash_ice",
-      targetServerLabel: "R&D",
+      targetServerLabel: "Research and Development",
+      targetIcePositionLabel: "ICE 1 in Research and Development",
       trashedCount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -2276,10 +2316,10 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         action.type === "rez_ice" &&
         sourceDefinition(canisState, action) === "onr_v1_225_canis-major",
     );
-    canisState = enterEncounterFromMovementWindow(canisState);
-    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    canisState = continueRunAction(canisState);
     expect(canisState.run?.futureEncounterIceStrengthBonus).toBe(2);
-    canisState = enterEncounterFromMovementWindow(canisState);
+    expect(canisState.timingPoint).toBe("run.jack_out_window");
+    canisState = continueRunAction(canisState);
     canisState = apply(
       canisState,
       "corp",
@@ -2293,7 +2333,7 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
         .servers.find((server) => server.id === "rd")
         ?.ice.find((ice) => ice.definitionId === "simple_code_gate_ice")?.strength,
     ).toBe((DEMO_CARDS_BY_ID.simple_code_gate_ice?.strength ?? 0) + 2);
-    canisState = apply(canisState, "runner", (action) => action.type === "continue_run");
+    canisState = continueRunThroughMovement(canisState);
     expect(canisState.run).toBeUndefined();
     const replay = replayEvents(initial, canisState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -4078,17 +4118,9 @@ describe("MVP 0.1 runs, access and scoring", () => {
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
 
-    const movementActions = getLegalActions(state, "runner");
     expect(state.timingPoint).toBe("run.jack_out_window");
-    expect(movementActions.some((action) => action.type === "access_card")).toBe(
-      false,
-    );
-    expect(
-      movementActions.find((action) => action.type === "continue_run")?.label,
-    ).toBe("Run fortsetzen");
+    state = continueRunAction(state);
     expect(state.randomDrawRecords).toHaveLength(randomDrawsBefore);
-
-    state = continueRunThroughMovementWindow(state);
     expect(state.run).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
@@ -4165,7 +4197,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       cardDefinitionId: "efficient_fracter",
       title: "Efficient Fracter",
     });
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -4234,7 +4266,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       "runner",
       (action) => action.type === "break_subroutine",
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     expect(state.run?.phase).toBe("encounter_ice");
     expect(state.run?.position).toEqual({
       kind: "ice",
@@ -4254,7 +4286,7 @@ describe("MVP 0.1 runs, access and scoring", () => {
       "runner",
       (action) => action.type === "break_subroutine",
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     expect(state.run?.phase).toBe("access");
     expect(state.run?.position).toEqual({ kind: "server", serverId: "rd" });
     expect(
@@ -4933,7 +4965,7 @@ describe("O:NR v1 Limited local private test access", () => {
         (action) => action.type === "continue_run",
       )?.label,
     ).toBe("ICE passieren");
-    codeGateState = continueRunThroughMovementWindow(codeGateState);
+    codeGateState = continueRunThroughMovement(codeGateState);
     codeGateState = apply(
       codeGateState,
       "runner",
@@ -4991,7 +5023,7 @@ describe("O:NR v1 Limited local private test access", () => {
       "runner",
       (action) => action.type === "break_subroutine",
     );
-    sentryState = continueRunThroughMovementWindow(sentryState);
+    sentryState = continueRunThroughMovement(sentryState);
     sentryState = apply(
       sentryState,
       "runner",
@@ -5484,7 +5516,7 @@ describe("V1.0.5K Card Release", () => {
         sourceDefinition(state, action) === "onr_v1_052_raffles" &&
         action.payload?.subroutineIndex === 1,
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -5975,7 +6007,7 @@ describe("V1.0.6K Card Release", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(sentryRun, action) === "onr_v1_072_wild-card",
     );
-    sentryRun = continueRunThroughMovementWindow(sentryRun);
+    sentryRun = continueRunThroughMovement(sentryRun);
     sentryRun = apply(
       sentryRun,
       "runner",
@@ -6302,7 +6334,7 @@ describe("V1.1.2K Card Release", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(codeGateState, action) === "onr_v1_014_codecracker",
     );
-    codeGateState = continueRunThroughMovementWindow(codeGateState);
+    codeGateState = continueRunThroughMovement(codeGateState);
     codeGateState = apply(
       codeGateState,
       "runner",
@@ -6364,7 +6396,7 @@ describe("V1.1.2K Card Release", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(sentryState, action) === "onr_v1_040_loony-goon",
     );
-    sentryState = continueRunThroughMovementWindow(sentryState);
+    sentryState = continueRunThroughMovement(sentryState);
     sentryState = apply(
       sentryState,
       "runner",
@@ -6860,7 +6892,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         String(action.payload?.breakerId) === krashId &&
         action.payload?.subroutineIndex === 0,
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     state = apply(
       state,
       "corp",
@@ -6899,7 +6931,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         String(action.payload?.breakerId) === krashId &&
         action.payload?.subroutineIndex === 1,
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       getPlayerView(state, "runner").own.rig?.find(
@@ -10139,9 +10171,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
           action.payload?.subroutineIndex === subroutineIndex,
       );
     }
-    addedSubroutineBroken = continueRunThroughMovementWindow(
-      addedSubroutineBroken,
-    );
+    addedSubroutineBroken = continueRunThroughMovement(addedSubroutineBroken);
     expect(addedSubroutineBroken.run?.phase).toBe("access");
 
     const unrezzedEncoder = approachIce(
@@ -12508,7 +12538,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
         ["hq", "Restrictive Net Zoning auf HQ ausrichten"],
         ["rd", "Restrictive Net Zoning auf R&D ausrichten"],
         ["archives", "Restrictive Net Zoning auf Archives ausrichten"],
-        ["remote_1", "Restrictive Net Zoning auf Remote Server 1 ausrichten"],
+        ["remote_1", "Restrictive Net Zoning auf Remote 1 ausrichten"],
       ]),
     );
     state = apply(
@@ -15668,6 +15698,42 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
   });
 
+  it("lets Mantis choose any Runner stack card instead of only programs", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-search"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_099_mantis-fixer-at-large",
+    );
+    const targetEventId = putRunnerCardOnTopOfStack(
+      state,
+      "simple_economy_event",
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
+    );
+
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.source).toContain("v1911.search_stack_card");
+    const eventOption = runnerChoice?.options.find(
+      (option) => option.value === targetEventId,
+    );
+    expect(eventOption).toMatchObject({
+      label: "Simple Economy Event",
+      card: { definitionId: "simple_economy_event", type: "event" },
+    });
+    expect(eventOption?.selectable).toBeUndefined();
+
+    state = applyChoice(state, "runner", String(eventOption?.id));
+    expect(state.runner.grip).toContain(targetEventId);
+    expect(state.runner.stack).not.toContain(targetEventId);
+  });
+
   it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-reveal"));
     state.runner.credits = 20;
@@ -16423,15 +16489,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     expect(cardCounterAmount(state, agendaId, "power")).toBe(1);
 
-    const scoredAgendaId = findCard(state, "simple_agenda");
-    removeEverywhere(state, scoredAgendaId);
-    state.corp.scoreArea.push(scoredAgendaId);
-    state.cardInstances[scoredAgendaId] = {
-      ...state.cardInstances[scoredAgendaId]!,
-      zone: { side: "corp", zone: "scoreArea" },
-      faceup: true,
-      rezzed: true,
-    };
     moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
     const creditsBeforeLayoffs = state.corp.credits;
     state = apply(
@@ -16441,27 +16498,132 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
     );
-    expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
-    expect(state.corp.credits).toBe(creditsBeforeLayoffs - 3);
+    expect(state.pendingChoice?.source).toContain(
+      "v1919.systematic_layoffs_advancement",
+    );
+    const singleTargetOption = state.pendingChoice?.options.find(
+      (option) => option.value === `${agendaId}|${agendaId}`,
+    );
+    expect(singleTargetOption).toBeDefined();
+    state = applyChoices(state, "corp", [singleTargetOption?.id ?? ""]);
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(3);
+    expect(state.corp.credits).toBe(creditsBeforeLayoffs - 5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
-      v1919OperationAbility: "forfeit_scored_agenda",
-      agendaPointCostPaid: 2,
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      v1919OperationAbility: "add_advancement_counters",
+      targetCardId: agendaId,
+      targetCardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
+      targetCardDefinitionIds: "onr_v1_202_genetics-visionary-acquisition",
+      addedAdvancementCounters: 2,
+      targetCount: 1,
+      advancementCountersAfter: 3,
     });
   });
 
-  it("opens a Systematic Layoffs target choice when multiple Corp agendas are scored", () => {
+  it("offers Systematic Layoffs advancement placements for installed advanceable cards", () => {
     let state = MECHANIC_SMOKE_GAMES.agendaScoring("v1919-systematic-layoffs-choice");
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const firstAgendaId = scoreCorpAgendaForTest(state, "simple_agenda");
-    const secondAgendaId = scoreCorpAgendaForTest(
+    state.corp.clicks = 5;
+    const firstAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    const secondAgendaId = putCorpRootInRemote(
       state,
       "onr_v1_202_genetics-visionary-acquisition",
     );
     moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
+    const layoffActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+    );
+
+    expect(layoffActions).toHaveLength(1);
+    expect(layoffActions[0]?.payload?.targetCardId).toBeUndefined();
+    expect(layoffActions[0]?.payload?.secondTargetCardId).toBeUndefined();
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+    );
+    const placementOptions = state.pendingChoice?.options ?? [];
+    expect(placementOptions).toHaveLength(3);
+    expect(
+      placementOptions.some(
+        (option) => option.value === `${firstAgendaId}|${firstAgendaId}`,
+      ),
+    ).toBe(true);
+    expect(
+      placementOptions.some(
+        (option) => {
+          const selectedIds = new Set(String(option.value).split("|"));
+          return (
+            selectedIds.has(firstAgendaId) &&
+            selectedIds.has(secondAgendaId)
+          );
+        },
+      ),
+    ).toBe(true);
+    expect(
+      placementOptions.some(
+        (option) => option.value === `${secondAgendaId}|${secondAgendaId}`,
+      ),
+    ).toBe(true);
+
+    const splitOption = placementOptions.find((option) => {
+      const selectedIds = new Set(String(option.value).split("|"));
+      return selectedIds.has(firstAgendaId) && selectedIds.has(secondAgendaId);
+    });
+    state = applyChoices(state, "corp", [splitOption?.id ?? ""]);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.cardInstances[firstAgendaId]?.advancementCounters).toBe(1);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      v1919OperationAbility: "add_advancement_counters",
+      addedAdvancementCounters: 2,
+      targetCount: 2,
+    });
+    expect(
+      String(state.eventLog.at(-1)?.publicPayload.targetCardDefinitionIds)
+        .split(",")
+        .sort(),
+    ).toEqual(["onr_v1_202_genetics-visionary-acquisition", "simple_agenda"]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("opens one Systematic Layoffs placement option for a single Corporate War", () => {
+    const corpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+      id: "onr_v1_corp_systematic_layoffs_corporate_war",
+      name: "O:NR V1.9.19 Systematic Layoffs Corporate War",
+      cards: [
+        { id: "onr_v1_196_corporate-war", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v1919-systematic-layoffs-corporate-war",
+      runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.clicks = 5;
+    const corporateWarId = putCorpRootInRemote(
+      state,
+      "onr_v1_196_corporate-war",
+    );
+    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
 
     state = apply(
       state,
@@ -16471,22 +16633,24 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
     );
 
-    expect(state.pendingChoice?.source).toContain("v1919.systematic_layoffs");
-    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(2);
-    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    state = applyChoices(state, "corp", [`card_${secondAgendaId}`]);
+    expect(state.pendingChoice?.options).toHaveLength(1);
+    expect(state.pendingChoice?.options[0]).toMatchObject({
+      value: `${corporateWarId}|${corporateWarId}`,
+    });
+    state = applyChoices(state, "corp", [
+      state.pendingChoice?.options[0]?.id ?? "",
+    ]);
 
-    expect(state.specialZones?.removedFromGame).toContain(secondAgendaId);
-    expect(state.corp.scoreArea).toContain(firstAgendaId);
+    expect(state.cardInstances[corporateWarId]?.advancementCounters).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
-      v1919OperationAbility: "forfeit_scored_agenda",
-      forfeitedAgendaDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
-      specialZone: "removed_from_game",
+      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      v1919OperationAbility: "add_advancement_counters",
+      addedAdvancementCounters: 2,
+      targetCount: 1,
+      targetCardDefinitionId: "onr_v1_196_corporate-war",
+      targetCardDefinitionIds: "onr_v1_196_corporate-war",
     });
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("resolves remaining V1.9.19 access ambush damage and installed-hardware paths", () => {
@@ -18683,22 +18847,72 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       faceup: true,
       rezzed: true,
     };
+    const drawActions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "draw_card",
+    );
+    expect(drawActions).toHaveLength(2);
+    expect(
+      drawActions.find(
+        (action) => action.payload?.citySurveillanceDrawDecision === "pay",
+      ),
+    ).toMatchObject({
+      costs: [{ clicks: 1, credits: 1 }],
+      payload: {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceProjectedCreditsPaid: 1,
+        citySurveillanceProjectedTagsAdded: 0,
+      },
+    });
+    expect(
+      drawActions.find(
+        (action) => action.payload?.citySurveillanceDrawDecision === "tag",
+      ),
+    ).toMatchObject({
+      costs: [{ clicks: 1 }],
+      payload: {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceProjectedCreditsPaid: 0,
+        citySurveillanceProjectedTagsAdded: 1,
+      },
+    });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "draw_card");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "draw_card" &&
+        action.payload?.citySurveillanceDrawDecision === "pay",
+    );
     expect(state.runner.credits).toBe(0);
     expect(state.runner.tags).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       drawnCount: 1,
       citySurveillanceSourceCount: 1,
+      citySurveillanceDrawDecision: "pay",
       citySurveillanceCreditsPaid: 1,
       citySurveillanceTagsAdded: 0,
       runnerCreditsAfter: 0,
     });
-    state = apply(state, "runner", (action) => action.type === "draw_card");
+    const tagOnlyDrawActions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "draw_card",
+    );
+    expect(tagOnlyDrawActions).toHaveLength(1);
+    expect(tagOnlyDrawActions[0]?.payload).toMatchObject({
+      citySurveillanceDrawDecision: "tag",
+      citySurveillanceProjectedTagsAdded: 1,
+    });
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "draw_card" &&
+        action.payload?.citySurveillanceDrawDecision === "tag",
+    );
     expect(state.runner.tags).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       citySurveillanceSourceCount: 1,
+      citySurveillanceDrawDecision: "tag",
       citySurveillanceCreditsPaid: 0,
       citySurveillanceTagsAdded: 1,
       runnerTagsAfter: 1,
@@ -20459,7 +20673,7 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     });
     expect(isHiddenInfoBarrierEvent(state.eventLog.at(-1)!)).toBe(false);
 
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     expect(state.timingPoint).toBe("access.resolve_card");
   });
 
@@ -21325,13 +21539,180 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload",
+        sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload" &&
+        action.payload?.powerGridOverloadTrashCount === 1,
     );
     expect(tagged.runner.rig.hardware).not.toContain(hardwareId);
     expect(tagged.runner.heap).toContain(hardwareId);
     expect(tagged.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
+      powerGridOverloadTrashCount: 1,
+      trashedHardwareCount: 1,
     });
+  });
+
+  it("offers Power Grid Overload X actions for non-Cybernetics hardware and choices exact targets", () => {
+    const runnerDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+      id: "v1914_power_grid_overload_rd_interface_runner",
+      cards: [
+        ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
+        { id: "onr_v1_127_full-body-conversion", quantity: 1 },
+        { id: "onr_v1_139_r-and-d-interface", quantity: 1 },
+        { id: "simple_setup_hardware", quantity: 1 },
+      ],
+    };
+    const makeState = (seed: string) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck,
+          corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+          agendaPointsToWin: 7,
+        }),
+      );
+
+    let rdOnly = makeState("v1914-power-grid-overload-rd-only");
+    const rdOnlyInterfaceId = installRunnerHardwareForTest(
+      rdOnly,
+      "onr_v1_139_r-and-d-interface",
+    );
+    const rdOnlyCyberneticsId = installRunnerHardwareForTest(
+      rdOnly,
+      "onr_v1_127_full-body-conversion",
+    );
+    const rdOnlyOperationId = moveCorpCardToHq(
+      rdOnly,
+      "onr_v1_299_power-grid-overload",
+    );
+    rdOnly.runner.tags = 25;
+    rdOnly = apply(rdOnly, "runner", (action) => action.type === "end_turn");
+    rdOnly = apply(
+      rdOnly,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    rdOnly.corp.credits = 1;
+    const rdOnlyAction = mustAction(
+      rdOnly,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(rdOnly, action) === "onr_v1_299_power-grid-overload" &&
+        action.payload?.cardId === rdOnlyOperationId &&
+        action.payload?.powerGridOverloadTrashCount === 1,
+    );
+    expect(rdOnlyAction.costs).toEqual([{ clicks: 1, credits: 1 }]);
+    rdOnly = apply(
+      rdOnly,
+      "corp",
+      (action) => action.actionId === rdOnlyAction.actionId,
+    );
+    expect(rdOnly.pendingChoice).toBeUndefined();
+    expect(rdOnly.runner.heap).toContain(rdOnlyInterfaceId);
+    expect(rdOnly.runner.rig.hardware).toContain(rdOnlyCyberneticsId);
+
+    let state = makeState(
+      "v1914-power-grid-overload-rd-interface-choice",
+    );
+    const rdInterfaceId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_139_r-and-d-interface",
+    );
+    const simpleHardwareId = installRunnerHardwareForTest(
+      state,
+      "simple_setup_hardware",
+    );
+    const cyberneticsId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_127_full-body-conversion",
+    );
+    const operationId = moveCorpCardToHq(
+      state,
+      "onr_v1_299_power-grid-overload",
+    );
+    state.runner.tags = 25;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 3;
+
+    const powerGridActions = getLegalActions(state, "corp")
+      .filter(
+        (action) =>
+          action.type === "play_operation" &&
+          sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
+          action.payload?.cardId === operationId,
+      )
+      .sort(
+        (left, right) =>
+          Number(left.payload?.powerGridOverloadTrashCount ?? 0) -
+          Number(right.payload?.powerGridOverloadTrashCount ?? 0),
+      );
+    expect(
+      powerGridActions.map(
+        (action) => action.payload?.powerGridOverloadTrashCount,
+      ),
+    ).toEqual([1, 2]);
+    expect(powerGridActions.map((action) => action.costs)).toEqual([
+      [{ clicks: 1, credits: 1 }],
+      [{ clicks: 1, credits: 2 }],
+    ]);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const trashOne = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
+        action.payload?.cardId === operationId &&
+        action.payload?.powerGridOverloadTrashCount === 1,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === trashOne.actionId,
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "public",
+    });
+    expect(
+      state.pendingChoice?.options.map((option) => option.value).sort(),
+    ).toEqual([rdInterfaceId, simpleHardwareId].sort());
+    expect(
+      state.pendingChoice?.options.map((option) => option.value),
+    ).not.toContain(cyberneticsId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      powerGridOverloadChoiceOpened: true,
+      eligibleHardwareCount: 2,
+      powerGridOverloadTrashCount: 1,
+    });
+
+    const rdOptionId =
+      state.pendingChoice?.options.find(
+        (option) => option.value === rdInterfaceId,
+      )?.id ?? "";
+    state = applyChoice(state, "corp", rdOptionId);
+    expect(state.runner.heap).toContain(rdInterfaceId);
+    expect(state.runner.rig.hardware).not.toContain(rdInterfaceId);
+    expect(state.runner.rig.hardware).toContain(simpleHardwareId);
+    expect(state.runner.rig.hardware).toContain(cyberneticsId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      powerGridOverloadTrashCount: 1,
+      trashedHardwareCount: 1,
+      trashedHardwareDefinitionIds: "onr_v1_139_r-and-d-interface",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("loads Armadillo bits for tag removal and refreshes them at Runner turn start", () => {
@@ -25667,6 +26048,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       v1922RunnerEventAbility: "force_rez_or_trash_ice",
       targetVisibility: "installed_ice_position",
       targetServerLabel: "R&D",
+      targetIcePositionLabel: "ICE 1 in R&D",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"simple_barrier_ice"/,
@@ -25685,6 +26067,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpDecision: "rez_ice",
       targetCardDefinitionId: "simple_barrier_ice",
       targetServerLabel: "R&D",
+      targetIcePositionLabel: "ICE 1 in R&D",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -25752,6 +26135,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpDecision: "trash_ice",
       trashedCount: 1,
       targetCardDefinitionId: "simple_barrier_ice",
+      targetIcePositionLabel: "ICE 1 in HQ",
     });
   });
 
@@ -29555,6 +29939,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
+    state = continueRunAction(state);
 
     state = enterEncounterFromMovementWindow(state);
     state = apply(
@@ -29714,6 +30099,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
+    state = continueRunAction(state);
 
     state = enterEncounterFromMovementWindow(state);
     state = apply(
@@ -29774,7 +30160,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(
       collectActiveModifiers(state).some(
@@ -34192,7 +34578,7 @@ describe("MVP 0.8 playable starter slice", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(state, action) === "v08_steady_fracter",
     );
-    state = continueRunThroughMovementWindow(state);
+    state = continueRunThroughMovement(state);
     const beforeAccessCredits = state.runner.credits;
     state = apply(state, "runner", (action) => action.type === "access_card");
 
@@ -35976,7 +36362,7 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
         sourceDefinition(corridor, action) === "onr_v1_052_raffles" &&
         action.payload?.subroutineIndex === 1,
     );
-    corridor = continueRunThroughMovementWindow(corridor);
+    corridor = continueRunThroughMovement(corridor);
     expect(corridor.run?.phase).toBe("access");
     const corridorReplay = replayEvents(
       corridorInitial,

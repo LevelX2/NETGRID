@@ -526,6 +526,11 @@ export function publicContextForAction(
       "runnerTagsAfter",
       "trashedResourceCount",
       "trashedResourceDefinitionIds",
+      "powerGridOverloadTrashCount",
+      "powerGridOverloadChoiceOpened",
+      "eligibleHardwareCount",
+      "trashedHardwareCount",
+      "trashedHardwareDefinitionIds",
       "runnerRunAttemptsLastTurn",
     ]) {
       const value = legalAction.payload?.[key];
@@ -839,8 +844,14 @@ export function publicContextForAction(
     "drawnCount",
     "runnerGripAfter",
     "citySurveillanceSourceCount",
+    "citySurveillanceDrawDecision",
     "citySurveillanceCreditsPaid",
     "citySurveillanceTagsAdded",
+    "powerGridOverloadTrashCount",
+    "powerGridOverloadChoiceOpened",
+    "eligibleHardwareCount",
+    "trashedHardwareCount",
+    "trashedHardwareDefinitionIds",
     "creditsLost",
     "tagsAdded",
     "runnerTagsAfter",
@@ -853,6 +864,7 @@ export function publicContextForAction(
     "subroutineIndex",
     "targetCardDefinitionId",
     "targetIceDefinitionId",
+    "targetIcePositionLabel",
     "breakSubroutineBaseCost",
     "checkedIceCount",
     "rezzedIceCount",
@@ -1362,6 +1374,9 @@ export function publicContextForAction(
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.targetServerLabel === "string")
       context.targetServerLabel = legalAction.payload.targetServerLabel;
+    if (typeof legalAction.payload.targetIcePositionLabel === "string")
+      context.targetIcePositionLabel =
+        legalAction.payload.targetIcePositionLabel;
     if (typeof legalAction.payload.targetVisibility === "string")
       context.targetVisibility = legalAction.payload.targetVisibility;
     if (typeof legalAction.payload.corpDecision === "string")
@@ -1533,7 +1548,7 @@ export function serverChoiceDisplayLabel(
 ): string {
   const label = publicServerLabel(state, serverId) ?? serverId;
   const remote = /^Remote\s+(\d+)$/i.exec(label.trim());
-  return remote?.[1] ? `Remote Server ${remote[1]}` : label;
+  return remote?.[1] ? `Remote ${remote[1]}` : label;
 }
 
 export function publicServerLabelForCard(

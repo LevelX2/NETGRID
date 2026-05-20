@@ -9433,24 +9433,25 @@
       "roles": [
         "operation",
         "agenda",
-        "forfeit",
-        "economy"
+        "advance",
+        "counter"
       ],
       "planRoles": [
         "corp_agenda_operation"
       ],
       "requiredMechanics": [
         "play_operation",
-        "forfeit_agenda",
-        "scored_agenda_choice",
-        "gain_credit"
+        "advance",
+        "advancement_counter",
+        "agenda_difficulty",
+        "overadvance"
       ],
       "valueHints": {
-        "economy": 2
+        "advance": 2
       },
       "riskTags": [
-        "forfeit_cost",
-        "choice_revalidation"
+        "counter_accounting",
+        "target_revalidation"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [

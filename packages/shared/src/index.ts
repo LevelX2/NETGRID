@@ -4542,11 +4542,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 5,
     rulesText:
-      "Forfeit a scored Corp agenda. Gain credits equal to that agenda's agenda points, minimum 1.",
+      "Add two advancement counters to any combination of installed cards that can be advanced.",
     mechanics: [
       "play_operation",
-      "forfeit_agenda",
-      "scored_agenda",
+      "advance",
+      "advancement_counter",
+      "agenda_difficulty",
+      "overadvance",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -8074,12 +8076,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: ["gray-ops"],
     implementationStatus: "playable_mvp",
-    cost: 1,
     rulesText:
-      "Play only if the Runner is tagged. Trash installed Runner hardware.",
+      "Play only if the Runner is tagged. Pay X to trash X pieces of installed Runner hardware, other than Cybernetics.",
     mechanics: [
       "play_operation",
       "tag_condition",
+      "trash_hardware",
       "resource_tag_interaction",
       ONR_V1_LOCAL_PRIVATE,
     ],

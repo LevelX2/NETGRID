@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi } from "./result-modal-ui";
 
 describe("result modal UI helpers", () => {
   it("selects winner motifs for runner, corp and draw results", () => {
@@ -46,6 +46,57 @@ describe("result modal UI helpers", () => {
     expect(resultExitButtonUi(false)).toMatchObject({
       label: "Zurück zum Startbildschirm",
       needsConfirmation: false
+    });
+  });
+
+  it("shows normal single-game match points for side wins", () => {
+    expect(
+      gameStandingForResult(
+        {
+          winner: "runner",
+          runnerAgendaPoints: 7,
+          corpAgendaPoints: 2
+        },
+        "runner"
+      )
+    ).toEqual({
+      summary: "Du: 10 Matchpunkte. Gegenseite: 2 Agenda-Punkte aus gescorten Agendas.",
+      viewerMatchPoints: 10,
+      opponentMatchPoints: 2
+    });
+  });
+
+  it("scores forfeits like normal side wins from the terminal result", () => {
+    expect(
+      gameStandingForResult(
+        {
+          winner: "corp",
+          runnerAgendaPoints: 0,
+          corpAgendaPoints: 4
+        },
+        "runner"
+      )
+    ).toEqual({
+      summary: "Gegenseite: 10 Matchpunkte. Du: 0 Agenda-Punkte aus gestohlenen Agendas.",
+      viewerMatchPoints: 0,
+      opponentMatchPoints: 10
+    });
+  });
+
+  it("scores draws by each side's agenda points", () => {
+    expect(
+      gameStandingForResult(
+        {
+          winner: "draw",
+          runnerAgendaPoints: 4,
+          corpAgendaPoints: 3
+        },
+        "corp"
+      )
+    ).toEqual({
+      summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
+      viewerMatchPoints: 3,
+      opponentMatchPoints: 4
     });
   });
 });

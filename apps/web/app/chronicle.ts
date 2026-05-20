@@ -21,6 +21,7 @@ export type ChronicleContext = {
   cardDetailLines?: string[];
   agendaPoints?: number | null;
   turnNumber?: number | null;
+  turnSide?: Side | null;
   actionUse?: ChronicleActionUse | null;
 };
 
@@ -60,6 +61,9 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
   hidden: "Verdeckt"
 };
 
+const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
+const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
+
 type EffectSummary = {
   category?: ChronicleCategory;
   suffix?: string;
@@ -82,6 +86,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const redactedKind = stringValue(payload.redactedKind);
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
   const turnNumber = positiveIntegerValue(context.turnNumber);
+  const turnSide = context.turnSide ?? undefined;
   const turnChip = turnLabel(actor, turnNumber);
   const actionUse = context.actionUse ?? actionUseFromPayload(payload);
   const label = stringValue(payload.label);
@@ -101,7 +106,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const abilityId = payloadAbilityId(payload);
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
-  const shellTradersAbility = stringValue(payload.shellTradersAbility);
+  const shellTradersAbility = shellTradersAbilityFromPayload(payload, abilityId ?? undefined);
+  const v1919OperationAbility = stringValue(payload.v1919OperationAbility);
   const shellTradersTargetTitle =
     shellTradersAbility === "set_aside_from_grip" ||
     shellTradersAbility === "remove_shell_counter" ||
@@ -134,6 +140,23 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (v1919OperationAbility === "add_advancement_counters") {
+        const added = numberValue(payload.addedAdvancementCounters) ?? 2;
+        const targetCount = numberValue(payload.targetCount) ?? 1;
+        const targetTitles = titlesForDefinitionIds(stringValue(payload.targetCardDefinitionIds));
+        const targetTitle = targetCardTitleFromPayload(payload);
+        const targetText =
+          targetTitles.length > 0
+            ? targetTitles.join(", ")
+            : targetTitle ?? (targetCount === 1 ? "eine Karte" : `${targetCount} Karten`);
+        category = "agenda";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, `${added} Advancement-Counter durch Systematic Layoffs auf ${targetText} gelegt`);
+        chips.push("Systematic Layoffs", `+${added} Advancement`, targetCount === 1 ? "1 Ziel" : `${targetCount} Ziele`);
+        break;
+      }
       if (shellTradersAbility === "auto_install_after_memory_choice") {
         category = "card";
         importance = "important";
@@ -318,6 +341,43 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         title = phrase(subject, `${cardCountText(rezzedCount)} aus Data Fort Reclamation gerezzt`);
         description = `${rezzedIceCount} ICE und ${rezzedRootCount} Root-Karte${rezzedRootCount === 1 ? "" : "n"} wurden gerezzt; ${temporaryCreditsSpent} temporäre und ${corpCreditsSpent} normale Credits wurden ausgegeben.`;
         chips.push("Data Fort", `${rezzedCount} Rez`, `${temporaryCreditsSpent} Temp`, `${corpCreditsSpent} Credits`);
+        break;
+      }
+      if (abilityId === "force_rez_or_trash_ice") {
+        const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
+        const targetTitle = titleForDefinitionId(targetDefinitionId);
+        const targetIceLabel =
+          displayServerLabel(stringValue(payload.targetIcePositionLabel)) ??
+          displayServerLabel(stringValue(payload.targetServerLabel)) ??
+          "einem Server";
+        const corpDecision = stringValue(payload.corpDecision);
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = targetDefinitionId ?? cardDefinitionId;
+        if (corpDecision === "rez_ice") {
+          const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
+          title = phrase(
+            subject,
+            `entschieden, ${targetTitle ? `${targetTitle} als ${targetIceLabel}` : targetIceLabel} zu rezzen`,
+          );
+          description = `Rez-Kosten: ${creditText(rezCostPaid)}.`;
+          chips.push("Forged Activation Orders", "Rez", `${rezCostPaid} ${creditLabel(rezCostPaid)}`, targetIceLabel);
+          break;
+        }
+        if (corpDecision === "trash_ice") {
+          title = phrase(
+            subject,
+            `entschieden, ${targetTitle ? `${targetTitle} als ${targetIceLabel}` : targetIceLabel} zu trashen`,
+          );
+          chips.push("Forged Activation Orders", "Trash", targetIceLabel);
+          break;
+        }
+        title = phrase(
+          subject,
+          `${targetIceLabel} für Forged Activation Orders gewählt`,
+        );
+        chips.push("Forged Activation Orders", "Ziel", targetIceLabel);
         break;
       }
       if (hiddenZoneAction === "aardvark_rez_trash_worm") {
@@ -686,7 +746,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         visibility = "public";
         title = phrase(subject, `${cardTitle ?? "Ice and Data's Guide to the Net"} gespielt und ${cardCountText(exposedCount)} äußerstes ICE aufgedeckt`);
-        description = serverLabels.length > 0 ? `Betroffene Forts: ${serverLabels.join(", ")}.` : undefined;
+        description = serverLabels.length > 0 ? `Betroffene Remotes: ${serverLabels.join(", ")}.` : undefined;
         chips.push("Event", "Expose", `${exposedCount} ICE`, ...serverLabels);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         break;
@@ -910,7 +970,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         category = "card";
         importance = "important";
         title = phrase(subject, `${shellTradersTargetTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
-        chips.push("The Shell Traders", "Set Aside", `${counters} Shell`);
+        chips.push("The Shell Traders", ...(shellTradersTargetTitle ? [shellTradersTargetTitle] : []), "Set Aside", `${counters} Shell`);
         break;
       }
       if (shellTradersAbility === "remove_shell_counter" || shellTradersAbility === "start_turn_remove_shell_counter") {
@@ -1021,7 +1081,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     category = "run";
     importance = "important";
     visibility = "public";
-    title = phrase(subject, `1 Pox-Counter auf ${targetServerLabel ?? "das angegriffene Fort"} gelegt`);
+    title = phrase(subject, `1 Pox-Counter auf ${targetServerLabel ?? "den angegriffenen Server"} gelegt`);
     chips.push("Pox", "+1 Virus", ...(targetServerLabel ? [targetServerLabel] : []), ...(countersAfter !== undefined ? [`${countersAfter} dort`] : []));
   }
   if (actionType === "install_card") {
@@ -1054,7 +1114,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     ...(cardTitle && visibility !== "redacted" ? { cardTitle } : {}),
     ...(cardText && visibility !== "redacted" ? { cardText } : {}),
     cardDetailLines: visibility === "redacted" ? [] : cardDetailLines,
-    groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber)
+    groupLabel: groupLabelFor(category, actor, label, serverLabel, turnNumber, turnSide)
   };
 }
 
@@ -1069,11 +1129,18 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
   const numbers: Record<string, number> = {};
   let activeSide: Side = "corp";
   let activeTurnNumber = 1;
+  let justEndedTurn: { side: Side; turnNumber: number } | null = null;
 
   for (const event of events) {
     const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
     const actor = sideValue(event.publicPayload.actor);
     if (!actor) continue;
+
+    if (justEndedTurn && actor === justEndedTurn.side && isDiscardPhaseResolution(event)) {
+      numbers[event.eventId] = justEndedTurn.turnNumber;
+      continue;
+    }
+    justEndedTurn = null;
 
     if (actionType === "mandatory_draw" && actor === "corp") {
       if (activeSide !== "corp") {
@@ -1088,12 +1155,52 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
 
     if (actionType === "end_turn") {
       if (activeSide !== actor) activeSide = actor;
+      justEndedTurn = { side: actor, turnNumber: activeTurnNumber };
       activeSide = actor === "corp" ? "runner" : "corp";
       activeTurnNumber += 1;
     }
   }
 
   return numbers;
+}
+
+export function chronicleTurnSideByEventId(events: PublicGameEvent[]): Record<string, Side> {
+  const sides: Record<string, Side> = {};
+  let activeSide: Side = "corp";
+  let justEndedTurn: { side: Side } | null = null;
+
+  for (const event of events) {
+    const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+    const actor = sideValue(event.publicPayload.actor);
+    if (!actor) continue;
+
+    if (justEndedTurn && actor === justEndedTurn.side && isDiscardPhaseResolution(event)) {
+      sides[event.eventId] = justEndedTurn.side;
+      continue;
+    }
+    justEndedTurn = null;
+
+    if (actionType === "mandatory_draw" && actor === "corp") {
+      activeSide = "corp";
+      sides[event.eventId] = activeSide;
+      continue;
+    }
+
+    if (actionType === "end_turn" && activeSide !== actor) activeSide = actor;
+    sides[event.eventId] = activeSide;
+
+    if (actionType === "end_turn") {
+      justEndedTurn = { side: actor };
+      activeSide = actor === "corp" ? "runner" : "corp";
+    }
+  }
+
+  return sides;
+}
+
+function isDiscardPhaseResolution(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload ?? {};
+  return payload.discardResolved === true || stringValue(payload.hiddenZoneAction) === "discard_phase";
 }
 
 export function chronicleActionUseByEventId(events: PublicGameEvent[]): Record<string, ChronicleActionUse> {
@@ -1130,7 +1237,10 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   const subject = subjectFor(actor, side, false);
   const sourceTitle = stringValue(effect.sourceTitle);
   const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  let displayCardDefinitionId = sourceDefinitionId;
+  let displayCardTitle = sourceTitle;
   const cardTitle = stringValue(effect.cardTitle);
+  const cardDefinitionId = stringValue(effect.cardDefinitionId);
   const amount = numberValue(effect.amount) ?? 0;
   const chips = [...baseChips(actor, false)];
   let category: ChronicleCategory = "system";
@@ -1195,10 +1305,22 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       const counterText = counterLabel(effect.counterType);
       const added = numberValue(effect.addedCounterAmount) ?? 0;
       const removed = numberValue(effect.removedCounterAmount) ?? 0;
+      const shellTradersRemoval =
+        sourceDefinitionId === SHELL_TRADERS_ID &&
+        effect.counterType === "shell" &&
+        removed > 0;
+      const counterTargetTitle = shellTradersRemoval
+        ? cardTitle ?? "einer Karte"
+        : sourceTitle ?? cardTitle ?? "einer Karte";
       category = "card";
       if (removed > 0) {
-        title = phrase(subject, `${removed} ${counterText} von ${sourceTitle ?? cardTitle ?? "einer Karte"} entfernt`);
+        title = phrase(subject, `${removed} ${counterText} von ${counterTargetTitle} entfernt`);
         chips.push(counterText, `${removed} entfernt`, `${amount} übrig`, "Automatisch");
+        if (shellTradersRemoval) {
+          displayCardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+          displayCardTitle = cardTitle ?? sourceTitle;
+          chips.push("The Shell Traders");
+        }
       } else {
         title = phrase(subject, `${counterText} auf ${sourceTitle ?? cardTitle ?? "einer Karte"} aufgefrischt`);
         chips.push(counterText, `${amount} bereit`, ...(added > 0 ? [`+${added}`] : []), "Automatisch");
@@ -1320,8 +1442,8 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     title: ensurePeriod(title),
     ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
-    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
-    ...(sourceTitle ? { cardTitle: sourceTitle } : {}),
+    ...(displayCardDefinitionId ? { cardDefinitionId: displayCardDefinitionId } : {}),
+    ...(displayCardTitle ? { cardTitle: displayCardTitle } : {}),
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
@@ -1642,7 +1764,7 @@ function installLocation(serverLabel: string | undefined, zoneLabel: string | un
   if (zoneLabel === "Rig") return " im Rig";
   if (zoneLabel === "Resource") return " als Resource";
   const area = installAreaFromLabel(label);
-  if (area === "Fort") return " in einem Fort";
+  if (area === "Remote") return " in einem Remote";
   if (area === "ICE") return " als ICE";
   return "";
 }
@@ -1655,14 +1777,14 @@ function installDestinationForTitle(actor: Side | undefined, serverLabel: string
 
 function installAreaFromPayload(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
   if (zoneLabel) return zoneLabel;
-  if (serverLabel) return /Fort/.test(serverLabel) ? "Fort" : serverLabel;
+  if (serverLabel) return /Remote/.test(serverLabel) ? "Remote" : serverLabel;
   return installAreaFromLabel(label);
 }
 
 function installAreaFromLabel(label: string | undefined): string {
   if (!label) return "Installation";
   if (/ice|vor/i.test(label)) return "ICE";
-  if (/remote|außenserver|aussenserver|fort/i.test(label)) return "Fort";
+  if (/remote|außenserver|aussenserver|fort/i.test(label)) return "Remote";
   return "Installation";
 }
 
@@ -1676,7 +1798,7 @@ function advanceTitlePart(cardTitle: string | undefined, cardType: string | null
 
 function displayServerLabel(label: string | undefined): string | undefined {
   if (!label) return undefined;
-  return label.replace(/\bRemote\s+(\d+)\b/g, "Fort $1").replace(/\bneuem Remote\b/g, "neuem Fort");
+  return label;
 }
 
 function runTargetFromLabel(label: string | undefined): string {
@@ -1706,6 +1828,18 @@ function extractCardTitleFromLabel(actionType: string, label: string | undefined
 function sourceTitleFromActionLabel(label: string | undefined): string | undefined {
   const title = label?.match(/^(.+?):\s+.+$/)?.[1]?.trim();
   return title && !isGenericCardLabel(title) ? title : undefined;
+}
+
+function shellTradersAbilityFromPayload(payload: Record<string, unknown>, abilityId: string | undefined): string | undefined {
+  const explicit = stringValue(payload.shellTradersAbility);
+  if (explicit) return explicit;
+  if (
+    stringValue(payload.sourceDefinitionId) === SHELL_TRADERS_ID &&
+    (abilityId === "set_aside_from_grip" || abilityId === "remove_shell_counter" || abilityId === "start_turn_remove_shell_counter")
+  ) {
+    return abilityId;
+  }
+  return undefined;
 }
 
 function targetCardTitleFromPayload(payload: Record<string, unknown>): string | undefined {
@@ -1759,11 +1893,13 @@ function runPhaseLabel(phase: string): string {
   return labels[phase] ?? phase;
 }
 
-function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number): string {
+function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number, turnSide?: Side): string {
   if (category === "system") return "System";
   if (category === "run") return `Run${serverLabel ? ` auf ${serverLabel}` : label && /Run auf/i.test(label) ? ` auf ${runTargetFromLabel(label)}` : ""}`;
   if (category === "turn" && actor === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
   if (category === "turn" && actor === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
+  if (turnSide === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
+  if (turnSide === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
   if (actor === "corp") return "Korp-Zug";
   if (actor === "runner") return "Runner-Zug";
   return "Spiel";
@@ -1809,6 +1945,7 @@ function counterLabel(counterType: unknown): string {
   if (counterType === "mastiff") return "Mastiff-Counter";
   if (counterType === "recurring_credit") return "Recurring Credits";
   if (counterType === "bit") return "Bit";
+  if (counterType === "shell") return "Shell-Counter";
   return counterType === "virus" ? "Virus-Counter" : "Counter";
 }
 

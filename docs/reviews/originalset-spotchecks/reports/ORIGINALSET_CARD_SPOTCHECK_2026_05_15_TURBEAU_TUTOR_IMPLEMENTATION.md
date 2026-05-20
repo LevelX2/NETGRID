@@ -14,7 +14,7 @@ Quelle: `docs/archive/originalset-spotcheck-jobs/2026-05/spotcheck-2026-05-15-tu
 | Krumz | Nacharbeit umgesetzt | Rezzed Bit-Counter als Trace-Bid-Zahlungsquelle mit Corp-Start-Refresh |
 | I Got a Rock | Nacharbeit umgesetzt | Rezzed Aktion nur gegen doppelt getaggten Runner, 3 Agenda-Punkte Kosten, 15 Meat Damage |
 | Dedicated Response Team | Nacharbeit umgesetzt | Nur tagged Runner erleiden 3 Meat Damage; kein eigener Tag-Gain |
-| Systematic Layoffs | Nacharbeit umgesetzt | Bei mehreren Corp-Agenden explizite Forfeit-Choice, Credits nach Agenda-Punkten |
+| Systematic Layoffs | Nacharbeit korrigiert | Zwei Advancement-Counter auf installierte advancebare Karten, Zielwahl über LegalActions |
 | Rescheduler | Nacharbeit umgesetzt | HQ verdeckt in R&D mischen, gleiche Anzahl ziehen, RandomDrawRecord/StateHash-stabil |
 | Tutor | Nachtest bestätigt | Bestehender V1.9.22-Resolver bleibt unverändert; keine Regression durch Subroutine-Duplikation |
 | Ice Transmutation | Nacharbeit umgesetzt | Score-Choice auf rezzed ICE, +1 Stärke und Duplikation printed Subroutinen |

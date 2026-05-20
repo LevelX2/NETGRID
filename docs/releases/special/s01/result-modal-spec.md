@@ -34,6 +34,12 @@ Das Fenster zeigt:
 - gescorte Agendas,
 - gekürzten finalen StateHash.
 
+Das Fenster zeigt außerdem für jedes terminale Einzelspiel die Spielwertung:
+
+- Gewinnerseite: 10 Matchpunkte,
+- Verliererseite: eigene Agenda-Punkte als Matchpunkte,
+- Draw: beide Seiten erhalten ihre eigenen Agenda-Punkte.
+
 Bei `two_game_side_swap` zeigt das Fenster zusätzlich:
 
 - aktuelles Serienspiel,

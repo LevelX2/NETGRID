@@ -1,4 +1,4 @@
-import type { Side, Winner } from "@netgrid/shared";
+import type { ApiGameResultSummary, Side, Winner } from "@netgrid/shared";
 
 export type ResultWinnerMotifKind = Side | "draw";
 export type ResultWinnerMotifUi = {
@@ -6,6 +6,13 @@ export type ResultWinnerMotifUi = {
   caption: string;
   imageSrc?: string;
 };
+export type GameStanding = {
+  summary: string;
+  viewerMatchPoints: number;
+  opponentMatchPoints: number;
+};
+
+const SERIES_WIN_MATCH_POINTS = 10;
 
 export function resultWinnerMotifFor(winner: Winner): ResultWinnerMotifKind {
   return winner === "runner" || winner === "corp" ? winner : "draw";
@@ -61,4 +68,44 @@ export function resultExitButtonUi(hasNextSeriesGame: boolean): { label: string;
         title: "Zurück zum Startbildschirm",
         needsConfirmation: false
       };
+}
+
+export function gameStandingForResult(
+  result: Pick<ApiGameResultSummary, "winner" | "runnerAgendaPoints" | "corpAgendaPoints">,
+  viewerSide: Side
+): GameStanding {
+  const opponentSide = oppositeSide(viewerSide);
+  if (result.winner === "draw") {
+    return {
+      summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
+      viewerMatchPoints: agendaPointsForResultSide(result, viewerSide),
+      opponentMatchPoints: agendaPointsForResultSide(result, opponentSide)
+    };
+  }
+
+  const winnerSide = result.winner;
+  const loserSide = oppositeSide(winnerSide);
+  const loserAgendaPoints = agendaPointsForResultSide(result, loserSide);
+  const winnerLabel = winnerSide === viewerSide ? "Du" : "Gegenseite";
+  const loserLabel = loserSide === viewerSide ? "Du" : "Gegenseite";
+  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, viewerSide);
+  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, opponentSide);
+
+  return {
+    summary: `${winnerLabel}: ${SERIES_WIN_MATCH_POINTS} Matchpunkte. ${loserLabel}: ${loserAgendaPoints} Agenda-Punkte aus ${agendaPointSourceLabel(loserSide)} Agendas.`,
+    viewerMatchPoints,
+    opponentMatchPoints
+  };
+}
+
+function agendaPointsForResultSide(result: Pick<ApiGameResultSummary, "runnerAgendaPoints" | "corpAgendaPoints">, side: Side): number {
+  return side === "runner" ? result.runnerAgendaPoints : result.corpAgendaPoints;
+}
+
+function agendaPointSourceLabel(side: Side): string {
+  return side === "runner" ? "gestohlenen" : "gescorten";
+}
+
+function oppositeSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
 }

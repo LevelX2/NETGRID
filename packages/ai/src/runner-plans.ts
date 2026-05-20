@@ -103,6 +103,7 @@ type RunnerFeatures = {
   credits: number;
   clicks: number;
   tags: number;
+  citySurveillanceSourceCount: number;
   memoryRemaining: number;
   handCount: number;
   rigRoles: Set<string>;
@@ -127,6 +128,13 @@ type RunnerTwoTurnRunIntent = {
   stateKey: string;
 };
 
+type CitySurveillanceDrawProjection = {
+  sourceCount: number;
+  creditsPaid: number;
+  tagsAdded: number;
+  decision: "pay" | "tag" | "none";
+};
+
 type InstalledEconomyActionKind = "direct_payout" | "pool_build" | "pool_payout" | "side_economy";
 
 type InstalledEconomyActionAssessment = {
@@ -143,9 +151,19 @@ type ShellTradersActionKind = "prepare" | "remove_counter";
 type ShellTradersActionAssessment = {
   kind: ShellTradersActionKind;
   shellCounters: number;
+  targetDefinitionId?: string;
   targetRoles: string[];
   immediateInstall: boolean;
   sourceVisible: boolean;
+  directInstallAvailable: boolean;
+  directInstallRemainingCredits?: number;
+  directInstallUrgency: number;
+};
+
+type ShellTradersBacklog = {
+  preparedCount: number;
+  nearInstallCount: number;
+  totalShellCounters: number;
 };
 
 const AI_HINTS = createAiHintsByCard();
@@ -299,6 +317,10 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
   const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
   const twoTurnIntent = evaluateRunnerTwoTurnRunIntent(input, candidate);
+  const citySurveillanceDrawRisk = evaluateCitySurveillanceDrawRisk(
+    input,
+    candidate,
+  );
   const installedEconomy = evaluateInstalledEconomyActions(input, candidate);
   const shellTraders = evaluateShellTradersActions(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
@@ -314,6 +336,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     corpThreat.score * profile.weights.corpScoringThreat +
     breakerPlan.score +
     twoTurnIntent.score +
+    citySurveillanceDrawRisk.score +
     installedEconomy.score +
     shellTraders.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
@@ -322,7 +345,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...citySurveillanceDrawRisk.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -332,6 +355,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...installedEconomy.evidence,
       ...shellTraders.evidence,
       ...twoTurnIntent.evidence,
+      ...citySurveillanceDrawRisk.evidence,
       ...rig.evidence,
       ...runCost.evidence,
       ...access.evidence,
@@ -385,6 +409,91 @@ function evaluateRunnerTwoTurnRunIntent(input: AiDecisionInput, candidate: Runne
       "two_turn_run_intent_lifetime:single_decision",
       "two_turn_run_intent_invalidates_on:target_credits_visible_ice_breakers"
     ]
+  };
+}
+
+function evaluateCitySurveillanceDrawRisk(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerPlanEvaluatorResult {
+  if (candidate.kind !== "draw_for_answers")
+    return { score: 0, reasons: [], evidence: [] };
+  const projection = bestCitySurveillanceDrawProjection(input, candidate);
+  if (projection.sourceCount <= 0) {
+    return { score: 0, reasons: [], evidence: ["city_surveillance_draw_tax:false"] };
+  }
+
+  let penalty = projection.creditsPaid * 185 + projection.tagsAdded * 620;
+  if (projection.creditsPaid > 0 && input.playerView.own.credits <= projection.creditsPaid + 1)
+    penalty += 120;
+  if (projection.tagsAdded > 0 && input.playerView.own.tags > 0)
+    penalty += Math.min(360, input.playerView.own.tags * 20);
+
+  return {
+    score: -penalty,
+    reasons: [
+      projection.tagsAdded > 0
+        ? "city_surveillance_draw_would_add_tag"
+        : "city_surveillance_draw_tax_paid",
+    ],
+    evidence: [
+      "city_surveillance_draw_tax:true",
+      `city_surveillance_sources:${projection.sourceCount}`,
+      `city_surveillance_decision:${projection.decision}`,
+      `city_surveillance_projected_credits:${projection.creditsPaid}`,
+      `city_surveillance_projected_tags:${projection.tagsAdded}`,
+      `tags:${input.playerView.own.tags}`,
+      `credits:${input.playerView.own.credits}`,
+    ],
+  };
+}
+
+function bestCitySurveillanceDrawProjection(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): CitySurveillanceDrawProjection {
+  const projections = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter(
+      (action): action is LegalAction =>
+        action !== undefined && action.type === "draw_card",
+    )
+    .map(citySurveillanceDrawProjectionForAction)
+    .filter((projection) => projection.sourceCount > 0)
+    .sort(
+      (left, right) =>
+        left.tagsAdded - right.tagsAdded ||
+        left.creditsPaid - right.creditsPaid ||
+        left.decision.localeCompare(right.decision),
+    );
+  return (
+    projections[0] ?? {
+      sourceCount: 0,
+      creditsPaid: 0,
+      tagsAdded: 0,
+      decision: "none",
+    }
+  );
+}
+
+function citySurveillanceDrawProjectionForAction(
+  action: LegalAction,
+): CitySurveillanceDrawProjection {
+  const sourceCount = Number(action.payload?.citySurveillanceSourceCount ?? 0);
+  if (!Number.isFinite(sourceCount) || sourceCount <= 0) {
+    return { sourceCount: 0, creditsPaid: 0, tagsAdded: 0, decision: "none" };
+  }
+  const creditsPaid = Number(
+    action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+  );
+  const tagsAdded = Number(action.payload?.citySurveillanceProjectedTagsAdded ?? 0);
+  const decision =
+    action.payload?.citySurveillanceDrawDecision === "pay" ? "pay" : "tag";
+  return {
+    sourceCount,
+    creditsPaid: Number.isFinite(creditsPaid) ? creditsPaid : 0,
+    tagsAdded: Number.isFinite(tagsAdded) ? tagsAdded : 0,
+    decision,
   };
 }
 
@@ -1019,25 +1128,30 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
     .map((action) => (action ? classifyShellTradersAction(input, action) : undefined))
     .filter((assessment): assessment is ShellTradersActionAssessment => Boolean(assessment));
   if (assessments.length === 0) return { score: 0, reasons: [], evidence: ["shell_traders:false"] };
+  const backlog = shellTradersBacklog(input);
 
   const prepare = assessments
     .filter((assessment) => assessment.kind === "prepare")
     .sort((left, right) => shellTradersTargetValue(right) - shellTradersTargetValue(left) || left.shellCounters - right.shellCounters)[0];
   const remove = assessments
     .filter((assessment) => assessment.kind === "remove_counter")
-    .sort((left, right) => Number(right.immediateInstall) - Number(left.immediateInstall) || left.shellCounters - right.shellCounters)[0];
-  const best = remove?.immediateInstall ? remove : prepare ?? remove ?? assessments[0]!;
-
-  let score = 0;
-  const reasons: string[] = [];
-  if (prepare) {
-    score += 165 + shellTradersTargetValue(prepare) + Math.max(0, 4 - input.playerView.own.credits) * 20;
-    reasons.push("shell_traders_prepare_build_rig");
-  }
-  if (remove) {
-    score += remove.immediateInstall ? 210 : 115;
-    reasons.push(remove.immediateInstall ? "shell_traders_finish_install" : "shell_traders_progress_counter");
-  }
+    .sort(
+      (left, right) =>
+        Number(right.immediateInstall) - Number(left.immediateInstall) ||
+        shellTradersTargetValue(right) - shellTradersTargetValue(left) ||
+        left.shellCounters - right.shellCounters
+    )[0];
+  const preparePenalty = prepare ? shellTradersPrepareBacklogPenalty(input, backlog, remove, prepare) : 0;
+  const prepareScore = prepare ? 165 + shellTradersTargetValue(prepare) + Math.max(0, 4 - input.playerView.own.credits) * 20 - preparePenalty : Number.NEGATIVE_INFINITY;
+  const removeScore = remove ? (remove.immediateInstall ? 230 : 125 + Math.max(0, 4 - remove.shellCounters) * 12) + Math.min(85, shellTradersTargetValue(remove) / 2) : Number.NEGATIVE_INFINITY;
+  const best = removeScore >= prepareScore ? remove ?? prepare ?? assessments[0]! : prepare ?? remove ?? assessments[0]!;
+  const score = Math.max(prepareScore, removeScore, 0);
+  const reasons = sortedUnique([
+    ...(best.kind === "prepare" ? ["shell_traders_prepare_build_rig"] : [best.immediateInstall ? "shell_traders_finish_install" : "shell_traders_progress_counter"]),
+    ...(prepare && preparePenalty > 0 ? ["shell_traders_prepare_backlog_limited"] : []),
+    ...(backlog.preparedCount >= 2 ? ["shell_traders_backlog_present"] : []),
+    ...(remove?.immediateInstall ? ["shell_traders_immediate_install_available"] : [])
+  ]);
 
   return {
     score,
@@ -1047,12 +1161,45 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
       `shell_traders_kind:${best.kind}`,
       `shell_traders_prepare_actions:${assessments.filter((assessment) => assessment.kind === "prepare").length}`,
       `shell_traders_remove_actions:${assessments.filter((assessment) => assessment.kind === "remove_counter").length}`,
+      `shell_traders_backlog:${backlog.preparedCount}`,
+      `shell_traders_near_install:${backlog.nearInstallCount}`,
+      `shell_traders_total_counters:${backlog.totalShellCounters}`,
+      `shell_traders_prepare_score:${Number.isFinite(prepareScore) ? round(prepareScore) : "none"}`,
+      `shell_traders_remove_score:${Number.isFinite(removeScore) ? round(removeScore) : "none"}`,
+      `shell_traders_prepare_backlog_penalty:${preparePenalty}`,
+      `shell_traders_immediate_install:${best.immediateInstall}`,
+      `shell_traders_direct_install_available:${best.directInstallAvailable}`,
+      `shell_traders_direct_install_urgency:${best.directInstallUrgency}`,
       `shell_traders_target_roles:${best.targetRoles.slice(0, 3).join(",") || "unknown"}`,
       `shell_traders_shell_counters:${best.shellCounters}`,
-      `shell_traders_immediate_install:${best.immediateInstall}`,
       `shell_traders_source_visible:${best.sourceVisible}`
     ]
   };
+}
+
+function shellTradersBacklog(input: AiDecisionInput): ShellTradersBacklog {
+  const preparedCards = input.playerView.specialZones?.setAside.filter((card) => card.known && card.owner === "runner" && card.counters?.shell !== undefined) ?? [];
+  return {
+    preparedCount: preparedCards.length,
+    nearInstallCount: preparedCards.filter((card) => Math.max(0, card.counters?.shell ?? 0) <= 1).length,
+    totalShellCounters: preparedCards.reduce((sum, card) => sum + Math.max(0, card.counters?.shell ?? 0), 0)
+  };
+}
+
+function shellTradersPrepareBacklogPenalty(
+  input: AiDecisionInput,
+  backlog: ShellTradersBacklog,
+  remove: ShellTradersActionAssessment | undefined,
+  prepare?: ShellTradersActionAssessment
+): number {
+  let penalty = 0;
+  if (backlog.preparedCount >= 2) penalty += 180 + Math.max(0, backlog.preparedCount - 2) * 45;
+  else if (backlog.preparedCount === 1) penalty += 55;
+  if (remove?.immediateInstall) penalty += 110;
+  if (backlog.nearInstallCount > 0) penalty += backlog.nearInstallCount * 35;
+  if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2) penalty += 55;
+  if (prepare?.directInstallAvailable) penalty += shellTradersDirectInstallPreparePenalty(prepare);
+  return penalty;
 }
 
 function classifyShellTradersAction(input: AiDecisionInput, action: LegalAction): ShellTradersActionAssessment | undefined {
@@ -1070,14 +1217,21 @@ function classifyShellTradersAction(input: AiDecisionInput, action: LegalAction)
       ? action.payload.targetCardDefinitionId
       : findVisibleCard(input, targetCardId)?.definitionId;
   const targetRoles = rolesForCardId(targetDefinitionId);
+  const directInstall = ability === "set_aside_from_grip" ? shellTradersDirectInstallAction(input, targetCardId) : undefined;
+  const directInstallRemainingCredits = directInstall ? input.playerView.own.credits - actionCreditCost(directInstall) : undefined;
+  const directInstallUrgency = directInstall ? shellTradersDirectInstallUrgency(input, targetRoles, directInstallRemainingCredits ?? 0) : 0;
   const shellCounters = Math.max(0, numberPayload(action, "shellCounterAmount"), numberPayload(action, "remainingCountersBefore"), numberPayload(action, "remainingCounters"));
   const immediateInstall = ability === "remove_shell_counter" && shellCounters <= 1;
   return {
     kind: ability === "set_aside_from_grip" ? "prepare" : "remove_counter",
     shellCounters,
+    ...(targetDefinitionId ? { targetDefinitionId } : {}),
     targetRoles,
     immediateInstall,
-    sourceVisible
+    sourceVisible,
+    directInstallAvailable: Boolean(directInstall),
+    ...(directInstallRemainingCredits !== undefined ? { directInstallRemainingCredits } : {}),
+    directInstallUrgency
   };
 }
 
@@ -1089,6 +1243,31 @@ function shellTradersTargetValue(assessment: ShellTradersActionAssessment): numb
   if (assessment.targetRoles.includes("economy") || assessment.targetRoles.includes("tempo")) value += 20;
   value += Math.min(60, assessment.shellCounters * 10);
   return value;
+}
+
+function shellTradersDirectInstallAction(input: AiDecisionInput, targetCardId: string): LegalAction | undefined {
+  if (!targetCardId) return undefined;
+  return input.legalActions.find((action) => action.type === "install_card" && action.source === targetCardId);
+}
+
+function shellTradersDirectInstallUrgency(input: AiDecisionInput, roles: string[], remainingCredits: number): number {
+  const features = extractRunnerFeatures(input);
+  let urgency = 0;
+  if (roles.some((role) => role.startsWith("breaker_") && !features.rigRoles.has(role))) urgency += 145;
+  if (roles.some((role) => role.startsWith("breaker_") && features.rigRoles.has(role))) urgency -= 25;
+  if (roles.includes("memory") || roles.includes("memory_support")) urgency += features.memoryRemaining <= 1 ? 110 : 25;
+  if (roles.includes("setup") || roles.includes("build_rig")) urgency += features.rigRoles.size === 0 ? 45 : 15;
+  if (roles.includes("economy") || roles.includes("tempo")) urgency += input.playerView.own.credits < 4 ? 55 : 15;
+  if (remainingCredits >= 2) urgency += 45;
+  else if (remainingCredits < 1) urgency -= 35;
+  return Math.max(0, urgency);
+}
+
+function shellTradersDirectInstallPreparePenalty(assessment: ShellTradersActionAssessment): number {
+  if (!assessment.directInstallAvailable) return 0;
+  let penalty = 35 + Math.min(170, assessment.directInstallUrgency);
+  if ((assessment.directInstallRemainingCredits ?? 0) >= 2) penalty += 35;
+  return penalty;
 }
 
 function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): InstalledEconomyActionAssessment | undefined {
@@ -1227,6 +1406,7 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
     tags: input.playerView.own.tags,
+    citySurveillanceSourceCount: visibleCitySurveillanceSourceCount(input),
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
@@ -1252,6 +1432,20 @@ function findVisibleCard(input: AiDecisionInput, instanceId: string): VisibleCar
     ...input.playerView.servers.flatMap((server) => [server.ice, server.root])
   ];
   return zones.flat().find((card) => card.instanceId === instanceId && card.known);
+}
+
+function visibleCitySurveillanceSourceCount(input: AiDecisionInput): number {
+  return input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.root.filter(
+        (card) =>
+          card.known &&
+          card.rezzed === true &&
+          card.definitionId === "onr_v1_313_city-surveillance",
+      ).length,
+    0,
+  );
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {
@@ -1302,7 +1496,10 @@ function runnerShellTradersPriority(input: AiDecisionInput, action: LegalAction)
   if (assessment.kind === "remove_counter") {
     return assessment.immediateInstall ? 132 : 86 + Math.max(0, 4 - assessment.shellCounters) * 5;
   }
-  return 96 + Math.min(35, shellTradersTargetValue(assessment) / 5) + Math.max(0, 4 - input.playerView.own.credits) * 5;
+  const backlog = shellTradersBacklog(input);
+  const hasImmediateRemove = input.legalActions.some((candidate) => classifyShellTradersAction(input, candidate)?.immediateInstall === true);
+  const backlogPenalty = shellTradersPrepareBacklogPenalty(input, backlog, hasImmediateRemove ? { ...assessment, kind: "remove_counter", immediateInstall: true } : undefined, assessment);
+  return 96 + Math.min(35, shellTradersTargetValue(assessment) / 5) + Math.max(0, 4 - input.playerView.own.credits) * 5 - Math.min(90, Math.round(backlogPenalty / 4));
 }
 
 function assessVisibleBreakerPressure(input: AiDecisionInput): VisibleBreakerPressure {

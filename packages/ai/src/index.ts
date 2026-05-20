@@ -88,6 +88,7 @@ type AiFeatures = {
   credits: number;
   clicks: number;
   tags: number;
+  citySurveillanceSourceCount: number;
   opponentCredits: number;
   opponentTags: number;
   memoryRemaining: number;
@@ -1936,10 +1937,26 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
     case "trigger_ability":
       if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
         const counterAmount = typeof action.payload.shellCounterAmount === "number" ? action.payload.shellCounterAmount : 0;
-        score = 620 + Math.max(0, counterAmount) * 30;
+        const targetRoles = shellTradersTargetRoles(input, action);
+        const directInstall = shellTradersDirectInstallAction(input, action);
+        const directInstallUrgency = directInstall ? shellTradersDirectInstallUrgency(input, targetRoles, directInstall) : 0;
+        const directInstallPenalty = directInstall ? shellTradersDirectInstallPreparePenalty(directInstallUrgency, directInstall, input) : 0;
+        const backlog = shellTradersBacklog(input);
+        const immediateRemoveAvailable = shellTradersImmediateRemoveAvailable(input);
+        const backlogPenalty = shellTradersPrepareBaselinePenalty(input, backlog, immediateRemoveAvailable);
+        score = 620 + Math.max(0, counterAmount) * 30 + Math.min(60, shellTradersTargetValue(targetRoles, counterAmount) / 3) - backlogPenalty - directInstallPenalty;
         reasonCode = "runner.shell_traders.prepare_install";
         explanation = "The Shell Traders bereitet ein eigenes Programm oder eine Hardwarekarte für die verzögerte kostenlose Installation vor.";
-        evidence.push("shell_traders", `shell_counters:${counterAmount}`);
+        evidence.push(
+          "shell_traders",
+          `shell_counters:${counterAmount}`,
+          `shell_traders_backlog:${backlog.preparedCount}`,
+          `shell_traders_prepare_backlog_penalty:${backlogPenalty}`,
+          `shell_traders_direct_install_available:${Boolean(directInstall)}`,
+          `shell_traders_direct_install_urgency:${directInstallUrgency}`,
+          `shell_traders_direct_install_penalty:${directInstallPenalty}`,
+          `shell_traders_immediate_remove:${immediateRemoveAvailable}`
+        );
       } else if (action.payload?.shellTradersAbility === "remove_shell_counter") {
         const remaining = typeof action.payload.remainingCounters === "number" ? action.payload.remainingCounters : 1;
         score = remaining <= 1 ? 650 : 360;
@@ -1982,9 +1999,36 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       break;
     case "draw_card":
       score = features.handCount < 3 ? 430 : 320;
+      if (features.citySurveillanceSourceCount > 0) {
+        const projectedCreditsPaid = Number(
+          action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+        );
+        const projectedTagsAdded = Number(
+          action.payload?.citySurveillanceProjectedTagsAdded ?? 0,
+        );
+        score -=
+          (Number.isFinite(projectedCreditsPaid) ? projectedCreditsPaid : 0) *
+            185 +
+          (Number.isFinite(projectedTagsAdded) ? projectedTagsAdded : 0) * 620;
+        if (projectedTagsAdded > 0 && features.tags > 0)
+          score -= Math.min(360, features.tags * 20);
+        if (
+          projectedCreditsPaid > 0 &&
+          features.credits <= projectedCreditsPaid + 1
+        )
+          score -= 120;
+      }
       reasonCode = "runner.economy.draw_card";
       explanation = "Eine Karte zu ziehen verbessert das sichtbare Setup.";
       evidence.push(`hand_count:${features.handCount}`);
+      if (features.citySurveillanceSourceCount > 0) {
+        evidence.push(
+          `city_surveillance_sources:${features.citySurveillanceSourceCount}`,
+          `city_surveillance_decision:${String(action.payload?.citySurveillanceDrawDecision ?? "unknown")}`,
+          `city_surveillance_projected_credits:${Number(action.payload?.citySurveillanceProjectedCreditsPaid ?? 0)}`,
+          `city_surveillance_projected_tags:${Number(action.payload?.citySurveillanceProjectedTagsAdded ?? 0)}`,
+        );
+      }
       break;
     case "end_turn":
       score = 120 + (features.clicks <= 0 ? 500 : 0);
@@ -2128,6 +2172,7 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
     tags: input.playerView.own.tags,
+    citySurveillanceSourceCount: visibleCitySurveillanceSourceCount(input),
     opponentCredits: input.playerView.opponent.credits,
     opponentTags: input.playerView.opponent.tags,
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
@@ -2157,6 +2202,20 @@ function buildServerFeatures(input: AiDecisionInput): Map<string, ServerFeatures
   );
 }
 
+function visibleCitySurveillanceSourceCount(input: AiDecisionInput): number {
+  return input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.root.filter(
+        (card) =>
+          card.known &&
+          card.rezzed === true &&
+          card.definitionId === "onr_v1_313_city-surveillance",
+      ).length,
+    0,
+  );
+}
+
 export function buildObservedFacts(input: AiDecisionInput): AiObservedFacts {
   const eventCounts: Record<string, number> = {};
   for (const event of input.eventTail) eventCounts[event.type] = (eventCounts[event.type] ?? 0) + 1;
@@ -2172,6 +2231,82 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
   if (action.source === "basic_action" || action.source === "game_rule") return [];
   const visible = findVisibleCard(input, action.source);
   return rolesForCardId(visible?.definitionId);
+}
+
+function shellTradersTargetRoles(input: AiDecisionInput, action: LegalAction): string[] {
+  const targetCardId = typeof action.payload?.targetCardId === "string" ? action.payload.targetCardId : "";
+  const targetDefinitionId =
+    typeof action.payload?.targetCardDefinitionId === "string"
+      ? action.payload.targetCardDefinitionId
+      : findVisibleCard(input, targetCardId)?.definitionId;
+  return rolesForCardId(targetDefinitionId);
+}
+
+function shellTradersTargetValue(roles: string[], shellCounters: number): number {
+  let value = 0;
+  if (roles.some((role) => role.startsWith("breaker_"))) value += 105;
+  if (roles.includes("memory") || roles.includes("memory_support")) value += 55;
+  if (roles.includes("setup") || roles.includes("build_rig")) value += 45;
+  if (roles.includes("economy") || roles.includes("tempo")) value += 20;
+  value += Math.min(60, Math.max(0, shellCounters) * 10);
+  return value;
+}
+
+function shellTradersDirectInstallAction(input: AiDecisionInput, action: LegalAction): LegalAction | undefined {
+  const targetCardId = typeof action.payload?.targetCardId === "string" ? action.payload.targetCardId : "";
+  if (!targetCardId) return undefined;
+  return input.legalActions.find((candidate) => candidate.type === "install_card" && candidate.source === targetCardId);
+}
+
+function shellTradersDirectInstallUrgency(input: AiDecisionInput, roles: string[], directInstall: LegalAction): number {
+  const remainingCredits = input.playerView.own.credits - creditCostForAiAction(directInstall);
+  let urgency = 0;
+  if (roles.some((role) => role.startsWith("breaker_") && !input.playerView.own.rig?.some((card) => rolesForCardId(card.definitionId).includes(role)))) urgency += 145;
+  const memoryRemaining = (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0);
+  if (roles.includes("memory") || roles.includes("memory_support")) urgency += memoryRemaining <= 1 ? 110 : 25;
+  if (roles.includes("setup") || roles.includes("build_rig")) urgency += (input.playerView.own.rig ?? []).length === 0 ? 45 : 15;
+  if (roles.includes("economy") || roles.includes("tempo")) urgency += input.playerView.own.credits < 4 ? 55 : 15;
+  if (remainingCredits >= 2) urgency += 45;
+  else if (remainingCredits < 1) urgency -= 35;
+  return Math.max(0, urgency);
+}
+
+function shellTradersDirectInstallPreparePenalty(urgency: number, directInstall: LegalAction, input: AiDecisionInput): number {
+  let penalty = 35 + Math.min(170, urgency);
+  if (input.playerView.own.credits - creditCostForAiAction(directInstall) >= 2) penalty += 35;
+  return penalty;
+}
+
+function shellTradersBacklog(input: AiDecisionInput): { preparedCount: number; nearInstallCount: number } {
+  const preparedCards = input.playerView.specialZones?.setAside.filter((card) => card.known && card.owner === "runner" && card.counters?.shell !== undefined) ?? [];
+  return {
+    preparedCount: preparedCards.length,
+    nearInstallCount: preparedCards.filter((card) => Math.max(0, card.counters?.shell ?? 0) <= 1).length
+  };
+}
+
+function shellTradersImmediateRemoveAvailable(input: AiDecisionInput): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.type === "trigger_ability" &&
+      action.payload?.shellTradersAbility === "remove_shell_counter" &&
+      typeof action.payload.remainingCountersBefore === "number" &&
+      action.payload.remainingCountersBefore <= 1
+  );
+}
+
+function shellTradersPrepareBaselinePenalty(
+  input: AiDecisionInput,
+  backlog: { preparedCount: number; nearInstallCount: number },
+  immediateRemoveAvailable: boolean
+): number {
+  let penalty = 0;
+  if (backlog.preparedCount >= 2) penalty += 240 + Math.max(0, backlog.preparedCount - 2) * 55;
+  else if (backlog.preparedCount === 1) penalty += 70;
+  if (immediateRemoveAvailable) penalty += 120;
+  if (backlog.nearInstallCount > 0) penalty += backlog.nearInstallCount * 40;
+  if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2) penalty += 70;
+  return penalty;
 }
 
 function findVisibleCard(input: AiDecisionInput, instanceId: string) {

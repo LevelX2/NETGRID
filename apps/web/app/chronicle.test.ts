@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
+import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -302,6 +302,7 @@ describe("formatChronicleEvent", () => {
 
     expect(setAside.title).toBe("Du hast Simple Fracter mit 2 Shell-Countern beiseitegelegt.");
     expect(setAside.chips).toContain("Set Aside");
+    expect(setAside.chips).toContain("Simple Fracter");
     expect(setAside.chips).toContain("2 Shell");
     expect(remove.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt; Karte kostenlos installiert.");
     expect(remove.chips).toContain("Shell -1");
@@ -314,7 +315,8 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         label: "The Shell Traders: Shell-Counter entfernen",
         title: "The Shell Traders",
-        shellTradersAbility: "remove_shell_counter",
+        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        abilityId: "remove_shell_counter",
         targetCardDefinitionId: "simple_fracter",
         remainingCounters: 1
       }),
@@ -511,6 +513,26 @@ describe("formatChronicleEvent", () => {
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows Systematic Layoffs advancement choices with target context", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        v1919OperationAbility: "add_advancement_counters",
+        targetCardDefinitionId: "onr_v1_196_corporate-war",
+        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        addedAdvancementCounters: 2,
+        targetCount: 1,
+        advancementCountersAfter: 2
+      }),
+      "corp"
+    );
+
+    expect(resolved.title).toBe("Du hast 2 Advancement-Counter durch Systematic Layoffs auf Corporate War gelegt.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["Systematic Layoffs", "+2 Advancement", "1 Ziel"]));
+    expect(resolved.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
     const blocked = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -704,7 +726,7 @@ describe("formatChronicleEvent", () => {
 
     expect(item.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
     expect(item.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Fort 1", "Wurf 1", "Run endet"]));
+    expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]));
   });
 
   it("shows Wall of Ice subroutine damage and end-the-run as separate chronicle steps", () => {
@@ -789,6 +811,54 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Core Command", "Trash", "3 Credits", "R&D"]);
   });
 
+  it("names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle", () => {
+    const runnerChoice = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+        targetServerLabel: "HQ",
+        targetIcePositionLabel: "ICE 2 in HQ",
+        targetVisibility: "installed_ice_position"
+      }),
+      "runner"
+    );
+    const corpRez = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+        corpDecision: "rez_ice",
+        targetCardDefinitionId: "simple_barrier_ice",
+        targetServerLabel: "HQ",
+        targetIcePositionLabel: "ICE 2 in HQ",
+        rezCostPaid: 3,
+        aiExplanation: "legal choice"
+      }),
+      "runner"
+    );
+    const corpTrash = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        v1922RunnerEventAbility: "force_rez_or_trash_ice",
+        corpDecision: "trash_ice",
+        targetCardDefinitionId: "simple_barrier_ice",
+        targetServerLabel: "HQ",
+        targetIcePositionLabel: "ICE 2 in HQ",
+        trashedCount: 1,
+        aiExplanation: "legal choice"
+      }),
+      "runner"
+    );
+
+    expect(runnerChoice.title).toBe("Du hast ICE 2 in HQ für Forged Activation Orders gewählt.");
+    expect(runnerChoice.title).not.toContain("Entscheidung beantwortet");
+    expect(runnerChoice.chips).toEqual(["Runner", "Forged Activation Orders", "Ziel", "ICE 2 in HQ"]);
+    expect(corpRez.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu rezzen.");
+    expect(corpRez.description).toBe("Rez-Kosten: 3 Credits.");
+    expect(corpRez.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Rez", "3 Credits", "ICE 2 in HQ"]);
+    expect(corpTrash.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu trashen.");
+    expect(corpTrash.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Trash", "ICE 2 in HQ"]);
+  });
+
   it("describes V1.8.1 Pattel and Pox run-success counters", () => {
     const pattel = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -854,14 +924,14 @@ describe("formatChronicleEvent", () => {
         title: "Restrictive Net Zoning",
         zoneLabel: "Resource",
         selectedServerId: "remote_1",
-        selectedServerLabel: "Remote Server 1"
+        selectedServerLabel: "Remote 1"
       }),
       "runner",
       { cardTitle: "Restrictive Net Zoning" }
     );
 
-    expect(item.title).toBe("Du hast Restrictive Net Zoning auf Remote Server 1 ausgerichtet installiert.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote Server 1"]));
+    expect(item.title).toBe("Du hast Restrictive Net Zoning auf Remote 1 ausgerichtet installiert.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote 1"]));
   });
 
   it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
@@ -2269,9 +2339,9 @@ describe("formatChronicleEvent", () => {
       }
     );
 
-    expect(hidden.title).toBe("Die Korp hat eine Installation in Fort 2 ausgebaut.");
+    expect(hidden.title).toBe("Die Korp hat eine Installation in Remote 2 ausgebaut.");
     expect(hidden.visibility).toBe("redacted");
-    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Fort 2", "Verdeckt"]);
+    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Remote 2", "Verdeckt"]);
     expect(JSON.stringify(hidden)).not.toContain("Simple Agenda");
     expect(visibleAgenda.title).toBe("Die Korp hat das Projekt Hostile Takeover weiterentwickelt.");
     expect(visibleAgenda.chips).toContain("+1 Entwicklung");
@@ -2385,25 +2455,39 @@ describe("formatChronicleEvent", () => {
   });
 
   it("counts Korp and Runner turns as one shared sequence", () => {
-    const turnNumbers = chronicleTurnNumberByEventId([
+    const events = [
       makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_1" }),
       makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
+      makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
       makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
+      makeEvent("play_event", { actor: "runner", eventId: "evt_runner_forged", cardDefinitionId: "onr_v1_086_forged-activation-orders" }),
+      makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_forged_response", v1922RunnerEventAbility: "force_rez_or_trash_ice" }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
+      makeEvent("resolve_choice", { actor: "runner", eventId: "evt_runner_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
       makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_2" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" })
-    ]);
+    ];
+    const turnNumbers = chronicleTurnNumberByEventId(events);
+    const turnSides = chronicleTurnSideByEventId(events);
 
     expect(turnNumbers).toMatchObject({
       evt_corp_draw_1: 1,
       evt_corp_end_1: 1,
+      evt_corp_discard_1: 1,
+      evt_runner_draw_1: 2,
+      evt_runner_forged: 2,
+      evt_corp_forged_response: 2,
       evt_runner_end_1: 2,
+      evt_runner_discard_1: 2,
       evt_corp_draw_2: 3,
       evt_corp_end_2: 3,
       evt_runner_end_2: 4
     });
+    expect(turnSides.evt_corp_forged_response).toBe("runner");
+
+    expect(turnSides.evt_runner_end_1).toBe("runner");
   });
 
   it("formats resolved automatic effects as separate chronicle items", () => {
@@ -2724,7 +2808,39 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
   });
 
-  it("shows start-of-Corp-turn hosted-credit takes without activated wording", () => {
+  it("shows Shell Traders start-of-turn counter removal on the prepared target card", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.shell_traders.shell_1.simple_fracter_1",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            counterType: "shell",
+            removedCounterAmount: 1,
+            remainingCounters: 1,
+            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            sourceTitle: "The Shell Traders",
+            cardDefinitionId: "simple_fracter",
+            cardTitle: "Simple Fracter",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
+    expect(items[0]?.groupLabel).toBe("Runner-Zug");
+    expect(items[0]?.cardDefinitionId).toBe("simple_fracter");
+    expect(items[0]?.cardTitle).toBe("Simple Fracter");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["The Shell Traders", "Shell-Counter", "1 entfernt", "1 übrig"]));
+  });
+
+  it("shows Braindance Campaign turn-start drain as one credit message", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "runner",

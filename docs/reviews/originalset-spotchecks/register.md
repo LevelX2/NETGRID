@@ -746,7 +746,7 @@ Detailbericht: `docs/reviews/originalset-spotchecks/reports/ORIGINALSET_CARD_SPO
 | Krumz | `onr_v1_330_krumz` | Nacharbeit umgesetzt: Trace-Bid-Bit mit Corp-Start-Refresh statt eigener Trace | Trace-Kostenlogik und PublicPayload ergänzt |
 | I Got a Rock | `onr_v1_327_i-got-a-rock` | Nacharbeit umgesetzt: doppelt getaggter Runner, 3 Agenda-Punkte Kosten, 15 Meat Damage | Engine-Test und AI-/Manifest-Vertrag ergänzt |
 | Dedicated Response Team | `onr_v1_356_dedicated-response-team` | Nacharbeit umgesetzt: 3 Meat Damage nur bei bereits getaggtem Runner, kein Tag-Gain | Damage-/No-op-Test und AI-Hint korrigiert |
-| Systematic Layoffs | `onr_v1_304_systematic-layoffs` | Nacharbeit umgesetzt: explizite Forfeit-Choice bei mehreren Corp-Agenden | Choice-Revalidation und Registervertrag ergänzt |
+| Systematic Layoffs | `onr_v1_304_systematic-layoffs` | Nacharbeit korrigiert: legt zwei Advancement-Counter auf installierte advancebare Karten | Ziel-Revalidation und Registervertrag ergänzt |
 | Rescheduler | `onr_v1_336_rescheduler` | Nacharbeit umgesetzt: HQ in R&D mischen und gleiche Anzahl ziehen | Hidden-Info-/RandomDrawRecord-Test ergänzt |
 | Tutor | `onr_v1_274_tutor` | Nachtest bestätigt: bestehender V1.9.22-Resolver bleibt replay-stabil | Kein Codefix nötig |
 | Ice Transmutation | `onr_v1_204_ice-transmutation` | Nacharbeit umgesetzt: Score-Choice auf rezzed ICE, +1 Stärke und Subroutine-Duplikation | Engine-Test und V1.9.20 Artefakte korrigiert |

@@ -34,7 +34,7 @@
     "Roving Submarine and Washington, D.C., City Grid contribute only rezzed server-bound agenda difficulty modifiers.",
     "Scored Artificial Security Directors and Genetics-Visionary Acquisition expose only a side-safe R&D-top reveal action.",
     "Chicago Branch and Vapor Ops expose rezzed Power-Counter LegalActions, Information Laundering exposes a rezzed economy LegalAction, and Experimental AI resolves an access-window installed-program ambush that trashes up to one public installed Runner program per advancement counter.",
-    "Project Consultants, Falsified-Transactions Expert, Management Shake-Up, Silver Lining Recovery Protocol, Systematic Layoffs and Team Restructuring have explicit play_operation resolver paths for advancement, counters, economy and public forfeit costs.",
+    "Project Consultants, Falsified-Transactions Expert, Management Shake-Up, Silver Lining Recovery Protocol, Systematic Layoffs and Team Restructuring have explicit play_operation resolver paths for advancement, counters and economy.",
     "Corprunner's Shattered Remains, Vacant Soulkiller and Virus Test Site resolve hardware-trash, core-damage and net-damage access ambushes through legal access windows.",
     "Fait Accompli and Arasaka Owns You resolve Runner agenda/counter/cost paths through explicit LegalActions with public cost payloads where required.",
     "Olivia Salazar resolves the source-bound half-cost ICE rez path during a run on her fort, revalidates source/server/timing/costs, and derezzes the temporary ICE at run end."

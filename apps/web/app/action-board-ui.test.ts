@@ -91,6 +91,7 @@ describe("V1.0.5 action board UI helpers", () => {
     const scoreAgenda = legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" });
 
     expect(automaticEndTurnAction(board, [endTurn], "corp")).toBe(endTurn);
+    expect(automaticEndTurnAction(board, [endTurn], "corp", { accessRevealVisible: true })).toBeUndefined();
     expect(automaticEndTurnAction(board, [endTurn, scoreAgenda], "corp")).toBeUndefined();
     expect(
       automaticEndTurnAction(
@@ -151,8 +152,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Run fortsetzen zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("R&D");
     expect(serverDisplayLabel("archives")).toBe("Archive");
-    expect(serverDisplayLabel("remote_2")).toBe("Fort 2");
-    expect(serverDisplayLabel("Remote 3")).toBe("Fort 3");
+    expect(serverDisplayLabel("remote_2")).toBe("Remote 2");
+    expect(serverDisplayLabel("Remote 3")).toBe("Remote 3");
     expect(actionButtonLabel(legalAction("corp", "advance_card", "basic_action", "Agenda in Remote 2 advancen"))).toBe("Installation ausbauen");
     expect(actionButtonLabel(legalAction("runner", "continue_run", "game_rule", "Subroutinen auslösen (Run endet)", undefined, "run.encounter_ice"))).toBe(
       "Subroutinen auslösen (Run endet)"
@@ -254,7 +255,7 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("places main-phase rez actions for installed upgrades on the card context", () => {
-    const upgradeRez = legalAction("corp", "rez_ice", "game_rule", "Karte in Fort 1 rezzen", { cardId: "upgrade_1", serverId: "remote_1" });
+    const upgradeRez = legalAction("corp", "rez_ice", "game_rule", "Karte in Remote 1 rezzen", { cardId: "upgrade_1", serverId: "remote_1" });
     const runIceRez = legalAction("corp", "rez_ice", "game_rule", "ICE rezzen", { cardId: "ice_1", serverId: "remote_1" }, "run.approach_ice");
 
     const split = splitLegalActions([upgradeRez, runIceRez]);
@@ -490,14 +491,18 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionConsumesClick({ costs: [] })).toBe(false);
   });
 
-  it("prefixes paid ability labels from LegalAction cost metadata", () => {
+  it("keeps paid ability costs in chips instead of duplicating them in labels", () => {
     const paidAbility: LegalAction = {
       ...legalAction("runner", "trigger_ability", "ability_1", "Bezahlte Fähigkeit ausführen", { cardId: "ability_1" }),
       costs: [{ clicks: 1 }, { credits: 2 }]
     };
 
-    expect(actionButtonLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
-    expect(contextualCardActionLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
+    expect(actionButtonLabel(paidAbility)).toBe("Bezahlte Fähigkeit ausführen");
+    expect(contextualCardActionLabel(paidAbility)).toBe("Bezahlte Fähigkeit ausführen");
+    expect(actionCostChips(paidAbility)).toEqual([
+      { kind: "action", amount: 1, label: "1 Aktion" },
+      { kind: "credit", amount: 2, label: "2 Credits" }
+    ]);
   });
 
   it("maps campaign stored bit counters to the existing card credit badge pattern", () => {
@@ -614,15 +619,15 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf R&D", { cardId: "card_1", serverId: "rd" }))).toBe("Run auf R&D");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
-    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Fort 2");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Remote 2");
   });
 
   it("names Corp install destinations in card context actions", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Fort erstellen");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Fort");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Remote erstellen");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Remote");
     expect(
       contextualCardActionLabel(
         legalAction("corp", "install_card", "agenda_1", "Karte in Remote 1 installieren", {
@@ -632,7 +637,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           rootReplacement: "asset_to_agenda",
         }),
       ),
-    ).toBe("In Fort 1 (Node ersetzen)");
+    ).toBe("In Remote 1 (Node ersetzen)");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "upgrade_1", "Karte in HQ installieren", { cardId: "upgrade_1", serverId: "hq", placement: "root" }))).toBe(
       "In HQ",
     );
@@ -657,14 +662,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "runner",
           "install_card",
           "restrictive_1",
-          "Restrictive Net Zoning auf Remote Server 1 ausrichten",
+          "Restrictive Net Zoning auf Remote 1 ausrichten",
           { cardId: "restrictive_1", selectedServerId: "remote_1" },
         ),
       ),
-    ).toBe("Auf Fort 1 ausrichten");
+    ).toBe("Auf Remote 1 ausrichten");
   });
 
-  it("keeps new-fort ICE installs as the last card-context action", () => {
+  it("keeps new-remote ICE installs as the last card-context action", () => {
     const newRemoteIce = legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" });
     const hqIce = legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" });
     const rdIce = legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" });
@@ -689,10 +694,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
-    expect(actionButtonLabel(paidBreakAction)).toBe("2 Credits - Subroutine 1 brechen (Simple Decoder)");
-    expect(contextualCardActionLabel(paidBreakAction)).toBe("2 Credits - Subroutine 1 brechen (Simple Decoder)");
-    expect(actionButtonLabel(paidPump)).toBe("1 Credit - Stärke +1 (Simple Decoder)");
-    expect(actionButtonLabel(multiCostBreakAction)).toBe("1 Aktion + 2 Credits - Subroutine 1 brechen (Simple Decoder)");
+    expect(actionButtonLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(actionButtonLabel(paidPump)).toBe("Stärke +1 (Simple Decoder)");
+    expect(actionButtonLabel(multiCostBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(actionCostChips(multiCostBreakAction)).toEqual([
+      { kind: "action", amount: 1, label: "1 Aktion" },
+      { kind: "credit", amount: 2, label: "2 Credits" }
+    ]);
   });
 
   it("keeps Broker abilities on the installed resource overlay", () => {
@@ -800,6 +809,25 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(take)).toBe("2 Credits nehmen");
   });
 
+  it("labels Junkyard BBS with the concrete heap target", () => {
+    const takeTopHeap = legalAction("runner", "trigger_ability", "junkyard_1", "Junkyard BBS: oberste Heap-Karte in die Grip nehmen", {
+      cardId: "junkyard_1",
+      resourceAbility: "junkyard_bbs_return_top_heap",
+      targetCardId: "fracter_1",
+      targetCardDefinitionId: "simple_fracter",
+      sourceZone: "heap",
+      destinationZone: "grip"
+    });
+
+    const split = splitLegalActions([takeTopHeap]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([takeTopHeap]);
+    expect(actionMatchesContext(takeTopHeap, { kind: "card", id: "junkyard_1", label: "Junkyard BBS" })).toBe(true);
+    expect(actionButtonLabel(takeTopHeap)).toBe("Simple Fracter aus dem Heap auf die Hand nehmen");
+    expect(contextualCardActionLabel(takeTopHeap)).toBe("Simple Fracter aus dem Heap auf die Hand nehmen");
+  });
+
   it("labels Self-Modifying Code activation without credit costs", () => {
     const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
       cardId: "smc_1",
@@ -849,7 +877,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
     expect(mirrored).toEqual([searchInstall, pump, continueRun]);
     expect(runWindowActionButtonLabel(running, searchInstall)).toBe("SMC: Programm suchen");
-    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Simple Decoder +1 Stärke");
+    expect(runWindowActionButtonLabel(running, pump)).toBe("Simple Decoder +1 Stärke");
     const breakAction = legalAction(
       "runner",
       "break_subroutine",
@@ -872,7 +900,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
 
-  it("keeps long run-window breaker examples compact while preserving cost and effect", () => {
+  it("keeps long run-window breaker examples compact while leaving costs to chips", () => {
     const krash = card("krash_1", "Krash", "program");
     const running = view("runner", {
       own: {
@@ -894,9 +922,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     const label = runWindowActionButtonLabel(running, pump);
 
-    expect(label).toBe("2 Credits - Krash +1 Stärke");
+    expect(label).toBe("Krash +1 Stärke");
     expect(label).not.toContain("gegen Fire Wall");
     expect(label).not.toContain("(ICE 1)");
+    expect(actionCostChips(pump)).toEqual([{ kind: "credit", amount: 2, label: "2 Credits" }]);
   });
 
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {
@@ -928,7 +957,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const mirrored = runWindowActions(running, [startupTrash, continueRun, offRunAbility]);
 
     expect(mirrored).toEqual([startupTrash, continueRun]);
-    expect(runWindowActionButtonLabel(running, startupTrash)).toBe("3 Credits - Startup Immolator: ICE trashen");
+    expect(runWindowActionButtonLabel(running, startupTrash)).toBe("Startup Immolator: ICE trashen");
+    expect(actionCostChips(startupTrash)).toEqual([{ kind: "credit", amount: 3, label: "3 Credits" }]);
     expect(actionMatchesContext(startupTrash, { kind: "card", id: "startup_1", label: "Startup Immolator" })).toBe(true);
   });
 
@@ -965,7 +995,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     accessedUpgrade.trashCost = 2;
     const decline = legalAction("runner", "decline_trash", "game_rule", "Nicht trashen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
 
-    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Fort 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
+    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Remote 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
   });
 
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
@@ -983,6 +1013,90 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId).toBe("evt_access");
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
+  });
+
+  it("retains a visible access reveal across turn end until it is dismissed", () => {
+    const rdReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "R&D",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
+    const runnerEndTurn = {
+      ...publicEvent("evt_runner_end", "action", {
+        actionType: "end_turn",
+        actor: "runner"
+      }),
+      stateVersionAfter: 2
+    };
+
+    expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], null)?.eventId).toBe("evt_access");
+    expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], "evt_access")).toBeNull();
+  });
+
+  it("does not retain an old access reveal after later turn and Corp action events", () => {
+    const access = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_agenda",
+      title: "Simple Agenda"
+    });
+    const runnerEndTurn = {
+      ...publicEvent("evt_runner_end", "action", {
+        actionType: "end_turn",
+        actor: "runner"
+      }),
+      stateVersionAfter: 2
+    };
+    const corpInstall = {
+      ...publicEvent("evt_corp_install", "action", {
+        actionType: "install_card",
+        actor: "corp",
+        serverLabel: "Remote 2"
+      }),
+      stateVersionAfter: 3
+    };
+
+    expect(retainedAccessRevealEvent([access, runnerEndTurn, corpInstall], null)).toBeNull();
+  });
+
+  it("does not fall back to an older visible reveal after a newer redacted access", () => {
+    const visibleRemoteAccess = publicEvent("evt_remote_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_agenda",
+      title: "Simple Agenda"
+    });
+    const redactedRdAccess = publicEvent("evt_rd_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "R&D",
+      redactedKind: "accessed_card"
+    });
+
+    expect(retainedAccessRevealEvent([visibleRemoteAccess, redactedRdAccess], null)).toBeNull();
+  });
+
+  it("retains access reveal across same-action public follow-up events", () => {
+    const access = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_ambush",
+      title: "Simple Ambush"
+    });
+    const sameActionEffect = {
+      ...publicEvent("evt_effect", "effect", {
+        actionType: "net_damage",
+        actor: "corp"
+      }),
+      stateVersionAfter: access.stateVersionAfter
+    };
+
+    expect(retainedAccessRevealEvent([access, sameActionEffect], null)?.eventId).toBe("evt_access");
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {

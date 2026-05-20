@@ -115,7 +115,7 @@ import {
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_FORFEIT_AGENDA_OPERATION_ID,
+  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
@@ -455,6 +455,8 @@ type CorpRootRezResolver = {
   name: string;
   resolve: (state: GameState) => void;
 };
+
+const POWER_GRID_OVERLOAD_OPERATION_ID = "onr_v1_299_power-grid-overload";
 
 type DamageSummary = {
   damageType: DamageType;
@@ -945,13 +947,15 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   "onr_v1_099_mantis-fixer-at-large": {
-    name: "onr_v1911_runner_event_search_stack_program_to_hand",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
+    name: "onr_v1911_runner_event_search_stack_card_to_hand",
+    canPlay: (state) => state.runner.stack.length > 0,
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
+      startRunnerStackSearchChoice(
+        state,
+        "v1911.search_stack_card",
+        "v1911_search_stack_card",
+        { cardType: "any" },
+      );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
@@ -1370,31 +1374,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  "onr_v1_299_power-grid-overload": {
+  [POWER_GRID_OVERLOAD_OPERATION_ID]: {
     name: "onr_corp_operation_tagged_runner_trash_hardware",
     canPlay: (state) =>
-      state.runner.tags > 0 && state.runner.rig.hardware.length > 0,
+      state.runner.tags > 0 &&
+      state.corp.credits > 0 &&
+      powerGridOverloadEligibleHardwareIds(state).length > 0,
     resolve: (state, legalAction) => {
       requireRunnerTagged(state);
-      const targetHardwareId = state.runner.rig.hardware
-        .slice()
-        .sort((left, right) => {
-          const leftDefinition = definitionFor(state, left);
-          const rightDefinition = definitionFor(state, right);
-          const byInstallCost =
-            (rightDefinition.installCost ?? 0) -
-            (leftDefinition.installCost ?? 0);
-          if (byInstallCost !== 0) return byInstallCost;
-          return left.localeCompare(right);
-        })[0];
-      if (!targetHardwareId)
-        throw new Error("Der Runner hat keine installierte Hardware.");
-      trashRunnerInstalledCardToHeap(state, targetHardwareId);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        trashedHardwareId: targetHardwareId,
-        trashedHardwareDefinitionId: definitionFor(state, targetHardwareId).id,
-      };
+      resolvePowerGridOverloadOperation(state, legalAction);
     },
   },
   [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
@@ -1543,25 +1531,11 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [SYSTEMATIC_LAYOFFS_FORFEIT_AGENDA_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_forfeit_scored_agenda",
-    canPlay: (state) => corpScoredAgendaForfeitTarget(state) !== undefined,
-    resolve: (state, legalAction) => {
-      const targets = corpScoredAgendaForfeitTargets(state);
-      if (targets.length === 0)
-        throw new Error(
-          "Systematic Layoffs findet keine gescorte Korp-Agenda.",
-        );
-      if (targets.length > 1) {
-        startSystematicLayoffsChoice(state, targets, legalAction);
-        return;
-      }
-      resolveSystematicLayoffsForfeit(
-        state,
-        mustArrayValue(targets, 0, "Systematic-Layoffs-Ziel fehlt."),
-        legalAction,
-      );
-    },
+  [SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID]: {
+    name: "onr_v1919_corp_operation_add_two_advancement_counters",
+    canPlay: (state) => advanceableInstalledCardTargets(state).length > 0,
+    resolve: (state, legalAction) =>
+      resolveSystematicLayoffsAdvancementOperation(state, legalAction),
   },
   [TEAM_RESTRUCTURING_COUNTER_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_power_counter",
@@ -1602,6 +1576,8 @@ type RunnerDrawSummary = {
   citySurveillanceCreditsPaid: number;
   citySurveillanceTagsAdded: number;
 };
+
+type CitySurveillanceDrawDecision = "auto" | "pay" | "tag";
 
 function emptyRunnerDrawSummary(): RunnerDrawSummary {
   return {
@@ -2995,6 +2971,14 @@ function corpMainActions(state: GameState): LegalAction[] {
       state.corp.credits >= (definition.cost ?? 0) &&
       canPlayCorpOperation(state, definition)
     ) {
+      if (definition.id === POWER_GRID_OVERLOAD_OPERATION_ID) {
+        actions.push(...powerGridOverloadLegalActions(state, id, definition));
+        continue;
+      }
+      if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
+        actions.push(...systematicLayoffsLegalActions(state, id, definition));
+        continue;
+      }
       actions.push(
         action(
           state,
@@ -3802,11 +3786,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       ),
     );
     if (state.runner.stack.length > 0)
-      actions.push(
-        action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
-          { clicks: 1 },
-        ]),
-      );
+      actions.push(...runnerDrawCardActions(state));
     if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
       actions.push(
         action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [
@@ -4630,6 +4610,59 @@ function runnerMainActions(state: GameState): LegalAction[] {
     actions,
   );
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+  return actions;
+}
+
+function runnerDrawCardActions(state: GameState): LegalAction[] {
+  const citySurveillanceSourceCount = citySurveillanceSourceIds(state).length;
+  if (citySurveillanceSourceCount <= 0) {
+    return [
+      action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
+        { clicks: 1 },
+      ]),
+    ];
+  }
+
+  const actions: LegalAction[] = [];
+  if (state.runner.credits >= citySurveillanceSourceCount) {
+    actions.push(
+      action(
+        state,
+        "runner",
+        "draw_card",
+        citySurveillanceSourceCount === 1
+          ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
+          : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Credits zahlen)`,
+        "basic_action",
+        [{ clicks: 1, credits: citySurveillanceSourceCount }],
+        {
+          citySurveillanceSourceCount,
+          citySurveillanceDrawDecision: "pay",
+          citySurveillanceProjectedCreditsPaid: citySurveillanceSourceCount,
+          citySurveillanceProjectedTagsAdded: 0,
+        },
+      ),
+    );
+  }
+
+  actions.push(
+    action(
+      state,
+      "runner",
+      "draw_card",
+      citySurveillanceSourceCount === 1
+        ? "Karte ziehen (City Surveillance: 1 Tag nehmen)"
+        : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Tags nehmen)`,
+      "basic_action",
+      [{ clicks: 1 }],
+      {
+        citySurveillanceSourceCount,
+        citySurveillanceDrawDecision: "tag",
+        citySurveillanceProjectedCreditsPaid: 0,
+        citySurveillanceProjectedTagsAdded: citySurveillanceSourceCount,
+      },
+    ),
+  );
   return actions;
 }
 
@@ -6534,7 +6567,7 @@ function successfulRunProgramActions(
           state,
           "runner",
           "trigger_ability",
-          `${definition.title}: Fort mit Power-Counter markieren`,
+          `${definition.title}: Remote mit Power-Counter markieren`,
           sourceCardId,
           [],
           {
@@ -7599,7 +7632,10 @@ function performAction(
         applyRunnerDrawSummaryPayload(
           state,
           legalAction,
-          drawRunnerCard(state),
+          drawRunnerCard(
+            state,
+            citySurveillanceDrawDecisionFromPayload(legalAction),
+          ),
         );
       } else {
         drawCorpCard(state);
@@ -8546,7 +8582,7 @@ function resolveNetspaceInverterReverseIce(
     throw new Error("Netspace Inverter wurde fuer diesen Run bereits genutzt.");
   const server = mustServer(state, serverId);
   if (server.kind === "archives" || server.ice.length <= 1)
-    throw new Error("Dieses Fort kann nicht umgekehrt werden.");
+    throw new Error("Dieses Remote kann nicht umgekehrt werden.");
   server.ice.reverse();
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
@@ -12187,7 +12223,7 @@ function delayBizarreEncryptionSchemeAgendaScore(
     zone.zone !== "serverRoot" ||
     zone.serverId !== serverId
   ) {
-    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Fort.");
+    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Remote.");
   }
   const existing = state.bizarreEncryptionDelayedAgendas ?? [];
   if (!existing.some((entry) => entry.agendaId === cardId)) {
@@ -12711,7 +12747,7 @@ function validateRovingSubmarineRunGate(
   );
   if (!hasActivity)
     throw new Error(
-      "Roving Submarine erlaubt Runs auf dieses Fort nur nach Korp-Aktivitaet im letzten Korpzug.",
+      "Roving Submarine erlaubt Runs auf dieses Remote nur nach Korp-Aktivitaet im letzten Korpzug.",
     );
 }
 
@@ -13776,7 +13812,25 @@ function drawCorpCards(state: GameState, amount: number): void {
   for (let index = 0; index < amount; index += 1) drawCorpCard(state);
 }
 
-function drawRunnerCard(state: GameState): RunnerDrawSummary {
+function citySurveillanceSourceIds(state: GameState): CardInstanceId[] {
+  return rezzedCorpRootCardIds(state).filter(
+    (sourceId) =>
+      definitionFor(state, sourceId).id === CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
+  );
+}
+
+function citySurveillanceDrawDecisionFromPayload(
+  legalAction: LegalAction,
+): CitySurveillanceDrawDecision {
+  const decision = legalAction.payload?.citySurveillanceDrawDecision;
+  if (decision === "pay" || decision === "tag") return decision;
+  return "auto";
+}
+
+function drawRunnerCard(
+  state: GameState,
+  citySurveillanceDecision: CitySurveillanceDrawDecision = "auto",
+): RunnerDrawSummary {
   const summary = emptyRunnerDrawSummary();
   const cardId = state.runner.stack.shift();
   if (!cardId) return summary;
@@ -13786,14 +13840,16 @@ function drawRunnerCard(state: GameState): RunnerDrawSummary {
     zone: { side: "runner", zone: "grip" },
   };
   summary.drawnCount = 1;
-  const citySurveillanceIds = rezzedCorpRootCardIds(state).filter(
-    (sourceId) =>
-      definitionFor(state, sourceId).id === CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
-  );
+  const citySurveillanceIds = citySurveillanceSourceIds(state);
   summary.citySurveillanceSourceCount = citySurveillanceIds.length;
   for (const _sourceId of citySurveillanceIds) {
     void _sourceId;
-    if (state.runner.credits > 0) {
+    if (
+      citySurveillanceDecision === "pay" ||
+      (citySurveillanceDecision === "auto" && state.runner.credits > 0)
+    ) {
+      if (state.runner.credits <= 0)
+        throw new Error("City Surveillance kann nicht bezahlt werden.");
       spendCredits(state, "runner", 1);
       summary.citySurveillanceCreditsPaid += 1;
     } else {
@@ -15205,12 +15261,6 @@ function corpAgendaCounterOperationTarget(
   return installedAgendaOperationTarget(state);
 }
 
-function corpScoredAgendaForfeitTarget(
-  state: GameState,
-): CardInstanceId | undefined {
-  return corpScoredAgendaForfeitTargets(state)[0];
-}
-
 function corpScoredAgendaForfeitTargets(
   state: GameState,
 ): CardInstanceId[] {
@@ -15223,6 +15273,195 @@ function corpScoredAgendaForfeitTargets(
       return byPoints !== 0 ? byPoints : left.localeCompare(right);
     })
     .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
+}
+
+function powerGridOverloadEligibleHardwareIds(
+  state: GameState,
+): CardInstanceId[] {
+  return state.runner.rig.hardware
+    .slice()
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return (
+        definition.type === "hardware" &&
+        !cardHasSubtype(definition, "cybernetics")
+      );
+    })
+    .sort((left, right) => {
+      const leftDefinition = definitionFor(state, left);
+      const rightDefinition = definitionFor(state, right);
+      const byTitle = leftDefinition.title.localeCompare(rightDefinition.title);
+      if (byTitle !== 0) return byTitle;
+      return left.localeCompare(right);
+    });
+}
+
+function powerGridOverloadLegalActions(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): LegalAction[] {
+  const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
+  const maxTrashCount = Math.min(eligibleHardwareIds.length, state.corp.credits);
+  const actions: LegalAction[] = [];
+  for (let trashCount = 1; trashCount <= maxTrashCount; trashCount += 1) {
+    actions.push(
+      action(
+        state,
+        "corp",
+        "play_operation",
+        `${definition.title}: ${trashCount} Hardware trashen`,
+        cardId,
+        [{ clicks: 1, credits: trashCount }],
+        {
+          cardId,
+          powerGridOverloadTrashCount: trashCount,
+          eligibleHardwareCount: eligibleHardwareIds.length,
+        },
+      ),
+    );
+  }
+  return actions;
+}
+
+function powerGridOverloadTrashCountFromPayload(
+  legalAction: LegalAction,
+): number {
+  const trashCount = Number(
+    legalAction.payload?.powerGridOverloadTrashCount ?? 1,
+  );
+  if (!Number.isInteger(trashCount) || trashCount <= 0)
+    throw new Error("Power Grid Overload braucht eine gueltige X-Auswahl.");
+  return trashCount;
+}
+
+function resolvePowerGridOverloadOperation(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const trashCount = powerGridOverloadTrashCountFromPayload(legalAction);
+  const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
+  if (eligibleHardwareIds.length < trashCount)
+    throw new Error(
+      "Power Grid Overload findet nicht genug nicht-Cybernetics-Hardware.",
+    );
+  if (eligibleHardwareIds.length > trashCount) {
+    startPowerGridOverloadChoice(
+      state,
+      eligibleHardwareIds,
+      trashCount,
+      legalAction,
+    );
+    return;
+  }
+  trashPowerGridOverloadHardware(state, eligibleHardwareIds, legalAction);
+}
+
+function startPowerGridOverloadChoice(
+  state: GameState,
+  eligibleHardwareIds: CardInstanceId[],
+  trashCount: number,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1914_power_grid_overload_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1914.power_grid_overload:${trashCount}:${state.stateVersion + 1}`,
+    prompt: `Power Grid Overload: ${trashCount} Hardware trashen`,
+    kind: "select_cards",
+    options: eligibleHardwareIds.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+      };
+    }),
+    minSelections: trashCount,
+    maxSelections: trashCount,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    powerGridOverloadChoiceOpened: true,
+    eligibleHardwareCount: eligibleHardwareIds.length,
+    powerGridOverloadTrashCount: trashCount,
+  };
+}
+
+function powerGridOverloadTrashCountFromChoiceSource(source: string): number {
+  const [, rawTrashCount] = source.split(":");
+  const trashCount = Number(rawTrashCount);
+  if (!Number.isInteger(trashCount) || trashCount <= 0)
+    throw new Error("Power-Grid-Overload-Choice hat keine gueltige X-Auswahl.");
+  return trashCount;
+}
+
+function resolvePowerGridOverloadChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1914.power_grid_overload"))
+    throw new Error("Es ist keine Power-Grid-Overload-Choice offen.");
+  const trashCount = powerGridOverloadTrashCountFromChoiceSource(choice.source);
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  if (selectedIds.length !== trashCount)
+    throw new Error("Power Grid Overload braucht genau X Hardware-Ziele.");
+  const legalTargets = new Set(powerGridOverloadEligibleHardwareIds(state));
+  for (const cardId of selectedIds) {
+    if (!legalTargets.has(cardId))
+      throw new Error(
+        "Power Grid Overload darf dieses Hardware-Ziel nicht trashen.",
+      );
+  }
+  trashPowerGridOverloadHardware(state, selectedIds, legalAction);
+  delete state.pendingChoice;
+}
+
+function trashPowerGridOverloadHardware(
+  state: GameState,
+  hardwareIds: CardInstanceId[],
+  legalAction: LegalAction,
+): void {
+  const definitionIds = hardwareIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+  for (const cardId of hardwareIds) {
+    if (!powerGridOverloadEligibleHardwareIds(state).includes(cardId))
+      throw new Error(
+        "Power Grid Overload darf dieses Hardware-Ziel nicht mehr trashen.",
+      );
+    trashRunnerInstalledCardToHeap(state, cardId);
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    powerGridOverloadTrashCount: hardwareIds.length,
+    trashedHardwareCount: hardwareIds.length,
+    trashedHardwareDefinitionIds: definitionIds.join(","),
+  };
+}
+
+function systematicLayoffsLegalActions(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): LegalAction[] {
+  return [
+    action(
+      state,
+      "corp",
+      "play_operation",
+      `${definition.title} spielen`,
+      cardId,
+      [{ clicks: 1, credits: definition.cost ?? 0 }],
+      { cardId },
+    ),
+  ];
 }
 
 function resolveAgendaCounterOperation(
@@ -15243,6 +15482,175 @@ function resolveAgendaCounterOperation(
     targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
     addedCounterAmount: 1,
     remainingCounters: cardCounter(state, targetAgendaId, "power"),
+  };
+}
+
+function resolveSystematicLayoffsAdvancementOperation(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const options = systematicLayoffsPlacementOptions(state);
+  if (options.length === 0)
+    throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
+  startSystematicLayoffsAdvancementChoice(state, options, legalAction);
+}
+
+function systematicLayoffsPlacementOptions(state: GameState): Array<{
+  firstTargetId: CardInstanceId;
+  secondTargetId?: CardInstanceId;
+  id: string;
+  label: string;
+  publicLabel: string;
+  value: string;
+}> {
+  const targets = advanceableInstalledCardTargets(state);
+  const options: Array<{
+    firstTargetId: CardInstanceId;
+    secondTargetId?: CardInstanceId;
+    id: string;
+    label: string;
+    publicLabel: string;
+    value: string;
+  }> = [];
+  for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
+    const firstTargetId = mustArrayValue(
+      targets,
+      firstIndex,
+      "Systematic-Layoffs-Ziel fehlt.",
+    );
+    for (
+      let secondIndex = firstIndex;
+      secondIndex < targets.length;
+      secondIndex += 1
+    ) {
+      const secondTargetId = mustArrayValue(
+        targets,
+        secondIndex,
+        "Systematic-Layoffs-Ziel fehlt.",
+      );
+      const splitTargets = firstTargetId !== secondTargetId;
+      const firstTitle = definitionFor(state, firstTargetId).title;
+      const secondTitle = definitionFor(state, secondTargetId).title;
+      const label = splitTargets
+        ? `Je 1 Advancement-Counter auf ${firstTitle} und ${secondTitle}`
+        : `2 Advancement-Counter auf ${firstTitle}`;
+      options.push({
+        firstTargetId,
+        ...(splitTargets ? { secondTargetId } : {}),
+        id: `placement_${sanitizeId(firstTargetId)}_${sanitizeId(secondTargetId)}`,
+        label,
+        publicLabel: label,
+        value: splitTargets
+          ? `${firstTargetId}|${secondTargetId}`
+          : `${firstTargetId}|${firstTargetId}`,
+      });
+    }
+  }
+  return options;
+}
+
+function startSystematicLayoffsAdvancementChoice(
+  state: GameState,
+  options: ReturnType<typeof systematicLayoffsPlacementOptions>,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1919_systematic_layoffs_advancement_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1919.systematic_layoffs_advancement:${state.stateVersion + 1}`,
+    prompt: "Systematic Layoffs: Advancement-Counter legen",
+    kind: "select_option",
+    options: options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      publicLabel: option.publicLabel,
+      value: option.value,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1919OperationAbility: "add_advancement_counters_choice",
+    eligiblePlacementCount: options.length,
+  };
+}
+
+function resolveSystematicLayoffsAdvancementChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1919.systematic_layoffs_advancement"))
+    throw new Error("Es ist keine Systematic-Layoffs-Advancement-Choice offen.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const selectedOption = choice.options.find(
+    (option) => option.id === selectedOptionId,
+  );
+  if (!selectedOption || typeof selectedOption.value !== "string")
+    throw new Error("Systematic Layoffs braucht genau eine Placement-Auswahl.");
+  const [firstTargetId, secondTargetId] = selectedOption.value.split("|") as [
+    CardInstanceId | undefined,
+    CardInstanceId | undefined,
+  ];
+  if (!firstTargetId || !secondTargetId)
+    throw new Error("Systematic Layoffs hat keine gueltige Placement-Auswahl.");
+  applySystematicLayoffsAdvancementPlacement(
+    state,
+    firstTargetId,
+    secondTargetId === firstTargetId ? undefined : secondTargetId,
+    legalAction,
+  );
+  delete state.pendingChoice;
+}
+
+function applySystematicLayoffsAdvancementPlacement(
+  state: GameState,
+  firstTargetId: CardInstanceId,
+  secondTargetId: CardInstanceId | undefined,
+  legalAction: LegalAction,
+): void {
+  const eligibleTargets = new Set(advanceableInstalledCardTargets(state));
+  if (!firstTargetId || !eligibleTargets.has(firstTargetId))
+    throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
+  if (secondTargetId && !eligibleTargets.has(secondTargetId))
+    throw new Error("Systematic Layoffs findet kein zweites advancebares Ziel.");
+
+  const placements: Record<CardInstanceId, number> = {
+    [firstTargetId]: secondTargetId ? 1 : 2,
+  };
+  if (secondTargetId) placements[secondTargetId] = 1;
+  for (const [targetId, amount] of Object.entries(placements)) {
+    mustInstance(state.cardInstances, targetId).advancementCounters += amount;
+  }
+  const placementEntries = Object.entries(placements);
+  const targetCount = placementEntries.length;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
+    v1919OperationAbility: "add_advancement_counters",
+    targetCardId: firstTargetId,
+    targetCardDefinitionId: definitionFor(state, firstTargetId).id,
+    targetCardDefinitionIds: placementEntries
+      .map(([targetId]) => definitionFor(state, targetId).id)
+      .join(","),
+    addedAdvancementCounters: 2,
+    targetCount,
+    systematicLayoffsDistribution: placementEntries
+      .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
+      .join(","),
+    ...(targetCount === 1
+      ? {
+          advancementCountersAfter: mustInstance(
+            state.cardInstances,
+            firstTargetId,
+          ).advancementCounters,
+        }
+      : {}),
   };
 }
 
@@ -15476,7 +15884,7 @@ function scoreAgenda(
           ? instanceBefore.zone.serverId
           : undefined;
     if (!selectedServerId || selectedServerId === "new_remote")
-      throw new Error("Security Net Optimization braucht einen gueltigen Fort.");
+      throw new Error("Security Net Optimization braucht ein gueltiges Remote.");
     mustServer(state, selectedServerId as Exclude<ServerId, "new_remote">);
     state.cardInstances[cardId] = {
       ...mustInstance(state.cardInstances, cardId),
@@ -16077,6 +16485,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v098.search_stack") ||
       choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.search_stack_card") ||
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("v1911.short_circuit_search") ||
@@ -16532,8 +16941,20 @@ function resolvePendingChoice(
     resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("v1919.systematic_layoffs")) {
-    resolveSystematicLayoffsChoice(state, legalAction, playerAction);
+  if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
+    resolvePowerGridOverloadChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "v1919.systematic_layoffs_advancement",
+    )
+  ) {
+    resolveSystematicLayoffsAdvancementChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v1920.ice_transmutation")) {
@@ -16962,20 +17383,33 @@ function startRunnerStackSearchChoice(
   state: GameState,
   sourcePrefix = "v098.search_stack",
   choiceIdPrefix = "v098_search_stack",
+  filter: { cardType?: CardDefinition["type"] | "any" } = {
+    cardType: "program",
+  },
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const hasSearchableProgram = state.runner.stack.some(
-    (cardId) => definitionFor(state, cardId).type === "program",
+  const cardTypeFilter = filter.cardType ?? "program";
+  const hasSearchableCard = state.runner.stack.some((cardId) =>
+    runnerStackSearchCardMatchesFilter(state, cardId, cardTypeFilter),
   );
-  if (!hasSearchableProgram)
-    throw new Error("Keine suchbare Programmkarte im Stack.");
+  if (!hasSearchableCard)
+    throw new Error(
+      cardTypeFilter === "program"
+        ? "Keine suchbare Programmkarte im Stack."
+        : "Keine suchbare Karte im Stack.",
+    );
   const options = state.runner.stack.map((cardId) => {
     const definition = definitionFor(state, cardId);
+    const selectable = runnerStackSearchCardMatchesFilter(
+      state,
+      cardId,
+      cardTypeFilter,
+    );
     return {
       id: `card_${cardId}`,
       label: definition.title,
       value: cardId,
-      ...(definition.type !== "program" ? { selectable: false } : {}),
+      ...(!selectable ? { selectable: false } : {}),
     };
   });
   state.pendingChoice = {
@@ -16990,6 +17424,15 @@ function startRunnerStackSearchChoice(
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
+}
+
+function runnerStackSearchCardMatchesFilter(
+  state: GameState,
+  cardId: CardInstanceId,
+  cardTypeFilter: CardDefinition["type"] | "any",
+): boolean {
+  if (cardTypeFilter === "any") return true;
+  return definitionFor(state, cardId).type === cardTypeFilter;
 }
 
 function startSelfModifyingCodeStackChoice(
@@ -17239,7 +17682,10 @@ function resolveRunnerStackSearchChoice(
   const cardId = selectedChoiceCardIds(choice, playerAction)[0];
   if (!cardId || !state.runner.stack.includes(cardId))
     throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
-  if (definitionFor(state, cardId).type !== "program")
+  if (
+    !choice.source.startsWith("v1911.search_stack_card") &&
+    definitionFor(state, cardId).type !== "program"
+  )
     throw new Error("Nur Programme sind in dieser Search-Harness legal.");
   removeFromAllZones(state, cardId);
   state.runner.grip.push(cardId);
@@ -17687,6 +18133,8 @@ function resolveCoreCommandJettisonIceChoice(
     );
   const definition = definitionFor(state, selectedId);
   const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  const icePositionLabel =
+    publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
   spendCredits(state, "runner", rezCost);
   trashCorpInstalledCardToArchives(state, selectedId);
   delete state.pendingChoice;
@@ -17698,7 +18146,34 @@ function resolveCoreCommandJettisonIceChoice(
     trashedCount: 1,
     targetCardDefinitionId: definition.id,
     targetServerLabel: serverLabel,
+    targetIcePositionLabel: icePositionLabel,
   };
+}
+
+function publicIcePositionLabelForCard(
+  state: GameState,
+  cardId: string | undefined,
+): string | undefined {
+  if (!cardId) return undefined;
+  const zone = state.cardInstances[cardId]?.zone;
+  const serverId = zone && "serverId" in zone ? zone.serverId : undefined;
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  const serverLabel = publicServerLabel(state, serverId);
+  if (!server || !serverLabel) return serverLabel;
+  const iceIndex = server.ice.indexOf(cardId);
+  return iceIndex >= 0
+    ? `ICE ${iceIndex + 1} in ${serverLabel}`
+    : `ICE in ${serverLabel}`;
+}
+
+function publicIceSelectionLabelForCard(
+  state: GameState,
+  cardId: string | undefined,
+): string | undefined {
+  if (!cardId) return undefined;
+  return publicIcePositionLabelForCard(state, cardId);
 }
 
 function startForgedActivationOrdersTargetChoice(
@@ -17718,11 +18193,11 @@ function startForgedActivationOrdersTargetChoice(
     prompt: "ICE für Rez-/Trash-Entscheidung wählen",
     kind: "select_cards",
     options: targets.map((cardId, index) => {
-      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      const iceLabel = publicIceSelectionLabelForCard(state, cardId) ?? "ICE";
       return {
         id: `ice_${index + 1}`,
-        label: `ICE in ${serverLabel}`,
-        publicLabel: `ICE in ${serverLabel}`,
+        label: iceLabel,
+        publicLabel: iceLabel,
         value: cardId,
       };
     }),
@@ -17752,6 +18227,8 @@ function resolveForgedActivationOrdersTargetChoice(
       "Das Forged-Activation-Orders-Ziel ist keine unrezzte installierte ICE.",
     );
   const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
+  const icePositionLabel =
+    publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
   state.pendingChoice = {
     choiceId: `v1922_forged_activation_orders_corp_${state.stateVersion + 1}`,
     side: "corp",
@@ -17785,6 +18262,7 @@ function resolveForgedActivationOrdersTargetChoice(
     ...(legalAction.payload ?? {}),
     v1922RunnerEventAbility: "force_rez_or_trash_ice",
     targetServerLabel: serverLabel,
+    targetIcePositionLabel: icePositionLabel,
     targetVisibility: "installed_ice_position",
   };
 }
@@ -17810,6 +18288,8 @@ function resolveForgedActivationOrdersCorpChoice(
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const definition = definitionFor(state, targetIceId);
   const serverLabel = publicServerLabelForCard(state, targetIceId) ?? "Server";
+  const icePositionLabel =
+    publicIcePositionLabelForCard(state, targetIceId) ?? serverLabel;
   if (selected === "rez_ice") {
     const rezCost = rezCostForCard(state, targetIceId);
     spendCredits(state, "corp", rezCost);
@@ -17826,6 +18306,7 @@ function resolveForgedActivationOrdersCorpChoice(
       rezCostPaid: rezCost,
       targetCardDefinitionId: definition.id,
       targetServerLabel: serverLabel,
+      targetIcePositionLabel: icePositionLabel,
     };
     return;
   }
@@ -17842,6 +18323,7 @@ function resolveForgedActivationOrdersCorpChoice(
     trashedCount: 1,
     targetCardDefinitionId: definition.id,
     targetServerLabel: serverLabel,
+    targetIcePositionLabel: icePositionLabel,
   };
 }
 
@@ -17862,11 +18344,11 @@ function startSecurityCodeWormChipTrashIceChoice(
     prompt: "Unrezzte ICE trashen",
     kind: "select_cards",
     options: targets.map((cardId, index) => {
-      const serverLabel = publicServerLabelForCard(state, cardId) ?? "Server";
+      const iceLabel = publicIceSelectionLabelForCard(state, cardId) ?? "ICE";
       return {
         id: `ice_${index + 1}`,
-        label: `ICE in ${serverLabel}`,
-        publicLabel: `ICE in ${serverLabel}`,
+        label: iceLabel,
+        publicLabel: iceLabel,
         value: cardId,
       };
     }),
@@ -18524,81 +19006,6 @@ function resolveReschedulerHqShuffleDraw(
   };
 }
 
-function startSystematicLayoffsChoice(
-  state: GameState,
-  targets: CardInstanceId[],
-  legalAction: LegalAction,
-): void {
-  state.pendingChoice = {
-    choiceId: `v1919_systematic_layoffs_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1919.systematic_layoffs:${state.stateVersion + 1}`,
-    prompt: "Systematic Layoffs: Agenda forfeiten",
-    kind: "select_cards",
-    options: targets.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: `${definition.title} (${agendaPointsForScoredCard(state, cardId)})`,
-        publicLabel: definition.title,
-        value: cardId,
-      };
-    }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1919OperationAbility: "forfeit_scored_agenda_choice",
-    eligibleAgendaCount: targets.length,
-  };
-}
-
-function resolveSystematicLayoffsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1919.systematic_layoffs"))
-    throw new Error("Es ist keine Systematic-Layoffs-Choice offen.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  if (selectedIds.length !== 1)
-    throw new Error("Systematic Layoffs braucht genau eine Agenda.");
-  resolveSystematicLayoffsForfeit(
-    state,
-    mustArrayValue(selectedIds, 0, "Systematic-Layoffs-Auswahl fehlt."),
-    legalAction,
-  );
-  delete state.pendingChoice;
-}
-
-function resolveSystematicLayoffsForfeit(
-  state: GameState,
-  targetAgendaId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (!corpScoredAgendaForfeitTargets(state).includes(targetAgendaId))
-    throw new Error("Systematic Layoffs darf diese Agenda nicht forfeiten.");
-  const agendaPointValue = agendaPointsForScoredCard(state, targetAgendaId);
-  forfeitCorpAgendaForPointCost(state, targetAgendaId);
-  credits(state, "corp", Math.max(1, agendaPointValue));
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1919OperationAbility: "forfeit_scored_agenda",
-    forfeitedAgendaCardId: targetAgendaId,
-    forfeitedAgendaDefinitionId: definitionFor(state, targetAgendaId).id,
-    agendaPointCostPaid: agendaPointValue,
-    gainedCredits: Math.max(1, agendaPointValue),
-    corpCreditsAfter: state.corp.credits,
-    specialZone: "removed_from_game",
-    specialZoneVisibility: "public",
-    specialZoneReason: "v1919_systematic_layoffs",
-  };
-}
-
 function corpAgendaPointTotal(state: GameState): number {
   const scoredPoints = state.corp.scoreArea.reduce(
     (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
@@ -18776,7 +19183,7 @@ function startSingaporeCityGridSwapChoice(
     throw new Error("Singapore City Grid ist nicht an diesen Run gebunden.");
   const server = mustServer(state, serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht im angegriffenen Fort.");
+    throw new Error("Singapore City Grid ist nicht im angegriffenen Remote.");
   const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
   if (
     !sourceInstance.rezzed ||
@@ -18849,7 +19256,7 @@ function resolveSingaporeCityGridSwapChoice(
     );
   const server = mustServer(state, serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Fort.");
+    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Remote.");
   if (
     definitionFor(state, sourceCardId).id !== SERVER_ICE_SWAP_UPGRADE_CARD_ID ||
     !mustInstance(state.cardInstances, sourceCardId).rezzed
@@ -20992,6 +21399,12 @@ function makeActionId(
   if (payload?.oliviaSalazarRezSourceCardId)
     parts.push(String(payload.oliviaSalazarRezSourceCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
+  if (payload?.secondTargetCardId)
+    parts.push(String(payload.secondTargetCardId));
+  if (payload?.powerGridOverloadTrashCount)
+    parts.push(String(payload.powerGridOverloadTrashCount));
+  if (payload?.citySurveillanceDrawDecision)
+    parts.push(String(payload.citySurveillanceDrawDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
   return parts.filter(Boolean).join(".");

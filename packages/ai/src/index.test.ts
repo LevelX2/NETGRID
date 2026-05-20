@@ -17,6 +17,7 @@ import {
   hashState,
   replayEvents,
 } from "@netgrid/engine";
+import { MECHANIC_SMOKE_DECKS } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   assertAiInputIsSideSafe,
@@ -87,6 +88,7 @@ import type {
   CardDefinition,
   CardInstanceId,
   ChoiceRequest,
+  CreateGameConfig,
   DeckDefinition,
   GameState,
   LegalAction,
@@ -902,6 +904,115 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(debugText).toContain("shell_traders_kind:remove_counter");
     expect(debugText).toContain("shell_traders_immediate_install:true");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("finishes Shell Traders backlog before preparing more cards", () => {
+    let state = runnerShellTradersState("ai-shell-traders-backlog-limit");
+    moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+    moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 1);
+    const firstTargetId = moveRunnerCardToGrip(state, "simple_fracter");
+    const secondTargetId = moveRunnerCardCopyToGrip(state, "simple_fracter", [
+      firstTargetId,
+    ]);
+    state.runner.credits = 4;
+    state.runner.clicks = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === firstTargetId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === secondTargetId,
+    );
+    setShellCountersForTest(state, firstTargetId, 1);
+    setShellCountersForTest(state, secondTargetId, 2);
+    moveRunnerCardToGrip(state, "simple_setup_hardware");
+    state.runner.credits = 1;
+    state.runner.clicks = 3;
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remove = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "remove_shell_counter",
+    );
+    const prepare = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remove).toBeDefined();
+    expect(prepare).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remove || !prepare || !gainCredit)
+      throw new Error("Missing Shell Traders backlog fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [prepare, remove, gainCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(remove.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders_kind:remove_counter");
+    expect(debugText).toContain("shell_traders_backlog:2");
+    expect(debugText).toContain("shell_traders_prepare_backlog_penalty:");
+    expect(debugText).toContain("shell_traders_immediate_install:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("installs urgent Shell Traders targets directly when affordable", () => {
+    const input = runnerShellTradersInput("ai-shell-traders-direct-urgent", (state) => {
+      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+      moveRunnerCardToGrip(state, "simple_fracter");
+      state.runner.credits = 5;
+      state.runner.clicks = 3;
+    });
+    const prepare = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardDefinitionId === "simple_fracter",
+    );
+    const directInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_fracter",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(prepare).toBeDefined();
+    expect(directInstall).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!prepare || !directInstall || !gainCredit)
+      throw new Error("Missing Shell Traders direct-install fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [prepare, directInstall, gainCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(directInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders_direct_install_available:true");
+    expect(debugText).toContain("shell_traders_direct_install_urgency:");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
   });
 
   it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
@@ -5632,6 +5743,67 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(drawDecision.reasonCode).toBe("runner.plan.draw_for_answers");
   });
 
+  it("avoids City Surveillance draw tags when economy is available", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-city-surveillance-draw-tax",
+      (state) => {
+        state.runner.credits = 0;
+        state.runner.tags = 16;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "onr_v1_313_city-surveillance", 0);
+        const cityId = state.corp.servers
+          .find((server) => server.id === "remote_1")
+          ?.root.find(
+            (cardId) =>
+              state.cardInstances[cardId]?.definitionId ===
+              "onr_v1_313_city-surveillance",
+          );
+        expect(cityId).toBeDefined();
+        if (!cityId) throw new Error("Missing City Surveillance");
+        state.cardInstances[cityId] = {
+          ...state.cardInstances[cityId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      },
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(drawCard?.payload).toMatchObject({
+      citySurveillanceDrawDecision: "tag",
+      citySurveillanceProjectedTagsAdded: 1,
+    });
+    expect(gainCredit).toBeDefined();
+    if (!drawCard || !gainCredit)
+      throw new Error("Missing City Surveillance draw-tax fixture actions");
+
+    const filteredInput = {
+      ...input,
+      legalActions: [drawCard, gainCredit],
+    };
+    const drawCandidate = generateRunnerPlanCandidates(filteredInput).find(
+      (candidate) => candidate.kind === "draw_for_answers",
+    );
+    expect(drawCandidate).toBeDefined();
+    if (!drawCandidate) throw new Error("Missing draw-for-answers candidate");
+    const drawScore = evaluateRunnerPlan(filteredInput, drawCandidate);
+    const decision = chooseRunnerAction(filteredInput);
+
+    expect(decision.actionId).toBe(gainCredit.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(drawScore.evidence).toContain("city_surveillance_draw_tax:true");
+    expect(drawScore.evidence).toContain("city_surveillance_projected_tags:1");
+  });
+
   it("handles access trash, jack-out and legal fallback without hidden-info claims", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v141-trash-jackout" }),
@@ -8668,8 +8840,9 @@ function installedCorpBbsEconomyInput(seed: string) {
 function runnerActionPhaseInput(
   seed: string,
   mutate: (state: GameState) => void,
+  config: CreateGameConfig = {},
 ) {
-  const state = toRunnerTurn(createGameAfterSetup({ seed }));
+  const state = toRunnerTurn(createGameAfterSetup({ seed, ...config }));
   mutate(state);
   return buildAiDecisionInput(state, "runner", {
     difficulty: "normal",
@@ -9431,6 +9604,29 @@ function moveRunnerCardToGrip(
   definitionId: string,
 ): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.grip.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
+function moveRunnerCardCopyToGrip(
+  state: GameState,
+  definitionId: string,
+  excludeIds: CardInstanceId[],
+): CardInstanceId {
+  const excluded = new Set(excludeIds);
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) => card.definitionId === definitionId && !excluded.has(id),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing ${definitionId} copy`);
+  const id = entry[0];
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = {

@@ -23,7 +23,7 @@
       "side": "corp",
       "coversCards": ["onr_v1_291_falsified-transactions-expert", "onr_v1_292_management-shake-up", "onr_v1_300_project-consultants", "onr_v1_303_silver-lining-recovery-protocol", "onr_v1_304_systematic-layoffs", "onr_v1_305_team-restructuring"],
       "expectedDecisionFamilies": ["play_operation", "resolve_choice", "end_turn"],
-      "sideSafetyAssertions": ["counter_targets_revalidated", "forfeit_cost_revalidated", "public_payload_only"]
+      "sideSafetyAssertions": ["counter_targets_revalidated", "advancement_targets_revalidated", "public_payload_only"]
     },
     {
       "id": "corp_v1919_asset_agenda_support",
