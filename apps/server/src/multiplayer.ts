@@ -1869,7 +1869,8 @@ export class MultiplayerService {
     const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === undoRecord.snapshotId);
     if (!snapshot) return false;
     const targetIndex = record.eventLog.findIndex((event) => event.eventId === undoRecord.targetEventId);
-    record.gameState = clone(snapshot.gameState);
+    const eventLog = record.gameState.eventLog.filter((event) => event.stateVersionAfter <= snapshot.stateVersion);
+    record.gameState = { ...clone(snapshot.gameState), eventLog };
     record.eventLog = targetIndex >= 0 ? record.eventLog.slice(0, targetIndex) : record.eventLog;
     record.actionReceipts = record.actionReceipts.filter((receipt) => receipt.stateVersionAfter <= snapshot.stateVersion);
     record.stateSnapshots = record.stateSnapshots.filter((candidate) => candidate.stateVersion <= snapshot.stateVersion);
@@ -2521,7 +2522,7 @@ export class MultiplayerService {
       stateVersion: gameState.stateVersion,
       matchVersion,
       stateHash: hashState(gameState),
-      gameState: clone(gameState),
+      gameState: cloneGameStateWithoutEventLog(gameState),
       createdAt: this.now(),
       hiddenInfoBarrier
     };
@@ -3217,6 +3218,13 @@ function randomId(prefix: string): string {
 
 function clone<T>(value: T): T {
   return structuredClone(value) as T;
+}
+
+function cloneGameStateWithoutEventLog(gameState: GameState): GameState {
+  return {
+    ...clone({ ...gameState, eventLog: [] }),
+    eventLog: []
+  };
 }
 
 function trimTrailingSlash(value: string): string {

@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-21-snapshot-creation-without-eventlog-clone
-status: inbox
+status: done
 kind: cleanup
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/multiplayer.test.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server test
 ---
 
 # Snapshot-Erzeugung ohne Eventlog-Tiefklon
@@ -48,11 +53,11 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] `snapshotFor` erzeugt neue Snapshots ohne Deepclone des historischen Eventlogs.
-- [ ] Undo findet den richtigen Snapshot und stellt den erwarteten Spielzustand wieder her.
-- [ ] Replay- und StateHash-Tests bleiben stabil.
-- [ ] Ein Regressionstest deckt einen Snapshot nach mehreren Events ab und bestätigt, dass keine private Event-Historie im Snapshot-Klon nötig ist.
-- [ ] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
+- [x] `snapshotFor` erzeugt neue Snapshots ohne Deepclone des historischen Eventlogs.
+- [x] Undo findet den richtigen Snapshot und stellt den erwarteten Spielzustand wieder her.
+- [x] Replay- und StateHash-Tests bleiben stabil.
+- [x] Ein Regressionstest deckt einen Snapshot nach mehreren Events ab und bestätigt, dass keine private Event-Historie im Snapshot-Klon nötig ist.
+- [x] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
 
 ## Umsetzungshinweise
 
@@ -62,4 +67,6 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `snapshotFor` klont neue Snapshot-States jetzt ohne eingebettete Engine-Event-Historie. Akzeptiertes Undo rekonstruiert das Runtime-Eventlog aus dem aktuellen GameState bis zur Snapshot-Version, sodass der wiederhergestellte State replayfähig bleibt. Ein Regressionstest deckt mehrere Events, eventlog-freie `snap_before_*`-Snapshots, akzeptiertes Undo und Replay ab.
+
+Verifikation: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.

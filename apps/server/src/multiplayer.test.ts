@@ -2107,6 +2107,39 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(JSON.stringify(blocked.error)).not.toContain("Simple Agenda");
   });
 
+  it("keeps undo snapshots free of embedded engine event history", async () => {
+    const match = await joinedMatch("undo-snapshot-eventlog-free");
+    const mandatory = await submit(match.service, match.matchId, match.corp, (action) => action.type === "mandatory_draw", "snapshot-free-mandatory");
+    const credit = await submit(match.service, match.matchId, match.corp, (action) => action.type === "gain_credit", "snapshot-free-credit");
+    const storedBeforeUndo = await match.service.loadForTest(match.matchId);
+    expect(storedBeforeUndo?.gameState.eventLog.length).toBeGreaterThan(2);
+    expect(storedBeforeUndo?.stateSnapshots.find((snapshot) => snapshot.snapshotId === `snap_before_${credit.receipt.stateVersionAfter}`)?.gameState.eventLog).toEqual([]);
+
+    const undo = await match.service.requestUndo({
+      matchId: match.matchId,
+      side: "corp",
+      sessionToken: match.corp.sessionToken,
+      targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
+      reason: "Snapshot event history regression"
+    });
+    expect(undo.ok).toBe(true);
+    if (!undo.ok || !undo.undoRequest) throw new Error("Expected undo request");
+    const accepted = await match.service.acceptUndo({
+      matchId: match.matchId,
+      side: "runner",
+      sessionToken: match.runner.sessionToken,
+      undoRequestId: undo.undoRequest.undoRequestId
+    });
+    expect(accepted.ok).toBe(true);
+    if (!accepted.ok) throw new Error(accepted.error.message);
+
+    const storedAfterUndo = await match.service.loadForTest(match.matchId);
+    expect(storedAfterUndo?.gameState.stateVersion).toBe(mandatory.receipt.stateVersionAfter);
+    expect(storedAfterUndo?.gameState.eventLog.map((event) => event.eventId)).toEqual(["evt_0", `evt_${mandatory.receipt.stateVersionAfter}`]);
+    expect(storedAfterUndo?.stateSnapshots.filter((snapshot) => snapshot.snapshotId.startsWith("snap_before_")).every((snapshot) => snapshot.gameState.eventLog.length === 0)).toBe(true);
+    expect((await match.service.replayMatch(match.matchId)).ok).toBe(true);
+  });
+
   it("auto-accepts undo in Human-vs-KI matches", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "undo-ai-auto-accept" });
     const created = await service.createMatch({
