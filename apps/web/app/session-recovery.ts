@@ -100,9 +100,13 @@ export function loadRecentSessions(): RecentSessionInfo[] {
 }
 
 export function loadStoredSession(): SessionInfo | null {
-  const sessionStored = loadSessionStorageSession();
+  const sessionStored = loadCurrentTabSession();
   if (sessionStored) return sessionStored;
   return loadRecoverableSession();
+}
+
+export function loadCurrentTabSession(): SessionInfo | null {
+  return loadSessionStorageSession();
 }
 
 export function storedSessionMatches(recent: RecentSessionInfo | null): boolean {

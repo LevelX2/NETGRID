@@ -106,6 +106,24 @@ function Get-UrlOrigin {
   }
 }
 
+function Convert-LocalWebUrlToLan {
+  param(
+    [Parameter(Mandatory = $true)][string]$Url,
+    [Parameter(Mandatory = $true)][string]$LanWebUrl
+  )
+
+  try {
+    $uri = [Uri]$Url
+    if (($uri.Host -eq "127.0.0.1" -or $uri.Host -eq "localhost") -and $uri.Port -eq 3100) {
+      return "$($LanWebUrl.TrimEnd('/'))$($uri.PathAndQuery)$($uri.Fragment)"
+    }
+  } catch {
+    return $Url
+  }
+
+  return $Url
+}
+
 function Get-LanIpv4 {
   try {
     $defaultRoute = Get-NetRoute -DestinationPrefix "0.0.0.0/0" -ErrorAction Stop |
@@ -168,6 +186,7 @@ $targetOpenUrl = if ([string]::IsNullOrWhiteSpace($OpenUrl)) {
 } else {
   $OpenUrl.Trim()
 }
+$targetOpenUrl = Convert-LocalWebUrlToLan -Url $targetOpenUrl -LanWebUrl $webUrl
 $targetWebUrl = Get-UrlOrigin -Url $targetOpenUrl
 if (-not $targetWebUrl) {
   $targetWebUrl = $webUrl

@@ -199,6 +199,7 @@ import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import { scoredAgendaCreditCounterSource, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
+  loadCurrentTabSession,
   loadRecentSession,
   loadStoredSession,
   persistSession,
@@ -1908,7 +1909,7 @@ export default function Page() {
       setSeed(createMatchSeed());
     }
     setMatchStartSettingsLoaded(true);
-    const storedSession = loadStoredSession();
+    const storedSession = loadCurrentTabSession();
     if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
       setEntryTab("play");
       setMode("join");

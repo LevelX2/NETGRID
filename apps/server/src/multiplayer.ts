@@ -289,6 +289,7 @@ export type MultiplayerStorage = {
   load(matchId: string): Promise<StoredMatch | undefined>;
   save(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
+  listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   health?(): Promise<StorageHealth>;
   backup?(reason?: BackupManifest["reason"]): Promise<{ backupDir: string; manifest: BackupManifest }>;
   maintenanceSummary?(): Promise<StorageMaintenanceSummary>;
@@ -1110,18 +1111,20 @@ export class MultiplayerService {
   async bootstrap(matchId: string, side: Side, sessionToken: string): Promise<SidePayload | { error: SafeErrorPayload }>;
   async bootstrap(matchId: string, side: Side, sessionToken: string, options: { allowLobby: true }): Promise<ServicePayload | { error: SafeErrorPayload }>;
   async bootstrap(matchId: string, side: Side, sessionToken: string, options?: { allowLobby?: boolean }): Promise<ServicePayload | { error: SafeErrorPayload }> {
-    const record = await this.mustLoad(matchId);
-    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
-    const session = this.authenticate(record, side, sessionToken);
-    if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-    session.lastSeenAt = this.now();
-    this.syncPlayerClock(record);
-    await this.storage.save(record);
-    if (this.shouldUseLobbyPayload(record)) {
-      const lobby = this.lobbyPayloadFor(record, side);
-      return options?.allowLobby ? lobby : ({ error: safeError("match_pending", "Das Match ist noch nicht aktiv.") } as { error: SafeErrorPayload });
-    }
-    return this.payloadFor(record, side);
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, side, sessionToken);
+      if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      session.lastSeenAt = this.now();
+      this.syncPlayerClock(record);
+      if (this.storage instanceof InMemoryMatchStorage) await this.storage.save(record);
+      if (this.shouldUseLobbyPayload(record)) {
+        const lobby = this.lobbyPayloadFor(record, side);
+        return options?.allowLobby ? lobby : ({ error: safeError("match_pending", "Das Match ist noch nicht aktiv.") } as { error: SafeErrorPayload });
+      }
+      return this.payloadFor(record, side);
+    });
   }
 
   async setConnected(matchId: string, side: Side, sessionToken: string, connected: boolean): Promise<ServicePayload | { error: SafeErrorPayload }> {
@@ -1615,8 +1618,7 @@ export class MultiplayerService {
   }
 
   async listOpenMatches(): Promise<OpenMatchListEntry[]> {
-    if (!this.storage.list) return [];
-    const records = await this.storage.list();
+    const records = this.storage.listOpenMatchCandidates ? await this.storage.listOpenMatchCandidates() : this.storage.list ? await this.storage.list() : [];
     const nowIso = this.now();
     const nowMs = Date.parse(nowIso);
     return records
