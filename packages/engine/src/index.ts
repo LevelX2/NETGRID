@@ -77,12 +77,6 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./ability-engine/card-implementation-modifiers";
-import {
-  type CardEffectDamageResult,
-  type CardEffectDrawCardsResult,
-  type CardEffectHostedCreditsResult,
-  type CardEffectTrashSourceResult,
-} from "./ability-engine/effect-interpreter";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
 import type {
@@ -239,6 +233,7 @@ import {
   quoteStealCostForAccessedAgenda,
   snapshotPersistentStealCostModifiersForSource,
 } from "./ability-engine/steal-cost-modifiers";
+import { createCardImplementationEffectAdapters } from "./ability-engine/card-implementation-effect-adapters";
 import {
   canPlayPrintedCostOnPlayImplementation,
   executeCardImplementationLifecycleEffects,
@@ -252,6 +247,24 @@ import {
 } from "./ability-engine/card-implementation-runtime";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
+const cardImplementationEffectAdapters = createCardImplementationEffectAdapters({
+  drawCorpCards,
+  drawRunnerCards,
+  runnerDrawSummaryPublicPayload,
+  createDamageImminentEvent,
+  openReplacementWindow,
+  openEventModificationWindow,
+  resolveDamageImminentEvent,
+  addCardCounter,
+  cardCounter,
+  spendCardCounter,
+  credits,
+  mustInstance,
+  definitionFor,
+  runnerInstalledCardIds,
+  trashCorpInstalledCardToArchives,
+  trashRunnerInstalledCardToHeap,
+});
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
@@ -261,12 +274,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   spendClick,
   createAction: action,
   appendResolvedEffectsToPayload,
-  drawCards: drawCardsForCardImplementationEffect,
-  damageRunner: damageRunnerForCardImplementationEffect,
-  addHostedCredits: addHostedCreditsForCardImplementationEffect,
-  takeHostedCredits: takeHostedCreditsForCardImplementationEffect,
-  trashSourceWhenEmpty: trashSourceWhenEmptyForCardImplementationEffect,
-  trashSource: trashSourceForCardImplementationEffect,
+  ...cardImplementationEffectAdapters,
 };
 type VisibleCounterPayload = {
   counterType: CounterType;
@@ -24403,182 +24411,6 @@ function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   if (major !== 0) return major > 0;
   if (minor !== minorGate) return minor > minorGate;
   return patch >= 0;
-}
-
-function drawCardsForCardImplementationEffect(
-  state: GameState,
-  side: Side,
-  amount: number,
-): CardEffectDrawCardsResult {
-  if (side === "corp") {
-    const rdBefore = state.corp.rd.length;
-    drawCorpCards(state, amount);
-    const drawnCount = rdBefore - state.corp.rd.length;
-    return {
-      drawnCount,
-      publicPayload: drawnCount > 0 ? { drawnCards: drawnCount } : {},
-    };
-  }
-
-  const summary = drawRunnerCards(state, amount);
-  return {
-    drawnCount: summary.drawnCount,
-    publicPayload: {
-      ...runnerDrawSummaryPublicPayload(state, summary),
-      ...(summary.drawnCount > 0
-        ? { runnerGripAfter: state.runner.grip.length }
-        : {}),
-    },
-  };
-}
-
-function damageRunnerForCardImplementationEffect(
-  state: GameState,
-  legalAction: LegalAction,
-  sourceDefinitionId: CardDefinitionId,
-  damageType: Extract<DamageType, "meat">,
-  amount: number,
-): CardEffectDamageResult {
-  const request = {
-    damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}`,
-    damageType,
-    amount,
-    source: `operation:${sourceDefinitionId}`,
-  };
-  const event = createDamageImminentEvent(state, request);
-  if (
-    openReplacementWindow(state, event, legalAction) ||
-    openEventModificationWindow(state, event, legalAction)
-  ) {
-    return {
-      resolved: false,
-      damageType,
-      amount: 0,
-      cardsTrashed: 0,
-      flatline: false,
-      publicPayload: legalAction.payload ?? {},
-    };
-  }
-
-  const summary = resolveDamageImminentEvent(state, event);
-  const publicPayload = damageSummaryPublicPayload(summary);
-  if (typeof event.payload.baseDamageAmount === "number")
-    publicPayload.baseDamageAmount = event.payload.baseDamageAmount;
-  if (typeof event.payload.bioweaponsEngineeringModifier === "number")
-    publicPayload.bioweaponsEngineeringModifier =
-      event.payload.bioweaponsEngineeringModifier;
-  return {
-    resolved: true,
-    damageType: summary.damageType,
-    amount: summary.amount,
-    cardsTrashed: summary.cardsTrashed,
-    flatline: summary.flatline,
-    publicPayload,
-  };
-}
-
-function damageSummaryPublicPayload(
-  summary: DamageSummary,
-): Record<string, string | number | boolean> {
-  return {
-    damageResolved: true,
-    damageType: summary.damageType,
-    damageAmount: summary.amount,
-    cardsTrashed: summary.cardsTrashed,
-    flatline: summary.flatline,
-    ...(summary.coreDamageAfter !== undefined
-      ? { coreDamageAfter: summary.coreDamageAfter }
-      : {}),
-    ...(summary.runnerMaxHandSizeAfter !== undefined
-      ? { runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter }
-      : {}),
-  };
-}
-
-function addHostedCreditsForCardImplementationEffect(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  amount: number,
-): CardEffectHostedCreditsResult {
-  addCardCounter(state, sourceCardId, "bit", amount);
-  const hostedCreditsAfter = cardCounter(state, sourceCardId, "bit");
-  return {
-    amount,
-    hostedCreditsAfter,
-    publicPayload: {
-      counterType: "bit",
-      hostedCreditsAdded: amount,
-      hostedCreditsAfter,
-      addedCounterAmount: amount,
-      remainingCounters: hostedCreditsAfter,
-    },
-  };
-}
-
-function takeHostedCreditsForCardImplementationEffect(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-  side: Side,
-  amount: number,
-): CardEffectHostedCreditsResult {
-  const available = cardCounter(state, sourceCardId, "bit");
-  if (available <= 0)
-    throw new Error("Auf der Quelle liegen keine Credits.");
-  const taken = Math.min(available, amount);
-  spendCardCounter(state, sourceCardId, "bit", taken);
-  credits(state, side, taken);
-  const hostedCreditsAfter = cardCounter(state, sourceCardId, "bit");
-  return {
-    amount: taken,
-    hostedCreditsAfter,
-    publicPayload: {
-      counterType: "bit",
-      hostedCreditsTaken: taken,
-      hostedCreditsAfter,
-      removedCounterAmount: taken,
-      remainingCounters: hostedCreditsAfter,
-      gainedCredits: taken,
-      [side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"]:
-        side === "corp" ? state.corp.credits : state.runner.credits,
-    },
-  };
-}
-
-function trashSourceWhenEmptyForCardImplementationEffect(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): CardEffectTrashSourceResult {
-  if (cardCounter(state, sourceCardId, "bit") > 0)
-    return { sourceTrashed: false };
-  return trashSourceForCardImplementationEffect(state, sourceCardId);
-}
-
-function trashSourceForCardImplementationEffect(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): CardEffectTrashSourceResult {
-  const instance = mustInstance(state.cardInstances, sourceCardId);
-  const definition = definitionFor(state, sourceCardId);
-  if (
-    instance.controller === "corp" &&
-    (instance.zone.zone === "serverRoot" || state.corp.servers.some((server) => server.root.includes(sourceCardId)))
-  ) {
-    trashCorpInstalledCardToArchives(state, sourceCardId);
-  } else if (
-    instance.controller === "runner" &&
-    runnerInstalledCardIds(state).includes(sourceCardId)
-  ) {
-    trashRunnerInstalledCardToHeap(state, sourceCardId);
-  } else {
-    return { sourceTrashed: false };
-  }
-  return {
-    sourceTrashed: true,
-    publicPayload: {
-      sourceTrashed: true,
-      trashedCardDefinitionId: definition.id,
-    },
-  };
 }
 
 function canPlayCorpOperation(
