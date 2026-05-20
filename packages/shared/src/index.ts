@@ -8027,12 +8027,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "operation",
     subtypes: ["gray-ops"],
     implementationStatus: "playable_mvp",
-    cost: 1,
     rulesText:
-      "Play only if the Runner is tagged. Trash installed Runner hardware.",
+      "Play only if the Runner is tagged. Pay X to trash X pieces of installed Runner hardware, other than Cybernetics.",
     mechanics: [
       "play_operation",
       "tag_condition",
+      "trash_hardware",
       "resource_tag_interaction",
       ONR_V1_LOCAL_PRIVATE,
     ],

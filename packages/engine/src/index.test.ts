@@ -18689,13 +18689,180 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload",
+        sourceDefinition(tagged, action) === "onr_v1_299_power-grid-overload" &&
+        action.payload?.powerGridOverloadTrashCount === 1,
     );
     expect(tagged.runner.rig.hardware).not.toContain(hardwareId);
     expect(tagged.runner.heap).toContain(hardwareId);
     expect(tagged.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
+      powerGridOverloadTrashCount: 1,
+      trashedHardwareCount: 1,
     });
+  });
+
+  it("offers Power Grid Overload X actions for non-Cybernetics hardware and choices exact targets", () => {
+    const runnerDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+      id: "v1914_power_grid_overload_rd_interface_runner",
+      cards: [
+        ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards,
+        { id: "onr_v1_127_full-body-conversion", quantity: 1 },
+        { id: "onr_v1_139_r-and-d-interface", quantity: 1 },
+        { id: "simple_setup_hardware", quantity: 1 },
+      ],
+    };
+    const makeState = (seed: string) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck,
+          corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+          agendaPointsToWin: 7,
+        }),
+      );
+
+    let rdOnly = makeState("v1914-power-grid-overload-rd-only");
+    const rdOnlyInterfaceId = installRunnerHardwareForTest(
+      rdOnly,
+      "onr_v1_139_r-and-d-interface",
+    );
+    const rdOnlyCyberneticsId = installRunnerHardwareForTest(
+      rdOnly,
+      "onr_v1_127_full-body-conversion",
+    );
+    const rdOnlyOperationId = moveCorpCardToHq(
+      rdOnly,
+      "onr_v1_299_power-grid-overload",
+    );
+    rdOnly.runner.tags = 25;
+    rdOnly = apply(rdOnly, "runner", (action) => action.type === "end_turn");
+    rdOnly = apply(
+      rdOnly,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    rdOnly.corp.credits = 1;
+    const rdOnlyAction = mustAction(
+      rdOnly,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(rdOnly, action) === "onr_v1_299_power-grid-overload" &&
+        action.payload?.cardId === rdOnlyOperationId &&
+        action.payload?.powerGridOverloadTrashCount === 1,
+    );
+    expect(rdOnlyAction.costs).toEqual([{ clicks: 1, credits: 1 }]);
+    rdOnly = apply(
+      rdOnly,
+      "corp",
+      (action) => action.actionId === rdOnlyAction.actionId,
+    );
+    expect(rdOnly.pendingChoice).toBeUndefined();
+    expect(rdOnly.runner.heap).toContain(rdOnlyInterfaceId);
+    expect(rdOnly.runner.rig.hardware).toContain(rdOnlyCyberneticsId);
+
+    let state = makeState(
+      "v1914-power-grid-overload-rd-interface-choice",
+    );
+    const rdInterfaceId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_139_r-and-d-interface",
+    );
+    const simpleHardwareId = installRunnerHardwareForTest(
+      state,
+      "simple_setup_hardware",
+    );
+    const cyberneticsId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_127_full-body-conversion",
+    );
+    const operationId = moveCorpCardToHq(
+      state,
+      "onr_v1_299_power-grid-overload",
+    );
+    state.runner.tags = 25;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 3;
+
+    const powerGridActions = getLegalActions(state, "corp")
+      .filter(
+        (action) =>
+          action.type === "play_operation" &&
+          sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
+          action.payload?.cardId === operationId,
+      )
+      .sort(
+        (left, right) =>
+          Number(left.payload?.powerGridOverloadTrashCount ?? 0) -
+          Number(right.payload?.powerGridOverloadTrashCount ?? 0),
+      );
+    expect(
+      powerGridActions.map(
+        (action) => action.payload?.powerGridOverloadTrashCount,
+      ),
+    ).toEqual([1, 2]);
+    expect(powerGridActions.map((action) => action.costs)).toEqual([
+      [{ clicks: 1, credits: 1 }],
+      [{ clicks: 1, credits: 2 }],
+    ]);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const trashOne = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_299_power-grid-overload" &&
+        action.payload?.cardId === operationId &&
+        action.payload?.powerGridOverloadTrashCount === 1,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === trashOne.actionId,
+    );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "public",
+    });
+    expect(
+      state.pendingChoice?.options.map((option) => option.value).sort(),
+    ).toEqual([rdInterfaceId, simpleHardwareId].sort());
+    expect(
+      state.pendingChoice?.options.map((option) => option.value),
+    ).not.toContain(cyberneticsId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_operation",
+      powerGridOverloadChoiceOpened: true,
+      eligibleHardwareCount: 2,
+      powerGridOverloadTrashCount: 1,
+    });
+
+    const rdOptionId =
+      state.pendingChoice?.options.find(
+        (option) => option.value === rdInterfaceId,
+      )?.id ?? "";
+    state = applyChoice(state, "corp", rdOptionId);
+    expect(state.runner.heap).toContain(rdInterfaceId);
+    expect(state.runner.rig.hardware).not.toContain(rdInterfaceId);
+    expect(state.runner.rig.hardware).toContain(simpleHardwareId);
+    expect(state.runner.rig.hardware).toContain(cyberneticsId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      powerGridOverloadTrashCount: 1,
+      trashedHardwareCount: 1,
+      trashedHardwareDefinitionIds: "onr_v1_139_r-and-d-interface",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("loads Armadillo bits for tag removal and refreshes them at Runner turn start", () => {

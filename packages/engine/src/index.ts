@@ -15874,6 +15874,177 @@ function corpScoredAgendaForfeitTargets(
     .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
 }
 
+function powerGridOverloadEligibleHardwareIds(
+  state: GameState,
+): CardInstanceId[] {
+  return state.runner.rig.hardware
+    .slice()
+    .filter((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return (
+        definition.type === "hardware" &&
+        !cardHasSubtype(definition, "cybernetics")
+      );
+    })
+    .sort((left, right) => {
+      const leftDefinition = definitionFor(state, left);
+      const rightDefinition = definitionFor(state, right);
+      const byTitle = leftDefinition.title.localeCompare(rightDefinition.title);
+      if (byTitle !== 0) return byTitle;
+      return left.localeCompare(right);
+    });
+}
+
+function powerGridOverloadLegalActions(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): LegalAction[] {
+  const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
+  const maxTrashCount = Math.min(eligibleHardwareIds.length, state.corp.credits);
+  const actions: LegalAction[] = [];
+  for (let trashCount = 1; trashCount <= maxTrashCount; trashCount += 1) {
+    actions.push(
+      action(
+        state,
+        "corp",
+        "play_operation",
+        `${definition.title}: ${trashCount} Hardware trashen`,
+        cardId,
+        [{ clicks: 1, credits: trashCount }],
+        {
+          cardId,
+          powerGridOverloadTrashCount: trashCount,
+          eligibleHardwareCount: eligibleHardwareIds.length,
+        },
+      ),
+    );
+  }
+  return actions;
+}
+
+function powerGridOverloadTrashCountFromPayload(
+  legalAction: LegalAction,
+): number {
+  const trashCount = Number(
+    legalAction.payload?.powerGridOverloadTrashCount ?? 1,
+  );
+  if (!Number.isInteger(trashCount) || trashCount <= 0)
+    throw new Error("Power Grid Overload braucht eine gueltige X-Auswahl.");
+  return trashCount;
+}
+
+function resolvePowerGridOverloadOperation(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const trashCount = powerGridOverloadTrashCountFromPayload(legalAction);
+  const eligibleHardwareIds = powerGridOverloadEligibleHardwareIds(state);
+  if (eligibleHardwareIds.length < trashCount)
+    throw new Error(
+      "Power Grid Overload findet nicht genug nicht-Cybernetics-Hardware.",
+    );
+  if (eligibleHardwareIds.length > trashCount) {
+    startPowerGridOverloadChoice(
+      state,
+      eligibleHardwareIds,
+      trashCount,
+      legalAction,
+    );
+    return;
+  }
+  trashPowerGridOverloadHardware(state, eligibleHardwareIds, legalAction);
+}
+
+function startPowerGridOverloadChoice(
+  state: GameState,
+  eligibleHardwareIds: CardInstanceId[],
+  trashCount: number,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1914_power_grid_overload_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1914.power_grid_overload:${trashCount}:${state.stateVersion + 1}`,
+    prompt: `Power Grid Overload: ${trashCount} Hardware trashen`,
+    kind: "select_cards",
+    options: eligibleHardwareIds.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+      };
+    }),
+    minSelections: trashCount,
+    maxSelections: trashCount,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    powerGridOverloadChoiceOpened: true,
+    eligibleHardwareCount: eligibleHardwareIds.length,
+    powerGridOverloadTrashCount: trashCount,
+  };
+}
+
+function powerGridOverloadTrashCountFromChoiceSource(source: string): number {
+  const [, rawTrashCount] = source.split(":");
+  const trashCount = Number(rawTrashCount);
+  if (!Number.isInteger(trashCount) || trashCount <= 0)
+    throw new Error("Power-Grid-Overload-Choice hat keine gueltige X-Auswahl.");
+  return trashCount;
+}
+
+function resolvePowerGridOverloadChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1914.power_grid_overload"))
+    throw new Error("Es ist keine Power-Grid-Overload-Choice offen.");
+  const trashCount = powerGridOverloadTrashCountFromChoiceSource(choice.source);
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  if (selectedIds.length !== trashCount)
+    throw new Error("Power Grid Overload braucht genau X Hardware-Ziele.");
+  const legalTargets = new Set(powerGridOverloadEligibleHardwareIds(state));
+  for (const cardId of selectedIds) {
+    if (!legalTargets.has(cardId))
+      throw new Error(
+        "Power Grid Overload darf dieses Hardware-Ziel nicht trashen.",
+      );
+  }
+  trashPowerGridOverloadHardware(state, selectedIds, legalAction);
+  delete state.pendingChoice;
+}
+
+function trashPowerGridOverloadHardware(
+  state: GameState,
+  hardwareIds: CardInstanceId[],
+  legalAction: LegalAction,
+): void {
+  const definitionIds = hardwareIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+  for (const cardId of hardwareIds) {
+    if (!powerGridOverloadEligibleHardwareIds(state).includes(cardId))
+      throw new Error(
+        "Power Grid Overload darf dieses Hardware-Ziel nicht mehr trashen.",
+      );
+    trashRunnerInstalledCardToHeap(state, cardId);
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    powerGridOverloadTrashCount: hardwareIds.length,
+    trashedHardwareCount: hardwareIds.length,
+    trashedHardwareDefinitionIds: definitionIds.join(","),
+  };
+}
+
 function systematicLayoffsLegalActions(
   state: GameState,
   cardId: CardInstanceId,
@@ -17328,6 +17499,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
     resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
+    resolvePowerGridOverloadChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1920.ice_transmutation")) {
@@ -21670,6 +21845,8 @@ function makeActionId(
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
   if (payload?.secondTargetCardId)
     parts.push(String(payload.secondTargetCardId));
+  if (payload?.powerGridOverloadTrashCount)
+    parts.push(String(payload.powerGridOverloadTrashCount));
   if (payload?.citySurveillanceDrawDecision)
     parts.push(String(payload.citySurveillanceDrawDecision));
   if (payload?.approachIceExposeDecision)
@@ -22285,6 +22462,11 @@ function publicContextForAction(
       "runnerTagsAfter",
       "trashedResourceCount",
       "trashedResourceDefinitionIds",
+      "powerGridOverloadTrashCount",
+      "powerGridOverloadChoiceOpened",
+      "eligibleHardwareCount",
+      "trashedHardwareCount",
+      "trashedHardwareDefinitionIds",
       "runnerRunAttemptsLastTurn",
     ]) {
       const value = legalAction.payload?.[key];
@@ -22580,6 +22762,11 @@ function publicContextForAction(
     "citySurveillanceProjectedTagsAdded",
     "citySurveillanceCreditsPaid",
     "citySurveillanceTagsAdded",
+    "powerGridOverloadTrashCount",
+    "powerGridOverloadChoiceOpened",
+    "eligibleHardwareCount",
+    "trashedHardwareCount",
+    "trashedHardwareDefinitionIds",
     "creditsLost",
     "tagsAdded",
     "runnerTagsAfter",
