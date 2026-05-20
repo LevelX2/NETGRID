@@ -132,6 +132,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
   "onr_v1_224_bolter-cluster":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
+  "onr_v1_225_canis-major":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/canis-major.ts",
+  "onr_v1_226_canis-minor":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/canis-minor.ts",
   "onr_v1_227_cerberus":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/cerberus.ts",
   "onr_v1_229_code-corpse":
@@ -164,12 +168,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
   "onr_v1_244_filter":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/filter.ts",
+  "onr_v1_245_fire-wall":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/fire-wall.ts",
   "onr_v1_246_fragmentation-storm":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fragmentation-storm.ts",
   "onr_v1_249_hunter":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
   "onr_v1_250_ice-pick-willie":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/ice-pick-willie.ts",
+  "onr_v1_251_jack-attack":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/jack-attack.ts",
   "onr_v1_252_keeper":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/keeper.ts",
   "onr_v1_253_laser-wire":
@@ -184,6 +192,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/nerve-labyrinth.ts",
   "onr_v1_258_neural-blade":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/neural-blade.ts",
+  "onr_v1_259_in-the-face":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/pi-in-the-face.ts",
   "onr_v1_261_quandary":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/quandary.ts",
   "onr_v1_262_razor-wire":
@@ -206,6 +216,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/sleeper.ts",
   "onr_v1_273_triggerman":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/triggerman.ts",
+  "onr_v1_274_tutor":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/tutor.ts",
+  "onr_v1_277_virizz":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/virizz.ts",
   "onr_v1_278_wall-of-ice":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/wall-of-ice.ts",
   "onr_v1_279_wall-of-static":
@@ -466,16 +480,6 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
       status: "legacy_engine_special_case",
       reason:
         "Run-duration breaker strength modifier is still stored in RunState and reconstructed by ActiveModifier query.",
-      currentLocations: [
-        "packages/engine/src/index.ts",
-        "packages/engine/src/ability-engine/active-modifiers.ts",
-      ],
-    },
-    {
-      cardDefinitionId: "onr_v1_277_virizz",
-      status: "legacy_engine_special_case",
-      reason:
-        "Run-duration break-subroutine-cost modifier is still stored in RunState and reconstructed by ActiveModifier query.",
       currentLocations: [
         "packages/engine/src/index.ts",
         "packages/engine/src/ability-engine/active-modifiers.ts",

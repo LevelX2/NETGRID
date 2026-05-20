@@ -401,6 +401,27 @@ export type CardPrintedSubroutineImplementation =
       breakTags?: readonly string[];
     }
   | {
+      kind: "run_duration_additional_subroutine";
+      subroutine: CardSubroutineImplementation;
+      append: "after_existing";
+      text: string;
+      visibility: EventVisibilityClass;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "run_duration_break_subroutine_cost";
+      amount: number;
+      text: string;
+      visibility: EventVisibilityClass;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "run_duration_cannot_jack_out";
+      text: string;
+      visibility: EventVisibilityClass;
+      breakTags?: readonly string[];
+    }
+  | {
       kind: "trace";
       baseTraceStrength: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];

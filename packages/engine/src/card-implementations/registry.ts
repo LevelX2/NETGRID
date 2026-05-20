@@ -41,6 +41,8 @@ import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq
 import { aspImplementation } from "./onr-v1/corp/ice/asp";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
+import { canisMajorImplementation } from "./onr-v1/corp/ice/canis-major";
+import { canisMinorImplementation } from "./onr-v1/corp/ice/canis-minor";
 import { cerberusImplementation } from "./onr-v1/corp/ice/cerberus";
 import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
 import { corticalScannerImplementation } from "./onr-v1/corp/ice/cortical-scanner";
@@ -57,9 +59,11 @@ import { fangTwoPointZeroImplementation } from "./onr-v1/corp/ice/fang-2-0";
 import { fangImplementation } from "./onr-v1/corp/ice/fang";
 import { fetchFourPointZeroPointOneImplementation } from "./onr-v1/corp/ice/fetch-4-0-1";
 import { filterImplementation } from "./onr-v1/corp/ice/filter";
+import { fireWallImplementation } from "./onr-v1/corp/ice/fire-wall";
 import { fragmentationStormImplementation } from "./onr-v1/corp/ice/fragmentation-storm";
 import { hunterImplementation } from "./onr-v1/corp/ice/hunter";
 import { icePickWillieImplementation } from "./onr-v1/corp/ice/ice-pick-willie";
+import { jackAttackImplementation } from "./onr-v1/corp/ice/jack-attack";
 import { keeperImplementation } from "./onr-v1/corp/ice/keeper";
 import { laserWireImplementation } from "./onr-v1/corp/ice/laser-wire";
 import { licheImplementation } from "./onr-v1/corp/ice/liche";
@@ -67,6 +71,7 @@ import { mazerImplementation } from "./onr-v1/corp/ice/mazer";
 import { mastiffImplementation } from "./onr-v1/corp/ice/mastiff";
 import { nerveLabyrinthImplementation } from "./onr-v1/corp/ice/nerve-labyrinth";
 import { neuralBladeImplementation } from "./onr-v1/corp/ice/neural-blade";
+import { piInTheFaceImplementation } from "./onr-v1/corp/ice/pi-in-the-face";
 import { quandaryImplementation } from "./onr-v1/corp/ice/quandary";
 import { razorWireImplementation } from "./onr-v1/corp/ice/razor-wire";
 import { reinforcedWallImplementation } from "./onr-v1/corp/ice/reinforced-wall";
@@ -78,6 +83,8 @@ import { shockRImplementation } from "./onr-v1/corp/ice/shock-r";
 import { shotgunWireImplementation } from "./onr-v1/corp/ice/shotgun-wire";
 import { sleeperImplementation } from "./onr-v1/corp/ice/sleeper";
 import { triggermanImplementation } from "./onr-v1/corp/ice/triggerman";
+import { tutorImplementation } from "./onr-v1/corp/ice/tutor";
+import { virizzImplementation } from "./onr-v1/corp/ice/virizz";
 import { wallOfIceImplementation } from "./onr-v1/corp/ice/wall-of-ice";
 import { wallOfStaticImplementation } from "./onr-v1/corp/ice/wall-of-static";
 import { zombieImplementation } from "./onr-v1/corp/ice/zombie";
@@ -184,6 +191,8 @@ export const CARD_IMPLEMENTATIONS = [
   aspImplementation,
   banpeiImplementation,
   bolterClusterImplementation,
+  canisMajorImplementation,
+  canisMinorImplementation,
   cerberusImplementation,
   codeCorpseImplementation,
   corticalScannerImplementation,
@@ -200,9 +209,11 @@ export const CARD_IMPLEMENTATIONS = [
   fangTwoPointZeroImplementation,
   fetchFourPointZeroPointOneImplementation,
   filterImplementation,
+  fireWallImplementation,
   fragmentationStormImplementation,
   hunterImplementation,
   icePickWillieImplementation,
+  jackAttackImplementation,
   keeperImplementation,
   laserWireImplementation,
   licheImplementation,
@@ -210,6 +221,7 @@ export const CARD_IMPLEMENTATIONS = [
   mazerImplementation,
   nerveLabyrinthImplementation,
   neuralBladeImplementation,
+  piInTheFaceImplementation,
   quandaryImplementation,
   razorWireImplementation,
   reinforcedWallImplementation,
@@ -221,6 +233,8 @@ export const CARD_IMPLEMENTATIONS = [
   shotgunWireImplementation,
   sleeperImplementation,
   triggermanImplementation,
+  tutorImplementation,
+  virizzImplementation,
   wallOfIceImplementation,
   wallOfStaticImplementation,
   zombieImplementation,

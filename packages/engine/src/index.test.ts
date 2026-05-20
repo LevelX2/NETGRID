@@ -8819,6 +8819,84 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("registers P3.30 run-duration and ETR catchup ICE as implemented", () => {
+    const p330IceCases = [
+      {
+        definitionId: "onr_v1_245_fire-wall",
+        subroutines: [expect.objectContaining({ kind: "end_the_run" })],
+      },
+      {
+        definitionId: "onr_v1_259_in-the-face",
+        subroutines: [expect.objectContaining({ kind: "end_the_run" })],
+      },
+      {
+        definitionId: "onr_v1_226_canis-minor",
+        subroutines: [
+          expect.objectContaining({
+            kind: "run_duration_ice_strength",
+            amount: 1,
+          }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_225_canis-major",
+        subroutines: [
+          expect.objectContaining({
+            kind: "run_duration_ice_strength",
+            amount: 2,
+          }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_274_tutor",
+        subroutines: [
+          expect.objectContaining({
+            kind: "run_duration_additional_subroutine",
+            append: "after_existing",
+            subroutine: expect.objectContaining({ kind: "end_the_run" }),
+          }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_277_virizz",
+        subroutines: [
+          expect.objectContaining({
+            kind: "run_duration_break_subroutine_cost",
+            amount: 1,
+          }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_251_jack-attack",
+        subroutines: [
+          expect.objectContaining({ kind: "run_duration_cannot_jack_out" }),
+          expect.objectContaining({
+            kind: "trace",
+            baseTraceStrength: 5,
+          }),
+        ],
+      },
+    ] as const;
+
+    for (const { definitionId, subroutines } of p330IceCases) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.printedSubroutines,
+        definitionId,
+      ).toEqual(subroutines);
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_222_ball-and-chain"),
+    ).toBeUndefined();
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_222_ball-and-chain")
+        ?.status,
+    ).toBe("pending_implementation");
+  });
+
   it("executes typed gain_credits card effects", () => {
     const state = createGameAfterSetup({ seed: "card-effect-gain-credits" });
     state.runner.credits = 5;

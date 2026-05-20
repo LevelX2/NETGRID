@@ -62,6 +62,39 @@ function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "run_duration_additional_subroutine") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    if (
+      subroutine.append !== "after_existing" ||
+      subroutine.subroutine.kind !== "end_the_run"
+    )
+      throw new Error("Unsupported run-duration additional subroutine.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_future_end_the_run_subroutine",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (subroutine.kind === "run_duration_break_subroutine_cost") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Run-duration break-cost subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_break_subroutine_cost_modifier",
+      amount,
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (subroutine.kind === "run_duration_cannot_jack_out") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_jack_out_lock",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");
