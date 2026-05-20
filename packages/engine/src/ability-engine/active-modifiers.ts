@@ -31,6 +31,7 @@ export type ActiveModifierKind =
   | "rez_cost"
   | "install_cost"
   | "memory_units"
+  | "agenda_difficulty"
   | "trash_cost"
   | "break_subroutine_cost"
   | "jack_out_cost";
@@ -133,6 +134,30 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
       amount,
       duration: "while_installed",
       target: { kind: "side", id: "runner" },
+      visibility: "public",
+    });
+  }
+  for (const active of activeCardImplementationModifiersForScoredCorpAgendas(
+    state,
+    "agenda_difficulty",
+  )) {
+    if (!isPublicScoredCorpAgendaModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `scored.agenda_difficulty.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "agenda_difficulty",
+      side: "corp",
+      amount: active.modifier.operation === "reduce" ? -amount : amount,
+      duration: "game",
+      target: {
+        kind: "subtype",
+        ...(active.modifier.appliesTo.subtype
+          ? { subtype: active.modifier.appliesTo.subtype }
+          : {}),
+      },
       visibility: "public",
     });
   }

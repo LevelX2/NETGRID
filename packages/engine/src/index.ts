@@ -72,6 +72,7 @@ import {
   activeCardImplementationModifiersForCorpRoot,
   activeCardImplementationModifiersForRunnerInstalled,
   activeCardImplementationModifiersForScoredCorpAgendas,
+  cardMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
@@ -90,6 +91,7 @@ import type {
   CardEffectImplementation,
   CardLifecycleImplementation,
   CardLifecycleTriggeredAbilityImplementation,
+  CardAgendaDifficultyModifierImplementation,
   OnPlayCardAbilityImplementation,
 } from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
@@ -402,8 +404,6 @@ const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
-const BLACK_ICE_QUALITY_ASSURANCE_ID =
-  "onr_v1_191_black-ice-quality-assurance";
 const ARMADILLO_ARMORED_ROAD_HOME_ID =
   "onr_v1_120_armadillo-armored-road-home";
 const DRIFTER_MOBILE_ENVIRONMENT_ID =
@@ -4858,11 +4858,6 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
       cardHasSubtype(iceDefinition, "wall")
     )
       bonus += 1;
-    if (
-      agendaDefinition.id === BLACK_ICE_QUALITY_ASSURANCE_ID &&
-      cardHasSubtype(iceDefinition, "black_ice")
-    )
-      bonus += 2;
   }
   bonus += iceStrengthModifierBonusFor(state, iceId);
   bonus += cardCounter(state, iceId, "mark");
@@ -14988,13 +14983,6 @@ function markBrokerUsedThisTurn(
   flags.brokerActionCardIdsThisTurn = used.slice().sort();
 }
 
-function corpHasScoredExecutiveExtraction(state: GameState): boolean {
-  return scoredCorpAgendaIds(state).some(
-    (cardId) =>
-      definitionFor(state, cardId).id === "onr_v1_201_executive-extraction",
-  );
-}
-
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
     (cardId) =>
@@ -15012,14 +15000,35 @@ function effectiveAgendaDifficulty(
     throw new Error("Difficulty kann nur fuer Agenda-Karten berechnet werden.");
   let difficulty = definition.advancementRequirement ?? 0;
   if (runnerHasInstalledCorporateAlly(state)) difficulty += 1;
-  if (
-    corpHasScoredExecutiveExtraction(state) &&
-    cardHasSubtype(definition, "gray_ops")
-  )
-    difficulty -= 1;
+  difficulty += cardImplementationAgendaDifficultyModifier(state, definition);
   difficulty += serverDifficultyIncreaseFromFaitAccompli(state, agendaId);
   difficulty -= serverDifficultyReductionFromUpgrades(state, agendaId);
   return Math.max(0, difficulty);
+}
+
+function cardImplementationAgendaDifficultyModifier(
+  state: GameState,
+  agendaDefinition: CardDefinition,
+): number {
+  return activeCardImplementationModifiersForScoredCorpAgendas(
+    state,
+    "agenda_difficulty",
+  ).reduce((sum, active) => {
+    const modifier: CardAgendaDifficultyModifierImplementation =
+      active.modifier;
+    if (!isPublicScoredCorpAgendaModifier(modifier)) return sum;
+    if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+      return sum;
+    if (
+      typeof modifier.amount !== "number" ||
+      !Number.isInteger(modifier.amount) ||
+      modifier.amount <= 0
+    )
+      return sum;
+    return (
+      sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
+    );
+  }, 0);
 }
 
 function serverDifficultyIncreaseFromFaitAccompli(
@@ -22752,7 +22761,12 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     rezzed: instance.rezzed,
     advancementCounters: instance.advancementCounters,
     ...(definition.advancementRequirement !== undefined
-      ? { advancementRequirement: definition.advancementRequirement }
+      ? {
+          advancementRequirement:
+            definition.type === "agenda"
+              ? effectiveAgendaDifficulty(state, id)
+              : definition.advancementRequirement,
+        }
       : {}),
     ...(definition.strength !== undefined
       ? {

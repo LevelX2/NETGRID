@@ -70,10 +70,18 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/silicon-saloon-franchise.ts",
   "onr_v1_184_top-runners-conference":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/top-runners-conference.ts",
+  "onr_v1_189_artificial-security-directors":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/artificial-security-directors.ts",
+  "onr_v1_191_black-ice-quality-assurance":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/black-ice-quality-assurance.ts",
   "onr_v1_193_corporate-coup":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
   "onr_v1_198_detroit-police-contract":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/detroit-police-contract.ts",
+  "onr_v1_201_executive-extraction":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/executive-extraction.ts",
+  "onr_v1_202_genetics-visionary-acquisition":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/genetics-visionary-acquisition.ts",
   "onr_v1_205_main-office-relocation":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/main-office-relocation.ts",
   "onr_v1_206_marine-arcology":
@@ -193,6 +201,16 @@ function implementedCoverageFor(
   ) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for passive memory-unit modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "agenda_difficulty",
+    )
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive agenda-difficulty modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
   }

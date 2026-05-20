@@ -1,6 +1,10 @@
 import type { CardDefinitionId } from "@netgrid/shared";
+import { artificialSecurityDirectorsImplementation } from "./onr-v1/corp/agendas/artificial-security-directors";
+import { blackIceQualityAssuranceImplementation } from "./onr-v1/corp/agendas/black-ice-quality-assurance";
 import { corporateCoupImplementation } from "./onr-v1/corp/agendas/corporate-coup";
 import { detroitPoliceContractImplementation } from "./onr-v1/corp/agendas/detroit-police-contract";
+import { executiveExtractionImplementation } from "./onr-v1/corp/agendas/executive-extraction";
+import { geneticsVisionaryAcquisitionImplementation } from "./onr-v1/corp/agendas/genetics-visionary-acquisition";
 import { mainOfficeRelocationImplementation } from "./onr-v1/corp/agendas/main-office-relocation";
 import { marineArcologyImplementation } from "./onr-v1/corp/agendas/marine-arcology";
 import { onCallSoloTeamImplementation } from "./onr-v1/corp/agendas/on-call-solo-team";
@@ -65,8 +69,12 @@ export const CARD_IMPLEMENTATIONS = [
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
   topRunnersConferenceImplementation,
+  artificialSecurityDirectorsImplementation,
+  blackIceQualityAssuranceImplementation,
   corporateCoupImplementation,
   detroitPoliceContractImplementation,
+  executiveExtractionImplementation,
+  geneticsVisionaryAcquisitionImplementation,
   mainOfficeRelocationImplementation,
   marineArcologyImplementation,
   onCallSoloTeamImplementation,

@@ -1,10 +1,12 @@
 import type { CardDefinition, CardInstanceId, GameState } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
+  activeCardImplementationModifiersForScoredCorpAgendas,
   cardDefinitionForInstance,
   cardInstanceFor,
   cardMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
+  isPublicScoredCorpAgendaModifier,
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
 import type { CardIceStrengthModifierImplementation } from "./definition-types";
@@ -16,9 +18,10 @@ function iceStrengthModifierAppliesToIce(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): boolean {
+  if (modifier.operation !== "increase") return false;
   if (
-    modifier.operation !== "increase" ||
-    !isPublicRezzedCorpRootModifier(modifier)
+    !isPublicRezzedCorpRootModifier(modifier) &&
+    !isPublicScoredCorpAgendaModifier(modifier)
   )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
@@ -42,6 +45,22 @@ export function iceStrengthModifierBonusFor(
   if (iceDefinition.type !== "ice") return 0;
   let bonus = 0;
   for (const match of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "ice_strength",
+  )) {
+    if (
+      !iceStrengthModifierAppliesToIce(
+        state,
+        match.modifier,
+        match.sourceCardInstanceId,
+        iceId,
+        iceDefinition,
+      )
+    )
+      continue;
+    bonus += match.modifier.amount;
+  }
+  for (const match of activeCardImplementationModifiersForScoredCorpAgendas(
     state,
     "ice_strength",
   )) {

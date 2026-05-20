@@ -8115,6 +8115,57 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("describes P3.9 scored agenda passive modifiers", () => {
+    for (const [definitionId, subtype] of [
+      ["onr_v1_189_artificial-security-directors", "black_ops"],
+      ["onr_v1_201_executive-extraction", "gray_ops"],
+      ["onr_v1_202_genetics-visionary-acquisition", "research"],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+        expect.objectContaining({
+          kind: "agenda_difficulty",
+          operation: "reduce",
+          amount: 1,
+          activeWhile: "scored",
+          sourceZone: "corp_scored_agenda",
+          side: "corp",
+          visibility: "public",
+          appliesTo: { cardType: "agenda", subtype },
+        }),
+      );
+    }
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_191_black-ice-quality-assurance",
+      )?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "ice_strength",
+        operation: "increase",
+        amount: 2,
+        activeWhile: "scored",
+        sourceZone: "corp_scored_agenda",
+        visibility: "public",
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          subtype: "black_ice",
+        },
+      }),
+    );
+
+    for (const definitionId of [
+      "onr_v1_189_artificial-security-directors",
+      "onr_v1_191_black-ice-quality-assurance",
+      "onr_v1_201_executive-extraction",
+      "onr_v1_202_genetics-visionary-acquisition",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -40423,5 +40474,149 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("applies P3.9 agenda_difficulty modifiers from scored Corp agendas to score actions and revalidation", () => {
+    const p39CardIds = new Set([
+      "onr_v1_189_artificial-security-directors",
+      "onr_v1_191_black-ice-quality-assurance",
+      "onr_v1_201_executive-extraction",
+      "onr_v1_202_genetics-visionary-acquisition",
+      "onr_v1_203_hostile-takeover",
+    ]);
+    const makeState = (seed: string) => {
+      const state = apply(
+        createGameAfterSetup({
+          seed,
+          runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: `${seed}_corp`,
+            name: `${seed} Corp`,
+            cards: [
+              { id: "onr_v1_189_artificial-security-directors", quantity: 2 },
+              { id: "onr_v1_191_black-ice-quality-assurance", quantity: 2 },
+              { id: "onr_v1_201_executive-extraction", quantity: 2 },
+              { id: "onr_v1_202_genetics-visionary-acquisition", quantity: 2 },
+              { id: "onr_v1_203_hostile-takeover", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+                (entry) => !p39CardIds.has(entry.id),
+              ),
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+        "corp",
+        (action) => action.type === "mandatory_draw",
+      );
+      state.corp.credits = 80;
+      state.corp.clicks = 30;
+      state.corp.maxHandSize = 100;
+      return state;
+    };
+    const scoreActionExists = (state: GameState, agendaId: CardInstanceId) =>
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "score_agenda" &&
+          String(action.payload?.cardId) === agendaId,
+      );
+    const visibleAgendaDifficulty = (
+      state: GameState,
+      agendaId: CardInstanceId,
+    ) =>
+      getPlayerView(state, "corp")
+        .servers.flatMap((server) => server.root)
+        .find((card) => card.instanceId === agendaId)?.advancementRequirement;
+
+    for (const [sourceDefinitionId, targetDefinitionId] of [
+      [
+        "onr_v1_189_artificial-security-directors",
+        "onr_v1_201_executive-extraction",
+      ],
+      ["onr_v1_201_executive-extraction", "onr_v1_203_hostile-takeover"],
+      [
+        "onr_v1_202_genetics-visionary-acquisition",
+        "onr_v1_191_black-ice-quality-assurance",
+      ],
+    ] as const) {
+      const state = makeState(`p39-${sourceDefinitionId}`);
+      const targetId = putCorpRootInRemote(state, targetDefinitionId);
+      const printedDifficulty =
+        DEMO_CARDS_BY_ID[targetDefinitionId]?.advancementRequirement ?? 0;
+      state.cardInstances[targetId] = {
+        ...state.cardInstances[targetId]!,
+        advancementCounters: printedDifficulty - 1,
+      };
+      expect(scoreActionExists(state, targetId)).toBe(false);
+
+      const sourceId = scoreCorpAgendaForTest(state, sourceDefinitionId);
+      expect(scoreActionExists(state, targetId)).toBe(true);
+      expect(visibleAgendaDifficulty(state, targetId)).toBe(
+        printedDifficulty - 1,
+      );
+
+      removeEverywhere(state, sourceId);
+      expect(scoreActionExists(state, targetId)).toBe(false);
+    }
+
+    const stackingState = makeState("p39-stacking-and-stale");
+    const firstSource = scoreCorpAgendaForTest(
+      stackingState,
+      "onr_v1_189_artificial-security-directors",
+    );
+    const secondSource = scoreCorpAgendaForTest(
+      stackingState,
+      "onr_v1_189_artificial-security-directors",
+    );
+    const blackOpsTarget = putCorpRootInRemote(
+      stackingState,
+      "onr_v1_201_executive-extraction",
+    );
+    stackingState.cardInstances[blackOpsTarget] = {
+      ...stackingState.cardInstances[blackOpsTarget]!,
+      advancementCounters: 1,
+    };
+    expect(scoreActionExists(stackingState, blackOpsTarget)).toBe(true);
+    expect(visibleAgendaDifficulty(stackingState, blackOpsTarget)).toBe(1);
+    expect(
+      collectActiveModifiers(stackingState).filter(
+        (modifier) => modifier.kind === "agenda_difficulty",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceDefinitionId: "onr_v1_189_artificial-security-directors",
+          kind: "agenda_difficulty",
+          side: "corp",
+          amount: -1,
+          duration: "game",
+          target: { kind: "subtype", subtype: "black_ops" },
+          visibility: "public",
+        }),
+      ]),
+    );
+
+    const staleAction = mustAction(
+      stackingState,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        String(action.payload?.cardId) === blackOpsTarget,
+    );
+    const stale = structuredClone(stackingState);
+    removeEverywhere(stale, firstSource);
+    removeEverywhere(stale, secondSource);
+    const staleResult = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "corp",
+      actionId: staleAction.actionId,
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "p39-score-stale-agenda-difficulty",
+    });
+    expect(staleResult.ok).toBe(false);
+    expect(stale.cardInstances[blackOpsTarget]?.zone).toMatchObject({
+      side: "corp",
+      zone: "serverRoot",
+    });
   });
 });

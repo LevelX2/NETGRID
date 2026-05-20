@@ -11,7 +11,8 @@ export type CardModifierImplementation =
   | CardIceStrengthModifierImplementation
   | CardAdditionalSubroutineModifierImplementation
   | CardHandSizeModifierImplementation
-  | CardMemoryUnitsModifierImplementation;
+  | CardMemoryUnitsModifierImplementation
+  | CardAgendaDifficultyModifierImplementation;
 
 export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
@@ -171,8 +172,8 @@ export type CardIceStrengthModifierImplementation = {
   kind: "ice_strength";
   operation: "increase";
   amount: number;
-  activeWhile: "rezzed";
-  sourceZone: "corp_root";
+  activeWhile: "rezzed" | "scored";
+  sourceZone: "corp_root" | "corp_scored_agenda";
   visibility: EventVisibilityClass;
   appliesTo: {
     side: Extract<Side, "corp">;
@@ -215,6 +216,20 @@ export type CardMemoryUnitsModifierImplementation = {
   sourceZone: "runner_installed";
   side: "runner";
   visibility: EventVisibilityClass;
+};
+
+export type CardAgendaDifficultyModifierImplementation = {
+  kind: "agenda_difficulty";
+  operation: "increase" | "reduce";
+  amount: number;
+  activeWhile: "scored";
+  sourceZone: "corp_scored_agenda";
+  side: "corp";
+  visibility: EventVisibilityClass;
+  appliesTo: {
+    cardType: Extract<CardType, "agenda">;
+    subtype?: string;
+  };
 };
 
 export type CardSubroutineImplementation = {
