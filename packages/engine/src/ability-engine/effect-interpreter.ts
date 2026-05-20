@@ -62,6 +62,17 @@ export type CardEffectExecutionContext = {
     zone: Extract<ServerId, "rd" | "hq">,
     count: number | "all",
   ) => CardEffectPrivateLookResult;
+  startDistributeAdvancementCounters?: (
+    amount: number,
+    distribution:
+      | "single_target"
+      | "any_combination"
+      | "up_to_distinct_targets_one_each",
+  ) => CardEffectAdvancementChoiceResult;
+  startMoveAdvancementCounters?: (
+    source: "chosen_card" | "source_card",
+    maxAmount: number | "all",
+  ) => CardEffectAdvancementChoiceResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -120,6 +131,10 @@ export type CardEffectMakeRunResult = {
 };
 
 export type CardEffectPrivateLookResult = {
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectAdvancementChoiceResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -268,6 +283,51 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: effect.amount,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "gain_credits_per_advancement_counter_on_source": {
+        assertPositiveIntegerAmount(
+          "gain_credits_per_advancement_counter_on_source",
+          effect.amountPerCounter,
+        );
+        assertPublicVisibility(
+          "gain_credits_per_advancement_counter_on_source",
+          effect.visibility,
+        );
+        const source = state.cardInstances[context.sourceCardId];
+        if (!source)
+          throw new Error(
+            "gain_credits_per_advancement_counter_on_source source is missing.",
+          );
+        const advancementCounterCount = Math.max(
+          0,
+          Math.floor(source.advancementCounters),
+        );
+        const amount = advancementCounterCount * effect.amountPerCounter;
+        const side = recipientSide(context, effect.recipient);
+        gainCredits(state, side, amount);
+        publicPayload.advancementCounterCount = advancementCounterCount;
+        publicPayload.gainedCredits =
+          Number(publicPayload.gainedCredits ?? 0) + amount;
+        publicPayload[
+          side === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"
+        ] = side === "corp" ? state.corp.credits : state.runner.credits;
+        resolvedEffects.push({
+          effectId: publicEffectId(
+            context,
+            index,
+            "gain_credits_per_advancement_counter_on_source",
+          ),
+          kind: "gain_credits",
+          visibility: effect.visibility,
+          side,
+          amount,
           reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -516,6 +576,54 @@ export function executeCardImplementationEffects(
           throw new Error("private_look count must be positive or all.");
         const lookResult = context.startPrivateLook(effect.zone, effect.count);
         mergePublicPayload(publicPayload, lookResult.publicPayload);
+        return;
+      }
+      case "distribute_advancement_counters": {
+        assertPositiveIntegerAmount(
+          "distribute_advancement_counters",
+          effect.amount,
+        );
+        assertPublicVisibility(
+          "distribute_advancement_counters",
+          effect.visibility,
+        );
+        if (effect.target !== "installed_advanceable_cards")
+          throw new Error(
+            "distribute_advancement_counters target must be installed_advanceable_cards.",
+          );
+        if (!context.startDistributeAdvancementCounters)
+          throw new Error(
+            "distribute_advancement_counters requires a host choice context.",
+          );
+        const choiceResult = context.startDistributeAdvancementCounters(
+          effect.amount,
+          effect.distribution,
+        );
+        mergePublicPayload(publicPayload, choiceResult.publicPayload);
+        return;
+      }
+      case "move_advancement_counters": {
+        assertPublicVisibility("move_advancement_counters", effect.visibility);
+        if (effect.target !== "chosen_installed_advanceable_card")
+          throw new Error(
+            "move_advancement_counters target must be chosen_installed_advanceable_card.",
+          );
+        if (
+          effect.maxAmount !== "all" &&
+          (!Number.isInteger(effect.maxAmount) || effect.maxAmount <= 0)
+        )
+          throw new Error(
+            "move_advancement_counters maxAmount must be all or a positive integer.",
+          );
+        if (!context.startMoveAdvancementCounters)
+          throw new Error(
+            "move_advancement_counters requires a host choice context.",
+          );
+        const choiceResult = context.startMoveAdvancementCounters(
+          effect.source,
+          effect.maxAmount,
+        );
+        mergePublicPayload(publicPayload, choiceResult.publicPayload);
         return;
       }
       case "add_hosted_credits": {

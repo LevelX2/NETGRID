@@ -29,6 +29,7 @@ import {
   type CardEffectMakeRunResult,
   type CardEffectPrivateLookResult,
   type CardEffectTrashSourceResult,
+  type CardEffectAdvancementChoiceResult,
 } from "./effect-interpreter";
 import {
   canUseCardImplementationAbilityLimit,
@@ -38,6 +39,7 @@ import {
 } from "./card-implementation-ability-limits";
 import type {
   ActivatedCardAbilityImplementation,
+  CardAbilityCostImplementation,
   CardConditionImplementation,
   CardEffectImplementation,
   CardLifecycleImplementation,
@@ -72,6 +74,7 @@ export type CardImplementationRuntimeDependencies = {
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
   runnerRunAttemptsLastTurn: (state: GameState) => number;
   spendClick: (state: GameState, side: Side) => void;
+  spendCredits: (state: GameState, side: Side, amount: number) => void;
   createAction: (
     state: GameState,
     side: Side,
@@ -139,6 +142,25 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     legalAction?: LegalAction,
   ) => CardEffectTrashSourceResult;
+  startDistributeAdvancementCounters: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    amount: number,
+    distribution:
+      | "single_target"
+      | "any_combination"
+      | "up_to_distinct_targets_one_each",
+  ) => CardEffectAdvancementChoiceResult;
+  startMoveAdvancementCounters: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    source: "chosen_card" | "source_card",
+    maxAmount: number | "all",
+  ) => CardEffectAdvancementChoiceResult;
   abilityLimits: CardImplementationAbilityLimitHost;
 };
 
@@ -171,6 +193,13 @@ function cardImplementationConditionMet(
         sourceCardId &&
           state.cardInstances[sourceCardId] &&
           deps.cardCounter(state, sourceCardId, "bit") > 0,
+      );
+    case "source_has_advancement_counters":
+      return Boolean(
+        sourceCardId &&
+          state.cardInstances[sourceCardId] &&
+          Math.floor(state.cardInstances[sourceCardId].advancementCounters) >=
+            condition.minimum,
       );
     case "runner_attempted_run_last_turn":
       return (
@@ -264,6 +293,8 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Der Runner muss getaggt sein.");
   if (ability.condition?.kind === "source_has_hosted_credits")
     throw new Error("Auf der Quelle muessen Credits liegen.");
+  if (ability.condition?.kind === "source_has_advancement_counters")
+    throw new Error("Auf der Quelle muessen Advancement-Counter liegen.");
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
   const limitFailureMessage = cardImplementationAbilityLimitFailureMessage(
@@ -722,21 +753,108 @@ function activatedCardImplementationAbilitiesForTiming(
   );
 }
 
-function actionCostForActivatedAbility(
+function assertActivatedCostAmount(
+  cost: CardAbilityCostImplementation,
+): number {
+  if (!Number.isInteger(cost.amount) || cost.amount < 0)
+    throw new Error("Activated CardImplementation cost amount must be non-negative.");
+  return cost.amount;
+}
+
+function activatedAbilityLegalActionCosts(
+  ability: ActivatedCardAbilityImplementation,
+): LegalAction["costs"] {
+  let clicks = 0;
+  let credits = 0;
+  for (const cost of ability.costs) {
+    const amount = assertActivatedCostAmount(cost);
+    if (cost.kind === "action") clicks += amount;
+    else if (cost.kind === "credit") credits += amount;
+    else if (cost.kind === "advancement_counter") {
+      if (cost.source !== "source")
+        throw new Error(
+          "Activated CardImplementation advancement counter cost must use source.",
+        );
+    } else {
+      const unknownCost = cost as { kind?: string };
+      throw new Error(
+        `Unsupported activated CardImplementation cost: ${
+          unknownCost.kind ?? "unknown"
+        }`,
+      );
+    }
+  }
+  return clicks > 0 || credits > 0
+    ? [{ ...(clicks > 0 ? { clicks } : {}), ...(credits > 0 ? { credits } : {}) }]
+    : [];
+}
+
+function advancementCounterCostForActivatedAbility(
   ability: ActivatedCardAbilityImplementation,
 ): number {
-  const actionCosts = ability.costs.filter((cost) => cost.kind === "action");
+  return ability.costs
+    .filter((cost) => cost.kind === "advancement_counter")
+    .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
+}
+
+function validateActivatedAbilityCosts(
+  ability: ActivatedCardAbilityImplementation,
+  legalAction: LegalAction,
+): void {
+  const expectedCosts = activatedAbilityLegalActionCosts(ability);
+  const expectedFirst = expectedCosts[0] ?? {};
+  const actualFirst = legalAction.costs[0] ?? {};
   if (
-    ability.costs.length !== 1 ||
-    actionCosts.length !== 1 ||
-    !Number.isInteger(actionCosts[0]?.amount) ||
-    (actionCosts[0]?.amount ?? 0) <= 0
-  ) {
-    throw new Error(
-      "Activated CardImplementation ability supports exactly one positive action cost.",
-    );
+    legalAction.costs.length !== expectedCosts.length ||
+    (actualFirst.clicks ?? 0) !== (expectedFirst.clicks ?? 0) ||
+    (actualFirst.credits ?? 0) !== (expectedFirst.credits ?? 0)
+  )
+    throw new Error("Die aktivierte Kartenfaehigkeit hat andere Kosten.");
+}
+
+function canPayActivatedCardImplementationCosts(
+  state: GameState,
+  side: Side,
+  cardId: CardInstanceId,
+  ability: ActivatedCardAbilityImplementation,
+): boolean {
+  const legalCosts = activatedAbilityLegalActionCosts(ability);
+  const clicks = legalCosts[0]?.clicks ?? 0;
+  const credits = legalCosts[0]?.credits ?? 0;
+  if ((side === "corp" ? state.corp.clicks : state.runner.clicks) < clicks)
+    return false;
+  if ((side === "corp" ? state.corp.credits : state.runner.credits) < credits)
+    return false;
+  const advancementCounterCost = advancementCounterCostForActivatedAbility(ability);
+  if (advancementCounterCost > 0) {
+    const source = state.cardInstances[cardId];
+    if (!source || source.advancementCounters < advancementCounterCost)
+      return false;
   }
-  return actionCosts[0]!.amount;
+  return true;
+}
+
+function payActivatedCardImplementationCosts(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  side: Side,
+  cardId: CardInstanceId,
+  ability: ActivatedCardAbilityImplementation,
+): void {
+  const legalCosts = activatedAbilityLegalActionCosts(ability);
+  const clicks = legalCosts[0]?.clicks ?? 0;
+  const creditCost = legalCosts[0]?.credits ?? 0;
+  for (let spentClicks = 0; spentClicks < clicks; spentClicks += 1) {
+    deps.spendClick(state, side);
+  }
+  if (creditCost > 0) deps.spendCredits(state, side, creditCost);
+  const advancementCounterCost = advancementCounterCostForActivatedAbility(ability);
+  if (advancementCounterCost > 0) {
+    const source = state.cardInstances[cardId];
+    if (!source || source.advancementCounters < advancementCounterCost)
+      throw new Error("Die Quelle hat nicht genug Advancement-Counter.");
+    source.advancementCounters -= advancementCounterCost;
+  }
 }
 
 function activatedAbilityPayload(
@@ -750,6 +868,12 @@ function activatedAbilityPayload(
     cardImplementationAbilityIndex: abilityIndex,
     cardImplementationAbilityTiming: ability.timing,
     ...(ability.label ? { cardImplementationAbilityLabel: ability.label } : {}),
+    ...(advancementCounterCostForActivatedAbility(ability) > 0
+      ? {
+          cardImplementationAdvancementCounterCost:
+            advancementCounterCostForActivatedAbility(ability),
+        }
+      : {}),
   };
 }
 
@@ -784,7 +908,8 @@ export function pushActivatedCardImplementationActions(
       )
     )
       continue;
-    const actionCost = actionCostForActivatedAbility(ability);
+    if (!canPayActivatedCardImplementationCosts(state, side, sourceCardId, ability))
+      continue;
     actions.push(
       deps.createAction(
         state,
@@ -792,7 +917,7 @@ export function pushActivatedCardImplementationActions(
         "activated_card_ability",
         ability.label ?? `${definition.title}: Fähigkeit nutzen`,
         sourceCardId,
-        [{ clicks: actionCost }],
+        activatedAbilityLegalActionCosts(ability),
         activatedAbilityPayload(sourceCardId, ability, index),
       ),
     );
@@ -850,9 +975,16 @@ function validateActivatedCardImplementationAbility(
   const { cardId, ability } = match;
   if (deps.mustInstance(state.cardInstances, cardId).controller !== legalAction.side)
     throw new Error("Diese aktivierte Kartenfaehigkeit gehoert der anderen Seite.");
-  const actionCost = actionCostForActivatedAbility(ability);
-  if (legalAction.costs[0]?.clicks !== actionCost)
-    throw new Error("Die aktivierte Kartenfaehigkeit hat andere Aktionskosten.");
+  validateActivatedAbilityCosts(ability, legalAction);
+  if (
+    !canPayActivatedCardImplementationCosts(
+      state,
+      legalAction.side,
+      cardId,
+      ability,
+    )
+  )
+    throw new Error("Die aktivierte Kartenfaehigkeit kann nicht bezahlt werden.");
   if (
     legalAction.payload?.cardImplementationAbilityTiming !== ability.timing ||
     legalAction.payload?.cardImplementationAbilityIndex !== match.abilityIndex
@@ -913,10 +1045,13 @@ export function resolveActivatedCardImplementationAbility(
   const match = activatedAbilityForLegalAction(deps, state, legalAction);
   if (!match) return false;
   validateActivatedCardImplementationAbility(deps, state, legalAction, match);
-  const actionCost = actionCostForActivatedAbility(match.ability);
-  for (let spentClicks = 0; spentClicks < actionCost; spentClicks += 1) {
-    deps.spendClick(state, legalAction.side);
-  }
+  payActivatedCardImplementationCosts(
+    deps,
+    state,
+    legalAction.side,
+    match.cardId,
+    match.ability,
+  );
   const result = executeCardImplementationEffects(
     state,
     {
@@ -960,6 +1095,26 @@ export function resolveActivatedCardImplementationAbility(
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
         deps.trashSourceWhenEmpty(state, sourceCardId),
+      trashSource: (sourceCardId) =>
+        deps.trashSource(state, sourceCardId, legalAction),
+      startDistributeAdvancementCounters: (amount, distribution) =>
+        deps.startDistributeAdvancementCounters(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          amount,
+          distribution,
+        ),
+      startMoveAdvancementCounters: (source, maxAmount) =>
+        deps.startMoveAdvancementCounters(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          source,
+          maxAmount,
+        ),
     },
     match.ability.effects,
   );
@@ -1031,6 +1186,26 @@ export function executeOnPlayCardImplementationAbility(
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
         deps.trashSourceWhenEmpty(state, sourceCardId),
+      trashSource: (sourceCardId) =>
+        deps.trashSource(state, sourceCardId, legalAction),
+      startDistributeAdvancementCounters: (amount, distribution) =>
+        deps.startDistributeAdvancementCounters(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          amount,
+          distribution,
+        ),
+      startMoveAdvancementCounters: (source, maxAmount) =>
+        deps.startMoveAdvancementCounters(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          source,
+          maxAmount,
+        ),
     },
     ability.effects,
   );

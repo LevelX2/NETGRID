@@ -72,6 +72,7 @@ export type OnPlayCardAbilityImplementation = {
 export type CardConditionImplementation =
   | { kind: "runner_is_tagged" }
   | { kind: "source_has_hosted_credits" }
+  | { kind: "source_has_advancement_counters"; minimum: number }
   | { kind: "runner_attempted_run_last_turn"; minimumRuns: number };
 
 export type ActivatedCardAbilityImplementation = {
@@ -110,6 +111,11 @@ export type CardAbilityCostImplementation =
   | {
       kind: "credit";
       amount: number;
+    }
+  | {
+      kind: "advancement_counter";
+      amount: number;
+      source: "source";
     };
 
 export type CardEffectImplementation =
@@ -128,13 +134,42 @@ export type CardEffectImplementation =
   | PayCreditsOrLoseGameEffectImplementation
   | UseBaseLinkEffectImplementation
   | IncreaseTraceLinkEffectImplementation
-  | PrivateLookEffectImplementation;
+  | PrivateLookEffectImplementation
+  | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
+  | DistributeAdvancementCountersEffectImplementation
+  | MoveAdvancementCountersEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
   recipient: "controller" | "runner" | "corp";
   amount: number;
   visibility: EventVisibilityClass;
+};
+
+export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
+  kind: "gain_credits_per_advancement_counter_on_source";
+  recipient: "controller" | "corp";
+  amountPerCounter: number;
+  visibility: EventVisibilityClass;
+};
+
+export type DistributeAdvancementCountersEffectImplementation = {
+  kind: "distribute_advancement_counters";
+  amount: number;
+  target: "installed_advanceable_cards";
+  distribution:
+    | "single_target"
+    | "any_combination"
+    | "up_to_distinct_targets_one_each";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type MoveAdvancementCountersEffectImplementation = {
+  kind: "move_advancement_counters";
+  source: "chosen_card" | "source_card";
+  target: "chosen_installed_advanceable_card";
+  maxAmount: number | "all";
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type DrawCardsEffectImplementation = {

@@ -1002,6 +1002,9 @@ export function publicContextForAction(
       "addedCounterAmount",
       "removedCounterAmount",
       "remainingCounters",
+      "advancementCounterCount",
+      "cardImplementationAdvancementCounterCost",
+      "corpClicksAfter",
       "hostedCreditsAdded",
       "hostedCreditsTaken",
       "hostedCreditsAfter",
@@ -1131,6 +1134,27 @@ export function publicContextForAction(
     if (typeof legalAction.payload.advancementCountersAfter === "number")
       context.advancementCountersAfter =
         legalAction.payload.advancementCountersAfter;
+    if (typeof legalAction.payload.advancementCountersMoved === "number")
+      context.advancementCountersMoved =
+        legalAction.payload.advancementCountersMoved;
+    if (
+      typeof legalAction.payload.advancementCounterSourceDefinitionId ===
+      "string"
+    )
+      context.advancementCounterSourceDefinitionId =
+        legalAction.payload.advancementCounterSourceDefinitionId;
+    if (
+      typeof legalAction.payload.advancementCounterTargetDefinitionId ===
+      "string"
+    )
+      context.advancementCounterTargetDefinitionId =
+        legalAction.payload.advancementCounterTargetDefinitionId;
+    if (typeof legalAction.payload.advancementCounterSourceAfter === "number")
+      context.advancementCounterSourceAfter =
+        legalAction.payload.advancementCounterSourceAfter;
+    if (typeof legalAction.payload.advancementCounterTargetAfter === "number")
+      context.advancementCounterTargetAfter =
+        legalAction.payload.advancementCounterTargetAfter;
     if (typeof legalAction.payload.agendaPointCostPaid === "number")
       context.agendaPointCostPaid = legalAction.payload.agendaPointCostPaid;
     if (typeof legalAction.payload.forfeitedAgendaDefinitionId === "string")

@@ -292,14 +292,24 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/day-shift.ts",
   "onr_v1_290_efficiency-experts":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/efficiency-experts.ts",
+  "onr_v1_291_falsified-transactions-expert":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/falsified-transactions-expert.ts",
+  "onr_v1_292_management-shake-up":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/management-shake-up.ts",
   "onr_v1_293_netwatch-credit-voucher":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/netwatch-credit-voucher.ts",
   "onr_v1_295_night-shift":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/night-shift.ts",
+  "onr_v1_300_project-consultants":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/project-consultants.ts",
   "onr_v1_301_punitive-counterstrike":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/punitive-counterstrike.ts",
   "onr_v1_302_scorched-earth":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/scorched-earth.ts",
+  "onr_v1_304_systematic-layoffs":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/systematic-layoffs.ts",
+  "onr_v1_305_team-restructuring":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/team-restructuring.ts",
   "onr_v1_307_urban-renewal":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
   "onr_v1_309_bbs-whispering-campaign":
@@ -308,6 +318,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/blood-cat.ts",
   "onr_v1_311_braindance-campaign":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
+  "onr_v1_312_chicago-branch":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_318_department-of-truth-enhancement":
@@ -320,6 +332,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
   "onr_v1_326_holovid-campaign":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/holovid-campaign.ts",
+  "onr_v1_328_information-laundering":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/information-laundering.ts",
+  "onr_v1_334_pacifica-regional-ai":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/pacifica-regional-ai.ts",
   "onr_v1_341_skalderviken-sa-beta-test-site":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/skalderviken-sa-beta-test-site.ts",
   "onr_v1_342_solo-squad":
@@ -334,6 +350,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rustbelt-hq-branch.ts",
   "onr_v1_344_spinn-public-relations":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
+  "onr_v1_347_vapor-ops":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/vapor-ops.ts",
   "onr_v1_350_antiquated-interface-routines":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
   "onr_v1_352_chester-mix":
@@ -447,6 +465,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive access-count modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
+  }
+  if (implementation.advanceable) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for installed before/after-rez advanceable behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ACTIVATED_ABILITY_LOCATION);
   }
   if (implementation.accessHooks?.length) {
     reasons.push(

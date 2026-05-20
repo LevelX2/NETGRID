@@ -25,12 +25,15 @@ import { subsidiaryBranchImplementation } from "./onr-v1/corp/agendas/subsidiary
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
 import { bloodCatImplementation } from "./onr-v1/corp/assets/blood-cat";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
+import { chicagoBranchImplementation } from "./onr-v1/corp/assets/chicago-branch";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "./onr-v1/corp/assets/department-of-truth-enhancement";
 import { encoderIncImplementation } from "./onr-v1/corp/assets/encoder-inc";
 import { esaContractImplementation } from "./onr-v1/corp/assets/esa-contract";
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
 import { holovidCampaignImplementation } from "./onr-v1/corp/assets/holovid-campaign";
+import { informationLaunderingImplementation } from "./onr-v1/corp/assets/information-laundering";
+import { pacificaRegionalAiImplementation } from "./onr-v1/corp/assets/pacifica-regional-ai";
 import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/skalderviken-sa-beta-test-site";
 import { soloSquadImplementation } from "./onr-v1/corp/assets/solo-squad";
 import { southAfricanMiningCorpImplementation } from "./onr-v1/corp/assets/south-african-mining-corp";
@@ -38,6 +41,7 @@ import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-p
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
+import { vaporOpsImplementation } from "./onr-v1/corp/assets/vapor-ops";
 import { aspImplementation } from "./onr-v1/corp/ice/asp";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
@@ -96,10 +100,15 @@ import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-ac
 import { datapoolByZetatechImplementation } from "./onr-v1/corp/operations/datapool-by-zetatech";
 import { dayShiftImplementation } from "./onr-v1/corp/operations/day-shift";
 import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/efficiency-experts";
+import { falsifiedTransactionsExpertImplementation } from "./onr-v1/corp/operations/falsified-transactions-expert";
+import { managementShakeUpImplementation } from "./onr-v1/corp/operations/management-shake-up";
 import { netwatchCreditVoucherImplementation } from "./onr-v1/corp/operations/netwatch-credit-voucher";
 import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
+import { projectConsultantsImplementation } from "./onr-v1/corp/operations/project-consultants";
 import { punitiveCounterstrikeImplementation } from "./onr-v1/corp/operations/punitive-counterstrike";
 import { scorchedEarthImplementation } from "./onr-v1/corp/operations/scorched-earth";
+import { systematicLayoffsImplementation } from "./onr-v1/corp/operations/systematic-layoffs";
+import { teamRestructuringImplementation } from "./onr-v1/corp/operations/team-restructuring";
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
@@ -217,25 +226,34 @@ export const CARD_IMPLEMENTATIONS = [
   datapoolByZetatechImplementation,
   dayShiftImplementation,
   efficiencyExpertsImplementation,
+  falsifiedTransactionsExpertImplementation,
+  managementShakeUpImplementation,
   netwatchCreditVoucherImplementation,
   nightShiftImplementation,
+  projectConsultantsImplementation,
   punitiveCounterstrikeImplementation,
   scorchedEarthImplementation,
+  systematicLayoffsImplementation,
+  teamRestructuringImplementation,
   urbanRenewalImplementation,
   bbsWhisperingCampaignImplementation,
   bloodCatImplementation,
   braindanceCampaignImplementation,
+  chicagoBranchImplementation,
   dataMasonsHostingImplementation,
   departmentOfTruthEnhancementImplementation,
   encoderIncImplementation,
   esaContractImplementation,
   fortressArchitectsImplementation,
   holovidCampaignImplementation,
+  informationLaunderingImplementation,
+  pacificaRegionalAiImplementation,
   skaldervikenSaBetaTestSiteImplementation,
   soloSquadImplementation,
   remoteFacilityImplementation,
   rockerboyPromotionImplementation,
   rustbeltHqBranchImplementation,
+  vaporOpsImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
   aspImplementation,

@@ -16603,31 +16603,38 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       rezzed: true,
       advancementCounters: 2,
     };
+    const targetAgendaId = putCorpRootInRemote(corpState, "simple_agenda");
 
     corpState = apply(
       corpState,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1919AssetAbility === "add_power_counter",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        action.payload?.cardId === chicagoId,
     );
-    expect(cardCounterAmount(corpState, chicagoId, "power")).toBe(1);
+    const chicagoPlacement = corpState.pendingChoice?.options.find(
+      (option) => String(option.value) === `${targetAgendaId}:2`,
+    );
+    expect(chicagoPlacement).toBeDefined();
+    corpState = applyChoices(corpState, "corp", [chicagoPlacement?.id ?? ""]);
+    expect(corpState.cardInstances[targetAgendaId]?.advancementCounters).toBe(2);
     const beforeCredits = corpState.corp.credits;
     corpState = apply(
       corpState,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1919AssetAbility === "gain_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         String(action.payload?.cardId) === informationId,
     );
     expect(corpState.corp.credits).toBe(beforeCredits + 8);
     expect(corpState.corp.archives).toContain(informationId);
     expect(corpState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1919AssetAbility: "gain_credits",
+      sourceDefinitionId: "onr_v1_328_information-laundering",
       advancementCounterCount: 2,
       gainedCredits: 8,
-      selfTrashed: true,
+      sourceTrashed: true,
     });
 
     let accessState = toRunnerTurn(
@@ -16692,13 +16699,24 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_300_project-consultants",
     );
-    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(1);
+    expect(state.pendingChoice?.source).toContain("p3_34.distribute_advancement");
+    const projectOption = state.pendingChoice?.options.find(
+      (option) => String(option.value) === `${agendaId}:4`,
+    );
+    expect(projectOption).toBeDefined();
+    state = applyChoices(state, "corp", [projectOption?.id ?? ""]);
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(4);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
-      v1919OperationAbility: "advance_installed_agenda",
-      addedAdvancementCounters: 1,
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_300_project-consultants",
+      addedAdvancementCounters: 4,
     });
 
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      advancementCounters: 4,
+    };
+    const secondAgendaId = putCorpRootInRemote(state, "simple_agenda");
     moveCorpCardToHq(state, "onr_v1_291_falsified-transactions-expert");
     state = apply(
       state,
@@ -16708,7 +16726,13 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         sourceDefinition(state, action) ===
           "onr_v1_291_falsified-transactions-expert",
     );
-    expect(cardCounterAmount(state, agendaId, "power")).toBe(1);
+    const falsifiedOption = state.pendingChoice?.options.find(
+      (option) => String(option.value) === `${agendaId}|${secondAgendaId}|3`,
+    );
+    expect(falsifiedOption).toBeDefined();
+    state = applyChoices(state, "corp", [falsifiedOption?.id ?? ""]);
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(1);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(3);
 
     moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
     const creditsBeforeLayoffs = state.corp.credits;
@@ -16720,10 +16744,10 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1919.systematic_layoffs_advancement",
+      "p3_34.distribute_advancement",
     );
     const singleTargetOption = state.pendingChoice?.options.find(
-      (option) => option.value === `${agendaId}|${agendaId}`,
+      (option) => option.value === `${agendaId}:2`,
     );
     expect(singleTargetOption).toBeDefined();
     state = applyChoices(state, "corp", [singleTargetOption?.id ?? ""]);
@@ -16732,13 +16756,33 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_304_systematic-layoffs",
-      v1919OperationAbility: "add_advancement_counters",
       targetCardId: agendaId,
       targetCardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
       targetCardDefinitionIds: "onr_v1_202_genetics-visionary-acquisition",
       addedAdvancementCounters: 2,
       targetCount: 1,
       advancementCountersAfter: 3,
+    });
+
+    moveCorpCardToHq(state, "onr_v1_292_management-shake-up");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_292_management-shake-up",
+    );
+    const managementOption = state.pendingChoice?.options.find(
+      (option) => option.value === `${secondAgendaId}:3`,
+    );
+    expect(managementOption).toBeDefined();
+    state = applyChoices(state, "corp", [managementOption?.id ?? ""]);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(6);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_292_management-shake-up",
+      addedAdvancementCounters: 3,
+      targetCardDefinitionId: "simple_agenda",
     });
   });
 
@@ -16775,13 +16819,17 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(placementOptions).toHaveLength(3);
     expect(
       placementOptions.some(
-        (option) => option.value === `${firstAgendaId}|${firstAgendaId}`,
+        (option) => option.value === `${firstAgendaId}:2`,
       ),
     ).toBe(true);
     expect(
       placementOptions.some(
         (option) => {
-          const selectedIds = new Set(String(option.value).split("|"));
+          const selectedIds = new Set(
+            String(option.value)
+              .split("|")
+              .map((entry) => entry.split(":")[0]),
+          );
           return (
             selectedIds.has(firstAgendaId) &&
             selectedIds.has(secondAgendaId)
@@ -16791,12 +16839,16 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     ).toBe(true);
     expect(
       placementOptions.some(
-        (option) => option.value === `${secondAgendaId}|${secondAgendaId}`,
+        (option) => option.value === `${secondAgendaId}:2`,
       ),
     ).toBe(true);
 
     const splitOption = placementOptions.find((option) => {
-      const selectedIds = new Set(String(option.value).split("|"));
+      const selectedIds = new Set(
+        String(option.value)
+          .split("|")
+          .map((entry) => entry.split(":")[0]),
+      );
       return selectedIds.has(firstAgendaId) && selectedIds.has(secondAgendaId);
     });
     state = applyChoices(state, "corp", [splitOption?.id ?? ""]);
@@ -16807,7 +16859,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_304_systematic-layoffs",
-      v1919OperationAbility: "add_advancement_counters",
       addedAdvancementCounters: 2,
       targetCount: 2,
     });
@@ -16856,7 +16907,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
 
     expect(state.pendingChoice?.options).toHaveLength(1);
     expect(state.pendingChoice?.options[0]).toMatchObject({
-      value: `${corporateWarId}|${corporateWarId}`,
+      value: `${corporateWarId}:2`,
     });
     state = applyChoices(state, "corp", [
       state.pendingChoice?.options[0]?.id ?? "",
@@ -16866,7 +16917,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       sourceDefinitionId: "onr_v1_304_systematic-layoffs",
-      v1919OperationAbility: "add_advancement_counters",
       addedAdvancementCounters: 2,
       targetCount: 1,
       targetCardDefinitionId: "onr_v1_196_corporate-war",
@@ -17856,7 +17906,6 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
     for (const definitionId of [
       "onr_v1_331_nevinyrral",
-      "onr_v1_334_pacifica-regional-ai",
     ]) {
       let state = apply(
         createGameAfterSetup({
@@ -18009,7 +18058,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
-    const assetId = putCorpRootInRemote(state, "onr_v1_334_pacifica-regional-ai");
+    const assetId = putCorpRootInRemote(state, "onr_v1_331_nevinyrral");
     state.cardInstances[assetId] = {
       ...state.cardInstances[assetId]!,
       faceup: true,
@@ -24483,18 +24532,18 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
         state,
         "corp",
         (action) =>
-          action.type === "gain_credit" &&
-          action.payload?.v1919AssetAbility === "gain_credits" &&
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbility === "activated" &&
           action.payload?.cardId === informationId,
       );
 
       expect(state.corp.credits).toBe(creditsBefore + advancementCounters * 4);
       expect(state.corp.archives).toContain(informationId);
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        v1919AssetAbility: "gain_credits",
+        sourceDefinitionId: "onr_v1_328_information-laundering",
         advancementCounterCount: advancementCounters,
         gainedCredits: advancementCounters * 4,
-        selfTrashed: true,
+        sourceTrashed: true,
       });
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
@@ -25211,25 +25260,28 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       ...pacificaState.cardInstances[pacificaId]!,
       faceup: true,
       rezzed: true,
+      advancementCounters: 1,
     };
     const pacificaAction = mustAction(
       pacificaState,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1920AssetAbility === "gain_actions" &&
+        action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === pacificaId,
     );
-    const zeroClickState = structuredClone(pacificaState);
-    zeroClickState.corp.clicks = 0;
-    const zeroClick = applyAction(zeroClickState, {
-      matchId: zeroClickState.matchId,
+    const zeroCounterState = structuredClone(pacificaState);
+    zeroCounterState.cardInstances[pacificaId] = {
+      ...zeroCounterState.cardInstances[pacificaId]!,
+      advancementCounters: 0,
+    };
+    const zeroCounter = applyAction(zeroCounterState, {
+      matchId: zeroCounterState.matchId,
       side: "corp",
       actionId: pacificaAction.actionId,
-      clientKnownStateVersion: zeroClickState.stateVersion,
-      idempotencyKey: "spotcheck-pacifica-zero-click",
+      clientKnownStateVersion: zeroCounterState.stateVersion,
+      idempotencyKey: "spotcheck-pacifica-zero-counter",
     });
-    expect(zeroClick.ok).toBe(false);
+    expect(zeroCounter.ok).toBe(false);
     const pacificaInitial = structuredClone(pacificaState);
     const pacificaReplayStart = pacificaState.eventLog.length;
     const clicksBefore = pacificaState.corp.clicks;
@@ -25239,10 +25291,12 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       (action) => action.actionId === pacificaAction.actionId,
     );
     expect(pacificaState.corp.clicks).toBe(clicksBefore + 1);
+    expect(pacificaState.cardInstances[pacificaId]?.advancementCounters).toBe(0);
     expect(pacificaState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      v1920AssetAbility: "gain_actions",
-      gainedActions: 2,
+      actionType: "activated_card_ability",
+      sourceDefinitionId: "onr_v1_334_pacifica-regional-ai",
+      cardImplementationAdvancementCounterCost: 1,
+      gainedActions: 1,
       corpClicksAfter: clicksBefore + 1,
     });
     const pacificaReplay = replayEvents(
@@ -31151,11 +31205,12 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
 
     const chicagoId = putCorpRootInRemote(state, "onr_v1_312_chicago-branch");
     const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    const agendaId = putCorpRootInRemote(state, "simple_agenda");
     expect(state.cardInstances[chicagoId]?.rezzed).toBe(false);
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.payload?.v1919AssetAbility === "add_power_counter" &&
+          action.type === "activated_card_ability" &&
           action.payload?.cardId === chicagoId,
       ),
     ).toBe(false);
@@ -31171,17 +31226,25 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1919AssetAbility === "add_power_counter" &&
+        action.type === "activated_card_ability" &&
         action.payload?.cardId === chicagoId,
     );
-    expect(cardCounterAmount(state, chicagoId, "power")).toBe(1);
+    const chicagoOption = state.pendingChoice?.options.find(
+      (option) => option.value === `${agendaId}:2`,
+    );
+    expect(chicagoOption).toBeDefined();
+    state = applyChoices(state, "corp", [chicagoOption?.id ?? ""]);
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_312_chicago-branch",
-      addedCounterAmount: 1,
-      remainingCounters: 1,
+      addedAdvancementCounters: 2,
+      targetCardDefinitionId: "simple_agenda",
     });
 
+    state.cardInstances[vaporId] = {
+      ...state.cardInstances[vaporId]!,
+      advancementCounters: 1,
+    };
     state = apply(
       state,
       "corp",
@@ -31192,15 +31255,15 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1919AssetAbility === "add_power_counter" &&
-        action.payload?.cardId === vaporId,
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === vaporId &&
+        action.payload?.cardImplementationAbilityLabel ===
+          "Vapor Ops: Advancement-Counter fuer 1 Credit ausgeben",
     );
-    expect(cardCounterAmount(state, vaporId, "power")).toBe(1);
+    expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_347_vapor-ops",
-      addedCounterAmount: 1,
-      remainingCounters: 1,
+      gainedCredits: 1,
     });
 
     const retreatId = scoreCorpAgendaForTest(state, "onr_v1_195_corporate-retreat");
@@ -37130,6 +37193,11 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_292_management-shake-up",
     );
+    const managementOption = state.pendingChoice?.options.find(
+      (option) => String(option.value) === `${agendaId}:2|${virusId}:1`,
+    );
+    expect(managementOption).toBeDefined();
+    state = applyChoices(state, "corp", [managementOption?.id ?? ""]);
     expect(
       (state.cardInstances[agendaId]?.advancementCounters ?? 0) +
         (state.cardInstances[virusId]?.advancementCounters ?? 0),
@@ -37140,7 +37208,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
       targetCount: 2,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /targetCardDefinitionId|cardInstances|privatePayload/,
+      /cardInstances|privatePayload/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
@@ -39159,12 +39227,17 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
     state = apply(state, "corp", (action) => action.actionId === projectAction.actionId);
-    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(2);
+    const projectOption = state.pendingChoice?.options.find(
+      (option) => String(option.value) === `${secondAgendaId}:4`,
+    );
+    expect(projectOption).toBeDefined();
+    state = applyChoices(state, "corp", [projectOption?.id ?? ""]);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1919OperationAbility: "advance_installed_agenda",
+      sourceDefinitionId: "onr_v1_300_project-consultants",
       targetCardId: secondAgendaId,
       targetCardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
-      addedAdvancementCounters: 1,
+      addedAdvancementCounters: 4,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -39193,12 +39266,17 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.type === "play_operation" &&
         sourceDefinition(state, action) === "onr_v1_305_team-restructuring",
     );
-    expect(cardCounterAmount(state, scoredAgendaId, "power")).toBe(1);
+    const teamOption = state.pendingChoice?.options.find(
+      (option) => String(option.value) === `${firstAgendaId}:1|${secondAgendaId}:1`,
+    );
+    expect(teamOption).toBeDefined();
+    state = applyChoices(state, "corp", [teamOption?.id ?? ""]);
+    expect(state.cardInstances[firstAgendaId]?.advancementCounters).toBe(4);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(6);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1919OperationAbility: "add_power_counter",
-      targetCardId: scoredAgendaId,
-      targetCardDefinitionId: "simple_agenda",
-      addedCounterAmount: 1,
+      sourceDefinitionId: "onr_v1_305_team-restructuring",
+      addedAdvancementCounters: 2,
+      targetCount: 2,
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -40735,6 +40813,14 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
     );
     counterState.corp.credits = 20;
     const agendaId = putCorpRootInRemote(counterState, "simple_agenda");
+    const targetAgendaId = putCorpRootInRemote(
+      counterState,
+      "onr_v1_202_genetics-visionary-acquisition",
+    );
+    counterState.cardInstances[agendaId] = {
+      ...counterState.cardInstances[agendaId]!,
+      advancementCounters: 2,
+    };
     moveCorpCardToHq(counterState, "onr_v1_291_falsified-transactions-expert");
     const counterInitial = structuredClone(counterState);
     const counterReplayStart = counterState.eventLog.length;
@@ -40746,13 +40832,20 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
         sourceDefinition(counterState, action) ===
           "onr_v1_291_falsified-transactions-expert",
     );
-    expect(cardCounterAmount(counterState, agendaId, "power")).toBe(1);
+    const moveOption = counterState.pendingChoice?.options.find(
+      (option) => String(option.value) === `${agendaId}|${targetAgendaId}|2`,
+    );
+    expect(moveOption).toBeDefined();
+    counterState = applyChoices(counterState, "corp", [moveOption?.id ?? ""]);
+    expect(counterState.cardInstances[agendaId]?.advancementCounters).toBe(0);
+    expect(counterState.cardInstances[targetAgendaId]?.advancementCounters).toBe(2);
     expect(counterState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_291_falsified-transactions-expert",
-      v1919OperationAbility: "add_power_counter",
-      targetCardDefinitionId: "simple_agenda",
-      addedCounterAmount: 1,
-      remainingCounters: 1,
+      sourceDefinitionId: "onr_v1_291_falsified-transactions-expert",
+      v1919OperationAbility: "move_advancement_counters",
+      advancementCountersMoved: 2,
+      advancementCounterSourceDefinitionId: "simple_agenda",
+      advancementCounterTargetDefinitionId:
+        "onr_v1_202_genetics-visionary-acquisition",
     });
     expect(JSON.stringify(counterState.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
