@@ -1022,6 +1022,70 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     }
   });
 
+  it("keeps long-match SQLite records and snapshots free of embedded event history", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-long-match-guardrail" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v108-long-match-guardrail" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+    await forceSetupComplete(service, created.matchId);
+
+    for (let turn = 0; turn < 2; turn += 1) {
+      await submit(service, created.matchId, corp, (action) => action.type === "mandatory_draw", `guardrail-corp-mandatory-${turn}`);
+      await submit(service, created.matchId, corp, (action) => action.type === "gain_credit", `guardrail-corp-credit-a-${turn}`);
+      await submit(service, created.matchId, corp, (action) => action.type === "gain_credit", `guardrail-corp-credit-b-${turn}`);
+      await submit(service, created.matchId, corp, (action) => action.type === "end_turn", `guardrail-corp-end-${turn}`);
+      await resolveCorpDiscardIfPending(service, created.matchId, corp, `guardrail-corp-discard-${turn}`);
+      await submit(service, created.matchId, runner, (action) => action.type === "gain_credit", `guardrail-runner-credit-a-${turn}`);
+      await submit(service, created.matchId, runner, (action) => action.type === "gain_credit", `guardrail-runner-credit-b-${turn}`);
+      await submit(service, created.matchId, runner, (action) => action.type === "end_turn", `guardrail-runner-end-${turn}`);
+    }
+
+    const hydrated = await storage.load(created.matchId);
+    if (!hydrated) throw new Error("Missing hydrated long-match record");
+    expect(hydrated.gameState.eventLog.length).toBeGreaterThan(12);
+    expect((await service.replayMatch(created.matchId)).ok).toBe(true);
+
+    const db = new DatabaseSync(dbPath, { readOnly: true });
+    try {
+      const stored = db
+        .prepare(
+          `SELECT
+            (SELECT LENGTH(record_json) FROM matches WHERE match_id = ?) AS recordBytes,
+            (SELECT LENGTH(game_state_json) FROM game_states WHERE match_id = ?) AS gameStateBytes,
+            (SELECT COALESCE(MAX(LENGTH(game_state_json)), 0) FROM state_snapshots WHERE match_id = ?) AS maxSnapshotBytes,
+            (SELECT COUNT(*) FROM state_snapshots WHERE match_id = ? AND game_state_json LIKE '%"eventLog":[{%') AS snapshotsWithEmbeddedEvents,
+            (SELECT COUNT(*) FROM engine_events WHERE match_id = ?) AS engineEventCount`
+        )
+        .get(created.matchId, created.matchId, created.matchId, created.matchId, created.matchId) as {
+        recordBytes: number;
+        gameStateBytes: number;
+        maxSnapshotBytes: number;
+        snapshotsWithEmbeddedEvents: number;
+        engineEventCount: number;
+      };
+      const hydratedRecordBytes = JSON.stringify(hydrated).length;
+      const hydratedGameStateBytes = JSON.stringify(hydrated.gameState).length;
+      const hydratedMaxSnapshotBytes = Math.max(...hydrated.stateSnapshots.map((snapshot) => JSON.stringify(snapshot.gameState).length));
+      expect(Number(stored.engineEventCount)).toBe(hydrated.gameState.eventLog.length);
+      expect(Number(stored.snapshotsWithEmbeddedEvents)).toBe(0);
+      expect(Number(stored.recordBytes)).toBeLessThan(hydratedRecordBytes / 2);
+      expect(Number(stored.gameStateBytes)).toBeLessThan(hydratedGameStateBytes);
+      expect(Number(stored.maxSnapshotBytes)).toBeLessThan(hydratedMaxSnapshotBytes);
+    } finally {
+      db.close();
+      service.closeStorage();
+    }
+  });
+
   it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
     const legacyPath = join(dir, "netgrid.sqlite");

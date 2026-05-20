@@ -1,19 +1,23 @@
 ---
 activityId: act-2026-05-21-long-match-performance-guardrail
-status: inbox
+status: done
 kind: cleanup
 area: server
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.test.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server test
 ---
 
 # Long-Match-Performance-Guardrail ergänzen
@@ -47,11 +51,11 @@ Die langen-Match-Optimierungen sollen einen reproduzierbaren Guardrail bekommen,
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt einen wiederholbaren Guardrail für lange Match-Historien.
-- [ ] Der Guardrail erkennt wieder eingebettete Event-Historie in State-/Snapshot-Blobs.
-- [ ] Wo Timing gemessen wird, ist die Messung als Smoke/Diagnose eingeordnet und nicht flaky.
-- [ ] Die relevanten Performance-Annahmen sind knapp im Ergebnis dokumentiert.
-- [ ] Checks: abhängig vom gewählten Ort mindestens `corepack pnpm --filter @netgrid/server test` oder ein klar benannter lokaler Smoke-Befehl.
+- [x] Es gibt einen wiederholbaren Guardrail für lange Match-Historien.
+- [x] Der Guardrail erkennt wieder eingebettete Event-Historie in State-/Snapshot-Blobs.
+- [x] Wo Timing gemessen wird, ist die Messung als Smoke/Diagnose eingeordnet und nicht flaky.
+- [x] Die relevanten Performance-Annahmen sind knapp im Ergebnis dokumentiert.
+- [x] Checks: abhängig vom gewählten Ort mindestens `corepack pnpm --filter @netgrid/server test` oder ein klar benannter lokaler Smoke-Befehl.
 
 ## Umsetzungshinweise
 
@@ -61,4 +65,6 @@ Die langen-Match-Optimierungen sollen einen reproduzierbaren Guardrail bekommen,
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Ein deterministischer Server-Regressionstest erzeugt ein mehrzügiges SQLite-Match und prüft ohne Wallclock-Grenzen, dass `record_json`, `game_states.game_state_json` und `state_snapshots.game_state_json` kompakt gegenüber der hydrierten Vollform bleiben, Snapshot-Blobs keine eingebettete `eventLog`-Historie tragen, `engine_events` die vollständige Engine-Historie halten und Replay weiterhin grün ist. Die SidePayload-Begrenzung bleibt bewusst beim separaten PlayerView-PublicEvents-Paket.
+
+Verifikation: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
