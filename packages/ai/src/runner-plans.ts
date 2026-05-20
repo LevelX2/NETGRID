@@ -888,22 +888,33 @@ function staleArchivesRepeatPenalty(input: AiDecisionInput, target: string | und
   const lastArchivesAccessIndex = findLastIndex(history, (event) => isArchivesAccessEvent(event));
   const visibleArchivesCards =
     input.playerView.servers.find((candidate) => candidate.id === "archives")?.root ?? [];
+  const archivesCardCount = input.playerView.opponent.discardCount;
+  const hiddenArchivesCount = Math.max(0, archivesCardCount - visibleArchivesCards.length);
+  const allVisibleArchivesLowValue =
+    visibleArchivesCards.length > 0 &&
+    visibleArchivesCards.every(
+      (card) =>
+        card.known &&
+        card.definitionId &&
+        isLowValueKnownArchivesAccessCard(card.definitionId),
+    );
   if (lastArchivesAccessIndex < 0) {
-    if (visibleArchivesCards.length === 0) return 260;
-    if (visibleArchivesCards.every((card) => card.known && card.definitionId && isLowValueKnownHqAccessCard(card.definitionId, input.playerView.own.credits))) return 320;
+    if (archivesCardCount === 0) return 260;
+    if (hiddenArchivesCount === 0 && allVisibleArchivesLowValue) return 520;
     return 0;
   }
   if (history.slice(lastArchivesAccessIndex + 1).some((event) => eventMayChangeArchives(event))) return 0;
+  if (hiddenArchivesCount > 0) return 0;
   const lastArchivesAccess = history[lastArchivesAccessIndex];
   if (!lastArchivesAccess) return 0;
   const accessedDefinitionId = stringPayloadValue(lastArchivesAccess, "cardDefinitionId");
   const visibleArchivesDefinitions = new Set(visibleArchivesCards.map((card) => card.definitionId).filter((definitionId): definitionId is string => Boolean(definitionId)));
   if (accessedDefinitionId && !visibleArchivesDefinitions.has(accessedDefinitionId)) return 0;
   if (visibleArchivesCards.length > 0 && visibleArchivesCards.every((card) => card.known && card.definitionId)) {
-    return visibleArchivesCards.every((card) => isLowValueKnownHqAccessCard(card.definitionId!, input.playerView.own.credits)) ? 520 : 420;
+    return visibleArchivesCards.every((card) => isLowValueKnownArchivesAccessCard(card.definitionId!)) ? 640 : 0;
   }
   if (!accessedDefinitionId) return 0;
-  return isLowValueKnownHqAccessCard(accessedDefinitionId, input.playerView.own.credits) ? 360 : 240;
+  return isLowValueKnownArchivesAccessCard(accessedDefinitionId) ? 360 : 0;
 }
 
 function mergedPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
@@ -955,6 +966,13 @@ function isLowValueKnownHqAccessCard(definitionId: string, runnerCredits: number
   const trashCost = runtimeDefinition?.numeric.trashCost ?? demoDefinition?.trashCost ?? 0;
   if ((type === "asset" || type === "upgrade") && runnerCredits >= trashCost) return false;
   return true;
+}
+
+function isLowValueKnownArchivesAccessCard(definitionId: string): boolean {
+  const runtimeDefinition = RUNTIME_CARDS[definitionId];
+  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const type = runtimeDefinition?.type ?? demoDefinition?.type;
+  return Boolean(type && type !== "agenda");
 }
 
 export function evaluateRemoteThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {

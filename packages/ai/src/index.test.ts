@@ -2597,6 +2597,65 @@ describe("MVP 0.3 Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
+  it("does not value an open Archives asset as trashable access value", () => {
+    const requiredCorpCards = ["simple_economy_asset"];
+    const corpDeckCards = [
+      ...ONR_V1_1_2K_CORP_DECK.cards,
+      ...requiredCorpCards
+        .filter(
+          (id) => !ONR_V1_1_2K_CORP_DECK.cards.some((card) => card.id === id),
+        )
+        .map((id) => ({ id, quantity: 1 })),
+    ];
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-open-archives-asset-no-trash-value",
+        corpDeck: { ...ONR_V1_1_2K_CORP_DECK, cards: corpDeckCards },
+        agendaPointsToWin: 7,
+        baseline: CURRENT_RULES_BASELINE,
+      }),
+    );
+    state.runner.credits = 5;
+    const assetId = moveCorpCardToArchives(
+      state,
+      "simple_economy_asset",
+      true,
+    );
+    keepOnlyCorpArchivesCards(state, [assetId]);
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+      profileId: "runner-ai-v0.9-hard",
+    });
+    const archivesRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(archivesRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!archivesRun || !gain)
+      throw new Error("Missing open Archives asset fixture actions");
+
+    const safeProbeCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "safe_probe_run",
+    );
+    expect(safeProbeCandidate).toBeDefined();
+    if (!safeProbeCandidate)
+      throw new Error("Missing open Archives safe_probe_run candidate");
+    const safeProbeScore = evaluateServerAccessValue(input, safeProbeCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [archivesRun, gain],
+    });
+
+    expect(safeProbeScore.reasons).toContain("known_archives_access_not_fresh");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
   it("does not pump or repeat a remote run when the visible breaker cannot break the rezzed ICE", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
