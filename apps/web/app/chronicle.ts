@@ -1035,11 +1035,18 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
   const numbers: Record<string, number> = {};
   let activeSide: Side = "corp";
   let activeTurnNumber = 1;
+  let justEndedTurn: { side: Side; turnNumber: number } | null = null;
 
   for (const event of events) {
     const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
     const actor = sideValue(event.publicPayload.actor);
     if (!actor) continue;
+
+    if (justEndedTurn && actor === justEndedTurn.side && isDiscardPhaseResolution(event)) {
+      numbers[event.eventId] = justEndedTurn.turnNumber;
+      continue;
+    }
+    justEndedTurn = null;
 
     if (actionType === "mandatory_draw" && actor === "corp") {
       if (activeSide !== "corp") {
@@ -1054,12 +1061,18 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
 
     if (actionType === "end_turn") {
       if (activeSide !== actor) activeSide = actor;
+      justEndedTurn = { side: actor, turnNumber: activeTurnNumber };
       activeSide = actor === "corp" ? "runner" : "corp";
       activeTurnNumber += 1;
     }
   }
 
   return numbers;
+}
+
+function isDiscardPhaseResolution(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload ?? {};
+  return payload.discardResolved === true || stringValue(payload.hiddenZoneAction) === "discard_phase";
 }
 
 export function chronicleActionUseByEventId(events: PublicGameEvent[]): Record<string, ChronicleActionUse> {

@@ -1762,8 +1762,10 @@ describe("formatChronicleEvent", () => {
       makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_1" }),
       makeEvent("gain_credit", { actor: "corp", eventId: "evt_corp_credit_1" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_1" }),
+      makeEvent("resolve_choice", { actor: "corp", eventId: "evt_corp_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
       makeEvent("draw_card", { actor: "runner", eventId: "evt_runner_draw_1" }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_1" }),
+      makeEvent("resolve_choice", { actor: "runner", eventId: "evt_runner_discard_1", discardResolved: true, hiddenZoneAction: "discard_phase" }),
       makeEvent("mandatory_draw", { actor: "corp", eventId: "evt_corp_draw_2" }),
       makeEvent("end_turn", { actor: "corp", eventId: "evt_corp_end_2" }),
       makeEvent("end_turn", { actor: "runner", eventId: "evt_runner_end_2" })
@@ -1772,7 +1774,10 @@ describe("formatChronicleEvent", () => {
     expect(turnNumbers).toMatchObject({
       evt_corp_draw_1: 1,
       evt_corp_end_1: 1,
+      evt_corp_discard_1: 1,
+      evt_runner_draw_1: 2,
       evt_runner_end_1: 2,
+      evt_runner_discard_1: 2,
       evt_corp_draw_2: 3,
       evt_corp_end_2: 3,
       evt_runner_end_2: 4
