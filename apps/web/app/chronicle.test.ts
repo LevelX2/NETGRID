@@ -1886,6 +1886,60 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["+12 Credits"]));
   });
 
+  it("shows Loan from Chiba leave-play payment and loss effects", () => {
+    const paidItems = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        cardDefinitionId: "onr_v1_168_loan-from-chiba",
+        title: "Loan from Chiba",
+        resolvedEffects: [
+          {
+            effectId: "loan.leave.pay",
+            kind: "pay_credits_or_lose_game",
+            visibility: "public",
+            side: "runner",
+            amount: 10,
+            paidCredits: 10,
+            gameLost: false,
+            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceTitle: "Loan from Chiba",
+            reason: "source_left_play"
+          }
+        ]
+      }),
+      "runner"
+    );
+    expect(paidItems[0]?.title).toBe("Loan from Chiba verlässt das Spiel; Runner zahlt 10 Credits.");
+    expect(paidItems[0]?.chips).toEqual(expect.arrayContaining(["10 Credits gezahlt"]));
+
+    const lostItems = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        cardDefinitionId: "onr_v1_168_loan-from-chiba",
+        title: "Loan from Chiba",
+        resolvedEffects: [
+          {
+            effectId: "loan.leave.lose",
+            kind: "pay_credits_or_lose_game",
+            visibility: "public",
+            side: "runner",
+            amount: 10,
+            paidCredits: 0,
+            gameLost: true,
+            winner: "corp",
+            sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+            sourceTitle: "Loan from Chiba",
+            reason: "source_left_play"
+          }
+        ]
+      }),
+      "runner"
+    );
+    expect(lostItems[0]?.title).toBe("Loan from Chiba verlässt das Spiel; Runner verliert das Spiel.");
+    expect(lostItems[0]?.importance).toBe("critical");
+    expect(lostItems[0]?.chips).toEqual(expect.arrayContaining(["Spielverlust"]));
+  });
+
   it("highlights stolen agendas with visible agenda points", () => {
     const item = formatChronicleEvent(
       makeEvent("steal_agenda", {

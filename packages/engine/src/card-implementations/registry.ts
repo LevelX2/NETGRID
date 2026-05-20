@@ -66,6 +66,7 @@ import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
+import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
@@ -79,6 +80,7 @@ export const CARD_IMPLEMENTATIONS = [
   newsgroupFilterImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
+  loanFromChibaImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
   riggedInvestmentsImplementation,

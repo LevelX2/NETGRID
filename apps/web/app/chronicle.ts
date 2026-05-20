@@ -1213,6 +1213,20 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
           : `${sourceTitle ?? cardTitle ?? "Die Quelle"} wurde getrasht`;
       chips.push("Quelle getrasht", "Automatisch");
       break;
+    case "pay_credits_or_lose_game": {
+      const paid = numberValue(effect.paidCredits) ?? 0;
+      category = effect.gameLost === true ? "danger" : "economy";
+      importance = effect.gameLost === true ? "critical" : "important";
+      title =
+        effect.gameLost === true
+          ? `${sourceTitle ?? cardTitle ?? "Eine Karte"} verlässt das Spiel; ${sideLabel(actor)} verliert das Spiel`
+          : `${sourceTitle ?? cardTitle ?? "Eine Karte"} verlässt das Spiel; ${sideLabel(actor)} zahlt ${creditText(paid)}`;
+      chips.push(
+        effect.gameLost === true ? "Spielverlust" : `${paid} ${creditLabel(paid)} gezahlt`,
+        "Leave play",
+      );
+      break;
+    }
     case "gain_actions":
       category = "turn";
       title =

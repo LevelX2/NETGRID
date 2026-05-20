@@ -244,7 +244,9 @@ import {
   executeCardImplementationStartOfRunnerTurnEffects,
   executeOnPlayCardImplementationAbility,
   pushActivatedCardImplementationActions,
+  pushCardImplementationEndOfRunnerTurnActions,
   resolveActivatedCardImplementationAbility,
+  resolveCardImplementationEndOfRunnerTurnAction,
   type CardImplementationRuntimeDependencies,
 } from "./ability-engine/card-implementation-runtime";
 
@@ -469,7 +471,6 @@ const PROTEUS_FOOD_FIGHT_ID = "onr_proteus_022_food-fight";
 const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
-const LOAN_FROM_CHIBA_ID = "onr_v1_168_loan-from-chiba";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
@@ -3805,6 +3806,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
   const hasClicks = state.runner.clicks > 0;
   const bonusRunPending = flags.allNighterBonusRunPending === true;
   if (!hasClicks && !bonusRunPending) {
+    pushCardImplementationEndOfRunnerTurnActions(
+      cardImplementationRuntimeDeps,
+      state,
+      actions,
+    );
     actions.push(
       action(state, "runner", "end_turn", "Zug beenden", "game_rule"),
     );
@@ -3828,6 +3834,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
+    pushCardImplementationEndOfRunnerTurnActions(
+      cardImplementationRuntimeDeps,
+      state,
+      actions,
+    );
     actions.push(
       action(state, "runner", "end_turn", "Zug beenden", "game_rule", [], {
         v1922ValuPakSequenceEnd: true,
@@ -4688,6 +4699,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
     );
   }
   actions.push(...specialZoneHarnessActions(state, "runner"));
+  pushCardImplementationEndOfRunnerTurnActions(
+    cardImplementationRuntimeDeps,
+    state,
+    actions,
+  );
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
   return actions;
 }
@@ -9332,22 +9348,6 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
-      if (definition.id === LOAN_FROM_CHIBA_ID) {
-        credits(state, "runner", 12);
-        legalAction.resolvedEffects = [
-          ...(legalAction.resolvedEffects ?? []),
-          {
-            effectId: `runner.install.loan_from_chiba.${cardId}`,
-            kind: "gain_credits",
-            visibility: "public",
-            side: "runner",
-            amount: 12,
-            reason: "card_resolver",
-            sourceDefinitionId: LOAN_FROM_CHIBA_ID,
-            sourceTitle: publicCardTitle(LOAN_FROM_CHIBA_ID),
-          },
-        ];
-      }
       if (concealedHiddenRunnerResource) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -12482,7 +12482,7 @@ function trashResource(
   const hiddenResourceSlotId = hiddenRunnerResourceSlotId(resolvedCardId);
   spendClick(state, "corp");
   spendCredits(state, "corp", 2);
-  trashRunnerInstalledCardToHeap(state, resolvedCardId);
+  trashRunnerInstalledCardToHeap(state, resolvedCardId, legalAction);
   if (legalAction && wasConcealedHiddenResource) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -12622,6 +12622,7 @@ function runnerProgramUsesMemory(
 function trashRunnerInstalledCardToHeap(
   state: GameState,
   cardId: CardInstanceId,
+  legalAction?: LegalAction,
 ): void {
   const definition = definitionFor(state, cardId);
   if (definition.type === "program") {
@@ -12634,6 +12635,14 @@ function trashRunnerInstalledCardToHeap(
       ? state.runner.rig.hardware
       : state.runner.rig.resources;
   if (!rig.includes(cardId)) return;
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_leave_play",
+  );
   for (const hostedId of hostedCardsOn(state, cardId)) {
     const hostedDefinition = definitionFor(state, hostedId);
     if (hostedDefinition.type === "program")
@@ -13132,6 +13141,12 @@ function endTurn(
   legalAction: LegalAction,
 ): void {
   if (side === "runner") {
+    resolveCardImplementationEndOfRunnerTurnAction(
+      cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+    );
+    if (state.winner) return;
     resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
@@ -21031,6 +21046,10 @@ function makeActionId(
     parts.push(String(payload.cardImplementationAbility));
   if (payload?.cardImplementationAbilityIndex !== undefined)
     parts.push(String(payload.cardImplementationAbilityIndex));
+  if (payload?.cardImplementationLifecycleAction)
+    parts.push(String(payload.cardImplementationLifecycleAction));
+  if (payload?.cardImplementationLifecycleAbilityIndex !== undefined)
+    parts.push(String(payload.cardImplementationLifecycleAbilityIndex));
   if (payload?.iceInstallTotalCost !== undefined)
     parts.push(String(payload.iceInstallTotalCost));
   if (payload?.iceInstallReductionSourceDefinitionIds)

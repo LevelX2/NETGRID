@@ -10,9 +10,11 @@ import type {
   CardDefinitionId,
   CardInstanceId,
   DamageType,
+  GameEndReason,
   GameState,
   ResolvedGameEffect,
   Side,
+  Winner,
 } from "@netgrid/shared";
 import type { CardEffectImplementation } from "./definition-types";
 
@@ -98,6 +100,37 @@ function loseCredits(state: GameState, side: Side, amount: number): void {
   if (side === "corp")
     state.corp.credits = Math.max(0, state.corp.credits - amount);
   else state.runner.credits = Math.max(0, state.runner.credits - amount);
+}
+
+function spendCreditsIfAvailable(
+  state: GameState,
+  side: Side,
+  amount: number,
+): boolean {
+  if (creditsForSide(state, side) < amount) return false;
+  if (side === "corp") state.corp.credits -= amount;
+  else state.runner.credits -= amount;
+  return true;
+}
+
+function loserToWinner(side: Side): Winner {
+  return side === "runner" ? "corp" : "runner";
+}
+
+function loseGame(
+  state: GameState,
+  side: Side,
+  reason: GameEndReason = "unknown",
+): Winner {
+  const winner = loserToWinner(side);
+  state.winner = winner;
+  state.gameEndReason = reason;
+  state.phase = "game_over";
+  state.timingPoint = "game.checkpoint";
+  state.activeSide = winner === "draw" ? state.activeSide : winner;
+  delete state.pendingChoice;
+  delete state.run;
+  return winner;
 }
 
 function addRunnerTags(state: GameState, amount: number): void {
@@ -251,6 +284,47 @@ export function executeCardImplementationEffects(
           side,
           amount: amountToLose,
           reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "pay_credits_or_lose_game": {
+        assertPositiveIntegerAmount(
+          "pay_credits_or_lose_game",
+          effect.amount,
+        );
+        assertPublicVisibility("pay_credits_or_lose_game", effect.visibility);
+        if (effect.reason !== "source_left_play")
+          throw new Error(
+            "pay_credits_or_lose_game reason must be source_left_play.",
+          );
+        const payer = recipientSide(context, effect.payer);
+        const loseSide = recipientSide(context, effect.loseSide);
+        const paid = spendCreditsIfAvailable(state, payer, effect.amount);
+        const winner = paid ? undefined : loseGame(state, loseSide);
+        publicPayload.creditsPaid =
+          Number(publicPayload.creditsPaid ?? 0) + (paid ? effect.amount : 0);
+        publicPayload.payCreditsOrLoseGameAmount = effect.amount;
+        publicPayload.payCreditsOrLoseGamePaid = paid;
+        publicPayload[payer === "corp" ? "corpCreditsAfter" : "runnerCreditsAfter"] =
+          creditsForSide(state, payer);
+        if (!paid) {
+          publicPayload.gameLost = true;
+          publicPayload.winner = winner ?? "";
+        }
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "pay_credits_or_lose_game"),
+          kind: "pay_credits_or_lose_game",
+          visibility: effect.visibility,
+          side: payer,
+          amount: effect.amount,
+          paidCredits: paid ? effect.amount : 0,
+          gameLost: !paid,
+          ...(winner ? { winner } : {}),
+          reason: effect.reason,
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

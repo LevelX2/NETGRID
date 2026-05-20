@@ -34,8 +34,10 @@ export type CardLifecycleImplementation = {
   on_rez?: readonly CardEffectImplementation[];
   on_install?: readonly CardEffectImplementation[];
   on_score?: readonly CardEffectImplementation[];
+  on_leave_play?: readonly CardEffectImplementation[];
   start_of_corp_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   start_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
+  end_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
 };
 
@@ -85,7 +87,8 @@ export type CardEffectImplementation =
   | TakeHostedCreditsEffectImplementation
   | TrashSourceWhenEmptyEffectImplementation
   | GainActionsEffectImplementation
-  | TrashSourceEffectImplementation;
+  | TrashSourceEffectImplementation
+  | PayCreditsOrLoseGameEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -158,6 +161,15 @@ export type GainActionsEffectImplementation = {
 
 export type TrashSourceEffectImplementation = {
   kind: "trash_source";
+  visibility: EventVisibilityClass;
+};
+
+export type PayCreditsOrLoseGameEffectImplementation = {
+  kind: "pay_credits_or_lose_game";
+  payer: "controller" | "runner" | "corp";
+  amount: number;
+  loseSide: "controller" | "runner" | "corp";
+  reason: "source_left_play";
   visibility: EventVisibilityClass;
 };
 

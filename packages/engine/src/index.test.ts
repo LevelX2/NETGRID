@@ -17650,6 +17650,216 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("resolves Loan from Chiba start-of-turn loss from CardImplementation only while installed", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p324-loan-start-runner-turn",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.maxHandSize = 100;
+    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+    );
+    expect(state.runner.credits).toBe(32);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "end_turn" &&
+        action.payload?.cardImplementationLifecycleAction !==
+          "end_of_runner_turn",
+    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.credits).toBe(31);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+      resolvedEffects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "lose_credits",
+          side: "runner",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+        }),
+      ]),
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    state.runner.credits = 0;
+    state.corp.maxHandSize = 100;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "end_turn" &&
+        action.payload?.cardImplementationLifecycleAction !==
+          "end_of_runner_turn",
+    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.credits).toBe(0);
+  });
+
+  it("lets the Runner trash Loan from Chiba at end of turn and pays the leave-play penalty once", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p324-loan-end-turn-trash-pay",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+    );
+    const loanId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_168_loan-from-chiba",
+    );
+    expect(loanId).toBeDefined();
+    if (!loanId) throw new Error("Missing Loan from Chiba");
+    const trashAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "end_turn" &&
+        action.payload?.cardImplementationLifecycleAction ===
+          "end_of_runner_turn" &&
+        action.payload?.cardId === loanId,
+    );
+    const removed = structuredClone(state);
+    removeEverywhere(removed, loanId);
+    expect(
+      applyAction(removed, {
+        matchId: removed.matchId,
+        side: "runner",
+        actionId: trashAction.actionId,
+        clientKnownStateVersion: removed.stateVersion,
+        idempotencyKey: "p324-loan-stale-removed",
+      }).ok,
+    ).toBe(false);
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === trashAction.actionId,
+    );
+    expect(state.runner.heap).toContain(loanId);
+    expect(state.runner.rig.resources).not.toContain(loanId);
+    expect(state.runner.credits).toBe(22);
+    expect(state.winner).toBeNull();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+      sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+      sourceTrashed: true,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "pay_credits_or_lose_game",
+          side: "runner",
+          amount: 10,
+          paidCredits: 10,
+          gameLost: false,
+          reason: "source_left_play",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+        }),
+        expect.objectContaining({
+          kind: "trash_source",
+          reason: "end_of_turn",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+        }),
+      ],
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = apply(state, "corp", (action) => action.type === "end_turn");
+    expect(state.runner.credits).toBe(22);
+    expect(
+      JSON.stringify(state.eventLog.at(-1)?.publicPayload ?? {}),
+    ).not.toContain("onr_v1_168_loan-from-chiba");
+  });
+
+  it("makes the Runner lose the game if Loan from Chiba leaves play without 10 credits", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p324-loan-end-turn-trash-lose",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 0;
+    moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_168_loan-from-chiba",
+    );
+    state.runner.credits = 9;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "end_turn" &&
+        action.payload?.cardImplementationLifecycleAction ===
+          "end_of_runner_turn",
+    );
+    expect(state.winner).toBe("corp");
+    expect(state.gameEndReason).toBe("unknown");
+    expect(state.phase).toBe("game_over");
+    expect(state.runner.credits).toBe(9);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "end_turn",
+      gameEndReason: "unknown",
+      resolvedEffects: expect.arrayContaining([
+        expect.objectContaining({
+          kind: "pay_credits_or_lose_game",
+          paidCredits: 0,
+          gameLost: true,
+          winner: "corp",
+          sourceDefinitionId: "onr_v1_168_loan-from-chiba",
+        }),
+      ]),
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("applies Rabbit only to Corp ICE trace bid limits", () => {
     const runnerDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.traceTags.runner,

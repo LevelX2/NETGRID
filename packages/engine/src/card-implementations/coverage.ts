@@ -331,16 +331,6 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
       ],
     },
     {
-      cardDefinitionId: "onr_v1_168_loan-from-chiba",
-      status: "legacy_engine_special_case",
-      reason:
-        "Installed resource creates immediate credits, turn loss, leave-play penalty and special state outside CardImplementationDefinition.",
-      currentLocations: [
-        "packages/engine/src/index.ts",
-        "packages/engine/src/index.test.ts",
-      ],
-    },
-    {
       cardDefinitionId: "onr_v1_314_corporate-negotiating-center",
       status: "legacy_engine_special_case",
       reason:

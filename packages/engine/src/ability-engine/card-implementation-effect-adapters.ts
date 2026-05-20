@@ -106,10 +106,12 @@ export type CardImplementationEffectAdapterHost = {
   trashCorpInstalledCardToArchives: (
     state: GameState,
     sourceCardId: CardInstanceId,
+    legalAction?: LegalAction,
   ) => void;
   trashRunnerInstalledCardToHeap: (
     state: GameState,
     sourceCardId: CardInstanceId,
+    legalAction?: LegalAction,
   ) => void;
 };
 
@@ -271,6 +273,7 @@ export function createCardImplementationEffectAdapters(
   function trashSourceForCardImplementationEffect(
     state: GameState,
     sourceCardId: CardInstanceId,
+    legalAction?: LegalAction,
   ): CardEffectTrashSourceResult {
     const instance = host.mustInstance(state.cardInstances, sourceCardId);
     const definition = host.definitionFor(state, sourceCardId);
@@ -279,12 +282,12 @@ export function createCardImplementationEffectAdapters(
       (instance.zone.zone === "serverRoot" ||
         state.corp.servers.some((server) => server.root.includes(sourceCardId)))
     ) {
-      host.trashCorpInstalledCardToArchives(state, sourceCardId);
+      host.trashCorpInstalledCardToArchives(state, sourceCardId, legalAction);
     } else if (
       instance.controller === "runner" &&
       host.runnerInstalledCardIds(state).includes(sourceCardId)
     ) {
-      host.trashRunnerInstalledCardToHeap(state, sourceCardId);
+      host.trashRunnerInstalledCardToHeap(state, sourceCardId, legalAction);
     } else {
       return { sourceTrashed: false };
     }

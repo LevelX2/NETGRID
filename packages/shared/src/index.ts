@@ -215,6 +215,7 @@ export type ResolvedGameEffectKind =
   | "take_hosted_credits"
   | "trash_source_when_empty"
   | "trash_source"
+  | "pay_credits_or_lose_game"
   | "resolve_subroutine";
 
 export type ResolvedGameEffect = {
@@ -236,6 +237,8 @@ export type ResolvedGameEffect = {
   cardsTrashed?: number;
   endedRun?: boolean;
   paidCredits?: number;
+  gameLost?: boolean;
+  winner?: Winner;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;
