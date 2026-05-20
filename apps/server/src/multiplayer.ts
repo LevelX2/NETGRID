@@ -190,21 +190,27 @@ export type MatchRecord = {
   winner?: Side | "draw";
 };
 
-export type PlayerClockState = {
+export type PlayerClockActivityState = {
+  key: string;
+  decisionOwnerSide: Side;
+  startedAtMs: number;
+  chargedMs: number;
+};
+
+export type PlayerClockBaseState = {
+  consumedMs: { runner: number; corp: number };
+  activity?: PlayerClockActivityState;
+};
+
+export type PlayerClockState = PlayerClockBaseState & ({
+  mode: "none";
+} | {
   mode: "player_clock";
   startingTimeMs: number;
   gracePeriodMs: number;
   remainingMs: { runner: number; corp: number };
-  activity?: {
-    key: string;
-    decisionOwnerSide: Side;
-    startedAtMs: number;
-    chargedMs: number;
-  };
   expiredSide?: Side;
-};
-
-type EnabledPlayerClockConfig = ApiPlayerClockConfig & { mode: "player_clock"; startingTimeMs: number; gracePeriodMs: number };
+});
 
 export type SessionRecord = {
   sessionId: string;
@@ -844,7 +850,7 @@ export class MultiplayerService {
                   }
             }
           : {}),
-        ...(playerClockConfig.mode === "player_clock" ? { playerClock: initialPlayerClockState(playerClockConfig as EnabledPlayerClockConfig) } : {}),
+        playerClock: initialPlayerClockState(playerClockConfig),
         createdAt: now,
         updatedAt: now
       },
@@ -1955,11 +1961,7 @@ export class MultiplayerService {
     record.match.baseline = baseline;
     record.match.status = "ready_check";
     record.match.settings = { ...record.match.settings, agendaPointsToWin, matchFormat };
-    if (record.match.settings.playerClock?.mode === "player_clock") {
-      record.match.playerClock = initialPlayerClockState(record.match.settings.playerClock as EnabledPlayerClockConfig);
-    } else {
-      delete record.match.playerClock;
-    }
+    record.match.playerClock = initialPlayerClockState(normalizePlayerClockConfig(record.match.settings.playerClock));
     record.match.deckSetup = {
       runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
       corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
@@ -1992,7 +1994,7 @@ export class MultiplayerService {
 
   private syncPlayerClock(record: StoredMatch, nowIso = this.now()): boolean {
     const clock = record.match.playerClock;
-    if (!clock || record.match.status !== "active" || !record.gameState || record.gameState.winner || clock.expiredSide) return false;
+    if (!clock || record.match.status !== "active" || !record.gameState || record.gameState.winner || (clock.mode === "player_clock" && clock.expiredSide)) return false;
     const nowMs = Date.parse(nowIso);
     if (!Number.isFinite(nowMs)) return false;
     const owner = this.playerClockDecisionOwner(record);
@@ -2006,6 +2008,13 @@ export class MultiplayerService {
       return false;
     }
     const elapsedMs = Math.max(0, nowMs - clock.activity.startedAtMs);
+    if (clock.mode === "none") {
+      const consumedDeltaMs = Math.max(0, elapsedMs - clock.activity.chargedMs);
+      if (consumedDeltaMs <= 0) return false;
+      clock.consumedMs[owner] += consumedDeltaMs;
+      clock.activity.chargedMs += consumedDeltaMs;
+      return false;
+    }
     const chargeableMs = Math.max(0, elapsedMs - clock.gracePeriodMs - clock.activity.chargedMs);
     if (chargeableMs <= 0) return false;
     clock.remainingMs[owner] = Math.max(0, clock.remainingMs[owner] - chargeableMs);
@@ -2045,7 +2054,7 @@ export class MultiplayerService {
     record.match.winner = winnerSide;
     record.match.matchVersion += 1;
     record.match.updatedAt = nowIso;
-    if (record.match.playerClock) record.match.playerClock.expiredSide = expiredSide;
+    if (record.match.playerClock?.mode === "player_clock") record.match.playerClock.expiredSide = expiredSide;
     record.lifecycleResult = {
       status: "finished",
       reason: "time_expired",
@@ -2066,9 +2075,24 @@ export class MultiplayerService {
     const nowMs = Date.parse(nowIso);
     const activity = clock.activity;
     const elapsedActivityMs = activity && Number.isFinite(nowMs) ? Math.max(0, nowMs - activity.startedAtMs) : undefined;
+    const decisionOwnerSide = activity?.decisionOwnerSide;
+    if (clock.mode === "none") {
+      const effectiveConsumed = { ...clock.consumedMs };
+      if (decisionOwnerSide && elapsedActivityMs !== undefined && activity) {
+        effectiveConsumed[decisionOwnerSide] += Math.max(0, elapsedActivityMs - activity.chargedMs);
+      }
+      return {
+        schemaVersion: "player-clock-v1",
+        mode: "none",
+        consumedMs: effectiveConsumed,
+        ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
+        ...(activity ? { activityStartedAtMs: activity.startedAtMs } : {}),
+        ...(elapsedActivityMs !== undefined ? { elapsedActivityMs } : {}),
+        warningLevel: "none"
+      };
+    }
     const chargeableElapsedMs = activity && elapsedActivityMs !== undefined ? Math.max(0, elapsedActivityMs - clock.gracePeriodMs) : undefined;
     const graceRemainingMs = activity && elapsedActivityMs !== undefined ? Math.max(0, clock.gracePeriodMs - elapsedActivityMs) : undefined;
-    const decisionOwnerSide = activity?.decisionOwnerSide;
     const effectiveRemaining = { ...clock.remainingMs };
     if (decisionOwnerSide && chargeableElapsedMs !== undefined && activity) {
       effectiveRemaining[decisionOwnerSide] = Math.max(0, effectiveRemaining[decisionOwnerSide] - Math.max(0, chargeableElapsedMs - activity.chargedMs));
@@ -2088,6 +2112,7 @@ export class MultiplayerService {
       schemaVersion: "player-clock-v1",
       mode: "player_clock",
       remainingMs: effectiveRemaining,
+      consumedMs: { ...clock.consumedMs },
       startingTimeMs: clock.startingTimeMs,
       gracePeriodMs: clock.gracePeriodMs,
       ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
@@ -2560,12 +2585,19 @@ function normalizePlayerClockConfig(config: ApiPlayerClockConfig | undefined): A
   return { mode: "player_clock", startingTimeMs, gracePeriodMs };
 }
 
-function initialPlayerClockState(config: Required<Pick<ApiPlayerClockConfig, "mode" | "startingTimeMs" | "gracePeriodMs">>): PlayerClockState {
+function initialPlayerClockState(config: ApiPlayerClockConfig): PlayerClockState {
+  if (config.mode !== "player_clock") {
+    return {
+      mode: "none",
+      consumedMs: { runner: 0, corp: 0 }
+    };
+  }
   return {
     mode: "player_clock",
-    startingTimeMs: config.startingTimeMs,
-    gracePeriodMs: config.gracePeriodMs,
-    remainingMs: { runner: config.startingTimeMs, corp: config.startingTimeMs }
+    startingTimeMs: config.startingTimeMs ?? 5 * 60_000,
+    gracePeriodMs: config.gracePeriodMs ?? 10_000,
+    remainingMs: { runner: config.startingTimeMs ?? 5 * 60_000, corp: config.startingTimeMs ?? 5 * 60_000 },
+    consumedMs: { runner: 0, corp: 0 }
   };
 }
 

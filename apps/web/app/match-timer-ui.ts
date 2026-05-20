@@ -1,4 +1,4 @@
-import type { LegalAction, PlayerView, Side, Winner } from "@netgrid/shared";
+import type { ApiPlayerClockSnapshot, LegalAction, PlayerView, Side, Winner } from "@netgrid/shared";
 
 export type MatchTimerSnapshotInput = {
   matchId: string;
@@ -43,4 +43,29 @@ export function matchTimerScopeLabel(view: PlayerView, legalActions: LegalAction
   if (view.phase === "setup") return "Setup";
   if (view.phase === "run") return `${sideLabel(view.activeSide)} im Run`;
   return `${sideLabel(view.activeSide)} am Zug`;
+}
+
+export function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
+  let remainingMs = snapshot.remainingMs?.[side] ?? 0;
+  if (snapshot.expiredSide === side) return 0;
+  if (snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined || snapshot.gracePeriodMs === undefined) return remainingMs;
+  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const liveChargeableMs = Math.max(0, elapsedMs - snapshot.gracePeriodMs);
+  const serverChargeableMs = snapshot.chargeableElapsedMs ?? 0;
+  return Math.max(0, remainingMs - Math.max(0, liveChargeableMs - serverChargeableMs));
+}
+
+export function playerClockLiveConsumed(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
+  const consumedMs = snapshot.consumedMs?.[side] ?? 0;
+  if (snapshot.mode !== "none" || snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined) return consumedMs;
+  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const serverElapsedMs = snapshot.elapsedActivityMs ?? 0;
+  return Math.max(0, consumedMs + Math.max(0, elapsedMs - serverElapsedMs));
+}
+
+export function formatPlayerClockDuration(valueMs: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(valueMs / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${minutes}:${String(seconds).padStart(2, "0")}`;
 }

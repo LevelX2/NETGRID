@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { LegalAction, PlayerView, PublicGameEvent, Side, VisibleCard } from "@netgrid/shared";
-import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
+import { formatMatchTimerDuration, formatPlayerClockDuration, matchTimerDecisionKey, matchTimerScopeLabel, playerClockLiveConsumed, playerClockLiveRemaining } from "./match-timer-ui";
 
 describe("UI-only match timer helpers", () => {
   it("formats compact match durations", () => {
@@ -8,6 +8,28 @@ describe("UI-only match timer helpers", () => {
     expect(formatMatchTimerDuration(5_900)).toBe("00:05");
     expect(formatMatchTimerDuration(65_000)).toBe("01:05");
     expect(formatMatchTimerDuration(3_661_000)).toBe("1:01:01");
+  });
+
+  it("formats player clock durations for remaining and consumed displays", () => {
+    expect(formatPlayerClockDuration(-1)).toBe("0:00");
+    expect(formatPlayerClockDuration(5_001)).toBe("0:06");
+    expect(formatPlayerClockDuration(65_000)).toBe("1:05");
+  });
+
+  it("counts no-limit consumed player time upward without reducing a budget", () => {
+    const snapshot = {
+      schemaVersion: "player-clock-v1",
+      mode: "none",
+      consumedMs: { runner: 30_000, corp: 10_000 },
+      decisionOwnerSide: "runner",
+      activityStartedAtMs: 1_000,
+      elapsedActivityMs: 4_000,
+      warningLevel: "none"
+    } as const;
+
+    expect(playerClockLiveConsumed(snapshot, "runner", 8_500)).toBe(33_500);
+    expect(playerClockLiveConsumed(snapshot, "corp", 8_500)).toBe(10_000);
+    expect(playerClockLiveRemaining(snapshot, "runner", 8_500)).toBe(0);
   });
 
   it("uses only side-safe snapshot fields for the visible scope label", () => {

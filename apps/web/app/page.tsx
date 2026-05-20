@@ -4864,7 +4864,7 @@ export default function Page() {
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
-          {matchClockDisplay || payload.playerClock?.mode === "player_clock" ? (
+          {matchClockDisplay || payload.playerClock ? (
             <div className="clockCluster" aria-label="Uhrenbereich">
               {matchClockDisplay ? (
                 <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
@@ -4880,7 +4880,7 @@ export default function Page() {
                   {matchClockDisplay.graceLabel ? <small>{matchClockDisplay.graceLabel}</small> : null}
                 </div>
               ) : null}
-              {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
+              {payload.playerClock ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
             </div>
           ) : null}
           {activeView.side === "corp" ? (
@@ -12354,22 +12354,26 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
 }
 
 function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapshot; nowMs: number }) {
-  const runnerRemainingMs = playerClockLiveRemaining(snapshot, "runner", nowMs);
-  const corpRemainingMs = playerClockLiveRemaining(snapshot, "corp", nowMs);
+  const isNoLimit = snapshot.mode === "none";
+  const runnerValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "runner", nowMs) : playerClockLiveRemaining(snapshot, "runner", nowMs);
+  const corpValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "corp", nowMs) : playerClockLiveRemaining(snapshot, "corp", nowMs);
   const ownerLabel = snapshot.expiredSide
     ? `${sideLabel(snapshot.expiredSide)} abgelaufen`
     : snapshot.decisionOwnerSide
       ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
       : "Wartet";
+  const valueLabel = isNoLimit ? "verbraucht" : "verbleibend";
   return (
-    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label={`Spielerzeit: ${ownerLabel}`} data-testid="player-clock">
+    <div className={`playerClockStrip ${snapshot.warningLevel} ${isNoLimit ? "countUp" : "countDown"}`} aria-label={`Spielerzeit ${valueLabel}: ${ownerLabel}`} data-testid="player-clock">
       <span className={`playerClockSide runner ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
         <strong>Runner</strong>
-        <span className="playerClockValue">{formatPlayerClockDuration(runnerRemainingMs)}</span>
+        <span className="playerClockValue">{formatPlayerClockDuration(runnerValueMs)}</span>
+        {isNoLimit ? <small>verbraucht</small> : null}
       </span>
       <span className={`playerClockSide corp ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
         <strong>Korp</strong>
-        <span className="playerClockValue">{formatPlayerClockDuration(corpRemainingMs)}</span>
+        <span className="playerClockValue">{formatPlayerClockDuration(corpValueMs)}</span>
+        {isNoLimit ? <small>verbraucht</small> : null}
       </span>
     </div>
   );
@@ -12390,6 +12394,13 @@ function playerClockLiveGraceRemaining(snapshot: ApiPlayerClockSnapshot, nowMs: 
   }
   if (snapshot.graceRemainingMs !== undefined) return Math.max(0, snapshot.graceRemainingMs);
   return null;
+}
+function playerClockLiveConsumed(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
+  const consumedMs = snapshot.consumedMs?.[side] ?? 0;
+  if (snapshot.mode !== "none" || snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined) return consumedMs;
+  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const serverElapsedMs = snapshot.elapsedActivityMs ?? 0;
+  return Math.max(0, consumedMs + Math.max(0, elapsedMs - serverElapsedMs));
 }
 
 function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {

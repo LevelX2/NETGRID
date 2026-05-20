@@ -1536,23 +1536,64 @@ describe("MVP 0.2 multiplayer service", () => {
     expect((await service.replayMatch(created.matchId)).finalStateHash).toBe(beforeHash);
   });
 
-  it("keeps matches without player clock free of timer payloads and time-expiry losses", async () => {
-    const { service, matchId, corp } = await joinedMatch("player-clock-none");
+  it("tracks no-limit consumed player time without time-expiry losses", async () => {
+    const startMs = Date.parse("2026-05-21T08:00:00.000Z");
+    let nowMs = startMs;
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "player-clock-none",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
+      publicServerBaseUrl: "http://127.0.0.1:8787",
+      now: () => new Date(nowMs).toISOString()
+    });
+    const created = await service.createMatch({ hostSide: "corp", seed: "player-clock-none" });
+    expect(created.joinUrl).toBeTruthy();
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    const matchId = created.matchId;
+    const corp = { side: "corp" as const, sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken };
+    await forceSetupComplete(service, matchId);
+
     const before = await bootstrap(service, matchId, corp);
-    expect(before.playerClock).toBeUndefined();
+    expect(before.playerClock).toMatchObject({
+      schemaVersion: "player-clock-v1",
+      mode: "none",
+      decisionOwnerSide: "corp",
+      consumedMs: { runner: 0, corp: 0 },
+      warningLevel: "none"
+    });
     const mandatoryDraw = mustAction(before, (action) => action.type === "mandatory_draw");
 
+    nowMs = startMs + 6_000;
+    const reconnected = await service.reconnectMatch(matchId, { side: "corp", reconnectToken: corp.reconnectToken });
+    expect("error" in reconnected).toBe(false);
+    if ("error" in reconnected) throw new Error(reconnected.error.message);
+    expect(reconnected.playerClock).toMatchObject({
+      mode: "none",
+      decisionOwnerSide: "corp",
+      consumedMs: { runner: 0, corp: 6_000 },
+      warningLevel: "none"
+    });
+    expect(JSON.stringify(reconnected.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
+
+    nowMs = startMs + 126_000;
     const submitted = await service.submitAction({
       matchId,
       side: "corp",
-      sessionToken: corp.sessionToken,
+      sessionToken: reconnected.sessionToken,
       actionId: mandatoryDraw.actionId,
       clientKnownStateVersion: before.playerView.stateVersion,
       idempotencyKey: "player-clock-none-action"
     });
     expect(submitted.ok).toBe(true);
     if (!submitted.ok) throw new Error(submitted.error.message);
-    expect(submitted.actorPayload.playerClock).toBeUndefined();
+    expect(submitted.actorPayload.playerClock).toMatchObject({
+      mode: "none",
+      consumedMs: { runner: 0, corp: 126_000 },
+      warningLevel: "none"
+    });
     expect(submitted.actorPayload.matchStatus).toBe("active");
     expect(submitted.actorPayload.resultSummary).toBeUndefined();
   });
