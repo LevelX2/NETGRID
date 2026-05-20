@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-20-runner-ai-shell-traders-overprepare
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-20
-startedAt:
-completedAt:
+startedAt: 2026-05-20
+completedAt: 2026-05-20
 branch:
 releaseTarget: Runner AI Shell Traders follow-up
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-plans.ts
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Shell Traders"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Runner AI|Runner plan|Shell Traders|installed Runner economy|King of the Road|breaker|economy"
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - git diff --check -- packages/ai/src/index.ts packages/ai/src/runner-plans.ts packages/ai/src/index.test.ts docs/activities/done/act-2026-05-20-runner-ai-shell-traders-overprepare.md
 relatedActivities:
   - act-2026-05-18-runner-ai-shell-traders-unused
   - act-2026-05-19-shell-traders-missing-prepare-action
@@ -70,4 +78,6 @@ Die Runner-KI soll `The Shell Traders` weiterhin sinnvoll nutzen, aber nicht imm
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Runner-Planbewertung für `The Shell Traders` bewertet Prepare und Remove nicht mehr additiv als immer weiter wachsenden Build-Rig-Nutzen. Stattdessen wird das beste Shell-Traders-Vorhaben gewählt: sofortige oder nahe Remove-Counter-Fertigstellung wird bevorzugt, weiteres Prepare erhält bei vorhandenen vorbereiteten Shell-Zielen einen Backlog-Malus. Die Baseline-Bewertung für Shell-Traders-Prepare wurde konsistent gedämpft, damit der Planpfad nicht durch reaktive Baseline-Scores wieder zum Überfüllen kippt.
+
+Ein neuer AI-Test reproduziert den Backlog-Fall mit zwei vorbereiteten Shell-Traders-Zielen und einem weiteren Prepare-Ziel im Grip: Die KI wählt `remove_shell_counter` zur Fertigstellung statt erneut `set_aside_from_grip`. Debug/Evidence enthält side-sichere Felder wie `shell_traders_backlog`, `shell_traders_near_install`, `shell_traders_prepare_score`, `shell_traders_remove_score` und `shell_traders_prepare_backlog_penalty`; keine FullState- oder PrivatePayload-Daten werden ausgegeben. Niedriger/leer laufender Backlog bleibt durch den bestehenden Prepare-Test abgedeckt.

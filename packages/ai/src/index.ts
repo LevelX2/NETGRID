@@ -1937,10 +1937,19 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
     case "trigger_ability":
       if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
         const counterAmount = typeof action.payload.shellCounterAmount === "number" ? action.payload.shellCounterAmount : 0;
-        score = 620 + Math.max(0, counterAmount) * 30;
+        const backlog = shellTradersBacklog(input);
+        const immediateRemoveAvailable = shellTradersImmediateRemoveAvailable(input);
+        const backlogPenalty = shellTradersPrepareBaselinePenalty(input, backlog, immediateRemoveAvailable);
+        score = 620 + Math.max(0, counterAmount) * 30 - backlogPenalty;
         reasonCode = "runner.shell_traders.prepare_install";
         explanation = "The Shell Traders bereitet ein eigenes Programm oder eine Hardwarekarte für die verzögerte kostenlose Installation vor.";
-        evidence.push("shell_traders", `shell_counters:${counterAmount}`);
+        evidence.push(
+          "shell_traders",
+          `shell_counters:${counterAmount}`,
+          `shell_traders_backlog:${backlog.preparedCount}`,
+          `shell_traders_prepare_backlog_penalty:${backlogPenalty}`,
+          `shell_traders_immediate_remove:${immediateRemoveAvailable}`
+        );
       } else if (action.payload?.shellTradersAbility === "remove_shell_counter") {
         const remaining = typeof action.payload.remainingCounters === "number" ? action.payload.remainingCounters : 1;
         score = remaining <= 1 ? 650 : 360;
@@ -2215,6 +2224,38 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
   if (action.source === "basic_action" || action.source === "game_rule") return [];
   const visible = findVisibleCard(input, action.source);
   return rolesForCardId(visible?.definitionId);
+}
+
+function shellTradersBacklog(input: AiDecisionInput): { preparedCount: number; nearInstallCount: number } {
+  const preparedCards = input.playerView.specialZones?.setAside.filter((card) => card.known && card.owner === "runner" && card.counters?.shell !== undefined) ?? [];
+  return {
+    preparedCount: preparedCards.length,
+    nearInstallCount: preparedCards.filter((card) => Math.max(0, card.counters?.shell ?? 0) <= 1).length
+  };
+}
+
+function shellTradersImmediateRemoveAvailable(input: AiDecisionInput): boolean {
+  return input.legalActions.some(
+    (action) =>
+      action.type === "trigger_ability" &&
+      action.payload?.shellTradersAbility === "remove_shell_counter" &&
+      typeof action.payload.remainingCountersBefore === "number" &&
+      action.payload.remainingCountersBefore <= 1
+  );
+}
+
+function shellTradersPrepareBaselinePenalty(
+  input: AiDecisionInput,
+  backlog: { preparedCount: number; nearInstallCount: number },
+  immediateRemoveAvailable: boolean
+): number {
+  let penalty = 0;
+  if (backlog.preparedCount >= 2) penalty += 240 + Math.max(0, backlog.preparedCount - 2) * 55;
+  else if (backlog.preparedCount === 1) penalty += 70;
+  if (immediateRemoveAvailable) penalty += 120;
+  if (backlog.nearInstallCount > 0) penalty += backlog.nearInstallCount * 40;
+  if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2) penalty += 70;
+  return penalty;
 }
 
 function findVisibleCard(input: AiDecisionInput, instanceId: string) {

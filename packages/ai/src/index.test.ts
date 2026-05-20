@@ -889,6 +889,19 @@ describe("MVP 0.3 AI controller contract", () => {
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
     );
+    if (!remove) {
+      console.log(
+        "Shell backlog legal actions",
+        input.legalActions.map((action) => ({
+          type: action.type,
+          ability: action.payload?.shellTradersAbility,
+          target: action.payload?.targetCardDefinitionId,
+          before: action.payload?.remainingCountersBefore,
+          counters: action.payload?.shellCounterAmount,
+          source: action.source,
+        })),
+      );
+    }
     expect(remove).toBeDefined();
     expect(gainCredit).toBeDefined();
     if (!remove || !gainCredit) throw new Error("Missing Shell-counter removal actions");
@@ -904,6 +917,75 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(debugText).toContain("shell_traders_kind:remove_counter");
     expect(debugText).toContain("shell_traders_immediate_install:true");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("finishes Shell Traders backlog before preparing more cards", () => {
+    let state = runnerShellTradersState("ai-shell-traders-backlog-limit");
+    moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+    moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 1);
+    const firstTargetId = moveRunnerCardToGrip(state, "simple_fracter");
+    const secondTargetId = moveRunnerCardCopyToGrip(state, "simple_fracter", [
+      firstTargetId,
+    ]);
+    state.runner.credits = 4;
+    state.runner.clicks = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === firstTargetId,
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardId === secondTargetId,
+    );
+    setShellCountersForTest(state, firstTargetId, 1);
+    setShellCountersForTest(state, secondTargetId, 2);
+    moveRunnerCardToGrip(state, "simple_setup_hardware");
+    state.runner.credits = 1;
+    state.runner.clicks = 3;
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remove = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "remove_shell_counter",
+    );
+    const prepare = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remove).toBeDefined();
+    expect(prepare).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remove || !prepare || !gainCredit)
+      throw new Error("Missing Shell Traders backlog fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [prepare, remove, gainCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(remove.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders_kind:remove_counter");
+    expect(debugText).toContain("shell_traders_backlog:2");
+    expect(debugText).toContain("shell_traders_prepare_backlog_penalty:");
+    expect(debugText).toContain("shell_traders_immediate_install:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
   });
 
   it("resolves V1.9.9 Aardvark and Chimera choices through side-safe LegalActions", () => {
@@ -9495,6 +9577,29 @@ function moveRunnerCardToGrip(
   definitionId: string,
 ): CardInstanceId {
   const id = findCard(state, definitionId);
+  removeEverywhere(state, id);
+  state.runner.grip.unshift(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "runner", zone: "grip" },
+    faceup: true,
+    rezzed: true,
+  };
+  return id;
+}
+
+function moveRunnerCardCopyToGrip(
+  state: GameState,
+  definitionId: string,
+  excludeIds: CardInstanceId[],
+): CardInstanceId {
+  const excluded = new Set(excludeIds);
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) => card.definitionId === definitionId && !excluded.has(id),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing ${definitionId} copy`);
+  const id = entry[0];
   removeEverywhere(state, id);
   state.runner.grip.unshift(id);
   state.cardInstances[id] = {

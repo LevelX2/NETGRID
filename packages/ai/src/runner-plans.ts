@@ -156,6 +156,12 @@ type ShellTradersActionAssessment = {
   sourceVisible: boolean;
 };
 
+type ShellTradersBacklog = {
+  preparedCount: number;
+  nearInstallCount: number;
+  totalShellCounters: number;
+};
+
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
@@ -1118,6 +1124,7 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
     .map((action) => (action ? classifyShellTradersAction(input, action) : undefined))
     .filter((assessment): assessment is ShellTradersActionAssessment => Boolean(assessment));
   if (assessments.length === 0) return { score: 0, reasons: [], evidence: ["shell_traders:false"] };
+  const backlog = shellTradersBacklog(input);
 
   const prepare = assessments
     .filter((assessment) => assessment.kind === "prepare")
@@ -1125,18 +1132,17 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
   const remove = assessments
     .filter((assessment) => assessment.kind === "remove_counter")
     .sort((left, right) => Number(right.immediateInstall) - Number(left.immediateInstall) || left.shellCounters - right.shellCounters)[0];
-  const best = remove?.immediateInstall ? remove : prepare ?? remove ?? assessments[0]!;
-
-  let score = 0;
-  const reasons: string[] = [];
-  if (prepare) {
-    score += 165 + shellTradersTargetValue(prepare) + Math.max(0, 4 - input.playerView.own.credits) * 20;
-    reasons.push("shell_traders_prepare_build_rig");
-  }
-  if (remove) {
-    score += remove.immediateInstall ? 210 : 115;
-    reasons.push(remove.immediateInstall ? "shell_traders_finish_install" : "shell_traders_progress_counter");
-  }
+  const preparePenalty = prepare ? shellTradersPrepareBacklogPenalty(input, backlog, remove) : 0;
+  const prepareScore = prepare ? 165 + shellTradersTargetValue(prepare) + Math.max(0, 4 - input.playerView.own.credits) * 20 - preparePenalty : Number.NEGATIVE_INFINITY;
+  const removeScore = remove ? (remove.immediateInstall ? 230 : 125 + Math.max(0, 4 - remove.shellCounters) * 12) : Number.NEGATIVE_INFINITY;
+  const best = removeScore >= prepareScore ? remove ?? prepare ?? assessments[0]! : prepare ?? remove ?? assessments[0]!;
+  const score = Math.max(prepareScore, removeScore, 0);
+  const reasons = sortedUnique([
+    ...(best.kind === "prepare" ? ["shell_traders_prepare_build_rig"] : [best.immediateInstall ? "shell_traders_finish_install" : "shell_traders_progress_counter"]),
+    ...(prepare && preparePenalty > 0 ? ["shell_traders_prepare_backlog_limited"] : []),
+    ...(backlog.preparedCount >= 2 ? ["shell_traders_backlog_present"] : []),
+    ...(remove?.immediateInstall ? ["shell_traders_immediate_install_available"] : [])
+  ]);
 
   return {
     score,
@@ -1146,12 +1152,41 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
       `shell_traders_kind:${best.kind}`,
       `shell_traders_prepare_actions:${assessments.filter((assessment) => assessment.kind === "prepare").length}`,
       `shell_traders_remove_actions:${assessments.filter((assessment) => assessment.kind === "remove_counter").length}`,
+      `shell_traders_backlog:${backlog.preparedCount}`,
+      `shell_traders_near_install:${backlog.nearInstallCount}`,
+      `shell_traders_total_counters:${backlog.totalShellCounters}`,
+      `shell_traders_prepare_score:${Number.isFinite(prepareScore) ? round(prepareScore) : "none"}`,
+      `shell_traders_remove_score:${Number.isFinite(removeScore) ? round(removeScore) : "none"}`,
+      `shell_traders_prepare_backlog_penalty:${preparePenalty}`,
       `shell_traders_target_roles:${best.targetRoles.slice(0, 3).join(",") || "unknown"}`,
       `shell_traders_shell_counters:${best.shellCounters}`,
       `shell_traders_immediate_install:${best.immediateInstall}`,
       `shell_traders_source_visible:${best.sourceVisible}`
     ]
   };
+}
+
+function shellTradersBacklog(input: AiDecisionInput): ShellTradersBacklog {
+  const preparedCards = input.playerView.specialZones?.setAside.filter((card) => card.known && card.owner === "runner" && card.counters?.shell !== undefined) ?? [];
+  return {
+    preparedCount: preparedCards.length,
+    nearInstallCount: preparedCards.filter((card) => Math.max(0, card.counters?.shell ?? 0) <= 1).length,
+    totalShellCounters: preparedCards.reduce((sum, card) => sum + Math.max(0, card.counters?.shell ?? 0), 0)
+  };
+}
+
+function shellTradersPrepareBacklogPenalty(
+  input: AiDecisionInput,
+  backlog: ShellTradersBacklog,
+  remove: ShellTradersActionAssessment | undefined
+): number {
+  let penalty = 0;
+  if (backlog.preparedCount >= 2) penalty += 180 + Math.max(0, backlog.preparedCount - 2) * 45;
+  else if (backlog.preparedCount === 1) penalty += 55;
+  if (remove?.immediateInstall) penalty += 110;
+  if (backlog.nearInstallCount > 0) penalty += backlog.nearInstallCount * 35;
+  if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2) penalty += 55;
+  return penalty;
 }
 
 function classifyShellTradersAction(input: AiDecisionInput, action: LegalAction): ShellTradersActionAssessment | undefined {
@@ -1416,7 +1451,10 @@ function runnerShellTradersPriority(input: AiDecisionInput, action: LegalAction)
   if (assessment.kind === "remove_counter") {
     return assessment.immediateInstall ? 132 : 86 + Math.max(0, 4 - assessment.shellCounters) * 5;
   }
-  return 96 + Math.min(35, shellTradersTargetValue(assessment) / 5) + Math.max(0, 4 - input.playerView.own.credits) * 5;
+  const backlog = shellTradersBacklog(input);
+  const hasImmediateRemove = input.legalActions.some((candidate) => classifyShellTradersAction(input, candidate)?.immediateInstall === true);
+  const backlogPenalty = shellTradersPrepareBacklogPenalty(input, backlog, hasImmediateRemove ? { ...assessment, kind: "remove_counter", immediateInstall: true } : undefined);
+  return 96 + Math.min(35, shellTradersTargetValue(assessment) / 5) + Math.max(0, 4 - input.playerView.own.credits) * 5 - Math.min(90, Math.round(backlogPenalty / 4));
 }
 
 function assessVisibleBreakerPressure(input: AiDecisionInput): VisibleBreakerPressure {
