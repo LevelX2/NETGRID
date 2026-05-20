@@ -1113,7 +1113,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     for (const table of [
       "sessions",
       "tokens",
-      "engine_events",
       "action_receipts",
       "undo_snapshots",
       "pending_undo",
@@ -1150,31 +1149,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       )
       .run(matchId, stateVersion, stateHash, toJson(gameStateForStorage(record.gameState)));
 
-    const insertEvent = this.db.prepare(
-      `INSERT INTO events
-       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-        + ` ON CONFLICT(match_id, event_id) DO UPDATE SET
-          event_index = excluded.event_index,
-          state_version_before = excluded.state_version_before,
-          state_version_after = excluded.state_version_after,
-          state_hash_after = excluded.state_hash_after,
-          public_payload_json = excluded.public_payload_json,
-          private_payload_local_only = excluded.private_payload_local_only,
-          hidden_info_barrier = excluded.hidden_info_barrier`
-    );
-    this.db.prepare("DELETE FROM events WHERE match_id = ? AND event_index >= ?").run(matchId, record.eventLog.length);
-    record.eventLog.forEach((event, index) => {
-      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(event.publicPayload), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
-    });
-
-    const insertEngineEvent = this.db.prepare(
-      `INSERT INTO engine_events (match_id, event_id, event_index, event_json)
-       VALUES (?, ?, ?, ?)`
-    );
-    record.gameState?.eventLog.forEach((event, index) => {
-      insertEngineEvent.run(matchId, event.eventId, index, JSON.stringify(event));
-    });
+    this.syncPublicEvents(matchId, record.eventLog);
+    this.syncEngineEvents(matchId, record.gameState?.eventLog ?? []);
 
     const insertReceipt = this.db.prepare(
       `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
@@ -1209,6 +1185,53 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     if (record.pendingUndo) this.db.prepare("INSERT INTO pending_undo (match_id, pending_undo_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.pendingUndo));
     if (record.privateDeckSnapshots) this.db.prepare("INSERT INTO private_deck_snapshots (match_id, private_deck_snapshots_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.privateDeckSnapshots));
     if (record.startLobby) this.db.prepare("INSERT INTO start_lobbies (match_id, start_lobby_json) VALUES (?, ?)").run(matchId, JSON.stringify(record.startLobby));
+  }
+
+  private syncPublicEvents(matchId: string, events: StoredMatch["eventLog"]): void {
+    const eventIds = events.map((event) => event.eventId);
+    this.truncateEventTable("events", matchId, eventIds);
+    const prefixLength = this.existingContiguousEventPrefixLength("events", matchId, eventIds);
+    this.truncateEventTable("events", matchId, eventIds.slice(0, prefixLength));
+    const insertEvent = this.db.prepare(
+      `INSERT INTO events
+       (match_id, event_id, event_index, state_version_before, state_version_after, state_hash_after, public_payload_json, private_payload_local_only, hidden_info_barrier)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    events.slice(prefixLength).forEach((event, offset) => {
+      const index = prefixLength + offset;
+      insertEvent.run(matchId, event.eventId, index, event.stateVersionBefore, event.stateVersionAfter, event.stateHashAfter, JSON.stringify(event.publicPayload), event.privatePayloadLocalOnly ? 1 : 0, event.hiddenInfoBarrier ? 1 : 0);
+    });
+  }
+
+  private syncEngineEvents(matchId: string, events: GameEvent[]): void {
+    const eventIds = events.map((event) => event.eventId);
+    this.truncateEventTable("engine_events", matchId, eventIds);
+    const prefixLength = this.existingContiguousEventPrefixLength("engine_events", matchId, eventIds);
+    this.truncateEventTable("engine_events", matchId, eventIds.slice(0, prefixLength));
+    const insertEngineEvent = this.db.prepare(
+      `INSERT INTO engine_events (match_id, event_id, event_index, event_json)
+       VALUES (?, ?, ?, ?)`
+    );
+    events.slice(prefixLength).forEach((event, offset) => {
+      const index = prefixLength + offset;
+      insertEngineEvent.run(matchId, event.eventId, index, JSON.stringify(event));
+    });
+  }
+
+  private truncateEventTable(table: "events" | "engine_events", matchId: string, eventIds: string[]): void {
+    this.db.prepare(`DELETE FROM ${table} WHERE match_id = ? AND event_index >= ?`).run(matchId, eventIds.length);
+  }
+
+  private existingContiguousEventPrefixLength(table: "events" | "engine_events", matchId: string, eventIds: string[]): number {
+    const rows = this.db
+      .prepare(`SELECT event_id AS eventId, event_index AS eventIndex FROM ${table} WHERE match_id = ? AND event_index < ? ORDER BY event_index ASC`)
+      .all(matchId, eventIds.length) as Array<{ eventId: string; eventIndex: number }>;
+    let prefixLength = 0;
+    for (const row of rows) {
+      if (Number(row.eventIndex) !== prefixLength || row.eventId !== eventIds[prefixLength]) break;
+      prefixLength += 1;
+    }
+    return prefixLength;
   }
 
   private tableExists(name: string): boolean {

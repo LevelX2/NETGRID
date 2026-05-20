@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-21-sqlite-incremental-event-writes
-status: inbox
+status: done
 kind: cleanup
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/storage-sqlite.ts
+  - apps/server/src/multiplayer.test.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server test
 ---
 
 # SQLite-Events inkrementell schreiben
@@ -47,11 +52,11 @@ Der SQLite-Save-Pfad soll bei langen Matches nicht mehr bei jedem Zug die gesamt
 
 ## Akzeptanzkriterien
 
-- [ ] Normale neue Züge schreiben nur die neu hinzugekommenen öffentlichen und privaten Engine-Events.
-- [ ] Undo oder Rückschnitt entfernt überzählige Events aus `events` und `engine_events`.
-- [ ] Replay-StateHash-Checks bleiben nach Save, Reload und Undo grün.
-- [ ] Ein Regressionstest simuliert ein Match mit mehreren Events, speichert erneut und bestätigt, dass vorhandene Eventzeilen nicht unnötig umgeschrieben werden.
-- [ ] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
+- [x] Normale neue Züge schreiben nur die neu hinzugekommenen öffentlichen und privaten Engine-Events.
+- [x] Undo oder Rückschnitt entfernt überzählige Events aus `events` und `engine_events`.
+- [x] Replay-StateHash-Checks bleiben nach Save, Reload und Undo grün.
+- [x] Ein Regressionstest simuliert ein Match mit mehreren Events, speichert erneut und bestätigt, dass vorhandene Eventzeilen nicht unnötig umgeschrieben werden.
+- [x] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
 
 ## Umsetzungshinweise
 
@@ -61,4 +66,6 @@ Der SQLite-Save-Pfad soll bei langen Matches nicht mehr bei jedem Zug die gesamt
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der SQLite-Save-Pfad synchronisiert `events` und `engine_events` jetzt append-/truncate-orientiert: vorhandene zusammenhängende Event-Präfixe bleiben unangetastet, neue Events werden angehängt und Rückschnitte löschen nur den Suffix. Ein Trigger-basierter Regressionstest prüft unverändertes Resave ohne Eventwrites, normalen Append mit je einem öffentlichen und privaten Insert sowie akzeptiertes Undo mit symmetrischem Delete in beiden Eventtabellen.
+
+Verifikation: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.

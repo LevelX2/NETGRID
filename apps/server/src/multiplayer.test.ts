@@ -937,6 +937,91 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     }
   });
 
+  it("writes only appended SQLite events and truncates public and private event tails on undo", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "v108-sqlite-incremental-events" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "v108-sqlite-incremental-events" });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    await forceSetupComplete(service, created.matchId);
+    await submit(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      (action) => action.type === "mandatory_draw",
+      "v108-sqlite-incremental-mandatory"
+    );
+
+    const auditDb = new DatabaseSync(dbPath);
+    const auditCounts = (): Record<string, number> => Object.fromEntries(
+      (auditDb.prepare("SELECT table_name || ':' || op AS key, COUNT(*) AS count FROM event_write_audit GROUP BY key ORDER BY key").all() as Array<{ key: string; count: number }>)
+        .map((row) => [row.key, Number(row.count)])
+    );
+    const clearAudit = (): void => {
+      auditDb.prepare("DELETE FROM event_write_audit").run();
+    };
+    try {
+      auditDb.exec(`
+        CREATE TABLE event_write_audit (table_name TEXT NOT NULL, op TEXT NOT NULL, event_id TEXT NOT NULL);
+        CREATE TRIGGER audit_events_insert AFTER INSERT ON events BEGIN INSERT INTO event_write_audit VALUES ('events', 'insert', NEW.event_id); END;
+        CREATE TRIGGER audit_events_update AFTER UPDATE ON events BEGIN INSERT INTO event_write_audit VALUES ('events', 'update', NEW.event_id); END;
+        CREATE TRIGGER audit_events_delete AFTER DELETE ON events BEGIN INSERT INTO event_write_audit VALUES ('events', 'delete', OLD.event_id); END;
+        CREATE TRIGGER audit_engine_events_insert AFTER INSERT ON engine_events BEGIN INSERT INTO event_write_audit VALUES ('engine_events', 'insert', NEW.event_id); END;
+        CREATE TRIGGER audit_engine_events_update AFTER UPDATE ON engine_events BEGIN INSERT INTO event_write_audit VALUES ('engine_events', 'update', NEW.event_id); END;
+        CREATE TRIGGER audit_engine_events_delete AFTER DELETE ON engine_events BEGIN INSERT INTO event_write_audit VALUES ('engine_events', 'delete', OLD.event_id); END;
+      `);
+      clearAudit();
+
+      const loaded = await storage.load(created.matchId);
+      if (!loaded) throw new Error("Missing loaded SQLite match");
+      await storage.save(loaded);
+      expect(auditCounts()).toEqual({});
+
+      clearAudit();
+      const credit = await submit(
+        service,
+        created.matchId,
+        { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+        (action) => action.type === "gain_credit",
+        "v108-sqlite-incremental-credit"
+      );
+      expect(auditCounts()).toEqual({ "engine_events:insert": 1, "events:insert": 1 });
+
+      clearAudit();
+      const undo = await service.requestUndo({
+        matchId: created.matchId,
+        side: "corp",
+        sessionToken: created.hostSessionToken,
+        targetEventId: `evt_${credit.receipt.stateVersionAfter}`,
+        reason: "Incremental event write regression"
+      });
+      expect(undo.ok).toBe(true);
+      if (!undo.ok || !undo.undoRequest) throw new Error("Expected undo request");
+      expect(auditCounts()).toEqual({});
+
+      clearAudit();
+      const accepted = await service.acceptUndo({
+        matchId: created.matchId,
+        side: "runner",
+        sessionToken: joined.sessionToken,
+        undoRequestId: undo.undoRequest.undoRequestId
+      });
+      expect(accepted.ok).toBe(true);
+      if (!accepted.ok) throw new Error(accepted.error.message);
+      expect(auditCounts()).toEqual({ "engine_events:delete": 1, "events:delete": 1 });
+      expect((await service.replayMatch(created.matchId)).ok).toBe(true);
+    } finally {
+      auditDb.close();
+      service.closeStorage();
+    }
+  });
+
   it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
     const legacyPath = join(dir, "netgrid.sqlite");
