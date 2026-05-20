@@ -809,6 +809,25 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(take)).toBe("2 Credits nehmen");
   });
 
+  it("labels Junkyard BBS with the concrete heap target", () => {
+    const takeTopHeap = legalAction("runner", "trigger_ability", "junkyard_1", "Junkyard BBS: oberste Heap-Karte in die Grip nehmen", {
+      cardId: "junkyard_1",
+      resourceAbility: "junkyard_bbs_return_top_heap",
+      targetCardId: "fracter_1",
+      targetCardDefinitionId: "simple_fracter",
+      sourceZone: "heap",
+      destinationZone: "grip"
+    });
+
+    const split = splitLegalActions([takeTopHeap]);
+
+    expect(split.primaryActions).toEqual([]);
+    expect(split.contextualActions).toEqual([takeTopHeap]);
+    expect(actionMatchesContext(takeTopHeap, { kind: "card", id: "junkyard_1", label: "Junkyard BBS" })).toBe(true);
+    expect(actionButtonLabel(takeTopHeap)).toBe("Simple Fracter aus dem Heap auf die Hand nehmen");
+    expect(contextualCardActionLabel(takeTopHeap)).toBe("Simple Fracter aus dem Heap auf die Hand nehmen");
+  });
+
   it("labels Self-Modifying Code activation without credit costs", () => {
     const searchInstall = legalAction("runner", "trigger_ability", "smc_1", "Self-Modifying Code: trashen und Programm aus Stack installieren", {
       cardId: "smc_1",

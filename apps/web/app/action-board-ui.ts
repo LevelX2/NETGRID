@@ -402,14 +402,22 @@ function resourceAbilityContextLabel(action: LegalAction): string | null {
       const amount = Number(action.payload.gainCreditsAmount ?? action.payload.gainedCredits ?? 2);
       return amount > 0 ? `${amount} ${amount === 1 ? "Credit" : "Credits"} nehmen` : "Credits nehmen";
     }
+    case "junkyard_bbs_return_top_heap": {
+      const targetTitle = targetTitleFromDefinition(action);
+      return targetTitle ? `${targetTitle} aus dem Heap auf die Hand nehmen` : "Oberste Heap-Karte auf die Hand nehmen";
+    }
     default:
       return null;
   }
 }
 
-function shellTradersTargetTitle(action: LegalAction): string | null {
+function targetTitleFromDefinition(action: LegalAction): string | null {
   const targetDefinitionId = typeof action.payload?.targetCardDefinitionId === "string" ? action.payload.targetCardDefinitionId : undefined;
-  const titleFromDefinition = targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
+  return targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title ?? null : null;
+}
+
+function shellTradersTargetTitle(action: LegalAction): string | null {
+  const titleFromDefinition = targetTitleFromDefinition(action);
   if (titleFromDefinition) return titleFromDefinition;
   if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
     const labelTarget = /^The Shell Traders:\s*(.+?)\s+(?:vorbereiten|beiseitelegen|zur Seite legen)$/i.exec(action.label.trim())?.[1]?.trim();
