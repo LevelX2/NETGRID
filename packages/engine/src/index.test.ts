@@ -4663,7 +4663,8 @@ describe("O:NR v1 Limited local private test access", () => {
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_145_wutech-mem-chip",
     );
-    expect(state.runner.memoryLimit).toBe(5);
+    expect(state.runner.memoryLimit).toBe(4);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(5);
     state = apply(
       state,
       "runner",
@@ -5221,8 +5222,9 @@ describe("V1.0.5K Card Release", () => {
         sourceDefinition(state, action) === "onr_v1_146_zetatech-mem-chip",
     );
 
-    expect(state.runner.memoryLimit).toBe(9);
     const runnerView = getPlayerView(state, "runner");
+    expect(state.runner.memoryLimit).toBe(4);
+    expect(runnerView.own.memoryLimit).toBe(9);
     expect(
       runnerView.own.rig?.find(
         (card) => card.definitionId === "onr_v1_144_tycho-mem-chip",
@@ -5260,6 +5262,7 @@ describe("V1.0.5K Card Release", () => {
         action.type === "install_card" &&
         sourceDefinition(gatedState, action) === "onr_v1_144_tycho-mem-chip",
     );
+    expect(getPlayerView(gatedState, "runner").own.memoryLimit).toBe(7);
     expect(
       getLegalActions(gatedState, "runner").some(
         (action) =>
@@ -5730,7 +5733,8 @@ describe("V1.0.6K Card Release", () => {
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_072_wild-card",
     );
-    expect(state.runner.memoryLimit).toBe(5);
+    expect(state.runner.memoryLimit).toBe(4);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(5);
     expect(
       state.runner.rig.programs.map(
         (id) => state.cardInstances[id]?.definitionId,
@@ -8023,6 +8027,87 @@ describe("V1.6.2 Mechanikpaket B", () => {
       "onr_v1_211_polymer-breakthrough",
       "onr_v1_218_subsidiary-branch",
       "onr_v1_335_remote-facility",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
+  it("describes P3.8 passive hand-size and memory-unit modifiers", () => {
+    for (const [definitionId, amount] of [
+      ["onr_v1_134_mram-chip", 2],
+      ["onr_v1_133_militech-mram-chip", 3],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+        expect.objectContaining({
+          kind: "hand_size",
+          operation: "increase",
+          amount,
+          activeWhile: "installed",
+          sourceZone: "runner_installed",
+          side: "runner",
+          visibility: "public",
+        }),
+      );
+    }
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_205_main-office-relocation",
+      )?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "hand_size",
+        operation: "increase",
+        amount: 2,
+        activeWhile: "scored",
+        sourceZone: "corp_scored_agenda",
+        side: "corp",
+        visibility: "public",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_338_rustbelt-hq-branch",
+      )?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "hand_size",
+        operation: "increase",
+        amount: 2,
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        side: "corp",
+        visibility: "public",
+      }),
+    );
+
+    for (const [definitionId, amount] of [
+      ["onr_v1_145_wutech-mem-chip", 1],
+      ["onr_v1_146_zetatech-mem-chip", 2],
+      ["onr_v1_144_tycho-mem-chip", 3],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.modifiers).toContainEqual(
+        expect.objectContaining({
+          kind: "memory_units",
+          operation: "increase",
+          amount,
+          activeWhile: "installed",
+          sourceZone: "runner_installed",
+          side: "runner",
+          visibility: "public",
+        }),
+      );
+    }
+
+    for (const definitionId of [
+      "onr_v1_134_mram-chip",
+      "onr_v1_133_militech-mram-chip",
+      "onr_v1_205_main-office-relocation",
+      "onr_v1_338_rustbelt-hq-branch",
+      "onr_v1_145_wutech-mem-chip",
+      "onr_v1_146_zetatech-mem-chip",
+      "onr_v1_144_tycho-mem-chip",
     ] as const) {
       expect(
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
@@ -16532,8 +16617,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     );
 
     expect(state.corp.maxHandSize).toBe(5);
-    expect(getPlayerView(state, "corp").own.maxHandSize).toBe(6);
-    expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(6);
+    expect(getPlayerView(state, "corp").own.maxHandSize).toBe(7);
+    expect(getPlayerView(state, "runner").opponent.maxHandSize).toBe(7);
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"hq"|"rd"|"Simple Economy Operation"/,
     );
@@ -38401,7 +38486,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     );
     state.runner.credits = 80;
     state.runner.clicks = 30;
-    const initialMemory = state.runner.memoryLimit;
+    const initialMemory = getPlayerView(state, "runner").own.memoryLimit ?? 0;
     for (const definitionId of runnerDeck.cards
       .map((card) => card.id)
       .filter((id) => id.startsWith("onr_v1_")) as string[]) {
@@ -38428,7 +38513,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       expect(replay.ok, definitionId).toBe(true);
       expect(hashState(replay.state), definitionId).toBe(hashState(state));
     }
-    expect(state.runner.memoryLimit).toBeGreaterThan(initialMemory);
+    expect(getPlayerView(state, "runner").own.memoryLimit ?? 0).toBeGreaterThan(
+      initialMemory,
+    );
   });
 
   it("keeps Green Knight and Techtronica prevention source-safe", () => {

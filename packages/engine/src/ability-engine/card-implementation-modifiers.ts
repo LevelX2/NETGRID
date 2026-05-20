@@ -106,6 +106,18 @@ export function rezzedCorpRootCardIds(state: GameState): CardInstanceId[] {
   return ids;
 }
 
+export function runnerInstalledCardIds(state: GameState): CardInstanceId[] {
+  return [
+    ...state.runner.rig.programs,
+    ...state.runner.rig.hardware,
+    ...state.runner.rig.resources,
+  ];
+}
+
+export function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
+  return state.corp.scoreArea.slice();
+}
+
 export function isPublicRezzedCorpRootModifier(
   modifier: Pick<
     CardModifierImplementation,
@@ -115,6 +127,32 @@ export function isPublicRezzedCorpRootModifier(
   return (
     modifier.activeWhile === "rezzed" &&
     modifier.sourceZone === "corp_root" &&
+    modifier.visibility === "public"
+  );
+}
+
+export function isPublicRunnerInstalledModifier(
+  modifier: Pick<
+    CardModifierImplementation,
+    "activeWhile" | "sourceZone" | "visibility"
+  >,
+): boolean {
+  return (
+    modifier.activeWhile === "installed" &&
+    modifier.sourceZone === "runner_installed" &&
+    modifier.visibility === "public"
+  );
+}
+
+export function isPublicScoredCorpAgendaModifier(
+  modifier: Pick<
+    CardModifierImplementation,
+    "activeWhile" | "sourceZone" | "visibility"
+  >,
+): boolean {
+  return (
+    modifier.activeWhile === "scored" &&
+    modifier.sourceZone === "corp_scored_agenda" &&
     modifier.visibility === "public"
   );
 }
@@ -131,6 +169,76 @@ export function activeCardImplementationModifiersForCorpRoot<
     Extract<CardModifierImplementation, { kind: TKind }>
   >[] = [];
   for (const sourceCardInstanceId of rezzedCorpRootCardIds(state)) {
+    const sourceDefinition = cardDefinitionForInstance(
+      state,
+      sourceCardInstanceId,
+    );
+    const sourceImplementation = cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    );
+    for (const modifier of sourceImplementation?.modifiers ?? []) {
+      if (modifier.kind !== kind) continue;
+      matches.push({
+        sourceCardInstanceId,
+        sourceDefinitionId: sourceDefinition.id,
+        sourceDefinition,
+        modifier: modifier as Extract<
+          CardModifierImplementation,
+          { kind: TKind }
+        >,
+      });
+    }
+  }
+  return matches;
+}
+
+export function activeCardImplementationModifiersForRunnerInstalled<
+  TKind extends CardModifierImplementation["kind"],
+>(
+  state: GameState,
+  kind: TKind,
+): ActiveCardImplementationModifier<
+  Extract<CardModifierImplementation, { kind: TKind }>
+>[] {
+  const matches: ActiveCardImplementationModifier<
+    Extract<CardModifierImplementation, { kind: TKind }>
+  >[] = [];
+  for (const sourceCardInstanceId of runnerInstalledCardIds(state).sort()) {
+    const sourceDefinition = cardDefinitionForInstance(
+      state,
+      sourceCardInstanceId,
+    );
+    const sourceImplementation = cardImplementationForDefinitionId(
+      sourceDefinition.id,
+    );
+    for (const modifier of sourceImplementation?.modifiers ?? []) {
+      if (modifier.kind !== kind) continue;
+      matches.push({
+        sourceCardInstanceId,
+        sourceDefinitionId: sourceDefinition.id,
+        sourceDefinition,
+        modifier: modifier as Extract<
+          CardModifierImplementation,
+          { kind: TKind }
+        >,
+      });
+    }
+  }
+  return matches;
+}
+
+export function activeCardImplementationModifiersForScoredCorpAgendas<
+  TKind extends CardModifierImplementation["kind"],
+>(
+  state: GameState,
+  kind: TKind,
+): ActiveCardImplementationModifier<
+  Extract<CardModifierImplementation, { kind: TKind }>
+>[] {
+  const matches: ActiveCardImplementationModifier<
+    Extract<CardModifierImplementation, { kind: TKind }>
+  >[] = [];
+  for (const sourceCardInstanceId of scoredCorpAgendaIds(state).sort()) {
     const sourceDefinition = cardDefinitionForInstance(
       state,
       sourceCardInstanceId,

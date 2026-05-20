@@ -28,6 +28,9 @@ const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
 const IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ON_PLAY_EFFECT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -39,6 +42,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
 > = {
   "onr_v1_045_newsgroup-filter":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
+  "onr_v1_133_militech-mram-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
+  "onr_v1_134_mram-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/mram-chip.ts",
+  "onr_v1_144_tycho-mem-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/tycho-mem-chip.ts",
+  "onr_v1_145_wutech-mem-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/wutech-mem-chip.ts",
+  "onr_v1_146_zetatech-mem-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/zetatech-mem-chip.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
   "onr_v1_095_jack-n-joe":
@@ -61,6 +74,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
   "onr_v1_198_detroit-police-contract":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/detroit-police-contract.ts",
+  "onr_v1_205_main-office-relocation":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/main-office-relocation.ts",
   "onr_v1_206_marine-arcology":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
   "onr_v1_208_on-call-solo-team":
@@ -121,6 +136,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rockerboy-promotion.ts",
   "onr_v1_335_remote-facility":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/remote-facility.ts",
+  "onr_v1_338_rustbelt-hq-branch":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/rustbelt-hq-branch.ts",
   "onr_v1_344_spinn-public-relations":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
   "onr_v1_360_jerusalem-city-grid":
@@ -164,6 +181,20 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive additional-subroutine modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION);
+  }
+  if (implementation.modifiers?.some((modifier) => modifier.kind === "hand_size")) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive hand-size modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "memory_units")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive memory-unit modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
   }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(
@@ -256,28 +287,6 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
       reason:
         "Server-bound install-cost modifier and selected-server state are still implemented in legacy engine paths.",
       currentLocations: ["packages/engine/src/index.ts"],
-    },
-    {
-      cardDefinitionId: "onr_v1_133_militech-mram-chip",
-      status: "legacy_engine_special_case",
-      reason:
-        "Installed hardware hand-size modifier is still represented by existing CardDefinition fields and ActiveModifier query reconstruction.",
-      currentLocations: [
-        "packages/shared/src/index.ts::maxHandSizeBonus",
-        "packages/engine/src/ability-engine/active-modifiers.ts",
-        "packages/engine/src/index.ts",
-      ],
-    },
-    {
-      cardDefinitionId: "onr_v1_134_mram-chip",
-      status: "legacy_engine_special_case",
-      reason:
-        "Installed hardware hand-size modifier is still represented by existing CardDefinition fields and ActiveModifier query reconstruction.",
-      currentLocations: [
-        "packages/shared/src/index.ts::maxHandSizeBonus",
-        "packages/engine/src/ability-engine/active-modifiers.ts",
-        "packages/engine/src/index.ts",
-      ],
     },
     {
       cardDefinitionId: "onr_v1_039_krash",

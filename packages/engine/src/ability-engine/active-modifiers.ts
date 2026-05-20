@@ -1,11 +1,18 @@
 import {
-  DEMO_CARDS_BY_ID,
   type CardDefinitionId,
   type CardInstanceId,
   type EventVisibilityClass,
   type GameState,
   type Side,
 } from "@netgrid/shared";
+import {
+  activeCardImplementationModifiersForCorpRoot,
+  activeCardImplementationModifiersForRunnerInstalled,
+  activeCardImplementationModifiersForScoredCorpAgendas,
+  isPublicRezzedCorpRootModifier,
+  isPublicRunnerInstalledModifier,
+  isPublicScoredCorpAgendaModifier,
+} from "./card-implementation-modifiers";
 
 const VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID = "onr_v1_277_virizz";
 
@@ -23,6 +30,7 @@ export type ActiveModifierKind =
   | "breaker_strength"
   | "rez_cost"
   | "install_cost"
+  | "memory_units"
   | "trash_cost"
   | "break_subroutine_cost"
   | "jack_out_cost";
@@ -52,17 +60,75 @@ function positiveInteger(value: unknown): number {
 export function collectActiveModifiers(state: GameState): ActiveModifier[] {
   const modifiers: ActiveModifier[] = [];
 
-  for (const cardId of state.runner.rig.hardware.slice().sort()) {
-    const instance = state.cardInstances[cardId];
-    if (!instance) continue;
-    const definition = DEMO_CARDS_BY_ID[instance.definitionId];
-    const amount = positiveInteger(definition?.maxHandSizeBonus);
+  for (const active of activeCardImplementationModifiersForRunnerInstalled(
+    state,
+    "hand_size",
+  )) {
+    if (!isPublicRunnerInstalledModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
     if (amount <= 0) continue;
     modifiers.push({
-      id: `installed.max_hand_size.${cardId}`,
-      sourceCardInstanceId: cardId,
-      sourceDefinitionId: instance.definitionId,
+      id: `installed.max_hand_size.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
       kind: "max_hand_size",
+      side: active.modifier.side,
+      amount,
+      duration: "while_installed",
+      target: { kind: "side", id: active.modifier.side },
+      visibility: "public",
+    });
+  }
+  for (const active of activeCardImplementationModifiersForScoredCorpAgendas(
+    state,
+    "hand_size",
+  )) {
+    if (!isPublicScoredCorpAgendaModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `scored.max_hand_size.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "max_hand_size",
+      side: active.modifier.side,
+      amount,
+      duration: "game",
+      target: { kind: "side", id: active.modifier.side },
+      visibility: "public",
+    });
+  }
+  for (const active of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "hand_size",
+  )) {
+    if (!isPublicRezzedCorpRootModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `rezzed.max_hand_size.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "max_hand_size",
+      side: active.modifier.side,
+      amount,
+      duration: "while_rezzed",
+      target: { kind: "side", id: active.modifier.side },
+      visibility: "public",
+    });
+  }
+  for (const active of activeCardImplementationModifiersForRunnerInstalled(
+    state,
+    "memory_units",
+  )) {
+    if (!isPublicRunnerInstalledModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `installed.memory_units.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "memory_units",
       side: "runner",
       amount,
       duration: "while_installed",

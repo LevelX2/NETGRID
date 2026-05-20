@@ -69,6 +69,14 @@ import {
   dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
 import {
+  activeCardImplementationModifiersForCorpRoot,
+  activeCardImplementationModifiersForRunnerInstalled,
+  activeCardImplementationModifiersForScoredCorpAgendas,
+  isPublicRezzedCorpRootModifier,
+  isPublicRunnerInstalledModifier,
+  isPublicScoredCorpAgendaModifier,
+} from "./ability-engine/card-implementation-modifiers";
+import {
   executeCardImplementationEffects,
   type CardEffectDamageResult,
   type CardEffectDrawCardsResult,
@@ -154,7 +162,6 @@ import {
   HACKER_TRACKER_CENTRAL_RUN_LOCK_ASSET_ID,
   ICE_TRANSMUTATION_AGENDA_ID,
   I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
-  MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
   NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
 } from "./mechanics/global-modifiers";
 import { COUNTER_UPGRADE_CARD_IDS } from "./mechanics/hosting-counters";
@@ -458,7 +465,6 @@ const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
-const RUSTBELT_HQ_BRANCH_ID = "onr_v1_338_rustbelt-hq-branch";
 const PARIS_CITY_GRID_TRACE_POOL_BITS = 6;
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
@@ -2042,7 +2048,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
             ...state.runner.rig.resources,
           ].map((id) => visibleOwnCard(state, id)),
           memoryUsed: state.runner.memoryUsed,
-          memoryLimit: state.runner.memoryLimit,
+          memoryLimit: runnerMemoryLimit(state),
           maxHandSize: maxHandSize(state, "runner"),
           coreDamage: state.runner.coreDamage,
           tags: state.runner.tags,
@@ -2101,7 +2107,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
             ...state.runner.rig.resources,
           ].map((id) => visibleRunnerRigCardForViewer(state, id, side)),
           memoryUsed: state.runner.memoryUsed,
-          memoryLimit: state.runner.memoryLimit,
+          memoryLimit: runnerMemoryLimit(state),
         },
     servers: visibleServers,
     specialZones: visibleSpecialZones(state, side),
@@ -2239,7 +2245,7 @@ export function validateGameState(state: GameState): ValidationResult {
     errors.push("Runner memory limit must be a non-negative integer.");
   if (!Number.isInteger(state.runner.memoryUsed) || state.runner.memoryUsed < 0)
     errors.push("Runner memory used must be a non-negative integer.");
-  if (state.runner.memoryUsed > state.runner.memoryLimit)
+  if (state.runner.memoryUsed > runnerMemoryLimit(state))
     errors.push("Runner memory limit exceeded.");
   for (const id of state.runner.rig.programs) {
     if (definitionFor(state, id).type !== "program")
@@ -3693,7 +3699,7 @@ function runnerInstallableProgramIdsForValuPak(
       availableRunnerProgramInstallCredits(state) >=
         (definition.installCost ?? 0) &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-        state.runner.memoryLimit
+        runnerMemoryLimit(state)
     );
   });
 }
@@ -3872,7 +3878,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       availableRunnerProgramInstallCredits(state) >=
         (definition.installCost ?? 0) &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-        state.runner.memoryLimit
+        runnerMemoryLimit(state)
     ) {
       actions.push(
         action(
@@ -8263,7 +8269,7 @@ function shellTradersCanPrepareTarget(
   if (
     definition.type === "program" &&
     state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      state.runner.memoryLimit
+      runnerMemoryLimit(state)
   )
     return false;
   return true;
@@ -8435,7 +8441,7 @@ function installShellTradersPreparedCardForFree(
   if (
     definition.type === "program" &&
     state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-      state.runner.memoryLimit
+      runnerMemoryLimit(state)
   )
     throw new Error("Nicht genug Memory fuer The Shell Traders.");
 
@@ -8445,10 +8451,12 @@ function installShellTradersPreparedCardForFree(
     state.runner.memoryUsed += definition.memoryCost ?? 0;
   } else {
     state.runner.rig.hardware.push(cardId);
-    if (definition.mechanics.includes("modify_memory_limit"))
-      state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
-    else if ((definition.memoryLimitBonus ?? 0) > 0)
-      state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
+    if (!hasCardImplementationMemoryUnitModifier(definition)) {
+      if (definition.mechanics.includes("modify_memory_limit"))
+        state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
+      else if ((definition.memoryLimitBonus ?? 0) > 0)
+        state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
+    }
   }
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
@@ -8849,7 +8857,7 @@ function resolveMysteryBoxChoice(
     throw new Error("Mystery Box kann nur ein Programm installieren.");
   if (
     state.runner.memoryUsed + (selectedDefinition.memoryCost ?? 0) >
-    state.runner.memoryLimit
+    runnerMemoryLimit(state)
   )
     throw new Error("Nicht genug Memory fuer das Mystery-Box-Programm.");
 
@@ -9194,10 +9202,12 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         }
       }
       state.runner.rig.hardware.push(cardId);
-      if (definition.mechanics.includes("modify_memory_limit"))
-        state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
-      else if ((definition.memoryLimitBonus ?? 0) > 0)
-        state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
+      if (!hasCardImplementationMemoryUnitModifier(definition)) {
+        if (definition.mechanics.includes("modify_memory_limit"))
+          state.runner.memoryLimit += definition.memoryLimitBonus ?? 1;
+        else if ((definition.memoryLimitBonus ?? 0) > 0)
+          state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
+      }
       if ((definition.recurringCredits ?? 0) > 0)
         setCardCounter(
           state,
@@ -12434,7 +12444,11 @@ function trashRunnerInstalledCardToHeap(
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
   void _hostedOn;
   removeFromAllZones(state, cardId);
-  if (definition.type === "hardware" && (definition.memoryLimitBonus ?? 0) > 0)
+  if (
+    definition.type === "hardware" &&
+    !hasCardImplementationMemoryUnitModifier(definition) &&
+    (definition.memoryLimitBonus ?? 0) > 0
+  )
     state.runner.memoryLimit = Math.max(
       0,
       state.runner.memoryLimit - (definition.memoryLimitBonus ?? 0),
@@ -13623,39 +13637,90 @@ function handForSide(state: GameState, side: Side): CardInstanceId[] {
 
 function maxHandSize(state: GameState, side: Side): number {
   if (side === "corp")
-    return state.corp.maxHandSize + corpAgendaMaxHandSizeModifier(state);
+    return state.corp.maxHandSize + cardImplementationHandSizeModifier(state, "corp");
   return (
     state.runner.maxHandSize +
-    runnerInstalledMaxHandSizeModifier(state) -
+    cardImplementationHandSizeModifier(state, "runner") -
     state.runner.coreDamage
   );
 }
 
-function corpAgendaMaxHandSizeModifier(state: GameState): number {
-  const agendaModifier = scoredCorpAgendaIds(state).some(
-    (cardId) =>
-      definitionFor(state, cardId).id ===
-      MAIN_OFFICE_RELOCATION_HANDSIZE_AGENDA_ID,
-  )
-    ? 1
-    : 0;
-  const rustbeltModifier = rezzedCorpRootCardIds(state).reduce(
-    (sum, cardId) =>
-      definitionFor(state, cardId).id === RUSTBELT_HQ_BRANCH_ID
-        ? sum + 2
-        : sum,
-    0,
-  );
-  return agendaModifier + rustbeltModifier;
+function positiveCardImplementationModifierAmount(
+  kind: string,
+  amount: number,
+): number {
+  if (!Number.isInteger(amount) || amount <= 0)
+    throw new Error(`${kind}-Modifier ist ungueltig.`);
+  return amount;
 }
 
-function runnerInstalledMaxHandSizeModifier(state: GameState): number {
-  return state.runner.rig.hardware.reduce((sum, cardId) => {
-    const bonus = definitionFor(state, cardId).maxHandSizeBonus ?? 0;
-    if (!Number.isInteger(bonus))
-      throw new Error("Handlimit-Bonus ist ungueltig.");
-    return sum + bonus;
-  }, 0);
+function cardImplementationHandSizeModifier(
+  state: GameState,
+  side: Side,
+): number {
+  const runnerInstalled = activeCardImplementationModifiersForRunnerInstalled(
+    state,
+    "hand_size",
+  ).filter(
+    (active) =>
+      active.modifier.side === side &&
+      isPublicRunnerInstalledModifier(active.modifier),
+  );
+  const scoredCorpAgendas =
+    side === "corp"
+      ? activeCardImplementationModifiersForScoredCorpAgendas(
+          state,
+          "hand_size",
+        ).filter((active) =>
+          isPublicScoredCorpAgendaModifier(active.modifier),
+        )
+      : [];
+  const rezzedCorpRoots =
+    side === "corp"
+      ? activeCardImplementationModifiersForCorpRoot(state, "hand_size").filter(
+          (active) => isPublicRezzedCorpRootModifier(active.modifier),
+        )
+      : [];
+  return [...runnerInstalled, ...scoredCorpAgendas, ...rezzedCorpRoots].reduce(
+    (sum, active) =>
+      sum +
+      positiveCardImplementationModifierAmount(
+        "hand_size",
+        active.modifier.amount,
+      ),
+    0,
+  );
+}
+
+function cardImplementationMemoryUnitModifier(state: GameState): number {
+  return activeCardImplementationModifiersForRunnerInstalled(
+    state,
+    "memory_units",
+  )
+    .filter((active) => isPublicRunnerInstalledModifier(active.modifier))
+    .reduce(
+      (sum, active) =>
+        sum +
+        positiveCardImplementationModifierAmount(
+          "memory_units",
+          active.modifier.amount,
+        ),
+      0,
+    );
+}
+
+function runnerMemoryLimit(state: GameState): number {
+  return state.runner.memoryLimit + cardImplementationMemoryUnitModifier(state);
+}
+
+function hasCardImplementationMemoryUnitModifier(
+  definition: CardDefinition,
+): boolean {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.modifiers?.some(
+      (modifier) => modifier.kind === "memory_units",
+    ) === true
+  );
 }
 
 function drawCorpCard(state: GameState): void {
@@ -17000,7 +17065,7 @@ function installRunnerProgramFromStackWithoutClick(
     return false;
   if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
     return false;
-  if (state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit)
+  if (state.runner.memoryUsed + (definition.memoryCost ?? 0) > runnerMemoryLimit(state))
     return false;
 
   spendRunnerInstallCredits(state, definition.installCost ?? 0, "program");
@@ -17083,7 +17148,7 @@ function resolveSelfModifyingCodeStackChoice(
     isUniqueCard(definition) &&
     hasInstalledUniqueCardDefinition(state, "runner", definition.id);
   const needsMemory =
-    state.runner.memoryUsed + (definition.memoryCost ?? 0) > state.runner.memoryLimit;
+    state.runner.memoryUsed + (definition.memoryCost ?? 0) > runnerMemoryLimit(state);
   if (canPay && !uniqueBlocked && needsMemory) {
     shuffleRunnerStack(state, `v1911_self_modifying_code:${choice.choiceId}:shuffle`);
     const opened = startSelfModifyingCodeFreeMuChoice(state, cardId);
@@ -17243,7 +17308,7 @@ function sneakPreviewInstallableProgramIds(
       definition.type === "program" &&
       !uniqueBlocked &&
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-        state.runner.memoryLimit
+        runnerMemoryLimit(state)
     );
   });
 }
@@ -17396,7 +17461,7 @@ function installRunnerProgramForFree(
     throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
   if (
     state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-    state.runner.memoryLimit
+    runnerMemoryLimit(state)
   )
     throw new Error("Nicht genug Memory fuer Sneak Preview.");
   removeFromAllZones(state, cardId);
@@ -19019,7 +19084,7 @@ function startRunnerHostingChoice(
       return (
         definition.type === "program" &&
         state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
-          state.runner.memoryLimit
+          runnerMemoryLimit(state)
       );
     })
     .map((cardId) => {
@@ -19071,7 +19136,7 @@ function resolveRunnerHostingChoice(
     );
   if (
     state.runner.memoryUsed + (definition.memoryCost ?? 0) >
-    state.runner.memoryLimit
+    runnerMemoryLimit(state)
   )
     throw new Error("Nicht genug Memory für das gehostete Programm.");
   setHostedOn(state, cardId, hostId);

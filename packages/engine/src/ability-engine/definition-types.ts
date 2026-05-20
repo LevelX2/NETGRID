@@ -9,7 +9,9 @@ export type CardModifierImplementation =
   | CardRezCostModifierImplementation
   | CardInstallCostModifierImplementation
   | CardIceStrengthModifierImplementation
-  | CardAdditionalSubroutineModifierImplementation;
+  | CardAdditionalSubroutineModifierImplementation
+  | CardHandSizeModifierImplementation
+  | CardMemoryUnitsModifierImplementation;
 
 export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
@@ -193,6 +195,26 @@ export type CardAdditionalSubroutineModifierImplementation = {
   };
   append: "after_existing";
   subroutine: CardSubroutineImplementation;
+};
+
+export type CardHandSizeModifierImplementation = {
+  kind: "hand_size";
+  operation: "increase";
+  amount: number;
+  activeWhile: "installed" | "scored" | "rezzed";
+  sourceZone: "runner_installed" | "corp_scored_agenda" | "corp_root";
+  side: "runner" | "corp";
+  visibility: EventVisibilityClass;
+};
+
+export type CardMemoryUnitsModifierImplementation = {
+  kind: "memory_units";
+  operation: "increase";
+  amount: number;
+  activeWhile: "installed";
+  sourceZone: "runner_installed";
+  side: "runner";
+  visibility: EventVisibilityClass;
 };
 
 export type CardSubroutineImplementation = {

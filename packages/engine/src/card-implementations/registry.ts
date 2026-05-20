@@ -1,6 +1,7 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { corporateCoupImplementation } from "./onr-v1/corp/agendas/corporate-coup";
 import { detroitPoliceContractImplementation } from "./onr-v1/corp/agendas/detroit-police-contract";
+import { mainOfficeRelocationImplementation } from "./onr-v1/corp/agendas/main-office-relocation";
 import { marineArcologyImplementation } from "./onr-v1/corp/agendas/marine-arcology";
 import { onCallSoloTeamImplementation } from "./onr-v1/corp/agendas/on-call-solo-team";
 import { politicalCoupImplementation } from "./onr-v1/corp/agendas/political-coup";
@@ -21,6 +22,7 @@ import { southAfricanMiningCorpImplementation } from "./onr-v1/corp/assets/south
 import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-public-relations";
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
+import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
 import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
@@ -34,6 +36,11 @@ import { scorchedEarthImplementation } from "./onr-v1/corp/operations/scorched-e
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
+import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
+import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
+import { tychoMemChipImplementation } from "./onr-v1/runner/hardware/tycho-mem-chip";
+import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem-chip";
+import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech-mem-chip";
 import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
@@ -51,6 +58,8 @@ export const CARD_IMPLEMENTATIONS = [
   livewiresContactsImplementation,
   newsgroupFilterImplementation,
   floatingRunnerBbsImplementation,
+  militechMramChipImplementation,
+  mramChipImplementation,
   riggedInvestmentsImplementation,
   scoreImplementation,
   shortTermContractImplementation,
@@ -58,6 +67,7 @@ export const CARD_IMPLEMENTATIONS = [
   topRunnersConferenceImplementation,
   corporateCoupImplementation,
   detroitPoliceContractImplementation,
+  mainOfficeRelocationImplementation,
   marineArcologyImplementation,
   onCallSoloTeamImplementation,
   politicalCoupImplementation,
@@ -87,8 +97,12 @@ export const CARD_IMPLEMENTATIONS = [
   soloSquadImplementation,
   remoteFacilityImplementation,
   rockerboyPromotionImplementation,
+  rustbeltHqBranchImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
+  tychoMemChipImplementation,
+  wutechMemChipImplementation,
+  zetatechMemChipImplementation,
   jerusalemCityGridImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
