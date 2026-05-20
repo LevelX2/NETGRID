@@ -3379,7 +3379,8 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(entry).toBeDefined();
     if (!entry) throw new Error("Missing replay index entry");
     expect(entry.finalStateHash).toMatch(/^fnv1a:/);
-    expect(typeof entry.replayOk).toBe("boolean");
+    expect(entry.replayCheckStatus).toBe("unchecked");
+    expect(entry.replayOk).toBeUndefined();
     expect(JSON.stringify(entry)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|privatePayload|cardInstances|decklist/i);
     const stored = await match.service.loadForTest(match.matchId);
     expect(stored?.gameState.eventLog.some((event) => Boolean(event.privatePayload))).toBe(true);
@@ -3393,6 +3394,8 @@ describe("MVP 0.2 multiplayer service", () => {
     const runnerReplay = runnerLoaded.replay;
     expect(runnerReplay.perspective).toBe("runner");
     expect(runnerReplay.localAnalysis).toBe(false);
+    expect(runnerReplay.metadata.replayCheckStatus).toBe("verified");
+    expect(typeof runnerReplay.metadata.replayOk).toBe("boolean");
     expect(runnerReplay.timeline.length).toBeGreaterThan(0);
     expect(runnerReplay.timeline.every((step) => typeof step.stateVersionBefore === "number" && typeof step.stateVersionAfter === "number" && typeof step.timingPoint === "string")).toBe(true);
     expect(runnerReplay.timeline.every((step) => step.stateHashCheck.expected.startsWith("fnv1a:"))).toBe(true);

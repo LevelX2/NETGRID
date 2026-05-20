@@ -330,7 +330,8 @@ export type ReplayIndexEntry = {
   updatedAt: string;
   winner?: Side | "draw";
   finalStateHash: string;
-  replayOk: boolean;
+  replayCheckStatus: "unchecked" | "verified";
+  replayOk?: boolean;
   participantNames: {
     runner?: string;
     corp?: string;
@@ -1655,8 +1656,8 @@ export class MultiplayerService {
     if (!record || !record.gameState) return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
     if (!isReplayPerspective(perspective)) return { ok: false, error: safeError("bad_request", "Die Replay-Perspektive ist ungültig.") };
 
-    const metadata = replayIndexEntryFor(record);
     const checks = replayStateHashChecks(record);
+    const metadata = replayIndexEntryFor(record, checks);
     const publicEvents = replayEventsForPerspective(record, perspective);
     const localAnalysis = perspective === "local_analysis";
     const timeline = publicEvents.map((event, index) =>
@@ -2671,7 +2672,10 @@ function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): Eve
   return projectEngineEventToServerRecord(matchId, event, barrier);
 }
 
-function replayIndexEntryFor(record: StoredMatch): ReplayIndexEntry {
+function replayIndexEntryFor(
+  record: StoredMatch,
+  checks?: ReturnType<typeof replayStateHashChecks>
+): ReplayIndexEntry {
   const names = participantNamesForReplay(record);
   const winner = record.match.winner ?? record.gameState.winner ?? undefined;
   return {
@@ -2685,7 +2689,8 @@ function replayIndexEntryFor(record: StoredMatch): ReplayIndexEntry {
     updatedAt: record.match.updatedAt,
     ...(winner ? { winner } : {}),
     finalStateHash: hashState(record.gameState),
-    replayOk: replayStateHashChecks(record).errors.length === 0,
+    replayCheckStatus: checks ? "verified" : "unchecked",
+    ...(checks ? { replayOk: checks.errors.length === 0 } : {}),
     participantNames: names
   };
 }

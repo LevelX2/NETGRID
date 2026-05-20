@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-21-replay-index-lazy-hash-checks
-status: inbox
+status: done
 kind: cleanup
 area: server
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/multiplayer.test.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server test
 ---
 
 # Replay-Index ohne wiederholtes Voll-Replay laden
@@ -48,11 +53,11 @@ Replay-Listen und Indexansichten sollen nicht jedes Match bei jedem Aufruf volls
 
 ## Akzeptanzkriterien
 
-- [ ] Replay-Index lädt ohne vollständiges Nachspielen jedes einzelnen Matches pro Aufruf.
-- [ ] Replay-Detailansicht und Export führen weiterhin eine vollständige oder nachweislich gültige StateHash-Prüfung aus.
-- [ ] Cache-/Lazy-Status wird bei Matchänderungen korrekt invalidiert.
-- [ ] Redaction-Tests bestätigen, dass keine privaten Engine-Events über Indexantworten auslaufen.
-- [ ] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
+- [x] Replay-Index lädt ohne vollständiges Nachspielen jedes einzelnen Matches pro Aufruf.
+- [x] Replay-Detailansicht und Export führen weiterhin eine vollständige oder nachweislich gültige StateHash-Prüfung aus.
+- [x] Cache-/Lazy-Status wird bei Matchänderungen korrekt invalidiert.
+- [x] Redaction-Tests bestätigen, dass keine privaten Engine-Events über Indexantworten auslaufen.
+- [x] Checks: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
 
 ## Umsetzungshinweise
 
@@ -61,4 +66,6 @@ Replay-Listen und Indexansichten sollen nicht jedes Match bei jedem Aufruf volls
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Replay-Indexeinträge werden jetzt lazy als `replayCheckStatus: "unchecked"` geliefert und enthalten kein `replayOk`; dadurch wird pro Listenaufruf kein vollständiger StateHash-Replaycheck mehr ausgeführt. Replay-Detailansicht und Export berechnen die Checks weiterhin vollständig und liefern Metadaten mit `replayCheckStatus: "verified"` sowie booleschem `replayOk`. Eine separate Cache-Invalidierung ist nicht nötig, weil der Index bewusst ungeprüft bleibt und Detail/Export frisch prüfen.
+
+Verifikation: `corepack pnpm --filter @netgrid/server typecheck`, `corepack pnpm --filter @netgrid/server test`.
