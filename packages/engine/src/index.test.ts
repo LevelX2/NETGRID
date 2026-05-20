@@ -179,6 +179,7 @@ import {
 import {
   CURRENT_RULES_BASELINE,
   type CardDefinition,
+  type CardDefinitionId,
   type CardInstanceId,
   type ChoiceRequest,
   type CounterType,
@@ -8976,16 +8977,24 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("pending_implementation");
   });
 
-  it("registers P3.32 runner successful-run cards as implemented", () => {
+  it("registers migrated runner successful-run and access-interface cards as implemented", () => {
     const p332Cases = [
       "onr_v1_081_custodial-position",
       "onr_v1_084_edited-shipping-manifests",
       "onr_v1_085_executive-wiretaps",
       "onr_v1_096_kilroy-was-here",
+      "onr_v1_105_priority-wreck",
       "onr_v1_106_private-ldl-access",
       "onr_v1_107_romp-through-hq",
       "onr_v1_118_weather-to-finance-pipe",
       "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_050_r-and-d-protocol-files",
+      "onr_v1_129_hq-interface",
+      "onr_v1_139_r-and-d-interface",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_183_technician-lover",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_142_record-reconstructor",
     ] as const;
 
     for (const definitionId of p332Cases) {
@@ -8998,12 +9007,6 @@ describe("V1.6.2 Mechanikpaket B", () => {
         definitionId,
       ).toBe("implemented");
     }
-    expect(
-      cardImplementationForDefinitionId("onr_v1_105_priority-wreck"),
-    ).toBeUndefined();
-    expect(
-      cardImplementationForDefinitionId("onr_v1_050_r-and-d-protocol-files"),
-    ).toBeUndefined();
   });
 
   it("executes typed gain_credits card effects", () => {
@@ -22118,8 +22121,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       },
       {
         definitionId: "onr_v1_105_priority-wreck",
-        serverId: "rd",
-        accessCount: 2,
+        serverId: "hq",
+        accessCount: 1,
       },
       {
         definitionId: "onr_v1_111_social-engineering",
@@ -22164,14 +22167,15 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     }
   });
 
-  it("breaches R&D with Priority Wreck multiaccess without leaking future queued cards", () => {
+  it("uses Priority Wreck as successful HQ replacement without accessing HQ", () => {
     let state = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.runAccess("v1915-priority-wreck-rd-multiaccess"),
+      MECHANIC_SMOKE_GAMES.runAccess("v1915-priority-wreck-hq-replacement"),
     );
     state.runner.credits = 8;
+    state.corp.credits = 5;
     moveRunnerCardToGrip(state, "onr_v1_105_priority-wreck");
-    putCorpCardOnTopOfRd(state, "simple_agenda");
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const hqCardId = moveCorpCardToHq(state, "simple_economy_operation");
+    keepOnlyCorpHqCard(state, hqCardId);
     const initial = structuredClone(state);
 
     state = apply(
@@ -22180,39 +22184,26 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(state, action) === "onr_v1_105_priority-wreck" &&
-        action.payload?.serverId === "rd",
+        action.payload?.serverId === "hq",
     );
 
-    expect(state.timingPoint).toBe("access.resolve_card");
-    expect(state.run?.breach).toMatchObject({
-      serverId: "rd",
-      accessMode: "multi",
-      currentIndex: 0,
-    });
-    expect(state.run?.breach?.queue).toHaveLength(2);
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      "Simple Agenda",
-    );
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+    expect(state.pendingChoice?.source).toContain("p3_33.priority_wreck");
+    expect(state.run?.breach).toBeUndefined();
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
       "Simple Economy Operation",
     );
 
-    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = applyChoice(state, "runner", "pay_2");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.credits).toBe(6);
+    expect(state.corp.credits).toBe(3);
+    expect(state.corp.hq).toContain(hqCardId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
-      cardDefinitionId: "simple_economy_operation",
-      title: "Simple Economy Operation",
+      accessReplacement: "runner_spend_corp_lose_credits",
+      runnerPaidAmount: 2,
+      corpLostCredits: 2,
+      sourceDefinitionId: "onr_v1_105_priority-wreck",
     });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      "Simple Agenda",
-    );
-
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "simple_agenda",
-      title: "Simple Agenda",
-    });
-    state = apply(state, "runner", (action) => action.type === "steal_agenda");
 
     const replay = replayEvents(
       initial,
@@ -22220,7 +22211,6 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
-    expect(agendaPoints(state, "runner")).toBe(2);
   });
 
   it("applies installed V1.9.15 run and access helpers through existing breach paths", () => {
@@ -22231,12 +22221,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state.runner.memoryLimit = 12;
     for (const definitionId of [
       "onr_v1_020_dupre",
-      "onr_v1_024_expert-schedule-analyzer",
-      "onr_v1_041_microtech-ai-interface",
       "onr_v1_043_mystery-box",
       "onr_v1_062_shredder-uplink-protocol",
       "onr_v1_065_smarteye",
-      "onr_v1_142_record-reconstructor",
     ] as const) {
       moveRunnerCardToGrip(state, definitionId);
       state.runner.clicks = 10;
@@ -22266,7 +22253,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
 
     expect(dupreId ? (state.cardInstances[dupreId]?.counters?.power ?? 0) : 0).toBe(0);
-    expect(state.run?.breach?.queue).toHaveLength(2);
+    expect(state.run?.breach?.queue).toHaveLength(1);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Agenda",
     );
@@ -39406,6 +39393,339 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       status: "runner_bid",
       runnerLink: 9,
     });
+  });
+
+  it("migrates P3.33 access-interface cards through CardImplementation without hidden-info leaks", () => {
+    const p333State = (seed: string, runnerCards: CardDefinitionId[]) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+            id: `${seed}_runner`,
+            name: `${seed} Runner`,
+            cards: [
+              ...runnerCards.map((id) => ({ id, quantity: 1 })),
+              ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+                (card) => !runnerCards.includes(card.id),
+              ),
+            ],
+          },
+          corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+          agendaPointsToWin: 7,
+        }),
+      );
+    let priorityState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("p3-33-priority-wreck"),
+    );
+    priorityState.runner.credits = 8;
+    priorityState.corp.credits = 6;
+    moveRunnerCardToGrip(priorityState, "onr_v1_105_priority-wreck");
+    const hqCardId = moveCorpCardToHq(priorityState, "simple_economy_operation");
+    keepOnlyCorpHqCard(priorityState, hqCardId);
+    priorityState = apply(
+      priorityState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(priorityState, action) === "onr_v1_105_priority-wreck" &&
+        action.payload?.serverId === "hq",
+    );
+    expect(priorityState.pendingChoice?.source).toContain("p3_33.priority_wreck");
+    expect(priorityState.run?.breach).toBeUndefined();
+    priorityState = applyChoice(priorityState, "runner", "pay_3");
+    expect(priorityState.runner.credits).toBe(5);
+    expect(priorityState.corp.credits).toBe(3);
+    expect(priorityState.corp.hq).toContain(hqCardId);
+    expect(priorityState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      accessReplacement: "runner_spend_corp_lose_credits",
+      runnerPaidAmount: 3,
+      corpLostCredits: 3,
+      sourceDefinitionId: "onr_v1_105_priority-wreck",
+    });
+
+    let protocolState = p333State("p3-33-rd-protocol-files", [
+      "onr_v1_050_r-and-d-protocol-files",
+    ]);
+    protocolState.runner.credits = 20;
+    protocolState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(protocolState, "onr_v1_050_r-and-d-protocol-files");
+    protocolState = apply(
+      protocolState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(protocolState, action) ===
+          "onr_v1_050_r-and-d-protocol-files",
+    );
+    putCorpCardOnTopOfRd(protocolState, "simple_economy_operation");
+    putCorpCardOnTopOfRd(protocolState, "simple_agenda");
+    protocolState = apply(
+      protocolState,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(protocolState, action) ===
+          "onr_v1_050_r-and-d-protocol-files",
+    );
+    expect(protocolState.pendingChoice?.source).toContain("p3_33.private_look");
+    expect(
+      getPlayerView(protocolState, "runner").pendingChoice?.options.some(
+        (option) => option.card?.definitionId === "simple_agenda",
+      ),
+    ).toBe(true);
+    expect(getPlayerView(protocolState, "corp").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(protocolState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_agenda|Simple Agenda|"cardInstances"|"privatePayload"/,
+    );
+    protocolState = applyChoice(protocolState, "runner", "done");
+    expect(protocolState.run).toBeUndefined();
+
+    let interfaceState = p333State("p3-33-hq-interface", [
+      "onr_v1_129_hq-interface",
+    ]);
+    interfaceState.runner.credits = 20;
+    interfaceState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(interfaceState, "onr_v1_129_hq-interface");
+    interfaceState = apply(
+      interfaceState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(interfaceState, action) === "onr_v1_129_hq-interface",
+    );
+    keepOnlyCorpHqCards(interfaceState, [
+      moveCorpCardToHq(interfaceState, "simple_economy_operation"),
+      moveCorpCardToHq(interfaceState, "simple_agenda"),
+    ]);
+    const hqRun = apply(
+      structuredClone(interfaceState),
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expect(hqRun.run?.breach?.queue.filter((entry) => entry.zone === "hq")).toHaveLength(2);
+    expect(hqRun.eventLog.at(-1)?.publicPayload).toMatchObject({
+      installedAccessBonus: 1,
+      effectiveAccessCount: 2,
+        installedAccessBonusSourceDefinitionIds: "onr_v1_129_hq-interface",
+      });
+
+    let rdInterfaceState = p333State("p3-33-rd-interface", [
+      "onr_v1_139_r-and-d-interface",
+    ]);
+    rdInterfaceState.runner.credits = 20;
+    rdInterfaceState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(rdInterfaceState, "onr_v1_139_r-and-d-interface");
+    rdInterfaceState = apply(
+      rdInterfaceState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(rdInterfaceState, action) ===
+          "onr_v1_139_r-and-d-interface",
+    );
+    putCorpCardOnTopOfRd(rdInterfaceState, "simple_economy_asset");
+    putCorpCardOnTopOfRd(rdInterfaceState, "simple_agenda");
+    const rdRun = apply(
+      structuredClone(rdInterfaceState),
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(rdRun.run?.breach?.queue).toHaveLength(2);
+    expect(rdRun.eventLog.at(-1)?.publicPayload).toMatchObject({
+      installedAccessBonus: 1,
+      effectiveAccessCount: 2,
+      installedAccessBonusSourceDefinitionIds: "onr_v1_139_r-and-d-interface",
+    });
+  });
+
+  it("handles P3.33 private look, R&D cut, and Archives replacement access hooks", () => {
+    const p333State = (seed: string, runnerCards: CardDefinitionId[]) =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+            id: `${seed}_runner`,
+            name: `${seed} Runner`,
+            cards: [
+              ...runnerCards.map((id) => ({ id, quantity: 1 })),
+              ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+                (card) => !runnerCards.includes(card.id),
+              ),
+            ],
+          },
+          corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+          agendaPointsToWin: 7,
+        }),
+      );
+    let expertState = p333State("p3-33-expert-schedule-analyzer", [
+      "onr_v1_024_expert-schedule-analyzer",
+    ]);
+    expertState.runner.credits = 20;
+    expertState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(expertState, "onr_v1_024_expert-schedule-analyzer");
+    expertState = apply(
+      expertState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(expertState, action) ===
+          "onr_v1_024_expert-schedule-analyzer",
+    );
+    keepOnlyCorpHqCards(expertState, [
+      moveCorpCardToHq(expertState, "simple_economy_operation"),
+      moveCorpCardToHq(expertState, "simple_economy_asset"),
+    ]);
+    expertState = apply(
+      expertState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    expertState = apply(expertState, "runner", (action) => action.type === "access_card");
+    expect(expertState.pendingChoice?.source).toContain("p3_33.private_look:post_access");
+    expect(
+      getPlayerView(expertState, "runner").pendingChoice?.options.some(
+        (option) => option.card?.definitionId === "simple_economy_asset",
+      ),
+    ).toBe(true);
+    expect(getPlayerView(expertState, "corp").pendingChoice).toBeUndefined();
+    expertState = applyChoice(expertState, "runner", "done");
+    expect(expertState.run).toBeUndefined();
+
+    let technicianState = p333State("p3-33-technician-lover", [
+      "onr_v1_183_technician-lover",
+    ]);
+    technicianState.runner.credits = 20;
+    moveRunnerCardToGrip(technicianState, "onr_v1_183_technician-lover");
+    technicianState = apply(
+      technicianState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(technicianState, action) === "onr_v1_183_technician-lover",
+    );
+    putCorpCardOnTopOfRd(technicianState, "simple_agenda");
+    technicianState = apply(
+      technicianState,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(technicianState, action) === "onr_v1_183_technician-lover",
+    );
+    expect(technicianState.pendingChoice?.source).toContain("p3_33.private_look:ability");
+    expect(
+      getPlayerView(technicianState, "runner").pendingChoice?.options.some(
+        (option) => option.card?.definitionId === "simple_agenda",
+      ),
+    ).toBe(true);
+    const technicianRemoved = structuredClone(technicianState);
+    const technicianId = technicianRemoved.runner.rig.resources.find(
+      (id) => technicianRemoved.cardInstances[id]?.definitionId === "onr_v1_183_technician-lover",
+    );
+    if (!technicianId) throw new Error("Missing Technician Lover");
+    removeEverywhere(technicianRemoved, technicianId);
+    expect(
+      applyAction(technicianRemoved, {
+        matchId: technicianRemoved.matchId,
+        side: "runner",
+        actionId: mustAction(
+          technicianRemoved,
+          "runner",
+          (action) => action.type === "resolve_choice",
+        ).actionId,
+        clientKnownStateVersion: technicianRemoved.stateVersion,
+        selectedChoices: {
+          choiceId: technicianRemoved.pendingChoice?.choiceId,
+          selectedOptionIds: ["done"],
+        },
+        idempotencyKey: "technician-removed-source",
+      }).ok,
+    ).toBe(false);
+    technicianState = applyChoice(technicianState, "runner", "done");
+    expect(technicianState.pendingChoice).toBeUndefined();
+
+    let microtechState = p333State("p3-33-microtech-ai-interface", [
+      "onr_v1_041_microtech-ai-interface",
+    ]);
+    microtechState.runner.credits = 20;
+    microtechState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(microtechState, "onr_v1_041_microtech-ai-interface");
+    microtechState = apply(
+      microtechState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(microtechState, action) ===
+          "onr_v1_041_microtech-ai-interface",
+    );
+    putCorpCardOnTopOfRd(microtechState, "simple_economy_operation");
+    putCorpCardOnTopOfRd(microtechState, "simple_agenda");
+    microtechState = apply(
+      microtechState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(microtechState.pendingChoice?.source).toContain("p3_33.microtech_ai_interface");
+    microtechState = applyChoice(microtechState, "runner", "cut_1");
+    expect(microtechState.run?.breach?.queue[0]?.cardInstanceId).toBe(microtechState.corp.rd[0]);
+    microtechState = apply(microtechState, "runner", (action) => action.type === "access_card");
+    expect(microtechState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "simple_economy_operation",
+    });
+
+    let recordState = p333State("p3-33-record-reconstructor", [
+      "onr_v1_142_record-reconstructor",
+    ]);
+    recordState.runner.credits = 20;
+    moveRunnerCardToGrip(recordState, "onr_v1_142_record-reconstructor");
+    recordState = apply(
+      recordState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(recordState, action) === "onr_v1_142_record-reconstructor",
+    );
+    const firstArchive = moveCorpCardToHq(recordState, "simple_economy_operation");
+    removeEverywhere(recordState, firstArchive);
+    recordState.corp.archives.push(firstArchive);
+    recordState.cardInstances[firstArchive] = {
+      ...recordState.cardInstances[firstArchive]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+    };
+    const secondArchive = moveCorpCardToHq(recordState, "simple_agenda");
+    removeEverywhere(recordState, secondArchive);
+    recordState.corp.archives.push(secondArchive);
+    recordState.cardInstances[secondArchive] = {
+      ...recordState.cardInstances[secondArchive]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+    };
+    const initial = structuredClone(recordState);
+    const replayStart = recordState.eventLog.length;
+    recordState = apply(
+      recordState,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(recordState, action) === "onr_v1_142_record-reconstructor",
+    );
+    expect(recordState.run).toBeUndefined();
+    expect(recordState.corp.rd.slice(0, 2).sort()).toEqual(
+      [firstArchive, secondArchive].sort(),
+    );
+    expect(recordState.corp.archives).not.toContain(firstArchive);
+    expect(recordState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      accessReplacement: "archives_faceup_to_rd",
+      movedCount: 2,
+      sourceDefinitionId: "onr_v1_142_record-reconstructor",
+    });
+    const replay = replayEvents(initial, recordState.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(recordState));
   });
 
   it("uses Mystery Box once per run with public top-five reveal, free program install and deterministic shuffle", () => {

@@ -24,7 +24,8 @@ export type CardModifierImplementation =
   | CardMemoryUnitsModifierImplementation
   | CardAgendaDifficultyModifierImplementation
   | CardTrashCostModifierImplementation
-  | CardBreakSubroutineCostModifierImplementation;
+  | CardBreakSubroutineCostModifierImplementation
+  | CardAccessCountModifierImplementation;
 
 export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
@@ -42,6 +43,19 @@ export type CardLifecycleImplementation = {
   end_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
   on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
 };
+
+export type CardAccessHookImplementation =
+  | {
+      kind: "pre_access_rd_cut";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "post_access_private_look";
+      afterAccessServer: Extract<ServerId, "hq">;
+      lookZone: Extract<ServerId, "hq">;
+      count: "all";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    };
 
 export type CardLifecycleTriggeredAbilityImplementation = {
   condition?: CardConditionImplementation;
@@ -113,7 +127,8 @@ export type CardEffectImplementation =
   | TrashSourceEffectImplementation
   | PayCreditsOrLoseGameEffectImplementation
   | UseBaseLinkEffectImplementation
-  | IncreaseTraceLinkEffectImplementation;
+  | IncreaseTraceLinkEffectImplementation
+  | PrivateLookEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -199,12 +214,25 @@ export type MakeRunEffectImplementation = {
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
   accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
-  successfulRunAccessReplacement?: "corp_lose_credits";
+  successfulRunAccessReplacement?:
+    | "corp_lose_credits"
+    | "runner_spend_corp_lose_credits"
+    | "private_look_top_rd"
+    | "archives_faceup_to_rd";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
   successfulRunRequiresCorpCredits?: boolean;
+  successfulRunPrivateLookCount?: number;
+  successfulRunArchivesMoveCount?: number;
   visibility: EventVisibilityClass;
+};
+
+export type PrivateLookEffectImplementation = {
+  kind: "private_look";
+  zone: Extract<ServerId, "rd" | "hq">;
+  count: number | "all";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
 export type AddHostedCreditsEffectImplementation = {
@@ -410,8 +438,17 @@ export type CardSubroutineImplementation =
       kind: "end_the_run_unless_runner_pays";
       amount: number;
       text: "*End the run unless Runner pays [1].";
-      visibility: EventVisibilityClass;
-    };
+  visibility: EventVisibilityClass;
+};
+
+export type CardAccessCountModifierImplementation = {
+  kind: "access_count";
+  sourceZone: "runner_installed";
+  activeWhile: "installed";
+  server: Extract<ServerId, "hq" | "rd">;
+  amount: number;
+  visibility: EventVisibilityClass;
+};
 
 export type CardPrintedSubroutineImplementation =
   | {

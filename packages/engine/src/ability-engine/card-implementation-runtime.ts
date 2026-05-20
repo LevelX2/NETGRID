@@ -27,6 +27,7 @@ import {
   type CardEffectHostedCreditsResult,
   type CardEffectMakeRunOptions,
   type CardEffectMakeRunResult,
+  type CardEffectPrivateLookResult,
   type CardEffectTrashSourceResult,
 } from "./effect-interpreter";
 import {
@@ -110,6 +111,14 @@ export type CardImplementationRuntimeDependencies = {
     serverId: Extract<ServerId, "hq" | "rd" | "archives">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  startPrivateLook: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    zone: Extract<ServerId, "rd" | "hq">,
+    count: number | "all",
+  ) => CardEffectPrivateLookResult;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -936,6 +945,15 @@ export function resolveActivatedCardImplementationAbility(
       }),
       startRun: (serverId, options) =>
         deps.startRun(state, legalAction, serverId, options),
+      startPrivateLook: (zone, count) =>
+        deps.startPrivateLook(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          zone,
+          count,
+        ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
@@ -1005,6 +1023,8 @@ export function executeOnPlayCardImplementationAbility(
       }),
       startRun: (serverId, options) =>
         deps.startRun(state, legalAction, serverId, options),
+      startPrivateLook: (zone, count) =>
+        deps.startPrivateLook(state, legalAction, cardId, definition.id, zone, count),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>

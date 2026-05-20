@@ -649,6 +649,19 @@ export function publicContextForAction(
       context.accessReplacement = legalAction.payload.accessReplacement;
     if (typeof legalAction.payload.creditLoss === "number")
       context.creditLoss = legalAction.payload.creditLoss;
+    if (typeof legalAction.payload.runnerPaidAmount === "number")
+      context.runnerPaidAmount = legalAction.payload.runnerPaidAmount;
+    if (typeof legalAction.payload.corpLostCredits === "number")
+      context.corpLostCredits = legalAction.payload.corpLostCredits;
+    if (typeof legalAction.payload.privateLookZone === "string")
+      context.privateLookZone = legalAction.payload.privateLookZone;
+    if (typeof legalAction.payload.privateLookCount === "number")
+      context.privateLookCount = legalAction.payload.privateLookCount;
+    if (typeof legalAction.payload.movedCount === "number")
+      context.movedCount = legalAction.payload.movedCount;
+    if (typeof legalAction.payload.shuffledFaceUpArchivesCount === "number")
+      context.shuffledFaceUpArchivesCount =
+        legalAction.payload.shuffledFaceUpArchivesCount;
     if (typeof legalAction.payload.ambushDefinitionId === "string")
       context.ambushDefinitionId = legalAction.payload.ambushDefinitionId;
     if (typeof legalAction.payload.advancementCounterCount === "number")

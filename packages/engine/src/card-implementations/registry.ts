@@ -114,8 +114,12 @@ import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial
 import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
 import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
+import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
+import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
+import { rAndDInterfaceImplementation } from "./onr-v1/runner/hardware/r-d-interface";
+import { recordReconstructorImplementation } from "./onr-v1/runner/hardware/record-reconstructor";
 import { tychoMemChipImplementation } from "./onr-v1/runner/hardware/tycho-mem-chip";
 import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem-chip";
 import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech-mem-chip";
@@ -127,7 +131,10 @@ import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
+import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
+import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
 import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
@@ -141,6 +148,7 @@ import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
+import { technicianLoverImplementation } from "./onr-v1/runner/resources/technician-lover";
 import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import type { CardImplementationDefinition } from "./types";
@@ -153,12 +161,16 @@ export const CARD_IMPLEMENTATIONS = [
   jackNJoeImplementation,
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
+  priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,
   weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
+  expertScheduleAnalyzerImplementation,
+  microtechAiInterfaceImplementation,
   newsgroupFilterImplementation,
+  rAndDProtocolFilesImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
   accessThroughAlphaImplementation,
@@ -169,12 +181,16 @@ export const CARD_IMPLEMENTATIONS = [
   brokerImplementation,
   floatingRunnerBbsImplementation,
   loanFromChibaImplementation,
+  hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
+  rAndDInterfaceImplementation,
+  recordReconstructorImplementation,
   riggedInvestmentsImplementation,
   scoreImplementation,
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
+  technicianLoverImplementation,
   theSpringboardImplementation,
   topRunnersConferenceImplementation,
   artificialSecurityDirectorsImplementation,

@@ -760,12 +760,21 @@ export type RunState = {
   accessServerOverride?: Exclude<ServerId, "new_remote">;
   freeTrashAccessZones?: Array<"rd" | "hq">;
   grantAllNighterBonusRunOnFinish?: boolean;
-  successfulRunAccessReplacement?: "corp_lose_credits";
+  successfulRunAccessReplacement?:
+    | "corp_lose_credits"
+    | "runner_spend_corp_lose_credits"
+    | "private_look_top_rd"
+    | "archives_faceup_to_rd";
+  successfulRunSourceCardId?: CardInstanceId;
+  successfulRunSourceDefinitionId?: CardDefinitionId;
+  successfulRunSourceTitle?: string;
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunCorpDraw?: number;
   successfulRunRunnerCreditGain?: number;
   successfulRunRequiresCorpCredits?: boolean;
+  successfulRunPrivateLookCount?: number;
+  successfulRunArchivesMoveCount?: number;
   phase: "approach_ice" | "encounter_ice" | "movement" | "access";
   position:
     | {
@@ -784,6 +793,7 @@ export type RunState = {
   accessedCardId?: CardInstanceId;
   pendingSuccessBonusCredits?: number;
   accessCount?: number;
+  microtechAiInterfacePreAccessResolved?: boolean;
   badPublicityCredits?: number;
   bypassFirstIceRemaining?: boolean;
   encounterTaxForFutureIce?: number;

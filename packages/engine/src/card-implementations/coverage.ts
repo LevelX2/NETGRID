@@ -104,6 +104,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
   "onr_v1_096_kilroy-was-here":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
+  "onr_v1_105_priority-wreck":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
   "onr_v1_095_jack-n-joe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
   "onr_v1_097_livewires-contacts":
@@ -116,8 +118,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
   "onr_v1_118_weather-to-finance-pipe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/weather-to-finance-pipe.ts",
+  "onr_v1_024_expert-schedule-analyzer":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
+  "onr_v1_041_microtech-ai-interface":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
+  "onr_v1_050_r-and-d-protocol-files":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
   "onr_v1_062_shredder-uplink-protocol":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
+  "onr_v1_129_hq-interface":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/hq-interface.ts",
+  "onr_v1_139_r-and-d-interface":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/r-d-interface.ts",
+  "onr_v1_142_record-reconstructor":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/record-reconstructor.ts",
   "onr_v1_163_floating-runner-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
   "onr_v1_174_rigged-investments":
@@ -128,6 +142,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/silicon-saloon-franchise.ts",
   "onr_v1_184_top-runners-conference":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/top-runners-conference.ts",
+  "onr_v1_183_technician-lover":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/technician-lover.ts",
   "onr_v1_189_artificial-security-directors":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/artificial-security-directors.ts",
   "onr_v1_191_black-ice-quality-assurance":
@@ -423,6 +439,20 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive break-subroutine-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_BREAK_SUBROUTINE_COST_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "access_count")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive access-count modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION);
+  }
+  if (implementation.accessHooks?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for access-context hook behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ON_PLAY_EFFECT_LOCATION);
   }
   if (implementation.printedSubroutines?.length) {
     reasons.push(

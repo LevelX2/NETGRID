@@ -58,6 +58,10 @@ export type CardEffectExecutionContext = {
     serverId: Extract<ServerId, "hq" | "rd" | "archives">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  startPrivateLook?: (
+    zone: Extract<ServerId, "rd" | "hq">,
+    count: number | "all",
+  ) => CardEffectPrivateLookResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -98,14 +102,24 @@ export type CardEffectMakeRunOptions = {
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
   accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
-  successfulRunAccessReplacement?: "corp_lose_credits";
+  successfulRunAccessReplacement?:
+    | "corp_lose_credits"
+    | "runner_spend_corp_lose_credits"
+    | "private_look_top_rd"
+    | "archives_faceup_to_rd";
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunRunnerCreditGain?: number;
   successfulRunRequiresCorpCredits?: boolean;
+  successfulRunPrivateLookCount?: number;
+  successfulRunArchivesMoveCount?: number;
 };
 
 export type CardEffectMakeRunResult = {
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectPrivateLookResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -476,8 +490,32 @@ export function executeCardImplementationEffects(
                   effect.successfulRunRequiresCorpCredits,
               }
             : {}),
+          ...(effect.successfulRunPrivateLookCount !== undefined
+            ? { successfulRunPrivateLookCount: effect.successfulRunPrivateLookCount }
+            : {}),
+          ...(effect.successfulRunArchivesMoveCount !== undefined
+            ? { successfulRunArchivesMoveCount: effect.successfulRunArchivesMoveCount }
+            : {}),
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);
+        return;
+      }
+      case "private_look": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error("private_look visibility must be hidden_info_barrier.");
+        if (!context.startPrivateLook)
+          throw new Error(
+            "private_look effect requires a startPrivateLook execution context.",
+          );
+        if (effect.zone !== "rd" && effect.zone !== "hq")
+          throw new Error("private_look supports only R&D and HQ.");
+        if (
+          effect.count !== "all" &&
+          (!Number.isInteger(effect.count) || effect.count <= 0)
+        )
+          throw new Error("private_look count must be positive or all.");
+        const lookResult = context.startPrivateLook(effect.zone, effect.count);
+        mergePublicPayload(publicPayload, lookResult.publicPayload);
         return;
       }
       case "add_hosted_credits": {
