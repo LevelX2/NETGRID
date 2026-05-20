@@ -14,6 +14,7 @@ import {
   type DeckDefinition,
   type DemoDeckId,
   type DamageType,
+  type ApplyActionOptions,
   type EngineError,
   type EngineResult,
   type EventVisibilityClass,
@@ -1901,6 +1902,7 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
 export function applyAction(
   state: GameState,
   playerAction: PlayerAction,
+  options: ApplyActionOptions = {},
 ): EngineResult {
   if (playerAction.matchId !== state.matchId) {
     return fail(
@@ -1979,7 +1981,10 @@ export function applyAction(
     ok: true,
     state: next,
     event,
-    publicEvents: next.eventLog.map(toPublicEvent),
+    publicEvents:
+      options.publicEventsMode === "latest"
+        ? [toPublicEvent(event)]
+        : next.eventLog.map(toPublicEvent),
     stateHash,
   };
 }

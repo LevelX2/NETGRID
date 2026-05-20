@@ -684,6 +684,42 @@ describe("V1.0.8 SQLite storage and backup hardening", () => {
     storage.close();
   });
 
+  it("keeps SQLite snapshot history when normal transitions load without full snapshots", async () => {
+    const fixture = await storedMatchFixture("v108-partial-snapshot-load");
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const record = structuredClone(fixture.record) as StoredMatch;
+    const gameState = createGameAfterSetup({ matchId: record.match.matchId, seed: "v108-partial-snapshot-load" });
+    record.gameState = gameState;
+    record.stateSnapshots = [
+      stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion, "snap_one"),
+      { ...stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion + 1, "snap_two"), stateVersion: gameState.stateVersion + 1 }
+    ];
+    await storage.save(record);
+
+    const partial = await storage.load(record.match.matchId, { includeStateSnapshots: false });
+    expect(partial?.stateSnapshots).toEqual([]);
+    if (!partial) throw new Error("Missing partial match");
+    partial.stateSnapshots.push({ ...stateSnapshotForTest(record.match.matchId, gameState, record.match.matchVersion + 2, "snap_three"), stateVersion: gameState.stateVersion + 2 });
+    await storage.save(partial);
+
+    const reopened = await storage.load(record.match.matchId);
+    expect(reopened?.stateSnapshots.map((candidate) => candidate.snapshotId)).toEqual(["snap_one", "snap_two", "snap_three"]);
+    const db = new DatabaseSync(dbPath, { readOnly: true });
+    const sizes = db
+      .prepare(
+        `SELECT
+          (SELECT LENGTH(record_json) FROM matches WHERE match_id = ?) AS recordBytes,
+          (SELECT COALESCE(SUM(LENGTH(game_state_json)), 0) FROM state_snapshots WHERE match_id = ?) AS snapshotBytes`
+      )
+      .get(record.match.matchId, record.match.matchId) as { recordBytes: number; snapshotBytes: number };
+    expect(sizes.recordBytes).toBeLessThan(sizes.snapshotBytes);
+    db.close();
+    storage.close();
+  });
+
   it("imports the legacy netgrid.sqlite path non-destructively when the NETGRID default is empty", async () => {
     const dir = await tempStorageDir();
     const legacyPath = join(dir, "netgrid.sqlite");

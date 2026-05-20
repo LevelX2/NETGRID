@@ -1065,6 +1065,10 @@ export type EngineResult =
       state: GameState;
     };
 
+export type ApplyActionOptions = {
+  publicEventsMode?: "history" | "latest";
+};
+
 export type ValidationResult = {
   ok: boolean;
   errors: string[];

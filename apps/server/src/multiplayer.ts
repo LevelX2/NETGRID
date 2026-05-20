@@ -286,7 +286,7 @@ export type StoredMatch = {
 };
 
 export type MultiplayerStorage = {
-  load(matchId: string): Promise<StoredMatch | undefined>;
+  load(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined>;
   save(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
@@ -532,7 +532,7 @@ export type AdvanceAiResult =
 export class InMemoryMatchStorage implements MultiplayerStorage {
   private readonly records = new Map<string, StoredMatch>();
 
-  async load(matchId: string): Promise<StoredMatch | undefined> {
+  async load(matchId: string, _options: { includeStateSnapshots?: boolean } = {}): Promise<StoredMatch | undefined> {
     const record = this.records.get(matchId);
     return record ? clone(record) : undefined;
   }
@@ -558,7 +558,7 @@ export class JsonFileMatchStorage implements MultiplayerStorage {
     this.ready = this.loadFromDisk();
   }
 
-  async load(matchId: string): Promise<StoredMatch | undefined> {
+  async load(matchId: string, _options: { includeStateSnapshots?: boolean } = {}): Promise<StoredMatch | undefined> {
     await this.ready;
     const record = this.records.get(matchId);
     return record ? clone(record) : undefined;
@@ -1154,7 +1154,7 @@ export class MultiplayerService {
 
   async setLobbyReady(input: { matchId: string; side: Side; sessionToken: string; ready: boolean }): Promise<LobbyActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1176,7 +1176,7 @@ export class MultiplayerService {
 
   async cancelLobbyCountdown(input: { matchId: string; side: Side; sessionToken: string }): Promise<LobbyActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1195,7 +1195,7 @@ export class MultiplayerService {
 
   async cancelMatch(input: { matchId: string; side: Side; sessionToken: string }): Promise<LifecycleActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1213,7 +1213,7 @@ export class MultiplayerService {
 
   async leaveMatch(input: { matchId: string; side: Side; sessionToken: string }): Promise<LifecycleActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1369,7 +1369,7 @@ export class MultiplayerService {
     selectedChoices?: Record<string, unknown>;
   }): Promise<SubmitActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1418,7 +1418,7 @@ export class MultiplayerService {
         ...(input.selectedChoices ? { selectedChoices: input.selectedChoices } : {})
       };
       const snapshot = this.snapshotFor(input.matchId, record.gameState, record.match.matchVersion, `snap_before_${record.gameState.stateVersion + 1}`, false);
-      const result = applyAction(record.gameState, action);
+      const result = applyAction(record.gameState, action, { publicEventsMode: "latest" });
       if (!result.ok) {
         const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, result.error.code);
         record.actionReceipts.push(receipt);
@@ -1475,7 +1475,7 @@ export class MultiplayerService {
     mode?: "single_step" | "until_human";
   }): Promise<AdvanceAiResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -2346,14 +2346,18 @@ export class MultiplayerService {
     const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
     if (!legalAction) return false;
     const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
-    const result = applyAction(state, {
-      matchId: record.match.matchId,
-      side,
-      actionId: legalAction.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
-      idempotencyKey: `ai-${side}-${state.stateVersion}`
-    });
+    const result = applyAction(
+      state,
+      {
+        matchId: record.match.matchId,
+        side,
+        actionId: legalAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+        idempotencyKey: `ai-${side}-${state.stateVersion}`
+      },
+      { publicEventsMode: "latest" }
+    );
     if (!result.ok) return false;
     const event: GameEvent = {
       ...result.event,
@@ -2405,8 +2409,8 @@ export class MultiplayerService {
     return record.match.aiControllers?.[side]?.type === "ai";
   }
 
-  private async mustLoad(matchId: string): Promise<StoredMatch | undefined> {
-    return this.storage.load(matchId);
+  private async mustLoad(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined> {
+    return this.storage.load(matchId, options);
   }
 
   private authenticate(record: StoredMatch, side: Side, sessionToken: string): SessionRecord | undefined {
