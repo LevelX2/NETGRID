@@ -1,3 +1,10 @@
+/**
+ * Calculates effective game values derived from CardImplementation modifiers.
+ *
+ * This module is read-only. It combines base state/catalog values with active
+ * modifier queries and injected legacy host dependencies, but it must not create
+ * actions, mutate state, or decide visibility beyond public modifier use.
+ */
 import type {
   CardDefinition,
   CardInstanceId,
@@ -17,6 +24,8 @@ import {
 import type { CardAgendaDifficultyModifierImplementation } from "./definition-types";
 
 export type EffectiveAgendaDifficultyDependencies = {
+  // Legacy agenda-difficulty rules still live in the host. Injecting them keeps
+  // this module free of index.ts imports while preserving current ordering.
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   runnerHasInstalledCorporateAlly: (state: GameState) => boolean;
   serverDifficultyIncreaseFromFaitAccompli: (
@@ -29,6 +38,9 @@ export type EffectiveAgendaDifficultyDependencies = {
   ) => number;
 };
 
+/**
+ * Returns the effective maximum hand size used by PlayerView and cleanup.
+ */
 export function maxHandSize(state: GameState, side: Side): number {
   if (side === "corp")
     return state.corp.maxHandSize + cardImplementationHandSizeModifier(state, "corp");
@@ -39,10 +51,22 @@ export function maxHandSize(state: GameState, side: Side): number {
   );
 }
 
+/**
+ * Returns the effective Runner memory limit used by PlayerView and install
+ * legality. The base state remains the legacy/base value; modifiers are added
+ * here to avoid double counting in card data.
+ */
 export function runnerMemoryLimit(state: GameState): number {
   return state.runner.memoryLimit + cardImplementationMemoryUnitModifier(state);
 }
 
+/**
+ * Calculates the effective agenda difficulty used by score LegalActions and
+ * revalidation.
+ *
+ * CardImplementation modifiers are combined with existing host-supplied legacy
+ * adjustments until those older rules can be moved behind the same boundary.
+ */
 export function effectiveAgendaDifficulty(
   deps: EffectiveAgendaDifficultyDependencies,
   state: GameState,

@@ -1,3 +1,10 @@
+/**
+ * Bridges declarative CardImplementation effects to existing engine primitives.
+ *
+ * The adapter layer may call mutating host functions supplied by index.ts, but
+ * it must not introduce card-specific behavior or bypass existing draw, damage,
+ * hosted-credit, and source-trash rules.
+ */
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -43,6 +50,8 @@ type DamageRequestForCardImplementation = {
 };
 
 export type CardImplementationEffectAdapterHost = {
+  // These dependencies are the mutation boundary: index.ts owns the underlying
+  // primitives, while this module shapes them for the CardImplementation runtime.
   drawCorpCards: (state: GameState, amount: number) => void;
   drawRunnerCards: (
     state: GameState,
@@ -114,6 +123,13 @@ export type CardImplementationEffectAdapters = Pick<
   | "trashSource"
 >;
 
+/**
+ * Creates runtime callbacks for effects that need host-owned mechanics.
+ *
+ * The returned functions preserve public payload and ResolvedEffect contracts
+ * while delegating actual state mutation to injected host primitives. This keeps
+ * the runtime independent from index.ts and avoids a parallel damage/draw engine.
+ */
 export function createCardImplementationEffectAdapters(
   host: CardImplementationEffectAdapterHost,
 ): CardImplementationEffectAdapters {
@@ -151,6 +167,9 @@ export function createCardImplementationEffectAdapters(
     damageType: Extract<DamageType, "meat">,
     amount: number,
   ): CardEffectDamageResult {
+    // Damage uses the existing imminent-event, prevention, and modification
+    // windows. CardImplementation effects do not resolve damage through a
+    // separate shortcut path.
     const request = {
       damageId: `${state.matchId}.${state.stateVersion}.${sourceDefinitionId}`,
       damageType,
@@ -194,6 +213,8 @@ export function createCardImplementationEffectAdapters(
     sourceCardId: CardInstanceId,
     amount: number,
   ): CardEffectHostedCreditsResult {
+    // Hosted credits are public bit counters on the source card; this adapter
+    // does not generalize them into a named-counter engine.
     host.addCardCounter(state, sourceCardId, "bit", amount);
     const hostedCreditsAfter = host.cardCounter(state, sourceCardId, "bit");
     return {

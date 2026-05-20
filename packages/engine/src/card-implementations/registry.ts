@@ -1,3 +1,10 @@
+/**
+ * Registers concrete CardImplementation definitions by card definition id.
+ *
+ * This file is a catalog only: it imports declarative card files and builds
+ * lookup tables. It must not execute abilities, add coverage semantics, or
+ * contain legacy resolver branches.
+ */
 import type { CardDefinitionId } from "@netgrid/shared";
 import { artificialSecurityDirectorsImplementation } from "./onr-v1/corp/agendas/artificial-security-directors";
 import { blackIceQualityAssuranceImplementation } from "./onr-v1/corp/agendas/black-ice-quality-assurance";
@@ -141,6 +148,9 @@ export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<
   ]),
 );
 
+/**
+ * Looks up the declarative implementation for a card definition, if migrated.
+ */
 export function cardImplementationForDefinitionId(
   definitionId: CardDefinitionId,
 ): CardImplementationDefinition | undefined {

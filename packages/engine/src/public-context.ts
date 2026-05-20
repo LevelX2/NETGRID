@@ -1,3 +1,11 @@
+/**
+ * Builds public action context payloads from already-created engine actions.
+ *
+ * This module is intentionally read-only: it may inspect GameState and injected
+ * host helpers, but it must not mutate state, decide action legality, or import
+ * from index.ts. Hidden-info redaction and legacy payload forwarding are kept
+ * here because PublicEvent and chronicle consumers depend on stable field names.
+ */
 import type {
   CardDefinition,
   CardInstanceId,
@@ -31,6 +39,14 @@ export type PublicContextForActionDependencies = {
   ) => number;
 };
 
+/**
+ * Produces the public context attached to a GameEvent for one LegalAction.
+ *
+ * The LegalAction has already been generated or validated elsewhere; this
+ * function only mirrors public-safe payload data into a chronicle/UI-friendly
+ * shape. Sections that copy legacy payload fields are compatibility bridges,
+ * not new gameplay authority.
+ */
 export function publicContextForAction(
   state: GameState,
   legalAction: LegalAction,
@@ -76,6 +92,9 @@ export function publicContextForAction(
   const agendaId = cardId ?? sourceCardId;
   const resolvedEffects = legalAction.resolvedEffects;
 
+  // CardImplementation runtime paths attach redacted ResolvedEffects here. Keep
+  // instance-level private data out unless execution already exposed public
+  // source titles or definition ids.
   if (Array.isArray(resolvedEffects)) context.resolvedEffects = resolvedEffects;
   if (serverLabel) context.serverLabel = serverLabel;
   if (legalAction.type === "start_run" && state.run) {
@@ -119,6 +138,8 @@ export function publicContextForAction(
           ? "ICE"
         : "Remote";
     if (legalAction.payload?.hiddenRunnerResourceInstall === true) {
+      // Hidden Runner resources expose only a stable slot identity at install
+      // time; the actual card identity remains private until a reveal path runs.
       context.redactedKind = "hidden_runner_resource";
       context.hiddenRunnerResourceInstall = true;
       if (typeof legalAction.payload.hiddenResourceSlotId === "string")
@@ -179,6 +200,8 @@ export function publicContextForAction(
   if (legalAction.type === "trash_resource") {
     context.zoneLabel = "Resource";
     if (legalAction.payload?.hiddenRunnerResource === true) {
+      // Trash events for hidden resources keep the same redacted slot contract
+      // as install events unless execution explicitly marked the card revealed.
       context.redactedKind = "hidden_runner_resource";
       if (typeof legalAction.payload.hiddenResourceSlotId === "string")
         context.hiddenResourceSlotId = legalAction.payload.hiddenResourceSlotId;
@@ -473,6 +496,8 @@ export function publicContextForAction(
     }
   }
   if (legalAction.payload?.traceStarted === true) {
+    // Trace contexts are public bidding state. This layer only forwards the
+    // fields emitted by trace execution and does not infer hidden choices.
     if (typeof legalAction.payload.agendaAbility === "string")
       context.agendaAbility = legalAction.payload.agendaAbility;
     context.traceStarted = true;
@@ -506,6 +531,8 @@ export function publicContextForAction(
     }
   }
   if (legalAction.payload?.damageResolved === true) {
+    // Damage summaries are public outcomes only. Hidden-zone card identities are
+    // not reconstructed from the state while building public context.
     context.damageResolved = true;
     context.damageType = legalAction.payload.damageType;
     context.damageAmount = legalAction.payload.damageAmount;
@@ -737,6 +764,8 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.printedDamageAmount === "number")
     context.printedDamageAmount = legalAction.payload.printedDamageAmount;
   if (typeof legalAction.payload?.stealCost === "number")
+    // Steal-cost fields may include current-access persistence; the cost layer
+    // owns that rule and this module only reports the already-quoted result.
     context.stealCost = legalAction.payload.stealCost;
   if (typeof legalAction.payload?.stealAdditionalCost === "number")
     context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;
@@ -787,6 +816,9 @@ export function publicContextForAction(
     context.runnerTagsAfter = legalAction.payload.runnerTagsAfter;
   if (legalAction.payload?.socialEngineeringRun === true)
     context.socialEngineeringRun = true;
+  // Hosted-credit and counter values copied below are public summaries already
+  // produced by execution. Keep this list as presentation wiring, not as a
+  // general counter-engine policy layer.
   for (const key of [
     "gainedCredits",
     "runnerCreditsAfter",

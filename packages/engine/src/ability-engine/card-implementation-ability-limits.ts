@@ -1,3 +1,10 @@
+/**
+ * Evaluates declarative CardImplementation ability limits.
+ *
+ * This module owns generic limit keys and checks, while the actual turn-flag
+ * storage is supplied by the host through dependencies. It currently supports
+ * only the narrow once-per-turn-per-source shape used by migrated cards.
+ */
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 import type { CardAbilityLimitImplementation } from "./definition-types";
 
@@ -13,6 +20,12 @@ export type CardImplementationAbilityLimitHost = {
   ) => void;
 };
 
+/**
+ * Host binding for the current Runner-turn source-wide limit storage.
+ *
+ * The flag lives in GameState for replay determinism; this adapter deliberately
+ * does not introduce a second limit store or Broker-specific runtime branch.
+ */
 export const runnerCardImplementationAbilityLimitHost: CardImplementationAbilityLimitHost =
   {
     usedSourceIdsThisTurn: (state) =>
@@ -33,6 +46,12 @@ export function cardImplementationAbilityLimitKey(
   return `${limit.kind}:${limit.scope}`;
 }
 
+/**
+ * Checks whether the declared limit allows the source to be used right now.
+ *
+ * Runtime code calls this during action generation and stale-action
+ * revalidation before costs are paid.
+ */
 export function canUseCardImplementationAbilityLimit(
   host: CardImplementationAbilityLimitHost,
   state: GameState,
@@ -51,6 +70,8 @@ export function markCardImplementationAbilityLimitUsed(
   sourceCardId: CardInstanceId,
   limit: CardAbilityLimitImplementation,
 ): void {
+  // Marking happens only after successful resolution. The host owns persistence;
+  // this helper only defines the CardImplementation-level keying contract.
   assertSupportedAbilityLimit(limit);
   const used = sourceIdsUsedForLimit(host, state, limit);
   if (used.includes(sourceCardId)) return;

@@ -1,3 +1,11 @@
+/**
+ * Interprets declarative CardImplementation effects against the current state.
+ *
+ * Simple public effects such as credits, tags, and actions mutate state here.
+ * Effects that require existing engine primitives, such as draw, damage,
+ * hosted-credit mutation, or source trashing, are supplied through the execution
+ * context so this module does not import index.ts or duplicate host rules.
+ */
 import type {
   CardDefinitionId,
   CardInstanceId,
@@ -150,6 +158,14 @@ function mergePublicPayload(
   }
 }
 
+/**
+ * Executes ordered CardImplementation effects and returns public payload plus
+ * redacted ResolvedEffects for event/chronicle consumers.
+ *
+ * This function is a mutating interpreter. It validates the small declarative
+ * vocabulary, preserves effect order, and relies on injected host callbacks for
+ * mechanics with their own revalidation or hidden-info contracts.
+ */
 export function executeCardImplementationEffects(
   state: GameState,
   context: CardEffectExecutionContext,

@@ -1,3 +1,10 @@
+/**
+ * Defines the declarative, engine-local CardImplementation vocabulary.
+ *
+ * This file describes what card files may declare. It must not execute effects,
+ * query GameState, or contain concrete card IDs; runtime modules interpret these
+ * types through explicit effect, lifecycle, modifier, and limit pipelines.
+ */
 import type {
   CardType,
   DamageType,
@@ -22,6 +29,8 @@ export type CardAbilityImplementation =
   | ActivatedCardAbilityImplementation;
 
 export type CardLifecycleImplementation = {
+  // These lifecycle hooks are deliberately narrow CardImplementation entry
+  // points. They are not a general trigger registry with priorities or choices.
   on_rez?: readonly CardEffectImplementation[];
   on_install?: readonly CardEffectImplementation[];
   on_score?: readonly CardEffectImplementation[];
@@ -117,6 +126,8 @@ export type DamageEffectImplementation = {
 };
 
 export type AddHostedCreditsEffectImplementation = {
+  // Hosted credits currently model public on-card bits only; this is not a
+  // named-counter, virus-counter, or advancement-counter abstraction.
   kind: "add_hosted_credits";
   target: "source";
   amount: number;

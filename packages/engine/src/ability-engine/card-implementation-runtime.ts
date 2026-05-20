@@ -1,3 +1,11 @@
+/**
+ * Orchestrates generic CardImplementation execution.
+ *
+ * The runtime turns declarative card abilities and lifecycle hooks into actions
+ * or ordered effect execution. It owns CardImplementation revalidation and
+ * payload merging, but delegates engine primitives through dependencies so it
+ * does not import index.ts or contain card-specific branches.
+ */
 import type {
   ActionType,
   CardDefinition,
@@ -40,6 +48,8 @@ type ImmediateLifecycle = Exclude<
 type RuntimeEffectCollector = ResolvedGameEffect[];
 
 export type CardImplementationRuntimeDependencies = {
+  // Host-owned primitives keep movement, payment, draw, damage, and trash
+  // semantics centralized in the engine while this runtime stays card-generic.
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
   mustInstance: (
     source: Record<CardInstanceId, CardInstance>,
@@ -109,6 +119,12 @@ function printedCostOnPlayImplementation(
   );
 }
 
+/**
+ * Evaluates the small declarative condition vocabulary used by migrated cards.
+ *
+ * Conditions are checked during LegalAction generation and revalidation;
+ * unsupported condition kinds fail closed instead of silently becoming legal.
+ */
 function cardImplementationConditionMet(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -226,6 +242,14 @@ function cardImplementationLifecycleEffects(
   );
 }
 
+/**
+ * Dispatches immediate lifecycle effects such as on_rez, on_install, and
+ * on_score for one source card.
+ *
+ * These hooks are intentionally narrow lifecycle entry points, not a general
+ * trigger registry. Callers choose the timing and source; this helper only
+ * executes the declared effects for the current source.
+ */
 export function executeCardImplementationLifecycleEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -341,6 +365,11 @@ function isActiveCardImplementationStartOfRunnerTurnSource(
   );
 }
 
+/**
+ * Runs deterministic start-of-Corp-turn lifecycle effects for active Corp
+ * sources only. The caller owns turn transition ordering; this helper just
+ * queries eligible CardImplementation sources and executes their effects.
+ */
 export function executeCardImplementationStartOfCorpTurnEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -400,6 +429,11 @@ export function executeCardImplementationStartOfCorpTurnEffects(
   }
 }
 
+/**
+ * Runs deterministic start-of-Runner-turn lifecycle effects for installed
+ * Runner sources only. This is intentionally narrower than a general trigger
+ * system and has no optional trigger or priority handling.
+ */
 export function executeCardImplementationStartOfRunnerTurnEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -448,6 +482,12 @@ export function executeCardImplementationStartOfRunnerTurnEffects(
   }
 }
 
+/**
+ * Runs the narrow runner-run-start lifecycle path for installed Runner sources.
+ *
+ * It exists for source-scoped cleanup effects and must not grow into a general
+ * run/access replacement engine.
+ */
 export function executeCardImplementationRunnerRunStartEffects(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -545,6 +585,13 @@ function activatedAbilityPayload(
   };
 }
 
+/**
+ * Adds LegalActions for active declarative abilities on an already-valid source.
+ *
+ * This is action construction only. The same source, timing, condition, cost,
+ * and limit rules are checked again by resolveActivatedCardImplementationAbility
+ * before any click is spent or effect mutates state.
+ */
 export function pushActivatedCardImplementationActions(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -683,6 +730,13 @@ function validateActivatedCardImplementationAbility(
   );
 }
 
+/**
+ * Revalidates and resolves one activated CardImplementation ability.
+ *
+ * Costs are paid only after source status, timing, conditions, and ability
+ * limits have been checked against the current state, which rejects stale
+ * actions without partial effect execution.
+ */
 export function resolveActivatedCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,
@@ -742,6 +796,11 @@ export function resolveActivatedCardImplementationAbility(
   return true;
 }
 
+/**
+ * Resolves a printed-cost on-play CardImplementation ability after the host has
+ * accepted the play action. The runtime executes only declarative effects; play
+ * legality, card movement, and printed cost payment stay in the host.
+ */
 export function executeOnPlayCardImplementationAbility(
   deps: CardImplementationRuntimeDependencies,
   state: GameState,

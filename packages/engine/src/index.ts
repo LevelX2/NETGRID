@@ -249,12 +249,20 @@ import {
 } from "./ability-engine/card-implementation-runtime";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
+
+// Effective-value helpers are pure/read-only. Legacy agenda-difficulty pieces
+// are still injected from index.ts so the extracted module avoids index imports
+// without changing existing score legality or revalidation ordering.
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
   runnerHasInstalledCorporateAlly,
   serverDifficultyIncreaseFromFaitAccompli,
   serverDifficultyReductionFromUpgrades,
 };
+
+// CardImplementation effect adapters are the mutation boundary for effects that
+// still need host primitives. The adapters may call these functions, but card
+// files and runtime code stay free of index.ts imports and card-specific logic.
 const cardImplementationEffectAdapters = createCardImplementationEffectAdapters({
   drawCorpCards,
   drawRunnerCards,
@@ -273,6 +281,10 @@ const cardImplementationEffectAdapters = createCardImplementationEffectAdapters(
   trashCorpInstalledCardToArchives,
   trashRunnerInstalledCardToHeap,
 });
+
+// Runtime dependencies define the host contract for declarative
+// CardImplementation abilities and lifecycle hooks. Payment timing, movement,
+// damage windows, and source trashing remain owned by index.ts primitives.
 const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   definitionFor,
   mustInstance,
@@ -286,6 +298,9 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
 
+// Public context generation is read-only and injected here to avoid an import
+// cycle. It may format already-public payload data, but it must not decide
+// action legality or reveal hidden card identities.
 const publicContextDeps: PublicContextForActionDependencies = {
   agendaPointsForScoredCard,
   cardCounter,
@@ -21063,6 +21078,9 @@ function buildEvent(
   const reveal = revealForPublicEvent(state, legalAction);
   const visibilityClass = eventVisibilityForAction(legalAction);
   const actionUseContext = publicActionUseContext(previousState, legalAction);
+  // Public context is constructed after action resolution from already-public
+  // payload data. buildEvent owns final PublicPayload assembly, while
+  // public-context.ts remains read-only and free of state mutation.
   const actionContext = publicContextForAction(state, legalAction, publicContextDeps);
   const publicPayload: Record<string, unknown> = {
     actor,
@@ -21568,6 +21586,9 @@ function cardCounter(
   return mustInstance(state.cardInstances, cardId).counters?.[counterType] ?? 0;
 }
 
+// Counter mutation stays in index.ts because many legacy mechanics still share
+// this primitive. CardImplementation adapters call through dependencies instead
+// of importing these functions directly.
 function setCardCounter(
   state: GameState,
   cardId: CardInstanceId,
@@ -22564,6 +22585,9 @@ function refreshRecurringCredits(
 }
 
 function spendClick(state: GameState, side: Side): void {
+  // Click payment is a host primitive. CardImplementation runtime revalidates
+  // abilities first, then calls this through dependencies so stale actions do
+  // not pay costs before source/timing/limit checks pass.
   if (side === "corp") {
     if (state.corp.clicks <= 0)
       throw new Error("Die Korp hat keine Clicks mehr.");

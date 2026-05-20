@@ -1,3 +1,10 @@
+/**
+ * Quotes additional break-subroutine costs from CardImplementation modifiers.
+ *
+ * This module reads active server-scoped sources for the encountered ICE and
+ * returns a cost quote for the existing icebreaker action path. It does not
+ * break subroutines, spend credits, or alter run state.
+ */
 import type {
   CardDefinition,
   CardInstanceId,
@@ -51,6 +58,12 @@ function breakSubroutineCostModifierAppliesToIce(
   );
 }
 
+/**
+ * Calculates the additional cost for breaking one or more subroutines on an ICE.
+ *
+ * The quote carries public source attribution so LegalAction payloads and
+ * revalidation can stay aligned without exposing private source instance data.
+ */
 export function quoteBreakSubroutineCostModifiers(
   state: GameState,
   iceId: CardInstanceId,

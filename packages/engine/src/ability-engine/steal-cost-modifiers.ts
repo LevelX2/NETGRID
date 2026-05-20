@@ -1,3 +1,10 @@
+/**
+ * Quotes agenda steal costs from CardImplementation modifiers.
+ *
+ * This module is read/query oriented except for the explicit current-access
+ * snapshot helper. It does not replace access flow; it only supplies costs and
+ * redacted public attribution for the existing steal action path.
+ */
 import type {
   AccessStealCostModifierSnapshot,
   CardDefinition,
@@ -103,6 +110,12 @@ function persistedStealCostModifiersForAgenda(
     }));
 }
 
+/**
+ * Quotes the current steal cost for an accessed agenda on a server.
+ *
+ * Active source modifiers and persisted current-access snapshots are combined
+ * here so LegalAction generation and revalidation can compare the same quote.
+ */
 export function quoteStealCostForAccessedAgenda(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
@@ -164,6 +177,13 @@ function snapshotForModifier(
   };
 }
 
+/**
+ * Persists steal-cost modifiers that must survive source trash during the
+ * current access sequence.
+ *
+ * This is intentionally scoped to current-access steal costs and must not grow
+ * into a general access replacement or trigger snapshot system.
+ */
 export function snapshotPersistentStealCostModifiersForSource(
   state: GameState,
   sourceCardInstanceId: CardInstanceId,

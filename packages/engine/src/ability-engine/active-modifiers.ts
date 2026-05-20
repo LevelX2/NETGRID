@@ -1,3 +1,11 @@
+/**
+ * Builds the public ActiveModifier list exposed through PlayerView.
+ *
+ * This module translates current CardImplementation modifiers and selected
+ * legacy run-state modifiers into redacted public summaries. It must not decide
+ * legality or apply modifier math used by gameplay; effective-value and cost
+ * modules remain the gameplay authority for those calculations.
+ */
 import {
   type CardDefinitionId,
   type CardInstanceId,
@@ -58,6 +66,13 @@ function positiveInteger(value: unknown): number {
     : 0;
 }
 
+/**
+ * Collects currently visible modifiers for display/debug consumers.
+ *
+ * The result is a snapshot of current public state, not a replay log. Concrete
+ * legacy ids may remain here only for older non-CardImplementation mechanics
+ * that have not yet moved behind declarative modifier queries.
+ */
 export function collectActiveModifiers(state: GameState): ActiveModifier[] {
   const modifiers: ActiveModifier[] = [];
 

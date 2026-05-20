@@ -1,3 +1,10 @@
+/**
+ * Builds dynamic subroutines from CardImplementation modifiers.
+ *
+ * This is a narrow public attribution layer for additional_subroutine effects.
+ * It appends supported subroutines to current ICE definitions and leaves break,
+ * resolve, and stale dynamic-subroutine revalidation to the run engine.
+ */
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -52,6 +59,11 @@ function additionalSubroutineModifierAppliesToIce(
   );
 }
 
+/**
+ * Converts one declarative additional subroutine into a public dynamic
+ * SubroutineDefinition. Public ids are stable and redacted; internal ids keep
+ * source instance attribution for revalidation.
+ */
 function subroutineDefinitionForImplementation(
   match: ActiveCardImplementationModifier<CardAdditionalSubroutineModifierImplementation>,
   subroutine: CardSubroutineImplementation,
@@ -87,6 +99,12 @@ function subroutineDefinitionForImplementation(
   throw new Error(`Unsupported additional subroutine: ${JSON.stringify(subroutine)}`);
 }
 
+/**
+ * Returns active additional subroutines for a rezzed ICE in append order.
+ *
+ * This helper is not a general subroutine DSL; unsupported subroutine kinds fail
+ * loudly until the engine has an explicit implementation.
+ */
 export function additionalSubroutinesForIce(
   state: GameState,
   iceId: CardInstanceId,
@@ -120,6 +138,9 @@ export function additionalSubroutinesForIce(
   return subroutines;
 }
 
+/**
+ * Reads CardImplementation attribution from a dynamic subroutine definition.
+ */
 export function dynamicSubroutineAttributionFor(
   subroutine: SubroutineDefinition | undefined,
 ): DynamicSubroutineAttribution | undefined {

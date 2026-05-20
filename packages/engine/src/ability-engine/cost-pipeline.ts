@@ -1,3 +1,10 @@
+/**
+ * Quotes Corp install/rez costs with CardImplementation modifier support.
+ *
+ * This module is a cost-query and revalidation helper: it reads current state,
+ * returns legal-action-ready public quotes, and must stay aligned with the
+ * payment paths in index.ts. It must not move cards or pay costs itself.
+ */
 import type {
   CardDefinition,
   CardDefinitionId,
@@ -67,6 +74,10 @@ export type CorpInstallCostOptions = {
   legacyReduction?: number;
 };
 
+/**
+ * Converts an immutable quote into LegalAction costs so action generation and
+ * revalidation use the same cost vocabulary.
+ */
 export function costQuoteToLegalActionCosts(quote: CostQuote): Cost[] {
   return quote.costs.map((cost) => ({ ...cost }));
 }
@@ -120,6 +131,12 @@ function corpRezCostModifierAppliesToIce(
   );
 }
 
+/**
+ * Collects currently active rez-cost modifiers for one ICE.
+ *
+ * Same-server filtering happens here from the current board state; stale action
+ * protection relies on callers rebuilding and comparing the quote before pay.
+ */
 function activeCorpRezCostModifiersForIce(
   state: GameState,
   iceId: CardInstanceId,
@@ -210,6 +227,9 @@ export function rezCostReductionSourceDefinitionIdsFor(
   );
 }
 
+/**
+ * Calculates current effective rez cost for a card without paying it.
+ */
 export function rezCostForCard(
   state: GameState,
   cardId: CardInstanceId,

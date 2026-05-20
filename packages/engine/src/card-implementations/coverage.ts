@@ -1,3 +1,10 @@
+/**
+ * Reports CardImplementation coverage for the original set.
+ *
+ * Coverage is metadata for planning, audits, and tests. It must not influence
+ * runtime legality or execute card behavior; implemented behavior comes from
+ * the registry and the ability-engine runtime.
+ */
 import type { CardDefinitionId } from "@netgrid/shared";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { CARD_IMPLEMENTATIONS } from "./registry";
@@ -411,6 +418,9 @@ export const CARD_IMPLEMENTATION_COVERAGE_ENTRIES: readonly CardImplementationCo
     (entry): entry is CardImplementationCoverageEntry => Boolean(entry),
   );
 
+/**
+ * Returns the current coverage status for a card definition id.
+ */
 export function cardImplementationCoverageForDefinitionId(
   definitionId: CardDefinitionId,
 ): CardImplementationCoverageEntry | undefined {

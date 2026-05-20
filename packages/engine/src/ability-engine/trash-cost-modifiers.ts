@@ -1,3 +1,10 @@
+/**
+ * Quotes access trash costs from CardImplementation modifiers.
+ *
+ * The helper reads current server/root state and returns a public quote for the
+ * existing access-trash action path. It does not trash cards or persist costs
+ * after a source leaves play.
+ */
 import type {
   CardDefinition,
   CardInstanceId,
@@ -51,6 +58,12 @@ function trashCostModifierAppliesToCard(
   );
 }
 
+/**
+ * Calculates the effective access trash cost for one accessed card.
+ *
+ * Callers are responsible for rebuilding this quote during revalidation before
+ * runner credits are spent.
+ */
 export function quoteAccessTrashCost(
   state: GameState,
   targetCardInstanceId: CardInstanceId,

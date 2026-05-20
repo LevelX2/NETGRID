@@ -1,3 +1,9 @@
+/**
+ * Calculates public ICE strength bonuses from CardImplementation modifiers.
+ *
+ * The query is read-only and current-state based. It supports scored agenda and
+ * rezzed Corp root sources but does not contain card-specific strength rules.
+ */
 import type { CardDefinition, CardInstanceId, GameState } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
@@ -35,6 +41,12 @@ function iceStrengthModifierAppliesToIce(
   );
 }
 
+/**
+ * Returns the active CardImplementation strength bonus for one rezzed ICE.
+ *
+ * PlayerView, encounter, and revalidation callers must add this to the same
+ * base strength they already use, rather than duplicating modifier traversal.
+ */
 export function iceStrengthModifierBonusFor(
   state: GameState,
   iceId: CardInstanceId,

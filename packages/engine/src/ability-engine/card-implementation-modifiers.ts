@@ -1,3 +1,10 @@
+/**
+ * Queries active declarative CardImplementation modifiers from the board state.
+ *
+ * The helpers here are read-only and card-generic. They know source zones such
+ * as rezzed Corp root, scored Corp agenda, and installed Runner card, but they
+ * must not contain concrete card IDs or execute modifier effects themselves.
+ */
 import {
   DEMO_CARDS_BY_ID,
   type CardDefinition,
@@ -82,6 +89,11 @@ export function corpServerIdForInstalledCard(
   return undefined;
 }
 
+/**
+ * Applies the shared same-server/source-fort predicate for server-scoped
+ * modifiers. It reads current installed zones only and does not snapshot past
+ * access or run state.
+ */
 export function sameServerAsSourceApplies(
   state: GameState,
   sourceCardInstanceId: CardInstanceId,
@@ -157,6 +169,12 @@ export function isPublicScoredCorpAgendaModifier(
   );
 }
 
+/**
+ * Returns active modifiers from currently rezzed Corp root cards.
+ *
+ * The query reads the current board state directly; it does not replay events,
+ * persist access snapshots, or apply same-server filtering by itself.
+ */
 export function activeCardImplementationModifiersForCorpRoot<
   TKind extends CardModifierImplementation["kind"],
 >(
@@ -192,6 +210,9 @@ export function activeCardImplementationModifiersForCorpRoot<
   return matches;
 }
 
+/**
+ * Returns active modifiers from installed Runner cards in deterministic order.
+ */
 export function activeCardImplementationModifiersForRunnerInstalled<
   TKind extends CardModifierImplementation["kind"],
 >(
@@ -227,6 +248,12 @@ export function activeCardImplementationModifiersForRunnerInstalled<
   return matches;
 }
 
+/**
+ * Returns active modifiers from the Corp score area.
+ *
+ * Scored-agenda modifiers are global unless their specific modifier kind later
+ * applies additional filtering in its own query module.
+ */
 export function activeCardImplementationModifiersForScoredCorpAgendas<
   TKind extends CardModifierImplementation["kind"],
 >(
