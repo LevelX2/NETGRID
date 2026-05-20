@@ -689,6 +689,9 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
+const SPECIAL_ZONE_CARD_WIDTH_MIN = 56;
+const SPECIAL_ZONE_CARD_WIDTH_PREFERRED = 140;
+const SPECIAL_ZONE_CARD_GAP = 6;
 const SCORE_AREA_PREVIEW_LIMIT = 18;
 const CARD_DISPLAY_BASE_MIN_WIDTH = 108;
 const DECK_TABLE_CARD_WIDTH_DEFAULT = 94;
@@ -7116,13 +7119,7 @@ function SpecialZonesStrip({
               <span>{group.count}</span>
             </div>
             {compact ? (
-              <div className="specialZoneOverlapRow">
-                {group.cards.slice(0, SPECIAL_ZONE_PREVIEW_LIMIT).map((card) => {
-                  const displayCard = enrichVisibleCard(card, cardDetailsById);
-                  return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
-                })}
-                {group.cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{group.cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}</span> : null}
-              </div>
+              <SpecialZoneOverlapRow cards={group.cards} cardDetailsById={cardDetailsById} displayMode={displayMode} {...(onFocus ? { onFocus } : {})} />
             ) : (
               <div className="cards miniCards">
                 {group.cards.map((card) => {
@@ -7135,6 +7132,63 @@ function SpecialZonesStrip({
         ))}
       </div>
     </section>
+  );
+}
+
+function SpecialZoneOverlapRow({
+  cards,
+  cardDetailsById,
+  displayMode,
+  onFocus
+}: {
+  cards: VisibleCard[];
+  cardDetailsById: Record<string, CatalogCardDetail>;
+  displayMode: CardDisplayMode;
+  onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
+}) {
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const previewCards = cards.slice(0, SPECIAL_ZONE_PREVIEW_LIMIT);
+  const previewCount = Math.max(1, previewCards.length);
+  const [cardWidth, setCardWidth] = useState(SPECIAL_ZONE_CARD_WIDTH_PREFERRED);
+
+  useEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+
+    const updateCardWidth = () => {
+      const availableWidth = row.clientWidth;
+      if (availableWidth <= 0) return;
+
+      const singleRowWidth = Math.floor((availableWidth - SPECIAL_ZONE_CARD_GAP * (previewCount - 1)) / previewCount);
+      const nextCardWidth = Math.max(SPECIAL_ZONE_CARD_WIDTH_MIN, Math.min(SPECIAL_ZONE_CARD_WIDTH_PREFERRED, singleRowWidth));
+      setCardWidth((current) => (current === nextCardWidth ? current : nextCardWidth));
+    };
+
+    updateCardWidth();
+
+    if (typeof ResizeObserver !== "undefined") {
+      const observer = new ResizeObserver(updateCardWidth);
+      observer.observe(row);
+      return () => observer.disconnect();
+    }
+
+    window.addEventListener("resize", updateCardWidth);
+    return () => window.removeEventListener("resize", updateCardWidth);
+  }, [previewCount]);
+
+  const rowStyle = {
+    "--special-zone-card-width": `${cardWidth}px`,
+    "--special-zone-card-gap": `${SPECIAL_ZONE_CARD_GAP}px`
+  } as CSSProperties;
+
+  return (
+    <div ref={rowRef} className="specialZoneOverlapRow" style={rowStyle}>
+      {previewCards.map((card) => {
+        const displayCard = enrichVisibleCard(card, cardDetailsById);
+        return <CardView key={card.instanceId} card={displayCard} compact displayMode={displayMode} actions={[]} actionDisabled {...(onFocus ? { onFocus } : {})} />;
+      })}
+      {cards.length > SPECIAL_ZONE_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{cards.length - SPECIAL_ZONE_PREVIEW_LIMIT}</span> : null}
+    </div>
   );
 }
 
