@@ -69,19 +69,13 @@ import {
   dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
 import {
-  activeCardImplementationModifiersForCorpRoot,
-  activeCardImplementationModifiersForRunnerInstalled,
-  activeCardImplementationModifiersForScoredCorpAgendas,
-  cardMatchesModifierAppliesTo,
-  isPublicRezzedCorpRootModifier,
-  isPublicRunnerInstalledModifier,
-  isPublicScoredCorpAgendaModifier,
-} from "./ability-engine/card-implementation-modifiers";
+  effectiveAgendaDifficulty,
+  maxHandSize,
+  runnerMemoryLimit,
+  type EffectiveAgendaDifficultyDependencies,
+} from "./ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
-import type {
-  CardAgendaDifficultyModifierImplementation,
-} from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
 import {
   ACTION_ASSET_CARD_IDS,
@@ -247,6 +241,12 @@ import {
 } from "./ability-engine/card-implementation-runtime";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
+const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
+  definitionFor,
+  runnerHasInstalledCorporateAlly,
+  serverDifficultyIncreaseFromFaitAccompli,
+  serverDifficultyReductionFromUpgrades,
+};
 const cardImplementationEffectAdapters = createCardImplementationEffectAdapters({
   drawCorpCards,
   drawRunnerCards,
@@ -2818,7 +2818,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, id);
       if (
         definition.type === "agenda" &&
-        effectiveAgendaDifficulty(state, id) <=
+        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, id) <=
           mustInstance(state.cardInstances, id).advancementCounters
       ) {
         if (definition.id === SECURITY_NET_OPTIMIZATION_ID) {
@@ -13835,84 +13835,6 @@ function handForSide(state: GameState, side: Side): CardInstanceId[] {
   return side === "corp" ? state.corp.hq : state.runner.grip;
 }
 
-function maxHandSize(state: GameState, side: Side): number {
-  if (side === "corp")
-    return state.corp.maxHandSize + cardImplementationHandSizeModifier(state, "corp");
-  return (
-    state.runner.maxHandSize +
-    cardImplementationHandSizeModifier(state, "runner") -
-    state.runner.coreDamage
-  );
-}
-
-function positiveCardImplementationModifierAmount(
-  kind: string,
-  amount: number,
-): number {
-  if (!Number.isInteger(amount) || amount <= 0)
-    throw new Error(`${kind}-Modifier ist ungueltig.`);
-  return amount;
-}
-
-function cardImplementationHandSizeModifier(
-  state: GameState,
-  side: Side,
-): number {
-  const runnerInstalled = activeCardImplementationModifiersForRunnerInstalled(
-    state,
-    "hand_size",
-  ).filter(
-    (active) =>
-      active.modifier.side === side &&
-      isPublicRunnerInstalledModifier(active.modifier),
-  );
-  const scoredCorpAgendas =
-    side === "corp"
-      ? activeCardImplementationModifiersForScoredCorpAgendas(
-          state,
-          "hand_size",
-        ).filter((active) =>
-          isPublicScoredCorpAgendaModifier(active.modifier),
-        )
-      : [];
-  const rezzedCorpRoots =
-    side === "corp"
-      ? activeCardImplementationModifiersForCorpRoot(state, "hand_size").filter(
-          (active) => isPublicRezzedCorpRootModifier(active.modifier),
-        )
-      : [];
-  return [...runnerInstalled, ...scoredCorpAgendas, ...rezzedCorpRoots].reduce(
-    (sum, active) =>
-      sum +
-      positiveCardImplementationModifierAmount(
-        "hand_size",
-        active.modifier.amount,
-      ),
-    0,
-  );
-}
-
-function cardImplementationMemoryUnitModifier(state: GameState): number {
-  return activeCardImplementationModifiersForRunnerInstalled(
-    state,
-    "memory_units",
-  )
-    .filter((active) => isPublicRunnerInstalledModifier(active.modifier))
-    .reduce(
-      (sum, active) =>
-        sum +
-        positiveCardImplementationModifierAmount(
-          "memory_units",
-          active.modifier.amount,
-        ),
-      0,
-    );
-}
-
-function runnerMemoryLimit(state: GameState): number {
-  return state.runner.memoryLimit + cardImplementationMemoryUnitModifier(state);
-}
-
 function hasCardImplementationMemoryUnitModifier(
   definition: CardDefinition,
 ): boolean {
@@ -15196,86 +15118,6 @@ function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
   );
 }
 
-function effectiveAgendaDifficulty(
-  state: GameState,
-  agendaId: CardInstanceId,
-): number {
-  const definition = definitionFor(state, agendaId);
-  if (definition.type !== "agenda")
-    throw new Error("Difficulty kann nur fuer Agenda-Karten berechnet werden.");
-  let difficulty = definition.advancementRequirement ?? 0;
-  if (runnerHasInstalledCorporateAlly(state)) difficulty += 1;
-  difficulty += cardImplementationAgendaDifficultyModifier(
-    state,
-    agendaId,
-    definition,
-  );
-  difficulty += serverDifficultyIncreaseFromFaitAccompli(state, agendaId);
-  difficulty -= serverDifficultyReductionFromUpgrades(state, agendaId);
-  return Math.max(0, difficulty);
-}
-
-function cardImplementationAgendaDifficultyModifier(
-  state: GameState,
-  agendaId: CardInstanceId,
-  agendaDefinition: CardDefinition,
-): number {
-  const scoredModifier = activeCardImplementationModifiersForScoredCorpAgendas(
-    state,
-    "agenda_difficulty",
-  ).reduce((sum, active) => {
-    const modifier: CardAgendaDifficultyModifierImplementation =
-      active.modifier;
-    if (!isPublicScoredCorpAgendaModifier(modifier)) return sum;
-    if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
-      return sum;
-    if (
-      typeof modifier.amount !== "number" ||
-      !Number.isInteger(modifier.amount) ||
-      modifier.amount <= 0
-    )
-      return sum;
-    return (
-      sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
-    );
-  }, 0);
-  const rootModifier = activeCardImplementationModifiersForCorpRoot(
-    state,
-    "agenda_difficulty",
-  ).reduce((sum, active) => {
-    const modifier: CardAgendaDifficultyModifierImplementation =
-      active.modifier;
-    if (!isPublicRezzedCorpRootModifier(modifier)) return sum;
-    if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
-      return sum;
-    if (
-      modifier.appliesTo.sameServerAsSource &&
-      !sameCorpServerAsSource(state, active.sourceCardInstanceId, agendaId)
-    )
-      return sum;
-    if (
-      typeof modifier.amount !== "number" ||
-      !Number.isInteger(modifier.amount) ||
-      modifier.amount <= 0
-    )
-      return sum;
-    return (
-      sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
-    );
-  }, 0);
-  return scoredModifier + rootModifier;
-}
-
-function sameCorpServerAsSource(
-  state: GameState,
-  sourceCardInstanceId: CardInstanceId,
-  targetCardInstanceId: CardInstanceId,
-): boolean {
-  const sourceServerId = corpServerIdForInstalledCard(state, sourceCardInstanceId);
-  const targetServerId = corpServerIdForInstalledCard(state, targetCardInstanceId);
-  return Boolean(sourceServerId) && sourceServerId === targetServerId;
-}
-
 function serverDifficultyIncreaseFromFaitAccompli(
   state: GameState,
   agendaId: CardInstanceId,
@@ -15455,12 +15297,12 @@ function installedAgendaOperationTarget(
     .sort((left, right) => {
       const leftRemaining = Math.max(
         0,
-        effectiveAgendaDifficulty(state, left) -
+        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, left) -
           mustInstance(state.cardInstances, left).advancementCounters,
       );
       const rightRemaining = Math.max(
         0,
-        effectiveAgendaDifficulty(state, right) -
+        effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, right) -
           mustInstance(state.cardInstances, right).advancementCounters,
       );
       return rightRemaining - leftRemaining || left.localeCompare(right);
@@ -15602,7 +15444,11 @@ function scoreAgenda(
   if (definition.type !== "agenda")
     throw new Error("Nur Agendas koennen gescored werden.");
   const instanceBefore = mustInstance(state.cardInstances, cardId);
-  const requiredDifficulty = effectiveAgendaDifficulty(state, cardId);
+  const requiredDifficulty = effectiveAgendaDifficulty(
+    effectiveAgendaDifficultyDeps,
+    state,
+    cardId,
+  );
   if (instanceBefore.advancementCounters < requiredDifficulty)
     throw new Error("Agenda hat nicht genug Advancements.");
   removeFromAllZones(state, cardId);
@@ -23033,7 +22879,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
       ? {
           advancementRequirement:
             definition.type === "agenda"
-              ? effectiveAgendaDifficulty(state, id)
+              ? effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, id)
               : definition.advancementRequirement,
         }
       : {}),
