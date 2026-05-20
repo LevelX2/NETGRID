@@ -7304,7 +7304,7 @@ function RunTimelineOverlay({
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}
                   type="button"
-                  title={fullLabel}
+                  data-tooltip={fullLabel}
                   aria-label={fullLabel}
                   data-testid="run-action-button"
                   data-action-type={action.type}
@@ -7691,7 +7691,7 @@ function LegalActionsPanel({
         {primaryActions.map((action) => {
           const label = runAwareActionButtonLabel(view, action);
           return (
-            <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} title={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
+            <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
               <ActionLeadIcon action={action} />
               <span className="actionButtonLabel">{label}</span>
               <CostChips action={action} />
@@ -7709,7 +7709,7 @@ function LegalActionsPanel({
             {contextualActions.map((action) => {
               const label = runAwareActionButtonLabel(view, action);
               return (
-                <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} title={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
+                <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
                   <ActionLeadIcon action={action} />
                   <span className="actionButtonLabel">{label}</span>
                   <CostChips action={action} />
@@ -11968,7 +11968,7 @@ function CardActionsPopover({
         const fullLabel = actionLabelForAction(action);
         const label = compactCardActionMenuLabel(action, fullLabel);
         return (
-          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" title={fullLabel} aria-label={fullLabel} role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
+          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" data-tooltip={fullLabel} aria-label={fullLabel} role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
             <ActionLeadIcon action={action} size={14} />
             <span className="actionButtonLabel">{label}</span>
             <CostChips action={action} />

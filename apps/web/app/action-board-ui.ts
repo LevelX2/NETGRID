@@ -250,7 +250,7 @@ export function actionButtonLabel(action: LegalAction): string {
     case "draw_card":
       return "Karte ziehen";
     case "activated_card_ability":
-      return withActionCostPrefix(action, normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen"));
+      return normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen");
     case "jack_out":
       return "Run abbrechen (Jack-out)";
     case "decline_rez":
@@ -327,7 +327,7 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
-  return withActionCostPrefix(action, resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label));
+  return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
@@ -420,8 +420,7 @@ function shellTradersTargetTitle(action: LegalAction): string | null {
 
 function pumpBreakerActionLabel(action: LegalAction): string {
   const breakerName = breakerNameFromActionLabel(action.label, "pumpen") ?? breakerNameFromActionLabel(action.label, "stärke \\+1");
-  const label = breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
-  return withActionCostPrefix(action, label);
+  return breakerName ? `Stärke +1 (${normalizeVisibleTerms(breakerName)})` : "Stärke +1";
 }
 
 function breakSubroutineActionLabel(action: LegalAction): string {
@@ -429,19 +428,7 @@ function breakSubroutineActionLabel(action: LegalAction): string {
   const hasIndex = typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0;
   const base = hasIndex ? `Subroutine ${Math.floor(rawIndex) + 1} brechen` : "Subroutine brechen";
   const breakerName = breakerNameFromActionLabel(action.label, "subroutine \\d+ brechen") ?? breakerNameFromActionLabel(action.label, "subroutine brechen");
-  const label = breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
-  return withActionCostPrefix(action, label);
-}
-
-function withActionCostPrefix(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>, label: string): string {
-  const costLabel = actionCostText(action);
-  return costLabel ? `${costLabel} - ${label}` : label;
-}
-
-function actionCostText(action: Pick<LegalAction, "costs"> & Partial<Pick<LegalAction, "type" | "payload">>): string | null {
-  const chips = actionCostChips(action);
-  if (chips.length === 0) return null;
-  return chips.map((chip) => chip.label).join(" + ");
+  return breakerName ? `${base} (${normalizeVisibleTerms(breakerName)})` : base;
 }
 
 function breakerNameFromActionLabel(label: string | undefined, actionSuffixPattern: string): string | null {
@@ -800,17 +787,15 @@ export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction
 
 function compactRunWindowBreakerLabel(view: PlayerView, action: LegalAction): string {
   const breakerTitle = sourceCardTitleForAction(view, action);
-  const costPrefix = actionCostText(action);
-  const prefix = costPrefix ? `${costPrefix} - ` : "";
   if (action.type === "pump_breaker") {
-    return `${prefix}${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
+    return `${breakerTitle ? `${breakerTitle} ` : ""}+1 Stärke`;
   }
   const rawIndex = action.payload?.subroutineIndex;
   const subroutineLabel =
     typeof rawIndex === "number" && Number.isFinite(rawIndex) && rawIndex >= 0
       ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
       : "Subroutine brechen";
-  return `${prefix}${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
+  return `${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {

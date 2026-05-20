@@ -491,14 +491,18 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionConsumesClick({ costs: [] })).toBe(false);
   });
 
-  it("prefixes paid ability labels from LegalAction cost metadata", () => {
+  it("keeps paid ability costs in chips instead of duplicating them in labels", () => {
     const paidAbility: LegalAction = {
       ...legalAction("runner", "trigger_ability", "ability_1", "Bezahlte Fähigkeit ausführen", { cardId: "ability_1" }),
       costs: [{ clicks: 1 }, { credits: 2 }]
     };
 
-    expect(actionButtonLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
-    expect(contextualCardActionLabel(paidAbility)).toBe("1 Aktion + 2 Credits - Bezahlte Fähigkeit ausführen");
+    expect(actionButtonLabel(paidAbility)).toBe("Bezahlte Fähigkeit ausführen");
+    expect(contextualCardActionLabel(paidAbility)).toBe("Bezahlte Fähigkeit ausführen");
+    expect(actionCostChips(paidAbility)).toEqual([
+      { kind: "action", amount: 1, label: "1 Aktion" },
+      { kind: "credit", amount: 2, label: "2 Credits" }
+    ]);
   });
 
   it("maps campaign stored bit counters to the existing card credit badge pattern", () => {
@@ -690,10 +694,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(pump)).toBe("Stärke +1 (Simple Decoder)");
     expect(actionButtonLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
     expect(contextualCardActionLabel(breakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
-    expect(actionButtonLabel(paidBreakAction)).toBe("2 Credits - Subroutine 1 brechen (Simple Decoder)");
-    expect(contextualCardActionLabel(paidBreakAction)).toBe("2 Credits - Subroutine 1 brechen (Simple Decoder)");
-    expect(actionButtonLabel(paidPump)).toBe("1 Credit - Stärke +1 (Simple Decoder)");
-    expect(actionButtonLabel(multiCostBreakAction)).toBe("1 Aktion + 2 Credits - Subroutine 1 brechen (Simple Decoder)");
+    expect(actionButtonLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(contextualCardActionLabel(paidBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(actionButtonLabel(paidPump)).toBe("Stärke +1 (Simple Decoder)");
+    expect(actionButtonLabel(multiCostBreakAction)).toBe("Subroutine 1 brechen (Simple Decoder)");
+    expect(actionCostChips(multiCostBreakAction)).toEqual([
+      { kind: "action", amount: 1, label: "1 Aktion" },
+      { kind: "credit", amount: 2, label: "2 Credits" }
+    ]);
   });
 
   it("keeps Broker abilities on the installed resource overlay", () => {
@@ -850,7 +858,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(split.contextualActions).toEqual([searchInstall, pump, offRunAbility]);
     expect(mirrored).toEqual([searchInstall, pump, continueRun]);
     expect(runWindowActionButtonLabel(running, searchInstall)).toBe("SMC: Programm suchen");
-    expect(runWindowActionButtonLabel(running, pump)).toBe("1 Credit - Simple Decoder +1 Stärke");
+    expect(runWindowActionButtonLabel(running, pump)).toBe("Simple Decoder +1 Stärke");
     const breakAction = legalAction(
       "runner",
       "break_subroutine",
@@ -873,7 +881,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips(searchInstall)).toEqual([]);
   });
 
-  it("keeps long run-window breaker examples compact while preserving cost and effect", () => {
+  it("keeps long run-window breaker examples compact while leaving costs to chips", () => {
     const krash = card("krash_1", "Krash", "program");
     const running = view("runner", {
       own: {
@@ -895,9 +903,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     const label = runWindowActionButtonLabel(running, pump);
 
-    expect(label).toBe("2 Credits - Krash +1 Stärke");
+    expect(label).toBe("Krash +1 Stärke");
     expect(label).not.toContain("gegen Fire Wall");
     expect(label).not.toContain("(ICE 1)");
+    expect(actionCostChips(pump)).toEqual([{ kind: "credit", amount: 2, label: "2 Credits" }]);
   });
 
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {
@@ -929,7 +938,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const mirrored = runWindowActions(running, [startupTrash, continueRun, offRunAbility]);
 
     expect(mirrored).toEqual([startupTrash, continueRun]);
-    expect(runWindowActionButtonLabel(running, startupTrash)).toBe("3 Credits - Startup Immolator: ICE trashen");
+    expect(runWindowActionButtonLabel(running, startupTrash)).toBe("Startup Immolator: ICE trashen");
+    expect(actionCostChips(startupTrash)).toEqual([{ kind: "credit", amount: 3, label: "3 Credits" }]);
     expect(actionMatchesContext(startupTrash, { kind: "card", id: "startup_1", label: "Startup Immolator" })).toBe(true);
   });
 

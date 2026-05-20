@@ -3900,11 +3900,15 @@ select {
 .actions > .actionButton,
 .selectedActionGroup > .actionButton,
 .runActionButton {
+  position: relative;
+  height: auto;
+  min-height: 38px;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   justify-items: stretch;
   column-gap: 8px;
+  padding-block: 7px;
   overflow: hidden;
   flex-wrap: nowrap;
 }
@@ -3923,10 +3927,13 @@ select {
   grid-column: 2;
   justify-self: center;
   max-width: 100%;
+  display: -webkit-box;
   overflow: hidden;
   overflow-wrap: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
   word-break: normal;
 }
 
@@ -3939,6 +3946,93 @@ select {
   flex: 0 0 auto;
   flex-wrap: nowrap;
   margin-left: 0;
+}
+
+.actions > .actionButton[data-tooltip],
+.selectedActionGroup > .actionButton[data-tooltip],
+.runActionButton[data-tooltip],
+.cardActionButton[data-tooltip] {
+  overflow: visible;
+}
+
+.actions > .actionButton[data-tooltip]::before,
+.actions > .actionButton[data-tooltip]::after,
+.selectedActionGroup > .actionButton[data-tooltip]::before,
+.selectedActionGroup > .actionButton[data-tooltip]::after,
+.runActionButton[data-tooltip]::before,
+.runActionButton[data-tooltip]::after,
+.cardActionButton[data-tooltip]::before,
+.cardActionButton[data-tooltip]::after {
+  position: absolute;
+  left: 50%;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+.actions > .actionButton[data-tooltip]::before,
+.selectedActionGroup > .actionButton[data-tooltip]::before,
+.runActionButton[data-tooltip]::before,
+.cardActionButton[data-tooltip]::before {
+  content: "";
+  bottom: calc(100% + 3px);
+  z-index: 118;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 7px solid color-mix(in srgb, var(--runner), var(--panel) 38%);
+  filter: drop-shadow(0 2px 2px rgb(0 0 0 / 0.42));
+  transform: translateX(-50%) translateY(-3px);
+}
+
+.actions > .actionButton[data-tooltip]::after,
+.selectedActionGroup > .actionButton[data-tooltip]::after,
+.runActionButton[data-tooltip]::after,
+.cardActionButton[data-tooltip]::after {
+  content: attr(data-tooltip);
+  bottom: calc(100% + 10px);
+  z-index: 119;
+  width: max-content;
+  max-width: min(430px, calc(100vw - 28px));
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--runner), white 16%);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--panel), var(--runner) 13%), var(--tooltip-bg)),
+    var(--tooltip-bg);
+  color: color-mix(in srgb, var(--text), white 8%);
+  box-shadow:
+    0 16px 34px rgb(0 0 0 / 0.46),
+    inset 0 0 0 1px rgb(255 255 255 / 0.04);
+  font-size: 12.5px;
+  font-weight: 750;
+  line-height: 1.38;
+  text-align: left;
+  white-space: normal;
+  transform: translateX(-50%) translateY(-3px);
+}
+
+.actions > .actionButton[data-tooltip]:hover::before,
+.actions > .actionButton[data-tooltip]:hover::after,
+.actions > .actionButton[data-tooltip]:focus-visible::before,
+.actions > .actionButton[data-tooltip]:focus-visible::after,
+.selectedActionGroup > .actionButton[data-tooltip]:hover::before,
+.selectedActionGroup > .actionButton[data-tooltip]:hover::after,
+.selectedActionGroup > .actionButton[data-tooltip]:focus-visible::before,
+.selectedActionGroup > .actionButton[data-tooltip]:focus-visible::after,
+.runActionButton[data-tooltip]:hover::before,
+.runActionButton[data-tooltip]:hover::after,
+.runActionButton[data-tooltip]:focus-visible::before,
+.runActionButton[data-tooltip]:focus-visible::after,
+.cardActionButton[data-tooltip]:hover::before,
+.cardActionButton[data-tooltip]:hover::after,
+.cardActionButton[data-tooltip]:focus-visible::before,
+.cardActionButton[data-tooltip]:focus-visible::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }
 
 .selectedActionGroup {
@@ -5456,7 +5550,7 @@ select {
   border: 0;
   background: transparent;
   filter: drop-shadow(0 10px 16px rgb(0 0 0 / 0.34));
-  overflow-y: auto;
+  overflow: visible;
   transform-origin: top left;
   animation: cardActionPlateBelow 150ms cubic-bezier(0.2, 0.85, 0.24, 1);
 }
@@ -5500,13 +5594,16 @@ select {
   grid-row: 1;
   flex-basis: auto;
   max-width: 100%;
+  display: -webkit-box;
   font-size: 14px;
   font-weight: 700;
   line-height: 1.15;
   overflow: hidden;
   overflow-wrap: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
   word-break: normal;
 }
 
@@ -8446,10 +8543,13 @@ select,
 .runActionButton .actionButtonLabel {
   min-width: 0;
   max-width: 100%;
+  display: -webkit-box;
   overflow: hidden;
   overflow-wrap: normal;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
   word-break: normal;
   line-height: 1.25;
 }
