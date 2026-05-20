@@ -50,6 +50,18 @@ function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "run_duration_ice_strength") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Run-duration ICE-strength subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_future_strength_bonus",
+      amount,
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");

@@ -220,6 +220,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const traceStrength = numberValue(payload.traceStrength);
         const runnerStrength = numberValue(payload.runnerStrength);
         const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
+        const addedCounterAmount = numberValue(payload.addedCounterAmount) ?? 0;
+        const addedCounterLabel =
+          addedCounterAmount > 0 ? counterLabel(payload.counterType) : undefined;
         const hackerTrackerCountersAdded = numberValue(payload.hackerTrackerCountersAdded) ?? 0;
         const runnerRunLockCreditCost =
           numberValue(payload.runnerRunLockCreditCost) ??
@@ -232,7 +235,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         visibility = "public";
         title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
-        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
+        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${addedCounterAmount > 0 && addedCounterLabel ? `; Runner erhält ${addedCounterAmount} ${addedCounterLabel}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
@@ -241,6 +244,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           ...(traceStrength !== undefined && runnerStrength !== undefined ? [`${traceStrength}:${runnerStrength}`] : []),
           successful ? "Erfolg" : "Fehlschlag",
           ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
+          ...(addedCounterAmount > 0 && addedCounterLabel
+            ? [`+${addedCounterAmount} ${addedCounterLabel}`]
+            : []),
           ...(hardwareWreckerEffect ? [`Hardware -${trashedCount}`, `${damageAmount} Schaden`, "Run endet"] : []),
           ...(payload.runnerRunEnded === true || payload.fangRunEnded === true ? ["Run endet", `Run-Sperre ${runnerRunLockCreditCost ?? 2}`] : []),
           ...(hackerTrackerCountersAdded > 0 ? [`HTC +${hackerTrackerCountersAdded}`] : [])
@@ -485,6 +491,17 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `die Run-Sperre für ${creditText(paid)} entfernt`);
         chips.push("Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
+        break;
+      }
+      if (abilityId === "remove_runner_trace_counter") {
+        const removed = numberValue(payload.removedCounterAmount) ?? 1;
+        const remaining = numberValue(payload.remainingCounters) ?? 0;
+        const paid = numberValue(payload.counterRemoveCreditCost) ?? 0;
+        const counterText = counterLabel(payload.counterType);
+        category = "card";
+        importance = "important";
+        title = phrase(subject, `${removed} ${counterText} entfernt`);
+        chips.push(counterText, `-${removed}`, `${remaining} übrig`, `${paid} ${creditLabel(paid)}`);
         break;
       }
       if (isExposeServerCardPayload(payload) || payload.revealKind === "expose") {
@@ -1787,6 +1804,9 @@ function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
 }
 
 function counterLabel(counterType: unknown): string {
+  if (counterType === "data_raven") return "Data-Raven-Counter";
+  if (counterType === "cerberus") return "Cerberus-Counter";
+  if (counterType === "mastiff") return "Mastiff-Counter";
   if (counterType === "recurring_credit") return "Recurring Credits";
   if (counterType === "bit") return "Bit";
   return counterType === "virus" ? "Virus-Counter" : "Counter";

@@ -41,6 +41,7 @@ import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq
 import { aspImplementation } from "./onr-v1/corp/ice/asp";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
+import { cerberusImplementation } from "./onr-v1/corp/ice/cerberus";
 import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
 import { corticalScannerImplementation } from "./onr-v1/corp/ice/cortical-scanner";
 import { corticalScrubImplementation } from "./onr-v1/corp/ice/cortical-scrub";
@@ -50,6 +51,7 @@ import { dataDartsImplementation } from "./onr-v1/corp/ice/data-darts";
 import { dataWallTwoPointZeroImplementation } from "./onr-v1/corp/ice/data-wall-2-0";
 import { dataWallImplementation } from "./onr-v1/corp/ice/data-wall";
 import { dataNagaImplementation } from "./onr-v1/corp/ice/data-naga";
+import { dataRavenImplementation } from "./onr-v1/corp/ice/data-raven";
 import { endlessCorridorImplementation } from "./onr-v1/corp/ice/endless-corridor";
 import { fangTwoPointZeroImplementation } from "./onr-v1/corp/ice/fang-2-0";
 import { fangImplementation } from "./onr-v1/corp/ice/fang";
@@ -62,6 +64,7 @@ import { keeperImplementation } from "./onr-v1/corp/ice/keeper";
 import { laserWireImplementation } from "./onr-v1/corp/ice/laser-wire";
 import { licheImplementation } from "./onr-v1/corp/ice/liche";
 import { mazerImplementation } from "./onr-v1/corp/ice/mazer";
+import { mastiffImplementation } from "./onr-v1/corp/ice/mastiff";
 import { nerveLabyrinthImplementation } from "./onr-v1/corp/ice/nerve-labyrinth";
 import { neuralBladeImplementation } from "./onr-v1/corp/ice/neural-blade";
 import { quandaryImplementation } from "./onr-v1/corp/ice/quandary";
@@ -181,6 +184,7 @@ export const CARD_IMPLEMENTATIONS = [
   aspImplementation,
   banpeiImplementation,
   bolterClusterImplementation,
+  cerberusImplementation,
   codeCorpseImplementation,
   corticalScannerImplementation,
   corticalScrubImplementation,
@@ -190,6 +194,7 @@ export const CARD_IMPLEMENTATIONS = [
   dataWallImplementation,
   dataWallTwoPointZeroImplementation,
   dataNagaImplementation,
+  dataRavenImplementation,
   endlessCorridorImplementation,
   fangImplementation,
   fangTwoPointZeroImplementation,
@@ -201,6 +206,7 @@ export const CARD_IMPLEMENTATIONS = [
   keeperImplementation,
   laserWireImplementation,
   licheImplementation,
+  mastiffImplementation,
   mazerImplementation,
   nerveLabyrinthImplementation,
   neuralBladeImplementation,

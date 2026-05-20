@@ -7,6 +7,7 @@
  */
 import type {
   CardType,
+  CounterType,
   DamageType,
   EventVisibilityClass,
   Side,
@@ -134,6 +135,13 @@ export type CardTraceSuccessEffectImplementation =
   | {
       kind: "add_tags";
       recipient: "runner";
+      amount: number;
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "add_counter";
+      recipient: "runner";
+      counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;
       amount: number;
       visibility: EventVisibilityClass;
     }
@@ -386,6 +394,13 @@ export type CardPrintedSubroutineImplementation =
       breakTags?: readonly string[];
     }
   | {
+      kind: "run_duration_ice_strength";
+      amount: number;
+      text: string;
+      visibility: EventVisibilityClass;
+      breakTags?: readonly string[];
+    }
+  | {
       kind: "trace";
       baseTraceStrength: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];
@@ -393,3 +408,20 @@ export type CardPrintedSubroutineImplementation =
       visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     };
+
+export type RunnerTraceCounterEffectImplementation = {
+  counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;
+  removeCost: number;
+  startOfRunnerTurn?: {
+    kind: "add_tags";
+    amountPerCounter: number;
+    visibility: EventVisibilityClass;
+  };
+  runStart?: {
+    kind: "damage";
+    damageType: "net" | "brain";
+    amountPerCounter: number;
+    preventable: true;
+    visibility: EventVisibilityClass;
+  };
+};

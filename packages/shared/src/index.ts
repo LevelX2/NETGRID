@@ -138,6 +138,8 @@ export type CounterType =
   | "advancement"
   | "virus"
   | "cerberus"
+  | "data_raven"
+  | "mastiff"
   | "militech"
   | "power"
   | "agenda"
@@ -154,6 +156,12 @@ export type CounterType =
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
   | { type: "add_counter"; counterType: CounterType; amount: number }
+  | {
+      type: "add_tag_and_counter";
+      tagAmount: number;
+      counterType: CounterType;
+      amount: number;
+    }
   | { type: "end_run_and_run_lock"; amount: number }
   | { type: "end_run_trash_program_and_run_lock"; amount: number }
   | { type: "none" };
@@ -7049,15 +7057,19 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 5,
     rulesText:
-      "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and put a Data Raven counter on Data Raven. Each Data Raven counter gives Runner a tag at the start of each Runner turn.\n[Subroutine] End the run.",
+      "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
     subroutines: [
       {
         id: "onr_v1_236_data_raven_trace_counter",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: {
+          type: "add_tag_and_counter",
+          tagAmount: 1,
+          counterType: "data_raven",
+          amount: 1,
+        },
       },
-      onrEtr("onr_v1_236_data_raven_etr"),
     ],
     mechanics: [
       "trace",
@@ -8334,24 +8346,32 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 12,
     strength: 5,
     rulesText:
-      "Trace 5. If successful, give the Runner 1 tag. Do 1 core damage. End the run.",
+      "[Subroutine] Do 1 brain damage.\n[Subroutine] Do 1 Net damage.\n[Subroutine] For the remainder of the run, all ice is encountered at +1 strength.\n[Subroutine] Trace 5 - If trace is successful, give Runner a Mastiff counter.\n[Subroutine] End the run.",
     subroutines: [
+      onrCoreDamage("onr_v1_255_mastiff_core_damage", 1),
+      onrNetDamage("onr_v1_255_mastiff_net_damage", 1),
+      onrSetRunFutureStrengthBonus("onr_v1_255_mastiff_strength_bonus", 1),
       {
         id: "onr_v1_255_mastiff_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: {
+          type: "add_counter",
+          counterType: "mastiff",
+          amount: 1,
+        },
       },
-      onrCoreDamage("onr_v1_255_mastiff_core_damage", 1),
       onrEtr("onr_v1_255_mastiff_etr"),
     ],
     mechanics: [
       "trace",
       "link",
       "bid_amount",
-      "add_tag",
+      "persistent_counter",
       "damage",
       "core_damage",
+      "encounter_ice_strength_bonus",
+      "run_modifier",
       "end_the_run",
       "run_flow",
       ONR_V1_LOCAL_PRIVATE,

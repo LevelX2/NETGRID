@@ -14999,11 +14999,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     let state = toRunnerTurn(v196CardReleaseGame("v196-data-raven"));
     state.runner.credits = 20;
     state.corp.credits = 20;
-    const dataRavenId = putCorpIceOnServer(
-      state,
-      "rd",
-      "onr_v1_236_data-raven",
-    );
+    putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
 
     state = apply(
       state,
@@ -15030,7 +15026,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     expect(runnerBid).toBeDefined();
     state = applyChoice(state, "runner", String(runnerBid?.id));
 
-    expect(cardCounterAmount(state, dataRavenId, "power")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
     expect(state.runner.tags).toBe(1);
 
     state.activeSide = "corp";
@@ -15039,6 +15035,7 @@ describe("V1.9.6 Mechanikpaket O", () => {
     state.corp.clicks = 1;
     state = apply(state, "corp", (action) => action.type === "end_turn");
     expect(state.runner.tags).toBe(2);
+    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
   });
 });
 
@@ -21934,7 +21931,9 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     state = apply(
       state,
       "runner",
-      (action) => action.payload?.runnerAbility === "remove_cerberus_counter",
+      (action) =>
+        action.payload?.runnerAbility === "remove_runner_trace_counter" &&
+        action.payload?.counterType === "cerberus",
     );
     expect(cardCounterAmount(state, state.runner.identity, "cerberus")).toBe(0);
   });
@@ -30319,6 +30318,63 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     });
   });
 
+  it("applies Mastiff counters and run-duration ICE-strength from CardImplementation subroutines", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-mastiff-counter-strength"),
+    );
+    drawRunnerCardsForTest(state, 6);
+    putCorpIceOnServer(state, "rd", "onr_v1_227_cerberus");
+    putCorpIceOnServer(state, "rd", "onr_v1_255_mastiff");
+    state.corp.credits = 20;
+    state.runner.credits = 0;
+    const gripBefore = state.runner.grip.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_255_mastiff",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+
+    expect(state.runner.grip.length).toBe(gripBefore - 2);
+    expect(state.run?.futureEncounterIceStrengthBonus).toBe(1);
+    expect(state.trace).toMatchObject({
+      sourceDefinitionId: "onr_v1_255_mastiff",
+      baseTraceStrength: 5,
+      successEffect: {
+        type: "add_counter",
+        counterType: "mastiff",
+        amount: 1,
+      },
+    });
+
+    state = applyChoice(state, "corp", "bid_1");
+    state = applyChoice(state, "runner", "bid_0");
+    expect(cardCounterAmount(state, state.runner.identity, "mastiff")).toBe(1);
+
+    state.runner.clicks = 1;
+    state.runner.credits = 4;
+    state.phase = "runner_action_phase";
+    state.timingPoint = "runner_action.main";
+    state.activeSide = "runner";
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.payload?.runnerAbility === "remove_runner_trace_counter" &&
+        action.payload?.counterType === "mastiff",
+    );
+    expect(cardCounterAmount(state, state.runner.identity, "mastiff")).toBe(0);
+  });
+
   it("resolves CardImplementation printed Net-damage ICE subroutines without shared duplication", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -32125,23 +32181,15 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
   it("lets the Runner remove Data Raven counters for an action and 1 credit", () => {
     let state = toRunnerTurn(v196CardReleaseGame("spotcheck-data-raven-remove"));
     state.runner.credits = 5;
-    const dataRavenId = putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
-    state.cardInstances[dataRavenId] = {
-      ...state.cardInstances[dataRavenId]!,
-      faceup: true,
-      rezzed: true,
-    };
-    setCardCounterForTest(state, dataRavenId, "power", 2);
-    const runnerDataRaven = getPlayerView(state, "runner")
-      .servers.flatMap((server) => server.ice)
-      .find((card) => card.instanceId === dataRavenId);
-    expect(runnerDataRaven?.counters?.power).toBe(2);
+    putCorpIceOnServer(state, "rd", "onr_v1_236_data-raven");
+    setCardCounterForTest(state, state.runner.identity, "data_raven", 2);
     expect(
       getPlayerView(state, "runner").legalActions.some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.runnerAbility === "remove_data_raven_counter" &&
-          action.payload?.cardId === dataRavenId,
+          action.payload?.runnerAbility === "remove_runner_trace_counter" &&
+          action.payload?.counterType === "data_raven" &&
+          action.payload?.cardId === state.runner.identity,
       ),
     ).toBe(true);
     state = apply(
@@ -32149,13 +32197,15 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       "runner",
       (action) =>
         action.type === "trigger_ability" &&
-        action.payload?.runnerAbility === "remove_data_raven_counter",
+        action.payload?.runnerAbility === "remove_runner_trace_counter" &&
+        action.payload?.counterType === "data_raven",
     );
-    expect(cardCounterAmount(state, dataRavenId, "power")).toBe(1);
+    expect(cardCounterAmount(state, state.runner.identity, "data_raven")).toBe(1);
     expect(state.runner.credits).toBe(4);
     expect(state.runner.clicks).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerAbility: "remove_data_raven_counter",
+      runnerAbility: "remove_runner_trace_counter",
+      counterType: "data_raven",
       removedCounterAmount: 1,
       remainingCounters: 1,
     });

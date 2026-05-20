@@ -86,7 +86,10 @@ import {
 import { printedSubroutinesForCardImplementation } from "./ability-engine/printed-subroutine-implementations";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
-import { cardImplementationForDefinitionId } from "./card-implementations/registry";
+import {
+  CARD_IMPLEMENTATIONS,
+  cardImplementationForDefinitionId,
+} from "./card-implementations/registry";
 import {
   ACTION_ASSET_CARD_IDS,
   COUNTER_ASSET_CARD_IDS,
@@ -501,8 +504,6 @@ const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
-const CERBERUS_ID = "onr_v1_227_cerberus";
-const DATA_RAVEN_ID = "onr_v1_236_data-raven";
 const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 const CINDERELLA_ID = "onr_v1_228_cinderella";
 const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
@@ -3832,45 +3833,25 @@ function runnerMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (
-      cardCounter(state, state.runner.identity, "cerberus") > 0 &&
-      state.runner.credits >= 4
-    ) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "gain_credit",
-          "Cerberus-Counter entfernen",
-          state.runner.identity,
-          [{ clicks: 1, credits: 4 }],
-          {
-            runnerAbility: "remove_cerberus_counter",
-            cardId: state.runner.identity,
-            counterType: "cerberus",
-            removeCounterAmount: 1,
-            gainCreditsAmount: 0,
-          },
-        ),
-      );
-    }
-    for (const dataRavenId of rezzedInstalledIceIds(state).sort()) {
-      if (definitionFor(state, dataRavenId).id !== DATA_RAVEN_ID) continue;
-      if (cardCounter(state, dataRavenId, "power") <= 0) continue;
-      if (state.runner.credits < 1) continue;
+    for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+      if (cardCounter(state, state.runner.identity, counterEffect.counterType) <= 0)
+        continue;
+      if (state.runner.credits < counterEffect.removeCost) continue;
       actions.push(
         action(
           state,
           "runner",
           "trigger_ability",
-          "Data-Raven-Counter entfernen",
-          dataRavenId,
-          [{ clicks: 1, credits: 1 }],
+          `${runnerCounterDisplayName(counterEffect.counterType)} entfernen`,
+          state.runner.identity,
+          [{ clicks: 1, credits: counterEffect.removeCost }],
           {
-            cardId: dataRavenId,
-            runnerAbility: "remove_data_raven_counter",
-            counterType: "power",
+            cardId: state.runner.identity,
+            runnerAbility: "remove_runner_trace_counter",
+            sourceDefinitionId: counterEffect.sourceDefinitionId,
+            counterType: counterEffect.counterType,
             removeCounterAmount: 1,
+            counterRemoveCreditCost: counterEffect.removeCost,
           },
         ),
       );
@@ -7005,40 +6986,6 @@ function performAction(
         };
         return;
       }
-      if (legalAction.payload?.runnerAbility === "remove_cerberus_counter") {
-        if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf Cerberus-Counter entfernen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (sourceCardId !== state.runner.identity)
-          throw new Error(
-            "Cerberus-Counter liegen auf dem Runner-Identitaetsstatus.",
-          );
-        if (cardCounter(state, state.runner.identity, "cerberus") <= 0)
-          throw new Error("Es ist kein Cerberus-Counter vorhanden.");
-        const removeAmount = Number(
-          legalAction.payload?.removeCounterAmount ?? 0,
-        );
-        if (!Number.isInteger(removeAmount) || removeAmount !== 1)
-          throw new Error("Es wird genau 1 Cerberus-Counter entfernt.");
-        spendCredits(state, "runner", 4);
-        spendCardCounter(
-          state,
-          state.runner.identity,
-          "cerberus",
-          removeAmount,
-        );
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          removedCounterAmount: removeAmount,
-          remainingCounters: cardCounter(
-            state,
-            state.runner.identity,
-            "cerberus",
-          ),
-          runnerCreditsAfter: state.runner.credits,
-        };
-        return;
-      }
       if (resolveCorpInstalledEconomyAction(state, legalAction)) {
         return;
       }
@@ -8104,28 +8051,8 @@ function performAction(
         resolveShellTradersRemoveCounter(state, legalAction);
         return;
       }
-      if (legalAction.payload?.runnerAbility === "remove_data_raven_counter") {
-        if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf Data-Raven-Counter entfernen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedInstalledIceIds(state).includes(sourceCardId))
-          throw new Error("Data Raven ist nicht mehr rezzed installiert.");
-        if (definitionFor(state, sourceCardId).id !== DATA_RAVEN_ID)
-          throw new Error("Die Counter-Entfernung passt nicht zur Karte.");
-        const removeAmount = Number(
-          legalAction.payload?.removeCounterAmount ?? 0,
-        );
-        if (!Number.isInteger(removeAmount) || removeAmount !== 1)
-          throw new Error("Es wird genau 1 Data-Raven-Counter entfernt.");
-        spendClick(state, "runner");
-        spendCredits(state, "runner", 1);
-        spendCardCounter(state, sourceCardId, "power", removeAmount);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          removedCounterAmount: removeAmount,
-          remainingCounters: cardCounter(state, sourceCardId, "power"),
-          runnerCreditsAfter: state.runner.credits,
-        };
+      if (legalAction.payload?.runnerAbility === "remove_runner_trace_counter") {
+        resolveRemoveRunnerTraceCounter(state, legalAction);
         return;
       }
       if (
@@ -9520,7 +9447,7 @@ function startRun(
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
-  applyCerberusRunStartDamage(state, legalAction);
+  applyRunnerTraceCounterRunStartEffects(state, legalAction);
   if (state.winner) return;
   if (legalAction) {
     legalAction.payload = {
@@ -9552,30 +9479,115 @@ function startRun(
   }
 }
 
-function applyCerberusRunStartDamage(
+type RunnerTraceCounterEffectRuntime =
+  NonNullable<(typeof CARD_IMPLEMENTATIONS)[number]["runnerCounterEffects"]>[number] & {
+    sourceDefinitionId: CardDefinitionId;
+  };
+
+function runnerTraceCounterEffectDefinitions(): RunnerTraceCounterEffectRuntime[] {
+  return CARD_IMPLEMENTATIONS.flatMap((implementation) =>
+    (implementation.runnerCounterEffects ?? []).map((counterEffect) => ({
+      ...counterEffect,
+      sourceDefinitionId: implementation.cardDefinitionId,
+    })),
+  );
+}
+
+function runnerCounterDisplayName(counterType: CounterType): string {
+  if (counterType === "data_raven") return "Data-Raven-Counter";
+  if (counterType === "cerberus") return "Cerberus-Counter";
+  if (counterType === "mastiff") return "Mastiff-Counter";
+  return "Counter";
+}
+
+function traceCounterEffectDefinitionFor(
+  counterType: unknown,
+): RunnerTraceCounterEffectRuntime | undefined {
+  return runnerTraceCounterEffectDefinitions().find(
+    (effect) => effect.counterType === counterType,
+  );
+}
+
+function resolveRemoveRunnerTraceCounter(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Runner-Trace-Counter entfernen.");
+  if (legalAction.payload?.cardId !== state.runner.identity)
+    throw new Error("Trace-Counter liegen auf der Runner-Identitaet.");
+  const counterType = legalAction.payload?.counterType;
+  const counterEffect = traceCounterEffectDefinitionFor(counterType);
+  if (!counterEffect)
+    throw new Error("Dieser Runner-Trace-Counter ist nicht entfernbar.");
+  const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
+  if (!Number.isInteger(removeAmount) || removeAmount !== 1)
+    throw new Error("Es kann genau ein Runner-Trace-Counter entfernt werden.");
+  const cost = Number(legalAction.payload?.counterRemoveCreditCost ?? 0);
+  if (!Number.isInteger(cost) || cost !== counterEffect.removeCost)
+    throw new Error("Der Counter verlangt den aktuellen Entfernen-Betrag.");
+  if (cardCounter(state, state.runner.identity, counterEffect.counterType) < 1)
+    throw new Error("Es ist kein passender Counter vorhanden.");
+  spendClick(state, "runner");
+  spendCredits(state, "runner", counterEffect.removeCost);
+  spendCardCounter(state, state.runner.identity, counterEffect.counterType, 1);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: counterEffect.sourceDefinitionId,
+    counterType: counterEffect.counterType,
+    removedCounterAmount: 1,
+    remainingCounters: cardCounter(
+      state,
+      state.runner.identity,
+      counterEffect.counterType,
+    ),
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function applyRunnerTraceCounterRunStartEffects(
   state: GameState,
   legalAction?: LegalAction,
 ): void {
-  const counterCount = cardCounter(state, state.runner.identity, "cerberus");
-  if (counterCount <= 0) return;
-  const damageAmount = counterCount * 2;
-  const summary = doDamage(state, {
-    damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.cerberus_counter_start_damage`,
-    damageType: "net",
-    amount: damageAmount,
-    source: `counter:${CERBERUS_ID}`,
-  });
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      sourceDefinitionId: CERBERUS_ID,
-      cerberusCounterCount: counterCount,
-      damageResolved: true,
-      damageType: summary.damageType,
-      damageAmount: summary.amount,
-      cardsTrashed: summary.cardsTrashed,
-      flatline: summary.flatline,
-    };
+  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+    if (!counterEffect.runStart) continue;
+    const counterCount = cardCounter(
+      state,
+      state.runner.identity,
+      counterEffect.counterType,
+    );
+    if (counterCount <= 0) continue;
+    const damageAmount =
+      counterCount * counterEffect.runStart.amountPerCounter;
+    const damageType =
+      counterEffect.runStart.damageType === "brain" ? "core" : "net";
+    const summary = doDamage(state, {
+      damageId: `${state.run?.runId ?? `run_${state.stateVersion + 1}`}.${counterEffect.counterType}_counter_start_damage`,
+      damageType,
+      amount: damageAmount,
+      source: `counter:${counterEffect.sourceDefinitionId}`,
+    });
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        sourceDefinitionId: counterEffect.sourceDefinitionId,
+        counterType: counterEffect.counterType,
+        counterCount,
+        [`${counterEffect.counterType}CounterCount`]: counterCount,
+        damageResolved: true,
+        damageType: summary.damageType,
+        damageAmount: summary.amount,
+        cardsTrashed: summary.cardsTrashed,
+        flatline: summary.flatline,
+        ...(summary.coreDamageAfter !== undefined
+          ? {
+              coreDamageAfter: summary.coreDamageAfter,
+              runnerMaxHandSizeAfter: summary.runnerMaxHandSizeAfter,
+            }
+          : {}),
+      };
+    }
+    if (state.winner) return;
   }
 }
 
@@ -13569,21 +13581,22 @@ function applyRunnerStartOfTurnEffects(
   effects?: AutomaticEffectCollector,
 ): void {
   const flags = ensureRunnerTurnFlags(state);
-  const dataRavenCounters = Object.entries(state.cardInstances).reduce(
-    (sum, [cardId, instance]) => {
-      return definitionFor(state, cardId).id === DATA_RAVEN_ID
-        ? sum + (instance.counters?.power ?? 0)
-        : sum;
-    },
-    0,
-  );
-  if (dataRavenCounters > 0) {
-    state.runner.tags += dataRavenCounters;
+  for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+    if (!counterEffect.startOfRunnerTurn) continue;
+    const counterCount = cardCounter(
+      state,
+      state.runner.identity,
+      counterEffect.counterType,
+    );
+    if (counterCount <= 0) continue;
+    const tagsAdded =
+      counterCount * counterEffect.startOfRunnerTurn.amountPerCounter;
+    state.runner.tags += tagsAdded;
     effects?.push(
       automaticTagEffect(
-        "runner.start.data_raven",
-        dataRavenCounters,
-        DATA_RAVEN_ID,
+        `runner.start.${counterEffect.counterType}`,
+        tagsAdded,
+        counterEffect.sourceDefinitionId,
       ),
     );
   }
@@ -20236,17 +20249,22 @@ function resolveTraceRunnerBid(
   }
   const successful = traceStrength > runnerStrength;
   const tagsAdded =
-    successful && trace.successEffect.type === "add_tag"
+    successful && trace.successEffect.type === "add_tag_and_counter"
+      ? trace.successEffect.tagAmount
+      : successful && trace.successEffect.type === "add_tag"
       ? trace.successEffect.amount
       : 0;
-  let dataRavenCounterAdded = 0;
   const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
   let traceCounterPayload: Record<string, string | number> = {};
-  if (successful && trace.successEffect.type === "add_counter") {
+  if (
+    successful &&
+    (trace.successEffect.type === "add_counter" ||
+      trace.successEffect.type === "add_tag_and_counter")
+  ) {
     addCardCounter(
       state,
       state.runner.identity,
@@ -20262,10 +20280,6 @@ function resolveTraceRunnerBid(
         trace.successEffect.counterType,
       ),
     };
-  }
-  if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
-    addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
-    dataRavenCounterAdded = 1;
   }
   if (
     successful &&
@@ -20340,7 +20354,6 @@ function resolveTraceRunnerBid(
     traceSuccessful: successful,
     tagsAdded,
     ...traceCounterPayload,
-    ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
     ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
     ...(runnerRunEnded
       ? {
@@ -20497,17 +20510,22 @@ function completeTraceAfterPostBidLink(
   const runnerStrength = trace.runnerStrength ?? runnerLink + runnerBid;
   const successful = traceStrength > runnerStrength;
   const tagsAdded =
-    successful && trace.successEffect.type === "add_tag"
+    successful && trace.successEffect.type === "add_tag_and_counter"
+      ? trace.successEffect.tagAmount
+      : successful && trace.successEffect.type === "add_tag"
       ? trace.successEffect.amount
       : 0;
-  let dataRavenCounterAdded = 0;
   const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
   let runnerRunLockCreditCost = 0;
   let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
   let traceCounterPayload: Record<string, string | number> = {};
-  if (successful && trace.successEffect.type === "add_counter") {
+  if (
+    successful &&
+    (trace.successEffect.type === "add_counter" ||
+      trace.successEffect.type === "add_tag_and_counter")
+  ) {
     addCardCounter(
       state,
       state.runner.identity,
@@ -20523,10 +20541,6 @@ function completeTraceAfterPostBidLink(
         trace.successEffect.counterType,
       ),
     };
-  }
-  if (successful && trace.sourceDefinitionId === DATA_RAVEN_ID) {
-    addCardCounter(state, trace.sourceCardInstanceId, "power", 1);
-    dataRavenCounterAdded = 1;
   }
   if (
     successful &&
@@ -20590,7 +20604,6 @@ function completeTraceAfterPostBidLink(
     traceSuccessful: successful,
     tagsAdded,
     ...traceCounterPayload,
-    ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
     ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
     ...(runnerRunEnded
       ? {
@@ -20610,7 +20623,16 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
     return (
       Number.isInteger(effect.amount) &&
       effect.amount >= 0 &&
-      effect.counterType === "cerberus"
+      traceCounterEffectDefinitionFor(effect.counterType) !== undefined
+    );
+  }
+  if (effect.type === "add_tag_and_counter") {
+    return (
+      Number.isInteger(effect.tagAmount) &&
+      effect.tagAmount >= 0 &&
+      Number.isInteger(effect.amount) &&
+      effect.amount >= 0 &&
+      traceCounterEffectDefinitionFor(effect.counterType) !== undefined
     );
   }
   if (

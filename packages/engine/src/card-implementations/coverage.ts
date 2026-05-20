@@ -47,6 +47,9 @@ const IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION =
 const IMPLEMENTED_PRINTED_SUBROUTINE_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/corp/ice";
 
+const IMPLEMENTED_RUNNER_COUNTER_EFFECT_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/corp/ice";
+
 const IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -129,6 +132,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
   "onr_v1_224_bolter-cluster":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
+  "onr_v1_227_cerberus":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/cerberus.ts",
   "onr_v1_229_code-corpse":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/code-corpse.ts",
   "onr_v1_230_cortical-scanner":
@@ -143,6 +148,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-darts.ts",
   "onr_v1_235_data-naga":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-naga.ts",
+  "onr_v1_236_data-raven":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/data-raven.ts",
   "onr_v1_237_data-wall":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall.ts",
   "onr_v1_238_data-wall-2-0":
@@ -169,6 +176,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/laser-wire.ts",
   "onr_v1_254_liche":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/liche.ts",
+  "onr_v1_255_mastiff":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/mastiff.ts",
   "onr_v1_256_mazer":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/mazer.ts",
   "onr_v1_257_nerve-labyrinth":
@@ -372,6 +381,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for printed ICE subroutine behavior.",
     );
     currentLocations.add(IMPLEMENTED_PRINTED_SUBROUTINE_LOCATION);
+  }
+  if (implementation.runnerCounterEffects?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Runner trace-counter lifecycle and removal behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_RUNNER_COUNTER_EFFECT_LOCATION);
   }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(

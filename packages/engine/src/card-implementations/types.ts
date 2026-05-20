@@ -4,6 +4,7 @@ import type {
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  RunnerTraceCounterEffectImplementation,
 } from "../ability-engine/definition-types";
 
 export type CardImplementationDefinition = {
@@ -12,4 +13,5 @@ export type CardImplementationDefinition = {
   modifiers?: CardModifierImplementation[];
   abilities?: CardAbilityImplementation[];
   lifecycle?: CardLifecycleImplementation;
+  runnerCounterEffects?: readonly RunnerTraceCounterEffectImplementation[];
 };
