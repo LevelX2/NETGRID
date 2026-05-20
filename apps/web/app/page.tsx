@@ -176,7 +176,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -338,7 +338,6 @@ type SeriesResultSummary = ApiSeriesResultSummary;
 type GameResultSummary = ApiGameResultSummary;
 type LifecycleResultSummary = ApiLifecycleResultSummary;
 type ClientPayload = ApiSidePayload;
-const SERIES_WIN_MATCH_POINTS = 10;
 type LocalMatchClockAnchor = {
   matchId: string;
   matchStartedAtMs: number;
@@ -5872,7 +5871,7 @@ function GameOverModal({
         ? "Korp gewinnt."
         : "Das Spiel endet unentschieden.";
   const seriesText = result.series ? seriesStatusText(result.series) : null;
-  const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
+  const gameStanding = gameStandingForResult(result, side);
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
   const retentionUi = retentionProtectionUi(retentionProtected);
@@ -5984,43 +5983,6 @@ function ResultWinnerMotif({ motif }: { motif: ResultWinnerMotifKind }) {
       <span>{motifUi.caption}</span>
     </div>
   );
-}
-
-function gameStandingForResult(result: GameResultSummary, viewerSide: Side): { summary: string; viewerMatchPoints: number; opponentMatchPoints: number } {
-  const opponentSide = oppositeSide(viewerSide);
-  if (result.winner === "draw") {
-    return {
-      summary: "Draw: beide Seiten erhalten ihre Agenda-Punkte.",
-      viewerMatchPoints: agendaPointsForResultSide(result, viewerSide),
-      opponentMatchPoints: agendaPointsForResultSide(result, opponentSide)
-    };
-  }
-
-  const winnerSide = result.winner;
-  const loserSide = oppositeSide(winnerSide);
-  const loserAgendaPoints = agendaPointsForResultSide(result, loserSide);
-  const winnerLabel = winnerSide === viewerSide ? "Du" : "Gegenseite";
-  const loserLabel = loserSide === viewerSide ? "Du" : "Gegenseite";
-  const viewerMatchPoints = winnerSide === viewerSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, viewerSide);
-  const opponentMatchPoints = winnerSide === opponentSide ? SERIES_WIN_MATCH_POINTS : agendaPointsForResultSide(result, opponentSide);
-
-  return {
-    summary: `${winnerLabel}: ${SERIES_WIN_MATCH_POINTS} Matchpunkte. ${loserLabel}: ${loserAgendaPoints} Agenda-Punkte aus ${agendaPointSourceLabel(loserSide)} Agendas.`,
-    viewerMatchPoints,
-    opponentMatchPoints
-  };
-}
-
-function agendaPointsForResultSide(result: GameResultSummary, side: Side): number {
-  return side === "runner" ? result.runnerAgendaPoints : result.corpAgendaPoints;
-}
-
-function agendaPointSourceLabel(side: Side): string {
-  return side === "runner" ? "gestohlenen" : "gescorten";
-}
-
-function oppositeSide(side: Side): Side {
-  return side === "runner" ? "corp" : "runner";
 }
 
 function ConfirmationDialog({
