@@ -8715,6 +8715,37 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("registers P3.26 program-trash ICE printed subroutines as implemented", () => {
+    const p326IceCases = [
+      "onr_v1_223_banpei",
+      "onr_v1_233_d-arc-knight",
+      "onr_v1_235_data-naga",
+      "onr_v1_250_ice-pick-willie",
+      "onr_v1_267_sentinels-prime",
+      "onr_v1_273_triggerman",
+    ] as const;
+
+    for (const definitionId of p326IceCases) {
+      const implementation = cardImplementationForDefinitionId(definitionId);
+      expect(implementation?.printedSubroutines, definitionId).toEqual([
+        expect.objectContaining({
+          kind: "trash_program",
+          text: "*Trash a program.",
+          visibility: "public",
+        }),
+        expect.objectContaining({
+          kind: "end_the_run",
+          text: "*End the run.",
+          visibility: "public",
+        }),
+      ]);
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("executes typed gain_credits card effects", () => {
     const state = createGameAfterSetup({ seed: "card-effect-gain-credits" });
     state.runner.credits = 5;
@@ -13219,6 +13250,224 @@ describe("V1.9.0 Mechanikpaket I", () => {
       (action) => action.type === "continue_run",
     );
     expect(withoutProgram.run).toBeUndefined();
+  });
+
+  it("resolves CardImplementation printed program-trash ICE without shared duplication", () => {
+    const setupTrashProgramIce = (
+      seed: string,
+      definitionId: "onr_v1_223_banpei" | "onr_v1_235_data-naga",
+      options: {
+        serverId?: "rd" | "remote_1";
+        crystal?: boolean;
+        tesseract?: boolean;
+      } = {},
+    ): GameState => {
+      const serverId = options.serverId ?? "rd";
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          runnerDeck: {
+            ...ONR_V1_RUNNER_DECK,
+            cards: [
+              { id: "simple_killer", quantity: 2 },
+              ...ONR_V1_RUNNER_DECK.cards.filter(
+                (card) => card.id !== "simple_killer",
+              ),
+            ],
+          },
+          corpDeck: {
+            ...ONR_V1_CORP_DECK,
+            cards: [
+              { id: definitionId, quantity: 1 },
+              ...(options.crystal
+                ? [
+                    {
+                      id: "onr_v1_355_crystal-palace-station-grid",
+                      quantity: 1,
+                    },
+                  ]
+                : []),
+              ...(options.tesseract
+                ? [
+                    {
+                      id: "onr_v1_370_tesseract-fort-construction",
+                      quantity: 1,
+                    },
+                  ]
+                : []),
+              ...ONR_V1_CORP_DECK.cards.filter(
+                (card) =>
+                  card.id !== definitionId &&
+                  card.id !== "onr_v1_355_crystal-palace-station-grid" &&
+                  card.id !== "onr_v1_370_tesseract-fort-construction",
+              ),
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 50;
+      state.corp.credits = 50;
+      if (options.crystal) {
+        const crystalId = putCorpRootInRemote(
+          state,
+          "onr_v1_355_crystal-palace-station-grid",
+        );
+        state.cardInstances[crystalId] = {
+          ...state.cardInstances[crystalId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      }
+      if (options.tesseract) {
+        const tesseractId = putCorpRootInRemote(
+          state,
+          "onr_v1_370_tesseract-fort-construction",
+        );
+        state.cardInstances[tesseractId] = {
+          ...state.cardInstances[tesseractId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      }
+      putCorpIceOnServer(state, serverId, definitionId);
+      return encounterIce(state, serverId, definitionId);
+    };
+
+    let unbroken = setupTrashProgramIce(
+      "p326-banpei-unbroken",
+      "onr_v1_223_banpei",
+    );
+    const killerId = installRunnerProgramForTest(unbroken, "simple_killer");
+    const continueAction = mustAction(
+      unbroken,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 2,
+      encounterSubroutineIds:
+        "card_implementation.onr_v1_223_banpei.printed_subroutine.1.trash_program,card_implementation.onr_v1_223_banpei.printed_subroutine.2.end_the_run",
+      encounterWillEndRun: true,
+    });
+    unbroken = apply(
+      unbroken,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(unbroken.runner.heap).toContain(killerId);
+    expect(unbroken.run).toBeUndefined();
+    expect(unbroken.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      sourceDefinitionId: "onr_v1_223_banpei",
+      trashedCardDefinitionId: "simple_killer",
+      trashedCardType: "program",
+      trashedCount: 1,
+      resolvedEffects: [
+        {
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 1,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+
+    let brokenTrash = setupTrashProgramIce(
+      "p326-banpei-break-trash",
+      "onr_v1_223_banpei",
+    );
+    const protectedKillerId = installRunnerProgramForTest(
+      brokenTrash,
+      "simple_killer",
+    );
+    brokenTrash = breakCurrentSubroutine(brokenTrash, "simple_killer", 0);
+    brokenTrash = apply(
+      brokenTrash,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(brokenTrash.runner.heap).not.toContain(protectedKillerId);
+    expect(brokenTrash.run).toBeUndefined();
+
+    let bothBroken = setupTrashProgramIce(
+      "p326-banpei-break-both",
+      "onr_v1_223_banpei",
+    );
+    const survivingKillerId = installRunnerProgramForTest(
+      bothBroken,
+      "simple_killer",
+    );
+    bothBroken = breakCurrentSubroutine(bothBroken, "simple_killer", 0);
+    bothBroken = breakCurrentSubroutine(bothBroken, "simple_killer", 1);
+    bothBroken = continueRunThroughMovementWindow(bothBroken);
+    expect(bothBroken.runner.heap).not.toContain(survivingKillerId);
+    expect(bothBroken.run?.phase).toBe("access");
+
+    let withoutProgram = setupTrashProgramIce(
+      "p326-banpei-no-program",
+      "onr_v1_223_banpei",
+    );
+    withoutProgram = apply(
+      withoutProgram,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(withoutProgram.run).toBeUndefined();
+    expect(withoutProgram.runner.heap).toHaveLength(0);
+
+    let dataNaga = setupTrashProgramIce(
+      "p326-data-naga-program-trash",
+      "onr_v1_235_data-naga",
+    );
+    const dataNagaKillerId = installRunnerProgramForTest(dataNaga, "simple_killer");
+    dataNaga = apply(dataNaga, "runner", (action) => action.type === "continue_run");
+    expect(dataNaga.runner.heap).toContain(dataNagaKillerId);
+    expect(dataNaga.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_235_data-naga",
+      trashedCardDefinitionId: "simple_killer",
+      trashedCardType: "program",
+      trashedCount: 1,
+    });
+
+    let crystal = setupTrashProgramIce(
+      "p326-crystal-break-trash-program",
+      "onr_v1_223_banpei",
+      { serverId: "remote_1", crystal: true },
+    );
+    installRunnerProgramForTest(crystal, "simple_killer");
+    const crystalBreaks = getLegalActions(crystal, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(crystal, action) === "simple_killer",
+    );
+    expect(crystalBreaks.map((action) => action.payload?.subroutineIndex)).toEqual([
+      0,
+      1,
+    ]);
+    expect(crystalBreaks.map((action) => action.costs)).toEqual([
+      [{ credits: 2 }],
+      [{ credits: 2 }],
+    ]);
+
+    let tesseract = setupTrashProgramIce(
+      "p326-tesseract-after-trash-program",
+      "onr_v1_223_banpei",
+      { serverId: "remote_1", tesseract: true },
+    );
+    installRunnerProgramForTest(tesseract, "simple_killer");
+    const tesseractContinue = mustAction(
+      tesseract,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(tesseractContinue.payload).toMatchObject({
+      unbrokenSubroutineCount: 3,
+      encounterSubroutineIds:
+        "card_implementation.onr_v1_223_banpei.printed_subroutine.1.trash_program,card_implementation.onr_v1_223_banpei.printed_subroutine.2.end_the_run,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+    });
   });
 
   it("rewinds runs with Vacuum Link on 1..3 and preserves legal jack-out window with first-ice edge handling", () => {

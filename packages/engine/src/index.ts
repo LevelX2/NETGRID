@@ -503,7 +503,6 @@ const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
 const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
-const BANPEI_ID = "onr_v1_223_banpei";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const DUPRE_ID = "onr_v1_020_dupre";
 const PATTELS_VIRUS_ID = "onr_v1_046_pattels-virus";
@@ -10334,23 +10333,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       if (state.winner) return;
     }
     if (subroutine.type === "trash_installed_program") {
-      if (definition.id === BANPEI_ID) {
-        resolveBanpeiProgramTrashSubroutine(state, legalAction);
-      } else {
-        const targetProgramId = pickRunnerProgramForUninstall(state);
-        if (targetProgramId) {
-          const targetDefinitionId = definitionFor(state, targetProgramId).id;
-          trashRunnerInstalledProgram(state, targetProgramId);
-          if (legalAction) {
-            legalAction.payload = {
-              ...(legalAction.payload ?? {}),
-              trashedCardDefinitionId: targetDefinitionId,
-              trashedCardType: "program",
-              trashedCount: 1,
-            };
-          }
-        }
-      }
+      resolveTrashInstalledProgramSubroutine(state, legalAction);
     }
     if (subroutine.type === "set_run_encounter_tax") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
@@ -12518,25 +12501,18 @@ function pickRunnerProgramForUninstall(
   })[0];
 }
 
-function resolveBanpeiProgramTrashSubroutine(
+function resolveTrashInstalledProgramSubroutine(
   state: GameState,
   legalAction?: LegalAction,
 ): void {
   const targetProgramId = pickRunnerProgramForUninstall(state);
-  if (!targetProgramId) {
-    if (legalAction)
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        banpeiProgramTrashed: false,
-      };
-    return;
-  }
+  if (!targetProgramId) return;
+  const targetDefinitionId = definitionFor(state, targetProgramId).id;
   trashRunnerInstalledProgram(state, targetProgramId);
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      banpeiProgramTrashed: true,
-      trashedCardDefinitionId: definitionFor(state, targetProgramId).id,
+      trashedCardDefinitionId: targetDefinitionId,
       trashedCardType: "program",
       trashedCount: 1,
     };

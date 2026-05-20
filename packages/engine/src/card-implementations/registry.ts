@@ -35,14 +35,18 @@ import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-p
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
+import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
 import { corticalScannerImplementation } from "./onr-v1/corp/ice/cortical-scanner";
 import { corticalScrubImplementation } from "./onr-v1/corp/ice/cortical-scrub";
 import { crystalWallImplementation } from "./onr-v1/corp/ice/crystal-wall";
+import { dArcKnightImplementation } from "./onr-v1/corp/ice/d-arc-knight";
 import { dataWallTwoPointZeroImplementation } from "./onr-v1/corp/ice/data-wall-2-0";
 import { dataWallImplementation } from "./onr-v1/corp/ice/data-wall";
+import { dataNagaImplementation } from "./onr-v1/corp/ice/data-naga";
 import { endlessCorridorImplementation } from "./onr-v1/corp/ice/endless-corridor";
 import { filterImplementation } from "./onr-v1/corp/ice/filter";
+import { icePickWillieImplementation } from "./onr-v1/corp/ice/ice-pick-willie";
 import { keeperImplementation } from "./onr-v1/corp/ice/keeper";
 import { laserWireImplementation } from "./onr-v1/corp/ice/laser-wire";
 import { licheImplementation } from "./onr-v1/corp/ice/liche";
@@ -53,8 +57,10 @@ import { razorWireImplementation } from "./onr-v1/corp/ice/razor-wire";
 import { reinforcedWallImplementation } from "./onr-v1/corp/ice/reinforced-wall";
 import { rockIsStrongImplementation } from "./onr-v1/corp/ice/rock-is-strong";
 import { scrambleImplementation } from "./onr-v1/corp/ice/scramble";
+import { sentinelsPrimeImplementation } from "./onr-v1/corp/ice/sentinels-prime";
 import { shotgunWireImplementation } from "./onr-v1/corp/ice/shotgun-wire";
 import { sleeperImplementation } from "./onr-v1/corp/ice/sleeper";
+import { triggermanImplementation } from "./onr-v1/corp/ice/triggerman";
 import { wallOfIceImplementation } from "./onr-v1/corp/ice/wall-of-ice";
 import { wallOfStaticImplementation } from "./onr-v1/corp/ice/wall-of-static";
 import { zombieImplementation } from "./onr-v1/corp/ice/zombie";
@@ -151,14 +157,18 @@ export const CARD_IMPLEMENTATIONS = [
   rustbeltHqBranchImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
+  banpeiImplementation,
   codeCorpseImplementation,
   corticalScannerImplementation,
   corticalScrubImplementation,
   crystalWallImplementation,
+  dArcKnightImplementation,
   dataWallImplementation,
   dataWallTwoPointZeroImplementation,
+  dataNagaImplementation,
   endlessCorridorImplementation,
   filterImplementation,
+  icePickWillieImplementation,
   keeperImplementation,
   laserWireImplementation,
   licheImplementation,
@@ -169,8 +179,10 @@ export const CARD_IMPLEMENTATIONS = [
   reinforcedWallImplementation,
   rockIsStrongImplementation,
   scrambleImplementation,
+  sentinelsPrimeImplementation,
   shotgunWireImplementation,
   sleeperImplementation,
+  triggermanImplementation,
   wallOfIceImplementation,
   wallOfStaticImplementation,
   zombieImplementation,

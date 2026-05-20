@@ -29,6 +29,12 @@ function printedSubroutineDefinitionForImplementation(
       type: "end_the_run",
     };
   }
+  if (subroutine.kind === "trash_program") {
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "trash_installed_program",
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");

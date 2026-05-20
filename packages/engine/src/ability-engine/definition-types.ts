@@ -329,6 +329,11 @@ export type CardPrintedSubroutineImplementation =
       visibility: EventVisibilityClass;
     }
   | {
+      kind: "trash_program";
+      text: "*Trash a program.";
+      visibility: EventVisibilityClass;
+    }
+  | {
       kind: "damage";
       damageType: "net" | "brain";
       amount: number;

@@ -119,6 +119,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
   "onr_v1_218_subsidiary-branch":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
+  "onr_v1_223_banpei":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
   "onr_v1_229_code-corpse":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/code-corpse.ts",
   "onr_v1_230_cortical-scanner":
@@ -127,6 +129,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/cortical-scrub.ts",
   "onr_v1_232_crystal-wall":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/crystal-wall.ts",
+  "onr_v1_233_d-arc-knight":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/d-arc-knight.ts",
+  "onr_v1_235_data-naga":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/data-naga.ts",
   "onr_v1_237_data-wall":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall.ts",
   "onr_v1_238_data-wall-2-0":
@@ -135,6 +141,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/endless-corridor.ts",
   "onr_v1_244_filter":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/filter.ts",
+  "onr_v1_250_ice-pick-willie":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/ice-pick-willie.ts",
   "onr_v1_252_keeper":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/keeper.ts",
   "onr_v1_253_laser-wire":
@@ -155,10 +163,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/rock-is-strong.ts",
   "onr_v1_266_scramble":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/scramble.ts",
+  "onr_v1_267_sentinels-prime":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/sentinels-prime.ts",
   "onr_v1_269_shotgun-wire":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/shotgun-wire.ts",
   "onr_v1_270_sleeper":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/sleeper.ts",
+  "onr_v1_273_triggerman":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/triggerman.ts",
   "onr_v1_278_wall-of-ice":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/wall-of-ice.ts",
   "onr_v1_279_wall-of-static":
