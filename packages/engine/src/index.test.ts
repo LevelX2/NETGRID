@@ -30161,17 +30161,14 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.corp.credits = 10;
     state.runner.tags = 1;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const crystalId = putCorpRootInRemote(
-      state,
-      "onr_v1_355_crystal-palace-station-grid",
-    );
+    const drDreffId = putCorpRootInRemote(state, "onr_v1_358_dr-dreff");
     const omniId = putCorpRootInRemote(state, "onr_v1_364_omni-kismet-ph-d");
     const galvestonId = putCorpRootInRemote(
       state,
       "onr_v1_362_new-galveston-city-grid",
     );
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
-    for (const upgradeId of [crystalId, omniId, galvestonId]) {
+    for (const upgradeId of [drDreffId, omniId, galvestonId]) {
       state.cardInstances[upgradeId] = {
         ...state.cardInstances[upgradeId]!,
         faceup: true,
@@ -30188,7 +30185,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
         action.type === "gain_credit" &&
         action.payload?.v1918UpgradeAbility === "add_power_counter",
     );
-    expect(cardCounterAmount(state, crystalId, "power")).toBe(1);
+    expect(cardCounterAmount(state, drDreffId, "power")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "gain_credit",
       v1918UpgradeAbility: "add_power_counter",
@@ -30226,51 +30223,359 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("applies Crystal Palace Station Grid counters only to agendas in its server", () => {
-    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-crystal-counter-difficulty");
+  it("applies Crystal Palace Station Grid break_subroutine_cost only on its fort", () => {
+    const approachIce = (
+      seed: string,
+      targetServerId: "remote_1" | "rd",
+      rezzedCrystal: boolean,
+      withTesseract = false,
+    ): { state: GameState; crystalId: CardInstanceId } => {
+      let state = createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_6_2_RUNNER_DECK,
+          cards: [
+            ...ONR_V1_6_2_RUNNER_DECK.cards,
+            { id: "simple_decoder", quantity: 1 },
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_6_2_CORP_DECK,
+          cards: [
+            ...ONR_V1_6_2_CORP_DECK.cards,
+            {
+              id: "onr_v1_355_crystal-palace-station-grid",
+              quantity: 1,
+            },
+            ...(withTesseract
+              ? [
+                  {
+                    id: "onr_v1_370_tesseract-fort-construction",
+                    quantity: 1,
+                  },
+                ]
+              : []),
+          ],
+        },
+        agendaPointsToWin: 7,
+      });
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.corp.credits = 30;
+      state.runner.credits = 20;
+      const crystalId = putCorpRootInRemote(
+        state,
+        "onr_v1_355_crystal-palace-station-grid",
+      );
+      state.cardInstances[crystalId] = {
+        ...state.cardInstances[crystalId]!,
+        faceup: rezzedCrystal,
+        rezzed: rezzedCrystal,
+      };
+      if (withTesseract) {
+        const tesseractId = putCorpRootInRemote(
+          state,
+          "onr_v1_370_tesseract-fort-construction",
+        );
+        state.cardInstances[tesseractId] = {
+          ...state.cardInstances[tesseractId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      }
+      putCorpIceOnServer(state, targetServerId, "onr_v1_230_cortical-scanner");
+      state = toRunnerTurnFromCorpMain(state);
+      state.runner.credits = 20;
+      const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "install_card" && action.source === decoderId,
+      );
+      state.runner.credits = 20;
+      state.runner.clicks = 4;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === targetServerId,
+      );
+      state = apply(state, "corp", (action) => action.type === "rez_ice");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) === "simple_decoder",
+      );
+      return { state, crystalId };
+    };
+
+    const { state: sameFort, crystalId } = approachIce(
+      "p316-crystal-break-cost",
+      "remote_1",
+      true,
+    );
+    const breakActions = getLegalActions(sameFort, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(sameFort, action) === "simple_decoder",
+    );
+    expect(breakActions).toHaveLength(3);
+    expect(breakActions.map((action) => action.costs)).toEqual([
+      [{ credits: 2 }],
+      [{ credits: 2 }],
+      [{ credits: 2 }],
+    ]);
+    expect(breakActions[0]?.payload).toMatchObject({
+      breakSubroutineBaseCost: 1,
+      breakSubroutineAdditionalCost: 1,
+      breakSubroutineTotalCost: 2,
+      breakSubroutineCostPerSubroutine: 1,
+      breakSubroutineCostSourceDefinitionIds:
+        "onr_v1_355_crystal-palace-station-grid",
+      breakSubroutineCostSourceTitles: "Crystal Palace Station Grid",
+    });
+    expect(JSON.stringify(breakActions[0]?.payload)).not.toContain(crystalId);
+    const paid = apply(
+      sameFort,
+      "runner",
+      (action) => action.actionId === breakActions[0]?.actionId,
+    );
+    expect(paid.runner.credits).toBe(sameFort.runner.credits - 2);
+
+    const stale = structuredClone(sameFort);
+    stale.cardInstances[crystalId] = {
+      ...stale.cardInstances[crystalId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    const staleResult = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "runner",
+      actionId: breakActions[1]?.actionId ?? "",
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "p316-crystal-stale-break-cost",
+    });
+    expect(staleResult.ok).toBe(true);
+    if (staleResult.ok)
+      expect(staleResult.state.runner.credits).toBe(sameFort.runner.credits - 1);
+
+    const { state: otherFort } = approachIce(
+      "p316-crystal-other-fort",
+      "rd",
+      true,
+    );
+    expect(
+      mustAction(
+        otherFort,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(otherFort, action) === "simple_decoder",
+      ).costs,
+    ).toEqual([{ credits: 1 }]);
+
+    const { state: unrezzed } = approachIce(
+      "p316-crystal-unrezzed",
+      "remote_1",
+      false,
+    );
+    expect(
+      mustAction(
+        unrezzed,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(unrezzed, action) === "simple_decoder",
+      ).costs,
+    ).toEqual([{ credits: 1 }]);
+
+    let tesseractState = approachIce(
+      "p316-crystal-tesseract",
+      "remote_1",
+      true,
+      true,
+    ).state;
+    for (const subroutineIndex of [0, 1, 2]) {
+      tesseractState = apply(
+        tesseractState,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(tesseractState, action) === "simple_decoder" &&
+          action.payload?.subroutineIndex === subroutineIndex,
+      );
+    }
+    expect(
+      mustAction(
+        tesseractState,
+        "runner",
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(tesseractState, action) === "simple_decoder",
+      ).costs,
+    ).toEqual([{ credits: 2 }]);
+  });
+
+  it("uses the generic region install baseline for Crystal Palace Station Grid", () => {
+    const p316Ids = new Set([
+      "onr_v1_355_crystal-palace-station-grid",
+      "onr_v1_360_jerusalem-city-grid",
+    ]);
+    let state = createGameAfterSetup({
+      seed: "p316-crystal-region-baseline",
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        id: "p316_crystal_region_corp",
+        name: "P3.16 Crystal Region Corp",
+        cards: [
+          { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+          { id: "onr_v1_360_jerusalem-city-grid", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+            (entry) => !p316Ids.has(entry.id),
+          ),
+        ],
+      },
+    });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    const crystalId = moveCorpCardToHq(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    state.corp.credits = 4;
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === crystalId,
+      ),
+    ).toBe(false);
+
+    state.corp.credits = 7;
+    const jerusalemId = moveCorpCardToHq(
+      state,
+      "onr_v1_360_jerusalem-city-grid",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === jerusalemId &&
+        action.payload?.serverId === "new_remote",
+    );
+    expect(state.cardInstances[jerusalemId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+
+    state.corp.credits = 5;
+    const installCrystal = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === crystalId &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(installCrystal.costs).toEqual([{ clicks: 1, credits: 5 }]);
+    expect(installCrystal.payload?.regionReplacementWarning).toBe(true);
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === installCrystal.actionId,
+    );
+    expect(state.cardInstances[crystalId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+    expect(state.corp.archives).toContain(jerusalemId);
+  });
+
+  it("adds Crystal Palace Station Grid cost once per Pile Driver subroutine target", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p316-crystal-pile-driver",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          id: "p316_crystal_pile_driver_runner",
+          name: "P3.16 Crystal Pile Driver Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_047_pile-driver", quantity: 1 },
+            { id: "onr_v1_011_cloak", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: {
+          id: "p316_crystal_pile_driver_corp",
+          name: "P3.16 Crystal Pile Driver Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+            { id: "onr_v1_278_wall-of-ice", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
     const crystalId = putCorpRootInRemote(
       state,
       "onr_v1_355_crystal-palace-station-grid",
     );
-    const agendaId = putCorpRootInRemote(state, "simple_agenda");
-    const remoteOne = state.corp.servers.find((server) => server.id === "remote_1");
-    if (!remoteOne) throw new Error("remote_1 missing");
     state.cardInstances[crystalId] = {
       ...state.cardInstances[crystalId]!,
       faceup: true,
       rezzed: true,
     };
-    setCardCounterForTest(state, crystalId, "power", 1);
-    state.cardInstances[agendaId] = {
-      ...state.cardInstances[agendaId]!,
-      advancementCounters: 2,
-    };
+    installRunnerProgramForTest(state, "onr_v1_047_pile-driver");
+    const cloakId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
+    setCardCounterForTest(state, cloakId, "recurring_credit", 3);
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_278_wall-of-ice",
+    );
 
-    let scoreActions = getLegalActions(state, "corp").filter(
-      (action) => action.type === "score_agenda",
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    expect(
-      scoreActions.some((action) => action.payload?.cardId === agendaId),
-    ).toBe(true);
-    state.corp.servers.push({
-      id: "remote_2",
-      kind: "remote",
-      label: "Remote 2",
-      ice: [],
-      root: [agendaId],
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.pileDriverMultiBreak === true &&
+        action.payload?.subroutineIndexes === "0,1,2,3",
+    );
+    expect(breakAction.costs).toEqual([{ credits: 7 }]);
+    expect(breakAction.payload).toMatchObject({
+      breakSubroutineCount: 4,
+      breakSubroutineBaseCost: 3,
+      breakSubroutineAdditionalCost: 4,
+      breakSubroutineTotalCost: 7,
+      breakSubroutineCostPerSubroutine: 1,
+      breakSubroutineCostSourceDefinitionIds:
+        "onr_v1_355_crystal-palace-station-grid",
     });
-    remoteOne.root = remoteOne.root.filter((id) => id !== agendaId);
-    state.cardInstances[agendaId] = {
-      ...state.cardInstances[agendaId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
-    };
-    scoreActions = getLegalActions(state, "corp").filter(
-      (action) => action.type === "score_agenda",
-    );
-    expect(
-      scoreActions.some((action) => action.payload?.cardId === agendaId),
-    ).toBe(false);
   });
 
   it("applies Washington D.C. City Grid as a same-fort agenda_difficulty modifier", () => {

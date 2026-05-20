@@ -14,7 +14,8 @@ export type CardModifierImplementation =
   | CardHandSizeModifierImplementation
   | CardMemoryUnitsModifierImplementation
   | CardAgendaDifficultyModifierImplementation
-  | CardTrashCostModifierImplementation;
+  | CardTrashCostModifierImplementation
+  | CardBreakSubroutineCostModifierImplementation;
 
 export type CardAbilityImplementation =
   | OnPlayCardAbilityImplementation
@@ -261,6 +262,20 @@ export type CardTrashCostModifierImplementation = {
   visibility: EventVisibilityClass;
   appliesTo: {
     cardType: Extract<CardType, "asset" | "upgrade">;
+  };
+  sameServerAsSource: true;
+};
+
+export type CardBreakSubroutineCostModifierImplementation = {
+  kind: "break_subroutine_cost";
+  operation: "increase";
+  amount: number;
+  activeWhile: "rezzed";
+  sourceZone: "corp_root";
+  side: "corp";
+  visibility: EventVisibilityClass;
+  appliesTo: {
+    cardType: Extract<CardType, "ice">;
   };
   sameServerAsSource: true;
 };

@@ -68,6 +68,7 @@ import {
   additionalSubroutinesForIce,
   dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
+import { quoteBreakSubroutineCostModifiers } from "./ability-engine/break-subroutine-cost-modifiers";
 import {
   effectiveAgendaDifficulty,
   maxHandSize,
@@ -210,7 +211,6 @@ import {
   TRACE_AWARE_RUN_EVENT_CARD_ID,
 } from "./mechanics/run-access";
 import {
-  CRYSTAL_PALACE_COUNTER_UPGRADE_ID,
   CRYBABY_ACCESS_COST_UPGRADE_ID,
   DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
   DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
@@ -4947,6 +4947,69 @@ function microtechTrodeSetBreakAdditionalCost(state: GameState): number {
     : 0;
 }
 
+type BreakSubroutineCostBreakdown = {
+  baseCost: number;
+  legacyRunAdditionalCost: number;
+  runnerHardwareAdditionalCost: number;
+  cardImplementationAdditionalCost: number;
+  additionalCost: number;
+  totalCost: number;
+  publicPayload: NonNullable<LegalAction["payload"]>;
+};
+
+function breakSubroutineCostBreakdown(
+  state: GameState,
+  baseCost: number,
+  subroutineCount = 1,
+): BreakSubroutineCostBreakdown {
+  const run = mustRun(state);
+  const encounteredIceId = run.encounteredIceId;
+  if (!encounteredIceId)
+    throw new Error("Break-Subroutine-Kosten brauchen ein encountered ICE.");
+  const legacyRunAdditionalCost = runBreakSubroutineAdditionalCost(run);
+  const runnerHardwareAdditionalCost =
+    microtechTrodeSetBreakAdditionalCost(state);
+  const cardImplementationQuote = quoteBreakSubroutineCostModifiers(
+    state,
+    encounteredIceId,
+    subroutineCount,
+  );
+  const cardImplementationAdditionalCost =
+    cardImplementationQuote.totalAdditionalCost;
+  const additionalCost =
+    legacyRunAdditionalCost +
+    runnerHardwareAdditionalCost +
+    cardImplementationAdditionalCost;
+  const totalCost = baseCost + additionalCost;
+  return {
+    baseCost,
+    legacyRunAdditionalCost,
+    runnerHardwareAdditionalCost,
+    cardImplementationAdditionalCost,
+    additionalCost,
+    totalCost,
+    publicPayload: {
+      breakSubroutineBaseCost: baseCost,
+      ...(additionalCost > 0
+        ? {
+            breakSubroutineAdditionalCost: additionalCost,
+            breakSubroutineTotalCost: totalCost,
+            ...(legacyRunAdditionalCost > 0
+              ? { v1922CorpIceAbility: "virizz_break_cost_modifier" }
+              : {}),
+            ...(runnerHardwareAdditionalCost > 0
+              ? {
+                  runnerHardwareAbility:
+                    "microtech_trode_set_break_cost_modifier",
+                }
+              : {}),
+            ...cardImplementationQuote.publicPayload,
+          }
+        : {}),
+    },
+  };
+}
+
 function hasInstalledMicrotechTrodeSet(state: GameState): boolean {
   return state.runner.rig.hardware.some(
     (cardId) => definitionFor(state, cardId).id === MICROTECH_TRODE_SET_ID,
@@ -5808,20 +5871,19 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
         ability.type === "break_subroutine" &&
         breakAbilityMatchesIce(ability, iceDefinition),
     );
-    const additionalBreakCost =
-      runBreakSubroutineAdditionalCost(run) +
-      microtechTrodeSetBreakAdditionalCost(state);
+    const singleBreakCost = breakAbility
+      ? breakSubroutineCostBreakdown(state, breakAbility.cost.credits, 1)
+      : undefined;
     if (
       !run.noBreakSubroutinesActive &&
       breakAbility &&
       breakerStrength >= encounteredIceStrength &&
       availableRunnerRunCredits(state, breakerId) >=
-        breakAbility.cost.credits + additionalBreakCost &&
+        (singleBreakCost?.totalCost ?? breakAbility.cost.credits) &&
       (![RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(breaker.id) ||
         runnerStealthRecurringCredits(state) >=
           (breakAbility.postBreakStealthLoss ?? 0))
     ) {
-      const totalBreakCost = breakAbility.cost.credits + additionalBreakCost;
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = encounterSubroutines;
@@ -5834,8 +5896,6 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
             iceDefinition,
             subroutines,
             breakAbility,
-            totalBreakCost,
-            additionalBreakCost,
           ),
         );
         continue;
@@ -5859,7 +5919,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
               "break_subroutine",
               `${breaker.title}: ${subroutineLabel}`,
               breakerId,
-              [{ credits: totalBreakCost }],
+              [{ credits: singleBreakCost?.totalCost ?? breakAbility.cost.credits }],
               {
                 breakerId,
                 iceId: encounteredIceId,
@@ -5868,22 +5928,9 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
                 targetIceDefinitionId: iceDefinition.id,
                 targetIceTitle: iceDefinition.title,
                 ...dynamicSubroutinePayload(subroutine),
-                breakSubroutineBaseCost: breakAbility.cost.credits,
-                ...(additionalBreakCost > 0
-                  ? {
-                      breakSubroutineAdditionalCost: additionalBreakCost,
-                      breakSubroutineTotalCost: totalBreakCost,
-                      ...(runBreakSubroutineAdditionalCost(run) > 0
-                        ? { v1922CorpIceAbility: "virizz_break_cost_modifier" }
-                        : {}),
-                      ...(microtechTrodeSetBreakAdditionalCost(state) > 0
-                        ? {
-                            runnerHardwareAbility:
-                              "microtech_trode_set_break_cost_modifier",
-                          }
-                        : {}),
-                    }
-                  : {}),
+                ...(singleBreakCost?.publicPayload ?? {
+                  breakSubroutineBaseCost: breakAbility.cost.credits,
+                }),
               },
               abilityMetadata(breakerId, breakAbility.id, encounteredIceId),
             ),
@@ -5977,8 +6024,6 @@ function pileDriverBreakActions(
   iceDefinition: CardDefinition,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
   breakAbility: NonNullable<CardDefinition["abilities"]>[number],
-  totalBreakCost: number,
-  additionalBreakCost: number,
 ): LegalAction[] {
   const run = mustRun(state);
   const eligibleIndexes = subroutines
@@ -6001,6 +6046,13 @@ function pileDriverBreakActions(
         subroutineIndexes.length === 1
           ? `Pile Driver: Subroutine ${firstIndex + 1} brechen`
           : `Pile Driver: ${subroutineIndexes.length} Subroutinen brechen`;
+      const breakCost = breakSubroutineCostBreakdown(
+        state,
+        breakAbility.cost.credits,
+        subroutineIndexes.length,
+      );
+      if (availableRunnerRunCredits(state, breakerId) < breakCost.totalCost)
+        return;
       actions.push(
         action(
           state,
@@ -6008,7 +6060,7 @@ function pileDriverBreakActions(
           "break_subroutine",
           label,
           breakerId,
-          [{ credits: totalBreakCost }],
+          [{ credits: breakCost.totalCost }],
           {
             breakerId,
             iceId: encounteredIceId,
@@ -6017,22 +6069,7 @@ function pileDriverBreakActions(
             pileDriverMultiBreak: true,
             targetIceDefinitionId: iceDefinition.id,
             targetIceTitle: iceDefinition.title,
-            breakSubroutineBaseCost: breakAbility.cost.credits,
-            ...(additionalBreakCost > 0
-              ? {
-                  breakSubroutineAdditionalCost: additionalBreakCost,
-                  breakSubroutineTotalCost: totalBreakCost,
-                  ...(runBreakSubroutineAdditionalCost(run) > 0
-                    ? { v1922CorpIceAbility: "virizz_break_cost_modifier" }
-                    : {}),
-                  ...(microtechTrodeSetBreakAdditionalCost(state) > 0
-                    ? {
-                        runnerHardwareAbility:
-                          "microtech_trode_set_break_cost_modifier",
-                      }
-                    : {}),
-                }
-              : {}),
+            ...breakCost.publicPayload,
           },
           abilityMetadata(breakerId, breakAbility.id, encounteredIceId),
         ),
@@ -6209,10 +6246,11 @@ function resolvePileDriverBreakSubroutinesAction(
   const stealthLoss = ability.postBreakStealthLoss ?? 0;
   if (runnerStealthRecurringCredits(state) < stealthLoss)
     throw new Error("Nicht genug Stealth-Credits fuer Pile Driver.");
-  const expectedCost =
-    ability.cost.credits +
-    runBreakSubroutineAdditionalCost(run) +
-    microtechTrodeSetBreakAdditionalCost(state);
+  const expectedCost = breakSubroutineCostBreakdown(
+    state,
+    ability.cost.credits,
+    subroutineIndexes.length,
+  ).totalCost;
   if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
     throw new Error("Pile Driver-Kosten sind nicht mehr gueltig.");
   spendRunnerRunCredits(state, expectedCost, breakerId);
@@ -6230,6 +6268,38 @@ function resolvePileDriverBreakSubroutinesAction(
     sourceDefinitionId: PILE_DRIVER_ID,
   };
   applyPostBreakStealthLoss(state, breakerId, legalAction);
+}
+
+function assertBreakSubroutineCostQuoteValid(
+  state: GameState,
+  breakerId: CardInstanceId | undefined,
+  legalAction: LegalAction,
+  subroutine: NonNullable<CardDefinition["subroutines"]>[number],
+): void {
+  if (!breakerId) throw new Error("Break-Subroutine-Quelle fehlt.");
+  const run = mustRun(state);
+  if (run.phase !== "encounter_ice" || !run.encounteredIceId)
+    throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
+  if (!state.runner.rig.programs.includes(breakerId))
+    throw new Error("Breaker ist nicht installiert.");
+  const breakerDefinition = definitionFor(state, breakerId);
+  const iceDefinition = definitionFor(state, run.encounteredIceId);
+  const ability = breakerDefinition.abilities?.find(
+    (candidate) =>
+      candidate.id === legalAction.abilityRef?.abilityId &&
+      candidate.type === "break_subroutine",
+  );
+  if (!ability || !breakAbilityMatchesIce(ability, iceDefinition))
+    throw new Error("Breaker hat keine gueltige Break-Faehigkeit.");
+  if (!breakAbilityMatchesSubroutine(ability, subroutine))
+    throw new Error("Breaker kann diese Subroutine nicht brechen.");
+  const expectedCost = breakSubroutineCostBreakdown(
+    state,
+    ability.cost.credits,
+    1,
+  ).totalCost;
+  if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+    throw new Error("Break-Subroutine-Kosten sind nicht mehr gueltig.");
 }
 
 function subroutinesForCurrentEncounter(
@@ -7923,11 +7993,17 @@ function performAction(
       if (!state.run?.encounteredIceId)
         throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
       const iceDefinition = definitionFor(state, state.run.encounteredIceId);
-      assertCurrentSubroutineMatchesLegalAction(
+      const currentSubroutine = assertCurrentSubroutineMatchesLegalAction(
         state,
         iceDefinition,
         Number(legalAction.payload?.subroutineIndex),
         legalAction,
+      );
+      assertBreakSubroutineCostQuoteValid(
+        state,
+        breakerId,
+        legalAction,
+        currentSubroutine,
       );
       spendRunnerRunCredits(
         state,
@@ -15144,8 +15220,6 @@ function serverDifficultyReductionFromUpgrades(
     const instance = mustInstance(state.cardInstances, rootCardId);
     if (!instance.rezzed) return sum;
     const definitionId = definitionFor(state, rootCardId).id;
-    if (definitionId === CRYSTAL_PALACE_COUNTER_UPGRADE_ID)
-      return sum + cardCounter(state, rootCardId, "power");
     return SERVER_DIFFICULTY_UPGRADE_CARD_IDS.has(definitionId) ? sum + 1 : sum;
   }, 0);
 }

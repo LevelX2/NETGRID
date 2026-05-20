@@ -40,6 +40,7 @@ import { scorchedEarthImplementation } from "./onr-v1/corp/operations/scorched-e
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
+import { crystalPalaceStationGridImplementation } from "./onr-v1/corp/upgrades/crystal-palace-station-grid";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { newGalvestonCityGridImplementation } from "./onr-v1/corp/upgrades/new-galveston-city-grid";
 import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
@@ -119,6 +120,7 @@ export const CARD_IMPLEMENTATIONS = [
   zetatechMemChipImplementation,
   antiquatedInterfaceRoutinesImplementation,
   chesterMixImplementation,
+  crystalPalaceStationGridImplementation,
   jerusalemCityGridImplementation,
   newGalvestonCityGridImplementation,
   redHerringsImplementation,

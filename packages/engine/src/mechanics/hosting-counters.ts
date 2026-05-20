@@ -1,9 +1,5 @@
-import {
-  CRYSTAL_PALACE_COUNTER_UPGRADE_ID,
-  DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID,
-} from "./server-upgrades";
+import { DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID } from "./server-upgrades";
 
 export const COUNTER_UPGRADE_CARD_IDS = new Set([
-  CRYSTAL_PALACE_COUNTER_UPGRADE_ID,
   DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID,
 ]);

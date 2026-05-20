@@ -4,9 +4,6 @@ export const DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID =
 export const DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID =
   "onr_v1_357_dieter-esslin";
 
-export const CRYSTAL_PALACE_COUNTER_UPGRADE_ID =
-  "onr_v1_355_crystal-palace-station-grid";
-
 export const CRYBABY_ACCESS_COST_UPGRADE_ID = "onr_v1_354_crybaby";
 
 export const DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID = "onr_v1_358_dr-dreff";

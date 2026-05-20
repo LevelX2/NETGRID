@@ -28,6 +28,9 @@ const IMPLEMENTED_STEAL_COST_MODIFIER_LOCATION =
 const IMPLEMENTED_TRASH_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_BREAK_SUBROUTINE_COST_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -158,6 +161,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
   "onr_v1_352_chester-mix":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
+  "onr_v1_355_crystal-palace-station-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
   "onr_v1_362_new-galveston-city-grid":
@@ -247,6 +252,16 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive access trash-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_TRASH_COST_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some(
+      (modifier) => modifier.kind === "break_subroutine_cost",
+    )
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive break-subroutine-cost modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_BREAK_SUBROUTINE_COST_MODIFIER_LOCATION);
   }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(

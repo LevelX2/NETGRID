@@ -185,6 +185,27 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
       visibility: "public",
     });
   }
+  for (const active of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "break_subroutine_cost",
+  )) {
+    if (!isPublicRezzedCorpRootModifier(active.modifier)) continue;
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `rezzed.break_subroutine_cost.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "break_subroutine_cost",
+      side: "runner",
+      amount,
+      duration: "while_rezzed",
+      target: {
+        kind: active.modifier.sameServerAsSource ? "server" : "subtype",
+      },
+      visibility: "public",
+    });
+  }
 
   const run = state.run;
   if (!run) return modifiers;
