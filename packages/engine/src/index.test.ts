@@ -1117,12 +1117,24 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         traceStrength: 3,
       });
       state = applyChoice(state, "runner", "bid_0");
-      expect(state.runner.tags, definitionId).toBe(1);
-      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        traceStep: "runner_bid",
-        traceSuccessful: true,
-        tagsAdded: 1,
-      });
+      if (definitionId === "onr_v1_243_fetch-4-0-1") {
+        expect(state.runner.tags, definitionId).toBe(1);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          traceStep: "runner_bid",
+          traceSuccessful: true,
+          tagsAdded: 1,
+        });
+      } else {
+        expect(state.runner.tags, definitionId).toBe(0);
+        expect(state.run, definitionId).toBeUndefined();
+        expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          traceStep: "runner_bid",
+          traceSuccessful: true,
+          runnerRunEnded: true,
+          runnerRunLockCreditCost: 2,
+        });
+      }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
@@ -14444,10 +14456,9 @@ describe("V1.9.3 Mechanikpaket L", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
-          "onr_v1_207_netwatch-operations-office" &&
-        action.payload?.agendaAbility === "netwatch_operations_office",
+          "onr_v1_207_netwatch-operations-office",
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
@@ -14473,9 +14484,8 @@ describe("V1.9.3 Mechanikpaket L", () => {
       baseTraceStrength: 2,
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_207_netwatch-operations-office",
-      agendaAbility: "netwatch_operations_office",
       traceStarted: true,
       baseTraceStrength: 2,
     });
@@ -14488,10 +14498,9 @@ describe("V1.9.3 Mechanikpaket L", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinition(state, action) ===
-          "onr_v1_213_private-cybernet-police" &&
-        action.payload?.agendaAbility === "private_cybernet_police",
+          "onr_v1_213_private-cybernet-police",
     );
     expect(state.trace).toMatchObject({
       status: "corp_bid",
@@ -20604,7 +20613,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(DEMO_CARDS_BY_ID["onr_v1_221_asp"]?.mechanics).toEqual(
-      expect.arrayContaining(["trace", "link", "bid_amount", "add_tag"]),
+      expect.arrayContaining(["trace", "link", "bid_amount", "end_the_run", "run_lock"]),
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.kind).toBe("bid_amount");
@@ -20626,12 +20635,15 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     });
 
     state = applyChoice(state, "runner", "bid_0");
-    expect(state.runner.tags).toBe(1);
+    expect(state.runner.tags).toBe(0);
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(1);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.trace).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
-      tagsAdded: 1,
+      runnerRunEnded: true,
+      runnerRunLockCreditCost: 1,
     });
   });
 
@@ -22268,7 +22280,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
-  it("gates Fragmentation Storm program trash and net damage on trace success", () => {
+  it("gates Fragmentation Storm program trash and run lock on trace success", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.programSubtypeHosting("v1916-fragmentation-storm-success"),
     );
@@ -22288,7 +22300,6 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     );
     expect(pileDriverId).toBeDefined();
     putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
-    const gripBeforeDamage = state.runner.grip.length;
     const initial = structuredClone(state);
 
     state = apply(
@@ -22310,11 +22321,16 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceSuccessful: true,
       tagsAdded: 0,
+      runnerRunEnded: true,
+      runnerRunLockCreditCost: 1,
+      trashedCardDefinitionId: "onr_v1_047_pile-driver",
+      trashedCardType: "program",
+      trashedCount: 1,
     });
-    state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(pileDriverId && state.runner.heap.includes(pileDriverId)).toBe(true);
-    expect(state.runner.grip.length).toBe(Math.max(0, gripBeforeDamage - 1));
+    expect(state.run).toBeUndefined();
+    expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(1);
     expect(validateGameState(state).ok).toBe(true);
     const successReplay = replayEvents(
       initial,
@@ -22354,7 +22370,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(
       pileDriverId && failed.runner.rig.programs.includes(pileDriverId),
     ).toBe(true);
-    expect(failed.runner.grip.length).toBe(gripBeforeDamage);
+    expect(failed.run).toBeDefined();
     expect(validateGameState(failed).ok).toBe(true);
     const failedReplay = replayEvents(
       initial,
@@ -23073,8 +23089,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         state,
         "corp",
         (action) =>
-          action.type === "gain_credit" &&
-          action.payload?.v1917AssetAbility === "trace_3_tag" &&
+          action.type === "activated_card_ability" &&
           action.payload?.cardId === assetId,
       );
 
@@ -23087,7 +23102,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
       expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-        actionType: "gain_credit",
+        actionType: "activated_card_ability",
         traceStarted: true,
         sourceDefinitionId: definitionId,
       });
@@ -23139,8 +23154,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "trace_3_tag" &&
+        action.type === "activated_card_ability" &&
         action.payload?.cardId === bloodCatId,
     );
     expect(state.pendingChoice?.options.some((option) => option.id === "bid_1")).toBe(
@@ -23885,15 +23899,16 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_0");
     state = applyChoice(state, "runner", "bid_0");
-    state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(pileDriverId && state.runner.heap.includes(pileDriverId)).toBe(true);
+    expect(state.run).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "continue_run",
+      actionType: "resolve_choice",
       trashedCardDefinitionId: "onr_v1_047_pile-driver",
       trashedCardType: "program",
       trashedCount: 1,
-      damageAmount: 1,
+      runnerRunEnded: true,
+      runnerRunLockCreditCost: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"stack"/,
@@ -24295,7 +24310,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       policeState,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinition(policeState, action) ===
           "onr_v1_213_private-cybernet-police",
     );
@@ -39566,7 +39581,16 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
         });
         state = applyChoice(state, "corp", "bid_5");
         state = applyChoice(state, "runner", "bid_0");
-        expect(state.runner.tags, definitionId).toBe(1);
+        if (definitionId === "onr_v1_221_asp") {
+          expect(state.runner.tags, definitionId).toBe(0);
+          expect(state.run, definitionId).toBeUndefined();
+          expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+            runnerRunEnded: true,
+            runnerRunLockCreditCost: 1,
+          });
+        } else {
+          expect(state.runner.tags, definitionId).toBe(1);
+        }
       } else {
         expect(state.run, definitionId).toBeUndefined();
       }
@@ -39763,8 +39787,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       trace,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "trace_3_tag" &&
+        action.type === "activated_card_ability" &&
         action.payload?.cardId === bloodCatId,
     );
     expect(trace.trace).toMatchObject({

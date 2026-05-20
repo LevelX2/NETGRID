@@ -2156,9 +2156,9 @@ describe("formatChronicleEvent", () => {
       { cardTitle: "Arasaka Owns You" }
     );
 
-    expect(trace.description).toContain("Fang 2.0 beendet den Run");
+    expect(trace.description).toContain("Karteneffekt beendet den Run");
     expect(trace.chips).toContain("HTC +1");
-    expect(lockCleared.title).toBe("Du hast die Fang-2.0-Run-Sperre für 2 Credits entfernt.");
+    expect(lockCleared.title).toBe("Du hast die Run-Sperre für 2 Credits entfernt.");
     expect(arasaka.title).toBe("Du hast Arasaka Owns You gespielt und 4 Schaden ersetzt.");
     expect(arasaka.chips).toContain("Flatline verhindert");
   });

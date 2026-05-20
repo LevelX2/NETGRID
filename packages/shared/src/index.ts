@@ -154,6 +154,8 @@ export type CounterType =
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
   | { type: "add_counter"; counterType: CounterType; amount: number }
+  | { type: "end_run_and_run_lock"; amount: number }
+  | { type: "end_run_trash_program_and_run_lock"; amount: number }
   | { type: "none" };
 
 export type SubroutineType =
@@ -7881,16 +7883,24 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 4,
     strength: 4,
-    rulesText: "Trace 5. If successful, give the Runner 1 tag.",
+    rulesText:
+      "Trace 5. If successful, end the run. The Runner cannot make another run until they take an action to pay 1.",
     subroutines: [
       {
         id: "onr_v1_221_asp_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "end_run_and_run_lock", amount: 1 },
       },
     ],
-    mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE],
+    mechanics: [
+      "trace",
+      "link",
+      "bid_amount",
+      "end_the_run",
+      "run_lock",
+      ONR_V1_LOCAL_PRIVATE,
+    ],
   }),
   onrIce({
     id: "onr_v1_228_cinderella",
@@ -7932,7 +7942,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
         id: "onr_v1_240_fang_trace",
         type: "initiate_trace",
         baseTraceStrength: 4,
-        traceSuccessEffect: { type: "none" },
+        traceSuccessEffect: { type: "end_run_and_run_lock", amount: 2 },
       },
     ],
     mechanics: [
@@ -7957,7 +7967,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
         id: "onr_v1_241_fang_2_0_trace",
         type: "initiate_trace",
         baseTraceStrength: 5,
-        traceSuccessEffect: { type: "none" },
+        traceSuccessEffect: { type: "end_run_and_run_lock", amount: 2 },
       },
     ],
     mechanics: [
@@ -8026,16 +8036,24 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry", "pit_bull"],
     rezCost: 4,
     strength: 3,
-    rulesText: "Trace 3. If successful, give the Runner 1 tag.",
+    rulesText:
+      "Trace 3. If successful, end the run. The Runner cannot make another run until they take an action to pay 2.",
     subroutines: [
       {
         id: "onr_v1_264_rex_trace",
         type: "initiate_trace",
         baseTraceStrength: 3,
-        traceSuccessEffect: { type: "add_tag", amount: 1 },
+        traceSuccessEffect: { type: "end_run_and_run_lock", amount: 2 },
       },
     ],
-    mechanics: ["trace", "link", "bid_amount", "add_tag", ONR_V1_LOCAL_PRIVATE],
+    mechanics: [
+      "trace",
+      "link",
+      "bid_amount",
+      "end_the_run",
+      "run_lock",
+      ONR_V1_LOCAL_PRIVATE,
+    ],
   }),
   {
     id: "onr_v1_299_power-grid-overload",
@@ -8676,23 +8694,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 6,
     strength: 4,
     rulesText:
-      "Trace 4. If successful, trash an installed Runner program. Do 1 net damage.",
+      "Trace 4. If successful, end the run and trash a program. The Runner cannot make another run until they take an action to pay 1.",
     subroutines: [
       {
         id: "onr_v1_246_fragmentation_storm_trace",
         type: "initiate_trace",
         baseTraceStrength: 4,
-        traceSuccessEffect: { type: "none" },
-      },
-      {
-        ...onrTrashInstalledProgram(
-          "onr_v1_246_fragmentation_storm_trash_program",
-        ),
-        requiresSuccessfulTraceSubroutineIndex: 0,
-      },
-      {
-        ...onrNetDamage("onr_v1_246_fragmentation_storm_net_damage", 1),
-        requiresSuccessfulTraceSubroutineIndex: 0,
+        traceSuccessEffect: {
+          type: "end_run_trash_program_and_run_lock",
+          amount: 1,
+        },
       },
     ],
     mechanics: [
@@ -8700,8 +8711,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "rez_ice",
       "trace",
       "link",
+      "end_the_run",
+      "run_lock",
       "trash_installed_program",
-      "damage",
       ONR_V1_LOCAL_PRIVATE,
     ],
   }),

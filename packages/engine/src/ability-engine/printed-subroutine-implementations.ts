@@ -7,6 +7,7 @@
 import type { CardDefinition, SubroutineDefinition } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardPrintedSubroutineImplementation } from "./definition-types";
+import { traceSuccessEffectForCardImplementation } from "./trace-implementations";
 
 function printedSubroutineId(
   definition: CardDefinition,
@@ -60,6 +61,22 @@ function printedSubroutineDefinitionForImplementation(
       type: "do_damage",
       damageType: subroutine.damageType === "brain" ? "core" : "net",
       amount,
+    };
+  }
+  if (subroutine.kind === "trace") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const baseTraceStrength = Math.max(
+      0,
+      Math.floor(subroutine.baseTraceStrength),
+    );
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "initiate_trace",
+      baseTraceStrength,
+      traceSuccessEffect: traceSuccessEffectForCardImplementation(
+        subroutine.onSuccess,
+      ),
+      ...(breakTags.length ? { breakTags } : {}),
     };
   }
   throw new Error(`Unsupported printed subroutine: ${JSON.stringify(subroutine)}`);

@@ -107,6 +107,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/main-office-relocation.ts",
   "onr_v1_206_marine-arcology":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
+  "onr_v1_207_netwatch-operations-office":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/netwatch-operations-office.ts",
   "onr_v1_208_on-call-solo-team":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/on-call-solo-team.ts",
   "onr_v1_209_political-coup":
@@ -115,10 +117,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
   "onr_v1_211_polymer-breakthrough":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/polymer-breakthrough.ts",
+  "onr_v1_213_private-cybernet-police":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/private-cybernet-police.ts",
   "onr_v1_217_strike-force-kali":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
   "onr_v1_218_subsidiary-branch":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
+  "onr_v1_221_asp":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/asp.ts",
   "onr_v1_223_banpei":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
   "onr_v1_224_bolter-cluster":
@@ -143,8 +149,18 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall-2-0.ts",
   "onr_v1_239_endless-corridor":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/endless-corridor.ts",
+  "onr_v1_240_fang":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/fang.ts",
+  "onr_v1_241_fang-2-0":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/fang-2-0.ts",
+  "onr_v1_243_fetch-4-0-1":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
   "onr_v1_244_filter":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/filter.ts",
+  "onr_v1_246_fragmentation-storm":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/fragmentation-storm.ts",
+  "onr_v1_249_hunter":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
   "onr_v1_250_ice-pick-willie":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/ice-pick-willie.ts",
   "onr_v1_252_keeper":
@@ -165,6 +181,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/razor-wire.ts",
   "onr_v1_263_reinforced-wall":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/reinforced-wall.ts",
+  "onr_v1_264_rex":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/rex.ts",
   "onr_v1_265_rock-is-strong":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/rock-is-strong.ts",
   "onr_v1_266_scramble":
@@ -189,6 +207,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
   "onr_v1_282_annual-reviews":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/annual-reviews.ts",
+  "onr_v1_283_audit-of-call-records":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/audit-of-call-records.ts",
+  "onr_v1_284_chance-observation":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/chance-observation.ts",
   "onr_v1_285_closed-accounts":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/closed-accounts.ts",
   "onr_v1_287_datapool-by-zetatech":
@@ -209,6 +231,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
   "onr_v1_309_bbs-whispering-campaign":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/bbs-whispering-campaign.ts",
+  "onr_v1_310_blood-cat":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/blood-cat.ts",
   "onr_v1_311_braindance-campaign":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
   "onr_v1_317_data-masons":

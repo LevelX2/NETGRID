@@ -229,7 +229,6 @@ import {
 import {
   RUN_TAX_UPGRADE_CARD_IDS,
   TAG_CONDITION_UPGRADE_CARD_IDS,
-  TRACE_ASSET_CARD_IDS,
 } from "./mechanics/trace-tags";
 import { hashStateSnapshot } from "./state-hash";
 import {
@@ -294,10 +293,31 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   cardCounter,
   rezzedCorpRootCardIds,
   runnerInstalledCardIds,
+  runnerRunAttemptsLastTurn,
   spendClick,
   createAction: action,
   appendResolvedEffectsToPayload,
   ...cardImplementationEffectAdapters,
+  startTrace: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    baseTraceStrength,
+    successEffect,
+  ) => {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      cardId: sourceCardId,
+    };
+    return startTraceFromOperation(
+      state,
+      sourceDefinitionId,
+      baseTraceStrength,
+      legalAction,
+      successEffect,
+    );
+  },
   abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
 
@@ -475,8 +495,6 @@ const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const THE_SPRINGBOARD_ID = "onr_v1_181_the-springboard";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
-const NETWATCH_OPERATIONS_OFFICE_ID = "onr_v1_207_netwatch-operations-office";
-const PRIVATE_CYBERNET_POLICE_ID = "onr_v1_213_private-cybernet-police";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
@@ -485,8 +503,6 @@ const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const CERBERUS_ID = "onr_v1_227_cerberus";
 const DATA_RAVEN_ID = "onr_v1_236_data-raven";
-const FANG_ID = "onr_v1_240_fang";
-const FANG_2_0_ID = "onr_v1_241_fang-2-0";
 const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 const CINDERELLA_ID = "onr_v1_228_cinderella";
 const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
@@ -1331,36 +1347,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (state) => {
       state.corp.credits += 3;
       state.corp.badPublicity += 1;
-    },
-  },
-  "onr_v1_283_audit-of-call-records": {
-    name: "onr_corp_operation_trace_5_after_two_run_attempts",
-    canPlay: (state) => runnerRunAttemptsLastTurn(state) >= 2,
-    resolve: (state, legalAction) => {
-      if (runnerRunAttemptsLastTurn(state) < 2)
-        throw new Error(
-          "Der Runner hat im letzten Zug nicht mindestens zwei Runs versucht.",
-        );
-      startTraceFromOperation(
-        state,
-        "onr_v1_283_audit-of-call-records",
-        5,
-        legalAction,
-      );
-    },
-  },
-  "onr_v1_284_chance-observation": {
-    name: "onr_corp_operation_trace_5_after_run_attempt",
-    canPlay: (state) => runnerRunAttemptsLastTurn(state) >= 1,
-    resolve: (state, legalAction) => {
-      if (runnerRunAttemptsLastTurn(state) < 1)
-        throw new Error("Der Runner hat im letzten Zug keinen Run versucht.");
-      startTraceFromOperation(
-        state,
-        "onr_v1_284_chance-observation",
-        5,
-        legalAction,
-      );
     },
   },
   "onr_v1_286_corporate-detective-agency": {
@@ -3221,23 +3207,6 @@ function corpMainActions(state: GameState): LegalAction[] {
       assetId,
       definition,
     );
-    if (TRACE_ASSET_CARD_IDS.has(definition.id)) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Trace ${definition.id === "onr_v1_310_blood-cat" ? 5 : 3} starten`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1917AssetAbility: "trace_3_tag",
-            traceStrength: definition.id === "onr_v1_310_blood-cat" ? 5 : 3,
-          },
-        ),
-      );
-    }
     if (
       HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS.has(definition.id) &&
       state.corp.rd.length > 0
@@ -3494,32 +3463,6 @@ function corpMainActions(state: GameState): LegalAction[] {
       agendaId,
       definition,
     );
-    if (
-      definition.id === NETWATCH_OPERATIONS_OFFICE_ID ||
-      definition.id === PRIVATE_CYBERNET_POLICE_ID
-    ) {
-      const traceStrength =
-        definition.id === NETWATCH_OPERATIONS_OFFICE_ID ? 2 : 5;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: Trace ${traceStrength} starten`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility:
-              definition.id === NETWATCH_OPERATIONS_OFFICE_ID
-                ? "netwatch_operations_office"
-                : "private_cybernet_police",
-            traceStrength,
-          },
-        ),
-      );
-      continue;
-    }
     if (definition.id === AI_CHIEF_FINANCIAL_OFFICER_ID) {
       actions.push(
         action(
@@ -4687,12 +4630,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
         state,
         "runner",
         "trigger_ability",
-        `Fang 2.0: Run-Sperre für ${fangRunLockCreditCost} Credits entfernen`,
+        `Run-Sperre für ${fangRunLockCreditCost} Credits entfernen`,
         "game_rule",
         [{ clicks: 1, credits: fangRunLockCreditCost }],
         {
           v1920RunnerRunLockAbility: "fang_2_0_pay_to_run",
           fangRunLockCreditCost,
+          runnerRunLockCreditCost: fangRunLockCreditCost,
           gainCreditsAmount: 0,
         },
       ),
@@ -7098,38 +7042,6 @@ function performAction(
       if (resolveCorpInstalledEconomyAction(state, legalAction)) {
         return;
       }
-      if (legalAction.payload?.v1917AssetAbility === "trace_3_tag") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf V1.9.17-Asset-Traces nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error(
-            "Die V1.9.17-Trace-Asset-Faehigkeit ist nicht rezzed installiert.",
-          );
-        const definition = definitionFor(state, sourceCardId);
-        if (!TRACE_ASSET_CARD_IDS.has(definition.id))
-          throw new Error(
-            "Die V1.9.17-Trace-Asset-Faehigkeit passt nicht zur Karte.",
-          );
-        const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
-        const expectedTraceStrength =
-          definition.id === "onr_v1_310_blood-cat" ? 5 : 3;
-        if (
-          !Number.isInteger(traceStrength) ||
-          traceStrength !== expectedTraceStrength
-        ) {
-          throw new Error(
-            "V1.9.17-Trace-Assets starten mit der kartenspezifischen Trace-Staerke.",
-          );
-        }
-        startTraceFromOperation(
-          state,
-          definition.id,
-          traceStrength,
-          legalAction,
-        );
-        return;
-      }
       if (
         legalAction.payload?.v1917AssetAbility ===
         "rescheduler_hq_shuffle_draw"
@@ -7700,55 +7612,24 @@ function performAction(
         return;
       }
       if (
-        legalAction.payload?.agendaAbility === "netwatch_operations_office" ||
-        legalAction.payload?.agendaAbility === "private_cybernet_police"
-      ) {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf diese Agenda-Aktion nutzen.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!state.corp.scoreArea.includes(sourceCardId))
-          throw new Error("Die gewaehlte Trace-Agenda ist nicht gescort.");
-        const definition = definitionFor(state, sourceCardId);
-        const expectedDefinitionId =
-          legalAction.payload?.agendaAbility === "netwatch_operations_office"
-            ? NETWATCH_OPERATIONS_OFFICE_ID
-            : PRIVATE_CYBERNET_POLICE_ID;
-        if (definition.id !== expectedDefinitionId)
-          throw new Error(
-            "Die Agenda-Aktion passt nicht zur ausgewaehlten Trace-Agenda.",
-          );
-        const traceStrength = Number(legalAction.payload?.traceStrength ?? 0);
-        const expectedTraceStrength =
-          legalAction.payload?.agendaAbility === "netwatch_operations_office"
-            ? 2
-            : 5;
-        if (
-          !Number.isInteger(traceStrength) ||
-          traceStrength !== expectedTraceStrength
-        )
-          throw new Error("Die Agenda-Trace-Staerke ist ungueltig.");
-        startTraceFromOperation(
-          state,
-          definition.id,
-          traceStrength,
-          legalAction,
-        );
-        return;
-      }
-      if (
         legalAction.payload?.v1920RunnerRunLockAbility ===
         "fang_2_0_pay_to_run"
       ) {
         if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf die Fang-2.0-Sperre entfernen.");
+          throw new Error("Nur der Runner darf die Run-Sperre entfernen.");
         const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
-        if (!Number.isInteger(cost) || cost !== 2)
-          throw new Error("Fang 2.0 verlangt genau 2 Credits.");
+        const pendingCost = Math.max(
+          0,
+          Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+        );
+        if (!Number.isInteger(cost) || cost <= 0 || cost !== pendingCost)
+          throw new Error("Die Run-Sperre verlangt den aktuellen Betrag.");
         spendCredits(state, "runner", cost);
         ensureRunnerTurnFlags(state).fangRunLockCreditCost = 0;
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           fangRunLockCleared: true,
+          runnerRunLockCleared: true,
           runnerCreditsAfter: state.runner.credits,
           gainedCredits: 0,
         };
@@ -8252,16 +8133,21 @@ function performAction(
         "fang_2_0_pay_to_run"
       ) {
         if (legalAction.side !== "runner")
-          throw new Error("Nur der Runner darf die Fang-2.0-Sperre entfernen.");
+          throw new Error("Nur der Runner darf die Run-Sperre entfernen.");
         spendClick(state, "runner");
         const cost = Number(legalAction.payload?.fangRunLockCreditCost ?? 0);
-        if (!Number.isInteger(cost) || cost !== 2)
-          throw new Error("Fang 2.0 verlangt genau 2 Credits.");
+        const pendingCost = Math.max(
+          0,
+          Math.floor(state.runnerTurnFlags?.fangRunLockCreditCost ?? 0),
+        );
+        if (!Number.isInteger(cost) || cost <= 0 || cost !== pendingCost)
+          throw new Error("Die Run-Sperre verlangt den aktuellen Betrag.");
         spendCredits(state, "runner", cost);
         ensureRunnerTurnFlags(state).fangRunLockCreditCost = 0;
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           fangRunLockCleared: true,
+          runnerRunLockCleared: true,
           runnerCreditsAfter: state.runner.credits,
         };
         return;
@@ -10883,11 +10769,14 @@ function startTraceFromOperation(
   sourceDefinitionId: string,
   baseTraceStrength: number,
   legalAction: LegalAction,
-): void {
+  successEffect: TraceSuccessEffect = { type: "add_tag", amount: 1 },
+): Record<string, string | number | boolean> {
   if (state.trace || state.pendingChoice)
     throw new Error("Es ist bereits ein Trace oder eine Choice offen.");
   if (!Number.isInteger(baseTraceStrength) || baseTraceStrength < 0)
     throw new Error("Trace strength ist ungueltig.");
+  if (!isSupportedTraceSuccessEffect(successEffect))
+    throw new Error("Dieser Trace-Erfolgseffekt wird nicht unterstuetzt.");
   const sourceCardInstanceId = String(legalAction.payload?.cardId ?? "");
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
@@ -10904,7 +10793,7 @@ function startTraceFromOperation(
       krumzTraceBitTotal(state) +
       (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0),
     status: "corp_bid",
-    successEffect: { type: "add_tag", amount: 1 },
+    successEffect,
     ...(parisPoolSource
       ? {
           parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
@@ -10926,8 +10815,7 @@ function startTraceFromOperation(
       (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0),
   );
   state.activeSide = "corp";
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  const publicPayload = {
     traceStarted: true,
     traceId,
     sourceCardId: sourceCardInstanceId,
@@ -10949,6 +10837,11 @@ function startTraceFromOperation(
         }
       : {}),
   };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...publicPayload,
+  };
+  return publicPayload;
 }
 
 function traceBidChoice(
@@ -20348,8 +20241,8 @@ function resolveTraceRunnerBid(
       : 0;
   let dataRavenCounterAdded = 0;
   const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
-  let fangRunLockCreditCost = 0;
-  let fangRunEnded = false;
+  let runnerRunLockCreditCost = 0;
+  let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
   let traceCounterPayload: Record<string, string | number> = {};
@@ -20376,12 +20269,15 @@ function resolveTraceRunnerBid(
   }
   if (
     successful &&
-    (trace.sourceDefinitionId === FANG_ID ||
-      trace.sourceDefinitionId === FANG_2_0_ID)
+    (trace.successEffect.type === "end_run_and_run_lock" ||
+      trace.successEffect.type === "end_run_trash_program_and_run_lock")
   ) {
-    fangRunLockCreditCost = 2;
-    ensureRunnerTurnFlags(state).fangRunLockCreditCost = fangRunLockCreditCost;
-    fangRunEnded = true;
+    runnerRunLockCreditCost = trace.successEffect.amount;
+    ensureRunnerTurnFlags(state).fangRunLockCreditCost =
+      runnerRunLockCreditCost;
+    runnerRunEnded = true;
+    if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
+      resolveTrashInstalledProgramSubroutine(state, legalAction);
   }
   delete state.pendingChoice;
   delete state.trace;
@@ -20404,7 +20300,7 @@ function resolveTraceRunnerBid(
         trace.traceId,
       );
       if (!state.winner && state.run) finishRun(state, false);
-    } else if (fangRunEnded) {
+    } else if (runnerRunEnded) {
       finishRun(state, false);
     } else {
       state.timingPoint = "run.encounter_ice";
@@ -20446,10 +20342,12 @@ function resolveTraceRunnerBid(
     ...traceCounterPayload,
     ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
     ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
-    ...(fangRunEnded
+    ...(runnerRunEnded
       ? {
           fangRunEnded: true,
-          fangRunLockCreditCost,
+          runnerRunEnded: true,
+          fangRunLockCreditCost: runnerRunLockCreditCost,
+          runnerRunLockCreditCost,
         }
       : {}),
     ...traceHardwareWreckerPayload,
@@ -20604,8 +20502,8 @@ function completeTraceAfterPostBidLink(
       : 0;
   let dataRavenCounterAdded = 0;
   const hackerTrackerCountersAdded = addHackerTrackerTraceCounters(state);
-  let fangRunLockCreditCost = 0;
-  let fangRunEnded = false;
+  let runnerRunLockCreditCost = 0;
+  let runnerRunEnded = false;
   let traceHardwareWreckerPayload: Record<string, unknown> = {};
   if (successful) state.runner.tags += tagsAdded;
   let traceCounterPayload: Record<string, string | number> = {};
@@ -20632,12 +20530,15 @@ function completeTraceAfterPostBidLink(
   }
   if (
     successful &&
-    (trace.sourceDefinitionId === FANG_ID ||
-      trace.sourceDefinitionId === FANG_2_0_ID)
+    (trace.successEffect.type === "end_run_and_run_lock" ||
+      trace.successEffect.type === "end_run_trash_program_and_run_lock")
   ) {
-    fangRunLockCreditCost = 2;
-    ensureRunnerTurnFlags(state).fangRunLockCreditCost = fangRunLockCreditCost;
-    fangRunEnded = true;
+    runnerRunLockCreditCost = trace.successEffect.amount;
+    ensureRunnerTurnFlags(state).fangRunLockCreditCost =
+      runnerRunLockCreditCost;
+    runnerRunEnded = true;
+    if (trace.successEffect.type === "end_run_trash_program_and_run_lock")
+      resolveTrashInstalledProgramSubroutine(state, legalAction);
   }
   delete state.trace;
   if (state.run) {
@@ -20659,7 +20560,7 @@ function completeTraceAfterPostBidLink(
         trace.traceId,
       );
       if (!state.winner && state.run) finishRun(state, false);
-    } else if (fangRunEnded) {
+    } else if (runnerRunEnded) {
       finishRun(state, false);
     } else {
       state.timingPoint = "run.encounter_ice";
@@ -20691,10 +20592,12 @@ function completeTraceAfterPostBidLink(
     ...traceCounterPayload,
     ...(dataRavenCounterAdded > 0 ? { dataRavenCounterAdded } : {}),
     ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
-    ...(fangRunEnded
+    ...(runnerRunEnded
       ? {
           fangRunEnded: true,
-          fangRunLockCreditCost,
+          runnerRunEnded: true,
+          fangRunLockCreditCost: runnerRunLockCreditCost,
+          runnerRunLockCreditCost,
         }
       : {}),
     ...traceHardwareWreckerPayload,
@@ -20709,6 +20612,12 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
       effect.amount >= 0 &&
       effect.counterType === "cerberus"
     );
+  }
+  if (
+    effect.type === "end_run_and_run_lock" ||
+    effect.type === "end_run_trash_program_and_run_lock"
+  ) {
+    return Number.isInteger(effect.amount) && effect.amount > 0;
   }
   return (
     effect.type === "add_tag" &&
@@ -21260,7 +21169,6 @@ function revealForPublicEvent(
     (legalAction.type === "gain_credit" &&
       hasLegacyAbilityPayload(legalAction.payload, "v1917AssetAbility", [
         "gain_credits",
-        "trace_3_tag",
       ])) ||
     (legalAction.type === "gain_credit" &&
       hasLegacyAbilityPayload(legalAction.payload, "v1920AssetAbility")) ||

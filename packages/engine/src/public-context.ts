@@ -449,6 +449,8 @@ export function publicContextForAction(
       "hackerTrackerCountersAdded",
       "fangRunEnded",
       "fangRunLockCreditCost",
+      "runnerRunEnded",
+      "runnerRunLockCreditCost",
       "traceSuccessEffect",
       "trashedCardDefinitionId",
       "trashedCardType",
@@ -1264,8 +1266,13 @@ export function publicContextForAction(
       legalAction.payload.v1920RunnerRunLockAbility;
     if (typeof legalAction.payload.fangRunLockCreditCost === "number")
       context.fangRunLockCreditCost = legalAction.payload.fangRunLockCreditCost;
+    if (typeof legalAction.payload.runnerRunLockCreditCost === "number")
+      context.runnerRunLockCreditCost =
+        legalAction.payload.runnerRunLockCreditCost;
     if (legalAction.payload.fangRunLockCleared === true)
       context.fangRunLockCleared = true;
+    if (legalAction.payload.runnerRunLockCleared === true)
+      context.runnerRunLockCleared = true;
     if (typeof legalAction.payload.runnerCreditsAfter === "number")
       context.runnerCreditsAfter = legalAction.payload.runnerCreditsAfter;
   }

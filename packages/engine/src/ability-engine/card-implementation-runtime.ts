@@ -16,6 +16,7 @@ import type {
   LegalAction,
   ResolvedGameEffect,
   Side,
+  TraceSuccessEffect,
 } from "@netgrid/shared";
 import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import {
@@ -65,6 +66,7 @@ export type CardImplementationRuntimeDependencies = {
   ) => number;
   rezzedCorpRootCardIds: (state: GameState) => CardInstanceId[];
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
+  runnerRunAttemptsLastTurn: (state: GameState) => number;
   spendClick: (state: GameState, side: Side) => void;
   createAction: (
     state: GameState,
@@ -91,6 +93,14 @@ export type CardImplementationRuntimeDependencies = {
     damageType: Extract<DamageType, "meat">,
     amount: number,
   ) => CardEffectDamageResult;
+  startTrace: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    baseTraceStrength: number,
+    successEffect: TraceSuccessEffect,
+  ) => Record<string, string | number | boolean>;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -143,6 +153,11 @@ function cardImplementationConditionMet(
         sourceCardId &&
           state.cardInstances[sourceCardId] &&
           deps.cardCounter(state, sourceCardId, "bit") > 0,
+      );
+    case "runner_attempted_run_last_turn":
+      return (
+        deps.runnerRunAttemptsLastTurn(state) >=
+        Math.max(0, condition.minimumRuns)
       );
     default: {
       const unknownCondition = condition as { kind?: string };
@@ -207,6 +222,8 @@ function assertOnPlayCardImplementationAbilityCanResolve(
   if (canResolveOnPlayCardImplementationAbility(deps, state, ability)) return;
   if (ability.condition?.kind === "runner_is_tagged")
     throw new Error("Der Runner muss getaggt sein.");
+  if (ability.condition?.kind === "runner_attempted_run_last_turn")
+    throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
   throw new Error("Die On-Play-Kartenbedingung ist nicht erfuellt.");
 }
 
@@ -229,6 +246,8 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Der Runner muss getaggt sein.");
   if (ability.condition?.kind === "source_has_hosted_credits")
     throw new Error("Auf der Quelle muessen Credits liegen.");
+  if (ability.condition?.kind === "runner_attempted_run_last_turn")
+    throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
   const limitFailureMessage = cardImplementationAbilityLimitFailureMessage(
     ability.limit,
   );
@@ -896,6 +915,16 @@ export function resolveActivatedCardImplementationAbility(
           damageType,
           amount,
         ),
+      startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
+        ...deps.startTrace(
+          state,
+          legalAction,
+          sourceCardId,
+          match.definition.id,
+          baseTraceStrength,
+          successEffect,
+        ),
+      }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
@@ -953,6 +982,16 @@ export function executeOnPlayCardImplementationAbility(
       drawCards: (side, amount) => deps.drawCards(state, side, amount),
       damageRunner: (damageType, amount) =>
         deps.damageRunner(state, legalAction, definition.id, damageType, amount),
+      startTrace: (sourceCardId, baseTraceStrength, successEffect) => ({
+        ...deps.startTrace(
+          state,
+          legalAction,
+          sourceCardId,
+          definition.id,
+          baseTraceStrength,
+          successEffect,
+        ),
+      }),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>

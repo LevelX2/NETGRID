@@ -55,7 +55,8 @@ export type OnPlayCardAbilityImplementation = {
 
 export type CardConditionImplementation =
   | { kind: "runner_is_tagged" }
-  | { kind: "source_has_hosted_credits" };
+  | { kind: "source_has_hosted_credits" }
+  | { kind: "runner_attempted_run_last_turn"; minimumRuns: number };
 
 export type ActivatedCardAbilityImplementation = {
   kind: "activated";
@@ -83,6 +84,7 @@ export type CardEffectImplementation =
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
   | DamageEffectImplementation
+  | TraceEffectImplementation
   | AddHostedCreditsEffectImplementation
   | TakeHostedCreditsEffectImplementation
   | TrashSourceWhenEmptyEffectImplementation
@@ -125,6 +127,36 @@ export type DamageEffectImplementation = {
   damageType: Extract<DamageType, "meat">;
   amount: number;
   preventable: true;
+  visibility: EventVisibilityClass;
+};
+
+export type CardTraceSuccessEffectImplementation =
+  | {
+      kind: "add_tags";
+      recipient: "runner";
+      amount: number;
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "end_run";
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "runner_run_lock_until_action_paid";
+      amount: number;
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "trash_program";
+      target: "installed_runner_program";
+      visibility: EventVisibilityClass;
+    };
+
+export type TraceEffectImplementation = {
+  kind: "trace";
+  baseTraceStrength: number;
+  onSuccess: readonly CardTraceSuccessEffectImplementation[];
+  onFailure?: readonly CardTraceSuccessEffectImplementation[];
   visibility: EventVisibilityClass;
 };
 
@@ -350,6 +382,14 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "prohibit_break_and_jack_out_next_ice";
       text: "*Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.";
+      visibility: EventVisibilityClass;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "trace";
+      baseTraceStrength: number;
+      onSuccess: readonly CardTraceSuccessEffectImplementation[];
+      text: string;
       visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     };

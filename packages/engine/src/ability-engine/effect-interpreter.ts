@@ -17,6 +17,7 @@ import type {
   Winner,
 } from "@netgrid/shared";
 import type { CardEffectImplementation } from "./definition-types";
+import { traceSuccessEffectForCardImplementation } from "./trace-implementations";
 
 export type CardEffectExecutionContext = {
   sourceCardId: CardInstanceId;
@@ -47,6 +48,11 @@ export type CardEffectExecutionContext = {
   trashSource?: (
     sourceCardId: CardInstanceId,
   ) => CardEffectTrashSourceResult;
+  startTrace?: (
+    sourceCardId: CardInstanceId,
+    baseTraceStrength: number,
+    successEffect: ReturnType<typeof traceSuccessEffectForCardImplementation>,
+  ) => CardEffectTraceResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -76,6 +82,10 @@ export type CardEffectHostedCreditsResult = {
 
 export type CardEffectTrashSourceResult = {
   sourceTrashed: boolean;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectTraceResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -389,6 +399,21 @@ export function executeCardImplementationEffects(
             : {}),
           ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
+        return;
+      }
+      case "trace": {
+        assertPositiveIntegerAmount("trace", effect.baseTraceStrength);
+        assertPublicVisibility("trace", effect.visibility);
+        if (effect.onFailure && effect.onFailure.length > 0)
+          throw new Error("Trace onFailure effects are not supported yet.");
+        if (!context.startTrace)
+          throw new Error("trace effect requires a startTrace execution context.");
+        const traceResult = context.startTrace(
+          context.sourceCardId,
+          effect.baseTraceStrength,
+          traceSuccessEffectForCardImplementation(effect.onSuccess),
+        );
+        mergePublicPayload(publicPayload, traceResult.publicPayload);
         return;
       }
       case "add_hosted_credits": {

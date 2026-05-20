@@ -221,7 +221,9 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const runnerStrength = numberValue(payload.runnerStrength);
         const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
         const hackerTrackerCountersAdded = numberValue(payload.hackerTrackerCountersAdded) ?? 0;
-        const fangRunLockCreditCost = numberValue(payload.fangRunLockCreditCost);
+        const runnerRunLockCreditCost =
+          numberValue(payload.runnerRunLockCreditCost) ??
+          numberValue(payload.fangRunLockCreditCost);
         const successful = payload.traceSuccessful === true;
         const hardwareWreckerEffect = successful && payload.traceSuccessEffect === "hardware_trash_meat_damage_end_run";
         const trashedCount = numberValue(payload.trashedCount) ?? 0;
@@ -230,7 +232,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         visibility = "public";
         title = `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`;
-        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.fangRunEnded === true ? `; Fang 2.0 beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(fangRunLockCreditCost ?? 2)}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
+        description = traceStrength !== undefined && runnerStrength !== undefined ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${payload.runnerRunEnded === true || payload.fangRunEnded === true ? `; Karteneffekt beendet den Run und sperrt weitere Runs bis zur Zahlung von ${creditText(runnerRunLockCreditCost ?? 2)}` : ""}${hardwareWreckerEffect ? `; Karteneffekt: ${trashedCount} Hardware getrasht, ${damageAmount} Meat-Schaden${payload.damageCannotBePrevented === true ? " nicht verhinderbar" : ""}, Run endet` : ""}${hackerTrackerCountersAdded > 0 ? `; Hacker Tracker Central erhält ${hackerTrackerCountersAdded} Counter` : ""}.` : undefined;
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         chips.push(
           "Trace",
@@ -240,7 +242,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           successful ? "Erfolg" : "Fehlschlag",
           ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
           ...(hardwareWreckerEffect ? [`Hardware -${trashedCount}`, `${damageAmount} Schaden`, "Run endet"] : []),
-          ...(payload.fangRunEnded === true ? ["Run endet", `Run-Sperre ${fangRunLockCreditCost ?? 2}`] : []),
+          ...(payload.runnerRunEnded === true || payload.fangRunEnded === true ? ["Run endet", `Run-Sperre ${runnerRunLockCreditCost ?? 2}`] : []),
           ...(hackerTrackerCountersAdded > 0 ? [`HTC +${hackerTrackerCountersAdded}`] : [])
         );
         break;
@@ -475,11 +477,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "gain_credit":
       if (abilityId === "fang_2_0_pay_to_run") {
-        const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
+        const paid =
+          numberValue(payload.runnerRunLockCreditCost) ??
+          numberValue(payload.fangRunLockCreditCost) ??
+          2;
         category = "run";
         importance = "important";
-        title = phrase(subject, `die Fang-2.0-Run-Sperre für ${creditText(paid)} entfernt`);
-        chips.push("Fang 2.0", "Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
+        title = phrase(subject, `die Run-Sperre für ${creditText(paid)} entfernt`);
+        chips.push("Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
         break;
       }
       if (isExposeServerCardPayload(payload) || payload.revealKind === "expose") {
@@ -872,11 +877,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     case "trigger_ability": {
       const resourceAbility = stringValue(payload.resourceAbility);
       if (abilityId === "fang_2_0_pay_to_run") {
-        const paid = numberValue(payload.fangRunLockCreditCost) ?? 2;
+        const paid =
+          numberValue(payload.runnerRunLockCreditCost) ??
+          numberValue(payload.fangRunLockCreditCost) ??
+          2;
         category = "run";
         importance = "important";
-        title = phrase(subject, `die Fang-2.0-Run-Sperre für ${creditText(paid)} entfernt`);
-        chips.push("Fang 2.0", "Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
+        title = phrase(subject, `die Run-Sperre für ${creditText(paid)} entfernt`);
+        chips.push("Run-Sperre weg", `${paid} ${creditLabel(paid)}`);
         break;
       }
       if (shellTradersAbility === "set_aside_from_grip") {

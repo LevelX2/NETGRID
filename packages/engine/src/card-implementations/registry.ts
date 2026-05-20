@@ -14,13 +14,16 @@ import { executiveExtractionImplementation } from "./onr-v1/corp/agendas/executi
 import { geneticsVisionaryAcquisitionImplementation } from "./onr-v1/corp/agendas/genetics-visionary-acquisition";
 import { mainOfficeRelocationImplementation } from "./onr-v1/corp/agendas/main-office-relocation";
 import { marineArcologyImplementation } from "./onr-v1/corp/agendas/marine-arcology";
+import { netwatchOperationsOfficeImplementation } from "./onr-v1/corp/agendas/netwatch-operations-office";
 import { onCallSoloTeamImplementation } from "./onr-v1/corp/agendas/on-call-solo-team";
 import { politicalCoupImplementation } from "./onr-v1/corp/agendas/political-coup";
 import { politicalOverthrowImplementation } from "./onr-v1/corp/agendas/political-overthrow";
 import { polymerBreakthroughImplementation } from "./onr-v1/corp/agendas/polymer-breakthrough";
+import { privateCybernetPoliceImplementation } from "./onr-v1/corp/agendas/private-cybernet-police";
 import { strikeForceKaliImplementation } from "./onr-v1/corp/agendas/strike-force-kali";
 import { subsidiaryBranchImplementation } from "./onr-v1/corp/agendas/subsidiary-branch";
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
+import { bloodCatImplementation } from "./onr-v1/corp/assets/blood-cat";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "./onr-v1/corp/assets/department-of-truth-enhancement";
@@ -35,6 +38,7 @@ import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-p
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
+import { aspImplementation } from "./onr-v1/corp/ice/asp";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
 import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
@@ -47,7 +51,12 @@ import { dataWallTwoPointZeroImplementation } from "./onr-v1/corp/ice/data-wall-
 import { dataWallImplementation } from "./onr-v1/corp/ice/data-wall";
 import { dataNagaImplementation } from "./onr-v1/corp/ice/data-naga";
 import { endlessCorridorImplementation } from "./onr-v1/corp/ice/endless-corridor";
+import { fangTwoPointZeroImplementation } from "./onr-v1/corp/ice/fang-2-0";
+import { fangImplementation } from "./onr-v1/corp/ice/fang";
+import { fetchFourPointZeroPointOneImplementation } from "./onr-v1/corp/ice/fetch-4-0-1";
 import { filterImplementation } from "./onr-v1/corp/ice/filter";
+import { fragmentationStormImplementation } from "./onr-v1/corp/ice/fragmentation-storm";
+import { hunterImplementation } from "./onr-v1/corp/ice/hunter";
 import { icePickWillieImplementation } from "./onr-v1/corp/ice/ice-pick-willie";
 import { keeperImplementation } from "./onr-v1/corp/ice/keeper";
 import { laserWireImplementation } from "./onr-v1/corp/ice/laser-wire";
@@ -58,6 +67,7 @@ import { neuralBladeImplementation } from "./onr-v1/corp/ice/neural-blade";
 import { quandaryImplementation } from "./onr-v1/corp/ice/quandary";
 import { razorWireImplementation } from "./onr-v1/corp/ice/razor-wire";
 import { reinforcedWallImplementation } from "./onr-v1/corp/ice/reinforced-wall";
+import { rexImplementation } from "./onr-v1/corp/ice/rex";
 import { rockIsStrongImplementation } from "./onr-v1/corp/ice/rock-is-strong";
 import { scrambleImplementation } from "./onr-v1/corp/ice/scramble";
 import { sentinelsPrimeImplementation } from "./onr-v1/corp/ice/sentinels-prime";
@@ -70,6 +80,8 @@ import { wallOfStaticImplementation } from "./onr-v1/corp/ice/wall-of-static";
 import { zombieImplementation } from "./onr-v1/corp/ice/zombie";
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
+import { auditOfCallRecordsImplementation } from "./onr-v1/corp/operations/audit-of-call-records";
+import { chanceObservationImplementation } from "./onr-v1/corp/operations/chance-observation";
 import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
 import { datapoolByZetatechImplementation } from "./onr-v1/corp/operations/datapool-by-zetatech";
 import { dayShiftImplementation } from "./onr-v1/corp/operations/day-shift";
@@ -129,14 +141,18 @@ export const CARD_IMPLEMENTATIONS = [
   geneticsVisionaryAcquisitionImplementation,
   mainOfficeRelocationImplementation,
   marineArcologyImplementation,
+  netwatchOperationsOfficeImplementation,
   onCallSoloTeamImplementation,
   politicalCoupImplementation,
   politicalOverthrowImplementation,
   polymerBreakthroughImplementation,
+  privateCybernetPoliceImplementation,
   strikeForceKaliImplementation,
   subsidiaryBranchImplementation,
   accountsReceivableImplementation,
   annualReviewsImplementation,
+  auditOfCallRecordsImplementation,
+  chanceObservationImplementation,
   closedAccountsImplementation,
   datapoolByZetatechImplementation,
   dayShiftImplementation,
@@ -147,6 +163,7 @@ export const CARD_IMPLEMENTATIONS = [
   scorchedEarthImplementation,
   urbanRenewalImplementation,
   bbsWhisperingCampaignImplementation,
+  bloodCatImplementation,
   braindanceCampaignImplementation,
   dataMasonsHostingImplementation,
   departmentOfTruthEnhancementImplementation,
@@ -161,6 +178,7 @@ export const CARD_IMPLEMENTATIONS = [
   rustbeltHqBranchImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
+  aspImplementation,
   banpeiImplementation,
   bolterClusterImplementation,
   codeCorpseImplementation,
@@ -173,7 +191,12 @@ export const CARD_IMPLEMENTATIONS = [
   dataWallTwoPointZeroImplementation,
   dataNagaImplementation,
   endlessCorridorImplementation,
+  fangImplementation,
+  fangTwoPointZeroImplementation,
+  fetchFourPointZeroPointOneImplementation,
   filterImplementation,
+  fragmentationStormImplementation,
+  hunterImplementation,
   icePickWillieImplementation,
   keeperImplementation,
   laserWireImplementation,
@@ -184,6 +207,7 @@ export const CARD_IMPLEMENTATIONS = [
   quandaryImplementation,
   razorWireImplementation,
   reinforcedWallImplementation,
+  rexImplementation,
   rockIsStrongImplementation,
   scrambleImplementation,
   sentinelsPrimeImplementation,
