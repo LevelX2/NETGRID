@@ -1125,21 +1125,28 @@ export class MultiplayerService {
   }
 
   async setConnected(matchId: string, side: Side, sessionToken: string, connected: boolean): Promise<ServicePayload | { error: SafeErrorPayload }> {
-    const record = await this.mustLoad(matchId);
-    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
-    const session = this.authenticate(record, side, sessionToken);
-    if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-    session.connected = connected;
-    session.lastSeenAt = this.now();
-    this.syncPlayerClock(record);
-    if (!connected && record.match.status === "countdown" && record.startLobby) {
-      this.cancelCountdownFor(record, side);
-    }
-    record.match.matchVersion += 1;
-    record.match.updatedAt = this.now();
-    await this.storage.save(record);
-    if (this.shouldUseLobbyPayload(record)) return this.lobbyPayloadFor(record, side);
-    return this.payloadFor(record, side);
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, side, sessionToken);
+      if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      session.connected = connected;
+      session.lastSeenAt = this.now();
+      this.syncPlayerClock(record);
+      let persistentLifecycleChange = false;
+      if (!connected && record.match.status === "countdown" && record.startLobby) {
+        this.cancelCountdownFor(record, side);
+        persistentLifecycleChange = true;
+      }
+      const persistTransientConnectionState = this.storage instanceof InMemoryMatchStorage;
+      if (persistentLifecycleChange || persistTransientConnectionState) {
+        record.match.matchVersion += 1;
+        record.match.updatedAt = this.now();
+        await this.storage.save(record);
+      }
+      if (this.shouldUseLobbyPayload(record)) return this.lobbyPayloadFor(record, side);
+      return this.payloadFor(record, side);
+    });
   }
 
   async setLobbyReady(input: { matchId: string; side: Side; sessionToken: string; ready: boolean }): Promise<LobbyActionResult> {
