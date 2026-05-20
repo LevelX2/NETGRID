@@ -5092,7 +5092,7 @@ function restrictiveNetZoningInstallTax(
     const definition = definitionFor(state, cardId);
     if (definition.id !== "onr_v1_173_restrictive-net-zoning") return sum;
     const instance = mustInstance(state.cardInstances, cardId);
-    return instance.selectedServerId === serverId ? sum + 1 : sum;
+    return instance.selectedServerId === serverId ? sum + 2 : sum;
   }, 0);
 }
 

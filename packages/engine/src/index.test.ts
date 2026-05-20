@@ -12302,8 +12302,121 @@ describe("V1.8.1 Mechanikpaket H", () => {
         action.payload?.serverId === "rd" &&
         action.payload?.placement === "ice",
     );
-    expect(rdInstall.costs[0]?.credits).toBe(2);
-    expect(rdInstall.payload?.iceInstallAdditionalCost).toBe(2);
+    expect(rdInstall.costs[0]?.credits).toBe(3);
+    expect(rdInstall.payload?.iceInstallAdditionalCost).toBe(3);
+  });
+
+  it("applies Restrictive Net Zoning as a +2 ICE install tax only on the chosen fort", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v181-restrictive-tax",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: ONR_V1_8_1_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_8_1_CORP_DECK,
+          id: "v181_restrictive_tax_corp",
+          name: "V1.8.1 Restrictive Tax Corp",
+          cards: [
+            ...ONR_V1_8_1_CORP_DECK.cards,
+            { id: "simple_upgrade", quantity: 1 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 40;
+    const restrictiveCardId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_173_restrictive-net-zoning",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === restrictiveCardId &&
+        action.payload?.selectedServerId === "rd",
+    );
+    expect(state.cardInstances[restrictiveCardId]?.selectedServerId).toBe("rd");
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
+
+    const sameFortIceId = moveCorpCardToHq(state, "simple_barrier_ice");
+    const sameFortInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === sameFortIceId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice",
+    );
+    expect(sameFortInstall.costs[0]).toMatchObject({ clicks: 1, credits: 2 });
+    expect(sameFortInstall.payload).toMatchObject({
+      iceInstallAdditionalCost: 2,
+      iceInstallTotalCost: 2,
+    });
+
+    const stale = structuredClone(state);
+    stale.runner.rig.resources = stale.runner.rig.resources.filter(
+      (cardId) => cardId !== restrictiveCardId,
+    );
+    stale.cardInstances[restrictiveCardId] = {
+      ...stale.cardInstances[restrictiveCardId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
+    const staleCredits = stale.corp.credits;
+    const staleResult = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "corp",
+      actionId: sameFortInstall.actionId,
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "v181-restrictive-tax-stale",
+    });
+    expect(staleResult.ok).toBe(false);
+    expect(stale.corp.credits).toBe(staleCredits);
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === sameFortInstall.actionId,
+    );
+    expect(state.corp.credits).toBe(18);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      iceInstallAdditionalCost: 2,
+      iceInstallTotalCost: 2,
+    });
+
+    const otherFortIceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+    const otherFortInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === otherFortIceId &&
+        action.payload?.serverId === "hq" &&
+        action.payload?.placement === "ice",
+    );
+    expect(otherFortInstall.payload).toMatchObject({
+      iceInstallAdditionalCost: 0,
+      iceInstallTotalCost: 0,
+    });
+    expect(otherFortInstall.costs[0]).toEqual({ clicks: 1 });
+
+    const upgradeId = moveCorpCardToHq(state, "simple_upgrade");
+    const nonIceInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === upgradeId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "root",
+    );
+    expect(nonIceInstall.payload?.iceInstallAdditionalCost).toBeUndefined();
+    expect(nonIceInstall.costs[0]).toEqual({ clicks: 1 });
   });
 
   it("scores Coup agendas with deterministic start counters and spends them via legal click actions", () => {
@@ -23535,8 +23648,8 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
         action.payload?.placement === "ice",
     );
     expect(taxedInstall.payload).toMatchObject({
-      iceInstallAdditionalCost: 2,
-      iceInstallTotalCost: 2,
+      iceInstallAdditionalCost: 4,
+      iceInstallTotalCost: 4,
     });
 
     let polymerState = toRunnerTurn(v192CardReleaseGame("spotcheck-polymer"));
