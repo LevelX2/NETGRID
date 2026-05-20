@@ -454,7 +454,7 @@ function installContextLabel(action: LegalAction): string {
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
-  if (isNewRemoteIceInstallAction(action)) return "Neues Fort erstellen";
+  if (isNewRemoteIceInstallAction(action)) return "Neues Remote erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
   if (
@@ -594,8 +594,6 @@ export function normalizeVisibleTerms(value: string): string {
     .replace(/\bAccess abschließen\b/g, "Zugriff abschließen")
     .replace(/\bR&D\b/g, "R&D")
     .replace(/\bArchives\b/g, "Archive")
-    .replace(/\bRemote\s+(\d+)\b/g, "Fort $1")
-    .replace(/\bneuem Remote\b/g, "neuem Fort")
     .replace(/\bApproach\b/g, "Annäherung")
     .replace(/\bEncounter\b/g, "Begegnung")
     .replace(/\bAccess\b/g, "Zugriff")
@@ -607,9 +605,9 @@ export function serverDisplayLabel(serverIdOrLabel: string): string {
   if (serverIdOrLabel === "hq" || serverIdOrLabel === "HQ") return "HQ";
   if (serverIdOrLabel === "rd" || serverIdOrLabel === "R&D") return "R&D";
   if (serverIdOrLabel === "archives" || serverIdOrLabel === "Archives") return "Archive";
-  if (serverIdOrLabel === "new_remote") return "neuem Fort";
+  if (serverIdOrLabel === "new_remote") return "neuem Remote";
   const remote = /^remote_(\d+)$/.exec(serverIdOrLabel);
-  if (remote?.[1]) return `Fort ${remote[1]}`;
+  if (remote?.[1]) return `Remote ${remote[1]}`;
   return normalizeVisibleTerms(serverIdOrLabel);
 }
 

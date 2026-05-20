@@ -871,13 +871,15 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   "onr_v1_099_mantis-fixer-at-large": {
-    name: "onr_v1911_runner_event_search_stack_program_to_hand",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
+    name: "onr_v1911_runner_event_search_stack_card_to_hand",
+    canPlay: (state) => state.runner.stack.length > 0,
     resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
+      startRunnerStackSearchChoice(
+        state,
+        "v1911.search_stack_card",
+        "v1911_search_stack_card",
+        { cardType: "any" },
+      );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
@@ -6710,7 +6712,7 @@ function successfulRunProgramActions(
           state,
           "runner",
           "trigger_ability",
-          `${definition.title}: Fort mit Power-Counter markieren`,
+          `${definition.title}: Remote mit Power-Counter markieren`,
           sourceCardId,
           [],
           {
@@ -9073,7 +9075,7 @@ function resolveNetspaceInverterReverseIce(
     throw new Error("Netspace Inverter wurde fuer diesen Run bereits genutzt.");
   const server = mustServer(state, serverId);
   if (server.kind === "archives" || server.ice.length <= 1)
-    throw new Error("Dieses Fort kann nicht umgekehrt werden.");
+    throw new Error("Dieses Remote kann nicht umgekehrt werden.");
   server.ice.reverse();
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
@@ -12619,7 +12621,7 @@ function delayBizarreEncryptionSchemeAgendaScore(
     zone.zone !== "serverRoot" ||
     zone.serverId !== serverId
   ) {
-    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Fort.");
+    throw new Error("Die verzögerte Agenda liegt nicht im betroffenen Remote.");
   }
   const existing = state.bizarreEncryptionDelayedAgendas ?? [];
   if (!existing.some((entry) => entry.agendaId === cardId)) {
@@ -13137,7 +13139,7 @@ function validateRovingSubmarineRunGate(
   );
   if (!hasActivity)
     throw new Error(
-      "Roving Submarine erlaubt Runs auf dieses Fort nur nach Korp-Aktivitaet im letzten Korpzug.",
+      "Roving Submarine erlaubt Runs auf dieses Remote nur nach Korp-Aktivitaet im letzten Korpzug.",
     );
 }
 
@@ -16496,7 +16498,7 @@ function scoreAgenda(
           ? instanceBefore.zone.serverId
           : undefined;
     if (!selectedServerId || selectedServerId === "new_remote")
-      throw new Error("Security Net Optimization braucht einen gueltigen Fort.");
+      throw new Error("Security Net Optimization braucht ein gueltiges Remote.");
     mustServer(state, selectedServerId as Exclude<ServerId, "new_remote">);
     state.cardInstances[cardId] = {
       ...mustInstance(state.cardInstances, cardId),
@@ -17097,6 +17099,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
     choice.kind === "select_cards" &&
     (choice.source.startsWith("v098.search_stack") ||
       choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.search_stack_card") ||
       choice.source.startsWith("v1911.search_stack") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("v1911.short_circuit_search") ||
@@ -18035,20 +18038,33 @@ function startRunnerStackSearchChoice(
   state: GameState,
   sourcePrefix = "v098.search_stack",
   choiceIdPrefix = "v098_search_stack",
+  filter: { cardType?: CardDefinition["type"] | "any" } = {
+    cardType: "program",
+  },
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const hasSearchableProgram = state.runner.stack.some(
-    (cardId) => definitionFor(state, cardId).type === "program",
+  const cardTypeFilter = filter.cardType ?? "program";
+  const hasSearchableCard = state.runner.stack.some((cardId) =>
+    runnerStackSearchCardMatchesFilter(state, cardId, cardTypeFilter),
   );
-  if (!hasSearchableProgram)
-    throw new Error("Keine suchbare Programmkarte im Stack.");
+  if (!hasSearchableCard)
+    throw new Error(
+      cardTypeFilter === "program"
+        ? "Keine suchbare Programmkarte im Stack."
+        : "Keine suchbare Karte im Stack.",
+    );
   const options = state.runner.stack.map((cardId) => {
     const definition = definitionFor(state, cardId);
+    const selectable = runnerStackSearchCardMatchesFilter(
+      state,
+      cardId,
+      cardTypeFilter,
+    );
     return {
       id: `card_${cardId}`,
       label: definition.title,
       value: cardId,
-      ...(definition.type !== "program" ? { selectable: false } : {}),
+      ...(!selectable ? { selectable: false } : {}),
     };
   });
   state.pendingChoice = {
@@ -18063,6 +18079,15 @@ function startRunnerStackSearchChoice(
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
+}
+
+function runnerStackSearchCardMatchesFilter(
+  state: GameState,
+  cardId: CardInstanceId,
+  cardTypeFilter: CardDefinition["type"] | "any",
+): boolean {
+  if (cardTypeFilter === "any") return true;
+  return definitionFor(state, cardId).type === cardTypeFilter;
 }
 
 function startSelfModifyingCodeStackChoice(
@@ -18312,7 +18337,10 @@ function resolveRunnerStackSearchChoice(
   const cardId = selectedChoiceCardIds(choice, playerAction)[0];
   if (!cardId || !state.runner.stack.includes(cardId))
     throw new Error("Die gewaehlte Karte liegt nicht im Stack.");
-  if (definitionFor(state, cardId).type !== "program")
+  if (
+    !choice.source.startsWith("v1911.search_stack_card") &&
+    definitionFor(state, cardId).type !== "program"
+  )
     throw new Error("Nur Programme sind in dieser Search-Harness legal.");
   removeFromAllZones(state, cardId);
   state.runner.grip.push(cardId);
@@ -18794,11 +18822,11 @@ function startForgedActivationOrdersTargetChoice(
     prompt: "ICE für Rez-/Trash-Entscheidung wählen",
     kind: "select_cards",
     options: targets.map((cardId, index) => {
-      const iceLabel = publicIcePositionLabelForCard(state, cardId) ?? "Server";
+      const iceLabel = publicIceSelectionLabelForCard(state, cardId) ?? "ICE";
       return {
         id: `ice_${index + 1}`,
-        label: `ICE in ${iceLabel}`,
-        publicLabel: `ICE in ${iceLabel}`,
+        label: iceLabel,
+        publicLabel: iceLabel,
         value: cardId,
       };
     }),
@@ -18945,11 +18973,11 @@ function startSecurityCodeWormChipTrashIceChoice(
     prompt: "Unrezzte ICE trashen",
     kind: "select_cards",
     options: targets.map((cardId, index) => {
-      const iceLabel = publicIcePositionLabelForCard(state, cardId) ?? "Server";
+      const iceLabel = publicIceSelectionLabelForCard(state, cardId) ?? "ICE";
       return {
         id: `ice_${index + 1}`,
-        label: `ICE in ${iceLabel}`,
-        publicLabel: `ICE in ${iceLabel}`,
+        label: iceLabel,
+        publicLabel: iceLabel,
         value: cardId,
       };
     }),
@@ -19784,7 +19812,7 @@ function startSingaporeCityGridSwapChoice(
     throw new Error("Singapore City Grid ist nicht an diesen Run gebunden.");
   const server = mustServer(state, serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht im angegriffenen Fort.");
+    throw new Error("Singapore City Grid ist nicht im angegriffenen Remote.");
   const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
   if (
     !sourceInstance.rezzed ||
@@ -19857,7 +19885,7 @@ function resolveSingaporeCityGridSwapChoice(
     );
   const server = mustServer(state, serverId);
   if (!server.root.includes(sourceCardId))
-    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Fort.");
+    throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Remote.");
   if (
     definitionFor(state, sourceCardId).id !== SERVER_ICE_SWAP_UPGRADE_CARD_ID ||
     !mustInstance(state.cardInstances, sourceCardId).rezzed
@@ -23570,7 +23598,7 @@ function serverChoiceDisplayLabel(
 ): string {
   const label = publicServerLabel(state, serverId) ?? serverId;
   const remote = /^Remote\s+(\d+)$/i.exec(label.trim());
-  return remote?.[1] ? `Remote Server ${remote[1]}` : label;
+  return remote?.[1] ? `Remote ${remote[1]}` : label;
 }
 
 function publicServerLabelForCard(
@@ -23594,7 +23622,15 @@ function publicIcePositionLabelForCard(
   const serverLabel = publicServerLabel(state, serverId);
   if (!server || !serverLabel) return serverLabel;
   const iceIndex = server.ice.indexOf(cardId);
-  return iceIndex >= 0 ? `${serverLabel} ${iceIndex + 1}` : serverLabel;
+  return iceIndex >= 0 ? `ICE ${iceIndex + 1} in ${serverLabel}` : `ICE in ${serverLabel}`;
+}
+
+function publicIceSelectionLabelForCard(
+  state: GameState,
+  cardId: string | undefined,
+): string | undefined {
+  if (!cardId) return undefined;
+  return publicIcePositionLabelForCard(state, cardId);
 }
 
 function revealForPublicEvent(

@@ -45,7 +45,7 @@ describe("V1.6.0 tutorial and rule-help", () => {
   it("exposes a project-internal glossary with required terms", () => {
     const glossary = getTutorialGlossary();
     const terms = new Set(glossary.map((entry) => entry.term));
-    for (const term of ["Korp", "Runner", "Klick", "Credit", "HQ", "R&D", "Archive", "Fort", "Run", "Begegnung", "Zugriff", "Agenda", "Tag", "Schaden", "LegalAction"]) {
+    for (const term of ["Korp", "Runner", "Klick", "Credit", "HQ", "R&D", "Archive", "Remote", "Run", "Begegnung", "Zugriff", "Agenda", "Tag", "Schaden", "LegalAction"]) {
       expect(terms.has(term)).toBe(true);
     }
   });

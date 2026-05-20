@@ -713,7 +713,7 @@ describe("formatChronicleEvent", () => {
 
     expect(item.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
     expect(item.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Fort 1", "Wurf 1", "Run endet"]));
+    expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]));
   });
 
   it("shows Wall of Ice subroutine damage and end-the-run as separate chronicle steps", () => {
@@ -804,7 +804,7 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         v1922RunnerEventAbility: "force_rez_or_trash_ice",
         targetServerLabel: "HQ",
-        targetIcePositionLabel: "HQ 2",
+        targetIcePositionLabel: "ICE 2 in HQ",
         targetVisibility: "installed_ice_position"
       }),
       "runner"
@@ -816,7 +816,7 @@ describe("formatChronicleEvent", () => {
         corpDecision: "rez_ice",
         targetCardDefinitionId: "simple_barrier_ice",
         targetServerLabel: "HQ",
-        targetIcePositionLabel: "HQ 2",
+        targetIcePositionLabel: "ICE 2 in HQ",
         rezCostPaid: 3,
         aiExplanation: "legal choice"
       }),
@@ -829,21 +829,21 @@ describe("formatChronicleEvent", () => {
         corpDecision: "trash_ice",
         targetCardDefinitionId: "simple_barrier_ice",
         targetServerLabel: "HQ",
-        targetIcePositionLabel: "HQ 2",
+        targetIcePositionLabel: "ICE 2 in HQ",
         trashedCount: 1,
         aiExplanation: "legal choice"
       }),
       "runner"
     );
 
-    expect(runnerChoice.title).toBe("Du hast ICE in HQ 2 für Forged Activation Orders gewählt.");
+    expect(runnerChoice.title).toBe("Du hast ICE 2 in HQ für Forged Activation Orders gewählt.");
     expect(runnerChoice.title).not.toContain("Entscheidung beantwortet");
-    expect(runnerChoice.chips).toEqual(["Runner", "Forged Activation Orders", "Ziel", "HQ 2"]);
-    expect(corpRez.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE in HQ 2 zu rezzen.");
+    expect(runnerChoice.chips).toEqual(["Runner", "Forged Activation Orders", "Ziel", "ICE 2 in HQ"]);
+    expect(corpRez.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu rezzen.");
     expect(corpRez.description).toBe("Rez-Kosten: 3 Credits.");
-    expect(corpRez.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Rez", "3 Credits", "HQ 2"]);
-    expect(corpTrash.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE in HQ 2 zu trashen.");
-    expect(corpTrash.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Trash", "HQ 2"]);
+    expect(corpRez.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Rez", "3 Credits", "ICE 2 in HQ"]);
+    expect(corpTrash.title).toBe("Die Korp-KI hat entschieden, Simple Barrier ICE als ICE 2 in HQ zu trashen.");
+    expect(corpTrash.chips).toEqual(["Korp", "KI", "Forged Activation Orders", "Trash", "ICE 2 in HQ"]);
   });
 
   it("describes V1.8.1 Pattel and Pox run-success counters", () => {
@@ -911,14 +911,14 @@ describe("formatChronicleEvent", () => {
         title: "Restrictive Net Zoning",
         zoneLabel: "Resource",
         selectedServerId: "remote_1",
-        selectedServerLabel: "Remote Server 1"
+        selectedServerLabel: "Remote 1"
       }),
       "runner",
       { cardTitle: "Restrictive Net Zoning" }
     );
 
-    expect(item.title).toBe("Du hast Restrictive Net Zoning auf Remote Server 1 ausgerichtet installiert.");
-    expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote Server 1"]));
+    expect(item.title).toBe("Du hast Restrictive Net Zoning auf Remote 1 ausgerichtet installiert.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote 1"]));
   });
 
   it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
@@ -1712,9 +1712,9 @@ describe("formatChronicleEvent", () => {
       }
     );
 
-    expect(hidden.title).toBe("Die Korp hat eine Installation in Fort 2 ausgebaut.");
+    expect(hidden.title).toBe("Die Korp hat eine Installation in Remote 2 ausgebaut.");
     expect(hidden.visibility).toBe("redacted");
-    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Fort 2", "Verdeckt"]);
+    expect(hidden.chips).toEqual(["Korp", "+1 Entwicklung", "Remote 2", "Verdeckt"]);
     expect(JSON.stringify(hidden)).not.toContain("Simple Agenda");
     expect(visibleAgenda.title).toBe("Die Korp hat das Projekt Hostile Takeover weiterentwickelt.");
     expect(visibleAgenda.chips).toContain("+1 Entwicklung");

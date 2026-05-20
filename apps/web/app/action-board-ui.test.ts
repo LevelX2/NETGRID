@@ -152,8 +152,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(runAwareActionButtonLabel(running, legalAction("runner", "continue_run", "game_rule", "Run fortsetzen", undefined, "run.jack_out_window"))).toBe("Run fortsetzen zu ICE 3");
     expect(serverDisplayLabel("rd")).toBe("R&D");
     expect(serverDisplayLabel("archives")).toBe("Archive");
-    expect(serverDisplayLabel("remote_2")).toBe("Fort 2");
-    expect(serverDisplayLabel("Remote 3")).toBe("Fort 3");
+    expect(serverDisplayLabel("remote_2")).toBe("Remote 2");
+    expect(serverDisplayLabel("Remote 3")).toBe("Remote 3");
     expect(actionButtonLabel(legalAction("corp", "advance_card", "basic_action", "Agenda in Remote 2 advancen"))).toBe("Installation ausbauen");
     expect(actionButtonLabel(legalAction("runner", "continue_run", "game_rule", "Subroutinen auslösen (Run endet)", undefined, "run.encounter_ice"))).toBe(
       "Subroutinen auslösen (Run endet)"
@@ -255,7 +255,7 @@ describe("V1.0.5 action board UI helpers", () => {
   });
 
   it("places main-phase rez actions for installed upgrades on the card context", () => {
-    const upgradeRez = legalAction("corp", "rez_ice", "game_rule", "Karte in Fort 1 rezzen", { cardId: "upgrade_1", serverId: "remote_1" });
+    const upgradeRez = legalAction("corp", "rez_ice", "game_rule", "Karte in Remote 1 rezzen", { cardId: "upgrade_1", serverId: "remote_1" });
     const runIceRez = legalAction("corp", "rez_ice", "game_rule", "ICE rezzen", { cardId: "ice_1", serverId: "remote_1" }, "run.approach_ice");
 
     const split = splitLegalActions([upgradeRez, runIceRez]);
@@ -619,15 +619,15 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf R&D", { cardId: "card_1", serverId: "rd" }))).toBe("Run auf R&D");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
-    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Fort 2");
+    expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Remote 2");
   });
 
   it("names Corp install destinations in card context actions", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" }))).toBe("Vor HQ");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Fort erstellen");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Fort");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Remote erstellen");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Remote");
     expect(
       contextualCardActionLabel(
         legalAction("corp", "install_card", "agenda_1", "Karte in Remote 1 installieren", {
@@ -637,7 +637,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
           rootReplacement: "asset_to_agenda",
         }),
       ),
-    ).toBe("In Fort 1 (Node ersetzen)");
+    ).toBe("In Remote 1 (Node ersetzen)");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "upgrade_1", "Karte in HQ installieren", { cardId: "upgrade_1", serverId: "hq", placement: "root" }))).toBe(
       "In HQ",
     );
@@ -662,14 +662,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
           "runner",
           "install_card",
           "restrictive_1",
-          "Restrictive Net Zoning auf Remote Server 1 ausrichten",
+          "Restrictive Net Zoning auf Remote 1 ausrichten",
           { cardId: "restrictive_1", selectedServerId: "remote_1" },
         ),
       ),
-    ).toBe("Auf Fort 1 ausrichten");
+    ).toBe("Auf Remote 1 ausrichten");
   });
 
-  it("keeps new-fort ICE installs as the last card-context action", () => {
+  it("keeps new-remote ICE installs as the last card-context action", () => {
     const newRemoteIce = legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" });
     const hqIce = legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" });
     const rdIce = legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" });
@@ -995,7 +995,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     accessedUpgrade.trashCost = 2;
     const decline = legalAction("runner", "decline_trash", "game_rule", "Nicht trashen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
 
-    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Fort 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
+    expect(accessRevealStatusLabel(accessedUpgrade, [decline], "runner", "runner", "Remote 1")).toBe("Du hast aktuell nicht genug Credits, um die Trash-Kosten zu bezahlen. Du kannst den Zugriff abschließen.");
   });
 
   it("retains the latest visible access reveal after later cleanup events until it is dismissed", () => {
@@ -1039,7 +1039,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const access = publicEvent("evt_access", "action", {
       actionType: "access_card",
       actor: "runner",
-      serverLabel: "Fort 1",
+      serverLabel: "Remote 1",
       cardDefinitionId: "simple_agenda",
       title: "Simple Agenda"
     });
@@ -1054,7 +1054,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       ...publicEvent("evt_corp_install", "action", {
         actionType: "install_card",
         actor: "corp",
-        serverLabel: "Fort 2"
+        serverLabel: "Remote 2"
       }),
       stateVersionAfter: 3
     };
@@ -1066,7 +1066,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const visibleRemoteAccess = publicEvent("evt_remote_access", "action", {
       actionType: "access_card",
       actor: "runner",
-      serverLabel: "Fort 1",
+      serverLabel: "Remote 1",
       cardDefinitionId: "simple_agenda",
       title: "Simple Agenda"
     });
@@ -1084,7 +1084,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     const access = publicEvent("evt_access", "action", {
       actionType: "access_card",
       actor: "runner",
-      serverLabel: "Fort 1",
+      serverLabel: "Remote 1",
       cardDefinitionId: "simple_ambush",
       title: "Simple Ambush"
     });

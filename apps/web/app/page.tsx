@@ -1228,7 +1228,7 @@ function accessServerTitleLabel(serverLabel: string): string {
 function accessServerLocationPhrase(serverLabel: string): string {
   if (serverLabel === "HQ") return "im Hauptquartier (HQ)";
   if (serverLabel === "Archive") return "im Archiv";
-  if (/^Fort \d+$/.test(serverLabel)) return `im ${serverLabel}`;
+  if (/^Remote \d+$/.test(serverLabel)) return `in ${serverLabel}`;
   return `in ${serverLabel}`;
 }
 
@@ -6509,7 +6509,7 @@ function CardSizeSettings({
       <CardSizeSliderRow label="Handkarten" value={handPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onHandPercent} />
       <CardSizeSliderRow label="Archive" value={archivePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onArchivePercent} />
       <CardSizeSliderRow label="Stack/Heap" value={zonePercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onZonePercent} />
-      <CardSizeSliderRow label="Spielfeld/Forts" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
+      <CardSizeSliderRow label="Spielfeld/Remotes" value={boardPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onBoardPercent} />
       <CardSizeSliderRow label="Rig" value={rigPercent} min={CARD_SCALE_PERCENT_MIN} max={CARD_SCALE_PERCENT_MAX} onChange={onRigPercent} />
     </div>
   );

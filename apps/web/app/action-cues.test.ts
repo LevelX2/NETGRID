@@ -45,8 +45,8 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues).toHaveLength(1);
     expect(cues[0]?.visibility).toBe("redacted");
-    expect(cues[0]?.title).toBe("Die Korp hat eine verdeckte Karte in Fort 1 installiert.");
-    expect(cues[0]?.highlight).toEqual({ kind: "server", serverId: "remote_1", serverLabel: "Fort 1", lane: "root" });
+    expect(cues[0]?.title).toBe("Die Korp hat eine verdeckte Karte in Remote 1 installiert.");
+    expect(cues[0]?.highlight).toEqual({ kind: "server", serverId: "remote_1", serverLabel: "Remote 1", lane: "root" });
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
     expect(JSON.stringify(cues[0])).not.toContain("Simple Agenda");
     expect(JSON.stringify(cues[0])).not.toContain("simple_agenda");
@@ -102,7 +102,7 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues[0]?.title).toBe("Du hast simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
     expect(corpCues[0]?.title).toBe("Der Runner hat simple_barrier_ice passiert und Rio de Janeiro City Grid würfelt eine 1.");
     expect(runnerCues[0]?.description).toBe("Der Run endet durch Rio de Janeiro City Grid.");
-    expect(runnerCues[0]?.highlight).toEqual({ kind: "run", serverLabel: "Fort 1" });
+    expect(runnerCues[0]?.highlight).toEqual({ kind: "run", serverLabel: "Remote 1" });
     expect(runnerCues[0]?.sound).toBe("run");
     expect(cueHasHiddenLeak(runnerCues[0]!)).toBe(false);
     expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);

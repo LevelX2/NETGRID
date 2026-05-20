@@ -1200,6 +1200,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
           cards: [
             { id: "simple_barrier_ice", quantity: 1 },
             { id: "simple_code_gate_ice", quantity: 2 },
+            { id: "simple_sentry_ice", quantity: 1 },
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
           ],
         },
@@ -1211,6 +1212,14 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     const rdIce = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
     putCorpIceCopyOnServer(state, "hq", "simple_code_gate_ice");
+    state.corp.servers.push({
+      id: "remote_2",
+      kind: "remote",
+      label: "Remote 2",
+      ice: [],
+      root: [],
+    });
+    putCorpIceOnServer(state, "remote_2", "simple_sentry_ice");
     moveRunnerCardToGrip(state, "onr_v1_086_forged-activation-orders");
     state = apply(
       state,
@@ -1219,16 +1228,18 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         action.type === "play_event" &&
         sourceDefinition(state, action) === "onr_v1_086_forged-activation-orders",
     );
-    expect(state.pendingChoice?.options).toHaveLength(3);
+    expect(state.pendingChoice?.options).toHaveLength(4);
     expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
-      "ICE in HQ 1",
-      "ICE in HQ 2",
-      "ICE in R&D 1",
+      "ICE 1 in HQ",
+      "ICE 2 in HQ",
+      "ICE 1 in R&D",
+      "ICE 1 in Remote 2",
     ]);
     expect(state.pendingChoice?.options.map((option) => option.publicLabel)).toEqual([
-      "ICE in HQ 1",
-      "ICE in HQ 2",
-      "ICE in R&D 1",
+      "ICE 1 in HQ",
+      "ICE 2 in HQ",
+      "ICE 1 in R&D",
+      "ICE 1 in Remote 2",
     ]);
     expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toMatch(
       /simple_barrier_ice|cardInstances/,
@@ -1266,7 +1277,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       corpDecision: "trash_ice",
       targetServerLabel: "R&D",
-      targetIcePositionLabel: "R&D 1",
+      targetIcePositionLabel: "ICE 1 in R&D",
       trashedCount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
@@ -10527,7 +10538,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
         ["hq", "Restrictive Net Zoning auf HQ ausrichten"],
         ["rd", "Restrictive Net Zoning auf R&D ausrichten"],
         ["archives", "Restrictive Net Zoning auf Archives ausrichten"],
-        ["remote_1", "Restrictive Net Zoning auf Remote Server 1 ausrichten"],
+        ["remote_1", "Restrictive Net Zoning auf Remote 1 ausrichten"],
       ]),
     );
     state = apply(
@@ -13249,6 +13260,42 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(() => applyChoice(state, "runner", String(hardwareOption?.id))).toThrow(
       "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.",
     );
+  });
+
+  it("lets Mantis choose any Runner stack card instead of only programs", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-search"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_099_mantis-fixer-at-large",
+    );
+    const targetEventId = putRunnerCardOnTopOfStack(
+      state,
+      "simple_economy_event",
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
+    );
+
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.source).toContain("v1911.search_stack_card");
+    const eventOption = runnerChoice?.options.find(
+      (option) => option.value === targetEventId,
+    );
+    expect(eventOption).toMatchObject({
+      label: "Simple Economy Event",
+      card: { definitionId: "simple_economy_event", type: "event" },
+    });
+    expect(eventOption?.selectable).toBeUndefined();
+
+    state = applyChoice(state, "runner", String(eventOption?.id));
+    expect(state.runner.grip).toContain(targetEventId);
+    expect(state.runner.stack).not.toContain(targetEventId);
   });
 
   it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
@@ -23272,7 +23319,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       v1922RunnerEventAbility: "force_rez_or_trash_ice",
       targetVisibility: "installed_ice_position",
       targetServerLabel: "R&D",
-      targetIcePositionLabel: "R&D 1",
+      targetIcePositionLabel: "ICE 1 in R&D",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"simple_barrier_ice"/,
@@ -23291,7 +23338,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpDecision: "rez_ice",
       targetCardDefinitionId: "simple_barrier_ice",
       targetServerLabel: "R&D",
-      targetIcePositionLabel: "R&D 1",
+      targetIcePositionLabel: "ICE 1 in R&D",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -23359,7 +23406,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       corpDecision: "trash_ice",
       trashedCount: 1,
       targetCardDefinitionId: "simple_barrier_ice",
-      targetIcePositionLabel: "HQ 1",
+      targetIcePositionLabel: "ICE 1 in HQ",
     });
   });
 

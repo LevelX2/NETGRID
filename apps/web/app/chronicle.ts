@@ -351,7 +351,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           const rezCostPaid = numberValue(payload.rezCostPaid) ?? 0;
           title = phrase(
             subject,
-            `entschieden, ${targetTitle ?? "ICE"} in ${targetIceLabel} zu rezzen`,
+            `entschieden, ${targetTitle ? `${targetTitle} als ${targetIceLabel}` : targetIceLabel} zu rezzen`,
           );
           description = `Rez-Kosten: ${creditText(rezCostPaid)}.`;
           chips.push("Forged Activation Orders", "Rez", `${rezCostPaid} ${creditLabel(rezCostPaid)}`, targetIceLabel);
@@ -360,14 +360,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         if (corpDecision === "trash_ice") {
           title = phrase(
             subject,
-            `entschieden, ${targetTitle ?? "ICE"} in ${targetIceLabel} zu trashen`,
+            `entschieden, ${targetTitle ? `${targetTitle} als ${targetIceLabel}` : targetIceLabel} zu trashen`,
           );
           chips.push("Forged Activation Orders", "Trash", targetIceLabel);
           break;
         }
         title = phrase(
           subject,
-          `ICE in ${targetIceLabel} für Forged Activation Orders gewählt`,
+          `${targetIceLabel} für Forged Activation Orders gewählt`,
         );
         chips.push("Forged Activation Orders", "Ziel", targetIceLabel);
         break;
@@ -720,7 +720,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         visibility = "public";
         title = phrase(subject, `${cardTitle ?? "Ice and Data's Guide to the Net"} gespielt und ${cardCountText(exposedCount)} äußerstes ICE aufgedeckt`);
-        description = serverLabels.length > 0 ? `Betroffene Forts: ${serverLabels.join(", ")}.` : undefined;
+        description = serverLabels.length > 0 ? `Betroffene Remotes: ${serverLabels.join(", ")}.` : undefined;
         chips.push("Event", "Expose", `${exposedCount} ICE`, ...serverLabels);
         cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
         break;
@@ -1044,7 +1044,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
     category = "run";
     importance = "important";
     visibility = "public";
-    title = phrase(subject, `1 Pox-Counter auf ${targetServerLabel ?? "das angegriffene Fort"} gelegt`);
+    title = phrase(subject, `1 Pox-Counter auf ${targetServerLabel ?? "den angegriffenen Server"} gelegt`);
     chips.push("Pox", "+1 Virus", ...(targetServerLabel ? [targetServerLabel] : []), ...(countersAfter !== undefined ? [`${countersAfter} dort`] : []));
   }
   if (actionType === "install_card") {
@@ -1671,7 +1671,7 @@ function installLocation(serverLabel: string | undefined, zoneLabel: string | un
   if (zoneLabel === "Rig") return " im Rig";
   if (zoneLabel === "Resource") return " als Resource";
   const area = installAreaFromLabel(label);
-  if (area === "Fort") return " in einem Fort";
+  if (area === "Remote") return " in einem Remote";
   if (area === "ICE") return " als ICE";
   return "";
 }
@@ -1684,14 +1684,14 @@ function installDestinationForTitle(actor: Side | undefined, serverLabel: string
 
 function installAreaFromPayload(serverLabel: string | undefined, zoneLabel: string | undefined, label: string | undefined): string {
   if (zoneLabel) return zoneLabel;
-  if (serverLabel) return /Fort/.test(serverLabel) ? "Fort" : serverLabel;
+  if (serverLabel) return /Remote/.test(serverLabel) ? "Remote" : serverLabel;
   return installAreaFromLabel(label);
 }
 
 function installAreaFromLabel(label: string | undefined): string {
   if (!label) return "Installation";
   if (/ice|vor/i.test(label)) return "ICE";
-  if (/remote|außenserver|aussenserver|fort/i.test(label)) return "Fort";
+  if (/remote|außenserver|aussenserver|fort/i.test(label)) return "Remote";
   return "Installation";
 }
 
@@ -1705,7 +1705,7 @@ function advanceTitlePart(cardTitle: string | undefined, cardType: string | null
 
 function displayServerLabel(label: string | undefined): string | undefined {
   if (!label) return undefined;
-  return label.replace(/\bRemote\s+(\d+)\b/g, "Fort $1").replace(/\bneuem Remote\b/g, "neuem Fort");
+  return label;
 }
 
 function runTargetFromLabel(label: string | undefined): string {
