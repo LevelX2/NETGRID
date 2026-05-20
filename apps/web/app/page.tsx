@@ -348,7 +348,10 @@ type LocalMatchClockAnchor = {
 function effectiveAiTurnPresentation(payload: ClientPayload | null): ClientPayload["aiTurnPresentation"] | undefined {
   const presentation = payload?.aiTurnPresentation;
   if (!payload || !presentation?.activeAiSide) return presentation;
-  const aiHasCurrentControl = payload.playerView.activeSide === presentation.activeAiSide || payload.playerView.pendingChoice?.side === presentation.activeAiSide;
+  const aiHasCurrentControl =
+    payload.playerView.activeSide === presentation.activeAiSide ||
+    payload.playerView.pendingChoice?.side === presentation.activeAiSide ||
+    payload.playerClock?.decisionOwnerSide === presentation.activeAiSide;
   if (aiHasCurrentControl) return presentation;
   return { ...presentation, canAdvanceAi: false };
 }
