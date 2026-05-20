@@ -985,6 +985,70 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
   });
 
+  it("does not retain an old access reveal after later turn and Corp action events", () => {
+    const access = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Fort 1",
+      cardDefinitionId: "simple_agenda",
+      title: "Simple Agenda"
+    });
+    const runnerEndTurn = {
+      ...publicEvent("evt_runner_end", "action", {
+        actionType: "end_turn",
+        actor: "runner"
+      }),
+      stateVersionAfter: 2
+    };
+    const corpInstall = {
+      ...publicEvent("evt_corp_install", "action", {
+        actionType: "install_card",
+        actor: "corp",
+        serverLabel: "Fort 2"
+      }),
+      stateVersionAfter: 3
+    };
+
+    expect(retainedAccessRevealEvent([access, runnerEndTurn, corpInstall], null)).toBeNull();
+  });
+
+  it("does not fall back to an older visible reveal after a newer redacted access", () => {
+    const visibleRemoteAccess = publicEvent("evt_remote_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Fort 1",
+      cardDefinitionId: "simple_agenda",
+      title: "Simple Agenda"
+    });
+    const redactedRdAccess = publicEvent("evt_rd_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "R&D",
+      redactedKind: "accessed_card"
+    });
+
+    expect(retainedAccessRevealEvent([visibleRemoteAccess, redactedRdAccess], null)).toBeNull();
+  });
+
+  it("retains access reveal across same-action public follow-up events", () => {
+    const access = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Fort 1",
+      cardDefinitionId: "simple_ambush",
+      title: "Simple Ambush"
+    });
+    const sameActionEffect = {
+      ...publicEvent("evt_effect", "effect", {
+        actionType: "net_damage",
+        actor: "corp"
+      }),
+      stateVersionAfter: access.stateVersionAfter
+    };
+
+    expect(retainedAccessRevealEvent([access, sameActionEffect], null)?.eventId).toBe("evt_access");
+  });
+
   it("does not retain redacted central-access events without the accessed card identity", () => {
     const redactedRdAccess = publicEvent("evt_access", "action", {
       actionType: "access_card",

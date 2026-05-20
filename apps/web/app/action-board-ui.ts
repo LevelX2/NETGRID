@@ -632,15 +632,24 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
 }
 
 export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
+  const newerEvents: PublicGameEvent[] = [];
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event || event.eventId === dismissedEventId) return null;
-    if (event.publicPayload.actionType !== "access_card") continue;
-    if (typeof event.publicPayload.cardDefinitionId !== "string") continue;
-    if (typeof event.publicPayload.title !== "string") continue;
-    return event;
+    if (event.publicPayload.actionType !== "access_card") {
+      newerEvents.push(event);
+      continue;
+    }
+    if (typeof event.publicPayload.cardDefinitionId !== "string") return null;
+    if (typeof event.publicPayload.title !== "string") return null;
+    return newerEvents.every((newerEvent) => accessRevealCanBeRetainedPast(newerEvent, event)) ? event : null;
   }
   return null;
+}
+
+function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
+  if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
+  return newerEvent.publicPayload.actionType === "continue_run";
 }
 
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
