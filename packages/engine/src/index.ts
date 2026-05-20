@@ -235,7 +235,6 @@ import {
   DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
   NEW_GALVESTON_TRASH_COST_UPGRADE_ID,
   PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
-  RED_HERRINGS_STEAL_TAX_UPGRADE_ID,
   TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
 } from "./mechanics/server-upgrades";
 import {
@@ -244,6 +243,10 @@ import {
   TRACE_ASSET_CARD_IDS,
 } from "./mechanics/trace-tags";
 import { hashStateSnapshot } from "./state-hash";
+import {
+  quoteStealCostForAccessedAgenda,
+  snapshotPersistentStealCostModifiersForSource,
+} from "./ability-engine/steal-cost-modifiers";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
 type VisibleCounterPayload = {
@@ -6533,10 +6536,15 @@ function runnerAccessActions(state: GameState): LegalAction[] {
   );
   const accessedFromArchives = isCurrentAccessFromArchives(state, run);
   if (definition.type === "agenda") {
-    const redHerringsId = redHerringsCardIdForCurrentAccess(state, run);
-    if (redHerringsId) {
-      const stealCost = 5;
-      if (state.runner.credits < stealCost) {
+    const accessServerId =
+      run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
+    const stealCostQuote = quoteStealCostForAccessedAgenda(
+      state,
+      accessServerId,
+      definition,
+    );
+    if (stealCostQuote.totalCost > 0) {
+      if (state.runner.credits < stealCostQuote.totalCost) {
         return [
           action(
             state,
@@ -6547,9 +6555,7 @@ function runnerAccessActions(state: GameState): LegalAction[] {
             [],
             {
               cardId: run.accessedCardId,
-              v1918UpgradeAbility: "red_herrings_steal_tax",
-              redHerringsCardId: redHerringsId,
-              stealAdditionalCost: stealCost,
+              ...stealCostQuote.publicPayload,
               stealBlockedByCost: true,
             },
           ),
@@ -6562,12 +6568,10 @@ function runnerAccessActions(state: GameState): LegalAction[] {
           "steal_agenda",
           `${definition.title} stehlen`,
           run.accessedCardId,
-          [{ credits: stealCost }],
+          [{ credits: stealCostQuote.totalCost }],
           {
             cardId: run.accessedCardId,
-            v1918UpgradeAbility: "red_herrings_steal_tax",
-            redHerringsCardId: redHerringsId,
-            stealAdditionalCost: stealCost,
+            ...stealCostQuote.publicPayload,
           },
         ),
       ];
@@ -6686,22 +6690,6 @@ function runnerAccessActions(state: GameState): LegalAction[] {
       "game_rule",
     ),
   ];
-}
-
-function redHerringsCardIdForCurrentAccess(
-  state: GameState,
-  run: ActiveRun,
-): CardInstanceId | undefined {
-  const serverId =
-    run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId;
-  return (
-    rezzedRootCardIdOnServer(
-      state,
-      serverId,
-      RED_HERRINGS_STEAL_TAX_UPGRADE_ID,
-    ) ??
-    run.redHerringsTaxSourceByServer?.[serverId]
-  );
 }
 
 function hasPendingAccessCandidate(state: GameState, run: ActiveRun): boolean {
@@ -12322,23 +12310,16 @@ function trashAccessedCard(
   const run = state.run;
   if (
     run &&
-    definition.id === RED_HERRINGS_STEAL_TAX_UPGRADE_ID &&
     sourceZone.side === "corp" &&
     sourceZone.zone === "serverRoot" &&
     sourceZone.serverId === (run.breach?.serverId ?? run.attackedServerId)
   ) {
-    run.redHerringsTaxSourceByServer = {
-      ...(run.redHerringsTaxSourceByServer ?? {}),
-      [sourceZone.serverId]: cardId as CardInstanceId,
-    };
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1918UpgradeAbility: "red_herrings_steal_tax",
-        redHerringsCardId: cardId,
-        redHerringsTaxPersistsForRun: true,
-      };
-    }
+    snapshotPersistentStealCostModifiersForSource(
+      state,
+      cardId as CardInstanceId,
+      sourceZone.serverId,
+      legalAction,
+    );
   }
   trashCorpInstalledCardToArchives(state, cardId, legalAction);
   if (state.run?.breach) {
@@ -21133,7 +21114,11 @@ function makeActionId(
   )) {
     parts.push(entry.abilityId);
   }
-  if (payload?.redHerringsCardId) parts.push(String(payload.redHerringsCardId));
+  if (payload?.stealCost !== undefined) parts.push(String(payload.stealCost));
+  if (payload?.stealCostSourceDefinitionIds)
+    parts.push(String(payload.stealCostSourceDefinitionIds));
+  if (payload?.stealCostPersistedForCurrentAccess !== undefined)
+    parts.push(String(payload.stealCostPersistedForCurrentAccess));
   if (payload?.oliviaSalazarRezSourceCardId)
     parts.push(String(payload.oliviaSalazarRezSourceCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
@@ -21983,10 +21968,17 @@ function publicContextForAction(
     context.runnerHardwareAbility = legalAction.payload.runnerHardwareAbility;
   if (typeof legalAction.payload?.printedDamageAmount === "number")
     context.printedDamageAmount = legalAction.payload.printedDamageAmount;
-  if (typeof legalAction.payload?.redHerringsCardId === "string")
-    context.redHerringsCardId = legalAction.payload.redHerringsCardId;
-  if (legalAction.payload?.redHerringsTaxPersistsForRun === true)
-    context.redHerringsTaxPersistsForRun = true;
+  if (typeof legalAction.payload?.stealCost === "number")
+    context.stealCost = legalAction.payload.stealCost;
+  if (typeof legalAction.payload?.stealAdditionalCost === "number")
+    context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;
+  if (typeof legalAction.payload?.stealCostSourceDefinitionIds === "string")
+    context.stealCostSourceDefinitionIds =
+      legalAction.payload.stealCostSourceDefinitionIds;
+  if (typeof legalAction.payload?.stealCostSourceTitles === "string")
+    context.stealCostSourceTitles = legalAction.payload.stealCostSourceTitles;
+  if (legalAction.payload?.stealCostPersistedForCurrentAccess === true)
+    context.stealCostPersistedForCurrentAccess = true;
   if (legalAction.payload?.publicRevealKind)
     context.revealKind = legalAction.payload.publicRevealKind;
   if (typeof legalAction.payload?.publicRevealKind === "string")
@@ -22266,12 +22258,8 @@ function publicContextForAction(
       context.runStartTaxSourceDefinitionIds =
         legalAction.payload.runStartTaxSourceDefinitionIds;
   }
-  if (legalAction.payload?.v1918UpgradeAbility === "red_herrings_steal_tax") {
-    context.v1918UpgradeAbility = "red_herrings_steal_tax";
-    context.stealAdditionalCost = legalAction.payload.stealAdditionalCost;
-    if (legalAction.payload.stealBlockedByCost === true)
-      context.stealBlockedByCost = true;
-  }
+  if (legalAction.payload?.stealBlockedByCost === true)
+    context.stealBlockedByCost = true;
   if (
     legalAction.payload?.agendaAbility === "v1919_scored_agenda_reveal_rd_top"
   ) {

@@ -8,6 +8,7 @@ import type {
 export type CardModifierImplementation =
   | CardRezCostModifierImplementation
   | CardInstallCostModifierImplementation
+  | CardStealCostModifierImplementation
   | CardIceStrengthModifierImplementation
   | CardAdditionalSubroutineModifierImplementation
   | CardHandSizeModifierImplementation
@@ -167,6 +168,21 @@ export type CardInstallCostModifierImplementation = {
     cardType: Extract<CardType, "ice">;
     sameServerAsSource?: boolean;
   };
+};
+
+export type CardStealCostModifierImplementation = {
+  kind: "steal_cost";
+  operation: "increase";
+  amount: number;
+  activeWhile: "rezzed";
+  sourceZone: "corp_root";
+  side: Extract<Side, "corp">;
+  visibility: EventVisibilityClass;
+  appliesTo: {
+    cardType: Extract<CardType, "agenda">;
+  };
+  sameServerAsSource: true;
+  persistsForCurrentAccessIfSourceTrashed: true;
 };
 
 export type CardIceStrengthModifierImplementation = {

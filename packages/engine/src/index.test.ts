@@ -8237,7 +8237,32 @@ describe("V1.6.2 Mechanikpaket B", () => {
         cardImplementationCoverageForDefinitionId(definitionId)?.status,
       ).toBe("implemented");
     }
-    expect(cardImplementationForDefinitionId("onr_v1_366_red-herrings")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_366_red-herrings")).toBeDefined();
+  });
+
+  it("describes P3.11 Red Herrings steal-cost modifier", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_v1_366_red-herrings")?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "steal_cost",
+        operation: "increase",
+        amount: 5,
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        side: "corp",
+        visibility: "public",
+        appliesTo: {
+          cardType: "agenda",
+        },
+        sameServerAsSource: true,
+        persistsForCurrentAccessIfSourceTrashed: true,
+      }),
+    );
+    expect(
+      cardImplementationCoverageForDefinitionId("onr_v1_366_red-herrings")
+        ?.status,
+    ).toBe("implemented");
   });
 
   it("describes activated main-action card abilities without callbacks", () => {
@@ -29713,10 +29738,27 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(stealAction?.costs).toEqual([{ credits: 5 }]);
     expect(stealAction?.payload).toMatchObject({
-      v1918UpgradeAbility: "red_herrings_steal_tax",
-      redHerringsCardId: redHerringsId,
+      stealCost: 5,
       stealAdditionalCost: 5,
+      stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
+      stealCostSourceTitles: "Red Herrings",
     });
+
+    const stale = structuredClone(state);
+    stale.cardInstances[redHerringsId] = {
+      ...stale.cardInstances[redHerringsId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(stale, {
+        matchId: stale.matchId,
+        side: "runner",
+        actionId: stealAction!.actionId,
+        clientKnownStateVersion: stale.stateVersion,
+        idempotencyKey: "v1918-red-herrings-stale",
+      }).ok,
+    ).toBe(false);
 
     state = apply(state, "runner", (action) => action.type === "steal_agenda");
 
@@ -29724,13 +29766,89 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(state.runner.scoreArea).toContain(agendaId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "steal_agenda",
-      v1918UpgradeAbility: "red_herrings_steal_tax",
+      stealCost: 5,
       stealAdditionalCost: 5,
+      stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
     });
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("limits Red Herrings steal_cost to rezzed same-fort agenda access", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-scope"),
+    );
+    state.runner.credits = 4;
+    const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
+    putCorpRootInRemote(state, "simple_agenda");
+    state.cardInstances[redHerringsId] = {
+      ...state.cardInstances[redHerringsId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "steal_agenda",
+      ),
+    ).toBe(false);
+    expect(
+      mustAction(state, "runner", (action) => action.type === "decline_trash")
+        .payload,
+    ).toMatchObject({
+      stealCost: 5,
+      stealBlockedByCost: true,
+    });
+
+    let unrezzed = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-unrezzed"),
+    );
+    const unrezzedId = putCorpRootInRemote(unrezzed, "onr_v1_366_red-herrings");
+    putCorpRootInRemote(unrezzed, "simple_agenda");
+    unrezzed.cardInstances[unrezzedId] = {
+      ...unrezzed.cardInstances[unrezzedId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    unrezzed = apply(
+      unrezzed,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    unrezzed = apply(unrezzed, "runner", (action) => action.type === "access_card");
+    unrezzed = apply(unrezzed, "runner", (action) => action.type === "decline_trash");
+    unrezzed = apply(unrezzed, "runner", (action) => action.type === "access_card");
+    expect(mustAction(unrezzed, "runner", (action) => action.type === "steal_agenda").costs).toEqual([]);
+
+    let otherFort = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("p311-red-herrings-other-fort"),
+    );
+    const otherId = putCorpRootInRemote(otherFort, "onr_v1_366_red-herrings");
+    otherFort.cardInstances[otherId] = {
+      ...otherFort.cardInstances[otherId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const agendaId = moveCorpCardToHq(otherFort, "simple_agenda");
+    keepOnlyCorpHqCard(otherFort, agendaId);
+    otherFort = apply(
+      otherFort,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    otherFort = apply(otherFort, "runner", (action) => action.type === "access_card");
+    expect(mustAction(otherFort, "runner", (action) => action.type === "steal_agenda").costs).toEqual([]);
   });
 
   it("keeps V1.9.18 city-grid region replacement server-bound and visible", () => {
@@ -35401,22 +35519,41 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(state.runner.heap).not.toContain(redHerringsId);
     expect(state.corp.archives).toContain(redHerringsId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      redHerringsCardId: redHerringsId,
-      redHerringsTaxPersistsForRun: true,
+      stealCostPersistedForCurrentAccess: true,
+      stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
+      stealCostSourceTitles: "Red Herrings",
     });
     state = apply(state, "runner", (action) => action.type === "access_card");
     const steal = mustAction(state, "runner", (action) => action.type === "steal_agenda");
     expect(steal.costs).toEqual([{ credits: 5 }]);
     expect(steal.payload).toMatchObject({
-      redHerringsCardId: redHerringsId,
+      stealCost: 5,
       stealAdditionalCost: 5,
+      stealCostPersistedForCurrentAccess: true,
+      stealCostSourceDefinitionIds: "onr_v1_366_red-herrings",
     });
     state = apply(state, "runner", (action) => action.actionId === steal.actionId);
     expect(state.runner.scoreArea).toContain(agendaId);
+    expect(state.runner.credits).toBe(0);
     expect(validateGameState(state).ok).toBe(true);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+
+    state.runner.credits = 10;
+    const laterAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    expect(laterAgendaId).toBeDefined();
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(
+      mustAction(state, "runner", (action) => action.type === "steal_agenda")
+        .costs,
+    ).toEqual([]);
   });
 
   it("loads Vewy Vewy Quiet with two recurring run credits", () => {

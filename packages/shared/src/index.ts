@@ -742,6 +742,15 @@ export type RunnerState = {
   rig: RunnerRig;
 };
 
+export type AccessStealCostModifierSnapshot = {
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  sourceTitle: string;
+  amount: number;
+  appliesToCardType: Extract<CardType, "agenda">;
+  visibility: EventVisibilityClass;
+};
+
 export type RunState = {
   runId: string;
   attackedServerId: Exclude<ServerId, "new_remote">;
@@ -803,8 +812,11 @@ export type RunState = {
   remainderStrengthBonusByBreaker?: Partial<Record<CardInstanceId, number>>;
   bizarreEncryptionSchemeActive?: boolean;
   traceSuccessBySubroutineIndex?: Partial<Record<number, boolean>>;
-  redHerringsTaxSourceByServer?: Partial<
-    Record<Exclude<ServerId, "new_remote">, CardInstanceId>
+  accessStealCostModifierSnapshotsByServer?: Partial<
+    Record<
+      Exclude<ServerId, "new_remote">,
+      AccessStealCostModifierSnapshot[]
+    >
   >;
   singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];

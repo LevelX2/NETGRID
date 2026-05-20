@@ -22,6 +22,9 @@ const IMPLEMENTED_REZ_COST_MODIFIER_LOCATION =
 const IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_STEAL_COST_MODIFIER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -154,6 +157,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+  "onr_v1_366_red-herrings":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/red-herrings.ts",
   "onr_v1_370_tesseract-fort-construction":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
 };
@@ -185,6 +190,14 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive Corp install-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_INSTALL_COST_MODIFIER_LOCATION);
+  }
+  if (
+    implementation.modifiers?.some((modifier) => modifier.kind === "steal_cost")
+  ) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for passive access agenda steal-cost modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_STEAL_COST_MODIFIER_LOCATION);
   }
   if (
     implementation.modifiers?.some(

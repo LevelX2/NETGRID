@@ -20,8 +20,6 @@ export const OMNI_KISMET_TAG_CONDITION_UPGRADE_ID =
 export const PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID =
   "onr_v1_365_paris-city-grid";
 
-export const RED_HERRINGS_STEAL_TAX_UPGRADE_ID = "onr_v1_366_red-herrings";
-
 export const TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID =
   "onr_v1_372_turbeau-delacroix";
 

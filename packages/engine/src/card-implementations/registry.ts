@@ -41,6 +41,7 @@ import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renew
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
+import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
@@ -117,6 +118,7 @@ export const CARD_IMPLEMENTATIONS = [
   antiquatedInterfaceRoutinesImplementation,
   chesterMixImplementation,
   jerusalemCityGridImplementation,
+  redHerringsImplementation,
   tesseractFortConstructionImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
