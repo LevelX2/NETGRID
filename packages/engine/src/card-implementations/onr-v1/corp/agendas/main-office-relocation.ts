@@ -1,7 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Main-Office Relocation
-// text: Hand size +2.
+// text: Hand size +2
 export const mainOfficeRelocationImplementation: CardImplementationDefinition =
   {
     cardDefinitionId: "onr_v1_205_main-office-relocation",

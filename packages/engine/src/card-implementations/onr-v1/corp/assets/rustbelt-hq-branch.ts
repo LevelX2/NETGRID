@@ -1,7 +1,7 @@
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Rustbelt HQ Branch
-// text: Hand size +2.
+// text: Hand size +2
 export const rustbeltHqBranchImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_338_rustbelt-hq-branch",
   modifiers: [
