@@ -450,6 +450,17 @@ export type ReconnectResult = JoinMatchResult & {
   eventTail: PublicGameEvent[];
 };
 
+export type MaintenanceRecoveryAccessResult = {
+  matchId: string;
+  side: Side;
+  access: string;
+  displayName: string;
+  webSocketUrl: string;
+  matchStatus: MatchStatus;
+  matchVersion: number;
+  issuedAt: string;
+};
+
 export type LobbyActionResult =
   | {
       ok: true;
@@ -1724,6 +1735,47 @@ export class MultiplayerService {
 
   async storageMaintenanceSetRetentionProtection(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined> {
     return this.storage.maintenanceSetRetentionProtection?.(matchId, protectedValue);
+  }
+
+  async issueMaintenanceRecoveryAccess(matchId: string, input: { side: Side; displayName?: string }): Promise<MaintenanceRecoveryAccessResult | { error: SafeErrorPayload }> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      if (isTerminalStatus(record.match.status)) return { error: safeError("match_terminal", "Für abgeschlossene Matches wird kein Fortsetzungszugang erstellt.") };
+      const session = record.sessions.find((candidate) => candidate.side === input.side);
+      if (!session) return { error: safeError("side_unavailable", "Für diese Seite gibt es keine wiederherstellbare Spielersession.") };
+
+      const now = this.now();
+      const access = generateToken();
+      this.revokeTokenByHash(record, "session", session.sessionTokenHash, now);
+      this.revokeTokenByHash(record, "reconnect", session.reconnectTokenHash, now);
+      record.sessions = record.sessions.map((candidate) =>
+        candidate.sessionId === session.sessionId
+          ? {
+              ...candidate,
+              displayName: input.displayName?.trim() || candidate.displayName,
+              reconnectTokenHash: this.hashToken(access),
+              connected: false,
+              lastSeenAt: now
+            }
+          : candidate
+      );
+      record.tokens.push(this.tokenRecord(matchId, input.side, "reconnect", access, now));
+      record.match.matchVersion += 1;
+      record.match.updatedAt = now;
+      await this.storage.save(record);
+
+      return {
+        matchId,
+        side: input.side,
+        access,
+        displayName: input.displayName?.trim() || session.displayName,
+        webSocketUrl: this.webSocketUrl(),
+        matchStatus: record.match.status,
+        matchVersion: record.match.matchVersion,
+        issuedAt: now
+      };
+    });
   }
 
   async setMatchRetentionProtection(input: { matchId: string; side: Side; sessionToken: string; protected: boolean }): Promise<{ ok: true; payload: LobbyPayload | SidePayload } | { ok: false; error: SafeErrorPayload }> {

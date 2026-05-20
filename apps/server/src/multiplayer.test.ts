@@ -404,6 +404,50 @@ describe("Backend 0.5 private storage maintenance", () => {
     }
   });
 
+  it("issues a local recovery access from maintenance without listing raw token fields", async () => {
+    const dir = await tempStorageDir();
+    const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-recovery-access" });
+    const created = await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", displayName: "Ludwig", seed: "backend-05-recovery" });
+
+    const handle = createNetgridHttpServer(service, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const response = await fetch(`${baseUrl}/api/storage/maintenance/matches/${encodeURIComponent(created.matchId)}/recovery-access`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ side: "runner" })
+      });
+      const recovery = (await response.json()) as { matchId?: string; side?: Side; access?: string; displayName?: string; matchVersion?: number };
+      expect(response.status).toBe(200);
+      expect(recovery.matchId).toBe(created.matchId);
+      expect(recovery.side).toBe("runner");
+      expect(recovery.displayName).toBe("Ludwig");
+      expect(recovery.access).toMatch(/^[A-Za-z0-9_-]{32,}$/);
+      expect(JSON.stringify(recovery)).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privateDeckSnapshots|privatePayload|decklist|game_state_json/i);
+
+      const oldBootstrap = await service.bootstrap(created.matchId, "runner", created.hostSessionToken, { allowLobby: true });
+      expect("error" in oldBootstrap).toBe(true);
+      const oldReconnect = await service.reconnectMatch(created.matchId, { side: "runner", reconnectToken: created.hostReconnectToken });
+      expect("error" in oldReconnect).toBe(true);
+
+      const reconnectResponse = await fetch(`${baseUrl}/api/matches/${encodeURIComponent(created.matchId)}/reconnect`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ side: "runner", reconnectToken: recovery.access })
+      });
+      const reconnected = (await reconnectResponse.json()) as { matchId?: string; side?: Side; sessionToken?: string; reconnectToken?: string; matchVersion?: number };
+      expect(reconnectResponse.status).toBe(200);
+      expect(reconnected.matchId).toBe(created.matchId);
+      expect(reconnected.side).toBe("runner");
+      expect(reconnected.sessionToken).toBeTruthy();
+      expect(reconnected.reconnectToken).toBeTruthy();
+      expect(reconnected.matchVersion).toBeGreaterThan(recovery.matchVersion ?? 0);
+    } finally {
+      await handle.close();
+    }
+  });
+
   it("previews active cleanup candidates without exposing private storage data", async () => {
     const dir = await tempStorageDir();
     const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });

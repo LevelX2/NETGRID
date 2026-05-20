@@ -2248,6 +2248,10 @@ export default function Page() {
 
   useEffect(() => {
     if (!session) return;
+    if (!session.sessionToken.trim() || !session.webSocketUrl.trim()) {
+      setConnection("offline");
+      return;
+    }
     connectWebSocket(session);
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
@@ -3116,7 +3120,7 @@ export default function Page() {
     }
     if (reconnected.error) {
       setNotice(reconnected.error.message);
-      setSession(baseSession);
+      setSession(baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim() ? baseSession : null);
       setPayload(null);
       setLobby(null);
       setConnection("offline");
@@ -3837,7 +3841,20 @@ export default function Page() {
   function connectWebSocket(nextSession: SessionInfo) {
     setConnection("connecting");
     socketRef.current?.close();
-    const socket = new WebSocket(normalizeWebSocketUrl(nextSession.webSocketUrl));
+    const socketUrl = normalizeWebSocketUrl(nextSession.webSocketUrl);
+    if (!socketUrl) {
+      setConnection("offline");
+      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
+      return;
+    }
+    let socket: WebSocket;
+    try {
+      socket = new WebSocket(socketUrl);
+    } catch {
+      setConnection("offline");
+      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
+      return;
+    }
     socketRef.current = socket;
     socket.onopen = () => {
       if (socketRef.current !== socket) return;
@@ -12392,7 +12409,10 @@ function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayloa
 }
 
 function normalizeWebSocketUrl(value: string): string {
-  return value.trim().replace(/\s+(?=\/ws(?:$|[?#]))/, "");
+  return value
+    .trim()
+    .replace(/\s+(:\d+(?:\/|$|[?#]))/g, "$1")
+    .replace(/\s+(?=\/ws(?:$|[?#]))/, "");
 }
 
 async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyClientPayload | null> {

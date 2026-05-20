@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
+  buildMaintenanceRecoveryLink,
   DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
   EMPTY_MAINTENANCE_FILTERS,
   findForbiddenMaintenanceMarkers,
@@ -61,6 +62,19 @@ describe("Backend 0.5 maintenance UI helpers", () => {
         includeProtected: true
       })
     ).toEqual({ statuses: ["active", "abandoned"], olderThanMinutes: 90, limit: 500, includeProtected: true });
+  });
+
+  it("builds a root reconnect link from local recovery access", () => {
+    expect(
+      buildMaintenanceRecoveryLink(
+        {
+          matchId: "match_abc",
+          side: "runner",
+          access: "recovery_access_secret"
+        },
+        "http://127.0.0.1:3000/maintenance"
+      )
+    ).toBe("http://127.0.0.1:3000/?matchId=match_abc&side=runner&reconnectToken=recovery_access_secret");
   });
 
   it("uses the loopback backend for locally opened maintenance pages", () => {
