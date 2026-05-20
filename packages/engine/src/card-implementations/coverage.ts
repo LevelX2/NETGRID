@@ -96,12 +96,28 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
+  "onr_v1_081_custodial-position":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
+  "onr_v1_084_edited-shipping-manifests":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
+  "onr_v1_085_executive-wiretaps":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+  "onr_v1_096_kilroy-was-here":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
   "onr_v1_095_jack-n-joe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
   "onr_v1_097_livewires-contacts":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
+  "onr_v1_106_private-ldl-access":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/private-ldl-access.ts",
+  "onr_v1_107_romp-through-hq":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/romp-through-hq.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_118_weather-to-finance-pipe":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/weather-to-finance-pipe.ts",
+  "onr_v1_062_shredder-uplink-protocol":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
   "onr_v1_163_floating-runner-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
   "onr_v1_174_rigged-investments":

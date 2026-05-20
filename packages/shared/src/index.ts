@@ -764,6 +764,8 @@ export type RunState = {
   successfulRunCreditLoss?: number;
   successfulRunRunnerTagGain?: number;
   successfulRunCorpDraw?: number;
+  successfulRunRunnerCreditGain?: number;
+  successfulRunRequiresCorpCredits?: boolean;
   phase: "approach_ice" | "encounter_ice" | "movement" | "access";
   position:
     | {
@@ -2410,14 +2412,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 1,
     rulesText:
-      "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 1, Runner gains 1 tag and the Corp draws 1 card.",
+      "Make a run on HQ. If run is successful, and the Corp has any bits when you would access HQ, do not access cards from HQ; instead, the Corp loses 1 and gives you a tag, and you gain 10.",
     mechanics: [
       "play_event",
       "start_run",
       "breach",
       "access_replacement",
       "tag",
-      "corp_draw",
+      "gain_credits",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -3029,7 +3031,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 0,
     rulesText:
-      "Make a run on HQ. If run is successful, treat it as a successful run on R&D instead of accessing HQ.",
+      "Make a run on HQ. If run is successful, do not access cards from HQ; instead, treat run as a successful run on R&D.",
     mechanics: [
       "play_event",
       "start_run",
@@ -8195,7 +8197,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     memoryCost: 2,
-    rulesText: "Installed run and access tool for breach pressure.",
+    rulesText:
+      "A: Make a run on the Archives. If run is successful, do not access cards from the Archives; instead, treat run as a successful run on HQ.",
     mechanics: [
       "install_program",
       "memory",

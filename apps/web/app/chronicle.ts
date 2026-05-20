@@ -718,7 +718,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const creditLoss = numberValue(payload.creditLoss) ?? 0;
         const tagsAdded = numberValue(payload.tagsAdded) ?? 0;
         const corpDrawnCount = numberValue(payload.corpDrawnCount) ?? 0;
-        const effectParts = accessReplacementEffectParts(creditLoss, tagsAdded, corpDrawnCount);
+        const gainedCredits = numberValue(payload.gainedCredits) ?? 0;
+        const effectParts = accessReplacementEffectParts(creditLoss, tagsAdded, corpDrawnCount, gainedCredits);
         category = tagsAdded > 0 ? "danger" : creditLoss > 0 ? "economy" : "run";
         importance = "important";
         visibility = "public";
@@ -729,7 +730,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           "Access ersetzt",
           ...(creditLoss > 0 ? [`Korp -${creditLoss}`] : []),
           ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : []),
-          ...(corpDrawnCount > 0 ? [`Korp zieht ${corpDrawnCount}`] : [])
+          ...(corpDrawnCount > 0 ? [`Korp zieht ${corpDrawnCount}`] : []),
+          ...(gainedCredits > 0 ? [`Runner +${gainedCredits}`] : [])
         );
         break;
       }
@@ -1745,10 +1747,11 @@ function agendaRevealCountText(amount: number): string {
   return amount === 1 ? "eine Agenda" : `${amount} Agenden`;
 }
 
-function accessReplacementEffectParts(creditLoss: number, tagsAdded: number, corpDrawnCount: number): string[] {
+function accessReplacementEffectParts(creditLoss: number, tagsAdded: number, corpDrawnCount: number, gainedCredits = 0): string[] {
   const parts: string[] = [];
   if (creditLoss > 0) parts.push(`Korp verliert ${creditText(creditLoss)}`);
   if (tagsAdded > 0) parts.push(`Runner erhält ${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`);
+  if (gainedCredits > 0) parts.push(`Runner erhält ${creditText(gainedCredits)}`);
   if (corpDrawnCount > 0) parts.push(`Korp zieht ${cardCountText(corpDrawnCount)}`);
   return parts.length > 0 ? parts : ["der Zugriff wird ersetzt"];
 }

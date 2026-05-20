@@ -8976,6 +8976,36 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("pending_implementation");
   });
 
+  it("registers P3.32 runner successful-run cards as implemented", () => {
+    const p332Cases = [
+      "onr_v1_081_custodial-position",
+      "onr_v1_084_edited-shipping-manifests",
+      "onr_v1_085_executive-wiretaps",
+      "onr_v1_096_kilroy-was-here",
+      "onr_v1_106_private-ldl-access",
+      "onr_v1_107_romp-through-hq",
+      "onr_v1_118_weather-to-finance-pipe",
+      "onr_v1_062_shredder-uplink-protocol",
+    ] as const;
+
+    for (const definitionId of p332Cases) {
+      expect(
+        cardImplementationForDefinitionId(definitionId),
+        definitionId,
+      ).toBeDefined();
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_105_priority-wreck"),
+    ).toBeUndefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_050_r-and-d-protocol-files"),
+    ).toBeUndefined();
+  });
+
   it("executes typed gain_credits card effects", () => {
     const state = createGameAfterSetup({ seed: "card-effect-gain-credits" });
     state.runner.credits = 5;
@@ -11372,6 +11402,58 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(state.corp.hq).toContain(hqOperationId);
   });
 
+  it("runs P3.32 CardImplementation multiaccess events on their printed central servers", () => {
+    let rdState = toRunnerTurn(v123CardReleaseGame("p3-32-custodial"));
+    rdState.runner.credits = 20;
+    moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
+    putCorpCardOnTopOfRd(rdState, "onr_v1_203_hostile-takeover");
+    putCorpCardOnTopOfRd(rdState, "onr_v1_297_overtime-incentives");
+    putCorpCardOnTopOfRd(rdState, "onr_v1_306_trojan-horse");
+
+    rdState = apply(
+      rdState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(rdState, action) ===
+          "onr_v1_081_custodial-position" &&
+        action.payload?.serverId === "rd",
+    );
+
+    expect(rdState.run?.breach?.serverId).toBe("rd");
+    expect(rdState.run?.breach?.queue).toHaveLength(3);
+    expect(rdState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      baseAccessCount: 3,
+      effectiveAccessCount: 3,
+    });
+
+    let hqState = toRunnerTurn(v123CardReleaseGame("p3-32-wiretaps"));
+    hqState.runner.credits = 20;
+    moveRunnerCardToGrip(hqState, "onr_v1_085_executive-wiretaps");
+    const hqIds = [
+      moveCorpCardToHq(hqState, "onr_v1_203_hostile-takeover"),
+      moveCorpCardToHq(hqState, "onr_v1_297_overtime-incentives"),
+      moveCorpCardToHq(hqState, "onr_v1_306_trojan-horse"),
+    ];
+    keepOnlyCorpHqCards(hqState, hqIds);
+
+    hqState = apply(
+      hqState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(hqState, action) === "onr_v1_085_executive-wiretaps" &&
+        action.payload?.serverId === "hq",
+    );
+
+    expect(hqState.run?.breach?.serverId).toBe("hq");
+    expect(hqState.run?.breach?.queue.filter((entry) => entry.zone === "hq")).toHaveLength(3);
+    expect(hqState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      baseAccessCount: 3,
+      effectiveAccessCount: 3,
+    });
+  });
+
   it("applies successful-run replacement effects for Weather-to-Finance Pipe and Edited Shipping Manifests", () => {
     let weatherState = toRunnerTurn(v171CardReleaseGame("v171-weather-pipe"));
     weatherState.runner.credits = 20;
@@ -11401,6 +11483,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
       manifestsState,
       "onr_v1_084_edited-shipping-manifests",
     );
+    const runnerCreditsBefore = manifestsState.runner.credits;
     const corpHqBefore = manifestsState.corp.hq.length;
     const corpRdBefore = manifestsState.corp.rd.length;
     manifestsState = apply(
@@ -11415,10 +11498,97 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(manifestsState.run).toBeUndefined();
     expect(manifestsState.corp.credits).toBe(7);
     expect(manifestsState.runner.tags).toBe(1);
-    expect(manifestsState.corp.hq.length).toBe(corpHqBefore + 1);
-    expect(manifestsState.corp.rd.length).toBe(corpRdBefore - 1);
+    expect(manifestsState.runner.credits).toBe(runnerCreditsBefore - 1 + 10);
+    expect(manifestsState.corp.hq.length).toBe(corpHqBefore);
+    expect(manifestsState.corp.rd.length).toBe(corpRdBefore);
     expect(manifestsState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
+      creditLoss: 1,
+      tagsAdded: 1,
+      gainedCredits: 10,
+    });
+
+    let noCreditsState = toRunnerTurn(
+      v171CardReleaseGame("v171-edited-shipping-no-corp-credits"),
+    );
+    noCreditsState.runner.credits = 20;
+    noCreditsState.corp.credits = 0;
+    moveRunnerCardToGrip(
+      noCreditsState,
+      "onr_v1_084_edited-shipping-manifests",
+    );
+    const hqCardId = moveCorpCardToHq(noCreditsState, "simple_economy_operation");
+    keepOnlyCorpHqCard(noCreditsState, hqCardId);
+    noCreditsState = apply(
+      noCreditsState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(noCreditsState, action) ===
+          "onr_v1_084_edited-shipping-manifests" &&
+        action.payload?.serverId === "hq",
+    );
+    expect(noCreditsState.run?.breach?.serverId).toBe("hq");
+    expect(noCreditsState.runner.tags).toBe(0);
+    expect(noCreditsState.runner.credits).toBe(19);
+    expect(noCreditsState.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "accessReplacement",
+    );
+  });
+
+  it("uses P3.32 free-trash run events only for accessed cards from the printed central", () => {
+    let kilroyState = toRunnerTurn(v192CardReleaseGame("p3-32-kilroy"));
+    kilroyState.runner.credits = 20;
+    moveRunnerCardToGrip(kilroyState, "onr_v1_096_kilroy-was-here");
+    putCorpCardOnTopOfRd(kilroyState, "simple_economy_operation");
+    kilroyState = apply(
+      kilroyState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(kilroyState, action) ===
+          "onr_v1_096_kilroy-was-here" &&
+        action.payload?.serverId === "rd",
+    );
+    kilroyState = apply(
+      kilroyState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(
+      getLegalActions(kilroyState, "runner").find(
+        (action) => action.type === "trash_accessed_card",
+      )?.payload,
+    ).toMatchObject({
+      freeAccessTrash: true,
+      accessTrashCostOverride: 0,
+    });
+
+    let rompState = toRunnerTurn(v192CardReleaseGame("p3-32-romp"));
+    rompState.runner.credits = 20;
+    moveRunnerCardToGrip(rompState, "onr_v1_107_romp-through-hq");
+    const hqCardId = moveCorpCardToHq(rompState, "simple_economy_operation");
+    keepOnlyCorpHqCard(rompState, hqCardId);
+    rompState = apply(
+      rompState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(rompState, action) === "onr_v1_107_romp-through-hq" &&
+        action.payload?.serverId === "hq",
+    );
+    rompState = apply(
+      rompState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(
+      getLegalActions(rompState, "runner").find(
+        (action) => action.type === "trash_accessed_card",
+      )?.payload,
+    ).toMatchObject({
+      freeAccessTrash: true,
+      accessTrashCostOverride: 0,
     });
   });
 
@@ -13391,6 +13561,7 @@ describe("V1.9.0 Mechanikpaket I", () => {
     keepOnlyCorpHqCards(state, hqIds);
     const archivesBefore = state.corp.archives.length;
     const hqBefore = state.corp.hq.length;
+    const rdBefore = state.corp.rd.length;
     state = apply(
       state,
       "runner",
@@ -22095,7 +22266,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
 
     expect(dupreId ? (state.cardInstances[dupreId]?.counters?.power ?? 0) : 0).toBe(0);
-    expect(state.run?.breach?.queue).toHaveLength(3);
+    expect(state.run?.breach?.queue).toHaveLength(2);
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Simple Agenda",
     );
@@ -24361,6 +24532,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       "onr_v1_084_edited-shipping-manifests",
     );
     const hqBefore = state.corp.hq.length;
+    const rdBefore = state.corp.rd.length;
     const initial = structuredClone(state);
 
     state = apply(
@@ -24373,12 +24545,14 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     );
 
     expect(state.run).toBeUndefined();
-    expect(state.corp.hq.length).toBe(hqBefore + 1);
+    expect(state.corp.hq.length).toBe(hqBefore);
+    expect(state.corp.rd.length).toBe(rdBefore);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      accessReplacement: "corp_lose_credits_runner_tag_corp_draw",
+      accessReplacement: "corp_lose_credits",
       creditLoss: 1,
-      corpDrawnCount: 1,
       tagsAdded: 1,
+      gainedCredits: 10,
+      runnerCreditsAfter: 19,
       runnerTagsAfter: 1,
       hiddenZoneBarrier: true,
     });
@@ -39045,7 +39219,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("identifies Shredder Uplink access bonus and keeps Submarine Uplink as a single base-link source", () => {
+  it("uses Shredder Uplink Protocol as an Archives-to-HQ run ability and keeps Submarine Uplink as a single base-link source", () => {
     let accessState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.runAccess("spotcheck-shredder-uplink-access-source"),
     );
@@ -39069,13 +39243,14 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "runner",
       (action) => action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    expect(accessState.run?.breach?.queue).toHaveLength(2);
+    expect(accessState.run?.breach?.queue).toHaveLength(1);
     expect(accessState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      installedAccessBonus: 1,
-      effectiveAccessCount: 2,
-      installedAccessBonusSourceDefinitionIds:
-        "onr_v1_062_shredder-uplink-protocol",
+      installedAccessBonus: 0,
+      effectiveAccessCount: 1,
     });
+    expect(accessState.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "installedAccessBonusSourceDefinitionIds",
+    );
     expect(JSON.stringify(getPlayerView(accessState, "runner"))).not.toContain(
       "Simple Agenda",
     );
@@ -39092,6 +39267,51 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       "simple_agenda",
     );
     expect(replayEvents(accessInitial, accessState.eventLog.slice(accessReplayStart)).ok).toBe(true);
+
+    let shredderState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-shredder-uplink-activated-run"),
+    );
+    shredderState.runner.credits = 20;
+    shredderState.runner.memoryLimit = 8;
+    moveRunnerCardToGrip(shredderState, "onr_v1_062_shredder-uplink-protocol");
+    shredderState = apply(
+      shredderState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(shredderState, action) ===
+          "onr_v1_062_shredder-uplink-protocol",
+    );
+    const hqCardId = moveCorpCardToHq(shredderState, "simple_economy_operation");
+    keepOnlyCorpHqCard(shredderState, hqCardId);
+    const shredderInitial = structuredClone(shredderState);
+    const shredderReplayStart = shredderState.eventLog.length;
+    shredderState = apply(
+      shredderState,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(shredderState, action) ===
+          "onr_v1_062_shredder-uplink-protocol",
+    );
+    expect(shredderState.run?.attackedServerId).toBe("archives");
+    expect(shredderState.run?.breach?.serverId).toBe("hq");
+    shredderState = apply(
+      shredderState,
+      "runner",
+      (action) => action.type === "access_card",
+    );
+    expect(shredderState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_operation",
+      serverLabel: "HQ",
+    });
+    expect(
+      replayEvents(
+        shredderInitial,
+        shredderState.eventLog.slice(shredderReplayStart),
+      ).ok,
+    ).toBe(true);
 
     let traceState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.programSubtypeHosting(
@@ -41605,13 +41825,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         "onr_v1_081_custodial-position",
         v123CardReleaseGame("spotcheck-custodial-position"),
         "rd",
-        { accessCount: 3 },
+        { baseAccessCount: 3, effectiveAccessCount: 3 },
       ],
       [
         "onr_v1_085_executive-wiretaps",
         v123CardReleaseGame("spotcheck-executive-wiretaps"),
         "hq",
-        { accessCount: 3 },
+        { baseAccessCount: 3, effectiveAccessCount: 3 },
       ],
       [
         "onr_v1_094_inside-job",

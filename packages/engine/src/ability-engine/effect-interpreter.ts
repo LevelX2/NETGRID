@@ -13,6 +13,7 @@ import type {
   GameEndReason,
   GameState,
   ResolvedGameEffect,
+  ServerId,
   Side,
   Winner,
 } from "@netgrid/shared";
@@ -53,6 +54,10 @@ export type CardEffectExecutionContext = {
     baseTraceStrength: number,
     successEffect: ReturnType<typeof traceSuccessEffectForCardImplementation>,
   ) => CardEffectTraceResult;
+  startRun?: (
+    serverId: Extract<ServerId, "hq" | "rd" | "archives">,
+    options: CardEffectMakeRunOptions,
+  ) => CardEffectMakeRunResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -86,6 +91,21 @@ export type CardEffectTrashSourceResult = {
 };
 
 export type CardEffectTraceResult = {
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectMakeRunOptions = {
+  accessCount?: number;
+  freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
+  accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
+  successfulRunAccessReplacement?: "corp_lose_credits";
+  successfulRunCreditLoss?: number;
+  successfulRunRunnerTagGain?: number;
+  successfulRunRunnerCreditGain?: number;
+  successfulRunRequiresCorpCredits?: boolean;
+};
+
+export type CardEffectMakeRunResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -414,6 +434,50 @@ export function executeCardImplementationEffects(
           traceSuccessEffectForCardImplementation(effect.onSuccess),
         );
         mergePublicPayload(publicPayload, traceResult.publicPayload);
+        return;
+      }
+      case "make_run": {
+        assertPublicVisibility("make_run", effect.visibility);
+        if (!context.startRun)
+          throw new Error("make_run effect requires a startRun execution context.");
+        if (effect.target.kind !== "central_server")
+          throw new Error("make_run effect supports only central-server targets.");
+        const runResult = context.startRun(effect.target.server, {
+          ...(effect.accessCount !== undefined
+            ? { accessCount: effect.accessCount }
+            : {}),
+          ...(effect.freeTrashAccessZones
+            ? { freeTrashAccessZones: effect.freeTrashAccessZones }
+            : {}),
+          ...(effect.accessServerOverride
+            ? { accessServerOverride: effect.accessServerOverride }
+            : {}),
+          ...(effect.successfulRunAccessReplacement
+            ? {
+                successfulRunAccessReplacement:
+                  effect.successfulRunAccessReplacement,
+              }
+            : {}),
+          ...(effect.successfulRunCreditLoss !== undefined
+            ? { successfulRunCreditLoss: effect.successfulRunCreditLoss }
+            : {}),
+          ...(effect.successfulRunRunnerTagGain !== undefined
+            ? { successfulRunRunnerTagGain: effect.successfulRunRunnerTagGain }
+            : {}),
+          ...(effect.successfulRunRunnerCreditGain !== undefined
+            ? {
+                successfulRunRunnerCreditGain:
+                  effect.successfulRunRunnerCreditGain,
+              }
+            : {}),
+          ...(effect.successfulRunRequiresCorpCredits !== undefined
+            ? {
+                successfulRunRequiresCorpCredits:
+                  effect.successfulRunRequiresCorpCredits,
+              }
+            : {}),
+        });
+        mergePublicPayload(publicPayload, runResult.publicPayload);
         return;
       }
       case "add_hosted_credits": {

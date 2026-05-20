@@ -110,6 +110,10 @@ import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { washingtonDcCityGridImplementation } from "./onr-v1/corp/upgrades/washington-d-c-city-grid";
 import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
+import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial-position";
+import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
+import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
+import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
 import { tychoMemChipImplementation } from "./onr-v1/runner/hardware/tycho-mem-chip";
@@ -117,10 +121,14 @@ import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem
 import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech-mem-chip";
 import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
+import { privateLdlAccessImplementation } from "./onr-v1/runner/preps/private-ldl-access";
+import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-hq";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
+import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
 import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
 import { accessToArasakaImplementation } from "./onr-v1/runner/resources/access-to-arasaka";
@@ -139,11 +147,19 @@ import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
   bodyweightSyntheticBloodImplementation,
+  custodialPositionImplementation,
+  editedShippingManifestsImplementation,
+  executiveWiretapsImplementation,
   jackNJoeImplementation,
+  kilroyWasHereImplementation,
   livewiresContactsImplementation,
+  privateLdlAccessImplementation,
+  rompThroughHqImplementation,
+  weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
   newsgroupFilterImplementation,
+  shredderUplinkProtocolImplementation,
   signpostImplementation,
   accessThroughAlphaImplementation,
   accessToArasakaImplementation,

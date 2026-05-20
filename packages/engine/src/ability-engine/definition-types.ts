@@ -10,6 +10,7 @@ import type {
   CounterType,
   DamageType,
   EventVisibilityClass,
+  ServerId,
   Side,
 } from "@netgrid/shared";
 
@@ -104,6 +105,7 @@ export type CardEffectImplementation =
   | AddTagsEffectImplementation
   | DamageEffectImplementation
   | TraceEffectImplementation
+  | MakeRunEffectImplementation
   | AddHostedCreditsEffectImplementation
   | TakeHostedCreditsEffectImplementation
   | TrashSourceWhenEmptyEffectImplementation
@@ -185,6 +187,23 @@ export type TraceEffectImplementation = {
   baseTraceStrength: number;
   onSuccess: readonly CardTraceSuccessEffectImplementation[];
   onFailure?: readonly CardTraceSuccessEffectImplementation[];
+  visibility: EventVisibilityClass;
+};
+
+export type MakeRunEffectImplementation = {
+  kind: "make_run";
+  target: {
+    kind: "central_server";
+    server: Extract<ServerId, "hq" | "rd" | "archives">;
+  };
+  accessCount?: number;
+  freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
+  accessServerOverride?: Extract<ServerId, "hq" | "rd" | "archives">;
+  successfulRunAccessReplacement?: "corp_lose_credits";
+  successfulRunCreditLoss?: number;
+  successfulRunRunnerTagGain?: number;
+  successfulRunRunnerCreditGain?: number;
+  successfulRunRequiresCorpCredits?: boolean;
   visibility: EventVisibilityClass;
 };
 

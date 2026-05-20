@@ -212,11 +212,6 @@ import {
   SCHLAGHUND_RANDOM_ASSET_CARD_ID,
 } from "./mechanics/random-effects";
 import {
-  HQ_ACCESS_REPLACEMENT_CREDIT_LOSS_EVENT_CARD_ID,
-  HQ_ACCESS_REPLACEMENT_DRAW_EVENT_CARD_ID,
-  HQ_MULTIACCESS_EVENT_CARD_ID,
-  HQ_RUN_ACCESS_RD_EVENT_CARD_ID,
-  RD_MULTIACCESS_EVENT_CARD_ID,
   RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
   RUN_MULTIACCESS_EVENT_CARD_ID,
   RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID,
@@ -255,6 +250,7 @@ import {
 import type {
   ActivatedCardAbilityImplementation,
   IncreaseTraceLinkEffectImplementation,
+  MakeRunEffectImplementation,
   UseBaseLinkEffectImplementation,
 } from "./ability-engine/definition-types";
 
@@ -325,6 +321,48 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       legalAction,
       successEffect,
     );
+  },
+  startRun: (state, legalAction, serverId, options) => {
+    startRun(
+      state,
+      serverId,
+      undefined,
+      options.accessCount ?? 1,
+      {
+        ...(options.freeTrashAccessZones
+          ? { freeTrashAccessZones: options.freeTrashAccessZones.slice() }
+          : {}),
+        ...(options.accessServerOverride
+          ? { accessServerOverride: options.accessServerOverride }
+          : {}),
+        ...(options.successfulRunAccessReplacement
+          ? {
+              successfulRunAccessReplacement:
+                options.successfulRunAccessReplacement,
+            }
+          : {}),
+        ...(options.successfulRunCreditLoss !== undefined
+          ? { successfulRunCreditLoss: options.successfulRunCreditLoss }
+          : {}),
+        ...(options.successfulRunRunnerTagGain !== undefined
+          ? { successfulRunRunnerTagGain: options.successfulRunRunnerTagGain }
+          : {}),
+        ...(options.successfulRunRunnerCreditGain !== undefined
+          ? {
+              successfulRunRunnerCreditGain:
+                options.successfulRunRunnerCreditGain,
+            }
+          : {}),
+        ...(options.successfulRunRequiresCorpCredits !== undefined
+          ? {
+              successfulRunRequiresCorpCredits:
+                options.successfulRunRequiresCorpCredits,
+            }
+          : {}),
+      },
+      legalAction,
+    );
+    return { publicPayload: legalAction.payload ?? {} };
   },
   abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
@@ -450,6 +488,17 @@ type RunnerEventResolver = {
   resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 
+function printedCostCardImplementationMakeRunEffect(
+  definition: CardDefinition,
+): MakeRunEffectImplementation | undefined {
+  const ability = cardImplementationForDefinitionId(definition.id)?.abilities?.find(
+    (candidate) => candidate.kind === "on_play" && candidate.costs === "printed",
+  );
+  return ability?.effects.find(
+    (effect): effect is MakeRunEffectImplementation => effect.kind === "make_run",
+  );
+}
+
 type CorpOperationResolver = {
   name: string;
   canPlay?: (state: GameState) => boolean;
@@ -489,9 +538,7 @@ const INCUBATOR_ID = "onr_v1_034_incubator";
 const ALL_NIGHTER_ID = "onr_v1_076_all-nighter";
 const DEAL_WITH_MILITECH_ID = "onr_v1_082_deal-with-militech";
 const HUNT_CLUB_BBS_ID = "onr_v1_091_hunt-club-bbs";
-const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
-const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const ARMADILLO_ARMORED_ROAD_HOME_ID =
   "onr_v1_120_armadillo-armored-road-home";
@@ -534,7 +581,6 @@ const EXPERT_SCHEDULE_ANALYZER_ID = "onr_v1_024_expert-schedule-analyzer";
 const MICROTECH_AI_INTERFACE_ID = "onr_v1_041_microtech-ai-interface";
 const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
 const POLTERGEIST_ID = "onr_v1_048_poltergeist";
-const SHREDDER_UPLINK_PROTOCOL_ID = "onr_v1_062_shredder-uplink-protocol";
 const SMARTEYE_ID = "onr_v1_065_smarteye";
 const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
@@ -1037,19 +1083,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [RD_MULTIACCESS_EVENT_CARD_ID]: {
-    name: "runner_event_rd_multiaccess_3",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "rd",
-    resolve: (state, legalAction) => {
-      startRun(state, "rd", undefined, 3);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "rd",
-        accessCount: 3,
-      };
-    },
-  },
   "onr_v1_083_desperate-competitor": {
     name: "onr_runner_event_desperate_competitor",
     canPlay: (state) => runnerStoleAgendaSubtypeThisTurn(state, "gray_ops"),
@@ -1064,19 +1097,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         legalAction,
         "onr_v1_083_desperate-competitor",
       );
-    },
-  },
-  [HQ_MULTIACCESS_EVENT_CARD_ID]: {
-    name: "runner_event_hq_multiaccess_3",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "hq",
-    resolve: (state, legalAction) => {
-      startRun(state, "hq", undefined, 3);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "hq",
-        accessCount: 3,
-      };
     },
   },
   "onr_v1_090_hot-tip-for-wns": {
@@ -1113,59 +1133,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [KILROY_WAS_HERE_ID]: {
-    name: "onr_runner_event_kilroy_was_here_free_trash_rd",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "rd",
-    resolve: (state, legalAction) => {
-      startRun(state, "rd", undefined, 1, { freeTrashAccessZones: ["rd"] });
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "rd",
-        freeTrashAccessZones: "rd",
-      };
-    },
-  },
-  [HQ_ACCESS_REPLACEMENT_DRAW_EVENT_CARD_ID]: {
-    name: "runner_event_hq_access_replace_corp_lose1_tag_draw",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "hq",
-    resolve: (state, legalAction) => {
-      startRun(
-        state,
-        "hq",
-        undefined,
-        1,
-        {
-          successfulRunAccessReplacement: "corp_lose_credits",
-          successfulRunCreditLoss: 1,
-          successfulRunRunnerTagGain: 1,
-          successfulRunCorpDraw: 1,
-        },
-        legalAction,
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "hq",
-        hiddenZoneBarrier: true,
-        accessReplacement: "corp_lose_credits_runner_tag_corp_draw",
-      };
-    },
-  },
-  [HQ_RUN_ACCESS_RD_EVENT_CARD_ID]: {
-    name: "runner_event_hq_run_access_rd",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "hq",
-    resolve: (state, legalAction) => {
-      startRun(state, "hq", undefined, 1, { accessServerOverride: "rd" });
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "hq",
-        hiddenZoneBarrier: true,
-        accessServerOverride: "rd",
-      };
-    },
-  },
   "onr_v1_114_temple-microcode-outlet": {
     name: "onr_runner_event_search_stack_program_to_hand",
     canPlay: (state) =>
@@ -1181,40 +1148,10 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  [HQ_ACCESS_REPLACEMENT_CREDIT_LOSS_EVENT_CARD_ID]: {
-    name: "runner_event_hq_access_replace_corp_lose4",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "hq",
-    resolve: (state, legalAction) => {
-      startRun(state, "hq", undefined, 1, {
-        successfulRunAccessReplacement: "corp_lose_credits",
-        successfulRunCreditLoss: 4,
-      });
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "hq",
-        hiddenZoneBarrier: true,
-        accessReplacement: "corp_lose_credits",
-      };
-    },
-  },
   "onr_v1_101_mit-west-tier": {
     name: "onr_runner_event_mit_west_tier",
     resolve: (state, legalAction) => {
       resolveMitWestTier(state, legalAction);
-    },
-  },
-  [ROMP_THROUGH_HQ_ID]: {
-    name: "onr_runner_event_romp_through_hq_free_trash_hq",
-    requiresServer: true,
-    canPlayForServer: (_state, serverId) => serverId === "hq",
-    resolve: (state, legalAction) => {
-      startRun(state, "hq", undefined, 1, { freeTrashAccessZones: ["hq"] });
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId: "hq",
-        freeTrashAccessZones: "hq",
-      };
     },
   },
   [RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID]: {
@@ -4112,6 +4049,22 @@ function runnerMainActions(state: GameState): LegalAction[] {
           );
         }
       } else {
+        const makeRunEffect = printedCostCardImplementationMakeRunEffect(definition);
+        if (makeRunEffect?.target.kind === "central_server") {
+          const server = mustServer(state, makeRunEffect.target.server);
+          actions.push(
+            action(
+              state,
+              "runner",
+              "play_event",
+              `${definition.title} auf ${server.label}`,
+              id,
+              [{ clicks: 1, credits: definition.cost ?? 0 }],
+              { cardId: id, serverId: server.id },
+            ),
+          );
+          continue;
+        }
         actions.push(
           action(
             state,
@@ -9409,6 +9362,8 @@ type StartRunOptions = Pick<
   | "successfulRunCreditLoss"
   | "successfulRunRunnerTagGain"
   | "successfulRunCorpDraw"
+  | "successfulRunRunnerCreditGain"
+  | "successfulRunRequiresCorpCredits"
   | "bypassFirstIceRemaining"
 >;
 
@@ -9478,6 +9433,13 @@ function startRun(
       : {}),
     ...(options?.successfulRunCorpDraw && options.successfulRunCorpDraw > 0
       ? { successfulRunCorpDraw: options.successfulRunCorpDraw }
+      : {}),
+    ...(options?.successfulRunRunnerCreditGain &&
+    options.successfulRunRunnerCreditGain > 0
+      ? { successfulRunRunnerCreditGain: options.successfulRunRunnerCreditGain }
+      : {}),
+    ...(options?.successfulRunRequiresCorpCredits
+      ? { successfulRunRequiresCorpCredits: true }
       : {}),
     ...(options?.bypassFirstIceRemaining
       ? { bypassFirstIceRemaining: true }
@@ -11184,7 +11146,10 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
 function enterAccess(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   markSuccessfulRunForTurn(state, run);
-  if (run.successfulRunAccessReplacement === "corp_lose_credits") {
+  if (
+    run.successfulRunAccessReplacement === "corp_lose_credits" &&
+    (!run.successfulRunRequiresCorpCredits || state.corp.credits > 0)
+  ) {
     applySuccessfulRunAccessReplacement(state, run, legalAction);
     finishRun(state, true, legalAction);
     return;
@@ -11398,6 +11363,11 @@ function applySuccessfulRunAccessReplacement(
   if (runnerTagGain > 0) state.runner.tags += runnerTagGain;
   const corpDraw = Math.max(0, Math.floor(run.successfulRunCorpDraw ?? 0));
   if (corpDraw > 0) drawCorpCards(state, corpDraw);
+  const runnerCreditGain = Math.max(
+    0,
+    Math.floor(run.successfulRunRunnerCreditGain ?? 0),
+  );
+  if (runnerCreditGain > 0) state.runner.credits += runnerCreditGain;
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
@@ -11407,6 +11377,8 @@ function applySuccessfulRunAccessReplacement(
       tagsAdded: runnerTagGain,
       runnerTagsAfter: state.runner.tags,
       corpDrawnCount: corpDraw,
+      gainedCredits: runnerCreditGain,
+      runnerCreditsAfter: state.runner.credits,
       hiddenZoneBarrier: true,
     };
   }
@@ -11503,8 +11475,6 @@ function v1915InstalledAccessBonusSourceDefinitionIds(
     for (let index = 0; index < rdInterfaceCount; index += 1)
       sources.push(R_AND_D_INTERFACE_ID);
   }
-  if (serverId === "hq" || serverId === "rd")
-    pushIfInstalled(SHREDDER_UPLINK_PROTOCOL_ID);
   if (serverId === "archives")
     pushIfInstalled(RECORD_RECONSTRUCTOR_ID);
   return sources.sort();

@@ -669,18 +669,19 @@ describe("formatChronicleEvent", () => {
         corpCreditsAfter: 7,
         tagsAdded: 1,
         runnerTagsAfter: 1,
-        corpDrawnCount: 1,
+        gainedCredits: 10,
+        runnerCreditsAfter: 20,
         hiddenZoneBarrier: true
       }),
       "runner"
     );
 
-    expect(item.title).toBe("Du hast Edited Shipping Manifests gespielt: Korp verliert 1 Credit, Runner erhält 1 Tag, Korp zieht eine Karte.");
+    expect(item.title).toBe("Du hast Edited Shipping Manifests gespielt: Korp verliert 1 Credit, Runner erhält 1 Tag, Runner erhält 10 Credits.");
     expect(item.description).toBe("Der erfolgreiche Run wurde ohne Zugriff auf verdeckte Korp-Karten ersetzt.");
     expect(item.category).toBe("danger");
     expect(item.importance).toBe("important");
     expect(item.visibility).toBe("public");
-    expect(item.chips).toEqual(expect.arrayContaining(["Access ersetzt", "Korp -1", "+1 Tag", "Korp zieht 1"]));
+    expect(item.chips).toEqual(expect.arrayContaining(["Access ersetzt", "Korp -1", "+1 Tag", "Runner +10"]));
     expect(JSON.stringify(item)).not.toContain("cardInstances");
     expect(JSON.stringify(item)).not.toContain("\"hq\"");
     expect(JSON.stringify(item)).not.toContain("\"rd\"");

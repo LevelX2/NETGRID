@@ -15,6 +15,7 @@ import type {
   GameState,
   LegalAction,
   ResolvedGameEffect,
+  ServerId,
   Side,
   TraceSuccessEffect,
 } from "@netgrid/shared";
@@ -24,6 +25,8 @@ import {
   type CardEffectDamageResult,
   type CardEffectDrawCardsResult,
   type CardEffectHostedCreditsResult,
+  type CardEffectMakeRunOptions,
+  type CardEffectMakeRunResult,
   type CardEffectTrashSourceResult,
 } from "./effect-interpreter";
 import {
@@ -101,6 +104,12 @@ export type CardImplementationRuntimeDependencies = {
     baseTraceStrength: number,
     successEffect: TraceSuccessEffect,
   ) => Record<string, string | number | boolean>;
+  startRun: (
+    state: GameState,
+    legalAction: LegalAction,
+    serverId: Extract<ServerId, "hq" | "rd" | "archives">,
+    options: CardEffectMakeRunOptions,
+  ) => CardEffectMakeRunResult;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -925,6 +934,8 @@ export function resolveActivatedCardImplementationAbility(
           successEffect,
         ),
       }),
+      startRun: (serverId, options) =>
+        deps.startRun(state, legalAction, serverId, options),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
@@ -992,6 +1003,8 @@ export function executeOnPlayCardImplementationAbility(
           successEffect,
         ),
       }),
+      startRun: (serverId, options) =>
+        deps.startRun(state, legalAction, serverId, options),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
