@@ -2211,6 +2211,9 @@ export function encounterIce(
     (action) =>
       action.type === "rez_ice" && sourceDefinition(next, action) === definitionId,
   );
+  if (next.timingPoint === "run.jack_out_window" && next.run?.phase === "movement") {
+    next = apply(next, "runner", (action) => action.type === "continue_run");
+  }
   return next;
 }
 
