@@ -321,3 +321,18 @@ export type CardSubroutineImplementation =
       text: "*End the run unless Runner pays [1].";
       visibility: EventVisibilityClass;
     };
+
+export type CardPrintedSubroutineImplementation =
+  | {
+      kind: "end_the_run";
+      text: "*End the run.";
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "damage";
+      damageType: "net" | "brain";
+      amount: number;
+      preventable: true;
+      text: string;
+      visibility: EventVisibilityClass;
+    };

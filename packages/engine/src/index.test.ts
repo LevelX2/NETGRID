@@ -8676,6 +8676,45 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("registers P3.25 simple ICE printed subroutines as implemented", () => {
+    const p325IceCases = [
+      ["onr_v1_232_crystal-wall", 1],
+      ["onr_v1_237_data-wall", 1],
+      ["onr_v1_238_data-wall-2-0", 1],
+      ["onr_v1_244_filter", 1],
+      ["onr_v1_252_keeper", 1],
+      ["onr_v1_256_mazer", 1],
+      ["onr_v1_261_quandary", 1],
+      ["onr_v1_265_rock-is-strong", 1],
+      ["onr_v1_266_scramble", 1],
+      ["onr_v1_270_sleeper", 1],
+      ["onr_v1_279_wall-of-static", 1],
+      ["onr_v1_239_endless-corridor", 2],
+      ["onr_v1_263_reinforced-wall", 2],
+      ["onr_v1_230_cortical-scanner", 3],
+      ["onr_v1_253_laser-wire", 2],
+      ["onr_v1_262_razor-wire", 2],
+      ["onr_v1_269_shotgun-wire", 2],
+      ["onr_v1_257_nerve-labyrinth", 2],
+      ["onr_v1_231_cortical-scrub", 2],
+      ["onr_v1_229_code-corpse", 3],
+      ["onr_v1_280_zombie", 3],
+      ["onr_v1_254_liche", 4],
+      ["onr_v1_278_wall-of-ice", 4],
+    ] as const;
+
+    for (const [definitionId, subroutineCount] of p325IceCases) {
+      const implementation = cardImplementationForDefinitionId(definitionId);
+      expect(implementation?.printedSubroutines, definitionId).toHaveLength(
+        subroutineCount,
+      );
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("executes typed gain_credits card effects", () => {
     const state = createGameAfterSetup({ seed: "card-effect-gain-credits" });
     state.runner.credits = 5;
@@ -9786,9 +9825,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
         sourceDefinition(pumpedWithEncoder, action) === "simple_decoder",
     );
     expect(breakActions.map((action) => action.payload?.subroutineId)).toEqual([
-      "onr_v1_230_cortical_scanner_etr_1",
-      "onr_v1_230_cortical_scanner_etr_2",
-      "onr_v1_230_cortical_scanner_etr_3",
+      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.1.end_the_run",
+      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.2.end_the_run",
+      "card_implementation.onr_v1_230_cortical-scanner.printed_subroutine.3.end_the_run",
       "card_implementation.onr_v1_320_encoder-inc.additional_subroutine.1.end_the_run",
     ]);
     expect(breakActions[3]?.payload).toMatchObject({
@@ -29947,6 +29986,78 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       damageType: "core",
       damageAmount: 2,
     });
+  });
+
+  it("resolves CardImplementation printed Net-damage ICE subroutines without shared duplication", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p325-laser-wire-printed",
+        runnerDeck: ONR_V1_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_CORP_DECK,
+          cards: [
+            { id: "onr_v1_253_laser-wire", quantity: 1 },
+            ...ONR_V1_CORP_DECK.cards.filter(
+              (card) => card.id !== "onr_v1_253_laser-wire",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 30;
+    state.corp.credits = 30;
+    putCorpIceOnServer(state, "rd", "onr_v1_253_laser-wire");
+    state = encounterIce(state, "rd", "onr_v1_253_laser-wire");
+    const gripBefore = state.runner.grip.length;
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 2,
+      encounterSubroutineIds:
+        "card_implementation.onr_v1_253_laser-wire.printed_subroutine.1.net_damage,card_implementation.onr_v1_253_laser-wire.printed_subroutine.2.end_the_run",
+      encounterWillEndRun: true,
+    });
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === continueAction.actionId,
+    );
+    expect(state.run).toBeUndefined();
+    expect(state.runner.grip.length).toBe(gripBefore - 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "continue_run",
+      sourceDefinitionId: "onr_v1_253_laser-wire",
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 1,
+      resolvedEffects: [
+        {
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_253_laser-wire",
+          sourceTitle: "Laser Wire",
+          subroutineIndex: 0,
+          subroutineType: "do_damage",
+          damageType: "net",
+          amount: 1,
+          cardsTrashed: 1,
+        },
+        {
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_253_laser-wire",
+          sourceTitle: "Laser Wire",
+          subroutineIndex: 1,
+          subroutineType: "end_the_run",
+          endedRun: true,
+        },
+      ],
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"grip"|"privatePayload"|"cardInstances"/,
+    );
   });
 
   it("keeps Chicago Branch, Vapor Ops and Corporate Retreat source-bound", () => {

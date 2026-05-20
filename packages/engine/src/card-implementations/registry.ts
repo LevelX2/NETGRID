@@ -35,6 +35,29 @@ import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-p
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
+import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
+import { corticalScannerImplementation } from "./onr-v1/corp/ice/cortical-scanner";
+import { corticalScrubImplementation } from "./onr-v1/corp/ice/cortical-scrub";
+import { crystalWallImplementation } from "./onr-v1/corp/ice/crystal-wall";
+import { dataWallTwoPointZeroImplementation } from "./onr-v1/corp/ice/data-wall-2-0";
+import { dataWallImplementation } from "./onr-v1/corp/ice/data-wall";
+import { endlessCorridorImplementation } from "./onr-v1/corp/ice/endless-corridor";
+import { filterImplementation } from "./onr-v1/corp/ice/filter";
+import { keeperImplementation } from "./onr-v1/corp/ice/keeper";
+import { laserWireImplementation } from "./onr-v1/corp/ice/laser-wire";
+import { licheImplementation } from "./onr-v1/corp/ice/liche";
+import { mazerImplementation } from "./onr-v1/corp/ice/mazer";
+import { nerveLabyrinthImplementation } from "./onr-v1/corp/ice/nerve-labyrinth";
+import { quandaryImplementation } from "./onr-v1/corp/ice/quandary";
+import { razorWireImplementation } from "./onr-v1/corp/ice/razor-wire";
+import { reinforcedWallImplementation } from "./onr-v1/corp/ice/reinforced-wall";
+import { rockIsStrongImplementation } from "./onr-v1/corp/ice/rock-is-strong";
+import { scrambleImplementation } from "./onr-v1/corp/ice/scramble";
+import { shotgunWireImplementation } from "./onr-v1/corp/ice/shotgun-wire";
+import { sleeperImplementation } from "./onr-v1/corp/ice/sleeper";
+import { wallOfIceImplementation } from "./onr-v1/corp/ice/wall-of-ice";
+import { wallOfStaticImplementation } from "./onr-v1/corp/ice/wall-of-static";
+import { zombieImplementation } from "./onr-v1/corp/ice/zombie";
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
 import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
@@ -128,6 +151,29 @@ export const CARD_IMPLEMENTATIONS = [
   rustbeltHqBranchImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
+  codeCorpseImplementation,
+  corticalScannerImplementation,
+  corticalScrubImplementation,
+  crystalWallImplementation,
+  dataWallImplementation,
+  dataWallTwoPointZeroImplementation,
+  endlessCorridorImplementation,
+  filterImplementation,
+  keeperImplementation,
+  laserWireImplementation,
+  licheImplementation,
+  mazerImplementation,
+  nerveLabyrinthImplementation,
+  quandaryImplementation,
+  razorWireImplementation,
+  reinforcedWallImplementation,
+  rockIsStrongImplementation,
+  scrambleImplementation,
+  shotgunWireImplementation,
+  sleeperImplementation,
+  wallOfIceImplementation,
+  wallOfStaticImplementation,
+  zombieImplementation,
   tychoMemChipImplementation,
   wutechMemChipImplementation,
   zetatechMemChipImplementation,

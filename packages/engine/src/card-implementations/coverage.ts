@@ -44,6 +44,9 @@ const IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION =
 const IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_PRINTED_SUBROUTINE_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/corp/ice";
+
 const IMPLEMENTED_PASSIVE_ATTRIBUTE_MODIFIER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -116,6 +119,52 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
   "onr_v1_218_subsidiary-branch":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
+  "onr_v1_229_code-corpse":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/code-corpse.ts",
+  "onr_v1_230_cortical-scanner":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/cortical-scanner.ts",
+  "onr_v1_231_cortical-scrub":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/cortical-scrub.ts",
+  "onr_v1_232_crystal-wall":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/crystal-wall.ts",
+  "onr_v1_237_data-wall":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall.ts",
+  "onr_v1_238_data-wall-2-0":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall-2-0.ts",
+  "onr_v1_239_endless-corridor":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/endless-corridor.ts",
+  "onr_v1_244_filter":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/filter.ts",
+  "onr_v1_252_keeper":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/keeper.ts",
+  "onr_v1_253_laser-wire":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/laser-wire.ts",
+  "onr_v1_254_liche":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/liche.ts",
+  "onr_v1_256_mazer":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/mazer.ts",
+  "onr_v1_257_nerve-labyrinth":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/nerve-labyrinth.ts",
+  "onr_v1_261_quandary":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/quandary.ts",
+  "onr_v1_262_razor-wire":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/razor-wire.ts",
+  "onr_v1_263_reinforced-wall":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/reinforced-wall.ts",
+  "onr_v1_265_rock-is-strong":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/rock-is-strong.ts",
+  "onr_v1_266_scramble":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/scramble.ts",
+  "onr_v1_269_shotgun-wire":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/shotgun-wire.ts",
+  "onr_v1_270_sleeper":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/sleeper.ts",
+  "onr_v1_278_wall-of-ice":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/wall-of-ice.ts",
+  "onr_v1_279_wall-of-static":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/wall-of-static.ts",
+  "onr_v1_280_zombie":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/zombie.ts",
   "onr_v1_281_accounts-receivable":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
   "onr_v1_282_annual-reviews":
@@ -273,6 +322,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for passive break-subroutine-cost modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_BREAK_SUBROUTINE_COST_MODIFIER_LOCATION);
+  }
+  if (implementation.printedSubroutines?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for printed ICE subroutine behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_PRINTED_SUBROUTINE_LOCATION);
   }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(

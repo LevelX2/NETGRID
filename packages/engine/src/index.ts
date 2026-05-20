@@ -83,6 +83,7 @@ import {
   serverChoiceDisplayLabel,
   type PublicContextForActionDependencies,
 } from "./public-context";
+import { printedSubroutinesForCardImplementation } from "./ability-engine/printed-subroutine-implementations";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
@@ -6318,7 +6319,11 @@ function subroutinesForCurrentEncounter(
   const transmutationCopies = run?.encounteredIceId
     ? cardCounter(state, run.encounteredIceId, "mark")
     : 0;
-  const subroutines = (iceDefinition.subroutines ?? []).flatMap((subroutine) => {
+  const printedSubroutines =
+    printedSubroutinesForCardImplementation(iceDefinition) ??
+    iceDefinition.subroutines ??
+    [];
+  const subroutines = printedSubroutines.flatMap((subroutine) => {
     const copies = [subroutine];
     for (let index = 0; index < transmutationCopies; index += 1) {
       copies.push({
