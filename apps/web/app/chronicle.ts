@@ -61,6 +61,7 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
 };
 
 const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
+const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 
 type EffectSummary = {
   category?: ChronicleCategory;
@@ -103,7 +104,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const abilityId = payloadAbilityId(payload);
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
-  const shellTradersAbility = stringValue(payload.shellTradersAbility);
+  const shellTradersAbility = shellTradersAbilityFromPayload(payload, abilityId ?? undefined);
   const shellTradersTargetTitle =
     shellTradersAbility === "set_aside_from_grip" ||
     shellTradersAbility === "remove_shell_counter" ||
@@ -875,7 +876,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         category = "card";
         importance = "important";
         title = phrase(subject, `${shellTradersTargetTitle ?? "eine Karte"} mit ${counters} Shell-Counter${counters === 1 ? "" : "n"} beiseitegelegt${installed ? " und kostenlos installiert" : ""}`);
-        chips.push("The Shell Traders", "Set Aside", `${counters} Shell`);
+        chips.push("The Shell Traders", ...(shellTradersTargetTitle ? [shellTradersTargetTitle] : []), "Set Aside", `${counters} Shell`);
         break;
       }
       if (shellTradersAbility === "remove_shell_counter" || shellTradersAbility === "start_turn_remove_shell_counter") {
@@ -1109,7 +1110,10 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   const subject = subjectFor(actor, side, false);
   const sourceTitle = stringValue(effect.sourceTitle);
   const sourceDefinitionId = stringValue(effect.sourceDefinitionId);
+  let displayCardDefinitionId = sourceDefinitionId;
+  let displayCardTitle = sourceTitle;
   const cardTitle = stringValue(effect.cardTitle);
+  const cardDefinitionId = stringValue(effect.cardDefinitionId);
   const amount = numberValue(effect.amount) ?? 0;
   const chips = [...baseChips(actor, false)];
   let category: ChronicleCategory = "system";
@@ -1178,10 +1182,22 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       const counterText = counterLabel(effect.counterType);
       const added = numberValue(effect.addedCounterAmount) ?? 0;
       const removed = numberValue(effect.removedCounterAmount) ?? 0;
+      const shellTradersRemoval =
+        sourceDefinitionId === SHELL_TRADERS_ID &&
+        effect.counterType === "shell" &&
+        removed > 0;
+      const counterTargetTitle = shellTradersRemoval
+        ? cardTitle ?? "einer Karte"
+        : sourceTitle ?? cardTitle ?? "einer Karte";
       category = "card";
       if (removed > 0) {
-        title = phrase(subject, `${removed} ${counterText} von ${sourceTitle ?? cardTitle ?? "einer Karte"} entfernt`);
+        title = phrase(subject, `${removed} ${counterText} von ${counterTargetTitle} entfernt`);
         chips.push(counterText, `${removed} entfernt`, `${amount} übrig`, "Automatisch");
+        if (shellTradersRemoval) {
+          displayCardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+          displayCardTitle = cardTitle ?? sourceTitle;
+          chips.push("The Shell Traders");
+        }
       } else {
         title = phrase(subject, `${counterText} auf ${sourceTitle ?? cardTitle ?? "einer Karte"} aufgefrischt`);
         chips.push(counterText, `${amount} bereit`, ...(added > 0 ? [`+${added}`] : []), "Automatisch");
@@ -1253,8 +1269,8 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
     title: ensurePeriod(title),
     ...(description ? { description: ensurePeriod(description) } : {}),
     chips: uniqueChips(chips.filter(Boolean)),
-    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
-    ...(sourceTitle ? { cardTitle: sourceTitle } : {}),
+    ...(displayCardDefinitionId ? { cardDefinitionId: displayCardDefinitionId } : {}),
+    ...(displayCardTitle ? { cardTitle: displayCardTitle } : {}),
     cardDetailLines: [],
     groupLabel: groupLabelFor(category, actor, undefined, displayServerLabel(effect.serverLabel), undefined)
   };
@@ -1630,6 +1646,18 @@ function sourceTitleFromActionLabel(label: string | undefined): string | undefin
   return title && !isGenericCardLabel(title) ? title : undefined;
 }
 
+function shellTradersAbilityFromPayload(payload: Record<string, unknown>, abilityId: string | undefined): string | undefined {
+  const explicit = stringValue(payload.shellTradersAbility);
+  if (explicit) return explicit;
+  if (
+    stringValue(payload.sourceDefinitionId) === SHELL_TRADERS_ID &&
+    (abilityId === "set_aside_from_grip" || abilityId === "remove_shell_counter" || abilityId === "start_turn_remove_shell_counter")
+  ) {
+    return abilityId;
+  }
+  return undefined;
+}
+
 function targetCardTitleFromPayload(payload: Record<string, unknown>): string | undefined {
   const targetDefinitionId = stringValue(payload.targetCardDefinitionId);
   return targetDefinitionId ? DEMO_CARDS_BY_ID[targetDefinitionId]?.title : undefined;
@@ -1728,6 +1756,7 @@ function resolvedEffectsFromPayload(value: unknown): ResolvedGameEffect[] {
 function counterLabel(counterType: unknown): string {
   if (counterType === "recurring_credit") return "Recurring Credits";
   if (counterType === "bit") return "Bit";
+  if (counterType === "shell") return "Shell-Counter";
   return counterType === "virus" ? "Virus-Counter" : "Counter";
 }
 

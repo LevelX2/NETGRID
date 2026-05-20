@@ -289,6 +289,7 @@ describe("formatChronicleEvent", () => {
 
     expect(setAside.title).toBe("Du hast Simple Fracter mit 2 Shell-Countern beiseitegelegt.");
     expect(setAside.chips).toContain("Set Aside");
+    expect(setAside.chips).toContain("Simple Fracter");
     expect(setAside.chips).toContain("2 Shell");
     expect(remove.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt; Karte kostenlos installiert.");
     expect(remove.chips).toContain("Shell -1");
@@ -301,7 +302,8 @@ describe("formatChronicleEvent", () => {
         actor: "runner",
         label: "The Shell Traders: Shell-Counter entfernen",
         title: "The Shell Traders",
-        shellTradersAbility: "remove_shell_counter",
+        sourceDefinitionId: "onr_v1_176_the-shell-traders",
+        abilityId: "remove_shell_counter",
         targetCardDefinitionId: "simple_fracter",
         remainingCounters: 1
       }),
@@ -2016,6 +2018,38 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.title).toBe("Du hast Recurring Credits auf The Shell Traders aufgefrischt.");
     expect(items[0]?.category).toBe("card");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
+  });
+
+  it("shows Shell Traders start-of-turn counter removal on the prepared target card", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.shell_traders.shell_1.simple_fracter_1",
+            kind: "counter_change",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            counterType: "shell",
+            removedCounterAmount: 1,
+            remainingCounters: 1,
+            sourceDefinitionId: "onr_v1_176_the-shell-traders",
+            sourceTitle: "The Shell Traders",
+            cardDefinitionId: "simple_fracter",
+            cardTitle: "Simple Fracter",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items[0]?.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
+    expect(items[0]?.groupLabel).toBe("Runner-Zug");
+    expect(items[0]?.cardDefinitionId).toBe("simple_fracter");
+    expect(items[0]?.cardTitle).toBe("Simple Fracter");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["The Shell Traders", "Shell-Counter", "1 entfernt", "1 übrig"]));
   });
 
   it("shows Braindance Campaign turn-start drain as one credit message", () => {
