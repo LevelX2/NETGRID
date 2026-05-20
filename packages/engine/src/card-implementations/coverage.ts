@@ -121,6 +121,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
   "onr_v1_223_banpei":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/banpei.ts",
+  "onr_v1_224_bolter-cluster":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/bolter-cluster.ts",
   "onr_v1_229_code-corpse":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/code-corpse.ts",
   "onr_v1_230_cortical-scanner":
@@ -131,6 +133,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/crystal-wall.ts",
   "onr_v1_233_d-arc-knight":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/d-arc-knight.ts",
+  "onr_v1_234_data-darts":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/data-darts.ts",
   "onr_v1_235_data-naga":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/data-naga.ts",
   "onr_v1_237_data-wall":
@@ -153,6 +157,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/mazer.ts",
   "onr_v1_257_nerve-labyrinth":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/nerve-labyrinth.ts",
+  "onr_v1_258_neural-blade":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/neural-blade.ts",
   "onr_v1_261_quandary":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/quandary.ts",
   "onr_v1_262_razor-wire":
@@ -165,6 +171,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/scramble.ts",
   "onr_v1_267_sentinels-prime":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/sentinels-prime.ts",
+  "onr_v1_268_shock-r":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/shock-r.ts",
   "onr_v1_269_shotgun-wire":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/shotgun-wire.ts",
   "onr_v1_270_sleeper":

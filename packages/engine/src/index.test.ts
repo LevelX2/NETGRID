@@ -8746,6 +8746,67 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("registers P3.27 next-ICE restriction printed subroutines as implemented", () => {
+    const p327IceCases = [
+      {
+        definitionId: "onr_v1_224_bolter-cluster",
+        subroutines: [
+          expect.objectContaining({
+            kind: "damage",
+            damageType: "net",
+            amount: 4,
+            text: "*Do 4 Net damage.",
+          }),
+          expect.objectContaining({ kind: "prohibit_break_next_ice" }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_234_data-darts",
+        subroutines: [
+          expect.objectContaining({
+            kind: "damage",
+            damageType: "net",
+            amount: 3,
+            text: "*Do 3 Net damage.",
+          }),
+          expect.objectContaining({ kind: "prohibit_break_next_ice" }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_258_neural-blade",
+        subroutines: [
+          expect.objectContaining({
+            kind: "damage",
+            damageType: "net",
+            amount: 1,
+            text: "*Do 1 Net damage.",
+          }),
+          expect.objectContaining({ kind: "prohibit_break_next_ice" }),
+        ],
+      },
+      {
+        definitionId: "onr_v1_268_shock-r",
+        subroutines: [
+          expect.objectContaining({
+            kind: "prohibit_break_and_jack_out_next_ice",
+            breakTags: ["stun"],
+          }),
+        ],
+      },
+    ] as const;
+
+    for (const { definitionId, subroutines } of p327IceCases) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.printedSubroutines,
+        definitionId,
+      ).toEqual(subroutines);
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("implemented");
+    }
+  });
+
   it("executes typed gain_credits card effects", () => {
     const state = createGameAfterSetup({ seed: "card-effect-gain-credits" });
     state.runner.credits = 5;
@@ -30155,6 +30216,12 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     putCorpIceOnServer(shockState, "rd", "onr_v1_268_shock-r");
     shockState = encounterIce(shockState, "rd", "onr_v1_268_shock-r");
     shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
+    expect(shockState.run?.nextEncounterJackOutLock).toBe(true);
+    expect(
+      getLegalActions(shockState, "runner").some(
+        (action) => action.type === "jack_out",
+      ),
+    ).toBe(false);
     shockState = apply(shockState, "runner", (action) => action.type === "continue_run");
     shockState = apply(
       shockState,
@@ -37208,8 +37275,39 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = encounterIce(state, "rd", "onr_v1_234_data-darts");
-    state = breakCurrentSubroutine(state, "onr_v1_072_wild-card", 2);
-    state = apply(state, "runner", (action) => action.type === "continue_run");
+    const gripBefore = state.runner.grip.length;
+    const dataDartsContinue = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(dataDartsContinue.payload).toMatchObject({
+      unbrokenSubroutineCount: 2,
+      encounterSubroutineIds:
+        "card_implementation.onr_v1_234_data-darts.printed_subroutine.1.net_damage,card_implementation.onr_v1_234_data-darts.printed_subroutine.2.prohibit_break_next_ice",
+    });
+    expect(dataDartsContinue.payload?.encounterWillEndRun).toBe(false);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === dataDartsContinue.actionId,
+    );
+    expect(state.runner.grip.length).toBe(gripBefore - 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageResolved: true,
+      damageType: "net",
+      damageAmount: 3,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_234_data-darts",
+          subroutineIndex: 0,
+          subroutineType: "do_damage",
+          damageType: "net",
+          amount: 3,
+        }),
+      ],
+    });
     expect(state.run?.nextEncounterNoBreakSubroutines).toBe(true);
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.run?.noBreakSubroutinesActive).toBe(true);
@@ -37416,6 +37514,138 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       expect(replay.ok).toBe(true);
       expect(hashState(replay.state)).toBe(hashState(state));
     }
+  });
+
+  it("applies Crystal Palace costs and Tesseract appends to next-ICE restriction subroutines", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p327-bolter-crystal-tesseract",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_RUNNER_DECK,
+          cards: [
+            { id: "onr_v1_072_wild-card", quantity: 1 },
+            ...ONR_V1_RUNNER_DECK.cards.filter(
+              (card) => card.id !== "onr_v1_072_wild-card",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_CORP_DECK,
+          cards: [
+            { id: "onr_v1_224_bolter-cluster", quantity: 1 },
+            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+            { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
+            ...ONR_V1_CORP_DECK.cards.filter(
+              (card) =>
+                card.id !== "onr_v1_224_bolter-cluster" &&
+                card.id !== "onr_v1_355_crystal-palace-station-grid" &&
+                card.id !== "onr_v1_370_tesseract-fort-construction",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 50;
+    state.corp.credits = 50;
+    const wildCardId = installRunnerProgramForTest(
+      state,
+      "onr_v1_072_wild-card",
+    );
+    state.cardInstances[wildCardId] = {
+      ...state.cardInstances[wildCardId]!,
+      strengthModifier: 10,
+    };
+    for (const upgradeId of [
+      putCorpRootInRemote(state, "onr_v1_355_crystal-palace-station-grid"),
+      putCorpRootInRemote(state, "onr_v1_370_tesseract-fort-construction"),
+    ]) {
+      state.cardInstances[upgradeId] = {
+        ...state.cardInstances[upgradeId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    putCorpIceOnServer(state, "remote_1", "onr_v1_224_bolter-cluster");
+    state = encounterIce(state, "remote_1", "onr_v1_224_bolter-cluster");
+
+    const continueAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "continue_run",
+    );
+    expect(continueAction.payload).toMatchObject({
+      unbrokenSubroutineCount: 3,
+      encounterSubroutineIds:
+        "card_implementation.onr_v1_224_bolter-cluster.printed_subroutine.1.net_damage,card_implementation.onr_v1_224_bolter-cluster.printed_subroutine.2.prohibit_break_next_ice,card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+    });
+    const breakActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_072_wild-card",
+    );
+    expect(breakActions.map((action) => action.payload?.subroutineIndex)).toEqual([
+      0,
+      1,
+      2,
+    ]);
+    expect(breakActions.map((action) => action.costs)).toEqual([
+      [{ credits: 1 }],
+      [{ credits: 1 }],
+      [{ credits: 1 }],
+    ]);
+  });
+
+  it("rejects stale break actions once next-ICE no-break becomes active", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p327-stale-no-break",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...ONR_V1_RUNNER_DECK,
+          cards: [
+            { id: "simple_decoder", quantity: 1 },
+            ...ONR_V1_RUNNER_DECK.cards.filter(
+              (card) => card.id !== "simple_decoder",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_CORP_DECK,
+          cards: [
+            { id: "simple_code_gate_ice", quantity: 1 },
+            ...ONR_V1_CORP_DECK.cards.filter(
+              (card) => card.id !== "simple_code_gate_ice",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    installRunnerProgramForTest(state, "simple_decoder");
+    putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+    state = encounterIce(state, "rd", "simple_code_gate_ice");
+
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) => action.type === "break_subroutine",
+    );
+    state.run!.noBreakSubroutinesActive = true;
+    const creditsBefore = state.runner.credits;
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "p327-stale-no-break",
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error.code).toBe("ERR_UNKNOWN_ACTION");
+    expect(state.runner.credits).toBe(creditsBefore);
   });
 
   it("applies Fang trace success as a pay-to-run lock instead of a tag", () => {

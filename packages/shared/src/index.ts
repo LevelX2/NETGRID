@@ -7008,20 +7008,18 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 3,
     rulesText:
-      "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.\n[Subroutine] End the run.",
+      "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
-      onrNetDamage("onr_v1_234_data_darts_net_damage", 1),
+      onrNetDamage("onr_v1_234_data_darts_net_damage", 3),
       onrSetNextEncounterNoBreakSubroutines(
         "onr_v1_234_data_darts_next_ice_no_break",
       ),
-      onrEtr("onr_v1_234_data_darts_etr"),
     ],
     mechanics: [
       "damage",
       "flatline",
       "next_encounter_penalty",
       "run_modifier",
-      "end_the_run",
       "event_modification",
     ],
   }),

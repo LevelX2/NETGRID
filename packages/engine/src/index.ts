@@ -8004,6 +8004,8 @@ function performAction(
       }
       if (!state.run?.encounteredIceId)
         throw new Error("Subroutine kann nur im ICE-Encounter gebrochen werden.");
+      if (state.run.noBreakSubroutinesActive)
+        throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
       const iceDefinition = definitionFor(state, state.run.encounteredIceId);
       const currentSubroutine = assertCurrentSubroutineMatchesLegalAction(
         state,

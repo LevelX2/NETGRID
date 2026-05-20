@@ -35,6 +35,20 @@ function printedSubroutineDefinitionForImplementation(
       type: "trash_installed_program",
     };
   }
+  if (
+    subroutine.kind === "prohibit_break_next_ice" ||
+    subroutine.kind === "prohibit_break_and_jack_out_next_ice"
+  ) {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type:
+        subroutine.kind === "prohibit_break_next_ice"
+          ? "set_next_encounter_no_break_subroutines"
+          : "set_next_encounter_lock",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");

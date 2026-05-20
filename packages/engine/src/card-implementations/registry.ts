@@ -36,11 +36,13 @@ import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
+import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
 import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
 import { corticalScannerImplementation } from "./onr-v1/corp/ice/cortical-scanner";
 import { corticalScrubImplementation } from "./onr-v1/corp/ice/cortical-scrub";
 import { crystalWallImplementation } from "./onr-v1/corp/ice/crystal-wall";
 import { dArcKnightImplementation } from "./onr-v1/corp/ice/d-arc-knight";
+import { dataDartsImplementation } from "./onr-v1/corp/ice/data-darts";
 import { dataWallTwoPointZeroImplementation } from "./onr-v1/corp/ice/data-wall-2-0";
 import { dataWallImplementation } from "./onr-v1/corp/ice/data-wall";
 import { dataNagaImplementation } from "./onr-v1/corp/ice/data-naga";
@@ -52,12 +54,14 @@ import { laserWireImplementation } from "./onr-v1/corp/ice/laser-wire";
 import { licheImplementation } from "./onr-v1/corp/ice/liche";
 import { mazerImplementation } from "./onr-v1/corp/ice/mazer";
 import { nerveLabyrinthImplementation } from "./onr-v1/corp/ice/nerve-labyrinth";
+import { neuralBladeImplementation } from "./onr-v1/corp/ice/neural-blade";
 import { quandaryImplementation } from "./onr-v1/corp/ice/quandary";
 import { razorWireImplementation } from "./onr-v1/corp/ice/razor-wire";
 import { reinforcedWallImplementation } from "./onr-v1/corp/ice/reinforced-wall";
 import { rockIsStrongImplementation } from "./onr-v1/corp/ice/rock-is-strong";
 import { scrambleImplementation } from "./onr-v1/corp/ice/scramble";
 import { sentinelsPrimeImplementation } from "./onr-v1/corp/ice/sentinels-prime";
+import { shockRImplementation } from "./onr-v1/corp/ice/shock-r";
 import { shotgunWireImplementation } from "./onr-v1/corp/ice/shotgun-wire";
 import { sleeperImplementation } from "./onr-v1/corp/ice/sleeper";
 import { triggermanImplementation } from "./onr-v1/corp/ice/triggerman";
@@ -158,11 +162,13 @@ export const CARD_IMPLEMENTATIONS = [
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
   banpeiImplementation,
+  bolterClusterImplementation,
   codeCorpseImplementation,
   corticalScannerImplementation,
   corticalScrubImplementation,
   crystalWallImplementation,
   dArcKnightImplementation,
+  dataDartsImplementation,
   dataWallImplementation,
   dataWallTwoPointZeroImplementation,
   dataNagaImplementation,
@@ -174,12 +180,14 @@ export const CARD_IMPLEMENTATIONS = [
   licheImplementation,
   mazerImplementation,
   nerveLabyrinthImplementation,
+  neuralBladeImplementation,
   quandaryImplementation,
   razorWireImplementation,
   reinforcedWallImplementation,
   rockIsStrongImplementation,
   scrambleImplementation,
   sentinelsPrimeImplementation,
+  shockRImplementation,
   shotgunWireImplementation,
   sleeperImplementation,
   triggermanImplementation,
