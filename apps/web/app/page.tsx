@@ -1705,7 +1705,7 @@ export default function Page() {
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
-  const [seed, setSeed] = useState(() => createMatchSeed());
+  const [seed, setSeed] = useState("");
   const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
@@ -1890,6 +1890,7 @@ export default function Page() {
       if (typeof storedMatchStartSettings.testSetupMode === "boolean") setTestSetupMode(storedMatchStartSettings.testSetupMode);
       if (storedMatchStartSettings.countdownSeconds) setCountdownSeconds(storedMatchStartSettings.countdownSeconds);
       if (typeof storedMatchStartSettings.seed === "string") setSeed(normalizeMatchSeed(storedMatchStartSettings.seed));
+      else setSeed(createMatchSeed());
       if (storedMatchStartSettings.runnerDeckSource) setRunnerDeckSource(storedMatchStartSettings.runnerDeckSource);
       if (storedMatchStartSettings.corpDeckSource) setCorpDeckSource(storedMatchStartSettings.corpDeckSource);
       if (storedMatchStartSettings.participantBRunnerDeckSource) setParticipantBRunnerDeckSource(storedMatchStartSettings.participantBRunnerDeckSource);
@@ -1904,6 +1905,7 @@ export default function Page() {
       if (typeof storedMatchStartSettings.selectedParticipantBCorpLocalDeckId === "string") setSelectedParticipantBCorpLocalDeckId(storedMatchStartSettings.selectedParticipantBCorpLocalDeckId);
     } else {
       hasStoredMatchStartSettingsRef.current = false;
+      setSeed(createMatchSeed());
     }
     setMatchStartSettingsLoaded(true);
     const storedSession = loadStoredSession();
@@ -2432,6 +2434,7 @@ export default function Page() {
     aiDeckPolicy,
     testSetupMode
   }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
+  const playerClockDetailControlsDisabled = matchStartSettingsLoaded ? playerClockMode === "none" : false;
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
   const joinMatchIdTrimmed = joinMatchId.trim();
@@ -4287,7 +4290,7 @@ export default function Page() {
                     </label>
                     <label>
                       Zeit pro Seite
-                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockMode === "none"}>
+                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockDetailControlsDisabled}>
                         <option value={5}>5 Minuten</option>
                         <option value={10}>10 Minuten</option>
                         <option value={15}>15 Minuten</option>
@@ -4298,7 +4301,7 @@ export default function Page() {
                     </label>
                     <label>
                       Kulanz je Entscheidung
-                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockMode === "none"}>
+                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockDetailControlsDisabled}>
                         <option value={0}>0 Sekunden</option>
                         <option value={5}>5 Sekunden</option>
                         <option value={10}>10 Sekunden</option>

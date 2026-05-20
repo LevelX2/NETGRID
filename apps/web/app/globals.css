@@ -4445,32 +4445,28 @@ select {
   flex-wrap: wrap;
   align-items: flex-start;
   gap: 10px;
-  width: 100%;
-  max-width: 100%;
+  width: fit-content;
+  max-width: none;
 }
 
 .archivesPile {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
-  width: 100%;
-  max-width: 100%;
+  width: fit-content;
+  max-width: none;
   min-width: 0;
 }
 
 .archivesPileBody {
-  width: 100%;
-  max-width: 100%;
+  width: fit-content;
+  max-width: none;
   min-width: 0;
 }
 
 .archiveEmptyPlaceholder {
-  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
   display: grid;
   place-items: center;
-  min-height: calc(151px * var(--archive-card-scale, 1));
-  width: calc(108px * var(--archive-card-scale, 1));
-  max-width: calc(108px * var(--archive-card-scale, 1));
 }
 
 .archivesPileHeader {
@@ -4513,9 +4509,9 @@ select {
   grid-auto-rows: var(--archive-card-height);
   gap: calc(8px * var(--archive-card-scale, 1)) 0;
   align-items: flex-start;
-  width: min(100%, var(--archive-stack-width));
-  min-width: min(100%, var(--archive-card-width));
-  max-width: 100%;
+  width: var(--archive-stack-width);
+  min-width: var(--archive-card-width);
+  max-width: none;
   min-height: var(--archive-card-height);
   padding-right: calc(var(--archive-card-width) - var(--archive-card-step));
   overflow-x: visible;
@@ -7179,8 +7175,8 @@ select {
   grid-auto-rows: var(--zone-stack-card-height);
   gap: calc(8px * var(--zone-card-scale, 1)) 0;
   align-items: flex-start;
-  width: min(100%, var(--zone-stack-width));
-  max-width: 100%;
+  width: var(--zone-stack-width);
+  max-width: none;
   min-height: var(--zone-stack-card-height);
   padding-right: calc(var(--zone-stack-card-width) - var(--zone-stack-card-step));
   overflow-x: visible;
@@ -8735,6 +8731,15 @@ select,
 
 .lane .card {
   height: calc(151px * var(--lane-card-scale, 1));
+}
+
+.lane .archivesOverlapRow .cardSlot {
+  width: var(--archive-card-width);
+  max-width: var(--archive-card-width);
+}
+
+.lane .archivesOverlapRow .card {
+  height: var(--archive-card-height);
 }
 
 .lane .cardTitle {
