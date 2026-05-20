@@ -69,6 +69,7 @@ import {
   dynamicSubroutineAttributionFor,
 } from "./ability-engine/additional-subroutine-modifiers";
 import { quoteBreakSubroutineCostModifiers } from "./ability-engine/break-subroutine-cost-modifiers";
+import { runnerCardImplementationAbilityLimitHost } from "./ability-engine/card-implementation-ability-limits";
 import {
   effectiveAgendaDifficulty,
   maxHandSize,
@@ -282,8 +283,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   createAction: action,
   appendResolvedEffectsToPayload,
   ...cardImplementationEffectAdapters,
-  sourceAbilityUsedThisTurn: runnerUsedOncePerTurnSourceAbilityThisTurn,
-  markSourceAbilityUsedThisTurn: markRunnerOncePerTurnSourceAbilityUsedThisTurn,
+  abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
 
 const publicContextDeps: PublicContextForActionDependencies = {
@@ -15080,27 +15080,6 @@ function runnerHasInstalledCorporateAlly(state: GameState): boolean {
   return state.runner.rig.resources.some(
     (cardId) => definitionFor(state, cardId).id === "onr_v1_156_corporate-ally",
   );
-}
-
-function runnerUsedOncePerTurnSourceAbilityThisTurn(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): boolean {
-  return (
-    ensureRunnerTurnFlags(state).brokerActionCardIdsThisTurn?.includes(
-      sourceCardId,
-    ) === true
-  );
-}
-
-function markRunnerOncePerTurnSourceAbilityUsedThisTurn(
-  state: GameState,
-  sourceCardId: CardInstanceId,
-): void {
-  const flags = ensureRunnerTurnFlags(state);
-  const used = flags.brokerActionCardIdsThisTurn ?? [];
-  if (!used.includes(sourceCardId)) used.push(sourceCardId);
-  flags.brokerActionCardIdsThisTurn = used.slice().sort();
 }
 
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {

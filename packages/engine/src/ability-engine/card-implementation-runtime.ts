@@ -17,9 +17,14 @@ import {
   type CardEffectHostedCreditsResult,
   type CardEffectTrashSourceResult,
 } from "./effect-interpreter";
+import {
+  canUseCardImplementationAbilityLimit,
+  cardImplementationAbilityLimitFailureMessage,
+  markCardImplementationAbilityLimitUsed,
+  type CardImplementationAbilityLimitHost,
+} from "./card-implementation-ability-limits";
 import type {
   ActivatedCardAbilityImplementation,
-  CardAbilityLimitImplementation,
   CardConditionImplementation,
   CardEffectImplementation,
   CardLifecycleImplementation,
@@ -92,16 +97,7 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     sourceCardId: CardInstanceId,
   ) => CardEffectTrashSourceResult;
-  sourceAbilityUsedThisTurn: (
-    state: GameState,
-    sourceCardId: CardInstanceId,
-    limit: CardAbilityLimitImplementation,
-  ) => boolean;
-  markSourceAbilityUsedThisTurn: (
-    state: GameState,
-    sourceCardId: CardInstanceId,
-    limit: CardAbilityLimitImplementation,
-  ) => void;
+  abilityLimits: CardImplementationAbilityLimitHost;
 };
 
 function printedCostOnPlayImplementation(
@@ -161,9 +157,12 @@ function canResolveActivatedCardImplementationAbility(
   )
     return false;
   if (
-    ability.limit &&
-    (!sourceCardId ||
-      deps.sourceAbilityUsedThisTurn(state, sourceCardId, ability.limit))
+    !canUseCardImplementationAbilityLimit(
+      deps.abilityLimits,
+      state,
+      sourceCardId,
+      ability.limit,
+    )
   )
     return false;
   return true;
@@ -210,8 +209,10 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Der Runner muss getaggt sein.");
   if (ability.condition?.kind === "source_has_hosted_credits")
     throw new Error("Auf der Quelle muessen Credits liegen.");
-  if (ability.limit?.kind === "once_per_turn_per_source")
-    throw new Error("Diese Kartenquelle wurde in diesem Zug bereits genutzt.");
+  const limitFailureMessage = cardImplementationAbilityLimitFailureMessage(
+    ability.limit,
+  );
+  if (limitFailureMessage) throw new Error(limitFailureMessage);
   throw new Error("Die aktivierte Kartenbedingung ist nicht erfuellt.");
 }
 
@@ -720,7 +721,12 @@ export function resolveActivatedCardImplementationAbility(
     match.ability.effects,
   );
   if (match.ability.limit)
-    deps.markSourceAbilityUsedThisTurn(state, match.cardId, match.ability.limit);
+    markCardImplementationAbilityLimitUsed(
+      deps.abilityLimits,
+      state,
+      match.cardId,
+      match.ability.limit,
+    );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: match.definition.id,
