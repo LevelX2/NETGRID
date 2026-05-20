@@ -2787,7 +2787,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
+      "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 2, in addition to the normal cost, to install ice on that fort.",
     mechanics: [
       "install_resource",
       "install_cost_modifier",
