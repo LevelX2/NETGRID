@@ -275,6 +275,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   createAction: action,
   appendResolvedEffectsToPayload,
   ...cardImplementationEffectAdapters,
+  sourceAbilityUsedThisTurn: runnerUsedOncePerTurnSourceAbilityThisTurn,
+  markSourceAbilityUsedThisTurn: markRunnerOncePerTurnSourceAbilityUsedThisTurn,
 };
 type VisibleCounterPayload = {
   counterType: CounterType;
@@ -441,7 +443,6 @@ const DRIFTER_MOBILE_ENVIRONMENT_ID =
 const PROTEUS_DIGICONDA_ID = "onr_proteus_020_digiconda";
 const PROTEUS_FOOD_FIGHT_ID = "onr_proteus_022_food-fight";
 const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
-const BROKER_ID = "onr_v1_154_broker";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 const LOAN_FROM_CHIBA_ID = "onr_v1_168_loan-from-chiba";
@@ -4370,48 +4371,6 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
-      if (
-        definition.id === BROKER_ID &&
-        !runnerUsedBrokerThisTurn(state, resourceId)
-      ) {
-        const storedCredits = cardCounter(state, resourceId, "power");
-        actions.push(
-          action(
-            state,
-            "runner",
-            "trigger_ability",
-            `${definition.title}: 3 Credits auf Broker legen`,
-            resourceId,
-            [{ clicks: 1 }],
-            {
-              cardId: resourceId,
-              resourceAbility: "broker_load_credits",
-              counterType: "power",
-              addCounterAmount: 3,
-              gainCreditsAmount: 0,
-            },
-          ),
-        );
-        if (storedCredits > 0) {
-          actions.push(
-            action(
-              state,
-              "runner",
-              "trigger_ability",
-              `${definition.title}: ${storedCredits} ${storedCredits === 1 ? "Credit" : "Credits"} nehmen`,
-              resourceId,
-              [{ clicks: 1 }],
-              {
-                cardId: resourceId,
-                resourceAbility: "broker_take_credits",
-                counterType: "power",
-                removePowerCounterAmount: storedCredits,
-                gainCreditsAmount: storedCredits,
-              },
-            ),
-          );
-        }
-      }
       if (definition.id === "onr_v1_159_databroker") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
@@ -8209,13 +8168,6 @@ function performAction(
         resolveShellTradersRemoveCounter(state, legalAction);
         return;
       }
-      if (
-        legalAction.payload?.resourceAbility === "broker_load_credits" ||
-        legalAction.payload?.resourceAbility === "broker_take_credits"
-      ) {
-        resolveBrokerAbility(state, legalAction);
-        return;
-      }
       if (legalAction.payload?.runnerAbility === "remove_data_raven_counter") {
         if (legalAction.side !== "runner")
           throw new Error("Nur der Runner darf Data-Raven-Counter entfernen.");
@@ -8640,60 +8592,6 @@ function applyShellTradersStartOfTurn(
       cardTitle: publicCardTitle(targetDefinition.id),
     });
   }
-}
-
-function resolveBrokerAbility(state: GameState, legalAction: LegalAction): void {
-  if (legalAction.side !== "runner")
-    throw new Error("Nur der Runner darf Broker nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "");
-  if (!state.runner.rig.resources.includes(sourceCardId))
-    throw new Error("Broker ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== BROKER_ID)
-    throw new Error("Die Broker-Faehigkeit passt nicht zur Karte.");
-  if (runnerUsedBrokerThisTurn(state, sourceCardId))
-    throw new Error("Dieser Broker wurde in diesem Zug bereits genutzt.");
-
-  spendClick(state, "runner");
-  if (legalAction.payload?.resourceAbility === "broker_load_credits") {
-    const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
-    if (!Number.isInteger(addAmount) || addAmount !== 3)
-      throw new Error("Broker legt genau 3 Credits aus der Bank auf Broker.");
-    addCardCounter(state, sourceCardId, "power", addAmount);
-    markBrokerUsedThisTurn(state, sourceCardId);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      addedCounterAmount: addAmount,
-      remainingCounters: cardCounter(state, sourceCardId, "power"),
-      gainedCredits: 0,
-      runnerCreditsAfter: state.runner.credits,
-    };
-    return;
-  }
-
-  const storedCredits = cardCounter(state, sourceCardId, "power");
-  if (storedCredits <= 0)
-    throw new Error("Auf Broker liegen keine Credits.");
-  const removeAmount = Number(
-    legalAction.payload?.removePowerCounterAmount ?? 0,
-  );
-  const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-  if (
-    !Number.isInteger(removeAmount) ||
-    removeAmount !== storedCredits ||
-    !Number.isInteger(gainAmount) ||
-    gainAmount !== storedCredits
-  )
-    throw new Error("Broker nimmt immer alle gespeicherten Credits.");
-  spendCardCounter(state, sourceCardId, "power", removeAmount);
-  credits(state, "runner", gainAmount);
-  markBrokerUsedThisTurn(state, sourceCardId);
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    removedCounterAmount: removeAmount,
-    gainedCredits: gainAmount,
-    remainingCounters: cardCounter(state, sourceCardId, "power"),
-    runnerCreditsAfter: state.runner.credits,
-  };
 }
 
 function resolveFalseEchoForceRez(
@@ -15165,24 +15063,24 @@ function runnerHasInstalledCorporateAlly(state: GameState): boolean {
   );
 }
 
-function runnerUsedBrokerThisTurn(
+function runnerUsedOncePerTurnSourceAbilityThisTurn(
   state: GameState,
-  brokerId: CardInstanceId,
+  sourceCardId: CardInstanceId,
 ): boolean {
   return (
     ensureRunnerTurnFlags(state).brokerActionCardIdsThisTurn?.includes(
-      brokerId,
+      sourceCardId,
     ) === true
   );
 }
 
-function markBrokerUsedThisTurn(
+function markRunnerOncePerTurnSourceAbilityUsedThisTurn(
   state: GameState,
-  brokerId: CardInstanceId,
+  sourceCardId: CardInstanceId,
 ): void {
   const flags = ensureRunnerTurnFlags(state);
   const used = flags.brokerActionCardIdsThisTurn ?? [];
-  if (!used.includes(brokerId)) used.push(brokerId);
+  if (!used.includes(sourceCardId)) used.push(sourceCardId);
   flags.brokerActionCardIdsThisTurn = used.slice().sort();
 }
 

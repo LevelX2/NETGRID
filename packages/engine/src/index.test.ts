@@ -1450,6 +1450,120 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     ).toBe(false);
   });
 
+  it("executes P3.17 Department manual hosted-credit abilities", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+      "p317-department-manual-hosted-credits",
+    );
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 10;
+    state.corp.clicks = 5;
+    const departmentId = putCorpRootInRemote(
+      state,
+      "onr_v1_318_department-of-truth-enhancement",
+    );
+    state.cardInstances[departmentId] = {
+      ...state.cardInstances[departmentId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    let departmentActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === departmentId,
+    );
+    expect(
+      departmentActions.some(
+        (action) => action.payload?.cardImplementationAbilityIndex === 0,
+      ),
+    ).toBe(true);
+    expect(
+      departmentActions.some(
+        (action) => action.payload?.cardImplementationAbilityIndex === 1,
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === departmentId &&
+        action.payload?.cardImplementationAbilityIndex === 0,
+    );
+    expect(cardCounterAmount(state, departmentId, "bit")).toBe(3);
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === departmentId &&
+        action.payload?.cardImplementationAbilityIndex === 0,
+    );
+    expect(cardCounterAmount(state, departmentId, "bit")).toBe(6);
+
+    departmentActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === departmentId,
+    );
+    const takeAll = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === departmentId &&
+        action.payload?.cardImplementationAbilityIndex === 1,
+    );
+    expect(departmentActions).toHaveLength(2);
+    const stale = structuredClone(state);
+    stale.cardInstances[departmentId] = {
+      ...stale.cardInstances[departmentId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    const staleCredits = stale.corp.credits;
+    const staleResult = applyAction(stale, {
+      matchId: stale.matchId,
+      side: "corp",
+      actionId: takeAll.actionId,
+      clientKnownStateVersion: stale.stateVersion,
+      idempotencyKey: "p317-department-unrezzed-stale",
+    });
+    expect(staleResult.ok).toBe(false);
+    expect(stale.corp.credits).toBe(staleCredits);
+    expect(cardCounterAmount(stale, departmentId, "bit")).toBe(6);
+
+    const creditsBeforeTake = state.corp.credits;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "corp", (action) => action.actionId === takeAll.actionId);
+    expect(state.corp.credits).toBe(creditsBeforeTake + 6);
+    expect(cardCounterAmount(state, departmentId, "bit")).toBe(0);
+    expect(state.corp.archives).not.toContain(departmentId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      cardDefinitionId: "onr_v1_318_department-of-truth-enhancement",
+      hostedCreditsTaken: 6,
+      hostedCreditsAfter: 0,
+      gainedCredits: 6,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 6,
+          remainingCounters: 0,
+          sourceDefinitionId: "onr_v1_318_department-of-truth-enhancement",
+        }),
+      ],
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("executes start-of-Corp-turn hosted-credit campaign effects", () => {
     for (const [definitionId, takeAmount] of [
       ["onr_v1_311_braindance-campaign", 2],
@@ -7770,6 +7884,90 @@ describe("V1.6.2 Mechanikpaket B", () => {
         }),
       );
     }
+  });
+
+  it("describes P3.17 manual hosted-credit abilities", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_v1_154_broker")?.abilities,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "activated",
+        timing: "runner_main",
+        costs: [{ kind: "action", amount: 1 }],
+        limit: {
+          kind: "once_per_turn_per_source",
+          scope: "any_ability_on_source",
+        },
+        effects: [
+          expect.objectContaining({
+            kind: "add_hosted_credits",
+            target: "source",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        kind: "activated",
+        timing: "runner_main",
+        costs: [{ kind: "action", amount: 1 }],
+        condition: { kind: "source_has_hosted_credits" },
+        limit: {
+          kind: "once_per_turn_per_source",
+          scope: "any_ability_on_source",
+        },
+        effects: [
+          expect.objectContaining({
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            mode: "all",
+            visibility: "public",
+          }),
+        ],
+      }),
+    ]);
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_318_department-of-truth-enhancement",
+      )?.abilities,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "activated",
+        timing: "corp_main",
+        costs: [{ kind: "action", amount: 1 }],
+        effects: [
+          expect.objectContaining({
+            kind: "add_hosted_credits",
+            target: "source",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+      expect.objectContaining({
+        kind: "activated",
+        timing: "corp_main",
+        costs: [{ kind: "action", amount: 1 }],
+        condition: { kind: "source_has_hosted_credits" },
+        effects: [
+          expect.objectContaining({
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            mode: "all",
+            visibility: "public",
+          }),
+        ],
+      }),
+    ]);
+    expect(cardImplementationCoverageForDefinitionId("onr_v1_154_broker")?.status)
+      .toBe("implemented");
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_318_department-of-truth-enhancement",
+      )?.status,
+    ).toBe("implemented");
   });
 
   it("describes P3.6 start-of-Corp-turn hosted-credit economy cards", () => {
@@ -20010,11 +20208,11 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       resourceState,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_load_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 0 &&
         action.payload?.cardId === brokerId,
     );
-    expect(resourceState.cardInstances[brokerId]?.counters?.power).toBe(3);
+    expect(cardCounterAmount(resourceState, brokerId, "bit")).toBe(3);
     resourceState.runner.tags = 1;
     resourceState = apply(
       resourceState,
@@ -20065,13 +20263,15 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(
       brokerActions.some(
         (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.resourceAbility === "broker_load_credits",
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbilityIndex === 0,
       ),
     ).toBe(true);
     expect(
       brokerActions.some(
-        (action) => action.payload?.resourceAbility === "broker_take_credits",
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbilityIndex === 1,
       ),
     ).toBe(false);
 
@@ -20079,19 +20279,91 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_load_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 0 &&
         action.payload?.cardId === brokerId,
     );
-    expect(state.cardInstances[brokerId]?.counters?.power).toBe(3);
+    expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
     brokerActions = getLegalActions(state, "runner").filter(
       (action) => action.payload?.cardId === brokerId,
     );
     expect(
       brokerActions.some(
         (action) =>
-          action.payload?.resourceAbility === "broker_load_credits" ||
-          action.payload?.resourceAbility === "broker_take_credits",
+          action.type === "activated_card_ability" &&
+          (action.payload?.cardImplementationAbilityIndex === 0 ||
+            action.payload?.cardImplementationAbilityIndex === 1),
+      ),
+    ).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state = toRunnerTurnFromCorpMain(state);
+    brokerActions = getLegalActions(state, "runner").filter(
+      (action) => action.payload?.cardId === brokerId,
+    );
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbilityIndex === 0,
+      ),
+    ).toBe(true);
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbilityIndex === 1,
+      ),
+    ).toBe(true);
+
+    const loadAgain = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 0 &&
+        action.payload?.cardId === brokerId,
+    );
+    const staleTakeAll = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 1 &&
+        action.payload?.cardId === brokerId,
+    );
+    const creditsBeforeSecondLoad = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === loadAgain.actionId,
+    );
+    expect(state.runner.credits).toBe(creditsBeforeSecondLoad);
+    expect(cardCounterAmount(state, brokerId, "bit")).toBe(6);
+    const staleSecondUse = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: staleTakeAll.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "p317-broker-second-use-same-turn",
+    });
+    expect(staleSecondUse.ok).toBe(false);
+    expect(state.runner.credits).toBe(creditsBeforeSecondLoad);
+    expect(cardCounterAmount(state, brokerId, "bit")).toBe(6);
+    brokerActions = getLegalActions(state, "runner").filter(
+      (action) => action.payload?.cardId === brokerId,
+    );
+    expect(
+      brokerActions.some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          (action.payload?.cardImplementationAbilityIndex === 0 ||
+            action.payload?.cardImplementationAbilityIndex === 1),
       ),
     ).toBe(false);
 
@@ -20103,41 +20375,25 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     state = toRunnerTurnFromCorpMain(state);
     const creditsBeforeTake = state.runner.credits;
-    brokerActions = getLegalActions(state, "runner").filter(
-      (action) => action.payload?.cardId === brokerId,
-    );
-    expect(
-      brokerActions.some(
-        (action) => action.payload?.resourceAbility === "broker_load_credits",
-      ),
-    ).toBe(true);
-    expect(
-      brokerActions.some(
-        (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.resourceAbility === "broker_take_credits" &&
-          action.payload?.gainCreditsAmount === 3,
-      ),
-    ).toBe(true);
-
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_take_credits" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 1 &&
         action.payload?.cardId === brokerId,
     );
-    expect(state.runner.credits).toBe(creditsBeforeTake + 3);
-    expect(state.cardInstances[brokerId]?.counters?.power ?? 0).toBe(0);
+    expect(state.runner.credits).toBe(creditsBeforeTake + 6);
+    expect(cardCounterAmount(state, brokerId, "bit")).toBe(0);
     brokerActions = getLegalActions(state, "runner").filter(
       (action) => action.payload?.cardId === brokerId,
     );
     expect(
       brokerActions.some(
         (action) =>
-          action.payload?.resourceAbility === "broker_load_credits" ||
-          action.payload?.resourceAbility === "broker_take_credits",
+          action.type === "activated_card_ability" &&
+          (action.payload?.cardImplementationAbilityIndex === 0 ||
+            action.payload?.cardImplementationAbilityIndex === 1),
       ),
     ).toBe(false);
   });
@@ -39951,8 +40207,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_load_credits",
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 0,
     );
     const removed = structuredClone(state);
     removeEverywhere(removed, brokerId);
@@ -39967,10 +40223,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.actionId === load.actionId);
-    expect(cardCounterAmount(state, brokerId, "power")).toBe(3);
+    expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
     expect(
       getLegalActions(state, "runner").some(
-        (action) => action.payload?.resourceAbility === "broker_take_credits",
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardImplementationAbilityIndex === 1 &&
+          action.payload?.cardId === brokerId,
       ),
     ).toBe(false);
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -39980,12 +40239,15 @@ describe("Originalset Spotcheck 2026-05-16 Runner Hardware/Link/Resources harden
     state = apply(
       state,
       "runner",
-      (action) => action.payload?.resourceAbility === "broker_take_credits",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbilityIndex === 1 &&
+        action.payload?.cardId === brokerId,
     );
     expect(state.runner.credits).toBe(creditsBefore + 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_154_broker",
-      resourceAbility: "broker_take_credits",
+      actionType: "activated_card_ability",
       gainedCredits: 3,
       remainingCounters: 0,
     });

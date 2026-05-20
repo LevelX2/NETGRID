@@ -16,6 +16,7 @@ import { subsidiaryBranchImplementation } from "./onr-v1/corp/agendas/subsidiary
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
+import { departmentOfTruthEnhancementImplementation } from "./onr-v1/corp/assets/department-of-truth-enhancement";
 import { encoderIncImplementation } from "./onr-v1/corp/assets/encoder-inc";
 import { esaContractImplementation } from "./onr-v1/corp/assets/esa-contract";
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
@@ -57,6 +58,7 @@ import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
+import { brokerImplementation } from "./onr-v1/runner/resources/broker";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
@@ -68,6 +70,7 @@ export const CARD_IMPLEMENTATIONS = [
   jackNJoeImplementation,
   livewiresContactsImplementation,
   newsgroupFilterImplementation,
+  brokerImplementation,
   floatingRunnerBbsImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
@@ -104,6 +107,7 @@ export const CARD_IMPLEMENTATIONS = [
   bbsWhisperingCampaignImplementation,
   braindanceCampaignImplementation,
   dataMasonsHostingImplementation,
+  departmentOfTruthEnhancementImplementation,
   encoderIncImplementation,
   esaContractImplementation,
   fortressArchitectsImplementation,

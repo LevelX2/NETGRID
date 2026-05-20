@@ -29,7 +29,7 @@ export type CardEffectExecutionContext = {
   takeHostedCredits?: (
     sourceCardId: CardInstanceId,
     recipient: Side,
-    amount: number,
+    amount: number | "all",
   ) => CardEffectHostedCreditsResult;
   trashSourceWhenEmpty?: (
     sourceCardId: CardInstanceId,
@@ -333,7 +333,6 @@ export function executeCardImplementationEffects(
         return;
       }
       case "take_hosted_credits": {
-        assertPositiveIntegerAmount("take_hosted_credits", effect.amount);
         assertPublicVisibility("take_hosted_credits", effect.visibility);
         if ((effect as { source?: string }).source !== "source")
           throw new Error("take_hosted_credits effect source must be source.");
@@ -342,10 +341,17 @@ export function executeCardImplementationEffects(
             "take_hosted_credits effect recipient must be controller.",
           );
         const mode = effect.mode ?? "up_to_amount_if_available";
-        if (mode !== "up_to_amount_if_available")
+        if (mode !== "up_to_amount_if_available" && mode !== "all")
           throw new Error(
-            "take_hosted_credits effect mode must be up_to_amount_if_available.",
+            "take_hosted_credits effect mode must be up_to_amount_if_available or all.",
           );
+        if (mode === "up_to_amount_if_available") {
+          if (effect.amount === undefined)
+            throw new Error(
+              "take_hosted_credits amount mode requires an amount.",
+            );
+          assertPositiveIntegerAmount("take_hosted_credits", effect.amount);
+        }
         if (!context.takeHostedCredits)
           throw new Error(
             "take_hosted_credits effect requires a takeHostedCredits execution context.",
@@ -354,7 +360,7 @@ export function executeCardImplementationEffects(
         const takeResult = context.takeHostedCredits(
           context.sourceCardId,
           side,
-          effect.amount,
+          mode === "all" ? "all" : effect.amount!,
         );
         mergePublicPayload(publicPayload, takeResult.publicPayload);
         resolvedEffects.push({

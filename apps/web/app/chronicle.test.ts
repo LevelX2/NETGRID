@@ -1651,6 +1651,22 @@ describe("formatChronicleEvent", () => {
         9,
         "Die Korp hat Political Coup genutzt und 3 Credits von der Karte genommen."
       ],
+      [
+        "runner",
+        "Broker",
+        "onr_v1_154_broker",
+        6,
+        0,
+        "Du hast Broker genutzt und 6 Credits von der Karte genommen."
+      ],
+      [
+        "corp",
+        "Department of Truth Enhancement",
+        "onr_v1_318_department-of-truth-enhancement",
+        6,
+        0,
+        "Die Korp hat Department of Truth Enhancement genutzt und 6 Credits von der Karte genommen."
+      ],
     ] as const) {
       const event = makeEvent("activated_card_ability", {
         actor,
@@ -1717,6 +1733,53 @@ describe("formatChronicleEvent", () => {
     expect(item.title).not.toContain("gespielt");
     expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+3 Credits auf Karte"]));
     expect(effects).toEqual([]);
+  });
+
+  it("merges manual hosted-credit loading into activated ability entries", () => {
+    for (const [actor, title, cardDefinitionId, expectedTitle] of [
+      [
+        "runner",
+        "Broker",
+        "onr_v1_154_broker",
+        "Du hast Broker genutzt und 3 Credits auf die Karte gelegt."
+      ],
+      [
+        "corp",
+        "Department of Truth Enhancement",
+        "onr_v1_318_department-of-truth-enhancement",
+        "Die Korp hat Department of Truth Enhancement genutzt und 3 Credits auf die Karte gelegt."
+      ],
+    ] as const) {
+      const event = makeEvent("activated_card_ability", {
+        actor,
+        title,
+        cardDefinitionId,
+        cardImplementationAbility: "activated",
+        hostedCreditsAdded: 3,
+        hostedCreditsAfter: 3,
+        resolvedEffects: [
+          {
+            effectId: `${cardDefinitionId}.effect.0.add_hosted_credits`,
+            kind: "add_hosted_credits",
+            visibility: "public",
+            side: actor,
+            amount: 3,
+            remainingCounters: 3,
+            sourceDefinitionId: cardDefinitionId,
+            sourceTitle: title,
+            reason: "card_resolver"
+          }
+        ]
+      });
+
+      const item = formatChronicleEvent(event, "runner", { cardTitle: title });
+      const effects = formatChronicleEffectItems(event, "runner");
+
+      expect(item.title).toBe(expectedTitle);
+      expect(item.title).not.toContain("gespielt");
+      expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+3 Credits auf Karte"]));
+      expect(effects).toEqual([]);
+    }
   });
 
   it("shows trash-on-empty for hosted-credit campaign and contract abilities", () => {

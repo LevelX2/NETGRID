@@ -61,6 +61,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/wutech-mem-chip.ts",
   "onr_v1_146_zetatech-mem-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/zetatech-mem-chip.ts",
+  "onr_v1_154_broker":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
   "onr_v1_095_jack-n-joe":
@@ -135,6 +137,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
+  "onr_v1_318_department-of-truth-enhancement":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/department-of-truth-enhancement.ts",
   "onr_v1_320_encoder-inc":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/encoder-inc.ts",
   "onr_v1_321_esa-contract":

@@ -51,8 +51,14 @@ export type ActivatedCardAbilityImplementation = {
   timing: "runner_main" | "corp_main";
   costs: readonly CardAbilityCostImplementation[];
   condition?: CardConditionImplementation;
+  limit?: CardAbilityLimitImplementation;
   effects: readonly CardEffectImplementation[];
   label?: string;
+};
+
+export type CardAbilityLimitImplementation = {
+  kind: "once_per_turn_per_source";
+  scope: "any_ability_on_source";
 };
 
 export type CardAbilityCostImplementation = {
@@ -121,8 +127,8 @@ export type TakeHostedCreditsEffectImplementation = {
   kind: "take_hosted_credits";
   source: "source";
   recipient: "controller";
-  amount: number;
-  mode?: "up_to_amount_if_available";
+  amount?: number;
+  mode?: "up_to_amount_if_available" | "all";
   visibility: EventVisibilityClass;
 };
 

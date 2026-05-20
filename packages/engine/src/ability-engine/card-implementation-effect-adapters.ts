@@ -213,12 +213,12 @@ export function createCardImplementationEffectAdapters(
     state: GameState,
     sourceCardId: CardInstanceId,
     side: Side,
-    amount: number,
+    amount: number | "all",
   ): CardEffectHostedCreditsResult {
     const available = host.cardCounter(state, sourceCardId, "bit");
     if (available <= 0)
       throw new Error("Auf der Quelle liegen keine Credits.");
-    const taken = Math.min(available, amount);
+    const taken = amount === "all" ? available : Math.min(available, amount);
     host.spendCardCounter(state, sourceCardId, "bit", taken);
     host.credits(state, side, taken);
     const hostedCreditsAfter = host.cardCounter(state, sourceCardId, "bit");

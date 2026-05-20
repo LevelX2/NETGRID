@@ -19,6 +19,7 @@ import {
 } from "./effect-interpreter";
 import type {
   ActivatedCardAbilityImplementation,
+  CardAbilityLimitImplementation,
   CardConditionImplementation,
   CardEffectImplementation,
   CardLifecycleImplementation,
@@ -81,7 +82,7 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     sourceCardId: CardInstanceId,
     side: Side,
-    amount: number,
+    amount: number | "all",
   ) => CardEffectHostedCreditsResult;
   trashSourceWhenEmpty: (
     state: GameState,
@@ -91,6 +92,16 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     sourceCardId: CardInstanceId,
   ) => CardEffectTrashSourceResult;
+  sourceAbilityUsedThisTurn: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    limit: CardAbilityLimitImplementation,
+  ) => boolean;
+  markSourceAbilityUsedThisTurn: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    limit: CardAbilityLimitImplementation,
+  ) => void;
 };
 
 function printedCostOnPlayImplementation(
@@ -144,9 +155,18 @@ function canResolveActivatedCardImplementationAbility(
   ability: ActivatedCardAbilityImplementation,
   sourceCardId?: CardInstanceId,
 ): boolean {
-  return ability.condition
-    ? cardImplementationConditionMet(deps, state, ability.condition, sourceCardId)
-    : true;
+  if (
+    ability.condition &&
+    !cardImplementationConditionMet(deps, state, ability.condition, sourceCardId)
+  )
+    return false;
+  if (
+    ability.limit &&
+    (!sourceCardId ||
+      deps.sourceAbilityUsedThisTurn(state, sourceCardId, ability.limit))
+  )
+    return false;
+  return true;
 }
 
 export function canPlayPrintedCostOnPlayImplementation(
@@ -190,6 +210,8 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Der Runner muss getaggt sein.");
   if (ability.condition?.kind === "source_has_hosted_credits")
     throw new Error("Auf der Quelle muessen Credits liegen.");
+  if (ability.limit?.kind === "once_per_turn_per_source")
+    throw new Error("Diese Kartenquelle wurde in diesem Zug bereits genutzt.");
   throw new Error("Die aktivierte Kartenbedingung ist nicht erfuellt.");
 }
 
@@ -697,9 +719,17 @@ export function resolveActivatedCardImplementationAbility(
     },
     match.ability.effects,
   );
+  if (match.ability.limit)
+    deps.markSourceAbilityUsedThisTurn(state, match.cardId, match.ability.limit);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: match.definition.id,
+    ...(match.ability.limit
+      ? {
+          cardImplementationAbilityLimit: match.ability.limit.kind,
+          cardImplementationSourceAbilityUsedThisTurn: true,
+        }
+      : {}),
     ...result.publicPayload,
   };
   deps.appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
