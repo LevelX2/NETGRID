@@ -19,6 +19,12 @@ export type CardLifecycleImplementation = {
   on_rez?: readonly CardEffectImplementation[];
   on_install?: readonly CardEffectImplementation[];
   on_score?: readonly CardEffectImplementation[];
+  start_of_corp_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
+};
+
+export type CardLifecycleTriggeredAbilityImplementation = {
+  condition?: CardConditionImplementation;
+  effects: readonly CardEffectImplementation[];
 };
 
 export type OnPlayCardAbilityImplementation = {

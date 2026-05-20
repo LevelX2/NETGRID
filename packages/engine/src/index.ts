@@ -81,6 +81,7 @@ import type {
   CardConditionImplementation,
   CardEffectImplementation,
   CardLifecycleImplementation,
+  CardLifecycleTriggeredAbilityImplementation,
   OnPlayCardAbilityImplementation,
 } from "./ability-engine/definition-types";
 import { cardImplementationForDefinitionId } from "./card-implementations/registry";
@@ -120,7 +121,6 @@ import {
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
   KRUMZ_TRACE_ASSET_CARD_ID,
   SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID,
   TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "./mechanics/asset-node-effects";
 import {
@@ -440,7 +440,6 @@ const CHIMERA_ID = "onr_v1_353_chimera";
 const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
-const DETROIT_POLICE_CONTRACT_ID = "onr_v1_198_detroit-police-contract";
 const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
 const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
@@ -460,11 +459,6 @@ const RECORD_RECONSTRUCTOR_ID = "onr_v1_142_record-reconstructor";
 const R_AND_D_INTERFACE_ID = "onr_v1_139_r-and-d-interface";
 const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
-const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
-const BRAINDANCE_CAMPAIGN_STARTING_BITS = 12;
-const BRAINDANCE_CAMPAIGN_TURN_DRAIN = 2;
-const HOLOVID_CAMPAIGN_ID = "onr_v1_326_holovid-campaign";
-const HOLOVID_CAMPAIGN_STARTING_BITS = 12;
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
 const RUSTBELT_HQ_BRANCH_ID = "onr_v1_338_rustbelt-hq-branch";
@@ -3404,26 +3398,6 @@ function corpMainActions(state: GameState): LegalAction[] {
           { cardId: assetId, v1921AssetAbility: "schlaghund_tag_damage" },
         ),
       );
-    }
-    if (definition.id === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: 6 Bits laden`,
-          assetId,
-          [{ clicks: 1 }],
-          {
-            cardId: assetId,
-            v1917AssetAbility: "spinn_load_pool",
-            counterType: "bit",
-            addCounterAmount: 6,
-            gainCreditsAmount: 0,
-          },
-        ),
-      );
-      continue;
     }
     const economyProfile = corpInstalledEconomyActionProfileForDefinition(
       definition.id,
@@ -6954,37 +6928,6 @@ function performAction(
         };
         return;
       }
-      if (legalAction.payload?.v1917AssetAbility === "spinn_load_pool") {
-        if (legalAction.side !== "corp")
-          throw new Error("Nur die Korp darf Spinn Public Relations laden.");
-        const sourceCardId = String(legalAction.payload?.cardId ?? "");
-        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
-          throw new Error("Spinn Public Relations ist nicht rezzed installiert.");
-        if (
-          definitionFor(state, sourceCardId).id !==
-          SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID
-        )
-          throw new Error("Die Spinn-Faehigkeit passt nicht zur Karte.");
-        const addAmount = Number(legalAction.payload?.addCounterAmount ?? 0);
-        if (!Number.isInteger(addAmount) || addAmount !== 6)
-          throw new Error("Spinn Public Relations legt genau 6 Bits aus der Bank auf die Karte.");
-        const before = cardCounter(state, sourceCardId, "bit");
-        const counterPayload = addVisibleCardCounter(
-          state,
-          sourceCardId,
-          "bit",
-          addAmount,
-        );
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          spinnPublicRelationsPoolBefore: before,
-          spinnPublicRelationsPoolAfter: counterPayload.remainingCounters,
-          ...counterPayload,
-          gainedCredits: 0,
-          corpCreditsAfter: state.corp.credits,
-        };
-        return;
-      }
       if (resolveCorpInstalledEconomyAction(state, legalAction)) {
         return;
       }
@@ -9875,40 +9818,6 @@ function rezCard(
         counterType: "bit",
         addedCounterAmount: PARIS_CITY_GRID_TRACE_POOL_BITS,
         remainingCounters: PARIS_CITY_GRID_TRACE_POOL_BITS,
-      };
-    }
-  }
-  if (definition.id === BRAINDANCE_CAMPAIGN_ID) {
-    setCardCounter(
-      state,
-      cardId as CardInstanceId,
-      "bit",
-      BRAINDANCE_CAMPAIGN_STARTING_BITS,
-    );
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        sourceDefinitionId: BRAINDANCE_CAMPAIGN_ID,
-        counterType: "bit",
-        addedCounterAmount: BRAINDANCE_CAMPAIGN_STARTING_BITS,
-        remainingCounters: BRAINDANCE_CAMPAIGN_STARTING_BITS,
-      };
-    }
-  }
-  if (definition.id === HOLOVID_CAMPAIGN_ID) {
-    setCardCounter(
-      state,
-      cardId as CardInstanceId,
-      "bit",
-      HOLOVID_CAMPAIGN_STARTING_BITS,
-    );
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        sourceDefinitionId: HOLOVID_CAMPAIGN_ID,
-        counterType: "bit",
-        addedCounterAmount: HOLOVID_CAMPAIGN_STARTING_BITS,
-        remainingCounters: HOLOVID_CAMPAIGN_STARTING_BITS,
       };
     }
   }
@@ -13517,6 +13426,7 @@ function applyCorpStartOfTurnEffects(
       ),
     );
   }
+  executeCardImplementationStartOfCorpTurnEffects(state, effects);
   for (const cardId of rezzedCorpRootCardIds(state)) {
     const definitionId = definitionFor(state, cardId).id;
     if (
@@ -13540,71 +13450,6 @@ function applyCorpStartOfTurnEffects(
       cardCounter(state, cardId, "bit") < PARIS_CITY_GRID_TRACE_POOL_BITS
     ) {
       setCardCounter(state, cardId, "bit", PARIS_CITY_GRID_TRACE_POOL_BITS);
-    }
-    if (definitionId === SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID) {
-      if (cardCounter(state, cardId, "bit") > 0) {
-        spendCardCounter(state, cardId, "bit", 1);
-        credits(state, "corp", 1);
-        effects?.push(
-          automaticGainCreditsEffect(
-            `corp.start.spinn_public_relations.${cardId}`,
-            "corp",
-            1,
-            definitionId,
-          ),
-        );
-      }
-      continue;
-    }
-    if (definitionId === BRAINDANCE_CAMPAIGN_ID) {
-      const availableBits = cardCounter(state, cardId, "bit");
-      if (availableBits > 0) {
-        const drainedBits = Math.min(BRAINDANCE_CAMPAIGN_TURN_DRAIN, availableBits);
-        spendCardCounter(state, cardId, "bit", drainedBits);
-        credits(state, "corp", drainedBits);
-        const remainingCounters = cardCounter(state, cardId, "bit");
-        effects?.push(
-          automaticGainCreditsEffect(
-            `corp.start.braindance_campaign.${cardId}`,
-            "corp",
-            drainedBits,
-            definitionId,
-          ),
-        );
-        effects?.push({
-          effectId: `corp.start.braindance_campaign.bits.${cardId}`,
-          kind: "counter_change",
-          visibility: "public",
-          side: "corp",
-          amount: remainingCounters,
-          reason: "start_of_turn",
-          counterType: "bit",
-          removedCounterAmount: drainedBits,
-          remainingCounters,
-          sourceDefinitionId: definitionId,
-          sourceTitle: publicCardTitle(definitionId),
-        });
-      }
-      if (cardCounter(state, cardId, "bit") <= 0)
-        trashCorpInstalledCardToArchives(state, cardId);
-      continue;
-    }
-    if (definitionId === HOLOVID_CAMPAIGN_ID) {
-      if (cardCounter(state, cardId, "bit") > 0) {
-        spendCardCounter(state, cardId, "bit", 1);
-        credits(state, "corp", 1);
-        effects?.push(
-          automaticGainCreditsEffect(
-            `corp.start.holovid_campaign.${cardId}`,
-            "corp",
-            1,
-            definitionId,
-          ),
-        );
-      }
-      if (cardCounter(state, cardId, "bit") <= 0)
-        trashCorpInstalledCardToArchives(state, cardId);
-      continue;
     }
     if (definitionId === INVESTMENT_FIRM_ASSET_CARD_ID) {
       if (cardCounter(state, cardId, "recurring_credit") > 0) {
@@ -15597,17 +15442,6 @@ function scoreAgenda(
     cardId,
     "on_score",
   );
-  if (definition.id === DETROIT_POLICE_CONTRACT_ID) {
-    const counterAmount = 4;
-    setCardCounter(state, cardId, "power", counterAmount);
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        powerCountersAdded: counterAmount,
-        agendaAbility: "v1912_detroit_police_contract",
-      };
-    }
-  }
   if (definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID) {
     setCardCounter(state, cardId, "mark", 1);
     if (legalAction)
@@ -22831,7 +22665,6 @@ function revealForPublicEvent(
       hasLegacyAbilityPayload(legalAction.payload, "v1917AssetAbility", [
         "gain_credits",
         "trace_3_tag",
-        "spinn_load_pool",
       ])) ||
     (legalAction.type === "gain_credit" &&
       hasLegacyAbilityPayload(legalAction.payload, "v1920AssetAbility")) ||
@@ -24426,7 +24259,7 @@ function assertActivatedCardImplementationAbilityCanResolve(
 
 function cardImplementationLifecycleEffects(
   definition: CardDefinition,
-  lifecycle: keyof CardLifecycleImplementation,
+  lifecycle: Exclude<keyof CardLifecycleImplementation, "start_of_corp_turn">,
 ): readonly CardEffectImplementation[] {
   return cardImplementationForDefinitionId(definition.id)?.lifecycle?.[
     lifecycle
@@ -24438,7 +24271,7 @@ function executeCardImplementationLifecycleEffects(
   legalAction: LegalAction | undefined,
   definition: CardDefinition,
   cardId: CardInstanceId,
-  lifecycle: keyof CardLifecycleImplementation,
+  lifecycle: Exclude<keyof CardLifecycleImplementation, "start_of_corp_turn">,
 ): void {
   const effects = cardImplementationLifecycleEffects(definition, lifecycle);
   if (effects.length === 0) return;
@@ -24470,6 +24303,111 @@ function executeCardImplementationLifecycleEffects(
     ...result.publicPayload,
   };
   appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+}
+
+function cardImplementationStartOfCorpTurnAbilities(
+  definition: CardDefinition,
+): readonly CardLifecycleTriggeredAbilityImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.lifecycle
+      ?.start_of_corp_turn ?? []
+  );
+}
+
+function cardImplementationStartOfCorpTurnSourceIds(
+  state: GameState,
+): CardInstanceId[] {
+  return [...rezzedCorpRootCardIds(state), ...state.corp.scoreArea].sort();
+}
+
+function isActiveCardImplementationStartOfCorpTurnSource(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): boolean {
+  const instance = state.cardInstances[cardId];
+  if (!instance || instance.controller !== "corp") return false;
+  if (
+    definition.type === "agenda" &&
+    instance.zone.side === "corp" &&
+    instance.zone.zone === "scoreArea" &&
+    state.corp.scoreArea.includes(cardId)
+  )
+    return true;
+  if (definition.type === "agenda") return false;
+  return (
+    instance.zone.side === "corp" &&
+    instance.zone.zone === "serverRoot" &&
+    instance.rezzed === true &&
+    state.corp.servers.some((server) => server.root.includes(cardId))
+  );
+}
+
+function executeCardImplementationStartOfCorpTurnEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const sourceIds = cardImplementationStartOfCorpTurnSourceIds(state);
+  for (const cardId of sourceIds) {
+    const instance = state.cardInstances[cardId];
+    if (!instance) continue;
+    const definition = definitionFor(state, cardId);
+    const startAbilities = cardImplementationStartOfCorpTurnAbilities(definition);
+    if (startAbilities.length === 0) continue;
+    if (
+      !isActiveCardImplementationStartOfCorpTurnSource(
+        state,
+        cardId,
+        definition,
+      )
+    )
+      continue;
+    for (const ability of startAbilities) {
+      if (
+        ability.condition &&
+        !cardImplementationConditionMet(state, ability.condition, cardId)
+      )
+        continue;
+      const result = executeCardImplementationEffects(
+        state,
+        {
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+          controller: instance.controller,
+          reason: "start_of_turn",
+          addHostedCredits: (sourceCardId, amount) =>
+            addHostedCreditsForCardImplementationEffect(
+              state,
+              sourceCardId,
+              amount,
+            ),
+          takeHostedCredits: (sourceCardId, side, amount) =>
+            takeHostedCreditsForCardImplementationEffect(
+              state,
+              sourceCardId,
+              side,
+              amount,
+            ),
+          trashSourceWhenEmpty: (sourceCardId) =>
+            trashSourceWhenEmptyForCardImplementationEffect(
+              state,
+              sourceCardId,
+            ),
+        },
+        ability.effects,
+      );
+      effects?.push(...result.resolvedEffects);
+      if (
+        !isActiveCardImplementationStartOfCorpTurnSource(
+          state,
+          cardId,
+          definition,
+        )
+      )
+        break;
+    }
+  }
 }
 
 function activatedCardImplementationAbilitiesForTiming(

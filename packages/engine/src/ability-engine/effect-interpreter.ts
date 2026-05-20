@@ -13,6 +13,7 @@ export type CardEffectExecutionContext = {
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   controller: Side;
+  reason?: string;
   drawCards?: (
     side: Side,
     amount: number,
@@ -99,7 +100,15 @@ function publicEffectId(
   kind: string,
 ): string {
   const source = context.sourceDefinitionId ?? "card_implementation";
-  return `${source}.effect.${index}.${kind}`;
+  const instancePart =
+    context.reason && context.reason !== "card_resolver"
+      ? `.${context.sourceCardId}`
+      : "";
+  return `${source}${instancePart}.effect.${index}.${kind}`;
+}
+
+function effectReason(context: CardEffectExecutionContext): string {
+  return context.reason ?? "card_resolver";
 }
 
 function assertPositiveIntegerAmount(kind: string, amount: number): void {
@@ -162,7 +171,7 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: effect.amount,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -186,7 +195,7 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: drawResult.drawnCount,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -221,7 +230,7 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side,
           amount: amountToLose,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -244,7 +253,7 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side: "runner",
           amount: effect.amount,
-          reason: "card_resolver",
+          reason: effectReason(context),
           runnerTagsAfter: state.runner.tags,
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
@@ -280,7 +289,7 @@ export function executeCardImplementationEffects(
           amount: damageResult.amount,
           damageType: damageResult.damageType,
           cardsTrashed: damageResult.cardsTrashed,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -311,7 +320,7 @@ export function executeCardImplementationEffects(
           counterType: "bit",
           addedCounterAmount: addResult.amount,
           remainingCounters: addResult.hostedCreditsAfter,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -353,7 +362,7 @@ export function executeCardImplementationEffects(
           counterType: "bit",
           removedCounterAmount: takeResult.amount,
           remainingCounters: takeResult.hostedCreditsAfter,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),
@@ -380,7 +389,7 @@ export function executeCardImplementationEffects(
           visibility: effect.visibility,
           side: context.controller,
           amount: 1,
-          reason: "card_resolver",
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

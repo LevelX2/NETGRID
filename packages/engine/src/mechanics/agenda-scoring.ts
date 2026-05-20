@@ -54,19 +54,7 @@ export type ScoredAgendaActionProfile = {
   label: string;
 };
 
-export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] = [
-  {
-    profileId: "v1912.detroit_police_contract_counter_credit",
-    sourceDefinitionId: "onr_v1_198_detroit-police-contract",
-    agendaAbility: "v1912_detroit_police_contract",
-    side: "corp",
-    clickCost: 1,
-    counterType: "power",
-    removeCounterAmount: 1,
-    creditGain: 1,
-    label: "1 Credit aus Contract-Counter",
-  },
-];
+export const SCORED_AGENDA_COUNTER_CREDIT_PROFILES: ScoredAgendaActionProfile[] = [];
 
 export function scoredAgendaCounterCreditProfileForDefinition(
   sourceDefinitionId: string,

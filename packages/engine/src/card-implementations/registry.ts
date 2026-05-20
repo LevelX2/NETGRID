@@ -1,18 +1,22 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import { corporateCoupImplementation } from "./onr-v1/corp/agendas/corporate-coup";
+import { detroitPoliceContractImplementation } from "./onr-v1/corp/agendas/detroit-police-contract";
 import { marineArcologyImplementation } from "./onr-v1/corp/agendas/marine-arcology";
 import { onCallSoloTeamImplementation } from "./onr-v1/corp/agendas/on-call-solo-team";
 import { politicalCoupImplementation } from "./onr-v1/corp/agendas/political-coup";
 import { politicalOverthrowImplementation } from "./onr-v1/corp/agendas/political-overthrow";
 import { strikeForceKaliImplementation } from "./onr-v1/corp/agendas/strike-force-kali";
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
+import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
 import { encoderIncImplementation } from "./onr-v1/corp/assets/encoder-inc";
 import { esaContractImplementation } from "./onr-v1/corp/assets/esa-contract";
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
+import { holovidCampaignImplementation } from "./onr-v1/corp/assets/holovid-campaign";
 import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/skalderviken-sa-beta-test-site";
 import { soloSquadImplementation } from "./onr-v1/corp/assets/solo-squad";
 import { southAfricanMiningCorpImplementation } from "./onr-v1/corp/assets/south-african-mining-corp";
+import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-public-relations";
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
@@ -44,6 +48,7 @@ export const CARD_IMPLEMENTATIONS = [
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
   corporateCoupImplementation,
+  detroitPoliceContractImplementation,
   marineArcologyImplementation,
   onCallSoloTeamImplementation,
   politicalCoupImplementation,
@@ -61,14 +66,17 @@ export const CARD_IMPLEMENTATIONS = [
   scorchedEarthImplementation,
   urbanRenewalImplementation,
   bbsWhisperingCampaignImplementation,
+  braindanceCampaignImplementation,
   dataMasonsHostingImplementation,
   encoderIncImplementation,
   esaContractImplementation,
   fortressArchitectsImplementation,
+  holovidCampaignImplementation,
   skaldervikenSaBetaTestSiteImplementation,
   soloSquadImplementation,
   rockerboyPromotionImplementation,
   southAfricanMiningCorpImplementation,
+  spinnPublicRelationsImplementation,
   jerusalemCityGridImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 

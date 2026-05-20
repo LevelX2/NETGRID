@@ -53,6 +53,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/silicon-saloon-franchise.ts",
   "onr_v1_193_corporate-coup":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
+  "onr_v1_198_detroit-police-contract":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/detroit-police-contract.ts",
   "onr_v1_206_marine-arcology":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/marine-arcology.ts",
   "onr_v1_208_on-call-solo-team":
@@ -87,6 +89,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/urban-renewal.ts",
   "onr_v1_309_bbs-whispering-campaign":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/bbs-whispering-campaign.ts",
+  "onr_v1_311_braindance-campaign":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_320_encoder-inc":
@@ -95,6 +99,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/esa-contract.ts",
   "onr_v1_324_fortress-architects":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/fortress-architects.ts",
+  "onr_v1_326_holovid-campaign":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/holovid-campaign.ts",
   "onr_v1_341_skalderviken-sa-beta-test-site":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/skalderviken-sa-beta-test-site.ts",
   "onr_v1_342_solo-squad":
@@ -103,6 +109,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/south-african-mining-corp.ts",
   "onr_v1_337_rockerboy-promotion":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rockerboy-promotion.ts",
+  "onr_v1_344_spinn-public-relations":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
 };

@@ -1553,6 +1553,30 @@ describe("formatChronicleEvent", () => {
         12,
         "Die Korp hat Political Coup gescored und 12 Credits auf die Karte gelegt."
       ],
+      [
+        "rez_ice",
+        "corp",
+        "Braindance Campaign",
+        "onr_v1_311_braindance-campaign",
+        12,
+        "Die Korp hat Braindance Campaign gerezzt und 12 Credits auf die Karte gelegt."
+      ],
+      [
+        "rez_ice",
+        "corp",
+        "Holovid Campaign",
+        "onr_v1_326_holovid-campaign",
+        12,
+        "Die Korp hat Holovid Campaign gerezzt und 12 Credits auf die Karte gelegt."
+      ],
+      [
+        "score_agenda",
+        "corp",
+        "Detroit Police Contract",
+        "onr_v1_198_detroit-police-contract",
+        12,
+        "Die Korp hat Detroit Police Contract gescored und 12 Credits auf die Karte gelegt."
+      ],
     ] as const) {
       const event = makeEvent(actionType, {
         actor,
@@ -1659,6 +1683,40 @@ describe("formatChronicleEvent", () => {
       expect(item.chips).toEqual(expect.arrayContaining(["Ability", `+${amount} Credits`, `${amount} Credits von Karte`, `${remaining} Credits übrig`]));
       expect(effects).toEqual([]);
     }
+  });
+
+  it("merges Spinn Public Relations hosted-credit loading into activated ability entries", () => {
+    const event = makeEvent("activated_card_ability", {
+      actor: "corp",
+      title: "Spinn Public Relations",
+      cardDefinitionId: "onr_v1_344_spinn-public-relations",
+      cardImplementationAbility: "activated",
+      hostedCreditsAdded: 3,
+      hostedCreditsAfter: 3,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_344_spinn-public-relations.effect.0.add_hosted_credits",
+          kind: "add_hosted_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 3,
+          remainingCounters: 3,
+          sourceDefinitionId: "onr_v1_344_spinn-public-relations",
+          sourceTitle: "Spinn Public Relations",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", {
+      cardTitle: "Spinn Public Relations"
+    });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Spinn Public Relations genutzt und 3 Credits auf die Karte gelegt.");
+    expect(item.title).not.toContain("gespielt");
+    expect(item.chips).toEqual(expect.arrayContaining(["Ability", "+3 Credits auf Karte"]));
+    expect(effects).toEqual([]);
   });
 
   it("shows trash-on-empty for hosted-credit campaign and contract abilities", () => {
@@ -2378,30 +2436,20 @@ describe("formatChronicleEvent", () => {
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Recurring Credits", "1 bereit", "+1", "Automatisch"]));
   });
 
-  it("shows Braindance Campaign turn-start drain as one credit message", () => {
+  it("shows start-of-Corp-turn hosted-credit takes without activated wording", () => {
     const items = formatChronicleEffectItems(
       makeEvent("end_turn", {
         actor: "runner",
         resolvedEffects: [
           {
             effectId: "corp.start.braindance_campaign.card_311",
-            kind: "gain_credits",
-            visibility: "public",
-            side: "corp",
-            amount: 2,
-            sourceDefinitionId: "onr_v1_311_braindance-campaign",
-            sourceTitle: "Braindance Campaign",
-            reason: "start_of_turn"
-          },
-          {
-            effectId: "corp.start.braindance_campaign.bits.card_311",
-            kind: "counter_change",
+            kind: "take_hosted_credits",
             visibility: "public",
             side: "corp",
             amount: 2,
             counterType: "bit",
             removedCounterAmount: 2,
-            remainingCounters: 2,
+            remainingCounters: 10,
             sourceDefinitionId: "onr_v1_311_braindance-campaign",
             sourceTitle: "Braindance Campaign",
             reason: "start_of_turn"
@@ -2412,11 +2460,95 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Du hast 2 Credits von Braindance Campaign genommen.");
+    expect(items[0]?.title).toBe("Braindance Campaign gibt Korp 2 Credits von der Karte.");
     expect(items[0]?.category).toBe("economy");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "Automatisch"]));
-    expect(JSON.stringify(items)).not.toContain("aufgefrischt");
-    expect(JSON.stringify(items)).not.toContain("bereit");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "2 Credits von Karte", "10 Credits übrig", "Automatisch"]));
+    expect(JSON.stringify(items)).not.toContain("genutzt");
+    expect(JSON.stringify(items)).not.toContain("gespielt");
+  });
+
+  it("shows hosted-credit start-of-turn trash-on-empty as a follow-up effect", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "corp.start.holovid_campaign.card_326",
+            kind: "take_hosted_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            counterType: "bit",
+            removedCounterAmount: 1,
+            remainingCounters: 0,
+            sourceDefinitionId: "onr_v1_326_holovid-campaign",
+            sourceTitle: "Holovid Campaign",
+            reason: "start_of_turn"
+          },
+          {
+            effectId: "corp.start.holovid_campaign.trash.card_326",
+            kind: "trash_source_when_empty",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            sourceDefinitionId: "onr_v1_326_holovid-campaign",
+            sourceTitle: "Holovid Campaign",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items).toHaveLength(2);
+    expect(items[0]?.title).toBe("Holovid Campaign gibt Korp 1 Credit von der Karte.");
+    expect(items[1]?.title).toBe("Holovid Campaign wurde getrasht.");
+  });
+
+  it("shows Detroit and Spinn start-of-turn hosted-credit takes with card names", () => {
+    for (const [title, definitionId, amount, remaining, expectedTitle] of [
+      [
+        "Detroit Police Contract",
+        "onr_v1_198_detroit-police-contract",
+        2,
+        10,
+        "Detroit Police Contract gibt Korp 2 Credits von der Karte."
+      ],
+      [
+        "Spinn Public Relations",
+        "onr_v1_344_spinn-public-relations",
+        1,
+        2,
+        "Spinn Public Relations gibt Korp 1 Credit von der Karte."
+      ],
+    ] as const) {
+      const items = formatChronicleEffectItems(
+        makeEvent("end_turn", {
+          actor: "runner",
+          resolvedEffects: [
+            {
+              effectId: `${definitionId}.start.take_hosted_credits`,
+              kind: "take_hosted_credits",
+              visibility: "public",
+              side: "corp",
+              amount,
+              counterType: "bit",
+              removedCounterAmount: amount,
+              remainingCounters: remaining,
+              sourceDefinitionId: definitionId,
+              sourceTitle: title,
+              reason: "start_of_turn"
+            }
+          ]
+        }),
+        "runner"
+      );
+
+      expect(items).toHaveLength(1);
+      expect(items[0]?.title).toBe(expectedTitle);
+      expect(items[0]?.cardTitle).toBe(title);
+      expect(JSON.stringify(items)).not.toContain("genutzt");
+    }
   });
 
   it("shows delayed agenda steals from automatic start-of-turn effects", () => {

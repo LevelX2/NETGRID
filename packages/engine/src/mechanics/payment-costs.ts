@@ -1,15 +1,10 @@
 export const INVESTMENT_FIRM_ASSET_CARD_ID = "onr_v1_329_investment-firm";
 
-export const CORP_ECONOMY_ASSET_CARD_IDS = new Set([
-  "onr_v1_311_braindance-campaign",
-  "onr_v1_326_holovid-campaign",
-  "onr_v1_344_spinn-public-relations",
+export const CORP_ECONOMY_ASSET_CARD_IDS = new Set<string>([
 ]);
 
-export const CORP_RECURRING_ASSET_CARD_IDS = new Set([
-  "onr_v1_311_braindance-campaign",
+export const CORP_RECURRING_ASSET_CARD_IDS = new Set<string>([
   INVESTMENT_FIRM_ASSET_CARD_ID,
-  "onr_v1_344_spinn-public-relations",
 ]);
 
 export type EconomyActionProfile = {
@@ -24,10 +19,8 @@ export type EconomyActionProfile = {
   trashSource?: boolean;
 };
 
-const SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID = "onr_v1_344_spinn-public-relations";
 export const CORP_INSTALLED_ECONOMY_ACTION_PROFILES: EconomyActionProfile[] = [
   ...[...CORP_ECONOMY_ASSET_CARD_IDS]
-    .filter((sourceDefinitionId) => sourceDefinitionId !== SPINN_PUBLIC_RELATIONS_TAG_ASSET_CARD_ID)
     .map((sourceDefinitionId) => ({
       profileId: "v1917.corp_economy_asset_gain_2",
       sourceDefinitionId,

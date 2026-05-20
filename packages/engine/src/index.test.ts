@@ -1449,6 +1449,214 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       ),
     ).toBe(false);
   });
+
+  it("executes start-of-Corp-turn hosted-credit campaign effects", () => {
+    for (const [definitionId, takeAmount] of [
+      ["onr_v1_311_braindance-campaign", 2],
+      ["onr_v1_326_holovid-campaign", 1],
+    ] as const) {
+      let state = MECHANIC_SMOKE_GAMES.assetNodeEffects(
+        `p36-start-turn-${definitionId}`,
+      );
+      state.corp.credits = 30;
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      const campaignId = moveCorpCardToHq(state, definitionId);
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === campaignId &&
+          action.payload?.serverId === "new_remote" &&
+          action.payload?.placement === "root",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      expect(cardCounterAmount(state, campaignId, "bit")).toBe(12);
+
+      const creditsBeforeDrain = state.corp.credits;
+      const initial = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = toRunnerTurnFromCorpMain(state);
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      expect(state.corp.credits).toBe(creditsBeforeDrain + takeAmount);
+      expect(cardCounterAmount(state, campaignId, "bit")).toBe(12 - takeAmount);
+      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: takeAmount,
+          remainingCounters: 12 - takeAmount,
+          reason: "start_of_turn",
+          sourceDefinitionId: definitionId,
+        }),
+      );
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+        privatePayloadMarkers,
+      );
+      const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+      expect(replay.ok, definitionId).toBe(true);
+      expect(hashState(replay.state), definitionId).toBe(hashState(state));
+
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      setCardCounterForTest(state, campaignId, "bit", 1);
+      const finalCreditBefore = state.corp.credits;
+      state = toRunnerTurnFromCorpMain(state);
+      state = apply(state, "runner", (action) => action.type === "end_turn");
+      expect(state.corp.credits).toBe(finalCreditBefore + 1);
+      expect(state.corp.archives).toContain(campaignId);
+      expect(state.cardInstances[campaignId]?.zone).toMatchObject({
+        side: "corp",
+        zone: "archives",
+      });
+      expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            kind: "take_hosted_credits",
+            amount: 1,
+            remainingCounters: 0,
+            sourceDefinitionId: definitionId,
+          }),
+          expect.objectContaining({
+            kind: "trash_source_when_empty",
+            sourceDefinitionId: definitionId,
+          }),
+        ]),
+      );
+    }
+
+    let unrezzed = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("p36-unrezzed-campaign"),
+    );
+    const unrezzedId = putCorpRootInRemote(
+      unrezzed,
+      "onr_v1_311_braindance-campaign",
+    );
+    setCardCounterForTest(unrezzed, unrezzedId, "bit", 1);
+    const creditsBefore = unrezzed.corp.credits;
+    unrezzed = apply(unrezzed, "runner", (action) => action.type === "end_turn");
+    expect(unrezzed.corp.credits).toBe(creditsBefore);
+    expect(cardCounterAmount(unrezzed, unrezzedId, "bit")).toBe(1);
+  });
+
+  it("executes Detroit Police Contract and Spinn Public Relations hosted-credit turn effects", () => {
+    let detroit = apply(
+      MECHANIC_SMOKE_GAMES.counterRecurring("p36-detroit-start-turn"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    detroit.corp.credits = 10;
+    const detroitId = scoreCorpAgendaForTest(
+      detroit,
+      "onr_v1_198_detroit-police-contract",
+    );
+    setCardCounterForTest(detroit, detroitId, "bit", 1);
+    const detroitCreditsBefore = detroit.corp.credits;
+    detroit = toRunnerTurnFromCorpMain(detroit);
+    detroit = apply(detroit, "runner", (action) => action.type === "end_turn");
+    expect(detroit.corp.credits).toBe(detroitCreditsBefore + 1);
+    expect(cardCounterAmount(detroit, detroitId, "bit")).toBe(0);
+    expect(detroit.corp.scoreArea).toContain(detroitId);
+
+    let unscored = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.counterRecurring("p36-detroit-unscored"),
+    );
+    const unscoredDetroitId = putCorpRootInRemote(
+      unscored,
+      "onr_v1_198_detroit-police-contract",
+    );
+    unscored.cardInstances[unscoredDetroitId] = {
+      ...unscored.cardInstances[unscoredDetroitId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    setCardCounterForTest(unscored, unscoredDetroitId, "bit", 2);
+    const unscoredCreditsBefore = unscored.corp.credits;
+    unscored = apply(unscored, "runner", (action) => action.type === "end_turn");
+    expect(unscored.corp.credits).toBe(unscoredCreditsBefore);
+    expect(cardCounterAmount(unscored, unscoredDetroitId, "bit")).toBe(2);
+
+    let spinn = MECHANIC_SMOKE_GAMES.assetNodeEffects("p36-spinn-start-turn");
+    spinn.corp.credits = 10;
+    spinn = apply(spinn, "corp", (action) => action.type === "mandatory_draw");
+    const spinnId = moveCorpCardToHq(spinn, "onr_v1_344_spinn-public-relations");
+    spinn = apply(
+      spinn,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === spinnId &&
+        action.payload?.serverId === "new_remote",
+    );
+    spinn = apply(
+      spinn,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(spinn, action) === "onr_v1_344_spinn-public-relations",
+    );
+    const zeroCreditsBefore = spinn.corp.credits;
+    spinn = toRunnerTurnFromCorpMain(spinn);
+    spinn = apply(spinn, "runner", (action) => action.type === "end_turn");
+    expect(spinn.corp.credits).toBe(zeroCreditsBefore);
+    expect(cardCounterAmount(spinn, spinnId, "bit")).toBe(0);
+
+    spinn = apply(spinn, "corp", (action) => action.type === "mandatory_draw");
+    const loadAction = mustAction(
+      spinn,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
+        action.payload?.cardId === spinnId,
+    );
+    const removedSpinn = structuredClone(spinn);
+    removeEverywhere(removedSpinn, spinnId);
+    removedSpinn.corp.archives.push(spinnId);
+    removedSpinn.cardInstances[spinnId] = {
+      ...removedSpinn.cardInstances[spinnId]!,
+      zone: { side: "corp", zone: "archives" },
+      faceup: true,
+      rezzed: false,
+    };
+    const removedResult = applyAction(removedSpinn, {
+      matchId: removedSpinn.matchId,
+      side: "corp",
+      actionId: loadAction.actionId,
+      clientKnownStateVersion: removedSpinn.stateVersion,
+      idempotencyKey: "p36-spinn-removed-source",
+    });
+    expect(removedResult.ok).toBe(false);
+    const creditsBeforeLoad = spinn.corp.credits;
+    spinn = apply(spinn, "corp", (action) => action.actionId === loadAction.actionId);
+    expect(spinn.corp.credits).toBe(creditsBeforeLoad);
+    expect(cardCounterAmount(spinn, spinnId, "bit")).toBe(3);
+    expect(spinn.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      hostedCreditsAdded: 3,
+      hostedCreditsAfter: 3,
+    });
+
+    const creditsBeforeTake = spinn.corp.credits;
+    spinn = toRunnerTurnFromCorpMain(spinn);
+    spinn = apply(spinn, "runner", (action) => action.type === "end_turn");
+    expect(spinn.corp.credits).toBe(creditsBeforeTake + 1);
+    expect(cardCounterAmount(spinn, spinnId, "bit")).toBe(2);
+    expect(spinn.corp.archives).not.toContain(spinnId);
+    expect(spinn.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "take_hosted_credits",
+        amount: 1,
+        remainingCounters: 2,
+        reason: "start_of_turn",
+        sourceDefinitionId: "onr_v1_344_spinn-public-relations",
+      }),
+    );
+  });
 });
 
 describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () => {
@@ -7557,6 +7765,132 @@ describe("V1.6.2 Mechanikpaket B", () => {
           visibility: "public",
         }),
       );
+    }
+  });
+
+  it("describes P3.6 start-of-Corp-turn hosted-credit economy cards", () => {
+    for (const [definitionId, startingCredits, takeAmount, trashesWhenEmpty] of [
+      ["onr_v1_311_braindance-campaign", 12, 2, true],
+      ["onr_v1_326_holovid-campaign", 12, 1, true],
+    ] as const) {
+      expect(cardImplementationForDefinitionId(definitionId)?.lifecycle?.on_rez).toEqual([
+        expect.objectContaining({
+          kind: "add_hosted_credits",
+          target: "source",
+          amount: startingCredits,
+          visibility: "public",
+        }),
+      ]);
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.lifecycle
+          ?.start_of_corp_turn,
+      ).toContainEqual(
+        expect.objectContaining({
+          condition: { kind: "source_has_hosted_credits" },
+          effects: [
+            expect.objectContaining({
+              kind: "take_hosted_credits",
+              source: "source",
+              recipient: "controller",
+              amount: takeAmount,
+              mode: "up_to_amount_if_available",
+              visibility: "public",
+            }),
+            ...(trashesWhenEmpty
+              ? [
+                  expect.objectContaining({
+                    kind: "trash_source_when_empty",
+                    source: "source",
+                    visibility: "public",
+                  }),
+                ]
+              : []),
+          ],
+        }),
+      );
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_198_detroit-police-contract",
+      )?.lifecycle?.on_score,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "add_hosted_credits",
+        target: "source",
+        amount: 12,
+        visibility: "public",
+      }),
+    ]);
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_198_detroit-police-contract",
+      )?.lifecycle?.start_of_corp_turn,
+    ).toContainEqual(
+      expect.objectContaining({
+        condition: { kind: "source_has_hosted_credits" },
+        effects: [
+          expect.objectContaining({
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            amount: 2,
+            mode: "up_to_amount_if_available",
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_344_spinn-public-relations",
+      )?.lifecycle?.start_of_corp_turn,
+    ).toContainEqual(
+      expect.objectContaining({
+        condition: { kind: "source_has_hosted_credits" },
+        effects: [
+          expect.objectContaining({
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            amount: 1,
+            mode: "up_to_amount_if_available",
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_344_spinn-public-relations",
+      )?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "activated",
+        timing: "corp_main",
+        costs: [{ kind: "action", amount: 1 }],
+        effects: [
+          expect.objectContaining({
+            kind: "add_hosted_credits",
+            target: "source",
+            amount: 3,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+
+    for (const definitionId of [
+      "onr_v1_198_detroit-police-contract",
+      "onr_v1_344_spinn-public-relations",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
     }
   });
 
@@ -17562,15 +17896,20 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
         "onr_v1_198_detroit-police-contract",
     );
     expect(detroitId).toBeDefined();
-    if (detroitId)
-      expect(state.cardInstances[detroitId]?.counters?.power).toBe(4);
-    const legal = mustAction(
-      state,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility === "v1912_detroit_police_contract",
-    );
+    if (detroitId) expect(cardCounterAmount(state, detroitId, "bit")).toBe(12);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      cardDefinitionId: "onr_v1_198_detroit-police-contract",
+      hostedCreditsAdded: 12,
+      hostedCreditsAfter: 12,
+    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.agendaAbility === "v1912_detroit_police_contract",
+      ),
+    ).toBe(false);
     if (detroitId) {
       const stolen = structuredClone(state);
       stolen.corp.scoreArea = stolen.corp.scoreArea.filter(
@@ -17581,24 +17920,30 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
         ...stolen.cardInstances[detroitId]!,
         zone: { side: "runner", zone: "scoreArea" },
       };
-      const rejected = applyAction(stolen, {
-        matchId: stolen.matchId,
-        side: "corp",
-        actionId: legal.actionId,
-        clientKnownStateVersion: stolen.stateVersion,
-        idempotencyKey: "detroit-stolen-score-area",
-      });
-      expect(rejected.ok).toBe(false);
+      const creditsBeforeStolenTurn = stolen.corp.credits;
+      const afterRunnerTurn = toRunnerTurnFromCorpMain(stolen);
+      const afterStolenTurn = apply(
+        afterRunnerTurn,
+        "runner",
+        (action) => action.type === "end_turn",
+      );
+      expect(afterStolenTurn.corp.credits).toBe(creditsBeforeStolenTurn);
+      expect(cardCounterAmount(afterStolenTurn, detroitId, "bit")).toBe(12);
     }
     const beforeCredit = state.corp.credits;
-    state = apply(
-      state,
-      "corp",
-      (action) => action.actionId === legal.actionId,
+    state = toRunnerTurnFromCorpMain(state);
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.corp.credits).toBe(beforeCredit + 2);
+    if (detroitId) expect(cardCounterAmount(state, detroitId, "bit")).toBe(10);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "take_hosted_credits",
+        amount: 2,
+        remainingCounters: 10,
+        reason: "start_of_turn",
+        sourceDefinitionId: "onr_v1_198_detroit-police-contract",
+      }),
     );
-    expect(state.corp.credits).toBe(beforeCredit + 1);
-    if (detroitId)
-      expect(state.cardInstances[detroitId]?.counters?.power).toBe(3);
   });
 });
 
@@ -20497,7 +20842,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(validateGameState(state).ok).toBe(true);
   });
 
-  it("offers the public V1.9.17 economy asset action for every scoped economy asset", () => {
+  it("does not offer legacy manual economy actions for start-of-turn campaign assets", () => {
     const economyAssets = [
       "onr_v1_311_braindance-campaign",
       "onr_v1_326_holovid-campaign",
@@ -20526,23 +20871,14 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           action.type === "rez_ice" &&
           sourceDefinition(state, action) === definitionId,
       );
-      const creditsBefore = state.corp.credits;
-
-      state = apply(
-        state,
-        "corp",
-        (action) =>
-          action.type === "gain_credit" &&
-          action.payload?.v1917AssetAbility === "gain_credits" &&
-          action.payload?.cardId === assetId,
-      );
-
-      expect(state.corp.credits, definitionId).toBe(creditsBefore + 2);
-      expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
-        actionType: "gain_credit",
-        cardDefinitionId: definitionId,
-        amount: 2,
-      });
+      expect(
+        getLegalActions(state, "corp").some(
+          (action) =>
+            action.type === "gain_credit" &&
+            action.payload?.v1917AssetAbility === "gain_credits" &&
+            action.payload?.cardId === assetId,
+        ),
+      ).toBe(false);
       expect(validateGameState(state).ok, definitionId).toBe(true);
     }
   });
@@ -20807,7 +21143,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     expect(validateGameState(multi).ok).toBe(true);
   });
 
-  it("loads and spends Spinn Public Relations bits instead of generic economy credits", () => {
+  it("loads and spends Spinn Public Relations bits through CardImplementation", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1917-spinn-public-relations-pool");
     state.corp.credits = 10;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -20837,20 +21173,19 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "spinn_load_pool" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.payload?.cardId === spinnId,
     );
 
     expect(state.corp.credits).toBe(creditsBeforeLoad);
-    expect(cardCounterAmount(state, spinnId, "bit")).toBe(6);
+    expect(cardCounterAmount(state, spinnId, "bit")).toBe(3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
+      actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_344_spinn-public-relations",
-      v1917AssetAbility: "spinn_load_pool",
-      spinnPublicRelationsPoolBefore: 0,
-      spinnPublicRelationsPoolAfter: 6,
-      gainedCredits: 0,
+      cardImplementationAbility: "activated",
+      hostedCreditsAdded: 3,
+      hostedCreditsAfter: 3,
     });
 
     const initial = structuredClone(state);
@@ -20862,8 +21197,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     }
 
-    expect(cardCounterAmount(state, spinnId, "bit")).toBe(3);
+    expect(cardCounterAmount(state, spinnId, "bit")).toBe(0);
     expect(state.corp.credits).toBe(creditsBeforeLoad + 3);
+    expect(state.corp.archives).not.toContain(spinnId);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -34080,21 +34416,22 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
   it("hardens Detroit Police Contract, Off-Site Backups and Urban Renewal revalidation", () => {
     let detroit = apply(MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-detroit-negative"), "corp", (action) => action.type === "mandatory_draw");
-    detroit.corp.clicks = 5;
+    detroit.corp.credits = 5;
     const detroitId = scoreCorpAgendaForTest(detroit, "onr_v1_198_detroit-police-contract");
-    detroit.cardInstances[detroitId] = { ...detroit.cardInstances[detroitId]!, counters: { power: 1 } };
-    const detroitAction = mustAction(detroit, "corp", (action) => action.type === "gain_credit" && action.payload?.agendaAbility === "v1912_detroit_police_contract");
-    const wrongSide = applyAction(detroit, {
-      matchId: detroit.matchId,
-      side: "runner",
-      actionId: detroitAction.actionId,
-      clientKnownStateVersion: detroit.stateVersion,
-      idempotencyKey: "spotcheck-detroit-wrong-side",
-    });
-    expect(wrongSide.ok).toBe(false);
-    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
-    detroit.cardInstances[detroitId] = { ...detroit.cardInstances[detroitId]!, counters: { power: 0 } };
-    expect(getLegalActions(detroit, "corp").some((action) => action.actionId === detroitAction.actionId)).toBe(false);
+    setCardCounterForTest(detroit, detroitId, "bit", 1);
+    expect(
+      getLegalActions(detroit, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.agendaAbility === "v1912_detroit_police_contract",
+      ),
+    ).toBe(false);
+    const detroitCreditsBefore = detroit.corp.credits;
+    detroit = toRunnerTurnFromCorpMain(detroit);
+    detroit = apply(detroit, "runner", (action) => action.type === "end_turn");
+    expect(detroit.corp.credits).toBe(detroitCreditsBefore + 1);
+    expect(cardCounterAmount(detroit, detroitId, "bit")).toBe(0);
+    expect(detroit.corp.scoreArea).toContain(detroitId);
 
     const offsiteCorpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -36454,7 +36791,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     });
 
     for (const definitionId of [
-      "onr_v1_311_braindance-campaign",
+      "onr_v1_344_spinn-public-relations",
       "onr_v1_321_esa-contract",
       "onr_v1_335_remote-facility",
     ] as const) {
@@ -36498,7 +36835,8 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         "corp",
         (action) =>
           action.type ===
-            (definitionId === "onr_v1_321_esa-contract"
+            (definitionId === "onr_v1_321_esa-contract" ||
+            definitionId === "onr_v1_344_spinn-public-relations"
               ? "activated_card_ability"
               : "gain_credit") &&
           action.payload?.cardId === assetId,
