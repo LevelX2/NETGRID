@@ -20,6 +20,8 @@ export type CardLifecycleImplementation = {
   on_install?: readonly CardEffectImplementation[];
   on_score?: readonly CardEffectImplementation[];
   start_of_corp_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
+  start_of_runner_turn?: readonly CardLifecycleTriggeredAbilityImplementation[];
+  on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
 };
 
 export type CardLifecycleTriggeredAbilityImplementation = {
@@ -60,7 +62,9 @@ export type CardEffectImplementation =
   | DamageEffectImplementation
   | AddHostedCreditsEffectImplementation
   | TakeHostedCreditsEffectImplementation
-  | TrashSourceWhenEmptyEffectImplementation;
+  | TrashSourceWhenEmptyEffectImplementation
+  | GainActionsEffectImplementation
+  | TrashSourceEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -119,6 +123,18 @@ export type TakeHostedCreditsEffectImplementation = {
 export type TrashSourceWhenEmptyEffectImplementation = {
   kind: "trash_source_when_empty";
   source: "source";
+  visibility: EventVisibilityClass;
+};
+
+export type GainActionsEffectImplementation = {
+  kind: "gain_actions";
+  recipient: "controller" | "runner" | "corp";
+  amount: number;
+  visibility: EventVisibilityClass;
+};
+
+export type TrashSourceEffectImplementation = {
+  kind: "trash_source";
   visibility: EventVisibilityClass;
 };
 

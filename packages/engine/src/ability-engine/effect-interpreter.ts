@@ -34,6 +34,9 @@ export type CardEffectExecutionContext = {
   trashSourceWhenEmpty?: (
     sourceCardId: CardInstanceId,
   ) => CardEffectTrashSourceResult;
+  trashSource?: (
+    sourceCardId: CardInstanceId,
+  ) => CardEffectTrashSourceResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -133,6 +136,7 @@ function mergePublicPayload(
         key === "drawnCount" ||
         key === "gainedCredits" ||
         key === "creditsLost" ||
+        key === "gainedActions" ||
         key === "damageAmount" ||
         key === "cardsTrashed"
       ) &&
@@ -386,6 +390,54 @@ export function executeCardImplementationEffects(
         resolvedEffects.push({
           effectId: publicEffectId(context, index, "trash_source_when_empty"),
           kind: "trash_source_when_empty",
+          visibility: effect.visibility,
+          side: context.controller,
+          amount: 1,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "gain_actions": {
+        assertPositiveIntegerAmount("gain_actions", effect.amount);
+        assertPublicVisibility("gain_actions", effect.visibility);
+        const side = recipientSide(context, effect.recipient);
+        if (side === "corp") state.corp.clicks += effect.amount;
+        else state.runner.clicks += effect.amount;
+        publicPayload.gainedActions =
+          Number(publicPayload.gainedActions ?? 0) + effect.amount;
+        publicPayload[
+          side === "corp" ? "corpClicksAfter" : "runnerClicksAfter"
+        ] = side === "corp" ? state.corp.clicks : state.runner.clicks;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "gain_actions"),
+          kind: "gain_actions",
+          visibility: effect.visibility,
+          side,
+          amount: effect.amount,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "trash_source": {
+        assertPublicVisibility("trash_source", effect.visibility);
+        if (!context.trashSource)
+          throw new Error(
+            "trash_source effect requires a trashSource execution context.",
+          );
+        const trashResult = context.trashSource(context.sourceCardId);
+        mergePublicPayload(publicPayload, trashResult.publicPayload);
+        if (!trashResult.sourceTrashed) return;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "trash_source"),
+          kind: "trash_source",
           visibility: effect.visibility,
           side: context.controller,
           amount: 1,

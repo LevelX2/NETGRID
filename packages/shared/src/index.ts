@@ -223,6 +223,7 @@ export type ResolvedGameEffectKind =
   | "add_hosted_credits"
   | "take_hosted_credits"
   | "trash_source_when_empty"
+  | "trash_source"
   | "resolve_subroutine";
 
 export type ResolvedGameEffect = {

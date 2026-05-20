@@ -1070,10 +1070,10 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
   switch (effect.kind) {
     case "gain_credits": {
       category = "economy";
-      title = phrase(
-        subject,
-        `${creditText(amount)}${through} erhalten`
-      );
+      title =
+        effect.reason === "start_of_turn" && sourceTitle
+          ? `${sourceTitle} gibt ${sideLabel(actor)} ${creditText(amount)}`
+          : phrase(subject, `${creditText(amount)}${through} erhalten`);
       chips.push(`+${amount} Credit${amount === 1 ? "" : "s"}`, "Automatisch");
       break;
     }
@@ -1153,9 +1153,20 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       title = `${sourceTitle ?? cardTitle ?? "Die Quelle"} wurde getrasht`;
       chips.push("Quelle getrasht", "Automatisch");
       break;
+    case "trash_source":
+      category = "card";
+      title =
+        effect.reason === "run_start"
+          ? `${sourceTitle ?? cardTitle ?? "Die Quelle"} wurde getrasht, weil Runner einen Run startet`
+          : `${sourceTitle ?? cardTitle ?? "Die Quelle"} wurde getrasht`;
+      chips.push("Quelle getrasht", "Automatisch");
+      break;
     case "gain_actions":
       category = "turn";
-      title = phrase(subject, `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`);
+      title =
+        effect.reason === "start_of_turn" && sourceTitle
+          ? `${sourceTitle} gibt ${sideLabel(actor)} ${amount} Aktion${amount === 1 ? "" : "en"}`
+          : phrase(subject, `${amount} zusätzliche Aktion${amount === 1 ? "" : "en"}${through} erhalten`);
       chips.push(`+${amount} Aktion${amount === 1 ? "" : "en"}`);
       break;
     case "add_tags":
@@ -1382,6 +1393,7 @@ function cardResolverPlayEffectPart(
   if (effect.kind === "add_hosted_credits") return { category: "economy", suffix: `${creditText(amount)} auf die Karte gelegt`, chips: [`+${amount} ${creditLabel(amount)} auf Karte`] };
   if (effect.kind === "take_hosted_credits") return { category: "economy", suffix: `${creditText(amount)} von der Karte genommen`, chips: [`+${amount} ${creditLabel(amount)}`, `${amount} ${creditLabel(amount)} von Karte`, `${numberValue(effect.remainingCounters) ?? 0} ${creditLabel(numberValue(effect.remainingCounters) ?? 0)} übrig`] };
   if (effect.kind === "trash_source_when_empty") return { category: "economy", suffix: `${stringValue(effect.sourceTitle) ?? "Quelle"} getrasht`, chips: ["Quelle getrasht"] };
+  if (effect.kind === "trash_source") return { category: "card", suffix: `${stringValue(effect.sourceTitle) ?? "Quelle"} getrasht`, chips: ["Quelle getrasht"] };
   return undefined;
 }
 
@@ -1414,7 +1426,7 @@ function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedG
     effect.kind !== "add_hosted_credits"
   )
     return false;
-  if (!["draw_cards", "gain_credits", "lose_credits", "add_tags", "damage", "add_hosted_credits", "take_hosted_credits", "trash_source_when_empty"].includes(effect.kind) || effect.visibility !== "public") return false;
+  if (!["draw_cards", "gain_credits", "lose_credits", "add_tags", "damage", "add_hosted_credits", "take_hosted_credits", "trash_source_when_empty", "trash_source"].includes(effect.kind) || effect.visibility !== "public") return false;
   if (effect.reason !== "card_resolver") return false;
   const actor = sideValue(payload.actor);
   if (!["lose_credits", "add_tags", "damage"].includes(effect.kind) && actor && effect.side && actor !== effect.side) return false;

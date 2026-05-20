@@ -5,7 +5,9 @@ import { marineArcologyImplementation } from "./onr-v1/corp/agendas/marine-arcol
 import { onCallSoloTeamImplementation } from "./onr-v1/corp/agendas/on-call-solo-team";
 import { politicalCoupImplementation } from "./onr-v1/corp/agendas/political-coup";
 import { politicalOverthrowImplementation } from "./onr-v1/corp/agendas/political-overthrow";
+import { polymerBreakthroughImplementation } from "./onr-v1/corp/agendas/polymer-breakthrough";
 import { strikeForceKaliImplementation } from "./onr-v1/corp/agendas/strike-force-kali";
+import { subsidiaryBranchImplementation } from "./onr-v1/corp/agendas/subsidiary-branch";
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
@@ -18,6 +20,7 @@ import { soloSquadImplementation } from "./onr-v1/corp/assets/solo-squad";
 import { southAfricanMiningCorpImplementation } from "./onr-v1/corp/assets/south-african-mining-corp";
 import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-public-relations";
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
+import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { accountsReceivableImplementation } from "./onr-v1/corp/operations/accounts-receivable";
 import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-reviews";
 import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
@@ -35,8 +38,11 @@ import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
+import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
+import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -44,16 +50,21 @@ export const CARD_IMPLEMENTATIONS = [
   jackNJoeImplementation,
   livewiresContactsImplementation,
   newsgroupFilterImplementation,
+  floatingRunnerBbsImplementation,
+  riggedInvestmentsImplementation,
   scoreImplementation,
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
+  topRunnersConferenceImplementation,
   corporateCoupImplementation,
   detroitPoliceContractImplementation,
   marineArcologyImplementation,
   onCallSoloTeamImplementation,
   politicalCoupImplementation,
   politicalOverthrowImplementation,
+  polymerBreakthroughImplementation,
   strikeForceKaliImplementation,
+  subsidiaryBranchImplementation,
   accountsReceivableImplementation,
   annualReviewsImplementation,
   closedAccountsImplementation,
@@ -74,6 +85,7 @@ export const CARD_IMPLEMENTATIONS = [
   holovidCampaignImplementation,
   skaldervikenSaBetaTestSiteImplementation,
   soloSquadImplementation,
+  remoteFacilityImplementation,
   rockerboyPromotionImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,

@@ -77,6 +77,11 @@ const AMOUNT_KEYS = [
   "temporaryCreditsRemaining",
   "corpCreditsAfter",
   "runnerCreditsAfter",
+  "corpClicksAfter",
+  "runnerClicksAfter",
+  "hostedCreditsAdded",
+  "hostedCreditsTaken",
+  "hostedCreditsAfter",
   "randomRoll",
   "dieRoll",
   "randomCounterAfter",
@@ -99,6 +104,7 @@ const TARGET_KEYS = [
   "targetVisibility",
   "choiceVisibility",
   "redactedKind",
+  "sourceTrashed",
 ] as const;
 
 export function legacyAbilityPayloadEntries(

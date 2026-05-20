@@ -2313,11 +2313,9 @@ describe("formatChronicleEvent", () => {
         resolvedEffects: [
           {
             effectId: "top-runners-trash",
-            kind: "trash_card",
+            kind: "trash_source",
             visibility: "public",
             side: "runner",
-            cardDefinitionId: "onr_v1_184_top-runners-conference",
-            cardTitle: "Top Runners' Conference",
             sourceDefinitionId: "onr_v1_184_top-runners-conference",
             sourceTitle: "Top Runners' Conference",
             reason: "run_start"
@@ -2327,7 +2325,7 @@ describe("formatChronicleEvent", () => {
       "runner"
     );
 
-    expect(items[0]?.title).toBe("Top Runners' Conference wurde getrasht.");
+    expect(items[0]?.title).toBe("Top Runners' Conference wurde getrasht, weil Runner einen Run startet.");
     expect(items[0]?.chips).toContain("Automatisch");
   });
 
@@ -2391,7 +2389,7 @@ describe("formatChronicleEvent", () => {
             kind: "gain_credits",
             visibility: "public",
             side: "runner",
-            amount: 3,
+            amount: 2,
             sourceDefinitionId: "onr_v1_184_top-runners-conference",
             sourceTitle: "Top Runners' Conference",
             reason: "start_of_turn"
@@ -2402,10 +2400,96 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items).toHaveLength(1);
-    expect(items[0]?.title).toBe("Du hast 3 Credits durch Top Runners' Conference erhalten.");
+    expect(items[0]?.title).toBe("Top Runners' Conference gibt Runner 2 Credits.");
     expect(items[0]?.category).toBe("economy");
     expect(items[0]?.cardDefinitionId).toBe("onr_v1_184_top-runners-conference");
-    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+3 Credits", "Automatisch"]));
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["+2 Credits", "Automatisch"]));
+  });
+
+  it("shows P3.7 turn-start credit and action effects with card names", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "runner",
+        resolvedEffects: [
+          {
+            effectId: "corp.start.polymer.card_211",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            sourceDefinitionId: "onr_v1_211_polymer-breakthrough",
+            sourceTitle: "Polymer Breakthrough",
+            reason: "start_of_turn"
+          },
+          {
+            effectId: "corp.start.remote.card_335",
+            kind: "gain_actions",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            sourceDefinitionId: "onr_v1_335_remote-facility",
+            sourceTitle: "Remote Facility",
+            reason: "start_of_turn"
+          },
+          {
+            effectId: "corp.start.subsidiary.card_218",
+            kind: "gain_actions",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            sourceDefinitionId: "onr_v1_218_subsidiary-branch",
+            sourceTitle: "Subsidiary Branch",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items).toHaveLength(3);
+    expect(items[0]?.title).toBe("Polymer Breakthrough gibt Korp 1 Credit.");
+    expect(items[1]?.title).toBe("Remote Facility gibt Korp 1 Aktion.");
+    expect(items[2]?.title).toBe("Subsidiary Branch gibt Korp 1 Aktion.");
+    expect(JSON.stringify(items)).not.toContain("genutzt");
+  });
+
+  it("shows P3.7 Runner turn-start hosted-credit and credit effects", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("end_turn", {
+        actor: "corp",
+        resolvedEffects: [
+          {
+            effectId: "runner.start.floating.card_163",
+            kind: "gain_credits",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            sourceDefinitionId: "onr_v1_163_floating-runner-bbs",
+            sourceTitle: "Floating Runner BBS",
+            reason: "start_of_turn"
+          },
+          {
+            effectId: "runner.start.rigged.card_174",
+            kind: "take_hosted_credits",
+            visibility: "public",
+            side: "runner",
+            amount: 1,
+            counterType: "bit",
+            removedCounterAmount: 1,
+            remainingCounters: 11,
+            sourceDefinitionId: "onr_v1_174_rigged-investments",
+            sourceTitle: "Rigged Investments",
+            reason: "start_of_turn"
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items).toHaveLength(2);
+    expect(items[0]?.title).toBe("Floating Runner BBS gibt Runner 1 Credit.");
+    expect(items[1]?.title).toBe("Rigged Investments gibt Runner 1 Credit von der Karte.");
+    expect(items[1]?.chips).toEqual(expect.arrayContaining(["+1 Credit", "1 Credit von Karte", "11 Credits übrig", "Automatisch"]));
   });
 
   it("shows recurring-credit refreshes from automatic start-of-turn effects", () => {

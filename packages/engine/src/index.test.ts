@@ -7894,6 +7894,142 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("describes P3.7 turn-start economy and run-start cleanup cards", () => {
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_211_polymer-breakthrough",
+      )?.lifecycle?.start_of_corp_turn,
+    ).toContainEqual(
+      expect.objectContaining({
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_163_floating-runner-bbs",
+      )?.lifecycle?.start_of_runner_turn,
+    ).toContainEqual(
+      expect.objectContaining({
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 1,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_174_rigged-investments",
+      )?.lifecycle?.on_install,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "add_hosted_credits",
+        target: "source",
+        amount: 12,
+        visibility: "public",
+      }),
+    ]);
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_174_rigged-investments",
+      )?.lifecycle?.start_of_runner_turn,
+    ).toContainEqual(
+      expect.objectContaining({
+        condition: { kind: "source_has_hosted_credits" },
+        effects: [
+          expect.objectContaining({
+            kind: "take_hosted_credits",
+            source: "source",
+            recipient: "controller",
+            amount: 1,
+            mode: "up_to_amount_if_available",
+            visibility: "public",
+          }),
+          expect.objectContaining({
+            kind: "trash_source_when_empty",
+            source: "source",
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+
+    for (const definitionId of [
+      "onr_v1_335_remote-facility",
+      "onr_v1_218_subsidiary-branch",
+    ] as const) {
+      expect(
+        cardImplementationForDefinitionId(definitionId)?.lifecycle
+          ?.start_of_corp_turn,
+      ).toContainEqual(
+        expect.objectContaining({
+          effects: [
+            expect.objectContaining({
+              kind: "gain_actions",
+              recipient: "controller",
+              amount: 1,
+              visibility: "public",
+            }),
+          ],
+        }),
+      );
+    }
+
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_184_top-runners-conference",
+      )?.lifecycle?.start_of_runner_turn,
+    ).toContainEqual(
+      expect.objectContaining({
+        effects: [
+          expect.objectContaining({
+            kind: "gain_credits",
+            recipient: "controller",
+            amount: 2,
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_184_top-runners-conference",
+      )?.lifecycle?.on_runner_run_start,
+    ).toContainEqual(
+      expect.objectContaining({
+        effects: [
+          expect.objectContaining({
+            kind: "trash_source",
+            visibility: "public",
+          }),
+        ],
+      }),
+    );
+
+    for (const definitionId of [
+      "onr_v1_163_floating-runner-bbs",
+      "onr_v1_174_rigged-investments",
+      "onr_v1_184_top-runners-conference",
+      "onr_v1_211_polymer-breakthrough",
+      "onr_v1_218_subsidiary-branch",
+      "onr_v1_335_remote-facility",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -12891,7 +13027,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
         expect.objectContaining({
           kind: "gain_credits",
           side: "runner",
-          amount: 3,
+          amount: 2,
           reason: "start_of_turn",
           sourceDefinitionId: "onr_v1_184_top-runners-conference",
           sourceTitle: "Top Runners' Conference",
@@ -12899,7 +13035,7 @@ describe("V1.9.2 Mechanikpaket K", () => {
         }),
       ]),
     );
-    expect(state.runner.credits).toBe(creditsAfterInstall + 3);
+    expect(state.runner.credits).toBe(creditsAfterInstall + 2);
     const conferenceId = state.runner.rig.resources.find(
       (id) =>
         state.cardInstances[id]?.definitionId ===
@@ -12915,6 +13051,13 @@ describe("V1.9.2 Mechanikpaket K", () => {
     );
     expect(state.runner.rig.resources.includes(conferenceId)).toBe(false);
     expect(state.runner.heap).toContain(conferenceId);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "trash_source",
+        reason: "run_start",
+        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+      }),
+    );
   });
 
   it("handles Polymer start-of-turn credits, AI CFO hidden-zone shuffle action and Data Naga program trash", () => {
@@ -15931,7 +16074,6 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
     for (const definitionId of [
-      "onr_v1_335_remote-facility",
       "onr_v1_331_nevinyrral",
       "onr_v1_334_pacifica-regional-ai",
     ]) {
@@ -16086,7 +16228,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
-    const assetId = putCorpRootInRemote(state, "onr_v1_335_remote-facility");
+    const assetId = putCorpRootInRemote(state, "onr_v1_334_pacifica-regional-ai");
     state.cardInstances[assetId] = {
       ...state.cardInstances[assetId]!,
       faceup: true,
@@ -17714,7 +17856,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     if (investmentsId)
       expect(
         state.cardInstances[investmentsId]?.counters?.bit,
-      ).toBe(6);
+      ).toBe(12);
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -17736,7 +17878,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       );
     }
     if (investmentsId) {
-      expect(state.cardInstances[investmentsId]?.counters?.bit).toBe(6);
+      expect(state.cardInstances[investmentsId]?.counters?.bit).toBe(12);
       expect(
         state.cardInstances[investmentsId]?.counters?.recurring_credit,
       ).toBeUndefined();
@@ -34350,6 +34492,261 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("applies P3.7 turn-start economy CardImplementations once from valid sources", () => {
+    let corpState = apply(
+      createGameAfterSetup({
+        seed: "p37-corp-turn-start-economy",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          cards: [
+            { id: "onr_v1_335_remote-facility", quantity: 1 },
+            { id: "onr_v1_218_subsidiary-branch", quantity: 1 },
+            { id: "onr_v1_211_polymer-breakthrough", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) =>
+                ![
+                  "onr_v1_335_remote-facility",
+                  "onr_v1_218_subsidiary-branch",
+                  "onr_v1_211_polymer-breakthrough",
+                ].includes(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    corpState.corp.credits = 5;
+    const remoteId = putCorpRootInRemote(
+      corpState,
+      "onr_v1_335_remote-facility",
+    );
+    corpState.cardInstances[remoteId] = {
+      ...corpState.cardInstances[remoteId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const subsidiaryId = scoreCorpAgendaForTest(
+      corpState,
+      "onr_v1_218_subsidiary-branch",
+    );
+    const polymerId = scoreCorpAgendaForTest(
+      corpState,
+      "onr_v1_211_polymer-breakthrough",
+    );
+    const initial = structuredClone(corpState);
+    const replayStart = corpState.eventLog.length;
+
+    corpState = toRunnerTurnFromCorpMain(corpState);
+    corpState = apply(corpState, "runner", (action) => action.type === "end_turn");
+
+    expect(corpState.corp.credits).toBe(6);
+    expect(corpState.corp.clicks).toBe(5);
+    const effects = corpState.eventLog.at(-1)?.publicPayload.resolvedEffects;
+    expect(Array.isArray(effects)).toBe(true);
+    const resolvedEffects = Array.isArray(effects) ? effects : [];
+    expect(resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "gain_actions",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_335_remote-facility",
+          sourceTitle: "Remote Facility",
+        }),
+        expect.objectContaining({
+          kind: "gain_actions",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_218_subsidiary-branch",
+          sourceTitle: "Subsidiary Branch",
+        }),
+        expect.objectContaining({
+          kind: "gain_credits",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_211_polymer-breakthrough",
+          sourceTitle: "Polymer Breakthrough",
+        }),
+      ]),
+    );
+    expect(
+      resolvedEffects.filter(
+        (effect) =>
+          effect.sourceDefinitionId === "onr_v1_335_remote-facility" ||
+          effect.sourceDefinitionId === "onr_v1_218_subsidiary-branch" ||
+          effect.sourceDefinitionId === "onr_v1_211_polymer-breakthrough",
+      ),
+    ).toHaveLength(3);
+    expect(corpState.corp.scoreArea).toEqual(
+      expect.arrayContaining([subsidiaryId, polymerId]),
+    );
+    const replay = replayEvents(initial, corpState.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(corpState));
+
+    let invalidSourceState = apply(
+      createGameAfterSetup({
+        seed: "p37-corp-turn-start-invalid",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          cards: [
+            { id: "onr_v1_335_remote-facility", quantity: 1 },
+            { id: "onr_v1_218_subsidiary-branch", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) =>
+                ![
+                  "onr_v1_335_remote-facility",
+                  "onr_v1_218_subsidiary-branch",
+                ].includes(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    invalidSourceState.corp.credits = 5;
+    putCorpRootInRemote(invalidSourceState, "onr_v1_335_remote-facility");
+    invalidSourceState = toRunnerTurnFromCorpMain(invalidSourceState);
+    invalidSourceState = apply(
+      invalidSourceState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    expect(invalidSourceState.corp.credits).toBe(5);
+    expect(invalidSourceState.corp.clicks).toBe(3);
+    expect(
+      JSON.stringify(invalidSourceState.eventLog.at(-1)?.publicPayload),
+    ).not.toMatch(/Remote Facility|Subsidiary Branch/);
+  });
+
+  it("applies P3.7 Runner turn-start and run-start CardImplementations", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p37-runner-turn-start",
+        baseline: MVP_0_99_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          cards: [
+            { id: "onr_v1_163_floating-runner-bbs", quantity: 1 },
+            { id: "onr_v1_174_rigged-investments", quantity: 1 },
+            { id: "onr_v1_184_top-runners-conference", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) =>
+                ![
+                  "onr_v1_163_floating-runner-bbs",
+                  "onr_v1_174_rigged-investments",
+                  "onr_v1_184_top-runners-conference",
+                ].includes(card.id),
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_163_floating-runner-bbs");
+    moveRunnerCardToGrip(state, "onr_v1_174_rigged-investments");
+    moveRunnerCardToGrip(state, "onr_v1_184_top-runners-conference");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_163_floating-runner-bbs",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_174_rigged-investments",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_184_top-runners-conference",
+    );
+    const riggedId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_174_rigged-investments",
+    );
+    const topRunnersId = state.runner.rig.resources.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_184_top-runners-conference",
+    );
+    expect(riggedId && cardCounterAmount(state, riggedId, "bit")).toBe(12);
+    expect(topRunnersId).toBeDefined();
+    if (!riggedId || !topRunnersId) return;
+
+    const creditsBeforeTurn = state.runner.credits;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state = toRunnerTurnFromCorpMain(state);
+
+    expect(state.runner.credits).toBe(creditsBeforeTurn + 4);
+    expect(cardCounterAmount(state, riggedId, "bit")).toBe(11);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "gain_credits",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_163_floating-runner-bbs",
+          reason: "start_of_turn",
+        }),
+        expect.objectContaining({
+          kind: "take_hosted_credits",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_174_rigged-investments",
+          reason: "start_of_turn",
+        }),
+        expect.objectContaining({
+          kind: "gain_credits",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_184_top-runners-conference",
+          reason: "start_of_turn",
+        }),
+      ]),
+    );
+
+    const creditsBeforeNonRun = state.runner.credits;
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.runner.rig.resources).toContain(topRunnersId);
+    expect(state.runner.credits).toBe(creditsBeforeNonRun);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(state.runner.rig.resources).not.toContain(topRunnersId);
+    expect(state.runner.heap).toContain(topRunnersId);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "trash_source",
+        reason: "run_start",
+        sourceDefinitionId: "onr_v1_184_top-runners-conference",
+      }),
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("applies Data Darts damage and next-ICE no-break only to the next encounter", () => {
     let state = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-data-darts-next-ice",
@@ -36793,20 +37190,13 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     for (const definitionId of [
       "onr_v1_344_spinn-public-relations",
       "onr_v1_321_esa-contract",
-      "onr_v1_335_remote-facility",
     ] as const) {
       let state = apply(
         createGameAfterSetup({
           seed: `spotcheck-${definitionId}`,
           baseline: MVP_0_99_BASELINE,
-          runnerDeck:
-            definitionId === "onr_v1_335_remote-facility"
-              ? MECHANIC_SMOKE_DECKS.globalModifiers.runner
-              : MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
-          corpDeck:
-            definitionId === "onr_v1_335_remote-facility"
-              ? MECHANIC_SMOKE_DECKS.globalModifiers.corp
-              : MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+          corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
           agendaPointsToWin: 7,
         }),
         "corp",
@@ -36835,10 +37225,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
         "corp",
         (action) =>
           action.type ===
-            (definitionId === "onr_v1_321_esa-contract" ||
-            definitionId === "onr_v1_344_spinn-public-relations"
-              ? "activated_card_ability"
-              : "gain_credit") &&
+            "activated_card_ability" &&
           action.payload?.cardId === assetId,
       );
       state = apply(state, "corp", (action) => action.actionId === ability.actionId);
@@ -37143,7 +37530,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     topRunners = apply(topRunners, "runner", (action) => action.type === "end_turn");
     topRunners = apply(topRunners, "corp", (action) => action.type === "mandatory_draw");
     topRunners = toRunnerTurnFromCorpMain(topRunners);
-    expect(topRunners.runner.credits).toBe(creditsBeforeTopRunners + 3);
+    expect(topRunners.runner.credits).toBe(creditsBeforeTopRunners + 2);
     topRunners = apply(
       topRunners,
       "runner",

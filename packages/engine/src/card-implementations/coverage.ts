@@ -47,10 +47,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/livewires-contacts.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_163_floating-runner-bbs":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
+  "onr_v1_174_rigged-investments":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/rigged-investments.ts",
   "onr_v1_178_short-term-contract":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/short-term-contract.ts",
   "onr_v1_179_silicon-saloon-franchise":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/silicon-saloon-franchise.ts",
+  "onr_v1_184_top-runners-conference":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/top-runners-conference.ts",
   "onr_v1_193_corporate-coup":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/corporate-coup.ts",
   "onr_v1_198_detroit-police-contract":
@@ -63,8 +69,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-coup.ts",
   "onr_v1_210_political-overthrow":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/political-overthrow.ts",
+  "onr_v1_211_polymer-breakthrough":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/polymer-breakthrough.ts",
   "onr_v1_217_strike-force-kali":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/strike-force-kali.ts",
+  "onr_v1_218_subsidiary-branch":
+    "packages/engine/src/card-implementations/onr-v1/corp/agendas/subsidiary-branch.ts",
   "onr_v1_281_accounts-receivable":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/accounts-receivable.ts",
   "onr_v1_282_annual-reviews":
@@ -109,6 +119,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/south-african-mining-corp.ts",
   "onr_v1_337_rockerboy-promotion":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rockerboy-promotion.ts",
+  "onr_v1_335_remote-facility":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/remote-facility.ts",
   "onr_v1_344_spinn-public-relations":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
   "onr_v1_360_jerusalem-city-grid":

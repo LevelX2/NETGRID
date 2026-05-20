@@ -394,7 +394,6 @@ const HUNT_CLUB_BBS_ID = "onr_v1_091_hunt-club-bbs";
 const KILROY_WAS_HERE_ID = "onr_v1_096_kilroy-was-here";
 const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
 const ROMP_THROUGH_HQ_ID = "onr_v1_107_romp-through-hq";
-const TOP_RUNNERS_CONFERENCE_ID = "onr_v1_184_top-runners-conference";
 const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const BLACK_ICE_QUALITY_ASSURANCE_ID =
   "onr_v1_191_black-ice-quality-assurance";
@@ -432,7 +431,6 @@ const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
 const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
 const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
-const RIGGED_INVESTMENTS_ID = "onr_v1_174_rigged-investments";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
@@ -441,7 +439,6 @@ const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
 const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
-const POLYMER_BREAKTHROUGH_ID = "onr_v1_211_polymer-breakthrough";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
 const BANPEI_ID = "onr_v1_223_banpei";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
@@ -9254,15 +9251,6 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
-      if (definition.id === RIGGED_INVESTMENTS_ID) {
-        setCardCounter(state, cardId, "bit", 6);
-        legalAction.payload = {
-          ...(legalAction.payload ?? {}),
-          counterType: "bit",
-          addedCounterAmount: 6,
-          remainingCounters: 6,
-        };
-      }
       if (definition.id === LOAN_FROM_CHIBA_ID) {
         credits(state, "runner", 12);
         legalAction.resolvedEffects = [
@@ -9470,17 +9458,6 @@ function corpRegionUpgradeIdsInServer(
     .sort();
 }
 
-function trashTopRunnersConferenceOnRunStart(state: GameState): void {
-  const toTrash = state.runner.rig.resources
-    .filter(
-      (cardId) => definitionFor(state, cardId).id === TOP_RUNNERS_CONFERENCE_ID,
-    )
-    .sort();
-  for (const cardId of toTrash) {
-    trashRunnerInstalledCardToHeap(state, cardId);
-  }
-}
-
 type StartRunOptions = Pick<
   RunState,
   | "freeTrashAccessZones"
@@ -9504,7 +9481,7 @@ function startRun(
   const server = mustServer(state, serverId);
   const flags = ensureRunnerTurnFlags(state);
   flags.runAttemptsThisTurn = (flags.runAttemptsThisTurn ?? 0) + 1;
-  trashTopRunnersConferenceOnRunStart(state);
+  executeCardImplementationRunnerRunStartEffects(state, legalAction);
   const installedAccessBonus = v1915InstalledAccessBonus(state, server.id);
   const installedAccessBonusSourceDefinitionIds =
     v1915InstalledAccessBonusSourceDefinitionIds(state, server.id);
@@ -12941,14 +12918,6 @@ function endTurn(
   side: Side,
   legalAction: LegalAction,
 ): void {
-  const polymerBreakthroughCreditsGained =
-    side === "runner"
-      ? state.corp.scoreArea.reduce((sum, cardId) => {
-          return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID
-            ? sum + 1
-            : sum;
-        }, 0)
-      : 0;
   if (side === "runner") {
     resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
@@ -12969,17 +12938,6 @@ function endTurn(
     if (state.winner) return;
   }
   startDiscardPhase(state, side, legalAction);
-  if (
-    side === "runner" &&
-    polymerBreakthroughCreditsGained > 0 &&
-    state.activeSide === "corp"
-  ) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      polymerBreakthroughCreditsGained,
-      corpCreditsAfter: state.corp.credits,
-    };
-  }
 }
 
 function resolveSneakPreviewTemporaryInstallReturns(
@@ -13410,22 +13368,6 @@ function applyCorpStartOfTurnEffects(
       ),
     );
   }
-  const polymerCount = state.corp.scoreArea.reduce((sum, cardId) => {
-    return definitionFor(state, cardId).id === POLYMER_BREAKTHROUGH_ID
-      ? sum + 1
-      : sum;
-  }, 0);
-  if (polymerCount > 0) {
-    credits(state, "corp", polymerCount);
-    effects?.push(
-      automaticGainCreditsEffect(
-        "corp.start.polymer_breakthrough",
-        "corp",
-        polymerCount,
-        POLYMER_BREAKTHROUGH_ID,
-      ),
-    );
-  }
   executeCardImplementationStartOfCorpTurnEffects(state, effects);
   for (const cardId of rezzedCorpRootCardIds(state)) {
     const definitionId = definitionFor(state, cardId).id;
@@ -13537,31 +13479,7 @@ function applyRunnerStartOfTurnEffects(
       ),
     );
   }
-  for (const cardId of state.runner.rig.resources.slice().sort()) {
-    if (definitionFor(state, cardId).id !== RIGGED_INVESTMENTS_ID) continue;
-    if (cardCounter(state, cardId, "bit") <= 0) continue;
-    spendCardCounter(state, cardId, "bit", 1);
-    credits(state, "runner", 1);
-    effects?.push(
-      automaticGainCreditsEffect(
-        `runner.start.rigged_investments.${cardId}`,
-        "runner",
-        1,
-        RIGGED_INVESTMENTS_ID,
-      ),
-    );
-    if (cardCounter(state, cardId, "bit") <= 0) {
-      trashRunnerInstalledCardToHeap(state, cardId);
-      effects?.push(
-        automaticTrashCardEffect(
-          `runner.start.rigged_investments.trash.${cardId}`,
-          "runner",
-          RIGGED_INVESTMENTS_ID,
-          RIGGED_INVESTMENTS_ID,
-        ),
-      );
-    }
-  }
+  executeCardImplementationStartOfRunnerTurnEffects(state, effects);
   if (!flags.startOfTurnFloatingCreditsApplied) {
     const butcherBoyCounterTotal = installedVirusCounterTotalForDefinition(
       state,
@@ -13578,31 +13496,6 @@ function applyRunnerStartOfTurnEffects(
           BUTCHER_BOY_ID,
         ),
       );
-    }
-    for (const cardId of state.runner.rig.resources) {
-      const definition = definitionFor(state, cardId);
-      if (definition.id === "onr_v1_163_floating-runner-bbs") {
-        credits(state, "runner", 1);
-        effects?.push(
-          automaticGainCreditsEffect(
-            `runner.start.floating_runner_bbs.${cardId}`,
-            "runner",
-            1,
-            definition.id,
-          ),
-        );
-      }
-      if (definition.id === TOP_RUNNERS_CONFERENCE_ID) {
-        credits(state, "runner", 3);
-        effects?.push(
-          automaticGainCreditsEffect(
-            `runner.start.top_runners_conference.${cardId}`,
-            "runner",
-            3,
-            definition.id,
-          ),
-        );
-      }
     }
     flags.startOfTurnFloatingCreditsApplied = true;
   }
@@ -24259,7 +24152,10 @@ function assertActivatedCardImplementationAbilityCanResolve(
 
 function cardImplementationLifecycleEffects(
   definition: CardDefinition,
-  lifecycle: Exclude<keyof CardLifecycleImplementation, "start_of_corp_turn">,
+  lifecycle: Exclude<
+    keyof CardLifecycleImplementation,
+    "start_of_corp_turn" | "start_of_runner_turn" | "on_runner_run_start"
+  >,
 ): readonly CardEffectImplementation[] {
   return cardImplementationForDefinitionId(definition.id)?.lifecycle?.[
     lifecycle
@@ -24271,7 +24167,10 @@ function executeCardImplementationLifecycleEffects(
   legalAction: LegalAction | undefined,
   definition: CardDefinition,
   cardId: CardInstanceId,
-  lifecycle: Exclude<keyof CardLifecycleImplementation, "start_of_corp_turn">,
+  lifecycle: Exclude<
+    keyof CardLifecycleImplementation,
+    "start_of_corp_turn" | "start_of_runner_turn" | "on_runner_run_start"
+  >,
 ): void {
   const effects = cardImplementationLifecycleEffects(definition, lifecycle);
   if (effects.length === 0) return;
@@ -24293,6 +24192,8 @@ function executeCardImplementationLifecycleEffects(
         ),
       trashSourceWhenEmpty: (sourceCardId) =>
         trashSourceWhenEmptyForCardImplementationEffect(state, sourceCardId),
+      trashSource: (sourceCardId) =>
+        trashSourceForCardImplementationEffect(state, sourceCardId),
     },
     effects,
   );
@@ -24314,10 +24215,34 @@ function cardImplementationStartOfCorpTurnAbilities(
   );
 }
 
+function cardImplementationStartOfRunnerTurnAbilities(
+  definition: CardDefinition,
+): readonly CardLifecycleTriggeredAbilityImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.lifecycle
+      ?.start_of_runner_turn ?? []
+  );
+}
+
+function cardImplementationRunnerRunStartAbilities(
+  definition: CardDefinition,
+): readonly CardLifecycleTriggeredAbilityImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.lifecycle
+      ?.on_runner_run_start ?? []
+  );
+}
+
 function cardImplementationStartOfCorpTurnSourceIds(
   state: GameState,
 ): CardInstanceId[] {
   return [...rezzedCorpRootCardIds(state), ...state.corp.scoreArea].sort();
+}
+
+function cardImplementationRunnerInstalledSourceIds(
+  state: GameState,
+): CardInstanceId[] {
+  return runnerInstalledCardIds(state).slice().sort();
 }
 
 function isActiveCardImplementationStartOfCorpTurnSource(
@@ -24340,6 +24265,19 @@ function isActiveCardImplementationStartOfCorpTurnSource(
     instance.zone.zone === "serverRoot" &&
     instance.rezzed === true &&
     state.corp.servers.some((server) => server.root.includes(cardId))
+  );
+}
+
+function isActiveCardImplementationStartOfRunnerTurnSource(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const instance = state.cardInstances[cardId];
+  return (
+    instance?.controller === "runner" &&
+    instance.zone.side === "runner" &&
+    instance.zone.zone === "rig" &&
+    runnerInstalledCardIds(state).includes(cardId)
   );
 }
 
@@ -24394,6 +24332,8 @@ function executeCardImplementationStartOfCorpTurnEffects(
               state,
               sourceCardId,
             ),
+          trashSource: (sourceCardId) =>
+            trashSourceForCardImplementationEffect(state, sourceCardId),
         },
         ability.effects,
       );
@@ -24405,6 +24345,120 @@ function executeCardImplementationStartOfCorpTurnEffects(
           definition,
         )
       )
+        break;
+    }
+  }
+}
+
+function executeCardImplementationStartOfRunnerTurnEffects(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const sourceIds = cardImplementationRunnerInstalledSourceIds(state);
+  for (const cardId of sourceIds) {
+    const instance = state.cardInstances[cardId];
+    if (!instance) continue;
+    const definition = definitionFor(state, cardId);
+    const startAbilities = cardImplementationStartOfRunnerTurnAbilities(definition);
+    if (startAbilities.length === 0) continue;
+    if (!isActiveCardImplementationStartOfRunnerTurnSource(state, cardId))
+      continue;
+    for (const ability of startAbilities) {
+      if (
+        ability.condition &&
+        !cardImplementationConditionMet(state, ability.condition, cardId)
+      )
+        continue;
+      const result = executeCardImplementationEffects(
+        state,
+        {
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+          controller: instance.controller,
+          reason: "start_of_turn",
+          addHostedCredits: (sourceCardId, amount) =>
+            addHostedCreditsForCardImplementationEffect(
+              state,
+              sourceCardId,
+              amount,
+            ),
+          takeHostedCredits: (sourceCardId, side, amount) =>
+            takeHostedCreditsForCardImplementationEffect(
+              state,
+              sourceCardId,
+              side,
+              amount,
+            ),
+          trashSourceWhenEmpty: (sourceCardId) =>
+            trashSourceWhenEmptyForCardImplementationEffect(
+              state,
+              sourceCardId,
+            ),
+          trashSource: (sourceCardId) =>
+            trashSourceForCardImplementationEffect(state, sourceCardId),
+        },
+        ability.effects,
+      );
+      effects?.push(...result.resolvedEffects);
+      if (!isActiveCardImplementationStartOfRunnerTurnSource(state, cardId))
+        break;
+    }
+  }
+}
+
+function executeCardImplementationRunnerRunStartEffects(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const sourceIds = cardImplementationRunnerInstalledSourceIds(state);
+  for (const cardId of sourceIds) {
+    const instance = state.cardInstances[cardId];
+    if (!instance) continue;
+    const definition = definitionFor(state, cardId);
+    const runStartAbilities = cardImplementationRunnerRunStartAbilities(definition);
+    if (runStartAbilities.length === 0) continue;
+    if (!isActiveCardImplementationStartOfRunnerTurnSource(state, cardId))
+      continue;
+    for (const ability of runStartAbilities) {
+      if (
+        ability.condition &&
+        !cardImplementationConditionMet(state, ability.condition, cardId)
+      )
+        continue;
+      const result = executeCardImplementationEffects(
+        state,
+        {
+          sourceCardId: cardId,
+          sourceDefinitionId: definition.id,
+          sourceTitle: definition.title,
+          controller: instance.controller,
+          reason: "run_start",
+          addHostedCredits: (sourceCardId, amount) =>
+            addHostedCreditsForCardImplementationEffect(
+              state,
+              sourceCardId,
+              amount,
+            ),
+          takeHostedCredits: (sourceCardId, side, amount) =>
+            takeHostedCreditsForCardImplementationEffect(
+              state,
+              sourceCardId,
+              side,
+              amount,
+            ),
+          trashSourceWhenEmpty: (sourceCardId) =>
+            trashSourceWhenEmptyForCardImplementationEffect(
+              state,
+              sourceCardId,
+            ),
+          trashSource: (sourceCardId) =>
+            trashSourceForCardImplementationEffect(state, sourceCardId),
+        },
+        ability.effects,
+      );
+      appendResolvedEffectsToPayload(legalAction, result.resolvedEffects);
+      if (!isActiveCardImplementationStartOfRunnerTurnSource(state, cardId))
         break;
     }
   }
@@ -24814,6 +24868,13 @@ function trashSourceWhenEmptyForCardImplementationEffect(
 ): CardEffectTrashSourceResult {
   if (cardCounter(state, sourceCardId, "bit") > 0)
     return { sourceTrashed: false };
+  return trashSourceForCardImplementationEffect(state, sourceCardId);
+}
+
+function trashSourceForCardImplementationEffect(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): CardEffectTrashSourceResult {
   const instance = mustInstance(state.cardInstances, sourceCardId);
   const definition = definitionFor(state, sourceCardId);
   if (

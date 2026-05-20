@@ -39,7 +39,6 @@ export const COUNTER_OPERATION_CARD_IDS = new Set([
 export const ACTION_ASSET_CARD_IDS = new Set([
   "onr_v1_331_nevinyrral",
   "onr_v1_334_pacifica-regional-ai",
-  "onr_v1_335_remote-facility",
 ]);
 
 export type ScoredAgendaActionProfile = {
