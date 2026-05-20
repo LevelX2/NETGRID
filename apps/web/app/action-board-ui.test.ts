@@ -29,6 +29,7 @@ import {
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
+  runBreakerActionHint,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
   runPositionStatusLabel,
@@ -926,6 +927,54 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(label).not.toContain("gegen Fire Wall");
     expect(label).not.toContain("(ICE 1)");
     expect(actionCostChips(pump)).toEqual([{ kind: "credit", amount: 2, label: "2 Credits" }]);
+  });
+
+  it("does not show a false missing-breaker hint in the corp encounter view", () => {
+    const codecracker: VisibleCard = {
+      ...card("codecracker_1", "Codecracker", "program"),
+      subtypes: ["icebreaker"],
+      rulesText: "0 Credits: Break code gate subroutine.\n1 Credit: +1 strength.",
+      strength: 0
+    };
+    const endlessCorridor: VisibleCard = {
+      ...card("ice_1", "Endless Corridor", "ice"),
+      subtypes: ["code_gate"],
+      rulesText: "End the run.\nEnd the run.",
+      strength: 2
+    };
+    const corpView = view("corp", {
+      activeSide: "runner",
+      timingPoint: "run.encounter_ice",
+      opponent: {
+        ...view("corp").opponent,
+        rig: [codecracker]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: endlessCorridor,
+        successful: false
+      }
+    });
+
+    expect(runBreakerActionHint(corpView, [])).toBe("Runner-Rig zeigt passenden Eisbrecher: Codecracker.");
+  });
+
+  it("keeps the no-matching-breaker hint for the runner action view", () => {
+    const runnerView = view("runner", {
+      activeSide: "runner",
+      timingPoint: "run.encounter_ice",
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: { ...card("ice_1", "Endless Corridor", "ice"), subtypes: ["code_gate"] },
+        successful: false
+      }
+    });
+
+    expect(runBreakerActionHint(runnerView, [])).toBe("Kein passender Eisbrecher für dieses ICE verfügbar.");
   });
 
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {

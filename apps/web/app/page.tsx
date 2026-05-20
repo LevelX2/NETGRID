@@ -131,12 +131,14 @@ import {
   corpInstalledCardState,
   cuePositionClassName,
   cuePositionStyle,
+  encounterBreakerActions,
   groupRunnerRigCards,
   hasLegalAction,
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
+  runBreakerActionHint,
   runTargetServerIds,
   runAwareActionButtonLabel,
   runWindowActionButtonLabel,
@@ -7367,14 +7369,6 @@ function RunTimelineOverlay({
   return createPortal(overlay, document.body);
 }
 
-function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string | null {
-  if (view.run?.phase !== "encounter_ice") return null;
-  const breakerActions = encounterBreakerActions(view, actions);
-  if (breakerActions.length === 0) return "Kein passender Eisbrecher für dieses ICE verfügbar.";
-  const labels = Array.from(new Set(breakerActions.map((action) => runWindowActionButtonLabel(view, action)))).slice(0, 2);
-  return `Eisbrecher: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
-}
-
 function ScoredAgendaOverlay({
   side,
   cards,
@@ -7545,47 +7539,6 @@ function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAc
   if (uniqueNames.length === 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames[0]} im Rig für Aktionen gegen ${target}.`;
   if (uniqueNames.length > 1) return `Eisbrecher verfügbar: Wähle ${uniqueNames.slice(0, 2).join(" oder ")} im Rig für Aktionen gegen ${target}.`;
   return `Eisbrecher verfügbar: Wähle den passenden Eisbrecher im Rig für Aktionen gegen ${target}.`;
-}
-
-function encounterBreakerActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
-  const activeIceId = activeRunIceInstanceId(view);
-  const encounteredIce = view.run?.encounteredIce ?? null;
-  const runnerRig = view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
-  const rigById = new Map(runnerRig.map((card) => [card.instanceId, card]));
-  return actions.filter((action) => {
-    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
-    if (activeIceId && action.payload?.iceId !== activeIceId) return false;
-    if (action.type === "break_subroutine") return true;
-    const breakerId = breakerIdFromAction(action);
-    if (!breakerId) return false;
-    const breaker = rigById.get(breakerId);
-    return breaker ? breakerMatchesEncounteredIce(breaker, encounteredIce) : false;
-  });
-}
-
-function breakerIdFromAction(action: LegalAction): string | null {
-  if (typeof action.payload?.breakerId === "string") return action.payload.breakerId;
-  return action.source !== "basic_action" && action.source !== "game_rule" ? action.source : null;
-}
-
-function breakerMatchesEncounteredIce(breaker: VisibleCard, encounteredIce: VisibleCard | null): boolean {
-  if (!encounteredIce?.known) return true;
-  const iceSubtypes = new Set((encounteredIce.subtypes ?? []).map(normalizeBreakerSubtype));
-  if (iceSubtypes.size === 0) return true;
-  const rulesText = normalizeBreakerRulesText(breaker.rulesText ?? "");
-  if (/\bbreak\s+(?:1\s+)?ice\s+subroutine\b/.test(rulesText)) return true;
-  if (iceSubtypes.has("sentry") && /\bbreak\s+(?:1\s+)?sentry\s+subroutine\b/.test(rulesText)) return true;
-  if (iceSubtypes.has("wall") && /\bbreak\s+(?:1\s+)?wall\s+subroutine\b/.test(rulesText)) return true;
-  if (iceSubtypes.has("code gate") && /\bbreak\s+(?:1\s+)?code gate\s+subroutine\b/.test(rulesText)) return true;
-  return false;
-}
-
-function normalizeBreakerSubtype(value: string): string {
-  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function normalizeBreakerRulesText(value: string): string {
-  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function LegalActionsPanel({
