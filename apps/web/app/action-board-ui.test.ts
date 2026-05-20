@@ -1015,6 +1015,26 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
   });
 
+  it("retains a visible access reveal across turn end until it is dismissed", () => {
+    const rdReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "R&D",
+      cardDefinitionId: "simple_economy_operation",
+      title: "Simple Economy Operation"
+    });
+    const runnerEndTurn = {
+      ...publicEvent("evt_runner_end", "action", {
+        actionType: "end_turn",
+        actor: "runner"
+      }),
+      stateVersionAfter: 2
+    };
+
+    expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], null)?.eventId).toBe("evt_access");
+    expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], "evt_access")).toBeNull();
+  });
+
   it("does not retain an old access reveal after later turn and Corp action events", () => {
     const access = publicEvent("evt_access", "action", {
       actionType: "access_card",

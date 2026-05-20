@@ -1158,6 +1158,27 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   };
 }
 
+function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, eventId?: string): AccessReveal | null {
+  const accessedCard = view.run?.accessedCard;
+  if (!accessedCard?.known || !accessedCard.title) return null;
+  const actorSide: Side = "runner";
+  const serverLabel = serverDisplayLabel(view.run?.breach?.serverId ?? view.run?.attackedServerId ?? "einen Server");
+  const actions = legalActions.filter((action) => ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash"].includes(action.type));
+  const card = enrichVisibleCard(accessedCard, detailsById);
+  return {
+    eventId: eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
+    actorSide,
+    viewerSide,
+    serverLabel,
+    serverTitleLabel: accessServerTitleLabel(serverLabel),
+    serverLocationPhrase: accessServerLocationPhrase(serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    card,
+    actions,
+    trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
+  };
+}
+
 function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, title: string): DisplayVisibleCard {
   const card: DisplayVisibleCard = {
     instanceId: `access-${event.eventId}-${cardId}`,
@@ -2519,7 +2540,9 @@ export default function Page() {
     });
   };
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
-  const accessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
+  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, accessRevealEvent?.eventId) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
+  const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;

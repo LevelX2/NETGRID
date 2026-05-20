@@ -645,7 +645,7 @@ export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEv
 
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
-  return newerEvent.publicPayload.actionType === "continue_run";
+  return newerEvent.publicPayload.actionType === "continue_run" || newerEvent.publicPayload.actionType === "end_turn";
 }
 
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
