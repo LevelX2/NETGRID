@@ -570,6 +570,12 @@ export function executeCardImplementationEffects(
         });
         return;
       }
+      case "use_base_link":
+      case "increase_trace_link": {
+        throw new Error(
+          `${effect.kind} effects are resolved by the trace window host.`,
+        );
+      }
       default: {
         const unknownEffect = effect as { kind?: string };
         throw new Error(

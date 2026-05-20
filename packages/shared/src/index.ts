@@ -870,7 +870,7 @@ export type TraceState = {
   rabbitTraceLimitReduction?: number;
   parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
   parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
-  status: "corp_bid" | "runner_bid" | "post_bid_link";
+  status: "corp_bid" | "base_link" | "runner_bid" | "post_bid_link";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
   returnTimingPoint?: TimingPointId;
@@ -878,6 +878,9 @@ export type TraceState = {
   corpBid?: number;
   traceStrength?: number;
   runnerLink?: number;
+  baseLinkSourceId?: CardInstanceId;
+  baseLinkValue?: number;
+  baseLinkCostPaid?: number;
   runnerBid?: number;
   runnerStrength?: number;
   postBidLinkSourceIds?: CardInstanceId[];

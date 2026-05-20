@@ -216,6 +216,21 @@ function enterEncounterFromMovementWindow(state: GameState): GameState {
   return continueRunAction(state);
 }
 
+function traceChoiceOptionIdForDefinition(
+  state: GameState,
+  definitionId: string,
+  optionPrefix: string,
+): string {
+  const option = state.pendingChoice?.options.find(
+    (candidate) =>
+      candidate.id.startsWith(optionPrefix) &&
+      typeof candidate.value === "string" &&
+      state.cardInstances[candidate.value]?.definitionId === definitionId,
+  );
+  if (!option) throw new Error(`Missing trace choice option for ${definitionId}`);
+  return option.id;
+}
+
 describe("MVP 0.1 engine foundation", () => {
   it("normalizes legacy ability payloads into side-safe public ability schema", () => {
     const context = buildPublicAbilitySchemaContext(
@@ -1115,32 +1130,51 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       });
       state = applyChoice(state, "corp", "bid_0");
       expect(state.trace).toMatchObject({
-        status: "runner_bid",
-        runnerLink: 1,
+        status: "base_link",
+        runnerLink: 0,
         traceStrength: 3,
       });
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         traceStep: "corp_bid",
-        runnerLink: 1,
+        runnerLink: 0,
         traceStrength: 3,
       });
+      state = applyChoice(
+        state,
+        "runner",
+        traceChoiceOptionIdForDefinition(
+          state,
+          "onr_v1_149_access-to-arasaka",
+          "trace_base_link_",
+        ),
+      );
+      expect(state.runner.credits).toBe(16);
+      expect(state.trace).toMatchObject({
+        status: "runner_bid",
+        runnerLink: 4,
+        baseLinkValue: 4,
+        traceStrength: 3,
+      });
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        traceStep: "base_link",
+        runnerLink: 4,
+      });
       state = applyChoice(state, "runner", "bid_0");
+      state = applyChoice(state, "runner", "pass");
       if (definitionId === "onr_v1_243_fetch-4-0-1") {
-        expect(state.runner.tags, definitionId).toBe(1);
+        expect(state.runner.tags, definitionId).toBe(0);
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          traceStep: "runner_bid",
-          traceSuccessful: true,
-          tagsAdded: 1,
+          traceStep: "post_bid_link",
+          traceSuccessful: false,
+          tagsAdded: 0,
         });
       } else {
         expect(state.runner.tags, definitionId).toBe(0);
-        expect(state.run, definitionId).toBeUndefined();
-        expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
+        expect(state.run, definitionId).toBeDefined();
+        expect(state.runnerTurnFlags?.fangRunLockCreditCost).not.toBe(2);
         expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-          traceStep: "runner_bid",
-          traceSuccessful: true,
-          runnerRunEnded: true,
-          runnerRunLockCreditCost: 2,
+          traceStep: "post_bid_link",
+          traceSuccessful: false,
         });
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -3484,6 +3518,19 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     );
     trace = apply(trace, "runner", (action) => action.type === "continue_run");
     trace = applyChoice(trace, "corp", "bid_0");
+    expect(trace.trace).toMatchObject({
+      status: "base_link",
+      runnerLink: 0,
+    });
+    trace = applyChoice(
+      trace,
+      "runner",
+      traceChoiceOptionIdForDefinition(
+        trace,
+        "onr_v1_150_access-to-kiribati",
+        "trace_base_link_",
+      ),
+    );
     expect(trace.trace).toMatchObject({
       status: "runner_bid",
       runnerLink: 1,
@@ -22543,6 +22590,27 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     state = applyChoice(state, "corp", "bid_1");
 
     expect(state.trace).toMatchObject({
+      status: "base_link",
+      corpBid: 1,
+      traceStrength: 5,
+      runnerLink: 0,
+    });
+    expect(state.pendingChoice?.options.map((option) => option.id)).toEqual(
+      expect.arrayContaining([
+        "pass",
+        expect.stringMatching(/^trace_base_link_/),
+      ]),
+    );
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(
+        state,
+        "onr_v1_148_access-through-alpha",
+        "trace_base_link_",
+      ),
+    );
+    expect(state.trace).toMatchObject({
       status: "runner_bid",
       corpBid: 1,
       traceStrength: 5,
@@ -37092,11 +37160,172 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_1");
 
-    expect(state.trace).toMatchObject({ status: "runner_bid", traceStrength: 5, runnerLink: 9 });
+    expect(state.trace).toMatchObject({ status: "base_link", traceStrength: 5, runnerLink: 0 });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      runnerLink: 9,
+      runnerLink: 0,
       traceStrength: 5,
     });
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(
+        state,
+        "onr_v1_148_access-through-alpha",
+        "trace_base_link_",
+      ),
+    );
+    expect(state.trace).toMatchObject({ status: "runner_bid", runnerLink: 9 });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStep: "base_link",
+      runnerLink: 9,
+    });
+  });
+
+  it("uses migrated base link and trace link values from CardImplementation definitions", () => {
+    const specs = [
+      ["onr_v1_003_baedekers-net-map", 1, 0, 1],
+      ["onr_v1_004_bakdoor", 3, 0, 2],
+      ["onr_v1_148_access-through-alpha", 9, 1, undefined],
+      ["onr_v1_149_access-to-arasaka", 4, 2, 2],
+      ["onr_v1_150_access-to-kiribati", 1, 1, 1],
+      ["onr_v1_152_back-door-to-hilliard", 2, 0, 3],
+      ["onr_v1_153_back-door-to-orbital-air", 2, 1, 2],
+    ] as const;
+
+    for (const [definitionId, baseLink, baseCost, pumpCost] of specs) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `p331-trace-link-${definitionId}`,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            id: `p331_trace_link_runner_${definitionId}`,
+            name: `P3.31 Trace Link Runner ${definitionId}`,
+            side: "runner",
+            identity: "runner_identity_001",
+            cards: [
+              { id: definitionId, quantity: 1 },
+              { id: "simple_economy_event", quantity: 10 },
+            ],
+          },
+          corpDeck: {
+            id: `p331_trace_link_corp_${definitionId}`,
+            name: `P3.31 Trace Link Corp ${definitionId}`,
+            side: "corp",
+            identity: "corp_identity_001",
+            cards: [
+              { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+              { id: "simple_agenda", quantity: 6 },
+              { id: "simple_economy_operation", quantity: 6 },
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 20;
+      state.corp.credits = 8;
+      moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      putCorpIceOnServer(state, "rd", "onr_v1_243_fetch-4-0-1");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "onr_v1_243_fetch-4-0-1",
+      );
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = applyChoice(state, "corp", "bid_0");
+      expect(state.trace).toMatchObject({ status: "base_link", runnerLink: 0 });
+      const beforeBase = state.runner.credits;
+      state = applyChoice(
+        state,
+        "runner",
+        traceChoiceOptionIdForDefinition(state, definitionId, "trace_base_link_"),
+      );
+      expect(state.runner.credits).toBe(beforeBase - baseCost);
+      expect(state.trace).toMatchObject({
+        status: "runner_bid",
+        runnerLink: baseLink,
+        baseLinkValue: baseLink,
+      });
+      state = applyChoice(state, "runner", "bid_0");
+      if (pumpCost !== undefined) {
+        expect(state.trace).toMatchObject({ status: "post_bid_link" });
+        const beforePump = state.runner.credits;
+        state = applyChoice(
+          state,
+          "runner",
+          traceChoiceOptionIdForDefinition(state, definitionId, "trace_link_"),
+        );
+        expect(state.runner.credits).toBe(beforePump - pumpCost);
+        expect(state.trace).toMatchObject({
+          status: "post_bid_link",
+          runnerLink: baseLink + 1,
+          postBidLinkBonus: 1,
+        });
+        state = applyChoice(state, "runner", "pass");
+      }
+      expect(state.trace).toBeUndefined();
+      expect(validateGameState(state).ok).toBe(true);
+    }
+  });
+
+  it("rejects a stale second base link card in the same trace attempt", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.programSubtypeHosting("p331-one-base-link-stale"));
+    state.runner.credits = 20;
+    state.corp.credits = 8;
+    moveRunnerCardToGrip(state, "onr_v1_003_baedekers-net-map");
+    moveRunnerCardToGrip(state, "onr_v1_148_access-through-alpha");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_003_baedekers-net-map");
+    state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_148_access-through-alpha");
+    putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    state = apply(state, "corp", (action) => action.type === "rez_ice" && sourceDefinition(state, action) === "onr_v1_246_fragmentation-storm");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = applyChoice(state, "corp", "bid_0");
+    const baseChoiceAction = mustAction(state, "runner", (action) => action.type === "resolve_choice");
+    const baseChoiceId = state.pendingChoice?.choiceId;
+    const baedekerOption = traceChoiceOptionIdForDefinition(
+      state,
+      "onr_v1_003_baedekers-net-map",
+      "trace_base_link_",
+    );
+    state = applyChoice(
+      state,
+      "runner",
+      traceChoiceOptionIdForDefinition(
+        state,
+        "onr_v1_148_access-through-alpha",
+        "trace_base_link_",
+      ),
+    );
+    const afterBaseHash = hashState(state);
+    const afterBaseCredits = state.runner.credits;
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: baseChoiceAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: baseChoiceId,
+        selectedOptionIds: [baedekerOption],
+      },
+      idempotencyKey: "p331-stale-second-base-link",
+    });
+    expect(stale.ok).toBe(false);
+    expect(state.runner.credits).toBe(afterBaseCredits);
+    expect(hashState(state)).toBe(afterBaseHash);
   });
 
   it("lets Replicator break only trace subroutines and revalidates the current encounter", () => {
@@ -38940,7 +39169,23 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     maxLinkState = apply(maxLinkState, "runner", (action) => action.type === "continue_run");
     maxLinkState = applyChoice(maxLinkState, "corp", "bid_1");
-    expect(maxLinkState.trace).toMatchObject({ runnerLink: 9 });
+    expect(maxLinkState.trace).toMatchObject({
+      status: "base_link",
+      runnerLink: 1,
+    });
+    maxLinkState = applyChoice(
+      maxLinkState,
+      "runner",
+      traceChoiceOptionIdForDefinition(
+        maxLinkState,
+        "onr_v1_148_access-through-alpha",
+        "trace_base_link_",
+      ),
+    );
+    expect(maxLinkState.trace).toMatchObject({
+      status: "runner_bid",
+      runnerLink: 9,
+    });
   });
 
   it("uses Mystery Box once per run with public top-five reveal, free program install and deterministic shuffle", () => {

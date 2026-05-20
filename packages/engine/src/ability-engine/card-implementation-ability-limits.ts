@@ -89,6 +89,10 @@ export function cardImplementationAbilityLimitFailureMessage(
   assertSupportedAbilityLimit(limit);
   if (limit.kind === "once_per_turn_per_source")
     return "Diese Kartenquelle wurde in diesem Zug bereits genutzt.";
+  if (limit.kind === "one_base_link_card_per_trace_attempt")
+    return "In diesem Trace wurde bereits eine Base-Link-Karte genutzt.";
+  if (limit.kind === "once_per_trace_per_source")
+    return "Diese Kartenquelle wurde in diesem Trace bereits genutzt.";
   return undefined;
 }
 
@@ -108,7 +112,15 @@ function assertSupportedAbilityLimit(
     limit.scope === "any_ability_on_source"
   )
     return;
+  if (
+    limit.kind === "one_base_link_card_per_trace_attempt" &&
+    limit.scope === "trace_attempt"
+  )
+    return;
+  if (limit.kind === "once_per_trace_per_source" && limit.scope === "source")
+    return;
+  const unsupported = limit as { kind?: string; scope?: string };
   throw new Error(
-    `Unsupported card implementation ability limit: ${limit.kind}:${limit.scope}`,
+    `Unsupported card implementation ability limit: ${unsupported.kind ?? "unknown"}:${unsupported.scope ?? "unknown"}`,
   );
 }

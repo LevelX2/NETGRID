@@ -64,6 +64,24 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
 > = {
   "onr_v1_045_newsgroup-filter":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
+  "onr_v1_003_baedekers-net-map":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/baedekers-net-map.ts",
+  "onr_v1_004_bakdoor":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+  "onr_v1_063_signpost":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/signpost.ts",
+  "onr_v1_148_access-through-alpha":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/access-through-alpha.ts",
+  "onr_v1_149_access-to-arasaka":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/access-to-arasaka.ts",
+  "onr_v1_150_access-to-kiribati":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/access-to-kiribati.ts",
+  "onr_v1_152_back-door-to-hilliard":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/back-door-to-hilliard.ts",
+  "onr_v1_153_back-door-to-orbital-air":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/back-door-to-orbital-air.ts",
+  "onr_v1_181_the-springboard":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/the-springboard.ts",
   "onr_v1_133_militech-mram-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
   "onr_v1_134_mram-chip":

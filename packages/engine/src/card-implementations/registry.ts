@@ -118,13 +118,22 @@ import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech
 import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
+import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
+import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
+import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
+import { accessToArasakaImplementation } from "./onr-v1/runner/resources/access-to-arasaka";
+import { accessToKiribatiImplementation } from "./onr-v1/runner/resources/access-to-kiribati";
+import { backDoorToHilliardImplementation } from "./onr-v1/runner/resources/back-door-to-hilliard";
+import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/back-door-to-orbital-air";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
+import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import type { CardImplementationDefinition } from "./types";
 
@@ -132,7 +141,15 @@ export const CARD_IMPLEMENTATIONS = [
   bodyweightSyntheticBloodImplementation,
   jackNJoeImplementation,
   livewiresContactsImplementation,
+  baedekersNetMapImplementation,
+  bakdoorImplementation,
   newsgroupFilterImplementation,
+  signpostImplementation,
+  accessThroughAlphaImplementation,
+  accessToArasakaImplementation,
+  accessToKiribatiImplementation,
+  backDoorToHilliardImplementation,
+  backDoorToOrbitalAirImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
   loanFromChibaImplementation,
@@ -142,6 +159,7 @@ export const CARD_IMPLEMENTATIONS = [
   scoreImplementation,
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
+  theSpringboardImplementation,
   topRunnersConferenceImplementation,
   artificialSecurityDirectorsImplementation,
   blackIceQualityAssuranceImplementation,

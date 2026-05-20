@@ -61,7 +61,11 @@ export type CardConditionImplementation =
 
 export type ActivatedCardAbilityImplementation = {
   kind: "activated";
-  timing: "runner_main" | "corp_main";
+  timing:
+    | "runner_main"
+    | "corp_main"
+    | "trace_base_link_window"
+    | "trace_post_bid_link_window";
   costs: readonly CardAbilityCostImplementation[];
   condition?: CardConditionImplementation;
   limit?: CardAbilityLimitImplementation;
@@ -69,15 +73,29 @@ export type ActivatedCardAbilityImplementation = {
   label?: string;
 };
 
-export type CardAbilityLimitImplementation = {
-  kind: "once_per_turn_per_source";
-  scope: "any_ability_on_source";
-};
+export type CardAbilityLimitImplementation =
+  | {
+      kind: "once_per_turn_per_source";
+      scope: "any_ability_on_source";
+    }
+  | {
+      kind: "one_base_link_card_per_trace_attempt";
+      scope: "trace_attempt";
+    }
+  | {
+      kind: "once_per_trace_per_source";
+      scope: "source";
+    };
 
-export type CardAbilityCostImplementation = {
-  kind: "action";
-  amount: number;
-};
+export type CardAbilityCostImplementation =
+  | {
+      kind: "action";
+      amount: number;
+    }
+  | {
+      kind: "credit";
+      amount: number;
+    };
 
 export type CardEffectImplementation =
   | GainCreditsEffectImplementation
@@ -91,7 +109,9 @@ export type CardEffectImplementation =
   | TrashSourceWhenEmptyEffectImplementation
   | GainActionsEffectImplementation
   | TrashSourceEffectImplementation
-  | PayCreditsOrLoseGameEffectImplementation;
+  | PayCreditsOrLoseGameEffectImplementation
+  | UseBaseLinkEffectImplementation
+  | IncreaseTraceLinkEffectImplementation;
 
 export type GainCreditsEffectImplementation = {
   kind: "gain_credits";
@@ -210,6 +230,18 @@ export type PayCreditsOrLoseGameEffectImplementation = {
   amount: number;
   loseSide: "controller" | "runner" | "corp";
   reason: "source_left_play";
+  visibility: EventVisibilityClass;
+};
+
+export type UseBaseLinkEffectImplementation = {
+  kind: "use_base_link";
+  baseLink: number;
+  visibility: EventVisibilityClass;
+};
+
+export type IncreaseTraceLinkEffectImplementation = {
+  kind: "increase_trace_link";
+  amount: number;
   visibility: EventVisibilityClass;
 };
 
