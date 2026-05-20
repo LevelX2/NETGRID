@@ -18664,6 +18664,19 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           "onr_v1_343_south-african-mining-corp",
     );
     expect(legal.costs).toEqual([{ clicks: 3 }]);
+    expect(legal.label).toBe("6 Credits nehmen");
+    for (const remainingClicks of [0, 1, 2]) {
+      const lowClickLegalState = structuredClone(state);
+      lowClickLegalState.corp.clicks = remainingClicks;
+      expect(
+        getLegalActions(lowClickLegalState, "corp").some(
+          (action) =>
+            action.type === "activated_card_ability" &&
+            sourceDefinition(lowClickLegalState, action) ===
+              "onr_v1_343_south-african-mining-corp",
+        ),
+      ).toBe(false);
+    }
     const unrezzed = structuredClone(state);
     unrezzed.cardInstances[assetId] = {
       ...unrezzed.cardInstances[assetId]!,

@@ -767,6 +767,9 @@ export function pushActivatedCardImplementationActions(
     )
       continue;
     const actionCost = actionCostForActivatedAbility(ability);
+    const availableClicks =
+      side === "corp" ? state.corp.clicks : state.runner.clicks;
+    if (availableClicks < actionCost) continue;
     actions.push(
       deps.createAction(
         state,

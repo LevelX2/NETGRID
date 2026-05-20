@@ -9,6 +9,7 @@ export const southAfricanMiningCorpImplementation: CardImplementationDefinition 
       kind: "activated",
       timing: "corp_main",
       costs: [{ kind: "action", amount: 3 }],
+      label: "6 Credits nehmen",
       effects: [
         {
           kind: "gain_credits",
