@@ -10,8 +10,10 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  advancementCounterDisplay,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
+  armoredFridgeAblativeCounterBadge,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   breachProgressLabel,
@@ -540,6 +542,64 @@ describe("V1.0.6 resource and card-display helpers", () => {
       iconCount: 1
     });
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
+  });
+
+  it("maps only Armored Fridge power counters to an Ablative Counter badge", () => {
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("fridge_1", "Armored Fridge", "hardware"),
+        definitionId: "onr_v1_121_armored-fridge",
+        counters: { power: 7 }
+      })
+    ).toEqual({
+      amount: 7,
+      label: "7 Ablative Counter",
+      ariaLabel: "7 Ablative Counter",
+      shortLabel: "7 Ablative",
+      testId: "ablative-counter-badge"
+    });
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("fridge_1", "Armored Fridge", "hardware"),
+        definitionId: "onr_v1_121_armored-fridge",
+        counters: { power: 0 }
+      })
+    ).toBeNull();
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("data_raven_1", "Data Raven", "ice"),
+        definitionId: "onr_v1_236_data-raven",
+        counters: { power: 2 }
+      })
+    ).toBeNull();
+    expect(
+      armoredFridgeAblativeCounterBadge({
+        ...card("unknown_power_1", "Unknown Power Card", "resource"),
+        counters: { power: 3 }
+      })
+    ).toBeNull();
+  });
+
+  it("keeps hidden Corp advancement counters neutral at five counters", () => {
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 5 })).toEqual({
+      amount: 5,
+      ariaLabel: "5 öffentliche Advancement-Counter",
+      visibleGemCount: 5,
+      overflowLabel: null
+    });
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 10 })).toEqual({
+      amount: 10,
+      ariaLabel: "10 öffentliche Advancement-Counter",
+      visibleGemCount: 9,
+      overflowLabel: "x10"
+    });
+    expect(advancementCounterDisplay({ known: true, advancementCounters: 5 })).toEqual({
+      amount: 5,
+      ariaLabel: "5 Entwicklungen",
+      visibleGemCount: 4,
+      overflowLabel: "x5"
+    });
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 0 })).toBeNull();
   });
 
   it("renders low credit-counter amounts as separate icons", () => {

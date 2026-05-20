@@ -177,7 +177,7 @@ import {
   removeEverywhere,
 } from "./test-fixtures/mechanic-smoke-fixtures";
 import {
-  MVP_0_99_BASELINE,
+  CURRENT_RULES_BASELINE,
   type CardDefinition,
   type CardInstanceId,
   type ChoiceRequest,
@@ -187,6 +187,13 @@ import {
   type LegalAction,
   type Side,
 } from "@netgrid/shared";
+
+function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
+  expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
+  expect(state.baseline.engineSchemaVersion).toBe(
+    CURRENT_RULES_BASELINE.engineSchemaVersion,
+  );
+}
 
 describe("MVP 0.1 engine foundation", () => {
   it("normalizes legacy ability payloads into side-safe public ability schema", () => {
@@ -2573,7 +2580,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-rd-interface-multiaccess",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_rd_interface_runner",
@@ -2813,7 +2820,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-hells-run-trace-link",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.traceTags.runner,
           id: "spotcheck_hells_run_runner",
@@ -3433,7 +3440,7 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: `spotcheck-breaker-mix-${breakerDefinitionId}`,
-          baseline: MVP_0_99_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           runnerDeck: {
             ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
             id: `spotcheck_breaker_mix_runner_${breakerDefinitionId}`,
@@ -3586,7 +3593,7 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
     let smarteye = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-smarteye-source-bound",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.runAccess.runner,
           cards: [
@@ -4321,8 +4328,13 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     moveCorpCardToArchives(state, "simple_economy_operation");
     putCorpIceOnServer(state, "rd", "simple_barrier_ice");
     putCorpRootInRemote(state, "simple_economy_asset");
+    const advancedAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    if (!state.cardInstances[advancedAgendaId])
+      throw new Error("Missing advanced hidden agenda fixture");
+    state.cardInstances[advancedAgendaId].advancementCounters = 5;
 
     const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
     const serialized = JSON.stringify(runnerView);
     const knownRunnerCard = runnerView.own.gripOrHq.find(
       (card) => card.definitionId === "simple_run_event",
@@ -4339,6 +4351,31 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     expect(serialized).not.toContain(
       "Wenn diese Karte gerezzt wird, erhält die Corp 3 Credits.",
     );
+    const runnerHiddenAdvancedRoot = runnerView.servers
+      .flatMap((server) => server.root)
+      .find((card) => card.advancementCounters === 5);
+    expect(runnerHiddenAdvancedRoot).toMatchObject({
+      known: false,
+      rezzed: false,
+      advancementCounters: 5,
+    });
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("title");
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("type");
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty(
+      "advancementRequirement",
+    );
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("agendaPoints");
+    expect(
+      corpView.servers
+        .flatMap((server) => server.root)
+        .find((card) => card.instanceId === advancedAgendaId),
+    ).toMatchObject({
+      known: true,
+      title: "Simple Agenda",
+      advancementCounters: 5,
+      advancementRequirement: 3,
+      agendaPoints: 2,
+    });
     expect(runnerView.opponent.handCount).toBe(state.corp.hq.length);
     expect(runnerView.opponent.deckCount).toBe(state.corp.rd.length);
     expect(runnerView.opponent.discardCount).toBe(state.corp.archives.length);
@@ -4695,7 +4732,7 @@ describe("MVP 0.94 Damage and Flatline", () => {
 });
 
 describe("O:NR v1 Limited local private test access", () => {
-  it("validates the secured O:NR harness decks against the current card registry", () => {
+  it("validates the secured O:NR harness decks against the current card registry and rules baseline", () => {
     const runnerValidation = validateDeckDefinition(ONR_V1_RUNNER_DECK, {
       expectedSide: "runner",
     });
@@ -4709,7 +4746,7 @@ describe("O:NR v1 Limited local private test access", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.94",
     );
@@ -5294,7 +5331,7 @@ describe("V1.0.5K Card Release", () => {
     });
   });
 
-  it("validates the V1.0.5K smoke decks and starts on the O:NR rules baseline", () => {
+  it("validates the V1.0.5K smoke decks and starts on the current rules baseline", () => {
     const runnerValidation = validateDeckDefinition(ONR_V1_0_5K_RUNNER_DECK, {
       expectedSide: "runner",
     });
@@ -5308,7 +5345,7 @@ describe("V1.0.5K Card Release", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.94",
     );
@@ -5776,7 +5813,7 @@ describe("V1.0.6K Card Release", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
     expect(DEMO_CARDS_BY_ID["onr_v1_203_hostile-takeover"]).toBeDefined();
   });
@@ -6168,7 +6205,7 @@ describe("V1.1.2K Card Release", () => {
     expect(runnerValidation.ok).toBe(true);
     expect(corpValidation.errors).toEqual([]);
     expect(corpValidation.ok).toBe(true);
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(DEMO_CARDS_BY_ID["onr_v1_015_codeslinger"]).toBeDefined();
     expect(DEMO_CARDS_BY_ID["onr_v1_220_tycho-extension"]).toBeDefined();
   });
@@ -10243,7 +10280,7 @@ describe("V1.6.3 Mechanikpaket C", () => {
     };
     let state = createGameAfterSetup({
       seed: "v163-antiquated-central-root-install",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: ONR_V1_6_3_RUNNER_DECK,
       corpDeck: centralRootCorpDeck,
       agendaPointsToWin: 7,
@@ -10807,7 +10844,7 @@ describe("V1.7.0 Mechanikpaket D", () => {
     };
     let uniqueState = createGameAfterSetup({
       seed: "v170-unique-runtime",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: runtimeUniqueDeck,
       corpDeck: ONR_V1_7_0_CORP_DECK,
       agendaPointsToWin: 7,
@@ -12310,7 +12347,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v181-restrictive-tax",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_8_1_RUNNER_DECK,
         corpDeck: {
           ...ONR_V1_8_1_CORP_DECK,
@@ -14893,7 +14930,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
   it("reduces ICE install costs on Chester Mix forts only", () => {
     let state = createGameAfterSetup({
       seed: "v199-chester",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: ONR_V1_9_9_RUNNER_DECK,
       corpDeck: {
         ...ONR_V1_9_9_CORP_DECK,
@@ -14934,7 +14971,7 @@ describe("V1.9.9 Mechanikpaket R", () => {
   it("keeps Chester Mix install-cost quotes server-scoped and stale-safe", () => {
     let state = createGameAfterSetup({
       seed: "p310-chester-scope",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: ONR_V1_9_9_RUNNER_DECK,
       corpDeck: {
         ...ONR_V1_9_9_CORP_DECK,
@@ -16203,7 +16240,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1919-olivia-rez-cost",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
@@ -16338,7 +16375,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1919-olivia-normal-rez-still-payable",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
@@ -16411,7 +16448,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     let state = apply(
       createGameAfterSetup({
         seed: "v1919-olivia-quote-no-mutation",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
@@ -17555,7 +17592,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1920-loan-install-credit",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
@@ -17618,7 +17655,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-rabbit-trace",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck,
         corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
         agendaPointsToWin: 7,
@@ -17677,7 +17714,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-artemis-recurring",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_artemis_runner",
@@ -17971,7 +18008,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-city-surveillance-draw-tax",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
         agendaPointsToWin: 7,
@@ -18155,7 +18192,7 @@ describe("V1.9.21 Deterministic Random WIP", () => {
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed,
-          baseline: MVP_0_99_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           corpDeck: {
             ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -19328,7 +19365,7 @@ describe("MVP 0.95 Resources and tag interaction", () => {
         sourceDefinition(state, action) === "v095_safehouse_resource",
     );
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.95.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.runner.credits).toBe(4);
     expect(
       state.runner.rig.resources.map(
@@ -19719,7 +19756,7 @@ describe("MVP 0.96 Trace, Link and Bidding", () => {
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.96.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.kind).toBe("bid_amount");
     expect(state.trace).toMatchObject({
@@ -20991,7 +21028,7 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1915-dupre-breaker",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.runAccess.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.runAccess.corp,
@@ -23202,7 +23239,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-edited-shipping-manifests",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_7_1_RUNNER_DECK,
         corpDeck: ONR_V1_7_1_CORP_DECK,
         agendaPointsToWin: 7,
@@ -23298,7 +23335,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     let state = apply(
       createGameAfterSetup({
         seed: "spotcheck-skalderviken",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_6_2_RUNNER_DECK,
         corpDeck: ONR_V1_6_2_CORP_DECK,
         agendaPointsToWin: 7,
@@ -23724,7 +23761,7 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
     let nagaState = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-data-naga",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...ONR_V1_9_2_RUNNER_DECK,
           id: "spotcheck_data_naga_runner",
@@ -26456,7 +26493,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-zetatech-software-installer-recurring-program-install",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_zetatech_software_installer_recurring",
@@ -26559,7 +26596,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-zetatech-overlay-install",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "onr_v1_runner_v1922_zetatech_overlay",
@@ -26654,7 +26691,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-false-echo-netspace-inverter",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_false_echo_netspace_runner",
@@ -26824,7 +26861,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-roving-submarine-run-gate",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
           id: "spotcheck_roving_submarine_corp",
@@ -26890,7 +26927,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-speed-trap-rez-interrupt",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_speed_trap_runner",
@@ -26967,7 +27004,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-speed-trap-pass",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_speed_trap_pass_runner",
@@ -27030,7 +27067,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-startup-immolator-trash-ice",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_startup_immolator_runner",
@@ -27138,7 +27175,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-microtech-backup-drive",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_microtech_backup_runner",
@@ -27388,7 +27425,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-shield-prevention",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.damagePrevention.runner,
           id: "onr_v1_runner_v1922_shield_prevention",
@@ -29205,7 +29242,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "v1922-viral-15-program-trash",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -30869,7 +30906,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "p316-crystal-pile-driver",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: "p316_crystal_pile_driver_runner",
           name: "P3.16 Crystal Pile Driver Runner",
@@ -31297,7 +31334,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 1);
   });
 
-  it("uses The Short Circuit as a trash-on-use private stack tutor", () => {
+  it("uses The Short Circuit as a repeatable paid private stack tutor", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-short-circuit"));
     state.runner.credits = 20;
     moveRunnerCardToGrip(state, "onr_v1_177_the-short-circuit");
@@ -31314,6 +31351,15 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         "onr_v1_177_the-short-circuit",
     );
     expect(shortCircuitId).toBeDefined();
+    const creditsBeforeAbility = state.runner.credits;
+    const shortCircuitAction = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "gain_credit" &&
+        action.payload?.v1911HiddenZoneAbility ===
+          "search_stack_program_to_grip" &&
+        action.source === shortCircuitId,
+    );
+    expect(shortCircuitAction?.costs).toEqual([{ clicks: 1, credits: 1 }]);
     state = apply(
       state,
       "runner",
@@ -31323,6 +31369,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
           "search_stack_program_to_grip" &&
         sourceDefinition(state, action) === "onr_v1_177_the-short-circuit",
     );
+    expect(state.runner.credits).toBe(creditsBeforeAbility - 1);
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
       (option) => option.value === targetProgramId,
@@ -31330,12 +31377,19 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.grip).toContain(targetProgramId);
-    if (shortCircuitId) expect(state.runner.heap).toContain(shortCircuitId);
+    if (shortCircuitId) {
+      expect(state.runner.rig.resources).toContain(shortCircuitId);
+      expect(state.runner.heap).not.toContain(shortCircuitId);
+    }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneAction: "v1911_short_circuit_search",
+      sourceDefinitionId: "onr_v1_177_the-short-circuit",
       cardDefinitionId: "simple_decoder",
-      trashedCardDefinitionId: "onr_v1_177_the-short-circuit",
+      publicRevealDefinitionId: "simple_decoder",
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "trashOnUse",
+    );
   });
 
   it("enforces Bodyweight Data Creche install cost, MU, deck replacement and bonus run", () => {
@@ -31689,17 +31743,17 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
 });
 
 describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
-  it("creates V0.97 games with explicit demo decks and keeps old run behavior gated", () => {
+  it("creates V0.97 games with explicit demo decks on the current baseline and keeps default runs on the current baseline", () => {
     const state = createGameAfterSetup({
       seed: "v097-baseline",
       runnerDeckId: "demo_runner_097",
       corpDeckId: "demo_corp_097",
     });
-    const legacy = toRunnerTurn(
-      createGameAfterSetup({ seed: "v097-legacy-gate" }),
+    const defaultRun = toRunnerTurn(
+      createGameAfterSetup({ seed: "v097-current-default-gate" }),
     );
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.97.0");
+    expectCurrentRulesBaseline(state);
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.97",
     );
@@ -31710,18 +31764,16 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
       ),
     ).toBe(true);
 
-    let oldRun = legacy;
-    oldRun = apply(
-      oldRun,
+    expectCurrentRulesBaseline(defaultRun);
+    let currentRun = defaultRun;
+    currentRun = apply(
+      currentRun,
       "runner",
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "rd",
     );
-    expect(oldRun.timingPoint).toBe("access.resolve_card");
-    expect(oldRun.run?.breach).toBeUndefined();
-    expect(
-      getLegalActions(oldRun, "runner").map((action) => action.type),
-    ).not.toContain("jack_out");
+    expect(getLegalActions(currentRun, "runner").map((action) => action.type)).toContain("access_card");
+    expect(currentRun.timingPoint).toBe("access.resolve_card");
   });
 
   it("offers a public jack-out window after passing ICE", () => {
@@ -32159,7 +32211,7 @@ describe("MVP 0.98a Identity and modifiers", () => {
     const second = v098IdentityGame("v098-identity-setup");
     const legacy = createGameAfterSetup({ seed: "v098-legacy-identity" });
 
-    expect(first.baseline.engineSchemaVersion).toBe("0.98.0");
+    expect(first.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(first.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.98",
     );
@@ -32177,7 +32229,7 @@ describe("MVP 0.98a Identity and modifiers", () => {
     expect(first.randomDrawRecords).toEqual(second.randomDrawRecords);
     expect(validateGameState(first).ok).toBe(true);
 
-    expect(legacy.baseline.engineSchemaVersion).toBe("0.1.0");
+    expect(legacy.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(legacy.runner.credits).toBe(5);
     expect(legacy.corp.credits).toBe(5);
     expect(legacy.runner.memoryLimit).toBe(4);
@@ -33032,7 +33084,9 @@ describe("MVP 0.4 controlled card pool and tags", () => {
     });
 
     expect(legacy.agendaPointsToWin).toBe(7);
+    expect(legacy.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(expanded.agendaPointsToWin).toBe(7);
+    expect(expanded.baseline.engineSchemaVersion).toBe("0.99.0");
     expect(
       Object.values(expanded.cardInstances).some(
         (card) => card.definitionId === "simple_setup_hardware",
@@ -33214,15 +33268,15 @@ describe("MVP 0.4 controlled card pool and tags", () => {
 });
 
 describe("MVP 0.8 playable starter slice", () => {
-  it("creates V0.8 games with explicit starter decks and baseline", () => {
+  it("creates V0.8 starter decks with current rules baseline and legacy metadata", () => {
     const state = createGameAfterSetup({
       seed: "v08-starter",
       runnerDeckId: "demo_runner_008",
       corpDeckId: "demo_corp_008",
     });
 
-    expect(state.baseline.engineSchemaVersion).toBe("0.8.0");
-    expect(state.baseline.cardImplementationVersion).toBe("0.8.0");
+    expect(state.baseline.engineSchemaVersion).toBe("0.99.0");
+    expect(state.baseline.cardImplementationVersion).toBe("0.99.0");
     expect(state.agendaPointsToWin).toBe(7);
     expect(state.deckMetadata?.runner.cardPoolSnapshotId).toBe(
       "card-snapshot-0.8",
@@ -35679,7 +35733,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     let access = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-shattered-remains",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.agendaScoring.runner,
           cards: [
@@ -35889,7 +35943,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     let wallState = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-replicator-wall-negative",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: MECHANIC_SMOKE_DECKS.traceTags.runner,
       corpDeck: ONR_V1_0_6K_CORP_DECK,
       agendaPointsToWin: 7,
@@ -35912,7 +35966,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     let state = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-scatter-shot",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck,
       corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
       agendaPointsToWin: 7,
@@ -35950,7 +36004,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     let assetState = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-scatter-asset-negative",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck,
       corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
       agendaPointsToWin: 7,
@@ -35978,7 +36032,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     let state = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-poltergeist-node-trash",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck,
       corpDeck: {
         ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
@@ -36035,7 +36089,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
 
     let upgradeState = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-poltergeist-upgrade-negative",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck,
       corpDeck: {
         ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
@@ -36088,7 +36142,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     let state = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-pk-trace-link",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck,
       corpDeck: {
         ...MECHANIC_SMOKE_DECKS.traceTags.corp,
@@ -36265,7 +36319,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let corpState = apply(
       createGameAfterSetup({
         seed: "p37-corp-turn-start-economy",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -36360,7 +36414,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let invalidSourceState = apply(
       createGameAfterSetup({
         seed: "p37-corp-turn-start-invalid",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         corpDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -36400,7 +36454,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "p37-runner-turn-start",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           cards: [
@@ -36519,7 +36573,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
   it("applies Data Darts damage and next-ICE no-break only to the next encounter", () => {
     let state = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-data-darts-next-ice",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: {
         ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
         cards: [
@@ -36607,7 +36661,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     };
     let offsite = apply(createGameAfterSetup({
       seed: "spotcheck-offsite-empty",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
       corpDeck: offsiteCorpDeck,
       agendaPointsToWin: 7,
@@ -36688,7 +36742,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-vewy-vewy-quiet",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.programSubtypeHosting.runner,
         corpDeck: MECHANIC_SMOKE_DECKS.programSubtypeHosting.corp,
         agendaPointsToWin: 7,
@@ -36724,7 +36778,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: `spotcheck-${definitionId}`,
-          baseline: MVP_0_99_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
           corpDeck: {
             ...MECHANIC_SMOKE_DECKS.damagePrevention.corp,
@@ -36866,7 +36920,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-microtech-trode-set",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: microtechRunnerDeck,
         corpDeck: MECHANIC_SMOKE_DECKS.damagePrevention.corp,
         agendaPointsToWin: 7,
@@ -36896,7 +36950,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let damageState = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-microtech-ap-reduction",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.traceTags.runner,
         corpDeck: MECHANIC_SMOKE_DECKS.damagePrevention.corp,
         agendaPointsToWin: 7,
@@ -37167,7 +37221,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-singapore-city-grid",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
         corpDeck: singaporeCorpDeck,
         agendaPointsToWin: 7,
@@ -37652,7 +37706,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-corolla-speed-chip",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_corolla_runner",
@@ -37739,7 +37793,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     let decoderState = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-corolla-non-killer-negative",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
           id: "spotcheck_corolla_decoder_runner",
@@ -38209,7 +38263,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: `spotcheck-${definitionId}`,
-          baseline: MVP_0_99_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           runnerDeck,
           corpDeck,
           agendaPointsToWin: 7,
@@ -38291,7 +38345,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
     let state = apply(
       createGameAfterSetup({
         seed: "spotcheck-operation-economy-results",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_0_6K_RUNNER_DECK,
         corpDeck: ONR_V1_0_6K_CORP_DECK,
         agendaPointsToWin: 7,
@@ -38621,7 +38675,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE Trace/Barriers hardening", (
       let state = toRunnerTurn(
         createGameAfterSetup({
           seed: `spotcheck-${definitionId}-trace-barrier`,
-          baseline: MVP_0_99_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           runnerDeck,
           corpDeck,
           agendaPointsToWin: 7,
@@ -38904,7 +38958,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     let cowboy = apply(
       createGameAfterSetup({
         seed: "spotcheck-cowboy-source",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           ...MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
           id: "spotcheck_cowboy_runner",
@@ -38982,7 +39036,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       let state = apply(
         createGameAfterSetup({
           seed: `spotcheck-${definitionId}`,
-          baseline: MVP_0_99_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
           corpDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
           agendaPointsToWin: 7,
@@ -40697,7 +40751,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     const state = toRunnerTurn(
       createGameAfterSetup({
         seed,
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: `spotcheck_runner_prevention_tools_${seed}`,
           name: "Spotcheck Runner Prevention Tools",
@@ -41087,7 +41141,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-pile-driver-multi-break",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: "spotcheck_pile_driver_runner",
           name: "Spotcheck Pile Driver Runner",
@@ -41199,7 +41253,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     let state = apply(
       createGameAfterSetup({
         seed: "spotcheck-full-body-conversion",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: "spotcheck_full_body_runner",
           name: "Spotcheck Full Body Runner",
@@ -41289,7 +41343,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
     let preventAll = apply(
       createGameAfterSetup({
         seed: "spotcheck-full-body-conversion-prevent-all",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: "spotcheck_full_body_runner_all",
           name: "Spotcheck Full Body Runner All",
@@ -41351,7 +41405,7 @@ describe("Originalset Spotcheck 2026-05-16 Trace Link Post-Bid Resolvers", () =>
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "spotcheck-trace-post-bid-link",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: "spotcheck_trace_post_bid_runner",
           name: "Spotcheck Trace Post-Bid Runner",
@@ -41539,7 +41593,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     const state = toRunnerTurn(
       createGameAfterSetup({
         seed,
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: {
           id: `spotcheck_runner_resource_contacts_${seed}`,
           name: "Spotcheck Runner Resource Contacts",

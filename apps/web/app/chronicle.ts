@@ -21,6 +21,7 @@ export type ChronicleContext = {
   cardDetailLines?: string[];
   agendaPoints?: number | null;
   turnNumber?: number | null;
+  actionUse?: ChronicleActionUse | null;
 };
 
 export type ChronicleItem = {
@@ -82,7 +83,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const agendaPoints = numberValue(payload.agendaPoints) ?? context.agendaPoints;
   const turnNumber = positiveIntegerValue(context.turnNumber);
   const turnChip = turnLabel(actor, turnNumber);
-  const actionUse = actionUseFromPayload(payload);
+  const actionUse = context.actionUse ?? actionUseFromPayload(payload);
   const label = stringValue(payload.label);
   const explicitCardTitle = context.cardTitle ?? stringValue(payload.title);
   const labelCardTitle = extractCardTitleFromLabel(actionType, label, actor);
@@ -358,6 +359,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "v1911_short_circuit_search") {
+        const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
+        const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "The Short Circuit";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title = phrase(subject, `${source} genutzt, ${programTitle} der Korp gezeigt und in die Hand genommen`);
+        description = payload.shuffled === true ? "Der Stack wurde danach gemischt." : undefined;
+        chips.push(source, "Stack", "Vorgezeigt", "Hand", ...(payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       if (hiddenZoneAction === "self_modifying_code_install_program") {
         const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
         const installed = payload.installed === true || searchDestination === "runner_rig";
@@ -503,6 +516,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `${cardTitle ?? "eine gescorte Agenda"} genutzt`);
         chips.push("Agenda-Aktion");
+        break;
+      }
+      if (hiddenZoneAction === "v1911_short_circuit_search") {
+        const source = titleForDefinitionId(sourceDefinitionId) ?? cardTitle ?? "The Short Circuit";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, `${source} genutzt und eine Stack-Suche geöffnet`);
+        chips.push(source, "Stack-Suche");
         break;
       }
       if (
@@ -1046,6 +1069,35 @@ export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<
   }
 
   return numbers;
+}
+
+export function chronicleActionUseByEventId(events: PublicGameEvent[]): Record<string, ChronicleActionUse> {
+  const spentBySide: Partial<Record<Side, number>> = {};
+  const result: Record<string, ChronicleActionUse> = {};
+
+  for (const event of events) {
+    const payload = event.publicPayload ?? {};
+    const actionType = stringValue(payload.actionType) ?? event.type;
+    const actor = sideValue(payload.actor);
+    if (!actor) continue;
+
+    const clicks = positiveIntegerValue(payload.actionCostClicks);
+    if (clicks !== undefined) {
+      const runningStart = (spentBySide[actor] ?? 0) + 1;
+      const payloadStart = positiveIntegerValue(payload.turnActionOrdinalStart);
+      const start = Math.max(runningStart, payloadStart ?? 0);
+      const payloadEnd = positiveIntegerValue(payload.turnActionOrdinalEnd);
+      const end = Math.max(start + clicks - 1, payloadEnd ?? 0);
+      const label = start === end ? String(start) : `${start}-${end}`;
+      const title = start === end ? `${start}. Aktion in diesem Zug` : `Aktionen ${start} bis ${end} in diesem Zug`;
+      result[event.eventId] = { label, title, clicks, start, end };
+      spentBySide[actor] = end;
+    }
+
+    if (actionType === "end_turn") spentBySide[actor] = 0;
+  }
+
+  return result;
 }
 
 function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffect, index: number, side: Side): ChronicleItem {

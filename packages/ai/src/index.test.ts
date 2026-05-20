@@ -94,7 +94,7 @@ import type {
   Side,
   VisibleCard,
 } from "@netgrid/shared";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, MVP_0_99_BASELINE, sanitizeAiDecisionDebug } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, sanitizeAiDecisionDebug } from "@netgrid/shared";
 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {
@@ -2363,10 +2363,10 @@ describe("MVP 0.3 Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });
 
-  it("does not repeat a stale legacy Archives access on the same known operation", () => {
+  it("does not take a current-baseline Archives run when visible Archives cards are low value", () => {
     const requiredCorpCards = [
       "onr_v1_281_accounts-receivable",
-      "onr_v1_208_on-call-solo-team",
+      "onr_v1_282_annual-reviews",
     ];
     const corpDeckCards = [
       ...ONR_V1_1_2K_CORP_DECK.cards,
@@ -2381,9 +2381,13 @@ describe("MVP 0.3 Runner AI", () => {
         seed: "ai-runner-stale-legacy-archives",
         corpDeck: { ...ONR_V1_1_2K_CORP_DECK, cards: corpDeckCards },
         agendaPointsToWin: 7,
+        baseline: CURRENT_RULES_BASELINE,
       }),
     );
-    expect(state.baseline.engineSchemaVersion).toBe("0.94.0");
+    expect(state.baseline).toStrictEqual(CURRENT_RULES_BASELINE);
+    expect(state.baseline.engineSchemaVersion).toBe(
+      CURRENT_RULES_BASELINE.engineSchemaVersion,
+    );
     const accountsId = moveCorpCardToArchives(
       state,
       "onr_v1_281_accounts-receivable",
@@ -2391,19 +2395,10 @@ describe("MVP 0.3 Runner AI", () => {
     );
     const hiddenId = moveCorpCardToArchives(
       state,
-      "onr_v1_208_on-call-solo-team",
+      "onr_v1_282_annual-reviews",
       true,
     );
     keepOnlyCorpArchivesCards(state, [accountsId, hiddenId]);
-
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "archives",
-    );
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.run).toBeUndefined();
 
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "hard",
@@ -2419,7 +2414,7 @@ describe("MVP 0.3 Runner AI", () => {
     expect(archivesRun).toBeDefined();
     expect(gain).toBeDefined();
     if (!archivesRun || !gain)
-      throw new Error("Missing legacy Archives fixture actions");
+      throw new Error("Missing current Archives fixture actions");
 
     const safeProbeCandidate = generateRunnerPlanCandidates(input).find(
       (candidate) => candidate.kind === "safe_probe_run",
@@ -2432,16 +2427,10 @@ describe("MVP 0.3 Runner AI", () => {
       ...input,
       legalActions: [archivesRun, gain],
     });
-    const baselineDecision = chooseRunnerBaselineAction({
-      ...input,
-      legalActions: [archivesRun, gain],
-    });
 
     expect(safeProbeScore.reasons).toContain("known_archives_access_not_fresh");
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
-    expect(baselineDecision.actionId).toBe(gain.actionId);
-    expect(baselineDecision.reasonCode).toBe("runner.economy.basic_credit");
   });
 
   it("does not pump or repeat a remote run when the visible breaker cannot break the rezzed ICE", () => {
@@ -4181,7 +4170,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
   it("loads post-V1.9.9 AI hints into Corp plan roles", () => {
     let state = createGameAfterSetup({
       seed: "ai-v1922-hints-in-plan",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: V1911_RUNNER_DECK,
       corpDeck: {
         id: "ai_v1922_hint_corp",
@@ -4260,7 +4249,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
   it("allows newly approved legacy cards in Corp strategic plan roles via legal actions", () => {
     let state = createGameAfterSetup({
       seed: "ai-v140-unsupported-card",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: ONR_V1_2_3_RUNNER_DECK,
       corpDeck: ONR_V1_2_3_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4283,10 +4272,123 @@ describe("V1.4.0 plan-based Corp AI", () => {
     ).toBe(true);
   });
 
+  it("does not play Overtime Incentives when extra actions only recover basic credits at a net loss", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-corp-overtime-basic-credit-loss",
+      baseline: CURRENT_RULES_BASELINE,
+      corpDeck: {
+        id: "ai_overtime_loss_corp",
+        name: "AI Overtime Loss Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_297_overtime-incentives", quantity: 1 },
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_barrier_ice", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 4;
+    state.corp.clicks = 1;
+    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const overtime = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_297_overtime-incentives",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(overtime).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!overtime || !basicCredit)
+      throw new Error("Missing Overtime loss fixture actions");
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [overtime, basicCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(basicCredit.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(debugText).toContain("basic_credit_followup_only:true");
+    expect(debugText).toContain("overtime_net_value:-2");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("can play Overtime Incentives when the extra actions open an immediate score window", () => {
+    let state = createGameAfterSetup({
+      seed: "ai-corp-overtime-score-window",
+      baseline: CURRENT_RULES_BASELINE,
+      corpDeck: {
+        id: "ai_overtime_score_corp",
+        name: "AI Overtime Score Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_297_overtime-incentives", quantity: 1 },
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_barrier_ice", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 6;
+    state.corp.clicks = 1;
+    moveCorpCardToHq(state, "onr_v1_297_overtime-incentives");
+    putCorpRootInRemote(state, "simple_agenda", 2);
+    const input = buildAiDecisionInput(state, "corp", {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const overtime = input.legalActions.find(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_297_overtime-incentives",
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(overtime).toBeDefined();
+    expect(advance).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    if (!overtime || !advance || !basicCredit)
+      throw new Error("Missing Overtime score-window fixture actions");
+    const decision = chooseCorpAction({
+      ...input,
+      legalActions: [overtime, advance, basicCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(overtime.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.score_next_turn");
+    expect(debugText).toContain("score_window_after_extra_actions:true");
+    expect(debugText).toContain("basic_credit_followup_only:false");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
   it("uses tag-enabling ICE pressure without hidden-info leakage", () => {
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-ice-pressure",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4331,7 +4433,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_243_fetch-4-0-1"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-unreleased-ice-pressure",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4385,7 +4487,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-positive",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4453,7 +4555,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_287_datapool-by-zetatech"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-negative",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -4482,7 +4584,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     if (!createRuntimeCardsById()["onr_v1_306_trojan-horse"]) return;
     let state = createGameAfterSetup({
       seed: "ai-corp-tag-slice-trojan-positive",
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: CORP_TAG_SLICE_RUNNER_DECK,
       corpDeck: CORP_TAG_SLICE_CORP_DECK,
       agendaPointsToWin: 7,
@@ -5044,6 +5146,203 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(access.evidence).toContain("known_remote_root_unknown_count:1");
     expect(selectedRunOnly.reasonCode).toBe("runner.plan.contest_remote");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("runs the Bartmoss remote path after a declined rez and suppresses same-turn no-access repeats", () => {
+    const runnerDeck: DeckDefinition = {
+      id: "ai_bartmoss_remote_runner",
+      name: "AI Bartmoss Remote Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_005_bartmoss-memorial-icebreaker", quantity: 1 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    };
+    const corpDeck: DeckDefinition = {
+      id: "ai_bartmoss_remote_corp",
+      name: "AI Bartmoss Remote Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "onr_v1_279_wall-of-static", quantity: 2 },
+        { id: "simple_agenda", quantity: 3 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-bartmoss-remote-declined-rez",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    moveRunnerProgramToRig(
+      state,
+      "onr_v1_005_bartmoss-memorial-icebreaker",
+    );
+    ensureRemoteServer(state, "remote_1");
+    const innerWall = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_279_wall-of-static",
+    );
+    const outerWall = putUnusedCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_279_wall-of-static",
+      new Set([innerWall]),
+    );
+    state.cardInstances[innerWall] = {
+      ...state.cardInstances[innerWall]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.cardInstances[outerWall] = {
+      ...state.cardInstances[outerWall]!,
+      faceup: false,
+      rezzed: false,
+    };
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    state.runner.credits = 3;
+    state.corp.credits = 3;
+
+    const startInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v0.9-normal",
+    });
+    const startDecision = chooseRunnerAction(startInput);
+    const startSelected = startInput.legalActions.find(
+      (action) => action.actionId === startDecision.actionId,
+    );
+
+    expect(startSelected?.type).toBe("start_run");
+    expect(startSelected?.payload?.serverId).toBe("remote_1");
+    expect(startDecision.reasonCode).toBe("runner.plan.contest_remote");
+    expect(assertAiInputIsSideSafe(startInput)).toBe(true);
+    expect(JSON.stringify(startInput)).not.toMatch(/simple_agenda/);
+    expect(JSON.stringify(startDecision.decisionDebug)).not.toMatch(
+      /simple_agenda|cardInstances|privatePayload/,
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === startSelected?.actionId,
+    );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+
+    const selectedTypes: LegalAction["type"][] = [];
+    for (let step = 0; step < 8; step += 1) {
+      const input = buildAiDecisionInput(state, "runner", {
+        difficulty: "normal",
+        profileId: "runner-ai-v0.9-normal",
+        decisionId: `ai-bartmoss-remote-declined-rez:${step}`,
+        actionNumber: step,
+      });
+      const decision = chooseRunnerAction(input);
+      const selected = input.legalActions.find(
+        (action) => action.actionId === decision.actionId,
+      );
+      expect(assertAiInputIsSideSafe(input)).toBe(true);
+      expect(JSON.stringify(input)).not.toMatch(/simple_agenda/);
+      expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+        /simple_agenda|cardInstances|privatePayload/,
+      );
+      expect(selected?.type).not.toBe("jack_out");
+      expect(selected).toBeDefined();
+      if (!selected) throw new Error("Missing Bartmoss run sequence action");
+      selectedTypes.push(selected.type);
+      if (selected.type === "access_card") break;
+      state = apply(state, "runner", (action) => action.actionId === selected.actionId);
+    }
+
+    expect(selectedTypes).toEqual([
+      "continue_run",
+      "pump_breaker",
+      "pump_breaker",
+      "break_subroutine",
+      "continue_run",
+      "continue_run",
+      "access_card",
+    ]);
+
+    const repeatRemoteRun = startInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = startInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(repeatRemoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!repeatRemoteRun || !gainCredit)
+      throw new Error("Missing Bartmoss repeat fixture actions");
+
+    const repeatedInput = {
+      ...startInput,
+      playerView: {
+        ...startInput.playerView,
+        stateVersion: startInput.playerView.stateVersion + 2,
+      },
+      eventTail: [
+        ...startInput.eventTail,
+        {
+          eventId: "ai-bartmoss-remote-run-started",
+          type: "run_started",
+          stateVersionBefore: startInput.playerView.stateVersion,
+          stateVersionAfter: startInput.playerView.stateVersion + 1,
+          stateHashAfter: "fnv1a:bartmossrun",
+          visibilityClass: "public",
+          publicPayload: {
+            actionType: "start_run",
+            serverId: "remote_1",
+          },
+        } satisfies PublicGameEvent,
+        {
+          eventId: "ai-bartmoss-remote-jack-out",
+          type: "jack_out",
+          stateVersionBefore: startInput.playerView.stateVersion + 1,
+          stateVersionAfter: startInput.playerView.stateVersion + 2,
+          stateHashAfter: "fnv1a:bartmossjack",
+          visibilityClass: "public",
+          publicPayload: {
+            actionType: "jack_out",
+            serverId: "remote_1",
+          },
+        } satisfies PublicGameEvent,
+      ],
+      legalActions: [repeatRemoteRun, gainCredit],
+    };
+    const repeatedPlanDecision = chooseRunnerAction(repeatedInput);
+    const repeatedPlanSelected = repeatedInput.legalActions.find(
+      (action) => action.actionId === repeatedPlanDecision.actionId,
+    );
+    const repeatedBaselineDecision = chooseRunnerBaselineAction(repeatedInput);
+    const repeatedBaselineSelected = repeatedInput.legalActions.find(
+      (action) => action.actionId === repeatedBaselineDecision.actionId,
+    );
+    const repeatedContestCandidate =
+      generateRunnerPlanCandidates(repeatedInput).find(
+        (candidate) => candidate.kind === "contest_remote",
+      );
+
+    expect(repeatedPlanSelected?.type).toBe("gain_credit");
+    expect(repeatedPlanDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(repeatedContestCandidate).toBeDefined();
+    if (!repeatedContestCandidate)
+      throw new Error("Missing repeated Bartmoss contest candidate");
+    expect(
+      evaluateRemoteThreat(repeatedInput, repeatedContestCandidate).reasons,
+    ).toContain(
+      "recent_remote_contest_repeated",
+    );
+    expect(repeatedBaselineSelected?.type).toBe("gain_credit");
+    expect(repeatedBaselineDecision.reasonCode).toBe(
+      "runner.economy.basic_credit",
+    );
   });
 
   it("penalizes immediate repeated remote contest", () => {
@@ -6616,7 +6915,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-hq-known-low-value-repeat",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_2_3_RUNNER_DECK,
         corpDeck: ONR_V1_2_3_CORP_DECK,
         agendaPointsToWin: 7,
@@ -6691,7 +6990,7 @@ describe("V1.4.2 belief state and opponent model", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-hq-known-hand-memory",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_2_3_RUNNER_DECK,
         corpDeck: ONR_V1_2_3_CORP_DECK,
         agendaPointsToWin: 7,
@@ -7811,7 +8110,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-v123-human-only-mit",
-        baseline: MVP_0_99_BASELINE,
+        baseline: CURRENT_RULES_BASELINE,
         runnerDeck: ONR_V1_2_3_RUNNER_DECK,
         corpDeck: ONR_V1_2_3_CORP_DECK,
         agendaPointsToWin: 7,
@@ -7851,7 +8150,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       maxActions: 140,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.4.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -7873,7 +8172,7 @@ describe("MVP 0.3 AI simulation harness", () => {
     );
 
     for (const summary of summaries) {
-      expect(summary.cardPoolVersion).toBe("0.8.0");
+      expect(summary.cardPoolVersion).toBe("0.99.0");
       expect(summary.errors).toEqual([]);
       expect(summary.replayOk).toBe(true);
       expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -7894,7 +8193,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       maxActions: 180,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.97.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -7910,7 +8209,7 @@ describe("MVP 0.3 AI simulation harness", () => {
       maxActions: 180,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.98.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.finalStateHash).toMatch(/^fnv1a:/);
@@ -7946,7 +8245,7 @@ describe("MVP 0.9 stronger AI", () => {
       maxActions: 160,
     });
 
-    expect(summary.cardPoolVersion).toBe("0.8.0");
+    expect(summary.cardPoolVersion).toBe("0.99.0");
     expect(summary.errors).toEqual([]);
     expect(summary.replayOk).toBe(true);
     expect(summary.metrics.illegalActions).toBe(0);
@@ -8320,7 +8619,7 @@ function corpActionPhaseInput(
 function installedCorpBbsEconomyInput(seed: string) {
   let state = createGameAfterSetup({
     seed,
-    baseline: MVP_0_99_BASELINE,
+    baseline: CURRENT_RULES_BASELINE,
     runnerDeck: {
       id: `installed_corp_bbs_runner_${seed}`,
       name: "Installed Corp BBS Runner",
@@ -8382,7 +8681,7 @@ function runnerShellTradersState(seed: string): GameState {
   return toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: {
         id: `ai_shell_traders_runner_${seed}`,
         name: "AI Shell Traders Runner",
@@ -8679,7 +8978,7 @@ function krashFilterEncounterState(seed: string): GameState {
   let state = toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: batchARunnerDeck(),
       corpDeck: {
         id: "ai_krash_filter_corp",
@@ -8725,7 +9024,7 @@ function krashKeeperHqEncounterState(seed: string): GameState {
   let state = toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: batchARunnerDeck(),
       corpDeck: {
         id: "ai_krash_keeper_corp",
@@ -8881,7 +9180,7 @@ function kingOfTheRoadRunnerTurn(seed: string): GameState {
   return toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: kingOfTheRoadRunnerDeck(),
       corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
       agendaPointsToWin: 7,
@@ -8897,7 +9196,7 @@ function batchARunnerTurn(seed: string): GameState {
   return toRunnerTurn(
     createGameAfterSetup({
       seed,
-      baseline: MVP_0_99_BASELINE,
+      baseline: CURRENT_RULES_BASELINE,
       runnerDeck: batchARunnerDeck(),
       corpDeck: deckDefinitionFromSnapshot("demo_corp_008_snapshot_v0_8"),
       agendaPointsToWin: 7,
@@ -9077,6 +9376,40 @@ function putCorpIceOnServer(
   definitionId: string,
 ): CardInstanceId {
   const id = findCard(state, definitionId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  expect(server).toBeDefined();
+  if (!server) throw new Error("Missing server");
+  removeEverywhere(state, id);
+  server.ice.push(id);
+  state.cardInstances[id] = {
+    ...state.cardInstances[id]!,
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: false,
+    rezzed: false,
+  };
+  return id;
+}
+
+function putUnusedCorpIceOnServer(
+  state: GameState,
+  serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+  definitionId: string,
+  excludedIds: Set<CardInstanceId> = new Set(),
+): CardInstanceId {
+  const usedServerCards = new Set(
+    state.corp.servers.flatMap((server) => [...server.ice, ...server.root]),
+  );
+  const entry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === definitionId &&
+      !usedServerCards.has(id) &&
+      !excludedIds.has(id),
+  );
+  expect(entry).toBeDefined();
+  if (!entry) throw new Error(`Missing unused ${definitionId}`);
+  const id = entry[0];
   const server = state.corp.servers.find(
     (candidate) => candidate.id === serverId,
   );

@@ -6,12 +6,7 @@ import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netgrid/engine";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
-  MVP_0_2_BASELINE,
-  MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_99_BASELINE,
-  MVP_0_8_BASELINE,
+  CURRENT_RULES_BASELINE,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -50,8 +45,6 @@ import {
   deckSetupForParticipants,
   resolveParticipantDeckSetup,
   resolveParticipantDeckPair,
-  setupUsesExpandedRules,
-  setupUsesMvp08Rules,
   type AiDeckPolicy,
   type MatchDeckSelectionInput,
   type ParticipantDeckPairInput,
@@ -296,6 +289,7 @@ export type MultiplayerStorage = {
   load(matchId: string): Promise<StoredMatch | undefined>;
   save(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
+  listOpenMatchCandidates?(): Promise<StoredMatch[]>;
   health?(): Promise<StorageHealth>;
   backup?(reason?: BackupManifest["reason"]): Promise<{ backupDir: string; manifest: BackupManifest }>;
   maintenanceSummary?(): Promise<StorageMaintenanceSummary>;
@@ -455,6 +449,17 @@ export type JoinMatchResult = {
 
 export type ReconnectResult = JoinMatchResult & {
   eventTail: PublicGameEvent[];
+};
+
+export type MaintenanceRecoveryAccessResult = {
+  matchId: string;
+  side: Side;
+  access: string;
+  displayName: string;
+  webSocketUrl: string;
+  matchStatus: MatchStatus;
+  matchVersion: number;
+  issuedAt: string;
 };
 
 export type LobbyActionResult =
@@ -675,7 +680,7 @@ export class MultiplayerService {
           mode,
           matchVersion: 1,
           seed,
-          baseline: MVP_0_2_BASELINE,
+          baseline: CURRENT_RULES_BASELINE,
           settings: {
             agendaPointsToWin: pendingAgendaPointsToWin,
             matchFormat,
@@ -1106,36 +1111,45 @@ export class MultiplayerService {
   async bootstrap(matchId: string, side: Side, sessionToken: string): Promise<SidePayload | { error: SafeErrorPayload }>;
   async bootstrap(matchId: string, side: Side, sessionToken: string, options: { allowLobby: true }): Promise<ServicePayload | { error: SafeErrorPayload }>;
   async bootstrap(matchId: string, side: Side, sessionToken: string, options?: { allowLobby?: boolean }): Promise<ServicePayload | { error: SafeErrorPayload }> {
-    const record = await this.mustLoad(matchId);
-    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
-    const session = this.authenticate(record, side, sessionToken);
-    if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-    session.lastSeenAt = this.now();
-    this.syncPlayerClock(record);
-    await this.storage.save(record);
-    if (this.shouldUseLobbyPayload(record)) {
-      const lobby = this.lobbyPayloadFor(record, side);
-      return options?.allowLobby ? lobby : ({ error: safeError("match_pending", "Das Match ist noch nicht aktiv.") } as { error: SafeErrorPayload });
-    }
-    return this.payloadFor(record, side);
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, side, sessionToken);
+      if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      session.lastSeenAt = this.now();
+      this.syncPlayerClock(record);
+      if (this.storage instanceof InMemoryMatchStorage) await this.storage.save(record);
+      if (this.shouldUseLobbyPayload(record)) {
+        const lobby = this.lobbyPayloadFor(record, side);
+        return options?.allowLobby ? lobby : ({ error: safeError("match_pending", "Das Match ist noch nicht aktiv.") } as { error: SafeErrorPayload });
+      }
+      return this.payloadFor(record, side);
+    });
   }
 
   async setConnected(matchId: string, side: Side, sessionToken: string, connected: boolean): Promise<ServicePayload | { error: SafeErrorPayload }> {
-    const record = await this.mustLoad(matchId);
-    if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
-    const session = this.authenticate(record, side, sessionToken);
-    if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
-    session.connected = connected;
-    session.lastSeenAt = this.now();
-    this.syncPlayerClock(record);
-    if (!connected && record.match.status === "countdown" && record.startLobby) {
-      this.cancelCountdownFor(record, side);
-    }
-    record.match.matchVersion += 1;
-    record.match.updatedAt = this.now();
-    await this.storage.save(record);
-    if (this.shouldUseLobbyPayload(record)) return this.lobbyPayloadFor(record, side);
-    return this.payloadFor(record, side);
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, side, sessionToken);
+      if (!session) return { error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      session.connected = connected;
+      session.lastSeenAt = this.now();
+      this.syncPlayerClock(record);
+      let persistentLifecycleChange = false;
+      if (!connected && record.match.status === "countdown" && record.startLobby) {
+        this.cancelCountdownFor(record, side);
+        persistentLifecycleChange = true;
+      }
+      const persistTransientConnectionState = this.storage instanceof InMemoryMatchStorage;
+      if (persistentLifecycleChange || persistTransientConnectionState) {
+        record.match.matchVersion += 1;
+        record.match.updatedAt = this.now();
+        await this.storage.save(record);
+      }
+      if (this.shouldUseLobbyPayload(record)) return this.lobbyPayloadFor(record, side);
+      return this.payloadFor(record, side);
+    });
   }
 
   async setLobbyReady(input: { matchId: string; side: Side; sessionToken: string; ready: boolean }): Promise<LobbyActionResult> {
@@ -1604,8 +1618,7 @@ export class MultiplayerService {
   }
 
   async listOpenMatches(): Promise<OpenMatchListEntry[]> {
-    if (!this.storage.list) return [];
-    const records = await this.storage.list();
+    const records = this.storage.listOpenMatchCandidates ? await this.storage.listOpenMatchCandidates() : this.storage.list ? await this.storage.list() : [];
     const nowIso = this.now();
     const nowMs = Date.parse(nowIso);
     return records
@@ -1731,6 +1744,47 @@ export class MultiplayerService {
 
   async storageMaintenanceSetRetentionProtection(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined> {
     return this.storage.maintenanceSetRetentionProtection?.(matchId, protectedValue);
+  }
+
+  async issueMaintenanceRecoveryAccess(matchId: string, input: { side: Side; displayName?: string }): Promise<MaintenanceRecoveryAccessResult | { error: SafeErrorPayload }> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return { error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      if (isTerminalStatus(record.match.status)) return { error: safeError("match_terminal", "Für abgeschlossene Matches wird kein Fortsetzungszugang erstellt.") };
+      const session = record.sessions.find((candidate) => candidate.side === input.side);
+      if (!session) return { error: safeError("side_unavailable", "Für diese Seite gibt es keine wiederherstellbare Spielersession.") };
+
+      const now = this.now();
+      const access = generateToken();
+      this.revokeTokenByHash(record, "session", session.sessionTokenHash, now);
+      this.revokeTokenByHash(record, "reconnect", session.reconnectTokenHash, now);
+      record.sessions = record.sessions.map((candidate) =>
+        candidate.sessionId === session.sessionId
+          ? {
+              ...candidate,
+              displayName: input.displayName?.trim() || candidate.displayName,
+              reconnectTokenHash: this.hashToken(access),
+              connected: false,
+              lastSeenAt: now
+            }
+          : candidate
+      );
+      record.tokens.push(this.tokenRecord(matchId, input.side, "reconnect", access, now));
+      record.match.matchVersion += 1;
+      record.match.updatedAt = now;
+      await this.storage.save(record);
+
+      return {
+        matchId,
+        side: input.side,
+        access,
+        displayName: input.displayName?.trim() || session.displayName,
+        webSocketUrl: this.webSocketUrl(),
+        matchStatus: record.match.status,
+        matchVersion: record.match.matchVersion,
+        issuedAt: now
+      };
+    });
   }
 
   async setMatchRetentionProtection(input: { matchId: string; side: Side; sessionToken: string; protected: boolean }): Promise<{ ok: true; payload: LobbyPayload | SidePayload } | { ok: false; error: SafeErrorPayload }> {
@@ -3077,25 +3131,8 @@ function deterministicHostSide(seed: string): Side {
   return value % 2 === 0 ? "runner" : "corp";
 }
 
-function baselineForMode(mode: MatchMode, deckSetup: ResolvedDeckSetup): RulesBaseline {
-  if (setupUsesPrivateLocalOnrRules(deckSetup)) return MVP_0_99_BASELINE;
-  if (setupUsesMvp094Rules(deckSetup)) return MVP_0_94_BASELINE;
-  if (setupUsesMvp08Rules(deckSetup)) return MVP_0_8_BASELINE;
-  if (setupUsesExpandedRules(deckSetup)) return MVP_0_4_BASELINE;
-  return mode === "human_vs_human" ? MVP_0_2_BASELINE : MVP_0_3_BASELINE;
-}
-
-function setupUsesPrivateLocalOnrRules(setup: ResolvedDeckSetup): boolean {
-  return [setup.runnerSnapshot, setup.corpSnapshot].some(
-    (snapshot) => snapshot.cardPoolVersion === "private-local-onr-v1" || snapshot.publicMetadata.cardPoolVersion === "private-local-onr-v1"
-  );
-}
-
-function setupUsesMvp094Rules(setup: ResolvedDeckSetup): boolean {
-  return (
-    setup.runnerSnapshot.rulesBaselineId === "rules-baseline-mvp-0.94" ||
-    setup.corpSnapshot.rulesBaselineId === "rules-baseline-mvp-0.94"
-  );
+function baselineForMode(_mode: MatchMode, _deckSetup: ResolvedDeckSetup): RulesBaseline {
+  return CURRENT_RULES_BASELINE;
 }
 
 function controllersForMode(

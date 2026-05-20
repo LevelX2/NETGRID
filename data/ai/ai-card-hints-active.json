@@ -5428,7 +5428,7 @@
         "resource",
         "hidden_zone_tool",
         "stack_search",
-        "trash_on_use"
+        "repeatable_resource_ability"
       ],
       "planRoles": [
         "build_rig",
@@ -5439,7 +5439,6 @@
         "search_stack",
         "reveal",
         "shuffle",
-        "trash_on_use",
         "legal_action_only"
       ],
       "valueHints": {

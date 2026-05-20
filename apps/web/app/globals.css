@@ -89,6 +89,10 @@
   --chronicle-hidden: #8c98a3;
   --cue: #f4d56c;
   --cue-soft: #15231f;
+  --board-corp-zone-bg: color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 86%);
+  --board-corp-lane-bg: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 90%);
+  --board-runner-zone-bg: color-mix(in srgb, var(--chronicle-run), var(--section-bg) 86%);
+  --board-runner-lane-bg: color-mix(in srgb, var(--chronicle-run), var(--lane-bg) 90%);
 }
 
 * {
@@ -3938,9 +3942,11 @@ select {
   min-height: 0;
   box-sizing: border-box;
   padding: 6px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 66%);
   border-radius: 8px;
-  background: var(--section-bg);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    var(--board-corp-zone-bg);
 }
 
 .serverLayout {
@@ -4066,20 +4072,10 @@ select {
   flex: 1 1 680px;
   min-width: 0;
   max-width: min(74vw, 820px);
-}
-
-.corpHqHandHead {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 4px 0 3px;
-}
-
-.corpHqHandHead span {
-  text-transform: uppercase;
+  padding: 6px;
+  border: 1px solid color-mix(in srgb, var(--corp-status-accent), var(--line) 72%);
+  border-radius: 6px;
+  background: var(--board-corp-lane-bg);
 }
 
 .fixedZoneCards.corpHqHandCards {
@@ -4377,6 +4373,7 @@ select {
   padding: 6px;
   border: 1px dashed var(--lane-border);
   border-radius: 6px;
+  background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 92%);
   overflow: visible;
 }
 
@@ -4405,16 +4402,6 @@ select {
 .iceLane .iceCardSlot.actionMenuOpen,
 .iceLane .iceCardSlot.runPositionActiveSlot {
   z-index: 38;
-}
-
-.laneLabel {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 12px;
-  margin: 4px 0 3px;
 }
 
 .pairedServerLanes {
@@ -4459,27 +4446,27 @@ select {
   align-items: flex-start;
   gap: 10px;
   width: fit-content;
-  max-width: 100%;
+  max-width: none;
 }
 
 .archivesPile {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
+  width: fit-content;
+  max-width: none;
   min-width: 0;
 }
 
 .archivesPileBody {
+  width: fit-content;
+  max-width: none;
   min-width: 0;
 }
 
 .archiveEmptyPlaceholder {
-  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
   display: grid;
   place-items: center;
-  min-height: calc(151px * var(--archive-card-scale, 1));
-  width: calc(108px * var(--archive-card-scale, 1));
-  max-width: calc(108px * var(--archive-card-scale, 1));
 }
 
 .archivesPileHeader {
@@ -4512,27 +4499,37 @@ select {
 }
 
 .archivesOverlapRow {
-  display: flex;
+  --archive-card-width: calc(108px * var(--archive-card-scale, 1));
+  --archive-card-height: calc(151px * var(--archive-card-scale, 1));
+  --archive-card-step: calc(50px * var(--archive-card-scale, 1));
+  --archive-stack-width: calc(var(--archive-card-width) + (var(--archive-card-step) * 5));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--archive-card-step), var(--archive-card-step)));
+  grid-auto-rows: var(--archive-card-height);
+  gap: calc(8px * var(--archive-card-scale, 1)) 0;
   align-items: flex-start;
-  min-height: calc(151px * var(--archive-card-scale, 1));
-  padding-right: 6px;
-  overflow-x: auto;
+  width: var(--archive-stack-width);
+  min-width: var(--archive-card-width);
+  max-width: none;
+  min-height: var(--archive-card-height);
+  padding-right: calc(var(--archive-card-width) - var(--archive-card-step));
+  overflow-x: visible;
   overflow-y: visible;
 }
 
 .archivesOverlapRow .cardSlot {
-  flex: 0 0 calc(108px * var(--archive-card-scale, 1));
-  width: calc(108px * var(--archive-card-scale, 1));
-  max-width: calc(108px * var(--archive-card-scale, 1));
+  width: var(--archive-card-width);
+  max-width: var(--archive-card-width);
   z-index: 1;
 }
 
 .archivesOverlapRow .cardSlot + .cardSlot {
-  margin-left: calc(-77px * var(--archive-card-scale, 1));
+  margin-left: 0;
 }
 
 .archivesOverlapRow .card {
-  height: calc(151px * var(--archive-card-scale, 1));
+  height: var(--archive-card-height);
 }
 
 .archivesOverlapRow .cardSlot:hover,
@@ -4872,6 +4869,10 @@ select {
   font-size: 11px;
   font-weight: 700;
   text-align: center;
+}
+
+.sideZoneFrame.runner .archivesPileEmpty {
+  background: var(--board-runner-lane-bg);
 }
 
 @media (max-width: 720px) {
@@ -5767,6 +5768,33 @@ select {
   pointer-events: none;
 }
 
+.ablativeCounterBadge {
+  position: absolute;
+  right: 6px;
+  top: 6px;
+  z-index: 46;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  max-width: calc(100% - 12px);
+  min-height: 20px;
+  padding: 2px 7px;
+  border: 1px solid rgb(155 221 190 / 0.82);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 30% 22%, rgb(255 255 255 / 0.32), transparent 32%),
+    linear-gradient(135deg, rgb(29 91 67 / 0.95), rgb(17 42 39 / 0.96));
+  color: #c9ffe6;
+  box-shadow:
+    0 4px 9px rgb(0 0 0 / 0.34),
+    inset 0 1px 1px rgb(214 255 233 / 0.24);
+  font-size: 10px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 0.55);
+  pointer-events: none;
+}
+
 .scoreCardStateBadges {
   position: absolute;
   left: 6px;
@@ -6559,14 +6587,10 @@ select {
   z-index: 0;
 }
 
-.gameOverPanel.withMotifBackground::before {
+.gameOverPanel.withMotifHero::before {
   background:
-    linear-gradient(90deg, rgb(18 25 30 / 0.92) 0%, rgb(18 25 30 / 0.8) 44%, rgb(18 25 30 / 0.52) 100%),
-    linear-gradient(180deg, rgb(18 25 30 / 0.22), rgb(18 25 30 / 0.88)),
-    var(--result-panel-bg);
-  background-position: center;
-  background-size: cover;
-  opacity: 0.68;
+    linear-gradient(135deg, rgb(66 200 163 / 0.12), transparent 38%),
+    linear-gradient(315deg, rgb(240 106 91 / 0.11), transparent 42%);
 }
 
 .gameOverPanel > * {
@@ -6581,10 +6605,10 @@ select {
   gap: 18px;
 }
 
-.gameOverHero.backgroundOnly {
-  grid-template-columns: minmax(0, 1fr);
-  min-height: 150px;
-  align-items: end;
+.gameOverHero.withVisualMotif {
+  grid-template-columns: minmax(190px, 0.78fr) minmax(360px, 1.55fr);
+  align-items: stretch;
+  min-height: 186px;
 }
 
 .gameOverHeroCopy {
@@ -6604,6 +6628,7 @@ select {
 }
 
 .resultWinnerMotif {
+  position: relative;
   display: grid;
   justify-items: center;
   gap: 8px;
@@ -6615,6 +6640,28 @@ select {
   color: var(--muted);
   font-size: 12px;
   font-weight: 800;
+}
+
+.gameOverHero.withVisualMotif .resultWinnerMotif {
+  align-self: stretch;
+  min-height: 186px;
+  padding: 0;
+  border-color: rgb(255 255 255 / 0.22);
+  background: rgb(7 12 16 / 0.7);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.28), 0 14px 38px rgb(0 0 0 / 0.26);
+}
+
+.gameOverHero.withVisualMotif .resultWinnerMotif > span {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
 }
 
 .resultMotifFrame {
@@ -6629,6 +6676,16 @@ select {
     linear-gradient(180deg, rgb(255 255 255 / 0.07) 1px, transparent 1px),
     rgb(11 16 21 / 0.72);
   background-size: 18px 18px;
+}
+
+.gameOverHero.withVisualMotif .resultMotifFrame {
+  width: 100%;
+  height: 100%;
+  min-height: 186px;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: 8px;
+  background: rgb(7 12 16 / 0.88);
 }
 
 .resultWinnerMotif.bitmap .resultMotifFrame {
@@ -6646,6 +6703,14 @@ select {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.resultWinnerMotif.runner .resultMotifFrame img {
+  object-position: 74% center;
+}
+
+.resultWinnerMotif.corp .resultMotifFrame img {
+  object-position: 68% center;
 }
 
 .resultMotifCore,
@@ -6761,6 +6826,11 @@ select {
 
 .resultWinnerMotif.draw .resultMotifTrack.two {
   transform: rotate(156deg);
+}
+
+.resultWinnerMotif.bitmap .resultMotifFrame::before,
+.resultWinnerMotif.bitmap .resultMotifFrame::after {
+  content: none;
 }
 
 .gameOverStats {
@@ -7005,15 +7075,23 @@ select {
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .zoneBoardSection > .sideZoneFrame.corp {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    var(--board-corp-zone-bg);
 }
 
 .runnerGripHeapLayout .sideZoneFrame.corp {
   border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 68%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 90%), color-mix(in srgb, var(--corp-status-accent), transparent 90%)),
+    var(--board-corp-zone-bg);
 }
 
 .runnerGripZone {
@@ -7087,25 +7165,32 @@ select {
 }
 
 .runnerHeapOverlapRow {
-  display: flex;
+  --zone-stack-card-width: calc(108px * var(--zone-card-scale, 1));
+  --zone-stack-card-height: calc(151px * var(--zone-card-scale, 1));
+  --zone-stack-card-step: calc(50px * var(--zone-card-scale, 1));
+  --zone-stack-width: calc(var(--zone-stack-card-width) + (var(--zone-stack-card-step) * 5));
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--zone-stack-card-step), var(--zone-stack-card-step)));
+  grid-auto-rows: var(--zone-stack-card-height);
+  gap: calc(8px * var(--zone-card-scale, 1)) 0;
   align-items: flex-start;
-  width: fit-content;
-  max-width: 100%;
-  min-height: calc(151px * var(--zone-card-scale, 1));
-  padding-right: 4px;
-  overflow-x: auto;
+  width: var(--zone-stack-width);
+  max-width: none;
+  min-height: var(--zone-stack-card-height);
+  padding-right: calc(var(--zone-stack-card-width) - var(--zone-stack-card-step));
+  overflow-x: visible;
   overflow-y: visible;
 }
 
 .runnerHeapOverlapRow .cardSlot {
-  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-  width: calc(108px * var(--zone-card-scale, 1));
-  max-width: calc(108px * var(--zone-card-scale, 1));
+  width: var(--zone-stack-card-width);
+  max-width: var(--zone-stack-card-width);
   z-index: 1;
 }
 
 .runnerHeapOverlapRow .cardSlot + .cardSlot {
-  margin-left: calc(-76px * var(--zone-card-scale, 1));
+  margin-left: 0;
 }
 
 .runnerHeapOverlapRow .cardSlot:hover,
@@ -7122,6 +7207,9 @@ select {
   display: grid;
   place-items: start center;
   min-height: calc(151px * var(--zone-card-scale, 1));
+  padding: 2px;
+  border-radius: 6px;
+  background: var(--board-runner-lane-bg);
 }
 
 .runnerStackBack {
@@ -8334,11 +8422,29 @@ select,
 
 .server {
   min-height: 0;
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 52%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--corp-status-accent), transparent 84%), color-mix(in srgb, var(--corp-status-accent), transparent 84%)),
+    color-mix(in srgb, var(--corp-status-accent), var(--section-bg) 78%);
 }
 
 .lane {
   border-color: var(--lane-border);
   background: var(--lane-bg);
+}
+
+.server .lane {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--lane-border) 55%);
+  background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 82%);
+}
+
+.server .serverLead {
+  border-right-color: color-mix(in srgb, var(--corp-zone-accent), transparent 56%);
+}
+
+.corpHqHandPanel {
+  border-color: color-mix(in srgb, var(--corp-zone-accent), var(--line) 52%);
+  background: color-mix(in srgb, var(--corp-status-accent), var(--lane-bg) 82%);
 }
 
 .cards {
@@ -8627,6 +8733,15 @@ select,
   height: calc(151px * var(--lane-card-scale, 1));
 }
 
+.lane .archivesOverlapRow .cardSlot {
+  width: var(--archive-card-width);
+  max-width: var(--archive-card-width);
+}
+
+.lane .archivesOverlapRow .card {
+  height: var(--archive-card-height);
+}
+
 .lane .cardTitle {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -8722,9 +8837,11 @@ select,
   display: grid;
   gap: 6px;
   padding: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: var(--section-bg);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .opponentRunnerBoardStrip {
@@ -8767,7 +8884,9 @@ select,
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .runnerOpponentCountZone {
@@ -8785,13 +8904,12 @@ select,
 }
 
 .runnerHeapCompactPreview .cardSlot {
-  flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-  width: calc(108px * var(--zone-card-scale, 1));
-  max-width: calc(108px * var(--zone-card-scale, 1));
+  width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+  max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
 }
 
 .runnerHeapCompactPreview .cardSlot + .cardSlot {
-  margin-left: calc(-76px * var(--zone-card-scale, 1));
+  margin-left: 0;
 }
 
 .runnerOpponentZoneHeightShim {
@@ -8918,7 +9036,9 @@ select,
   padding: 6px;
   border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 68%);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--section-bg), transparent 5%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--chronicle-run), transparent 91%), color-mix(in srgb, var(--chronicle-run), transparent 91%)),
+    var(--board-runner-zone-bg);
 }
 
 .rigBoardSection.rigCollapsed {
@@ -9041,11 +9161,10 @@ select,
   width: fit-content;
   min-width: 0;
   max-width: 100%;
-  padding: 0 8px;
-  border-top: 0;
-  border-bottom: 0;
-  border-radius: 0;
-  background: color-mix(in srgb, var(--section-bg), transparent 6%);
+  padding: 6px 8px;
+  border: 1px solid color-mix(in srgb, var(--runner-zone-accent), var(--line) 60%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--runner-zone-accent), var(--section-bg) 84%);
 }
 
 .rigGroupHorizontal .rigGroupSideLabel {
@@ -9114,7 +9233,6 @@ select,
 .sideZoneTitle,
 .sideZoneCount,
 .serverCount,
-.laneLabel,
 .cardTooltipStat,
 .strengthBoostBadge {
   cursor: default;
@@ -9487,23 +9605,21 @@ select,
   }
 
   .runnerHeapOverlapRow .cardSlot {
-    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-    width: calc(108px * var(--zone-card-scale, 1));
-    max-width: calc(108px * var(--zone-card-scale, 1));
+    width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+    max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
   }
 
   .runnerHeapOverlapRow .cardSlot + .cardSlot {
-    margin-left: calc(-76px * var(--zone-card-scale, 1));
+    margin-left: 0;
   }
 
   .runnerHeapCompactPreview .cardSlot {
-    flex: 0 0 calc(108px * var(--zone-card-scale, 1));
-    width: calc(108px * var(--zone-card-scale, 1));
-    max-width: calc(108px * var(--zone-card-scale, 1));
+    width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
+    max-width: var(--zone-stack-card-width, calc(108px * var(--zone-card-scale, 1)));
   }
 
   .runnerHeapCompactPreview .cardSlot + .cardSlot {
-    margin-left: calc(-76px * var(--zone-card-scale, 1));
+    margin-left: 0;
   }
 
   .specialZoneOverlapRow .cardSlot {
@@ -9799,12 +9915,25 @@ select,
     grid-template-columns: 1fr;
   }
 
+  .gameOverHero.withVisualMotif {
+    grid-template-columns: 1fr;
+    min-height: 0;
+  }
+
   .resultWinnerMotif {
     justify-self: stretch;
   }
 
+  .gameOverHero.withVisualMotif .resultWinnerMotif {
+    min-height: clamp(150px, 38vw, 220px);
+  }
+
   .resultMotifFrame {
     width: min(220px, 100%);
+  }
+
+  .gameOverHero.withVisualMotif .resultMotifFrame {
+    min-height: clamp(150px, 38vw, 220px);
   }
 
   .gameOverActions {

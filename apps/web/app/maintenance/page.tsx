@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { AlertTriangle, ChevronDown, Database, Eye, ListFilter, RefreshCcw, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertTriangle, ChevronDown, Copy, Database, ExternalLink, Eye, KeyRound, ListFilter, RefreshCcw, ShieldCheck, Trash2 } from "lucide-react";
 import {
   buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
+  buildMaintenanceRecoveryLink,
   DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
   EMPTY_MAINTENANCE_FILTERS,
   findForbiddenMaintenanceMarkers,
@@ -22,6 +23,7 @@ import {
   type MaintenanceFilters,
   type MaintenanceMatchDetail,
   type MaintenanceMatchEntry,
+  type MaintenanceRecoveryAccess,
   type MaintenanceSummary
 } from "../maintenance";
 
@@ -41,6 +43,9 @@ export default function MaintenancePage() {
   const [cleanupResult, setCleanupResult] = useState<MaintenanceCleanupApplyResult | null>(null);
   const [cleanupConfirmed, setCleanupConfirmed] = useState(false);
   const [cleanupLoading, setCleanupLoading] = useState(false);
+  const [recoverySide, setRecoverySide] = useState<"runner" | "corp">("runner");
+  const [recoveryAccess, setRecoveryAccess] = useState<MaintenanceRecoveryAccess | null>(null);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
   const [cleanupPolicy, setCleanupPolicy] = useState<MaintenanceCleanupPolicy | null>(null);
   const [policyDraft, setPolicyDraft] = useState({
     enabled: false,
@@ -83,7 +88,14 @@ export default function MaintenancePage() {
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Matchdetail konnte nicht geladen werden." : "Matchdetail konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
     if (markers.length > 0) throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
-    setDetail(payload as MaintenanceMatchDetail);
+    const nextDetail = payload as MaintenanceMatchDetail;
+    setDetail(nextDetail);
+    setRecoveryAccess(null);
+    setRecoverySide((current) => {
+      if (nextDetail.participants.some((participant) => participant.side === current)) return current;
+      const firstSide = nextDetail.participants[0]?.side;
+      return firstSide === "runner" || firstSide === "corp" ? firstSide : current;
+    });
   };
 
   const loadCleanupPolicy = async () => {
@@ -194,6 +206,37 @@ export default function MaintenancePage() {
     } catch (protectionError) {
       setError(protectionError instanceof Error ? protectionError.message : "Löschschutz konnte nicht geändert werden.");
     }
+  };
+
+  const issueRecoveryAccess = async () => {
+    if (!detail) return;
+    setRecoveryLoading(true);
+    setRecoveryAccess(null);
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/recovery-access`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ side: recoverySide })
+      });
+      const payload = (await response.json()) as MaintenanceRecoveryAccess | { error?: { message?: string } };
+      if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Fortsetzungszugang konnte nicht erstellt werden." : "Fortsetzungszugang konnte nicht erstellt werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("Fortsetzungszugang wurde wegen Redaktionsprüfung blockiert.");
+      await loadDetail(detail.matchId);
+      await loadMatches(filters);
+      setRecoveryAccess(payload as MaintenanceRecoveryAccess);
+    } catch (recoveryError) {
+      setError(recoveryError instanceof Error ? recoveryError.message : "Fortsetzungszugang konnte nicht erstellt werden.");
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
+
+  const recoveryLink = recoveryAccess ? buildMaintenanceRecoveryLink(recoveryAccess, typeof window === "undefined" ? "http://127.0.0.1:3000" : window.location.origin) : "";
+  const copyRecoveryLink = async () => {
+    if (!recoveryLink) return;
+    await navigator.clipboard?.writeText(recoveryLink);
   };
 
   const saveCleanupPolicy = async () => {
@@ -432,6 +475,43 @@ export default function MaintenancePage() {
               ["Cleanup", detail.cleanupAssessment.reason]
             ]}
           />
+          <div style={recoveryBox}>
+            <div style={panelHeader}>
+              <div style={headerTitle}>
+                <KeyRound size={18} aria-hidden="true" />
+                <div>
+                  <h3 style={h3}>Fortsetzungszugang</h3>
+                  <p style={subtle}>Erzeugt lokal einen neuen Zugang für eine vorhandene Spieler-Seite; der alte Zugang dieser Seite wird ungültig.</p>
+                </div>
+              </div>
+              <div style={buttonRow}>
+                <select value={recoverySide} onChange={(event) => setRecoverySide(event.target.value === "corp" ? "corp" : "runner")} style={input} disabled={recoveryLoading || detail.participants.length === 0}>
+                  {detail.participants.map((participant) => (
+                    <option key={participant.side} value={participant.side}>
+                      {participant.side === "runner" ? "Runner" : "Korp"} · {participant.displayName}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" style={button} onClick={() => void issueRecoveryAccess()} disabled={recoveryLoading || detail.terminal || detail.participants.length === 0}>
+                  <KeyRound size={16} aria-hidden="true" />
+                  Erstellen
+                </button>
+              </div>
+            </div>
+            {recoveryAccess ? (
+              <div style={recoveryLinkRow}>
+                <input value={recoveryLink} readOnly style={wideInput} aria-label="Fortsetzungslink" />
+                <button type="button" style={button} onClick={() => void copyRecoveryLink()} title="Fortsetzungslink kopieren">
+                  <Copy size={16} aria-hidden="true" />
+                  Kopieren
+                </button>
+                <a href={recoveryLink} style={linkButton} title="Fortsetzungslink öffnen">
+                  <ExternalLink size={16} aria-hidden="true" />
+                  Öffnen
+                </a>
+              </div>
+            ) : null}
+          </div>
         </CollapsiblePanel>
       ) : null}
 
@@ -727,8 +807,12 @@ const field: CSSProperties = { display: "grid", gap: "0.25rem", fontSize: "0.82r
 const checkField: CSSProperties = { display: "inline-flex", alignItems: "center", gap: "0.45rem", fontSize: "0.86rem", color: "#102033", minHeight: 34 };
 const checkboxGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.35rem 0.65rem" };
 const input: CSSProperties = { minHeight: 34, border: "1px solid #9db0c3", borderRadius: 6, padding: "0.35rem 0.45rem", background: "#fff", color: "#102033" };
+const wideInput: CSSProperties = { ...input, width: "100%", minWidth: 280 };
 const detailGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.6rem" };
 const errorBox: CSSProperties = { margin: 0, border: "1px solid #f3b5b5", background: "#fff5f5", color: "#9b1c1c", borderRadius: 8, padding: "0.7rem" };
 const warningBox: CSSProperties = { display: "flex", alignItems: "flex-start", gap: "0.55rem", border: "1px solid #e2c16a", background: "#fff9e8", borderRadius: 8, padding: "0.7rem", color: "#5b4200" };
 const warningText: CSSProperties = { margin: 0, color: "#7a4b00", fontSize: "0.86rem" };
 const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };
+const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
+const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
+const linkButton: CSSProperties = { ...button, textDecoration: "none" };

@@ -14,7 +14,7 @@ Der sequenzielle Spotcheck-Job `spotcheck-2026-05-15-ramming-galveston` ist umge
 | Weather-to-Finance Pipe | Access-Replacement-Payload für HQ-Erfolgsrun, Creditverlust und Hidden-Zone-Barriere präzisiert. |
 | Bodyweight Data Creche | Installkosten 3, +1 MU, Deck-Einzigartigkeit und einmal-pro-Zug Bonus-Run nach erfolgreichem Run ergänzt. |
 | Rigged Investments | Recurring-Credit-Stub entfernt; sechs Bit-Counter, Runner-Zugstart-Credit und Auto-Trash umgesetzt. |
-| The Short Circuit | Stack-Programm-Suche mit Runner-privater Choice, Reveal genau der gewählten Karte, Shuffle und Trash-on-use umgesetzt. |
+| The Short Circuit | Korrigiert am 2026-05-20: Stack-Programm-Suche mit Runner-privater Choice, Reveal genau der gewählten Karte, Shuffle, gedruckten Creditkosten und ohne Self-Trash umgesetzt. |
 | Data Raven | Runner-Aktion zum Entfernen eines Data-Raven-Counters für `[A]` und 1 Credit ergänzt. |
 | Experimental AI | Advancement-Counter steuern die Anzahl getrashter öffentlicher installierter Runner-Programme. |
 | New Galveston City Grid | R&D-Reveal-Stub entfernt; servergebundener +2-Trashkosten-Modifikator für andere Nodes/Upgrades im Fort umgesetzt. |

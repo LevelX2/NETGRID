@@ -106,6 +106,24 @@ function Get-UrlOrigin {
   }
 }
 
+function Convert-LocalWebUrlToLan {
+  param(
+    [Parameter(Mandatory = $true)][string]$Url,
+    [Parameter(Mandatory = $true)][string]$LanWebUrl
+  )
+
+  try {
+    $uri = [Uri]$Url
+    if (($uri.Host -eq "127.0.0.1" -or $uri.Host -eq "localhost") -and $uri.Port -eq 3100) {
+      return "$($LanWebUrl.TrimEnd('/'))$($uri.PathAndQuery)$($uri.Fragment)"
+    }
+  } catch {
+    return $Url
+  }
+
+  return $Url
+}
+
 function Get-LanIpv4 {
   try {
     $defaultRoute = Get-NetRoute -DestinationPrefix "0.0.0.0/0" -ErrorAction Stop |
@@ -168,6 +186,7 @@ $targetOpenUrl = if ([string]::IsNullOrWhiteSpace($OpenUrl)) {
 } else {
   $OpenUrl.Trim()
 }
+$targetOpenUrl = Convert-LocalWebUrlToLan -Url $targetOpenUrl -LanWebUrl $webUrl
 $targetWebUrl = Get-UrlOrigin -Url $targetOpenUrl
 if (-not $targetWebUrl) {
   $targetWebUrl = $webUrl
@@ -201,9 +220,7 @@ if ($serverReadyLanBefore -and $maintenanceRequested -and -not $maintenanceReady
 }
 
 if (-not $serverReadyLanBefore) {
-  if ($serverReadyLocalBefore) {
-    Stop-PortListeners -Ports @(8787)
-  }
+  Stop-PortListeners -Ports @(8787)
   Write-LauncherLog "Starting server command"
   Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/server exec tsx src/index.ts" -LogPath $serverLog -Environment $serverEnvironment
 }
@@ -213,9 +230,7 @@ $webReadyLocalBefore = Test-Endpoint -Url $localWebUrl
 Write-LauncherLog "Web precheck lan=$webReadyLanBefore local=$webReadyLocalBefore"
 
 if (-not $webReadyLanBefore) {
-  if ($webReadyLocalBefore) {
-    Stop-PortListeners -Ports @(3100)
-  }
+  Stop-PortListeners -Ports @(3100)
   Write-LauncherLog "Starting web command"
   Start-NetgridProcess -Command "corepack pnpm --filter @netgrid/web exec next dev --webpack --hostname 0.0.0.0 --port 3100" -LogPath $webLog -Environment $webEnvironment
 }

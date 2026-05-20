@@ -28,7 +28,7 @@
     "Resolving search moves the selected program to grip and shuffles deterministically.",
     "Replay after search resolution reproduces the same StateHash.",
     "Reveal and expose publish only the explicitly revealed or exposed CardDefinition IDs; Ice and Data's Guide exposes only the outermost ICE of each data fort.",
-    "Installed Runner helpers use LegalActions and V1.9.11 PendingChoice sources without exposing options to the Corp; The Short Circuit trashes itself, reveals only the selected Stack program and shuffles deterministically.",
+    "Installed Runner helpers use LegalActions and V1.9.11 PendingChoice sources without exposing options to the Corp; The Short Circuit pays its printed credit cost, stays installed, reveals only the selected Stack program and shuffles deterministically.",
     "Scored Corporate Downsizing reveals only the public R&D top CardDefinition.",
     "Ice Pick Willie reveals only the public R&D top CardDefinition through a subroutine-bound path.",
     "Too Many Doors opens an R&D reorder PendingChoice only to the Corp and replays to the same StateHash.",

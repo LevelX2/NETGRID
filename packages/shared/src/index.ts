@@ -39,17 +39,7 @@ export {
 } from "./demo-fixtures";
 export { DEMO_DECKS } from "./demo-decks";
 export {
-  MVP_0_1_BASELINE,
-  MVP_0_2_BASELINE,
-  MVP_0_3_BASELINE,
-  MVP_0_4_BASELINE,
-  MVP_0_8_BASELINE,
-  MVP_0_94_BASELINE,
-  MVP_0_95_BASELINE,
-  MVP_0_96_BASELINE,
-  MVP_0_97_BASELINE,
-  MVP_0_98_BASELINE,
-  MVP_0_99_BASELINE,
+  CURRENT_RULES_BASELINE,
   type RulesBaseline,
 } from "./baselines";
 import type { RulesBaseline } from "./baselines";
@@ -2870,13 +2860,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "[A], trash The Short Circuit: Search your stack for a program, reveal it, add it to your grip, then shuffle your stack.",
+      "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
     mechanics: [
       "install_resource",
       "search",
       "reveal",
       "shuffle",
-      "trash_on_use",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],

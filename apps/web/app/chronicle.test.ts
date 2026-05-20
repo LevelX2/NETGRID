@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleTurnNumberByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
+import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -479,6 +479,36 @@ describe("formatChronicleEvent", () => {
     expect(installed.title).toBe("Du hast Simple Decoder aus dem Stack vorgezeigt und im Rig installiert.");
     expect(installed.chips).toEqual(expect.arrayContaining(["Self-Modifying Code", "Vorgezeigt", "Installiert", "Shuffle"]));
     expect(installed.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("shows The Short Circuit activation and selected program concretely", () => {
+    const activated = formatChronicleEvent(
+      makeEvent("gain_credit", {
+        actor: "runner",
+        hiddenZoneAction: "v1911_short_circuit_search",
+        sourceDefinitionId: "onr_v1_177_the-short-circuit"
+      }),
+      "runner"
+    );
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "v1911_short_circuit_search",
+        sourceDefinitionId: "onr_v1_177_the-short-circuit",
+        publicRevealDefinitionId: "simple_decoder",
+        cardDefinitionId: "simple_decoder",
+        searchDestination: "runner_grip",
+        shuffled: true
+      }),
+      "corp"
+    );
+
+    expect(activated.title).toBe("Du hast The Short Circuit genutzt und eine Stack-Suche geöffnet.");
+    expect(activated.chips).toEqual(expect.arrayContaining(["The Short Circuit", "Stack-Suche"]));
+    expect(resolved.title).toBe("Der Runner hat The Short Circuit genutzt, Simple Decoder der Korp gezeigt und in die Hand genommen.");
+    expect(resolved.description).toBe("Der Stack wurde danach gemischt.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["The Short Circuit", "Vorgezeigt", "Hand", "Shuffle"]));
+    expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
@@ -2218,6 +2248,63 @@ describe("formatChronicleEvent", () => {
     expect(paid.actionUse).toMatchObject({ label: "2", title: "2. Aktion in diesem Zug", clicks: 1 });
     expect(free.actionUse).toBeUndefined();
     expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
+  });
+
+  it("derives chronicle action numbers across extra actions when payload ordinals reset", () => {
+    const events = [
+      makeEvent("gain_credit", {
+        actor: "corp",
+        eventId: "evt_1",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 1,
+        turnActionOrdinalEnd: 1
+      }),
+      makeEvent("gain_credit", {
+        actor: "corp",
+        eventId: "evt_2",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 2,
+        turnActionOrdinalEnd: 2
+      }),
+      makeEvent("play_operation", {
+        actor: "corp",
+        eventId: "evt_overtime",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 3,
+        cardDefinitionId: "onr_v1_297_overtime-incentives",
+        title: "Overtime Incentives"
+      }),
+      makeEvent("gain_credit", {
+        actor: "corp",
+        eventId: "evt_extra_1",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 2,
+        turnActionOrdinalEnd: 2
+      }),
+      makeEvent("gain_credit", {
+        actor: "corp",
+        eventId: "evt_extra_2",
+        actionCostClicks: 1,
+        turnActionOrdinalStart: 3,
+        turnActionOrdinalEnd: 3
+      })
+    ];
+    const actionUseByEventId = chronicleActionUseByEventId(events);
+    const firstExtraActionUse = actionUseByEventId.evt_extra_1;
+    const secondExtraActionUse = actionUseByEventId.evt_extra_2;
+    expect(firstExtraActionUse).toBeDefined();
+    expect(secondExtraActionUse).toBeDefined();
+    const firstExtra = formatChronicleEvent(events[3]!, "runner", {
+      actionUse: firstExtraActionUse ?? null
+    });
+    const secondExtra = formatChronicleEvent(events[4]!, "runner", {
+      actionUse: secondExtraActionUse ?? null
+    });
+
+    expect(actionUseByEventId.evt_overtime).toMatchObject({ label: "3", title: "3. Aktion in diesem Zug" });
+    expect(firstExtra.actionUse).toMatchObject({ label: "4", title: "4. Aktion in diesem Zug" });
+    expect(secondExtra.actionUse).toMatchObject({ label: "5", title: "5. Aktion in diesem Zug" });
   });
 
   it("shows turn numbers for turn entries when provided by context", () => {

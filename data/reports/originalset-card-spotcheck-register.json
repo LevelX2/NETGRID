@@ -2828,7 +2828,7 @@
           "cardId": "onr_v1_177_the-short-circuit",
           "title": "The Short Circuit",
           "spotcheckStatus": "completed",
-          "result": "implementation_fixed_private_stack_program_search_trash_on_use",
+          "result": "implementation_fixed_private_stack_program_search_repeatable_paid",
           "followUpStatus": "fixed_and_tested"
         },
         {

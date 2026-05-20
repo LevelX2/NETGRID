@@ -688,6 +688,21 @@ async function routeHttp(
       return;
     }
 
+    const maintenanceRecoveryRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)\/recovery-access$/.exec(url.pathname);
+    if (maintenanceRecoveryRoute && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `storage-maintenance-recovery:${maintenanceRecoveryRoute[1]}`)) return;
+      const body = await readJson(request);
+      const matchId = decodeURIComponent(maintenanceRecoveryRoute[1] ?? "");
+      const side = body.side === "corp" ? "corp" : "runner";
+      const issued = await service.issueMaintenanceRecoveryAccess(matchId, {
+        side,
+        ...(typeof body.displayName === "string" ? { displayName: body.displayName } : {})
+      });
+      sendJson(response, "error" in issued ? 409 : 200, issued);
+      return;
+    }
+
     const maintenanceMatchRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)$/.exec(url.pathname);
     if (maintenanceMatchRoute && request.method === "GET") {
       if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;

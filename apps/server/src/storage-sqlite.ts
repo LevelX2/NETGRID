@@ -300,6 +300,17 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     });
   }
 
+  async listOpenMatchCandidates(): Promise<StoredMatch[]> {
+    const rows = this.db
+      .prepare("SELECT record_json FROM matches WHERE mode = ? AND status = ? ORDER BY created_at ASC")
+      .all("human_vs_human", "pending") as Array<{ record_json: string }>;
+    return rows.map((row) => {
+      const record = JSON.parse(row.record_json) as StoredMatch;
+      validateStoredMatch(record);
+      return clone(record);
+    });
+  }
+
   async health(): Promise<StorageHealth> {
     const schemaVersion = Number(this.meta("schema_version") ?? SQLITE_STORAGE_SCHEMA_VERSION);
     return {

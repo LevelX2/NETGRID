@@ -35,7 +35,7 @@
     "Verify Gideon's Pawnshop: choice comes from Runner heap, selected card moves to grip, the played Pawnshop is not selectable, and the stack is not shuffled.",
     "Verify Sneak Preview: source is chosen before search, Heap and Stack paths install a program at no cost, only Stack path shuffles, and the temporary program returns at Runner end of turn only while still installed.",
     "Verify reveal and expose: only the intentionally revealed or exposed CardDefinition IDs are public; Ice and Data's Guide exposes only the outermost ICE of each data fort.",
-    "Verify installed Runner helpers: LegalActions expose/search/reorder only through V1.9.11 PendingChoices; The Short Circuit trashes itself, reveals only the selected Stack program and shuffles deterministically.",
+    "Verify installed Runner helpers: LegalActions expose/search/reorder only through V1.9.11 PendingChoices; The Short Circuit pays its printed credit cost, stays installed, reveals only the selected Stack program and shuffles deterministically.",
     "Verify Corporate Downsizing and Ice Pick Willie: R&D top reveal is public without leaking the rest of R&D.",
     "Verify Too Many Doors: Corp-private R&D top-two reorder choice is replay- and StateHash-stable.",
     "Verify AI: multi-card Hidden-Zone choices are answered completely through LegalActions and PlayerView data."

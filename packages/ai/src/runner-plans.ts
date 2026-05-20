@@ -913,7 +913,35 @@ function recentRemoteContestPenalty(input: AiDecisionInput, candidate: RunnerPla
   const last = history[lastSameRemoteRun];
   if (!last) return 0;
   const distance = input.playerView.stateVersion - eventVersion(last);
-  return distance <= 8 ? 180 : 0;
+  if (distance > 8) return 0;
+  return recentSameRemoteJackOutWithoutAccess(history, lastSameRemoteRun, target) ? 620 : 180;
+}
+
+function recentSameRemoteJackOutWithoutAccess(history: PublicGameEvent[], startIndex: number, target: string): boolean {
+  const afterStart = history.slice(startIndex + 1);
+  const jackOutIndex = afterStart.findIndex((event) => {
+    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+    if (actionType !== "jack_out") return false;
+    const eventServerId = serverIdFromEvent(event);
+    return eventServerId === undefined || eventServerId === target;
+  });
+  if (jackOutIndex < 0) return false;
+  const beforeJackOut = afterStart.slice(0, jackOutIndex);
+  if (beforeJackOut.some((event) => serverIdFromEvent(event) === target && event.publicPayload.actionType === "access_card")) return false;
+  return !afterStart.slice(jackOutIndex + 1).some((event) => eventMayRefreshRemoteRun(event, target));
+}
+
+function eventMayRefreshRemoteRun(event: PublicGameEvent, target: string): boolean {
+  const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+  if (actionType === "access_card" && serverIdFromEvent(event) === target) return true;
+  return (
+    actionType === "gain_credit" ||
+    actionType === "draw_card" ||
+    actionType === "install_card" ||
+    actionType === "play_event" ||
+    actionType === "trigger_ability" ||
+    actionType === "rez_ice"
+  );
 }
 
 export function evaluateCorpScoringThreat(input: AiDecisionInput, candidate: RunnerPlanCandidate, beliefState: BeliefState = reconstructBeliefState(input)): RunnerPlanEvaluatorResult {
@@ -1134,10 +1162,11 @@ function selectPlanAction(input: AiDecisionInput, candidate: RunnerPlanCandidate
 
 function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDecisionInput): number {
   const reachedAccessMovement = runnerReachedAccessMovement(input);
+  const affordableMovement = runnerCanAffordCurrentMovementIce(input);
   if (kind === "trash_asset" && action.type === "trash_accessed_card") return 100;
   if ((kind === "pressure_rnd" || kind === "pressure_hq" || kind === "contest_remote" || kind === "safe_probe_run") && action.type === "start_run") return 90;
-  if (kind === "safe_probe_run" && action.type === "continue_run") return reachedAccessMovement ? 92 : 70;
-  if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement ? 30 : 88;
+  if (kind === "safe_probe_run" && action.type === "continue_run") return reachedAccessMovement || affordableMovement ? 92 : 70;
+  if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement || affordableMovement ? 30 : 88;
   if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
   if (kind === "build_rig" && action.type === "trigger_ability") return runnerShellTradersPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
@@ -1155,6 +1184,20 @@ function runnerReachedAccessMovement(input: AiDecisionInput): boolean {
     run?.phase === "movement" &&
     run.position?.kind === "server"
   );
+}
+
+function runnerCanAffordCurrentMovementIce(input: AiDecisionInput): boolean {
+  const run = input.playerView.run;
+  if (
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    run?.phase !== "movement" ||
+    run.position?.kind !== "ice"
+  )
+    return false;
+  const server = input.playerView.servers.find((candidate) => candidate.id === run.position?.serverId);
+  const ice = server?.ice[run.position.iceIndex];
+  if (!ice?.known || ice.rezzed !== true) return false;
+  return !assessKnownRezzedIcePath([ice], input.playerView.own.rig ?? [], input.playerView.own.credits).blocked;
 }
 
 function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {

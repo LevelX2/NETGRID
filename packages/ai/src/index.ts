@@ -11,7 +11,7 @@ import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpenin
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, creditsToBreakEndTheRunSubroutinesWithBreaker, endTheRunSubroutineCount, iceHasEndTheRun } from "./visible-run-analysis";
 import { buildAiDecisionInputDto } from "./input-dto";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
   BeliefEntry,
@@ -422,7 +422,7 @@ export type AiSimulationSummary = {
     installPlacement?: string;
   }>;
   errors: string[];
-  cardPoolVersion: "0.1.0" | "0.4.0" | "0.8.0" | "0.94.0" | "0.95.0" | "0.96.0" | "0.97.0" | "0.98.0" | "0.99.0";
+  cardPoolVersion: typeof CURRENT_RULES_BASELINE.engineSchemaVersion;
   metrics: AiQualityMetrics;
 };
 
@@ -570,7 +570,7 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
       replayErrors: [],
       actionSequence: [],
       errors: deckSupportErrors,
-      cardPoolVersion: cardPoolVersionForSimulation(config),
+      cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
       metrics: metricsFor([], deckSupportErrors, false, isHoldoutSeed(config.seed ?? "ai-vs-ai-smoke"))
     };
   }
@@ -683,7 +683,7 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
     replayErrors: replay.errors,
     actionSequence,
     errors,
-    cardPoolVersion: cardPoolVersionForSimulation(config),
+    cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
     metrics: metricsFor(actionSequence, errors, replay.ok, isHoldoutSeed(seed))
   };
 }
@@ -1193,95 +1193,6 @@ function applyFixtureChoiceFirstOption(
     return { ok: false, message: `${label}:${result.error.code}:${result.error.message}` };
   }
   return { ok: true, state: result.state };
-}
-
-function cardPoolVersionForSimulation(config: AiSimulationConfig): AiSimulationSummary["cardPoolVersion"] {
-  if (
-    config.runnerDeck?.id.includes("_099") ||
-    config.runnerDeck?.id.includes("_v0_99") ||
-    config.corpDeck?.id.includes("_099") ||
-    config.corpDeck?.id.includes("_v0_99") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v099_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v099_")) ||
-    config.runnerDeckId === "demo_runner_099" ||
-    config.corpDeckId === "demo_corp_099"
-  ) {
-    return "0.99.0";
-  }
-  if (
-    config.runnerDeck?.id.includes("_098") ||
-    config.runnerDeck?.id.includes("_v0_98") ||
-    config.corpDeck?.id.includes("_098") ||
-    config.corpDeck?.id.includes("_v0_98") ||
-    config.runnerDeck?.identity.startsWith("v098_") ||
-    config.corpDeck?.identity.startsWith("v098_") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v098_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v098_")) ||
-    config.runnerDeckId === "demo_runner_098" ||
-    config.corpDeckId === "demo_corp_098"
-  ) {
-    return "0.98.0";
-  }
-  if (
-    config.runnerDeck?.id.includes("_097") ||
-    config.runnerDeck?.id.includes("_v0_97") ||
-    config.corpDeck?.id.includes("_097") ||
-    config.corpDeck?.id.includes("_v0_97") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v097_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v097_")) ||
-    config.runnerDeckId === "demo_runner_097" ||
-    config.corpDeckId === "demo_corp_097"
-  ) {
-    return "0.97.0";
-  }
-  if (
-    config.runnerDeck?.id.includes("_096") ||
-    config.runnerDeck?.id.includes("_v0_96") ||
-    config.corpDeck?.id.includes("_096") ||
-    config.corpDeck?.id.includes("_v0_96") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v096_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v096_")) ||
-    config.runnerDeckId === "demo_runner_096" ||
-    config.corpDeckId === "demo_corp_096"
-  ) {
-    return "0.96.0";
-  }
-  if (
-    config.runnerDeck?.id.includes("_095") ||
-    config.runnerDeck?.id.includes("_v0_95") ||
-    config.corpDeck?.id.includes("_095") ||
-    config.corpDeck?.id.includes("_v0_95") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v095_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v095_"))
-  ) {
-    return "0.95.0";
-  }
-  if (
-    config.runnerDeck?.id.includes("_094") ||
-    config.runnerDeck?.id.includes("_v0_94") ||
-    config.corpDeck?.id.includes("_094") ||
-    config.corpDeck?.id.includes("_v0_94") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v094_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v094_")) ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("onr_v1_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("onr_v1_"))
-  ) {
-    return "0.94.0";
-  }
-  if (
-    config.runnerDeck?.id.includes("_008") ||
-    config.runnerDeck?.id.includes("_v0_8") ||
-    config.corpDeck?.id.includes("_008") ||
-    config.corpDeck?.id.includes("_v0_8") ||
-    config.runnerDeck?.cards.some((card) => card.id.startsWith("v08_")) ||
-    config.corpDeck?.cards.some((card) => card.id.startsWith("v08_")) ||
-    config.runnerDeckId === "demo_runner_008" ||
-    config.corpDeckId === "demo_corp_008"
-  ) {
-    return "0.8.0";
-  }
-  if (config.runnerDeck || config.corpDeck || config.runnerDeckId === "demo_runner_004" || config.corpDeckId === "demo_corp_004") return "0.4.0";
-  return "0.1.0";
 }
 
 function runV143Profile(profile: SimulationBenchmarkProfile, seeds: string[], config: V143LeagueConfig): V143SimulationRunResult {
@@ -2043,7 +1954,11 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       }
       break;
     case "start_run":
-      const staleCentralRepeatPenalty = staleKnownRndRepeatRunPenalty(input, action) + staleKnownHqRepeatRunPenalty(input, action) + staleKnownArchivesRepeatRunPenalty(input, action);
+      const staleCentralRepeatPenalty =
+        staleKnownRndRepeatRunPenalty(input, action) +
+        staleKnownHqRepeatRunPenalty(input, action) +
+        staleKnownArchivesRepeatRunPenalty(input, action) +
+        recentRemoteJackOutRepeatRunPenalty(input, action);
       score = scoreRunTarget(action, features, profile, input.difficulty, staleCentralRepeatPenalty);
       reasonCode = runnerRunReasonCode(action, features);
       explanation =
@@ -2349,6 +2264,50 @@ function staleKnownArchivesRepeatRunPenalty(input: AiDecisionInput, action: Lega
   if (lastArchivesAccessIndex < 0) return 0;
   if (history.slice(lastArchivesAccessIndex + 1).some((event) => aiEventMayChangeArchives(event))) return 0;
   return 520;
+}
+
+function recentRemoteJackOutRepeatRunPenalty(input: AiDecisionInput, action: LegalAction): number {
+  if (input.side !== "runner" || action.type !== "start_run") return 0;
+  const serverId = String(action.payload?.serverId ?? "");
+  if (!serverId.startsWith("remote_")) return 0;
+  const history = mergedAiPublicHistory(input);
+  const lastSameRemoteRunIndex = findLastAiHistoryIndex(
+    history,
+    (event) =>
+      aiServerIdFromEvent(event) === serverId &&
+      (event.publicPayload.actionType === "start_run" || event.type === "run_started"),
+  );
+  if (lastSameRemoteRunIndex < 0) return 0;
+  const lastRunEvent = history[lastSameRemoteRunIndex];
+  if (!lastRunEvent) return 0;
+  if (input.playerView.stateVersion - aiEventVersion(lastRunEvent) > 8) return 0;
+  return recentAiSameRemoteJackOutWithoutAccess(history, lastSameRemoteRunIndex, serverId) ? 520 : 0;
+}
+
+function recentAiSameRemoteJackOutWithoutAccess(history: PublicGameEvent[], startIndex: number, serverId: string): boolean {
+  const afterStart = history.slice(startIndex + 1);
+  const jackOutIndex = afterStart.findIndex((event) => {
+    const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+    if (actionType !== "jack_out") return false;
+    const eventServerId = aiServerIdFromEvent(event);
+    return eventServerId === undefined || eventServerId === serverId;
+  });
+  if (jackOutIndex < 0) return false;
+  if (afterStart.slice(0, jackOutIndex).some((event) => aiServerIdFromEvent(event) === serverId && event.publicPayload.actionType === "access_card")) return false;
+  return !afterStart.slice(jackOutIndex + 1).some((event) => aiEventMayRefreshRemoteRun(event, serverId));
+}
+
+function aiEventMayRefreshRemoteRun(event: PublicGameEvent, serverId: string): boolean {
+  const actionType = typeof event.publicPayload.actionType === "string" ? event.publicPayload.actionType : event.type;
+  if (actionType === "access_card" && aiServerIdFromEvent(event) === serverId) return true;
+  return (
+    actionType === "gain_credit" ||
+    actionType === "draw_card" ||
+    actionType === "install_card" ||
+    actionType === "play_event" ||
+    actionType === "trigger_ability" ||
+    actionType === "rez_ice"
+  );
 }
 
 function isLowValueKnownAccessCard(definitionId: string, runnerCredits: number): boolean {

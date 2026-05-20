@@ -80,6 +80,17 @@ export type MaintenanceMatchDetail = MaintenanceMatchEntry & {
   };
 };
 
+export type MaintenanceRecoveryAccess = {
+  matchId: string;
+  side: "runner" | "corp";
+  access: string;
+  displayName: string;
+  webSocketUrl: string;
+  matchStatus: string;
+  matchVersion: number;
+  issuedAt: string;
+};
+
 export type MaintenanceCleanupFilters = {
   statuses: string[];
   olderThanMinutes: string;
@@ -238,6 +249,14 @@ export function buildMaintenanceCleanupRequest(filters: MaintenanceCleanupFilter
     limit: Number.isFinite(limit) && limit > 0 ? Math.min(500, Math.floor(limit)) : 100,
     includeProtected: filters.includeProtected
   };
+}
+
+export function buildMaintenanceRecoveryLink(access: Pick<MaintenanceRecoveryAccess, "matchId" | "side" | "access">, webOrigin: string): string {
+  const url = new URL("/", webOrigin);
+  url.searchParams.set("matchId", access.matchId);
+  url.searchParams.set("side", access.side);
+  url.searchParams.set("reconnectToken", access.access);
+  return url.toString();
 }
 
 export function formatBytes(bytes: number): string {

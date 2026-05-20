@@ -83,6 +83,7 @@ import type {
 import {
   CHRONICLE_CATEGORY_LABELS,
   chronicleGroupLabel,
+  chronicleActionUseByEventId,
   chronicleTurnNumberByEventId,
   formatChronicleEvent,
   formatChronicleEffectItems,
@@ -117,8 +118,10 @@ import {
   actionSlotCapacityForTurn,
   actionSlotDisplay,
   activeRunIceInstanceId,
+  advancementCounterDisplay,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
+  armoredFridgeAblativeCounterBadge,
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
@@ -151,6 +154,7 @@ import {
   storedCreditAmount,
   storedCreditSourceLabel,
   currentRunTimelineStep,
+  type AdvancementCounterDisplay,
   type ActionContext,
   type CuePositionPreference,
   type CuePositionPreset
@@ -195,6 +199,7 @@ import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import { scoredAgendaCreditCounterSource, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
+  loadCurrentTabSession,
   loadRecentSession,
   loadStoredSession,
   persistSession,
@@ -1655,6 +1660,7 @@ function zoneHighlighted(highlight: BoardHighlight | null, side: Side, zone: "hq
 
 function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Record<string, CatalogCardDetail>): Record<string, Omit<ChronicleContext, "side">> {
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
+  const actionUseByEventId = chronicleActionUseByEventId(events);
   return Object.fromEntries(
     events.map((event) => {
       const card = eventCardDetail(event, detailsById);
@@ -1666,7 +1672,8 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
           cardType: card?.type ?? null,
           cardDetailLines: card ? catalogDetailLines(card) : [],
           agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null,
-          turnNumber: turnNumberByEventId[event.eventId] ?? null
+          turnNumber: turnNumberByEventId[event.eventId] ?? null,
+          actionUse: actionUseByEventId[event.eventId] ?? null
         }
       ];
     })
@@ -1699,7 +1706,7 @@ export default function Page() {
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
   const [countdownSeconds, setCountdownSeconds] = useState<3 | 5 | 10>(3);
-  const [seed, setSeed] = useState(() => createMatchSeed());
+  const [seed, setSeed] = useState("");
   const [joinLinkInput, setJoinLinkInput] = useState("");
   const [joinMatchId, setJoinMatchId] = useState("");
   const [joinToken, setJoinToken] = useState("");
@@ -1884,6 +1891,7 @@ export default function Page() {
       if (typeof storedMatchStartSettings.testSetupMode === "boolean") setTestSetupMode(storedMatchStartSettings.testSetupMode);
       if (storedMatchStartSettings.countdownSeconds) setCountdownSeconds(storedMatchStartSettings.countdownSeconds);
       if (typeof storedMatchStartSettings.seed === "string") setSeed(normalizeMatchSeed(storedMatchStartSettings.seed));
+      else setSeed(createMatchSeed());
       if (storedMatchStartSettings.runnerDeckSource) setRunnerDeckSource(storedMatchStartSettings.runnerDeckSource);
       if (storedMatchStartSettings.corpDeckSource) setCorpDeckSource(storedMatchStartSettings.corpDeckSource);
       if (storedMatchStartSettings.participantBRunnerDeckSource) setParticipantBRunnerDeckSource(storedMatchStartSettings.participantBRunnerDeckSource);
@@ -1898,9 +1906,10 @@ export default function Page() {
       if (typeof storedMatchStartSettings.selectedParticipantBCorpLocalDeckId === "string") setSelectedParticipantBCorpLocalDeckId(storedMatchStartSettings.selectedParticipantBCorpLocalDeckId);
     } else {
       hasStoredMatchStartSettingsRef.current = false;
+      setSeed(createMatchSeed());
     }
     setMatchStartSettingsLoaded(true);
-    const storedSession = loadStoredSession();
+    const storedSession = loadCurrentTabSession();
     if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
       setEntryTab("play");
       setMode("join");
@@ -2240,6 +2249,10 @@ export default function Page() {
 
   useEffect(() => {
     if (!session) return;
+    if (!session.sessionToken.trim() || !session.webSocketUrl.trim()) {
+      setConnection("offline");
+      return;
+    }
     connectWebSocket(session);
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
@@ -2426,6 +2439,7 @@ export default function Page() {
     aiDeckPolicy,
     testSetupMode
   }).concat(playerClockMode === "player_clock" ? [`Spielerzeit ${playerClockMinutes} Min · ${playerClockGraceSeconds} s Kulanz`] : ["Ohne Spielerzeit"]);
+  const playerClockDetailControlsDisabled = matchStartSettingsLoaded ? playerClockMode === "none" : false;
   const aiSlotDisabled = hasAiOpponent && aiDeckPolicy !== "selected";
   const openLanJoinableIds = new Set(openLanMatches.map((entry) => entry.matchId));
   const joinMatchIdTrimmed = joinMatchId.trim();
@@ -3107,7 +3121,7 @@ export default function Page() {
     }
     if (reconnected.error) {
       setNotice(reconnected.error.message);
-      setSession(baseSession);
+      setSession(baseSession.sessionToken.trim() && baseSession.webSocketUrl.trim() ? baseSession : null);
       setPayload(null);
       setLobby(null);
       setConnection("offline");
@@ -3828,7 +3842,20 @@ export default function Page() {
   function connectWebSocket(nextSession: SessionInfo) {
     setConnection("connecting");
     socketRef.current?.close();
-    const socket = new WebSocket(normalizeWebSocketUrl(nextSession.webSocketUrl));
+    const socketUrl = normalizeWebSocketUrl(nextSession.webSocketUrl);
+    if (!socketUrl) {
+      setConnection("offline");
+      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
+      return;
+    }
+    let socket: WebSocket;
+    try {
+      socket = new WebSocket(socketUrl);
+    } catch {
+      setConnection("offline");
+      setNotice("WebSocket-Verbindung konnte nicht gestartet werden.");
+      return;
+    }
     socketRef.current = socket;
     socket.onopen = () => {
       if (socketRef.current !== socket) return;
@@ -4281,7 +4308,7 @@ export default function Page() {
                     </label>
                     <label>
                       Zeit pro Seite
-                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockMode === "none"}>
+                      <select value={playerClockMinutes} onChange={(event) => setPlayerClockMinutes(Number(event.target.value) as MatchStartPlayerClockMinutes)} disabled={playerClockDetailControlsDisabled}>
                         <option value={5}>5 Minuten</option>
                         <option value={10}>10 Minuten</option>
                         <option value={15}>15 Minuten</option>
@@ -4292,7 +4319,7 @@ export default function Page() {
                     </label>
                     <label>
                       Kulanz je Entscheidung
-                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockMode === "none"}>
+                      <select value={playerClockGraceSeconds} onChange={(event) => setPlayerClockGraceSeconds(Number(event.target.value) as MatchStartPlayerClockGraceSeconds)} disabled={playerClockDetailControlsDisabled}>
                         <option value={0}>0 Sekunden</option>
                         <option value={5}>5 Sekunden</option>
                         <option value={10}>10 Sekunden</option>
@@ -4882,6 +4909,7 @@ export default function Page() {
                             viewerSide={activeView.side}
                             visibleCards={lane.cards}
                             totalArchivesCount={activeView.side === "runner" ? (activeView.opponent.discardCount ?? lane.cards.length) : lane.cards.length}
+                            emptyLabel={lane.label}
                             collapsed={false}
                             displayMode={cardDisplayMode}
                             selectedContext={selectedActionContext}
@@ -4897,7 +4925,7 @@ export default function Page() {
                       if (lane.cards.length === 0) {
                         return (
                           <span className="laneEmptyPlaceholder" aria-label={`${lane.label} leer`}>
-                            Leer
+                            {lane.label}
                           </span>
                         );
                       }
@@ -4976,9 +5004,6 @@ export default function Page() {
                               {isOwnCorpHq ? (
                                 <>
                                   <div className={`corpHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
-                                    <div className="corpHqHandHead">
-                                      <span>Handkarten</span>
-                                    </div>
                                     <HandCardsRow className="corpHqHandCards" style={handCardsStyle} count={activeView.own.gripOrHq.length}>
                                       {activeView.own.gripOrHq.map((card) => {
                                         const displayCard = enrichCard(card);
@@ -5012,9 +5037,6 @@ export default function Page() {
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
                                       <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                        <div className="laneLabel">
-                                          <span>{lane.label}</span>
-                                        </div>
                                         <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
                                           {renderLaneCards(lane)}
                                         </div>
@@ -5025,9 +5047,6 @@ export default function Page() {
                               ) : (
                                 lanes.map((lane) => (
                                   <div className="serverLaneGroup pairedServerLane" key={lane.label}>
-                                    <div className="laneLabel">
-                                      <span>{lane.label}</span>
-                                    </div>
                                     <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
                                       {renderLaneCards(lane)}
                                     </div>
@@ -5846,7 +5865,6 @@ function GameOverModal({
   const gameStanding = result.matchFormat === "two_game_side_swap" ? gameStandingForResult(result, side) : null;
   const winnerMotif = resultWinnerMotifFor(result.winner);
   const winnerMotifUi = resultWinnerMotifUi(winnerMotif);
-  const resultPanelStyle = winnerMotifUi.imageSrc ? ({ "--result-panel-bg": `url(${winnerMotifUi.imageSrc})` } as CSSProperties) : undefined;
   const retentionUi = retentionProtectionUi(retentionProtected);
   const exitUi = resultExitButtonUi(Boolean(onNextSeriesGame));
   const handleNewMatch = () => {
@@ -5861,14 +5879,14 @@ function GameOverModal({
   return (
     <div className={`gameOverOverlay ${result.viewerOutcome}`} role="dialog" aria-modal="true" aria-labelledby="game-over-title">
       <div className="gameOverBackdrop" aria-hidden="true" />
-      <section className={`gameOverPanel ${winnerMotifUi.imageSrc ? "withMotifBackground" : ""}`} style={resultPanelStyle}>
-        <div className={`gameOverHero ${winnerMotifUi.imageSrc ? "backgroundOnly" : ""}`}>
+      <section className={`gameOverPanel ${winnerMotifUi.imageSrc ? "withMotifHero" : ""}`}>
+        <div className={`gameOverHero ${winnerMotifUi.imageSrc ? "withVisualMotif" : ""}`}>
           <div className="gameOverHeroCopy">
             <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
             <h2 id="game-over-title">{outcomeText}</h2>
             <p>{resultReasonLabel(result.reason)}</p>
           </div>
-          {winnerMotifUi.imageSrc ? null : <ResultWinnerMotif motif={winnerMotif} />}
+          <ResultWinnerMotif motif={winnerMotif} />
         </div>
         {gameStanding ? (
           <div className="gameStandingStrip" aria-label="Spielwertung">
@@ -11151,6 +11169,7 @@ function ArchivesDualStackLane({
   viewerSide,
   visibleCards,
   totalArchivesCount,
+  emptyLabel = "Leer",
   collapsed,
   displayMode,
   selectedContext,
@@ -11164,6 +11183,7 @@ function ArchivesDualStackLane({
   viewerSide: Side;
   visibleCards: VisibleCard[];
   totalArchivesCount: number;
+  emptyLabel?: string;
   collapsed: boolean;
   displayMode: CardDisplayMode;
   selectedContext: ActionContext | null;
@@ -11190,7 +11210,7 @@ function ArchivesDualStackLane({
   if (faceupCards.length === 0 && facedownCount === 0) {
     return (
       <span className="laneEmptyPlaceholder archiveEmptyPlaceholder" style={archiveCardsStyle}>
-        Leer
+        {emptyLabel}
       </span>
     );
   }
@@ -11357,8 +11377,9 @@ function CardView({
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
   const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
-  const advancementCount = showAdvancementCounters && !preview ? Math.max(0, Math.floor(card.advancementCounters ?? 0)) : 0;
-  const advancementLabel = advancementCount > 0 ? developmentCountLabel(advancementCount) : null;
+  const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
+  const advancementCount = advancementDisplay?.amount ?? 0;
+  const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const scoredAgendaCreditSource = showScoreStateBadges ? scoredAgendaCreditCounterSource(card.definitionId) : null;
@@ -11367,6 +11388,7 @@ function CardView({
   const recurringCredits = preview ? 0 : recurringCreditAmount(card);
   const shellCounters = preview ? 0 : shellCounterAmount(card);
   const dataRavenCounters = preview ? 0 : dataRavenCounterAmount(card);
+  const ablativeCounterBadge = preview ? null : armoredFridgeAblativeCounterBadge(card);
   const storedCreditSource = storedCreditSourceLabel(card);
   const storedCreditsAria =
     storedCredits > 0 && storedCreditSource
@@ -11375,7 +11397,8 @@ function CardView({
   const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
   const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
   const dataRavenCountersAria = dataRavenCounters > 0 ? `${dataRavenCounters} Data-Raven-Counter` : null;
-  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria].filter(Boolean).join(", ");
+  const ablativeCountersAria = ablativeCounterBadge?.ariaLabel ?? null;
+  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria, ablativeCountersAria].filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
@@ -11708,13 +11731,14 @@ function CardView({
             ))}
           </span>
         ) : null}
-        {advancementCount > 0 ? <AdvancementGems card={card} count={advancementCount} /> : null}
+        {advancementDisplay ? <AdvancementGems card={card} display={advancementDisplay} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
         {storedCredits > 0 && storedCreditSource ? <StoredCreditsBadge amount={storedCredits} sourceLabel={storedCreditSource} /> : null}
         {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
         {scoredAgendaCredits > 0 && scoredAgendaCreditSource ? <ScoredAgendaCreditsBadge amount={scoredAgendaCredits} sourceLabel={scoredAgendaCreditSource} /> : null}
         {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
         {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
+        {ablativeCounterBadge ? <AblativeCounterBadge label={ablativeCounterBadge.shortLabel} ariaLabel={ablativeCounterBadge.ariaLabel} testId={ablativeCounterBadge.testId} /> : null}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
       {discardShortcut ? (
@@ -11889,14 +11913,13 @@ function compactCardActionMenuLabel(action: LegalAction, label: string): string 
   return label.replace(/\s+\([^)]*\)$/, "");
 }
 
-function AdvancementGems({ card, count }: { card: DisplayVisibleCard; count: number }) {
-  const visibleGemCount = Math.min(count, 4);
+function AdvancementGems({ card, display }: { card: DisplayVisibleCard; display: AdvancementCounterDisplay }) {
   return (
     <span className="advancementGems" aria-hidden="true">
-      {Array.from({ length: visibleGemCount }, (_, index) => (
+      {Array.from({ length: display.visibleGemCount }, (_, index) => (
         <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index)} />
       ))}
-      {count > visibleGemCount ? <span className="advancementGemCount">x{count}</span> : null}
+      {display.overflowLabel ? <span className="advancementGemCount">{display.overflowLabel}</span> : null}
     </span>
   );
 }
@@ -11989,6 +12012,14 @@ function DataRavenCounterBadge({ amount }: { amount: number }) {
   );
 }
 
+function AblativeCounterBadge({ label, ariaLabel, testId }: { label: string; ariaLabel: string; testId: string }) {
+  return (
+    <span className="ablativeCounterBadge" aria-label={ariaLabel} data-testid={testId} title={ariaLabel}>
+      {label}
+    </span>
+  );
+}
+
 function advancementGemStyle(instanceId: string, index: number): CSSProperties {
   const seed = hashString(`${instanceId}:${index}`);
   const x = 18 + (seed % 58);
@@ -12027,7 +12058,8 @@ function cardDetailLines(card: VisibleCard): string[] {
     storedCreditsLabel(card),
     recurringCreditLabel(card),
     shellCounterLabel(card),
-    dataRavenCounterLabel(card)
+    dataRavenCounterLabel(card),
+    armoredFridgeAblativeCounterBadge(card)?.label ?? null
   ]
     .filter(Boolean)
     .join(" · ");
@@ -12378,7 +12410,10 @@ function lobbyFromJoinedResponse(response: JoinMatchResponse): LobbyClientPayloa
 }
 
 function normalizeWebSocketUrl(value: string): string {
-  return value.trim().replace(/\s+(?=\/ws(?:$|[?#]))/, "");
+  return value
+    .trim()
+    .replace(/\s+(:\d+(?:\/|$|[?#]))/g, "$1")
+    .replace(/\s+(?=\/ws(?:$|[?#]))/, "");
 }
 
 async function bootstrap(session: SessionInfo): Promise<ClientPayload | LobbyClientPayload | null> {
