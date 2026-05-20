@@ -151,9 +151,13 @@ type ShellTradersActionKind = "prepare" | "remove_counter";
 type ShellTradersActionAssessment = {
   kind: ShellTradersActionKind;
   shellCounters: number;
+  targetDefinitionId?: string;
   targetRoles: string[];
   immediateInstall: boolean;
   sourceVisible: boolean;
+  directInstallAvailable: boolean;
+  directInstallRemainingCredits?: number;
+  directInstallUrgency: number;
 };
 
 type ShellTradersBacklog = {
@@ -1131,10 +1135,15 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
     .sort((left, right) => shellTradersTargetValue(right) - shellTradersTargetValue(left) || left.shellCounters - right.shellCounters)[0];
   const remove = assessments
     .filter((assessment) => assessment.kind === "remove_counter")
-    .sort((left, right) => Number(right.immediateInstall) - Number(left.immediateInstall) || left.shellCounters - right.shellCounters)[0];
-  const preparePenalty = prepare ? shellTradersPrepareBacklogPenalty(input, backlog, remove) : 0;
+    .sort(
+      (left, right) =>
+        Number(right.immediateInstall) - Number(left.immediateInstall) ||
+        shellTradersTargetValue(right) - shellTradersTargetValue(left) ||
+        left.shellCounters - right.shellCounters
+    )[0];
+  const preparePenalty = prepare ? shellTradersPrepareBacklogPenalty(input, backlog, remove, prepare) : 0;
   const prepareScore = prepare ? 165 + shellTradersTargetValue(prepare) + Math.max(0, 4 - input.playerView.own.credits) * 20 - preparePenalty : Number.NEGATIVE_INFINITY;
-  const removeScore = remove ? (remove.immediateInstall ? 230 : 125 + Math.max(0, 4 - remove.shellCounters) * 12) : Number.NEGATIVE_INFINITY;
+  const removeScore = remove ? (remove.immediateInstall ? 230 : 125 + Math.max(0, 4 - remove.shellCounters) * 12) + Math.min(85, shellTradersTargetValue(remove) / 2) : Number.NEGATIVE_INFINITY;
   const best = removeScore >= prepareScore ? remove ?? prepare ?? assessments[0]! : prepare ?? remove ?? assessments[0]!;
   const score = Math.max(prepareScore, removeScore, 0);
   const reasons = sortedUnique([
@@ -1158,9 +1167,11 @@ function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPl
       `shell_traders_prepare_score:${Number.isFinite(prepareScore) ? round(prepareScore) : "none"}`,
       `shell_traders_remove_score:${Number.isFinite(removeScore) ? round(removeScore) : "none"}`,
       `shell_traders_prepare_backlog_penalty:${preparePenalty}`,
+      `shell_traders_immediate_install:${best.immediateInstall}`,
+      `shell_traders_direct_install_available:${best.directInstallAvailable}`,
+      `shell_traders_direct_install_urgency:${best.directInstallUrgency}`,
       `shell_traders_target_roles:${best.targetRoles.slice(0, 3).join(",") || "unknown"}`,
       `shell_traders_shell_counters:${best.shellCounters}`,
-      `shell_traders_immediate_install:${best.immediateInstall}`,
       `shell_traders_source_visible:${best.sourceVisible}`
     ]
   };
@@ -1178,7 +1189,8 @@ function shellTradersBacklog(input: AiDecisionInput): ShellTradersBacklog {
 function shellTradersPrepareBacklogPenalty(
   input: AiDecisionInput,
   backlog: ShellTradersBacklog,
-  remove: ShellTradersActionAssessment | undefined
+  remove: ShellTradersActionAssessment | undefined,
+  prepare?: ShellTradersActionAssessment
 ): number {
   let penalty = 0;
   if (backlog.preparedCount >= 2) penalty += 180 + Math.max(0, backlog.preparedCount - 2) * 45;
@@ -1186,6 +1198,7 @@ function shellTradersPrepareBacklogPenalty(
   if (remove?.immediateInstall) penalty += 110;
   if (backlog.nearInstallCount > 0) penalty += backlog.nearInstallCount * 35;
   if (input.playerView.own.credits <= 1 && backlog.preparedCount >= 2) penalty += 55;
+  if (prepare?.directInstallAvailable) penalty += shellTradersDirectInstallPreparePenalty(prepare);
   return penalty;
 }
 
@@ -1204,14 +1217,21 @@ function classifyShellTradersAction(input: AiDecisionInput, action: LegalAction)
       ? action.payload.targetCardDefinitionId
       : findVisibleCard(input, targetCardId)?.definitionId;
   const targetRoles = rolesForCardId(targetDefinitionId);
+  const directInstall = ability === "set_aside_from_grip" ? shellTradersDirectInstallAction(input, targetCardId) : undefined;
+  const directInstallRemainingCredits = directInstall ? input.playerView.own.credits - actionCreditCost(directInstall) : undefined;
+  const directInstallUrgency = directInstall ? shellTradersDirectInstallUrgency(input, targetRoles, directInstallRemainingCredits ?? 0) : 0;
   const shellCounters = Math.max(0, numberPayload(action, "shellCounterAmount"), numberPayload(action, "remainingCountersBefore"), numberPayload(action, "remainingCounters"));
   const immediateInstall = ability === "remove_shell_counter" && shellCounters <= 1;
   return {
     kind: ability === "set_aside_from_grip" ? "prepare" : "remove_counter",
     shellCounters,
+    ...(targetDefinitionId ? { targetDefinitionId } : {}),
     targetRoles,
     immediateInstall,
-    sourceVisible
+    sourceVisible,
+    directInstallAvailable: Boolean(directInstall),
+    ...(directInstallRemainingCredits !== undefined ? { directInstallRemainingCredits } : {}),
+    directInstallUrgency
   };
 }
 
@@ -1223,6 +1243,31 @@ function shellTradersTargetValue(assessment: ShellTradersActionAssessment): numb
   if (assessment.targetRoles.includes("economy") || assessment.targetRoles.includes("tempo")) value += 20;
   value += Math.min(60, assessment.shellCounters * 10);
   return value;
+}
+
+function shellTradersDirectInstallAction(input: AiDecisionInput, targetCardId: string): LegalAction | undefined {
+  if (!targetCardId) return undefined;
+  return input.legalActions.find((action) => action.type === "install_card" && action.source === targetCardId);
+}
+
+function shellTradersDirectInstallUrgency(input: AiDecisionInput, roles: string[], remainingCredits: number): number {
+  const features = extractRunnerFeatures(input);
+  let urgency = 0;
+  if (roles.some((role) => role.startsWith("breaker_") && !features.rigRoles.has(role))) urgency += 145;
+  if (roles.some((role) => role.startsWith("breaker_") && features.rigRoles.has(role))) urgency -= 25;
+  if (roles.includes("memory") || roles.includes("memory_support")) urgency += features.memoryRemaining <= 1 ? 110 : 25;
+  if (roles.includes("setup") || roles.includes("build_rig")) urgency += features.rigRoles.size === 0 ? 45 : 15;
+  if (roles.includes("economy") || roles.includes("tempo")) urgency += input.playerView.own.credits < 4 ? 55 : 15;
+  if (remainingCredits >= 2) urgency += 45;
+  else if (remainingCredits < 1) urgency -= 35;
+  return Math.max(0, urgency);
+}
+
+function shellTradersDirectInstallPreparePenalty(assessment: ShellTradersActionAssessment): number {
+  if (!assessment.directInstallAvailable) return 0;
+  let penalty = 35 + Math.min(170, assessment.directInstallUrgency);
+  if ((assessment.directInstallRemainingCredits ?? 0) >= 2) penalty += 35;
+  return penalty;
 }
 
 function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): InstalledEconomyActionAssessment | undefined {
@@ -1453,7 +1498,7 @@ function runnerShellTradersPriority(input: AiDecisionInput, action: LegalAction)
   }
   const backlog = shellTradersBacklog(input);
   const hasImmediateRemove = input.legalActions.some((candidate) => classifyShellTradersAction(input, candidate)?.immediateInstall === true);
-  const backlogPenalty = shellTradersPrepareBacklogPenalty(input, backlog, hasImmediateRemove ? { ...assessment, kind: "remove_counter", immediateInstall: true } : undefined);
+  const backlogPenalty = shellTradersPrepareBacklogPenalty(input, backlog, hasImmediateRemove ? { ...assessment, kind: "remove_counter", immediateInstall: true } : undefined, assessment);
   return 96 + Math.min(35, shellTradersTargetValue(assessment) / 5) + Math.max(0, 4 - input.playerView.own.credits) * 5 - Math.min(90, Math.round(backlogPenalty / 4));
 }
 

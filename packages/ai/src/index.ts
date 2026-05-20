@@ -1937,10 +1937,14 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
     case "trigger_ability":
       if (action.payload?.shellTradersAbility === "set_aside_from_grip") {
         const counterAmount = typeof action.payload.shellCounterAmount === "number" ? action.payload.shellCounterAmount : 0;
+        const targetRoles = shellTradersTargetRoles(input, action);
+        const directInstall = shellTradersDirectInstallAction(input, action);
+        const directInstallUrgency = directInstall ? shellTradersDirectInstallUrgency(input, targetRoles, directInstall) : 0;
+        const directInstallPenalty = directInstall ? shellTradersDirectInstallPreparePenalty(directInstallUrgency, directInstall, input) : 0;
         const backlog = shellTradersBacklog(input);
         const immediateRemoveAvailable = shellTradersImmediateRemoveAvailable(input);
         const backlogPenalty = shellTradersPrepareBaselinePenalty(input, backlog, immediateRemoveAvailable);
-        score = 620 + Math.max(0, counterAmount) * 30 - backlogPenalty;
+        score = 620 + Math.max(0, counterAmount) * 30 + Math.min(60, shellTradersTargetValue(targetRoles, counterAmount) / 3) - backlogPenalty - directInstallPenalty;
         reasonCode = "runner.shell_traders.prepare_install";
         explanation = "The Shell Traders bereitet ein eigenes Programm oder eine Hardwarekarte für die verzögerte kostenlose Installation vor.";
         evidence.push(
@@ -1948,6 +1952,9 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
           `shell_counters:${counterAmount}`,
           `shell_traders_backlog:${backlog.preparedCount}`,
           `shell_traders_prepare_backlog_penalty:${backlogPenalty}`,
+          `shell_traders_direct_install_available:${Boolean(directInstall)}`,
+          `shell_traders_direct_install_urgency:${directInstallUrgency}`,
+          `shell_traders_direct_install_penalty:${directInstallPenalty}`,
           `shell_traders_immediate_remove:${immediateRemoveAvailable}`
         );
       } else if (action.payload?.shellTradersAbility === "remove_shell_counter") {
@@ -2224,6 +2231,50 @@ function rolesForAction(input: AiDecisionInput, action: LegalAction): string[] {
   if (action.source === "basic_action" || action.source === "game_rule") return [];
   const visible = findVisibleCard(input, action.source);
   return rolesForCardId(visible?.definitionId);
+}
+
+function shellTradersTargetRoles(input: AiDecisionInput, action: LegalAction): string[] {
+  const targetCardId = typeof action.payload?.targetCardId === "string" ? action.payload.targetCardId : "";
+  const targetDefinitionId =
+    typeof action.payload?.targetCardDefinitionId === "string"
+      ? action.payload.targetCardDefinitionId
+      : findVisibleCard(input, targetCardId)?.definitionId;
+  return rolesForCardId(targetDefinitionId);
+}
+
+function shellTradersTargetValue(roles: string[], shellCounters: number): number {
+  let value = 0;
+  if (roles.some((role) => role.startsWith("breaker_"))) value += 105;
+  if (roles.includes("memory") || roles.includes("memory_support")) value += 55;
+  if (roles.includes("setup") || roles.includes("build_rig")) value += 45;
+  if (roles.includes("economy") || roles.includes("tempo")) value += 20;
+  value += Math.min(60, Math.max(0, shellCounters) * 10);
+  return value;
+}
+
+function shellTradersDirectInstallAction(input: AiDecisionInput, action: LegalAction): LegalAction | undefined {
+  const targetCardId = typeof action.payload?.targetCardId === "string" ? action.payload.targetCardId : "";
+  if (!targetCardId) return undefined;
+  return input.legalActions.find((candidate) => candidate.type === "install_card" && candidate.source === targetCardId);
+}
+
+function shellTradersDirectInstallUrgency(input: AiDecisionInput, roles: string[], directInstall: LegalAction): number {
+  const remainingCredits = input.playerView.own.credits - creditCostForAiAction(directInstall);
+  let urgency = 0;
+  if (roles.some((role) => role.startsWith("breaker_") && !input.playerView.own.rig?.some((card) => rolesForCardId(card.definitionId).includes(role)))) urgency += 145;
+  const memoryRemaining = (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0);
+  if (roles.includes("memory") || roles.includes("memory_support")) urgency += memoryRemaining <= 1 ? 110 : 25;
+  if (roles.includes("setup") || roles.includes("build_rig")) urgency += (input.playerView.own.rig ?? []).length === 0 ? 45 : 15;
+  if (roles.includes("economy") || roles.includes("tempo")) urgency += input.playerView.own.credits < 4 ? 55 : 15;
+  if (remainingCredits >= 2) urgency += 45;
+  else if (remainingCredits < 1) urgency -= 35;
+  return Math.max(0, urgency);
+}
+
+function shellTradersDirectInstallPreparePenalty(urgency: number, directInstall: LegalAction, input: AiDecisionInput): number {
+  let penalty = 35 + Math.min(170, urgency);
+  if (input.playerView.own.credits - creditCostForAiAction(directInstall) >= 2) penalty += 35;
+  return penalty;
 }
 
 function shellTradersBacklog(input: AiDecisionInput): { preparedCount: number; nearInstallCount: number } {

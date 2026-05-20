@@ -889,19 +889,6 @@ describe("MVP 0.3 AI controller contract", () => {
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
     );
-    if (!remove) {
-      console.log(
-        "Shell backlog legal actions",
-        input.legalActions.map((action) => ({
-          type: action.type,
-          ability: action.payload?.shellTradersAbility,
-          target: action.payload?.targetCardDefinitionId,
-          before: action.payload?.remainingCountersBefore,
-          counters: action.payload?.shellCounterAmount,
-          source: action.source,
-        })),
-      );
-    }
     expect(remove).toBeDefined();
     expect(gainCredit).toBeDefined();
     if (!remove || !gainCredit) throw new Error("Missing Shell-counter removal actions");
@@ -985,6 +972,46 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(debugText).toContain("shell_traders_backlog:2");
     expect(debugText).toContain("shell_traders_prepare_backlog_penalty:");
     expect(debugText).toContain("shell_traders_immediate_install:true");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("installs urgent Shell Traders targets directly when affordable", () => {
+    const input = runnerShellTradersInput("ai-shell-traders-direct-urgent", (state) => {
+      moveRunnerResourceCopyToRig(state, "onr_v1_176_the-shell-traders", 0);
+      moveRunnerCardToGrip(state, "simple_fracter");
+      state.runner.credits = 5;
+      state.runner.clicks = 3;
+    });
+    const prepare = input.legalActions.find(
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.shellTradersAbility === "set_aside_from_grip" &&
+        action.payload?.targetCardDefinitionId === "simple_fracter",
+    );
+    const directInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_fracter",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(prepare).toBeDefined();
+    expect(directInstall).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!prepare || !directInstall || !gainCredit)
+      throw new Error("Missing Shell Traders direct-install fixture actions");
+
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [prepare, directInstall, gainCredit],
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(directInstall.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.build_rig");
+    expect(debugText).toContain("shell_traders_direct_install_available:true");
+    expect(debugText).toContain("shell_traders_direct_install_urgency:");
     expect(debugText).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
   });
 
