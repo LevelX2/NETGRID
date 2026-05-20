@@ -14001,15 +14001,25 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs" &&
-        action.payload?.targetCardId === agendaId,
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
     );
+    expect(state.pendingChoice?.source).toContain(
+      "v1919.systematic_layoffs_advancement",
+    );
+    const singleTargetOption = state.pendingChoice?.options.find(
+      (option) => option.value === `${agendaId}|${agendaId}`,
+    );
+    expect(singleTargetOption).toBeDefined();
+    state = applyChoices(state, "corp", [singleTargetOption?.id ?? ""]);
     expect(state.cardInstances[agendaId]?.advancementCounters).toBe(3);
     expect(state.corp.credits).toBe(creditsBeforeLayoffs - 5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
       v1919OperationAbility: "add_advancement_counters",
       targetCardId: agendaId,
+      targetCardDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
+      targetCardDefinitionIds: "onr_v1_202_genetics-visionary-acquisition",
       addedAdvancementCounters: 2,
       targetCount: 1,
       advancementCountersAfter: 3,
@@ -14035,21 +14045,27 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
     );
 
-    expect(layoffActions).toHaveLength(3);
+    expect(layoffActions).toHaveLength(1);
+    expect(layoffActions[0]?.payload?.targetCardId).toBeUndefined();
+    expect(layoffActions[0]?.payload?.secondTargetCardId).toBeUndefined();
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+    );
+    const placementOptions = state.pendingChoice?.options ?? [];
+    expect(placementOptions).toHaveLength(3);
     expect(
-      layoffActions.some(
-        (action) =>
-          action.payload?.targetCardId === firstAgendaId &&
-          action.payload?.secondTargetCardId === undefined,
+      placementOptions.some(
+        (option) => option.value === `${firstAgendaId}|${firstAgendaId}`,
       ),
     ).toBe(true);
     expect(
-      layoffActions.some(
-        (action) => {
-          const selectedIds = new Set([
-            action.payload?.targetCardId,
-            action.payload?.secondTargetCardId,
-          ]);
+      placementOptions.some(
+        (option) => {
+          const selectedIds = new Set(String(option.value).split("|"));
           return (
             selectedIds.has(firstAgendaId) &&
             selectedIds.has(secondAgendaId)
@@ -14058,41 +14074,88 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       ),
     ).toBe(true);
     expect(
-      layoffActions.some(
-        (action) =>
-          action.payload?.targetCardId === secondAgendaId &&
-          action.payload?.secondTargetCardId === undefined,
+      placementOptions.some(
+        (option) => option.value === `${secondAgendaId}|${secondAgendaId}`,
       ),
     ).toBe(true);
+
+    const splitOption = placementOptions.find((option) => {
+      const selectedIds = new Set(String(option.value).split("|"));
+      return selectedIds.has(firstAgendaId) && selectedIds.has(secondAgendaId);
+    });
+    state = applyChoices(state, "corp", [splitOption?.id ?? ""]);
+
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.cardInstances[firstAgendaId]?.advancementCounters).toBe(1);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+      v1919OperationAbility: "add_advancement_counters",
+      addedAdvancementCounters: 2,
+      targetCount: 2,
+    });
+    expect(
+      String(state.eventLog.at(-1)?.publicPayload.targetCardDefinitionIds)
+        .split(",")
+        .sort(),
+    ).toEqual(["onr_v1_202_genetics-visionary-acquisition", "simple_agenda"]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("opens one Systematic Layoffs placement option for a single Corporate War", () => {
+    const corpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+      id: "onr_v1_corp_systematic_layoffs_corporate_war",
+      name: "O:NR V1.9.19 Systematic Layoffs Corporate War",
+      cards: [
+        { id: "onr_v1_196_corporate-war", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.agendaScoring.corp.cards,
+      ],
+    };
+    let state = createGameAfterSetup({
+      seed: "v1919-systematic-layoffs-corporate-war",
+      runnerDeck: MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+      corpDeck,
+      agendaPointsToWin: 7,
+    });
+    state.corp.credits = 20;
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.clicks = 5;
+    const corporateWarId = putCorpRootInRemote(
+      state,
+      "onr_v1_196_corporate-war",
+    );
+    moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
 
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs" &&
-        new Set([
-          action.payload?.targetCardId,
-          action.payload?.secondTargetCardId,
-        ]).has(firstAgendaId) &&
-        new Set([
-          action.payload?.targetCardId,
-          action.payload?.secondTargetCardId,
-        ]).has(secondAgendaId),
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
     );
 
-    expect(state.pendingChoice).toBeUndefined();
-    expect(state.cardInstances[firstAgendaId]?.advancementCounters).toBe(1);
-    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(1);
+    expect(state.pendingChoice?.options).toHaveLength(1);
+    expect(state.pendingChoice?.options[0]).toMatchObject({
+      value: `${corporateWarId}|${corporateWarId}`,
+    });
+    state = applyChoices(state, "corp", [
+      state.pendingChoice?.options[0]?.id ?? "",
+    ]);
+
+    expect(state.cardInstances[corporateWarId]?.advancementCounters).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_304_systematic-layoffs",
       v1919OperationAbility: "add_advancement_counters",
       addedAdvancementCounters: 2,
-      targetCount: 2,
+      targetCount: 1,
+      targetCardDefinitionId: "onr_v1_196_corporate-war",
+      targetCardDefinitionIds: "onr_v1_196_corporate-war",
     });
-    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
-    expect(replay.ok).toBe(true);
-    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("resolves remaining V1.9.19 access ambush damage and installed-hardware paths", () => {

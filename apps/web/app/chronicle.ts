@@ -105,6 +105,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const searchReveal = stringValue(payload.searchReveal);
   const searchDestination = stringValue(payload.searchDestination);
   const shellTradersAbility = shellTradersAbilityFromPayload(payload, abilityId ?? undefined);
+  const v1919OperationAbility = stringValue(payload.v1919OperationAbility);
   const shellTradersTargetTitle =
     shellTradersAbility === "set_aside_from_grip" ||
     shellTradersAbility === "remove_shell_counter" ||
@@ -137,6 +138,23 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       chips.push("Spielstart");
       break;
     case "resolve_choice":
+      if (v1919OperationAbility === "add_advancement_counters") {
+        const added = numberValue(payload.addedAdvancementCounters) ?? 2;
+        const targetCount = numberValue(payload.targetCount) ?? 1;
+        const targetTitles = titlesForDefinitionIds(stringValue(payload.targetCardDefinitionIds));
+        const targetTitle = targetCardTitleFromPayload(payload);
+        const targetText =
+          targetTitles.length > 0
+            ? targetTitles.join(", ")
+            : targetTitle ?? (targetCount === 1 ? "eine Karte" : `${targetCount} Karten`);
+        category = "agenda";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title = phrase(subject, `${added} Advancement-Counter durch Systematic Layoffs auf ${targetText} gelegt`);
+        chips.push("Systematic Layoffs", `+${added} Advancement`, targetCount === 1 ? "1 Ziel" : `${targetCount} Ziele`);
+        break;
+      }
       if (shellTradersAbility === "auto_install_after_memory_choice") {
         category = "card";
         importance = "important";

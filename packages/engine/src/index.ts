@@ -16050,48 +16050,17 @@ function systematicLayoffsLegalActions(
   cardId: CardInstanceId,
   definition: CardDefinition,
 ): LegalAction[] {
-  const targets = advanceableInstalledCardTargets(state);
-  const costs = [{ clicks: 1, credits: definition.cost ?? 0 }];
-  const actions: LegalAction[] = [];
-  for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
-    const firstTargetId = mustArrayValue(
-      targets,
-      firstIndex,
-      "Systematic-Layoffs-Ziel fehlt.",
-    );
-    for (
-      let secondIndex = firstIndex;
-      secondIndex < targets.length;
-      secondIndex += 1
-    ) {
-      const secondTargetId = mustArrayValue(
-        targets,
-        secondIndex,
-        "Systematic-Layoffs-Ziel fehlt.",
-      );
-      const splitTargets = firstTargetId !== secondTargetId;
-      const firstTitle = definitionFor(state, firstTargetId).title;
-      const secondTitle = definitionFor(state, secondTargetId).title;
-      actions.push(
-        action(
-          state,
-          "corp",
-          "play_operation",
-          splitTargets
-            ? `${definition.title}: je 1 Advancement-Counter auf ${firstTitle} und ${secondTitle}`
-            : `${definition.title}: 2 Advancement-Counter auf ${firstTitle}`,
-          cardId,
-          costs,
-          {
-            cardId,
-            targetCardId: firstTargetId,
-            ...(splitTargets ? { secondTargetCardId: secondTargetId } : {}),
-          },
-        ),
-      );
-    }
-  }
-  return actions;
+  return [
+    action(
+      state,
+      "corp",
+      "play_operation",
+      `${definition.title} spielen`,
+      cardId,
+      [{ clicks: 1, credits: definition.cost ?? 0 }],
+      { cardId },
+    ),
+  ];
 }
 
 function resolveAgendaCounterOperation(
@@ -16119,15 +16088,132 @@ function resolveSystematicLayoffsAdvancementOperation(
   state: GameState,
   legalAction: LegalAction,
 ): void {
+  const options = systematicLayoffsPlacementOptions(state);
+  if (options.length === 0)
+    throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
+  startSystematicLayoffsAdvancementChoice(state, options, legalAction);
+}
+
+function systematicLayoffsPlacementOptions(state: GameState): Array<{
+  firstTargetId: CardInstanceId;
+  secondTargetId?: CardInstanceId;
+  id: string;
+  label: string;
+  publicLabel: string;
+  value: string;
+}> {
+  const targets = advanceableInstalledCardTargets(state);
+  const options: Array<{
+    firstTargetId: CardInstanceId;
+    secondTargetId?: CardInstanceId;
+    id: string;
+    label: string;
+    publicLabel: string;
+    value: string;
+  }> = [];
+  for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
+    const firstTargetId = mustArrayValue(
+      targets,
+      firstIndex,
+      "Systematic-Layoffs-Ziel fehlt.",
+    );
+    for (
+      let secondIndex = firstIndex;
+      secondIndex < targets.length;
+      secondIndex += 1
+    ) {
+      const secondTargetId = mustArrayValue(
+        targets,
+        secondIndex,
+        "Systematic-Layoffs-Ziel fehlt.",
+      );
+      const splitTargets = firstTargetId !== secondTargetId;
+      const firstTitle = definitionFor(state, firstTargetId).title;
+      const secondTitle = definitionFor(state, secondTargetId).title;
+      const label = splitTargets
+        ? `Je 1 Advancement-Counter auf ${firstTitle} und ${secondTitle}`
+        : `2 Advancement-Counter auf ${firstTitle}`;
+      options.push({
+        firstTargetId,
+        ...(splitTargets ? { secondTargetId } : {}),
+        id: `placement_${sanitizeId(firstTargetId)}_${sanitizeId(secondTargetId)}`,
+        label,
+        publicLabel: label,
+        value: splitTargets
+          ? `${firstTargetId}|${secondTargetId}`
+          : `${firstTargetId}|${firstTargetId}`,
+      });
+    }
+  }
+  return options;
+}
+
+function startSystematicLayoffsAdvancementChoice(
+  state: GameState,
+  options: ReturnType<typeof systematicLayoffsPlacementOptions>,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  state.pendingChoice = {
+    choiceId: `v1919_systematic_layoffs_advancement_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1919.systematic_layoffs_advancement:${state.stateVersion + 1}`,
+    prompt: "Systematic Layoffs: Advancement-Counter legen",
+    kind: "select_option",
+    options: options.map((option) => ({
+      id: option.id,
+      label: option.label,
+      publicLabel: option.publicLabel,
+      value: option.value,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1919OperationAbility: "add_advancement_counters_choice",
+    eligiblePlacementCount: options.length,
+  };
+}
+
+function resolveSystematicLayoffsAdvancementChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1919.systematic_layoffs_advancement"))
+    throw new Error("Es ist keine Systematic-Layoffs-Advancement-Choice offen.");
+  const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const selectedOption = choice.options.find(
+    (option) => option.id === selectedOptionId,
+  );
+  if (!selectedOption || typeof selectedOption.value !== "string")
+    throw new Error("Systematic Layoffs braucht genau eine Placement-Auswahl.");
+  const [firstTargetId, secondTargetId] = selectedOption.value.split("|") as [
+    CardInstanceId | undefined,
+    CardInstanceId | undefined,
+  ];
+  if (!firstTargetId || !secondTargetId)
+    throw new Error("Systematic Layoffs hat keine gueltige Placement-Auswahl.");
+  applySystematicLayoffsAdvancementPlacement(
+    state,
+    firstTargetId,
+    secondTargetId === firstTargetId ? undefined : secondTargetId,
+    legalAction,
+  );
+  delete state.pendingChoice;
+}
+
+function applySystematicLayoffsAdvancementPlacement(
+  state: GameState,
+  firstTargetId: CardInstanceId,
+  secondTargetId: CardInstanceId | undefined,
+  legalAction: LegalAction,
+): void {
   const eligibleTargets = new Set(advanceableInstalledCardTargets(state));
-  const firstTargetId =
-    typeof legalAction.payload?.targetCardId === "string"
-      ? (legalAction.payload.targetCardId as CardInstanceId)
-      : undefined;
-  const secondTargetId =
-    typeof legalAction.payload?.secondTargetCardId === "string"
-      ? (legalAction.payload.secondTargetCardId as CardInstanceId)
-      : undefined;
   if (!firstTargetId || !eligibleTargets.has(firstTargetId))
     throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
   if (secondTargetId && !eligibleTargets.has(secondTargetId))
@@ -16144,7 +16230,13 @@ function resolveSystematicLayoffsAdvancementOperation(
   const targetCount = placementEntries.length;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
+    sourceDefinitionId: SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
     v1919OperationAbility: "add_advancement_counters",
+    targetCardId: firstTargetId,
+    targetCardDefinitionId: definitionFor(state, firstTargetId).id,
+    targetCardDefinitionIds: placementEntries
+      .map(([targetId]) => definitionFor(state, targetId).id)
+      .join(","),
     addedAdvancementCounters: 2,
     targetCount,
     systematicLayoffsDistribution: placementEntries
@@ -17503,6 +17595,18 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
     resolvePowerGridOverloadChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith(
+      "v1919.systematic_layoffs_advancement",
+    )
+  ) {
+    resolveSystematicLayoffsAdvancementChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
     return;
   }
   if (state.pendingChoice.source.startsWith("v1920.ice_transmutation")) {

@@ -500,6 +500,26 @@ describe("formatChronicleEvent", () => {
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows Systematic Layoffs advancement choices with target context", () => {
+    const resolved = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_304_systematic-layoffs",
+        v1919OperationAbility: "add_advancement_counters",
+        targetCardDefinitionId: "onr_v1_196_corporate-war",
+        targetCardDefinitionIds: "onr_v1_196_corporate-war",
+        addedAdvancementCounters: 2,
+        targetCount: 1,
+        advancementCountersAfter: 2
+      }),
+      "corp"
+    );
+
+    expect(resolved.title).toBe("Du hast 2 Advancement-Counter durch Systematic Layoffs auf Corporate War gelegt.");
+    expect(resolved.chips).toEqual(expect.arrayContaining(["Systematic Layoffs", "+2 Advancement", "1 Ziel"]));
+    expect(resolved.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("shows Self-Modifying Code blocked and MU follow-up choices concretely", () => {
     const blocked = formatChronicleEvent(
       makeEvent("resolve_choice", {
