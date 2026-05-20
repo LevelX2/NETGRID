@@ -440,7 +440,6 @@ const SKIVVISS_ID = "onr_v1_064_skivviss";
 const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
 const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
-const CHESTER_MIX_ID = "onr_v1_352_chester-mix";
 const CHIMERA_ID = "onr_v1_353_chimera";
 const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
@@ -4831,15 +4830,6 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   const iceDefinition = definitionFor(state, iceId);
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
-  for (const sourceId of rezzedCorpRootCardIds(state)) {
-    const sourceDefinition = definitionFor(state, sourceId);
-    if (
-      sourceDefinition.id === "onr_v1_350_antiquated-interface-routines" &&
-      iceServerId &&
-      corpServerIdForInstalledCard(state, sourceId) === iceServerId
-    )
-      bonus += 1;
-  }
   for (const agendaId of scoredCorpAgendaIds(state)) {
     const agendaDefinition = definitionFor(state, agendaId);
     if (
@@ -5026,18 +5016,6 @@ function corpIceInstallAdditionalCost(
   );
 }
 
-function chesterMixIceInstallReduction(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  const server = mustServer(state, serverId);
-  return server.root.reduce((sum, cardId) => {
-    const instance = mustInstance(state.cardInstances, cardId);
-    if (!instance.rezzed) return sum;
-    return definitionFor(state, cardId).id === CHESTER_MIX_ID ? sum + 1 : sum;
-  }, 0);
-}
-
 function corpIceInstallTotalCost(
   state: GameState,
   cardId: CardInstanceId,
@@ -5050,17 +5028,16 @@ function corpIceInstallTotalCost(
   totalCost: number;
 } {
   const additionalCost = corpIceInstallAdditionalCost(state, server.id);
-  const legacyReduction = chesterMixIceInstallReduction(state, server.id);
   const quote = quoteCorpIceInstallCost(state, cardId, server, {
     additionalCredits: additionalCost,
-    legacyReduction,
   });
   return {
     baseCost: quote.baseCredits,
     additionalCost,
-    reduction:
-      legacyReduction +
-      quote.modifiers.reduce((sum, modifier) => sum + modifier.amount, 0),
+    reduction: quote.modifiers.reduce(
+      (sum, modifier) => sum + modifier.amount,
+      0,
+    ),
     reductionSourceDefinitionIds: quote.modifiers
       .map((modifier) => modifier.sourceDefinitionId)
       .join(","),
@@ -5090,10 +5067,8 @@ function assertCorpIceInstallCostValid(
   }
   const server = mustServer(state, String(serverId));
   const additionalCost = corpIceInstallAdditionalCost(state, server.id);
-  const legacyReduction = chesterMixIceInstallReduction(state, server.id);
   const quote = quoteCorpIceInstallCost(state, cardId, server, {
     additionalCredits: additionalCost,
-    legacyReduction,
   });
   if (!quote.canPay) throw new Error("Corp kann die Installkosten nicht zahlen.");
   if ((legalAction.costs[0]?.credits ?? 0) !== quote.finalCredits)
@@ -5880,21 +5855,75 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     run,
     encounterSubroutines,
   );
+  const nextSubroutineIndexes = encounterSubroutineIndexesForNextContinue(
+    run,
+    encounterSubroutines,
+  );
   const willEndRun = nextSubroutines.some(
+    (subroutine) =>
+      subroutine.type === "end_the_run" ||
+      subroutine.type === "end_the_run_unless_runner_pays",
+  );
+  const hardEndRun = nextSubroutines.some(
     (subroutine) => subroutine.type === "end_the_run",
   );
+  const payOrEndRunEntries = nextSubroutineIndexes
+    .map((index) => ({ index, subroutine: encounterSubroutines[index] }))
+    .filter(
+      (
+        entry,
+      ): entry is {
+        index: number;
+        subroutine: NonNullable<CardDefinition["subroutines"]>[number];
+      } => entry.subroutine?.type === "end_the_run_unless_runner_pays",
+    );
+  const payOrEndRunAmount = payOrEndRunEntries.reduce(
+    (sum, entry) => sum + Math.max(0, Math.floor(entry.subroutine.amount ?? 0)),
+    0,
+  );
+  const encounterSubroutineIds = nextSubroutines
+    .map((subroutine) => subroutine.id)
+    .join(",");
   const continueLabel =
     nextSubroutines.length === 0
       ? "ICE passieren"
       : willEndRun
         ? "Subroutinen auslösen (Run endet)"
         : "Subroutinen auslösen";
+  if (
+    payOrEndRunAmount > 0 &&
+    !hardEndRun &&
+    availableRunnerRunCredits(state) >= payOrEndRunAmount
+  ) {
+    actions.push(
+      action(
+        state,
+        "runner",
+        "continue_run",
+        `Subroutinen auslösen (Runner zahlt ${payOrEndRunAmount} Credit)`,
+        "game_rule",
+        [{ credits: payOrEndRunAmount }],
+        {
+          encounterContinue: true,
+          sourceDefinitionId: iceDefinition.id,
+          unbrokenSubroutineCount: nextSubroutines.length,
+          encounterWillEndRun: false,
+          encounterSubroutineIds,
+          payOrEndRunSubroutineIndexes: payOrEndRunEntries
+            .map((entry) => entry.index)
+            .join(","),
+          payOrEndRunSubroutinePayment: payOrEndRunAmount,
+        },
+      ),
+    );
+  }
   actions.push(
     action(state, "runner", "continue_run", continueLabel, "game_rule", [], {
       encounterContinue: true,
       sourceDefinitionId: iceDefinition.id,
       unbrokenSubroutineCount: nextSubroutines.length,
       encounterWillEndRun: willEndRun,
+      encounterSubroutineIds,
     }),
   );
   return actions;
@@ -6214,7 +6243,19 @@ function encounterSubroutinesForNextContinue(
   run: RunState,
   subroutines: NonNullable<CardDefinition["subroutines"]>,
 ): NonNullable<CardDefinition["subroutines"]> {
-  const nextSubroutines: NonNullable<CardDefinition["subroutines"]> = [];
+  return encounterSubroutineIndexesForNextContinue(run, subroutines).flatMap(
+    (index) => {
+      const subroutine = subroutines[index];
+      return subroutine ? [subroutine] : [];
+    },
+  );
+}
+
+function encounterSubroutineIndexesForNextContinue(
+  run: RunState,
+  subroutines: NonNullable<CardDefinition["subroutines"]>,
+): number[] {
+  const indexes: number[] = [];
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (
@@ -6223,10 +6264,10 @@ function encounterSubroutinesForNextContinue(
       run.resolvedSubroutineIndexes.includes(index)
     )
       continue;
-    nextSubroutines.push(subroutine);
+    indexes.push(index);
     if (subroutine.type === "initiate_trace") break;
   }
-  return nextSubroutines;
+  return indexes;
 }
 
 function runnerMovementActions(state: GameState): LegalAction[] {
@@ -10093,6 +10134,77 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
   let ended = false;
   const damageSummaries: DamageSummary[] = [];
   const subroutines = subroutinesForCurrentEncounter(state, definition);
+  const payOrEndRunIndexesForThisContinue = new Set(
+    encounterSubroutineIndexesForNextContinue(run, subroutines).filter(
+      (index) =>
+        subroutines[index]?.type === "end_the_run_unless_runner_pays",
+    ),
+  );
+  const expectedSubroutineIds =
+    typeof legalAction?.payload?.encounterSubroutineIds === "string"
+      ? String(legalAction.payload.encounterSubroutineIds)
+      : undefined;
+  if (expectedSubroutineIds !== undefined) {
+    const currentSubroutineIds = encounterSubroutinesForNextContinue(
+      run,
+      subroutines,
+    )
+      .map((subroutine) => subroutine.id)
+      .join(",");
+    if (currentSubroutineIds !== expectedSubroutineIds)
+      throw new Error("Die Encounter-Subroutinen sind nicht mehr gueltig.");
+  }
+  const paidPayOrEndRunIndexes = new Set<number>();
+  const payOrEndRunIndexPayload =
+    typeof legalAction?.payload?.payOrEndRunSubroutineIndexes === "string"
+      ? String(legalAction.payload.payOrEndRunSubroutineIndexes)
+      : "";
+  for (const rawIndex of payOrEndRunIndexPayload.split(",")) {
+    if (!rawIndex) continue;
+    const index = Number(rawIndex);
+    if (!Number.isInteger(index) || index < 0)
+      throw new Error("Die Pay-or-End-the-Run-Subroutine ist ungueltig.");
+    paidPayOrEndRunIndexes.add(index);
+  }
+  let expectedPayOrEndRunPayment = 0;
+  for (const index of paidPayOrEndRunIndexes) {
+    const subroutine = subroutines[index];
+    if (
+      !subroutine ||
+      subroutine.type !== "end_the_run_unless_runner_pays" ||
+      run.brokenSubroutineIndexes.includes(index) ||
+      run.resolvedSubroutineIndexes.includes(index)
+    ) {
+      throw new Error("Die Pay-or-End-the-Run-Subroutine ist nicht mehr gueltig.");
+    }
+    expectedPayOrEndRunPayment += Math.max(
+      0,
+      Math.floor(subroutine.amount ?? 0),
+    );
+  }
+  if (expectedPayOrEndRunPayment > 0) {
+    const declaredPayment = Math.max(
+      0,
+      Math.floor(
+        Number(legalAction?.payload?.payOrEndRunSubroutinePayment ?? 0),
+      ),
+    );
+    const declaredCost = Math.max(
+      0,
+      Math.floor(
+        (legalAction?.costs ?? []).reduce(
+          (sum, cost) => sum + (cost.credits ?? 0),
+          0,
+        ),
+      ),
+    );
+    if (
+      declaredPayment !== expectedPayOrEndRunPayment ||
+      declaredCost !== expectedPayOrEndRunPayment
+    )
+      throw new Error("Die Pay-or-End-the-Run-Kosten sind nicht mehr gueltig.");
+    spendRunnerRunCredits(state, expectedPayOrEndRunPayment);
+  }
   for (let index = 0; index < subroutines.length; index += 1) {
     const subroutine = subroutines[index];
     if (
@@ -10310,6 +10422,50 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       appendResolvedSubroutineEffect(legalAction, definition, index, subroutine);
       ended = true;
     }
+    if (subroutine.type === "end_the_run_unless_runner_pays") {
+      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+      if (paidPayOrEndRunIndexes.has(index)) {
+        appendResolvedSubroutineEffect(
+          legalAction,
+          definition,
+          index,
+          subroutine,
+          undefined,
+          { paidCredits: amount, endedRun: false },
+        );
+      } else {
+        appendResolvedSubroutineEffect(
+          legalAction,
+          definition,
+          index,
+          subroutine,
+          undefined,
+          { paidCredits: 0, endedRun: true },
+        );
+        ended = true;
+      }
+    }
+  }
+  for (const index of payOrEndRunIndexesForThisContinue) {
+    if (paidPayOrEndRunIndexes.has(index)) continue;
+    const alreadyResolved = (legalAction?.resolvedEffects ?? []).some(
+      (effect) =>
+        effect.kind === "resolve_subroutine" &&
+        effect.subroutineIndex === index,
+    );
+    if (alreadyResolved) continue;
+    const subroutine = subroutines[index];
+    if (!subroutine || subroutine.type !== "end_the_run_unless_runner_pays")
+      continue;
+    appendResolvedSubroutineEffect(
+      legalAction,
+      definition,
+      index,
+      subroutine,
+      undefined,
+      { paidCredits: 0, endedRun: true },
+    );
+    ended = true;
   }
   if (state.winner) return;
   const encounteredIceId = run.encounteredIceId;
@@ -10359,6 +10515,7 @@ function appendResolvedSubroutineEffect(
   subroutineIndex: number,
   subroutine: NonNullable<CardDefinition["subroutines"]>[number],
   damageSummary?: DamageSummary,
+  options: { paidCredits?: number; endedRun?: boolean } = {},
 ): void {
   if (!legalAction) return;
   const dynamicAttribution = dynamicSubroutineAttributionFor(subroutine);
@@ -10387,7 +10544,12 @@ function appendResolvedSubroutineEffect(
             cardsTrashed: damageSummary.cardsTrashed,
           }
         : {}),
-      ...(subroutine.type === "end_the_run" ? { endedRun: true } : {}),
+      ...(options.paidCredits !== undefined
+        ? { paidCredits: options.paidCredits }
+        : {}),
+      ...(subroutine.type === "end_the_run" || options.endedRun
+        ? { endedRun: true }
+        : {}),
     },
   ];
 }
@@ -20959,6 +21121,12 @@ function makeActionId(
     parts.push(String(payload.iceInstallTotalCost));
   if (payload?.iceInstallReductionSourceDefinitionIds)
     parts.push(String(payload.iceInstallReductionSourceDefinitionIds));
+  if (payload?.encounterSubroutineIds !== undefined)
+    parts.push(String(payload.encounterSubroutineIds));
+  if (payload?.payOrEndRunSubroutineIndexes !== undefined)
+    parts.push(String(payload.payOrEndRunSubroutineIndexes));
+  if (payload?.payOrEndRunSubroutinePayment !== undefined)
+    parts.push(String(payload.payOrEndRunSubroutinePayment));
   for (const entry of legacyAbilityPayloadEntries(
     payload,
     ACTION_ID_ABILITY_PAYLOAD_FIELDS,

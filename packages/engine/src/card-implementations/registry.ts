@@ -38,7 +38,10 @@ import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
 import { punitiveCounterstrikeImplementation } from "./onr-v1/corp/operations/punitive-counterstrike";
 import { scorchedEarthImplementation } from "./onr-v1/corp/operations/scorched-earth";
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
+import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
+import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
+import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
@@ -111,7 +114,10 @@ export const CARD_IMPLEMENTATIONS = [
   tychoMemChipImplementation,
   wutechMemChipImplementation,
   zetatechMemChipImplementation,
+  antiquatedInterfaceRoutinesImplementation,
+  chesterMixImplementation,
   jerusalemCityGridImplementation,
+  tesseractFortConstructionImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 
 export const CARD_IMPLEMENTATIONS_BY_DEFINITION_ID: Partial<

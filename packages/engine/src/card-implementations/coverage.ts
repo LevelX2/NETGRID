@@ -148,8 +148,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rustbelt-hq-branch.ts",
   "onr_v1_344_spinn-public-relations":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
+  "onr_v1_350_antiquated-interface-routines":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
+  "onr_v1_352_chester-mix":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
+  "onr_v1_370_tesseract-fort-construction":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tesseract-fort-construction.ts",
 };
 
 function implementedCoverageFor(

@@ -146,8 +146,11 @@ function activeCorpRezCostModifiersForIce(
 }
 
 function corpInstallCostModifierAppliesToCard(
+  state: GameState,
   modifier: CardInstallCostModifierImplementation,
+  sourceCardInstanceId: CardInstanceId,
   definition: CardDefinition,
+  targetServerId: CorpServer["id"],
 ): boolean {
   if (
     modifier.operation !== "reduce" ||
@@ -155,19 +158,31 @@ function corpInstallCostModifierAppliesToCard(
   )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
-  return cardMatchesModifierAppliesTo(definition, modifier.appliesTo);
+  if (!cardMatchesModifierAppliesTo(definition, modifier.appliesTo))
+    return false;
+  if (!modifier.appliesTo.sameServerAsSource) return true;
+  return corpServerIdForInstalledCard(state, sourceCardInstanceId) === targetServerId;
 }
 
 function activeCorpInstallCostModifiersForCard(
   state: GameState,
   definition: CardDefinition,
+  server: CorpServer,
 ): ActiveCorpInstallCostModifier[] {
   const matches: ActiveCorpInstallCostModifier[] = [];
   for (const match of activeCardImplementationModifiersForCorpRoot(
     state,
     "install_cost",
   )) {
-    if (!corpInstallCostModifierAppliesToCard(match.modifier, definition))
+    if (
+      !corpInstallCostModifierAppliesToCard(
+        state,
+        match.modifier,
+        match.sourceCardInstanceId,
+        definition,
+        server.id,
+      )
+    )
       continue;
     matches.push(match);
   }
@@ -246,7 +261,7 @@ export function quoteCorpIceInstallCost(
   const legacyReduction = Math.max(0, Math.floor(options.legacyReduction ?? 0));
   const modifierMatches =
     definition.type === "ice"
-      ? activeCorpInstallCostModifiersForCard(state, definition)
+      ? activeCorpInstallCostModifiersForCard(state, definition, server)
       : [];
   const modifierReduction = modifierMatches.reduce(
     (sum, match) => sum + match.modifier.amount,

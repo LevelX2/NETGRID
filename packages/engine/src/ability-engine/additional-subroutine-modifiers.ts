@@ -76,6 +76,14 @@ function subroutineDefinitionForImplementation(
       dynamicSubroutine,
     };
   }
+  if (subroutine.kind === "end_the_run_unless_runner_pays") {
+    return {
+      id: publicId,
+      type: "end_the_run_unless_runner_pays",
+      amount: subroutine.amount,
+      dynamicSubroutine,
+    };
+  }
   throw new Error(`Unsupported additional subroutine: ${JSON.stringify(subroutine)}`);
 }
 

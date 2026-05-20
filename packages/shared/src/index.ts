@@ -168,6 +168,7 @@ export type TraceSuccessEffect =
 
 export type SubroutineType =
   | "end_the_run"
+  | "end_the_run_unless_runner_pays"
   | "corp_gain_credit"
   | "runner_lose_credits"
   | "give_runner_tag"
@@ -244,6 +245,7 @@ export type ResolvedGameEffect = {
   damageType?: DamageType;
   cardsTrashed?: number;
   endedRun?: boolean;
+  paidCredits?: number;
   sourceDefinitionId?: CardDefinitionId;
   sourceTitle?: string;
   cardDefinitionId?: CardDefinitionId;

@@ -165,6 +165,7 @@ export type CardInstallCostModifierImplementation = {
   appliesTo: {
     side: Extract<Side, "corp">;
     cardType: Extract<CardType, "ice">;
+    sameServerAsSource?: boolean;
   };
 };
 
@@ -232,8 +233,15 @@ export type CardAgendaDifficultyModifierImplementation = {
   };
 };
 
-export type CardSubroutineImplementation = {
-  kind: "end_the_run";
-  text: "*End the run.";
-  visibility: EventVisibilityClass;
-};
+export type CardSubroutineImplementation =
+  | {
+      kind: "end_the_run";
+      text: "*End the run.";
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "end_the_run_unless_runner_pays";
+      amount: number;
+      text: "*End the run unless Runner pays [1].";
+      visibility: EventVisibilityClass;
+    };

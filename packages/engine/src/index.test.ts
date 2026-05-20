@@ -8166,6 +8166,80 @@ describe("V1.6.2 Mechanikpaket B", () => {
     }
   });
 
+  it("describes P3.10 server-scoped ICE modifiers", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_v1_352_chester-mix")?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "install_cost",
+        operation: "reduce",
+        amount: 2,
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        visibility: "public",
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          sameServerAsSource: true,
+        },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_350_antiquated-interface-routines",
+      )?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "ice_strength",
+        operation: "increase",
+        amount: 1,
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        visibility: "public",
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          sameServerAsSource: true,
+        },
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_370_tesseract-fort-construction",
+      )?.modifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "additional_subroutine",
+        activeWhile: "rezzed",
+        sourceZone: "corp_root",
+        visibility: "public",
+        appliesTo: {
+          side: "corp",
+          cardType: "ice",
+          sameServerAsSource: true,
+        },
+        append: "after_existing",
+        subroutine: {
+          kind: "end_the_run_unless_runner_pays",
+          amount: 1,
+          text: "*End the run unless Runner pays [1].",
+          visibility: "public",
+        },
+      }),
+    );
+
+    for (const definitionId of [
+      "onr_v1_350_antiquated-interface-routines",
+      "onr_v1_352_chester-mix",
+      "onr_v1_370_tesseract-fort-construction",
+    ] as const) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+      ).toBe("implemented");
+    }
+    expect(cardImplementationForDefinitionId("onr_v1_366_red-herrings")).toBeUndefined();
+  });
+
   it("describes activated main-action card abilities without callbacks", () => {
     expect(
       cardImplementationForDefinitionId(
@@ -9557,6 +9631,216 @@ describe("V1.6.2 Mechanikpaket B", () => {
       mustAction(nonCodeGate, "runner", (action) => action.type === "continue_run")
         .payload?.unbrokenSubroutineCount,
     ).toBe(2);
+  });
+
+  it("adds Tesseract pay-or-end-the-run subroutines only to ICE on its fort", () => {
+    const approachIce = (
+      seed: string,
+      targetServerId: "remote_1" | "rd",
+      rezzedTesseract: boolean,
+    ): GameState => {
+      let state = createGameAfterSetup({
+        seed,
+        runnerDeck: {
+          ...ONR_V1_6_2_RUNNER_DECK,
+          cards: [
+            ...ONR_V1_6_2_RUNNER_DECK.cards,
+            { id: "simple_decoder", quantity: 1 },
+          ],
+        },
+        corpDeck: {
+          ...ONR_V1_6_2_CORP_DECK,
+          cards: [
+            ...ONR_V1_6_2_CORP_DECK.cards,
+            {
+              id: "onr_v1_370_tesseract-fort-construction",
+              quantity: 1,
+            },
+          ],
+        },
+        agendaPointsToWin: 7,
+      });
+      state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+      state.corp.credits = 30;
+      state.runner.credits = 20;
+      const tesseractId = putCorpRootInRemote(
+        state,
+        "onr_v1_370_tesseract-fort-construction",
+      );
+      state.cardInstances[tesseractId] = {
+        ...state.cardInstances[tesseractId]!,
+        faceup: rezzedTesseract,
+        rezzed: rezzedTesseract,
+      };
+      putCorpIceOnServer(state, targetServerId, "onr_v1_230_cortical-scanner");
+      state = toRunnerTurnFromCorpMain(state);
+      state.runner.credits = 20;
+      const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          action.source === decoderId,
+      );
+      state.runner.credits = 20;
+      state.runner.clicks = 4;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.serverId === targetServerId,
+      );
+      return apply(state, "corp", (action) => action.type === "rez_ice");
+    };
+    const pumpAndBreakPrinted = (state: GameState): GameState => {
+      let next = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) === "simple_decoder",
+      );
+      for (const subroutineIndex of [0, 1, 2]) {
+        next = apply(
+          next,
+          "runner",
+          (action) =>
+            action.type === "break_subroutine" &&
+            sourceDefinition(next, action) === "simple_decoder" &&
+            action.payload?.subroutineIndex === subroutineIndex,
+        );
+      }
+      return next;
+    };
+
+    const withTesseract = pumpAndBreakPrinted(
+      approachIce("p310-tesseract-pay", "remote_1", true),
+    );
+    const breakActions = getLegalActions(withTesseract, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(withTesseract, action) === "simple_decoder",
+    );
+    expect(breakActions.map((action) => action.payload?.subroutineIndex)).toEqual([
+      3,
+    ]);
+    expect(breakActions[0]?.payload).toMatchObject({
+      subroutineId:
+        "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+      dynamicSourceDefinitionId: "onr_v1_370_tesseract-fort-construction",
+      dynamicSourceTitle: "Tesseract Fort Construction",
+      dynamicSourceKind: "additional_subroutine",
+      dynamicSubroutineKind: "end_the_run_unless_runner_pays",
+    });
+    const payContinue = mustAction(
+      withTesseract,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.costs[0]?.credits === 1 &&
+        action.payload?.encounterWillEndRun === false,
+    );
+    expect(payContinue.payload).toMatchObject({
+      payOrEndRunSubroutineIndexes: "3",
+      payOrEndRunSubroutinePayment: 1,
+    });
+    const publicTesseractId = Object.entries(withTesseract.cardInstances).find(
+      ([, instance]) =>
+        instance.definitionId === "onr_v1_370_tesseract-fort-construction",
+    )?.[0];
+    expect(publicTesseractId).toBeDefined();
+    expect(JSON.stringify(payContinue.payload)).not.toContain(
+      publicTesseractId!,
+    );
+    let paid = apply(
+      withTesseract,
+      "runner",
+      (action) => action.actionId === payContinue.actionId,
+    );
+    expect(paid.run?.phase).toBe("access");
+    expect(paid.runner.credits).toBe(withTesseract.runner.credits - 1);
+    expect(paid.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        sourceDefinitionId: "onr_v1_230_cortical-scanner",
+        subroutineIndex: 3,
+        subroutineType: "end_the_run_unless_runner_pays",
+        cardDefinitionId: "onr_v1_370_tesseract-fort-construction",
+        cardTitle: "Tesseract Fort Construction",
+        paidCredits: 1,
+      }),
+    ]);
+
+    const refusing = pumpAndBreakPrinted(
+      approachIce("p310-tesseract-refuse", "remote_1", true),
+    );
+    const refuseContinue = mustAction(
+      refusing,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.costs.length === 0 &&
+        action.payload?.encounterWillEndRun === true,
+    );
+    expect(refuseContinue.payload).toMatchObject({
+      unbrokenSubroutineCount: 1,
+      encounterSubroutineIds:
+        "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+    });
+    const refused = apply(
+      refusing,
+      "runner",
+      (action) => action.actionId === refuseContinue.actionId,
+    );
+    expect(refused.run).toBeUndefined();
+    expect(refused.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual([
+      expect.objectContaining({
+        kind: "resolve_subroutine",
+        subroutineIndex: 3,
+        subroutineType: "end_the_run_unless_runner_pays",
+        paidCredits: 0,
+        endedRun: true,
+      }),
+    ]);
+
+    const otherFort = pumpAndBreakPrinted(
+      approachIce("p310-tesseract-other-fort", "rd", true),
+    );
+    expect(
+      mustAction(otherFort, "runner", (action) => action.type === "continue_run")
+        .payload?.unbrokenSubroutineCount,
+    ).toBe(0);
+
+    const unrezzed = pumpAndBreakPrinted(
+      approachIce("p310-tesseract-unrezzed", "remote_1", false),
+    );
+    expect(
+      mustAction(unrezzed, "runner", (action) => action.type === "continue_run")
+        .payload?.unbrokenSubroutineCount,
+    ).toBe(0);
+
+    const stale = structuredClone(withTesseract);
+    const tesseractId = Object.entries(stale.cardInstances).find(
+      ([, instance]) =>
+        instance.definitionId === "onr_v1_370_tesseract-fort-construction",
+    )?.[0] as CardInstanceId | undefined;
+    expect(tesseractId).toBeDefined();
+    stale.cardInstances[tesseractId!] = {
+      ...stale.cardInstances[tesseractId!]!,
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(stale, {
+        matchId: stale.matchId,
+        side: "runner",
+        actionId: payContinue.actionId,
+        clientKnownStateVersion: stale.stateVersion,
+        idempotencyKey: "p310-tesseract-stale",
+      }).ok,
+    ).toBe(false);
   });
 });
 
@@ -14216,7 +14500,15 @@ describe("V1.9.9 Mechanikpaket R", () => {
       seed: "v199-chester",
       baseline: MVP_0_99_BASELINE,
       runnerDeck: ONR_V1_9_9_RUNNER_DECK,
-      corpDeck: ONR_V1_9_9_CORP_DECK,
+      corpDeck: {
+        ...ONR_V1_9_9_CORP_DECK,
+        cards: [
+          ...ONR_V1_9_9_CORP_DECK.cards,
+          { id: "onr_v1_324_fortress-architects", quantity: 1 },
+          { id: "simple_barrier_ice", quantity: 1 },
+          { id: "simple_sentry_ice", quantity: 1 },
+        ],
+      },
       agendaPointsToWin: 7,
     });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -14240,8 +14532,103 @@ describe("V1.9.9 Mechanikpaket R", () => {
         action.payload?.placement === "ice",
     );
     expect(install.payload?.iceInstallBaseCost).toBe(1);
-    expect(install.payload?.iceInstallReduction).toBe(1);
+    expect(install.payload?.iceInstallReduction).toBe(2);
     expect(install.payload?.iceInstallTotalCost).toBe(0);
+  });
+
+  it("keeps Chester Mix install-cost quotes server-scoped and stale-safe", () => {
+    let state = createGameAfterSetup({
+      seed: "p310-chester-scope",
+      baseline: MVP_0_99_BASELINE,
+      runnerDeck: ONR_V1_9_9_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_9_9_CORP_DECK,
+        cards: [
+          ...ONR_V1_9_9_CORP_DECK.cards,
+          { id: "onr_v1_324_fortress-architects", quantity: 1 },
+          { id: "simple_barrier_ice", quantity: 1 },
+          { id: "simple_sentry_ice", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 3;
+    const chesterId = putCorpRootInRemote(state, "onr_v1_352_chester-mix");
+    state.cardInstances[chesterId] = {
+      ...state.cardInstances[chesterId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const fortressId = putCorpRootInRemote(state, "onr_v1_324_fortress-architects");
+    state.cardInstances[fortressId] = {
+      ...state.cardInstances[fortressId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    putCorpIceOnServer(state, "rd", "simple_sentry_ice");
+    const iceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+
+    const sameFortInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === iceId &&
+        action.payload?.serverId === "remote_1" &&
+        action.payload?.placement === "ice",
+    );
+    expect(sameFortInstall.payload).toMatchObject({
+      iceInstallBaseCost: 2,
+      iceInstallReduction: 3,
+      iceInstallTotalCost: 0,
+    });
+    expect(
+      String(sameFortInstall.payload?.iceInstallReductionSourceDefinitionIds).split(
+        ",",
+      ),
+    ).toEqual(
+      expect.arrayContaining([
+        "onr_v1_352_chester-mix",
+        "onr_v1_324_fortress-architects",
+      ]),
+    );
+
+    const otherFortInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === iceId &&
+        action.payload?.serverId === "rd" &&
+        action.payload?.placement === "ice",
+    );
+    expect(otherFortInstall.payload).toMatchObject({
+      iceInstallBaseCost: 1,
+      iceInstallReduction: 1,
+      iceInstallTotalCost: 0,
+      iceInstallReductionSourceDefinitionIds: "onr_v1_324_fortress-architects",
+    });
+
+    const stale = structuredClone(state);
+    stale.cardInstances[chesterId] = {
+      ...stale.cardInstances[chesterId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    expect(
+      applyAction(stale, {
+        matchId: stale.matchId,
+        side: "corp",
+        actionId: sameFortInstall.actionId,
+        clientKnownStateVersion: stale.stateVersion,
+        idempotencyKey: "p310-chester-stale",
+      }).ok,
+    ).toBe(false);
+    expect(stale.corp.credits).toBe(20);
   });
 
   it("trashes a Runner daemon when Chimera is accessed and keeps the access flow legal", () => {
@@ -36360,7 +36747,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
         action.payload?.placement === "ice",
     );
     expect(discounted.payload).toMatchObject({
-      iceInstallReduction: 1,
+      iceInstallReduction: 2,
       iceInstallTotalCost: 0,
     });
     const otherServer = mustAction(
