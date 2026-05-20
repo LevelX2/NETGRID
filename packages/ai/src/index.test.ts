@@ -17,6 +17,7 @@ import {
   hashState,
   replayEvents,
 } from "@netgrid/engine";
+import { MECHANIC_SMOKE_DECKS } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   assertAiInputIsSideSafe,
@@ -87,6 +88,7 @@ import type {
   CardDefinition,
   CardInstanceId,
   ChoiceRequest,
+  CreateGameConfig,
   DeckDefinition,
   GameState,
   LegalAction,
@@ -5632,6 +5634,67 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(drawDecision.reasonCode).toBe("runner.plan.draw_for_answers");
   });
 
+  it("avoids City Surveillance draw tags when economy is available", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-city-surveillance-draw-tax",
+      (state) => {
+        state.runner.credits = 0;
+        state.runner.tags = 16;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "onr_v1_313_city-surveillance", 0);
+        const cityId = state.corp.servers
+          .find((server) => server.id === "remote_1")
+          ?.root.find(
+            (cardId) =>
+              state.cardInstances[cardId]?.definitionId ===
+              "onr_v1_313_city-surveillance",
+          );
+        expect(cityId).toBeDefined();
+        if (!cityId) throw new Error("Missing City Surveillance");
+        state.cardInstances[cityId] = {
+          ...state.cardInstances[cityId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      {
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      },
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(drawCard?.payload).toMatchObject({
+      citySurveillanceDrawDecision: "tag",
+      citySurveillanceProjectedTagsAdded: 1,
+    });
+    expect(gainCredit).toBeDefined();
+    if (!drawCard || !gainCredit)
+      throw new Error("Missing City Surveillance draw-tax fixture actions");
+
+    const filteredInput = {
+      ...input,
+      legalActions: [drawCard, gainCredit],
+    };
+    const drawCandidate = generateRunnerPlanCandidates(filteredInput).find(
+      (candidate) => candidate.kind === "draw_for_answers",
+    );
+    expect(drawCandidate).toBeDefined();
+    if (!drawCandidate) throw new Error("Missing draw-for-answers candidate");
+    const drawScore = evaluateRunnerPlan(filteredInput, drawCandidate);
+    const decision = chooseRunnerAction(filteredInput);
+
+    expect(decision.actionId).toBe(gainCredit.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(drawScore.evidence).toContain("city_surveillance_draw_tax:true");
+    expect(drawScore.evidence).toContain("city_surveillance_projected_tags:1");
+  });
+
   it("handles access trash, jack-out and legal fallback without hidden-info claims", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v141-trash-jackout" }),
@@ -8668,8 +8731,9 @@ function installedCorpBbsEconomyInput(seed: string) {
 function runnerActionPhaseInput(
   seed: string,
   mutate: (state: GameState) => void,
+  config: CreateGameConfig = {},
 ) {
-  const state = toRunnerTurn(createGameAfterSetup({ seed }));
+  const state = toRunnerTurn(createGameAfterSetup({ seed, ...config }));
   mutate(state);
   return buildAiDecisionInput(state, "runner", {
     difficulty: "normal",

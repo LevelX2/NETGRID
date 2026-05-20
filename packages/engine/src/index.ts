@@ -353,6 +353,8 @@ type CorpRootRezResolver = {
   resolve: (state: GameState) => void;
 };
 
+const POWER_GRID_OVERLOAD_OPERATION_ID = "onr_v1_299_power-grid-overload";
+
 type DamageSummary = {
   damageType: DamageType;
   amount: number;
@@ -1337,31 +1339,15 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  "onr_v1_299_power-grid-overload": {
+  [POWER_GRID_OVERLOAD_OPERATION_ID]: {
     name: "onr_corp_operation_tagged_runner_trash_hardware",
     canPlay: (state) =>
-      state.runner.tags > 0 && state.runner.rig.hardware.length > 0,
+      state.runner.tags > 0 &&
+      state.corp.credits > 0 &&
+      powerGridOverloadEligibleHardwareIds(state).length > 0,
     resolve: (state, legalAction) => {
       requireRunnerTagged(state);
-      const targetHardwareId = state.runner.rig.hardware
-        .slice()
-        .sort((left, right) => {
-          const leftDefinition = definitionFor(state, left);
-          const rightDefinition = definitionFor(state, right);
-          const byInstallCost =
-            (rightDefinition.installCost ?? 0) -
-            (leftDefinition.installCost ?? 0);
-          if (byInstallCost !== 0) return byInstallCost;
-          return left.localeCompare(right);
-        })[0];
-      if (!targetHardwareId)
-        throw new Error("Der Runner hat keine installierte Hardware.");
-      trashRunnerInstalledCardToHeap(state, targetHardwareId);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        trashedHardwareId: targetHardwareId,
-        trashedHardwareDefinitionId: definitionFor(state, targetHardwareId).id,
-      };
+      resolvePowerGridOverloadOperation(state, legalAction);
     },
   },
   [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
@@ -1606,6 +1592,8 @@ type RunnerDrawSummary = {
   citySurveillanceCreditsPaid: number;
   citySurveillanceTagsAdded: number;
 };
+
+type CitySurveillanceDrawDecision = "auto" | "pay" | "tag";
 
 function emptyRunnerDrawSummary(): RunnerDrawSummary {
   return {
@@ -2999,6 +2987,10 @@ function corpMainActions(state: GameState): LegalAction[] {
       state.corp.credits >= (definition.cost ?? 0) &&
       canPlayCorpOperation(state, definition)
     ) {
+      if (definition.id === POWER_GRID_OVERLOAD_OPERATION_ID) {
+        actions.push(...powerGridOverloadLegalActions(state, id, definition));
+        continue;
+      }
       if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
         actions.push(...systematicLayoffsLegalActions(state, id, definition));
         continue;
@@ -3962,11 +3954,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       ),
     );
     if (state.runner.stack.length > 0)
-      actions.push(
-        action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
-          { clicks: 1 },
-        ]),
-      );
+      actions.push(...runnerDrawCardActions(state));
     if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
       actions.push(
         action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [
@@ -4876,6 +4864,59 @@ function runnerMainActions(state: GameState): LegalAction[] {
   }
   actions.push(...specialZoneHarnessActions(state, "runner"));
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+  return actions;
+}
+
+function runnerDrawCardActions(state: GameState): LegalAction[] {
+  const citySurveillanceSourceCount = citySurveillanceSourceIds(state).length;
+  if (citySurveillanceSourceCount <= 0) {
+    return [
+      action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
+        { clicks: 1 },
+      ]),
+    ];
+  }
+
+  const actions: LegalAction[] = [];
+  if (state.runner.credits >= citySurveillanceSourceCount) {
+    actions.push(
+      action(
+        state,
+        "runner",
+        "draw_card",
+        citySurveillanceSourceCount === 1
+          ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
+          : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Credits zahlen)`,
+        "basic_action",
+        [{ clicks: 1, credits: citySurveillanceSourceCount }],
+        {
+          citySurveillanceSourceCount,
+          citySurveillanceDrawDecision: "pay",
+          citySurveillanceProjectedCreditsPaid: citySurveillanceSourceCount,
+          citySurveillanceProjectedTagsAdded: 0,
+        },
+      ),
+    );
+  }
+
+  actions.push(
+    action(
+      state,
+      "runner",
+      "draw_card",
+      citySurveillanceSourceCount === 1
+        ? "Karte ziehen (City Surveillance: 1 Tag nehmen)"
+        : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Tags nehmen)`,
+      "basic_action",
+      [{ clicks: 1 }],
+      {
+        citySurveillanceSourceCount,
+        citySurveillanceDrawDecision: "tag",
+        citySurveillanceProjectedCreditsPaid: 0,
+        citySurveillanceProjectedTagsAdded: citySurveillanceSourceCount,
+      },
+    ),
+  );
   return actions;
 }
 
@@ -8009,7 +8050,10 @@ function performAction(
         applyRunnerDrawSummaryPayload(
           state,
           legalAction,
-          drawRunnerCard(state),
+          drawRunnerCard(
+            state,
+            citySurveillanceDrawDecisionFromPayload(legalAction),
+          ),
         );
       } else {
         drawCorpCard(state);
@@ -14318,7 +14362,25 @@ function drawCorpCards(state: GameState, amount: number): void {
   for (let index = 0; index < amount; index += 1) drawCorpCard(state);
 }
 
-function drawRunnerCard(state: GameState): RunnerDrawSummary {
+function citySurveillanceSourceIds(state: GameState): CardInstanceId[] {
+  return rezzedCorpRootCardIds(state).filter(
+    (sourceId) =>
+      definitionFor(state, sourceId).id === CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
+  );
+}
+
+function citySurveillanceDrawDecisionFromPayload(
+  legalAction: LegalAction,
+): CitySurveillanceDrawDecision {
+  const decision = legalAction.payload?.citySurveillanceDrawDecision;
+  if (decision === "pay" || decision === "tag") return decision;
+  return "auto";
+}
+
+function drawRunnerCard(
+  state: GameState,
+  citySurveillanceDecision: CitySurveillanceDrawDecision = "auto",
+): RunnerDrawSummary {
   const summary = emptyRunnerDrawSummary();
   const cardId = state.runner.stack.shift();
   if (!cardId) return summary;
@@ -14328,14 +14390,16 @@ function drawRunnerCard(state: GameState): RunnerDrawSummary {
     zone: { side: "runner", zone: "grip" },
   };
   summary.drawnCount = 1;
-  const citySurveillanceIds = rezzedCorpRootCardIds(state).filter(
-    (sourceId) =>
-      definitionFor(state, sourceId).id === CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
-  );
+  const citySurveillanceIds = citySurveillanceSourceIds(state);
   summary.citySurveillanceSourceCount = citySurveillanceIds.length;
   for (const _sourceId of citySurveillanceIds) {
     void _sourceId;
-    if (state.runner.credits > 0) {
+    if (
+      citySurveillanceDecision === "pay" ||
+      (citySurveillanceDecision === "auto" && state.runner.credits > 0)
+    ) {
+      if (state.runner.credits <= 0)
+        throw new Error("City Surveillance kann nicht bezahlt werden.");
       spendCredits(state, "runner", 1);
       summary.citySurveillanceCreditsPaid += 1;
     } else {
@@ -22511,6 +22575,9 @@ function publicContextForAction(
     "drawnCount",
     "runnerGripAfter",
     "citySurveillanceSourceCount",
+    "citySurveillanceDrawDecision",
+    "citySurveillanceProjectedCreditsPaid",
+    "citySurveillanceProjectedTagsAdded",
     "citySurveillanceCreditsPaid",
     "citySurveillanceTagsAdded",
     "creditsLost",

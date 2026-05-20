@@ -103,6 +103,7 @@ type RunnerFeatures = {
   credits: number;
   clicks: number;
   tags: number;
+  citySurveillanceSourceCount: number;
   memoryRemaining: number;
   handCount: number;
   rigRoles: Set<string>;
@@ -125,6 +126,13 @@ type RunnerTwoTurnRunIntent = {
   creditsNeeded: number;
   ready: boolean;
   stateKey: string;
+};
+
+type CitySurveillanceDrawProjection = {
+  sourceCount: number;
+  creditsPaid: number;
+  tagsAdded: number;
+  decision: "pay" | "tag" | "none";
 };
 
 type InstalledEconomyActionKind = "direct_payout" | "pool_build" | "pool_payout" | "side_economy";
@@ -299,6 +307,10 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
   const earlyTurn = evaluateRunnerEarlyTurnDoctrine(input, candidate);
   const breakerPlan = evaluateVisibleBreakerPlan(input, candidate);
   const twoTurnIntent = evaluateRunnerTwoTurnRunIntent(input, candidate);
+  const citySurveillanceDrawRisk = evaluateCitySurveillanceDrawRisk(
+    input,
+    candidate,
+  );
   const installedEconomy = evaluateInstalledEconomyActions(input, candidate);
   const shellTraders = evaluateShellTradersActions(input, candidate);
   const doctrinePlanWeight = doctrinePlanWeightFor(input, candidate.kind);
@@ -314,6 +326,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     corpThreat.score * profile.weights.corpScoringThreat +
     breakerPlan.score +
     twoTurnIntent.score +
+    citySurveillanceDrawRisk.score +
     installedEconomy.score +
     shellTraders.score -
     visibleRiskPenalty(candidate, profile.riskTolerance) -
@@ -322,7 +335,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
-    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
+    reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...citySurveillanceDrawRisk.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -332,6 +345,7 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
       ...installedEconomy.evidence,
       ...shellTraders.evidence,
       ...twoTurnIntent.evidence,
+      ...citySurveillanceDrawRisk.evidence,
       ...rig.evidence,
       ...runCost.evidence,
       ...access.evidence,
@@ -385,6 +399,91 @@ function evaluateRunnerTwoTurnRunIntent(input: AiDecisionInput, candidate: Runne
       "two_turn_run_intent_lifetime:single_decision",
       "two_turn_run_intent_invalidates_on:target_credits_visible_ice_breakers"
     ]
+  };
+}
+
+function evaluateCitySurveillanceDrawRisk(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): RunnerPlanEvaluatorResult {
+  if (candidate.kind !== "draw_for_answers")
+    return { score: 0, reasons: [], evidence: [] };
+  const projection = bestCitySurveillanceDrawProjection(input, candidate);
+  if (projection.sourceCount <= 0) {
+    return { score: 0, reasons: [], evidence: ["city_surveillance_draw_tax:false"] };
+  }
+
+  let penalty = projection.creditsPaid * 185 + projection.tagsAdded * 620;
+  if (projection.creditsPaid > 0 && input.playerView.own.credits <= projection.creditsPaid + 1)
+    penalty += 120;
+  if (projection.tagsAdded > 0 && input.playerView.own.tags > 0)
+    penalty += Math.min(360, input.playerView.own.tags * 20);
+
+  return {
+    score: -penalty,
+    reasons: [
+      projection.tagsAdded > 0
+        ? "city_surveillance_draw_would_add_tag"
+        : "city_surveillance_draw_tax_paid",
+    ],
+    evidence: [
+      "city_surveillance_draw_tax:true",
+      `city_surveillance_sources:${projection.sourceCount}`,
+      `city_surveillance_decision:${projection.decision}`,
+      `city_surveillance_projected_credits:${projection.creditsPaid}`,
+      `city_surveillance_projected_tags:${projection.tagsAdded}`,
+      `tags:${input.playerView.own.tags}`,
+      `credits:${input.playerView.own.credits}`,
+    ],
+  };
+}
+
+function bestCitySurveillanceDrawProjection(
+  input: AiDecisionInput,
+  candidate: RunnerPlanCandidate,
+): CitySurveillanceDrawProjection {
+  const projections = candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter(
+      (action): action is LegalAction =>
+        action !== undefined && action.type === "draw_card",
+    )
+    .map(citySurveillanceDrawProjectionForAction)
+    .filter((projection) => projection.sourceCount > 0)
+    .sort(
+      (left, right) =>
+        left.tagsAdded - right.tagsAdded ||
+        left.creditsPaid - right.creditsPaid ||
+        left.decision.localeCompare(right.decision),
+    );
+  return (
+    projections[0] ?? {
+      sourceCount: 0,
+      creditsPaid: 0,
+      tagsAdded: 0,
+      decision: "none",
+    }
+  );
+}
+
+function citySurveillanceDrawProjectionForAction(
+  action: LegalAction,
+): CitySurveillanceDrawProjection {
+  const sourceCount = Number(action.payload?.citySurveillanceSourceCount ?? 0);
+  if (!Number.isFinite(sourceCount) || sourceCount <= 0) {
+    return { sourceCount: 0, creditsPaid: 0, tagsAdded: 0, decision: "none" };
+  }
+  const creditsPaid = Number(
+    action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+  );
+  const tagsAdded = Number(action.payload?.citySurveillanceProjectedTagsAdded ?? 0);
+  const decision =
+    action.payload?.citySurveillanceDrawDecision === "pay" ? "pay" : "tag";
+  return {
+    sourceCount,
+    creditsPaid: Number.isFinite(creditsPaid) ? creditsPaid : 0,
+    tagsAdded: Number.isFinite(tagsAdded) ? tagsAdded : 0,
+    decision,
   };
 }
 
@@ -1227,6 +1326,7 @@ function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
     tags: input.playerView.own.tags,
+    citySurveillanceSourceCount: visibleCitySurveillanceSourceCount(input),
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
     handCount: input.playerView.own.gripOrHq.length,
     rigRoles,
@@ -1252,6 +1352,20 @@ function findVisibleCard(input: AiDecisionInput, instanceId: string): VisibleCar
     ...input.playerView.servers.flatMap((server) => [server.ice, server.root])
   ];
   return zones.flat().find((card) => card.instanceId === instanceId && card.known);
+}
+
+function visibleCitySurveillanceSourceCount(input: AiDecisionInput): number {
+  return input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.root.filter(
+        (card) =>
+          card.known &&
+          card.rezzed === true &&
+          card.definitionId === "onr_v1_313_city-surveillance",
+      ).length,
+    0,
+  );
 }
 
 function rolesForCardId(cardId: string | undefined): string[] {

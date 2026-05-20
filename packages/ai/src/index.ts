@@ -88,6 +88,7 @@ type AiFeatures = {
   credits: number;
   clicks: number;
   tags: number;
+  citySurveillanceSourceCount: number;
   opponentCredits: number;
   opponentTags: number;
   memoryRemaining: number;
@@ -1982,9 +1983,36 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
       break;
     case "draw_card":
       score = features.handCount < 3 ? 430 : 320;
+      if (features.citySurveillanceSourceCount > 0) {
+        const projectedCreditsPaid = Number(
+          action.payload?.citySurveillanceProjectedCreditsPaid ?? 0,
+        );
+        const projectedTagsAdded = Number(
+          action.payload?.citySurveillanceProjectedTagsAdded ?? 0,
+        );
+        score -=
+          (Number.isFinite(projectedCreditsPaid) ? projectedCreditsPaid : 0) *
+            185 +
+          (Number.isFinite(projectedTagsAdded) ? projectedTagsAdded : 0) * 620;
+        if (projectedTagsAdded > 0 && features.tags > 0)
+          score -= Math.min(360, features.tags * 20);
+        if (
+          projectedCreditsPaid > 0 &&
+          features.credits <= projectedCreditsPaid + 1
+        )
+          score -= 120;
+      }
       reasonCode = "runner.economy.draw_card";
       explanation = "Eine Karte zu ziehen verbessert das sichtbare Setup.";
       evidence.push(`hand_count:${features.handCount}`);
+      if (features.citySurveillanceSourceCount > 0) {
+        evidence.push(
+          `city_surveillance_sources:${features.citySurveillanceSourceCount}`,
+          `city_surveillance_decision:${String(action.payload?.citySurveillanceDrawDecision ?? "unknown")}`,
+          `city_surveillance_projected_credits:${Number(action.payload?.citySurveillanceProjectedCreditsPaid ?? 0)}`,
+          `city_surveillance_projected_tags:${Number(action.payload?.citySurveillanceProjectedTagsAdded ?? 0)}`,
+        );
+      }
       break;
     case "end_turn":
       score = 120 + (features.clicks <= 0 ? 500 : 0);
@@ -2128,6 +2156,7 @@ function extractAiFeatures(input: AiDecisionInput): AiFeatures {
     credits: input.playerView.own.credits,
     clicks: input.playerView.own.clicks,
     tags: input.playerView.own.tags,
+    citySurveillanceSourceCount: visibleCitySurveillanceSourceCount(input),
     opponentCredits: input.playerView.opponent.credits,
     opponentTags: input.playerView.opponent.tags,
     memoryRemaining: (input.playerView.own.memoryLimit ?? 0) - (input.playerView.own.memoryUsed ?? 0),
@@ -2154,6 +2183,20 @@ function buildServerFeatures(input: AiDecisionInput): Map<string, ServerFeatures
         rezzedRootCount: server.root.filter((card) => card.rezzed === true).length
       }
     ])
+  );
+}
+
+function visibleCitySurveillanceSourceCount(input: AiDecisionInput): number {
+  return input.playerView.servers.reduce(
+    (count, server) =>
+      count +
+      server.root.filter(
+        (card) =>
+          card.known &&
+          card.rezzed === true &&
+          card.definitionId === "onr_v1_313_city-surveillance",
+      ).length,
+    0,
   );
 }
 

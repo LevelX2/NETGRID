@@ -16072,22 +16072,72 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       faceup: true,
       rezzed: true,
     };
+    const drawActions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "draw_card",
+    );
+    expect(drawActions).toHaveLength(2);
+    expect(
+      drawActions.find(
+        (action) => action.payload?.citySurveillanceDrawDecision === "pay",
+      ),
+    ).toMatchObject({
+      costs: [{ clicks: 1, credits: 1 }],
+      payload: {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceProjectedCreditsPaid: 1,
+        citySurveillanceProjectedTagsAdded: 0,
+      },
+    });
+    expect(
+      drawActions.find(
+        (action) => action.payload?.citySurveillanceDrawDecision === "tag",
+      ),
+    ).toMatchObject({
+      costs: [{ clicks: 1 }],
+      payload: {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceProjectedCreditsPaid: 0,
+        citySurveillanceProjectedTagsAdded: 1,
+      },
+    });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
-    state = apply(state, "runner", (action) => action.type === "draw_card");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "draw_card" &&
+        action.payload?.citySurveillanceDrawDecision === "pay",
+    );
     expect(state.runner.credits).toBe(0);
     expect(state.runner.tags).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       drawnCount: 1,
       citySurveillanceSourceCount: 1,
+      citySurveillanceDrawDecision: "pay",
       citySurveillanceCreditsPaid: 1,
       citySurveillanceTagsAdded: 0,
       runnerCreditsAfter: 0,
     });
-    state = apply(state, "runner", (action) => action.type === "draw_card");
+    const tagOnlyDrawActions = getLegalActions(state, "runner").filter(
+      (action) => action.type === "draw_card",
+    );
+    expect(tagOnlyDrawActions).toHaveLength(1);
+    expect(tagOnlyDrawActions[0]?.payload).toMatchObject({
+      citySurveillanceDrawDecision: "tag",
+      citySurveillanceProjectedTagsAdded: 1,
+    });
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "draw_card" &&
+        action.payload?.citySurveillanceDrawDecision === "tag",
+    );
     expect(state.runner.tags).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       citySurveillanceSourceCount: 1,
+      citySurveillanceDrawDecision: "tag",
       citySurveillanceCreditsPaid: 0,
       citySurveillanceTagsAdded: 1,
       runnerTagsAfter: 1,
