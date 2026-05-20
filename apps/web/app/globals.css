@@ -4584,7 +4584,7 @@ select {
   align-items: flex-start;
   gap: 10px;
   width: fit-content;
-  max-width: none;
+  max-width: 100%;
 }
 
 .archivesPile {
@@ -4592,13 +4592,13 @@ select {
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
   width: fit-content;
-  max-width: none;
+  max-width: 100%;
   min-width: 0;
 }
 
 .archivesPileBody {
   width: fit-content;
-  max-width: none;
+  max-width: 100%;
   min-width: 0;
 }
 
@@ -4640,7 +4640,8 @@ select {
   --archive-card-width: calc(108px * var(--archive-card-scale, 1));
   --archive-card-height: calc(151px * var(--archive-card-scale, 1));
   --archive-card-step: calc(50px * var(--archive-card-scale, 1));
-  --archive-stack-width: calc(var(--archive-card-width) + (var(--archive-card-step) * 5));
+  --archive-visible-steps: 5;
+  --archive-stack-width: calc(var(--archive-card-width) + (var(--archive-card-step) * var(--archive-visible-steps)));
   box-sizing: border-box;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(var(--archive-card-step), var(--archive-card-step)));
@@ -4649,7 +4650,7 @@ select {
   align-items: flex-start;
   width: var(--archive-stack-width);
   min-width: var(--archive-card-width);
-  max-width: none;
+  max-width: 100%;
   min-height: var(--archive-card-height);
   padding-right: calc(var(--archive-card-width) - var(--archive-card-step));
   overflow-x: visible;

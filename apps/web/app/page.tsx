@@ -11252,6 +11252,10 @@ function ArchivesDualStackLane({
   const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
   const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
   const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
+  const faceupRowItems = shownFaceupCards.length + (faceupOverflow > 0 ? 1 : 0);
+  const facedownRowItems = shownFacedownCount + (facedownOverflow > 0 ? 1 : 0);
+  const faceupRowStyle = { "--archive-visible-steps": String(Math.max(0, faceupRowItems - 1)) } as CSSProperties;
+  const facedownRowStyle = { "--archive-visible-steps": String(Math.max(0, facedownRowItems - 1)) } as CSSProperties;
 
   if (collapsed) {
     return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label="Archive eingeklappt" />;
@@ -11270,7 +11274,7 @@ function ArchivesDualStackLane({
       {faceupCards.length > 0 ? (
         <div className="archivesPile">
           <div className="archivesPileBody">
-            <div className="archivesOverlapRow">
+            <div className="archivesOverlapRow" style={faceupRowStyle}>
               {shownFaceupCards.map((card) => {
                 const displayCard = enrichCard(card);
                 return (
@@ -11299,7 +11303,7 @@ function ArchivesDualStackLane({
       {facedownCount > 0 ? (
         <div className="archivesPile">
           <div className="archivesPileBody">
-            <div className="archivesOverlapRow">
+            <div className="archivesOverlapRow" style={facedownRowStyle}>
               {Array.from({ length: shownFacedownCount }, (_, index) => (
                 <CardView
                   key={`archives-facedown-${index}`}
