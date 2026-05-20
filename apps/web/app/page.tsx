@@ -2526,7 +2526,8 @@ export default function Page() {
       ? {
           matchElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.matchStartedAtMs),
           decisionElapsed: formatMatchTimerDuration(matchClockNowMs - matchClockAnchor.decisionStartedAtMs),
-          scopeLabel: payload.winner ? "Spiel beendet" : matchTimerScopeLabel(activeView, payload.legalActions)
+          scopeLabel: payload.winner ? "Spiel beendet" : matchTimerScopeLabel(activeView, payload.legalActions),
+          graceLabel: playerClockGraceDisplay(payload.playerClock, matchClockNowMs)
         }
       : null;
   const activeMatchIsGame = activeMatchWorkspace === "game";
@@ -4845,7 +4846,7 @@ export default function Page() {
                   <span>
                     <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
                   </span>
-                  <small>Orientierung</small>
+                  {matchClockDisplay.graceLabel ? <small>{matchClockDisplay.graceLabel}</small> : null}
                 </div>
               ) : null}
               {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
@@ -12361,19 +12362,34 @@ function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapsho
       ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
       : "Wartet";
   return (
-    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label="Spielerzeit" data-testid="player-clock">
-      <span className="matchClockIcon" aria-hidden="true">
-        <Clock size={15} />
+    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label={`Spielerzeit: ${ownerLabel}`} data-testid="player-clock">
+      <span className={`playerClockSide runner ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
+        <strong>Runner</strong>
+        <span className="playerClockValue">{formatPlayerClockDuration(runnerRemainingMs)}</span>
       </span>
-      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
-        <strong>Runner</strong> {formatPlayerClockDuration(runnerRemainingMs)}
+      <span className={`playerClockSide corp ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
+        <strong>Korp</strong>
+        <span className="playerClockValue">{formatPlayerClockDuration(corpRemainingMs)}</span>
       </span>
-      <span className={`playerClockSide ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
-        <strong>Korp</strong> {formatPlayerClockDuration(corpRemainingMs)}
-      </span>
-      <small>{ownerLabel}</small>
     </div>
   );
+}
+
+function playerClockGraceDisplay(snapshot: ApiPlayerClockSnapshot | undefined, nowMs: number): string | null {
+  if (!snapshot || snapshot.mode !== "player_clock" || snapshot.decisionOwnerSide === undefined || snapshot.expiredSide) return null;
+  const remainingMs = playerClockLiveGraceRemaining(snapshot, nowMs);
+  if (remainingMs === null) return null;
+  return remainingMs > 0 ? `Kulanz ${formatPlayerClockDuration(remainingMs)}` : "Kulanz vorbei";
+}
+
+function playerClockLiveGraceRemaining(snapshot: ApiPlayerClockSnapshot, nowMs: number): number | null {
+  if (snapshot.decisionOwnerSide === undefined) return null;
+  if (snapshot.activityStartedAtMs !== undefined && snapshot.gracePeriodMs !== undefined) {
+    const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+    return Math.max(0, snapshot.gracePeriodMs - elapsedMs);
+  }
+  if (snapshot.graceRemainingMs !== undefined) return Math.max(0, snapshot.graceRemainingMs);
+  return null;
 }
 
 function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {

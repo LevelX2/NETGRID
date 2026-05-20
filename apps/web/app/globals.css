@@ -8123,10 +8123,10 @@ select,
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  flex: 0 1 auto;
+  flex: 1 1 220px;
   gap: 6px 10px;
   min-height: 34px;
-  min-width: min(100%, 360px);
+  min-width: min(100%, 220px);
   padding: 7px 10px;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -8159,48 +8159,64 @@ select,
 }
 
 .playerClockStrip {
-  display: grid;
-  grid-template-columns: auto minmax(96px, 1fr) minmax(96px, 1fr) auto;
-  align-items: center;
-  flex: 1 1 520px;
-  gap: 8px;
-  min-height: 38px;
-  min-width: min(100%, 420px);
-  padding: 7px 10px;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--panel), var(--corp) 6%);
+  display: contents;
   color: var(--muted);
   font-size: 12px;
 }
 
 .playerClockSide {
   display: inline-flex;
+  align-items: center;
   justify-content: space-between;
   gap: 8px;
-  min-width: 0;
-  padding: 5px 8px;
-  border: 1px solid color-mix(in srgb, var(--line), transparent 20%);
-  border-radius: 6px;
+  flex: 1 1 220px;
+  min-width: min(100%, 160px);
+  min-height: 38px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
   background: var(--panel-soft);
   white-space: nowrap;
+}
+
+.playerClockSide.runner {
+  border-color: color-mix(in srgb, var(--runner-zone-accent), var(--line) 15%);
+  background: color-mix(in srgb, var(--runner-zone-accent), transparent 90%);
+}
+
+.playerClockSide.corp {
+  border-color: color-mix(in srgb, var(--corp-status-accent), var(--line) 15%);
+  background: color-mix(in srgb, var(--corp-status-accent), transparent 90%);
 }
 
 .playerClockSide strong {
   color: var(--text);
   font-weight: 800;
+  line-height: 1;
 }
 
-.playerClockSide.active {
-  border-color: color-mix(in srgb, var(--runner), var(--line) 35%);
-  background: color-mix(in srgb, var(--runner), transparent 88%);
+.playerClockValue {
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 850;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.playerClockSide.runner.active {
+  border-color: var(--runner-zone-accent);
+  background: color-mix(in srgb, var(--runner-zone-accent), transparent 84%);
+}
+
+.playerClockSide.corp.active {
+  border-color: var(--corp-status-accent);
+  background: color-mix(in srgb, var(--corp-status-accent), transparent 84%);
 }
 
 .playerClockStrip.charging .playerClockSide.active,
 .playerClockStrip.critical .playerClockSide.active,
 .playerClockStrip.expired .playerClockSide.active {
-  border-color: color-mix(in srgb, var(--danger), var(--line) 24%);
-  background: color-mix(in srgb, var(--danger), transparent 88%);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--danger), transparent 35%);
 }
 
 .playerClockStrip.critical .playerClockSide.active,
@@ -9822,12 +9838,9 @@ select,
     margin-left: 0;
   }
 
-  .playerClockStrip {
-    grid-template-columns: auto minmax(0, 1fr);
-  }
-
-  .playerClockStrip small {
-    grid-column: 1 / -1;
+  .matchClockStrip,
+  .playerClockSide {
+    flex-basis: 100%;
   }
 
   .gameStandingStrip,
