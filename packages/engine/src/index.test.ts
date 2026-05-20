@@ -13994,15 +13994,6 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
     );
     expect(cardCounterAmount(state, agendaId, "power")).toBe(1);
 
-    const scoredAgendaId = findCard(state, "simple_agenda");
-    removeEverywhere(state, scoredAgendaId);
-    state.corp.scoreArea.push(scoredAgendaId);
-    state.cardInstances[scoredAgendaId] = {
-      ...state.cardInstances[scoredAgendaId]!,
-      zone: { side: "corp", zone: "scoreArea" },
-      faceup: true,
-      rezzed: true,
-    };
     moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
     const creditsBeforeLayoffs = state.corp.credits;
     state = apply(
@@ -14010,50 +14001,94 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs" &&
+        action.payload?.targetCardId === agendaId,
     );
-    expect(state.specialZones?.removedFromGame).toContain(scoredAgendaId);
-    expect(state.corp.credits).toBe(creditsBeforeLayoffs - 3);
+    expect(state.cardInstances[agendaId]?.advancementCounters).toBe(3);
+    expect(state.corp.credits).toBe(creditsBeforeLayoffs - 5);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
-      v1919OperationAbility: "forfeit_scored_agenda",
-      agendaPointCostPaid: 2,
+      v1919OperationAbility: "add_advancement_counters",
+      targetCardId: agendaId,
+      addedAdvancementCounters: 2,
+      targetCount: 1,
+      advancementCountersAfter: 3,
     });
   });
 
-  it("opens a Systematic Layoffs target choice when multiple Corp agendas are scored", () => {
+  it("offers Systematic Layoffs advancement placements for installed advanceable cards", () => {
     let state = MECHANIC_SMOKE_GAMES.agendaScoring("v1919-systematic-layoffs-choice");
     state.corp.credits = 20;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-    const firstAgendaId = scoreCorpAgendaForTest(state, "simple_agenda");
-    const secondAgendaId = scoreCorpAgendaForTest(
+    state.corp.clicks = 5;
+    const firstAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    const secondAgendaId = putCorpRootInRemote(
       state,
       "onr_v1_202_genetics-visionary-acquisition",
     );
     moveCorpCardToHq(state, "onr_v1_304_systematic-layoffs");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
+    const layoffActions = getLegalActions(state, "corp").filter(
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+    );
+
+    expect(layoffActions).toHaveLength(3);
+    expect(
+      layoffActions.some(
+        (action) =>
+          action.payload?.targetCardId === firstAgendaId &&
+          action.payload?.secondTargetCardId === undefined,
+      ),
+    ).toBe(true);
+    expect(
+      layoffActions.some(
+        (action) => {
+          const selectedIds = new Set([
+            action.payload?.targetCardId,
+            action.payload?.secondTargetCardId,
+          ]);
+          return (
+            selectedIds.has(firstAgendaId) &&
+            selectedIds.has(secondAgendaId)
+          );
+        },
+      ),
+    ).toBe(true);
+    expect(
+      layoffActions.some(
+        (action) =>
+          action.payload?.targetCardId === secondAgendaId &&
+          action.payload?.secondTargetCardId === undefined,
+      ),
+    ).toBe(true);
 
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs",
+        sourceDefinition(state, action) === "onr_v1_304_systematic-layoffs" &&
+        new Set([
+          action.payload?.targetCardId,
+          action.payload?.secondTargetCardId,
+        ]).has(firstAgendaId) &&
+        new Set([
+          action.payload?.targetCardId,
+          action.payload?.secondTargetCardId,
+        ]).has(secondAgendaId),
     );
 
-    expect(state.pendingChoice?.source).toContain("v1919.systematic_layoffs");
-    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(2);
-    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
-    state = applyChoices(state, "corp", [`card_${secondAgendaId}`]);
-
-    expect(state.specialZones?.removedFromGame).toContain(secondAgendaId);
-    expect(state.corp.scoreArea).toContain(firstAgendaId);
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.cardInstances[firstAgendaId]?.advancementCounters).toBe(1);
+    expect(state.cardInstances[secondAgendaId]?.advancementCounters).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
-      v1919OperationAbility: "forfeit_scored_agenda",
-      forfeitedAgendaDefinitionId: "onr_v1_202_genetics-visionary-acquisition",
-      specialZone: "removed_from_game",
+      actionType: "play_operation",
+      v1919OperationAbility: "add_advancement_counters",
+      addedAdvancementCounters: 2,
+      targetCount: 2,
     });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);

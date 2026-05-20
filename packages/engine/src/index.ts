@@ -104,7 +104,7 @@ import {
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
   ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
-  SYSTEMATIC_LAYOFFS_FORFEIT_AGENDA_OPERATION_ID,
+  SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
   VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
@@ -1561,25 +1561,11 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       };
     },
   },
-  [SYSTEMATIC_LAYOFFS_FORFEIT_AGENDA_OPERATION_ID]: {
-    name: "onr_v1919_corp_operation_forfeit_scored_agenda",
-    canPlay: (state) => corpScoredAgendaForfeitTarget(state) !== undefined,
-    resolve: (state, legalAction) => {
-      const targets = corpScoredAgendaForfeitTargets(state);
-      if (targets.length === 0)
-        throw new Error(
-          "Systematic Layoffs findet keine gescorte Korp-Agenda.",
-        );
-      if (targets.length > 1) {
-        startSystematicLayoffsChoice(state, targets, legalAction);
-        return;
-      }
-      resolveSystematicLayoffsForfeit(
-        state,
-        mustArrayValue(targets, 0, "Systematic-Layoffs-Ziel fehlt."),
-        legalAction,
-      );
-    },
+  [SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID]: {
+    name: "onr_v1919_corp_operation_add_two_advancement_counters",
+    canPlay: (state) => advanceableInstalledCardTargets(state).length > 0,
+    resolve: (state, legalAction) =>
+      resolveSystematicLayoffsAdvancementOperation(state, legalAction),
   },
   [TEAM_RESTRUCTURING_COUNTER_OPERATION_ID]: {
     name: "onr_v1919_corp_operation_add_power_counter",
@@ -3013,6 +2999,10 @@ function corpMainActions(state: GameState): LegalAction[] {
       state.corp.credits >= (definition.cost ?? 0) &&
       canPlayCorpOperation(state, definition)
     ) {
+      if (definition.id === SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID) {
+        actions.push(...systematicLayoffsLegalActions(state, id, definition));
+        continue;
+      }
       actions.push(
         action(
           state,
@@ -15806,12 +15796,6 @@ function corpAgendaCounterOperationTarget(
   return installedAgendaOperationTarget(state);
 }
 
-function corpScoredAgendaForfeitTarget(
-  state: GameState,
-): CardInstanceId | undefined {
-  return corpScoredAgendaForfeitTargets(state)[0];
-}
-
 function corpScoredAgendaForfeitTargets(
   state: GameState,
 ): CardInstanceId[] {
@@ -15824,6 +15808,55 @@ function corpScoredAgendaForfeitTargets(
       return byPoints !== 0 ? byPoints : left.localeCompare(right);
     })
     .filter((cardId) => agendaPointsForScoredCard(state, cardId) >= 1);
+}
+
+function systematicLayoffsLegalActions(
+  state: GameState,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+): LegalAction[] {
+  const targets = advanceableInstalledCardTargets(state);
+  const costs = [{ clicks: 1, credits: definition.cost ?? 0 }];
+  const actions: LegalAction[] = [];
+  for (let firstIndex = 0; firstIndex < targets.length; firstIndex += 1) {
+    const firstTargetId = mustArrayValue(
+      targets,
+      firstIndex,
+      "Systematic-Layoffs-Ziel fehlt.",
+    );
+    for (
+      let secondIndex = firstIndex;
+      secondIndex < targets.length;
+      secondIndex += 1
+    ) {
+      const secondTargetId = mustArrayValue(
+        targets,
+        secondIndex,
+        "Systematic-Layoffs-Ziel fehlt.",
+      );
+      const splitTargets = firstTargetId !== secondTargetId;
+      const firstTitle = definitionFor(state, firstTargetId).title;
+      const secondTitle = definitionFor(state, secondTargetId).title;
+      actions.push(
+        action(
+          state,
+          "corp",
+          "play_operation",
+          splitTargets
+            ? `${definition.title}: je 1 Advancement-Counter auf ${firstTitle} und ${secondTitle}`
+            : `${definition.title}: 2 Advancement-Counter auf ${firstTitle}`,
+          cardId,
+          costs,
+          {
+            cardId,
+            targetCardId: firstTargetId,
+            ...(splitTargets ? { secondTargetCardId: secondTargetId } : {}),
+          },
+        ),
+      );
+    }
+  }
+  return actions;
 }
 
 function resolveAgendaCounterOperation(
@@ -15844,6 +15877,52 @@ function resolveAgendaCounterOperation(
     targetCardDefinitionId: definitionFor(state, targetAgendaId).id,
     addedCounterAmount: 1,
     remainingCounters: cardCounter(state, targetAgendaId, "power"),
+  };
+}
+
+function resolveSystematicLayoffsAdvancementOperation(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const eligibleTargets = new Set(advanceableInstalledCardTargets(state));
+  const firstTargetId =
+    typeof legalAction.payload?.targetCardId === "string"
+      ? (legalAction.payload.targetCardId as CardInstanceId)
+      : undefined;
+  const secondTargetId =
+    typeof legalAction.payload?.secondTargetCardId === "string"
+      ? (legalAction.payload.secondTargetCardId as CardInstanceId)
+      : undefined;
+  if (!firstTargetId || !eligibleTargets.has(firstTargetId))
+    throw new Error("Systematic Layoffs findet kein advancebares Ziel.");
+  if (secondTargetId && !eligibleTargets.has(secondTargetId))
+    throw new Error("Systematic Layoffs findet kein zweites advancebares Ziel.");
+
+  const placements: Record<CardInstanceId, number> = {
+    [firstTargetId]: secondTargetId ? 1 : 2,
+  };
+  if (secondTargetId) placements[secondTargetId] = 1;
+  for (const [targetId, amount] of Object.entries(placements)) {
+    mustInstance(state.cardInstances, targetId).advancementCounters += amount;
+  }
+  const placementEntries = Object.entries(placements);
+  const targetCount = placementEntries.length;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1919OperationAbility: "add_advancement_counters",
+    addedAdvancementCounters: 2,
+    targetCount,
+    systematicLayoffsDistribution: placementEntries
+      .map(([targetId, amount]) => `${sanitizeId(targetId)}:${amount}`)
+      .join(","),
+    ...(targetCount === 1
+      ? {
+          advancementCountersAfter: mustInstance(
+            state.cardInstances,
+            firstTargetId,
+          ).advancementCounters,
+        }
+      : {}),
   };
 }
 
@@ -17185,10 +17264,6 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
     resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
-    return;
-  }
-  if (state.pendingChoice.source.startsWith("v1919.systematic_layoffs")) {
-    resolveSystematicLayoffsChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1920.ice_transmutation")) {
@@ -19176,81 +19251,6 @@ function resolveReschedulerHqShuffleDraw(
     drawnCount: hqCardCount,
     randomDrawRecordPurpose: randomPurpose,
     randomCounterAfter: state.randomCounter,
-  };
-}
-
-function startSystematicLayoffsChoice(
-  state: GameState,
-  targets: CardInstanceId[],
-  legalAction: LegalAction,
-): void {
-  state.pendingChoice = {
-    choiceId: `v1919_systematic_layoffs_${state.stateVersion + 1}`,
-    side: "corp",
-    source: `v1919.systematic_layoffs:${state.stateVersion + 1}`,
-    prompt: "Systematic Layoffs: Agenda forfeiten",
-    kind: "select_cards",
-    options: targets.map((cardId) => {
-      const definition = definitionFor(state, cardId);
-      return {
-        id: `card_${cardId}`,
-        label: `${definition.title} (${agendaPointsForScoredCard(state, cardId)})`,
-        publicLabel: definition.title,
-        value: cardId,
-      };
-    }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: state.stateVersion + 1,
-    visibility: "public",
-  };
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1919OperationAbility: "forfeit_scored_agenda_choice",
-    eligibleAgendaCount: targets.length,
-  };
-}
-
-function resolveSystematicLayoffsChoice(
-  state: GameState,
-  legalAction: LegalAction,
-  playerAction: PlayerAction,
-): void {
-  const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("v1919.systematic_layoffs"))
-    throw new Error("Es ist keine Systematic-Layoffs-Choice offen.");
-  const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  if (selectedIds.length !== 1)
-    throw new Error("Systematic Layoffs braucht genau eine Agenda.");
-  resolveSystematicLayoffsForfeit(
-    state,
-    mustArrayValue(selectedIds, 0, "Systematic-Layoffs-Auswahl fehlt."),
-    legalAction,
-  );
-  delete state.pendingChoice;
-}
-
-function resolveSystematicLayoffsForfeit(
-  state: GameState,
-  targetAgendaId: CardInstanceId,
-  legalAction: LegalAction,
-): void {
-  if (!corpScoredAgendaForfeitTargets(state).includes(targetAgendaId))
-    throw new Error("Systematic Layoffs darf diese Agenda nicht forfeiten.");
-  const agendaPointValue = agendaPointsForScoredCard(state, targetAgendaId);
-  forfeitCorpAgendaForPointCost(state, targetAgendaId);
-  credits(state, "corp", Math.max(1, agendaPointValue));
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
-    v1919OperationAbility: "forfeit_scored_agenda",
-    forfeitedAgendaCardId: targetAgendaId,
-    forfeitedAgendaDefinitionId: definitionFor(state, targetAgendaId).id,
-    agendaPointCostPaid: agendaPointValue,
-    gainedCredits: Math.max(1, agendaPointValue),
-    corpCreditsAfter: state.corp.credits,
-    specialZone: "removed_from_game",
-    specialZoneVisibility: "public",
-    specialZoneReason: "v1919_systematic_layoffs",
   };
 }
 
@@ -21604,6 +21604,10 @@ function makeActionId(
   if (payload?.oliviaSalazarRezSourceCardId)
     parts.push(String(payload.oliviaSalazarRezSourceCardId));
   if (payload?.targetCardId) parts.push(String(payload.targetCardId));
+  if (payload?.secondTargetCardId)
+    parts.push(String(payload.secondTargetCardId));
+  if (payload?.citySurveillanceDrawDecision)
+    parts.push(String(payload.citySurveillanceDrawDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
   return parts.filter(Boolean).join(".");
