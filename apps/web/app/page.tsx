@@ -4830,35 +4830,40 @@ export default function Page() {
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
-          {matchClockDisplay ? (
-            <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
-              <span className="matchClockIcon" aria-hidden="true">
-                <Clock size={15} />
-              </span>
-              <span>
-                <strong>Match</strong> {matchClockDisplay.matchElapsed}
-              </span>
-              <span>
-                <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
-              </span>
-              <small>Orientierung</small>
+          {matchClockDisplay || payload.playerClock?.mode === "player_clock" ? (
+            <div className="clockCluster" aria-label="Uhrenbereich">
+              {matchClockDisplay ? (
+                <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
+                  <span className="matchClockIcon" aria-hidden="true">
+                    <Clock size={15} />
+                  </span>
+                  <span>
+                    <strong>Match</strong> {matchClockDisplay.matchElapsed}
+                  </span>
+                  <span>
+                    <strong>{matchClockDisplay.scopeLabel}</strong> {matchClockDisplay.decisionElapsed}
+                  </span>
+                  <small>Orientierung</small>
+                </div>
+              ) : null}
+              {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
             </div>
           ) : null}
-          {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
           {activeView.side === "corp" ? (
             <section className="opponentRunnerBoardStrip" aria-label="Runner-Bereich">
-              <RunnerRigStrip
+              <RunnerOpponentZonesStrip
                 view={activeView}
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
                 selectedContext={selectedActionContext}
                 contextualActions={legalActionSplit.contextualActions}
                 actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                highlightedZone={activeCueHighlight}
                 onFocus={focusCard}
                 onActionContext={selectActionCard}
                 onAction={submitAction}
               />
-              <RunnerOpponentZonesStrip
+              <RunnerRigStrip
                 view={activeView}
                 cardDetailsById={catalogDetailsById}
                 displayMode={cardDisplayMode}
@@ -5063,62 +5068,6 @@ export default function Page() {
               ) : null
             )}
           </div>
-          {activeView.own.rig ? (
-            <section className={`section panel boardSection rigBoardSection ${boardZoneCollapsedFor("runner:rig") ? "rigCollapsed" : ""}`} style={zoneCardsStyle}>
-              <div className={`rigSectionLayout ${boardZoneCollapsedFor("runner:rig") ? "rigSectionLayoutCollapsed" : ""} ${zoneHighlighted(activeCueHighlight, activeView.side, "rig") ? "cueHighlightSoft" : ""}`}>
-                <div className="rigSectionLead">
-                  <div className="sideZoneLeadTop">
-                    <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
-                  </div>
-                  <div className="rigSectionLeadBottom">
-                    <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
-                    <ZoneCollapseButton
-                      side="runner"
-                      label="Rig"
-                      collapsed={boardZoneCollapsedFor("runner:rig")}
-                      onToggle={() => toggleBoardZoneCollapsed("runner:rig")}
-                    />
-                  </div>
-                </div>
-                {!boardZoneCollapsedFor("runner:rig") && ownRigGroups.length > 0 ? (
-                  <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
-                    {ownRigGroups.map((group) => (
-                      <div className="rigGroup rigGroupHorizontal" key={group.key} style={ownRigCardsStyle}>
-                        <div className="rigGroupLead">
-                          <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
-                          {group.key === "program" ? (
-                            <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${activeView.own.memoryUsed ?? 0} von ${activeView.own.memoryLimit ?? 0}`}>
-                              MU <strong>{activeView.own.memoryUsed ?? 0}/{activeView.own.memoryLimit ?? 0}</strong>
-                            </span>
-                          ) : null}
-                        </div>
-                        <div className="cards rigGroupCards rigGroupCardsFull">
-                          {group.cards.map((card) => {
-                            const displayCard = enrichCard(card);
-                            return (
-                              <CardView
-                                key={card.instanceId}
-                                card={displayCard}
-                                displayMode={cardDisplayMode}
-                                selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
-                                actions={cardActionsFor(card)}
-                                actionDisabled={Boolean(payload.winner) || connection !== "online"}
-                                onAction={submitAction}
-                                onFocus={focusCard}
-                                onActionContextSelect={selectActionCard}
-                              />
-                            );
-                          })}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : !boardZoneCollapsedFor("runner:rig") ? (
-                  <p className="meta">Keine installierten Runner-Karten.</p>
-                ) : null}
-              </div>
-            </section>
-          ) : null}
           <section className="section panel boardSection zoneBoardSection">
             {activeView.side === "runner" ? (
               <div className="runnerGripHeapLayout">
@@ -5165,6 +5114,27 @@ export default function Page() {
                 </SideZoneFrame>
                 <SideZoneFrame
                   side="runner"
+                  label="Stack"
+                  countLabel={formatCardCount(activeView.own.stackOrRdCount)}
+                  iconKind="stack"
+                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")}
+                  className="runnerStackZone"
+                  style={zoneCardsStyle}
+                  collapsed={boardZoneCollapsedFor("runner:stack")}
+                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:stack")}
+                >
+                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
+                    {activeView.own.stackOrRdCount > 0 ? (
+                      <div className="runnerStackBack" aria-hidden="true">
+                        <span />
+                      </div>
+                    ) : (
+                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                    )}
+                  </div>
+                </SideZoneFrame>
+                <SideZoneFrame
+                  side="runner"
                   label="Heap"
                   countLabel={formatCardCount(activeView.own.heapOrArchives.length)}
                   iconKind="heap"
@@ -5176,7 +5146,13 @@ export default function Page() {
                   collapseLabel="Heap"
                 >
                   {activeView.own.heapOrArchives.length > 0 ? (
-                    <div className="runnerHeapOverlapRow" style={zoneCardsStyle}>
+                    <div
+                      className="runnerHeapOverlapRow"
+                      style={{
+                        ...zoneCardsStyle,
+                        "--zone-stack-visible-steps": String(Math.max(0, Math.min(activeView.own.heapOrArchives.length, RUNNER_HEAP_PREVIEW_LIMIT) - 1))
+                      } as CSSProperties}
+                    >
                       {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
                         const displayCard = enrichCard(card);
                         return (
@@ -5200,27 +5176,61 @@ export default function Page() {
                     <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
                   )}
                 </SideZoneFrame>
-                <SideZoneFrame
-                  side="runner"
-                  label="Stack"
-                  countLabel={formatCardCount(activeView.own.stackOrRdCount)}
-                  iconKind="stack"
-                  highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "stack")}
-                  className="runnerStackZone"
-                  style={zoneCardsStyle}
-                  collapsed={boardZoneCollapsedFor("runner:stack")}
-                  onToggleCollapse={() => toggleBoardZoneCollapsed("runner:stack")}
-                >
-                  <div className="runnerStackPreview" style={zoneCardsStyle} aria-label={`Stack ${formatCardCount(activeView.own.stackOrRdCount)}`}>
-                    {activeView.own.stackOrRdCount > 0 ? (
-                      <div className="runnerStackBack" aria-hidden="true">
-                        <span />
+                {activeView.own.rig ? (
+                  <SideZoneFrame
+                    side="runner"
+                    label="Rig"
+                    countLabel={formatCardCount(activeView.own.rig.length)}
+                    iconKind="rig"
+                    highlighted={zoneHighlighted(activeCueHighlight, activeView.side, "rig")}
+                    className="runnerRigZone"
+                    style={zoneCardsStyle}
+                    collapsed={boardZoneCollapsedFor("runner:rig")}
+                    onToggleCollapse={() => toggleBoardZoneCollapsed("runner:rig")}
+                    collapseLabel="Rig"
+                  >
+                    {ownRigGroups.length > 0 ? (
+                      <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
+                        {ownRigGroups.map((group) => (
+                          <div
+                            className="rigGroup rigGroupHorizontal"
+                            key={group.key}
+                            style={ownRigCardsStyle}
+                          >
+                            <div className="rigGroupLead">
+                              <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                              {group.key === "program" ? (
+                                <span className="zoneLimitBadge rigMemoryBadge" aria-label={`MU ${activeView.own.memoryUsed ?? 0} von ${activeView.own.memoryLimit ?? 0}`}>
+                                  MU <strong>{activeView.own.memoryUsed ?? 0}/{activeView.own.memoryLimit ?? 0}</strong>
+                                </span>
+                              ) : null}
+                            </div>
+                            <div className="cards rigGroupCards rigGroupCardsFull">
+                              {group.cards.map((card) => {
+                                const displayCard = enrichCard(card);
+                                return (
+                                  <CardView
+                                    key={card.instanceId}
+                                    card={displayCard}
+                                    displayMode={cardDisplayMode}
+                                    selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
+                                    actions={cardActionsFor(card)}
+                                    actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                    onAction={submitAction}
+                                    onFocus={focusCard}
+                                    onActionContextSelect={selectActionCard}
+                                  />
+                                );
+                              })}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     ) : (
-                      <p className="archivesPileEmpty">Keine Karten im Stack.</p>
+                      <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Rig.</p>
                     )}
-                  </div>
-                </SideZoneFrame>
+                  </SideZoneFrame>
+                ) : null}
               </div>
             ) : (
               null
@@ -6947,6 +6957,18 @@ function RunnerOpponentZonesStrip({
       />
       <SideZoneFrame
         side="runner"
+        label="Stack"
+        countLabel={stackCountLabel}
+        iconKind="stack"
+        highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
+        className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
+        style={zoneCardsStyle}
+        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
+        ariaLabel={`Runner-Stack ${stackCountLabel}`}
+        collapsed
+      />
+      <SideZoneFrame
+        side="runner"
         label="Heap"
         countLabel={heapCountLabel}
         iconKind="heap"
@@ -6960,7 +6982,13 @@ function RunnerOpponentZonesStrip({
         collapseLabel="Heap"
       >
         {heapCards.length > 0 ? (
-          <div className="runnerHeapCompactPreview runnerHeapOverlapRow" style={zoneCardsStyle}>
+          <div
+            className="runnerHeapCompactPreview runnerHeapOverlapRow"
+            style={{
+              ...zoneCardsStyle,
+              "--zone-stack-visible-steps": String(Math.max(0, Math.min(heapCards.length, RUNNER_HEAP_PREVIEW_LIMIT) - 1))
+            } as CSSProperties}
+          >
             {heapCards.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
               const displayCard = enrichVisibleCard(card, cardDetailsById);
               return (
@@ -6984,18 +7012,6 @@ function RunnerOpponentZonesStrip({
           <p className="archivesPileEmpty">Keine Karten im Heap.</p>
         )}
       </SideZoneFrame>
-      <SideZoneFrame
-        side="runner"
-        label="Stack"
-        countLabel={stackCountLabel}
-        iconKind="stack"
-        highlighted={zoneHighlighted(highlightedZone, "runner", "stack")}
-        className="runnerOpponentZone runnerOpponentCountZone runnerOpponentStackZone"
-        style={zoneCardsStyle}
-        title="Stack: Runner-Deck. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
-        ariaLabel={`Runner-Stack ${stackCountLabel}`}
-        collapsed
-      />
     </section>
   );
 }
@@ -7007,6 +7023,7 @@ function RunnerRigStrip({
   selectedContext,
   contextualActions,
   actionDisabled,
+  highlightedZone,
   onFocus,
   onActionContext,
   onAction
@@ -7017,15 +7034,20 @@ function RunnerRigStrip({
   selectedContext: ActionContext | null;
   contextualActions: LegalAction[];
   actionDisabled: boolean;
+  highlightedZone?: BoardHighlight | null;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
 }) {
-  const { rigPercent } = useCardScaleSettings();
-  const opponentMiniCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, rigPercent / 100);
-  const opponentMiniCardsStyle = useMemo(
-    () => ({ "--mini-cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * opponentMiniCardScale)}px` } as CSSProperties),
-    [opponentMiniCardScale]
+  const { zonePercent } = useCardScaleSettings();
+  const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
+  const opponentRigStyle = useMemo(
+    () =>
+      ({
+        "--zone-card-scale": String(zoneCardScale),
+        "--mini-cards-min-width": `${Math.round(CARD_DISPLAY_BASE_MIN_WIDTH * zoneCardScale)}px`
+      } as CSSProperties),
+    [zoneCardScale]
   );
   const [rigCollapsed, setRigCollapsed] = useState(false);
   if (opponentSide(view.side) !== "runner") return null;
@@ -7037,55 +7059,64 @@ function RunnerRigStrip({
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
   };
   return (
-    <section className={`runnerRigStrip ${rigCollapsed ? "rigCollapsed" : ""}`} data-testid="runner-rig">
-      <div className={`rigSectionLayout rigSectionLayoutCompact ${rigCollapsed ? "rigSectionLayoutCollapsed" : ""}`}>
-        <div className="rigSectionLead rigSectionLeadCompact">
-          <h2 className={`rigSectionTitle rigGroupSideLabel ${zoneSideClass("runner")}`}>Rig</h2>
-          <div className="rigSectionLeadBottom">
-            <ZoneIdentityIcon side="runner" kind="rig" label="Rig" className="rigSectionIcon" />
-            <ZoneCollapseButton side="runner" label="Rig" collapsed={rigCollapsed} onToggle={() => setRigCollapsed((current) => !current)} />
-          </div>
-        </div>
-        {!rigCollapsed && groups.length > 0 ? (
-          <div className="rigGroups rigGroupsHorizontal rigGroupsTrack">
-            {groups.map((group) => (
-              <div className="rigGroup rigGroupHorizontal" key={group.key} style={opponentMiniCardsStyle}>
-                <div className="rigGroupLead">
-                  <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
-                  {group.key === "program" && memorySummary ? (
-                    <span className="zoneLimitBadge rigMemoryBadge" aria-label={memorySummary.ariaLabel}>
-                      MU <strong>{memorySummary.text}</strong>
-                    </span>
-                  ) : null}
-                </div>
-                <div className="cards rigGroupCards rigGroupCardsMini">
-                  {group.cards.map((card) => {
-                    const displayCard = enrichVisibleCard(card, cardDetailsById);
-                    return (
-                      <CardView
-                        key={card.instanceId}
-                        card={displayCard}
-                        compact
-                        displayMode={displayMode}
-                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
-                        actions={cardActionsForRig(card)}
-                        actionDisabled={actionDisabled}
-                        actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
-                        onFocus={onFocus}
-                        onActionContextSelect={onActionContext}
-                        onAction={onAction}
-                      />
-                    );
-                  })}
-                </div>
+    <SideZoneFrame
+      side="runner"
+      label="Rig"
+      countLabel={formatCardCount(runnerRig.length)}
+      iconKind="rig"
+      highlighted={zoneHighlighted(highlightedZone ?? null, "runner", "rig")}
+      className="runnerOpponentZone runnerOpponentRigZone runnerRigZone"
+      style={opponentRigStyle}
+      title="Rig: installierte Runner-Karten."
+      ariaLabel={`Runner-Rig ${formatCardCount(runnerRig.length)}`}
+      testId="runner-rig"
+      collapsed={rigCollapsed}
+      onToggleCollapse={() => setRigCollapsed((current) => !current)}
+      collapseLabel="Rig"
+    >
+      {groups.length > 0 ? (
+        <div className="rigGroups rigGroupsHorizontal rigGroupsTrack runnerRigZoneGroups">
+          {groups.map((group) => (
+            <div
+              className="rigGroup rigGroupHorizontal"
+              key={group.key}
+              style={opponentRigStyle}
+            >
+              <div className="rigGroupLead">
+                <h3 className={`rigGroupSideLabel ${zoneSideClass("runner")}`}>{group.label}</h3>
+                {group.key === "program" && memorySummary ? (
+                  <span className="zoneLimitBadge rigMemoryBadge" aria-label={memorySummary.ariaLabel}>
+                    MU <strong>{memorySummary.text}</strong>
+                  </span>
+                ) : null}
               </div>
-            ))}
-          </div>
-        ) : !rigCollapsed ? (
-          <p className="meta">Keine installierten Runner-Karten.</p>
-        ) : null}
-      </div>
-    </section>
+              <div className="cards rigGroupCards rigGroupCardsMini">
+                {group.cards.map((card) => {
+                  const displayCard = enrichVisibleCard(card, cardDetailsById);
+                  return (
+                    <CardView
+                      key={card.instanceId}
+                      card={displayCard}
+                      compact
+                      displayMode={displayMode}
+                      selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                      actions={cardActionsForRig(card)}
+                      actionDisabled={actionDisabled}
+                      actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                      onFocus={onFocus}
+                      onActionContextSelect={onActionContext}
+                      onAction={onAction}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="archivesPileEmpty" style={opponentRigStyle}>Keine Karten im Rig.</p>
+      )}
+    </SideZoneFrame>
   );
 }
 
@@ -7637,13 +7668,16 @@ function LegalActionsPanel({
         </div>
       </div>
       <div className="actions">
-        {primaryActions.map((action) => (
-          <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-            <ActionLeadIcon action={action} />
-            <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
-            <CostChips action={action} />
-          </button>
-        ))}
+        {primaryActions.map((action) => {
+          const label = runAwareActionButtonLabel(view, action);
+          return (
+            <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} title={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
+              <ActionLeadIcon action={action} />
+              <span className="actionButtonLabel">{label}</span>
+              <CostChips action={action} />
+            </button>
+          );
+        })}
         {selectedContext ? (
           <div className="actionGroup selectedActionGroup">
             <div className="selectedActionTitle">
@@ -7652,13 +7686,16 @@ function LegalActionsPanel({
                 <X size={14} />
               </button>
             </div>
-            {contextualActions.map((action) => (
-              <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-testid="action-button" data-action-type={action.type}>
-                <ActionLeadIcon action={action} />
-                <span className="actionButtonLabel">{runAwareActionButtonLabel(view, action)}</span>
-                <CostChips action={action} />
-              </button>
-            ))}
+            {contextualActions.map((action) => {
+              const label = runAwareActionButtonLabel(view, action);
+              return (
+                <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} title={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
+                  <ActionLeadIcon action={action} />
+                  <span className="actionButtonLabel">{label}</span>
+                  <CostChips action={action} />
+                </button>
+              );
+            })}
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
           </div>
         ) : hasHiddenContextActions ? (
@@ -11895,9 +11932,10 @@ function CardActionsPopover({
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style} data-card-action-surface="true">
       {actions.map((action) => {
-        const label = compactCardActionMenuLabel(action, actionLabelForAction(action));
+        const fullLabel = actionLabelForAction(action);
+        const label = compactCardActionMenuLabel(action, fullLabel);
         return (
-          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
+          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" title={fullLabel} aria-label={fullLabel} role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
             <ActionLeadIcon action={action} size={14} />
             <span className="actionButtonLabel">{label}</span>
             <CostChips action={action} />
@@ -12189,6 +12227,7 @@ function SideZoneFrame({
   style,
   title,
   ariaLabel,
+  testId,
   collapsed = false,
   onToggleCollapse,
   collapseLabel,
@@ -12203,6 +12242,7 @@ function SideZoneFrame({
   style?: CSSProperties;
   title?: string;
   ariaLabel?: string;
+  testId?: string;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
   collapseLabel?: string;
@@ -12210,7 +12250,7 @@ function SideZoneFrame({
 }) {
   const hasBody = children !== undefined && children !== null && !collapsed;
   return (
-    <div className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`} style={style} title={title} aria-label={ariaLabel}>
+    <div className={`sideZoneFrame ${side} ${hasBody ? "" : "sideZoneFrameCountOnly"} ${highlighted ? "cueHighlightSoft" : ""} ${className}`} style={style} title={title} aria-label={ariaLabel} data-testid={testId}>
       <div className="sideZoneLead">
         <div className="sideZoneLeadTop">
           <h2 className={`sideZoneTitle rigGroupSideLabel ${zoneSideClass(side)}`}>{label}</h2>
