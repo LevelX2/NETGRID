@@ -21,6 +21,7 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import type { CardAgendaDifficultyModifierImplementation } from "./definition-types";
 
 export type EffectiveAgendaDifficultyDependencies = {
@@ -43,12 +44,29 @@ export type EffectiveAgendaDifficultyDependencies = {
  */
 export function maxHandSize(state: GameState, side: Side): number {
   if (side === "corp")
-    return state.corp.maxHandSize + cardImplementationHandSizeModifier(state, "corp");
+    return Math.max(
+      0,
+      state.corp.maxHandSize +
+        cardImplementationHandSizeModifier(state, "corp") -
+        cardImplementationCorpHandSizeVirusReduction(state),
+    );
   return (
     state.runner.maxHandSize +
     cardImplementationHandSizeModifier(state, "runner") -
     state.runner.coreDamage
   );
+}
+
+function cardImplementationCorpHandSizeVirusReduction(state: GameState): number {
+  return Object.values(state.cardInstances).reduce((sum, instance) => {
+    const virusCounter = cardImplementationForDefinitionId(
+      instance.definitionId,
+    )?.virusCounter;
+    const effect = virusCounter?.continuousEffect;
+    if (effect?.kind !== "corp_hand_size_reduce_per_two_counters") return sum;
+    const counters = Math.max(0, Math.floor(instance.counters?.virus ?? 0));
+    return sum + Math.floor(counters / effect.perCounters) * effect.amountPerGroup;
+  }, 0);
 }
 
 /**

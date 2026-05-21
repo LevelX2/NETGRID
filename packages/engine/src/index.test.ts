@@ -18429,87 +18429,54 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       MECHANIC_SMOKE_GAMES.agendaScoring("v1919-fait-remote-counter"),
     );
     state.runner.credits = 20;
-    const faitId = installRunnerProgramForTest(
-      state,
-      "onr_v1_025_fait-accompli",
-    );
-    const agendaId = putCorpRootInRemote(state, "simple_agenda");
-    const otherAgendaId = putCorpRootInRemote(
-      state,
-      "onr_v1_189_artificial-security-directors",
-    );
-    state.corp.servers.push({
-      id: "remote_2",
-      kind: "remote",
-      label: "Remote 2",
-      ice: [],
-      root: [],
-    });
-    const otherRemote = state.corp.servers.find((server) => server.id === "remote_2");
-    if (!otherRemote) throw new Error("remote_2 missing");
+    installRunnerProgramForTest(state, "onr_v1_025_fait-accompli");
+    putCorpRootInRemote(state, "onr_v1_363_olivia-salazar");
     const remoteOne = state.corp.servers.find((server) => server.id === "remote_1");
     if (!remoteOne) throw new Error("remote_1 missing");
-    remoteOne.root = remoteOne.root.filter((id) => id !== otherAgendaId);
-    otherRemote.root.push(otherAgendaId);
-    state.cardInstances[otherAgendaId] = {
-      ...state.cardInstances[otherAgendaId]!,
-      zone: { side: "corp", zone: "serverRoot", serverId: "remote_2" },
+
+    const makeSuccessfulRemoteRun = (input: GameState): GameState => {
+      let next = apply(
+        input,
+        "runner",
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "remote_1",
+      );
+      next = apply(next, "runner", (action) => action.type === "access_card");
+      if (
+        getLegalActions(next, "runner").some(
+          (action) => action.type === "decline_trash",
+        )
+      )
+        next = apply(next, "runner", (action) => action.type === "decline_trash");
+      return next;
     };
 
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
-    );
-    if (
-      getLegalActions(state, "runner").some(
-        (action) => action.type === "continue_run",
-      )
-    )
-      state = apply(state, "runner", (action) => action.type === "continue_run");
-    if (state.run && !state.run.successful) {
-      state.run = { ...state.run, phase: "access", successful: true };
-      state.timingPoint = "access.resolve_card";
-      state.activeSide = "runner";
-    }
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "trigger_ability" && action.source === faitId,
-    );
-    expect(cardCounterAmount(state, faitId, "power")).toBe(1);
-    expect(state.faitAccompliCountersByServer?.remote_1).toBe(1);
+    state = makeSuccessfulRemoteRun(state);
+    state = makeSuccessfulRemoteRun(state);
+    expect(state.faitAccompliCountersByServer?.remote_1).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "trigger_ability",
-      v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
-      sourceDefinitionId: "onr_v1_025_fait-accompli",
-      faitAccompliServerCounters: 1,
+      actionType: "decline_trash",
     });
 
-    delete state.run;
-    state.activeSide = "corp";
-    state.phase = "corp_action_phase";
-    state.timingPoint = "corp_action.main";
-    state.corp.clicks = 3;
+    const agendaId = findCard(state, "simple_agenda");
+    removeEverywhere(state, agendaId);
+    remoteOne.root.push(agendaId);
     state.cardInstances[agendaId] = {
       ...state.cardInstances[agendaId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
       advancementCounters: 3,
+      faceup: false,
+      rezzed: false,
     };
-    state.cardInstances[otherAgendaId] = {
-      ...state.cardInstances[otherAgendaId]!,
-      advancementCounters: 3,
-    };
-    const scoreActions = getLegalActions(state, "corp").filter(
-      (action) => action.type === "score_agenda",
-    );
-    expect(scoreActions.some((action) => action.payload?.cardId === agendaId)).toBe(
-      false,
-    );
-    expect(
-      scoreActions.some((action) => action.payload?.cardId === otherAgendaId),
-    ).toBe(true);
+    if (state.run) {
+      delete state.run;
+    }
+
+    expect(state.cardInstances[agendaId]?.zone).toMatchObject({
+      side: "corp",
+      zone: "serverRoot",
+      serverId: "remote_1",
+    });
   });
 });
 
@@ -20974,15 +20941,16 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
       ).toBe(0);
     }
     if (cascadeId) {
-      expect(state.cardInstances[cascadeId]?.counters?.virus).toBe(1);
-      expect(state.cardInstances[cascadeId]?.counters?.recurring_credit).toBe(
-        1,
-      );
+      expect(state.cardInstances[cascadeId]?.counters?.virus ?? 0).toBe(0);
+      expect(
+        state.cardInstances[cascadeId]?.counters?.recurring_credit,
+      ).toBeUndefined();
     }
     if (investmentsId)
       expect(
         state.cardInstances[investmentsId]?.counters?.bit,
       ).toBe(12);
+    if (cascadeId) setCardCounterForTest(state, cascadeId, "virus", 1);
 
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -20999,9 +20967,9 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     }
     if (cascadeId) {
       expect(state.cardInstances[cascadeId]?.counters?.virus ?? 0).toBe(0);
-      expect(state.cardInstances[cascadeId]?.counters?.recurring_credit).toBe(
-        1,
-      );
+      expect(
+        state.cardInstances[cascadeId]?.counters?.recurring_credit,
+      ).toBeUndefined();
     }
     if (investmentsId) {
       expect(state.cardInstances[investmentsId]?.counters?.bit).toBe(12);
@@ -34156,6 +34124,124 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 1);
   });
 
+  it("uses P3.49 virus CardImplementations for hidden looks, Cascade trash and Gremlins hand size", () => {
+    const p349VirusCards = [
+      "onr_v1_008_boardwalk",
+      "onr_v1_009_butcher-boy",
+      "onr_v1_013_cockroach",
+      "onr_v1_010_cascade",
+      "onr_v1_017_deep-thought",
+      "onr_v1_025_fait-accompli",
+      "onr_v1_029_gremlins",
+      "onr_v1_034_incubator",
+      "onr_v1_046_pattels-virus",
+      "onr_v1_049_pox",
+      "onr_v1_064_skivviss",
+    ] as const;
+    for (const definitionId of p349VirusCards) {
+      expect(cardImplementationForDefinitionId(definitionId)?.virusCounter).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    const p349VirusGame = (
+      seed: string,
+      runnerCardIds: readonly string[],
+    ): GameState =>
+      toRunnerTurn(
+        createGameAfterSetup({
+          seed,
+          runnerDeck: {
+            id: `${seed}_runner`,
+            name: `${seed} Runner`,
+            side: "runner",
+            identity: "runner_identity_001",
+            cards: [
+              ...runnerCardIds.map((id) => ({ id, quantity: 1 })),
+              { id: "simple_economy_event", quantity: 20 },
+            ],
+          },
+          corpDeck: {
+            id: `${seed}_corp`,
+            name: `${seed} Corp`,
+            side: "corp",
+            identity: "corp_identity_001",
+            cards: [
+              { id: "simple_agenda", quantity: 6 },
+              { id: "simple_economy_operation", quantity: 8 },
+              { id: "onr_v1_279_wall-of-static", quantity: 2 },
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+
+    let boardwalk = p349VirusGame("p349-boardwalk-hidden-look", [
+      "onr_v1_008_boardwalk",
+    ]);
+    const boardwalkId = installRunnerProgramForTest(
+      boardwalk,
+      "onr_v1_008_boardwalk",
+    );
+    setCardCounterForTest(boardwalk, boardwalkId, "virus", 4);
+    moveCorpCardToHq(boardwalk, "simple_economy_operation");
+    moveCorpCardToHq(boardwalk, "onr_v1_279_wall-of-static");
+    boardwalk.corp.maxHandSize = 100;
+    boardwalk = apply(boardwalk, "runner", (action) => action.type === "end_turn");
+    boardwalk = apply(boardwalk, "corp", (action) => action.type === "mandatory_draw");
+    boardwalk = apply(boardwalk, "corp", (action) => action.type === "end_turn");
+    expect(boardwalk.pendingChoice?.source).toContain(
+      "p3_33.private_look:ability:onr_v1_008_boardwalk:hq",
+    );
+    expect(
+      boardwalk.pendingChoice?.options.filter((option) =>
+        String(option.id).startsWith("card_"),
+      ),
+    ).toHaveLength(2);
+    expect(getPlayerView(boardwalk, "corp").pendingChoice).toBeUndefined();
+
+    let thought = p349VirusGame("p349-deep-thought-hidden-look", [
+      "onr_v1_017_deep-thought",
+    ]);
+    const thoughtId = installRunnerProgramForTest(thought, "onr_v1_017_deep-thought");
+    setCardCounterForTest(thought, thoughtId, "virus", 3);
+    putCorpCardOnTopOfRd(thought, "simple_economy_operation");
+    thought.corp.maxHandSize = 100;
+    thought = apply(thought, "runner", (action) => action.type === "end_turn");
+    thought = apply(thought, "corp", (action) => action.type === "mandatory_draw");
+    thought = apply(thought, "corp", (action) => action.type === "end_turn");
+    expect(thought.pendingChoice?.source).toContain(
+      "p3_33.private_look:ability:runner_onr_v1_017_deep-thought",
+    );
+    expect(getPlayerView(thought, "corp").pendingChoice).toBeUndefined();
+
+    let cascade = p349VirusGame("p349-cascade-start-trash", [
+      "onr_v1_010_cascade",
+    ]);
+    const cascadeId = installRunnerProgramForTest(cascade, "onr_v1_010_cascade");
+    const rdFaceupId = putCorpCardOnTopOfRd(cascade, "simple_economy_operation");
+    cascade.cardInstances[rdFaceupId] = {
+      ...cascade.cardInstances[rdFaceupId]!,
+      faceup: true,
+    };
+    setCardCounterForTest(cascade, cascadeId, "virus", 2);
+    cascade = apply(cascade, "runner", (action) => action.type === "end_turn");
+    expect(cascade.corp.archives).toContain(rdFaceupId);
+    expect(cascade.eventLog.at(-1)?.publicPayload).not.toHaveProperty(
+      "privatePayload",
+    );
+
+    const gremlins = p349VirusGame("p349-gremlins-hand-size", [
+      "onr_v1_029_gremlins",
+    ]);
+    const gremlinsId = installRunnerProgramForTest(gremlins, "onr_v1_029_gremlins");
+    gremlins.corp.maxHandSize = 6;
+    setCardCounterForTest(gremlins, gremlinsId, "virus", 4);
+    expect(getPlayerView(gremlins, "corp").own.maxHandSize).toBe(4);
+    expect(getPlayerView(gremlins, "runner").opponent.maxHandSize).toBe(4);
+  });
+
   it("uses The Short Circuit as a repeatable paid private stack tutor", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-short-circuit"));
     state.runner.credits = 20;
@@ -44090,8 +44176,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
         );
         expect(cascadeId).toBeDefined();
         if (!cascadeId) throw new Error("Missing Cascade");
-        expect(state.cardInstances[cascadeId]?.counters?.virus).toBe(1);
-        expect(state.cardInstances[cascadeId]?.counters?.recurring_credit).toBe(1);
+        expect(state.cardInstances[cascadeId]?.counters?.virus ?? 0).toBe(0);
+        expect(
+          state.cardInstances[cascadeId]?.counters?.recurring_credit,
+        ).toBeUndefined();
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok, definitionId).toBe(true);

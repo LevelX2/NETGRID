@@ -109,6 +109,96 @@ export type CardSuccessfulRunFollowupImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
+export type CardVirusCounterKindImplementation =
+  | "boardwalk"
+  | "butcher_boy"
+  | "cockroach"
+  | "cascade"
+  | "thought"
+  | "fait"
+  | "gremlin"
+  | "incubate"
+  | "pattel"
+  | "pox"
+  | "skivviss";
+
+export type CardVirusCounterImplementation = {
+  counterKind: CardVirusCounterKindImplementation;
+  addOnSuccessfulRun?: {
+    server: "hq" | "rd" | "any" | "subsidiary_data_fort";
+    target: "source" | "successful_run_server" | "chosen_fully_broken_ice";
+    amount: 1;
+    visibility: Extract<EventVisibilityClass, "public">;
+  };
+  startOfRunnerTurn?:
+    | {
+        kind: "random_reveal_hq_cards_per_two_counters";
+        perCounters: 2;
+        countPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+      }
+    | {
+        kind: "gain_credits_per_two_counters";
+        recipient: "runner";
+        perCounters: 2;
+        amountPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "private_look_top_rd_at_threshold";
+        threshold: 3;
+        count: 1;
+        visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+      }
+    | {
+        kind: "incubator_duplicate_virus_counter";
+        rollPerCounter: true;
+        successDieValue: 6;
+        visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+      };
+  startOfCorpTurn?:
+    | {
+        kind: "trash_faceup_rd_cards_per_two_counters";
+        perCounters: 2;
+        countPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+      }
+    | {
+        kind: "draw_extra_cards_per_counter";
+        amountPerCounter: 1;
+        visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+      };
+  continuousEffect?:
+    | {
+        kind: "randomize_corp_hq_discards_at_threshold";
+        threshold: 2;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "corp_hand_size_reduce_per_two_counters";
+        perCounters: 2;
+        amountPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "agenda_difficulty_increase_per_two_fort_counters";
+        perCounters: 2;
+        amountPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "ice_strength_reduce_per_counter";
+        amountPerCounter: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      }
+    | {
+        kind: "corp_install_cost_increase_per_two_fort_counters";
+        perCounters: 2;
+        amountPerGroup: 1;
+        visibility: Extract<EventVisibilityClass, "public">;
+      };
+};
+
 export type HostedProgramCapacityImplementation = {
   capacityMu: number;
   allowedCardTypes: readonly ["program"];

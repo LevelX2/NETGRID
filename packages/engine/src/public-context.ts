@@ -181,6 +181,10 @@ export function publicContextForAction(
       "pattelsVirusCounterAdded",
       "poxCounterAdded",
       "poxCountersAfter",
+      "faitCounterAdded",
+      "faitCountersAfter",
+      "virusCounterAdded",
+      "virusCountersAfter",
       "remainingCounters",
     ]) {
       const value = legalAction.payload?.[key];
@@ -194,6 +198,12 @@ export function publicContextForAction(
         legalAction.payload.targetCardDefinitionId;
     if (typeof legalAction.payload.targetServerLabel === "string")
       context.targetServerLabel = legalAction.payload.targetServerLabel;
+    if (typeof legalAction.payload.virusCounterType === "string")
+      context.virusCounterType = legalAction.payload.virusCounterType;
+    if (typeof legalAction.payload.virusCounterLocation === "string")
+      context.virusCounterLocation = legalAction.payload.virusCounterLocation;
+    if (typeof legalAction.payload.sourceDefinitionId === "string")
+      context.sourceDefinitionId = legalAction.payload.sourceDefinitionId;
     if (typeof legalAction.payload.choiceVisibility === "string")
       context.choiceVisibility = legalAction.payload.choiceVisibility;
   }

@@ -13,6 +13,7 @@ import type {
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
+  CardVirusCounterImplementation,
   HostedProgramCapacityImplementation,
   HostedProgramModifierImplementation,
   RestrictedHostedCreditSourceImplementation,
@@ -41,6 +42,7 @@ export type CardImplementationDefinition = {
   tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];
   trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
+  virusCounter?: CardVirusCounterImplementation;
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";

@@ -194,10 +194,15 @@ import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { bartmossMemorialIcebreakerImplementation } from "./onr-v1/runner/programs/bartmoss-memorial-icebreaker";
 import { blackDahliaImplementation } from "./onr-v1/runner/programs/black-dahlia";
 import { blinkImplementation } from "./onr-v1/runner/programs/blink";
+import { boardwalkImplementation } from "./onr-v1/runner/programs/boardwalk";
+import { butcherBoyImplementation } from "./onr-v1/runner/programs/butcher-boy";
+import { cascadeImplementation } from "./onr-v1/runner/programs/cascade";
 import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
 import { codecrackerImplementation } from "./onr-v1/runner/programs/codecracker";
 import { codeslingerImplementation } from "./onr-v1/runner/programs/codeslinger";
+import { cockroachImplementation } from "./onr-v1/runner/programs/cockroach";
 import { cyfermasterImplementation } from "./onr-v1/runner/programs/cyfermaster";
+import { deepThoughtImplementation } from "./onr-v1/runner/programs/deep-thought";
 import { dogcatcherImplementation } from "./onr-v1/runner/programs/dogcatcher";
 import { droppImplementation } from "./onr-v1/runner/programs/dropp";
 import { dupreImplementation } from "./onr-v1/runner/programs/dupre";
@@ -208,8 +213,11 @@ import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/e
 import { flakImplementation } from "./onr-v1/runner/programs/flak";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { grubbImplementation } from "./onr-v1/runner/programs/grubb";
+import { faitAccompliImplementation } from "./onr-v1/runner/programs/fait-accompli";
+import { gremlinsImplementation } from "./onr-v1/runner/programs/gremlins";
 import { hammerImplementation } from "./onr-v1/runner/programs/hammer";
 import { impImplementation } from "./onr-v1/runner/programs/imp";
+import { incubatorImplementation } from "./onr-v1/runner/programs/incubator";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
 import { jackhammerImplementation } from "./onr-v1/runner/programs/jackhammer";
 import { japaneseWaterTortureImplementation } from "./onr-v1/runner/programs/japanese-water-torture";
@@ -221,8 +229,10 @@ import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
 import { netspaceInverterImplementation } from "./onr-v1/runner/programs/netspace-inverter";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { pattelsVirusImplementation } from "./onr-v1/runner/programs/pattels-virus";
 import { pileDriverImplementation } from "./onr-v1/runner/programs/pile-driver";
 import { poltergeistImplementation } from "./onr-v1/runner/programs/poltergeist";
+import { poxImplementation } from "./onr-v1/runner/programs/pox";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
 import { rafflesImplementation } from "./onr-v1/runner/programs/raffles";
 import { rammingPistonImplementation } from "./onr-v1/runner/programs/ramming-piston";
@@ -236,6 +246,7 @@ import { shakaImplementation } from "./onr-v1/runner/programs/shaka";
 import { shieldImplementation } from "./onr-v1/runner/programs/shield";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
+import { skivvissImplementation } from "./onr-v1/runner/programs/skivviss";
 import { snowballImplementation } from "./onr-v1/runner/programs/snowball";
 import { succubusImplementation } from "./onr-v1/runner/programs/succubus";
 import { tinweaselImplementation } from "./onr-v1/runner/programs/tinweasel";
@@ -312,10 +323,15 @@ export const CARD_IMPLEMENTATIONS = [
   bartmossMemorialIcebreakerImplementation,
   blackDahliaImplementation,
   blinkImplementation,
+  boardwalkImplementation,
+  butcherBoyImplementation,
+  cascadeImplementation,
   cloakImplementation,
   codecrackerImplementation,
   codeslingerImplementation,
+  cockroachImplementation,
   cyfermasterImplementation,
+  deepThoughtImplementation,
   dogcatcherImplementation,
   droppImplementation,
   dupreImplementation,
@@ -326,8 +342,11 @@ export const CARD_IMPLEMENTATIONS = [
   flakImplementation,
   forceShieldImplementation,
   grubbImplementation,
+  faitAccompliImplementation,
+  gremlinsImplementation,
   hammerImplementation,
   impImplementation,
+  incubatorImplementation,
   invisibilityImplementation,
   jackhammerImplementation,
   japaneseWaterTortureImplementation,
@@ -339,8 +358,10 @@ export const CARD_IMPLEMENTATIONS = [
   mysteryBoxImplementation,
   netspaceInverterImplementation,
   newsgroupFilterImplementation,
+  pattelsVirusImplementation,
   pileDriverImplementation,
   poltergeistImplementation,
+  poxImplementation,
   rAndDProtocolFilesImplementation,
   rafflesImplementation,
   rammingPistonImplementation,
@@ -354,6 +375,7 @@ export const CARD_IMPLEMENTATIONS = [
   shieldImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
+  skivvissImplementation,
   snowballImplementation,
   succubusImplementation,
   tinweaselImplementation,

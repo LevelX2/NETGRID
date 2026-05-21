@@ -80,6 +80,9 @@ const IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION =
 const IMPLEMENTED_RUN_CONTROL_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_VIRUS_COUNTER_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/runner/programs";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -99,6 +102,28 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
   "onr_v1_007_blink":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/blink.ts",
+  "onr_v1_008_boardwalk":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/boardwalk.ts",
+  "onr_v1_009_butcher-boy":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/butcher-boy.ts",
+  "onr_v1_010_cascade":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/cascade.ts",
+  "onr_v1_013_cockroach":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/cockroach.ts",
+  "onr_v1_017_deep-thought":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
+  "onr_v1_025_fait-accompli":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/fait-accompli.ts",
+  "onr_v1_029_gremlins":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/gremlins.ts",
+  "onr_v1_034_incubator":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/incubator.ts",
+  "onr_v1_046_pattels-virus":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/pattels-virus.ts",
+  "onr_v1_049_pox":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/pox.ts",
+  "onr_v1_064_skivviss":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/skivviss.ts",
   "onr_v1_014_codecracker":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
   "onr_v1_015_codeslinger":
@@ -802,6 +827,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for successful-run follow-up behavior.",
     );
     currentLocations.add(IMPLEMENTED_RUN_CONTROL_LOCATION);
+  }
+  if (implementation.virusCounter) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Virus-counter successful-run, start-of-turn and purge-linked behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_VIRUS_COUNTER_LOCATION);
   }
 
   return {

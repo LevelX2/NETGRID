@@ -92,6 +92,9 @@ import {
 } from "./ability-engine/icebreaker-abilities";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
+import type {
+  CardVirusCounterImplementation,
+} from "./ability-engine/definition-types";
 import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
@@ -5464,12 +5467,63 @@ function installedVirusCounterTotalForDefinition(
   }, 0);
 }
 
+function virusCounterImplementationForDefinition(
+  definitionId: CardDefinitionId,
+): CardVirusCounterImplementation | undefined {
+  return cardImplementationForDefinitionId(definitionId)?.virusCounter;
+}
+
+function virusCounterImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardVirusCounterImplementation | undefined {
+  return virusCounterImplementationForDefinition(definitionFor(state, cardId).id);
+}
+
+function installedRunnerVirusSourceIds(
+  state: GameState,
+  predicate?: (implementation: CardVirusCounterImplementation) => boolean,
+): CardInstanceId[] {
+  return state.runner.rig.programs
+    .slice()
+    .sort()
+    .filter((cardId) => {
+      const implementation = virusCounterImplementationForCard(state, cardId);
+      return implementation !== undefined && (!predicate || predicate(implementation));
+    });
+}
+
 function cockroachCounterTotal(state: GameState): number {
-  return installedVirusCounterTotalForDefinition(state, COCKROACH_ID);
+  const implementationTotal = Object.keys(state.cardInstances).reduce(
+    (sum, cardId) => {
+      const implementation = virusCounterImplementationForCard(state, cardId);
+      if (
+        implementation?.continuousEffect?.kind !==
+        "randomize_corp_hq_discards_at_threshold"
+      )
+        return sum;
+      return sum + cardCounter(state, cardId, "virus");
+    },
+    0,
+  );
+  return implementationTotal > 0
+    ? implementationTotal
+    : installedVirusCounterTotalForDefinition(state, COCKROACH_ID);
 }
 
 function incubatorCounterTotal(state: GameState): number {
-  return installedVirusCounterTotalForDefinition(state, INCUBATOR_ID);
+  const implementationTotal = Object.keys(state.cardInstances).reduce(
+    (sum, cardId) => {
+      const implementation = virusCounterImplementationForCard(state, cardId);
+      if (implementation?.startOfRunnerTurn?.kind !== "incubator_duplicate_virus_counter")
+        return sum;
+      return sum + cardCounter(state, cardId, "virus");
+    },
+    0,
+  );
+  return implementationTotal > 0
+    ? implementationTotal
+    : installedVirusCounterTotalForDefinition(state, INCUBATOR_ID);
 }
 
 function cockroachRandomHqDiscardActive(state: GameState): boolean {
@@ -7160,7 +7214,10 @@ function successfulRunProgramActions(
         ),
       );
     }
-    if (definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID) {
+    if (
+      definition.id === FAIT_ACCOMPLI_COUNTER_PROGRAM_ID &&
+      !cardImplementationForDefinitionId(definition.id)?.virusCounter
+    ) {
       const server = mustServer(state, run.attackedServerId);
       if (server.kind !== "remote") continue;
       actions.push(
@@ -9918,6 +9975,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         );
       if (
         definition.mechanics.includes("virus") &&
+        !cardImplementationForDefinitionId(definition.id)?.virusCounter &&
         definition.id !== BUTCHER_BOY_ID &&
         definition.id !== SKIVVISS_ID
       )
@@ -14524,7 +14582,6 @@ function finishRun(
   if (run && successful)
     applyV181SuccessfulRunCounterTriggers(state, run, legalAction);
   if (run && successful) {
-    applySkivvissSuccessfulRunCounter(state, run, legalAction);
     applyBodyweightDataCrecheSuccessfulRun(state, run, legalAction);
   }
   if (run && successful && run.attackedServerId === "hq")
@@ -14613,29 +14670,6 @@ function applyDupreRunEndCounters(state: GameState, run: ActiveRun): void {
   }
 }
 
-function applySkivvissSuccessfulRunCounter(
-  state: GameState,
-  run: ActiveRun,
-  legalAction?: LegalAction,
-): void {
-  if (run.attackedServerId !== "rd") return;
-  const sourceIds = state.runner.rig.programs
-    .filter((cardId) => definitionFor(state, cardId).id === SKIVVISS_ID)
-    .sort();
-  if (sourceIds.length === 0) return;
-  for (const cardId of sourceIds) addCardCounter(state, cardId, "virus", 1);
-  if (legalAction) {
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      skivvissCountersAdded: sourceIds.length,
-      skivvissCounterTotal: sourceIds.reduce(
-        (sum, cardId) => sum + cardCounter(state, cardId, "virus"),
-        0,
-      ),
-    };
-  }
-}
-
 function applyBodyweightDataCrecheSuccessfulRun(
   state: GameState,
   _run: ActiveRun,
@@ -14680,71 +14714,131 @@ function applyV181SuccessfulRunCounterTriggers(
   run: ActiveRun,
   legalAction?: LegalAction,
 ): void {
-  const pattelsInstalled = runnerInstalledCardCountByDefinition(
+  const sourceIds = installedRunnerVirusSourceIds(
     state,
-    PATTELS_VIRUS_ID,
+    (implementation) =>
+      implementation.addOnSuccessfulRun !== undefined &&
+      successfulRunMatchesVirusTrigger(state, run, implementation),
   );
-  if (pattelsInstalled > 0) {
+  const pattelSources = sourceIds.filter(
+    (cardId) =>
+      virusCounterImplementationForCard(state, cardId)?.addOnSuccessfulRun
+        ?.target === "chosen_fully_broken_ice",
+  );
+  if (pattelSources.length > 0) {
     const targetIceIds = (run.fullyBrokenIceIds ?? []).filter(
       (targetIceId) => state.cardInstances[targetIceId],
     );
     if (targetIceIds.length === 1) {
       const targetIceId = targetIceIds[0]!;
-      addCardCounter(state, targetIceId, "virus", 1);
+      addCardCounter(state, targetIceId, "virus", pattelSources.length);
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           v181RunnerProgramAbility: "pattels_virus_counter",
-          pattelsVirusCounterAdded: 1,
+          pattelsVirusCounterAdded: pattelSources.length,
           targetCardDefinitionId: definitionFor(state, targetIceId).id,
           remainingCounters: cardCounter(state, targetIceId, "virus"),
         };
       }
     } else if (targetIceIds.length > 1) {
-      startPattelsVirusCounterChoice(state, targetIceIds, legalAction);
+      startPattelsVirusCounterChoice(
+        state,
+        targetIceIds,
+        legalAction,
+        pattelSources.length,
+      );
     }
   }
-  const poxInstalled = runnerInstalledCardCountByDefinition(
-    state,
-    POX_ID,
-  );
-  if (poxInstalled > 0) {
+
+  for (const cardId of sourceIds) {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const trigger = implementation?.addOnSuccessfulRun;
+    if (!implementation || !trigger || trigger.target === "chosen_fully_broken_ice")
+      continue;
+    const definition = definitionFor(state, cardId);
+    if (trigger.target === "source") {
+      addCardCounter(state, cardId, "virus", trigger.amount);
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          virusCounterAdded: trigger.amount,
+          virusCounterType: implementation.counterKind,
+          virusCounterLocation: "source",
+          sourceDefinitionId: definition.id,
+          virusCountersAfter: cardCounter(state, cardId, "virus"),
+        };
+      }
+      continue;
+    }
     const serverId = run.attackedServerId;
-    const current = poxCountersForServer(state, serverId);
-    state.poxCountersByServer = {
-      ...(state.poxCountersByServer ?? {}),
-      [serverId]: current + 1,
-    };
-    if (legalAction) {
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v181RunnerProgramAbility: "pox_counter",
-        poxCounterAdded: 1,
-        poxCountersAfter: current + 1,
-        targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
+    if (implementation.counterKind === "pox") {
+      const current = poxCountersForServer(state, serverId);
+      state.poxCountersByServer = {
+        ...(state.poxCountersByServer ?? {}),
+        [serverId]: current + trigger.amount,
       };
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          v181RunnerProgramAbility: "pox_counter",
+          virusCounterAdded: trigger.amount,
+          virusCounterType: implementation.counterKind,
+          virusCounterLocation: "server",
+          sourceDefinitionId: definition.id,
+          poxCounterAdded: trigger.amount,
+          poxCountersAfter: current + trigger.amount,
+          targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
+        };
+      }
+      continue;
+    }
+    if (implementation.counterKind === "fait") {
+      const current = Math.max(
+        0,
+        Math.floor(state.faitAccompliCountersByServer?.[serverId] ?? 0),
+      );
+      state.faitAccompliCountersByServer = {
+        ...(state.faitAccompliCountersByServer ?? {}),
+        [serverId]: current + trigger.amount,
+      };
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          virusCounterAdded: trigger.amount,
+          virusCounterType: implementation.counterKind,
+          virusCounterLocation: "server",
+          sourceDefinitionId: definition.id,
+          faitCounterAdded: trigger.amount,
+          faitCountersAfter: current + trigger.amount,
+          targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
+        };
+      }
     }
   }
-  if (run.attackedServerId === "hq") {
-    for (const cardId of state.runner.rig.programs) {
-      if (definitionFor(state, cardId).id !== BUTCHER_BOY_ID) continue;
-      addCardCounter(state, cardId, "virus", 1);
-    }
-    for (const cardId of state.runner.rig.programs) {
-      if (definitionFor(state, cardId).id !== COCKROACH_ID) continue;
-      addCardCounter(state, cardId, "virus", 1);
-    }
+}
+
+function successfulRunMatchesVirusTrigger(
+  state: GameState,
+  run: ActiveRun,
+  implementation: CardVirusCounterImplementation,
+): boolean {
+  const trigger = implementation.addOnSuccessfulRun;
+  if (!trigger) return false;
+  if (trigger.server === "any") return true;
+  if (trigger.server === "hq" || trigger.server === "rd")
+    return run.attackedServerId === trigger.server;
+  if (trigger.server === "subsidiary_data_fort") {
+    return mustServer(state, run.attackedServerId).kind === "remote";
   }
-  for (const cardId of state.runner.rig.programs) {
-    if (definitionFor(state, cardId).id !== INCUBATOR_ID) continue;
-    addCardCounter(state, cardId, "virus", 1);
-  }
+  return false;
 }
 
 function startPattelsVirusCounterChoice(
   state: GameState,
   targetIceIds: CardInstanceId[],
   legalAction?: LegalAction,
+  amount = 1,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const options = targetIceIds
@@ -14763,7 +14857,7 @@ function startPattelsVirusCounterChoice(
   state.pendingChoice = {
     choiceId: `v181_pattels_virus_${state.stateVersion + 1}`,
     side: "runner",
-    source: `v181.pattels_virus:${options.map((option) => option.value).join(",")}:${state.stateVersion + 1}`,
+    source: `v181.pattels_virus:${options.map((option) => option.value).join(",")}:${state.stateVersion + 1}:amount=${amount}`,
     prompt: "Pattel's Virus: ICE für Virus-Counter wählen.",
     kind: "select_cards",
     options,
@@ -14777,6 +14871,7 @@ function startPattelsVirusCounterChoice(
       ...(legalAction.payload ?? {}),
       v181RunnerProgramAbility: "pattels_virus_counter_choice",
       pattelsVirusCandidateCount: options.length,
+      pattelsVirusCounterAmount: amount,
       pattelsVirusChoiceOpened: true,
       choiceVisibility: "public",
     };
@@ -14801,11 +14896,15 @@ function resolvePattelsVirusCounterChoice(
   ) {
     throw new Error("Die Pattel's-Virus-Auswahl ist ungültig.");
   }
-  addCardCounter(state, targetIceId, "virus", 1);
+  const amount = Math.max(
+    1,
+    Math.floor(Number(choice.source.match(/amount=(\d+)/)?.[1] ?? 1)),
+  );
+  addCardCounter(state, targetIceId, "virus", amount);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v181RunnerProgramAbility: "pattels_virus_counter",
-    pattelsVirusCounterAdded: 1,
+    pattelsVirusCounterAdded: amount,
     targetCardDefinitionId: definitionFor(state, targetIceId).id,
     remainingCounters: cardCounter(state, targetIceId, "virus"),
     choiceVisibility: "public",
@@ -15261,11 +15360,7 @@ function applyCorpStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
 ): void {
-  const skivvissDraws = state.runner.rig.programs.reduce((sum, cardId) => {
-    return definitionFor(state, cardId).id === SKIVVISS_ID
-      ? sum + cardCounter(state, cardId, "virus")
-      : sum;
-  }, 0);
+  const skivvissDraws = virusCounterDrawsAtCorpStart(state);
   if (skivvissDraws > 0) {
     drawCorpCards(state, skivvissDraws);
     effects?.push(
@@ -15276,6 +15371,26 @@ function applyCorpStartOfTurnEffects(
         SKIVVISS_ID,
       ),
     );
+  }
+  const cascadeTrash = virusCounterCascadeTrashAtCorpStart(state);
+  if (cascadeTrash.amount > 0) {
+    if (!cascadeTrash.sourceDefinitionId)
+      throw new Error("Cascade-Virus-Quelle fehlt.");
+    const trashed = trashFaceupRdCardsForCascade(state, cascadeTrash.amount);
+    if (trashed.length > 0) {
+      effects?.push({
+        effectId: "corp.start.cascade.trash_faceup_rd",
+        kind: "trash_card",
+        visibility: "hidden_info_barrier",
+        side: "corp",
+        amount: trashed.length,
+        reason: "start_of_turn",
+        sourceDefinitionId: cascadeTrash.sourceDefinitionId,
+        sourceTitle: publicCardTitle(cascadeTrash.sourceDefinitionId),
+        cardDefinitionId: definitionFor(state, trashed[0]!).id,
+        cardTitle: publicCardTitle(definitionFor(state, trashed[0]!).id),
+      });
+    }
   }
   executeCardImplementationStartOfCorpTurnEffects(
     cardImplementationRuntimeDeps,
@@ -15369,6 +15484,54 @@ function applyCorpStartOfTurnEffects(
   }
 }
 
+function virusCounterDrawsAtCorpStart(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfCorpTurn;
+    if (start?.kind !== "draw_extra_cards_per_counter") return sum;
+    return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
+  }, 0);
+}
+
+function virusCounterCascadeTrashAtCorpStart(state: GameState): {
+  amount: number;
+  sourceDefinitionId?: CardDefinitionId;
+} {
+  return Object.keys(state.cardInstances).reduce((result, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfCorpTurn;
+    if (start?.kind !== "trash_faceup_rd_cards_per_two_counters") return result;
+    const amount =
+      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+      start.countPerGroup;
+    return {
+      amount: result.amount + amount,
+      sourceDefinitionId:
+        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+    };
+  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+}
+
+function trashFaceupRdCardsForCascade(
+  state: GameState,
+  maxCount: number,
+): CardInstanceId[] {
+  const selected = state.corp.rd
+    .filter((cardId) => state.cardInstances[cardId]?.faceup === true)
+    .slice(0, Math.max(0, Math.floor(maxCount)));
+  for (const cardId of selected) {
+    removeFromAllZones(state, cardId);
+    state.corp.archives.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "archives" },
+    };
+  }
+  return selected;
+}
+
 function applyRunnerStartOfTurnEffects(
   state: GameState,
   effects?: AutomaticEffectCollector,
@@ -15399,19 +15562,17 @@ function applyRunnerStartOfTurnEffects(
     effects,
   );
   if (!flags.startOfTurnFloatingCreditsApplied) {
-    const butcherBoyCounterTotal = installedVirusCounterTotalForDefinition(
-      state,
-      BUTCHER_BOY_ID,
-    );
-    const butcherBoyCredits = Math.floor(butcherBoyCounterTotal / 2);
-    if (butcherBoyCredits > 0) {
-      credits(state, "runner", butcherBoyCredits);
+    const virusCredits = virusCounterCreditsAtRunnerStart(state);
+    if (virusCredits.amount > 0) {
+      if (!virusCredits.sourceDefinitionId)
+        throw new Error("Virus-Credit-Quelle fehlt.");
+      credits(state, "runner", virusCredits.amount);
       effects?.push(
         automaticGainCreditsEffect(
-          "runner.start.butcher_boy",
+          "runner.start.virus_counter_credits",
           "runner",
-          butcherBoyCredits,
-          BUTCHER_BOY_ID,
+          virusCredits.amount,
+          virusCredits.sourceDefinitionId,
         ),
       );
     }
@@ -15420,12 +15581,134 @@ function applyRunnerStartOfTurnEffects(
   applyShellTradersStartOfTurn(state, effects);
   if (state.pendingChoice) return;
   if (queueIncubatorStartOfTurnTransforms(state)) return;
+  if (startVirusCounterRunnerPrivateLookAtStart(state)) return;
   for (const cardId of state.runner.rig.resources.slice().sort()) {
     if (state.pendingChoice) break;
     const definition = definitionFor(state, cardId);
     if (definition.id === "onr_v1_180_smiths-pawnshop")
       startSmithsPawnshopChoice(state, cardId);
   }
+}
+
+function virusCounterCreditsAtRunnerStart(state: GameState): {
+  amount: number;
+  sourceDefinitionId?: CardDefinitionId;
+} {
+  return Object.keys(state.cardInstances).reduce((result, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfRunnerTurn;
+    if (start?.kind !== "gain_credits_per_two_counters") return result;
+    const amount =
+      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+      start.amountPerGroup;
+    return {
+      amount: result.amount + amount,
+      sourceDefinitionId:
+        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+    };
+  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+}
+
+function startVirusCounterRunnerPrivateLookAtStart(state: GameState): boolean {
+  const boardwalk = Object.keys(state.cardInstances).reduce((result, cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfRunnerTurn;
+    if (start?.kind !== "random_reveal_hq_cards_per_two_counters") return result;
+    const amount =
+      Math.floor(cardCounter(state, cardId, "virus") / start.perCounters) *
+      start.countPerGroup;
+    return {
+      amount: result.amount + amount,
+      sourceDefinitionId:
+        result.sourceDefinitionId ?? definitionFor(state, cardId).id,
+    };
+  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+  if (boardwalk.amount > 0 && state.corp.hq.length > 0) {
+    const selected = randomCorpHqCardsWithoutReplacement(
+      state,
+      Math.min(boardwalk.amount, state.corp.hq.length),
+      `p3_49.random.boardwalk.hq_reveal.${state.stateVersion}`,
+    );
+    return startRunnerPrivateLookAtSpecificCorpCards(
+      state,
+      boardwalk.sourceDefinitionId ?? definitionFor(state, state.runner.identity).id,
+      "hq",
+      selected,
+      "Boardwalk: zufällige HQ-Karten ansehen.",
+    );
+  }
+
+  const deepThoughtSourceCardId = Object.keys(state.cardInstances).find((cardId) => {
+    const implementation = virusCounterImplementationForCard(state, cardId);
+    const start = implementation?.startOfRunnerTurn;
+    return (
+      start?.kind === "private_look_top_rd_at_threshold" &&
+      cardCounter(state, cardId, "virus") >= start.threshold
+    );
+  });
+  if (!deepThoughtSourceCardId || state.corp.rd.length === 0) return false;
+  return startRunnerPrivateLookChoice(
+    state,
+    deepThoughtSourceCardId,
+    definitionFor(state, deepThoughtSourceCardId).id,
+    "rd",
+    1,
+    "ability",
+  );
+}
+
+function randomCorpHqCardsWithoutReplacement(
+  state: GameState,
+  count: number,
+  purpose: string,
+): CardInstanceId[] {
+  const pool = state.corp.hq.slice();
+  const selected: CardInstanceId[] = [];
+  const limit = Math.min(Math.max(0, Math.floor(count)), pool.length);
+  for (let index = 0; index < limit; index += 1) {
+    const value = nextRandom(state, `${purpose}.${index}`);
+    const selectedIndex = Math.floor(value * pool.length);
+    const [cardId] = pool.splice(selectedIndex, 1);
+    if (cardId) selected.push(cardId);
+  }
+  return selected;
+}
+
+function startRunnerPrivateLookAtSpecificCorpCards(
+  state: GameState,
+  sourceDefinitionId: CardDefinitionId,
+  zone: Extract<ServerId, "rd" | "hq">,
+  cardIds: CardInstanceId[],
+  prompt: string,
+): boolean {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const visibleIds = cardIds.filter((cardId) => {
+    const instance = state.cardInstances[cardId];
+    return instance?.owner === "corp";
+  });
+  if (visibleIds.length === 0) return false;
+  state.pendingChoice = {
+    choiceId: `p3_49_virus_private_look_${zone}_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_33.private_look:ability:${sourceDefinitionId}:${zone}:${state.stateVersion + 1}`,
+    prompt,
+    kind: "select_cards",
+    options: [
+      ...visibleIds.map((cardId) => ({
+        id: `card_${cardId}`,
+        label: definitionFor(state, cardId).title,
+        publicLabel: "Verdeckte Korp-Karte",
+        value: cardId,
+        selectable: false,
+      })),
+      { id: "done", label: "Fertig", publicLabel: "Fertig", value: "done" },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  return true;
 }
 
 function queueIncubatorStartOfTurnTransforms(state: GameState): boolean {
@@ -15482,7 +15765,23 @@ function startIncubatorTransformChoice(state: GameState): boolean {
       value: `pox:${entry.serverId}`,
     }));
 
-  const options = [...cardTargets, ...poxTargets];
+  const faitTargets = state.corp.servers
+    .map((server) => ({
+      serverId: server.id,
+      amount: Math.max(
+        0,
+        Math.floor(state.faitAccompliCountersByServer?.[server.id] ?? 0),
+      ),
+    }))
+    .filter((entry) => entry.amount > 0)
+    .map((entry) => ({
+      id: `fait_${entry.serverId}`,
+      label: `Fait auf ${publicServerLabel(state, entry.serverId) ?? entry.serverId} (${entry.amount})`,
+      publicLabel: "Virus-Counter",
+      value: `fait:${entry.serverId}`,
+    }));
+
+  const options = [...cardTargets, ...poxTargets, ...faitTargets];
   if (options.length === 0) {
     flags.incubatorPendingTransforms = 0;
     return false;
@@ -17737,7 +18036,12 @@ function serverDifficultyIncreaseFromFaitAccompli(
     return 0;
   return Math.max(
     0,
-    Math.floor(state.faitAccompliCountersByServer?.[zone.serverId] ?? 0),
+    Math.floor(
+      Math.max(
+        0,
+        Math.floor(state.faitAccompliCountersByServer?.[zone.serverId] ?? 0),
+      ) / 2,
+    ),
   );
 }
 
@@ -24086,6 +24390,28 @@ function resolveIncubatorTransformChoice(
       hiddenZoneAction: "incubator_transform",
       incubatorTargetKind: "server",
     };
+  } else if (value.startsWith("fait:")) {
+    const serverId = value.slice("fait:".length) as Exclude<
+      ServerId,
+      "new_remote"
+    >;
+    mustServer(state, serverId);
+    const available = Math.max(
+      0,
+      Math.floor(state.faitAccompliCountersByServer?.[serverId] ?? 0),
+    );
+    if (available <= 0)
+      throw new Error("Der gewählte Fait-Counter ist nicht mehr verfügbar.");
+    state.faitAccompliCountersByServer = {
+      ...(state.faitAccompliCountersByServer ?? {}),
+      [serverId]: available + 1,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "incubator_transform",
+      incubatorTargetKind: "server",
+    };
   } else {
     throw new Error("Die Incubator-Auswahl hat einen ungültigen Targettyp.");
   }
@@ -27020,7 +27346,11 @@ function totalCounters(state: GameState, counterType: CounterType): number {
   for (const amount of Object.values(state.poxCountersByServer ?? {})) {
     poxTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
   }
-  return cardCounterTotal + poxTotal;
+  let faitTotal = 0;
+  for (const amount of Object.values(state.faitAccompliCountersByServer ?? {})) {
+    faitTotal += Math.max(0, Math.floor(Number(amount ?? 0)));
+  }
+  return cardCounterTotal + poxTotal + faitTotal;
 }
 
 function purgeVirusCounters(state: GameState): number {
@@ -27030,6 +27360,8 @@ function purgeVirusCounters(state: GameState): number {
     setCardCounter(state, cardId, "virus", 0);
   }
   if (state.poxCountersByServer) state.poxCountersByServer = {};
+  if (state.faitAccompliCountersByServer)
+    state.faitAccompliCountersByServer = {};
   return total;
 }
 
@@ -27339,7 +27671,8 @@ function isRestrictedHostedCreditSource(definition: CardDefinition): boolean {
 function shouldLoadLegacyRecurringCredits(definition: CardDefinition): boolean {
   return (
     (definition.recurringCredits ?? 0) > 0 &&
-    !isRestrictedHostedCreditSource(definition)
+    !isRestrictedHostedCreditSource(definition) &&
+    !cardImplementationForDefinitionId(definition.id)?.virusCounter
   );
 }
 
