@@ -4,6 +4,7 @@ import type {
   CardAccessEffectImplementation,
   CardAccessHookImplementation,
   CardDamagePreventionSourceImplementation,
+  CardFlatlineReplacementSourceImplementation,
   CardInstallAdditionalCostImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
@@ -29,7 +30,12 @@ export type CardImplementationDefinition = {
   restrictedHostedCreditSource?: RestrictedHostedCreditSourceImplementation;
   installAdditionalCosts?: readonly CardInstallAdditionalCostImplementation[];
   damagePreventionSources?: readonly CardDamagePreventionSourceImplementation[];
+  flatlineReplacementSources?: readonly CardFlatlineReplacementSourceImplementation[];
   tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];
   trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
   hardwareDeck?: true;
+  unique?: {
+    kind: "unique_by_title";
+    controller: "runner";
+  };
 };

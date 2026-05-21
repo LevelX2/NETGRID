@@ -956,6 +956,8 @@ export type GameState = {
   eventModificationWindow?: EventModificationWindow;
   replacementWindow?: ReplacementWindow;
   runnerTagAvoidanceCredits?: number;
+  runnerActionsPerTurnOverride?: number;
+  runnerPermanentMeatDamagePrevention?: boolean;
   eventModificationHarness?: EventModificationTestHarness;
   specialZoneHarness?: SpecialZoneTestHarness;
   deckMetadata?: {
@@ -986,6 +988,8 @@ export type GameState = {
     runAttemptsLastTurn?: number;
     successfulHqRunThisTurn?: boolean;
     damagePreventionUsage?: Record<CardInstanceId, number>;
+    runnerActionsTakenThisTurn?: number;
+    lastDamageRunnerActionOrdinal?: number;
     brokerActionCardIdsThisTurn?: CardInstanceId[];
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
@@ -1017,6 +1021,7 @@ export type GameState = {
     Record<Exclude<ServerId, "new_remote">, number>
   >;
   runnerAgendaPointsToForfeit?: number;
+  cancelledDamagePreventionSourceIdsUntilEndOfTurn?: CardInstanceId[];
 };
 
 export type Cost = {

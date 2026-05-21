@@ -399,6 +399,8 @@ export function publicContextForAction(
       "gainedCredits",
       "removedTags",
       "runnerMaxHandSizeAfter",
+      "runnerActionsPerTurnOverride",
+      "permanentMeatDamagePrevention",
       "agendaPointCostPaid",
       "futureActionDebtAdded",
       "futureActionDebtPending",

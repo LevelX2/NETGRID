@@ -17959,7 +17959,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(state.winner).toBeNull();
     expect(state.runner.coreDamage).toBe(0);
     expect(state.runner.maxHandSize).toBe(4);
-    expect(state.runnerTurnFlags?.forgoNextActionsPending).toBe(3);
+    expect(state.runnerActionsPerTurnOverride).toBe(3);
+    expect(state.runnerPermanentMeatDamagePrevention).toBe(true);
     expect(state.runner.heap).toContain(emergencyId);
     for (const gripCardId of gripCardsLost) {
       expect(state.runner.heap).toContain(gripCardId);
@@ -17974,7 +17975,8 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       coreDamageRemoved: 1,
       gripCardsLost: 2,
       runnerMaxHandSizeAfter: 4,
-      futureActionDebtPending: 3,
+      runnerActionsPerTurnOverride: 3,
+      permanentMeatDamagePrevention: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"|"grip"|"stack"/,
@@ -44228,6 +44230,92 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       finalAmount: 0,
       damageAmount: 0,
     });
+  });
+
+  it("gates Lifesaver Nanosurgeons draw on damage during the last three Runner actions", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p343-lifesaver-recent-damage",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "spotcheck_lifesaver_runner",
+          name: "Spotcheck Lifesaver Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_130_lifesaver-nanosurgeons", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    const lifesaverId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_130_lifesaver-nanosurgeons",
+    );
+    state.runner.clicks = 4;
+    const gripBefore = state.runner.grip.length;
+
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === lifesaverId,
+      ),
+    ).toBe(false);
+
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+        runAttemptsThisTurn: 0,
+        runAttemptsLastTurn: 0,
+        damagePreventionUsage: {},
+      }),
+      runnerActionsTakenThisTurn: 2,
+      lastDamageRunnerActionOrdinal: 1,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === lifesaverId,
+    );
+
+    expect(state.runner.grip.length).toBe(gripBefore + 2);
+    expect(state.runner.clicks).toBe(3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      sourceDefinitionId: "onr_v1_130_lifesaver-nanosurgeons",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+        runAttemptsThisTurn: 0,
+        runAttemptsLastTurn: 0,
+        damagePreventionUsage: {},
+      }),
+      runnerActionsTakenThisTurn: 5,
+      lastDamageRunnerActionOrdinal: 1,
+    };
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === lifesaverId,
+      ),
+    ).toBe(false);
   });
 });
 

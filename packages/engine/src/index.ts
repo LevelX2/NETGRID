@@ -253,6 +253,7 @@ import type {
   CardAccessZone,
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
+  CardFlatlineReplacementSourceImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
   IncreaseTraceLinkEffectImplementation,
@@ -305,6 +306,7 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   rezzedCorpRootCardIds,
   runnerInstalledCardIds,
   runnerRunAttemptsLastTurn,
+  runnerWasDamagedDuringLastThreeActions,
   spendClick,
   spendCredits,
   createAction: action,
@@ -2035,6 +2037,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       runAttemptsLastTurn: 0,
       successfulHqRunThisTurn: false,
       damagePreventionUsage: {},
+      runnerActionsTakenThisTurn: 0,
     },
     corpTurnFlags: {
       scoredBlackOpsAgendaThisTurn: false,
@@ -4939,7 +4942,11 @@ function isRegionUpgrade(definition: CardDefinition): boolean {
 }
 
 function isUniqueCard(definition: CardDefinition): boolean {
-  return cardHasSubtype(definition, "unique");
+  return (
+    cardHasSubtype(definition, "unique") ||
+    cardImplementationForDefinitionId(definition.id)?.unique?.kind ===
+      "unique_by_title"
+  );
 }
 
 function runnerInstalledCardIds(state: GameState): CardInstanceId[] {
@@ -14363,6 +14370,8 @@ function endTurn(
     flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
     flags.runAttemptsThisTurn = 0;
     flags.successfulHqRunThisTurn = false;
+    flags.runnerActionsTakenThisTurn = 0;
+    delete flags.lastDamageRunnerActionOrdinal;
   } else {
     const corpFlags = ensureCorpTurnFlags(state);
     corpFlags.scoredBlackOpsAgendaLastTurn =
@@ -14371,6 +14380,7 @@ function endTurn(
     resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
     if (state.winner) return;
   }
+  delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
   startDiscardPhase(state, side, legalAction);
 }
 
@@ -14705,7 +14715,7 @@ function startRunnerTurn(
   state.activeSide = "runner";
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
-  state.runner.clicks = 4;
+  state.runner.clicks = runnerActionsPerTurn(state);
   state.corp.clicks = 0;
   clearEdgerunnerTempsInstallFlags(state);
   const flags = ensureRunnerTurnFlags(state);
@@ -15215,6 +15225,7 @@ function doDamage(
   }
 
   if (request.damageType === "core") state.runner.coreDamage += request.amount;
+  recordRunnerDamageDuringCurrentAction(state);
 
   return {
     damageType: request.damageType,
@@ -15483,7 +15494,30 @@ function collectRuntimeDamagePreventionCandidates(
     ...state.runner.rig.resources,
   ];
   const candidates: EventModificationCandidate[] = [];
+  if (
+    state.runnerPermanentMeatDamagePrevention === true &&
+    damageType === "meat"
+  ) {
+    candidates.push({
+      candidateId: `card_implementation_permanent_meat_prevent_${amount}`,
+      eventId: event.eventId,
+      kind: "prevent",
+      controller: "runner",
+      sourceRef: {
+        kind: "game_rule",
+        label: "Emergency Self-Construct",
+      },
+      priority: 141,
+      visibility: "hidden_info_barrier",
+      optional: true,
+      preventAmount: amount,
+    });
+  }
   for (const cardId of installed) {
+    if (
+      state.cancelledDamagePreventionSourceIdsUntilEndOfTurn?.includes(cardId)
+    )
+      continue;
     const definition = definitionFor(state, cardId);
     const cardImplementationPreventionSources =
       damagePreventionSourcesForDefinition(definition);
@@ -15616,6 +15650,15 @@ function trashPreventionSourcesForDefinition(
   );
 }
 
+function flatlineReplacementSourcesForDefinition(
+  definition: CardDefinition,
+): readonly CardFlatlineReplacementSourceImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.flatlineReplacementSources ??
+    []
+  );
+}
+
 function isRunnerHardwareDeckDefinition(definition: CardDefinition): boolean {
   return (
     definition.type === "hardware" &&
@@ -15643,6 +15686,7 @@ function cardImplementationDamagePreventionCandidates(
       return;
     if (!cardImplementationDamagePreventionSourceCanPay(state, cardId, source))
       return;
+    const sourceAmount = source.amount === "all" ? amount : source.amount;
     const preventAmount =
       source.limit?.kind === "per_turn"
         ? Math.min(
@@ -15652,13 +15696,19 @@ function cardImplementationDamagePreventionCandidates(
               source.limit.amount - damagePreventionUsedThisTurn(state, cardId),
             ),
           )
-        : Math.min(amount, source.amount);
+        : Math.min(amount, sourceAmount);
     if (preventAmount <= 0) return;
     candidates.push({
       candidateId: `card_implementation_damage_prevent_${sanitizeId(cardId)}_${sourceIndex}_${preventAmount}`,
       eventId: event.eventId,
       kind: "prevent",
-      controller: "runner",
+      controller: source.corpMayPayToBypass
+        ? "corp"
+        : source.corpMayCancelUntilEndOfTurn &&
+            corpAgendaPointTotal(state) >=
+              source.corpMayCancelUntilEndOfTurn.agendaPointCost
+          ? "corp"
+          : "runner",
       sourceRef: {
         kind: "card",
         instanceId: cardId,
@@ -15670,6 +15720,12 @@ function cardImplementationDamagePreventionCandidates(
       optional: true,
       preventAmount,
       preventionSourceIndex: sourceIndex,
+      ...(source.corpMayPayToBypass
+        ? {
+            bypassCostPerDamage: source.corpMayPayToBypass.costPerDamage,
+            bypassPaymentSide: "corp" as const,
+          }
+        : {}),
     });
   });
   return candidates;
@@ -15897,19 +15953,26 @@ function collectReplacementCandidates(
     damageAmount > state.runner.grip.length
   ) {
     const arasakaId = state.runner.grip.find(
-      (cardId) =>
-        definitionFor(state, cardId).id ===
-        ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
+      (cardId) => {
+        const definition = definitionFor(state, cardId);
+        return flatlineReplacementSourcesForDefinition(definition).some(
+          (source) =>
+            source.kind === "flatline_replacement_from_grip" &&
+            source.replacement === "arasaka_owns_you" &&
+            source.visibility === "public",
+        );
+      },
     );
     if (arasakaId) {
+      const definition = definitionFor(state, arasakaId);
       candidates.push({
         candidateId: `v1919_arasaka_owns_you_${arasakaId}`,
         controller: "runner",
         sourceRef: {
           kind: "card",
           instanceId: arasakaId,
-          definitionId: ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
-          label: "Arasaka Owns You",
+          definitionId: definition.id,
+          label: definition.title,
         },
         replacesEventType: "damage",
         replacementEventType: "add_tag",
@@ -15919,18 +15982,26 @@ function collectReplacementCandidates(
       });
     }
     const emergencySelfConstructId = state.runner.rig.programs.find(
-      (cardId) =>
-        definitionFor(state, cardId).id === EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
+      (cardId) => {
+        const definition = definitionFor(state, cardId);
+        return flatlineReplacementSourcesForDefinition(definition).some(
+          (source) =>
+            source.kind === "flatline_replacement_installed" &&
+            source.replacement === "emergency_self_construct" &&
+            source.visibility === "public",
+        );
+      },
     );
     if (emergencySelfConstructId) {
+      const definition = definitionFor(state, emergencySelfConstructId);
       candidates.push({
         candidateId: `v1920_emergency_self_construct_${emergencySelfConstructId}`,
         controller: "runner",
         sourceRef: {
           kind: "card",
           instanceId: emergencySelfConstructId,
-          definitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
-          label: "Emergency Self-Construct",
+          definitionId: definition.id,
+          label: definition.title,
         },
         replacesEventType: "damage",
         replacementEventType: "prevent_damage",
@@ -16167,6 +16238,15 @@ function resolveEventModificationChoice(
         .join(",");
       for (const agendaId of forfeitedAgendaIds)
         forfeitCorpAgendaForPointCost(state, agendaId);
+      const sourceInstanceId = window.candidates[0]?.sourceRef.instanceId;
+      if (sourceInstanceId) {
+        state.cancelledDamagePreventionSourceIdsUntilEndOfTurn = [
+          ...new Set([
+            ...(state.cancelledDamagePreventionSourceIdsUntilEndOfTurn ?? []),
+            sourceInstanceId,
+          ]),
+        ];
+      }
     }
     const summary = resolveDamageImminentEvent(state, event);
     legalAction.payload = {
@@ -16530,8 +16610,9 @@ function resolveEmergencySelfConstructReplacement(
   }
   state.runner.coreDamage = 0;
   state.runner.maxHandSize = Math.max(0, state.runner.maxHandSize - 1);
+  state.runnerActionsPerTurnOverride = 3;
+  state.runnerPermanentMeatDamagePrevention = true;
   trashRunnerInstalledCardToHeap(state, cardId);
-  addRunnerFutureActionDebt(state, 3);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     replacementDecision: "apply",
@@ -16547,9 +16628,9 @@ function resolveEmergencySelfConstructReplacement(
     trashedCardDefinitionId: EMERGENCY_SELF_CONSTRUCT_PROGRAM_ID,
     coreDamageRemoved,
     gripCardsLost,
+    runnerActionsPerTurnOverride: state.runnerActionsPerTurnOverride,
+    permanentMeatDamagePrevention: true,
     runnerMaxHandSizeAfter: maxHandSize(state, "runner"),
-    futureActionDebtAdded: 3,
-    futureActionDebtPending: state.runnerTurnFlags?.forgoNextActionsPending ?? 0,
     sourceKind: "card",
   };
 }
@@ -17129,6 +17210,28 @@ function runnerRunAttemptsLastTurn(state: GameState): number {
     0,
     Math.floor(state.runnerTurnFlags?.runAttemptsLastTurn ?? 0),
   );
+}
+
+function runnerWasDamagedDuringLastThreeActions(state: GameState): boolean {
+  const flags = state.runnerTurnFlags;
+  const lastDamageOrdinal = Math.floor(flags?.lastDamageRunnerActionOrdinal ?? 0);
+  if (lastDamageOrdinal <= 0) return false;
+  const actionsTaken = Math.floor(flags?.runnerActionsTakenThisTurn ?? 0);
+  return actionsTaken - lastDamageOrdinal < 3;
+}
+
+function recordRunnerActionSpent(state: GameState, amount: number): void {
+  if (!Number.isInteger(amount) || amount <= 0) return;
+  const flags = ensureRunnerTurnFlags(state);
+  flags.runnerActionsTakenThisTurn =
+    Math.max(0, Math.floor(flags.runnerActionsTakenThisTurn ?? 0)) + amount;
+}
+
+function recordRunnerDamageDuringCurrentAction(state: GameState): void {
+  const flags = ensureRunnerTurnFlags(state);
+  const currentOrdinal = Math.floor(flags.runnerActionsTakenThisTurn ?? 0);
+  if (state.activeSide !== "runner" || currentOrdinal <= 0) return;
+  flags.lastDamageRunnerActionOrdinal = currentOrdinal;
 }
 
 function corpScoredBlackOpsAgendaLastTurn(state: GameState): boolean {
@@ -25744,7 +25847,7 @@ function publicActionUseContext(
   if (actionCostClicks <= 0) return {};
   const clicksBefore = clicksForSide(state, legalAction.side);
   const turnCapacity = Math.max(
-    baseClicksForSide(legalAction.side),
+    baseClicksForSide(state, legalAction.side),
     clicksBefore,
   );
   const usedBefore = Math.max(0, turnCapacity - clicksBefore);
@@ -25775,8 +25878,13 @@ function clicksForSide(state: GameState, side: Side): number {
   return side === "corp" ? state.corp.clicks : state.runner.clicks;
 }
 
-function baseClicksForSide(side: Side): number {
-  return side === "corp" ? 3 : 4;
+function baseClicksForSide(state: GameState, side: Side): number {
+  return side === "corp" ? 3 : runnerActionsPerTurn(state);
+}
+
+function runnerActionsPerTurn(state: GameState): number {
+  const override = Math.floor(state.runnerActionsPerTurnOverride ?? 4);
+  return Math.max(0, override);
 }
 
 function publicLabel(legalAction: LegalAction): string {
@@ -27396,6 +27504,7 @@ function spendClick(state: GameState, side: Side): void {
   if (state.runner.clicks <= 0)
     throw new Error("Der Runner hat keine Clicks mehr.");
   state.runner.clicks -= 1;
+  recordRunnerActionSpent(state, 1);
   consumeRunnerRunLockAction(state);
 }
 
@@ -27417,6 +27526,7 @@ function spendClicks(state: GameState, side: Side, amount: number): void {
   if (state.runner.clicks < amount)
     throw new Error("Der Runner hat nicht genug Clicks.");
   state.runner.clicks -= amount;
+  recordRunnerActionSpent(state, amount);
 }
 
 function randomHqAccess(state: GameState): CardInstanceId | undefined {
@@ -27752,6 +27862,7 @@ function ensureRunnerTurnFlags(
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
     damagePreventionUsage: {},
+    runnerActionsTakenThisTurn: 0,
     brokerActionCardIdsThisTurn: [],
     startOfTurnFloatingCreditsApplied: false,
     allNighterBonusRunPending: false,
@@ -27773,6 +27884,7 @@ function ensureRunnerTurnFlags(
   flags.runAttemptsLastTurn ??= 0;
   flags.successfulHqRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
+  flags.runnerActionsTakenThisTurn ??= 0;
   flags.brokerActionCardIdsThisTurn ??= [];
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;

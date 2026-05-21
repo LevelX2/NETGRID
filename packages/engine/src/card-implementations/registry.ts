@@ -128,6 +128,7 @@ import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { washingtonDcCityGridImplementation } from "./onr-v1/corp/upgrades/washington-d-c-city-grid";
 import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
+import { arasakaOwnsYouImplementation } from "./onr-v1/runner/preps/arasaka-owns-you";
 import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial-position";
 import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
 import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
@@ -149,8 +150,10 @@ import { artemis2020Implementation } from "./onr-v1/runner/hardware/artemis-2020
 import { corollaSpeedChipImplementation } from "./onr-v1/runner/hardware/corolla-speed-chip";
 import { dermatechBodyplatingImplementation } from "./onr-v1/runner/hardware/dermatech-bodyplating";
 import { drifterMobileEnvironmentImplementation } from "./onr-v1/runner/hardware/drifter-mobile-environment";
+import { fullBodyConversionImplementation } from "./onr-v1/runner/hardware/full-body-conversion";
 import { greenKnightSurgeBuffersImplementation } from "./onr-v1/runner/hardware/green-knight-surge-buffers";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
+import { lifesaverNanosurgeonsImplementation } from "./onr-v1/runner/hardware/lifesaver-nanosurgeons";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
 import { nasukoCycleImplementation } from "./onr-v1/runner/hardware/nasuko-cycle";
@@ -176,6 +179,7 @@ import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weathe
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
+import { emergencySelfConstructImplementation } from "./onr-v1/runner/programs/emergency-self-construct";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
@@ -201,6 +205,7 @@ import { backDoorToHilliardImplementation } from "./onr-v1/runner/resources/back
 import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/back-door-to-orbital-air";
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
 import { danshisSecondIdImplementation } from "./onr-v1/runner/resources/danshis-second-id";
+import { diplomaticImmunityImplementation } from "./onr-v1/runner/resources/diplomatic-immunity";
 import { fallGuyImplementation } from "./onr-v1/runner/resources/fall-guy";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
@@ -223,6 +228,7 @@ import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
+  arasakaOwnsYouImplementation,
   bodyweightSyntheticBloodImplementation,
   custodialPositionImplementation,
   editedShippingManifestsImplementation,
@@ -247,6 +253,7 @@ export const CARD_IMPLEMENTATIONS = [
   baedekersNetMapImplementation,
   bakdoorImplementation,
   cloakImplementation,
+  emergencySelfConstructImplementation,
   expertScheduleAnalyzerImplementation,
   forceShieldImplementation,
   invisibilityImplementation,
@@ -272,6 +279,7 @@ export const CARD_IMPLEMENTATIONS = [
   backDoorToOrbitalAirImplementation,
   aujourdhuiImplementation,
   danshisSecondIdImplementation,
+  diplomaticImmunityImplementation,
   fallGuyImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
@@ -289,8 +297,10 @@ export const CARD_IMPLEMENTATIONS = [
   corollaSpeedChipImplementation,
   dermatechBodyplatingImplementation,
   drifterMobileEnvironmentImplementation,
+  fullBodyConversionImplementation,
   greenKnightSurgeBuffersImplementation,
   hqInterfaceImplementation,
+  lifesaverNanosurgeonsImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
   nasukoCycleImplementation,

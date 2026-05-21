@@ -79,6 +79,7 @@ export type CardImplementationRuntimeDependencies = {
   rezzedCorpRootCardIds: (state: GameState) => CardInstanceId[];
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
   runnerRunAttemptsLastTurn: (state: GameState) => number;
+  runnerWasDamagedDuringLastThreeActions: (state: GameState) => boolean;
   spendClick: (state: GameState, side: Side) => void;
   spendCredits: (state: GameState, side: Side, amount: number) => void;
   createAction: (
@@ -362,6 +363,8 @@ function cardImplementationConditionMet(
         deps.runnerRunAttemptsLastTurn(state) >=
         Math.max(0, condition.minimumRuns)
       );
+    case "runner_damaged_during_last_three_actions":
+      return deps.runnerWasDamagedDuringLastThreeActions(state);
     default: {
       const unknownCondition = condition as { kind?: string };
       throw new Error(
@@ -500,6 +503,8 @@ function assertOnPlayCardImplementationAbilityCanResolve(
     throw new Error("Der Runner muss getaggt sein.");
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
+  if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
+    throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
   throw new Error("Die On-Play-Kartenbedingung ist nicht erfuellt.");
 }
 
@@ -526,6 +531,8 @@ function assertActivatedCardImplementationAbilityCanResolve(
     throw new Error("Auf der Quelle muessen Advancement-Counter liegen.");
   if (ability.condition?.kind === "runner_attempted_run_last_turn")
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
+  if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
+    throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
   const limitFailureMessage = cardImplementationAbilityLimitFailureMessage(
     ability.limit,
   );

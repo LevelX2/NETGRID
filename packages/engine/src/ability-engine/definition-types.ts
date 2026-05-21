@@ -111,7 +111,8 @@ export type CardConditionImplementation =
   | { kind: "runner_is_tagged" }
   | { kind: "source_has_hosted_credits" }
   | { kind: "source_has_advancement_counters"; minimum: number }
-  | { kind: "runner_attempted_run_last_turn"; minimumRuns: number };
+  | { kind: "runner_attempted_run_last_turn"; minimumRuns: number }
+  | { kind: "runner_damaged_during_last_three_actions" };
 
 export type ActivatedCardAbilityImplementation = {
   kind: "activated";
@@ -696,7 +697,13 @@ export type CardInstallAdditionalCostImplementation = {
 export type CardDamagePreventionSourceImplementation = {
   kind: "damage_prevention";
   damageTypes: readonly Extract<DamageType, "net" | "meat" | "core">[];
-  amount: number;
+  amount: number | "all";
+  corpMayPayToBypass?: {
+    costPerDamage: 1;
+  };
+  corpMayCancelUntilEndOfTurn?: {
+    agendaPointCost: 1;
+  };
   limit?:
     | {
         kind: "per_turn";
@@ -723,6 +730,19 @@ export type CardDamagePreventionSourceImplementation = {
   priority: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
+
+export type CardFlatlineReplacementSourceImplementation =
+  | {
+      kind: "flatline_replacement_from_grip";
+      replacement: "arasaka_owns_you";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "flatline_replacement_installed";
+      replacement: "emergency_self_construct";
+      cost: { kind: "trash_source" };
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
 
 export type CardTagPreventionSourceImplementation = {
   kind: "avoid_tag";

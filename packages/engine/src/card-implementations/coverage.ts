@@ -660,6 +660,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_DAMAGE_PREVENTION_LOCATION);
   }
+  if (implementation.flatlineReplacementSources?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for flatline-replacement source behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_DAMAGE_PREVENTION_LOCATION);
+  }
   if (implementation.tagPreventionSources?.length) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for tag-prevention source behavior.",
