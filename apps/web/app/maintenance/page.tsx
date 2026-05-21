@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { AlertTriangle, ChevronDown, Copy, Database, ExternalLink, Eye, KeyRound, ListFilter, RefreshCcw, ShieldCheck, Trash2 } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, Copy, Database, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import {
   buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
@@ -29,6 +29,25 @@ import {
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
+type MaintenanceLoadStepId = "summary" | "matches" | "policy";
+
+type MaintenanceLoadStep = {
+  id: MaintenanceLoadStepId;
+  label: string;
+  status: "pending" | "loading" | "done" | "error";
+};
+
+type OperationNotice = {
+  tone: "working" | "success";
+  message: string;
+};
+
+const INITIAL_LOAD_STEPS: MaintenanceLoadStep[] = [
+  { id: "summary", label: "Backend- und DB-Status", status: "pending" },
+  { id: "matches", label: "Matchliste aus der Datenbank", status: "pending" },
+  { id: "policy", label: "Cleanup-Policy", status: "pending" }
+];
+
 export default function MaintenancePage() {
   const [serverHttp] = useState(() => resolveMaintenanceServerHttp(CONFIGURED_SERVER_HTTP, typeof window === "undefined" ? undefined : window.location.hostname));
   const [summary, setSummary] = useState<MaintenanceSummary | null>(null);
@@ -37,6 +56,9 @@ export default function MaintenancePage() {
   const [selectedMatchId, setSelectedMatchId] = useState("");
   const [filters, setFilters] = useState<MaintenanceFilters>(EMPTY_MAINTENANCE_FILTERS);
   const [loading, setLoading] = useState(false);
+  const [loadSteps, setLoadSteps] = useState<MaintenanceLoadStep[]>(INITIAL_LOAD_STEPS);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
   const [error, setError] = useState("");
   const [cleanupFilters, setCleanupFilters] = useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
   const [cleanupPreview, setCleanupPreview] = useState<MaintenanceCleanupPreview | null>(null);
@@ -119,6 +141,7 @@ export default function MaintenancePage() {
 
   const loadCleanupPreview = async () => {
     setCleanupLoading(true);
+    setOperationNotice({ tone: "working", message: "Löschvorschau wird erstellt. Die Datenbankabfrage läuft." });
     setCleanupResult(null);
     setCleanupConfirmed(false);
     setError("");
@@ -132,9 +155,12 @@ export default function MaintenancePage() {
       if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup-Vorschau konnte nicht geladen werden." : "Cleanup-Vorschau konnte nicht geladen werden.");
       const markers = findForbiddenMaintenanceMarkers(payload);
       if (markers.length > 0) throw new Error("Cleanup-Vorschau wurde wegen Redaktionsprüfung blockiert.");
-      setCleanupPreview(payload as MaintenanceCleanupPreview);
+      const preview = payload as MaintenanceCleanupPreview;
+      setCleanupPreview(preview);
+      setOperationNotice({ tone: "success", message: `Vorschau geladen: ${preview.matchCount} Matches gefunden.` });
     } catch (previewError) {
       setError(previewError instanceof Error ? previewError.message : "Cleanup-Vorschau konnte nicht geladen werden.");
+      setOperationNotice(null);
     } finally {
       setCleanupLoading(false);
     }
@@ -143,6 +169,7 @@ export default function MaintenancePage() {
   const applyCleanup = async () => {
     if (!cleanupPreview || !cleanupConfirmed) return;
     setCleanupLoading(true);
+    setOperationNotice({ tone: "working", message: `Löschen läuft: ${cleanupPreview.matchCount} Matches werden verarbeitet.` });
     setError("");
     try {
       const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/apply`, {
@@ -159,13 +186,16 @@ export default function MaintenancePage() {
       if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Cleanup konnte nicht abgeschlossen werden." : "Cleanup konnte nicht abgeschlossen werden.");
       const markers = findForbiddenMaintenanceMarkers(payload);
       if (markers.length > 0) throw new Error("Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.");
-      setCleanupResult(payload as MaintenanceCleanupApplyResult);
+      const result = payload as MaintenanceCleanupApplyResult;
+      setCleanupResult(result);
       setCleanupPreview(null);
       setCleanupConfirmed(false);
       if (cleanupPreview.matches.some((match) => match.matchId === selectedMatchId)) setSelectedMatchId("");
-      await refresh();
+      setOperationNotice({ tone: "success", message: `Löschen abgeschlossen: ${result.deletedCount} Matches entfernt. Aktualisierung läuft.` });
+      await refresh(undefined, "cleanup");
     } catch (applyError) {
       setError(applyError instanceof Error ? applyError.message : "Cleanup konnte nicht abgeschlossen werden.");
+      setOperationNotice(null);
     } finally {
       setCleanupLoading(false);
     }
@@ -190,6 +220,7 @@ export default function MaintenancePage() {
 
   const setDetailRetentionProtection = async (protectedValue: boolean) => {
     if (!detail) return;
+    setOperationNotice({ tone: "working", message: protectedValue ? "Löschschutz wird aktiviert." : "Löschschutz wird aufgehoben." });
     setError("");
     try {
       const response = await fetch(`${serverHttp}/api/storage/maintenance/matches/${encodeURIComponent(detail.matchId)}/retention-protection`, {
@@ -203,14 +234,17 @@ export default function MaintenancePage() {
       if (markers.length > 0) throw new Error("Matchdetail wurde wegen Redaktionsprüfung blockiert.");
       setDetail(payload as MaintenanceMatchDetail);
       await loadMatches(filters);
+      setOperationNotice({ tone: "success", message: protectedValue ? "Löschschutz aktiviert." : "Löschschutz aufgehoben." });
     } catch (protectionError) {
       setError(protectionError instanceof Error ? protectionError.message : "Löschschutz konnte nicht geändert werden.");
+      setOperationNotice(null);
     }
   };
 
   const issueRecoveryAccess = async () => {
     if (!detail) return;
     setRecoveryLoading(true);
+    setOperationNotice({ tone: "working", message: "Fortsetzungszugang wird erstellt." });
     setRecoveryAccess(null);
     setError("");
     try {
@@ -226,8 +260,10 @@ export default function MaintenancePage() {
       await loadDetail(detail.matchId);
       await loadMatches(filters);
       setRecoveryAccess(payload as MaintenanceRecoveryAccess);
+      setOperationNotice({ tone: "success", message: "Fortsetzungszugang erstellt." });
     } catch (recoveryError) {
       setError(recoveryError instanceof Error ? recoveryError.message : "Fortsetzungszugang konnte nicht erstellt werden.");
+      setOperationNotice(null);
     } finally {
       setRecoveryLoading(false);
     }
@@ -241,6 +277,7 @@ export default function MaintenancePage() {
 
   const saveCleanupPolicy = async () => {
     setPolicyLoading(true);
+    setOperationNotice({ tone: "working", message: "Cleanup-Policy wird gespeichert." });
     setError("");
     try {
       const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy`, {
@@ -261,8 +298,10 @@ export default function MaintenancePage() {
       const markers = findForbiddenMaintenanceMarkers(payload);
       if (markers.length > 0) throw new Error("Cleanup-Policy wurde wegen Redaktionsprüfung blockiert.");
       setCleanupPolicy(payload as MaintenanceCleanupPolicy);
+      setOperationNotice({ tone: "success", message: "Cleanup-Policy gespeichert." });
     } catch (policyError) {
       setError(policyError instanceof Error ? policyError.message : "Cleanup-Policy konnte nicht gespeichert werden.");
+      setOperationNotice(null);
     } finally {
       setPolicyLoading(false);
     }
@@ -270,6 +309,7 @@ export default function MaintenancePage() {
 
   const runCleanupPolicy = async () => {
     setPolicyLoading(true);
+    setOperationNotice({ tone: "working", message: "Auto-Cleanup wird geprüft." });
     setError("");
     try {
       const response = await fetch(`${serverHttp}/api/storage/maintenance/cleanup/policy/run`, { method: "POST" });
@@ -278,28 +318,59 @@ export default function MaintenancePage() {
       const markers = findForbiddenMaintenanceMarkers(payload);
       if (markers.length > 0) throw new Error("Auto-Cleanup-Ergebnis wurde wegen Redaktionsprüfung blockiert.");
       if (payload.policy) setCleanupPolicy(payload.policy);
-      await refresh();
+      setOperationNotice({ tone: "success", message: "Auto-Cleanup geprüft. Aktualisierung läuft." });
+      await refresh(undefined, "cleanup");
     } catch (policyError) {
       setError(policyError instanceof Error ? policyError.message : "Auto-Cleanup konnte nicht ausgeführt werden.");
+      setOperationNotice(null);
     } finally {
       setPolicyLoading(false);
     }
   };
 
-  const refresh = async (nextFilters = filters) => {
+  const markLoadStep = (id: MaintenanceLoadStepId, status: MaintenanceLoadStep["status"]) => {
+    setLoadSteps((current) => current.map((step) => (step.id === id ? { ...step, status } : step)));
+  };
+
+  const refresh = async (nextFilters = filters, reason: "initial" | "refresh" | "filters" | "cleanup" = "refresh") => {
     setLoading(true);
+    setLoadSteps(INITIAL_LOAD_STEPS.map((step) => ({ ...step, status: "loading" })));
+    setOperationNotice({
+      tone: "working",
+      message: reason === "filters" ? "Filter werden angewendet. Matchliste und Backendstatus werden geladen." : "Backendstatus, Datenbankstatus und Matchliste werden geladen."
+    });
     setError("");
     try {
-      await Promise.all([loadSummary(), loadMatches(nextFilters), loadCleanupPolicy()]);
+      const results = await Promise.allSettled([
+        loadSummary().then(() => markLoadStep("summary", "done"), (loadError) => {
+          markLoadStep("summary", "error");
+          throw loadError;
+        }),
+        loadMatches(nextFilters).then(() => markLoadStep("matches", "done"), (loadError) => {
+          markLoadStep("matches", "error");
+          throw loadError;
+        }),
+        loadCleanupPolicy().then(() => markLoadStep("policy", "done"), (loadError) => {
+          markLoadStep("policy", "error");
+          throw loadError;
+        })
+      ]);
+      const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
+      if (rejected) throw rejected.reason;
+      setOperationNotice({
+        tone: "success",
+        message: reason === "filters" ? "Filter angewendet. Matchliste ist geladen." : "Wartungsdaten sind geladen."
+      });
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Wartungsdaten konnten nicht geladen werden.");
+      setOperationNotice(null);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    void refresh();
+    void refresh(filters, "initial");
   }, []);
 
   useEffect(() => {
@@ -308,10 +379,14 @@ export default function MaintenancePage() {
       setDetail(null);
       return;
     }
+    setDetailLoading(true);
     setError("");
     loadDetail(selectedMatchId)
       .catch((detailError) => {
         if (!closed) setError(detailError instanceof Error ? detailError.message : "Matchdetail konnte nicht geladen werden.");
+      })
+      .finally(() => {
+        if (!closed) setDetailLoading(false);
       });
     return () => {
       closed = true;
@@ -321,7 +396,7 @@ export default function MaintenancePage() {
   const statusRows = useMemo(() => Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
   const modeRows = useMemo(() => Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
 
-  const applyFilters = () => void refresh(filters);
+  const applyFilters = () => void refresh(filters, "filters");
 
   return (
     <main style={pageShell}>
@@ -334,11 +409,13 @@ export default function MaintenancePage() {
             <p style={subtle}>Backend 0.5 · private Storage-Wartungsansicht</p>
           </div>
         </div>
-        <button type="button" style={button} onClick={() => void refresh()} disabled={loading} title="Aktualisieren">
-          <RefreshCcw size={16} aria-hidden="true" />
-          Aktualisieren
+        <button type="button" style={button} onClick={() => void refresh(filters, "refresh")} disabled={loading} title="Aktualisieren">
+          {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
+          {loading ? "Lädt" : "Aktualisieren"}
         </button>
       </header>
+
+      <LoadStatus steps={loadSteps} active={loading} notice={operationNotice} />
 
       {error ? <p style={errorBox}>{error}</p> : null}
 
@@ -388,14 +465,14 @@ export default function MaintenancePage() {
             </CollapsiblePanel>
           </section>
         </>
-      ) : null}
+      ) : loading ? <SkeletonDashboard /> : null}
 
       <CollapsiblePanel title="Matchliste" icon={<ListFilter size={18} aria-hidden="true" />}>
         <div style={panelHeader}>
-          <p style={subtle}>Geladen: {matches.length} · Limit leer lassen lädt alle Matches bewusst.</p>
+          <p style={subtle}>{loading ? "Matchliste wird geladen ..." : `Geladen: ${matches.length}`} · Limit leer lassen lädt alle Matches bewusst.</p>
           <button type="button" style={button} onClick={applyFilters} disabled={loading} title="Filter anwenden">
-            <Eye size={16} aria-hidden="true" />
-            Anwenden
+            {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Eye size={16} aria-hidden="true" />}
+            {loading ? "Lädt" : "Anwenden"}
           </button>
         </div>
         <div style={filtersGrid}>
@@ -423,6 +500,19 @@ export default function MaintenancePage() {
               </tr>
             </thead>
             <tbody>
+              {loading && matches.length === 0 ? (
+                <tr>
+                  <td style={loadingCell} colSpan={10}>
+                    <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
+                    Matchliste wird aus der Datenbank geladen ...
+                  </td>
+                </tr>
+              ) : null}
+              {!loading && matches.length === 0 ? (
+                <tr>
+                  <td style={loadingCell} colSpan={10}>Keine Matches für diese Filter gefunden.</td>
+                </tr>
+              ) : null}
               {matches.map((match) => (
                 <tr key={match.matchId} style={selectedMatchId === match.matchId ? selectedRow : undefined} onClick={() => setSelectedMatchId(match.matchId)}>
                   <td style={td}><code>{shortId(match.matchId)}</code></td>
@@ -442,13 +532,15 @@ export default function MaintenancePage() {
         </div>
       </CollapsiblePanel>
 
+      {detailLoading && selectedMatchId ? <p style={infoBox}>Matchdetail wird geladen: <code>{shortId(selectedMatchId)}</code></p> : null}
+
       {detail ? (
         <CollapsiblePanel title="Matchdetail" icon={<ShieldCheck size={18} aria-hidden="true" />}>
           <div style={panelHeader}>
             <p style={subtle}>{detail.retentionProtected ? "Gegen automatisches Löschen geschützt" : "Nicht gegen automatisches Löschen geschützt"}</p>
             <div style={buttonRow}>
-              <button type="button" style={button} onClick={() => void setDetailRetentionProtection(!detail.retentionProtected)}>
-                {detail.retentionProtected ? "Schutz aufheben" : "Aufheben schützen"}
+              <button type="button" style={button} onClick={() => void setDetailRetentionProtection(!detail.retentionProtected)} disabled={detailLoading || loading}>
+                {detail.retentionProtected ? "Schutz aufheben" : "Vor Löschen schützen"}
               </button>
               <code>{detail.matchId}</code>
             </div>
@@ -493,8 +585,8 @@ export default function MaintenancePage() {
                   ))}
                 </select>
                 <button type="button" style={button} onClick={() => void issueRecoveryAccess()} disabled={recoveryLoading || detail.terminal || detail.participants.length === 0}>
-                  <KeyRound size={16} aria-hidden="true" />
-                  Erstellen
+                  {recoveryLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <KeyRound size={16} aria-hidden="true" />}
+                  {recoveryLoading ? "Erstellt" : "Erstellen"}
                 </button>
               </div>
             </div>
@@ -520,8 +612,8 @@ export default function MaintenancePage() {
           <p style={subtle}>Manueller Dry-Run und automatischer stündlicher Cleanup.</p>
           <div style={buttonRow}>
             <button type="button" style={button} onClick={() => void loadCleanupPreview()} disabled={cleanupLoading} title="Löschvorschau erzeugen">
-              <Eye size={16} aria-hidden="true" />
-              Vorschau
+              {cleanupLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Eye size={16} aria-hidden="true" />}
+              {cleanupLoading ? "Lädt" : "Vorschau"}
             </button>
             <button
               type="button"
@@ -530,8 +622,8 @@ export default function MaintenancePage() {
               disabled={cleanupLoading || !cleanupPreview || cleanupPreview.matchCount === 0 || !cleanupConfirmed}
               title="Ganze Matches löschen"
             >
-              <Trash2 size={16} aria-hidden="true" />
-              Löschen
+              {cleanupLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Trash2 size={16} aria-hidden="true" />}
+              {cleanupLoading ? "Löscht" : "Löschen"}
             </button>
           </div>
         </div>
@@ -563,6 +655,7 @@ export default function MaintenancePage() {
             </label>
           ))}
         </div>
+        {cleanupLoading ? <p style={infoBox}>Cleanup-Anfrage läuft. Bitte warten, bis Vorschau oder Ergebnis angezeigt wird.</p> : null}
         {cleanupPreview ? (
           <div style={cleanupBox}>
             <MiniRows
@@ -631,8 +724,8 @@ export default function MaintenancePage() {
           <div style={panelHeader}>
             <h3 style={h3}>Automatischer Cleanup</h3>
             <div style={buttonRow}>
-              <button type="button" style={button} onClick={() => void saveCleanupPolicy()} disabled={policyLoading}>Speichern</button>
-              <button type="button" style={button} onClick={() => void runCleanupPolicy()} disabled={policyLoading}>Jetzt prüfen</button>
+              <button type="button" style={button} onClick={() => void saveCleanupPolicy()} disabled={policyLoading}>{policyLoading ? "Speichert" : "Speichern"}</button>
+              <button type="button" style={button} onClick={() => void runCleanupPolicy()} disabled={policyLoading}>{policyLoading ? "Prüft" : "Jetzt prüfen"}</button>
             </div>
           </div>
           <div style={filtersGrid}>
@@ -680,6 +773,53 @@ export default function MaintenancePage() {
       </CollapsiblePanel>
       </div>
     </main>
+  );
+}
+
+function LoadStatus({ steps, active, notice }: { steps: MaintenanceLoadStep[]; active: boolean; notice: OperationNotice | null }) {
+  const hasProgress = active || notice || steps.some((step) => step.status !== "pending");
+  if (!hasProgress) return null;
+  const isWorking = active || notice?.tone === "working";
+  const doneCount = steps.filter((step) => step.status === "done").length;
+  const progressValue = steps.length === 0 ? 0 : Math.round((doneCount / steps.length) * 100);
+  const noticeStyle = notice?.tone === "success" ? successNotice : workingNotice;
+  return (
+    <section style={loadStatusBox} aria-live="polite" aria-busy={isWorking}>
+      <div style={panelHeader}>
+        <div>
+          <h2 style={h2}>Ladestatus</h2>
+          <p style={subtle}>{notice?.message ?? "Bereit."}</p>
+        </div>
+        <strong style={noticeStyle}>{active ? `${progressValue}%` : isWorking ? "läuft" : "fertig"}</strong>
+      </div>
+      <div style={progressTrack} aria-hidden="true">
+        <div style={{ ...progressFill, width: `${active ? Math.max(progressValue, 8) : isWorking ? 100 : progressValue}%` }} />
+      </div>
+      <div style={loadStepGrid}>
+        {steps.map((step) => (
+          <span key={step.id} style={loadStep}>
+            {step.status === "loading" ? <LoaderCircle size={15} aria-hidden="true" style={spinIcon} /> : null}
+            {step.status === "done" ? <CheckCircle2 size={15} aria-hidden="true" /> : null}
+            {step.status === "error" ? <XCircle size={15} aria-hidden="true" /> : null}
+            {step.status === "pending" ? <span style={pendingDot} aria-hidden="true" /> : null}
+            {step.label}
+          </span>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function SkeletonDashboard() {
+  return (
+    <section style={grid4} aria-hidden="true">
+      {[0, 1, 2, 3].map((item) => (
+        <div key={item} style={skeletonMetric}>
+          <span style={skeletonLineSmall} />
+          <span style={skeletonLineLarge} />
+        </div>
+      ))}
+    </section>
   );
 }
 
@@ -812,6 +952,20 @@ const detailGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repea
 const errorBox: CSSProperties = { margin: 0, border: "1px solid #f3b5b5", background: "#fff5f5", color: "#9b1c1c", borderRadius: 8, padding: "0.7rem" };
 const warningBox: CSSProperties = { display: "flex", alignItems: "flex-start", gap: "0.55rem", border: "1px solid #e2c16a", background: "#fff9e8", borderRadius: 8, padding: "0.7rem", color: "#5b4200" };
 const warningText: CSSProperties = { margin: 0, color: "#7a4b00", fontSize: "0.86rem" };
+const infoBox: CSSProperties = { margin: 0, border: "1px solid #9db0c3", background: "#f6fbff", color: "#153654", borderRadius: 8, padding: "0.7rem", fontSize: "0.9rem" };
+const loadStatusBox: CSSProperties = { border: "1px solid #b9cbe0", borderRadius: 8, padding: "0.85rem", background: "#f9fcff", display: "grid", gap: "0.65rem", color: "#102033" };
+const progressTrack: CSSProperties = { height: 8, borderRadius: 999, overflow: "hidden", background: "#d8e4ef" };
+const progressFill: CSSProperties = { height: "100%", borderRadius: 999, background: "#2f74b5", transition: "width 180ms ease" };
+const loadStepGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(210px, 1fr))", gap: "0.45rem" };
+const loadStep: CSSProperties = { minHeight: 30, display: "inline-flex", alignItems: "center", gap: "0.4rem", border: "1px solid #d7e1eb", borderRadius: 6, background: "#fff", padding: "0.35rem 0.5rem", color: "#24394d", fontSize: "0.86rem" };
+const pendingDot: CSSProperties = { width: 9, height: 9, borderRadius: 999, border: "1px solid #9db0c3", background: "#fff" };
+const workingNotice: CSSProperties = { color: "#245f95", fontSize: "0.86rem" };
+const successNotice: CSSProperties = { color: "#24704c", fontSize: "0.86rem" };
+const spinIcon: CSSProperties = { flex: "0 0 auto" };
+const loadingCell: CSSProperties = { ...td, color: "#42576b", textAlign: "center", padding: "1rem", verticalAlign: "middle" };
+const skeletonMetric: CSSProperties = { ...metric, minHeight: 82 };
+const skeletonLineSmall: CSSProperties = { display: "block", width: "42%", height: 10, borderRadius: 999, background: "#d8e4ef" };
+const skeletonLineLarge: CSSProperties = { display: "block", width: "68%", height: 24, borderRadius: 6, background: "#c8d8e8" };
 const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };
 const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
 const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
