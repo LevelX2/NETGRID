@@ -163,18 +163,24 @@ function serverHasRezzedTesseractFortConstruction(server: PlayerView["servers"][
   return server.root.some((card) => card.known && card.rezzed === true && card.definitionId === TESSERACT_FORT_CONSTRUCTION_ID);
 }
 
-export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {
+export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId" | "counterDisplays">): string | null {
+  const display = counterDisplayById(card, "stored_credits");
+  if (display) return display.label;
   return storedCreditCounterSource(card)?.label ?? null;
 }
 
-export function storedCreditAmount(card: Pick<VisibleCard, "definitionId" | "counters">): number {
+export function storedCreditAmount(card: Pick<VisibleCard, "definitionId" | "counters" | "counterDisplays">): number {
+  const display = counterDisplayById(card, "stored_credits");
+  if (display) return safeCounterDisplayAmount(display.amount);
   const source = storedCreditCounterSource(card);
   if (!source) return 0;
   const amount = card.counters?.[source.counter] ?? 0;
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
 
-export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "definitionId" | "counters">): CardCounterBadgeView | null {
+export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "definitionId" | "counters" | "counterDisplays">): CardCounterBadgeView | null {
+  const display = counterDisplayById(card, "ablative");
+  if (display) return counterDisplayBadgeView(display, "ablative-counter-badge");
   if (card.definitionId !== "onr_v1_121_armored-fridge") return null;
   const amount = card.counters?.power ?? 0;
   const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
@@ -186,6 +192,30 @@ export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "defin
     shortLabel: `${safeAmount} Ablative`,
     testId: "ablative-counter-badge"
   };
+}
+
+export function counterDisplayById(card: Pick<VisibleCard, "counterDisplays">, id: string): NonNullable<VisibleCard["counterDisplays"]>[number] | null {
+  return card.counterDisplays?.find((display) => display.id === id && safeCounterDisplayAmount(display.amount) > 0) ?? null;
+}
+
+export function counterDisplayBadgeView(display: NonNullable<VisibleCard["counterDisplays"]>[number], testId: string): CardCounterBadgeView {
+  const amount = safeCounterDisplayAmount(display.amount);
+  const label = display.label;
+  return {
+    amount,
+    label: `${amount} ${label}`,
+    ariaLabel: display.ariaLabel,
+    shortLabel: `${amount} ${counterDisplayShortLabel(label)}`,
+    testId
+  };
+}
+
+export function safeCounterDisplayAmount(amount: number): number {
+  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+}
+
+function counterDisplayShortLabel(label: string): string {
+  return label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "");
 }
 
 export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "advancementCounters">): AdvancementCounterDisplay | null {

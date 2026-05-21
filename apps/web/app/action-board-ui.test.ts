@@ -18,6 +18,7 @@ import {
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
+  counterDisplayBadgeView,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -542,43 +543,49 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
-  it("maps hosted bit counters to the existing card credit badge pattern", () => {
+  it("maps CounterDisplay stored credits to the existing card credit badge pattern", () => {
     const brokerAfterLoad: VisibleCard = {
       ...card("broker_1", "Broker", "resource"),
-      definitionId: "onr_v1_154_broker",
-      counters: { bit: 3 }
+      counterDisplays: [
+        {
+          id: "stored_credits",
+          amount: 3,
+          displayKind: "stored_credits",
+          label: "Credits",
+          ariaLabel: "3 gespeicherte Credits",
+          counterType: "bit",
+          usageHint: "spendable"
+        }
+      ]
     };
     const brokerTenPlus: VisibleCard = {
       ...brokerAfterLoad,
       instanceId: "broker_2",
-      counters: { bit: 12 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 12, ariaLabel: "12 gespeicherte Credits" }]
     };
     const shortTerm: VisibleCard = {
       ...card("short_term_1", "Short-Term Contract", "resource"),
-      definitionId: "onr_v1_178_short-term-contract",
-      counters: { bit: 10 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 10, ariaLabel: "10 gespeicherte Credits" }]
     };
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
-      definitionId: "onr_v1_309_bbs-whispering-campaign",
-      counters: { bit: 8 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 8, ariaLabel: "8 gespeicherte Credits" }]
     };
     const bbsTenPlus: VisibleCard = {
       ...bbsUnderTen,
       instanceId: "bbs_2",
-      counters: { bit: 10 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 10, ariaLabel: "10 gespeicherte Credits" }]
     };
     const braindanceTenPlus: VisibleCard = {
       ...card("braindance_1", "Braindance Campaign", "asset"),
-      definitionId: "onr_v1_311_braindance-campaign",
-      counters: { bit: 12 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 12, ariaLabel: "12 gespeicherte Credits" }]
     };
     const unknownPowerCard: VisibleCard = {
       ...card("unknown_1", "Unknown Power Counter Card", "asset"),
       counters: { power: 8 }
     };
 
-    expect(storedCreditSourceLabel(brokerAfterLoad)).toBe("Broker");
+    expect(storedCreditSourceLabel(brokerAfterLoad)).toBe("Credits");
     expect(storedCreditAmount(brokerAfterLoad)).toBe(3);
     expect(cardCreditCounterVisual(storedCreditAmount(brokerAfterLoad))).toMatchObject({
       safeAmount: 3,
@@ -591,9 +598,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
-    expect(storedCreditSourceLabel(shortTerm)).toBe("Short-Term Contract");
+    expect(storedCreditSourceLabel(shortTerm)).toBe("Credits");
     expect(storedCreditAmount(shortTerm)).toBe(10);
-    expect(storedCreditSourceLabel(bbsUnderTen)).toBe("BBS Whispering Campaign");
+    expect(storedCreditSourceLabel(bbsUnderTen)).toBe("Credits");
     expect(storedCreditAmount(bbsUnderTen)).toBe(8);
     expect(cardCreditCounterVisual(storedCreditAmount(bbsUnderTen))).toMatchObject({
       safeAmount: 8,
@@ -606,7 +613,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
-    expect(storedCreditSourceLabel(braindanceTenPlus)).toBe("Braindance Campaign");
+    expect(storedCreditSourceLabel(braindanceTenPlus)).toBe("Credits");
     expect(storedCreditAmount(braindanceTenPlus)).toBe(12);
     expect(cardCreditCounterVisual(storedCreditAmount(braindanceTenPlus))).toMatchObject({
       safeAmount: 12,
@@ -616,19 +623,63 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 
-  it("maps only Armored Fridge power counters to an Ablative Counter badge", () => {
+  it("keeps legacy stored-credit fallback bounded while CounterDisplay remains primary", () => {
+    expect(
+      storedCreditAmount({
+        ...card("broker_legacy", "Broker", "resource"),
+        definitionId: "onr_v1_154_broker",
+        counters: { bit: 3 }
+      })
+    ).toBe(3);
+    expect(
+      storedCreditAmount({
+        ...card("unknown_1", "Unknown Power Counter Card", "asset"),
+        counters: { power: 8 }
+      })
+    ).toBe(0);
+  });
+
+  it("maps CounterDisplay special counters to compact badge models", () => {
     expect(
       armoredFridgeAblativeCounterBadge({
         ...card("fridge_1", "Armored Fridge", "hardware"),
-        definitionId: "onr_v1_121_armored-fridge",
-        counters: { power: 7 }
+        counterDisplays: [
+          {
+            id: "ablative",
+            amount: 7,
+            displayKind: "damage_prevention",
+            label: "Ablative-Counter",
+            ariaLabel: "7 Ablative-Counter",
+            counterType: "ablative",
+            usageHint: "status_marker"
+          }
+        ]
       })
     ).toEqual({
       amount: 7,
-      label: "7 Ablative Counter",
-      ariaLabel: "7 Ablative Counter",
+      label: "7 Ablative-Counter",
+      ariaLabel: "7 Ablative-Counter",
       shortLabel: "7 Ablative",
       testId: "ablative-counter-badge"
+    });
+    expect(
+      counterDisplayBadgeView(
+        {
+          id: "data_raven",
+          amount: 2,
+          displayKind: "trace",
+          label: "Data-Raven-Counter",
+          ariaLabel: "2 Data-Raven-Counter",
+          counterType: "data_raven",
+          usageHint: "status_marker"
+        },
+        "data-raven-counter-badge"
+      )
+    ).toMatchObject({
+      amount: 2,
+      label: "2 Data-Raven-Counter",
+      ariaLabel: "2 Data-Raven-Counter",
+      shortLabel: "2 Data-Raven"
     });
     expect(
       armoredFridgeAblativeCounterBadge({

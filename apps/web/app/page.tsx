@@ -121,7 +121,6 @@ import {
   advancementCounterDisplay,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
-  armoredFridgeAblativeCounterBadge,
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
@@ -150,12 +149,11 @@ import {
   serializeCuePositionPreference,
   showInstalledCorpState,
   shouldUseCardChoicePanel,
+  safeCounterDisplayAmount,
   serverBoardRows,
   serverDisplayLabel,
   splitArchiveCardsForDisplay,
   splitLegalActions,
-  storedCreditAmount,
-  storedCreditSourceLabel,
   currentRunTimelineStep,
   type AdvancementCounterDisplay,
   type ActionContext,
@@ -200,7 +198,7 @@ import {
 } from "./catalog-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
-import { scoredAgendaCreditCounterSource, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
+import { scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
   loadCurrentTabSession,
@@ -11511,23 +11509,8 @@ function CardView({
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
-  const scoredAgendaCreditSource = showScoreStateBadges ? scoredAgendaCreditCounterSource(card.definitionId) : null;
-  const scoredAgendaCredits = scoredAgendaCreditSource ? counterAmount(card, "power") : 0;
-  const storedCredits = preview ? 0 : storedCreditAmount(card);
-  const recurringCredits = preview ? 0 : recurringCreditAmount(card);
-  const shellCounters = preview ? 0 : shellCounterAmount(card);
-  const dataRavenCounters = preview ? 0 : dataRavenCounterAmount(card);
-  const ablativeCounterBadge = preview ? null : armoredFridgeAblativeCounterBadge(card);
-  const storedCreditSource = storedCreditSourceLabel(card);
-  const storedCreditsAria =
-    storedCredits > 0 && storedCreditSource
-      ? `${storedCredits} ${storedCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
-      : null;
-  const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
-  const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
-  const dataRavenCountersAria = dataRavenCounters > 0 ? `${dataRavenCounters} Data-Raven-Counter` : null;
-  const ablativeCountersAria = ablativeCounterBadge?.ariaLabel ?? null;
-  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria, ablativeCountersAria].filter(Boolean).join(", ");
+  const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
+  const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
@@ -11864,12 +11847,9 @@ function CardView({
         ) : null}
         {advancementDisplay ? <AdvancementGems card={card} display={advancementDisplay} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
-        {storedCredits > 0 && storedCreditSource ? <StoredCreditsBadge amount={storedCredits} sourceLabel={storedCreditSource} /> : null}
-        {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
-        {scoredAgendaCredits > 0 && scoredAgendaCreditSource ? <ScoredAgendaCreditsBadge amount={scoredAgendaCredits} sourceLabel={scoredAgendaCreditSource} /> : null}
-        {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
-        {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
-        {ablativeCounterBadge ? <AblativeCounterBadge label={ablativeCounterBadge.shortLabel} ariaLabel={ablativeCounterBadge.ariaLabel} testId={ablativeCounterBadge.testId} /> : null}
+        {renderedCounterDisplays.map((display) => (
+          <CounterDisplayBadge key={`${card.instanceId}-counter-display-${display.id}`} display={display} scoreState={showScoreStateBadges} />
+        ))}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
       {discardShortcut ? (
@@ -11995,13 +11975,9 @@ function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
   );
 }
 
-function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power" | "shell" | "recurring_credit"): number {
+function counterAmount(card: DisplayVisibleCard, counter: "agenda"): number {
   const amount = card.counters?.[counter];
   return typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function creditLabel(amount: number): string {
-  return amount === 1 ? "Credit" : "Credits";
 }
 
 function agendaPointLabel(amount: number): string {
@@ -12131,37 +12107,54 @@ function StrengthBoostBadge({ amount }: { amount: number }) {
   );
 }
 
-function StoredCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
+function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<VisibleCard["counterDisplays"]>[number]; scoreState: boolean }) {
+  const amount = safeCounterDisplayAmount(display.amount);
+  if (amount <= 0) return null;
+  if (display.displayKind === "stored_credits") {
+    return (
+      <CardCreditCounter
+        amount={amount}
+        ariaLabel={display.ariaLabel}
+        className={scoreState ? "scoredAgendaCreditsBadge" : "storedCreditsBadge brokerStoredCreditsBadge"}
+        testId={scoreState ? "scored-agenda-credits-badge" : "stored-credits-badge"}
+      />
+    );
+  }
+  if (display.displayKind === "recurring_credit") {
+    return (
+      <CardCreditCounter
+        amount={amount}
+        ariaLabel={display.ariaLabel}
+        className="recurringCreditBadge"
+        testId="recurring-credit-badge"
+      />
+    );
+  }
+  const className =
+    display.displayKind === "shell"
+      ? "shellCounterBadge"
+      : display.id === "data_raven"
+        ? "dataRavenCounterBadge"
+        : "ablativeCounterBadge";
+  const testId =
+    display.displayKind === "shell"
+      ? "shell-counter-badge"
+      : display.id === "data_raven"
+        ? "data-raven-counter-badge"
+        : display.id === "ablative"
+          ? "ablative-counter-badge"
+          : "counter-display-badge";
   return (
-    <CardCreditCounter
-      amount={amount}
-      ariaLabel={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf ${sourceLabel}`}
-      className="storedCreditsBadge brokerStoredCreditsBadge"
-      testId="stored-credits-badge"
-    />
+    <span className={className} aria-label={display.ariaLabel} data-testid={testId} title={display.ariaLabel}>
+      {counterDisplayBadgeText(display, amount)}
+    </span>
   );
 }
 
-function RecurringCreditBadge({ amount }: { amount: number }) {
-  return (
-    <CardCreditCounter
-      amount={amount}
-      ariaLabel={`${amount} wiederkehrende ${creditLabel(amount)}`}
-      className="recurringCreditBadge"
-      testId="recurring-credit-badge"
-    />
-  );
-}
-
-function ScoredAgendaCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
-  return (
-    <CardCreditCounter
-      amount={amount}
-      ariaLabel={`${amount} ${creditLabel(amount)} auf ${sourceLabel}`}
-      className="scoredAgendaCreditsBadge"
-      testId="scored-agenda-credits-badge"
-    />
-  );
+function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDisplays"]>[number], amount: number): string {
+  if (display.displayKind === "shell") return `${amount} Shell`;
+  if (display.id === "data_raven") return `${amount} Raven`;
+  return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
 }
 
 function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {
@@ -12182,30 +12175,6 @@ function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: n
           <span className="cardCreditCounterIcon" key={`card-credit-counter-icon-${index}`} />
         ))}
       </span>
-    </span>
-  );
-}
-
-function ShellCounterBadge({ amount }: { amount: number }) {
-  return (
-    <span className="shellCounterBadge" aria-label={`${amount} Shell-Counter`} data-testid="shell-counter-badge">
-      {amount} Shell
-    </span>
-  );
-}
-
-function DataRavenCounterBadge({ amount }: { amount: number }) {
-  return (
-    <span className="dataRavenCounterBadge" aria-label={`${amount} Data-Raven-Counter`} data-testid="data-raven-counter-badge">
-      {amount} Raven
-    </span>
-  );
-}
-
-function AblativeCounterBadge({ label, ariaLabel, testId }: { label: string; ariaLabel: string; testId: string }) {
-  return (
-    <span className="ablativeCounterBadge" aria-label={ariaLabel} data-testid={testId} title={ariaLabel}>
-      {label}
     </span>
   );
 }
@@ -12270,11 +12239,7 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
     selectedServerLabel(card),
-    storedCreditsLabel(card),
-    recurringCreditLabel(card),
-    shellCounterLabel(card),
-    dataRavenCounterLabel(card),
-    armoredFridgeAblativeCounterBadge(card)?.label ?? null
+    ...counterDisplayDetailLabels(card)
   ]
     .filter(Boolean)
     .join(" · ");
@@ -12286,46 +12251,18 @@ function selectedServerLabel(card: VisibleCard): string | null {
   return `Zielserver ${card.selectedServerLabel}`;
 }
 
-function storedCreditsLabel(card: VisibleCard): string | null {
-  const sourceLabel = storedCreditSourceLabel(card);
-  if (!sourceLabel) return null;
-  const amount = storedCreditAmount(card);
-  if (amount <= 0) return null;
-  return `${sourceLabel} ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
+function counterDisplayDetailLabels(card: VisibleCard): string[] {
+  return counterDisplaysForRendering(card).map(
+    (display) => `${safeCounterDisplayAmount(display.amount)} ${display.label}`,
+  );
 }
 
-function shellCounterLabel(card: VisibleCard): string | null {
-  const amount = shellCounterAmount(card);
-  if (amount <= 0) return null;
-  return `${amount} Shell-Counter`;
-}
-
-function recurringCreditLabel(card: VisibleCard): string | null {
-  const amount = recurringCreditAmount(card);
-  if (amount <= 0) return null;
-  return `${amount} wiederkehrende ${creditLabel(amount)}`;
-}
-
-function dataRavenCounterLabel(card: VisibleCard): string | null {
-  const amount = dataRavenCounterAmount(card);
-  if (amount <= 0) return null;
-  return `${amount} Data-Raven-Counter`;
-}
-
-function shellCounterAmount(card: VisibleCard): number {
-  const amount = card.counters?.shell ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function recurringCreditAmount(card: VisibleCard): number {
-  const amount = card.counters?.recurring_credit ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function dataRavenCounterAmount(card: VisibleCard): number {
-  if (card.definitionId !== "onr_v1_236_data-raven") return 0;
-  const amount = card.counters?.power ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+function counterDisplaysForRendering(card: VisibleCard): NonNullable<VisibleCard["counterDisplays"]> {
+  return (card.counterDisplays ?? []).filter(
+    (display) =>
+      display.displayKind !== "advancement" &&
+      safeCounterDisplayAmount(display.amount) > 0,
+  );
 }
 
 function cardWithoutDevelopmentCounters(card: DisplayVisibleCard): DisplayVisibleCard {
