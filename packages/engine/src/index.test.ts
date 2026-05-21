@@ -3415,14 +3415,14 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("revalidates Omni tag state, Disinfectant targets and Access to Kiribati trace link", () => {
-    let omni = MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-omni-tag-drift");
+  it("revalidates legacy tag-condition state, Disinfectant targets and Access to Kiribati trace link", () => {
+    let omni = MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-tag-condition-drift");
     omni.corp.credits = 10;
     omni.runner.tags = 1;
     omni = apply(omni, "corp", (action) => action.type === "mandatory_draw");
-    const omniId = putCorpRootInRemote(omni, "onr_v1_364_omni-kismet-ph-d");
-    omni.cardInstances[omniId] = {
-      ...omni.cardInstances[omniId]!,
+    const parisId = putCorpRootInRemote(omni, "onr_v1_365_paris-city-grid");
+    omni.cardInstances[parisId] = {
+      ...omni.cardInstances[parisId]!,
       faceup: true,
       rezzed: true,
     };
@@ -3432,7 +3432,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       (action) =>
         action.type === "gain_credit" &&
         action.payload?.v1918UpgradeAbility === "tag_condition_credit" &&
-        String(action.payload?.cardId) === omniId,
+        String(action.payload?.cardId) === parisId,
     );
     const noTag = structuredClone(omni);
     noTag.runner.tags = 0;
@@ -7554,6 +7554,58 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(
       cardImplementationForDefinitionId("onr_v1_330_krumz")?.corpUtility,
     ).toMatchObject({ kind: "krumz_trace_bit" });
+  });
+
+  it("migrates P3.52 fort ICE-control windows into CardImplementation coverage", () => {
+    const p352Cards = [
+      "onr_v1_363_olivia-salazar",
+      "onr_v1_364_omni-kismet-ph-d",
+      "onr_v1_369_singapore-city-grid",
+      "onr_v1_026_false-echo",
+    ] as const;
+
+    for (const definitionId of p352Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_363_olivia-salazar")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "discounted_rez_ice_on_this_fort",
+        discount: "half_rez_cost_rounded_down",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_364_omni-kismet-ph-d")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "swap_unrezzed_fort_ice_with_hq_ice",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_369_singapore-city-grid")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "swap_unrezzed_fort_ice_with_hq_ice",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_026_false-echo")
+        ?.successfulRunFollowups,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "force_rez_ice_outermost_inward_after_successful_run",
+      }),
+    );
+    expect(cardImplementationForDefinitionId("onr_v1_358_dr-dreff")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_359_jenny-jett")).toBeUndefined();
   });
 
   it("uses P3.51 Silver Lining advancement history and Omniscience/Disinfectant hooks", () => {
@@ -29288,6 +29340,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "trigger_ability" &&
         action.payload?.v1922RunnerProgramAbility === "false_echo_force_rez",
     );
+    expect(falseEcho.costs[0]?.credits).toBe(2);
     const stale = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
@@ -29300,6 +29353,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
 
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.actionId === falseEcho.actionId);
+    expect(state.runner.credits).toBe(8);
     expect(state.cardInstances[innerIce]?.rezzed).toBe(true);
     expect(state.cardInstances[outerIce]?.rezzed).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -29307,6 +29361,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       checkedIceCount: 2,
       rezzedIceCount: 2,
       rezCostPaid: 5,
+      falseEchoCreditCost: 2,
+      runnerCreditsAfter: 8,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
@@ -33611,13 +33667,13 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     state.runner.tags = 1;
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     const drDreffId = putCorpRootInRemote(state, "onr_v1_358_dr-dreff");
-    const omniId = putCorpRootInRemote(state, "onr_v1_364_omni-kismet-ph-d");
+    const parisId = putCorpRootInRemote(state, "onr_v1_365_paris-city-grid");
     const galvestonId = putCorpRootInRemote(
       state,
       "onr_v1_362_new-galveston-city-grid",
     );
     putCorpCardOnTopOfRd(state, "simple_economy_operation");
-    for (const upgradeId of [drDreffId, omniId, galvestonId]) {
+    for (const upgradeId of [drDreffId, parisId, galvestonId]) {
       state.cardInstances[upgradeId] = {
         ...state.cardInstances[upgradeId]!,
         faceup: true,
@@ -40846,6 +40902,95 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ),
     ).toBe(false);
     expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("resolves Omni Kismet as a CardImplementation fort ICE swap without legacy tag-credit actions", () => {
+    const omniCorpDeck: DeckDefinition = {
+      ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+      id: "spotcheck_omni_kismet_swap_corp",
+      name: "Spotcheck Omni Kismet Corp",
+      cards: [
+        { id: "onr_v1_364_omni-kismet-ph-d", quantity: 1 },
+        { id: "simple_barrier_ice", quantity: 1 },
+        { id: "simple_code_gate_ice", quantity: 1 },
+        ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+          (card) =>
+            card.id !== "onr_v1_364_omni-kismet-ph-d" &&
+            card.id !== "simple_barrier_ice" &&
+            card.id !== "simple_code_gate_ice",
+        ),
+      ],
+    };
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-omni-kismet-swap",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+        corpDeck: omniCorpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.tags = 1;
+    state.corp.credits = 20;
+    const omniId = putCorpRootInRemote(state, "onr_v1_364_omni-kismet-ph-d");
+    state.cardInstances[omniId] = {
+      ...state.cardInstances[omniId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const installedIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_barrier_ice",
+    );
+    const hqIceId = moveCorpCardToHq(state, "simple_code_gate_ice");
+    keepOnlyCorpHqCards(state, [hqIceId]);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.payload?.v1918UpgradeAbility === "tag_condition_credit",
+      ),
+    ).toBe(false);
+    const swapAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.v1918UpgradeAbility ===
+          "singapore_city_grid_hq_ice_swap" &&
+        action.payload?.cardId === omniId,
+    );
+    state = apply(state, "corp", (action) => action.actionId === swapAction.actionId);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "simple_code_gate_ice",
+    );
+
+    state = applyChoice(state, "corp", `card_${hqIceId}`);
+    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    expect(remote?.ice[0]).toBe(hqIceId);
+    expect(state.corp.hq).toContain(installedIceId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "v1918_singapore_city_grid_swap",
+      sourceDefinitionId: "onr_v1_364_omni-kismet-ph-d",
+      swappedIceCount: 1,
+      oncePerRunConsumed: true,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /simple_code_gate_ice|simple_barrier_ice|"hq"|"cardInstances"|"privatePayload"/,
+    );
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));

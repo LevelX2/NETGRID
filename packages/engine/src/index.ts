@@ -261,6 +261,7 @@ import type {
   CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
+  CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardScoredAgendaImplementation,
   CardTagPreventionSourceImplementation,
@@ -3696,6 +3697,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
     if (
       TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) &&
+      !cardImplementationForDefinitionId(definition.id) &&
       state.runner.tags > 0
     ) {
       actions.push(
@@ -5577,6 +5579,56 @@ function hasCorpUtilityKind(
   return corpUtilityImplementationForCard(state, cardId)?.kind === kind;
 }
 
+function fortRunWindowImplementationsForDefinition(
+  definitionId: CardDefinitionId,
+): readonly CardFortRunWindowImplementation[] {
+  return cardImplementationForDefinitionId(definitionId)?.fortRunWindows ?? [];
+}
+
+function hasFortRunWindowKind(
+  state: GameState,
+  cardId: CardInstanceId,
+  kind: CardFortRunWindowImplementation["kind"],
+): boolean {
+  return fortRunWindowImplementationsForDefinition(
+    definitionFor(state, cardId).id,
+  ).some((window) => window.kind === kind);
+}
+
+function isFortIceSwapSource(state: GameState, cardId: CardInstanceId): boolean {
+  const definitionId = definitionFor(state, cardId).id;
+  if (hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice"))
+    return true;
+  return (
+    !cardImplementationForDefinitionId(definitionId) &&
+    definitionId === SERVER_ICE_SWAP_UPGRADE_CARD_ID
+  );
+}
+
+function hasSuccessfulRunForceRezFollowup(
+  definitionId: CardDefinitionId,
+): boolean {
+  return (
+    cardImplementationForDefinitionId(definitionId)?.successfulRunFollowups?.some(
+      (followup) =>
+        followup.kind === "force_rez_ice_outermost_inward_after_successful_run",
+    ) ?? false
+  );
+}
+
+function successfulRunForceRezFollowupCreditCost(
+  definitionId: CardDefinitionId,
+): number {
+  const implementation =
+    cardImplementationForDefinitionId(definitionId)?.successfulRunFollowups?.find(
+      (followup) =>
+        followup.kind === "force_rez_ice_outermost_inward_after_successful_run",
+    );
+  if (implementation?.kind !== "force_rez_ice_outermost_inward_after_successful_run")
+    return 0;
+  return implementation.cost.amount;
+}
+
 function installedRunnerVirusSourceIds(
   state: GameState,
   predicate?: (implementation: CardVirusCounterImplementation) => boolean,
@@ -6215,10 +6267,7 @@ function singaporeCityGridRunActions(
     .filter((cardId) => !used.has(cardId))
     .filter((cardId) => {
       const instance = mustInstance(state.cardInstances, cardId);
-      return (
-        instance.rezzed &&
-        definitionFor(state, cardId).id === SERVER_ICE_SWAP_UPGRADE_CARD_ID
-      );
+      return instance.rezzed && isFortIceSwapSource(state, cardId);
     })
     .flatMap((sourceCardId) => {
       const definition = definitionFor(state, sourceCardId);
@@ -7260,12 +7309,18 @@ function successfulRunProgramActions(
   for (const sourceCardId of state.runner.rig.programs.slice().sort()) {
     if (used.has(sourceCardId)) continue;
     const definition = definitionFor(state, sourceCardId);
-    if (definition.id === FALSE_ECHO_FORCE_REZ_PROGRAM_ID) {
+    const forceRezFollowup =
+      hasSuccessfulRunForceRezFollowup(definition.id) ||
+      (!cardImplementationForDefinitionId(definition.id) &&
+        definition.id === FALSE_ECHO_FORCE_REZ_PROGRAM_ID);
+    if (forceRezFollowup) {
       const server = mustServer(state, run.attackedServerId);
       const unrezzedCount = server.ice.filter(
         (iceId) => !mustInstance(state.cardInstances, iceId).rezzed,
       ).length;
       if (unrezzedCount <= 0) continue;
+      const abilityCost = successfulRunForceRezFollowupCreditCost(definition.id);
+      if (state.runner.credits < abilityCost) continue;
       actions.push(
         action(
           state,
@@ -7273,11 +7328,12 @@ function successfulRunProgramActions(
           "trigger_ability",
           `${definition.title}: ICE rezzen lassen`,
           sourceCardId,
-          [],
+          abilityCost > 0 ? [{ credits: abilityCost }] : [],
           {
             cardId: sourceCardId,
             serverId: server.id,
             v1922RunnerProgramAbility: "false_echo_force_rez",
+            falseEchoCreditCost: abilityCost,
             unrezzedIceCount: unrezzedCount,
           },
         ),
@@ -8019,7 +8075,10 @@ function performAction(
             "Die V1.9.18-Tag-Condition-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (!TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id))
+        if (
+          !TAG_CONDITION_UPGRADE_CARD_IDS.has(definition.id) ||
+          cardImplementationForDefinitionId(definition.id)
+        )
           throw new Error(
             "Die V1.9.18-Tag-Condition-Faehigkeit passt nicht zur Karte.",
           );
@@ -9354,12 +9413,25 @@ function resolveFalseEchoForceRez(
     throw new Error("False Echo ist nur direkt nach erfolgreichem Run legal.");
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("False Echo ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== FALSE_ECHO_FORCE_REZ_PROGRAM_ID)
+  const sourceDefinitionId = definitionFor(state, sourceCardId).id;
+  if (
+    !hasSuccessfulRunForceRezFollowup(sourceDefinitionId) &&
+    !(
+      !cardImplementationForDefinitionId(sourceDefinitionId) &&
+      sourceDefinitionId === FALSE_ECHO_FORCE_REZ_PROGRAM_ID
+    )
+  )
     throw new Error("Die False-Echo-Faehigkeit passt nicht zur Karte.");
+  const abilityCost = successfulRunForceRezFollowupCreditCost(sourceDefinitionId);
+  if (creditCostForAction(legalAction) !== abilityCost)
+    throw new Error("False Echo hat nicht mehr die erwarteten Kosten.");
+  if (state.runner.credits < abilityCost)
+    throw new Error("Runner kann False Echo nicht bezahlen.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
     throw new Error("False Echo wurde fuer diesen Run bereits genutzt.");
   const server = mustServer(state, serverId);
+  if (abilityCost > 0) spendCredits(state, "runner", abilityCost);
   const checkedIceIds = server.ice.slice();
   let rezzedCount = 0;
   let rezCostPaid = 0;
@@ -9380,12 +9452,14 @@ function resolveFalseEchoForceRez(
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
+    sourceDefinitionId,
+    falseEchoCreditCost: abilityCost,
     serverLabel: publicServerLabel(state, server.id) ?? server.id,
     checkedIceCount: checkedIceIds.length,
     rezzedIceCount: rezzedCount,
     rezCostPaid,
     corpCreditsAfter: state.corp.credits,
+    runnerCreditsAfter: state.runner.credits,
   };
 }
 
@@ -24425,7 +24499,7 @@ function startSingaporeCityGridSwapChoice(
   const sourceInstance = mustInstance(state.cardInstances, sourceCardId);
   if (
     !sourceInstance.rezzed ||
-    definitionFor(state, sourceCardId).id !== SERVER_ICE_SWAP_UPGRADE_CARD_ID
+    !isFortIceSwapSource(state, sourceCardId)
   )
     throw new Error("Singapore City Grid ist nicht rezzed installiert.");
   if (run.singaporeCityGridUsedSourceIdsThisRun?.includes(sourceCardId))
@@ -24496,7 +24570,7 @@ function resolveSingaporeCityGridSwapChoice(
   if (!server.root.includes(sourceCardId))
     throw new Error("Singapore City Grid ist nicht mehr im angegriffenen Remote.");
   if (
-    definitionFor(state, sourceCardId).id !== SERVER_ICE_SWAP_UPGRADE_CARD_ID ||
+    !isFortIceSwapSource(state, sourceCardId) ||
     !mustInstance(state.cardInstances, sourceCardId).rezzed
   )
     throw new Error("Singapore City Grid ist nicht mehr rezzed installiert.");
@@ -24540,7 +24614,7 @@ function resolveSingaporeCityGridSwapChoice(
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1918_singapore_city_grid_swap",
-    sourceDefinitionId: SERVER_ICE_SWAP_UPGRADE_CARD_ID,
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
     serverLabel: server.label,
     iceIndex,
     swappedIceCount: 1,

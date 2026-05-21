@@ -5,6 +5,7 @@ import type {
   CardAccessHookImplementation,
   CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
+  CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardIcebreakerAbilityImplementation,
   CardInstallAdditionalCostImplementation,
@@ -44,6 +45,7 @@ export type CardImplementationDefinition = {
   tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];
   trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
+  fortRunWindows?: readonly CardFortRunWindowImplementation[];
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;

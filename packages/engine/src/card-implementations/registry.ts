@@ -156,7 +156,10 @@ import { dedicatedResponseTeamImplementation } from "./onr-v1/corp/upgrades/dedi
 import { dieterEsslinImplementation } from "./onr-v1/corp/upgrades/dieter-esslin";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { newGalvestonCityGridImplementation } from "./onr-v1/corp/upgrades/new-galveston-city-grid";
+import { oliviaSalazarImplementation } from "./onr-v1/corp/upgrades/olivia-salazar";
+import { omniKismetPhDImplementation } from "./onr-v1/corp/upgrades/omni-kismet-ph-d";
 import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
+import { singaporeCityGridImplementation } from "./onr-v1/corp/upgrades/singapore-city-grid";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { washingtonDcCityGridImplementation } from "./onr-v1/corp/upgrades/washington-d-c-city-grid";
 import { arasakaOwnsYouImplementation } from "./onr-v1/runner/preps/arasaka-owns-you";
@@ -241,6 +244,7 @@ import { dwarfImplementation } from "./onr-v1/runner/programs/dwarf";
 import { emergencySelfConstructImplementation } from "./onr-v1/runner/programs/emergency-self-construct";
 import { evilTwinImplementation } from "./onr-v1/runner/programs/evil-twin";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
+import { falseEchoImplementation } from "./onr-v1/runner/programs/false-echo";
 import { flakImplementation } from "./onr-v1/runner/programs/flak";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { grubbImplementation } from "./onr-v1/runner/programs/grubb";
@@ -370,6 +374,7 @@ export const CARD_IMPLEMENTATIONS = [
   emergencySelfConstructImplementation,
   evilTwinImplementation,
   expertScheduleAnalyzerImplementation,
+  falseEchoImplementation,
   flakImplementation,
   forceShieldImplementation,
   grubbImplementation,
@@ -620,7 +625,10 @@ export const CARD_IMPLEMENTATIONS = [
   dieterEsslinImplementation,
   jerusalemCityGridImplementation,
   newGalvestonCityGridImplementation,
+  oliviaSalazarImplementation,
+  omniKismetPhDImplementation,
   redHerringsImplementation,
+  singaporeCityGridImplementation,
   tesseractFortConstructionImplementation,
   washingtonDcCityGridImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];

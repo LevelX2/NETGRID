@@ -24,9 +24,11 @@ import {
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
 import type {
+  CardFortRunWindowImplementation,
   CardInstallCostModifierImplementation,
   CardRezCostModifierImplementation,
 } from "./definition-types";
+import { cardImplementationForDefinitionId } from "../card-implementations/registry";
 import { OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID } from "../mechanics/agenda-operation-effects";
 
 export { corpServerIdForInstalledCard } from "./card-implementation-modifiers";
@@ -338,6 +340,9 @@ export function quoteCorpRezCost(
   const existingSourceDefinitionIds =
     existingModifierMatches.map((match) => match.sourceDefinitionId);
   const oliviaSalazarSourceCardId = options.oliviaSalazarSourceCardId;
+  const oliviaSalazarSourceDefinitionId = oliviaSalazarSourceCardId
+    ? definitionFor(state, oliviaSalazarSourceCardId).id
+    : undefined;
   const finalCredits = oliviaSalazarSourceCardId
     ? Math.max(0, Math.floor(regularFinalCredits / 2))
     : regularFinalCredits;
@@ -349,24 +354,23 @@ export function quoteCorpRezCost(
   );
 
   if (oliviaSalazarSourceCardId) {
+    const sourceDefinitionId = oliviaSalazarSourceDefinitionId!;
     publicPayload.serverId = corpServerIdForInstalledCard(state, iceId) ?? "";
     publicPayload.oliviaSalazarRezSourceCardId = oliviaSalazarSourceCardId;
-    publicPayload.oliviaSalazarRezSourceDefinitionId =
-      OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID;
+    publicPayload.oliviaSalazarRezSourceDefinitionId = sourceDefinitionId;
     publicPayload.oliviaSalazarRezCostBase = regularFinalCredits;
     publicPayload.oliviaSalazarTemporaryDerez = true;
     publicPayload.rezCostReductionSourceDefinitionIds = [
       ...existingSourceDefinitionIds,
-      OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
+      sourceDefinitionId,
     ].join(",");
     publicPayload.rezCostReductionAmount = baseCredits - finalCredits;
     publicPayload.rezCostPaid = finalCredits;
     modifiers.push({
       sourceCardInstanceId: oliviaSalazarSourceCardId,
-      sourceDefinitionId: OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
+      sourceDefinitionId,
       label:
-        DEMO_CARDS_BY_ID[OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID]?.title ??
-        OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID,
+        DEMO_CARDS_BY_ID[sourceDefinitionId]?.title ?? sourceDefinitionId,
       amount: regularFinalCredits - finalCredits,
       kind: "reduction",
     });
@@ -390,6 +394,33 @@ export function quoteCorpRezCost(
   };
 }
 
+function definitionHasFortRunWindowKind(
+  definitionId: CardDefinitionId,
+  kind: CardFortRunWindowImplementation["kind"],
+): boolean {
+  return (
+    cardImplementationForDefinitionId(definitionId)?.fortRunWindows?.some(
+      (window) => window.kind === kind,
+    ) ?? false
+  );
+}
+
+function isOliviaSalazarRezSourceDefinition(
+  definitionId: CardDefinitionId,
+): boolean {
+  if (
+    definitionHasFortRunWindowKind(
+      definitionId,
+      "discounted_rez_ice_on_this_fort",
+    )
+  )
+    return true;
+  return (
+    !cardImplementationForDefinitionId(definitionId) &&
+    definitionId === OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID
+  );
+}
+
 export function oliviaSalazarRezSourcesForRunIce(
   state: GameState,
   iceId: CardInstanceId,
@@ -406,8 +437,7 @@ export function oliviaSalazarRezSourcesForRunIce(
       const instance = state.cardInstances[sourceId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, sourceId).id ===
-          OLIVIA_SALAZAR_REZ_COST_UPGRADE_ID &&
+        isOliviaSalazarRezSourceDefinition(definitionFor(state, sourceId).id) &&
         !used.has(sourceId)
       );
     })

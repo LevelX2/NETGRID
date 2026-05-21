@@ -89,6 +89,9 @@ const IMPLEMENTED_SCORED_AGENDA_LOCATION =
 const IMPLEMENTED_CORP_UTILITY_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/corp";
 
+const IMPLEMENTED_FORT_RUN_WINDOW_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -114,6 +117,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts",
   "onr_v1_322_euromarket-consortium":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/euromarket-consortium.ts",
+  "onr_v1_363_olivia-salazar":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
+  "onr_v1_364_omni-kismet-ph-d":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/omni-kismet-ph-d.ts",
+  "onr_v1_369_singapore-city-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/singapore-city-grid.ts",
   "onr_v1_330_krumz":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
   "onr_v1_332_newsgroup-taunting":
@@ -150,6 +159,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/deep-thought.ts",
   "onr_v1_025_fait-accompli":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/fait-accompli.ts",
+  "onr_v1_026_false-echo":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/false-echo.ts",
   "onr_v1_029_gremlins":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/gremlins.ts",
   "onr_v1_034_incubator":
@@ -864,6 +875,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_RUN_CONTROL_LOCATION);
   }
+  if (implementation.fortRunWindows?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for fort-run window ICE-control behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
   if (implementation.virusCounter) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for Virus-counter successful-run, start-of-turn and purge-linked behavior.",
@@ -902,17 +919,6 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
-    {
-      cardDefinitionId: "onr_v1_363_olivia-salazar",
-      status: "legacy_engine_special_case",
-      reason:
-        "Optional timed Corp rez-cost ability with source validation, once-per-run state and temporary derez; not yet migrated to CardImplementationDefinition.",
-      currentLocations: [
-        "packages/engine/src/ability-engine/cost-pipeline.ts",
-        "packages/engine/src/index.ts::corpApproachActions",
-        "packages/engine/src/index.ts::rezCard",
-      ],
-    },
     {
       cardDefinitionId: "onr_v1_068_startup-immolator",
       status: "legacy_engine_special_case",

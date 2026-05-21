@@ -172,6 +172,31 @@ export type CardSuccessfulRunFollowupImplementation =
       timing: "immediately_after_successful_run";
       cost: "none";
       visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "force_rez_ice_outermost_inward_after_successful_run";
+      cost: { kind: "credit"; amount: number };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    };
+
+export type CardFortRunWindowImplementation =
+  | {
+      kind: "discounted_rez_ice_on_this_fort";
+      timing: "during_run_on_this_fort";
+      discount: "half_rez_cost_rounded_down";
+      target: "unrezzed_ice_on_this_fort";
+      limit: "once_per_run_per_source";
+      endOfRun: "derez_target";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "swap_unrezzed_fort_ice_with_hq_ice";
+      timing: "during_run_on_this_fort";
+      target: "unrezzed_ice_on_this_fort";
+      hqCard: "ice";
+      replacementEnters: "concealed_unrezzed";
+      limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
 export type CardVirusCounterKindImplementation =

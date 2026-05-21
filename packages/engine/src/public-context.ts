@@ -906,6 +906,7 @@ export function publicContextForAction(
     "targetIcePositionLabel",
     "breakSubroutineBaseCost",
     "checkedIceCount",
+    "falseEchoCreditCost",
     "rezzedIceCount",
     "rezCostPaid",
     "priorityRequisitionChoiceOpened",
