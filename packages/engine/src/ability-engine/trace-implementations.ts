@@ -22,12 +22,20 @@ export function traceSuccessEffectForCardImplementation(
   const trashProgramEffects = effects.filter(
     (effect) => effect.kind === "trash_program",
   );
+  const trashHardwareEffects = effects.filter(
+    (effect) => effect.kind === "trash_hardware",
+  );
+  const unpreventableMeatEffects = effects.filter(
+    (effect) => effect.kind === "unpreventable_meat_damage",
+  );
   if (
     tagEffects.length === 1 &&
     counterEffects.length === 0 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
-    trashProgramEffects.length === 0
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
   ) {
     const amount = tagEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -39,7 +47,9 @@ export function traceSuccessEffectForCardImplementation(
     counterEffects.length === 1 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
-    trashProgramEffects.length === 0
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
   ) {
     const amount = counterEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -55,7 +65,9 @@ export function traceSuccessEffectForCardImplementation(
     counterEffects.length === 1 &&
     endRunEffects.length === 0 &&
     runLockEffects.length === 0 &&
-    trashProgramEffects.length === 0
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
   ) {
     const tagAmount = tagEffects[0]?.amount ?? 0;
     const counterAmount = counterEffects[0]?.amount ?? 0;
@@ -75,7 +87,9 @@ export function traceSuccessEffectForCardImplementation(
     counterEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 1 &&
-    trashProgramEffects.length === 0
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
   ) {
     const amount = runLockEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
@@ -87,12 +101,31 @@ export function traceSuccessEffectForCardImplementation(
     counterEffects.length === 0 &&
     endRunEffects.length === 1 &&
     runLockEffects.length === 1 &&
-    trashProgramEffects.length === 1
+    trashProgramEffects.length === 1 &&
+    trashHardwareEffects.length === 0 &&
+    unpreventableMeatEffects.length === 0
   ) {
     const amount = runLockEffects[0]?.amount ?? 0;
     if (!Number.isInteger(amount) || amount <= 0)
       throw new Error("Trace run-lock success effect requires a positive amount.");
     return { type: "end_run_trash_program_and_run_lock", amount };
+  }
+  if (
+    tagEffects.length === 0 &&
+    counterEffects.length === 0 &&
+    endRunEffects.length === 1 &&
+    runLockEffects.length === 0 &&
+    trashProgramEffects.length === 0 &&
+    trashHardwareEffects.length === 1 &&
+    unpreventableMeatEffects.length === 1
+  ) {
+    const amount = unpreventableMeatEffects[0]?.amount ?? 0;
+    if (!Number.isInteger(amount) || amount <= 0)
+      throw new Error("Trace unpreventable meat damage success effect requires a positive amount.");
+    return {
+      type: "end_run_trash_hardware_and_unpreventable_meat_damage",
+      amount,
+    };
   }
   throw new Error("Unsupported CardImplementation trace success effect sequence.");
 }

@@ -7869,6 +7869,76 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
   });
 
+  it("migrates P3.56 remaining Corp ICE longtail subroutines into CardImplementation coverage", () => {
+    const p356Cards = [
+      "onr_v1_222_ball-and-chain",
+      "onr_v1_228_cinderella",
+      "onr_v1_248_homewrecker",
+      "onr_v1_260_pocket-virtual-reality",
+      "onr_v1_272_too-many-doors",
+      "onr_v1_275_vacuum-link",
+      "onr_v1_276_viral-15",
+    ] as const;
+
+    for (const definitionId of p356Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_260_pocket-virtual-reality")
+        ?.iceEncounter,
+    ).toMatchObject({
+      kind: "add_encounter_temporary_credits",
+      amount: 4,
+    });
+    expect(
+      cardImplementationForDefinitionId("onr_v1_276_viral-15")
+        ?.printedSubroutines,
+    ).toHaveLength(2);
+  });
+
+  it("loads Pocket Virtual Reality temporary encounter trace credits for its printed traces", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.traceTags("p356-pocket-vr-temp-credits"),
+    );
+    state.runner.credits = 0;
+    state.corp.credits = 7;
+    putCorpIceOnServer(state, "rd", "onr_v1_260_pocket-virtual-reality");
+
+    state = encounterIce(state, "rd", "onr_v1_260_pocket-virtual-reality");
+    state.corp.credits = 0;
+    expect(state.run?.encounterTemporaryTraceCredits).toMatchObject({
+      sourceDefinitionId: "onr_v1_260_pocket-virtual-reality",
+      remaining: 4,
+    });
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace?.corpBidMax).toBe(4);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      traceStarted: true,
+      temporaryTraceCreditsAvailable: 4,
+      temporaryTraceCreditsSourceDefinitionId:
+        "onr_v1_260_pocket-virtual-reality",
+    });
+
+    state = applyChoice(state, "corp", "bid_4");
+    expect(state.corp.credits).toBe(0);
+    expect(state.run?.encounterTemporaryTraceCredits?.remaining).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      temporaryTraceCreditsSpent: 4,
+      temporaryTraceCreditsRemaining: 0,
+    });
+
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.runner.tags).toBe(1);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.trace?.corpBidMax).toBe(0);
+  });
+
   it("uses P3.51 Silver Lining advancement history and Omniscience/Disinfectant hooks", () => {
     let silver = apply(
       createGameAfterSetup({
@@ -10407,12 +10477,18 @@ describe("V1.6.2 Mechanikpaket B", () => {
       ).toBe("implemented");
     }
     expect(
-      cardImplementationForDefinitionId("onr_v1_222_ball-and-chain"),
-    ).toBeUndefined();
+      cardImplementationForDefinitionId("onr_v1_222_ball-and-chain")
+        ?.printedSubroutines,
+    ).toEqual([
+      expect.objectContaining({
+        kind: "run_duration_encounter_cost_or_end_run",
+        amount: 2,
+      }),
+    ]);
     expect(
       cardImplementationCoverageForDefinitionId("onr_v1_222_ball-and-chain")
         ?.status,
-    ).toBe("pending_implementation");
+    ).toBe("implemented");
   });
 
   it("registers migrated runner successful-run and access-interface cards as implemented", () => {
@@ -14494,7 +14570,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(ballTaxState.run?.encounterTaxForFutureIce).toBe(1);
+    expect(ballTaxState.run?.encounterTaxForFutureIce).toBe(2);
     ballTaxState = apply(
       ballTaxState,
       "runner",
@@ -14508,7 +14584,7 @@ describe("V1.8.1 Mechanikpaket H", () => {
         action.type === "rez_ice" &&
         sourceDefinition(ballTaxState, action) === "simple_barrier_ice",
     );
-    expect(ballTaxState.runner.credits).toBe(creditsBeforeBallTax - 1);
+    expect(ballTaxState.runner.credits).toBe(creditsBeforeBallTax - 2);
 
     let canisState = toRunnerTurn(v181CardReleaseGame("v181-canis-strength"));
     canisState.runner.credits = 20;
@@ -18056,19 +18132,11 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("opens Too Many Doors R&D reorder only to the Corp and resolves replay-safe", () => {
+  it("opens Too Many Doors secret spend privately and resolves replay-safe", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-too-many-doors"));
     state.runner.credits = 20;
     state.corp.credits = 20;
     putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
-    const bottomChoiceId = putCorpCardOnTopOfRd(
-      state,
-      "simple_economy_operation",
-    );
-    const topChoiceId = putCorpCardOnTopOfRd(
-      state,
-      "onr_v1_203_hostile-takeover",
-    );
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -18092,24 +18160,26 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "continue_run" &&
         action.payload?.encounterContinue === true,
     );
-    expect(state.pendingChoice?.source).toContain("v1911.corp_rd_arrange_top2");
-    expect(
-      getPlayerView(state, "corp").pendingChoice?.options.some(
-        (option) => option.value === topChoiceId,
-      ),
-    ).toBe(true);
+    expect(state.pendingChoice?.source).toContain(
+      "p3_56.too_many_doors_secret_spend",
+    );
+    expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(3);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
 
-    state = applyChoices(state, "corp", [
-      `card_${bottomChoiceId}`,
-      `card_${topChoiceId}`,
-    ]);
-    expect(state.corp.rd[0]).toBe(bottomChoiceId);
-    expect(state.corp.rd[1]).toBe(topChoiceId);
+    state = applyChoice(state, "corp", "bid_1");
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(getPlayerView(state, "runner").pendingChoice?.options).toHaveLength(3);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "secretSpendCorp",
+    );
+
+    state = applyChoice(state, "runner", "bid_1");
+    expect(state.run).toBeDefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
-      arrangedCount: 2,
+      secretSpendRevealed: true,
+      secretSpendCorp: 1,
+      secretSpendRunner: 1,
+      tooManyDoorsEndRun: false,
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -32637,13 +32707,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) => action.actionId === continueAction.actionId,
     );
-    expect(state.run?.viral15ActiveSourceIceId).toBe(viralId);
-    expect(state.run?.viral15PendingPassedIceId).toBe(viralId);
+    expect(state.run?.passRezzedIceProgramTrashSourceIceId).toBe(viralId);
+    expect(state.run?.passRezzedIceProgramTrashPendingPassedIceId).toBe(
+      viralId,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
-      v1922CorpIceAbility: "viral_15_run_modifier",
       jackOutAdditionalCost: 1,
       sourceDefinitionId: "onr_v1_276_viral-15",
+      passIceTrashProgramPrompt: true,
     });
 
     const jackOut = mustAction(
@@ -32661,14 +32733,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(jackOutBranch.runner.rig.programs).toContain(programId);
     expect(jackOutBranch.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "jack_out",
-      v1922CorpIceAbility: "viral_15_jack_out_tax",
       jackOutAdditionalCost: 1,
       runnerCreditsAfter: state.runner.credits - 1,
     });
 
     state = apply(state, "runner", (action) => action.type === "continue_run");
     expect(state.pendingChoice?.source).toContain(
-      "v1922.viral_15_program_trash",
+      "p3_56.pass_ice_program_trash",
     );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(getPlayerView(state, "runner").pendingChoice?.options).toHaveLength(
@@ -32677,10 +32748,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "continue_run",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_viral_15_program_trash_choice",
-      v1922CorpIceAbility: "viral_15_program_trash",
-      viral15ProgramTrashChoiceOpened: true,
-      viral15ProgramTrashCandidateCount: 1,
+      passIceTrashProgramPrompt: true,
+      passIceTrashProgramCandidateCount: 1,
     });
 
     state = applyChoice(state, "runner", `card_${programId}`);
@@ -32690,9 +32759,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_viral_15_program_trash",
-      v1922CorpIceAbility: "viral_15_program_trash",
-      trashedCount: 1,
+      passIceTrashProgramPrompt: false,
+      programTrashCount: 1,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"cardInstances"|"privatePayload"/,
@@ -32751,15 +32819,15 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     state.corp.credits = 30;
     installRunnerProgramForTest(state, "onr_v1_023_evil-twin");
     putCorpIceOnServer(state, "rd", "onr_v1_272_too-many-doors");
-    const bottomChoiceId = putCorpCardOnTopOfRd(state, "simple_economy_operation");
-    const topChoiceId = putCorpCardOnTopOfRd(state, "onr_v1_203_hostile-takeover");
 
     state = encounterIce(state, "rd", "onr_v1_272_too-many-doors");
     const opened = apply(state, "runner", (action) => action.type === "continue_run");
-    expect(opened.pendingChoice?.source).toContain("v1911.corp_rd_arrange_top2");
+    expect(opened.pendingChoice?.source).toContain(
+      "p3_56.too_many_doors_secret_spend",
+    );
     expect(getPlayerView(opened, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(opened, "runner"))).not.toContain(
-      topChoiceId,
+      "secretSpendCorp",
     );
     expect(JSON.stringify(opened.eventLog.at(-1)?.publicPayload)).not.toContain(
       "Hostile Takeover",
@@ -32773,7 +32841,7 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
       clientKnownStateVersion: opened.stateVersion,
       selectedChoices: {
         choiceId: opened.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${bottomChoiceId}`, `card_${topChoiceId}`],
+        selectedOptionIds: ["bid_1"],
       },
     });
     expect(runnerResolve.ok).toBe(false);
@@ -32782,26 +32850,21 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
         runnerResolve.error.code,
       );
 
-    const duplicateResolve = applyAction(opened, {
-      matchId: opened.matchId,
-      side: "corp",
-      actionId: mustAction(opened, "corp", (action) => action.type === "resolve_choice")
-        .actionId,
-      clientKnownStateVersion: opened.stateVersion,
-      selectedChoices: {
-        choiceId: opened.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${bottomChoiceId}`, `card_${bottomChoiceId}`],
-      },
-    });
-    expect(duplicateResolve.ok).toBe(false);
-
     const initial = structuredClone(opened);
     const replayStart = opened.eventLog.length;
-    state = applyChoices(opened, "corp", [
-      `card_${bottomChoiceId}`,
-      `card_${topChoiceId}`,
-    ]);
-    expect(state.corp.rd.slice(0, 2)).toEqual([bottomChoiceId, topChoiceId]);
+    state = applyChoice(opened, "corp", "bid_2");
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "secretSpendCorp",
+    );
+    state = applyChoice(state, "runner", "bid_0");
+    expect(state.run).toBeDefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      secretSpendRevealed: true,
+      secretSpendCorp: 2,
+      secretSpendRunner: 0,
+      tooManyDoorsEndRun: false,
+    });
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
@@ -32828,39 +32891,30 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     expect(brokenState.pendingChoice).toBeUndefined();
     expect(brokenState.corp.rd).toEqual(rdBeforeBroken);
 
-    let shortRdState = toRunnerTurn(
-      originalsetReorderCounterRunlockGame("spotcheck-too-many-doors-short-rd"),
+    let losingBidState = toRunnerTurn(
+      originalsetReorderCounterRunlockGame("spotcheck-too-many-doors-losing-bid"),
     );
-    shortRdState.runner.credits = 30;
-    shortRdState.corp.credits = 30;
-    installRunnerProgramForTest(shortRdState, "onr_v1_023_evil-twin");
-    putCorpIceOnServer(shortRdState, "rd", "onr_v1_272_too-many-doors");
-    const onlyRdCard = putCorpCardOnTopOfRd(
-      shortRdState,
-      "simple_economy_operation",
+    losingBidState.runner.credits = 30;
+    losingBidState.corp.credits = 30;
+    installRunnerProgramForTest(losingBidState, "onr_v1_023_evil-twin");
+    putCorpIceOnServer(losingBidState, "rd", "onr_v1_272_too-many-doors");
+    losingBidState = encounterIce(
+      losingBidState,
+      "rd",
+      "onr_v1_272_too-many-doors",
     );
-    for (const cardId of shortRdState.corp.rd.slice()) {
-      if (cardId === onlyRdCard) continue;
-      removeEverywhere(shortRdState, cardId);
-      shortRdState.corp.archives.push(cardId);
-      shortRdState.cardInstances[cardId] = {
-        ...shortRdState.cardInstances[cardId]!,
-        zone: { side: "corp", zone: "archives" },
-        faceup: false,
-      };
-    }
-    shortRdState = encounterIce(shortRdState, "rd", "onr_v1_272_too-many-doors");
-    shortRdState = apply(
-      shortRdState,
+    losingBidState = apply(
+      losingBidState,
       "runner",
       (action) => action.type === "continue_run",
     );
-    expect(shortRdState.pendingChoice).toBeUndefined();
-    expect(shortRdState.corp.rd).toEqual([onlyRdCard]);
-    expect(shortRdState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_corp_reorder_rd_top2",
-      arrangedCount: 1,
+    losingBidState = applyChoice(losingBidState, "corp", "bid_0");
+    losingBidState = applyChoice(losingBidState, "runner", "bid_1");
+    expect(losingBidState.run).toBeUndefined();
+    expect(losingBidState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      secretSpendCorp: 0,
+      secretSpendRunner: 1,
+      tooManyDoorsEndRun: true,
     });
   });
 
@@ -39399,7 +39453,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     taxState = apply(taxState, "corp", (action) => action.type === "rez_ice" && sourceDefinition(taxState, action) === "simple_barrier_ice");
     expect(taxState.run).toBeUndefined();
     expect(taxState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      encounterTaxForFutureIce: 1,
+      encounterTaxForFutureIce: 2,
       encounterTaxPaid: 0,
       encounterTaxSource: "onr_v1_222_ball-and-chain",
       result: "ended",

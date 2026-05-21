@@ -11,6 +11,7 @@ import type {
   CardInstallCapabilityImplementation,
   CardLeavePlayCleanupImplementation,
   CardIcebreakerAbilityImplementation,
+  CardIceEncounterImplementation,
   CardInstallAdditionalCostImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
@@ -34,6 +35,7 @@ export type CardImplementationDefinition = {
     while: "installed_before_and_after_rez";
   };
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
+  iceEncounter?: CardIceEncounterImplementation;
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   hostedProgramCapacity?: HostedProgramCapacityImplementation;
   hostedProgramModifiers?: readonly HostedProgramModifierImplementation[];

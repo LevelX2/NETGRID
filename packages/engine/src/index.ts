@@ -1010,8 +1010,6 @@ const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
 ]);
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
-const CINDERELLA_ID = "onr_v1_228_cinderella";
-const HOMEWRECKER_ID = "onr_v1_248_homewrecker";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
 const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
 const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
@@ -1025,7 +1023,6 @@ const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
 const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
 const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
-const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const DUPRE_ID = "onr_v1_020_dupre";
 const PATTELS_VIRUS_ID = "onr_v1_046_pattels-virus";
 const POX_ID = "onr_v1_049_pox";
@@ -7386,7 +7383,14 @@ function runnerMovementActions(state: GameState): LegalAction[] {
           ? {
               v1922CorpIceAbility: "viral_15_jack_out_tax",
               jackOutAdditionalCost,
-              sourceDefinitionId: VIRAL_15_PROGRAM_TRASH_ICE_ID,
+              ...(run.viral15ActiveSourceIceId
+                ? {
+                    sourceDefinitionId: definitionFor(
+                      state,
+                      run.viral15ActiveSourceIceId,
+                    ).id,
+                  }
+                : {}),
             }
           : undefined,
       ),
@@ -7498,7 +7502,27 @@ function startupImmolatorPostPassActions(
 }
 
 function runJackOutAdditionalCost(run: ActiveRun): number {
-  return run.viral15ActiveSourceIceId ? 1 : 0;
+  return (
+    Math.max(0, Math.floor(run.jackOutAdditionalCostForRun ?? 0)) +
+    (run.viral15ActiveSourceIceId ? 1 : 0)
+  );
+}
+
+function clearEncounterTemporaryTraceCredits(
+  run: ActiveRun,
+  legalAction?: LegalAction,
+): void {
+  const credits = run.encounterTemporaryTraceCredits;
+  if (!credits) return;
+  const returned = Math.max(0, Math.floor(credits.remaining ?? 0));
+  delete run.encounterTemporaryTraceCredits;
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      temporaryCreditsReturned: returned,
+      temporaryTraceCreditsSourceDefinitionId: credits.sourceDefinitionId,
+    };
+  }
 }
 
 function runStartTaxForServerUpgrades(
@@ -11426,6 +11450,7 @@ function beginEncounter(
   run.brokenSubroutineIndexes = [];
   run.resolvedSubroutineIndexes = [];
   run.traceSuccessBySubroutineIndex = {};
+  delete run.encounterTemporaryTraceCredits;
   run.bartmossUsedBreakerIdsThisEncounter = [];
   run.blinkUsedSubroutinesByBreakerThisEncounter = {};
   if (run.nextEncounterNoBreakSubroutines) {
@@ -11474,6 +11499,32 @@ function beginEncounter(
         encounterTaxPaid: encounterTax,
         encounterTaxSource: "onr_v1_222_ball-and-chain",
       };
+    }
+  }
+  const encounteredDefinition = definitionFor(state, encounteredIceId);
+  const iceEncounter = cardImplementationForDefinitionId(
+    encounteredDefinition.id,
+  )?.iceEncounter;
+  if (iceEncounter?.kind === "add_encounter_temporary_credits") {
+    const amount = Math.max(0, Math.floor(iceEncounter.amount));
+    if (
+      amount > 0 &&
+      iceEncounter.side === "corp" &&
+      iceEncounter.usableFor === "this_ice_printed_trace_subroutines"
+    ) {
+      run.encounterTemporaryTraceCredits = {
+        sourceIceId: encounteredIceId,
+        sourceDefinitionId: encounteredDefinition.id,
+        remaining: amount,
+        usableFor: iceEncounter.usableFor,
+      };
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          temporaryTraceCredits: amount,
+          temporaryTraceCreditsSourceDefinitionId: encounteredDefinition.id,
+        };
+      }
     }
   }
   state.timingPoint = "run.encounter_ice";
@@ -11735,6 +11786,30 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         };
       }
     }
+    if (subroutine.type === "set_run_jack_out_additional_cost") {
+      const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
+      run.jackOutAdditionalCostForRun =
+        Math.max(0, Math.floor(run.jackOutAdditionalCostForRun ?? 0)) + amount;
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          jackOutAdditionalCost: runJackOutAdditionalCost(run),
+          sourceDefinitionId: definition.id,
+        };
+      }
+    }
+    if (subroutine.type === "set_run_pass_rezzed_ice_program_trash") {
+      if (!run.encounteredIceId)
+        throw new Error("Program-Trash-Runmodifier benoetigt ein Encounter-ICE.");
+      run.passRezzedIceProgramTrashSourceIceId = run.encounteredIceId;
+      if (legalAction) {
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          passIceTrashProgramPrompt: true,
+          sourceDefinitionId: definition.id,
+        };
+      }
+    }
     if (subroutine.type === "set_run_future_strength_bonus") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
       run.futureEncounterIceStrengthBonus =
@@ -11800,6 +11875,20 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         continue;
       }
       startCorpRdArrangeChoice(state, run.encounteredIceId, index, legalAction);
+      if (!run.resolvedSubroutineIndexes.includes(index))
+        run.resolvedSubroutineIndexes.push(index);
+      return;
+    }
+    if (
+      subroutine.type ===
+      "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
+    ) {
+      startTooManyDoorsSecretSpendCorpChoice(
+        state,
+        run.encounteredIceId,
+        index,
+        legalAction,
+      );
       if (!run.resolvedSubroutineIndexes.includes(index))
         run.resolvedSubroutineIndexes.push(index);
       return;
@@ -12197,8 +12286,13 @@ function startTraceFromSubroutine(
   const sourceDefinition = definitionFor(state, sourceCardInstanceId);
   const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
   const parisPoolSource = parisCityGridTracePoolSource(state);
+  const encounterTemporaryTraceCredits =
+    run.encounterTemporaryTraceCredits?.sourceIceId === sourceCardInstanceId
+      ? Math.max(0, Math.floor(run.encounterTemporaryTraceCredits.remaining ?? 0))
+      : 0;
   const baseCorpBidMax =
     state.corp.credits +
+    encounterTemporaryTraceCredits +
     hackerTrackerCounterTotal(state) +
     krumzTraceBitTotal(state) +
     (parisPoolSource ? cardCounter(state, parisPoolSource.cardId, "bit") : 0);
@@ -12216,6 +12310,12 @@ function startTraceFromSubroutine(
       ? {
           parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
           parisCityGridPoolServerId: parisPoolSource.serverId,
+        }
+      : {}),
+    ...(encounterTemporaryTraceCredits > 0
+      ? {
+          encounterTemporaryTraceCreditSourceIceId: sourceCardInstanceId,
+          encounterTemporaryTraceCreditSourceDefinitionId: sourceDefinition.id,
         }
       : {}),
     status: "corp_bid",
@@ -12249,6 +12349,12 @@ function startTraceFromSubroutine(
             ),
             parisCityGridPoolServerId: parisPoolSource.serverId,
             sourceDefinitionId: sourceDefinition.id,
+          }
+        : {}),
+      ...(encounterTemporaryTraceCredits > 0
+        ? {
+            temporaryTraceCreditsAvailable: encounterTemporaryTraceCredits,
+            temporaryTraceCreditsSourceDefinitionId: sourceDefinition.id,
           }
         : {}),
     };
@@ -12372,6 +12478,132 @@ function traceBidChoice(
   };
 }
 
+function secretSpendChoice(
+  state: GameState,
+  side: Side,
+  source: string,
+  prompt: string,
+  maxSpend: number,
+): ChoiceRequest {
+  const boundedMax = Math.min(2, Math.max(0, Math.floor(maxSpend)));
+  return {
+    choiceId: `${source}.${side}.${state.stateVersion + 1}`,
+    side,
+    source,
+    prompt,
+    kind: "bid_amount",
+    options: Array.from({ length: boundedMax + 1 }, (_, amount) => ({
+      id: `bid_${amount}`,
+      label: `${amount} Credits`,
+      publicLabel: `${amount} Credits`,
+      value: amount,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function startTooManyDoorsSecretSpendCorpChoice(
+  state: GameState,
+  sourceIceId: CardInstanceId,
+  subroutineIndex: number,
+  legalAction?: LegalAction,
+): void {
+  if (state.pendingChoice || state.secretSpendComparison)
+    throw new Error("Es ist bereits eine Secret-Spend-Choice offen.");
+  const run = mustRun(state);
+  const source = `p3_56.too_many_doors_secret_spend:${run.runId}:${sourceIceId}:${subroutineIndex}`;
+  state.secretSpendComparison = {
+    source: "too_many_doors",
+    runId: run.runId,
+    sourceIceId,
+    subroutineIndex,
+  };
+  state.pendingChoice = secretSpendChoice(
+    state,
+    "corp",
+    source,
+    "Too Many Doors: Korp geheim 0, 1 oder 2 Credits ausgeben.",
+    state.corp.credits,
+  );
+  state.activeSide = "corp";
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      secretSpendStarted: true,
+      sourceDefinitionId: definitionFor(state, sourceIceId).id,
+      secretSpendAmounts: "0,1,2",
+    };
+  }
+}
+
+function resolveTooManyDoorsSecretSpendChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  const comparison = state.secretSpendComparison;
+  if (
+    !choice ||
+    !comparison ||
+    !choice.source.startsWith("p3_56.too_many_doors_secret_spend")
+  )
+    throw new Error("Too-Many-Doors-Secret-Spend-Choice ist nicht offen.");
+  const selected = selectedBidAmount(choice, playerAction);
+  if (selected < 0 || selected > 2)
+    throw new Error("Too Many Doors erlaubt nur 0, 1 oder 2 Credits.");
+  if (choice.side === "corp") {
+    if (state.corp.credits < selected)
+      throw new Error("Die Korp kann diesen Secret Spend nicht bezahlen.");
+    state.secretSpendComparison = {
+      ...comparison,
+      corpSpend: selected,
+    };
+    state.pendingChoice = secretSpendChoice(
+      state,
+      "runner",
+      choice.source,
+      "Too Many Doors: Runner geheim 0, 1 oder 2 Credits ausgeben.",
+      state.runner.credits,
+    );
+    state.activeSide = "runner";
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      secretSpendStep: "corp_selected",
+      sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
+      hiddenInfoBarrier: true,
+    };
+    return;
+  }
+  const corpSpend = comparison.corpSpend;
+  if (corpSpend === undefined)
+    throw new Error("Der Korp-Secret-Spend fehlt.");
+  if (state.corp.credits < corpSpend || state.runner.credits < selected)
+    throw new Error("Secret Spend ist nicht mehr bezahlbar.");
+  spendCredits(state, "corp", corpSpend);
+  spendCredits(state, "runner", selected);
+  const endRun = corpSpend < selected;
+  delete state.pendingChoice;
+  delete state.secretSpendComparison;
+  if (state.run) {
+    state.timingPoint = "run.encounter_ice";
+    state.activeSide = "runner";
+    if (endRun) finishRun(state, false, legalAction);
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    choiceVisibility: "public",
+    secretSpendRevealed: true,
+    secretSpendCorp: corpSpend,
+    secretSpendRunner: selected,
+    tooManyDoorsEndRun: endRun,
+    sourceDefinitionId: definitionFor(state, comparison.sourceIceId).id,
+  };
+}
+
 function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (run.position.kind !== "ice")
@@ -12379,8 +12611,15 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
   const server = mustServer(state, run.position.serverId);
   const nextIndex = run.position.iceIndex - 1;
   const passedIceId = run.encounteredIceId;
+  clearEncounterTemporaryTraceCredits(run, legalAction);
   const viral15PendingPassedIceId =
     run.viral15ActiveSourceIceId &&
+    passedIceId &&
+    mustInstance(state.cardInstances, passedIceId).rezzed
+      ? passedIceId
+      : undefined;
+  const passRezzedIceProgramTrashPendingPassedIceId =
+    run.passRezzedIceProgramTrashSourceIceId &&
     passedIceId &&
     mustInstance(state.cardInstances, passedIceId).rezzed
       ? passedIceId
@@ -12414,6 +12653,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
         position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
         approachedIceId,
         ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
+        ...(passRezzedIceProgramTrashPendingPassedIceId
+          ? { passRezzedIceProgramTrashPendingPassedIceId }
+          : {}),
         ...(startupImmolatorPendingPassedIceId
           ? { startupImmolatorPendingPassedIceId }
           : {}),
@@ -12430,6 +12672,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       position: { kind: "ice", serverId: server.id, iceIndex: nextIndex },
       approachedIceId,
       ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
+      ...(passRezzedIceProgramTrashPendingPassedIceId
+        ? { passRezzedIceProgramTrashPendingPassedIceId }
+        : {}),
       ...(startupImmolatorPendingPassedIceId
         ? { startupImmolatorPendingPassedIceId }
         : {}),
@@ -12447,6 +12692,9 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
       position: { kind: "server", serverId: server.id },
       phase: "movement",
       ...(viral15PendingPassedIceId ? { viral15PendingPassedIceId } : {}),
+      ...(passRezzedIceProgramTrashPendingPassedIceId
+        ? { passRezzedIceProgramTrashPendingPassedIceId }
+        : {}),
       ...(startupImmolatorPendingPassedIceId
         ? { startupImmolatorPendingPassedIceId }
         : {}),
@@ -12531,7 +12779,7 @@ function resolveVacuumLinkRewindSubroutine(
 
   const die = rollDeterministicDie(
     state,
-    `${VACUUM_LINK_ID}.rewind.${run.runId}.${run.encounteredIceId}`,
+    `${definitionFor(state, run.encounteredIceId).id}.rewind.${run.runId}.${run.encounteredIceId}`,
   );
   if (legalAction)
     legalAction.payload = {
@@ -12604,6 +12852,24 @@ function continueFromMovement(state: GameState, legalAction?: LegalAction): void
     state.run = runWithoutPending;
     if (
       startViral15ProgramTrashChoice(
+        state,
+        pendingPassedIceId,
+        legalAction,
+      )
+    )
+      return;
+  }
+  if (state.run?.passRezzedIceProgramTrashPendingPassedIceId) {
+    const pendingPassedIceId =
+      state.run.passRezzedIceProgramTrashPendingPassedIceId;
+    const {
+      passRezzedIceProgramTrashPendingPassedIceId: _pending,
+      ...runWithoutPending
+    } = state.run;
+    void _pending;
+    state.run = runWithoutPending;
+    if (
+      startPassRezzedIceProgramTrashChoice(
         state,
         pendingPassedIceId,
         legalAction,
@@ -15405,6 +15671,7 @@ function finishRun(
   legalAction?: LegalAction,
 ): void {
   const run = state.run;
+  if (run) clearEncounterTemporaryTraceCredits(run, legalAction);
   if (run) applyDupreRunEndCounters(state, run);
   if (run) derezOliviaSalazarTemporaryIce(state, run, legalAction);
   if (run && successful)
@@ -21603,6 +21870,12 @@ function resolvePendingChoice(
     return;
   }
   if (
+    state.pendingChoice.source.startsWith("p3_56.too_many_doors_secret_spend")
+  ) {
+    resolveTooManyDoorsSecretSpendChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
     state.pendingChoice.source.startsWith("v1922.open_ended_mileage_return")
   ) {
     resolveOpenEndedMileageProgramReturnChoice(state, legalAction, playerAction);
@@ -21618,6 +21891,12 @@ function resolvePendingChoice(
     state.pendingChoice.source.startsWith("v1922.viral_15_program_trash")
   ) {
     resolveViral15ProgramTrashChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("p3_56.pass_ice_program_trash")
+  ) {
+    resolvePassRezzedIceProgramTrashChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1922.speed_trap")) {
@@ -26824,6 +27103,37 @@ function resolveTraceHardwareWreckerSuccess(
   };
 }
 
+function encounterTemporaryTraceCreditsAvailable(
+  state: GameState,
+  trace: NonNullable<GameState["trace"]>,
+): number {
+  const credits = state.run?.encounterTemporaryTraceCredits;
+  if (
+    !credits ||
+    credits.sourceIceId !== trace.sourceCardInstanceId ||
+    credits.sourceIceId !== trace.encounterTemporaryTraceCreditSourceIceId
+  )
+    return 0;
+  return Math.max(0, Math.floor(credits.remaining ?? 0));
+}
+
+function spendEncounterTemporaryTraceCredits(
+  state: GameState,
+  trace: NonNullable<GameState["trace"]>,
+  amount: number,
+): number {
+  const credits = state.run?.encounterTemporaryTraceCredits;
+  if (
+    !credits ||
+    credits.sourceIceId !== trace.sourceCardInstanceId ||
+    amount <= 0
+  )
+    return 0;
+  const spent = Math.min(Math.max(0, Math.floor(amount)), credits.remaining);
+  credits.remaining = Math.max(0, credits.remaining - spent);
+  return spent;
+}
+
 function resolveTraceCorpBid(
   state: GameState,
   legalAction: LegalAction,
@@ -26838,19 +27148,36 @@ function resolveTraceCorpBid(
     trace.parisCityGridPoolServerId
       ? parisCityGridTracePoolTotal(state)
       : 0;
-  const parisCityGridPoolBid = Math.min(parisCityGridPoolAvailable, bid);
+  const encounterTemporaryTraceCreditsBid = Math.min(
+    encounterTemporaryTraceCreditsAvailable(state, trace),
+    bid,
+  );
+  const parisCityGridPoolBid = Math.min(
+    parisCityGridPoolAvailable,
+    bid - encounterTemporaryTraceCreditsBid,
+  );
   const creditBid = Math.min(
     state.corp.credits,
-    bid - parisCityGridPoolBid,
+    bid - encounterTemporaryTraceCreditsBid - parisCityGridPoolBid,
   );
   const krumzBitBid = Math.min(
     krumzTraceBitTotal(state),
-    bid - parisCityGridPoolBid - creditBid,
+    bid - encounterTemporaryTraceCreditsBid - parisCityGridPoolBid - creditBid,
   );
   const hackerTrackerBid =
-    bid - parisCityGridPoolBid - creditBid - krumzBitBid;
+    bid -
+    encounterTemporaryTraceCreditsBid -
+    parisCityGridPoolBid -
+    creditBid -
+    krumzBitBid;
   if (hackerTrackerBid > hackerTrackerCounterTotal(state))
     throw new Error("Hacker Tracker Central hat nicht genug Counter.");
+  const encounterTemporaryTraceCreditsSpent =
+    spendEncounterTemporaryTraceCredits(
+      state,
+      trace,
+      encounterTemporaryTraceCreditsBid,
+    );
   const parisCityGridPoolSpent = spendParisCityGridTracePool(
     state,
     trace.parisCityGridPoolSourceCardInstanceId,
@@ -26888,6 +27215,15 @@ function resolveTraceCorpBid(
         ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
         : {}),
       corpBid: bid,
+      ...(encounterTemporaryTraceCreditsSpent > 0
+        ? {
+            temporaryTraceCreditsSpent: encounterTemporaryTraceCreditsSpent,
+            temporaryTraceCreditsRemaining:
+              state.run?.encounterTemporaryTraceCredits?.remaining ?? 0,
+            temporaryTraceCreditsSourceDefinitionId:
+              trace.encounterTemporaryTraceCreditSourceDefinitionId,
+          }
+        : {}),
       corpCreditBid: creditBid,
       ...(parisCityGridPoolSpent > 0
         ? {
@@ -26938,6 +27274,15 @@ function resolveTraceCorpBid(
       ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
       : {}),
     corpBid: bid,
+    ...(encounterTemporaryTraceCreditsSpent > 0
+      ? {
+          temporaryTraceCreditsSpent: encounterTemporaryTraceCreditsSpent,
+          temporaryTraceCreditsRemaining:
+            state.run?.encounterTemporaryTraceCredits?.remaining ?? 0,
+          temporaryTraceCreditsSourceDefinitionId:
+            trace.encounterTemporaryTraceCreditSourceDefinitionId,
+        }
+      : {}),
     corpCreditBid: creditBid,
     ...(parisCityGridPoolSpent > 0
       ? {
@@ -27319,8 +27664,8 @@ function resolveTraceRunnerBid(
     }
     if (
       successful &&
-      (trace.sourceDefinitionId === CINDERELLA_ID ||
-        trace.sourceDefinitionId === HOMEWRECKER_ID)
+      trace.successEffect.type ===
+        "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
       traceHardwareWreckerPayload = resolveTraceHardwareWreckerSuccess(
         state,
@@ -27587,8 +27932,8 @@ function completeTraceAfterPostBidLink(
     }
     if (
       successful &&
-      (trace.sourceDefinitionId === CINDERELLA_ID ||
-        trace.sourceDefinitionId === HOMEWRECKER_ID)
+      trace.successEffect.type ===
+        "end_run_trash_hardware_and_unpreventable_meat_damage"
     ) {
       traceHardwareWreckerPayload = resolveTraceHardwareWreckerSuccess(
         state,
@@ -27664,6 +28009,8 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
   ) {
     return Number.isInteger(effect.amount) && effect.amount > 0;
   }
+  if (effect.type === "end_run_trash_hardware_and_unpreventable_meat_damage")
+    return Number.isInteger(effect.amount) && effect.amount > 0;
   return (
     effect.type === "add_tag" &&
     Number.isInteger(effect.amount) &&
@@ -29691,6 +30038,90 @@ function resolveViral15ProgramTrashChoice(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_viral_15_program_trash",
     trashedCount: 1,
+    trashedCardDefinitionId: selectedDefinitionId,
+  };
+}
+
+function startPassRezzedIceProgramTrashChoice(
+  state: GameState,
+  passedIceId: CardInstanceId,
+  legalAction?: LegalAction,
+): boolean {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const run = mustRun(state);
+  const sourceIceId = run.passRezzedIceProgramTrashSourceIceId;
+  if (!sourceIceId) return false;
+  const sourceDefinition = definitionFor(state, sourceIceId);
+  const programOptions = state.runner.rig.programs
+    .filter((cardId) => state.cardInstances[cardId])
+    .sort()
+    .map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    });
+  if (programOptions.length === 0) {
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        passIceTrashProgramPrompt: false,
+        sourceDefinitionId: sourceDefinition.id,
+        programTrashCount: 0,
+      };
+    }
+    return false;
+  }
+  state.pendingChoice = {
+    choiceId: `p3_56_pass_ice_program_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_56.pass_ice_program_trash:${sourceIceId}:${passedIceId}:${state.stateVersion + 1}`,
+    prompt: `${sourceDefinition.title}: installiertes Programm trashen.`,
+    kind: "select_cards",
+    options: programOptions,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  if (legalAction) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      passIceTrashProgramPrompt: true,
+      sourceDefinitionId: sourceDefinition.id,
+      passIceTrashProgramCandidateCount: programOptions.length,
+      hiddenZoneBarrier: true,
+    };
+  }
+  return true;
+}
+
+function resolvePassRezzedIceProgramTrashChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_56.pass_ice_program_trash"))
+    throw new Error("Pass-ICE-Programmtrash-Choice ist nicht offen.");
+  const [, sourceIceId, passedIceId] = choice.source.split(":");
+  if (!sourceIceId || !state.cardInstances[sourceIceId])
+    throw new Error("Die Programmtrash-Quelle ist nicht mehr gueltig.");
+  if (!passedIceId || !state.cardInstances[passedIceId])
+    throw new Error("Das passierte ICE fuer Programmtrash fehlt.");
+  const selectedProgramId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (
+    !selectedProgramId ||
+    !state.runner.rig.programs.includes(selectedProgramId)
+  )
+    throw new Error("Das gewaehlte Programm ist nicht installiert.");
+  const selectedDefinitionId = definitionFor(state, selectedProgramId).id;
+  trashRunnerInstalledProgram(state, selectedProgramId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    passIceTrashProgramPrompt: false,
+    sourceDefinitionId: definitionFor(state, sourceIceId).id,
+    hiddenZoneBarrier: true,
+    programTrashCount: 1,
     trashedCardDefinitionId: selectedDefinitionId,
   };
 }

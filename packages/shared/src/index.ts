@@ -167,6 +167,7 @@ export type TraceSuccessEffect =
     }
   | { type: "end_run_and_run_lock"; amount: number }
   | { type: "end_run_trash_program_and_run_lock"; amount: number }
+  | { type: "end_run_trash_hardware_and_unpreventable_meat_damage"; amount: number }
   | { type: "none" };
 
 export type SubroutineType =
@@ -189,6 +190,9 @@ export type SubroutineType =
   | "set_run_jack_out_lock"
   | "set_runner_forgo_next_action"
   | "set_runner_run_lock_actions"
+  | "set_run_jack_out_additional_cost"
+  | "set_run_pass_rezzed_ice_program_trash"
+  | "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
   | "reveal_corp_rd_top"
   | "reorder_corp_rd_top2"
   | "rewind_run_to_rezzed_ice_by_die";
@@ -818,6 +822,15 @@ export type RunState = {
   >;
   viral15ActiveSourceIceId?: CardInstanceId;
   viral15PendingPassedIceId?: CardInstanceId;
+  passRezzedIceProgramTrashSourceIceId?: CardInstanceId;
+  passRezzedIceProgramTrashPendingPassedIceId?: CardInstanceId;
+  jackOutAdditionalCostForRun?: number;
+  encounterTemporaryTraceCredits?: {
+    sourceIceId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    usableFor: "this_ice_printed_trace_subroutines";
+  };
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;
   aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
@@ -908,6 +921,8 @@ export type TraceState = {
   rabbitTraceLimitReduction?: number;
   parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
   parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
+  encounterTemporaryTraceCreditSourceIceId?: CardInstanceId;
+  encounterTemporaryTraceCreditSourceDefinitionId?: CardDefinitionId;
   status: "corp_bid" | "base_link" | "runner_bid" | "post_bid_link";
   successEffect: TraceSuccessEffect;
   returnPhase?: Phase;
@@ -981,6 +996,13 @@ export type GameState = {
   };
   run?: RunState;
   trace?: TraceState;
+  secretSpendComparison?: {
+    source: "too_many_doors";
+    runId: string;
+    sourceIceId: CardInstanceId;
+    subroutineIndex: number;
+    corpSpend?: number;
+  };
   bizarreEncryptionDelayedAgendas?: Array<{
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
@@ -6889,9 +6911,9 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     strength: 5,
     rulesText:
-      "[Subroutine] For the remainder of the run, Runner must pay 1 when encountering a piece of ice, in addition to any other costs, or end the run.",
+      "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
     subroutines: [
-      onrSetRunEncounterTax("onr_v1_222_ball_and_chain_encounter_tax", 1),
+      onrSetRunEncounterTax("onr_v1_222_ball_and_chain_encounter_tax", 2),
     ],
     mechanics: ["encounter_tax", "run_modifier"],
   }),
@@ -7482,7 +7504,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     strength: 3,
     rulesText:
-      "[Subroutine] The Corp looks at and reorders the top two cards of R&D.",
+      "[Subroutine] Secretly spend 0, 1, or 2; Runner does the same. Then reveal how much each of you spent. End the run unless the Corp spent at least as many credits as Runner spent.",
     subroutines: [
       onrReorderCorpRdTop2("onr_v1_272_too_many_doors_reorder_rd_top2"),
     ],
@@ -7523,7 +7545,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 5,
     strength: 3,
     rulesText:
-      "[Subroutine] For the remainder of the run, jack-out costs 1 additional credit and the Runner trashes an installed program after passing each rezzed ice unless they jack out.",
+      "[Subroutine] For the remainder of the run, Runner must pay 1 to jack out, in addition to any other costs.\n[Subroutine] For the remainder of the run, Runner trashes an installed program after passing each piece of rezzed ice, including Viral 15, unless Runner jacks out.",
     subroutines: [onrSetRunViral15("onr_v1_276_viral_15_run_modifier")],
     mechanics: [
       "run_modifier",
@@ -8077,7 +8099,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["sentry"],
     rezCost: 7,
     strength: 4,
-    rulesText: "Trace 6. If successful, give the Runner 1 tag.",
+    rulesText:
+      "Trace 6. If successful, give the Runner 1 tag. Trace 6. If successful, give the Runner 1 tag. Whenever Pocket Virtual Reality is encountered, gain 4 temporary credits usable only for these traces; return unused credits when the encounter ends.",
     subroutines: [
       {
         id: "onr_v1_260_pocket_virtual_reality_trace",

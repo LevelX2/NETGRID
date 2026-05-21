@@ -387,6 +387,12 @@ export function publicContextForAction(
       "preservedCounterAmount",
       "remainingVirusCounters",
       "preservedCardDefinitionIds",
+      "secretSpendRevealed",
+      "secretSpendCorp",
+      "secretSpendRunner",
+      "tooManyDoorsEndRun",
+      "passIceTrashProgramPrompt",
+      "programTrashCount",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -464,6 +470,9 @@ export function publicContextForAction(
       "krumzBitsSpent",
       "hackerTrackerCountersSpent",
       "hackerTrackerCountersAdded",
+      "temporaryTraceCreditsSpent",
+      "temporaryTraceCreditsRemaining",
+      "temporaryTraceCreditsSourceDefinitionId",
       "fangRunEnded",
       "fangRunLockCreditCost",
       "runnerRunEnded",
@@ -504,6 +513,12 @@ export function publicContextForAction(
       "tokyoChibaInfightingBonus",
       "corpCreditsGained",
       "corpCreditsAfter",
+      "jackOutAdditionalCost",
+      "passIceTrashProgramPrompt",
+      "passIceTrashProgramCandidateCount",
+      "temporaryTraceCredits",
+      "temporaryTraceCreditsSourceDefinitionId",
+      "temporaryCreditsReturned",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;
@@ -529,6 +544,15 @@ export function publicContextForAction(
     if (typeof legalAction.payload.rabbitTraceLimitReduction === "number")
       context.rabbitTraceLimitReduction =
         legalAction.payload.rabbitTraceLimitReduction;
+    if (typeof legalAction.payload.temporaryTraceCreditsAvailable === "number")
+      context.temporaryTraceCreditsAvailable =
+        legalAction.payload.temporaryTraceCreditsAvailable;
+    if (
+      typeof legalAction.payload.temporaryTraceCreditsSourceDefinitionId ===
+      "string"
+    )
+      context.temporaryTraceCreditsSourceDefinitionId =
+        legalAction.payload.temporaryTraceCreditsSourceDefinitionId;
     if (legalAction.payload.oncePerRunConsumed === true)
       context.oncePerRunConsumed = true;
   }

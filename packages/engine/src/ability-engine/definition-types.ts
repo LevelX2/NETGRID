@@ -841,6 +841,17 @@ export type CardTraceSuccessEffectImplementation =
       visibility: EventVisibilityClass;
     }
   | {
+      kind: "trash_hardware";
+      target: "installed_runner_hardware";
+      visibility: EventVisibilityClass;
+    }
+  | {
+      kind: "unpreventable_meat_damage";
+      recipient: "runner";
+      amount: number;
+      visibility: EventVisibilityClass;
+    }
+  | {
       kind: "runner_run_lock_until_action_paid";
       amount: number;
       visibility: EventVisibilityClass;
@@ -1340,6 +1351,34 @@ export type CardPrintedSubroutineImplementation =
       breakTags?: readonly string[];
     }
   | {
+      kind: "run_duration_encounter_cost_or_end_run";
+      amount: number;
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "run_duration_jack_out_cost";
+      amount: number;
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out";
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner";
+      allowedAmounts: readonly [0, 1, 2];
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "random_resume_from_rezzed_ice_back_or_jack_out";
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
       kind: "next_encounter_unless_fully_break_damage";
       damageType: "net";
       amount: number;
@@ -1364,6 +1403,15 @@ export type CardPrintedSubroutineImplementation =
       text: string;
       breakTags?: readonly string[];
     };
+
+export type CardIceEncounterImplementation = {
+  kind: "add_encounter_temporary_credits";
+  side: "corp";
+  amount: number;
+  usableFor: "this_ice_printed_trace_subroutines";
+  returnUnusedAtEncounterEnd: true;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
 
 export type RunnerTraceCounterEffectImplementation = {
   counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;

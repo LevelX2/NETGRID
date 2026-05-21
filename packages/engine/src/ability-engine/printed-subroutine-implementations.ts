@@ -93,6 +93,62 @@ function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "run_duration_encounter_cost_or_end_run") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Run-duration encounter-tax subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_encounter_tax",
+      amount,
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (subroutine.kind === "run_duration_jack_out_cost") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Run-duration jack-out-cost subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_jack_out_additional_cost",
+      amount,
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (
+    subroutine.kind ===
+    "run_duration_trash_program_after_passing_rezzed_ice_unless_jack_out"
+  ) {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_run_pass_rezzed_ice_program_trash",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (
+    subroutine.kind ===
+    "secret_spend_compare_end_run_unless_corp_spent_at_least_runner"
+  ) {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    if (subroutine.allowedAmounts.join(",") !== "0,1,2")
+      throw new Error("Secret-spend comparison supports only 0/1/2.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "secret_spend_compare_end_run_unless_corp_spent_at_least_runner",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (subroutine.kind === "random_resume_from_rezzed_ice_back_or_jack_out") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "rewind_run_to_rezzed_ice_by_die",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "next_encounter_unless_fully_break_damage") {
     const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
     const amount = Math.max(0, Math.floor(subroutine.amount));

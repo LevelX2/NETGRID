@@ -73,11 +73,13 @@ import { trapImplementation } from "./onr-v1/corp/assets/trap";
 import { vacantSoulkillerImplementation } from "./onr-v1/corp/assets/vacant-soulkiller";
 import { virusTestSiteImplementation } from "./onr-v1/corp/assets/virus-test-site";
 import { aspImplementation } from "./onr-v1/corp/ice/asp";
+import { ballAndChainImplementation } from "./onr-v1/corp/ice/ball-and-chain";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
 import { canisMajorImplementation } from "./onr-v1/corp/ice/canis-major";
 import { canisMinorImplementation } from "./onr-v1/corp/ice/canis-minor";
 import { cerberusImplementation } from "./onr-v1/corp/ice/cerberus";
+import { cinderellaImplementation } from "./onr-v1/corp/ice/cinderella";
 import { codeCorpseImplementation } from "./onr-v1/corp/ice/code-corpse";
 import { corticalScannerImplementation } from "./onr-v1/corp/ice/cortical-scanner";
 import { corticalScrubImplementation } from "./onr-v1/corp/ice/cortical-scrub";
@@ -97,6 +99,7 @@ import { filterImplementation } from "./onr-v1/corp/ice/filter";
 import { fireWallImplementation } from "./onr-v1/corp/ice/fire-wall";
 import { fragmentationStormImplementation } from "./onr-v1/corp/ice/fragmentation-storm";
 import { hauntingInquisitionImplementation } from "./onr-v1/corp/ice/haunting-inquisition";
+import { homewreckerImplementation } from "./onr-v1/corp/ice/homewrecker";
 import { hunterImplementation } from "./onr-v1/corp/ice/hunter";
 import { icePickWillieImplementation } from "./onr-v1/corp/ice/ice-pick-willie";
 import { jackAttackImplementation } from "./onr-v1/corp/ice/jack-attack";
@@ -108,6 +111,7 @@ import { mastiffImplementation } from "./onr-v1/corp/ice/mastiff";
 import { nerveLabyrinthImplementation } from "./onr-v1/corp/ice/nerve-labyrinth";
 import { neuralBladeImplementation } from "./onr-v1/corp/ice/neural-blade";
 import { piInTheFaceImplementation } from "./onr-v1/corp/ice/pi-in-the-face";
+import { pocketVirtualRealityImplementation } from "./onr-v1/corp/ice/pocket-virtual-reality";
 import { quandaryImplementation } from "./onr-v1/corp/ice/quandary";
 import { razorWireImplementation } from "./onr-v1/corp/ice/razor-wire";
 import { reinforcedWallImplementation } from "./onr-v1/corp/ice/reinforced-wall";
@@ -120,7 +124,10 @@ import { shotgunWireImplementation } from "./onr-v1/corp/ice/shotgun-wire";
 import { sleeperImplementation } from "./onr-v1/corp/ice/sleeper";
 import { triggermanImplementation } from "./onr-v1/corp/ice/triggerman";
 import { tkoTwoPointZeroImplementation } from "./onr-v1/corp/ice/tko-2-0";
+import { tooManyDoorsImplementation } from "./onr-v1/corp/ice/too-many-doors";
 import { tutorImplementation } from "./onr-v1/corp/ice/tutor";
+import { vacuumLinkImplementation } from "./onr-v1/corp/ice/vacuum-link";
+import { viral15Implementation } from "./onr-v1/corp/ice/viral-15";
 import { virizzImplementation } from "./onr-v1/corp/ice/virizz";
 import { wallOfIceImplementation } from "./onr-v1/corp/ice/wall-of-ice";
 import { wallOfStaticImplementation } from "./onr-v1/corp/ice/wall-of-static";
@@ -582,11 +589,13 @@ export const CARD_IMPLEMENTATIONS = [
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
   aspImplementation,
+  ballAndChainImplementation,
   banpeiImplementation,
   bolterClusterImplementation,
   canisMajorImplementation,
   canisMinorImplementation,
   cerberusImplementation,
+  cinderellaImplementation,
   codeCorpseImplementation,
   corticalScannerImplementation,
   corticalScrubImplementation,
@@ -606,6 +615,7 @@ export const CARD_IMPLEMENTATIONS = [
   fireWallImplementation,
   fragmentationStormImplementation,
   hauntingInquisitionImplementation,
+  homewreckerImplementation,
   hunterImplementation,
   icePickWillieImplementation,
   jackAttackImplementation,
@@ -617,6 +627,7 @@ export const CARD_IMPLEMENTATIONS = [
   nerveLabyrinthImplementation,
   neuralBladeImplementation,
   piInTheFaceImplementation,
+  pocketVirtualRealityImplementation,
   quandaryImplementation,
   razorWireImplementation,
   reinforcedWallImplementation,
@@ -628,8 +639,11 @@ export const CARD_IMPLEMENTATIONS = [
   shotgunWireImplementation,
   sleeperImplementation,
   tkoTwoPointZeroImplementation,
+  tooManyDoorsImplementation,
   triggermanImplementation,
   tutorImplementation,
+  vacuumLinkImplementation,
+  viral15Implementation,
   virizzImplementation,
   wallOfIceImplementation,
   wallOfStaticImplementation,
