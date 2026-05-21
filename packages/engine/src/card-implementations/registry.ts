@@ -139,6 +139,7 @@ import { ifYouWantItDoneRightImplementation } from "./onr-v1/runner/preps/if-you
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
 import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
+import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
@@ -159,9 +160,11 @@ import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
+import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
 import { seeyaImplementation } from "./onr-v1/runner/programs/seeya";
+import { selfModifyingCodeImplementation } from "./onr-v1/runner/programs/self-modifying-code";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
 import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
@@ -172,9 +175,11 @@ import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/ba
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
+import { junkyardBbsImplementation } from "./onr-v1/runner/resources/junkyard-bbs";
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { nEtoImplementation } from "./onr-v1/runner/resources/n-e-t-o";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
+import { roninAroundImplementation } from "./onr-v1/runner/resources/ronin-around";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
 import { technicianLoverImplementation } from "./onr-v1/runner/resources/technician-lover";
@@ -200,6 +205,7 @@ export const CARD_IMPLEMENTATIONS = [
   priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,
+  sneakPreviewImplementation,
   templeMicrocodeOutletImplementation,
   weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
@@ -207,9 +213,11 @@ export const CARD_IMPLEMENTATIONS = [
   expertScheduleAnalyzerImplementation,
   microtechAiInterfaceImplementation,
   mouseImplementation,
+  mysteryBoxImplementation,
   newsgroupFilterImplementation,
   rAndDProtocolFilesImplementation,
   seeyaImplementation,
+  selfModifyingCodeImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
   accessThroughAlphaImplementation,
@@ -220,8 +228,10 @@ export const CARD_IMPLEMENTATIONS = [
   aujourdhuiImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
+  junkyardBbsImplementation,
   loanFromChibaImplementation,
   nEtoImplementation,
+  roninAroundImplementation,
   hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,

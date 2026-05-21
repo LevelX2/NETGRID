@@ -81,9 +81,27 @@ export type CardEffectExecutionContext = {
     revealToCorp: boolean,
     shuffleAfterwards: true,
   ) => CardEffectHiddenInfoResult;
+  moveTopTrashToGrip?: () => CardEffectHiddenInfoResult;
+  startSearchStackInstall?: (
+    filter: "program",
+    installCost: "normal" | "free",
+    shuffleAfterwards: true,
+  ) => CardEffectHiddenInfoResult;
+  startChooseStackOrTrashProgramInstall?: (
+    installCost: "free",
+    shuffleStackIfSearched: true,
+    returnInstalledCardToGripAtEndOfTurn: true,
+  ) => CardEffectHiddenInfoResult;
+  startLookTopStackShowToCorpThenInstallMatching?: (
+    count: 5,
+    allowedTypes: readonly "program"[],
+    installCost: "free",
+    trashSourceIfInstalled: true,
+    shuffleAfterwards: true,
+  ) => CardEffectHiddenInfoResult;
   startLookTopStackTakeMatching?: (
     count: number,
-    allowedTypes: readonly ("program" | "event" | "resource")[],
+    allowedTypes: readonly ("program" | "event" | "hardware" | "resource")[],
     costPerTaken: number,
     revealTakenToCorp: true,
     shuffleRemainder: true,
@@ -726,6 +744,99 @@ export function executeCardImplementationEffects(
           effect.shuffleAfterwards,
         );
         mergePublicPayload(publicPayload, searchResult.publicPayload);
+        return;
+      }
+      case "move_top_trash_to_grip": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "move_top_trash_to_grip visibility must be hidden_info_barrier.",
+          );
+        if (effect.recipient !== "runner")
+          throw new Error("move_top_trash_to_grip recipient must be runner.");
+        if (!context.moveTopTrashToGrip)
+          throw new Error(
+            "move_top_trash_to_grip requires a moveTopTrashToGrip execution context.",
+          );
+        const moveResult = context.moveTopTrashToGrip();
+        mergePublicPayload(publicPayload, moveResult.publicPayload);
+        return;
+      }
+      case "search_stack_install": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "search_stack_install visibility must be hidden_info_barrier.",
+          );
+        if (effect.filter !== "program")
+          throw new Error("search_stack_install supports only program filter.");
+        if (effect.installCost !== "normal" && effect.installCost !== "free")
+          throw new Error("search_stack_install installCost is invalid.");
+        if (effect.shuffleAfterwards !== true)
+          throw new Error("search_stack_install must shuffle afterwards.");
+        if (!context.startSearchStackInstall)
+          throw new Error(
+            "search_stack_install requires a startSearchStackInstall execution context.",
+          );
+        const searchResult = context.startSearchStackInstall(
+          effect.filter,
+          effect.installCost,
+          effect.shuffleAfterwards,
+        );
+        mergePublicPayload(publicPayload, searchResult.publicPayload);
+        return;
+      }
+      case "choose_stack_or_trash_program_install": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "choose_stack_or_trash_program_install visibility must be hidden_info_barrier.",
+          );
+        if (
+          effect.installCost !== "free" ||
+          effect.shuffleStackIfSearched !== true ||
+          effect.returnInstalledCardToGripAtEndOfTurn !== true
+        )
+          throw new Error(
+            "choose_stack_or_trash_program_install supports only free temporary program installs.",
+          );
+        if (!context.startChooseStackOrTrashProgramInstall)
+          throw new Error(
+            "choose_stack_or_trash_program_install requires a host choice context.",
+          );
+        const choiceResult = context.startChooseStackOrTrashProgramInstall(
+          effect.installCost,
+          effect.shuffleStackIfSearched,
+          effect.returnInstalledCardToGripAtEndOfTurn,
+        );
+        mergePublicPayload(publicPayload, choiceResult.publicPayload);
+        return;
+      }
+      case "look_top_stack_show_to_corp_then_install_matching": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "look_top_stack_show_to_corp_then_install_matching visibility must be hidden_info_barrier.",
+          );
+        if (
+          effect.count !== 5 ||
+          effect.installCost !== "free" ||
+          effect.trashSourceIfInstalled !== true ||
+          effect.shuffleAfterwards !== true ||
+          effect.allowedTypes.some((type) => type !== "program")
+        )
+          throw new Error(
+            "look_top_stack_show_to_corp_then_install_matching supports only top-five free program installs.",
+          );
+        if (!context.startLookTopStackShowToCorpThenInstallMatching)
+          throw new Error(
+            "look_top_stack_show_to_corp_then_install_matching requires a host choice context.",
+          );
+        const lookResult =
+          context.startLookTopStackShowToCorpThenInstallMatching(
+            effect.count,
+            effect.allowedTypes,
+            effect.installCost,
+            effect.trashSourceIfInstalled,
+            effect.shuffleAfterwards,
+          );
+        mergePublicPayload(publicPayload, lookResult.publicPayload);
         return;
       }
       case "look_top_stack_take_matching": {

@@ -117,6 +117,7 @@ export type ActivatedCardAbilityImplementation = {
   kind: "activated";
   timing:
     | "runner_main"
+    | "during_run"
     | "corp_main"
     | "trace_base_link_window"
     | "trace_post_bid_link_window";
@@ -138,6 +139,10 @@ export type CardAbilityLimitImplementation =
     }
   | {
       kind: "once_per_trace_per_source";
+      scope: "source";
+    }
+  | {
+      kind: "once_per_run_per_source";
       scope: "source";
     };
 
@@ -179,6 +184,10 @@ export type CardEffectImplementation =
   | ShowHqAgendasForCreditsEffectImplementation
   | SearchTrashToGripEffectImplementation
   | SearchStackToGripEffectImplementation
+  | MoveTopTrashToGripEffectImplementation
+  | SearchStackInstallEffectImplementation
+  | ChooseStackOrTrashProgramInstallEffectImplementation
+  | LookTopStackShowToCorpThenInstallMatchingEffectImplementation
   | LookTopStackTakeMatchingEffectImplementation
   | LookTopStackTakeOneArrangeRestEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
@@ -265,10 +274,45 @@ export type SearchStackToGripEffectImplementation = {
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
+export type MoveTopTrashToGripEffectImplementation = {
+  kind: "move_top_trash_to_grip";
+  recipient: "runner";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type SearchStackInstallEffectImplementation = {
+  kind: "search_stack_install";
+  filter: "program";
+  installCost: "normal" | "free";
+  shuffleAfterwards: true;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type ChooseStackOrTrashProgramInstallEffectImplementation = {
+  kind: "choose_stack_or_trash_program_install";
+  installCost: "free";
+  shuffleStackIfSearched: true;
+  returnInstalledCardToGripAtEndOfTurn: true;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type LookTopStackShowToCorpThenInstallMatchingEffectImplementation = {
+  kind: "look_top_stack_show_to_corp_then_install_matching";
+  count: 5;
+  allowedTypes: readonly Extract<CardType, "program">[];
+  installCost: "free";
+  trashSourceIfInstalled: true;
+  shuffleAfterwards: true;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
 export type LookTopStackTakeMatchingEffectImplementation = {
   kind: "look_top_stack_take_matching";
   count: number;
-  allowedTypes: readonly Extract<CardType, "program" | "event" | "resource">[];
+  allowedTypes: readonly Extract<
+    CardType,
+    "program" | "event" | "hardware" | "resource"
+  >[];
   costPerTaken: number;
   revealTakenToCorp: true;
   shuffleRemainder: true;

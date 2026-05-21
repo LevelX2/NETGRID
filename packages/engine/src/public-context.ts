@@ -1167,9 +1167,13 @@ export function publicContextForAction(
     if (typeof legalAction.payload.specialZoneReason === "string")
       context.specialZoneReason = legalAction.payload.specialZoneReason;
   }
-  if (typeof legalAction.payload?.v1915RunnerProgramAbility === "string") {
+  if (
+    typeof legalAction.payload?.v1915RunnerProgramAbility === "string" ||
+    legalAction.payload?.hiddenZoneAction ===
+      "p3_38_look_top_stack_show_to_corp_then_install_matching"
+  ) {
     context.v1915RunnerProgramAbility =
-      legalAction.payload.v1915RunnerProgramAbility;
+      legalAction.payload.v1915RunnerProgramAbility ?? "card_implementation";
     if (typeof legalAction.payload.revealCount === "number")
       context.revealCount = legalAction.payload.revealCount;
     if (typeof legalAction.payload.revealedCardDefinitionIds === "string")

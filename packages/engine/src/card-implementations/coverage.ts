@@ -121,6 +121,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
   "onr_v1_105_priority-wreck":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
+  "onr_v1_110_sneak-preview":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/sneak-preview.ts",
   "onr_v1_095_jack-n-joe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/jack-n-joe.ts",
   "onr_v1_097_livewires-contacts":
@@ -141,8 +143,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
   "onr_v1_041_microtech-ai-interface":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
+  "onr_v1_043_mystery-box":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/mystery-box.ts",
   "onr_v1_050_r-and-d-protocol-files":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
+  "onr_v1_059_self-modifying-code":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/self-modifying-code.ts",
   "onr_v1_058_seeya":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
   "onr_v1_062_shredder-uplink-protocol":
@@ -157,8 +163,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/aujourdhui.ts",
   "onr_v1_163_floating-runner-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
+  "onr_v1_165_junkyard-bbs":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/junkyard-bbs.ts",
   "onr_v1_169_n-e-t-o":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/n-e-t-o.ts",
+  "onr_v1_175_ronin-around":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/ronin-around.ts",
   "onr_v1_174_rigged-investments":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/rigged-investments.ts",
   "onr_v1_177_the-short-circuit":

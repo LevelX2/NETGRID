@@ -3045,12 +3045,24 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     ).toBe(false);
   });
 
-  it("keeps Ronin Around top-two stack reorder private and source-bound", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ronin-around"));
+  it("uses Ronin Around for top-five hardware retrieval and expose", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-ronin-around",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.hiddenZone.runner,
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.hiddenZone.runner.cards,
+            { id: "simple_setup_hardware", quantity: 1 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.hiddenZone.corp,
+      }),
+    );
     state.runner.credits = 10;
     const roninId = installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
     const lowerCardId = putRunnerCardOnTopOfStack(state, "simple_decoder");
-    const topCardId = putRunnerCardOnTopOfStack(state, "simple_fracter");
+    const hardwareId = putRunnerCardOnTopOfStack(state, "simple_setup_hardware");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -3058,73 +3070,52 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility === "arrange_stack_top2" &&
-        String(action.payload?.cardId) === roninId,
+        action.type === "activated_card_ability" &&
+        String(action.payload?.cardId) === roninId &&
+        action.payload?.cardImplementationAbilityIndex === 0,
     );
-    expect(state.pendingChoice?.source).toContain(`v1911.arrange_stack_top2:${roninId}`);
+    expect(state.pendingChoice?.source).toContain("p3_37.look_top_stack_take_matching");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(runnerChoice?.options).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ value: topCardId }),
-        expect.objectContaining({ value: lowerCardId }),
+        expect.objectContaining({ value: hardwareId }),
+        expect.objectContaining({ value: lowerCardId, selectable: false }),
       ]),
     );
-    state = applyChoices(state, "runner", [`card_${lowerCardId}`, `card_${topCardId}`]);
-    expect(state.runner.stack.slice(0, 2)).toEqual([lowerCardId, topCardId]);
+    state = applyChoice(state, "runner", `card_${hardwareId}`);
+    expect(state.runner.grip).toContain(hardwareId);
+    expect(state.runner.stack).toContain(lowerCardId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "arrange_stack",
-      arrangedCount: 2,
+      hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+      publicRevealDefinitionIds: "simple_setup_hardware",
     });
-    expect(JSON.stringify(getPlayerView(state, "corp"))).not.toContain("Simple Fracter");
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    let removedSource = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ronin-around-source-drift"),
+    let exposeState = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-ronin-around-expose"),
     );
-    removedSource.runner.credits = 10;
-    const removedRoninId = installRunnerResourceForTest(
-      removedSource,
+    exposeState.runner.credits = 10;
+    const exposeRoninId = installRunnerResourceForTest(
+      exposeState,
       "onr_v1_175_ronin-around",
     );
-    const first = putRunnerCardOnTopOfStack(removedSource, "simple_decoder");
-    const second = putRunnerCardOnTopOfStack(removedSource, "simple_fracter");
-    removedSource = apply(
-      removedSource,
+    const targetIceId = putCorpIceOnServer(exposeState, "rd", "simple_barrier_ice");
+    exposeState = apply(
+      exposeState,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility === "arrange_stack_top2" &&
-        String(action.payload?.cardId) === removedRoninId,
+        action.type === "activated_card_ability" &&
+        String(action.payload?.cardId) === exposeRoninId &&
+        action.payload?.cardImplementationExposeTargetId === targetIceId,
     );
-    const legal = mustAction(
-      removedSource,
-      "runner",
-      (action) => action.type === "resolve_choice",
-    );
-    removeEverywhere(removedSource, removedRoninId);
-    removedSource.runner.heap.push(removedRoninId);
-    removedSource.cardInstances[removedRoninId] = {
-      ...removedSource.cardInstances[removedRoninId]!,
-      zone: { side: "runner", zone: "heap" },
-      faceup: true,
-      rezzed: true,
-    };
-    const result = applyAction(removedSource, {
-      matchId: removedSource.matchId,
-      side: "runner",
-      actionId: legal.actionId,
-      clientKnownStateVersion: removedSource.stateVersion,
-      selectedChoices: {
-        choiceId: removedSource.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${first}`, `card_${second}`],
-      },
+    expect(exposeState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_175_ronin-around",
+      hiddenZoneAction: "v1911_expose_server_card",
     });
-    expect(result.ok).toBe(false);
   });
 
   it("binds Hostile Takeover, Political Overthrow, Nevinyrral and Rustbelt to their live public sources", () => {
@@ -16095,10 +16086,14 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === eventId,
     );
-    expect(state.pendingChoice?.source).toContain("sneak_preview_source");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_38.stack_or_trash_program_install_source",
+    );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     state = applyChoice(state, "runner", "source_stack");
-    expect(state.pendingChoice?.source).toContain("sneak_preview_stack_install");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_38.stack_or_trash_program_install",
+    );
     expect(getPlayerView(state, "runner").pendingChoice?.stackSearchResolution).toMatchObject({
       reveal: "public",
       destination: "install_program",
@@ -16112,8 +16107,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.runner.rig.programs).toContain(targetProgramId);
     expect(state.runner.grip).not.toContain(targetProgramId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_program_install",
-      cardDefinitionId: "simple_decoder",
+      hiddenZoneAction: "p3_38_stack_or_trash_program_install",
+      sourceDefinitionId: "onr_v1_110_sneak-preview",
+      installedProgramDefinitionId: "simple_decoder",
       temporaryInstall: true,
     });
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -16149,7 +16145,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         String(action.payload?.cardId) === eventId,
     );
     state = applyChoice(state, "runner", "source_heap");
-    expect(state.pendingChoice?.source).toContain("sneak_preview_heap_install");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_38.stack_or_trash_program_install",
+    );
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
       (option) => option.value === targetProgramId,
     )?.id;
@@ -16157,7 +16155,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.rig.programs).toContain(targetProgramId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "sneak_preview_program_install",
+      hiddenZoneAction: "p3_38_stack_or_trash_program_install",
       searchShuffleAfter: false,
       temporaryInstall: true,
     });
@@ -16244,10 +16242,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility === "arrange_stack_top2",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_175_ronin-around" &&
+        action.payload?.cardImplementationAbilityIndex === 0,
     );
-    expect(state.pendingChoice?.source).toContain("v1911.arrange_stack_top2");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_37.look_top_stack_take_matching",
+    );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
   });
 
@@ -16283,9 +16284,9 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
-          action.type === "trigger_ability" &&
-          action.payload?.v1911HiddenZoneAbility ===
-            "self_modifying_code_install_program",
+          action.type === "activated_card_ability" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_059_self-modifying-code",
       ),
     ).toBe(true);
 
@@ -16331,13 +16332,13 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.v1911HiddenZoneAbility ===
-          "self_modifying_code_install_program",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_059_self-modifying-code",
     );
     expect(state.runner.heap).toContain(smcId);
     expect(state.pendingChoice?.source).toContain(
-      "v1911.self_modifying_code_install_program",
+      "p3_38.search_stack_install",
     );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(
@@ -16358,7 +16359,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
       sourceDefinitionId: "onr_v1_059_self-modifying-code",
-      hiddenZoneAction: "self_modifying_code_install_program",
+      hiddenZoneAction: "p3_38_search_stack_install",
       publicRevealDefinitionId: "simple_decoder",
       installedProgramDefinitionId: "simple_decoder",
       searchDestination: "runner_rig",
@@ -39960,14 +39961,12 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.v1915RunnerProgramAbility ===
-          "mystery_box_top5_program_install",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_043_mystery-box",
     );
     expect(mysteryAction.payload).toMatchObject({
-      revealCount: 5,
-      revealedProgramCount: 3,
-      hiddenZoneAction: "mystery_box_stack_top5_reveal",
+      cardImplementationAbility: "activated",
+      cardImplementationAbilityTiming: "during_run",
     });
     state = apply(state, "runner", (action) => action.actionId === mysteryAction.actionId);
     expect(state.pendingChoice).toMatchObject({
@@ -39988,7 +39987,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(state.runner.stack).not.toContain(selectedProgram);
     expect(state.runner.stack).toContain(bottomReveal);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "mystery_box_program_install",
+      hiddenZoneAction:
+        "p3_38_look_top_stack_show_to_corp_then_install_matching",
       installedProgramDefinitionId: "simple_decoder",
       selfTrashed: true,
     });
@@ -39998,8 +39998,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     expect(
       getLegalActions(state, "runner").some(
         (action) =>
-          action.payload?.v1915RunnerProgramAbility ===
-          "mystery_box_top5_program_install",
+          sourceDefinition(state, action) === "onr_v1_043_mystery-box",
       ),
     ).toBe(false);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -40033,9 +40032,8 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
       noProgram,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.v1915RunnerProgramAbility ===
-          "mystery_box_top5_program_install",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(noProgram, action) === "onr_v1_043_mystery-box",
     );
     expect(noProgram.pendingChoice).toBeUndefined();
     expect(noProgram.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -44248,10 +44246,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       state,
       "runner",
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "junkyard_bbs_return_top_heap" &&
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_165_junkyard-bbs" &&
         action.payload?.cardId === junkyardId &&
-        action.payload?.targetCardId === topHeapId,
+        action.payload?.cardImplementationTopTrashTargetId === topHeapId,
     );
     expect(junkyardAction.costs).toEqual([{ clicks: 1, credits: 1 }]);
 
@@ -44321,11 +44319,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(state.runner.heap).toEqual([bottomHeapId]);
     expect(state.runner.grip[0]).toBe(topHeapId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "trigger_ability",
-      cardDefinitionId: "onr_v1_165_junkyard-bbs",
-      resourceAbility: "junkyard_bbs_return_top_heap",
+      actionType: "activated_card_ability",
       sourceDefinitionId: "onr_v1_165_junkyard-bbs",
-      targetCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+      cardDefinitionId: "onr_v1_165_junkyard-bbs",
       returnedCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
       returnedCount: 1,
       sourceZone: "heap",

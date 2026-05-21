@@ -164,10 +164,27 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     filter: "program" | "any_card",
   ) => number;
+  topTrashToGripTargetCount: (state: GameState) => number;
+  topTrashToGripTargetId: (state: GameState) => CardInstanceId | undefined;
+  searchStackInstallTargetCount: (
+    state: GameState,
+    filter: "program",
+    installCost: "normal" | "free",
+  ) => number;
+  stackOrTrashProgramInstallTargetCount: (
+    state: GameState,
+    installCost: "free",
+  ) => number;
+  lookTopStackShowToCorpThenInstallMatchingTargetCount: (
+    state: GameState,
+    count: 5,
+    allowedTypes: readonly "program"[],
+    installCost: "free",
+  ) => number;
   lookTopStackTakeMatchingTargetCount: (
     state: GameState,
     count: number,
-    allowedTypes: readonly ("program" | "event" | "resource")[],
+    allowedTypes: readonly ("program" | "event" | "hardware" | "resource")[],
   ) => number;
   startSearchTrashToGripChoice: (
     state: GameState,
@@ -185,13 +202,48 @@ export type CardImplementationRuntimeDependencies = {
     revealToCorp: boolean,
     shuffleAfterwards: true,
   ) => CardEffectHiddenInfoResult;
+  moveTopTrashToGrip: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
+  startSearchStackInstallChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    filter: "program",
+    installCost: "normal" | "free",
+    shuffleAfterwards: true,
+  ) => CardEffectHiddenInfoResult;
+  startStackOrTrashProgramInstallChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    installCost: "free",
+    shuffleStackIfSearched: true,
+    returnInstalledCardToGripAtEndOfTurn: true,
+  ) => CardEffectHiddenInfoResult;
+  startLookTopStackShowToCorpThenInstallMatchingChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    count: 5,
+    allowedTypes: readonly "program"[],
+    installCost: "free",
+    trashSourceIfInstalled: true,
+    shuffleAfterwards: true,
+  ) => CardEffectHiddenInfoResult;
   startLookTopStackTakeMatchingChoice: (
     state: GameState,
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
     sourceDefinitionId: CardDefinition["id"],
     count: number,
-    allowedTypes: readonly ("program" | "event" | "resource")[],
+    allowedTypes: readonly ("program" | "event" | "hardware" | "resource")[],
     costPerTaken: number,
     revealTakenToCorp: true,
     shuffleRemainder: true,
@@ -317,6 +369,25 @@ function canResolveOnPlayCardImplementationAbility(
       return deps.searchTrashToGripTargetCount(state, effect.filter) > 0;
     if (effect.kind === "search_stack_to_grip")
       return deps.searchStackToGripTargetCount(state, effect.filter) > 0;
+    if (effect.kind === "move_top_trash_to_grip")
+      return deps.topTrashToGripTargetCount(state) > 0;
+    if (effect.kind === "search_stack_install")
+      return (
+        deps.searchStackInstallTargetCount(
+          state,
+          effect.filter,
+          effect.installCost,
+        ) > 0
+      );
+    if (effect.kind === "choose_stack_or_trash_program_install")
+      return (
+        deps.stackOrTrashProgramInstallTargetCount(
+          state,
+          effect.installCost,
+        ) > 0
+      );
+    if (effect.kind === "look_top_stack_show_to_corp_then_install_matching")
+      return state.runner.stack.length > 0;
     if (effect.kind === "look_top_stack_take_matching")
       return (
         state.runner.credits >= 0 &&
@@ -358,6 +429,25 @@ function canResolveActivatedCardImplementationAbility(
       return deps.searchTrashToGripTargetCount(state, effect.filter) > 0;
     if (effect.kind === "search_stack_to_grip")
       return deps.searchStackToGripTargetCount(state, effect.filter) > 0;
+    if (effect.kind === "move_top_trash_to_grip")
+      return deps.topTrashToGripTargetCount(state) > 0;
+    if (effect.kind === "search_stack_install")
+      return (
+        deps.searchStackInstallTargetCount(
+          state,
+          effect.filter,
+          effect.installCost,
+        ) > 0
+      );
+    if (effect.kind === "choose_stack_or_trash_program_install")
+      return (
+        deps.stackOrTrashProgramInstallTargetCount(
+          state,
+          effect.installCost,
+        ) > 0
+      );
+    if (effect.kind === "look_top_stack_show_to_corp_then_install_matching")
+      return state.runner.stack.length > 0;
     if (effect.kind === "look_top_stack_take_matching")
       return state.runner.stack.length > 0;
     if (effect.kind === "look_top_stack_take_one_arrange_rest")
@@ -1014,6 +1104,20 @@ function exposeInstalledCardEffect(
     : undefined;
 }
 
+function moveTopTrashToGripEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "move_top_trash_to_grip" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "move_top_trash_to_grip"
+    ? ability.effects[0]
+    : undefined;
+}
+
 /**
  * Adds LegalActions for active declarative abilities on an already-valid source.
  *
@@ -1029,9 +1133,29 @@ export function pushActivatedCardImplementationActions(
   sourceCardId: CardInstanceId,
   definition: CardDefinition,
 ): void {
+  const timing = side === "corp" ? "corp_main" : "runner_main";
+  pushActivatedCardImplementationActionsForTiming(
+    deps,
+    state,
+    actions,
+    side,
+    sourceCardId,
+    definition,
+    timing,
+  );
+}
+
+export function pushActivatedCardImplementationActionsForTiming(
+  deps: CardImplementationRuntimeDependencies,
+  state: GameState,
+  actions: LegalAction[],
+  side: Side,
+  sourceCardId: CardInstanceId,
+  definition: CardDefinition,
+  timing: ActivatedCardAbilityImplementation["timing"],
+): void {
   if (deps.mustInstance(state.cardInstances, sourceCardId).controller !== side)
     return;
-  const timing = side === "corp" ? "corp_main" : "runner_main";
   for (const { ability, index } of activatedCardImplementationAbilitiesForTiming(
     definition,
     timing,
@@ -1069,6 +1193,28 @@ export function pushActivatedCardImplementationActions(
           ),
         );
       }
+      continue;
+    }
+    const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
+    if (moveTopTrashEffect) {
+      const targetCardId = deps.topTrashToGripTargetId(state);
+      if (!targetCardId) continue;
+      const targetDefinition = deps.definitionFor(state, targetCardId);
+      actions.push(
+        deps.createAction(
+          state,
+          side,
+          "activated_card_ability",
+          ability.label ?? `${definition.title}: Fähigkeit nutzen`,
+          sourceCardId,
+          activatedAbilityLegalActionCosts(ability),
+          {
+            ...activatedAbilityPayload(sourceCardId, ability, index),
+            cardImplementationTopTrashTargetId: targetCardId,
+            targetDefinitionId: targetDefinition.id,
+          },
+        ),
+      );
       continue;
     }
     actions.push(
@@ -1178,6 +1324,21 @@ function validateActivatedCardImplementationAbility(
       )
         throw new Error("Die zu exposende Korp-Karte ist nicht mehr gueltig.");
     }
+    return;
+  }
+  if (ability.timing === "during_run") {
+    if (legalAction.side !== "runner")
+      throw new Error("Nur der Runner darf diese aktivierte Kartenfaehigkeit nutzen.");
+    if (!state.run)
+      throw new Error("Diese aktivierte Kartenfaehigkeit ist nur waehrend eines Runs nutzbar.");
+    if (!deps.runnerInstalledCardIds(state).includes(cardId))
+      throw new Error("Die aktivierte Runner-Kartenfaehigkeit ist nicht installiert.");
+    assertActivatedCardImplementationAbilityCanResolve(
+      deps,
+      state,
+      ability,
+      cardId,
+    );
     return;
   }
   if (legalAction.side !== "corp")
@@ -1303,6 +1464,55 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           filter,
           revealToCorp,
+          shuffleAfterwards,
+        ),
+      moveTopTrashToGrip: () =>
+        deps.moveTopTrashToGrip(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+        ),
+      startSearchStackInstall: (filter, installCost, shuffleAfterwards) =>
+        deps.startSearchStackInstallChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          filter,
+          installCost,
+          shuffleAfterwards,
+        ),
+      startChooseStackOrTrashProgramInstall: (
+        installCost,
+        shuffleStackIfSearched,
+        returnInstalledCardToGripAtEndOfTurn,
+      ) =>
+        deps.startStackOrTrashProgramInstallChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          installCost,
+          shuffleStackIfSearched,
+          returnInstalledCardToGripAtEndOfTurn,
+        ),
+      startLookTopStackShowToCorpThenInstallMatching: (
+        count,
+        allowedTypes,
+        installCost,
+        trashSourceIfInstalled,
+        shuffleAfterwards,
+      ) =>
+        deps.startLookTopStackShowToCorpThenInstallMatchingChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          count,
+          allowedTypes,
+          installCost,
+          trashSourceIfInstalled,
           shuffleAfterwards,
         ),
       startLookTopStackTakeMatching: (
@@ -1463,6 +1673,55 @@ export function executeOnPlayCardImplementationAbility(
           definition.id,
           filter,
           revealToCorp,
+          shuffleAfterwards,
+        ),
+      moveTopTrashToGrip: () =>
+        deps.moveTopTrashToGrip(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+        ),
+      startSearchStackInstall: (filter, installCost, shuffleAfterwards) =>
+        deps.startSearchStackInstallChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          filter,
+          installCost,
+          shuffleAfterwards,
+        ),
+      startChooseStackOrTrashProgramInstall: (
+        installCost,
+        shuffleStackIfSearched,
+        returnInstalledCardToGripAtEndOfTurn,
+      ) =>
+        deps.startStackOrTrashProgramInstallChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          installCost,
+          shuffleStackIfSearched,
+          returnInstalledCardToGripAtEndOfTurn,
+        ),
+      startLookTopStackShowToCorpThenInstallMatching: (
+        count,
+        allowedTypes,
+        installCost,
+        trashSourceIfInstalled,
+        shuffleAfterwards,
+      ) =>
+        deps.startLookTopStackShowToCorpThenInstallMatchingChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          count,
+          allowedTypes,
+          installCost,
+          trashSourceIfInstalled,
           shuffleAfterwards,
         ),
       startLookTopStackTakeMatching: (

@@ -28,9 +28,17 @@ export type CardImplementationAbilityLimitHost = {
  */
 export const runnerCardImplementationAbilityLimitHost: CardImplementationAbilityLimitHost =
   {
-    usedSourceIdsThisTurn: (state) =>
-      state.runnerTurnFlags?.brokerActionCardIdsThisTurn,
-    setUsedSourceIdsThisTurn: (state, _limit, sourceCardIds) => {
+    usedSourceIdsThisTurn: (state, limit) => {
+      if (limit.kind === "once_per_run_per_source")
+        return state.run?.successfulRunAbilityUsedSourceIds;
+      return state.runnerTurnFlags?.brokerActionCardIdsThisTurn;
+    },
+    setUsedSourceIdsThisTurn: (state, limit, sourceCardIds) => {
+      if (limit.kind === "once_per_run_per_source") {
+        if (!state.run) return;
+        state.run.successfulRunAbilityUsedSourceIds = sourceCardIds.slice().sort();
+        return;
+      }
       const flags = (state.runnerTurnFlags ??= {
         stoleAgendaThisTurn: false,
         stoleAgendaLastTurn: false,
@@ -93,6 +101,8 @@ export function cardImplementationAbilityLimitFailureMessage(
     return "In diesem Trace wurde bereits eine Base-Link-Karte genutzt.";
   if (limit.kind === "once_per_trace_per_source")
     return "Diese Kartenquelle wurde in diesem Trace bereits genutzt.";
+  if (limit.kind === "once_per_run_per_source")
+    return "Diese Kartenquelle wurde in diesem Run bereits genutzt.";
   return undefined;
 }
 
@@ -118,6 +128,8 @@ function assertSupportedAbilityLimit(
   )
     return;
   if (limit.kind === "once_per_trace_per_source" && limit.scope === "source")
+    return;
+  if (limit.kind === "once_per_run_per_source" && limit.scope === "source")
     return;
   const unsupported = limit as { kind?: string; scope?: string };
   throw new Error(
