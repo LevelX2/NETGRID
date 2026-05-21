@@ -12225,33 +12225,13 @@ function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side
 
 function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
-  const bonusAgendaPoints = counterAmount(card, "agenda");
-  if (bonusAgendaPoints > 0) {
-    const totalAgendaPoints = (card.agendaPoints ?? 0) + bonusAgendaPoints;
-    lines.push({
-      key: "agenda-bonus",
-      value: `+${bonusAgendaPoints} Agenda`,
-      label: `Gesamt ${totalAgendaPoints} ${agendaPointLabel(totalAgendaPoints)}`,
-      tone: "agenda"
-    });
-  }
-
   const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
   if (effectLine) lines.push(effectLine);
   return lines;
 }
 
-function scoreCardStateBadges(card: DisplayVisibleCard): ScoredAgendaStateLine[] {
+function scoreCardStateBadges(_card: DisplayVisibleCard): ScoredAgendaStateLine[] {
   const badges: ScoredAgendaStateLine[] = [];
-  const bonusAgendaPoints = counterAmount(card, "agenda");
-  if (bonusAgendaPoints > 0) {
-    badges.push({
-      key: "agenda-bonus-badge",
-      value: `+${bonusAgendaPoints} Agenda`,
-      label: "Bonus-Agenda-Punkte",
-      tone: "agenda"
-    });
-  }
   return badges;
 }
 
@@ -12265,15 +12245,6 @@ function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
       ))}
     </span>
   );
-}
-
-function counterAmount(card: DisplayVisibleCard, counter: "agenda"): number {
-  const amount = card.counters?.[counter];
-  return typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function agendaPointLabel(amount: number): string {
-  return amount === 1 ? "Agenda-Punkt" : "Agenda-Punkte";
 }
 
 function CardActionsPopover({

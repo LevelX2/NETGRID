@@ -780,20 +780,19 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 
-  it("keeps legacy stored-credit fallback bounded while CounterDisplay remains primary", () => {
-    expect(
-      storedCreditAmount({
-        ...card("broker_legacy", "Broker", "resource"),
-        definitionId: "onr_v1_154_broker",
-        counters: { bit: 3 }
-      })
-    ).toBe(3);
-    expect(
-      storedCreditAmount({
-        ...card("unknown_1", "Unknown Power Counter Card", "asset"),
-        counters: { power: 8 }
-      })
-    ).toBe(0);
+  it("does not use legacy stored-credit card tables when CounterDisplays are missing", () => {
+    const brokerRawOnly: VisibleCard = {
+      ...card("broker_legacy", "Broker", "resource"),
+      definitionId: "onr_v1_154_broker",
+      counters: { bit: 3 }
+    };
+    const unknownRawOnly: VisibleCard = {
+      ...card("unknown_1", "Unknown Power Counter Card", "asset"),
+      counters: { power: 8 }
+    };
+    expect(storedCreditSourceLabel(brokerRawOnly)).toBeNull();
+    expect(storedCreditAmount(brokerRawOnly)).toBe(0);
+    expect(storedCreditAmount(unknownRawOnly)).toBe(0);
   });
 
   it("does not select raw counters for board rendering when CounterDisplays are missing", () => {
@@ -829,6 +828,26 @@ describe("V1.0.6 resource and card-display helpers", () => {
   });
 
   it("maps CounterDisplay special counters to compact badge models", () => {
+    const rawArmoredFridge: VisibleCard = {
+      ...card("fridge_1", "Armored Fridge", "hardware"),
+      definitionId: "onr_v1_121_armored-fridge",
+      counters: { power: 7 }
+    };
+    const rawEmptyArmoredFridge: VisibleCard = {
+      ...card("fridge_1", "Armored Fridge", "hardware"),
+      definitionId: "onr_v1_121_armored-fridge",
+      counters: { power: 0 }
+    };
+    const rawDataRaven: VisibleCard = {
+      ...card("data_raven_1", "Data Raven", "ice"),
+      definitionId: "onr_v1_236_data-raven",
+      counters: { power: 2 }
+    };
+    const rawUnknownPowerCard: VisibleCard = {
+      ...card("unknown_power_1", "Unknown Power Card", "resource"),
+      counters: { power: 3 }
+    };
+
     expect(
       armoredFridgeAblativeCounterBadge({
         ...card("fridge_1", "Armored Fridge", "hardware"),
@@ -871,24 +890,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
       shortLabel: "2 Data-Raven"
     });
     expect(
-      armoredFridgeAblativeCounterBadge({
-        ...card("fridge_1", "Armored Fridge", "hardware"),
-        definitionId: "onr_v1_121_armored-fridge",
-        counters: { power: 0 }
-      })
+      armoredFridgeAblativeCounterBadge(rawArmoredFridge)
     ).toBeNull();
     expect(
-      armoredFridgeAblativeCounterBadge({
-        ...card("data_raven_1", "Data Raven", "ice"),
-        definitionId: "onr_v1_236_data-raven",
-        counters: { power: 2 }
-      })
+      armoredFridgeAblativeCounterBadge(rawEmptyArmoredFridge)
     ).toBeNull();
     expect(
-      armoredFridgeAblativeCounterBadge({
-        ...card("unknown_power_1", "Unknown Power Card", "resource"),
-        counters: { power: 3 }
-      })
+      armoredFridgeAblativeCounterBadge(rawDataRaven)
+    ).toBeNull();
+    expect(
+      armoredFridgeAblativeCounterBadge(rawUnknownPowerCard)
     ).toBeNull();
   });
 

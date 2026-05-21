@@ -155,15 +155,6 @@ export type AdvancementCounterDisplay = {
   overflowLabel: string | null;
 };
 
-type StoredCreditCounterType = "power" | "bit";
-
-const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
-  "onr_v1_154_broker": { label: "Broker", counter: "bit" },
-  "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "bit" },
-  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" },
-  "onr_v1_311_braindance-campaign": { label: "Braindance Campaign", counter: "bit" }
-};
-
 const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
 
 export function iceModifierBadgesForServer(server: PlayerView["servers"][number]): IceModifierBadgeView[] {
@@ -183,35 +174,19 @@ function serverHasRezzedTesseractFortConstruction(server: PlayerView["servers"][
   return server.root.some((card) => card.known && card.rezzed === true && card.definitionId === TESSERACT_FORT_CONSTRUCTION_ID);
 }
 
-export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId" | "counterDisplays">): string | null {
+export function storedCreditSourceLabel(card: Pick<VisibleCard, "counterDisplays">): string | null {
   const display = counterDisplayById(card, "stored_credits");
-  if (display) return display.label;
-  return storedCreditCounterSource(card)?.label ?? null;
+  return display?.label ?? null;
 }
 
-export function storedCreditAmount(card: Pick<VisibleCard, "definitionId" | "counters" | "counterDisplays">): number {
+export function storedCreditAmount(card: Pick<VisibleCard, "counterDisplays">): number {
   const display = counterDisplayById(card, "stored_credits");
-  if (display) return safeCounterDisplayAmount(display.amount);
-  const source = storedCreditCounterSource(card);
-  if (!source) return 0;
-  const amount = card.counters?.[source.counter] ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+  return display ? safeCounterDisplayAmount(display.amount) : 0;
 }
 
-export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "definitionId" | "counters" | "counterDisplays">): CardCounterBadgeView | null {
+export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "counterDisplays">): CardCounterBadgeView | null {
   const display = counterDisplayById(card, "ablative");
-  if (display) return counterDisplayBadgeView(display, "ablative-counter-badge");
-  if (card.definitionId !== "onr_v1_121_armored-fridge") return null;
-  const amount = card.counters?.power ?? 0;
-  const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-  if (safeAmount <= 0) return null;
-  return {
-    amount: safeAmount,
-    label: `${safeAmount} Ablative Counter`,
-    ariaLabel: `${safeAmount} Ablative Counter`,
-    shortLabel: `${safeAmount} Ablative`,
-    testId: "ablative-counter-badge"
-  };
+  return display ? counterDisplayBadgeView(display, "ablative-counter-badge") : null;
 }
 
 export function counterDisplayById(card: Pick<VisibleCard, "counterDisplays">, id: string): NonNullable<VisibleCard["counterDisplays"]>[number] | null {
@@ -261,10 +236,6 @@ export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "adv
     visibleGemCount,
     overflowLabel: showCount ? String(safeAmount) : null
   };
-}
-
-function storedCreditCounterSource(card: Pick<VisibleCard, "definitionId">): { label: string; counter: StoredCreditCounterType } | null {
-  return card.definitionId ? STORED_CREDIT_COUNTER_SOURCES[card.definitionId] ?? null : null;
 }
 
 export function cardCreditCounterVisual(amount: number): CardCreditCounterVisual {
