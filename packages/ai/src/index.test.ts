@@ -754,6 +754,91 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(decision)).not.toContain("display_event");
   });
 
+  it("chooses a redundant low-value program for runner program install MU trash", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-redundant",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["simple_fracter", "v099_virus_program"],
+        memoryUsed: 2,
+        memoryLimit: 2,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.reasonCode).toBe("runner.choice.resolve");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [fixture.optionIdsByDefinition.v099_virus_program!],
+    });
+    expect(decision.evidence).toContain(
+      "choice_source:runner_program_trash_before_install",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
+  });
+
+  it("protects the only visible installed breaker during runner program install MU trash", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-protect-breaker",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["simple_fracter"],
+        memoryUsed: 1,
+        memoryLimit: 1,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [],
+    });
+    expect(decision.evidence).toContain("protected_icebreakers:1");
+  });
+
+  it("does not voluntarily trash installed programs when runner program install has enough MU", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-enough-mu",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["v099_virus_program"],
+        memoryUsed: 1,
+        memoryLimit: 4,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [],
+    });
+    expect(decision.evidence).toContain("memory_required:0");
+  });
+
+  it("avoids insufficient runner program install trash selections", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-insufficient",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["simple_fracter", "v099_virus_program"],
+        memoryUsed: 2,
+        memoryLimit: 1,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [],
+    });
+    expect(decision.evidence).toContain("memory_required:2");
+    expect(decision.evidence).toContain("protected_icebreakers:1");
+  });
+
   it("uses The Shell Traders LegalActions and mandatory Shell-counter choices", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-shell-traders" }),
@@ -9046,6 +9131,87 @@ function runnerActionPhaseInput(
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",
   });
+}
+
+function runnerProgramTrashChoiceInput(
+  seed: string,
+  options: {
+    sourceDefinitionId: string;
+    installedDefinitionIds: string[];
+    memoryUsed: number;
+    memoryLimit: number;
+  },
+): {
+  input: AiDecisionInput;
+  optionIdsByDefinition: Record<string, string>;
+} {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `runner_program_trash_choice_${seed}`,
+        name: "Runner Program Trash Choice Fixture",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "simple_decoder", quantity: 3 },
+          { id: "simple_fracter", quantity: 3 },
+          { id: "simple_killer", quantity: 2 },
+          { id: "v099_virus_program", quantity: 3 },
+          { id: "simple_economy_event", quantity: 4 },
+        ],
+      },
+      corpDeck: {
+        id: `runner_program_trash_choice_corp_${seed}`,
+        name: "Runner Program Trash Choice Corp Fixture",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_barrier_ice", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  const sourceCardId = moveRunnerCardToGrip(state, options.sourceDefinitionId);
+  const installedCardIds = options.installedDefinitionIds.map((definitionId) =>
+    moveRunnerProgramToRig(state, definitionId),
+  );
+  state.runner.memoryUsed = options.memoryUsed;
+  state.runner.memoryLimit = options.memoryLimit;
+  state.pendingChoice = {
+    choiceId: `runner_program_trash_before_install_${state.stateVersion}`,
+    side: "runner",
+    source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion}`,
+    prompt: "Programme vor Installation trashen",
+    kind: "select_cards",
+    options: installedCardIds.map((cardId) => {
+      const definition = DEMO_CARDS_BY_ID[state.cardInstances[cardId]!.definitionId]!;
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+      };
+    }),
+    minSelections: 0,
+    maxSelections: installedCardIds.length,
+    stateVersion: state.stateVersion,
+    visibility: "hidden_info_barrier",
+  };
+  return {
+    input: buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    }),
+    optionIdsByDefinition: Object.fromEntries(
+      installedCardIds.map((cardId) => [
+        state.cardInstances[cardId]!.definitionId,
+        `card_${cardId}`,
+      ]),
+    ),
+  };
 }
 
 function runnerShellTradersState(seed: string): GameState {

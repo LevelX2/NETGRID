@@ -11,7 +11,7 @@ import { buildDeckDoctrineProfile, evaluateCorpOpeningHand, evaluateRunnerOpenin
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { canBreakerDefinitionBreakIce, creditsToBreakEndTheRunSubroutinesWithBreaker, endTheRunSubroutineCount, iceHasEndTheRun } from "./visible-run-analysis";
 import { buildAiDecisionInputDto } from "./input-dto";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PublicGameEvent, type Side } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, CURRENT_RULES_BASELINE, DEMO_CARDS_BY_ID, DEMO_DECKS, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type DeckDefinition, type DeckPublicMetadata, type GameState, type LegalAction, type PlayerView, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 export { beliefDebugSummary, beliefStateInvariantSignature, reconstructBeliefState } from "./belief-state";
 export type {
   BeliefEntry,
@@ -1495,6 +1495,12 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
         })[0] ?? choice.options[0];
     return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
   }
+  if (choice.kind === "select_cards" && choice.source.startsWith("runner_program_trash_before_install")) {
+    return {
+      choiceId: choice.choiceId,
+      selectedOptionIds: selectedRunnerProgramInstallTrashOptionIds(input, choice, selectableOptions)
+    };
+  }
   if (choice.kind === "select_cards") {
     const searchSelected = selectedSearchChoiceOptionIds(input, choice, selectableOptions);
     if (searchSelected) return { choiceId: choice.choiceId, selectedOptionIds: searchSelected };
@@ -1544,6 +1550,118 @@ function selectedChoicesForDecision(input: AiDecisionInput, action: LegalAction)
   }
   const selected = bidOptions.find((option) => option.amount === desired) ?? bidOptions[0];
   return selected ? { choiceId: choice.choiceId, selectedOptionIds: [selected.id] } : { choiceId: choice.choiceId, selectedOptionIds: [] };
+}
+
+function selectedRunnerProgramInstallTrashOptionIds(
+  input: AiDecisionInput,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  selectableOptions: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"],
+): string[] {
+  const assessment = runnerProgramInstallTrashAssessment(input, choice, selectableOptions);
+  if (!assessment.memoryRequired) return [];
+  if (assessment.requiredMemoryToFree <= 0) return [];
+  const selected: string[] = [];
+  let memoryFreed = 0;
+  for (const candidate of assessment.candidates) {
+    if (candidate.protectedRole) continue;
+    selected.push(candidate.option.id);
+    memoryFreed += candidate.memoryCost;
+    if (memoryFreed >= assessment.requiredMemoryToFree) break;
+  }
+  return memoryFreed >= assessment.requiredMemoryToFree ? selected : [];
+}
+
+function runnerProgramInstallTrashAssessment(
+  input: AiDecisionInput,
+  choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
+  selectableOptions: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>["options"]
+): {
+  memoryRequired: boolean;
+  requiredMemoryToFree: number;
+  candidates: Array<{
+    option: (typeof selectableOptions)[number];
+    card?: VisibleCard;
+    memoryCost: number;
+    protectedRole: boolean;
+    score: number;
+  }>;
+  evidence: string[];
+} {
+  const sourceCardId = choice.source.split(":")[1] ?? "";
+  const source = input.playerView.own.gripOrHq.find((card) => card.instanceId === sourceCardId);
+  const memoryUsed = Math.max(0, Math.floor(input.playerView.own.memoryUsed ?? 0));
+  const memoryLimit = Math.max(0, Math.floor(input.playerView.own.memoryLimit ?? 0));
+  const sourceMemoryCost = Math.max(0, Math.floor(source?.memoryCost ?? 0));
+  const requiredMemoryToFree = Math.max(0, memoryUsed + sourceMemoryCost - memoryLimit);
+  const installedCards = visibleCardsByInstanceIdForAi(input.playerView);
+  const installedBreakerRoleCounts = visibleBreakerRoleCountsForAi(input.playerView.own.rig ?? []);
+  const candidates = selectableOptions
+    .map((option) => {
+      const card = typeof option.value === "string" ? installedCards.get(option.value) : undefined;
+      const memoryCost = Math.max(0, Math.floor(card?.memoryCost ?? 0));
+      const icebreaker = card ? isVisibleIcebreakerProgram(card) : false;
+      const protectedRole = Boolean(card && icebreaker && visibleBreakerRolesForAi(card).some((role) => installedBreakerRoleCounts.get(role) === 1));
+      const counterPenalty = card && (card.counters || card.counterDisplays?.length) ? 35 : 0;
+      const rolePenalty = icebreaker ? 90 : 0;
+      const score = memoryCost * 20 - rolePenalty - counterPenalty - (protectedRole ? 1000 : 0);
+      return { option, ...(card ? { card } : {}), memoryCost, protectedRole, score };
+    })
+    .filter((candidate) => candidate.memoryCost > 0)
+    .sort(
+      (left, right) =>
+        right.score - left.score ||
+        right.memoryCost - left.memoryCost ||
+        left.option.label.localeCompare(right.option.label, "de")
+    );
+  return {
+    memoryRequired: requiredMemoryToFree > 0,
+    requiredMemoryToFree,
+    candidates,
+    evidence: [
+      "choice_source:runner_program_trash_before_install",
+      `memory_required:${requiredMemoryToFree}`,
+      `trash_candidates:${candidates.length}`,
+      `protected_icebreakers:${candidates.filter((candidate) => candidate.protectedRole).length}`
+    ]
+  };
+}
+
+function visibleCardsByInstanceIdForAi(view: PlayerView): Map<string, VisibleCard> {
+  const cards = [
+    view.own.identity,
+    ...view.own.gripOrHq,
+    ...view.own.heapOrArchives,
+    ...view.own.scoreArea,
+    ...(view.own.rig ?? []),
+    view.opponent.identity,
+    ...view.opponent.scoreArea,
+    ...(view.opponent.rig ?? []),
+    ...(view.opponent.discardCards ?? []),
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root])
+  ];
+  return new Map(cards.map((card) => [card.instanceId, card]));
+}
+
+function isVisibleIcebreakerProgram(card: VisibleCard): boolean {
+  return card.known === true && card.type === "program" && visibleBreakerRolesForAi(card).length > 0;
+}
+
+function visibleBreakerRoleCountsForAi(cards: VisibleCard[]): Map<string, number> {
+  const counts = new Map<string, number>();
+  for (const card of cards) {
+    for (const role of visibleBreakerRolesForAi(card)) counts.set(role, (counts.get(role) ?? 0) + 1);
+  }
+  return counts;
+}
+
+function visibleBreakerRolesForAi(card: VisibleCard): string[] {
+  const subtypes = (card.subtypes ?? []).map((subtype) => subtype.toLowerCase());
+  const roles = new Set<string>();
+  if (subtypes.includes("fracter") || card.definitionId === "simple_fracter") roles.add("fracter");
+  if (subtypes.includes("decoder") || card.definitionId === "simple_decoder") roles.add("decoder");
+  if (subtypes.includes("killer") || card.definitionId === "simple_killer") roles.add("killer");
+  if (subtypes.includes("icebreaker") && roles.size === 0) roles.add("icebreaker");
+  return [...roles].sort();
 }
 
 function selectedDiscardChoiceOptionIds(
@@ -1844,12 +1962,20 @@ function scoreRunnerAction(input: AiDecisionInput, features: AiFeatures, action:
           input.playerView.pendingChoice?.source.startsWith(
             "trace_post_bid_link",
           ) === true;
-        score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : postBidTraceLink ? 880 : 620;
+        const programTrashAssessment =
+          input.playerView.pendingChoice?.source.startsWith("runner_program_trash_before_install") === true &&
+          input.playerView.pendingChoice.kind === "select_cards"
+            ? runnerProgramInstallTrashAssessment(input, input.playerView.pendingChoice, selectableChoiceOptions(input.playerView.pendingChoice.options))
+            : null;
+        score = input.playerView.pendingChoice?.kind === "bid_amount" ? 900 : postBidTraceLink ? 880 : programTrashAssessment ? 640 : 620;
         reasonCode = input.playerView.pendingChoice?.kind === "bid_amount" ? "runner.trace.bid_visible_amount" : postBidTraceLink ? "runner.trace.post_bid_link" : "runner.choice.resolve";
-        explanation = postBidTraceLink
-          ? "Der Runner nutzt nach offen gelegten Trace-Bids eine legale Link-Faehigkeit."
-          : "Der Runner beantwortet eine sichtbare legale Choice.";
+        explanation = programTrashAssessment
+          ? "Der Runner bewertet side-sicher, ob installierte Programme fuer MU getrasht werden."
+          : postBidTraceLink
+            ? "Der Runner nutzt nach offen gelegten Trace-Bids eine legale Link-Faehigkeit."
+            : "Der Runner beantwortet eine sichtbare legale Choice.";
         evidence.push("choice_legal", `choice_kind:${input.playerView.pendingChoice?.kind ?? "unknown"}`);
+        if (programTrashAssessment) evidence.push(...programTrashAssessment.evidence);
         if (input.playerView.pendingChoice?.source === "discard_phase")
           evidence.push("choice_source:discard_phase", "discard_selection:keep_value", ...discardEvidenceForInput(input));
       }
