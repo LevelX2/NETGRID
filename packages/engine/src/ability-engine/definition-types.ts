@@ -676,6 +676,10 @@ export type CardIcebreakerAbilityImplementation =
         amount: number;
       };
       matches: CardIcebreakerBreakMatcherImplementation;
+      count?: number;
+      onSuccessfulBreak?: readonly CardIcebreakerBreakSideEffectImplementation[];
+      special?: CardIcebreakerBreakSpecialImplementation;
+      onUse?: readonly CardIcebreakerUseSideEffectImplementation[];
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -686,6 +690,11 @@ export type CardIcebreakerAbilityImplementation =
       };
       amount: number;
       duration: "current_encounter" | "current_run";
+      variableAmount?: {
+        kind: "paid_amount";
+        min: number;
+      };
+      onUse?: readonly CardIcebreakerUseSideEffectImplementation[];
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
@@ -695,6 +704,23 @@ export type CardIcebreakerBreakMatcherImplementation =
   | { kind: "ice_subtype_any_of"; subtypes: readonly string[] }
   | { kind: "subroutine_tag"; tag: string }
   | { kind: "subroutine_traces" };
+
+export type CardIcebreakerBreakSideEffectImplementation = {
+  kind: "lose_bits_from_stealth_sources";
+  amount: number;
+  mode: "total_if_available" | "up_to_if_available";
+};
+
+export type CardIcebreakerUseSideEffectImplementation = {
+  kind: "end_run";
+};
+
+export type CardIcebreakerBreakSpecialImplementation =
+  | { kind: "ai_boon_run_start_random_strength" }
+  | { kind: "blink_random_break_or_net_damage" }
+  | { kind: "bartmoss_post_encounter_self_trash_check" }
+  | { kind: "snowball_run_strength_per_successful_break" }
+  | { kind: "dupre_strength_counter_and_last_fort" };
 
 export type RestrictedHostedCreditUse =
   | "using_icebreaker_during_run"

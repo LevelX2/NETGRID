@@ -83,8 +83,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/baedekers-net-map.ts",
   "onr_v1_004_bakdoor":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+  "onr_v1_002_ai-boon":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/ai-boon.ts",
+  "onr_v1_005_bartmoss-memorial-icebreaker":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/bartmoss-memorial-icebreaker.ts",
   "onr_v1_006_black-dahlia":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
+  "onr_v1_007_blink":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/blink.ts",
   "onr_v1_014_codecracker":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
   "onr_v1_015_codeslinger":
@@ -93,16 +99,34 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
   "onr_v1_018_dogcatcher":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/dogcatcher.ts",
+  "onr_v1_019_dropp":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/dropp.ts",
+  "onr_v1_020_dupre":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/dupre.ts",
   "onr_v1_021_dwarf":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/dwarf.ts",
+  "onr_v1_023_evil-twin":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/evil-twin.ts",
   "onr_v1_027_flak":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/flak.ts",
+  "onr_v1_030_grubb":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/grubb.ts",
+  "onr_v1_031_hammer":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/hammer.ts",
+  "onr_v1_036_jackhammer":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/jackhammer.ts",
+  "onr_v1_037_japanese-water-torture":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/japanese-water-torture.ts",
   "onr_v1_039_krash":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
   "onr_v1_040_loony-goon":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
+  "onr_v1_047_pile-driver":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/pile-driver.ts",
   "onr_v1_052_raffles":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
+  "onr_v1_053_ramming-piston":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/ramming-piston.ts",
   "onr_v1_054_raptor":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
   "onr_v1_055_reflector":
@@ -111,6 +135,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
   "onr_v1_060_shaka":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
+  "onr_v1_066_snowball":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/snowball.ts",
   "onr_v1_070_tinweasel":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
   "onr_v1_072_wild-card":

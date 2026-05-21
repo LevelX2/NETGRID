@@ -817,6 +817,7 @@ export type RunState = {
   viral15PendingPassedIceId?: CardInstanceId;
   aiBoonSourceCardId?: CardInstanceId;
   aiBoonRunStrength?: number;
+  aiBoonRunStrengthByBreaker?: Partial<Record<CardInstanceId, number>>;
   futureEncounterIceStrengthBonus?: number;
   nextEncounterNoBreakSubroutines?: boolean;
   nextEncounterJackOutLock?: boolean;

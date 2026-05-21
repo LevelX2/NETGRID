@@ -13,6 +13,15 @@ import type {
 export type RuntimeIcebreakerAbility = AbilityDefinition & {
   iceSubtypes?: readonly string[];
   strengthDuration?: "current_encounter" | "current_run";
+  variableStrength?: { min: number };
+  postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
+  onUseEndRun?: boolean;
+  special?:
+    | "ai_boon_run_start_random_strength"
+    | "blink_random_break_or_net_damage"
+    | "bartmoss_post_encounter_self_trash_check"
+    | "snowball_run_strength_per_successful_break"
+    | "dupre_strength_counter_and_last_fort";
   source: "shared_card_definition" | "card_implementation";
 };
 
@@ -42,15 +51,34 @@ function abilityForImplementation(
       amount: ability.amount,
       timingPoint: "run.encounter_ice",
       strengthDuration: ability.duration,
+      ...(ability.variableAmount
+        ? { variableStrength: { min: ability.variableAmount.min } }
+        : {}),
+      ...(ability.onUse?.some((effect) => effect.kind === "end_run")
+        ? { onUseEndRun: true }
+        : {}),
       source: "card_implementation",
     };
   }
+  const stealthLoss = ability.onSuccessfulBreak?.find(
+    (effect) => effect.kind === "lose_bits_from_stealth_sources",
+  );
   return {
     id: abilityId,
     type: "break_subroutine",
     cost: { credits: ability.cost.amount },
-    count: 1,
+    count: ability.count ?? 1,
     timingPoint: "run.encounter_ice",
+    ...(stealthLoss
+      ? {
+          postBreakStealthLoss: stealthLoss.amount,
+          postBreakStealthLossMode: stealthLoss.mode,
+        }
+      : {}),
+    ...(ability.onUse?.some((effect) => effect.kind === "end_run")
+      ? { onUseEndRun: true }
+      : {}),
+    ...(ability.special ? { special: ability.special.kind } : {}),
     ...breakMatcherFields(ability.matches),
     source: "card_implementation",
   };

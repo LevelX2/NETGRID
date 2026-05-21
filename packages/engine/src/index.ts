@@ -6071,9 +6071,11 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breaker = definitionFor(state, breakerId);
     if (!runnerCanUseBreakerOnCurrentFort(state, breakerId)) continue;
     const breakerBaseStrength =
-      breaker.id === AI_BOON_RANDOM_BREAKER_CARD_ID &&
-      typeof run.aiBoonRunStrength === "number"
-        ? run.aiBoonRunStrength
+      typeof run.aiBoonRunStrengthByBreaker?.[breakerId] === "number"
+        ? run.aiBoonRunStrengthByBreaker[breakerId]
+        : breaker.id === AI_BOON_RANDOM_BREAKER_CARD_ID &&
+            typeof run.aiBoonRunStrength === "number"
+          ? run.aiBoonRunStrength
         : (breaker.strength ?? 0);
     const breakerStrength =
       breakerBaseStrength +
@@ -6089,18 +6091,49 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       pump &&
       availableRunnerRunCredits(state, breakerId) >= pump.cost.credits
     ) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "pump_breaker",
-          `${breaker.title}: Stärke +${pump.amount ?? 1}`,
-          breakerId,
-          [{ credits: pump.cost.credits }],
-          { breakerId, iceId: encounteredIceId },
-          abilityMetadata(breakerId, pump.id, encounteredIceId),
-        ),
-      );
+      const variableStrength = pump.variableStrength;
+      if (variableStrength) {
+        const maxAmount = Math.max(
+          0,
+          Math.floor(availableRunnerRunCredits(state, breakerId)),
+        );
+        for (
+          let amount = Math.max(1, Math.floor(variableStrength.min));
+          amount <= maxAmount;
+          amount += 1
+        ) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "pump_breaker",
+              `${breaker.title}: Stärke +${amount}`,
+              breakerId,
+              [{ credits: amount }],
+              {
+                breakerId,
+                iceId: encounteredIceId,
+                pumpAmount: amount,
+                futureActionDebtAdded: amount,
+              },
+              abilityMetadata(breakerId, pump.id, encounteredIceId),
+            ),
+          );
+        }
+      } else {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "pump_breaker",
+            `${breaker.title}: Stärke +${pump.amount ?? 1}`,
+            breakerId,
+            [{ credits: pump.cost.credits }],
+            { breakerId, iceId: encounteredIceId },
+            abilityMetadata(breakerId, pump.id, encounteredIceId),
+          ),
+        );
+      }
     }
     const breakAbilities = breakerAbilities.filter(
       (ability) =>
@@ -6116,14 +6149,17 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       breakAbilities.length > 0 &&
       breakerStrength >= encounteredIceStrength &&
       canPayAtLeastOneBreakAbility &&
-      (![RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(breaker.id) ||
-        runnerStealthRecurringCredits(state) >=
-          (breakAbilities[0]?.postBreakStealthLoss ?? 0))
+      breakAbilities.every(
+        (ability) =>
+          ability.postBreakStealthLossMode !== "total_if_available" ||
+          runnerStealthRecurringCredits(state) >=
+            (ability.postBreakStealthLoss ?? 0),
+      )
     ) {
       const blinkUsedSubroutines =
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = encounterSubroutines;
-      if (breaker.id === PILE_DRIVER_ID) {
+      if (breakAbilities.some((ability) => (ability.count ?? 1) > 1)) {
         const breakAbility = breakAbilities[0];
         if (!breakAbility) continue;
         actions.push(
@@ -6358,7 +6394,8 @@ function dupreStrengthCounterBonus(
   state: GameState,
   breakerId: CardInstanceId,
 ): number {
-  if (definitionFor(state, breakerId).id !== DUPRE_ID) return 0;
+  if (!icebreakerHasSpecial(state, breakerId, "dupre_strength_counter_and_last_fort"))
+    return 0;
   const selectedServerId = mustInstance(state.cardInstances, breakerId)
     .selectedServerId;
   if (
@@ -6374,6 +6411,9 @@ function pumpAmountForLegalAction(
   state: GameState,
   legalAction: LegalAction,
 ): number {
+  const payloadAmount = Number(legalAction.payload?.pumpAmount);
+  if (Number.isInteger(payloadAmount) && payloadAmount >= 0)
+    return payloadAmount;
   const breakerId = String(legalAction.payload?.breakerId ?? "");
   const abilityId = legalAction.abilityRef?.abilityId;
   const definition = state.cardInstances[breakerId]
@@ -6388,6 +6428,42 @@ function pumpAmountForLegalAction(
     : undefined;
   const amount = ability?.amount ?? 1;
   return Number.isInteger(amount) ? amount : 1;
+}
+
+function pumpAbilityForLegalAction(
+  state: GameState,
+  legalAction: LegalAction,
+): RuntimeIcebreakerAbility | undefined {
+  const breakerId = String(legalAction.payload?.breakerId ?? "");
+  const abilityId = legalAction.abilityRef?.abilityId;
+  const definition = state.cardInstances[breakerId]
+    ? definitionFor(state, breakerId)
+    : undefined;
+  return definition
+    ? icebreakerAbilitiesForDefinition(definition).find(
+        (candidate) =>
+          candidate.type === "pump_strength" &&
+          (!abilityId || candidate.id === abilityId),
+      )
+    : undefined;
+}
+
+function breakAbilityForLegalAction(
+  state: GameState,
+  legalAction: LegalAction,
+): RuntimeIcebreakerAbility | undefined {
+  const breakerId = String(legalAction.payload?.breakerId ?? "");
+  const abilityId = legalAction.abilityRef?.abilityId;
+  const definition = state.cardInstances[breakerId]
+    ? definitionFor(state, breakerId)
+    : undefined;
+  return definition
+    ? icebreakerAbilitiesForDefinition(definition).find(
+        (candidate) =>
+          candidate.type === "break_subroutine" &&
+          (!abilityId || candidate.id === abilityId),
+      )
+    : undefined;
 }
 
 function pumpDurationForLegalAction(
@@ -6467,22 +6543,18 @@ function resolvePileDriverBreakSubroutinesAction(
   if (run.noBreakSubroutinesActive)
     throw new Error("Subroutinen koennen in diesem Encounter nicht gebrochen werden.");
   if (!state.runner.rig.programs.includes(breakerId))
-    throw new Error("Pile Driver ist nicht installiert.");
+    throw new Error("Der Icebreaker ist nicht installiert.");
   const breakerDefinition = definitionFor(state, breakerId);
-  if (breakerDefinition.id !== PILE_DRIVER_ID)
-    throw new Error("Die Breaker-Quelle ist nicht Pile Driver.");
   const iceDefinition = definitionFor(state, iceId);
   if (legalAction.payload?.targetIceDefinitionId !== iceDefinition.id)
     throw new Error("Pile Driver zielt auf die falsche ICE-Definition.");
-  if (!cardHasSubtype(iceDefinition, "wall"))
-    throw new Error("Pile Driver kann nur Wall-Subroutinen brechen.");
   const ability = icebreakerAbilitiesForDefinition(breakerDefinition).find(
     (candidate) =>
       candidate.id === legalAction.abilityRef?.abilityId &&
       candidate.type === "break_subroutine",
   );
   if (!ability || !breakAbilityMatchesIce(ability, iceDefinition))
-    throw new Error("Pile Driver hat keine gueltige Break-Faehigkeit.");
+    throw new Error("Der Icebreaker hat keine gueltige Multi-Break-Faehigkeit.");
   const breakerStrength =
     (breakerDefinition.strength ?? 0) +
     mustInstance(state.cardInstances, breakerId).strengthModifier +
@@ -6490,12 +6562,12 @@ function resolvePileDriverBreakSubroutinesAction(
     dupreStrengthCounterBonus(state, breakerId) +
     runRemainderStrengthBonusForBreaker(run, breakerId);
   if (breakerStrength < iceStrengthFor(state, iceId))
-    throw new Error("Pile Driver ist nicht stark genug fuer dieses ICE.");
+    throw new Error("Der Icebreaker ist nicht stark genug fuer dieses ICE.");
   const rawIndexes =
     typeof legalAction.payload?.subroutineIndexes === "string"
       ? legalAction.payload.subroutineIndexes
       : "";
-  if (!rawIndexes) throw new Error("Pile Driver braucht Subroutine-Ziele.");
+  if (!rawIndexes) throw new Error("Multi-Break braucht Subroutine-Ziele.");
   const subroutineIndexes = rawIndexes.split(",").map((value) => Number(value));
   if (
     subroutineIndexes.length < 1 ||
@@ -6503,25 +6575,25 @@ function resolvePileDriverBreakSubroutinesAction(
     new Set(subroutineIndexes).size !== subroutineIndexes.length ||
     subroutineIndexes.some((index) => !Number.isInteger(index) || index < 0)
   ) {
-    throw new Error("Pile Driver hat ungueltige Subroutine-Ziele.");
+    throw new Error("Multi-Break hat ungueltige Subroutine-Ziele.");
   }
   const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
   for (const subroutineIndex of subroutineIndexes) {
     const subroutine = subroutines[subroutineIndex];
     if (!subroutine)
-      throw new Error("Pile Driver zielt auf eine fehlende Subroutine.");
+      throw new Error("Multi-Break zielt auf eine fehlende Subroutine.");
     if (!breakAbilityMatchesSubroutine(ability, subroutine))
-      throw new Error("Pile Driver kann diese Subroutine nicht brechen.");
+      throw new Error("Multi-Break kann diese Subroutine nicht brechen.");
     if (
       run.brokenSubroutineIndexes.includes(subroutineIndex) ||
       run.resolvedSubroutineIndexes.includes(subroutineIndex)
     ) {
-      throw new Error("Pile Driver zielt auf eine bereits erledigte Subroutine.");
+      throw new Error("Multi-Break zielt auf eine bereits erledigte Subroutine.");
     }
   }
   const stealthLoss = ability.postBreakStealthLoss ?? 0;
   if (runnerStealthRecurringCredits(state) < stealthLoss)
-    throw new Error("Nicht genug Stealth-Credits fuer Pile Driver.");
+    throw new Error("Nicht genug Stealth-Credits fuer Multi-Break.");
   const expectedCost = breakSubroutineCostBreakdown(
     state,
     ability.cost.credits,
@@ -6541,7 +6613,7 @@ function resolvePileDriverBreakSubroutinesAction(
     ...(legalAction.payload ?? {}),
     breakSubroutineCount: subroutineIndexes.length,
     pileDriverMultiBreak: true,
-    sourceDefinitionId: PILE_DRIVER_ID,
+    sourceDefinitionId: breakerDefinition.id,
   };
   applyPostBreakStealthLoss(state, breakerId, legalAction);
 }
@@ -8134,6 +8206,16 @@ function performAction(
           typeof legalAction.payload?.breakerId === "string"
             ? (String(legalAction.payload.breakerId) as CardInstanceId)
             : undefined;
+        const pumpAbility = pumpAbilityForLegalAction(state, legalAction);
+        const pumpAmount = pumpAmountForLegalAction(state, legalAction);
+        const isVariablePump =
+          pumpAbility?.variableStrength !== undefined ||
+          legalAction.payload?.pumpAmount !== undefined;
+        if (isVariablePump) {
+          const expectedCost = pumpAmount;
+          if ((legalAction.costs[0]?.credits ?? 0) !== expectedCost)
+            throw new Error("Variable Icebreaker-Pump-Kosten sind nicht mehr gueltig.");
+        }
         spendRunnerRunCredits(
           state,
           legalAction.costs[0]?.credits ?? 1,
@@ -8150,31 +8232,28 @@ function performAction(
         }
         if (
           breakerId &&
-          (definitionFor(state, breakerId).id === GRUBB_ID ||
-            pumpDurationForLegalAction(state, legalAction) === "current_run") &&
+          pumpDurationForLegalAction(state, legalAction) === "current_run" &&
           state.run
         ) {
           const run = mustRun(state);
           const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
           run.remainderStrengthBonusByBreaker = {
             ...(run.remainderStrengthBonusByBreaker ?? {}),
-            [breakerId]: previous + 1,
+            [breakerId]: previous + pumpAmount,
           };
           legalAction.payload = {
             ...(legalAction.payload ?? {}),
             runRemainderStrengthBonusApplied: true,
-            runRemainderStrengthBonusAfter: previous + 1,
+            runRemainderStrengthBonusAfter: previous + pumpAmount,
           };
+          if (pumpAbility?.onUseEndRun) finishRun(state, false, legalAction);
           return;
         }
-        if (
-          breakerId &&
-          definitionFor(state, breakerId).id === JAPANESE_WATER_TORTURE_BREAKER_ID
-        ) {
+        if (breakerId && isVariablePump) {
           executeEffectCommands(state, [
-            { type: "change_breaker_strength", breakerId, amount: 1 },
+            { type: "change_breaker_strength", breakerId, amount: pumpAmount },
           ]);
-          addRunnerFutureActionDebt(state, 1);
+          addRunnerFutureActionDebt(state, pumpAmount);
           const pendingDebt = Math.max(
             0,
             Math.floor(
@@ -8185,21 +8264,23 @@ function performAction(
             ...(legalAction.payload ?? {}),
             v1922RunnerProgramAbility:
               "japanese_water_torture_future_action_debt",
-            futureActionDebtAdded: 1,
+            futureActionDebtAdded: pumpAmount,
             futureActionDebtPending: pendingDebt,
             breakerStrengthAfter:
               (definitionFor(state, breakerId).strength ?? 0) +
               mustInstance(state.cardInstances, breakerId).strengthModifier,
           };
+          if (pumpAbility?.onUseEndRun) finishRun(state, false, legalAction);
           return;
         }
         executeEffectCommands(state, [
           {
             type: "change_breaker_strength",
             breakerId: String(legalAction.payload?.breakerId),
-            amount: pumpAmountForLegalAction(state, legalAction),
+            amount: pumpAmount,
           },
         ]);
+        if (breakerId && pumpAbility?.onUseEndRun) finishRun(state, false, legalAction);
       }
       return;
     case "break_subroutine": {
@@ -8207,14 +8288,17 @@ function performAction(
         typeof legalAction.payload?.breakerId === "string"
           ? (String(legalAction.payload.breakerId) as CardInstanceId)
           : undefined;
+      const breakAbility = breakAbilityForLegalAction(state, legalAction);
       if (
         breakerId &&
-        definitionFor(state, breakerId).id === PILE_DRIVER_ID &&
+        (breakAbility?.count ?? 1) > 1 &&
         typeof legalAction.payload?.subroutineIndexes === "string"
       ) {
         resolvePileDriverBreakSubroutinesAction(state, breakerId, legalAction);
         recordBartmossEncounterUsage(state, breakerId);
         recordDupreBreakUsage(state, breakerId);
+        recordSnowballBreakUsage(state, breakerId);
+        if (breakAbility?.onUseEndRun) finishRun(state, false, legalAction);
         return;
       }
       if (!state.run?.encounteredIceId)
@@ -8249,14 +8333,14 @@ function performAction(
         return;
       }
       if (breakerId) {
-        const breakerDefinition = definitionFor(state, breakerId);
-        if (breakerDefinition.id === BLINK_ID) {
+        if (breakAbility?.special === "blink_random_break_or_net_damage") {
           resolveBlinkBreakSubroutineAction(
             state,
             breakerId,
             Number(legalAction.payload?.subroutineIndex),
             legalAction,
           );
+          if (breakAbility.onUseEndRun) finishRun(state, false, legalAction);
           return;
         }
       }
@@ -8270,6 +8354,8 @@ function performAction(
         applyPostBreakStealthLoss(state, breakerId, legalAction);
         recordBartmossEncounterUsage(state, breakerId);
         recordDupreBreakUsage(state, breakerId);
+        recordSnowballBreakUsage(state, breakerId);
+        if (breakAbility?.onUseEndRun) finishRun(state, false, legalAction);
       }
       return;
     }
@@ -10037,29 +10123,45 @@ function applyAiBoonRunStart(
   state: GameState,
   legalAction?: LegalAction,
 ): void {
-  const sourceCardId = state.runner.rig.programs
+  const sourceCardIds = state.runner.rig.programs
     .slice()
     .sort()
-    .find(
-      (cardId) =>
-        definitionFor(state, cardId).id === AI_BOON_RANDOM_BREAKER_CARD_ID,
+    .filter((cardId) =>
+      icebreakerHasSpecial(state, cardId, "ai_boon_run_start_random_strength"),
     );
-  if (!sourceCardId || !state.run) return;
-  const randomPurpose = `v1921.die.${AI_BOON_RANDOM_BREAKER_CARD_ID}.run_start_strength`;
-  const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
-  const baseStrength = definitionFor(state, sourceCardId).strength ?? 0;
-  const runStrength = baseStrength + dieRoll;
-  state.run.aiBoonSourceCardId = sourceCardId;
-  state.run.aiBoonRunStrength = runStrength;
-  if (legalAction) {
+  if (sourceCardIds.length === 0 || !state.run) return;
+  const outcomes: string[] = [];
+  for (const sourceCardId of sourceCardIds) {
+    const definition = definitionFor(state, sourceCardId);
+    const randomPurpose = `v1921.die.${definition.id}.run_start_strength`;
+    const dieRoll = Math.floor(nextRandom(state, randomPurpose) * 6) + 1;
+    const baseStrength = definition.strength ?? 0;
+    const runStrength = baseStrength + dieRoll;
+    state.run.aiBoonRunStrengthByBreaker = {
+      ...(state.run.aiBoonRunStrengthByBreaker ?? {}),
+      [sourceCardId]: runStrength,
+    };
+    state.run.aiBoonSourceCardId = sourceCardId;
+    state.run.aiBoonRunStrength = runStrength;
+    outcomes.push(`${sourceCardId}:${dieRoll}:${runStrength}`);
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1921RunnerProgramAbility: "ai_boon_run_start_strength",
+        sourceDefinitionId: definition.id,
+        aiBoonSourceCardId: sourceCardId,
+        randomPurpose,
+        v1921DieRoll: dieRoll,
+        aiBoonRunStrength: runStrength,
+        randomCounterAfter: state.randomCounter,
+      };
+    }
+  }
+  if (legalAction && outcomes.length > 1) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1921RunnerProgramAbility: "ai_boon_run_start_strength",
-      sourceDefinitionId: AI_BOON_RANDOM_BREAKER_CARD_ID,
-      aiBoonSourceCardId: sourceCardId,
-      randomPurpose,
-      v1921DieRoll: dieRoll,
-      aiBoonRunStrength: runStrength,
+      aiBoonRunStrengthOutcomes: outcomes.join(","),
       randomCounterAfter: state.randomCounter,
     };
   }
@@ -10954,7 +11056,8 @@ function applyBartmossPostEncounterTrigger(
   }> = [];
   for (const breakerId of usedBreakerIds) {
     if (!state.runner.rig.programs.includes(breakerId)) continue;
-    if (definitionFor(state, breakerId).id !== BARTMOSS_ID) continue;
+    if (!icebreakerHasSpecial(state, breakerId, "bartmoss_post_encounter_self_trash_check"))
+      continue;
     const die = rollDeterministicDie(
       state,
       `${BARTMOSS_ID}.post_encounter.${run.runId}.${encounteredIceId}.${breakerId}`,
@@ -11051,7 +11154,8 @@ function recordBartmossEncounterUsage(
 ): void {
   const run = state.run;
   if (!run || run.phase !== "encounter_ice") return;
-  if (definitionFor(state, breakerId).id !== BARTMOSS_ID) return;
+  if (!icebreakerHasSpecial(state, breakerId, "bartmoss_post_encounter_self_trash_check"))
+    return;
   const usedBreakerIds = run.bartmossUsedBreakerIdsThisEncounter ?? [];
   if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
   run.bartmossUsedBreakerIdsThisEncounter = usedBreakerIds;
@@ -11062,7 +11166,8 @@ function recordDupreBreakUsage(
   breakerId: CardInstanceId,
 ): void {
   const run = state.run;
-  if (!run || definitionFor(state, breakerId).id !== DUPRE_ID) return;
+  if (!run || !icebreakerHasSpecial(state, breakerId, "dupre_strength_counter_and_last_fort"))
+    return;
   const instance = mustInstance(state.cardInstances, breakerId);
   if (
     instance.selectedServerId &&
@@ -11073,6 +11178,31 @@ function recordDupreBreakUsage(
   const usedBreakerIds = run.dupreUsedBreakerIdsThisRun ?? [];
   if (!usedBreakerIds.includes(breakerId)) usedBreakerIds.push(breakerId);
   run.dupreUsedBreakerIdsThisRun = usedBreakerIds;
+}
+
+function recordSnowballBreakUsage(
+  state: GameState,
+  breakerId: CardInstanceId,
+): void {
+  const run = state.run;
+  if (!run || !icebreakerHasSpecial(state, breakerId, "snowball_run_strength_per_successful_break"))
+    return;
+  const previous = runRemainderStrengthBonusForBreaker(run, breakerId);
+  run.remainderStrengthBonusByBreaker = {
+    ...(run.remainderStrengthBonusByBreaker ?? {}),
+    [breakerId]: previous + 1,
+  };
+}
+
+function icebreakerHasSpecial(
+  state: GameState,
+  breakerId: CardInstanceId,
+  special: NonNullable<RuntimeIcebreakerAbility["special"]>,
+): boolean {
+  if (!state.cardInstances[breakerId]) return false;
+  return icebreakerAbilitiesForDefinition(definitionFor(state, breakerId)).some(
+    (ability) => ability.special === special,
+  );
 }
 
 function recordRunFullyBrokenIce(run: ActiveRun, iceId: CardInstanceId): void {
@@ -14189,7 +14319,8 @@ function applyDupreRunEndCounters(state: GameState, run: ActiveRun): void {
   for (const breakerId of usedBreakerIds) {
     const instance = state.cardInstances[breakerId];
     if (!instance || !state.runner.rig.programs.includes(breakerId)) continue;
-    if (definitionFor(state, breakerId).id !== DUPRE_ID) continue;
+    if (!icebreakerHasSpecial(state, breakerId, "dupre_strength_counter_and_last_fort"))
+      continue;
     if (
       instance.selectedServerId &&
       instance.selectedServerId !== run.attackedServerId
@@ -25768,6 +25899,8 @@ function makeActionId(
     parts.push(String(payload.subroutineId));
   if (payload?.subroutineIndexes !== undefined)
     parts.push(String(payload.subroutineIndexes));
+  if (payload?.pumpAmount !== undefined)
+    parts.push(String(payload.pumpAmount));
   if (payload?.proteusVariableRez !== undefined)
     parts.push(String(payload.proteusVariableRez));
   if (payload?.variableRezAdditionalCost !== undefined)
@@ -27159,11 +27292,7 @@ function applyPostBreakStealthLoss(
   legalAction: LegalAction,
 ): void {
   const breakerDefinition = definitionFor(state, breakerId);
-  const ability = breakerDefinition.abilities?.find(
-    (candidate) =>
-      candidate.id === legalAction.abilityRef?.abilityId &&
-      candidate.type === "break_subroutine",
-  );
+  const ability = breakAbilityForLegalAction(state, legalAction);
   const lossAmount = ability?.postBreakStealthLoss ?? 0;
   if (lossAmount <= 0) return;
   const stealthSources = runnerStealthRecurringCreditSources(state);
@@ -27171,9 +27300,7 @@ function applyPostBreakStealthLoss(
     (sum, source) => sum + source.available,
     0,
   );
-  const exactStealthLoss = [RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(
-    breakerDefinition.id,
-  );
+  const exactStealthLoss = ability?.postBreakStealthLossMode === "total_if_available";
   if (exactStealthLoss && availableStealth < lossAmount)
     throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
   const requiredLoss = exactStealthLoss

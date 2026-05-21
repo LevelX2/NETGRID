@@ -176,20 +176,30 @@ import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/temple-microcode-outlet";
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
+import { aiBoonImplementation } from "./onr-v1/runner/programs/ai-boon";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
+import { bartmossMemorialIcebreakerImplementation } from "./onr-v1/runner/programs/bartmoss-memorial-icebreaker";
 import { blackDahliaImplementation } from "./onr-v1/runner/programs/black-dahlia";
+import { blinkImplementation } from "./onr-v1/runner/programs/blink";
 import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
 import { codecrackerImplementation } from "./onr-v1/runner/programs/codecracker";
 import { codeslingerImplementation } from "./onr-v1/runner/programs/codeslinger";
 import { cyfermasterImplementation } from "./onr-v1/runner/programs/cyfermaster";
 import { dogcatcherImplementation } from "./onr-v1/runner/programs/dogcatcher";
+import { droppImplementation } from "./onr-v1/runner/programs/dropp";
+import { dupreImplementation } from "./onr-v1/runner/programs/dupre";
 import { dwarfImplementation } from "./onr-v1/runner/programs/dwarf";
 import { emergencySelfConstructImplementation } from "./onr-v1/runner/programs/emergency-self-construct";
+import { evilTwinImplementation } from "./onr-v1/runner/programs/evil-twin";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
 import { flakImplementation } from "./onr-v1/runner/programs/flak";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
+import { grubbImplementation } from "./onr-v1/runner/programs/grubb";
+import { hammerImplementation } from "./onr-v1/runner/programs/hammer";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
+import { jackhammerImplementation } from "./onr-v1/runner/programs/jackhammer";
+import { japaneseWaterTortureImplementation } from "./onr-v1/runner/programs/japanese-water-torture";
 import { joanOfArcImplementation } from "./onr-v1/runner/programs/joan-of-arc";
 import { krashImplementation } from "./onr-v1/runner/programs/krash";
 import { loonyGoonImplementation } from "./onr-v1/runner/programs/loony-goon";
@@ -197,9 +207,11 @@ import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/mic
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { pileDriverImplementation } from "./onr-v1/runner/programs/pile-driver";
 import { poltergeistImplementation } from "./onr-v1/runner/programs/poltergeist";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
 import { rafflesImplementation } from "./onr-v1/runner/programs/raffles";
+import { rammingPistonImplementation } from "./onr-v1/runner/programs/ramming-piston";
 import { raptorImplementation } from "./onr-v1/runner/programs/raptor";
 import { reflectorImplementation } from "./onr-v1/runner/programs/reflector";
 import { replicatorImplementation } from "./onr-v1/runner/programs/replicator";
@@ -210,6 +222,7 @@ import { shakaImplementation } from "./onr-v1/runner/programs/shaka";
 import { shieldImplementation } from "./onr-v1/runner/programs/shield";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
+import { snowballImplementation } from "./onr-v1/runner/programs/snowball";
 import { tinweaselImplementation } from "./onr-v1/runner/programs/tinweasel";
 import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
 import { wildCardImplementation } from "./onr-v1/runner/programs/wild-card";
@@ -268,20 +281,30 @@ export const CARD_IMPLEMENTATIONS = [
   templeMicrocodeOutletImplementation,
   totalGeneticRetrofitImplementation,
   weatherToFinancePipeImplementation,
+  aiBoonImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
+  bartmossMemorialIcebreakerImplementation,
   blackDahliaImplementation,
+  blinkImplementation,
   cloakImplementation,
   codecrackerImplementation,
   codeslingerImplementation,
   cyfermasterImplementation,
   dogcatcherImplementation,
+  droppImplementation,
+  dupreImplementation,
   dwarfImplementation,
   emergencySelfConstructImplementation,
+  evilTwinImplementation,
   expertScheduleAnalyzerImplementation,
   flakImplementation,
   forceShieldImplementation,
+  grubbImplementation,
+  hammerImplementation,
   invisibilityImplementation,
+  jackhammerImplementation,
+  japaneseWaterTortureImplementation,
   joanOfArcImplementation,
   krashImplementation,
   loonyGoonImplementation,
@@ -289,9 +312,11 @@ export const CARD_IMPLEMENTATIONS = [
   mouseImplementation,
   mysteryBoxImplementation,
   newsgroupFilterImplementation,
+  pileDriverImplementation,
   poltergeistImplementation,
   rAndDProtocolFilesImplementation,
   rafflesImplementation,
+  rammingPistonImplementation,
   raptorImplementation,
   reflectorImplementation,
   replicatorImplementation,
@@ -302,6 +327,7 @@ export const CARD_IMPLEMENTATIONS = [
   shieldImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
+  snowballImplementation,
   tinweaselImplementation,
   vewyVewyQuietImplementation,
   wildCardImplementation,

@@ -7297,6 +7297,94 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(state.runner.credits).toBe(0);
   });
 
+  const p345SpecialIcebreakers = [
+    "onr_v1_031_hammer",
+    "onr_v1_036_jackhammer",
+    "onr_v1_047_pile-driver",
+    "onr_v1_053_ramming-piston",
+    "onr_v1_019_dropp",
+    "onr_v1_030_grubb",
+    "onr_v1_037_japanese-water-torture",
+    "onr_v1_066_snowball",
+    "onr_v1_002_ai-boon",
+    "onr_v1_007_blink",
+    "onr_v1_005_bartmoss-memorial-icebreaker",
+    "onr_v1_020_dupre",
+    "onr_v1_023_evil-twin",
+  ] as const;
+
+  it("migrates P3.45 special icebreakers into CardImplementation coverage", () => {
+    for (const definitionId of p345SpecialIcebreakers) {
+      const implementation = cardImplementationForDefinitionId(definitionId);
+      expect(implementation?.icebreakerAbilities?.length, definitionId).toBeGreaterThan(0);
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(cardImplementationForDefinitionId("onr_v1_023_evil-twin")).toMatchObject({
+      damagePreventionSources: expect.any(Array),
+    });
+  });
+
+  it("runs P3.45 Dropp, Japanese Water Torture and Snowball specials from CardImplementation", () => {
+    let droppPump = p344EncounterState(
+      "p345-dropp-pump",
+      "onr_v1_019_dropp",
+      "simple_code_gate_ice",
+    ).state;
+    const droppPumpAction = mustAction(
+      droppPump,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(droppPump, action) === "onr_v1_019_dropp",
+    );
+    droppPump = apply(droppPump, "runner", (action) => action.actionId === droppPumpAction.actionId);
+    expect(droppPump.run).toBeUndefined();
+    expect(droppPump.timingPoint).toBe("runner_action.main");
+
+    let japanese = p344EncounterState(
+      "p345-japanese-variable-pump",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_237_data-wall",
+    ).state;
+    japanese.runner.credits = 3;
+    const japanesePump = mustAction(
+      japanese,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinition(japanese, action) ===
+          "onr_v1_037_japanese-water-torture" &&
+        action.costs[0]?.credits === 3,
+    );
+    const japaneseId = String(japanesePump.payload?.breakerId);
+    japanese = apply(japanese, "runner", (action) => action.actionId === japanesePump.actionId);
+    expect(japanese.cardInstances[japaneseId]?.strengthModifier).toBe(3);
+    expect(japanese.runnerTurnFlags?.forgoNextActionsPending).toBe(3);
+
+    let snowball = p344EncounterState(
+      "p345-snowball-run-strength",
+      "onr_v1_066_snowball",
+      "simple_sentry_ice",
+    ).state;
+    const snowballId = snowball.runner.rig.programs.find(
+      (id) => snowball.cardInstances[id]?.definitionId === "onr_v1_066_snowball",
+    );
+    expect(snowballId).toBeDefined();
+    snowball = p344PumpUntilBreak(snowball, snowballId!);
+    const snowballBreak = mustAction(
+      snowball,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === snowballId,
+    );
+    snowball = apply(snowball, "runner", (action) => action.actionId === snowballBreak.actionId);
+    expect(snowball.run?.remainderStrengthBonusByBreaker?.[snowballId!]).toBe(1);
+  });
+
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
     let rdState = toRunnerTurn(v123CardReleaseGame("v123-custodial-position"));
     moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
@@ -43859,7 +43947,12 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       expect(removedSource.ok, breakerDefinitionId).toBe(false);
 
       state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
-      expect(state.run?.brokenSubroutineIndexes).toContain(0);
+      if (breakerDefinitionId === "onr_v1_019_dropp") {
+        expect(state.run).toBeUndefined();
+        expect(state.timingPoint).toBe("runner_action.main");
+      } else {
+        expect(state.run?.brokenSubroutineIndexes).toContain(0);
+      }
       expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
         actionType: "break_subroutine",
         cardDefinitionId: breakerDefinitionId,
