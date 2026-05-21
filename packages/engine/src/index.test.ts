@@ -40679,7 +40679,18 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (card) => card.instanceId === fridgeId,
     );
     const corpView = getPlayerView(state, "corp");
+    const projectedDisplayIds = [
+      recurringCard,
+      restrictedCard,
+      virusCard,
+      fridgeCard,
+      runnerView.own.identity,
+    ].flatMap((card) => card?.counterDisplays?.map((display) => display.id) ?? []);
+    expect(new Set(projectedDisplayIds).size).toBe(projectedDisplayIds.length);
 
+    expect(recurringCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "recurring_credit",
+    ]);
     expect(recurringCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -40690,6 +40701,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
+    expect(restrictedCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "restricted_pool",
+    ]);
     expect(restrictedCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -40701,6 +40715,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
+    expect(virusCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "virus",
+    ]);
     expect(virusCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -40711,6 +40728,9 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
+    expect(fridgeCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "ablative",
+    ]);
     expect(fridgeCard?.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
@@ -40721,6 +40741,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         }),
       ]),
     );
+    expect(runnerView.own.identity.counterDisplays?.map((display) => display.id)).toEqual([
+      "data_raven",
+      "cerberus",
+      "mastiff",
+      "crying",
+    ]);
     expect(runnerView.own.identity.counterDisplays).toEqual(
       expect.arrayContaining([
         expect.objectContaining({

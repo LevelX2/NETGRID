@@ -19,6 +19,7 @@ import {
   breachProgressLabel,
   cardCreditCounterVisual,
   counterDisplayBadgeView,
+  counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -637,6 +638,38 @@ describe("V1.0.6 resource and card-display helpers", () => {
         counters: { power: 8 }
       })
     ).toBe(0);
+  });
+
+  it("does not select raw counters for board rendering when CounterDisplays are missing", () => {
+    const rawOnly: VisibleCard = {
+      ...card("broker_raw_only", "Broker", "resource"),
+      definitionId: "onr_v1_154_broker",
+      counters: { bit: 3, recurring_credit: 2, shell: 1 }
+    };
+    const displayCard: VisibleCard = {
+      ...card("broker_display", "Broker", "resource"),
+      counters: { bit: 99 },
+      counterDisplays: [
+        {
+          id: "stored_credits",
+          amount: 3,
+          displayKind: "stored_credits",
+          label: "Credits",
+          ariaLabel: "3 gespeicherte Credits",
+          counterType: "bit",
+          usageHint: "spendable"
+        },
+        {
+          id: "advancement",
+          amount: 2,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "2 Entwicklungen"
+        }
+      ]
+    };
+    expect(counterDisplaysForRendering(rawOnly)).toEqual([]);
+    expect(counterDisplaysForRendering(displayCard).map((display) => display.id)).toEqual(["stored_credits"]);
   });
 
   it("maps CounterDisplay special counters to compact badge models", () => {

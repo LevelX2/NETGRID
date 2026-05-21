@@ -210,6 +210,14 @@ export function counterDisplayBadgeView(display: NonNullable<VisibleCard["counte
   };
 }
 
+export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisplays">): NonNullable<VisibleCard["counterDisplays"]> {
+  return (card.counterDisplays ?? []).filter(
+    (display) =>
+      display.displayKind !== "advancement" &&
+      safeCounterDisplayAmount(display.amount) > 0,
+  );
+}
+
 export function safeCounterDisplayAmount(amount: number): number {
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }

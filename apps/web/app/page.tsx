@@ -124,6 +124,7 @@ import {
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
@@ -12254,14 +12255,6 @@ function selectedServerLabel(card: VisibleCard): string | null {
 function counterDisplayDetailLabels(card: VisibleCard): string[] {
   return counterDisplaysForRendering(card).map(
     (display) => `${safeCounterDisplayAmount(display.amount)} ${display.label}`,
-  );
-}
-
-function counterDisplaysForRendering(card: VisibleCard): NonNullable<VisibleCard["counterDisplays"]> {
-  return (card.counterDisplays ?? []).filter(
-    (display) =>
-      display.displayKind !== "advancement" &&
-      safeCounterDisplayAmount(display.amount) > 0,
   );
 }
 
