@@ -92,6 +92,9 @@ const IMPLEMENTED_CORP_UTILITY_LOCATION =
 const IMPLEMENTED_FORT_RUN_WINDOW_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -171,6 +174,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/pox.ts",
   "onr_v1_064_skivviss":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/skivviss.ts",
+  "onr_v1_065_smarteye":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/smarteye.ts",
+  "onr_v1_067_speed-trap":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/speed-trap.ts",
   "onr_v1_014_codecracker":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
   "onr_v1_015_codeslinger":
@@ -499,6 +506,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fang.ts",
   "onr_v1_241_fang-2-0":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fang-2-0.ts",
+  "onr_v1_242_fatal-attractor":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/fatal-attractor.ts",
   "onr_v1_243_fetch-4-0-1":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fetch-4-0-1.ts",
   "onr_v1_244_filter":
@@ -507,6 +516,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fire-wall.ts",
   "onr_v1_246_fragmentation-storm":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/fragmentation-storm.ts",
+  "onr_v1_247_haunting-inquisition":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/haunting-inquisition.ts",
   "onr_v1_249_hunter":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/hunter.ts",
   "onr_v1_250_ice-pick-willie":
@@ -549,6 +560,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/ice/shotgun-wire.ts",
   "onr_v1_270_sleeper":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/sleeper.ts",
+  "onr_v1_271_tko-2-0":
+    "packages/engine/src/card-implementations/onr-v1/corp/ice/tko-2-0.ts",
   "onr_v1_273_triggerman":
     "packages/engine/src/card-implementations/onr-v1/corp/ice/triggerman.ts",
   "onr_v1_274_tutor":
@@ -880,6 +893,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for fort-run window ICE-control behavior.",
     );
     currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
+  if (implementation.runEncounterInterventions?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for run/encounter intervention behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION);
   }
   if (implementation.virusCounter) {
     reasons.push(

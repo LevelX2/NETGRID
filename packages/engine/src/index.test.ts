@@ -7608,6 +7608,63 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(cardImplementationForDefinitionId("onr_v1_359_jenny-jett")).toBeUndefined();
   });
 
+  it("migrates P3.53 run/encounter interventions into CardImplementation coverage", () => {
+    const p353Cards = [
+      "onr_v1_065_smarteye",
+      "onr_v1_067_speed-trap",
+      "onr_v1_242_fatal-attractor",
+      "onr_v1_247_haunting-inquisition",
+      "onr_v1_271_tko-2-0",
+    ] as const;
+
+    for (const definitionId of p353Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_065_smarteye")
+        ?.runEncounterInterventions,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "approach_ice_expose_then_jack_out_before_rez",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_067_speed-trap")
+        ?.runEncounterInterventions,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_242_fatal-attractor")
+        ?.printedSubroutines,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "next_encounter_unless_fully_break_damage",
+        amount: 3,
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_247_haunting-inquisition")
+        ?.printedSubroutines,
+    ).toContainEqual(
+      expect.objectContaining({ kind: "runner_run_lock_actions", amount: 6 }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_271_tko-2-0")
+        ?.printedSubroutines,
+    ).toContainEqual(
+      expect.objectContaining({ kind: "runner_forgoes_next_action" }),
+    );
+    expect(cardImplementationForDefinitionId("onr_v1_358_dr-dreff")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_359_jenny-jett")).toBeUndefined();
+  });
+
   it("uses P3.51 Silver Lining advancement history and Omniscience/Disinfectant hooks", () => {
     let silver = apply(
       createGameAfterSetup({

@@ -93,6 +93,39 @@ function printedSubroutineDefinitionForImplementation(
       ...(breakTags.length ? { breakTags } : {}),
     };
   }
+  if (subroutine.kind === "next_encounter_unless_fully_break_damage") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Next-encounter damage subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_next_encounter_unless_fully_break_damage",
+      damageType: subroutine.damageType,
+      amount,
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (subroutine.kind === "runner_run_lock_actions") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    const amount = Math.max(0, Math.floor(subroutine.amount));
+    if (amount <= 0)
+      throw new Error("Runner run-lock subroutines require a positive amount.");
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_runner_run_lock_actions",
+      amount,
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
+  if (subroutine.kind === "runner_forgoes_next_action") {
+    const breakTags = subroutine.breakTags ? [...subroutine.breakTags] : [];
+    return {
+      id: printedSubroutineId(definition, index, subroutine),
+      type: "set_runner_forgo_next_action",
+      ...(breakTags.length ? { breakTags } : {}),
+    };
+  }
   if (subroutine.kind === "damage") {
     if (subroutine.preventable !== true)
       throw new Error("Unsupported unpreventable printed damage subroutine.");

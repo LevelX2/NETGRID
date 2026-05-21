@@ -91,10 +91,12 @@ import { dataRavenImplementation } from "./onr-v1/corp/ice/data-raven";
 import { endlessCorridorImplementation } from "./onr-v1/corp/ice/endless-corridor";
 import { fangTwoPointZeroImplementation } from "./onr-v1/corp/ice/fang-2-0";
 import { fangImplementation } from "./onr-v1/corp/ice/fang";
+import { fatalAttractorImplementation } from "./onr-v1/corp/ice/fatal-attractor";
 import { fetchFourPointZeroPointOneImplementation } from "./onr-v1/corp/ice/fetch-4-0-1";
 import { filterImplementation } from "./onr-v1/corp/ice/filter";
 import { fireWallImplementation } from "./onr-v1/corp/ice/fire-wall";
 import { fragmentationStormImplementation } from "./onr-v1/corp/ice/fragmentation-storm";
+import { hauntingInquisitionImplementation } from "./onr-v1/corp/ice/haunting-inquisition";
 import { hunterImplementation } from "./onr-v1/corp/ice/hunter";
 import { icePickWillieImplementation } from "./onr-v1/corp/ice/ice-pick-willie";
 import { jackAttackImplementation } from "./onr-v1/corp/ice/jack-attack";
@@ -117,6 +119,7 @@ import { shockRImplementation } from "./onr-v1/corp/ice/shock-r";
 import { shotgunWireImplementation } from "./onr-v1/corp/ice/shotgun-wire";
 import { sleeperImplementation } from "./onr-v1/corp/ice/sleeper";
 import { triggermanImplementation } from "./onr-v1/corp/ice/triggerman";
+import { tkoTwoPointZeroImplementation } from "./onr-v1/corp/ice/tko-2-0";
 import { tutorImplementation } from "./onr-v1/corp/ice/tutor";
 import { virizzImplementation } from "./onr-v1/corp/ice/virizz";
 import { wallOfIceImplementation } from "./onr-v1/corp/ice/wall-of-ice";
@@ -281,8 +284,10 @@ import { shakaImplementation } from "./onr-v1/runner/programs/shaka";
 import { shieldImplementation } from "./onr-v1/runner/programs/shield";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
+import { smarteyeImplementation } from "./onr-v1/runner/programs/smarteye";
 import { skivvissImplementation } from "./onr-v1/runner/programs/skivviss";
 import { snowballImplementation } from "./onr-v1/runner/programs/snowball";
+import { speedTrapImplementation } from "./onr-v1/runner/programs/speed-trap";
 import { succubusImplementation } from "./onr-v1/runner/programs/succubus";
 import { tinweaselImplementation } from "./onr-v1/runner/programs/tinweasel";
 import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
@@ -411,8 +416,10 @@ export const CARD_IMPLEMENTATIONS = [
   shieldImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
+  smarteyeImplementation,
   skivvissImplementation,
   snowballImplementation,
+  speedTrapImplementation,
   succubusImplementation,
   tinweaselImplementation,
   vewyVewyQuietImplementation,
@@ -582,10 +589,12 @@ export const CARD_IMPLEMENTATIONS = [
   endlessCorridorImplementation,
   fangImplementation,
   fangTwoPointZeroImplementation,
+  fatalAttractorImplementation,
   fetchFourPointZeroPointOneImplementation,
   filterImplementation,
   fireWallImplementation,
   fragmentationStormImplementation,
+  hauntingInquisitionImplementation,
   hunterImplementation,
   icePickWillieImplementation,
   jackAttackImplementation,
@@ -607,6 +616,7 @@ export const CARD_IMPLEMENTATIONS = [
   shockRImplementation,
   shotgunWireImplementation,
   sleeperImplementation,
+  tkoTwoPointZeroImplementation,
   triggermanImplementation,
   tutorImplementation,
   virizzImplementation,

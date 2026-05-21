@@ -92,9 +92,6 @@ import {
 } from "./ability-engine/icebreaker-abilities";
 import { iceStrengthModifierBonusFor } from "./ability-engine/ice-strength-modifiers";
 import { quoteAccessTrashCost } from "./ability-engine/trash-cost-modifiers";
-import type {
-  CardVirusCounterImplementation,
-} from "./ability-engine/definition-types";
 import {
   CARD_IMPLEMENTATIONS,
   cardImplementationForDefinitionId,
@@ -263,9 +260,11 @@ import type {
   CardEffectImplementation,
   CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
+  CardRunEncounterInterventionImplementation,
   CardScoredAgendaImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
+  CardVirusCounterImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
   RestrictedHostedCreditUse,
@@ -5595,6 +5594,25 @@ function hasFortRunWindowKind(
   ).some((window) => window.kind === kind);
 }
 
+function runEncounterInterventionsForDefinition(
+  definitionId: CardDefinitionId,
+): readonly CardRunEncounterInterventionImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definitionId)?.runEncounterInterventions ??
+    []
+  );
+}
+
+function hasRunEncounterInterventionKind(
+  state: GameState,
+  cardId: CardInstanceId,
+  kind: CardRunEncounterInterventionImplementation["kind"],
+): boolean {
+  return runEncounterInterventionsForDefinition(
+    definitionFor(state, cardId).id,
+  ).some((intervention) => intervention.kind === kind);
+}
+
 function isFortIceSwapSource(state: GameState, cardId: CardInstanceId): boolean {
   const definitionId = definitionFor(state, cardId).id;
   if (hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice"))
@@ -6319,7 +6337,17 @@ function installedApproachIceExposeSources(state: GameState): CardInstanceId[] {
     .sort()
     .filter((cardId) => {
       if (used.has(cardId)) return false;
-      return definitionFor(state, cardId).abilities?.some(
+      const definition = definitionFor(state, cardId);
+      if (
+        hasRunEncounterInterventionKind(
+          state,
+          cardId,
+          "approach_ice_expose_then_jack_out_before_rez",
+        )
+      )
+        return true;
+      if (cardImplementationForDefinitionId(definition.id)) return false;
+      return definition.abilities?.some(
         (ability) =>
           ability.type === "approach_ice_expose" &&
           ability.timingPoint === "run.approach_ice" &&
@@ -6332,7 +6360,16 @@ function approachIceExposeAbilityIdForSource(
   state: GameState,
   sourceCardId: CardInstanceId,
 ): string {
-  const ability = definitionFor(state, sourceCardId).abilities?.find(
+  const definition = definitionFor(state, sourceCardId);
+  if (
+    hasRunEncounterInterventionKind(
+      state,
+      sourceCardId,
+      "approach_ice_expose_then_jack_out_before_rez",
+    )
+  )
+    return `card_implementation.${definition.id}.approach_ice_expose`;
+  const ability = definition.abilities?.find(
     (candidate) =>
       candidate.type === "approach_ice_expose" &&
       candidate.timingPoint === "run.approach_ice",
@@ -11004,7 +11041,21 @@ function resolveCorpRootRezEffect(
 
 function installedSpeedTrapIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.programs
-    .filter((cardId) => definitionFor(state, cardId).id === SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
+    .filter((cardId) => {
+      const definitionId = definitionFor(state, cardId).id;
+      if (
+        hasRunEncounterInterventionKind(
+          state,
+          cardId,
+          "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
+        )
+      )
+        return true;
+      return (
+        !cardImplementationForDefinitionId(definitionId) &&
+        definitionId === SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID
+      );
+    })
     .sort();
 }
 
@@ -11054,10 +11105,11 @@ function startSpeedTrapRezInterruptChoice(
   state.activeSide = "runner";
   if (legalAction) {
     const serverLabel = publicServerLabel(state, run.attackedServerId);
+    const speedTrapDefinitionId = definitionFor(state, speedTrapId).id;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922RunnerProgramAbility: "speed_trap_rez_interrupt_choice",
-      sourceDefinitionId: SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
+      sourceDefinitionId: speedTrapDefinitionId,
       speedTrapSourceCardId: speedTrapId,
       rezzedCardDefinitionId: definition.id,
       ...(serverLabel ? { serverLabel } : {}),
@@ -28956,8 +29008,18 @@ function resolveSpeedTrapRezInterruptChoice(
   const [, speedTrapId, rezzedCardId] = choice.source.split(":");
   if (
     !speedTrapId ||
-    !state.runner.rig.programs.includes(speedTrapId) ||
-    definitionFor(state, speedTrapId).id !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID
+    !state.runner.rig.programs.includes(speedTrapId)
+  )
+    throw new Error("Speed Trap ist nicht mehr installiert.");
+  const speedTrapDefinitionId = definitionFor(state, speedTrapId).id;
+  if (
+    !hasRunEncounterInterventionKind(
+      state,
+      speedTrapId,
+      "jack_out_after_corp_rezzes_upgrade_or_node_before_effect",
+    ) &&
+    (cardImplementationForDefinitionId(speedTrapDefinitionId) ||
+      speedTrapDefinitionId !== SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID)
   )
     throw new Error("Speed Trap ist nicht mehr installiert.");
   const run = mustRun(state);
@@ -28990,7 +29052,7 @@ function resolveSpeedTrapRezInterruptChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerProgramAbility: "speed_trap_rez_interrupt",
-    sourceDefinitionId: SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
+    sourceDefinitionId: speedTrapDefinitionId,
     speedTrapSourceCardId: speedTrapId,
     rezzedCardDefinitionId: rezzedDefinition.id,
     ...(serverLabel ? { serverLabel } : {}),

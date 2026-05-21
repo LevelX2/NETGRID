@@ -199,6 +199,21 @@ export type CardFortRunWindowImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type CardRunEncounterInterventionImplementation =
+  | {
+      kind: "approach_ice_expose_then_jack_out_before_rez";
+      timing: "approaching_unrezzed_ice";
+      target: "approached_unrezzed_ice";
+      limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "jack_out_after_corp_rezzes_upgrade_or_node_before_effect";
+      timing: "after_corp_rezzes_upgrade_or_node_before_effect";
+      cost: { kind: "credit"; amount: 0 };
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
 export type CardVirusCounterKindImplementation =
   | "boardwalk"
   | "butcher_boy"
@@ -1225,6 +1240,24 @@ export type CardPrintedSubroutineImplementation =
     }
   | {
       kind: "run_duration_cannot_jack_out";
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "next_encounter_unless_fully_break_damage";
+      damageType: "net";
+      amount: number;
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "runner_run_lock_actions";
+      amount: number;
+      text: string;
+      breakTags?: readonly string[];
+    }
+  | {
+      kind: "runner_forgoes_next_action";
       text: string;
       breakTags?: readonly string[];
     }

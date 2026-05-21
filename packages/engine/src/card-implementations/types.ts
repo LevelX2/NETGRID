@@ -12,6 +12,7 @@ import type {
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  CardRunEncounterInterventionImplementation,
   CardScoredAgendaImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
@@ -46,6 +47,7 @@ export type CardImplementationDefinition = {
   trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
   fortRunWindows?: readonly CardFortRunWindowImplementation[];
+  runEncounterInterventions?: readonly CardRunEncounterInterventionImplementation[];
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;
