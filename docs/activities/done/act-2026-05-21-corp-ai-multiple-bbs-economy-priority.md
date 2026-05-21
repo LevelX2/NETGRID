@@ -1,14 +1,14 @@
 ---
 activityId: act-2026-05-21-corp-ai-multiple-bbs-economy-priority
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
@@ -16,8 +16,15 @@ relatedActivities:
   - act-2026-05-19-corp-ai-installed-asset-economy-bbs
   - act-2026-05-17-bbs-whispering-campaign-credit-badge
   - act-2026-05-21-counter-display-stored-credits-and-agenda-pools
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/corp-plans.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "installed Corp economy|multiple installed Corp BBS|too few stored credits"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "V1.4.0 plan-based Corp AI"
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
+  - "Nicht grün, nicht paketbezogen: corepack pnpm --filter @netgrid/ai test zeigte drei bestehende breitere Failures in Corp-R&D-Reorder-Choice und Runner-Economy-Tests."
 ---
 
 # Corp-KI: Mehrere BBS-Economy-Aktionen vor Basiscredit priorisieren
@@ -59,12 +66,12 @@ Die Corp-KI soll bei mehreren installierten und gerezzten `BBS Whispering Campai
 
 ## Akzeptanzkriterien
 
-- [ ] Ein fokussierter AI-Test reproduziert den Nutzerbefund mit zwei rezzed `BBS Whispering Campaign` in Remote-Forts und normaler Credit-Aktion im selben Entscheidungsfenster.
-- [ ] Der Test weist nach, ob beide BBS-Aktionen im AI-Input als getrennte legale Aktionen mit Source-Referenz sichtbar sind.
-- [ ] In einer klaren Economy-Lage wählt die Corp-KI eine verfügbare BBS-Aktion mit 2 Credits statt der normalen 1-Credit-Aktion.
-- [ ] Die Bewertung bleibt korrekt, wenn zwei gleichnamige BBS-Quellen vorhanden sind; die KI darf legale Quellen nicht nach Kartentitel wegdeduplizieren.
-- [ ] Die KI wählt keine BBS-Aktion, wenn die konkrete Source nicht legal, nicht rezzed, nicht installiert oder mit weniger als 2 gespeicherten Credits/Bits versehen ist.
-- [ ] Bestehende Corp-KI-Regressionen für BBS, allgemeine Economy-Recovery, Remote-Scoring, Rez-Entscheidungen und side-sichere Debugdaten bleiben grün.
+- [x] Ein fokussierter AI-Test reproduziert den Nutzerbefund mit zwei rezzed `BBS Whispering Campaign` in Remote-Forts und normaler Credit-Aktion im selben Entscheidungsfenster.
+- [x] Der Test weist nach, ob beide BBS-Aktionen im AI-Input als getrennte legale Aktionen mit Source-Referenz sichtbar sind.
+- [x] In einer klaren Economy-Lage wählt die Corp-KI eine verfügbare BBS-Aktion mit 2 Credits statt der normalen 1-Credit-Aktion.
+- [x] Die Bewertung bleibt korrekt, wenn zwei gleichnamige BBS-Quellen vorhanden sind; die KI darf legale Quellen nicht nach Kartentitel wegdeduplizieren.
+- [x] Die KI wählt keine BBS-Aktion, wenn die konkrete Source nicht legal, nicht rezzed, nicht installiert oder mit weniger als 2 gespeicherten Credits/Bits versehen ist.
+- [x] Bestehende Corp-KI-Regressionen für BBS, allgemeine Economy-Recovery, Remote-Scoring, Rez-Entscheidungen und side-sichere Debugdaten bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -79,4 +86,4 @@ Die Corp-KI soll bei mehreren installierten und gerezzten `BBS Whispering Campai
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Corp-Plan-KI erkennt installierte Economy-Payouts jetzt auch dann, wenn die Engine sie als generische `activated_card_ability` aus einer CardImplementation liefert. Für `BBS Whispering Campaign` wird der sichtbare Credit-Gain aus der side-sicheren Ability-Label-/Counter-Lage bewertet; Quellen mit weniger als 2 gespeicherten Bits werden nicht als besserer Economy-Payout über Basiscredit eingestuft. Die neue Regression baut zwei getrennte rezzed BBS-Quellen in unterschiedlichen Remotes, weist getrennte Source-Referenzen und ActionIds nach und erwartet eine BBS-Aktion statt `[A]: 1 Credit`. Fokussierte BBS-Tests, die V1.4.0-Corp-Plan-Gruppe, AI-Typecheck und `git diff --check` sind grün. Der vollständige `@netgrid/ai`-Testlauf ist nicht grün wegen drei nicht paketbezogenen bestehenden Failures in Corp-R&D-Reorder-Choice und Runner-Economy-Tests.

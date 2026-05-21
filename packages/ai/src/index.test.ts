@@ -3156,7 +3156,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     const input = installedCorpBbsEconomyInput("ai-corp-installed-bbs-economy");
     const bbsTake = input.legalActions.find(
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) ===
           "onr_v1_309_bbs-whispering-campaign",
     );
@@ -3168,8 +3168,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(basicCredit).toBeDefined();
     if (!bbsTake || !basicCredit)
       throw new Error("Missing installed BBS economy fixture actions");
-    expect(bbsTake.payload?.gainCreditsAmount).toBe(2);
-    expect(bbsTake.payload?.removeCounterAmount).toBe(2);
+    expect(bbsTake.label).toContain("2 Credits nehmen");
 
     const decision = chooseCorpAction({
       ...input,
@@ -3184,6 +3183,69 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
     expect(debugText).toContain("installed_corp_economy_stored_credits:16");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("keeps multiple installed Corp BBS economy actions source-bound above basic credit", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-multiple-installed-bbs-economy",
+      [16, 16],
+    );
+    const bbsActions = input.legalActions.filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsActions).toHaveLength(2);
+    expect(new Set(bbsActions.map((action) => action.actionId)).size).toBe(2);
+    expect(new Set(bbsActions.map((action) => String(action.source))).size).toBe(2);
+    expect(
+      bbsActions.every(
+        (action) => action.label.includes("2 Credits nehmen"),
+      ),
+    ).toBe(true);
+    expect(basicCredit).toBeDefined();
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(bbsActions.map((action) => action.actionId)).toContain(decision.actionId);
+    expect(decision.actionId).not.toBe(basicCredit?.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(debugText).toContain("installed_corp_economy:true");
+    expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
+    expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("ignores installed Corp BBS sources with too few stored credits", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-low-counter-installed-bbs-economy",
+      [1, 16],
+    );
+    const bbsActions = input.legalActions.filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const sourceCards = new Map(
+      input.playerView.servers
+        .flatMap((server) => server.root)
+        .map((card) => [card.instanceId, card]),
+    );
+    const fullBbsActions = bbsActions.filter((action) => {
+      const sourceCard = sourceCards.get(String(action.source));
+      return (sourceCard?.counters?.bit ?? 0) >= 2;
+    });
+
+    expect(bbsActions).toHaveLength(2);
+    expect(fullBbsActions).toHaveLength(1);
+    expect(chooseCorpAction(input).actionId).toBe(fullBbsActions[0]?.actionId);
   });
 
   it("recovers economy before low-reserve central ICE protection without urgent pressure", () => {
@@ -8900,7 +8962,7 @@ function corpActionPhaseInput(
   });
 }
 
-function installedCorpBbsEconomyInput(seed: string) {
+function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
   let state = createGameAfterSetup({
     seed,
     baseline: CURRENT_RULES_BASELINE,
@@ -8920,7 +8982,10 @@ function installedCorpBbsEconomyInput(seed: string) {
       side: "corp",
       identity: "corp_identity_001",
       cards: [
-        { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+        {
+          id: "onr_v1_309_bbs-whispering-campaign",
+          quantity: bbsBits.length,
+        },
         { id: "simple_agenda", quantity: 4 },
         { id: "simple_economy_operation", quantity: 6 },
         { id: "simple_barrier_ice", quantity: 2 },
@@ -8929,24 +8994,45 @@ function installedCorpBbsEconomyInput(seed: string) {
     agendaPointsToWin: 7,
   });
   state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-  ensureRemoteServer(state, "remote_1");
-  const bbsId = putCorpRootInRemote(
-    state,
-    "onr_v1_309_bbs-whispering-campaign",
-    0,
-  );
-  state.cardInstances[bbsId] = {
-    ...state.cardInstances[bbsId]!,
-    faceup: true,
-    rezzed: true,
-    counters: { bit: 16 },
-  };
+  bbsBits.forEach((bitCount, index) => {
+    putInstalledCorpBbsInRemote(state, `remote_${index + 1}`, bitCount);
+  });
   state.corp.credits = 2;
   state.corp.clicks = 3;
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",
   });
+}
+
+function putInstalledCorpBbsInRemote(
+  state: GameState,
+  serverId: `remote_${number}`,
+  bitCount: number,
+): CardInstanceId {
+  ensureRemoteServer(state, serverId);
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) throw new Error(`Missing ${serverId}`);
+  const bbsEntry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === "onr_v1_309_bbs-whispering-campaign" &&
+      !state.corp.servers.some((candidate) =>
+        candidate.root.includes(id as CardInstanceId),
+      ),
+  );
+  if (!bbsEntry) throw new Error("Missing BBS Whispering Campaign copy");
+  const bbsId = bbsEntry[0] as CardInstanceId;
+  removeEverywhere(state, bbsId);
+  server.root.push(bbsId);
+  state.cardInstances[bbsId] = {
+    ...state.cardInstances[bbsId]!,
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: true,
+    rezzed: true,
+    counters: { bit: bitCount },
+    advancementCounters: 0,
+  };
+  return bbsId;
 }
 
 function runnerActionPhaseInput(
