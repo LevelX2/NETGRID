@@ -44,15 +44,22 @@ import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindanc
 import { chicagoBranchImplementation } from "./onr-v1/corp/assets/chicago-branch";
 import { corporateNegotiatingCenterImplementation } from "./onr-v1/corp/assets/corporate-negotiating-center";
 import { corprunnersShatteredRemainsImplementation } from "./onr-v1/corp/assets/corprunners-shattered-remains";
+import { cowboySysopImplementation } from "./onr-v1/corp/assets/cowboy-sysop";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "./onr-v1/corp/assets/department-of-truth-enhancement";
+import { disinfectantIncImplementation } from "./onr-v1/corp/assets/disinfectant-inc";
 import { encoderIncImplementation } from "./onr-v1/corp/assets/encoder-inc";
 import { esaContractImplementation } from "./onr-v1/corp/assets/esa-contract";
+import { euromarketConsortiumImplementation } from "./onr-v1/corp/assets/euromarket-consortium";
 import { experimentalAiImplementation } from "./onr-v1/corp/assets/experimental-ai";
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
 import { holovidCampaignImplementation } from "./onr-v1/corp/assets/holovid-campaign";
 import { informationLaunderingImplementation } from "./onr-v1/corp/assets/information-laundering";
+import { krumzImplementation } from "./onr-v1/corp/assets/krumz";
+import { newsgroupTauntingImplementation } from "./onr-v1/corp/assets/newsgroup-taunting";
+import { omniscienceFoundationImplementation } from "./onr-v1/corp/assets/omniscience-foundation";
 import { pacificaRegionalAiImplementation } from "./onr-v1/corp/assets/pacifica-regional-ai";
+import { reschedulerImplementation } from "./onr-v1/corp/assets/rescheduler";
 import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/skalderviken-sa-beta-test-site";
 import { soloSquadImplementation } from "./onr-v1/corp/assets/solo-squad";
 import { southAfricanMiningCorpImplementation } from "./onr-v1/corp/assets/south-african-mining-corp";
@@ -120,18 +127,26 @@ import { annualReviewsImplementation } from "./onr-v1/corp/operations/annual-rev
 import { auditOfCallRecordsImplementation } from "./onr-v1/corp/operations/audit-of-call-records";
 import { chanceObservationImplementation } from "./onr-v1/corp/operations/chance-observation";
 import { closedAccountsImplementation } from "./onr-v1/corp/operations/closed-accounts";
+import { corporateDetectiveAgencyImplementation } from "./onr-v1/corp/operations/corporate-detective-agency";
 import { datapoolByZetatechImplementation } from "./onr-v1/corp/operations/datapool-by-zetatech";
 import { dayShiftImplementation } from "./onr-v1/corp/operations/day-shift";
+import { edgerunnerIncTempsImplementation } from "./onr-v1/corp/operations/edgerunner-inc-temps";
 import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/efficiency-experts";
 import { falsifiedTransactionsExpertImplementation } from "./onr-v1/corp/operations/falsified-transactions-expert";
 import { managementShakeUpImplementation } from "./onr-v1/corp/operations/management-shake-up";
 import { netwatchCreditVoucherImplementation } from "./onr-v1/corp/operations/netwatch-credit-voucher";
 import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
+import { offSiteBackupsImplementation } from "./onr-v1/corp/operations/off-site-backups";
+import { overtimeIncentivesImplementation } from "./onr-v1/corp/operations/overtime-incentives";
+import { planningConsultantsImplementation } from "./onr-v1/corp/operations/planning-consultants";
+import { powerGridOverloadImplementation } from "./onr-v1/corp/operations/power-grid-overload";
 import { projectConsultantsImplementation } from "./onr-v1/corp/operations/project-consultants";
 import { punitiveCounterstrikeImplementation } from "./onr-v1/corp/operations/punitive-counterstrike";
 import { scorchedEarthImplementation } from "./onr-v1/corp/operations/scorched-earth";
+import { silverLiningRecoveryProtocolImplementation } from "./onr-v1/corp/operations/silver-lining-recovery-protocol";
 import { systematicLayoffsImplementation } from "./onr-v1/corp/operations/systematic-layoffs";
 import { teamRestructuringImplementation } from "./onr-v1/corp/operations/team-restructuring";
+import { trojanHorseImplementation } from "./onr-v1/corp/operations/trojan-horse";
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
@@ -488,18 +503,26 @@ export const CARD_IMPLEMENTATIONS = [
   auditOfCallRecordsImplementation,
   chanceObservationImplementation,
   closedAccountsImplementation,
+  corporateDetectiveAgencyImplementation,
   datapoolByZetatechImplementation,
   dayShiftImplementation,
+  edgerunnerIncTempsImplementation,
   efficiencyExpertsImplementation,
   falsifiedTransactionsExpertImplementation,
   managementShakeUpImplementation,
   netwatchCreditVoucherImplementation,
   nightShiftImplementation,
+  offSiteBackupsImplementation,
+  overtimeIncentivesImplementation,
+  planningConsultantsImplementation,
+  powerGridOverloadImplementation,
   projectConsultantsImplementation,
   punitiveCounterstrikeImplementation,
   scorchedEarthImplementation,
+  silverLiningRecoveryProtocolImplementation,
   systematicLayoffsImplementation,
   teamRestructuringImplementation,
+  trojanHorseImplementation,
   urbanRenewalImplementation,
   bbsWhisperingCampaignImplementation,
   bloodCatImplementation,
@@ -507,15 +530,22 @@ export const CARD_IMPLEMENTATIONS = [
   chicagoBranchImplementation,
   corporateNegotiatingCenterImplementation,
   corprunnersShatteredRemainsImplementation,
+  cowboySysopImplementation,
   dataMasonsHostingImplementation,
   departmentOfTruthEnhancementImplementation,
+  disinfectantIncImplementation,
   encoderIncImplementation,
   esaContractImplementation,
+  euromarketConsortiumImplementation,
   experimentalAiImplementation,
   fortressArchitectsImplementation,
   holovidCampaignImplementation,
   informationLaunderingImplementation,
+  krumzImplementation,
+  newsgroupTauntingImplementation,
+  omniscienceFoundationImplementation,
   pacificaRegionalAiImplementation,
+  reschedulerImplementation,
   skaldervikenSaBetaTestSiteImplementation,
   soloSquadImplementation,
   remoteFacilityImplementation,

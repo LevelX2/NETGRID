@@ -86,9 +86,42 @@ const IMPLEMENTED_VIRUS_COUNTER_LOCATION =
 const IMPLEMENTED_SCORED_AGENDA_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/corp/agendas";
 
+const IMPLEMENTED_CORP_UTILITY_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/corp";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
+  "onr_v1_286_corporate-detective-agency":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/corporate-detective-agency.ts",
+  "onr_v1_289_edgerunner-inc-temps":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/edgerunner-inc-temps.ts",
+  "onr_v1_296_off-site-backups":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/off-site-backups.ts",
+  "onr_v1_297_overtime-incentives":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/overtime-incentives.ts",
+  "onr_v1_298_planning-consultants":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/planning-consultants.ts",
+  "onr_v1_299_power-grid-overload":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/power-grid-overload.ts",
+  "onr_v1_303_silver-lining-recovery-protocol":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/silver-lining-recovery-protocol.ts",
+  "onr_v1_306_trojan-horse":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/trojan-horse.ts",
+  "onr_v1_316_cowboy-sysop":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/cowboy-sysop.ts",
+  "onr_v1_319_disinfectant-inc":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts",
+  "onr_v1_322_euromarket-consortium":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/euromarket-consortium.ts",
+  "onr_v1_330_krumz":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/krumz.ts",
+  "onr_v1_332_newsgroup-taunting":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/newsgroup-taunting.ts",
+  "onr_v1_333_omniscience-foundation":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/omniscience-foundation.ts",
+  "onr_v1_336_rescheduler":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/rescheduler.ts",
   "onr_v1_001_afreet":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/afreet.ts",
   "onr_v1_045_newsgroup-filter":
@@ -842,6 +875,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for scored agenda on-score, scored-area ability or persistent scored modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_SCORED_AGENDA_LOCATION);
+  }
+  if (implementation.corpUtility) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Corp utility operation/node behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_CORP_UTILITY_LOCATION);
   }
 
   return {

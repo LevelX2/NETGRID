@@ -86,6 +86,10 @@ const AMOUNT_KEYS = [
   "dieRoll",
   "randomCounterAfter",
   "returnedCount",
+  "movedCardCount",
+  "virusCounterAvoided",
+  "disinfectantCreditsPaid",
+  "stolenAgendaAdvancementCountersLastTurn",
 ] as const;
 
 const TARGET_KEYS = [
@@ -103,6 +107,7 @@ const TARGET_KEYS = [
   "targetServerLabel",
   "targetVisibility",
   "choiceVisibility",
+  "restrictedActionSequence",
   "redactedKind",
   "sourceTrashed",
 ] as const;

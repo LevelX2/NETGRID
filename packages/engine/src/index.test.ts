@@ -1966,11 +1966,14 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
-          action.payload?.cardId === boonId ||
-          action.payload?.cardId === branchId ||
-          action.payload?.cardId === euromarketId,
+          action.payload?.cardId === boonId || action.payload?.cardId === branchId,
       ),
     ).toBe(false);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) => action.payload?.cardId === euromarketId,
+      ),
+    ).toBe(true);
     removeEverywhere(state, euromarketId);
     state.corp.archives.push(euromarketId);
     state.cardInstances[euromarketId] = {
@@ -3465,23 +3468,12 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       faceup: true,
       rezzed: true,
     };
-    const disinfectantLegal = mustAction(
-      disinfectant,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "remove_virus_counter" &&
-        action.payload?.targetCardId === virusTargetId,
-    );
-    const spentCounter = structuredClone(disinfectant);
-    setCardCounterForTest(spentCounter, virusTargetId, "virus", 0);
-    const spentResult = applyAction(spentCounter, {
-      matchId: spentCounter.matchId,
-      side: "corp",
-      actionId: disinfectantLegal.actionId,
-      clientKnownStateVersion: spentCounter.stateVersion,
-    });
-    expect(spentResult.ok).toBe(false);
+    expect(
+      getLegalActions(disinfectant, "corp").some(
+        (action) => action.payload?.v1917AssetAbility === "remove_virus_counter",
+      ),
+    ).toBe(false);
+    expect(disinfectant.cardInstances[virusTargetId]?.counters?.virus).toBe(1);
 
     let trace = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.programSubtypeHosting("spotcheck-kiribati-link"),
@@ -7527,6 +7519,236 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     );
     expect(cardImplementationForDefinitionId("onr_v1_098_lucidrine-booster-drug")).toBeUndefined();
     expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeUndefined();
+  });
+
+  it("migrates P3.51 Corp utility operations and nodes into CardImplementation coverage", () => {
+    const p351Cards = [
+      "onr_v1_297_overtime-incentives",
+      "onr_v1_289_edgerunner-inc-temps",
+      "onr_v1_296_off-site-backups",
+      "onr_v1_298_planning-consultants",
+      "onr_v1_306_trojan-horse",
+      "onr_v1_303_silver-lining-recovery-protocol",
+      "onr_v1_286_corporate-detective-agency",
+      "onr_v1_299_power-grid-overload",
+      "onr_v1_322_euromarket-consortium",
+      "onr_v1_336_rescheduler",
+      "onr_v1_316_cowboy-sysop",
+      "onr_v1_333_omniscience-foundation",
+      "onr_v1_319_disinfectant-inc",
+      "onr_v1_332_newsgroup-taunting",
+      "onr_v1_330_krumz",
+    ] as const;
+
+    for (const definitionId of p351Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_319_disinfectant-inc")
+        ?.corpUtility,
+    ).toMatchObject({ kind: "disinfectant_avoid_virus_counter" });
+    expect(
+      cardImplementationForDefinitionId("onr_v1_330_krumz")?.corpUtility,
+    ).toMatchObject({ kind: "krumz_trace_bit" });
+  });
+
+  it("uses P3.51 Silver Lining advancement history and Omniscience/Disinfectant hooks", () => {
+    let silver = apply(
+      createGameAfterSetup({
+        seed: "p351-silver-lining-formula",
+        runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          id: "p351_silver_corp",
+          name: "P3.51 Silver Corp",
+          cards: [
+            { id: "onr_v1_303_silver-lining-recovery-protocol", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+              (card) =>
+                card.id !== "onr_v1_303_silver-lining-recovery-protocol",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    silver.corp.credits = 5;
+    moveCorpCardToHq(silver, "onr_v1_303_silver-lining-recovery-protocol");
+    silver.runnerTurnFlags = {
+      ...(silver.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: true,
+      stolenAgendaAdvancementCountersLastTurn: 4,
+    };
+    silver = apply(
+      silver,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(silver, action) ===
+          "onr_v1_303_silver-lining-recovery-protocol",
+    );
+    expect(silver.corp.credits).toBe(17);
+    expect(silver.eventLog.at(-1)?.publicPayload).toMatchObject({
+      gainedCredits: 12,
+    });
+
+    let omni = apply(
+      createGameAfterSetup({
+        seed: "p351-omniscience-extra-tag",
+        runnerDeck: MECHANIC_SMOKE_DECKS.assetNodeEffects.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp,
+          id: "p351_omni_corp",
+          name: "P3.51 Omni Corp",
+          cards: [
+            { id: "onr_v1_333_omniscience-foundation", quantity: 1 },
+            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.assetNodeEffects.corp.cards.filter(
+              (card) =>
+                card.id !== "onr_v1_333_omniscience-foundation" &&
+                card.id !== "onr_v1_306_trojan-horse",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    omni.corp.credits = 10;
+    omni.runner.tags = 0;
+    const omniId = moveCorpCardToHq(omni, "onr_v1_333_omniscience-foundation");
+    omni = apply(
+      omni,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === omniId &&
+        action.payload?.serverId === "new_remote",
+    );
+    omni = apply(
+      omni,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === omniId,
+    );
+    moveCorpCardToHq(omni, "onr_v1_306_trojan-horse");
+    omni.runnerTurnFlags = {
+      ...(omni.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: true,
+    };
+    omni = apply(
+      omni,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(omni, action) === "onr_v1_306_trojan-horse",
+    );
+    expect(omni.runner.tags).toBe(1);
+    omni = apply(omni, "corp", (action) => action.type === "end_turn");
+    expect(omni.runner.tags).toBe(2);
+    expect(omni.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerTagsAfter: 2,
+    });
+
+    let disinfectant = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p351-disinfectant-avoid-virus",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.counterRecurring.runner,
+          id: "p351_disinfectant_runner",
+          name: "P3.51 Disinfectant Runner",
+          cards: [
+            { id: "onr_v1_009_butcher-boy", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.counterRecurring.runner.cards.filter(
+              (card) => card.id !== "onr_v1_009_butcher-boy",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.counterRecurring.corp,
+          id: "p351_disinfectant_corp",
+          name: "P3.51 Disinfectant Corp",
+          cards: [
+            { id: "onr_v1_319_disinfectant-inc", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.counterRecurring.corp.cards.filter(
+              (card) => card.id !== "onr_v1_319_disinfectant-inc",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    disinfectant.corp.credits = 3;
+    const disinfectantId = moveCorpCardToHq(
+      disinfectant,
+      "onr_v1_319_disinfectant-inc",
+    );
+    removeEverywhere(disinfectant, disinfectantId);
+    const disinfectantServer = {
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    } as (typeof disinfectant.corp.servers)[number];
+    disinfectant.corp.servers.push(disinfectantServer);
+    disinfectantServer.root.push(disinfectantId);
+    disinfectant.cardInstances[disinfectantId] = {
+      ...disinfectant.cardInstances[disinfectantId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      faceup: true,
+      rezzed: true,
+    };
+    const butcherId = installRunnerProgramForTest(
+      disinfectant,
+      "onr_v1_009_butcher-boy",
+    );
+    for (const cardId of disinfectant.corp.hq.slice()) {
+      removeEverywhere(disinfectant, cardId);
+      disinfectant.corp.archives.push(cardId);
+      disinfectant.cardInstances[cardId] = {
+        ...disinfectant.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "archives" },
+      };
+    }
+    moveCorpCardToHq(disinfectant, "simple_economy_operation");
+    disinfectant = apply(
+      disinfectant,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    disinfectant = apply(
+      disinfectant,
+      "runner",
+      (action) =>
+        action.type === "access_card" ||
+        action.type === "steal_agenda" ||
+        action.type === "decline_trash",
+    );
+    expect(cardCounterAmount(disinfectant, butcherId, "virus")).toBe(0);
+    expect(disinfectant.corp.credits).toBe(2);
+    expect(disinfectant.eventLog.at(-1)?.publicPayload).toMatchObject({
+      amounts: {
+        virusCounterAvoided: 1,
+        disinfectantCreditsPaid: 1,
+      },
+    });
   });
 
   it("starts Stumble through Wilderspace runs with a temporary trace-link bonus from CardImplementation", () => {
@@ -25140,9 +25362,9 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       "corp",
       (action) => action.type === "mandatory_draw",
     );
-    const runnerProgramId = installRunnerProgramForTest(
+    const corpTargetId = putCorpRootInRemote(
       cowboyState,
-      "simple_decoder",
+      "onr_v1_309_bbs-whispering-campaign",
     );
     const cowboyId = moveCorpCardToHq(cowboyState, "onr_v1_316_cowboy-sysop");
     cowboyState = apply(
@@ -25167,16 +25389,20 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
       cowboyState,
       "corp",
       (action) =>
-        action.payload?.v1917AssetAbility === "trash_installed_runner_card" &&
-        action.payload?.targetCardId === runnerProgramId,
+        action.payload?.v1951CorpUtilityAbility ===
+          "cowboy_sysop_uninstall_corp_card_to_hq" &&
+        action.payload?.targetCardId === corpTargetId,
     );
 
-    expect(cowboyState.runner.heap).toContain(runnerProgramId);
-    expect(cowboyState.runner.rig.programs).not.toContain(runnerProgramId);
+    expect(cowboyState.corp.hq).toContain(corpTargetId);
+    expect(
+      cowboyState.corp.servers.some((server) =>
+        server.root.includes(corpTargetId),
+      ),
+    ).toBe(false);
     expect(cowboyState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_trash_installed_runner_card",
-      trashedCardDefinitionId: "simple_decoder",
+      hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
     });
     expect(
       JSON.stringify(cowboyState.eventLog.at(-1)?.publicPayload),
@@ -25225,38 +25451,14 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
         sourceDefinition(disinfectantState, action) ===
           "onr_v1_319_disinfectant-inc",
     );
-    const disinfectantInitial = structuredClone(disinfectantState);
-    const disinfectantReplayStart = disinfectantState.eventLog.length;
-
-    disinfectantState = apply(
-      disinfectantState,
-      "corp",
-      (action) =>
-        action.payload?.v1917AssetAbility === "remove_virus_counter" &&
-        action.payload?.targetCardId === virusTargetId,
-    );
-
+    expect(
+      getLegalActions(disinfectantState, "corp").some(
+        (action) => action.payload?.v1917AssetAbility === "remove_virus_counter",
+      ),
+    ).toBe(false);
     expect(
       disinfectantState.cardInstances[virusTargetId]?.counters?.virus,
-    ).toBe(1);
-    expect(disinfectantState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1917_remove_virus_counter",
-      removedCounterAmount: 1,
-      remainingCounters: 1,
-      targetCardDefinitionId: "simple_decoder",
-    });
-    expect(
-      JSON.stringify(disinfectantState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(/"privatePayload"|"cardInstances"|"hq"|"rd"/);
-    const disinfectantReplay = replayEvents(
-      disinfectantInitial,
-      disinfectantState.eventLog.slice(disinfectantReplayStart),
-    );
-    expect(disinfectantReplay.ok).toBe(true);
-    expect(hashState(disinfectantReplay.state)).toBe(
-      hashState(disinfectantState),
-    );
+    ).toBe(2);
   });
 
   it("triggers Setup! and TRAP! only from legal access windows without leaking hidden payloads", () => {
@@ -40677,6 +40879,15 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     moveCorpCardToHq(state, "onr_v1_300_project-consultants");
     moveCorpCardToHq(state, "onr_v1_303_silver-lining-recovery-protocol");
     moveCorpCardToHq(state, "onr_v1_305_team-restructuring");
+    state.runnerTurnFlags = {
+      ...(state.runnerTurnFlags ?? {
+        stoleAgendaThisTurn: false,
+        stoleAgendaLastTurn: false,
+      }),
+      stoleAgendaThisTurn: false,
+      stoleAgendaLastTurn: true,
+      stolenAgendaAdvancementCountersLastTurn: 1,
+    };
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -40734,7 +40945,6 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     );
     expect(state.corp.credits).toBe(creditsBefore + 3);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1919OperationAbility: "gain_credits",
       gainedCredits: 3,
       corpCreditsAfter: creditsBefore + 3,
     });
@@ -42659,9 +42869,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     );
     cowboy.corp.credits = 20;
     cowboy.runner.credits = 20;
-    const resourceId = installRunnerResourceForTest(
+    const corpTargetId = putCorpRootInRemote(
       cowboy,
-      "onr_v1_158_danshis-second-id",
+      "onr_v1_309_bbs-whispering-campaign",
     );
     const cowboyId = moveCorpCardToHq(cowboy, "onr_v1_316_cowboy-sysop");
     cowboy = apply(
@@ -42683,17 +42893,18 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
       "corp",
       (action) =>
         action.type === "gain_credit" &&
-        action.payload?.v1917AssetAbility === "trash_installed_runner_card" &&
-        action.payload?.targetCardId === resourceId,
+        action.payload?.v1951CorpUtilityAbility ===
+          "cowboy_sysop_uninstall_corp_card_to_hq" &&
+        action.payload?.targetCardId === corpTargetId,
     );
     const removedTarget = structuredClone(cowboy);
-    removeEverywhere(removedTarget, resourceId);
-    removedTarget.runner.heap.push(resourceId);
-    removedTarget.cardInstances[resourceId] = {
-      ...removedTarget.cardInstances[resourceId]!,
-      zone: { side: "runner", zone: "heap" },
-      faceup: true,
-      rezzed: true,
+    removeEverywhere(removedTarget, corpTargetId);
+    removedTarget.corp.hq.push(corpTargetId);
+    removedTarget.cardInstances[corpTargetId] = {
+      ...removedTarget.cardInstances[corpTargetId]!,
+      zone: { side: "corp", zone: "hq" },
+      faceup: false,
+      rezzed: false,
     };
     const drift = applyAction(removedTarget, {
       matchId: removedTarget.matchId,
@@ -42704,10 +42915,9 @@ describe("Originalset Spotcheck 2026-05-16 Corp Operation/Asset Node hardening",
     });
     expect(drift.ok).toBe(false);
     cowboy = apply(cowboy, "corp", (action) => action.actionId === cowboyAction.actionId);
-    expect(cowboy.runner.heap).toContain(resourceId);
+    expect(cowboy.corp.hq).toContain(corpTargetId);
     expect(cowboy.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v1917_trash_installed_runner_card",
-      trashedCardDefinitionId: "onr_v1_158_danshis-second-id",
+      hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
     });
 
     for (const definitionId of [

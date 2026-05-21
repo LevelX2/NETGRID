@@ -985,6 +985,9 @@ export type GameState = {
   runnerTurnFlags?: {
     stoleAgendaThisTurn: boolean;
     stoleAgendaLastTurn: boolean;
+    stolenAgendaAdvancementCountersThisTurn?: number;
+    stolenAgendaAdvancementCountersLastTurn?: number;
+    runnerReceivedTagThisTurn?: boolean;
     stoleResearchAgendaThisTurn?: boolean;
     stoleGrayOpsAgendaThisTurn?: boolean;
     stoleBlackOpsAgendaThisTurn?: boolean;
@@ -1013,6 +1016,7 @@ export type GameState = {
     scoredBlackOpsAgendaThisTurn: boolean;
     scoredBlackOpsAgendaLastTurn: boolean;
     edgerunnerTempsInstallActionsRemaining?: number;
+    disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   ambushHarness?: {
     enabled: boolean;

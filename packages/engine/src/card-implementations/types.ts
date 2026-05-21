@@ -3,6 +3,7 @@ import type {
   CardAbilityImplementation,
   CardAccessEffectImplementation,
   CardAccessHookImplementation,
+  CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardIcebreakerAbilityImplementation,
@@ -45,6 +46,7 @@ export type CardImplementationDefinition = {
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
+  corpUtility?: CardCorpUtilityImplementation;
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";

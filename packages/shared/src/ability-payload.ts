@@ -21,6 +21,7 @@ export const LEGACY_ABILITY_PAYLOAD_FIELDS = [
   "v1922RunnerEventAbility",
   "v1922RunnerHardwareAbility",
   "v1922RunnerProgramAbility",
+  "v1951CorpUtilityAbility",
   "agendaAbility",
   "resourceAbility",
   "runnerAbility",

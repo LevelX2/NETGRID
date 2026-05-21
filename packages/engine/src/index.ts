@@ -258,6 +258,7 @@ import type {
   CardAccessEffectImplementation,
   CardAccessEffectStepImplementation,
   CardAccessZone,
+  CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
   CardFlatlineReplacementSourceImplementation,
@@ -2186,6 +2187,9 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     runnerTurnFlags: {
       stoleAgendaThisTurn: false,
       stoleAgendaLastTurn: false,
+      stolenAgendaAdvancementCountersThisTurn: 0,
+      stolenAgendaAdvancementCountersLastTurn: 0,
+      runnerReceivedTagThisTurn: false,
       stoleResearchAgendaThisTurn: false,
       stoleGrayOpsAgendaThisTurn: false,
       stoleBlackOpsAgendaThisTurn: false,
@@ -2198,6 +2202,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
     corpTurnFlags: {
       scoredBlackOpsAgendaThisTurn: false,
       scoredBlackOpsAgendaLastTurn: false,
+      disinfectantUsedSourceIdsThisTurn: [],
     },
   };
 
@@ -3607,7 +3612,10 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID) {
+    if (
+      definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID ||
+      hasCorpUtilityKind(state, assetId, "rescheduler_hq_shuffle_draw")
+    ) {
       actions.push(
         action(
           state,
@@ -3620,27 +3628,33 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
-    if (definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID) {
-      for (const targetCardId of runnerInstalledCardIds(state).sort()) {
+    if (
+      definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID ||
+      hasCorpUtilityKind(state, assetId, "cowboy_sysop_uninstall_corp_card_to_hq")
+    ) {
+      for (const targetCardId of corpInstalledCardIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
         actions.push(
           action(
             state,
             "corp",
             "gain_credit",
-            `${definition.title}: ${targetDefinition.title} trashen`,
+            `${definition.title}: ${targetDefinition.title} nach HQ nehmen`,
             assetId,
             [{ clicks: 1 }],
             {
               cardId: assetId,
-              v1917AssetAbility: "trash_installed_runner_card",
+              v1951CorpUtilityAbility: "cowboy_sysop_uninstall_corp_card_to_hq",
               targetCardId,
             },
           ),
         );
       }
     }
-    if (definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID) {
+    if (
+      definition.id === DISINFECTANT_VIRUS_COUNTER_ASSET_ID &&
+      !hasCorpUtilityKind(state, assetId, "disinfectant_avoid_virus_counter")
+    ) {
       for (const targetCardId of visibleVirusCounterTargetIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);
         actions.push(
@@ -5542,6 +5556,27 @@ function virusCounterImplementationForCard(
   return virusCounterImplementationForDefinition(definitionFor(state, cardId).id);
 }
 
+function corpUtilityImplementationForDefinition(
+  definitionId: CardDefinitionId,
+): CardCorpUtilityImplementation | undefined {
+  return cardImplementationForDefinitionId(definitionId)?.corpUtility;
+}
+
+function corpUtilityImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardCorpUtilityImplementation | undefined {
+  return corpUtilityImplementationForDefinition(definitionFor(state, cardId).id);
+}
+
+function hasCorpUtilityKind(
+  state: GameState,
+  cardId: CardInstanceId,
+  kind: CardCorpUtilityImplementation["kind"],
+): boolean {
+  return corpUtilityImplementationForCard(state, cardId)?.kind === kind;
+}
+
 function installedRunnerVirusSourceIds(
   state: GameState,
   predicate?: (implementation: CardVirusCounterImplementation) => boolean,
@@ -7199,11 +7234,12 @@ function newsgroupTauntingRunStartTax(
   state: GameState,
 ): { amount: number; sourceDefinitionIds: CardDefinitionId[] } {
   const sourceDefinitionIds = rezzedCorpRootCardIds(state)
-    .map((cardId) => definitionFor(state, cardId).id)
     .filter(
-      (definitionId) =>
-        definitionId === NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
-    );
+      (cardId) =>
+        definitionFor(state, cardId).id === NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID ||
+        hasCorpUtilityKind(state, cardId, "newsgroup_taunting_run_start_tax"),
+    )
+    .map((cardId) => definitionFor(state, cardId).id);
   return {
     amount: sourceDefinitionIds.length,
     sourceDefinitionIds,
@@ -7840,6 +7876,41 @@ function performAction(
           hiddenZoneBarrier: true,
           hiddenZoneAction: "v1917_trash_installed_runner_card",
           trashedCardDefinitionId: targetDefinitionId,
+        };
+        return;
+      }
+      if (
+        legalAction.payload?.v1951CorpUtilityAbility ===
+        "cowboy_sysop_uninstall_corp_card_to_hq"
+      ) {
+        if (legalAction.side !== "corp")
+          throw new Error("Nur die Korp darf Cowboy Sysop nutzen.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
+          throw new Error("Cowboy Sysop ist nicht rezzed installiert.");
+        if (
+          !hasCorpUtilityKind(
+            state,
+            sourceCardId,
+            "cowboy_sysop_uninstall_corp_card_to_hq",
+          )
+        )
+          throw new Error("Die Cowboy-Sysop-Faehigkeit passt nicht zur Karte.");
+        const targetCardId = String(legalAction.payload?.targetCardId ?? "");
+        if (!corpInstalledCardIds(state).includes(targetCardId))
+          throw new Error("Das Cowboy-Sysop-Ziel ist nicht mehr installiert.");
+        const targetDefinitionId = definitionFor(state, targetCardId).id;
+        const targetIdentityKnown = publicInstalledCorpCardIdentityKnown(
+          state,
+          targetCardId,
+        );
+        uninstallCorpInstalledCardToHq(state, targetCardId);
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "v1951_cowboy_sysop_uninstall_to_hq",
+          movedCardCount: 1,
+          ...(targetIdentityKnown ? { movedCardDefinitionId: targetDefinitionId } : {}),
         };
         return;
       }
@@ -10731,7 +10802,10 @@ function rezCard(
     faceup: true,
     ...(proteusVariableIceState ? { proteusVariableIceState } : {}),
   };
-  if (definition.id === KRUMZ_TRACE_ASSET_CARD_ID) {
+  if (
+    definition.id === KRUMZ_TRACE_ASSET_CARD_ID &&
+    !cardImplementationForDefinitionId(definition.id)
+  ) {
     setCardCounter(state, cardId as CardInstanceId, "bit", 1);
   }
   if (definition.id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID) {
@@ -13974,6 +14048,12 @@ function stealAgenda(state: GameState, cardId: string, legalAction?: LegalAction
   }
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = true;
+  flags.stolenAgendaAdvancementCountersThisTurn =
+    Math.max(0, Math.floor(flags.stolenAgendaAdvancementCountersThisTurn ?? 0)) +
+    Math.max(
+      0,
+      Math.floor(mustInstance(state.cardInstances, cardId).advancementCounters),
+    );
   const definition = definitionFor(state, cardId);
   if (cardHasSubtype(definition, "research"))
     flags.stoleResearchAgendaThisTurn = true;
@@ -14813,12 +14893,17 @@ function applyV181SuccessfulRunCounterTriggers(
     );
     if (targetIceIds.length === 1) {
       const targetIceId = targetIceIds[0]!;
-      addCardCounter(state, targetIceId, "virus", pattelSources.length);
+      const added = addVirusCounterWithDisinfectantPrevention(
+        state,
+        targetIceId,
+        pattelSources.length,
+        legalAction,
+      );
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           v181RunnerProgramAbility: "pattels_virus_counter",
-          pattelsVirusCounterAdded: pattelSources.length,
+          pattelsVirusCounterAdded: added,
           targetCardDefinitionId: definitionFor(state, targetIceId).id,
           remainingCounters: cardCounter(state, targetIceId, "virus"),
         };
@@ -14840,11 +14925,16 @@ function applyV181SuccessfulRunCounterTriggers(
       continue;
     const definition = definitionFor(state, cardId);
     if (trigger.target === "source") {
-      addCardCounter(state, cardId, "virus", trigger.amount);
+      const added = addVirusCounterWithDisinfectantPrevention(
+        state,
+        cardId,
+        trigger.amount,
+        legalAction,
+      );
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          virusCounterAdded: trigger.amount,
+          virusCounterAdded: added,
           virusCounterType: implementation.counterKind,
           virusCounterLocation: "source",
           sourceDefinitionId: definition.id,
@@ -14856,20 +14946,23 @@ function applyV181SuccessfulRunCounterTriggers(
     const serverId = run.attackedServerId;
     if (implementation.counterKind === "pox") {
       const current = poxCountersForServer(state, serverId);
+      const added = preventOneVirusCounterWithDisinfectant(state).prevented
+        ? 0
+        : trigger.amount;
       state.poxCountersByServer = {
         ...(state.poxCountersByServer ?? {}),
-        [serverId]: current + trigger.amount,
+        [serverId]: current + added,
       };
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           v181RunnerProgramAbility: "pox_counter",
-          virusCounterAdded: trigger.amount,
+          virusCounterAdded: added,
           virusCounterType: implementation.counterKind,
           virusCounterLocation: "server",
           sourceDefinitionId: definition.id,
-          poxCounterAdded: trigger.amount,
-          poxCountersAfter: current + trigger.amount,
+          poxCounterAdded: added,
+          poxCountersAfter: current + added,
           targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
         };
       }
@@ -14880,19 +14973,22 @@ function applyV181SuccessfulRunCounterTriggers(
         0,
         Math.floor(state.faitAccompliCountersByServer?.[serverId] ?? 0),
       );
+      const added = preventOneVirusCounterWithDisinfectant(state).prevented
+        ? 0
+        : trigger.amount;
       state.faitAccompliCountersByServer = {
         ...(state.faitAccompliCountersByServer ?? {}),
-        [serverId]: current + trigger.amount,
+        [serverId]: current + added,
       };
       if (legalAction) {
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
-          virusCounterAdded: trigger.amount,
+          virusCounterAdded: added,
           virusCounterType: implementation.counterKind,
           virusCounterLocation: "server",
           sourceDefinitionId: definition.id,
-          faitCounterAdded: trigger.amount,
-          faitCountersAfter: current + trigger.amount,
+          faitCounterAdded: added,
+          faitCountersAfter: current + added,
           targetServerLabel: publicServerLabel(state, serverId) ?? serverId,
         };
       }
@@ -14982,16 +15078,45 @@ function resolvePattelsVirusCounterChoice(
     1,
     Math.floor(Number(choice.source.match(/amount=(\d+)/)?.[1] ?? 1)),
   );
-  addCardCounter(state, targetIceId, "virus", amount);
+  const added = addVirusCounterWithDisinfectantPrevention(
+    state,
+    targetIceId,
+    amount,
+    legalAction,
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v181RunnerProgramAbility: "pattels_virus_counter",
-    pattelsVirusCounterAdded: amount,
+    pattelsVirusCounterAdded: added,
     targetCardDefinitionId: definitionFor(state, targetIceId).id,
     remainingCounters: cardCounter(state, targetIceId, "virus"),
     choiceVisibility: "public",
   };
   delete state.pendingChoice;
+}
+
+function resolveOmniscienceFoundationEndTurnTag(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.runnerTurnFlags?.runnerReceivedTagThisTurn !== true) return;
+  const sourceIds = rezzedCorpRootCardIds(state)
+    .filter((cardId) =>
+      hasCorpUtilityKind(state, cardId, "omniscience_foundation_end_turn_tag"),
+    )
+    .sort();
+  if (sourceIds.length === 0) return;
+  const tagsBefore = state.runner.tags;
+  for (const _sourceId of sourceIds) {
+    addRunnerTagsWithPrevention(state, legalAction, 1, "omniscience_foundation");
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1951CorpUtilityAbility: "omniscience_foundation_end_turn_tag",
+    omniscienceFoundationTagsAdded: Math.max(0, state.runner.tags - tagsBefore),
+    sourceCount: sourceIds.length,
+    runnerTagsAfter: state.runner.tags,
+  };
 }
 
 function endTurn(
@@ -15006,10 +15131,15 @@ function endTurn(
       legalAction,
     );
     if (state.winner) return;
+    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
     resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
     flags.stoleAgendaLastTurn = flags.stoleAgendaThisTurn;
+    flags.stolenAgendaAdvancementCountersLastTurn =
+      flags.stolenAgendaAdvancementCountersThisTurn ?? 0;
     flags.stoleAgendaThisTurn = false;
+    flags.stolenAgendaAdvancementCountersThisTurn = 0;
+    flags.runnerReceivedTagThisTurn = false;
     flags.stoleResearchAgendaThisTurn = false;
     flags.stoleGrayOpsAgendaThisTurn = false;
     flags.stoleBlackOpsAgendaThisTurn = false;
@@ -15019,12 +15149,14 @@ function endTurn(
     flags.runnerActionsTakenThisTurn = 0;
     delete flags.lastDamageRunnerActionOrdinal;
   } else {
+    resolveOmniscienceFoundationEndTurnTag(state, legalAction);
     const corpFlags = ensureCorpTurnFlags(state);
     corpFlags.scoredBlackOpsAgendaLastTurn =
       corpFlags.scoredBlackOpsAgendaThisTurn;
     corpFlags.scoredBlackOpsAgendaThisTurn = false;
     resolveAcmeSavingsAndLoanEndOfCorpTurn(state, legalAction);
     if (state.winner) return;
+    ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   }
   delete state.cancelledDamagePreventionSourceIdsUntilEndOfTurn;
   startDiscardPhase(state, side, legalAction);
@@ -15351,6 +15483,8 @@ function startCorpTurn(
   clearValuPakProgramInstallFlags(state);
   clearRovingSubmarineActivityMarkers(state);
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
+  ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   applyCorpStartOfTurnEffects(state, effects);
 }
 
@@ -15367,6 +15501,9 @@ function startRunnerTurn(
   const flags = ensureRunnerTurnFlags(state);
   flags.stoleAgendaThisTurn = false;
   flags.stoleAgendaLastTurn = false;
+  flags.stolenAgendaAdvancementCountersThisTurn = 0;
+  flags.stolenAgendaAdvancementCountersLastTurn = 0;
+  flags.runnerReceivedTagThisTurn = false;
   flags.stoleResearchAgendaThisTurn = false;
   flags.stoleGrayOpsAgendaThisTurn = false;
   flags.stoleBlackOpsAgendaThisTurn = false;
@@ -15383,6 +15520,7 @@ function startRunnerTurn(
   flags.bodyweightDataCrecheExtraRunPending = false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
   flags.startupImmolatorUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
   resolveBizarreEncryptionDelayedAgendas(state, effects);
@@ -15482,7 +15620,8 @@ function applyCorpStartOfTurnEffects(
   for (const cardId of rezzedCorpRootCardIds(state)) {
     const definitionId = definitionFor(state, cardId).id;
     if (
-      definitionId === KRUMZ_TRACE_ASSET_CARD_ID &&
+      (definitionId === KRUMZ_TRACE_ASSET_CARD_ID ||
+        hasCorpUtilityKind(state, cardId, "krumz_trace_bit")) &&
       cardCounter(state, cardId, "bit") <= 0
     ) {
       setCardCounter(state, cardId, "bit", 1);
@@ -16234,6 +16373,7 @@ function addRunnerTagsWithPrevention(
     state.runnerTagAvoidanceCredits = oneShotAvoidance - 1;
     const tagsAdded = Math.max(0, amount - 1);
     state.runner.tags += tagsAdded;
+    recordRunnerReceivedTags(state, tagsAdded);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       tagsAdded,
@@ -16259,12 +16399,17 @@ function resolveAddTagImminentEvent(
   const amount = numberPayload(event, "amount");
   const tagsAdded = Math.max(0, amount - preventedTags);
   state.runner.tags += tagsAdded;
+  recordRunnerReceivedTags(state, tagsAdded);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     tagsAdded,
     ...(preventedTags > 0 ? { preventedTags } : {}),
     runnerTagsAfter: state.runner.tags,
   };
+}
+
+function recordRunnerReceivedTags(state: GameState, amount: number): void {
+  if (amount > 0) ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = true;
 }
 
 function openEventModificationWindow(
@@ -18051,6 +18196,15 @@ function startReturnSourceToGripIfPaidChoice(
 
 function runnerStoleAgendaLastTurn(state: GameState): boolean {
   return state.runnerTurnFlags?.stoleAgendaLastTurn === true;
+}
+
+function runnerStolenAgendaAdvancementCountersLastTurn(
+  state: GameState,
+): number {
+  return Math.max(
+    0,
+    Math.floor(state.runnerTurnFlags?.stolenAgendaAdvancementCountersLastTurn ?? 0),
+  );
 }
 
 function runnerRunAttemptsLastTurn(state: GameState): number {
@@ -24400,7 +24554,10 @@ function startCorpRdTopReorderChoice(
   legalAction: LegalAction,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID)
+  if (
+    definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID &&
+    !hasCorpUtilityKind(state, sourceCardId, "corp_rd_top_reorder")
+  )
     throw new Error("Die R&D-Reorder-Quelle ist nicht Planning Consultants.");
   const topCards = state.corp.rd.slice(0, 5);
   if (topCards.length < 2)
@@ -24439,7 +24596,8 @@ function resolveCorpRdTopReorderChoice(
   const [, sourceCardId] = choice.source.split(":");
   if (
     !sourceCardId ||
-    definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID
+    (definitionFor(state, sourceCardId).id !== CORP_RD_TOP5_REORDER_OPERATION_CARD_ID &&
+      !hasCorpUtilityKind(state, sourceCardId, "corp_rd_top_reorder"))
   )
     throw new Error(
       "Die V1.9.22-R&D-Reorder-Choice gehoert nicht zu Planning Consultants.",
@@ -24478,7 +24636,10 @@ function startCorpArchivesToHqChoice(
   legalAction: LegalAction,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  if (definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID)
+  if (
+    definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID &&
+    !hasCorpUtilityKind(state, sourceCardId, "corp_archives_to_hq")
+  )
     throw new Error("Die Archives-Quelle ist nicht Off-Site Backups.");
   const archiveCards = state.corp.archives.filter(
     (cardId) => cardId !== sourceCardId,
@@ -24518,7 +24679,8 @@ function resolveCorpArchivesToHqChoice(
   const [, sourceCardId] = choice.source.split(":");
   if (
     !sourceCardId ||
-    definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID
+    (definitionFor(state, sourceCardId).id !== CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID &&
+      !hasCorpUtilityKind(state, sourceCardId, "corp_archives_to_hq"))
   )
     throw new Error(
       "Die V1.9.22-Archives-Choice gehoert nicht zu Off-Site Backups.",
@@ -25716,7 +25878,8 @@ function krumzTraceBitCardIds(state: GameState): CardInstanceId[] {
   return rezzedCorpRootCardIds(state)
     .filter(
       (cardId) =>
-        definitionFor(state, cardId).id === KRUMZ_TRACE_ASSET_CARD_ID &&
+        (definitionFor(state, cardId).id === KRUMZ_TRACE_ASSET_CARD_ID ||
+          hasCorpUtilityKind(state, cardId, "krumz_trace_bit")) &&
         cardCounter(state, cardId, "bit") > 0,
     )
     .sort();
@@ -27642,6 +27805,58 @@ function addCardCounter(
   );
 }
 
+function addVirusCounterWithDisinfectantPrevention(
+  state: GameState,
+  targetCardId: CardInstanceId,
+  amount: number,
+  legalAction?: LegalAction,
+): number {
+  if (!Number.isInteger(amount) || amount < 0)
+    throw new Error("Virus-Counter amount ist ungueltig.");
+  let added = 0;
+  let prevented = 0;
+  let creditsPaid = 0;
+  for (let index = 0; index < amount; index += 1) {
+    const prevention = preventOneVirusCounterWithDisinfectant(state);
+    if (prevention.prevented) {
+      prevented += 1;
+      creditsPaid += prevention.creditsPaid;
+      continue;
+    }
+    addCardCounter(state, targetCardId, "virus", 1);
+    added += 1;
+  }
+  if (legalAction && prevented > 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      virusCounterAvoided: prevented,
+      disinfectantCreditsPaid: creditsPaid,
+      corpCreditsAfter: state.corp.credits,
+    };
+  }
+  return added;
+}
+
+function preventOneVirusCounterWithDisinfectant(
+  state: GameState,
+): { prevented: boolean; creditsPaid: number } {
+  const flags = ensureCorpTurnFlags(state);
+  const used = new Set(flags.disinfectantUsedSourceIdsThisTurn ?? []);
+  const sourceId = rezzedCorpRootCardIds(state)
+    .filter((cardId) =>
+      hasCorpUtilityKind(state, cardId, "disinfectant_avoid_virus_counter"),
+    )
+    .filter((cardId) => !used.has(cardId))
+    .sort()[0];
+  if (!sourceId || state.corp.credits < 1) return { prevented: false, creditsPaid: 0 };
+  state.corp.credits -= 1;
+  flags.disinfectantUsedSourceIdsThisTurn = [
+    ...(flags.disinfectantUsedSourceIdsThisTurn ?? []),
+    sourceId,
+  ];
+  return { prevented: true, creditsPaid: 1 };
+}
+
 function spendCardCounter(
   state: GameState,
   cardId: CardInstanceId,
@@ -28987,6 +29202,8 @@ function canPlayCorpOperation(
       state,
       definition,
     ) && onPlayCardImplementationChoicesAreAvailable(state, definition);
+  const utility = corpUtilityImplementationForDefinition(definition.id);
+  if (utility) return canPlayCorpUtilityOperation(state, definition, utility);
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
   if (resolver) return resolver.canPlay?.(state) ?? true;
   return canPlayPrintedCostOnPlayImplementation(
@@ -29015,6 +29232,11 @@ function resolveCorpOperation(
     );
     return;
   }
+  const utility = corpUtilityImplementationForDefinition(definition.id);
+  if (utility) {
+    resolveCorpUtilityOperation(state, definition, legalAction, utility);
+    return;
+  }
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
   if (resolver) {
     resolver.resolve(state, legalAction);
@@ -29031,6 +29253,140 @@ function resolveCorpOperation(
     definition,
     cardId,
   );
+}
+
+function canPlayCorpUtilityOperation(
+  state: GameState,
+  definition: CardDefinition,
+  utility: CardCorpUtilityImplementation,
+): boolean {
+  switch (utility.kind) {
+    case "gain_restricted_install_actions":
+      return state.corp.hq.some((cardId) =>
+        isCorpInstallableCardType(definitionFor(state, cardId)),
+      );
+    case "corp_archives_to_hq":
+      return state.corp.archives.some((cardId) => {
+        const sourceCardId = state.corp.hq.find(
+          (candidate) => definitionFor(state, candidate).id === definition.id,
+        );
+        return cardId !== sourceCardId;
+      });
+    case "corp_rd_top_reorder":
+      return state.corp.rd.length >= 2;
+    case "trojan_horse_tag":
+      return runnerStoleAgendaLastTurn(state);
+    case "silver_lining_recovery":
+      return runnerStoleAgendaLastTurn(state);
+    case "trash_runner_resources_if_tagged":
+      return state.runner.tags > 0;
+    case "power_grid_overload":
+      return (
+        state.runner.tags > 0 &&
+        state.corp.credits > 0 &&
+        powerGridOverloadEligibleHardwareIds(state).length > 0
+      );
+    default:
+      return false;
+  }
+}
+
+function resolveCorpUtilityOperation(
+  state: GameState,
+  definition: CardDefinition,
+  legalAction: LegalAction,
+  utility: CardCorpUtilityImplementation,
+): void {
+  switch (utility.kind) {
+    case "gain_restricted_install_actions": {
+      if (!canPlayCorpUtilityOperation(state, definition, utility)) {
+        throw new Error(
+          "Edgerunner, Inc., Temps findet keine installierbare Korp-Karte.",
+        );
+      }
+      const flags = ensureCorpTurnFlags(state);
+      flags.edgerunnerTempsInstallActionsRemaining = utility.amount;
+      state.corp.clicks += utility.amount;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1951CorpUtilityAbility: "install_action_bundle",
+        v1922CorpOperationAbility: "install_action_bundle",
+        gainedActions: utility.amount,
+        restrictedActionSequence: "corp_install",
+        edgerunnerTempsInstallActionsRemaining:
+          flags.edgerunnerTempsInstallActionsRemaining,
+        corpClicksAfter: state.corp.clicks,
+      };
+      return;
+    }
+    case "corp_archives_to_hq": {
+      const sourceCardId = String(legalAction.payload?.cardId ?? "");
+      if (!sourceCardId || definitionFor(state, sourceCardId).id !== definition.id)
+        throw new Error("Off-Site Backups fehlt als Quelle.");
+      startCorpArchivesToHqChoice(state, sourceCardId, legalAction);
+      return;
+    }
+    case "corp_rd_top_reorder": {
+      const sourceCardId = String(legalAction.payload?.cardId ?? "");
+      if (!sourceCardId || definitionFor(state, sourceCardId).id !== definition.id)
+        throw new Error("Planning Consultants fehlt als Quelle.");
+      startCorpRdTopReorderChoice(state, sourceCardId, legalAction);
+      return;
+    }
+    case "trojan_horse_tag": {
+      if (!runnerStoleAgendaLastTurn(state))
+        throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
+      addRunnerTagsWithPrevention(state, legalAction, 1, "trojan_horse");
+      return;
+    }
+    case "silver_lining_recovery": {
+      if (!runnerStoleAgendaLastTurn(state))
+        throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
+      const advancementCounters = runnerStolenAgendaAdvancementCountersLastTurn(state);
+      const gainedCredits = advancementCounters * utility.multiplierPerAdvancementCounter;
+      credits(state, "corp", gainedCredits);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1951CorpUtilityAbility: "silver_lining_recovery",
+        stolenAgendaAdvancementCountersLastTurn: advancementCounters,
+        gainedCredits,
+        corpCreditsAfter: state.corp.credits,
+      };
+      return;
+    }
+    case "trash_runner_resources_if_tagged": {
+      requireRunnerTagged(state);
+      const targetIds = state.runner.rig.resources
+        .slice()
+        .sort()
+        .slice(0, utility.max);
+      const targetDefinitionIds = targetIds.map(
+        (cardId) => definitionFor(state, cardId).id,
+      );
+      for (const cardId of targetIds) {
+        if (!state.runner.rig.resources.includes(cardId)) continue;
+        trashRunnerInstalledCardToHeap(state, cardId);
+      }
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1951CorpUtilityAbility: "trash_runner_resources_if_tagged",
+        trashedResourceCount: targetIds.length,
+        trashedResourceDefinitionIds: targetDefinitionIds.join(","),
+      };
+      return;
+    }
+    case "power_grid_overload": {
+      requireRunnerTagged(state);
+      resolvePowerGridOverloadOperation(state, legalAction);
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1951CorpUtilityAbility: "power_grid_overload",
+      };
+      return;
+    }
+    default:
+      throw new Error("Diese Korp-Utility-Operation ist nicht spielbar.");
+  }
 }
 
 function hasPrintedCostOnPlayCardImplementation(
@@ -29133,6 +29489,29 @@ function removeFromAllZones(state: GameState, cardId: string): void {
   if (wasRunnerRigCard) clearCardCounters(state, cardId);
 }
 
+function publicInstalledCorpCardIdentityKnown(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const instance = state.cardInstances[cardId];
+  return instance?.faceup === true || instance?.rezzed === true;
+}
+
+function uninstallCorpInstalledCardToHq(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  const instance = mustInstance(state.cardInstances, cardId);
+  removeFromAllZones(state, cardId);
+  state.corp.hq.unshift(cardId);
+  state.cardInstances[cardId] = {
+    ...instance,
+    faceup: false,
+    rezzed: false,
+    zone: { side: "corp", zone: "hq" },
+  };
+}
+
 function ensureSpecialZones(state: GameState): SpecialZoneState {
   state.specialZones ??= { setAside: [], removedFromGame: [] };
   state.specialZones.setAside ??= [];
@@ -29146,6 +29525,9 @@ function ensureRunnerTurnFlags(
   const flags = (state.runnerTurnFlags ??= {
     stoleAgendaThisTurn: false,
     stoleAgendaLastTurn: false,
+    stolenAgendaAdvancementCountersThisTurn: 0,
+    stolenAgendaAdvancementCountersLastTurn: 0,
+    runnerReceivedTagThisTurn: false,
     stoleResearchAgendaThisTurn: false,
     stoleGrayOpsAgendaThisTurn: false,
     stoleBlackOpsAgendaThisTurn: false,
@@ -29167,6 +29549,9 @@ function ensureRunnerTurnFlags(
     bodyweightDataCrecheExtraRunUsedThisTurn: false,
     startupImmolatorUsedSourceIdsThisTurn: [],
   });
+  flags.stolenAgendaAdvancementCountersThisTurn ??= 0;
+  flags.stolenAgendaAdvancementCountersLastTurn ??= 0;
+  flags.runnerReceivedTagThisTurn ??= false;
   flags.stoleResearchAgendaThisTurn ??= false;
   flags.stoleGrayOpsAgendaThisTurn ??= false;
   flags.stoleBlackOpsAgendaThisTurn ??= false;
@@ -29205,6 +29590,7 @@ function ensureCorpTurnFlags(
   flags.scoredBlackOpsAgendaThisTurn ??= false;
   flags.scoredBlackOpsAgendaLastTurn ??= false;
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
+  flags.disinfectantUsedSourceIdsThisTurn ??= [];
   return flags;
 }
 

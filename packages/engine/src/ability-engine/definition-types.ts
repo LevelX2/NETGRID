@@ -44,6 +44,71 @@ export type CardLifecycleImplementation = {
   on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
 };
 
+export type CardCorpUtilityImplementation =
+  | {
+      kind: "gain_restricted_install_actions";
+      amount: 3;
+      mayStopEarly: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corp_archives_to_hq";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "corp_rd_top_reorder";
+      count: 5;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "trojan_horse_tag";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "silver_lining_recovery";
+      multiplierPerAdvancementCounter: 3;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "trash_runner_resources_if_tagged";
+      max: 2;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "power_grid_overload";
+      excludesSubtype: "cybernetics";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "rescheduler_hq_shuffle_draw";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "cowboy_sysop_uninstall_corp_card_to_hq";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "omniscience_foundation_end_turn_tag";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "disinfectant_avoid_virus_counter";
+      cost: { kind: "credit"; amount: 1 };
+      limit: "once_per_turn_per_source";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "newsgroup_taunting_run_start_tax";
+      amount: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "krumz_trace_bit";
+      amount: 1;
+      refresh: "start_of_corp_turn_after_use";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
 export type CardAccessHookImplementation =
   | {
       kind: "pre_access_rd_cut";
