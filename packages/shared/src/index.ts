@@ -811,6 +811,15 @@ export type RunState = {
   accessCount?: number;
   microtechAiInterfacePreAccessResolved?: boolean;
   badPublicityCredits?: number;
+  runnerRunTemporaryCredits?: {
+    sourceDefinitionId: CardDefinitionId;
+    remaining: number;
+    returnUnusedAtRunEnd: true;
+  };
+  unpreventableCoreDamageAtRunEnd?: {
+    sourceDefinitionId: CardDefinitionId;
+    amount: number;
+  };
   runTraceLinkBonus?: number;
   runTraceLinkBonusSourceDefinitionId?: CardDefinitionId;
   bypassFirstIceRemaining?: boolean;

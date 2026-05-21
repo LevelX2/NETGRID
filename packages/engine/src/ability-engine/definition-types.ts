@@ -510,6 +510,14 @@ export type CardConditionImplementation =
   | { kind: "runner_attempted_run_last_turn"; minimumRuns: number }
   | { kind: "runner_damaged_during_last_three_actions" }
   | {
+      kind: "runner_liberated_agenda_subtype_this_turn";
+      subtype: "research" | "gray_ops" | "black_ops";
+    }
+  | {
+      kind: "corp_scored_agenda_subtype_last_turn";
+      subtype: "black_ops";
+    }
+  | {
       kind: "runner_made_successful_run_on_server_this_turn";
       server: Extract<ServerId, "hq">;
     };
@@ -612,6 +620,13 @@ export type CardEffectImplementation =
   | TrashUnrezzedIceEffectImplementation
   | CorpChoiceRezOrTrashIceEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
+  | AddCounterToAllInstalledRunnerIcebreakersEffectImplementation
+  | GainRunnerEventAgendaPointEffectImplementation
+  | GainRunnerEventAgendaPointIfLiberatedAgendaSubtypeEffectImplementation
+  | CorpRandomDiscardFromHqEffectImplementation
+  | CorpDiscardHqWithRetainPaymentEffectImplementation
+  | DerezRezzedBlackIceEffectImplementation
+  | StartRunnerProgramInstallActionBundleEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
 
@@ -627,6 +642,53 @@ export type GainCreditsPerAdvancementCounterOnSourceEffectImplementation = {
   recipient: "controller" | "corp";
   amountPerCounter: number;
   visibility: EventVisibilityClass;
+};
+
+export type AddCounterToAllInstalledRunnerIcebreakersEffectImplementation = {
+  kind: "add_counter_to_all_installed_runner_icebreakers";
+  counterType: Extract<CounterType, "militech">;
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type GainRunnerEventAgendaPointEffectImplementation = {
+  kind: "gain_runner_event_agenda_point";
+  amount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type GainRunnerEventAgendaPointIfLiberatedAgendaSubtypeEffectImplementation = {
+  kind: "gain_runner_event_agenda_point_if_liberated_agenda_subtype";
+  subtype: "black_ops";
+  amount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CorpRandomDiscardFromHqEffectImplementation = {
+  kind: "corp_random_discard_from_hq";
+  count: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type CorpDiscardHqWithRetainPaymentEffectImplementation = {
+  kind: "corp_discard_hq_with_retain_payment";
+  retainCostPerCard: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type DerezRezzedBlackIceEffectImplementation = {
+  kind: "derez_rezzed_black_ice";
+  target: "chosen_rezzed_black_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type StartRunnerProgramInstallActionBundleEffectImplementation = {
+  kind: "start_runner_program_install_action_bundle";
+  actionCount: 5;
+  temporaryCredit: 1;
+  allowedActionKind: "install_program";
+  mayStopEarly: true;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type DistributeAdvancementCountersEffectImplementation = {
@@ -895,6 +957,13 @@ export type MakeRunEffectImplementation = {
   followupRunOnEnd?: "optional";
   bypassFirstIce?: boolean;
   runTraceLinkBonus?: number;
+  runTemporaryCredits?: {
+    side: "runner";
+    amount: number;
+    usableFor: "any_runner_cost_during_this_run";
+    returnUnusedAtRunEnd: true;
+  };
+  afterRunCompletedUnpreventableCoreDamage?: number;
   visibility: EventVisibilityClass;
 };
 

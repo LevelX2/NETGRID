@@ -73,6 +73,23 @@ export type CardEffectExecutionContext = {
     serverId: Exclude<ServerId, "new_remote">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  addCounterToAllInstalledRunnerIcebreakers?: (
+    counterType: Extract<CounterType, "militech">,
+    amount: number,
+  ) => CardEffectCounterResult;
+  gainRunnerEventAgendaPoint?: (amount: 1) => CardEffectHiddenInfoResult;
+  runnerLiberatedAgendaSubtypeThisTurn?: (
+    subtype: "research" | "gray_ops" | "black_ops",
+  ) => boolean;
+  corpRandomDiscardFromHq?: (count: number) => CardEffectHiddenInfoResult;
+  startCorpDiscardHqWithRetainPayment?: (
+    retainCostPerCard: number,
+  ) => CardEffectHiddenInfoResult;
+  startDerezRezzedBlackIceChoice?: () => CardEffectHiddenInfoResult;
+  startRunnerProgramInstallActionBundle?: (
+    actionCount: 5,
+    temporaryCredit: 1,
+  ) => CardEffectHiddenInfoResult;
   chosenRunServerId?: () => Exclude<ServerId, "new_remote">;
   startPrivateLook?: (
     zone: Extract<ServerId, "rd" | "hq">,
@@ -181,7 +198,7 @@ export type CardEffectHostedCreditsResult = {
 
 export type CardEffectCounterResult = {
   amount: number;
-  counterType: Extract<CounterType, "ablative" | "trauma" | "boon">;
+  counterType: Extract<CounterType, "ablative" | "trauma" | "boon" | "militech">;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;
 };
@@ -229,6 +246,13 @@ export type CardEffectMakeRunOptions = {
   followupRunOnEnd?: "optional";
   bypassFirstIce?: boolean;
   runTraceLinkBonus?: number;
+  runTemporaryCredits?: {
+    side: "runner";
+    amount: number;
+    usableFor: "any_runner_cost_during_this_run";
+    returnUnusedAtRunEnd: true;
+  };
+  afterRunCompletedUnpreventableCoreDamage?: number;
 };
 
 export type CardEffectMakeRunResult = {
@@ -734,6 +758,155 @@ export function executeCardImplementationEffects(
         mergePublicPayload(publicPayload, traceResult.publicPayload);
         return;
       }
+      case "add_counter_to_all_installed_runner_icebreakers": {
+        assertPositiveIntegerAmount(
+          "add_counter_to_all_installed_runner_icebreakers",
+          effect.amount,
+        );
+        assertPublicVisibility(
+          "add_counter_to_all_installed_runner_icebreakers",
+          effect.visibility,
+        );
+        if (effect.counterType !== "militech")
+          throw new Error(
+            "add_counter_to_all_installed_runner_icebreakers supports only Militech counters.",
+          );
+        if (!context.addCounterToAllInstalledRunnerIcebreakers)
+          throw new Error(
+            "add_counter_to_all_installed_runner_icebreakers requires a counter execution context.",
+          );
+        const addResult = context.addCounterToAllInstalledRunnerIcebreakers(
+          effect.counterType,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, addResult.publicPayload);
+        resolvedEffects.push({
+          effectId: publicEffectId(
+            context,
+            index,
+            "add_counter_to_all_installed_runner_icebreakers",
+          ),
+          kind: "counter_change",
+          visibility: effect.visibility,
+          side: "runner",
+          amount: addResult.amount,
+          counterType: addResult.counterType,
+          addedCounterAmount: addResult.amount,
+          reason: effectReason(context),
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "gain_runner_event_agenda_point": {
+        assertPublicVisibility("gain_runner_event_agenda_point", effect.visibility);
+        if (effect.amount !== 1)
+          throw new Error("gain_runner_event_agenda_point supports only amount 1.");
+        if (!context.gainRunnerEventAgendaPoint)
+          throw new Error(
+            "gain_runner_event_agenda_point requires an agenda-point context.",
+          );
+        const result = context.gainRunnerEventAgendaPoint(effect.amount);
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "gain_runner_event_agenda_point_if_liberated_agenda_subtype": {
+        assertPublicVisibility(
+          "gain_runner_event_agenda_point_if_liberated_agenda_subtype",
+          effect.visibility,
+        );
+        if (effect.amount !== 1 || effect.subtype !== "black_ops")
+          throw new Error(
+            "gain_runner_event_agenda_point_if_liberated_agenda_subtype supports only Black Ops amount 1.",
+          );
+        if (!context.runnerLiberatedAgendaSubtypeThisTurn)
+          throw new Error(
+            "gain_runner_event_agenda_point_if_liberated_agenda_subtype requires a history context.",
+          );
+        if (!context.runnerLiberatedAgendaSubtypeThisTurn(effect.subtype)) {
+          publicPayload.agendaPointsGained = 0;
+          return;
+        }
+        if (!context.gainRunnerEventAgendaPoint)
+          throw new Error(
+            "gain_runner_event_agenda_point_if_liberated_agenda_subtype requires an agenda-point context.",
+          );
+        const result = context.gainRunnerEventAgendaPoint(effect.amount);
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "corp_random_discard_from_hq": {
+        assertPositiveIntegerAmount("corp_random_discard_from_hq", effect.count);
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "corp_random_discard_from_hq visibility must be hidden_info_barrier.",
+          );
+        if (!context.corpRandomDiscardFromHq)
+          throw new Error(
+            "corp_random_discard_from_hq requires a random-discard context.",
+          );
+        const result = context.corpRandomDiscardFromHq(effect.count);
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "corp_discard_hq_with_retain_payment": {
+        assertPositiveIntegerAmount(
+          "corp_discard_hq_with_retain_payment",
+          effect.retainCostPerCard,
+        );
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "corp_discard_hq_with_retain_payment visibility must be hidden_info_barrier.",
+          );
+        if (!context.startCorpDiscardHqWithRetainPayment)
+          throw new Error(
+            "corp_discard_hq_with_retain_payment requires a hidden choice context.",
+          );
+        const result = context.startCorpDiscardHqWithRetainPayment(
+          effect.retainCostPerCard,
+        );
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "derez_rezzed_black_ice": {
+        assertPublicVisibility("derez_rezzed_black_ice", effect.visibility);
+        if (effect.target !== "chosen_rezzed_black_ice")
+          throw new Error("derez_rezzed_black_ice target is invalid.");
+        if (!context.startDerezRezzedBlackIceChoice)
+          throw new Error(
+            "derez_rezzed_black_ice requires a target choice context.",
+          );
+        const result = context.startDerezRezzedBlackIceChoice();
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "start_runner_program_install_action_bundle": {
+        assertPublicVisibility(
+          "start_runner_program_install_action_bundle",
+          effect.visibility,
+        );
+        if (
+          effect.actionCount !== 5 ||
+          effect.temporaryCredit !== 1 ||
+          effect.allowedActionKind !== "install_program" ||
+          effect.mayStopEarly !== true
+        )
+          throw new Error(
+            "start_runner_program_install_action_bundle supports only the Valu-Pak profile.",
+          );
+        if (!context.startRunnerProgramInstallActionBundle)
+          throw new Error(
+            "start_runner_program_install_action_bundle requires a restricted-action context.",
+          );
+        const result = context.startRunnerProgramInstallActionBundle(
+          effect.actionCount,
+          effect.temporaryCredit,
+        );
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
       case "make_run": {
         assertPublicVisibility("make_run", effect.visibility);
         if (!context.startRun)
@@ -792,6 +965,15 @@ export function executeCardImplementationEffects(
             : {}),
           ...(effect.runTraceLinkBonus !== undefined
             ? { runTraceLinkBonus: effect.runTraceLinkBonus }
+            : {}),
+          ...(effect.runTemporaryCredits !== undefined
+            ? { runTemporaryCredits: effect.runTemporaryCredits }
+            : {}),
+          ...(effect.afterRunCompletedUnpreventableCoreDamage !== undefined
+            ? {
+                afterRunCompletedUnpreventableCoreDamage:
+                  effect.afterRunCompletedUnpreventableCoreDamage,
+              }
             : {}),
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);

@@ -84,6 +84,14 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     server: Extract<ServerId, "hq">,
   ) => boolean;
+  runnerLiberatedAgendaSubtypeThisTurn: (
+    state: GameState,
+    subtype: "research" | "gray_ops" | "black_ops",
+  ) => boolean;
+  corpScoredAgendaSubtypeLastTurn: (
+    state: GameState,
+    subtype: "black_ops",
+  ) => boolean;
   spendClick: (state: GameState, side: Side) => void;
   spendCredits: (state: GameState, side: Side, amount: number) => void;
   createAction: (
@@ -295,6 +303,9 @@ export type CardImplementationRuntimeDependencies = {
   rezzedIceTargetCount: (state: GameState) => number;
   unrezzedIceTargetCount: (state: GameState) => number;
   installedIceTargetCount: (state: GameState) => number;
+  rezzedBlackIceTargetCount: (state: GameState) => number;
+  corpHqCardCount: (state: GameState) => number;
+  runnerValuPakInstallableProgramCount: (state: GameState) => number;
   startPayRezCostToTrashRezzedIceChoice: (
     state: GameState,
     legalAction: LegalAction,
@@ -309,6 +320,39 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
+  startDerezRezzedBlackIceChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
+  startCorpDiscardHqWithRetainPayment: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    retainCostPerCard: number,
+  ) => CardEffectHiddenInfoResult;
+  startRunnerProgramInstallActionBundle: (
+    state: GameState,
+    legalAction: LegalAction,
+    actionCount: 5,
+    temporaryCredit: 1,
+  ) => CardEffectHiddenInfoResult;
+  addCounterToAllInstalledRunnerIcebreakers: (
+    state: GameState,
+    counterType: Extract<CounterType, "militech">,
+    amount: number,
+  ) => CardEffectCounterResult;
+  gainRunnerEventAgendaPoint: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceDefinitionId: CardDefinition["id"],
+    amount: 1,
+  ) => CardEffectHiddenInfoResult;
+  corpRandomDiscardFromHq: (
+    state: GameState,
+    sourceDefinitionId: CardDefinition["id"],
+    count: number,
   ) => CardEffectHiddenInfoResult;
   addHostedCredits: (
     state: GameState,
@@ -414,6 +458,13 @@ function cardImplementationConditionMet(
       );
     case "runner_damaged_during_last_three_actions":
       return deps.runnerWasDamagedDuringLastThreeActions(state);
+    case "runner_liberated_agenda_subtype_this_turn":
+      return deps.runnerLiberatedAgendaSubtypeThisTurn(
+        state,
+        condition.subtype,
+      );
+    case "corp_scored_agenda_subtype_last_turn":
+      return deps.corpScoredAgendaSubtypeLastTurn(state, condition.subtype);
     case "runner_made_successful_run_on_server_this_turn":
       return deps.runnerMadeSuccessfulRunOnServerThisTurn(
         state,
@@ -490,6 +541,10 @@ function canResolveOnPlayCardImplementationAbility(
       return deps.unrezzedIceTargetCount(state) > 0;
     if (effect.kind === "corp_choice_rez_or_trash_ice")
       return deps.installedIceTargetCount(state) > 0;
+    if (effect.kind === "derez_rezzed_black_ice")
+      return deps.rezzedBlackIceTargetCount(state) > 0;
+    if (effect.kind === "start_runner_program_install_action_bundle")
+      return deps.runnerValuPakInstallableProgramCount(state) > 0;
     return true;
   });
 }
@@ -576,6 +631,14 @@ function assertOnPlayCardImplementationAbilityCanResolve(
   if (ability.condition?.kind === "runner_made_successful_run_on_server_this_turn")
     throw new Error(
       "Der Runner hat in diesem Zug keinen passenden erfolgreichen Run gemacht.",
+    );
+  if (ability.condition?.kind === "runner_liberated_agenda_subtype_this_turn")
+    throw new Error(
+      "Der Runner hat in diesem Zug keine passende Agenda befreit.",
+    );
+  if (ability.condition?.kind === "corp_scored_agenda_subtype_last_turn")
+    throw new Error(
+      "Die Korp hat im letzten Zug keine passende Agenda gescored.",
     );
   throw new Error("Die On-Play-Kartenbedingung ist nicht erfuellt.");
 }
@@ -1987,6 +2050,39 @@ export function executeOnPlayCardImplementationAbility(
         deps.startTrashUnrezzedIceChoice(state, legalAction, cardId),
       startCorpChoiceRezOrTrashIceChoice: () =>
         deps.startCorpChoiceRezOrTrashIceChoice(state, legalAction, cardId),
+      startDerezRezzedBlackIceChoice: () =>
+        deps.startDerezRezzedBlackIceChoice(state, legalAction, cardId),
+      startCorpDiscardHqWithRetainPayment: (retainCostPerCard) =>
+        deps.startCorpDiscardHqWithRetainPayment(
+          state,
+          legalAction,
+          cardId,
+          retainCostPerCard,
+        ),
+      startRunnerProgramInstallActionBundle: (actionCount, temporaryCredit) =>
+        deps.startRunnerProgramInstallActionBundle(
+          state,
+          legalAction,
+          actionCount,
+          temporaryCredit,
+        ),
+      addCounterToAllInstalledRunnerIcebreakers: (counterType, amount) =>
+        deps.addCounterToAllInstalledRunnerIcebreakers(
+          state,
+          counterType,
+          amount,
+        ),
+      gainRunnerEventAgendaPoint: (amount) =>
+        deps.gainRunnerEventAgendaPoint(
+          state,
+          legalAction,
+          definition.id,
+          amount,
+        ),
+      runnerLiberatedAgendaSubtypeThisTurn: (subtype) =>
+        deps.runnerLiberatedAgendaSubtypeThisTurn(state, subtype),
+      corpRandomDiscardFromHq: (count) =>
+        deps.corpRandomDiscardFromHq(state, definition.id, count),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       removeRunnerTags: (mode, amount) =>

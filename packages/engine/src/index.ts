@@ -322,6 +322,10 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   runnerWasDamagedDuringLastThreeActions,
   runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
     server === "hq" && hasSuccessfulHqRunThisTurn(state),
+  runnerLiberatedAgendaSubtypeThisTurn: (state, subtype) =>
+    runnerStoleAgendaSubtypeThisTurn(state, subtype),
+  corpScoredAgendaSubtypeLastTurn: (state, subtype) =>
+    subtype === "black_ops" && corpScoredBlackOpsAgendaLastTurn(state),
   spendClick,
   spendCredits,
   createAction: action,
@@ -348,6 +352,17 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     );
   },
   startRun: (state, legalAction, serverId, options) => {
+    const sourceCardId =
+      typeof legalAction.source === "string" &&
+      state.cardInstances[legalAction.source]
+        ? legalAction.source
+        : typeof legalAction.payload?.cardId === "string" &&
+            state.cardInstances[legalAction.payload.cardId]
+          ? legalAction.payload.cardId
+          : undefined;
+    const sourceDefinitionId = sourceCardId
+      ? definitionFor(state, sourceCardId).id
+      : undefined;
     startRun(
       state,
       serverId,
@@ -397,24 +412,34 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
         ...(options.runTraceLinkBonus !== undefined
           ? { runTraceLinkBonus: options.runTraceLinkBonus }
           : {}),
-        ...(options.runTraceLinkBonus !== undefined &&
-        typeof legalAction.source === "string" &&
-        state.cardInstances[legalAction.source]
+        ...(options.runTemporaryCredits !== undefined
           ? {
-              runTraceLinkBonusSourceDefinitionId: definitionFor(
-                state,
-                legalAction.source,
-              ).id,
+              runnerRunTemporaryCredits: {
+                sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+                remaining: options.runTemporaryCredits.amount,
+                returnUnusedAtRunEnd: true,
+              },
             }
           : {}),
-        ...(typeof legalAction.source === "string" &&
-        state.cardInstances[legalAction.source]
+        ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
           ? {
-              successfulRunSourceCardId: legalAction.source,
-              successfulRunSourceDefinitionId:
-                definitionFor(state, legalAction.source).id,
-              successfulRunSourceTitle:
-                definitionFor(state, legalAction.source).title,
+              unpreventableCoreDamageAtRunEnd: {
+                sourceDefinitionId: sourceDefinitionId ?? "card_implementation",
+                amount: options.afterRunCompletedUnpreventableCoreDamage,
+              },
+            }
+          : {}),
+        ...(options.runTraceLinkBonus !== undefined &&
+        sourceDefinitionId
+          ? {
+              runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
+            }
+          : {}),
+        ...(sourceCardId && sourceDefinitionId
+          ? {
+              successfulRunSourceCardId: sourceCardId,
+              successfulRunSourceDefinitionId: sourceDefinitionId,
+              successfulRunSourceTitle: definitionFor(state, sourceCardId).title,
             }
           : {}),
       },
@@ -430,14 +455,26 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
         ? {
             runTraceLinkBonus: options.runTraceLinkBonus,
             ...(typeof legalAction.source === "string" &&
-            state.cardInstances[legalAction.source]
+            sourceCardId &&
+            sourceDefinitionId
               ? {
-                  runTraceLinkBonusSourceDefinitionId: definitionFor(
-                    state,
-                    legalAction.source,
-                  ).id,
+                  runTraceLinkBonusSourceDefinitionId: sourceDefinitionId,
                 }
               : {}),
+          }
+        : {}),
+      ...(options.runTemporaryCredits !== undefined
+        ? {
+            v1922RunnerEventAbility: "lucidrine_booster_drug_run_temporary_credits",
+            temporaryRunCredits: options.runTemporaryCredits.amount,
+            temporaryRunCreditsRemaining:
+              state.run?.runnerRunTemporaryCredits?.remaining ?? 0,
+          }
+        : {}),
+      ...(options.afterRunCompletedUnpreventableCoreDamage !== undefined
+        ? {
+            afterRunUnpreventableCoreDamage:
+              options.afterRunCompletedUnpreventableCoreDamage,
           }
         : {}),
     };
@@ -744,6 +781,10 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     corpInstalledCardIds(state).filter(
       (cardId) => mustInstance(state.cardInstances, cardId).zone.zone === "serverIce",
     ).length,
+  rezzedBlackIceTargetCount: (state) => rezzedBlackIceIds(state).length,
+  corpHqCardCount: (state) => state.corp.hq.length,
+  runnerValuPakInstallableProgramCount: (state) =>
+    runnerInstallableProgramIdsForValuPak(state).length,
   startPayRezCostToTrashRezzedIceChoice: (state, legalAction, sourceCardId) => {
     startCoreCommandJettisonIceChoice(state, sourceCardId);
     legalAction.payload = {
@@ -774,6 +815,104 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       sourceDefinitionId: definitionFor(state, sourceCardId).id,
     };
     return { publicPayload: legalAction.payload ?? {} };
+  },
+  startDerezRezzedBlackIceChoice: (state, legalAction, sourceCardId) => {
+    startAnonymousTipDerezBlackIceChoice(state, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerEventAbility: "derez_black_ice",
+      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    };
+    return { publicPayload: legalAction.payload ?? {} };
+  },
+  startCorpDiscardHqWithRetainPayment: (
+    state,
+    legalAction,
+    sourceCardId,
+    retainCostPerCard,
+  ) => {
+    if (retainCostPerCard !== 2)
+      throw new Error("Synchronized Attack on HQ retain cost must be 2.");
+    if (state.corp.hq.length === 0) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+        retainedCount: 0,
+        discardedCount: 0,
+        paidCredits: 0,
+        corpCreditsAfter: state.corp.credits,
+        sourceDefinitionId: definitionFor(state, sourceCardId).id,
+      };
+      return { publicPayload: legalAction.payload ?? {} };
+    }
+    startSynchronizedAttackOnHqRetainChoice(state, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerEventAbility: "successful_hq_run_corp_pay_to_retain_hq",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1922_synchronized_attack_on_hq_retain",
+      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    };
+    return { publicPayload: legalAction.payload ?? {} };
+  },
+  startRunnerProgramInstallActionBundle: (
+    state,
+    legalAction,
+    actionCount,
+    temporaryCredit,
+  ) => {
+    if (actionCount !== 5 || temporaryCredit !== 1)
+      throw new Error("Valu-Pak Software Bundle profile is invalid.");
+    const installablePrograms = runnerInstallableProgramIdsForValuPak(state);
+    if (installablePrograms.length === 0)
+      throw new Error(
+        "Valu-Pak Software Bundle findet kein installierbares Programm.",
+      );
+    const flags = ensureRunnerTurnFlags(state);
+    flags.valuPakProgramInstallActionsRemaining = actionCount;
+    flags.valuPakTemporaryProgramInstallCredits = temporaryCredit;
+    state.runner.clicks += actionCount;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      v1922RunnerEventAbility: "program_install_action_bundle",
+      gainedActions: actionCount,
+      temporaryProgramInstallCredits: temporaryCredit,
+      valuPakProgramInstallActionsRemaining:
+        flags.valuPakProgramInstallActionsRemaining,
+      runnerClicksAfter: state.runner.clicks,
+    };
+    return { publicPayload: legalAction.payload ?? {} };
+  },
+  addCounterToAllInstalledRunnerIcebreakers: (state, counterType, amount) =>
+    addCounterToAllInstalledRunnerIcebreakers(state, counterType, amount),
+  gainRunnerEventAgendaPoint: (
+    state,
+    legalAction,
+    sourceDefinitionId,
+    amount,
+  ) => {
+    if (amount !== 1)
+      throw new Error("Runner event agenda point amount must be 1.");
+    awardRunnerEventAgendaPoint(state, legalAction, sourceDefinitionId);
+    return { publicPayload: legalAction.payload ?? {} };
+  },
+  corpRandomDiscardFromHq: (state, sourceDefinitionId, count) => {
+    const discardedCardIds = discardRandomCorpHqCards(
+      state,
+      count,
+      sourceDefinitionId === TERRORIST_REPRISAL_ID
+        ? `v190.random.${TERRORIST_REPRISAL_ID}.hq_discard`
+        : `card_implementation.random.${sourceDefinitionId}.hq_discard`,
+    );
+    return {
+      publicPayload: {
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "hq_random_discard",
+        discardedCardsCount: discardedCardIds.length,
+      },
+    };
   },
   startDistributeAdvancementCounters: (
     state,
@@ -10760,6 +10899,8 @@ type StartRunOptions = Pick<
   | "bypassFirstIceRemaining"
   | "runTraceLinkBonus"
   | "runTraceLinkBonusSourceDefinitionId"
+  | "runnerRunTemporaryCredits"
+  | "unpreventableCoreDamageAtRunEnd"
 >;
 
 function startRun(
@@ -10867,6 +11008,20 @@ function startRun(
       : {}),
     ...(isV099OrLater(state)
       ? { badPublicityCredits: state.corp.badPublicity }
+      : {}),
+    ...(options?.runnerRunTemporaryCredits
+      ? {
+          runnerRunTemporaryCredits: {
+            ...options.runnerRunTemporaryCredits,
+          },
+        }
+      : {}),
+    ...(options?.unpreventableCoreDamageAtRunEnd
+      ? {
+          unpreventableCoreDamageAtRunEnd: {
+            ...options.unpreventableCoreDamageAtRunEnd,
+          },
+        }
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
@@ -15762,6 +15917,7 @@ function finishRun(
   if (allNighterBonusRunOnFinish && !state.winner) {
     ensureRunnerTurnFlags(state).allNighterBonusRunPending = true;
   }
+  applyRunnerRunTemporaryCreditCleanupAndDamage(state, run, legalAction);
   resetBreakerStrength(state);
   delete state.run;
   state.phase = "runner_action_phase";
@@ -15769,6 +15925,53 @@ function finishRun(
   state.activeSide = "runner";
   consumeRunnerFutureActionDebt(state);
   cleanupEmptyRemotes(state);
+}
+
+function applyRunnerRunTemporaryCreditCleanupAndDamage(
+  state: GameState,
+  run: ActiveRun | undefined,
+  legalAction?: LegalAction,
+): void {
+  if (!run) return;
+  const runTemporaryCredits = run.runnerRunTemporaryCredits;
+  const unpreventableCoreDamage = run.unpreventableCoreDamageAtRunEnd;
+  if (!runTemporaryCredits && !unpreventableCoreDamage) return;
+  const unusedTemporaryCredits = runTemporaryCredits?.remaining ?? 0;
+  let damageSummary: DamageSummary | undefined;
+  if (unpreventableCoreDamage && unpreventableCoreDamage.amount > 0) {
+    damageSummary = doDamage(state, {
+      damageId: `${run.runId}.${unpreventableCoreDamage.sourceDefinitionId}.run_end_unpreventable_core`,
+      damageType: "core",
+      amount: unpreventableCoreDamage.amount,
+      source: `run_end:${unpreventableCoreDamage.sourceDefinitionId}`,
+    });
+  }
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...(runTemporaryCredits
+      ? {
+          temporaryRunCreditsReturned: unusedTemporaryCredits,
+          temporaryRunCreditsRemaining: 0,
+        }
+      : {}),
+    ...(damageSummary
+      ? {
+          damageCannotBePrevented: true,
+          damageResolved: true,
+          damageType: damageSummary.damageType,
+          damageAmount: damageSummary.amount,
+          cardsTrashed: damageSummary.cardsTrashed,
+          flatline: damageSummary.flatline,
+          ...(damageSummary.coreDamageAfter !== undefined
+            ? { coreDamageAfter: damageSummary.coreDamageAfter }
+            : {}),
+          ...(damageSummary.runnerMaxHandSizeAfter !== undefined
+            ? { runnerMaxHandSizeAfter: damageSummary.runnerMaxHandSizeAfter }
+            : {}),
+        }
+      : {}),
+  };
 }
 
 function derezOliviaSalazarTemporaryIce(
@@ -26912,23 +27115,46 @@ function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
     .sort();
 }
 
+function addCounterToAllInstalledRunnerIcebreakers(
+  state: GameState,
+  counterType: Extract<CounterType, "militech">,
+  amount: number,
+): { amount: number; counterType: Extract<CounterType, "militech">; countersAfter: number; publicPayload: Record<string, string | number | boolean> } {
+  const targetIds = installedRunnerIcebreakerIds(state);
+  for (const cardId of targetIds) addCardCounter(state, cardId, counterType, amount);
+  return {
+    amount: targetIds.length * amount,
+    counterType,
+    countersAfter: targetIds.reduce(
+      (sum, cardId) => sum + cardCounter(state, cardId, counterType),
+      0,
+    ),
+    publicPayload: {
+      counterType,
+      addedCounterAmount: targetIds.length * amount,
+      targetCount: targetIds.length,
+      targetCardDefinitionIds: targetIds
+        .map((cardId) => definitionFor(state, cardId).id)
+        .join(","),
+    },
+  };
+}
+
 function resolveDealWithMilitech(
   state: GameState,
   legalAction: LegalAction,
 ): void {
   if (!runnerStoleAgendaSubtypeThisTurn(state, "research"))
     throw new Error("Deal with Militech benoetigt eine befreite Research-Agenda in diesem Zug.");
-  const targetIds = installedRunnerIcebreakerIds(state);
-  for (const cardId of targetIds) addCardCounter(state, cardId, "militech", 1);
+  const result = addCounterToAllInstalledRunnerIcebreakers(
+    state,
+    "militech",
+    1,
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     sourceDefinitionId: DEAL_WITH_MILITECH_ID,
-    counterType: "militech",
-    addedCounterAmount: targetIds.length,
-    targetCount: targetIds.length,
-    targetCardDefinitionIds: targetIds
-      .map((cardId) => definitionFor(state, cardId).id)
-      .join(","),
+    ...result.publicPayload,
   };
 }
 
@@ -29870,6 +30096,7 @@ function availableRunnerRunCredits(
   return (
     state.runner.credits +
     (state.run?.badPublicityCredits ?? 0) +
+    (state.run?.runnerRunTemporaryCredits?.remaining ?? 0) +
     runnerRunRecurringCredits(state, breakerId)
   );
 }
@@ -29888,6 +30115,15 @@ function spendRunnerRunCredits(
   if (fromBadPublicity > 0) {
     run.badPublicityCredits = (run.badPublicityCredits ?? 0) - fromBadPublicity;
     remaining -= fromBadPublicity;
+  }
+  const runTemporaryCredits = run.runnerRunTemporaryCredits;
+  const fromRunTemporaryCredits = Math.min(
+    runTemporaryCredits?.remaining ?? 0,
+    remaining,
+  );
+  if (runTemporaryCredits && fromRunTemporaryCredits > 0) {
+    runTemporaryCredits.remaining -= fromRunTemporaryCredits;
+    remaining -= fromRunTemporaryCredits;
   }
   for (const cardId of runnerRunRecurringCreditSourceIds(state, breakerId)) {
     if (remaining <= 0) break;

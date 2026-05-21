@@ -98,6 +98,22 @@ const IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION =
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
+  "onr_v1_077_anonymous-tip":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/anonymous-tip.ts",
+  "onr_v1_082_deal-with-militech":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/deal-with-militech.ts",
+  "onr_v1_083_desperate-competitor":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/desperate-competitor.ts",
+  "onr_v1_090_hot-tip-for-wns":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/hot-tip-for-wns.ts",
+  "onr_v1_098_lucidrine-booster-drug":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/lucidrine-booster-drug.ts",
+  "onr_v1_113_synchronized-attack-on-hq":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/synchronized-attack-on-hq.ts",
+  "onr_v1_115_terrorist-reprisal":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/terrorist-reprisal.ts",
+  "onr_v1_117_valu-pak-software-bundle":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/valu-pak-software-bundle.ts",
   "onr_v1_349_aardvark":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/aardvark.ts",
   "onr_v1_358_dr-dreff":

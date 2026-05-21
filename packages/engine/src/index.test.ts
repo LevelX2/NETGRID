@@ -7612,7 +7612,6 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         kind: "reverse_ice_on_successful_run_fort",
       }),
     );
-    expect(cardImplementationForDefinitionId("onr_v1_098_lucidrine-booster-drug")).toBeUndefined();
     expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeUndefined();
   });
 
@@ -7898,6 +7897,29 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       cardImplementationForDefinitionId("onr_v1_276_viral-15")
         ?.printedSubroutines,
     ).toHaveLength(2);
+  });
+
+  it("migrates P3.57 runner sabotage prep cards into CardImplementation coverage", () => {
+    const p357Cards = [
+      "onr_v1_077_anonymous-tip",
+      "onr_v1_082_deal-with-militech",
+      "onr_v1_083_desperate-competitor",
+      "onr_v1_090_hot-tip-for-wns",
+      "onr_v1_098_lucidrine-booster-drug",
+      "onr_v1_113_synchronized-attack-on-hq",
+      "onr_v1_115_terrorist-reprisal",
+      "onr_v1_117_valu-pak-software-bundle",
+    ] as const;
+
+    for (const definitionId of p357Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_111_social-engineering")).toBeUndefined();
   });
 
   it("loads Pocket Virtual Reality temporary encounter trace credits for its printed traces", () => {
@@ -13558,7 +13580,16 @@ describe("V1.8.0 Mechanikpaket G", () => {
           action.type === "play_event" &&
           String(action.payload?.cardId) === hotTipCardId,
       ),
-    ).toBe(false);
+    ).toBe(true);
+    const hotTipNoBlackOps = apply(
+      structuredClone(grayState),
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === hotTipCardId,
+    );
+    expect(hotTipNoBlackOps.runner.scoreArea).not.toContain(hotTipCardId);
+    expect(hotTipNoBlackOps.runner.heap).toContain(hotTipCardId);
     putCorpCardOnTopOfRd(grayState, "onr_v1_203_hostile-takeover");
     grayState = apply(
       grayState,
@@ -13589,7 +13620,7 @@ describe("V1.8.0 Mechanikpaket G", () => {
           action.type === "play_event" &&
           String(action.payload?.cardId) === hotTipCardId,
       ),
-    ).toBe(false);
+    ).toBe(true);
     grayState = apply(
       grayState,
       "runner",
@@ -24122,6 +24153,54 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     );
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("runs Lucidrine with temporary run credits and unpreventable core damage", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.runAccess("p357-lucidrine-temporary-credits"),
+    );
+    state.runner.credits = 0;
+    const lucidrineId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_098_lucidrine-booster-drug",
+    );
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === lucidrineId &&
+        action.payload?.serverId === "rd",
+    );
+    expect(state.run?.runnerRunTemporaryCredits).toMatchObject({
+      sourceDefinitionId: "onr_v1_098_lucidrine-booster-drug",
+      remaining: 9,
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      amounts: {
+        temporaryRunCredits: 9,
+        afterRunUnpreventableCoreDamage: 1,
+      },
+    });
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run).toBeUndefined();
+    expect(state.runner.coreDamage).toBe(1);
+    expect(state.runner.credits).toBe(0);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageType: "core",
+      amounts: {
+        temporaryRunCreditsReturned: 9,
+        damageAmount: 1,
+      },
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("applies installed V1.9.15 run and access helpers through existing breach paths", () => {
@@ -44894,7 +44973,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
         getLegalActions(state, "runner").some(
           (action) => action.type === "play_event" && action.payload?.cardId === eventId,
         ),
-      ).toBe(false);
+      ).toBe(definitionId === "onr_v1_090_hot-tip-for-wns");
       putCorpCardOnTopOfRd(state, stolenAgendaId);
       state = apply(
         state,

@@ -233,13 +233,21 @@ import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem
 import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech-mem-chip";
 import { zz22SpeedChipImplementation } from "./onr-v1/runner/hardware/zz22-speed-chip";
 import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
+import { anonymousTipImplementation } from "./onr-v1/runner/preps/anonymous-tip";
+import { dealWithMilitechImplementation } from "./onr-v1/runner/preps/deal-with-militech";
+import { desperateCompetitorImplementation } from "./onr-v1/runner/preps/desperate-competitor";
+import { hotTipForWnsImplementation } from "./onr-v1/runner/preps/hot-tip-for-wns";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
+import { lucidrineBoosterDrugImplementation } from "./onr-v1/runner/preps/lucidrine-booster-drug";
 import { privateLdlAccessImplementation } from "./onr-v1/runner/preps/private-ldl-access";
 import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-hq";
 import { securityCodeWormChipImplementation } from "./onr-v1/runner/preps/security-code-worm-chip";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { stumbleThroughWilderspaceImplementation } from "./onr-v1/runner/preps/stumble-through-wilderspace";
+import { synchronizedAttackOnHqImplementation } from "./onr-v1/runner/preps/synchronized-attack-on-hq";
 import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/temple-microcode-outlet";
+import { terroristReprisalImplementation } from "./onr-v1/runner/preps/terrorist-reprisal";
+import { valuPakSoftwareBundleImplementation } from "./onr-v1/runner/preps/valu-pak-software-bundle";
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { afreetImplementation } from "./onr-v1/runner/programs/afreet";
 import { aiBoonImplementation } from "./onr-v1/runner/programs/ai-boon";
@@ -343,22 +351,27 @@ import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
   allNighterImplementation,
+  anonymousTipImplementation,
   arasakaOwnsYouImplementation,
   bodyweightSyntheticBloodImplementation,
   coreCommandJettisonIceImplementation,
   custodialPositionImplementation,
+  dealWithMilitechImplementation,
+  desperateCompetitorImplementation,
   editedShippingManifestsImplementation,
   executiveWiretapsImplementation,
   forgedActivationOrdersImplementation,
   forgottenBackupChipImplementation,
   gideonsPawnshopImplementation,
   huntClubBbsImplementation,
+  hotTipForWnsImplementation,
   iceAndDatasGuideToTheNetImplementation,
   ifYouWantItDoneRightImplementation,
   insideJobImplementation,
   jackNJoeImplementation,
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
+  lucidrineBoosterDrugImplementation,
   mantisFixerAtLargeImplementation,
   miscForSaleImplementation,
   mitWestTierImplementation,
@@ -371,7 +384,10 @@ export const CARD_IMPLEMENTATIONS = [
   sneakPreviewImplementation,
   templeMicrocodeOutletImplementation,
   stumbleThroughWilderspaceImplementation,
+  synchronizedAttackOnHqImplementation,
+  terroristReprisalImplementation,
   totalGeneticRetrofitImplementation,
+  valuPakSoftwareBundleImplementation,
   weatherToFinancePipeImplementation,
   afreetImplementation,
   aiBoonImplementation,
