@@ -6,6 +6,7 @@ import type {
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  RestrictedHostedCreditSourceImplementation,
   RunnerTraceCounterEffectImplementation,
 } from "../ability-engine/definition-types";
 
@@ -21,4 +22,5 @@ export type CardImplementationDefinition = {
   accessHooks?: readonly CardAccessHookImplementation[];
   lifecycle?: CardLifecycleImplementation;
   runnerCounterEffects?: readonly RunnerTraceCounterEffectImplementation[];
+  restrictedHostedCreditSource?: RestrictedHostedCreditSourceImplementation;
 };

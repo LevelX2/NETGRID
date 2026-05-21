@@ -140,6 +140,8 @@ import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-he
 import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
+import { corollaSpeedChipImplementation } from "./onr-v1/runner/hardware/corolla-speed-chip";
+import { drifterMobileEnvironmentImplementation } from "./onr-v1/runner/hardware/drifter-mobile-environment";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
@@ -148,6 +150,7 @@ import { recordReconstructorImplementation } from "./onr-v1/runner/hardware/reco
 import { tychoMemChipImplementation } from "./onr-v1/runner/hardware/tycho-mem-chip";
 import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem-chip";
 import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech-mem-chip";
+import { zz22SpeedChipImplementation } from "./onr-v1/runner/hardware/zz22-speed-chip";
 import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
 import { privateLdlAccessImplementation } from "./onr-v1/runner/preps/private-ldl-access";
@@ -157,16 +160,22 @@ import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/templ
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
+import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
+import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
+import { poltergeistImplementation } from "./onr-v1/runner/programs/poltergeist";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
+import { scatterShotImplementation } from "./onr-v1/runner/programs/scatter-shot";
 import { seeyaImplementation } from "./onr-v1/runner/programs/seeya";
 import { selfModifyingCodeImplementation } from "./onr-v1/runner/programs/self-modifying-code";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
+import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
+import { zetatechSoftwareInstallerImplementation } from "./onr-v1/runner/programs/zetatech-software-installer";
 import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
 import { accessToArasakaImplementation } from "./onr-v1/runner/resources/access-to-arasaka";
 import { accessToKiribatiImplementation } from "./onr-v1/runner/resources/access-to-kiribati";
@@ -175,6 +184,7 @@ import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/ba
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
+import { hellsRunImplementation } from "./onr-v1/runner/resources/hells-run";
 import { junkyardBbsImplementation } from "./onr-v1/runner/resources/junkyard-bbs";
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { nEtoImplementation } from "./onr-v1/runner/resources/n-e-t-o";
@@ -210,16 +220,22 @@ export const CARD_IMPLEMENTATIONS = [
   weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
+  cloakImplementation,
   expertScheduleAnalyzerImplementation,
+  invisibilityImplementation,
   microtechAiInterfaceImplementation,
   mouseImplementation,
   mysteryBoxImplementation,
   newsgroupFilterImplementation,
+  poltergeistImplementation,
   rAndDProtocolFilesImplementation,
+  scatterShotImplementation,
   seeyaImplementation,
   selfModifyingCodeImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
+  vewyVewyQuietImplementation,
+  zetatechSoftwareInstallerImplementation,
   accessThroughAlphaImplementation,
   accessToArasakaImplementation,
   accessToKiribatiImplementation,
@@ -228,10 +244,13 @@ export const CARD_IMPLEMENTATIONS = [
   aujourdhuiImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
+  hellsRunImplementation,
   junkyardBbsImplementation,
   loanFromChibaImplementation,
   nEtoImplementation,
   roninAroundImplementation,
+  corollaSpeedChipImplementation,
+  drifterMobileEnvironmentImplementation,
   hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
@@ -359,6 +378,7 @@ export const CARD_IMPLEMENTATIONS = [
   tychoMemChipImplementation,
   wutechMemChipImplementation,
   zetatechMemChipImplementation,
+  zz22SpeedChipImplementation,
   antiquatedInterfaceRoutinesImplementation,
   chesterMixImplementation,
   crystalPalaceStationGridImplementation,

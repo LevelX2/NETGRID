@@ -62,6 +62,9 @@ const IMPLEMENTED_ACTIVATED_ABILITY_LOCATION =
 const IMPLEMENTED_ACCESS_EFFECT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -71,8 +74,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/baedekers-net-map.ts",
   "onr_v1_004_bakdoor":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+  "onr_v1_011_cloak":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/cloak.ts",
+  "onr_v1_035_invisibility":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/invisibility.ts",
+  "onr_v1_048_poltergeist":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/poltergeist.ts",
+  "onr_v1_057_scatter-shot":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/scatter-shot.ts",
   "onr_v1_063_signpost":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/signpost.ts",
+  "onr_v1_071_vewy-vewy-quiet":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/vewy-vewy-quiet.ts",
+  "onr_v1_075_zetatech-software-installer":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/zetatech-software-installer.ts",
   "onr_v1_148_access-through-alpha":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/access-through-alpha.ts",
   "onr_v1_149_access-to-arasaka":
@@ -85,6 +100,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/back-door-to-orbital-air.ts",
   "onr_v1_181_the-springboard":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/the-springboard.ts",
+  "onr_v1_124_corolla-speed-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/corolla-speed-chip.ts",
+  "onr_v1_126_drifter-mobile-environment":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/drifter-mobile-environment.ts",
   "onr_v1_133_militech-mram-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
   "onr_v1_134_mram-chip":
@@ -95,6 +114,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/wutech-mem-chip.ts",
   "onr_v1_146_zetatech-mem-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/zetatech-mem-chip.ts",
+  "onr_v1_147_zz22-speed-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/zz22-speed-chip.ts",
   "onr_v1_154_broker":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
@@ -163,6 +184,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/aujourdhui.ts",
   "onr_v1_163_floating-runner-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
+  "onr_v1_164_hells-run":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/hells-run.ts",
   "onr_v1_165_junkyard-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/junkyard-bbs.ts",
   "onr_v1_169_n-e-t-o":
@@ -564,6 +587,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for activated main-action ability behavior.",
     );
     currentLocations.add(IMPLEMENTED_ACTIVATED_ABILITY_LOCATION);
+  }
+  if (implementation.restrictedHostedCreditSource) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for restricted hosted-credit source behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION);
   }
 
   return {

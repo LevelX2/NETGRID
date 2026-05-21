@@ -631,6 +631,26 @@ export type CardAccessCountModifierImplementation = {
   visibility: EventVisibilityClass;
 };
 
+export type RestrictedHostedCreditUse =
+  | "using_icebreaker_during_run_non_noisy"
+  | "using_killer_during_run"
+  | "increase_link"
+  | "trash_nodes"
+  | "trash_upgrades"
+  | "install_programs"
+  | "remove_tags";
+
+export type RestrictedHostedCreditSourceImplementation = {
+  capacity: number;
+  counterType: Extract<CounterType, "bit">;
+  usableFor: readonly RestrictedHostedCreditUse[];
+  refresh: {
+    timing: "start_of_runner_turn";
+    mode: "refill_to_capacity_if_used";
+  };
+  allowUseWhileOverwritingSource?: true;
+};
+
 export type CardPrintedSubroutineImplementation =
   | {
       kind: "end_the_run";

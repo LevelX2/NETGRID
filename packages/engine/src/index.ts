@@ -256,6 +256,7 @@ import type {
   CardEffectImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
+  RestrictedHostedCreditUse,
   UseBaseLinkEffectImplementation,
 } from "./ability-engine/definition-types";
 
@@ -6966,12 +6967,12 @@ function runnerAccessActions(state: GameState): LegalAction[] {
     ) {
       const scatterShotRecurringCreditsAvailable =
         scatterShotRecurringCreditSourceIds(state, run.accessedCardId).reduce(
-          (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+          (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
           0,
         );
       const poltergeistRecurringCreditsAvailable =
         poltergeistRecurringCreditSourceIds(state, run.accessedCardId).reduce(
-          (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+          (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
           0,
         );
       actions.push(
@@ -7132,11 +7133,17 @@ function scatterShotRecurringCreditSourceIds(
 ): CardInstanceId[] {
   const accessedDefinition = definitionFor(state, accessedCardId);
   if (accessedDefinition.type !== "upgrade") return [];
-  return state.runner.rig.programs.filter(
-    (cardId) =>
-      definitionFor(state, cardId).id === SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID &&
-      cardCounter(state, cardId, "recurring_credit") > 0,
-  );
+  return [
+    ...restrictedHostedCreditSourceIds(state, "trash_upgrades", {
+      accessedCardId,
+    }),
+    ...state.runner.rig.programs.filter(
+      (cardId) =>
+        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
+        definitionFor(state, cardId).id === SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID &&
+        cardCounter(state, cardId, "recurring_credit") > 0,
+    ),
+  ].sort();
 }
 
 function poltergeistRecurringCreditSourceIds(
@@ -7145,11 +7152,17 @@ function poltergeistRecurringCreditSourceIds(
 ): CardInstanceId[] {
   const accessedDefinition = definitionFor(state, accessedCardId);
   if (accessedDefinition.type !== "asset") return [];
-  return state.runner.rig.programs.filter(
-    (cardId) =>
-      definitionFor(state, cardId).id === POLTERGEIST_ID &&
-      cardCounter(state, cardId, "recurring_credit") > 0,
-  );
+  return [
+    ...restrictedHostedCreditSourceIds(state, "trash_nodes", {
+      accessedCardId,
+    }),
+    ...state.runner.rig.programs.filter(
+      (cardId) =>
+        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
+        definitionFor(state, cardId).id === POLTERGEIST_ID &&
+        cardCounter(state, cardId, "recurring_credit") > 0,
+    ),
+  ].sort();
 }
 
 function runnerAccessTrashRecurringCreditSourceIds(
@@ -7167,7 +7180,7 @@ function runnerAccessTrashRecurringCredits(
   accessedCardId: CardInstanceId,
 ): number {
   return runnerAccessTrashRecurringCreditSourceIds(state, accessedCardId).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );
 }
@@ -7197,10 +7210,10 @@ function spendRunnerAccessTrashCredits(
     accessedCardId,
   )) {
     if (remaining <= 0) break;
-    const available = cardCounter(state, cardId, "recurring_credit");
+    const available = hostedPaymentCredits(state, cardId);
     const spent = Math.min(available, remaining);
     if (spent > 0) {
-      spendCardCounter(state, cardId, "recurring_credit", spent);
+      spendHostedPaymentCredits(state, cardId, spent);
       recurringSpent += spent;
       remaining -= spent;
     }
@@ -8730,7 +8743,7 @@ function installShellTradersPreparedCardForFree(
     zone: { side: "runner", zone: "rig" },
   };
   setCardCounter(state, cardId, "shell", 0);
-  if ((definition.recurringCredits ?? 0) > 0)
+  if (shouldLoadLegacyRecurringCredits(definition))
     setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
   if (
     definition.type === "program" &&
@@ -9081,7 +9094,7 @@ function resolveMysteryBoxChoice(
     rezzed: true,
     zone: { side: "runner", zone: "rig" },
   };
-  if ((selectedDefinition.recurringCredits ?? 0) > 0)
+  if (shouldLoadLegacyRecurringCredits(selectedDefinition))
     setCardCounter(
       state,
       selectedId,
@@ -9094,6 +9107,14 @@ function resolveMysteryBoxChoice(
     selectedDefinition.id !== SKIVVISS_ID
   )
     addCardCounter(state, selectedId, "virus", 1);
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    selectedDefinition,
+    selectedId,
+    "on_install",
+  );
 
   trashRunnerInstalledCardToHeap(state, sourceCardId);
   state.runner.stack = shuffleStateIds(
@@ -9364,7 +9385,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     }
     const zetatechRecurringBefore =
       zetatechOverlayInstall && hostOnCardId
-        ? cardCounter(state, hostOnCardId, "recurring_credit")
+        ? hostedPaymentCredits(state, hostOnCardId)
         : 0;
     const concealedHiddenRunnerResource =
       definition.type === "resource" && cardHasSubtype(definition, "hidden");
@@ -9433,7 +9454,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         else if ((definition.memoryLimitBonus ?? 0) > 0)
           state.runner.memoryLimit += definition.memoryLimitBonus ?? 0;
       }
-      if ((definition.recurringCredits ?? 0) > 0)
+      if (shouldLoadLegacyRecurringCredits(definition))
         setCardCounter(
           state,
           cardId,
@@ -9464,7 +9485,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     } else if (definition.type === "program") {
       state.runner.rig.programs.push(cardId);
       if (!hostOnCardId) state.runner.memoryUsed += definition.memoryCost ?? 0;
-      if ((definition.recurringCredits ?? 0) > 0)
+      if (shouldLoadLegacyRecurringCredits(definition))
         setCardCounter(
           state,
           cardId,
@@ -9479,7 +9500,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         addCardCounter(state, cardId, "virus", 1);
     } else if (definition.type === "resource") {
       state.runner.rig.resources.push(cardId);
-      if ((definition.recurringCredits ?? 0) > 0 && !concealedHiddenRunnerResource)
+      if (shouldLoadLegacyRecurringCredits(definition) && !concealedHiddenRunnerResource)
         setCardCounter(
           state,
           cardId,
@@ -9521,14 +9542,14 @@ function installCard(state: GameState, legalAction: LegalAction): void {
             ? Math.max(
                 0,
                 zetatechRecurringBefore -
-                  cardCounter(state, hostOnCardId, "recurring_credit"),
+                  hostedPaymentCredits(state, hostOnCardId),
               )
             : 0,
         runnerCreditsAfter: state.runner.credits,
       };
     }
     consumeValuPakProgramInstallAction(state, legalAction);
-    if ((definition.recurringCredits ?? 0) > 0) {
+    if (shouldLoadLegacyRecurringCredits(definition)) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         recurringCreditsLoaded: definition.recurringCredits ?? 0,
@@ -19735,7 +19756,7 @@ function installRunnerProgramFromStackWithoutClick(
     rezzed: true,
     zone: { side: "runner", zone: "rig" },
   };
-  if ((definition.recurringCredits ?? 0) > 0)
+  if (shouldLoadLegacyRecurringCredits(definition))
     setCardCounter(
       state,
       cardId,
@@ -19748,6 +19769,14 @@ function installRunnerProgramFromStackWithoutClick(
     definition.id !== SKIVVISS_ID
   )
     addCardCounter(state, cardId, "virus", 1);
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_install",
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     installedProgramDefinitionId: definition.id,
@@ -19804,7 +19833,7 @@ function installRunnerProgramFromZoneWithoutClick(
     rezzed: true,
     zone: { side: "runner", zone: "rig" },
   };
-  if ((definition.recurringCredits ?? 0) > 0)
+  if (shouldLoadLegacyRecurringCredits(definition))
     setCardCounter(
       state,
       cardId,
@@ -19817,6 +19846,14 @@ function installRunnerProgramFromZoneWithoutClick(
     definition.id !== SKIVVISS_ID
   )
     addCardCounter(state, cardId, "virus", 1);
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_install",
+  );
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     installedProgramDefinitionId: definition.id,
@@ -20515,7 +20552,7 @@ function resolveSneakPreviewProgramChoice(
   if (!cardId) throw new Error("Es wurde kein Programm fuer Sneak Preview gewaehlt.");
   if (!sneakPreviewInstallableProgramIds(state, sourceZone).includes(cardId))
     throw new Error("Dieses Programm ist nicht mehr legal installierbar.");
-  installRunnerProgramForFree(state, cardId);
+  installRunnerProgramForFree(state, cardId, legalAction);
   state.sneakPreviewTemporaryInstalls ??= [];
   state.sneakPreviewTemporaryInstalls.push({
     cardId,
@@ -20548,6 +20585,7 @@ function resolveSneakPreviewProgramChoice(
 function installRunnerProgramForFree(
   state: GameState,
   cardId: CardInstanceId,
+  legalAction: LegalAction,
 ): void {
   const definition = definitionFor(state, cardId);
   if (definition.type !== "program")
@@ -20571,7 +20609,7 @@ function installRunnerProgramForFree(
     rezzed: true,
     zone: { side: "runner", zone: "rig" },
   };
-  if ((definition.recurringCredits ?? 0) > 0)
+  if (shouldLoadLegacyRecurringCredits(definition))
     setCardCounter(state, cardId, "recurring_credit", definition.recurringCredits ?? 0);
   if (
     definition.mechanics.includes("virus") &&
@@ -20579,6 +20617,14 @@ function installRunnerProgramForFree(
     definition.id !== SKIVVISS_ID
   )
     addCardCounter(state, cardId, "virus", 1);
+  executeCardImplementationLifecycleEffects(
+    cardImplementationRuntimeDeps,
+    state,
+    legalAction,
+    definition,
+    cardId,
+    "on_install",
+  );
 }
 
 function startRunnerStackArrangeChoice(
@@ -24082,14 +24128,15 @@ function postBidTraceLinkCandidates(
     const instance = state.cardInstances[cardId];
     if (!instance || instance.controller !== "runner") continue;
     const definition = definitionFor(state, cardId);
-    for (const { ability } of activatedCardImplementationTraceAbilities(
+  for (const { ability } of activatedCardImplementationTraceAbilities(
       definition,
       "trace_post_bid_link_window",
     )) {
       const effect = increaseTraceLinkEffect(ability);
       if (!effect) continue;
       const creditCost = creditCostForTraceAbility(ability);
-      if (state.runner.credits < creditCost) continue;
+      if (state.runner.credits + runnerTraceLinkCredits(state) < creditCost)
+        continue;
       const limitOncePerTrace =
         ability.limit?.kind === "once_per_trace_per_source" &&
         ability.limit.scope === "source";
@@ -24165,7 +24212,7 @@ function resolveTracePostBidLinkChoice(
     );
     if (!candidate)
       throw new Error("Diese Post-Bid-Link-Quelle ist nicht legal.");
-    spendCredits(state, "runner", candidate.creditCost);
+    const payment = spendRunnerTraceLinkBidCredits(state, candidate.creditCost);
     const nextTrace = {
       ...trace,
       runnerLink: (trace.runnerLink ?? 0) + candidate.linkDelta,
@@ -24188,6 +24235,14 @@ function resolveTracePostBidLinkChoice(
       sourceDefinitionId: candidate.definitionId,
       postBidTraceLinkSourceDefinitionId: candidate.definitionId,
       postBidTraceLinkCostPaid: candidate.creditCost,
+      ...(payment.traceLinkCreditSpent > 0
+        ? {
+            traceLinkCreditsSpent: payment.traceLinkCreditSpent,
+            runnerCreditsSpent: payment.runnerCreditsSpent,
+            traceLinkCreditSourceDefinitionIds:
+              payment.sourceDefinitionIds.join(","),
+          }
+        : {}),
       postBidTraceLinkDelta: candidate.linkDelta,
       postBidTraceLinkBonus: nextTrace.postBidLinkBonus ?? 0,
       runnerLink: nextTrace.runnerLink ?? 0,
@@ -24353,19 +24408,21 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
 }
 
 function runnerTraceLinkCreditSourceIds(state: GameState): CardInstanceId[] {
-  return [...state.runner.rig.hardware, ...state.runner.rig.resources]
-    .filter(
+  return [
+    ...restrictedHostedCreditSourceIds(state, "increase_link"),
+    ...[...state.runner.rig.hardware, ...state.runner.rig.resources].filter(
       (cardId) =>
+        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
         (definitionFor(state, cardId).id === HELLS_RUN_ID ||
           definitionFor(state, cardId).id === PK_6089A_ID) &&
         cardCounter(state, cardId, "recurring_credit") > 0,
-    )
-    .sort();
+    ),
+  ].sort();
 }
 
 function runnerTraceLinkCredits(state: GameState): number {
   return runnerTraceLinkCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );
 }
@@ -24394,12 +24451,9 @@ function spendRunnerTraceLinkBidCredits(
   const sourceDefinitionIds = new Set<string>();
   for (const cardId of runnerTraceLinkCreditSourceIds(state)) {
     if (remaining <= 0) break;
-    const spent = Math.min(
-      cardCounter(state, cardId, "recurring_credit"),
-      remaining,
-    );
+    const spent = Math.min(hostedPaymentCredits(state, cardId), remaining);
     if (spent <= 0) continue;
-    spendCardCounter(state, cardId, "recurring_credit", spent);
+    spendHostedPaymentCredits(state, cardId, spent);
     remaining -= spent;
     traceLinkCreditSpent += spent;
     const definitionId = definitionFor(state, cardId).id;
@@ -25643,10 +25697,150 @@ function spendCredits(state: GameState, side: Side, amount: number): void {
   state.runner.credits -= amount;
 }
 
+type RestrictedHostedCreditPaymentOptions = {
+  breakerId?: CardInstanceId | undefined;
+  accessedCardId?: CardInstanceId | undefined;
+  installCardType?: CardDefinition["type"] | undefined;
+};
+
+function restrictedHostedCreditSourceForDefinition(
+  definition: CardDefinition,
+) {
+  return cardImplementationForDefinitionId(definition.id)
+    ?.restrictedHostedCreditSource;
+}
+
+function isRestrictedHostedCreditSource(definition: CardDefinition): boolean {
+  return Boolean(restrictedHostedCreditSourceForDefinition(definition));
+}
+
+function shouldLoadLegacyRecurringCredits(definition: CardDefinition): boolean {
+  return (
+    (definition.recurringCredits ?? 0) > 0 &&
+    !isRestrictedHostedCreditSource(definition)
+  );
+}
+
+function hostedPaymentCounterTypeForSource(
+  state: GameState,
+  cardId: CardInstanceId,
+): Extract<CounterType, "bit" | "recurring_credit"> {
+  return isRestrictedHostedCreditSource(definitionFor(state, cardId))
+    ? "bit"
+    : "recurring_credit";
+}
+
+function hostedPaymentCredits(
+  state: GameState,
+  cardId: CardInstanceId,
+): number {
+  return cardCounter(state, cardId, hostedPaymentCounterTypeForSource(state, cardId));
+}
+
+function spendHostedPaymentCredits(
+  state: GameState,
+  cardId: CardInstanceId,
+  amount: number,
+): void {
+  spendCardCounter(
+    state,
+    cardId,
+    hostedPaymentCounterTypeForSource(state, cardId),
+    amount,
+  );
+}
+
+function restrictedHostedCreditSourceMatchesUse(
+  state: GameState,
+  cardId: CardInstanceId,
+  use: RestrictedHostedCreditUse,
+  options: RestrictedHostedCreditPaymentOptions = {},
+): boolean {
+  if (!runnerInstalledCardIds(state).includes(cardId)) return false;
+  const definition = definitionFor(state, cardId);
+  const source = restrictedHostedCreditSourceForDefinition(definition);
+  if (!source || source.counterType !== "bit" || !source.usableFor.includes(use))
+    return false;
+  if (cardCounter(state, cardId, "bit") <= 0) return false;
+  if (
+    use === "using_icebreaker_during_run_non_noisy" ||
+    use === "using_killer_during_run"
+  ) {
+    const breakerId = options.breakerId;
+    if (!state.run || !breakerId || !state.runner.rig.programs.includes(breakerId))
+      return false;
+    const breakerDefinition = definitionFor(state, breakerId);
+    if (!cardHasSubtype(breakerDefinition, "icebreaker")) return false;
+    if (use === "using_icebreaker_during_run_non_noisy")
+      return !cardHasSubtype(breakerDefinition, "noisy");
+    return cardHasSubtype(breakerDefinition, "killer");
+  }
+  if (use === "trash_nodes" || use === "trash_upgrades") {
+    const accessedCardId = options.accessedCardId;
+    if (!accessedCardId || !state.cardInstances[accessedCardId]) return false;
+    const accessedDefinition = definitionFor(state, accessedCardId);
+    return use === "trash_nodes"
+      ? accessedDefinition.type === "asset"
+      : accessedDefinition.type === "upgrade";
+  }
+  if (use === "install_programs") return options.installCardType === "program";
+  return use === "increase_link" || use === "remove_tags";
+}
+
+function restrictedHostedCreditSourceIds(
+  state: GameState,
+  use: RestrictedHostedCreditUse,
+  options: RestrictedHostedCreditPaymentOptions = {},
+): CardInstanceId[] {
+  return runnerInstalledCardIds(state)
+    .filter((cardId) =>
+      restrictedHostedCreditSourceMatchesUse(state, cardId, use, options),
+    )
+    .sort();
+}
+
+function restrictedHostedCredits(
+  state: GameState,
+  use: RestrictedHostedCreditUse,
+  options: RestrictedHostedCreditPaymentOptions = {},
+): number {
+  return restrictedHostedCreditSourceIds(state, use, options).reduce(
+    (sum, cardId) => sum + cardCounter(state, cardId, "bit"),
+    0,
+  );
+}
+
+function spendRestrictedHostedCredits(
+  state: GameState,
+  use: RestrictedHostedCreditUse,
+  amount: number,
+  options: RestrictedHostedCreditPaymentOptions = {},
+): {
+  spent: number;
+  sourceDefinitionIds: string[];
+} {
+  let remaining = Math.max(0, Math.floor(amount));
+  let spent = 0;
+  const sourceDefinitionIds = new Set<string>();
+  for (const cardId of restrictedHostedCreditSourceIds(state, use, options)) {
+    if (remaining <= 0) break;
+    const cardSpent = Math.min(cardCounter(state, cardId, "bit"), remaining);
+    if (cardSpent <= 0) continue;
+    spendCardCounter(state, cardId, "bit", cardSpent);
+    remaining -= cardSpent;
+    spent += cardSpent;
+    sourceDefinitionIds.add(definitionFor(state, cardId).id);
+  }
+  return { spent, sourceDefinitionIds: [...sourceDefinitionIds].sort() };
+}
+
 function availableRunnerProgramInstallCredits(state: GameState): number {
   return (
     state.runner.credits +
     runnerRecurringCredits(state) +
+    restrictedHostedCredits(state, "install_programs", {
+      installCardType: "program",
+    }) +
     valuPakTemporaryProgramInstallCredits(state)
   );
 }
@@ -25669,7 +25863,7 @@ function runnerProgramInstallRecurringCreditSourceIds(
       (cardId) =>
         definitionFor(state, cardId).id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID,
     ),
-  ];
+  ].filter((cardId) => !isRestrictedHostedCreditSource(definitionFor(state, cardId)));
 }
 
 function spendRunnerInstallCredits(
@@ -25697,12 +25891,19 @@ function spendRunnerInstallCredits(
     );
     remaining -= temporary;
   }
+  const restricted = spendRestrictedHostedCredits(
+    state,
+    "install_programs",
+    remaining,
+    { installCardType: cardType },
+  );
+  remaining -= restricted.spent;
   for (const cardId of runnerProgramInstallRecurringCreditSourceIds(state)) {
     if (remaining <= 0) break;
-    const available = cardCounter(state, cardId, "recurring_credit");
+    const available = hostedPaymentCredits(state, cardId);
     const spent = Math.min(available, remaining);
     if (spent > 0) {
-      spendCardCounter(state, cardId, "recurring_credit", spent);
+      spendHostedPaymentCredits(state, cardId, spent);
       remaining -= spent;
     }
   }
@@ -25724,7 +25925,32 @@ function runnerRunRecurringCreditSourceIds(
     ...state.runner.rig.programs,
     ...state.runner.rig.resources,
   ];
-  return runnerRig.filter((cardId) => {
+  const restrictedRunCostSources =
+    breakerId === undefined
+      ? runnerRig.filter((cardId) => {
+          const source =
+            restrictedHostedCreditSourceForDefinition(definitionFor(state, cardId));
+          return (
+            Boolean(source) &&
+            source?.counterType === "bit" &&
+            source.usableFor.includes("using_icebreaker_during_run_non_noisy") &&
+            cardCounter(state, cardId, "bit") > 0
+          );
+        })
+      : [];
+  const restrictedSources = [
+    ...restrictedRunCostSources,
+    ...restrictedHostedCreditSourceIds(
+      state,
+      "using_icebreaker_during_run_non_noisy",
+      { breakerId },
+    ),
+    ...restrictedHostedCreditSourceIds(state, "using_killer_during_run", {
+      breakerId,
+    }),
+  ];
+  const legacySources = runnerRig.filter((cardId) => {
+    if (isRestrictedHostedCreditSource(definitionFor(state, cardId))) return false;
     if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
     const definition = definitionFor(state, cardId);
     if (
@@ -25763,6 +25989,7 @@ function runnerRunRecurringCreditSourceIds(
     if (!noisyBreaker) return true;
     return !cardHasSubtype(definition, "stealth");
   });
+  return [...new Set([...restrictedSources, ...legacySources])].sort();
 }
 
 function runnerRunRecurringCredits(
@@ -25770,7 +25997,7 @@ function runnerRunRecurringCredits(
   breakerId?: CardInstanceId,
 ): number {
   return runnerRunRecurringCreditSourceIds(state, breakerId).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );
 }
@@ -25803,10 +26030,10 @@ function spendRunnerRunCredits(
   }
   for (const cardId of runnerRunRecurringCreditSourceIds(state, breakerId)) {
     if (remaining <= 0) break;
-    const available = cardCounter(state, cardId, "recurring_credit");
+    const available = hostedPaymentCredits(state, cardId);
     const spent = Math.min(available, remaining);
     if (spent > 0) {
-      spendCardCounter(state, cardId, "recurring_credit", spent);
+      spendHostedPaymentCredits(state, cardId, spent);
       remaining -= spent;
     }
   }
@@ -25816,20 +26043,22 @@ function spendRunnerRunCredits(
 function runnerTagRemovalRecurringCreditSourceIds(
   state: GameState,
 ): CardInstanceId[] {
-  return state.runner.rig.hardware
-    .filter(
+  return [
+    ...restrictedHostedCreditSourceIds(state, "remove_tags"),
+    ...state.runner.rig.hardware.filter(
       (cardId) =>
+        !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
         TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(
           definitionFor(state, cardId).id,
         ) &&
         cardCounter(state, cardId, "recurring_credit") > 0,
-    )
-    .sort();
+    ),
+  ].sort();
 }
 
 function runnerTagRemovalRecurringCredits(state: GameState): number {
   return runnerTagRemovalRecurringCreditSourceIds(state).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "recurring_credit"),
+    (sum, cardId) => sum + hostedPaymentCredits(state, cardId),
     0,
   );
 }
@@ -25853,11 +26082,11 @@ function spendRunnerTagRemovalCredits(
   for (const cardId of runnerTagRemovalRecurringCreditSourceIds(state)) {
     if (remaining <= 0) break;
     const spent = Math.min(
-      cardCounter(state, cardId, "recurring_credit"),
+      hostedPaymentCredits(state, cardId),
       remaining,
     );
     if (spent <= 0) continue;
-    spendCardCounter(state, cardId, "recurring_credit", spent);
+    spendHostedPaymentCredits(state, cardId, spent);
     const sourceDefinitionId = definitionFor(state, cardId).id;
     if (sourceDefinitionId === ARMADILLO_ARMORED_ROAD_HOME_ID)
       armadilloRecurringSpent += spent;
@@ -25927,10 +26156,10 @@ function applyPostBreakStealthLoss(
   let spent = 0;
   for (const { cardId } of stealthSources) {
     if (remaining <= 0) break;
-    const available = cardCounter(state, cardId, "recurring_credit");
+    const available = hostedPaymentCredits(state, cardId);
     const cardSpent = Math.min(available, remaining);
     if (cardSpent > 0) {
-      spendCardCounter(state, cardId, "recurring_credit", cardSpent);
+      spendHostedPaymentCredits(state, cardId, cardSpent);
       remaining -= cardSpent;
       spent += cardSpent;
     }
@@ -25958,7 +26187,7 @@ function runnerStealthRecurringCreditSources(
   const sources: { cardId: CardInstanceId; available: number }[] = [];
   for (const cardId of runnerRig) {
     if (!cardHasSubtype(definitionFor(state, cardId), "stealth")) continue;
-    const available = cardCounter(state, cardId, "recurring_credit");
+    const available = hostedPaymentCredits(state, cardId);
     if (available > 0) sources.push({ cardId, available });
   }
   return sources;
@@ -26034,9 +26263,9 @@ function resolveHammerStealthLossChoice(
       throw new Error("Die Stealth-Quelle ist nicht mehr installiert.");
     if (!cardHasSubtype(definitionFor(state, cardId), "stealth"))
       throw new Error("Nur Stealth-Karten koennen gewaehlt werden.");
-    if (cardCounter(state, cardId, "recurring_credit") < amount)
+    if (hostedPaymentCredits(state, cardId) < amount)
       throw new Error("Nicht genug Stealth-Credits fuer die Auswahl.");
-    spendCardCounter(state, cardId, "recurring_credit", amount);
+    spendHostedPaymentCredits(state, cardId, amount);
   }
   delete state.pendingChoice;
   legalAction.payload = {
@@ -26216,6 +26445,31 @@ function refreshRecurringCredits(
   if (side !== "runner" || !isV099OrLater(state)) return;
   for (const cardId of runnerInstalledCardIds(state)) {
     const definition = definitionFor(state, cardId);
+    const restrictedSource = restrictedHostedCreditSourceForDefinition(definition);
+    if (restrictedSource) {
+      if (
+        restrictedSource.counterType !== "bit" ||
+        restrictedSource.refresh.timing !== "start_of_runner_turn" ||
+        restrictedSource.refresh.mode !== "refill_to_capacity_if_used"
+      )
+        throw new Error("Restricted hosted credit source is invalid.");
+      const capacity = Math.max(0, Math.floor(restrictedSource.capacity));
+      const previous = cardCounter(state, cardId, "bit");
+      if (previous < capacity) {
+        setCardCounter(state, cardId, "bit", capacity);
+        effects?.push(
+          automaticCounterChangeEffect(
+            `runner.start.restricted_hosted_credit.${cardId}`,
+            "runner",
+            definition.id,
+            "bit",
+            capacity,
+            capacity - previous,
+          ),
+        );
+      }
+      continue;
+    }
     const recurringCredits = definition.recurringCredits ?? 0;
     if (recurringCredits > 0) {
       const previous = cardCounter(state, cardId, "recurring_credit");

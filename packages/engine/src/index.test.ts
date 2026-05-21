@@ -2961,7 +2961,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
         String(action.payload?.cardId) === hellsRunId,
     );
     state.runner.credits = 0;
-    expect(cardCounterAmount(state, hellsRunId, "recurring_credit")).toBe(1);
+    expect(cardCounterAmount(state, hellsRunId, "bit")).toBe(1);
     putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -2972,7 +2972,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       true,
     );
     state = applyChoice(state, "runner", "bid_1");
-    expect(cardCounterAmount(state, hellsRunId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, hellsRunId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hellsRunTraceCreditsSpent: 1,
       runnerCreditsSpent: 0,
@@ -2983,12 +2983,12 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(hashState(replay.state)).toBe(hashState(state));
 
     let refreshState = structuredClone(initial);
-    setCardCounterForTest(refreshState, hellsRunId, "recurring_credit", 0);
+    setCardCounterForTest(refreshState, hellsRunId, "bit", 0);
     refreshState.corp.maxHandSize = 100;
     refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
     refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
     refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
-    expect(cardCounterAmount(refreshState, hellsRunId, "recurring_credit")).toBe(1);
+    expect(cardCounterAmount(refreshState, hellsRunId, "bit")).toBe(1);
 
     let runCostState = toRunnerTurn(
       createGameAfterSetup({
@@ -3023,7 +3023,7 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       runCostState,
       "onr_v1_164_hells-run",
     );
-    setCardCounterForTest(runCostState, runCostHell, "recurring_credit", 1);
+    setCardCounterForTest(runCostState, runCostHell, "bit", 1);
     putCorpRootInRemote(runCostState, "onr_v1_332_newsgroup-taunting");
     const taxAssetId = runCostState.corp.servers
       .flatMap((server) => server.root)
@@ -11133,12 +11133,12 @@ describe("V1.7.0 Mechanikpaket D", () => {
     );
     if (cloakId) {
       expect(
-        nonNoisyState.cardInstances[cloakId]?.counters?.recurring_credit,
+        nonNoisyState.cardInstances[cloakId]?.counters?.bit,
       ).toBe(2);
       expect(
         getPlayerView(nonNoisyState, "runner").own.rig?.find(
           (card) => card.instanceId === cloakId,
-        )?.counters?.recurring_credit,
+        )?.counters?.bit,
       ).toBe(2);
     }
   });
@@ -22210,12 +22210,12 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     expect(drifterId).toBeDefined();
     if (!drifterId) throw new Error("Missing Drifter");
-    expect(cardCounterAmount(state, drifterId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, drifterId, "bit")).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
         (card) =>
           card.definitionId === "onr_v1_126_drifter-mobile-environment",
-      )?.counters?.recurring_credit,
+      )?.counters?.bit,
     ).toBe(2);
 
     state.runner.tags = 1;
@@ -22227,7 +22227,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = apply(state, "runner", (action) => action.type === "remove_tag");
     expect(state.runner.tags).toBe(0);
     expect(state.runner.credits).toBe(0);
-    expect(cardCounterAmount(state, drifterId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, drifterId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "remove_tag",
       amount: 1,
@@ -22263,7 +22263,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         String(state.pendingChoice.options[0]?.id),
       );
     }
-    expect(cardCounterAmount(state, drifterId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, drifterId, "bit")).toBe(2);
   });
 });
 
@@ -23004,7 +23004,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     if (!invisibilityId || !eagleId || !owlId)
       throw new Error("Missing installed V1.9.16 recurring cards");
     expect(
-      state.cardInstances[invisibilityId]?.counters?.recurring_credit,
+      state.cardInstances[invisibilityId]?.counters?.bit,
     ).toBe(1);
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
     expect(state.cardInstances[owlId]?.counters?.recurring_credit).toBe(3);
@@ -23013,7 +23013,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       ...state.cardInstances[invisibilityId]!,
       counters: {
         ...state.cardInstances[invisibilityId]!.counters,
-        recurring_credit: 0,
+        bit: 0,
       },
     };
     state.cardInstances[eagleId] = {
@@ -23036,7 +23036,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     state = apply(state, "corp", (action) => action.type === "end_turn");
 
     expect(
-      state.cardInstances[invisibilityId]?.counters?.recurring_credit,
+      state.cardInstances[invisibilityId]?.counters?.bit,
     ).toBe(1);
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
     expect(state.cardInstances[owlId]?.counters?.recurring_credit).toBe(3);
@@ -25627,7 +25627,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.actionId === installZz22.actionId,
     );
     expect(
-      killerState.cardInstances[zz22Id]?.counters?.recurring_credit,
+      killerState.cardInstances[zz22Id]?.counters?.bit,
     ).toBe(2);
     installRunnerProgramForTest(killerState, "simple_killer");
     killerState.runner.credits = 1;
@@ -25651,7 +25651,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(killerState.runner.credits).toBe(1);
     expect(
-      killerState.cardInstances[zz22Id]?.counters?.recurring_credit,
+      killerState.cardInstances[zz22Id]?.counters?.bit,
     ).toBe(1);
     killerState = apply(
       killerState,
@@ -25662,7 +25662,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(killerState.runner.credits).toBe(1);
     expect(
-      killerState.cardInstances[zz22Id]?.counters?.recurring_credit ?? 0,
+      killerState.cardInstances[zz22Id]?.counters?.bit ?? 0,
     ).toBe(0);
     const killerBreak = mustAction(
       killerState,
@@ -25678,7 +25678,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(killerState.runner.credits).toBe(0);
     expect(
-      killerState.cardInstances[zz22Id]?.counters?.recurring_credit ?? 0,
+      killerState.cardInstances[zz22Id]?.counters?.bit ?? 0,
     ).toBe(0);
 
     let decoderState = toRunnerTurn(
@@ -27348,7 +27348,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     if (!cloakId || !hammerId)
       throw new Error("Missing installed Hammer or Cloak");
     expect(state.runner.memoryUsed).toBe(2);
-    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(3);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(3);
 
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -27406,7 +27406,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.actionId === legal.actionId,
     );
     expect(state.run?.brokenSubroutineIndexes).toContain(0);
-    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(1);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_031_hammer",
@@ -27544,8 +27544,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       invisibilityOption.id,
     ]);
     expect(state.pendingChoice).toBeUndefined();
-    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(2);
-    expect(cardCounterAmount(state, invisibilityId, "recurring_credit")).toBe(
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(2);
+    expect(cardCounterAmount(state, invisibilityId, "bit")).toBe(
       0,
     );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
@@ -27987,7 +27987,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
 
     expect(state.runner.credits).toBe(0);
-    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, installerId, "bit")).toBe(2);
     const legal = mustAction(
       state,
       "runner",
@@ -28026,7 +28026,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
 
     expect(state.runner.credits).toBe(0);
-    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, installerId, "bit")).toBe(0);
     expect(state.runner.rig.programs).toContain(hammerId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
@@ -28049,7 +28049,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         String(state.pendingChoice.options[0]?.id),
       );
 
-    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, installerId, "bit")).toBe(2);
     expect(validateGameState(state).ok).toBe(true);
   });
 
@@ -28089,7 +28089,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           "onr_v1_075_zetatech-software-installer",
     );
     expect(state.runner.memoryUsed).toBe(1);
-    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, installerId, "bit")).toBe(2);
 
     const legal = mustAction(
       state,
@@ -28129,7 +28129,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runner.rig.programs).toContain(hammerId);
     expect(state.cardInstances[hammerId]?.hostedOn).toBe(installerId);
     expect(state.runner.memoryUsed).toBe(1);
-    expect(cardCounterAmount(state, installerId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, installerId, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
@@ -32559,7 +32559,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     };
     installRunnerProgramForTest(state, "onr_v1_047_pile-driver");
     const cloakId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
-    setCardCounterForTest(state, cloakId, "recurring_credit", 3);
+    setCardCounterForTest(state, cloakId, "bit", 3);
     const iceId = putCorpIceOnServer(
       state,
       "remote_1",
@@ -32804,7 +32804,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     runState.cardInstances[stealthId] = {
       ...runState.cardInstances[stealthId]!,
-      counters: { recurring_credit: 1 },
+      counters: { bit: 1 },
     };
     const runInitial = structuredClone(runState);
     const runReplayStart = runState.eventLog.length;
@@ -32822,7 +32822,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) => action.actionId === runAction?.actionId,
     );
 
-    expect(cardCounterAmount(runState, stealthId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(runState, stealthId, "bit")).toBe(0);
     expect(runState.runner.credits).toBe(0);
     expect(runState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "start_run",
@@ -32871,7 +32871,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     expect(cloakId).toBeDefined();
     if (!cloakId) throw new Error("Missing Cloak");
-    setCardCounterForTest(state, cloakId, "recurring_credit", 5);
+    setCardCounterForTest(state, cloakId, "bit", 5);
     state = apply(
       state,
       "runner",
@@ -32906,7 +32906,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
         action.type === "break_subroutine" &&
         sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
     );
-    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(1);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_053_ramming-piston",
@@ -37752,7 +37752,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     moveRunnerCardToGrip(state, "onr_v1_057_scatter-shot");
     state = apply(state, "runner", (action) => action.type === "install_card" && sourceDefinition(state, action) === "onr_v1_057_scatter-shot");
     const scatterId = state.runner.rig.programs.find((id) => state.cardInstances[id]?.definitionId === "onr_v1_057_scatter-shot");
-    expect(scatterId && state.cardInstances[scatterId]?.counters?.recurring_credit).toBe(2);
+    expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(2);
     const redHerringsId = putCorpRootInRemote(state, "onr_v1_366_red-herrings");
     state.cardInstances[redHerringsId] = { ...state.cardInstances[redHerringsId]!, faceup: true, rezzed: true };
     const initial = structuredClone(state);
@@ -37765,7 +37765,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       scatterShotRecurringCreditsAvailable: 2,
     });
     state = apply(state, "runner", (action) => action.actionId === trash.actionId);
-    expect(scatterId && state.cardInstances[scatterId]?.counters?.recurring_credit).toBe(1);
+    expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(1);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       scatterShotRecurringCreditsSpent: 1,
@@ -37776,7 +37776,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.maxHandSize = 100;
     state = apply(state, "corp", (action) => action.type === "end_turn");
-    expect(scatterId && state.cardInstances[scatterId]?.counters?.recurring_credit).toBe(2);
+    expect(scatterId && state.cardInstances[scatterId]?.counters?.bit).toBe(2);
 
     let assetState = toRunnerTurn(createGameAfterSetup({
       seed: "spotcheck-scatter-asset-negative",
@@ -37835,7 +37835,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const poltergeistId = state.runner.rig.programs.find(
       (id) => state.cardInstances[id]?.definitionId === "onr_v1_048_poltergeist",
     );
-    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "recurring_credit")).toBe(2);
+    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "bit")).toBe(2);
     putCorpRootInRemote(state, "simple_economy_asset");
 
     const initial = structuredClone(state);
@@ -37853,7 +37853,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       poltergeistRecurringCreditsAvailable: 2,
     });
     state = apply(state, "runner", (action) => action.actionId === trash.actionId);
-    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "recurring_credit")).toBe(0);
+    expect(poltergeistId && cardCounterAmount(state, poltergeistId, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       poltergeistRecurringCreditsSpent: 2,
@@ -38571,9 +38571,10 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     );
     expect(vewyId).toBeDefined();
     if (!vewyId) throw new Error("Missing Vewy Vewy Quiet");
-    expect(cardCounterAmount(state, vewyId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, vewyId, "bit")).toBe(2);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      recurringCreditsLoaded: 2,
+      hostedCreditsAdded: 2,
+      counterType: "bit",
     });
   });
 
@@ -40090,18 +40091,19 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_124_corolla-speed-chip",
     );
-    expect(cardCounterAmount(state, corollaId, "recurring_credit")).toBe(1);
+    expect(cardCounterAmount(state, corollaId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      recurringCreditsLoaded: 1,
+      hostedCreditsAdded: 1,
+      counterType: "bit",
     });
     let refreshState = structuredClone(state);
-    setCardCounterForTest(refreshState, corollaId, "recurring_credit", 0);
+    setCardCounterForTest(refreshState, corollaId, "bit", 0);
     refreshState.runner.maxHandSize = 100;
     refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
     refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
     refreshState.corp.maxHandSize = 100;
     refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
-    expect(cardCounterAmount(refreshState, corollaId, "recurring_credit")).toBe(1);
+    expect(cardCounterAmount(refreshState, corollaId, "bit")).toBe(1);
     state = apply(
       state,
       "runner",
@@ -40120,7 +40122,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         sourceDefinition(state, action) === "simple_killer",
     );
     expect(state.runner.credits).toBe(1);
-    expect(cardCounterAmount(state, corollaId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, corollaId, "bit")).toBe(0);
     state = apply(
       state,
       "runner",
@@ -43545,7 +43547,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
       "onr_v1_047_pile-driver",
     );
     const cloakId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
-    setCardCounterForTest(state, cloakId, "recurring_credit", 3);
+    setCardCounterForTest(state, cloakId, "bit", 3);
     const iceId = putCorpIceOnServer(state, "rd", "onr_v1_278_wall-of-ice");
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
@@ -43604,7 +43606,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Breaker/Prevention Resolvers",
 
     state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
     expect(state.run?.brokenSubroutineIndexes).toEqual([0, 1, 2, 3]);
-    expect(cardCounterAmount(state, cloakId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, cloakId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
       cardDefinitionId: "onr_v1_047_pile-driver",
