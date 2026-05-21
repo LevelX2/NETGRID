@@ -151,12 +151,15 @@ import { systematicLayoffsImplementation } from "./onr-v1/corp/operations/system
 import { teamRestructuringImplementation } from "./onr-v1/corp/operations/team-restructuring";
 import { trojanHorseImplementation } from "./onr-v1/corp/operations/trojan-horse";
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
+import { aardvarkImplementation } from "./onr-v1/corp/upgrades/aardvark";
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
 import { chimeraImplementation } from "./onr-v1/corp/upgrades/chimera";
 import { crystalPalaceStationGridImplementation } from "./onr-v1/corp/upgrades/crystal-palace-station-grid";
 import { dedicatedResponseTeamImplementation } from "./onr-v1/corp/upgrades/dedicated-response-team";
 import { dieterEsslinImplementation } from "./onr-v1/corp/upgrades/dieter-esslin";
+import { drDreffImplementation } from "./onr-v1/corp/upgrades/dr-dreff";
+import { jennyJettImplementation } from "./onr-v1/corp/upgrades/jenny-jett";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { newGalvestonCityGridImplementation } from "./onr-v1/corp/upgrades/new-galveston-city-grid";
 import { oliviaSalazarImplementation } from "./onr-v1/corp/upgrades/olivia-salazar";
@@ -164,6 +167,8 @@ import { omniKismetPhDImplementation } from "./onr-v1/corp/upgrades/omni-kismet-
 import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
 import { singaporeCityGridImplementation } from "./onr-v1/corp/upgrades/singapore-city-grid";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
+import { twentyFourHourSurveillanceImplementation } from "./onr-v1/corp/upgrades/twenty-four-hour-surveillance";
+import { turbeauDelacroixImplementation } from "./onr-v1/corp/upgrades/turbeau-delacroix";
 import { washingtonDcCityGridImplementation } from "./onr-v1/corp/upgrades/washington-d-c-city-grid";
 import { arasakaOwnsYouImplementation } from "./onr-v1/runner/preps/arasaka-owns-you";
 import { allNighterImplementation } from "./onr-v1/runner/preps/all-nighter";
@@ -513,6 +518,7 @@ export const CARD_IMPLEMENTATIONS = [
   accountsReceivableImplementation,
   annualReviewsImplementation,
   auditOfCallRecordsImplementation,
+  aardvarkImplementation,
   chanceObservationImplementation,
   closedAccountsImplementation,
   corporateDetectiveAgencyImplementation,
@@ -633,6 +639,8 @@ export const CARD_IMPLEMENTATIONS = [
   crystalPalaceStationGridImplementation,
   dedicatedResponseTeamImplementation,
   dieterEsslinImplementation,
+  drDreffImplementation,
+  jennyJettImplementation,
   jerusalemCityGridImplementation,
   newGalvestonCityGridImplementation,
   oliviaSalazarImplementation,
@@ -640,6 +648,8 @@ export const CARD_IMPLEMENTATIONS = [
   redHerringsImplementation,
   singaporeCityGridImplementation,
   tesseractFortConstructionImplementation,
+  twentyFourHourSurveillanceImplementation,
+  turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
 

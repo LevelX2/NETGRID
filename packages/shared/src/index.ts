@@ -851,6 +851,17 @@ export type RunState = {
   singaporeCityGridUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarUsedSourceIdsThisRun?: CardInstanceId[];
   oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
+  successfulRunInterventionUsedSourceIds?: CardInstanceId[];
+  successfulRunInterventionWindowClosed?: boolean;
+  delayedSuccessfulRun?: {
+    originalServerId: Exclude<ServerId, "new_remote">;
+    interventionSourceId: CardInstanceId;
+    pendingMode:
+      | "temporary_hq_ice_encounter"
+      | "installed_ice_immediate_approach";
+    temporaryIceId?: CardInstanceId;
+    installedIceId?: CardInstanceId;
+  };
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
   speedTrapPendingRezCardId?: CardInstanceId;

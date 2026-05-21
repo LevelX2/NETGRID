@@ -98,6 +98,16 @@ const IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION =
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
+  "onr_v1_349_aardvark":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/aardvark.ts",
+  "onr_v1_358_dr-dreff":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dr-dreff.ts",
+  "onr_v1_359_jenny-jett":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jenny-jett.ts",
+  "onr_v1_372_turbeau-delacroix":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/turbeau-delacroix.ts",
+  "onr_v1_373_twenty-four-hour-surveillance":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/twenty-four-hour-surveillance.ts",
   "onr_v1_286_corporate-detective-agency":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/corporate-detective-agency.ts",
   "onr_v1_289_edgerunner-inc-temps":

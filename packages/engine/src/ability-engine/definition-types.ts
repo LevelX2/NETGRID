@@ -141,6 +141,13 @@ export type CardAccessEffectImplementation = {
 export type CardAccessEffectStepImplementation =
   | CardEffectImplementation
   | {
+      kind: "trace";
+      baseTraceStrength: number;
+      onSuccess: readonly CardTraceSuccessEffectImplementation[];
+      limit: "once_per_run_on_this_fort_per_source";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
       kind: "damage_from_source_advancement_counters";
       recipient: "runner";
       damageType: Extract<DamageType, "net" | "core">;
@@ -196,6 +203,35 @@ export type CardFortRunWindowImplementation =
       hqCard: "ice";
       replacementEnters: "concealed_unrezzed";
       limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "temporary_hq_ice_encounter_after_successful_run";
+      timing: "before_successful_run_finalizes_on_this_fort";
+      hqCard: "ice";
+      cost: "half_rez_cost_rounded_down";
+      limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "install_hq_ice_innermost_after_successful_run";
+      timing: "before_successful_run_finalizes_on_this_fort";
+      hqCard: "ice";
+      installCost: "one_per_existing_ice_on_fort";
+      limit: "once_per_run_per_source";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "block_stealth_bits_during_runs_on_this_fort";
+      timing: "during_run_on_this_fort";
+      blocks: "runner_stealth_bit_payment_sources";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "aardvark_worm_lock_and_reaction";
+      timing: "during_run_on_this_fort";
+      blocks: "runner_worm_icebreaker_use";
+      reaction: "rez_to_trash_worm_and_cancel_current_use";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 

@@ -186,6 +186,7 @@ import {
   type DeckDefinition,
   type GameState,
   type LegalAction,
+  type ServerId,
   type Side,
 } from "@netgrid/shared";
 
@@ -230,6 +231,114 @@ function traceChoiceOptionIdForDefinition(
   );
   if (!option) throw new Error(`Missing trace choice option for ${definitionId}`);
   return option.id;
+}
+
+function addCorpCardToHqForTest(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  suffix: string,
+): CardInstanceId {
+  const cardId = `p354_${suffix}_${definitionId}` as CardInstanceId;
+  state.corp.hq.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "hq" },
+    faceup: false,
+    rezzed: false,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addRezzedCorpRootForTest(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  serverId: Exclude<ServerId, "new_remote">,
+  suffix: string,
+): CardInstanceId {
+  const cardId = `p354_${suffix}_${definitionId}` as CardInstanceId;
+  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) {
+    server = {
+      id: serverId,
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
+    state.corp.servers.push(server);
+  }
+  server.root.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addRezzedCorpIceForTest(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  serverId: Exclude<ServerId, "new_remote">,
+  suffix: string,
+): CardInstanceId {
+  const cardId = `p354_${suffix}_${definitionId}` as CardInstanceId;
+  let server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) {
+    server = {
+      id: serverId,
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    };
+    state.corp.servers.push(server);
+  }
+  server.ice.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "corp",
+    controller: "corp",
+    zone: { side: "corp", zone: "serverIce", serverId },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
+}
+
+function addInstalledRunnerProgramForTest(
+  state: GameState,
+  definitionId: CardDefinitionId,
+  suffix: string,
+): CardInstanceId {
+  const cardId = `p354_${suffix}_${definitionId}` as CardInstanceId;
+  state.runner.rig.programs.push(cardId);
+  state.cardInstances[cardId] = {
+    instanceId: cardId,
+    definitionId,
+    owner: "runner",
+    controller: "runner",
+    zone: { side: "runner", zone: "rig" },
+    faceup: true,
+    rezzed: true,
+    advancementCounters: 0,
+    strengthModifier: 0,
+  };
+  return cardId;
 }
 
 describe("MVP 0.1 engine foundation", () => {
@@ -7604,8 +7713,6 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         kind: "force_rez_ice_outermost_inward_after_successful_run",
       }),
     );
-    expect(cardImplementationForDefinitionId("onr_v1_358_dr-dreff")).toBeUndefined();
-    expect(cardImplementationForDefinitionId("onr_v1_359_jenny-jett")).toBeUndefined();
   });
 
   it("migrates P3.53 run/encounter interventions into CardImplementation coverage", () => {
@@ -7661,8 +7768,58 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     ).toContainEqual(
       expect.objectContaining({ kind: "runner_forgoes_next_action" }),
     );
-    expect(cardImplementationForDefinitionId("onr_v1_358_dr-dreff")).toBeUndefined();
-    expect(cardImplementationForDefinitionId("onr_v1_359_jenny-jett")).toBeUndefined();
+  });
+
+  it("migrates P3.54 delayed fort run windows into CardImplementation coverage", () => {
+    const p354Cards = [
+      "onr_v1_349_aardvark",
+      "onr_v1_358_dr-dreff",
+      "onr_v1_359_jenny-jett",
+      "onr_v1_372_turbeau-delacroix",
+      "onr_v1_373_twenty-four-hour-surveillance",
+    ] as const;
+
+    for (const definitionId of p354Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_358_dr-dreff")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "temporary_hq_ice_encounter_after_successful_run",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_359_jenny-jett")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "install_hq_ice_innermost_after_successful_run",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId(
+        "onr_v1_373_twenty-four-hour-surveillance",
+      )?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "block_stealth_bits_during_runs_on_this_fort",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_372_turbeau-delacroix")
+        ?.accessEffects?.[0]?.effects,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "trace",
+        baseTraceStrength: 10,
+      }),
+    );
   });
 
   it("uses P3.51 Silver Lining advancement history and Omniscience/Disinfectant hooks", () => {
@@ -16798,6 +16955,109 @@ describe("V1.9.9 Mechanikpaket R", () => {
       replayStart,
       state.eventLog.slice(replayEventOffset),
     );
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("delays successful run finalization through Dr. Dreff temporary HQ ICE", () => {
+    let state = toRunnerTurn(onrV1Game("p354-dr-dreff"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    addInstalledRunnerProgramForTest(state, "onr_v1_073_wizards-book", "wizard");
+    addRezzedCorpRootForTest(state, "onr_v1_358_dr-dreff", "remote_1", "dr");
+    const hqIceId = addCorpCardToHqForTest(
+      state,
+      "onr_v1_261_quandary",
+      "dr_quandary",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(state.pendingChoice?.source).toContain("p3_54.delayed_success");
+    expect(state.run?.successful).toBe(false);
+
+    state = applyChoice(
+      state,
+      "corp",
+      traceChoiceOptionIdForDefinition(state, "onr_v1_261_quandary", "ice_"),
+    );
+    expect(state.run).toMatchObject({
+      phase: "encounter_ice",
+      encounteredIceId: hqIceId,
+      successful: false,
+    });
+    expect(state.corp.credits).toBe(19);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        action.payload?.subroutineIndex === 0,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.corp.archives).toContain(hqIceId);
+    expect(state.run?.successful).toBe(false);
+
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toMatchObject({ phase: "access", successful: true });
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("delays successful run finalization through Jenny Jett install-and-approach", () => {
+    let state = toRunnerTurn(onrV1Game("p354-jenny-jett"));
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    addRezzedCorpRootForTest(state, "onr_v1_359_jenny-jett", "remote_1", "jenny");
+    const hqIceId = addCorpCardToHqForTest(
+      state,
+      "onr_v1_261_quandary",
+      "jenny_quandary",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = applyChoice(
+      state,
+      "corp",
+      traceChoiceOptionIdForDefinition(state, "onr_v1_261_quandary", "ice_"),
+    );
+    expect(state.run).toMatchObject({
+      phase: "approach_ice",
+      approachedIceId: hqIceId,
+      successful: false,
+    });
+    expect(state.corp.credits).toBe(20);
+    expect(state.corp.hq).not.toContain(hqIceId);
+    expect(state.corp.servers.find((server) => server.id === "remote_1")?.ice[0]).toBe(
+      hqIceId,
+    );
+
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    expect(state.run?.successful).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.run).toMatchObject({ phase: "access", successful: true });
+    expect(state.corp.archives).not.toContain(hqIceId);
+    expect(state.corp.servers.find((server) => server.id === "remote_1")?.ice).toContain(
+      hqIceId,
+    );
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
@@ -33296,7 +33556,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
 
     expect(state.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 4,
+      baseTraceStrength: 10,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
     });
     expect(state.pendingChoice?.side).toBe("corp");
@@ -33309,7 +33569,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       hiddenZoneAction: "v1918_upgrade_access_trace",
       ambushDefinitionId: "onr_v1_372_turbeau-delacroix",
       oncePerRunConsumed: true,
-      baseTraceStrength: 4,
+      baseTraceStrength: 10,
     });
 
     state = applyChoice(state, "corp", "bid_0");
@@ -34258,7 +34518,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     ).toBe(false);
   });
 
-  it("covers V1.9.18 city-grid trace pool and run-start stealth tax paths", () => {
+  it("covers V1.9.18 city-grid trace pool and fort stealth block paths", () => {
     let traceState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-paris-city-grid-trace"),
     );
@@ -34303,7 +34563,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     );
     expect(traceState.trace).toMatchObject({
       status: "corp_bid",
-      baseTraceStrength: 4,
+      baseTraceStrength: 10,
       corpBidMax: 11,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
       parisCityGridPoolSourceCardInstanceId: parisId,
@@ -34330,8 +34590,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(traceReplay.ok).toBe(true);
     expect(hashState(traceReplay.state)).toBe(hashState(traceState));
 
-    let runState = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-run-tax"));
-    runState.runner.credits = 0;
+    let runState = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-stealth-block"));
+    runState.runner.credits = 20;
     const surveillanceId = putCorpRootInRemote(
       runState,
       "onr_v1_373_twenty-four-hour-surveillance",
@@ -34341,36 +34601,62 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       faceup: true,
       rezzed: true,
     };
-    const stealthId = installRunnerProgramForTest(
+    const breakerId = addInstalledRunnerProgramForTest(
+      runState,
+      "onr_v1_014_codecracker",
+      "stealth_block_codecracker",
+    );
+    const stealthId = addInstalledRunnerProgramForTest(
       runState,
       "onr_v1_035_invisibility",
+      "stealth_block_invisibility",
+    );
+    addRezzedCorpIceForTest(
+      runState,
+      "onr_v1_261_quandary",
+      "remote_1",
+      "stealth_block_quandary",
     );
     runState.cardInstances[stealthId] = {
       ...runState.cardInstances[stealthId]!,
       counters: { bit: 1 },
     };
-    const runInitial = structuredClone(runState);
-    const runReplayStart = runState.eventLog.length;
+    runState.runner.credits = 0;
 
     const runAction = getLegalActions(runState, "runner").find(
       (action) =>
         action.type === "start_run" &&
-        action.payload?.serverId === "remote_1" &&
-        action.payload?.v1918UpgradeAbility === "run_start_tax",
+        action.payload?.serverId === "remote_1",
     );
-    expect(runAction?.costs).toEqual([{ clicks: 1, credits: 1 }]);
+    expect(runAction?.payload?.v1918UpgradeAbility).toBeUndefined();
+    expect(runAction?.costs).toEqual([{ clicks: 1 }]);
     runState = apply(
       runState,
       "runner",
       (action) => action.actionId === runAction?.actionId,
     );
 
-    expect(cardCounterAmount(runState, stealthId, "bit")).toBe(0);
+    expect(
+      getLegalActions(runState, "runner").some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          action.payload?.breakerId === breakerId,
+      ),
+    ).toBe(false);
+    runState.runner.credits = 1;
+    const runInitial = structuredClone(runState);
+    const runReplayStart = runState.eventLog.length;
+    runState = apply(
+      runState,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        action.payload?.breakerId === breakerId,
+    );
+    expect(cardCounterAmount(runState, stealthId, "bit")).toBe(1);
     expect(runState.runner.credits).toBe(0);
     expect(runState.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "start_run",
-      v1918UpgradeAbility: "run_start_tax",
-      runStartTaxPaid: 1,
+      actionType: "pump_breaker",
     });
     expect(validateGameState(runState).ok).toBe(true);
     const runReplay = replayEvents(
