@@ -7,7 +7,12 @@ import {
 import { RUNTIME_CARDS } from "./ai-hints";
 
 type IceCardLike = { definitionId?: string; rezzed?: boolean; known: boolean; subtypes?: string[]; strength?: number };
-type BreakAssessment = { cost: number; breakerInstanceId: string; endingStrength: number };
+type BreakAssessment = { cost: number; breakerInstanceId: string; endingStrength: number; carriesStrengthAcrossIce: boolean };
+
+const RUN_REMAINDER_STRENGTH_BREAKER_IDS = new Set([
+  "onr_v1_030_grubb",
+  "onr_v1_039_krash",
+]);
 
 export function serverIdFromEvent(event: PublicGameEvent): string | undefined {
   const candidate = event.publicPayload.serverId ?? event.publicPayload.attackedServerId ?? event.publicPayload.server ?? event.publicPayload.targetServerId;
@@ -36,7 +41,9 @@ export function assessKnownRezzedIcePath(
     const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, endTheRunCount, breakerStrengths);
     if (!breakAssessment) return { blocked: true, ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}) };
     visibleBreakCost += breakAssessment.cost;
-    breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
+    if (breakAssessment.carriesStrengthAcrossIce) {
+      breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
+    }
   }
   return visibleBreakCost > 0 ? { blocked: visibleBreakCost > runnerCredits, visibleBreakCost } : { blocked: false };
 }
@@ -86,7 +93,8 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
   return {
     cost: pumpCost + breakUses * (breakAbility.cost.credits ?? 0),
     breakerInstanceId: breakerCard.instanceId,
-    endingStrength
+    endingStrength,
+    carriesStrengthAcrossIce: breakerCarriesStrengthAcrossIce(breakerDefinition),
   };
 }
 
@@ -126,6 +134,13 @@ function visibleRunCardDefinition(definitionId: string | undefined): CardDefinit
   if (directDefinition) return directDefinition;
   const runtimeEngineId = RUNTIME_CARDS[definitionId]?.engineCardId;
   return runtimeEngineId ? DEMO_CARDS_BY_ID[runtimeEngineId] : undefined;
+}
+
+export function breakerCarriesStrengthAcrossIce(definition: CardDefinition): boolean {
+  return (
+    RUN_REMAINDER_STRENGTH_BREAKER_IDS.has(definition.id) ||
+    (definition.mechanics ?? []).includes("run_remainder_strength_bonus")
+  );
 }
 
 function hasSubtype(subtypes: string[], expectedSubtype: string): boolean {

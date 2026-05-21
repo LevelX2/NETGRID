@@ -17,7 +17,6 @@ import {
   CopyPlus,
   Download,
   Eye,
-  EyeOff,
   Fingerprint,
   FlaskConical,
   Award,
@@ -55,7 +54,7 @@ import {
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
   ApiAiPacingMode,
   ApiClientGameMode,
@@ -131,12 +130,15 @@ import {
   corpInstalledCardState,
   cuePositionClassName,
   cuePositionStyle,
+  encounterBreakerActions,
   groupRunnerRigCards,
   hasLegalAction,
+  iceModifierBadgesForServer,
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
+  runBreakerActionHint,
   runTargetServerIds,
   runAwareActionButtonLabel,
   runWindowActionButtonLabel,
@@ -158,7 +160,8 @@ import {
   type AdvancementCounterDisplay,
   type ActionContext,
   type CuePositionPreference,
-  type CuePositionPreset
+  type CuePositionPreset,
+  type IceModifierBadgeView
 } from "./action-board-ui";
 import { CardImage, isGeneratedCardImageId, localCardImageUrl } from "./card-image-service";
 import {
@@ -4862,7 +4865,7 @@ export default function Page() {
         </aside>
 
         <section className="board boardPanel" data-testid="active-board">
-          {matchClockDisplay || payload.playerClock?.mode === "player_clock" ? (
+          {matchClockDisplay || payload.playerClock ? (
             <div className="clockCluster" aria-label="Uhrenbereich">
               {matchClockDisplay ? (
                 <div className="matchClockStrip" aria-label="Uhr für dieses Match" data-testid="match-clock">
@@ -4878,7 +4881,7 @@ export default function Page() {
                   {matchClockDisplay.graceLabel ? <small>{matchClockDisplay.graceLabel}</small> : null}
                 </div>
               ) : null}
-              {payload.playerClock?.mode === "player_clock" ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
+              {payload.playerClock ? <PlayerClockStrip snapshot={payload.playerClock} nowMs={matchClockNowMs} /> : null}
             </div>
           ) : null}
           {activeView.side === "corp" ? (
@@ -4981,6 +4984,7 @@ export default function Page() {
                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
                             {...(lane.kind === "ice" ? { slotClassName: iceStackSlotClass(card) } : {})}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
+                            {...(lane.kind === "ice" ? { modifierBadges: iceModifierBadgesForServer(server) } : {})}
                             runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
@@ -7324,21 +7328,19 @@ function RunTimelineOverlay({
                   ? normalizeVisibleTerms(action.label)
                   : runAwareActionButtonLabel(view, action);
               return (
-                <button
+                <OverflowAwareActionButton
+                  action={action}
                   className="button primary actionButton runActionButton"
                   key={action.actionId}
+                  label={fullLabel}
+                  displayLabel={compactLabel}
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}
                   type="button"
-                  data-tooltip={fullLabel}
-                  aria-label={fullLabel}
                   data-testid="run-action-button"
                   data-action-type={action.type}
-                >
-                  <ActionLeadIcon action={action} size={14} />
-                  <span className="actionButtonLabel">{compactLabel}</span>
-                  <CostChips action={action} />
-                </button>
+                  iconSize={14}
+                />
               );
             })}
           </div>
@@ -7365,14 +7367,6 @@ function RunTimelineOverlay({
 
   if (typeof document === "undefined") return null;
   return createPortal(overlay, document.body);
-}
-
-function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string | null {
-  if (view.run?.phase !== "encounter_ice") return null;
-  const breakerActions = encounterBreakerActions(view, actions);
-  if (breakerActions.length === 0) return "Kein passender Eisbrecher für dieses ICE verfügbar.";
-  const labels = Array.from(new Set(breakerActions.map((action) => runWindowActionButtonLabel(view, action)))).slice(0, 2);
-  return `Eisbrecher: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
 }
 
 function ScoredAgendaOverlay({
@@ -7547,47 +7541,6 @@ function runHiddenContextActionHint(view: PlayerView, contextualActions: LegalAc
   return `Eisbrecher verfügbar: Wähle den passenden Eisbrecher im Rig für Aktionen gegen ${target}.`;
 }
 
-function encounterBreakerActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
-  const activeIceId = activeRunIceInstanceId(view);
-  const encounteredIce = view.run?.encounteredIce ?? null;
-  const runnerRig = view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
-  const rigById = new Map(runnerRig.map((card) => [card.instanceId, card]));
-  return actions.filter((action) => {
-    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
-    if (activeIceId && action.payload?.iceId !== activeIceId) return false;
-    if (action.type === "break_subroutine") return true;
-    const breakerId = breakerIdFromAction(action);
-    if (!breakerId) return false;
-    const breaker = rigById.get(breakerId);
-    return breaker ? breakerMatchesEncounteredIce(breaker, encounteredIce) : false;
-  });
-}
-
-function breakerIdFromAction(action: LegalAction): string | null {
-  if (typeof action.payload?.breakerId === "string") return action.payload.breakerId;
-  return action.source !== "basic_action" && action.source !== "game_rule" ? action.source : null;
-}
-
-function breakerMatchesEncounteredIce(breaker: VisibleCard, encounteredIce: VisibleCard | null): boolean {
-  if (!encounteredIce?.known) return true;
-  const iceSubtypes = new Set((encounteredIce.subtypes ?? []).map(normalizeBreakerSubtype));
-  if (iceSubtypes.size === 0) return true;
-  const rulesText = normalizeBreakerRulesText(breaker.rulesText ?? "");
-  if (/\bbreak\s+(?:1\s+)?ice\s+subroutine\b/.test(rulesText)) return true;
-  if (iceSubtypes.has("sentry") && /\bbreak\s+(?:1\s+)?sentry\s+subroutine\b/.test(rulesText)) return true;
-  if (iceSubtypes.has("wall") && /\bbreak\s+(?:1\s+)?wall\s+subroutine\b/.test(rulesText)) return true;
-  if (iceSubtypes.has("code gate") && /\bbreak\s+(?:1\s+)?code gate\s+subroutine\b/.test(rulesText)) return true;
-  return false;
-}
-
-function normalizeBreakerSubtype(value: string): string {
-  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-}
-
-function normalizeBreakerRulesText(value: string): string {
-  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
-}
-
 function LegalActionsPanel({
   view,
   primaryActions,
@@ -7717,11 +7670,16 @@ function LegalActionsPanel({
         {primaryActions.map((action) => {
           const label = runAwareActionButtonLabel(view, action);
           return (
-            <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
-              <ActionLeadIcon action={action} />
-              <span className="actionButtonLabel">{label}</span>
-              <CostChips action={action} />
-            </button>
+            <OverflowAwareActionButton
+              action={action}
+              className="button actionButton primary"
+              key={action.actionId}
+              label={label}
+              onClick={() => onAction(action)}
+              disabled={disabled}
+              data-testid="action-button"
+              data-action-type={action.type}
+            />
           );
         })}
         {selectedContext ? (
@@ -7735,11 +7693,16 @@ function LegalActionsPanel({
             {contextualActions.map((action) => {
               const label = runAwareActionButtonLabel(view, action);
               return (
-                <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
-                  <ActionLeadIcon action={action} />
-                  <span className="actionButtonLabel">{label}</span>
-                  <CostChips action={action} />
-                </button>
+                <OverflowAwareActionButton
+                  action={action}
+                  className="button actionButton"
+                  key={action.actionId}
+                  label={label}
+                  onClick={() => onAction(action)}
+                  disabled={disabled}
+                  data-testid="action-button"
+                  data-action-type={action.type}
+                />
               );
             })}
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
@@ -8028,6 +7991,64 @@ function CostChips({ action }: { action: LegalAction }) {
         </span>
       ))}
     </span>
+  );
+}
+
+type OverflowAwareActionButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & {
+  action: LegalAction;
+  label: string;
+  displayLabel?: string;
+  iconSize?: number;
+};
+
+function OverflowAwareActionButton({
+  action,
+  label,
+  displayLabel = label,
+  iconSize,
+  type = "button",
+  ...buttonProps
+}: OverflowAwareActionButtonProps) {
+  const labelRef = useRef<HTMLSpanElement | null>(null);
+  const [tooltipEnabled, setTooltipEnabled] = useState(false);
+
+  useEffect(() => {
+    const labelElement = labelRef.current;
+    if (!labelElement) {
+      setTooltipEnabled(false);
+      return;
+    }
+
+    const updateTooltipAvailability = () => {
+      const clipped =
+        labelElement.scrollWidth > labelElement.clientWidth + 1 ||
+        labelElement.scrollHeight > labelElement.clientHeight + 1;
+      setTooltipEnabled((current) => (current === clipped ? current : clipped));
+    };
+
+    updateTooltipAvailability();
+    const frame = window.requestAnimationFrame(updateTooltipAvailability);
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateTooltipAvailability) : null;
+    resizeObserver?.observe(labelElement);
+    window.addEventListener("resize", updateTooltipAvailability);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateTooltipAvailability);
+    };
+  }, [displayLabel, label]);
+
+  return (
+    <button
+      {...buttonProps}
+      type={type}
+      aria-label={label}
+      data-tooltip={tooltipEnabled ? label : undefined}
+    >
+      <ActionLeadIcon action={action} {...(iconSize !== undefined ? { size: iconSize } : {})} />
+      <span className="actionButtonLabel" ref={labelRef}>{displayLabel}</span>
+      <CostChips action={action} />
+    </button>
   );
 }
 
@@ -11299,6 +11320,10 @@ function ArchivesDualStackLane({
   const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
   const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
   const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
+  const faceupRowItems = shownFaceupCards.length + (faceupOverflow > 0 ? 1 : 0);
+  const facedownRowItems = shownFacedownCount + (facedownOverflow > 0 ? 1 : 0);
+  const faceupRowStyle = { "--archive-visible-steps": String(Math.max(0, faceupRowItems - 1)) } as CSSProperties;
+  const facedownRowStyle = { "--archive-visible-steps": String(Math.max(0, facedownRowItems - 1)) } as CSSProperties;
 
   if (collapsed) {
     return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label="Archive eingeklappt" />;
@@ -11317,7 +11342,7 @@ function ArchivesDualStackLane({
       {faceupCards.length > 0 ? (
         <div className="archivesPile">
           <div className="archivesPileBody">
-            <div className="archivesOverlapRow">
+            <div className="archivesOverlapRow" style={faceupRowStyle}>
               {shownFaceupCards.map((card) => {
                 const displayCard = enrichCard(card);
                 return (
@@ -11346,7 +11371,7 @@ function ArchivesDualStackLane({
       {facedownCount > 0 ? (
         <div className="archivesPile">
           <div className="archivesPileBody">
-            <div className="archivesOverlapRow">
+            <div className="archivesOverlapRow" style={facedownRowStyle}>
               {Array.from({ length: shownFacedownCount }, (_, index) => (
                 <CardView
                   key={`archives-facedown-${index}`}
@@ -11381,6 +11406,7 @@ function CardView({
   actionLabelForAction = contextualCardActionLabel,
   slotClassName,
   positionBadge,
+  modifierBadges = [],
   runPositionActive = false,
   runPositionLabel,
   showAdvancementCounters = true,
@@ -11404,6 +11430,7 @@ function CardView({
   actionLabelForAction?: (action: LegalAction) => string;
   slotClassName?: string;
   positionBadge?: string;
+  modifierBadges?: IceModifierBadgeView[];
   runPositionActive?: boolean;
   runPositionLabel?: string | undefined;
   showAdvancementCounters?: boolean;
@@ -11473,7 +11500,6 @@ function CardView({
   const showRulesPreview = !visualImageUrl && card.known && hasRulesText && !isCompact;
   const tooltipScale = Math.max(0.5, tooltipPercent / 100);
   const installedState = installedCorpCard ? corpInstalledCardState(card) : null;
-  const installedStateLabel = installedState === "unrezzed" ? "Ungerezzt" : installedState === "rezzed" ? "Gerezzt" : installedState === "hidden" ? "Verdeckt / ungerezzt" : null;
   const advancementDisplay = showAdvancementCounters && !preview ? advancementCounterDisplay(card) : null;
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
@@ -11497,13 +11523,15 @@ function CardView({
   const ablativeCountersAria = ablativeCounterBadge?.ariaLabel ?? null;
   const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria, ablativeCountersAria].filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
+  const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
+  const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}`
+      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${cardStateAria}`
-      : "Verdeckte Karte";
+      ? `Karte ${card.title}${cardStateAria}${modifierBadgeAriaSuffix}`
+      : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
     if (showImageTooltip) return 320;
@@ -11757,7 +11785,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -11816,7 +11844,7 @@ function CardView({
         ) : null}
         {showArtBlock ? <span className="cardArt" aria-hidden="true" /> : null}
         {visualImageUrl ? null : <span className="cardTitle">{card.known ? card.title : "Verdeckte Karte"}</span>}
-        {installedState && installedStateLabel ? <InstalledStateMark state={installedState} label={installedStateLabel} /> : null}
+        {modifierBadges.length > 0 ? <IceModifierBadges badges={modifierBadges} /> : null}
         {showMetaLine ? <span className="cardMeta">{metaText}</span> : null}
         {showRulesPreview ? (
           <span className="cardRulesPreview">
@@ -11991,15 +12019,24 @@ function CardActionsPopover({
 }) {
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style} data-card-action-surface="true">
-      {actions.map((action) => {
+      {actions.map((action, index) => {
         const fullLabel = actionLabelForAction(action);
         const label = compactCardActionMenuLabel(action, fullLabel);
         return (
-          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" data-tooltip={fullLabel} aria-label={fullLabel} role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
-            <ActionLeadIcon action={action} size={14} />
-            <span className="actionButtonLabel">{label}</span>
-            <CostChips action={action} />
-          </button>
+          <OverflowAwareActionButton
+            action={action}
+            className="button actionButton cardActionButton"
+            key={`${action.actionId}:${index}`}
+            onClick={() => onAction(action)}
+            disabled={disabled}
+            type="button"
+            label={fullLabel}
+            displayLabel={label}
+            role="menuitem"
+            data-testid="card-action-button"
+            data-action-type={action.type}
+            iconSize={14}
+          />
         );
       })}
     </div>
@@ -12012,21 +12049,70 @@ function compactCardActionMenuLabel(action: LegalAction, label: string): string 
 }
 
 function AdvancementGems({ card, display }: { card: DisplayVisibleCard; display: AdvancementCounterDisplay }) {
+  if (display.overflowLabel) {
+    return (
+      <span className="advancementGems counted" aria-hidden="true">
+        <span className="advancementGemCount">
+          <span className="advancementGem advancementGemCountIcon" />
+          <span className="advancementGemCountAmount">{display.overflowLabel}</span>
+        </span>
+      </span>
+    );
+  }
+
   return (
-    <span className="advancementGems" aria-hidden="true">
+    <span className="advancementGems iconsOnly" aria-hidden="true">
       {Array.from({ length: display.visibleGemCount }, (_, index) => (
-        <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index)} />
+        <span className="advancementGem" key={`${card.instanceId}-development-${index}`} style={advancementGemStyle(card.instanceId, index, display.visibleGemCount)} />
       ))}
-      {display.overflowLabel ? <span className="advancementGemCount">{display.overflowLabel}</span> : null}
     </span>
   );
 }
 
-function InstalledStateMark({ state, label }: { state: "hidden" | "unrezzed" | "rezzed" | "known"; label: string }) {
-  if (state === "known") return null;
+function IceModifierBadges({ badges }: { badges: IceModifierBadgeView[] }) {
+  const [tooltipBadge, setTooltipBadge] = useState<IceModifierBadgeView | null>(null);
+  const [tooltipStyle, setTooltipStyle] = useState<CSSProperties>({});
+  const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("above");
+
+  const showBadgeTooltip = (element: HTMLElement, badge: IceModifierBadgeView) => {
+    const rect = element.getBoundingClientRect();
+    const width = Math.min(240, Math.max(160, window.innerWidth - 32));
+    const margin = 16;
+    const left = Math.max(margin, Math.min(rect.left + rect.width / 2 - width / 2, window.innerWidth - width - margin));
+    const estimatedHeight = 44;
+    const above = rect.top > estimatedHeight + margin;
+    setTooltipPlacement(above ? "above" : "below");
+    setTooltipStyle(
+      above
+        ? { left: `${left}px`, top: `${rect.top - 8}px`, width: `${width}px` }
+        : { left: `${left}px`, top: `${rect.bottom + 8}px`, width: `${width}px` }
+    );
+    setTooltipBadge(badge);
+  };
+
   return (
-    <span className={`installedStateMark ${state}`} aria-label={label} data-tooltip={label} data-testid="installed-state-mark">
-      {state === "rezzed" ? <span className="installedStateLetter" aria-hidden="true">R</span> : <EyeOff size={11} strokeWidth={2.4} aria-hidden="true" />}
+    <span className="iceModifierBadges" aria-hidden="true">
+      {badges.map((badge) => (
+        <span
+          className="iceModifierBadge"
+          key={badge.key}
+          data-testid={badge.testId}
+          onPointerEnter={(event) => showBadgeTooltip(event.currentTarget, badge)}
+          onPointerLeave={() => setTooltipBadge(null)}
+        >
+          <SubroutineIcon />
+          <span>{badge.shortLabel}</span>
+        </span>
+      ))}
+      {tooltipBadge && typeof document !== "undefined"
+        ? createPortal(
+            <span className={`cardTooltip iceModifierTooltip ${tooltipPlacement} visible`} role="tooltip" style={tooltipStyle}>
+              <strong>{tooltipBadge.shortLabel}</strong>
+              <span className="cardTooltipText">{tooltipBadge.tooltip}</span>
+            </span>,
+            document.body
+          )
+        : null}
     </span>
   );
 }
@@ -12118,17 +12204,42 @@ function AblativeCounterBadge({ label, ariaLabel, testId }: { label: string; ari
   );
 }
 
-function advancementGemStyle(instanceId: string, index: number): CSSProperties {
-  const seed = hashString(`${instanceId}:${index}`);
-  const x = 18 + (seed % 58);
-  const y = 14 + (Math.floor(seed / 7) % 45);
-  const rotation = (Math.floor(seed / 17) % 38) - 19;
-  const scale = 0.9 + ((Math.floor(seed / 31) % 18) / 100);
+const ADVANCEMENT_GEM_ANCHORS = [
+  { x: 24, y: 19 },
+  { x: 63, y: 16 },
+  { x: 78, y: 34 },
+  { x: 38, y: 36 },
+  { x: 18, y: 52 },
+  { x: 59, y: 50 },
+  { x: 32, y: 69 },
+  { x: 74, y: 65 },
+  { x: 49, y: 79 }
+];
+
+function advancementGemStyle(instanceId: string, index: number, count: number): CSSProperties {
+  const orderSeed = hashString(`${instanceId}:advancement-order`);
+  const anchor = advancementGemAnchor(orderSeed, index, count);
+  const seed = hashString(`${instanceId}:advancement:${index}`);
+  const xJitter = (seed % 9) - 4;
+  const yJitter = (Math.floor(seed / 11) % 9) - 4;
+  const x = Math.max(12, Math.min(82, anchor.x + xJitter));
+  const y = Math.max(12, Math.min(82, anchor.y + yJitter));
+  const rotation = (Math.floor(seed / 17) % 42) - 21;
+  const scale = 0.9 + ((Math.floor(seed / 31) % 16) / 100);
   return {
     left: `${x}%`,
     top: `${y}%`,
     transform: `rotate(${rotation}deg) scale(${scale})`
   };
+}
+
+function advancementGemAnchor(orderSeed: number, index: number, count: number): { x: number; y: number } {
+  const anchors = [...ADVANCEMENT_GEM_ANCHORS];
+  const fallback = ADVANCEMENT_GEM_ANCHORS[0] ?? { x: 49, y: 50 };
+  anchors.sort((a, b) => hashString(`${orderSeed}:${a.x}:${a.y}`) - hashString(`${orderSeed}:${b.x}:${b.y}`));
+  if (count <= 3) return anchors[(index * 3) % anchors.length] ?? fallback;
+  if (count <= 6) return anchors[(index * 2) % anchors.length] ?? fallback;
+  return anchors[index % anchors.length] ?? fallback;
 }
 
 function hashString(value: string): number {
@@ -12397,22 +12508,26 @@ function ZoneSideCount({ side, value }: { side: Side; value: string }) {
 }
 
 function PlayerClockStrip({ snapshot, nowMs }: { snapshot: ApiPlayerClockSnapshot; nowMs: number }) {
-  const runnerRemainingMs = playerClockLiveRemaining(snapshot, "runner", nowMs);
-  const corpRemainingMs = playerClockLiveRemaining(snapshot, "corp", nowMs);
+  const isNoLimit = snapshot.mode === "none";
+  const runnerValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "runner", nowMs) : playerClockLiveRemaining(snapshot, "runner", nowMs);
+  const corpValueMs = isNoLimit ? playerClockLiveConsumed(snapshot, "corp", nowMs) : playerClockLiveRemaining(snapshot, "corp", nowMs);
   const ownerLabel = snapshot.expiredSide
     ? `${sideLabel(snapshot.expiredSide)} abgelaufen`
     : snapshot.decisionOwnerSide
       ? `${sideLabel(snapshot.decisionOwnerSide)} entscheidet`
       : "Wartet";
+  const valueLabel = isNoLimit ? "verbraucht" : "verbleibend";
   return (
-    <div className={`playerClockStrip ${snapshot.warningLevel}`} aria-label={`Spielerzeit: ${ownerLabel}`} data-testid="player-clock">
+    <div className={`playerClockStrip ${snapshot.warningLevel} ${isNoLimit ? "countUp" : "countDown"}`} aria-label={`Spielerzeit ${valueLabel}: ${ownerLabel}`} data-testid="player-clock">
       <span className={`playerClockSide runner ${snapshot.decisionOwnerSide === "runner" ? "active" : ""}`}>
         <strong>Runner</strong>
-        <span className="playerClockValue">{formatPlayerClockDuration(runnerRemainingMs)}</span>
+        <span className="playerClockValue">{formatPlayerClockDuration(runnerValueMs)}</span>
+        {isNoLimit ? <small>verbraucht</small> : null}
       </span>
       <span className={`playerClockSide corp ${snapshot.decisionOwnerSide === "corp" ? "active" : ""}`}>
         <strong>Korp</strong>
-        <span className="playerClockValue">{formatPlayerClockDuration(corpRemainingMs)}</span>
+        <span className="playerClockValue">{formatPlayerClockDuration(corpValueMs)}</span>
+        {isNoLimit ? <small>verbraucht</small> : null}
       </span>
     </div>
   );
@@ -12433,6 +12548,13 @@ function playerClockLiveGraceRemaining(snapshot: ApiPlayerClockSnapshot, nowMs: 
   }
   if (snapshot.graceRemainingMs !== undefined) return Math.max(0, snapshot.graceRemainingMs);
   return null;
+}
+function playerClockLiveConsumed(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {
+  const consumedMs = snapshot.consumedMs?.[side] ?? 0;
+  if (snapshot.mode !== "none" || snapshot.decisionOwnerSide !== side || snapshot.activityStartedAtMs === undefined) return consumedMs;
+  const elapsedMs = Math.max(0, nowMs - snapshot.activityStartedAtMs);
+  const serverElapsedMs = snapshot.elapsedActivityMs ?? 0;
+  return Math.max(0, consumedMs + Math.max(0, elapsedMs - serverElapsedMs));
 }
 
 function playerClockLiveRemaining(snapshot: ApiPlayerClockSnapshot, side: Side, nowMs: number): number {

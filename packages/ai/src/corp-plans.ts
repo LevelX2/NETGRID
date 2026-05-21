@@ -1065,7 +1065,9 @@ function assessKnownIcePathForRunnerContest(
     const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(ice, rigCards, endTheRunCount, breakerStrengths);
     if (!breakAssessment) return { capacity: "low", ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}), reasons: ["runner_remote_contest_low_missing_breaker"] };
     visibleBreakCost += breakAssessment.cost;
-    breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
+    if (breakAssessment.carriesStrengthAcrossIce) {
+      breakerStrengths.set(breakAssessment.breakerInstanceId, breakAssessment.endingStrength);
+    }
   }
 
   if (relevantKnownIce > 0 && visibleBreakCost > runnerCredits) return { capacity: "low", visibleBreakCost, reasons: ["runner_remote_contest_low_break_cost"] };

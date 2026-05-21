@@ -52,6 +52,7 @@ export type ApiPlayerClockSnapshot = {
   schemaVersion: "player-clock-v1";
   mode: ApiPlayerClockMode;
   remainingMs?: { runner: number; corp: number };
+  consumedMs?: { runner: number; corp: number };
   startingTimeMs?: number;
   gracePeriodMs?: number;
   decisionOwnerSide?: Side;

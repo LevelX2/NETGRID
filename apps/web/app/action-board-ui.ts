@@ -120,6 +120,14 @@ export type CardCounterBadgeView = {
   testId: string;
 };
 
+export type IceModifierBadgeView = {
+  key: string;
+  shortLabel: string;
+  ariaLabel: string;
+  tooltip: string;
+  testId: string;
+};
+
 export type AdvancementCounterDisplay = {
   amount: number;
   ariaLabel: string;
@@ -130,11 +138,30 @@ export type AdvancementCounterDisplay = {
 type StoredCreditCounterType = "power" | "bit";
 
 const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
-  "onr_v1_154_broker": { label: "Broker", counter: "power" },
-  "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "power" },
+  "onr_v1_154_broker": { label: "Broker", counter: "bit" },
+  "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "bit" },
   "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" },
   "onr_v1_311_braindance-campaign": { label: "Braindance Campaign", counter: "bit" }
 };
+
+const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
+
+export function iceModifierBadgesForServer(server: PlayerView["servers"][number]): IceModifierBadgeView[] {
+  if (!serverHasRezzedTesseractFortConstruction(server)) return [];
+  return [
+    {
+      key: "tesseract-additional-subroutine",
+      shortLabel: "+Sub",
+      ariaLabel: "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
+      tooltip: "Tesseract Fort Construction: zusätzliche Subroutine",
+      testId: "tesseract-ice-subroutine-badge"
+    }
+  ];
+}
+
+function serverHasRezzedTesseractFortConstruction(server: PlayerView["servers"][number]): boolean {
+  return server.root.some((card) => card.known && card.rezzed === true && card.definitionId === TESSERACT_FORT_CONSTRUCTION_ID);
+}
 
 export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {
   return storedCreditCounterSource(card)?.label ?? null;
@@ -166,14 +193,15 @@ export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "adv
   const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
   if (safeAmount <= 0) return null;
   const hiddenCard = card.known === false;
-  const visibleGemCount = hiddenCard ? Math.min(safeAmount, 9) : Math.min(safeAmount, 4);
+  const showCount = safeAmount >= 10;
+  const visibleGemCount = showCount ? 1 : Math.min(safeAmount, 9);
   return {
     amount: safeAmount,
     ariaLabel: hiddenCard
       ? `${safeAmount} öffentliche Advancement-Counter`
       : `${safeAmount} ${safeAmount === 1 ? "Entwicklung" : "Entwicklungen"}`,
     visibleGemCount,
-    overflowLabel: safeAmount > visibleGemCount ? `x${safeAmount}` : null
+    overflowLabel: showCount ? String(safeAmount) : null
   };
 }
 
@@ -248,7 +276,9 @@ export function actionButtonLabel(action: LegalAction): string {
     case "gain_credit":
       return action.source === "basic_action" ? "Credit nehmen" : normalizeVisibleTerms(action.label);
     case "draw_card":
-      return "Karte ziehen";
+      return action.payload?.citySurveillanceDrawDecision
+        ? normalizeVisibleTerms(action.label)
+        : "Karte ziehen";
     case "activated_card_ability":
       return normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen");
     case "jack_out":
@@ -331,6 +361,9 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
+  if (typeof action.payload?.v1911HiddenZoneAbility === "string") {
+    return stripActionSourcePrefix(action.label);
+  }
   if (typeof action.payload?.v1917AssetAbility === "string") {
     switch (action.payload.v1917AssetAbility) {
       case "gain_credits": {
@@ -791,6 +824,22 @@ export function runWindowActionButtonLabel(view: PlayerView, action: LegalAction
   return runAwareActionButtonLabel(view, action);
 }
 
+export function runBreakerActionHint(view: PlayerView, actions: LegalAction[]): string | null {
+  if (view.run?.phase !== "encounter_ice") return null;
+  const breakerActions = encounterBreakerActions(view, actions);
+  if (breakerActions.length > 0) {
+    const labels = Array.from(new Set(breakerActions.map((action) => runWindowActionButtonLabel(view, action)))).slice(0, 2);
+    return `Eisbrecher: ${labels.join(", ")}${breakerActions.length > labels.length ? " ..." : ""}`;
+  }
+  if (view.side !== "runner") {
+    const visibleBreakers = visibleMatchingRunnerBreakers(view);
+    if (visibleBreakers.length === 1) return `Runner-Rig zeigt passenden Eisbrecher: ${visibleBreakers[0]!.title}.`;
+    if (visibleBreakers.length > 1) return `Runner-Rig zeigt passende Eisbrecher: ${visibleBreakers.slice(0, 2).map((card) => card.title).join(", ")}${visibleBreakers.length > 2 ? " ..." : ""}.`;
+    return null;
+  }
+  return "Kein passender Eisbrecher für dieses ICE verfügbar.";
+}
+
 function compactRunWindowBreakerLabel(view: PlayerView, action: LegalAction): string {
   const breakerTitle = sourceCardTitleForAction(view, action);
   if (action.type === "pump_breaker") {
@@ -802,6 +851,64 @@ function compactRunWindowBreakerLabel(view: PlayerView, action: LegalAction): st
       ? `Subroutine ${Math.floor(rawIndex) + 1} brechen`
       : "Subroutine brechen";
   return `${breakerTitle ? `${breakerTitle}: ` : ""}${subroutineLabel}`;
+}
+
+export function encounterBreakerActions(view: PlayerView, actions: LegalAction[]): LegalAction[] {
+  const activeIceId = activeRunIceInstanceId(view);
+  const encounteredIce = view.run?.encounteredIce ?? null;
+  const rigById = new Map(runnerRigForView(view).map((card) => [card.instanceId, card]));
+  return actions.filter((action) => {
+    if (action.type !== "pump_breaker" && action.type !== "break_subroutine") return false;
+    if (activeIceId && action.payload?.iceId !== activeIceId) return false;
+    if (action.type === "break_subroutine") return true;
+    const breakerId = breakerIdFromAction(action);
+    if (!breakerId) return false;
+    const breaker = rigById.get(breakerId);
+    return breaker ? breakerMatchesEncounteredIce(breaker, encounteredIce) : false;
+  });
+}
+
+function visibleMatchingRunnerBreakers(view: PlayerView): VisibleCard[] {
+  const encounteredIce = view.run?.encounteredIce ?? null;
+  return runnerRigForView(view)
+    .filter((card) => card.known && Boolean(card.title))
+    .filter(isVisibleIcebreaker)
+    .filter((card) => breakerMatchesEncounteredIce(card, encounteredIce));
+}
+
+function runnerRigForView(view: PlayerView): VisibleCard[] {
+  return view.side === "runner" ? (view.own.rig ?? []) : (view.opponent.rig ?? []);
+}
+
+function breakerIdFromAction(action: LegalAction): string | null {
+  if (typeof action.payload?.breakerId === "string") return action.payload.breakerId;
+  return action.source !== "basic_action" && action.source !== "game_rule" ? action.source : null;
+}
+
+function breakerMatchesEncounteredIce(breaker: VisibleCard, encounteredIce: VisibleCard | null): boolean {
+  if (!encounteredIce?.known) return true;
+  const iceSubtypes = new Set((encounteredIce.subtypes ?? []).map(normalizeBreakerSubtype));
+  if (iceSubtypes.size === 0) return true;
+  const rulesText = normalizeBreakerRulesText(breaker.rulesText ?? "");
+  if (/\bbreak\s+(?:1\s+)?ice\s+subroutine\b/.test(rulesText)) return true;
+  if (iceSubtypes.has("sentry") && /\bbreak\s+(?:1\s+)?sentry\s+subroutine\b/.test(rulesText)) return true;
+  if (iceSubtypes.has("wall") && /\bbreak\s+(?:1\s+)?wall\s+subroutine\b/.test(rulesText)) return true;
+  if (iceSubtypes.has("code gate") && /\bbreak\s+(?:1\s+)?code gate\s+subroutine\b/.test(rulesText)) return true;
+  return false;
+}
+
+function isVisibleIcebreaker(card: VisibleCard): boolean {
+  const subtypes = new Set((card.subtypes ?? []).map(normalizeBreakerSubtype));
+  if (subtypes.has("icebreaker")) return true;
+  return /\bbreak\s+(?:1\s+)?(?:ice|sentry|wall|code gate)\s+subroutine\b/.test(normalizeBreakerRulesText(card.rulesText ?? ""));
+}
+
+function normalizeBreakerSubtype(value: string): string {
+  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function normalizeBreakerRulesText(value: string): string {
+  return value.toLowerCase().replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim();
 }
 
 export function groupRunnerRigCards(cards: VisibleCard[]): Array<{ key: string; label: string; cards: VisibleCard[] }> {

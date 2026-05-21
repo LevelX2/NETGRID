@@ -18,7 +18,7 @@ Erlaubte Modi:
 
 | Modus | Wirkung |
 | --- | --- |
-| `none` | Keine Spielerzeit. UI darf weiterhin die sichtbare Matchlaufzeit anzeigen. |
+| `none` | Keine Zeitbegrenzung, kein Abzug und keine Niederlage durch Zeitablauf. Die UI darf zusätzlich zur Matchlaufzeit die kumulierte verbrauchte Entscheidungszeit je Side hochzählend anzeigen. |
 | `player_clock` | Runner und Korp starten mit gleichem Zeitkonto und gleicher Grundfrist je Entscheidung. |
 
 Freigegebene Zeitkonto-Presets:
@@ -63,7 +63,8 @@ Die Rules Engine bleibt die einzige Regelautorität für Karten, LegalActions, P
 Der Server hält:
 
 - Zeitkonfiguration des Matches.
-- verbleibende Spielerzeit je Side.
+- verbleibende Spielerzeit je Side bei `player_clock`.
+- kumulierte verbrauchte Entscheidungszeit je Side bei `none`.
 - aktuellen Entscheidungseigner.
 - Startzeitpunkt der aktuellen Aktivitätszuweisung.
 - bereits abgerechnete belastete Millisekunden für diese Aktivität.
@@ -118,6 +119,14 @@ remainingTime[decisionOwnerSide] -= belasteteZeit
 
 Entscheidungen innerhalb der Grundfrist belasten das Zeitkonto nicht. Entscheidungen nach Ablauf der Grundfrist belasten nur die überschrittene Zeit. Die Abrechnung darf nie negative Zeit gutschreiben.
 
+Bei `mode: "none"` wird derselbe Entscheidungseigner-/Aktivitätswechsel-Vertrag genutzt, aber ohne Grundfrist, Restzeitkonto, Warnstufe oder Zeitablauf-Folge:
+
+```text
+verbrauchteZeit[decisionOwnerSide] += elapsedSinceActivityStart - alreadyCountedInThisActivity
+```
+
+Die hochgezählte Verbrauchszeit ist serverseitige Match-Metadatenprojektion für REST/WebSocket/Reconnect. Sie wird nicht in den deterministischen Engine-State geschrieben und erzeugt keinen `time_expired`-Lifecycle-Grund.
+
 ## Zeitablauf
 
 Zeitablauf darf nur greifen, wenn alle Bedingungen erfüllt sind:
@@ -158,6 +167,7 @@ export type ApiPlayerClockSnapshot = {
   schemaVersion: "player-clock-v1";
   mode: ApiPlayerClockMode;
   remainingMs?: { runner: number; corp: number };
+  consumedMs?: { runner: number; corp: number };
   startingTimeMs?: number;
   gracePeriodMs?: number;
   decisionOwnerSide?: Side;
@@ -187,12 +197,14 @@ Der Zeitbalken zeigt:
 - kritischen Zustand kurz vor Ablauf,
 - terminalen Zeitablauf im Ergebniszustand.
 
+Bei `mode: "none"` nutzt die Anzeige denselben Ort, zeigt aber hochzählende Verbrauchswerte je Side. Die aktive entscheidende Side bleibt markiert. Es gibt keine rote Ablauf-/Critical-Darstellung, keine Restzeit-Labels und keinen Zeitablaufzustand.
+
 Darstellung:
 
 - Während der Grundfrist normale Darstellung mit erkennbarem Grace-Indikator.
 - Nach Grundfristablauf rotes Segment oder roter Hintergrund für die belastete Side.
 - Unter 60 Sekunden zusätzlicher kritischer Zustand.
-- Bei `mode: "none"` wird kein Spielerzeitbalken gezeigt; die bisherige Matchlaufzeit darf bleiben.
+- Bei `mode: "none"` wird kein Countdown-Spielerzeitbalken gezeigt; stattdessen darf der Spielerzeitbereich die verbrauchte Entscheidungszeit je Side anzeigen.
 - Mobile und Desktop dürfen keine Überlappung mit Statusleiste, Action Board, Board, Run-Zeitstrahl oder Result Modal erzeugen.
 
 Matchstart:
@@ -221,7 +233,7 @@ ResultSummary:
 
 Spielerzeit-Payloads dürfen enthalten:
 
-- Modus, Presetwerte, verbleibende Millisekunden je Side,
+- Modus, Presetwerte, verbleibende oder verbrauchte Millisekunden je Side,
 - aktuelle entscheidende Side,
 - grobe Aktivitätsdauer, Grundfriststatus und Warnstufe,
 - terminale abgelaufene Side.

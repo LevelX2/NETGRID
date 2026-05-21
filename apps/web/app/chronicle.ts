@@ -427,6 +427,22 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "v1911_aujourdoui_top5") {
+        const revealedTitles = titlesForDefinitionIds(stringValue(payload.publicRevealDefinitionIds));
+        const selectedCount = numberValue(payload.selectedCount) ?? revealedTitles.length;
+        const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "Aujourd'Oui";
+        const shuffleSuffix = payload.shuffled === true ? " und danach den Stack gemischt" : "";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title =
+          selectedCount > 0
+            ? phrase(subject, `${source} genutzt, ${revealedTitles.length > 0 ? revealedTitles.join(", ") : cardCountText(selectedCount)} vorgezeigt, in den Grip genommen${shuffleSuffix}`)
+            : phrase(subject, `${source} genutzt, keine Programme aus den obersten 5 genommen${shuffleSuffix}`);
+        chips.push(source, "Top 5", selectedCount === 1 ? "1 Programm" : `${selectedCount} Programme`, ...(selectedCount > 0 ? ["Vorgezeigt", "Grip"] : ["Keine Auswahl"]), ...(payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       if (hiddenZoneAction === "v1911_short_circuit_search") {
         const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
         const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "The Short Circuit";
@@ -874,14 +890,28 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       category = "run";
       {
         const unbrokenSubroutineCount = numberValue(payload.unbrokenSubroutineCount);
+        const trashedProgramTitle =
+          stringValue(payload.trashedCardType) === "program"
+            ? titleForDefinitionId(stringValue(payload.trashedCardDefinitionId)) ??
+              stringValue(payload.trashedCardTitle)
+            : undefined;
         if (encounterContinue && unbrokenSubroutineCount === 0) {
           title = phrase(subject, "das ICE passiert");
           chips.push("Run", "ICE passiert");
         } else {
-          title = encounterContinue
-            ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
-            : phrase(subject, result === "ended" ? "den Run beendet" : "den Run fortgesetzt");
-          chips.push("Run", ...(encounterContinue ? ["Subroutinen"] : runPhase ? [runPhaseLabel(runPhase)] : []));
+          if (encounterContinue && trashedProgramTitle) {
+            title = phrase(
+              subject,
+              result === "ended"
+                ? `ungebrochene Subroutinen ausgelöst, ${trashedProgramTitle} getrasht und der Run endete`
+                : `ungebrochene Subroutinen ausgelöst und ${trashedProgramTitle} getrasht`,
+            );
+          } else {
+            title = encounterContinue
+              ? phrase(subject, result === "ended" ? "ungebrochene Subroutinen ausgelöst und der Run endete" : "ungebrochene Subroutinen ausgelöst")
+              : phrase(subject, result === "ended" ? "den Run beendet" : "den Run fortgesetzt");
+          }
+          chips.push("Run", ...(encounterContinue ? ["Subroutinen"] : runPhase ? [runPhaseLabel(runPhase)] : []), ...(trashedProgramTitle ? [trashedProgramTitle, "Programm getrasht"] : []));
         }
       }
       break;
@@ -1415,19 +1445,28 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       const subroutineType = stringValue(effect.subroutineType);
       const damageType = stringValue(effect.damageType);
       const cardsTrashed = numberValue(effect.cardsTrashed) ?? 0;
+      const trashedProgramTitle =
+        subroutineType === "trash_installed_program" && cardsTrashed > 0
+          ? titleForDefinitionId(cardDefinitionId) ?? cardTitle ?? "ein Programm"
+          : undefined;
       category = subroutineType === "do_damage" ? "danger" : "run";
       importance = subroutineType === "do_damage" || effect.endedRun === true ? "critical" : "important";
       title =
         subroutineType === "do_damage"
           ? `${source}: ${subroutineChip} macht ${amount} ${damageTypeLabel(damageType)}`
+          : trashedProgramTitle
+            ? `${source}: ${subroutineChip} trashte ${trashedProgramTitle}`
           : effect.endedRun === true
             ? `${source}: ${subroutineChip} beendet den Run`
             : `${source}: ${subroutineChip} aufgelöst`;
       if (subroutineType === "do_damage")
         description = `${cardCountText(cardsTrashed)} wurden in den Heap bewegt.`;
+      if (trashedProgramTitle)
+        description = `${trashedProgramTitle} wurde in den Heap bewegt.`;
       chips.push(
         subroutineChip,
         ...(subroutineType === "do_damage" ? [`${amount} ${damageTypeLabel(damageType)}`, `${cardsTrashed} Heap`] : []),
+        ...(trashedProgramTitle ? [trashedProgramTitle, "Programm getrasht"] : []),
         ...(effect.endedRun === true ? ["Run endet"] : []),
         source
       );

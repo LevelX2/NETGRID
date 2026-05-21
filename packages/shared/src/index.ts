@@ -1135,6 +1135,10 @@ export type EngineResult =
       state: GameState;
     };
 
+export type ApplyActionOptions = {
+  publicEventsMode?: "history" | "latest";
+};
+
 export type ValidationResult = {
   ok: boolean;
   errors: string[];
@@ -2713,11 +2717,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Installed Hidden-Zone helper: search your stack for a program or reveal the top card of your stack.",
+      "Look at the top five cards of your stack. You may bring any program cards among them into your grip. Pay 1 credit for each card taken this way, reveal those cards to the Corp, then shuffle your stack.",
     mechanics: [
       "install_resource",
       "search_stack",
-      "reveal",
       "shuffle",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
@@ -6397,14 +6400,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     rezCost: 0,
     trashCost: 1,
-    rulesText: "[A], trash: Gain 8 credits.",
+    rulesText: "[A], [A], [A]: Gain 6 credits.",
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "generic_asset_node",
       "gain_credits",
-      "self_trash",
       "legal_action_only",
       "persistent_special_state",
       ONR_V1_LOCAL_PRIVATE,

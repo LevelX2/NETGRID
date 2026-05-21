@@ -73,6 +73,7 @@ import type {
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
+  StorageMaintenanceSnapshotCompactionResult,
   StorageMaintenanceSummary
 } from "./storage-sqlite";
 
@@ -190,21 +191,27 @@ export type MatchRecord = {
   winner?: Side | "draw";
 };
 
-export type PlayerClockState = {
+export type PlayerClockActivityState = {
+  key: string;
+  decisionOwnerSide: Side;
+  startedAtMs: number;
+  chargedMs: number;
+};
+
+export type PlayerClockBaseState = {
+  consumedMs: { runner: number; corp: number };
+  activity?: PlayerClockActivityState;
+};
+
+export type PlayerClockState = PlayerClockBaseState & ({
+  mode: "none";
+} | {
   mode: "player_clock";
   startingTimeMs: number;
   gracePeriodMs: number;
   remainingMs: { runner: number; corp: number };
-  activity?: {
-    key: string;
-    decisionOwnerSide: Side;
-    startedAtMs: number;
-    chargedMs: number;
-  };
   expiredSide?: Side;
-};
-
-type EnabledPlayerClockConfig = ApiPlayerClockConfig & { mode: "player_clock"; startingTimeMs: number; gracePeriodMs: number };
+});
 
 export type SessionRecord = {
   sessionId: string;
@@ -286,7 +293,7 @@ export type StoredMatch = {
 };
 
 export type MultiplayerStorage = {
-  load(matchId: string): Promise<StoredMatch | undefined>;
+  load(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined>;
   save(record: StoredMatch): Promise<void>;
   list?(): Promise<StoredMatch[]>;
   listOpenMatchCandidates?(): Promise<StoredMatch[]>;
@@ -300,6 +307,7 @@ export type MultiplayerStorage = {
   maintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicy>;
   setMaintenanceCleanupPolicy?(policy: StorageMaintenanceCleanupPolicyInput): Promise<StorageMaintenanceCleanupPolicy>;
   runMaintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicyRunResult>;
+  maintenanceCompactSnapshots?(): Promise<StorageMaintenanceSnapshotCompactionResult>;
   maintenanceSetRetentionProtection?(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined>;
   close?(): void;
 };
@@ -322,7 +330,8 @@ export type ReplayIndexEntry = {
   updatedAt: string;
   winner?: Side | "draw";
   finalStateHash: string;
-  replayOk: boolean;
+  replayCheckStatus: "unchecked" | "verified";
+  replayOk?: boolean;
   participantNames: {
     runner?: string;
     corp?: string;
@@ -532,7 +541,7 @@ export type AdvanceAiResult =
 export class InMemoryMatchStorage implements MultiplayerStorage {
   private readonly records = new Map<string, StoredMatch>();
 
-  async load(matchId: string): Promise<StoredMatch | undefined> {
+  async load(matchId: string, _options: { includeStateSnapshots?: boolean } = {}): Promise<StoredMatch | undefined> {
     const record = this.records.get(matchId);
     return record ? clone(record) : undefined;
   }
@@ -558,7 +567,7 @@ export class JsonFileMatchStorage implements MultiplayerStorage {
     this.ready = this.loadFromDisk();
   }
 
-  async load(matchId: string): Promise<StoredMatch | undefined> {
+  async load(matchId: string, _options: { includeStateSnapshots?: boolean } = {}): Promise<StoredMatch | undefined> {
     await this.ready;
     const record = this.records.get(matchId);
     return record ? clone(record) : undefined;
@@ -844,7 +853,7 @@ export class MultiplayerService {
                   }
             }
           : {}),
-        ...(playerClockConfig.mode === "player_clock" ? { playerClock: initialPlayerClockState(playerClockConfig as EnabledPlayerClockConfig) } : {}),
+        playerClock: initialPlayerClockState(playerClockConfig),
         createdAt: now,
         updatedAt: now
       },
@@ -1154,7 +1163,7 @@ export class MultiplayerService {
 
   async setLobbyReady(input: { matchId: string; side: Side; sessionToken: string; ready: boolean }): Promise<LobbyActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1176,7 +1185,7 @@ export class MultiplayerService {
 
   async cancelLobbyCountdown(input: { matchId: string; side: Side; sessionToken: string }): Promise<LobbyActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1195,7 +1204,7 @@ export class MultiplayerService {
 
   async cancelMatch(input: { matchId: string; side: Side; sessionToken: string }): Promise<LifecycleActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1213,7 +1222,7 @@ export class MultiplayerService {
 
   async leaveMatch(input: { matchId: string; side: Side; sessionToken: string }): Promise<LifecycleActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1369,7 +1378,7 @@ export class MultiplayerService {
     selectedChoices?: Record<string, unknown>;
   }): Promise<SubmitActionResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1418,7 +1427,7 @@ export class MultiplayerService {
         ...(input.selectedChoices ? { selectedChoices: input.selectedChoices } : {})
       };
       const snapshot = this.snapshotFor(input.matchId, record.gameState, record.match.matchVersion, `snap_before_${record.gameState.stateVersion + 1}`, false);
-      const result = applyAction(record.gameState, action);
+      const result = applyAction(record.gameState, action, { publicEventsMode: "latest" });
       if (!result.ok) {
         const receipt = this.receiptFor(record, input.side, input.idempotencyKey, false, result.error.code);
         record.actionReceipts.push(receipt);
@@ -1475,7 +1484,7 @@ export class MultiplayerService {
     mode?: "single_step" | "until_human";
   }): Promise<AdvanceAiResult> {
     return this.withMatchLock(input.matchId, async () => {
-      const record = await this.mustLoad(input.matchId);
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
       if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
       const session = this.authenticate(record, input.side, input.sessionToken);
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
@@ -1647,8 +1656,8 @@ export class MultiplayerService {
     if (!record || !record.gameState) return { ok: false, error: safeError("not_found", "Dieses Replay ist nicht verfügbar.") };
     if (!isReplayPerspective(perspective)) return { ok: false, error: safeError("bad_request", "Die Replay-Perspektive ist ungültig.") };
 
-    const metadata = replayIndexEntryFor(record);
     const checks = replayStateHashChecks(record);
+    const metadata = replayIndexEntryFor(record, checks);
     const publicEvents = replayEventsForPerspective(record, perspective);
     const localAnalysis = perspective === "local_analysis";
     const timeline = publicEvents.map((event, index) =>
@@ -1740,6 +1749,10 @@ export class MultiplayerService {
 
   async runStorageMaintenanceCleanupPolicy(): Promise<StorageMaintenanceCleanupPolicyRunResult | undefined> {
     return this.storage.runMaintenanceCleanupPolicy?.();
+  }
+
+  async storageMaintenanceCompactSnapshots(): Promise<StorageMaintenanceSnapshotCompactionResult | undefined> {
+    return this.storage.maintenanceCompactSnapshots?.();
   }
 
   async storageMaintenanceSetRetentionProtection(matchId: string, protectedValue: boolean): Promise<StorageMaintenanceMatchDetail | undefined> {
@@ -1857,7 +1870,8 @@ export class MultiplayerService {
     const snapshot = record.stateSnapshots.find((candidate) => candidate.snapshotId === undoRecord.snapshotId);
     if (!snapshot) return false;
     const targetIndex = record.eventLog.findIndex((event) => event.eventId === undoRecord.targetEventId);
-    record.gameState = clone(snapshot.gameState);
+    const eventLog = record.gameState.eventLog.filter((event) => event.stateVersionAfter <= snapshot.stateVersion);
+    record.gameState = { ...clone(snapshot.gameState), eventLog };
     record.eventLog = targetIndex >= 0 ? record.eventLog.slice(0, targetIndex) : record.eventLog;
     record.actionReceipts = record.actionReceipts.filter((receipt) => receipt.stateVersionAfter <= snapshot.stateVersion);
     record.stateSnapshots = record.stateSnapshots.filter((candidate) => candidate.stateVersion <= snapshot.stateVersion);
@@ -1955,11 +1969,7 @@ export class MultiplayerService {
     record.match.baseline = baseline;
     record.match.status = "ready_check";
     record.match.settings = { ...record.match.settings, agendaPointsToWin, matchFormat };
-    if (record.match.settings.playerClock?.mode === "player_clock") {
-      record.match.playerClock = initialPlayerClockState(record.match.settings.playerClock as EnabledPlayerClockConfig);
-    } else {
-      delete record.match.playerClock;
-    }
+    record.match.playerClock = initialPlayerClockState(normalizePlayerClockConfig(record.match.settings.playerClock));
     record.match.deckSetup = {
       runnerSnapshotId: deckSetup.runnerSnapshot.deckSnapshotId,
       corpSnapshotId: deckSetup.corpSnapshot.deckSnapshotId,
@@ -1992,7 +2002,7 @@ export class MultiplayerService {
 
   private syncPlayerClock(record: StoredMatch, nowIso = this.now()): boolean {
     const clock = record.match.playerClock;
-    if (!clock || record.match.status !== "active" || !record.gameState || record.gameState.winner || clock.expiredSide) return false;
+    if (!clock || record.match.status !== "active" || !record.gameState || record.gameState.winner || (clock.mode === "player_clock" && clock.expiredSide)) return false;
     const nowMs = Date.parse(nowIso);
     if (!Number.isFinite(nowMs)) return false;
     const owner = this.playerClockDecisionOwner(record);
@@ -2006,6 +2016,13 @@ export class MultiplayerService {
       return false;
     }
     const elapsedMs = Math.max(0, nowMs - clock.activity.startedAtMs);
+    if (clock.mode === "none") {
+      const consumedDeltaMs = Math.max(0, elapsedMs - clock.activity.chargedMs);
+      if (consumedDeltaMs <= 0) return false;
+      clock.consumedMs[owner] += consumedDeltaMs;
+      clock.activity.chargedMs += consumedDeltaMs;
+      return false;
+    }
     const chargeableMs = Math.max(0, elapsedMs - clock.gracePeriodMs - clock.activity.chargedMs);
     if (chargeableMs <= 0) return false;
     clock.remainingMs[owner] = Math.max(0, clock.remainingMs[owner] - chargeableMs);
@@ -2045,7 +2062,7 @@ export class MultiplayerService {
     record.match.winner = winnerSide;
     record.match.matchVersion += 1;
     record.match.updatedAt = nowIso;
-    if (record.match.playerClock) record.match.playerClock.expiredSide = expiredSide;
+    if (record.match.playerClock?.mode === "player_clock") record.match.playerClock.expiredSide = expiredSide;
     record.lifecycleResult = {
       status: "finished",
       reason: "time_expired",
@@ -2066,9 +2083,24 @@ export class MultiplayerService {
     const nowMs = Date.parse(nowIso);
     const activity = clock.activity;
     const elapsedActivityMs = activity && Number.isFinite(nowMs) ? Math.max(0, nowMs - activity.startedAtMs) : undefined;
+    const decisionOwnerSide = activity?.decisionOwnerSide;
+    if (clock.mode === "none") {
+      const effectiveConsumed = { ...clock.consumedMs };
+      if (decisionOwnerSide && elapsedActivityMs !== undefined && activity) {
+        effectiveConsumed[decisionOwnerSide] += Math.max(0, elapsedActivityMs - activity.chargedMs);
+      }
+      return {
+        schemaVersion: "player-clock-v1",
+        mode: "none",
+        consumedMs: effectiveConsumed,
+        ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
+        ...(activity ? { activityStartedAtMs: activity.startedAtMs } : {}),
+        ...(elapsedActivityMs !== undefined ? { elapsedActivityMs } : {}),
+        warningLevel: "none"
+      };
+    }
     const chargeableElapsedMs = activity && elapsedActivityMs !== undefined ? Math.max(0, elapsedActivityMs - clock.gracePeriodMs) : undefined;
     const graceRemainingMs = activity && elapsedActivityMs !== undefined ? Math.max(0, clock.gracePeriodMs - elapsedActivityMs) : undefined;
-    const decisionOwnerSide = activity?.decisionOwnerSide;
     const effectiveRemaining = { ...clock.remainingMs };
     if (decisionOwnerSide && chargeableElapsedMs !== undefined && activity) {
       effectiveRemaining[decisionOwnerSide] = Math.max(0, effectiveRemaining[decisionOwnerSide] - Math.max(0, chargeableElapsedMs - activity.chargedMs));
@@ -2088,6 +2120,7 @@ export class MultiplayerService {
       schemaVersion: "player-clock-v1",
       mode: "player_clock",
       remainingMs: effectiveRemaining,
+      consumedMs: { ...clock.consumedMs },
       startingTimeMs: clock.startingTimeMs,
       gracePeriodMs: clock.gracePeriodMs,
       ...(decisionOwnerSide ? { decisionOwnerSide } : {}),
@@ -2346,14 +2379,18 @@ export class MultiplayerService {
     const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
     if (!legalAction) return false;
     const snapshot = this.snapshotFor(record.match.matchId, state, record.match.matchVersion, `snap_before_${state.stateVersion + 1}`, false);
-    const result = applyAction(state, {
-      matchId: record.match.matchId,
-      side,
-      actionId: legalAction.actionId,
-      clientKnownStateVersion: state.stateVersion,
-      ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
-      idempotencyKey: `ai-${side}-${state.stateVersion}`
-    });
+    const result = applyAction(
+      state,
+      {
+        matchId: record.match.matchId,
+        side,
+        actionId: legalAction.actionId,
+        clientKnownStateVersion: state.stateVersion,
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+        idempotencyKey: `ai-${side}-${state.stateVersion}`
+      },
+      { publicEventsMode: "latest" }
+    );
     if (!result.ok) return false;
     const event: GameEvent = {
       ...result.event,
@@ -2405,8 +2442,8 @@ export class MultiplayerService {
     return record.match.aiControllers?.[side]?.type === "ai";
   }
 
-  private async mustLoad(matchId: string): Promise<StoredMatch | undefined> {
-    return this.storage.load(matchId);
+  private async mustLoad(matchId: string, options?: { includeStateSnapshots?: boolean }): Promise<StoredMatch | undefined> {
+    return this.storage.load(matchId, options);
   }
 
   private authenticate(record: StoredMatch, side: Side, sessionToken: string): SessionRecord | undefined {
@@ -2486,7 +2523,7 @@ export class MultiplayerService {
       stateVersion: gameState.stateVersion,
       matchVersion,
       stateHash: hashState(gameState),
-      gameState: clone(gameState),
+      gameState: cloneGameStateWithoutEventLog(gameState),
       createdAt: this.now(),
       hiddenInfoBarrier
     };
@@ -2556,12 +2593,19 @@ function normalizePlayerClockConfig(config: ApiPlayerClockConfig | undefined): A
   return { mode: "player_clock", startingTimeMs, gracePeriodMs };
 }
 
-function initialPlayerClockState(config: Required<Pick<ApiPlayerClockConfig, "mode" | "startingTimeMs" | "gracePeriodMs">>): PlayerClockState {
+function initialPlayerClockState(config: ApiPlayerClockConfig): PlayerClockState {
+  if (config.mode !== "player_clock") {
+    return {
+      mode: "none",
+      consumedMs: { runner: 0, corp: 0 }
+    };
+  }
   return {
     mode: "player_clock",
-    startingTimeMs: config.startingTimeMs,
-    gracePeriodMs: config.gracePeriodMs,
-    remainingMs: { runner: config.startingTimeMs, corp: config.startingTimeMs }
+    startingTimeMs: config.startingTimeMs ?? 5 * 60_000,
+    gracePeriodMs: config.gracePeriodMs ?? 10_000,
+    remainingMs: { runner: config.startingTimeMs ?? 5 * 60_000, corp: config.startingTimeMs ?? 5 * 60_000 },
+    consumedMs: { runner: 0, corp: 0 }
   };
 }
 
@@ -2628,7 +2672,10 @@ function toEventRecord(matchId: string, event: GameEvent, barrier: boolean): Eve
   return projectEngineEventToServerRecord(matchId, event, barrier);
 }
 
-function replayIndexEntryFor(record: StoredMatch): ReplayIndexEntry {
+function replayIndexEntryFor(
+  record: StoredMatch,
+  checks?: ReturnType<typeof replayStateHashChecks>
+): ReplayIndexEntry {
   const names = participantNamesForReplay(record);
   const winner = record.match.winner ?? record.gameState.winner ?? undefined;
   return {
@@ -2642,7 +2689,8 @@ function replayIndexEntryFor(record: StoredMatch): ReplayIndexEntry {
     updatedAt: record.match.updatedAt,
     ...(winner ? { winner } : {}),
     finalStateHash: hashState(record.gameState),
-    replayOk: replayStateHashChecks(record).errors.length === 0,
+    replayCheckStatus: checks ? "verified" : "unchecked",
+    ...(checks ? { replayOk: checks.errors.length === 0 } : {}),
     participantNames: names
   };
 }
@@ -3175,6 +3223,13 @@ function randomId(prefix: string): string {
 
 function clone<T>(value: T): T {
   return structuredClone(value) as T;
+}
+
+function cloneGameStateWithoutEventLog(gameState: GameState): GameState {
+  return {
+    ...clone({ ...gameState, eventLog: [] }),
+    eventLog: []
+  };
 }
 
 function trimTrailingSlash(value: string): string {

@@ -13,6 +13,8 @@ export const SERVER_ICE_SWAP_UPGRADE_CARD_ID =
 export const RUNNER_STACK_TOP5_EVENT_CARD_ID =
   "onr_v1_093_if-you-want-it-done-right";
 
+export const AUJOURD_OUI_RESOURCE_CARD_ID = "onr_v1_151_aujourdoui";
+
 export const RUNNER_GRIP_TRASH_EVENT_CARD_ID = "onr_v1_103_organ-donor";
 
 export const CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID =
@@ -28,7 +30,7 @@ export const SERVER_EXPOSE_PROGRAM_CARD_IDS = new Set([
 
 export const STACK_SEARCH_PROGRAM_CARD_IDS = new Set([
   "onr_v1_059_self-modifying-code",
-  "onr_v1_151_aujourdoui",
+  AUJOURD_OUI_RESOURCE_CARD_ID,
   "onr_v1_169_n-e-t-o",
   "onr_v1_177_the-short-circuit",
 ]);
@@ -36,9 +38,7 @@ export const STACK_SEARCH_PROGRAM_CARD_IDS = new Set([
 export const SELF_MODIFYING_CODE_PROGRAM_ID =
   "onr_v1_059_self-modifying-code";
 
-export const STACK_TOP_REVEAL_PROGRAM_CARD_IDS = new Set([
-  "onr_v1_151_aujourdoui",
-]);
+export const STACK_TOP_REVEAL_PROGRAM_CARD_IDS = new Set<string>([]);
 
 export const COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID = "onr_v1_032_i-spy";
 

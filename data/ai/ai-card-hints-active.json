@@ -4658,7 +4658,8 @@
       "requiredMechanics": [
         "install_resource",
         "search_stack",
-        "reveal_stack_top",
+        "top_five_program_choice",
+        "reveal_selected_programs",
         "shuffle",
         "legal_action_only"
       ],

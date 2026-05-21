@@ -2251,9 +2251,62 @@ describe("MVP 0.3 Runner AI", () => {
     });
 
     expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
-    expect(runCost.evidence).toContain("visible_etr_break_cost:4");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:6");
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("counts normal Codecracker pump costs once per visible ICE", () => {
+    const input = codecrackerDoubleEndlessCorridorInput(
+      "ai-codecracker-double-endless-low-credits",
+      3,
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain)
+      throw new Error("Missing Codecracker/Endless fixture actions");
+
+    const pressureCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_rnd candidate");
+    const runCost = estimateRunCost(input, pressureCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [rdRun, gain],
+    });
+
+    expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:4");
+    expect(runCost.evidence).toContain("blocked:true");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("does not mark the double Endless Corridor path blocked once Codecracker can pay both pumps", () => {
+    const input = codecrackerDoubleEndlessCorridorInput(
+      "ai-codecracker-double-endless-affordable",
+      4,
+    );
+    const pressureCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "pressure_rnd",
+    );
+    expect(pressureCandidate).toBeDefined();
+    if (!pressureCandidate) throw new Error("Missing pressure_rnd candidate");
+
+    const runCost = estimateRunCost(input, pressureCandidate);
+
+    expect(runCost.reasons).not.toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:4");
+    expect(runCost.evidence).toContain("blocked:false");
   });
 
   it("uses a short Runner two-turn economy intent before an unprofitable visible HQ run", () => {
@@ -2533,6 +2586,65 @@ describe("MVP 0.3 Runner AI", () => {
     expect(safeProbeCandidate).toBeDefined();
     if (!safeProbeCandidate)
       throw new Error("Missing safe_probe_run candidate");
+    const safeProbeScore = evaluateServerAccessValue(input, safeProbeCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [archivesRun, gain],
+    });
+
+    expect(safeProbeScore.reasons).toContain("known_archives_access_not_fresh");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("does not value an open Archives asset as trashable access value", () => {
+    const requiredCorpCards = ["simple_economy_asset"];
+    const corpDeckCards = [
+      ...ONR_V1_1_2K_CORP_DECK.cards,
+      ...requiredCorpCards
+        .filter(
+          (id) => !ONR_V1_1_2K_CORP_DECK.cards.some((card) => card.id === id),
+        )
+        .map((id) => ({ id, quantity: 1 })),
+    ];
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-open-archives-asset-no-trash-value",
+        corpDeck: { ...ONR_V1_1_2K_CORP_DECK, cards: corpDeckCards },
+        agendaPointsToWin: 7,
+        baseline: CURRENT_RULES_BASELINE,
+      }),
+    );
+    state.runner.credits = 5;
+    const assetId = moveCorpCardToArchives(
+      state,
+      "simple_economy_asset",
+      true,
+    );
+    keepOnlyCorpArchivesCards(state, [assetId]);
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "hard",
+      profileId: "runner-ai-v0.9-hard",
+    });
+    const archivesRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(archivesRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!archivesRun || !gain)
+      throw new Error("Missing open Archives asset fixture actions");
+
+    const safeProbeCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "safe_probe_run",
+    );
+    expect(safeProbeCandidate).toBeDefined();
+    if (!safeProbeCandidate)
+      throw new Error("Missing open Archives safe_probe_run candidate");
     const safeProbeScore = evaluateServerAccessValue(input, safeProbeCandidate);
     const decision = chooseRunnerAction({
       ...input,
@@ -9236,6 +9348,63 @@ function krashKeeperHqEncounterState(seed: string): GameState {
       action.type === "rez_ice" &&
       sourceDefinition(state, action) === "onr_v1_252_keeper",
   );
+}
+
+function codecrackerDoubleEndlessCorridorInput(
+  seed: string,
+  runnerCredits: number,
+): ReturnType<typeof buildAiDecisionInput> {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_1_2K_RUNNER_DECK,
+      corpDeck: {
+        id: "ai_codecracker_double_endless_corp",
+        name: "AI Codecracker Double Endless Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_239_endless-corridor", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+          { id: "simple_agenda", quantity: 3 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 10;
+  state.corp.credits = 10;
+  moveRunnerCardToGrip(state, "onr_v1_014_codecracker");
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === "onr_v1_014_codecracker",
+  );
+  const innerIceId = putCorpIceOnServer(
+    state,
+    "rd",
+    "onr_v1_239_endless-corridor",
+  );
+  const outerIceId = putUnusedCorpIceOnServer(
+    state,
+    "rd",
+    "onr_v1_239_endless-corridor",
+    new Set([innerIceId]),
+  );
+  for (const iceId of [innerIceId, outerIceId]) {
+    state.cardInstances[iceId] = {
+      ...state.cardInstances[iceId]!,
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  state.runner.credits = runnerCredits;
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
 }
 
 function krashDataWallBbsRemoteInput(

@@ -11,9 +11,7 @@ export function hashStateSnapshot(state: GameState): StateHash {
 }
 
 export function stripEventLogForHash(state: GameState): unknown {
-  const copy = structuredClone(state) as GameState;
-  copy.eventLog = [];
-  return copy;
+  return { ...state, eventLog: [] };
 }
 
 export function stableStringifyForHash(value: unknown): string {

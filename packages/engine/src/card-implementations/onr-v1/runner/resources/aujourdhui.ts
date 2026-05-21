@@ -9,7 +9,7 @@ export const aujourdhuiImplementation: CardImplementationDefinition = {
       kind: "activated",
       timing: "runner_main",
       costs: [{ kind: "action", amount: 1 }],
-      label: "Aujourd'Oui: Stack-Spitze nach Programmen durchsuchen",
+      label: "Aujourd'Oui: Top 5 nach Programmen prüfen",
       effects: [
         {
           kind: "look_top_stack_take_matching",

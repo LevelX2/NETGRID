@@ -26,9 +26,11 @@ import {
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
   groupRunnerRigCards,
+  iceModifierBadgesForServer,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
+  runBreakerActionHint,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
   runPositionStatusLabel,
@@ -160,6 +162,31 @@ describe("V1.0.5 action board UI helpers", () => {
     );
   });
 
+  it("marks ICE in a server with rezzed Tesseract Fort Construction", () => {
+    const tesseract = {
+      ...card("tesseract_1", "Tesseract Fort Construction", "upgrade", true),
+      definitionId: "onr_v1_370_tesseract-fort-construction"
+    };
+    const server = {
+      id: "remote_1" as const,
+      label: "Remote 1",
+      ice: [card("ice_1", "Wall of Static", "ice")],
+      root: [tesseract]
+    };
+
+    expect(iceModifierBadgesForServer(server)).toEqual([
+      {
+        key: "tesseract-additional-subroutine",
+        shortLabel: "+Sub",
+        ariaLabel: "Tesseract Fort Construction: zusätzliche Subroutine auf diesem ICE",
+        tooltip: "Tesseract Fort Construction: zusätzliche Subroutine",
+        testId: "tesseract-ice-subroutine-badge"
+      }
+    ]);
+    expect(iceModifierBadgesForServer({ ...server, root: [{ ...tesseract, rezzed: false }] })).toEqual([]);
+    expect(iceModifierBadgesForServer({ ...server, root: [{ ...tesseract, known: false }] })).toEqual([]);
+  });
+
   it("keeps card-sourced gain-credit actions on their specific labels", () => {
     const basic = legalAction("corp", "gain_credit", "basic_action", "1 Credit nehmen");
     const privatePolice = legalAction("corp", "gain_credit", "private_police_1", "Private Cybernet Police: Trace 5 starten", {
@@ -180,7 +207,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(basic)).toBe("Credit nehmen");
     expect(actionButtonLabel(privatePolice)).toBe("Private Cybernet Police: Trace 5 starten");
     expect(actionMatchesContext(seeya, { kind: "card", id: "seeya_1", label: "SeeYa" })).toBe(true);
-    expect(contextualCardActionLabel(seeya)).toBe("SeeYa: Karte in HQ expose");
+    expect(contextualCardActionLabel(seeya)).toBe("Karte in HQ expose");
   });
 
   it("removes redundant installed asset names from card-context action labels", () => {
@@ -221,6 +248,16 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(actionButtonLabel(corporateCoup)).toBe("Corporate Coup: 3 Credits aus Coup-Counter");
     expect(contextualCardActionLabel(corporateCoup)).toBe("3 Credits nehmen");
+  });
+
+  it("drops the card-name prefix for V1.9.11 hidden-zone card menu actions", () => {
+    const aujourdOui = legalAction("runner", "gain_credit", "aujourdoui_1", "Aujourd'Oui: Top 5 nach Programmen prüfen", {
+      cardId: "aujourdoui_1",
+      v1911HiddenZoneAbility: "search_stack_program_to_grip"
+    });
+
+    expect(actionButtonLabel(aujourdOui)).toBe("Aujourd'Oui: Top 5 nach Programmen prüfen");
+    expect(contextualCardActionLabel(aujourdOui)).toBe("Top 5 nach Programmen prüfen");
   });
 
   it("labels encounter breaker actions against the current ICE", () => {
@@ -505,7 +542,22 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
-  it("maps campaign stored bit counters to the existing card credit badge pattern", () => {
+  it("maps hosted bit counters to the existing card credit badge pattern", () => {
+    const brokerAfterLoad: VisibleCard = {
+      ...card("broker_1", "Broker", "resource"),
+      definitionId: "onr_v1_154_broker",
+      counters: { bit: 3 }
+    };
+    const brokerTenPlus: VisibleCard = {
+      ...brokerAfterLoad,
+      instanceId: "broker_2",
+      counters: { bit: 12 }
+    };
+    const shortTerm: VisibleCard = {
+      ...card("short_term_1", "Short-Term Contract", "resource"),
+      definitionId: "onr_v1_178_short-term-contract",
+      counters: { bit: 10 }
+    };
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
       definitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -526,6 +578,21 @@ describe("V1.0.6 resource and card-display helpers", () => {
       counters: { power: 8 }
     };
 
+    expect(storedCreditSourceLabel(brokerAfterLoad)).toBe("Broker");
+    expect(storedCreditAmount(brokerAfterLoad)).toBe(3);
+    expect(cardCreditCounterVisual(storedCreditAmount(brokerAfterLoad))).toMatchObject({
+      safeAmount: 3,
+      showCount: false,
+      iconCount: 3
+    });
+    expect(storedCreditAmount(brokerTenPlus)).toBe(12);
+    expect(cardCreditCounterVisual(storedCreditAmount(brokerTenPlus))).toMatchObject({
+      safeAmount: 12,
+      showCount: true,
+      iconCount: 1
+    });
+    expect(storedCreditSourceLabel(shortTerm)).toBe("Short-Term Contract");
+    expect(storedCreditAmount(shortTerm)).toBe(10);
     expect(storedCreditSourceLabel(bbsUnderTen)).toBe("BBS Whispering Campaign");
     expect(storedCreditAmount(bbsUnderTen)).toBe(8);
     expect(cardCreditCounterVisual(storedCreditAmount(bbsUnderTen))).toMatchObject({
@@ -585,24 +652,30 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBeNull();
   });
 
-  it("keeps hidden Corp advancement counters neutral at five counters", () => {
+  it("keeps advancement counters as separate gems until ten counters", () => {
     expect(advancementCounterDisplay({ known: false, advancementCounters: 5 })).toEqual({
       amount: 5,
       ariaLabel: "5 öffentliche Advancement-Counter",
       visibleGemCount: 5,
       overflowLabel: null
     });
-    expect(advancementCounterDisplay({ known: false, advancementCounters: 10 })).toEqual({
-      amount: 10,
-      ariaLabel: "10 öffentliche Advancement-Counter",
-      visibleGemCount: 9,
-      overflowLabel: "x10"
-    });
     expect(advancementCounterDisplay({ known: true, advancementCounters: 5 })).toEqual({
       amount: 5,
       ariaLabel: "5 Entwicklungen",
-      visibleGemCount: 4,
-      overflowLabel: "x5"
+      visibleGemCount: 5,
+      overflowLabel: null
+    });
+    expect(advancementCounterDisplay({ known: true, advancementCounters: 9 })).toEqual({
+      amount: 9,
+      ariaLabel: "9 Entwicklungen",
+      visibleGemCount: 9,
+      overflowLabel: null
+    });
+    expect(advancementCounterDisplay({ known: false, advancementCounters: 10 })).toEqual({
+      amount: 10,
+      ariaLabel: "10 öffentliche Advancement-Counter",
+      visibleGemCount: 1,
+      overflowLabel: "10"
     });
     expect(advancementCounterDisplay({ known: false, advancementCounters: 0 })).toBeNull();
   });
@@ -928,6 +1001,54 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionCostChips(pump)).toEqual([{ kind: "credit", amount: 2, label: "2 Credits" }]);
   });
 
+  it("does not show a false missing-breaker hint in the corp encounter view", () => {
+    const codecracker: VisibleCard = {
+      ...card("codecracker_1", "Codecracker", "program"),
+      subtypes: ["icebreaker"],
+      rulesText: "0 Credits: Break code gate subroutine.\n1 Credit: +1 strength.",
+      strength: 0
+    };
+    const endlessCorridor: VisibleCard = {
+      ...card("ice_1", "Endless Corridor", "ice"),
+      subtypes: ["code_gate"],
+      rulesText: "End the run.\nEnd the run.",
+      strength: 2
+    };
+    const corpView = view("corp", {
+      activeSide: "runner",
+      timingPoint: "run.encounter_ice",
+      opponent: {
+        ...view("corp").opponent,
+        rig: [codecracker]
+      },
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: endlessCorridor,
+        successful: false
+      }
+    });
+
+    expect(runBreakerActionHint(corpView, [])).toBe("Runner-Rig zeigt passenden Eisbrecher: Codecracker.");
+  });
+
+  it("keeps the no-matching-breaker hint for the runner action view", () => {
+    const runnerView = view("runner", {
+      activeSide: "runner",
+      timingPoint: "run.encounter_ice",
+      run: {
+        attackedServerId: "rd",
+        phase: "encounter_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        encounteredIce: { ...card("ice_1", "Endless Corridor", "ice"), subtypes: ["code_gate"] },
+        successful: false
+      }
+    });
+
+    expect(runBreakerActionHint(runnerView, [])).toBe("Kein passender Eisbrecher für dieses ICE verfügbar.");
+  });
+
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {
     const startup = card("startup_1", "Startup Immolator", "program");
     const running = view("runner", {
@@ -979,6 +1100,38 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(access)).toBe("Zugriff auf Karte");
     expect(mirrored).toEqual([access]);
     expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
+  });
+
+  it("keeps City Surveillance draw choices visible in draw action labels", () => {
+    const pay = legalAction(
+      "runner",
+      "draw_card",
+      "basic_action",
+      "Karte ziehen (City Surveillance: 1 Credit zahlen)",
+      {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceDrawDecision: "pay",
+        citySurveillanceProjectedCreditsPaid: 1,
+        citySurveillanceProjectedTagsAdded: 0
+      }
+    );
+    const tag = legalAction(
+      "runner",
+      "draw_card",
+      "basic_action",
+      "Karte ziehen (City Surveillance: 1 Tag nehmen)",
+      {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceDrawDecision: "tag",
+        citySurveillanceProjectedCreditsPaid: 0,
+        citySurveillanceProjectedTagsAdded: 1
+      }
+    );
+    const plain = legalAction("runner", "draw_card", "basic_action", "Karte ziehen");
+
+    expect(actionButtonLabel(pay)).toBe("Karte ziehen (City Surveillance: 1 Credit zahlen)");
+    expect(actionButtonLabel(tag)).toBe("Karte ziehen (City Surveillance: 1 Tag nehmen)");
+    expect(actionButtonLabel(plain)).toBe("Karte ziehen");
   });
 
   it("describes accessed Archive assets as already trashed instead of blocked by credits", () => {

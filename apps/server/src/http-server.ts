@@ -673,6 +673,23 @@ async function routeHttp(
       return;
     }
 
+    if (url.pathname === "/api/storage/maintenance/snapshot-compaction/apply" && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-snapshot-compaction")) return;
+      try {
+        const result = await service.storageMaintenanceCompactSnapshots();
+        if (!result) {
+          sendJson(response, 503, maintenanceUnavailablePayload());
+          return;
+        }
+        sendJson(response, 200, result);
+      } catch (error) {
+        const payload = maintenanceCleanupErrorPayload(error);
+        sendJson(response, payload.status, { error: { code: payload.code, message: payload.message } });
+      }
+      return;
+    }
+
     const maintenanceRetentionRoute = /^\/api\/storage\/maintenance\/matches\/([^/]+)\/retention-protection$/.exec(url.pathname);
     if (maintenanceRetentionRoute && request.method === "POST") {
       if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;

@@ -15,6 +15,7 @@ import {
   type DeckDefinition,
   type DemoDeckId,
   type DamageType,
+  type ApplyActionOptions,
   type EngineError,
   type EngineResult,
   type EventVisibilityClass,
@@ -148,6 +149,7 @@ import {
   CORP_HQ_SHUFFLE_DRAW_CARD_ID,
   CORP_RD_TOP5_REORDER_OPERATION_CARD_ID,
   COUNTER_STACK_TOP_REVEAL_PROGRAM_CARD_ID,
+  AUJOURD_OUI_RESOURCE_CARD_ID,
   HIDDEN_ZONE_REORDER_ASSET_CARD_IDS,
   HIDDEN_ZONE_REVEAL_ASSET_CARD_IDS,
   RUNNER_GRIP_TRASH_EVENT_CARD_ID,
@@ -844,6 +846,7 @@ type VisibleCounterPayload = {
 const BAD_PUBLICITY_LOSS_THRESHOLD = 7;
 
 const ACTION_ID_ABILITY_PAYLOAD_FIELDS = [
+  "v1911HiddenZoneAbility",
   "v1917AssetAbility",
   "v1918UpgradeAbility",
   "v1919AssetAbility",
@@ -2284,6 +2287,7 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
 export function applyAction(
   state: GameState,
   playerAction: PlayerAction,
+  options: ApplyActionOptions = {},
 ): EngineResult {
   if (playerAction.matchId !== state.matchId) {
     return fail(
@@ -2321,7 +2325,7 @@ export function applyAction(
   );
   if (choiceError) return fail(state, "ERR_INVALID_CHOICE", choiceError);
 
-  const next = cloneState(state);
+  const next = cloneGameStateForAction(state);
   const before = state.stateVersion;
 
   try {
@@ -2362,7 +2366,10 @@ export function applyAction(
     ok: true,
     state: next,
     event,
-    publicEvents: next.eventLog.map(toPublicEvent),
+    publicEvents:
+      options.publicEventsMode === "latest"
+        ? [toPublicEvent(event)]
+        : next.eventLog.map(toPublicEvent),
     stateHash,
   };
 }
@@ -4605,16 +4612,20 @@ function runnerMainActions(state: GameState): LegalAction[] {
         definition.id !== SELF_MODIFYING_CODE_ID &&
         (definition.id !== SHORT_CIRCUIT_RESOURCE_CARD_ID ||
           state.runner.credits >= 1) &&
-        state.runner.stack.some(
-          (id) => definitionFor(state, id).type === "program",
-        )
+        (definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+          ? state.runner.stack.length > 0
+          : state.runner.stack.some(
+              (id) => definitionFor(state, id).type === "program",
+            ))
       ) {
         actions.push(
           action(
             state,
             "runner",
             "gain_credit",
-            `${definition.title}: Stack nach Programm durchsuchen`,
+            definition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+              ? `${definition.title}: Top 5 nach Programmen prüfen`
+              : `${definition.title}: Stack nach Programm durchsuchen`,
             cardId,
             [
               {
@@ -6769,6 +6780,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       canPayAtLeastOneBreakAbility &&
       breakAbilities.every(
         (ability) =>
+          breaker.id !== PILE_DRIVER_ID ||
           ability.postBreakStealthLossMode !== "total_if_available" ||
           runnerStealthRecurringCredits(state) >=
             (ability.postBreakStealthLoss ?? 0),
@@ -11743,7 +11755,24 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       if (state.winner) return;
     }
     if (subroutine.type === "trash_installed_program") {
-      resolveTrashInstalledProgramSubroutine(state, legalAction);
+      const trashResult = resolveTrashInstalledProgramSubroutine(
+        state,
+        legalAction,
+      );
+      appendResolvedSubroutineEffect(
+        legalAction,
+        definition,
+        index,
+        subroutine,
+        undefined,
+        trashResult
+          ? {
+              cardDefinitionId: trashResult.definitionId,
+              cardTitle: trashResult.title,
+              cardsTrashed: 1,
+            }
+          : { cardsTrashed: 0 },
+      );
     }
     if (subroutine.type === "set_run_encounter_tax") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
@@ -11995,7 +12024,13 @@ function appendResolvedSubroutineEffect(
   subroutineIndex: number,
   subroutine: NonNullable<CardDefinition["subroutines"]>[number],
   damageSummary?: DamageSummary,
-  options: { paidCredits?: number; endedRun?: boolean } = {},
+  options: {
+    paidCredits?: number;
+    endedRun?: boolean;
+    cardDefinitionId?: string;
+    cardTitle?: string;
+    cardsTrashed?: number;
+  } = {},
 ): void {
   if (!legalAction) return;
   const dynamicAttribution = dynamicSubroutineAttributionFor(subroutine);
@@ -12026,6 +12061,13 @@ function appendResolvedSubroutineEffect(
         : {}),
       ...(options.paidCredits !== undefined
         ? { paidCredits: options.paidCredits }
+        : {}),
+      ...(options.cardDefinitionId
+        ? { cardDefinitionId: options.cardDefinitionId }
+        : {}),
+      ...(options.cardTitle ? { cardTitle: options.cardTitle } : {}),
+      ...(options.cardsTrashed !== undefined
+        ? { cardsTrashed: options.cardsTrashed }
         : {}),
       ...(subroutine.type === "end_the_run" || options.endedRun
         ? { endedRun: true }
@@ -15232,10 +15274,11 @@ function pickRunnerProgramForUninstall(
 function resolveTrashInstalledProgramSubroutine(
   state: GameState,
   legalAction?: LegalAction,
-): void {
+): { definitionId: string; title: string } | undefined {
   const targetProgramId = pickRunnerProgramForUninstall(state);
-  if (!targetProgramId) return;
-  const targetDefinitionId = definitionFor(state, targetProgramId).id;
+  if (!targetProgramId) return undefined;
+  const targetDefinition = definitionFor(state, targetProgramId);
+  const targetDefinitionId = targetDefinition.id;
   if (
     legalAction &&
     openRunnerInstalledTrashPreventionWindow(
@@ -15245,7 +15288,7 @@ function resolveTrashInstalledProgramSubroutine(
       "trash_program_subroutine",
     )
   )
-    return;
+    return undefined;
   trashRunnerInstalledProgram(state, targetProgramId);
   if (legalAction) {
     legalAction.payload = {
@@ -15255,6 +15298,7 @@ function resolveTrashInstalledProgramSubroutine(
       trashedCount: 1,
     };
   }
+  return { definitionId: targetDefinitionId, title: targetDefinition.title };
 }
 
 function trashRunnerInstalledProgram(
@@ -21207,6 +21251,7 @@ function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
       choice.source.startsWith("v1911.self_modifying_code_install_program") ||
       choice.source.startsWith("v1911.search_stack_card") ||
       choice.source.startsWith("v1911.search_stack") ||
+      choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1912.search_stack") ||
       choice.source.startsWith("v1911.short_circuit_search") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install") ||
@@ -21222,6 +21267,7 @@ function stackSearchResolutionForChoice(
   return {
     reveal:
       choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.aujourdoui_top5") ||
       choice.source.startsWith("v1911.self_modifying_code_install_program") ||
       choice.source.startsWith("v1911.sneak_preview_stack_install") ||
       choice.source.startsWith("p3_38.search_stack_install") ||
@@ -21628,6 +21674,7 @@ function resolvePendingChoice(
     ) ||
     state.pendingChoice.source.startsWith("v098.search_stack") ||
     state.pendingChoice.source.startsWith("v1911.search_stack") ||
+    state.pendingChoice.source.startsWith("v1911.aujourdoui_top5") ||
     state.pendingChoice.source.startsWith("v1912.search_stack") ||
     state.pendingChoice.source.startsWith("v1911.short_circuit_search")
   ) {
@@ -21637,6 +21684,10 @@ function resolvePendingChoice(
       )
     ) {
       resolveSelfModifyingCodeStackChoice(state, legalAction, playerAction);
+      return;
+    }
+    if (state.pendingChoice.source.startsWith("v1911.aujourdoui_top5")) {
+      resolveAujourdOuiTop5Choice(state, legalAction, playerAction);
       return;
     }
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
@@ -22516,6 +22567,12 @@ function startCardImplementationLookTopStackTakeMatchingChoice(
     ),
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
+    stackSearchResolution: {
+      reveal: "public",
+      destination: "grip",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+    },
   };
   const payload = {
     hiddenZoneBarrier: true,
@@ -22759,6 +22816,52 @@ function startCardImplementationLookTopStackShowToCorpThenInstallMatchingChoice(
     choiceVisibility: "public",
   };
   return { publicPayload: legalAction.payload as Record<string, string | number | boolean> };
+}
+
+function startAujourdOuiTop5Choice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (
+    !state.runner.rig.resources.includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== AUJOURD_OUI_RESOURCE_CARD_ID
+  ) {
+    throw new Error("Aujourd'Oui ist nicht mehr installiert.");
+  }
+  const topCards = state.runner.stack.slice(0, 5);
+  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
+  const selectableProgramCount = topCards.filter(
+    (cardId) => definitionFor(state, cardId).type === "program",
+  ).length;
+  const maxSelections = Math.min(selectableProgramCount, state.runner.credits);
+  state.pendingChoice = {
+    choiceId: `v1911_aujourdoui_top5_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `v1911.aujourdoui_top5:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Top 5 nach Programmen prüfen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = definition.type === "program" && maxSelections > 0;
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+    minSelections: 0,
+    maxSelections,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+    stackSearchResolution: {
+      reveal: "public",
+      destination: "grip",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+    },
+  };
 }
 
 function runnerStackSearchCardMatchesFilter(
@@ -23091,6 +23194,80 @@ function resolveSelfModifyingCodeFreeMuChoice(
     trashedCount: uniqueTrashIds.length,
     trashedCardDefinitionIds: trashedDefinitionIds.join(","),
     installed: true,
+  };
+}
+
+function resolveAujourdOuiTop5Choice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1911.aujourdoui_top5"))
+    throw new Error("Es ist keine Aujourd'Oui-Top-5-Choice offen.");
+  const sourceCardId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (
+    !sourceCardId ||
+    !state.runner.rig.resources.includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== AUJOURD_OUI_RESOURCE_CARD_ID
+  ) {
+    throw new Error("Aujourd'Oui ist nicht mehr installiert.");
+  }
+
+  const topCardIds = choice.options
+    .map((option) => option.value)
+    .filter((value): value is CardInstanceId => typeof value === "string");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const uniqueSelectedIds = [...new Set(selectedIds)];
+  if (uniqueSelectedIds.length !== selectedIds.length)
+    throw new Error("Die Aujourd'Oui-Auswahl enthaelt doppelte Karten.");
+  if (uniqueSelectedIds.some((cardId) => !topCardIds.includes(cardId)))
+    throw new Error("Aujourd'Oui darf nur Karten aus den obersten 5 waehlen.");
+  if (
+    uniqueSelectedIds.some((cardId) => definitionFor(state, cardId).type !== "program")
+  )
+    throw new Error("Aujourd'Oui darf nur Programme in den Grip nehmen.");
+  const creditCost = uniqueSelectedIds.length;
+  if (state.runner.credits < creditCost)
+    throw new Error("Der Runner kann die Aujourd'Oui-Kosten nicht bezahlen.");
+
+  spendCredits(state, "runner", creditCost);
+  for (const cardId of uniqueSelectedIds) {
+    removeFromAllZones(state, cardId);
+    state.runner.grip.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      zone: { side: "runner", zone: "grip" },
+    };
+  }
+  shuffleRunnerStack(state, `v1911_aujourdoui_top5:${choice.choiceId}:shuffle`);
+  delete state.pendingChoice;
+  const revealedDefinitionIds = uniqueSelectedIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+  const revealPayload: NonNullable<LegalAction["payload"]> =
+    revealedDefinitionIds.length > 0
+      ? {
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: revealedDefinitionIds[0]!,
+          publicRevealDefinitionIds: revealedDefinitionIds.join(","),
+          revealedCount: revealedDefinitionIds.length,
+        }
+      : { revealedCount: 0 };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_aujourdoui_top5",
+    sourceDefinitionId: AUJOURD_OUI_RESOURCE_CARD_ID,
+    selectedCount: uniqueSelectedIds.length,
+    searchedTopCount: topCardIds.length,
+    searchDestination: "runner_grip",
+    creditCostPaid: creditCost,
+    runnerCreditsAfter: state.runner.credits,
+    shuffled: true,
+    ...revealPayload,
   };
 }
 
@@ -26531,21 +26708,27 @@ function resolveV1911RunnerHiddenZoneAbility(
     if (cardImplementationForDefinitionId(sourceDefinition.id))
       throw new Error("Diese Stack-Search-Ability wird deklarativ abgewickelt.");
     spendCredits(state, "runner", creditCostForAction(legalAction));
-    startRunnerStackSearchChoice(
-      state,
-      sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-        ? `v1911.short_circuit_search:${sourceCardId}`
-        : "v1911.search_stack",
-      sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
-        ? "v1911_short_circuit_search"
-        : "v1911_search_stack",
-    );
+    if (sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID) {
+      startAujourdOuiTop5Choice(state, sourceCardId);
+    } else {
+      startRunnerStackSearchChoice(
+        state,
+        sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+          ? `v1911.short_circuit_search:${sourceCardId}`
+          : "v1911.search_stack",
+        sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+          ? "v1911_short_circuit_search"
+          : "v1911_search_stack",
+      );
+    }
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       hiddenZoneBarrier: true,
       sourceDefinitionId: sourceDefinition.id,
       hiddenZoneAction:
-        sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
+        sourceDefinition.id === AUJOURD_OUI_RESOURCE_CARD_ID
+          ? "v1911_aujourdoui_top5"
+          : sourceDefinition.id === SHORT_CIRCUIT_RESOURCE_CARD_ID
           ? "v1911_short_circuit_search"
           : "v1911_search_stack",
     };
@@ -29804,7 +29987,7 @@ function applyPostBreakStealthLoss(
     (sum, source) => sum + source.available,
     0,
   );
-  const exactStealthLoss = ability?.postBreakStealthLossMode === "total_if_available";
+  const exactStealthLoss = breakerDefinition.id === PILE_DRIVER_ID;
   if (exactStealthLoss && availableStealth < lossAmount)
     throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
   const requiredLoss = exactStealthLoss
@@ -31142,6 +31325,13 @@ function fail(
 
 function cloneState<T>(state: T): T {
   return structuredClone(state) as T;
+}
+
+function cloneGameStateForAction(state: GameState): GameState {
+  return {
+    ...cloneState({ ...state, eventLog: [] }),
+    eventLog: state.eventLog.slice(),
+  };
 }
 
 function isReplayAction(value: unknown): value is PlayerAction {

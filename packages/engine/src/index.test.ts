@@ -15279,17 +15279,29 @@ describe("V1.9.0 Mechanikpaket I", () => {
       trashedCardDefinitionId: "simple_killer",
       trashedCardType: "program",
       trashedCount: 1,
-      resolvedEffects: [
-        {
+    });
+    expect(unbroken.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 0,
+          subroutineType: "trash_installed_program",
+          cardDefinitionId: "simple_killer",
+          cardTitle: "Simple Killer",
+          cardsTrashed: 1,
+        }),
+        expect.objectContaining({
           kind: "resolve_subroutine",
           sourceDefinitionId: "onr_v1_223_banpei",
           sourceTitle: "Banpei",
           subroutineIndex: 1,
           subroutineType: "end_the_run",
           endedRun: true,
-        },
-      ],
-    });
+        }),
+      ]),
+    );
 
     let brokenTrash = setupTrashProgramIce(
       "p326-banpei-break-trash",
@@ -17875,6 +17887,122 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
       "p3_37.look_top_stack_take_matching",
     );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+  });
+
+  it("uses Aujourd'Oui as a paid top-five program choice and removes the separate top-card reveal action", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdoui-top5"));
+    state.runner.credits = 2;
+    const aujourdOuiId = installRunnerResourceForTest(
+      state,
+      "onr_v1_151_aujourdoui",
+    );
+
+    const usedIds = new Set<CardInstanceId>();
+    const putCopyOnTop = (definitionId: string): CardInstanceId => {
+      const entry = Object.entries(state.cardInstances).find(
+        ([id, card]) => card.definitionId === definitionId && !usedIds.has(id),
+      );
+      if (!entry) throw new Error(`Missing test card ${definitionId}`);
+      const id = entry[0] as CardInstanceId;
+      usedIds.add(id);
+      removeEverywhere(state, id);
+      state.runner.stack.unshift(id);
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        zone: { side: "runner", zone: "stack" },
+        faceup: true,
+        rezzed: true,
+      };
+      return id;
+    };
+
+    const outOfRangeProgramId = putCopyOnTop("simple_decoder");
+    const displayOnlyEvent3Id = putCopyOnTop("simple_economy_event");
+    putCopyOnTop("simple_economy_event");
+    const selectedFracterId = putCopyOnTop("simple_fracter");
+    const displayOnlyEventId = putCopyOnTop("simple_economy_event");
+    const selectedDecoderId = putCopyOnTop("simple_decoder");
+
+    const aujourdOuiActions = getLegalActions(state, "runner").filter(
+      (action) => action.source === aujourdOuiId,
+    );
+    expect(aujourdOuiActions).toHaveLength(1);
+    expect(new Set(aujourdOuiActions.map((action) => action.actionId)).size).toBe(
+      aujourdOuiActions.length,
+    );
+    expect(aujourdOuiActions[0]?.type).toBe("activated_card_ability");
+    expect(aujourdOuiActions[0]?.payload).toMatchObject({
+      cardImplementationAbility: "activated",
+    });
+    expect(aujourdOuiActions[0]?.label).toContain("Top 5");
+    expect(
+      aujourdOuiActions.some(
+        (action) => action.payload?.v1911HiddenZoneAbility === "reveal_stack_top",
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.source === aujourdOuiId &&
+        action.type === "activated_card_ability",
+    );
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.source).toContain("p3_37.look_top_stack_take_matching");
+    expect(runnerChoice?.options).toHaveLength(5);
+    expect(
+      runnerChoice?.options.some((option) => option.value === outOfRangeProgramId),
+    ).toBe(false);
+    expect(
+      runnerChoice?.options.find((option) => option.value === displayOnlyEventId)
+        ?.selectable,
+    ).toBe(false);
+    expect(runnerChoice?.minSelections).toBe(0);
+    expect(runnerChoice?.maxSelections).toBe(2);
+    expect(runnerChoice?.stackSearchResolution).toMatchObject({
+      reveal: "public",
+      destination: "grip",
+      shuffleAfter: true,
+    });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const decoderOptionId = runnerChoice?.options.find(
+      (option) => option.value === selectedDecoderId,
+    )?.id;
+    const fracterOptionId = runnerChoice?.options.find(
+      (option) => option.value === selectedFracterId,
+    )?.id;
+    expect(decoderOptionId).toBeDefined();
+    expect(fracterOptionId).toBeDefined();
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = applyChoices(state, "runner", [
+      String(decoderOptionId),
+      String(fracterOptionId),
+    ]);
+
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.grip).toEqual(
+      expect.arrayContaining([selectedDecoderId, selectedFracterId]),
+    );
+    expect(state.runner.stack).not.toContain(selectedDecoderId);
+    expect(state.runner.stack).not.toContain(selectedFracterId);
+    expect(state.runner.stack).toContain(outOfRangeProgramId);
+    expect(state.runner.stack).toContain(displayOnlyEvent3Id);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+      sourceDefinitionId: "onr_v1_151_aujourdoui",
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+      shuffled: true,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("limits Self-Modifying Code to ICE encounters and removes the option after the run", () => {
@@ -20607,6 +20735,19 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
           "onr_v1_343_south-african-mining-corp",
     );
     expect(legal.costs).toEqual([{ clicks: 3 }]);
+    expect(legal.label).toBe("6 Credits nehmen");
+    for (const remainingClicks of [0, 1, 2]) {
+      const lowClickLegalState = structuredClone(state);
+      lowClickLegalState.corp.clicks = remainingClicks;
+      expect(
+        getLegalActions(lowClickLegalState, "corp").some(
+          (action) =>
+            action.type === "activated_card_ability" &&
+            sourceDefinition(lowClickLegalState, action) ===
+              "onr_v1_343_south-african-mining-corp",
+        ),
+      ).toBe(false);
+    }
     const unrezzed = structuredClone(state);
     unrezzed.cardInstances[assetId] = {
       ...unrezzed.cardInstances[assetId]!,
@@ -34839,6 +34980,86 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
   });
 
+  it("offers Ramming Piston wall break without installed Stealth cards because Noisy loss is a penalty", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-ramming-piston-no-stealth",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_ramming_no_stealth_runner",
+          name: "Spotcheck Ramming No Stealth Runner",
+          cards: [
+            { id: "onr_v1_053_ramming-piston", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          cards: [
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    moveRunnerCardToGrip(state, "onr_v1_053_ramming-piston");
+    const iceId = putCorpIceOnServer(state, "remote_1", "onr_v1_237_data-wall");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
+    );
+    const rammingId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_053_ramming-piston",
+    );
+    expect(rammingId).toBeDefined();
+    if (!rammingId) throw new Error("Missing Ramming Piston");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+
+    const rammingBreak = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
+    );
+    expect(rammingBreak).toBeDefined();
+    expect(rammingBreak?.costs).toEqual([{ credits: 2 }]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === rammingBreak?.actionId,
+    );
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_053_ramming-piston",
+      targetIceDefinitionId: "onr_v1_237_data-wall",
+    });
+    expect(
+      state.eventLog.at(-1)?.publicPayload.postBreakStealthLoss,
+    ).toBeUndefined();
+  });
+
   it("adds Skivviss counters on successful R&D runs and converts them into Corp start-turn draws", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-skivviss-rd"),
@@ -42884,6 +43105,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           trashedCardType: "program",
           trashedCount: 1,
         });
+        expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+          expect.objectContaining({
+            kind: "resolve_subroutine",
+            subroutineType: "trash_installed_program",
+            cardDefinitionId: "simple_decoder",
+            cardTitle: "Simple Decoder",
+            cardsTrashed: 1,
+          }),
+        );
       }
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         privatePayloadMarkers,

@@ -791,6 +791,50 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(items)).not.toContain("runner_card_");
   });
 
+  it("names the program trashed by Banpei's trash-a-program subroutine", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        encounterContinue: true,
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_223_banpei",
+            sourceTitle: "Banpei",
+            subroutineIndex: 0,
+            subroutineType: "trash_installed_program",
+            cardDefinitionId: "simple_decoder",
+            cardTitle: "Simple Decoder",
+            cardsTrashed: 1
+          },
+          {
+            effectId: "subroutine_2",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_223_banpei",
+            sourceTitle: "Banpei",
+            subroutineIndex: 1,
+            subroutineType: "end_the_run",
+            endedRun: true
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items.map((item) => item.title)).toEqual([
+      "Banpei: Subroutine 1 trashte Simple Decoder.",
+      "Banpei: Subroutine 2 beendet den Run."
+    ]);
+    expect(items[0]?.description).toBe("Simple Decoder wurde in den Heap bewegt.");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "Simple Decoder", "Programm getrasht", "Banpei"]));
+  });
+
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1017,6 +1061,25 @@ describe("formatChronicleEvent", () => {
 
     expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst und der Run endete.");
     expect(item.chips).toContain("Subroutinen");
+  });
+
+  it("includes trashed program titles in Encounter continuation summaries", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "ended",
+        encounterContinue: true,
+        encounterWillEndRun: true,
+        unbrokenSubroutineCount: 2,
+        trashedCardDefinitionId: "simple_decoder",
+        trashedCardType: "program",
+        trashedCount: 1
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst, Simple Decoder getrasht und der Run endete.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Subroutinen", "Simple Decoder", "Programm getrasht"]));
   });
 
   it("shows fully broken Encounter continuation as passed ICE", () => {
@@ -2069,6 +2132,48 @@ describe("formatChronicleEvent", () => {
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("onr_v1_036_jackhammer");
     expect(item.chips).toEqual(["Runner", "Stack", "Vorgezeigt", "den Grip", "Shuffle"]);
+  });
+
+  it("describes Aujourd'Oui top-five program choices with revealed selected programs only", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1911_aujourdoui_top5",
+        sourceDefinitionId: "onr_v1_151_aujourdoui",
+        selectedCount: 2,
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "simple_decoder",
+        publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, Simple Decoder, Simple Fracter vorgezeigt, in den Grip genommen und danach den Stack gemischt.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "2 Programme", "Vorgezeigt", "Grip", "Shuffle"]);
+  });
+
+  it("describes Aujourd'Oui empty top-five choices with the required shuffle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1911_aujourdoui_top5",
+        sourceDefinitionId: "onr_v1_151_aujourdoui",
+        selectedCount: 0,
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, keine Programme aus den obersten 5 genommen und danach den Stack gemischt.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "0 Programme", "Keine Auswahl", "Shuffle"]);
   });
 
   it("describes hidden stack-search moves without leaking the selected card", () => {
