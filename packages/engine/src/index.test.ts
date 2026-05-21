@@ -24272,6 +24272,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           `v1917-access-ambush-${definitionId}`,
         ),
       );
+      state.corp.credits = 10;
       state.runner.credits = 10;
       const ambushId = putCorpRootInRemote(state, definitionId);
       const initial = structuredClone(state);
@@ -24287,6 +24288,10 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           action.payload?.serverId === "remote_1",
       );
       state = apply(state, "runner", (action) => action.type === "access_card");
+      if (definitionId === "onr_v1_345_trap") {
+        expect(state.pendingChoice?.source).toContain("p3_35.access_payment");
+        state = applyChoice(state, "corp", "pay");
+      }
 
       expect(state.run?.accessedCardId).toBe(ambushId);
       expect(state.runner.tags).toBe(tagsBefore + expectedTagsAdded);
@@ -24433,6 +24438,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
     let rdState = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-trap-rd"),
     );
+    rdState.corp.credits = 10;
     rdState.runner.credits = 10;
     drawRunnerCardsForTest(rdState, 4);
     const rdTrapId = putCorpCardOnTopOfRd(rdState, "onr_v1_345_trap");
@@ -24450,6 +24456,8 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       (action) => action.type === "start_run" && action.payload?.serverId === "rd",
     );
     rdState = apply(rdState, "runner", (action) => action.type === "access_card");
+    expect(rdState.pendingChoice?.source).toContain("p3_35.access_payment");
+    rdState = applyChoice(rdState, "corp", "pay");
 
     expect(rdState.run?.accessedCardId).toBe(rdTrapId);
     expect(rdState.runner.tags).toBe(rdTagsBefore + 1);

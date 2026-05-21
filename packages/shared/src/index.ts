@@ -4051,7 +4051,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 0,
     rulesText:
-      "If you pay 0 when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
+      "If you pay [4] when Runner accesses TRAP!, it does 3 Net damage and gives Runner a tag, even if TRAP! is not installed. Ignore this effect if Runner accesses it from Archives. If TRAP! is accessed from R&D, Runner must show it to you.",
     mechanics: [
       "install_remote",
       "rez_card",

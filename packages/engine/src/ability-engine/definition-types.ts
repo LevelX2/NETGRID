@@ -57,6 +57,44 @@ export type CardAccessHookImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type CardAccessZone = "installed" | "hq" | "rd" | "archives";
+
+export type CardAccessEffectImplementation = {
+  kind: "on_access";
+  sourceZones: readonly CardAccessZone[];
+  ignoreIfAccessedFrom?: readonly CardAccessZone[];
+  revealIfAccessedFrom?: readonly Extract<CardAccessZone, "rd">[];
+  condition?: CardConditionImplementation;
+  cost?: {
+    kind: "corp_may_pay_credits";
+    amount: number;
+  };
+  effects: readonly CardAccessEffectStepImplementation[];
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type CardAccessEffectStepImplementation =
+  | CardEffectImplementation
+  | {
+      kind: "damage_from_source_advancement_counters";
+      recipient: "runner";
+      damageType: Extract<DamageType, "net" | "core">;
+      amountPerCounter: number;
+      minimumAmount: number;
+      preventable: true;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "trash_installed_runner_cards";
+      target: "program" | "hardware" | "daemon";
+      amount:
+        | number
+        | {
+            kind: "source_advancement_counter_count";
+          };
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    };
+
 export type CardLifecycleTriggeredAbilityImplementation = {
   condition?: CardConditionImplementation;
   effects: readonly CardEffectImplementation[];
@@ -197,7 +235,7 @@ export type AddTagsEffectImplementation = {
 export type DamageEffectImplementation = {
   kind: "damage";
   recipient: "runner";
-  damageType: Extract<DamageType, "meat">;
+  damageType: Extract<DamageType, "meat" | "net" | "core">;
   amount: number;
   preventable: true;
   visibility: EventVisibilityClass;

@@ -97,7 +97,7 @@ export type CardImplementationRuntimeDependencies = {
     state: GameState,
     legalAction: LegalAction,
     sourceDefinitionId: CardDefinition["id"],
-    damageType: Extract<DamageType, "meat">,
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ) => CardEffectDamageResult;
   startTrace: (

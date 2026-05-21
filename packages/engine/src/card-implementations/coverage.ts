@@ -59,6 +59,9 @@ const IMPLEMENTED_ON_PLAY_EFFECT_LOCATION =
 const IMPLEMENTED_ACTIVATED_ABILITY_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_ACCESS_EFFECT_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -352,12 +355,28 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/spinn-public-relations.ts",
   "onr_v1_347_vapor-ops":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/vapor-ops.ts",
+  "onr_v1_315_corprunners-shattered-remains":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/corprunners-shattered-remains.ts",
+  "onr_v1_323_experimental-ai":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/experimental-ai.ts",
+  "onr_v1_340_setup":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/setup.ts",
+  "onr_v1_345_trap":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/trap.ts",
+  "onr_v1_346_vacant-soulkiller":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/vacant-soulkiller.ts",
+  "onr_v1_348_virus-test-site":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/virus-test-site.ts",
   "onr_v1_350_antiquated-interface-routines":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
   "onr_v1_352_chester-mix":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
   "onr_v1_355_crystal-palace-station-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
+  "onr_v1_356_dedicated-response-team":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dedicated-response-team.ts",
+  "onr_v1_357_dieter-esslin":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dieter-esslin.ts",
   "onr_v1_360_jerusalem-city-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jerusalem-city-grid.ts",
   "onr_v1_362_new-galveston-city-grid":
@@ -477,6 +496,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for access-context hook behavior.",
     );
     currentLocations.add(IMPLEMENTED_ON_PLAY_EFFECT_LOCATION);
+  }
+  if (implementation.accessEffects?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Corp access-effect behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ACCESS_EFFECT_LOCATION);
   }
   if (implementation.printedSubroutines?.length) {
     reasons.push(

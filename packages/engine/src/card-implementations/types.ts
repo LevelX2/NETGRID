@@ -1,6 +1,7 @@
 import type { CardDefinitionId } from "@netgrid/shared";
 import type {
   CardAbilityImplementation,
+  CardAccessEffectImplementation,
   CardAccessHookImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
@@ -16,6 +17,7 @@ export type CardImplementationDefinition = {
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
   modifiers?: CardModifierImplementation[];
   abilities?: CardAbilityImplementation[];
+  accessEffects?: readonly CardAccessEffectImplementation[];
   accessHooks?: readonly CardAccessHookImplementation[];
   lifecycle?: CardLifecycleImplementation;
   runnerCounterEffects?: readonly RunnerTraceCounterEffectImplementation[];

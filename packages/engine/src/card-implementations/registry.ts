@@ -26,10 +26,12 @@ import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-wh
 import { bloodCatImplementation } from "./onr-v1/corp/assets/blood-cat";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
 import { chicagoBranchImplementation } from "./onr-v1/corp/assets/chicago-branch";
+import { corprunnersShatteredRemainsImplementation } from "./onr-v1/corp/assets/corprunners-shattered-remains";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "./onr-v1/corp/assets/department-of-truth-enhancement";
 import { encoderIncImplementation } from "./onr-v1/corp/assets/encoder-inc";
 import { esaContractImplementation } from "./onr-v1/corp/assets/esa-contract";
+import { experimentalAiImplementation } from "./onr-v1/corp/assets/experimental-ai";
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
 import { holovidCampaignImplementation } from "./onr-v1/corp/assets/holovid-campaign";
 import { informationLaunderingImplementation } from "./onr-v1/corp/assets/information-laundering";
@@ -41,7 +43,11 @@ import { spinnPublicRelationsImplementation } from "./onr-v1/corp/assets/spinn-p
 import { rockerboyPromotionImplementation } from "./onr-v1/corp/assets/rockerboy-promotion";
 import { remoteFacilityImplementation } from "./onr-v1/corp/assets/remote-facility";
 import { rustbeltHqBranchImplementation } from "./onr-v1/corp/assets/rustbelt-hq-branch";
+import { setupImplementation } from "./onr-v1/corp/assets/setup";
 import { vaporOpsImplementation } from "./onr-v1/corp/assets/vapor-ops";
+import { trapImplementation } from "./onr-v1/corp/assets/trap";
+import { vacantSoulkillerImplementation } from "./onr-v1/corp/assets/vacant-soulkiller";
+import { virusTestSiteImplementation } from "./onr-v1/corp/assets/virus-test-site";
 import { aspImplementation } from "./onr-v1/corp/ice/asp";
 import { banpeiImplementation } from "./onr-v1/corp/ice/banpei";
 import { bolterClusterImplementation } from "./onr-v1/corp/ice/bolter-cluster";
@@ -113,6 +119,8 @@ import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renew
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
 import { crystalPalaceStationGridImplementation } from "./onr-v1/corp/upgrades/crystal-palace-station-grid";
+import { dedicatedResponseTeamImplementation } from "./onr-v1/corp/upgrades/dedicated-response-team";
+import { dieterEsslinImplementation } from "./onr-v1/corp/upgrades/dieter-esslin";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { newGalvestonCityGridImplementation } from "./onr-v1/corp/upgrades/new-galveston-city-grid";
 import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
@@ -240,10 +248,12 @@ export const CARD_IMPLEMENTATIONS = [
   bloodCatImplementation,
   braindanceCampaignImplementation,
   chicagoBranchImplementation,
+  corprunnersShatteredRemainsImplementation,
   dataMasonsHostingImplementation,
   departmentOfTruthEnhancementImplementation,
   encoderIncImplementation,
   esaContractImplementation,
+  experimentalAiImplementation,
   fortressArchitectsImplementation,
   holovidCampaignImplementation,
   informationLaunderingImplementation,
@@ -253,7 +263,11 @@ export const CARD_IMPLEMENTATIONS = [
   remoteFacilityImplementation,
   rockerboyPromotionImplementation,
   rustbeltHqBranchImplementation,
+  setupImplementation,
   vaporOpsImplementation,
+  trapImplementation,
+  vacantSoulkillerImplementation,
+  virusTestSiteImplementation,
   southAfricanMiningCorpImplementation,
   spinnPublicRelationsImplementation,
   aspImplementation,
@@ -312,6 +326,8 @@ export const CARD_IMPLEMENTATIONS = [
   antiquatedInterfaceRoutinesImplementation,
   chesterMixImplementation,
   crystalPalaceStationGridImplementation,
+  dedicatedResponseTeamImplementation,
+  dieterEsslinImplementation,
   jerusalemCityGridImplementation,
   newGalvestonCityGridImplementation,
   redHerringsImplementation,

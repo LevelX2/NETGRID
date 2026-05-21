@@ -31,7 +31,7 @@ export type CardEffectExecutionContext = {
     amount: number,
   ) => CardEffectDrawCardsResult;
   damageRunner?: (
-    damageType: Extract<DamageType, "meat">,
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ) => CardEffectDamageResult;
   addHostedCredits?: (
@@ -465,8 +465,12 @@ export function executeCardImplementationEffects(
         assertPublicVisibility("damage", effect.visibility);
         if ((effect as { recipient?: string }).recipient !== "runner")
           throw new Error("damage effect recipient must be runner.");
-        if ((effect as { damageType?: string }).damageType !== "meat")
-          throw new Error("damage effect damageType must be meat.");
+        if (
+          !["meat", "net", "core"].includes(
+            (effect as { damageType?: string }).damageType ?? "",
+          )
+        )
+          throw new Error("damage effect damageType must be meat, net, or core.");
         if ((effect as { preventable?: boolean }).preventable !== true)
           throw new Error("damage effect must be preventable.");
         if (!context.damageRunner)

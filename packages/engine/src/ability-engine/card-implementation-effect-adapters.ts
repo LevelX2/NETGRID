@@ -166,7 +166,7 @@ export function createCardImplementationEffectAdapters(
     state: GameState,
     legalAction: LegalAction,
     sourceDefinitionId: CardDefinitionId,
-    damageType: Extract<DamageType, "meat">,
+    damageType: Extract<DamageType, "meat" | "net" | "core">,
     amount: number,
   ): CardEffectDamageResult {
     // Damage uses the existing imminent-event, prevention, and modification
