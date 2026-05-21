@@ -164,8 +164,6 @@ import {
 import { COUNTER_UPGRADE_CARD_IDS } from "./mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
-  ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID,
-  ARTEMIS_2020_STRENGTH_HARDWARE_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
   CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID,
   CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID,
@@ -179,7 +177,6 @@ import {
   MISC_FOR_SALE_TRASH_INSTALLED_EVENT_ID,
   NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
   OPEN_ENDED_MILEAGE_PROGRAM_TAG_RETURN_EVENT_ID,
-  PANDORAS_DECK_LINK_HARDWARE_ID,
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
   SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
@@ -877,7 +874,6 @@ const POX_ID = "onr_v1_049_pox";
 const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
 const POLTERGEIST_ID = "onr_v1_048_poltergeist";
 const SMARTEYE_ID = "onr_v1_065_smarteye";
-const PK_6089A_ID = "onr_v1_138_pk-6089a";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
@@ -4155,7 +4151,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
       !uniqueBlocked &&
       state.runner.credits >= (definition.installCost ?? 0)
     ) {
-      if (definition.id === ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID) {
+      const installAgendaPointCost =
+        cardImplementationAgendaPointInstallCost(definition);
+      if (installAgendaPointCost > 0) {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
         actions.push(
@@ -4168,9 +4166,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
             [{ clicks: 1, credits: definition.installCost ?? 0 }],
             {
               cardId: id,
-              installAgendaPointCost: 1,
+              installAgendaPointCost,
               forfeitAgendaCardId: forfeitAgendaId,
-              installCostReason: "arasaka_portable_prototype",
+              installCostReason: "card_implementation_agenda_point_cost",
             },
             {
               targetRequirements: [
@@ -9410,13 +9408,18 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         specialZoneReason: "agenda_point_cost_corporate_ally",
       };
     }
-    if (definition.id === ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID) {
+    const cardImplementationAgendaPointCost =
+      cardImplementationAgendaPointInstallCost(definition);
+    if (cardImplementationAgendaPointCost > 0) {
       const agendaCost = Number(
         legalAction.payload?.installAgendaPointCost ?? 0,
       );
-      if (!Number.isInteger(agendaCost) || agendaCost !== 1)
+      if (
+        !Number.isInteger(agendaCost) ||
+        agendaCost !== cardImplementationAgendaPointCost
+      )
         throw new Error(
-          "Arasaka Portable Prototype benötigt exakt 1 Agenda-Punkt als Zusatzkosten.",
+          "Die CardImplementation-Installation benötigt exakt die deklarierten Agenda-Punkt-Zusatzkosten.",
         );
       const forfeitAgendaCardId = String(
         legalAction.payload?.forfeitAgendaCardId ?? "",
@@ -9428,7 +9431,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         forfeitedAgendaCardId: forfeitAgendaCardId,
         specialZone: "removed_from_game",
         specialZoneVisibility: "public",
-        specialZoneReason: "agenda_point_cost_arasaka_portable_prototype",
+        specialZoneReason: "agenda_point_cost_card_implementation_install",
       };
     }
     spendRunnerInstallCredits(
@@ -14998,6 +15001,18 @@ function hasCardImplementationMemoryUnitModifier(
       (modifier) => modifier.kind === "memory_units",
     ) === true
   );
+}
+
+function cardImplementationAgendaPointInstallCost(
+  definition: CardDefinition,
+): number {
+  return (cardImplementationForDefinitionId(definition.id)
+    ?.installAdditionalCosts ?? []).reduce((sum, cost) => {
+    if (cost.kind !== "agenda_point") return sum;
+    if (!Number.isInteger(cost.amount) || cost.amount <= 0)
+      throw new Error("Agenda-Punkt-Installationskosten sind ungueltig.");
+    return sum + cost.amount;
+  }, 0);
 }
 
 function drawCorpCard(state: GameState): void {
@@ -24413,8 +24428,7 @@ function runnerTraceLinkCreditSourceIds(state: GameState): CardInstanceId[] {
     ...[...state.runner.rig.hardware, ...state.runner.rig.resources].filter(
       (cardId) =>
         !isRestrictedHostedCreditSource(definitionFor(state, cardId)) &&
-        (definitionFor(state, cardId).id === HELLS_RUN_ID ||
-          definitionFor(state, cardId).id === PK_6089A_ID) &&
+        definitionFor(state, cardId).id === HELLS_RUN_ID &&
         cardCounter(state, cardId, "recurring_credit") > 0,
     ),
   ].sort();
@@ -25763,6 +25777,7 @@ function restrictedHostedCreditSourceMatchesUse(
     return false;
   if (cardCounter(state, cardId, "bit") <= 0) return false;
   if (
+    use === "using_icebreaker_during_run" ||
     use === "using_icebreaker_during_run_non_noisy" ||
     use === "using_killer_during_run"
   ) {
@@ -25771,6 +25786,7 @@ function restrictedHostedCreditSourceMatchesUse(
       return false;
     const breakerDefinition = definitionFor(state, breakerId);
     if (!cardHasSubtype(breakerDefinition, "icebreaker")) return false;
+    if (use === "using_icebreaker_during_run") return true;
     if (use === "using_icebreaker_during_run_non_noisy")
       return !cardHasSubtype(breakerDefinition, "noisy");
     return cardHasSubtype(breakerDefinition, "killer");
@@ -25940,6 +25956,9 @@ function runnerRunRecurringCreditSourceIds(
       : [];
   const restrictedSources = [
     ...restrictedRunCostSources,
+    ...restrictedHostedCreditSourceIds(state, "using_icebreaker_during_run", {
+      breakerId,
+    }),
     ...restrictedHostedCreditSourceIds(
       state,
       "using_icebreaker_during_run_non_noisy",
@@ -25964,23 +25983,8 @@ function runnerRunRecurringCreditSourceIds(
           cardHasSubtype(definitionFor(state, breakerId), "killer"),
       );
     }
-    if (definition.id === ARTEMIS_2020_STRENGTH_HARDWARE_ID) {
-      return Boolean(
-        state.run &&
-          breakerId &&
-          state.runner.rig.programs.includes(breakerId),
-      );
-    }
-    if (definition.id === ARASAKA_PORTABLE_PROTOTYPE_LINK_HARDWARE_ID) {
-      return Boolean(
-        state.run &&
-          breakerId &&
-          state.runner.rig.programs.includes(breakerId),
-      );
-    }
     if (
       definition.id === ZETATECH_SOFTWARE_INSTALLER_OVERLAY_HOST_ID ||
-      definition.id === PANDORAS_DECK_LINK_HARDWARE_ID ||
       TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS.has(definition.id)
     ) {
       return false;

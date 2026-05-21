@@ -901,12 +901,15 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
     state = apply(state, "runner", (action) => action.actionId === legal.actionId);
-    expect(state.runner.memoryLimit).toBe(memoryBefore + 1);
-    expect(cardCounterAmount(state, parralineId, "recurring_credit")).toBe(1);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 1,
+    );
+    expect(cardCounterAmount(state, parralineId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       cardDefinitionId: "onr_v1_137_parraline-5750",
-      recurringCreditsLoaded: 1,
+      hostedCreditsAdded: 1,
+      counterType: "bit",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -924,7 +927,9 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     expect(state.runner.heap).toContain(parralineId);
     expect(state.runner.rig.hardware).toContain(pandoraId);
-    expect(state.runner.memoryLimit).toBe(memoryBefore + 2);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 2,
+    );
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       deckUniqueReplacement: true,
     });
@@ -18969,7 +18974,10 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     expect(artemisId).toBeDefined();
     if (!artemisId) throw new Error("Missing Artemis");
     expect(state.runner.memoryLimit).toBe(memoryBefore);
-    expect(cardCounterAmount(state, artemisId, "recurring_credit")).toBe(2);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 2,
+    );
+    expect(cardCounterAmount(state, artemisId, "bit")).toBe(2);
     if (oldDeckId) expect(state.runner.heap).toContain(oldDeckId);
   });
 
@@ -23007,7 +23015,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       state.cardInstances[invisibilityId]?.counters?.bit,
     ).toBe(1);
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
-    expect(state.cardInstances[owlId]?.counters?.recurring_credit).toBe(3);
+    expect(state.cardInstances[owlId]?.counters?.bit).toBe(3);
 
     state.cardInstances[invisibilityId] = {
       ...state.cardInstances[invisibilityId]!,
@@ -23027,7 +23035,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       ...state.cardInstances[owlId]!,
       counters: {
         ...state.cardInstances[owlId]!.counters,
-        recurring_credit: 0,
+        bit: 0,
       },
     };
     state = apply(state, "runner", (action) => action.type === "end_turn");
@@ -23039,7 +23047,7 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       state.cardInstances[invisibilityId]?.counters?.bit,
     ).toBe(1);
     expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
-    expect(state.cardInstances[owlId]?.counters?.recurring_credit).toBe(3);
+    expect(state.cardInstances[owlId]?.counters?.bit).toBe(3);
   });
 
   it("hosts V1.9.16 programs on Imp and keeps hosted-card trash deterministic", () => {
@@ -28296,8 +28304,8 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       "runner",
       (action) => sourceDefinition(state, action) === "onr_v1_136_pandoras-deck",
     );
-    expect(state.runner.memoryLimit).toBe(6);
-    expect(cardCounterAmount(state, pandoraId, "recurring_credit")).toBe(3);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(6);
+    expect(cardCounterAmount(state, pandoraId, "bit")).toBe(3);
     state = apply(
       state,
       "runner",
@@ -28307,15 +28315,263 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.runner.heap).toContain(pandoraId);
     expect(state.runner.rig.hardware).toContain(arasakaId);
-    expect(state.runner.memoryLimit).toBe(7);
-    expect(cardCounterAmount(state, arasakaId, "recurring_credit")).toBe(3);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(7);
+    expect(cardCounterAmount(state, arasakaId, "bit")).toBe(3);
     expect(state.runner.scoreArea.length).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_119_arasaka-portable-prototype",
       deckUniqueReplacement: true,
       agendaPointCostPaid: 1,
-      recurringCreditsLoaded: 3,
+      hostedCreditsAdded: 3,
+      counterType: "bit",
     });
+  });
+
+  it("loads P3.40 hardware decks through CardImplementation bits and memory modifiers", () => {
+    for (const [definitionId, expectedMu, expectedBits] of [
+      ["onr_v1_119_arasaka-portable-prototype", 3, 3],
+      ["onr_v1_122_artemis-2020", 2, 2],
+      ["onr_v1_136_pandoras-deck", 2, 3],
+      ["onr_v1_137_parraline-5750", 1, 1],
+      ["onr_v1_138_pk-6089a", 1, 3],
+      ["onr_v1_141_raven-microcyb-owl", 1, 3],
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `p340-${definitionId}-deck-ci`,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+            id: `p340_${definitionId}_runner`,
+            name: `P3.40 ${definitionId} Runner`,
+            cards: [
+              { id: definitionId, quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+            ],
+          },
+          corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 30;
+      const cardId = moveRunnerCardToGrip(state, definitionId);
+      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
+        scoreRunnerAgendaForTest(state, "simple_agenda");
+      const memoryBefore = getPlayerView(state, "runner").own.memoryLimit ?? 0;
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+        memoryBefore + expectedMu,
+      );
+      expect(cardCounterAmount(state, cardId, "bit")).toBe(expectedBits);
+      expect(cardCounterAmount(state, cardId, "recurring_credit")).toBe(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        cardDefinitionId: definitionId,
+        hostedCreditsAdded: expectedBits,
+        counterType: "bit",
+      });
+      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
+        expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+          agendaPointCostPaid: 1,
+        });
+    }
+  });
+
+  it("uses P3.40 deck bits for allowed icebreaker and link-payment contexts only", () => {
+    for (const [definitionId, expectedAfterPump] of [
+      ["onr_v1_119_arasaka-portable-prototype", 2],
+      ["onr_v1_122_artemis-2020", 1],
+      ["onr_v1_137_parraline-5750", 0],
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `p340-${definitionId}-icebreaker-pay`,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+            id: `p340_${definitionId}_icebreaker_runner`,
+            name: `P3.40 ${definitionId} Icebreaker Runner`,
+            cards: [
+              { id: definitionId, quantity: 1 },
+              { id: "simple_decoder", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+                (card) => card.id !== "simple_decoder",
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+            id: `p340_${definitionId}_icebreaker_corp`,
+            name: `P3.40 ${definitionId} Icebreaker Corp`,
+            cards: [
+              { id: "simple_code_gate_ice", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 30;
+      state.runner.memoryLimit = 4;
+      const deckId = moveRunnerCardToGrip(state, definitionId);
+      moveRunnerCardToGrip(state, "simple_decoder");
+      if (definitionId === "onr_v1_119_arasaka-portable-prototype")
+        scoreRunnerAgendaForTest(state, "simple_agenda");
+      const iceId = putCorpIceOnServer(state, "rd", "simple_code_gate_ice");
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      installRunnerProgramForTest(state, "simple_decoder");
+      state.runner.credits = 0;
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      );
+      state = apply(
+        state,
+        "corp",
+        (action) => action.type === "rez_ice" && action.source === iceId,
+      );
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(state, action) === "simple_decoder",
+      );
+      expect(state.runner.credits).toBe(0);
+      expect(cardCounterAmount(state, deckId, "bit")).toBe(expectedAfterPump);
+    }
+
+    for (const definitionId of [
+      "onr_v1_136_pandoras-deck",
+      "onr_v1_138_pk-6089a",
+    ] as const) {
+      let state = toRunnerTurn(
+        createGameAfterSetup({
+          seed: `p340-${definitionId}-link-pay`,
+          baseline: CURRENT_RULES_BASELINE,
+          runnerDeck: {
+            ...MECHANIC_SMOKE_DECKS.traceTags.runner,
+            id: `p340_${definitionId}_link_runner`,
+            name: `P3.40 ${definitionId} Link Runner`,
+            cards: [
+              { id: definitionId, quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.traceTags.runner.cards.filter(
+                (card) => card.id !== definitionId,
+              ),
+            ],
+          },
+          corpDeck: {
+            ...MECHANIC_SMOKE_DECKS.traceTags.corp,
+            cards: [
+              { id: "onr_v1_246_fragmentation-storm", quantity: 1 },
+              ...MECHANIC_SMOKE_DECKS.traceTags.corp.cards.filter(
+                (card) => card.id !== "onr_v1_246_fragmentation-storm",
+              ),
+            ],
+          },
+          agendaPointsToWin: 7,
+        }),
+      );
+      state.runner.credits = 20;
+      state.corp.credits = 20;
+      const deckId = moveRunnerCardToGrip(state, definitionId);
+      state = apply(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId,
+      );
+      state.runner.credits = 0;
+      putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
+      state = encounterIce(state, "rd", "onr_v1_246_fragmentation-storm");
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = applyChoice(state, "corp", "bid_0");
+      state = applyChoice(state, "runner", "bid_3");
+      expect(cardCounterAmount(state, deckId, "bit")).toBe(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        traceLinkCreditsSpent: 3,
+        runnerCreditsSpent: 0,
+      });
+    }
+
+    let owlState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p340-owl-noisy-negative",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p340_owl_noisy_runner",
+          name: "P3.40 Owl Noisy Runner",
+          cards: [
+            { id: "onr_v1_141_raven-microcyb-owl", quantity: 1 },
+            { id: "onr_v1_036_jackhammer", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "p340_owl_noisy_corp",
+          name: "P3.40 Owl Noisy Corp",
+          cards: [
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards.filter(
+              (card) => card.id !== "onr_v1_232_crystal-wall",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    owlState.runner.credits = 30;
+    owlState.runner.memoryLimit = 4;
+    moveRunnerCardToGrip(owlState, "onr_v1_141_raven-microcyb-owl");
+    moveRunnerCardToGrip(owlState, "onr_v1_036_jackhammer");
+    const wallId = putCorpIceOnServer(owlState, "rd", "onr_v1_232_crystal-wall");
+    owlState = apply(
+      owlState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(owlState, action) === "onr_v1_141_raven-microcyb-owl",
+    );
+    owlState = apply(
+      owlState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(owlState, action) === "onr_v1_036_jackhammer",
+    );
+    owlState.runner.credits = 0;
+    owlState = apply(
+      owlState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    owlState = apply(
+      owlState,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === wallId,
+    );
+    expect(
+      getLegalActions(owlState, "runner").some(
+        (action) =>
+          action.type === "pump_breaker" &&
+          sourceDefinition(owlState, action) === "onr_v1_036_jackhammer",
+      ),
+    ).toBe(false);
   });
 
   it("gates Roving Submarine runs by previous Corp activity and keeps region install public", () => {
@@ -37945,8 +38201,10 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const pkId = state.runner.rig.hardware.find(
       (id) => state.cardInstances[id]?.definitionId === "onr_v1_138_pk-6089a",
     );
-    expect(state.runner.memoryLimit).toBe(memoryBefore + 1);
-    expect(pkId && cardCounterAmount(state, pkId, "recurring_credit")).toBe(3);
+    expect(getPlayerView(state, "runner").own.memoryLimit).toBe(
+      memoryBefore + 1,
+    );
+    expect(pkId && cardCounterAmount(state, pkId, "bit")).toBe(3);
     state.runner.credits = 0;
     putCorpIceOnServer(state, "rd", "onr_v1_246_fragmentation-storm");
     const initial = structuredClone(state);
@@ -37956,7 +38214,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     state = applyChoice(state, "corp", "bid_0");
     expect(state.pendingChoice?.options.some((option) => option.id === "bid_3")).toBe(true);
     state = applyChoice(state, "runner", "bid_3");
-    expect(pkId && cardCounterAmount(state, pkId, "recurring_credit")).toBe(0);
+    expect(pkId && cardCounterAmount(state, pkId, "bit")).toBe(0);
     expect(state.runner.credits).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceLinkCreditsSpent: 3,
@@ -37968,12 +38226,12 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(hashState(replay.state)).toBe(hashState(state));
 
     let refreshState = structuredClone(initial);
-    if (pkId) setCardCounterForTest(refreshState, pkId, "recurring_credit", 0);
+    if (pkId) setCardCounterForTest(refreshState, pkId, "bit", 0);
     refreshState = apply(refreshState, "runner", (action) => action.type === "end_turn");
     refreshState.corp.maxHandSize = 100;
     refreshState = apply(refreshState, "corp", (action) => action.type === "mandatory_draw");
     refreshState = apply(refreshState, "corp", (action) => action.type === "end_turn");
-    expect(pkId && cardCounterAmount(refreshState, pkId, "recurring_credit")).toBe(3);
+    expect(pkId && cardCounterAmount(refreshState, pkId, "bit")).toBe(3);
   });
 
   it("loads Holovid Campaign with 12 public bits and self-trashes on the last Corp turn drain", () => {

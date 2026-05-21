@@ -140,12 +140,18 @@ import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-he
 import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
+import { arasakaPortablePrototypeImplementation } from "./onr-v1/runner/hardware/arasaka-portable-prototype";
+import { artemis2020Implementation } from "./onr-v1/runner/hardware/artemis-2020";
 import { corollaSpeedChipImplementation } from "./onr-v1/runner/hardware/corolla-speed-chip";
 import { drifterMobileEnvironmentImplementation } from "./onr-v1/runner/hardware/drifter-mobile-environment";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
+import { pandorasDeckImplementation } from "./onr-v1/runner/hardware/pandoras-deck";
+import { parraline5750Implementation } from "./onr-v1/runner/hardware/parraline-5750";
+import { pk6089aImplementation } from "./onr-v1/runner/hardware/pk-6089a";
 import { rAndDInterfaceImplementation } from "./onr-v1/runner/hardware/r-d-interface";
+import { ravenMicrocybOwlImplementation } from "./onr-v1/runner/hardware/raven-microcyb-owl";
 import { recordReconstructorImplementation } from "./onr-v1/runner/hardware/record-reconstructor";
 import { tychoMemChipImplementation } from "./onr-v1/runner/hardware/tycho-mem-chip";
 import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem-chip";
@@ -249,12 +255,18 @@ export const CARD_IMPLEMENTATIONS = [
   loanFromChibaImplementation,
   nEtoImplementation,
   roninAroundImplementation,
+  arasakaPortablePrototypeImplementation,
+  artemis2020Implementation,
   corollaSpeedChipImplementation,
   drifterMobileEnvironmentImplementation,
   hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
+  pandorasDeckImplementation,
+  parraline5750Implementation,
+  pk6089aImplementation,
   rAndDInterfaceImplementation,
+  ravenMicrocybOwlImplementation,
   recordReconstructorImplementation,
   riggedInvestmentsImplementation,
   scoreImplementation,

@@ -88,6 +88,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/vewy-vewy-quiet.ts",
   "onr_v1_075_zetatech-software-installer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/zetatech-software-installer.ts",
+  "onr_v1_119_arasaka-portable-prototype":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/arasaka-portable-prototype.ts",
+  "onr_v1_122_artemis-2020":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/artemis-2020.ts",
   "onr_v1_148_access-through-alpha":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/access-through-alpha.ts",
   "onr_v1_149_access-to-arasaka":
@@ -104,6 +108,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/corolla-speed-chip.ts",
   "onr_v1_126_drifter-mobile-environment":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/drifter-mobile-environment.ts",
+  "onr_v1_136_pandoras-deck":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/pandoras-deck.ts",
+  "onr_v1_137_parraline-5750":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/parraline-5750.ts",
+  "onr_v1_138_pk-6089a":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/pk-6089a.ts",
+  "onr_v1_141_raven-microcyb-owl":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/raven-microcyb-owl.ts",
   "onr_v1_133_militech-mram-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
   "onr_v1_134_mram-chip":
@@ -591,6 +603,12 @@ function implementedCoverageFor(
   if (implementation.restrictedHostedCreditSource) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for restricted hosted-credit source behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION);
+  }
+  if (implementation.installAdditionalCosts?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition declares additional install cost behavior.",
     );
     currentLocations.add(IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION);
   }

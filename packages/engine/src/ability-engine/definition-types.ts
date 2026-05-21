@@ -632,6 +632,7 @@ export type CardAccessCountModifierImplementation = {
 };
 
 export type RestrictedHostedCreditUse =
+  | "using_icebreaker_during_run"
   | "using_icebreaker_during_run_non_noisy"
   | "using_killer_during_run"
   | "increase_link"
@@ -649,6 +650,11 @@ export type RestrictedHostedCreditSourceImplementation = {
     mode: "refill_to_capacity_if_used";
   };
   allowUseWhileOverwritingSource?: true;
+};
+
+export type CardInstallAdditionalCostImplementation = {
+  kind: "agenda_point";
+  amount: number;
 };
 
 export type CardPrintedSubroutineImplementation =
