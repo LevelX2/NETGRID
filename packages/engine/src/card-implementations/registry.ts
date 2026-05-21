@@ -140,7 +140,10 @@ import { iceAndDatasGuideToTheNetImplementation } from "./onr-v1/runner/preps/ic
 import { ifYouWantItDoneRightImplementation } from "./onr-v1/runner/preps/if-you-want-it-done-right";
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
 import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
+import { miscForSaleImplementation } from "./onr-v1/runner/preps/misc-for-sale";
+import { mitWestTierImplementation } from "./onr-v1/runner/preps/mit-west-tier";
 import { openEndedMileageProgramImplementation } from "./onr-v1/runner/preps/open-ended-mileage-program";
+import { organDonorImplementation } from "./onr-v1/runner/preps/organ-donor";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
 import { totalGeneticRetrofitImplementation } from "./onr-v1/runner/preps/total-genetic-retrofit";
@@ -277,7 +280,10 @@ export const CARD_IMPLEMENTATIONS = [
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
   mantisFixerAtLargeImplementation,
+  miscForSaleImplementation,
+  mitWestTierImplementation,
   openEndedMileageProgramImplementation,
+  organDonorImplementation,
   priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,

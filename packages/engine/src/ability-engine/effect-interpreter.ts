@@ -124,6 +124,19 @@ export type CardEffectExecutionContext = {
   startLookTopStackTakeOneArrangeRest?: (
     count: 5,
   ) => CardEffectHiddenInfoResult;
+  startTrashOwnInstalledCardsForCredits?: (
+    min: 0 | 1,
+    max: "any",
+    gainPerTrashed: number,
+  ) => CardEffectHiddenInfoResult;
+  startTrashCardsFromGripForCredits?: (
+    max: number,
+    gainPerTrashed: number,
+  ) => CardEffectHiddenInfoResult;
+  shuffleGripTrashAndStackThenDraw?: (
+    drawCount: number,
+    removePlayedCardFromGame: true,
+  ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters?: (
     amount: number,
     distribution:
@@ -1035,6 +1048,91 @@ export function executeCardImplementationEffects(
           effect.count,
         );
         mergePublicPayload(publicPayload, lookResult.publicPayload);
+        return;
+      }
+      case "trash_own_installed_cards_for_credits": {
+        assertPublicVisibility(
+          "trash_own_installed_cards_for_credits",
+          effect.visibility,
+        );
+        if (effect.target !== "chosen_installed_runner_cards")
+          throw new Error(
+            "trash_own_installed_cards_for_credits target must be chosen_installed_runner_cards.",
+          );
+        if (effect.min !== 0 && effect.min !== 1)
+          throw new Error(
+            "trash_own_installed_cards_for_credits min must be 0 or 1.",
+          );
+        if (effect.max !== "any")
+          throw new Error(
+            "trash_own_installed_cards_for_credits max must be any.",
+          );
+        assertPositiveIntegerAmount(
+          "trash_own_installed_cards_for_credits",
+          effect.gainPerTrashed,
+        );
+        if (!context.startTrashOwnInstalledCardsForCredits)
+          throw new Error(
+            "trash_own_installed_cards_for_credits requires a host choice context.",
+          );
+        const choiceResult = context.startTrashOwnInstalledCardsForCredits(
+          effect.min,
+          effect.max,
+          effect.gainPerTrashed,
+        );
+        mergePublicPayload(publicPayload, choiceResult.publicPayload);
+        return;
+      }
+      case "trash_cards_from_grip_for_credits": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "trash_cards_from_grip_for_credits visibility must be hidden_info_barrier.",
+          );
+        if (effect.target !== "chosen_runner_grip_cards")
+          throw new Error(
+            "trash_cards_from_grip_for_credits target must be chosen_runner_grip_cards.",
+          );
+        assertPositiveIntegerAmount(
+          "trash_cards_from_grip_for_credits",
+          effect.max,
+        );
+        assertPositiveIntegerAmount(
+          "trash_cards_from_grip_for_credits",
+          effect.gainPerTrashed,
+        );
+        if (!context.startTrashCardsFromGripForCredits)
+          throw new Error(
+            "trash_cards_from_grip_for_credits requires a host choice context.",
+          );
+        const choiceResult = context.startTrashCardsFromGripForCredits(
+          effect.max,
+          effect.gainPerTrashed,
+        );
+        mergePublicPayload(publicPayload, choiceResult.publicPayload);
+        return;
+      }
+      case "shuffle_grip_trash_and_stack_then_draw": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "shuffle_grip_trash_and_stack_then_draw visibility must be hidden_info_barrier.",
+          );
+        assertPositiveIntegerAmount(
+          "shuffle_grip_trash_and_stack_then_draw",
+          effect.drawCount,
+        );
+        if (effect.removePlayedCardFromGame !== true)
+          throw new Error(
+            "shuffle_grip_trash_and_stack_then_draw must remove the played card from the game.",
+          );
+        if (!context.shuffleGripTrashAndStackThenDraw)
+          throw new Error(
+            "shuffle_grip_trash_and_stack_then_draw requires a host zone context.",
+          );
+        const shuffleResult = context.shuffleGripTrashAndStackThenDraw(
+          effect.drawCount,
+          effect.removePlayedCardFromGame,
+        );
+        mergePublicPayload(publicPayload, shuffleResult.publicPayload);
         return;
       }
       case "distribute_advancement_counters": {

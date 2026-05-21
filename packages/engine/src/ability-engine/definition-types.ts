@@ -213,6 +213,9 @@ export type CardEffectImplementation =
   | LookTopStackShowToCorpThenInstallMatchingEffectImplementation
   | LookTopStackTakeMatchingEffectImplementation
   | LookTopStackTakeOneArrangeRestEffectImplementation
+  | TrashOwnInstalledCardsForCreditsEffectImplementation
+  | TrashCardsFromGripForCreditsEffectImplementation
+  | ShuffleGripTrashAndStackThenDrawEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -345,6 +348,30 @@ export type LookTopStackTakeMatchingEffectImplementation = {
 export type LookTopStackTakeOneArrangeRestEffectImplementation = {
   kind: "look_top_stack_take_one_arrange_rest";
   count: 5;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type TrashOwnInstalledCardsForCreditsEffectImplementation = {
+  kind: "trash_own_installed_cards_for_credits";
+  target: "chosen_installed_runner_cards";
+  min: 0 | 1;
+  max: "any";
+  gainPerTrashed: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type TrashCardsFromGripForCreditsEffectImplementation = {
+  kind: "trash_cards_from_grip_for_credits";
+  target: "chosen_runner_grip_cards";
+  max: number;
+  gainPerTrashed: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type ShuffleGripTrashAndStackThenDrawEffectImplementation = {
+  kind: "shuffle_grip_trash_and_stack_then_draw";
+  drawCount: number;
+  removePlayedCardFromGame: true;
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 

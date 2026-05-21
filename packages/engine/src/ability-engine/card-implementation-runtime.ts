@@ -261,6 +261,33 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     count: 5,
   ) => CardEffectHiddenInfoResult;
+  trashOwnInstalledCardTargetCount: (state: GameState) => number;
+  trashGripCardTargetCount: (state: GameState) => number;
+  startTrashOwnInstalledCardsForCreditsChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    min: 0 | 1,
+    max: "any",
+    gainPerTrashed: number,
+  ) => CardEffectHiddenInfoResult;
+  startTrashCardsFromGripForCreditsChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    max: number,
+    gainPerTrashed: number,
+  ) => CardEffectHiddenInfoResult;
+  shuffleGripTrashAndStackThenDraw: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    drawCount: number,
+    removePlayedCardFromGame: true,
+  ) => CardEffectHiddenInfoResult;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -426,6 +453,10 @@ function canResolveOnPlayCardImplementationAbility(
       );
     if (effect.kind === "look_top_stack_take_one_arrange_rest")
       return state.runner.stack.length > 0;
+    if (effect.kind === "trash_own_installed_cards_for_credits")
+      return deps.trashOwnInstalledCardTargetCount(state) >= effect.min;
+    if (effect.kind === "trash_cards_from_grip_for_credits")
+      return effect.max >= 0;
     return true;
   });
 }
@@ -478,6 +509,10 @@ function canResolveActivatedCardImplementationAbility(
       return state.runner.stack.length > 0;
     if (effect.kind === "look_top_stack_take_one_arrange_rest")
       return state.runner.stack.length > 0;
+    if (effect.kind === "trash_own_installed_cards_for_credits")
+      return deps.trashOwnInstalledCardTargetCount(state) >= effect.min;
+    if (effect.kind === "trash_cards_from_grip_for_credits")
+      return effect.max >= 0;
     return true;
   });
 }
@@ -1824,6 +1859,37 @@ export function executeOnPlayCardImplementationAbility(
           cardId,
           definition.id,
           count,
+        ),
+      startTrashOwnInstalledCardsForCredits: (min, max, gainPerTrashed) =>
+        deps.startTrashOwnInstalledCardsForCreditsChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          min,
+          max,
+          gainPerTrashed,
+        ),
+      startTrashCardsFromGripForCredits: (max, gainPerTrashed) =>
+        deps.startTrashCardsFromGripForCreditsChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          max,
+          gainPerTrashed,
+        ),
+      shuffleGripTrashAndStackThenDraw: (
+        drawCount,
+        removePlayedCardFromGame,
+      ) =>
+        deps.shuffleGripTrashAndStackThenDraw(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          drawCount,
+          removePlayedCardFromGame,
         ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),

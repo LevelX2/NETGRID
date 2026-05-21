@@ -636,6 +636,58 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       sourceDefinitionId,
       count,
     ),
+  trashOwnInstalledCardTargetCount: (state) => runnerInstalledCardIds(state).length,
+  trashGripCardTargetCount: (state) => state.runner.grip.length,
+  startTrashOwnInstalledCardsForCreditsChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    min,
+    max,
+    gainPerTrashed,
+  ) =>
+    startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      min,
+      max,
+      gainPerTrashed,
+    ),
+  startTrashCardsFromGripForCreditsChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    max,
+    gainPerTrashed,
+  ) =>
+    startCardImplementationTrashCardsFromGripForCreditsChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      max,
+      gainPerTrashed,
+    ),
+  shuffleGripTrashAndStackThenDraw: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    drawCount,
+    removePlayedCardFromGame,
+  ) =>
+    shuffleGripTrashAndStackThenDrawForCardImplementation(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      drawCount,
+      removePlayedCardFromGame,
+    ),
   startDistributeAdvancementCounters: (
     state,
     legalAction,
@@ -9443,6 +9495,71 @@ function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
     specialZoneReason: "onr_v1_101_mit_west_tier",
   };
   applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
+}
+
+function shuffleGripTrashAndStackThenDrawForCardImplementation(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  drawCount: number,
+  removePlayedCardFromGame: true,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (removePlayedCardFromGame !== true)
+    throw new Error("MIT West Tier muss aus dem Spiel entfernt werden.");
+  removeFromAllZones(state, sourceCardId);
+  const specialZones = ensureSpecialZones(state);
+  specialZones.removedFromGame.push(sourceCardId);
+  specialZones.removedFromGame.sort();
+  state.cardInstances[sourceCardId] = {
+    ...mustInstance(state.cardInstances, sourceCardId),
+    faceup: true,
+    zone: { side: "special", zone: "removed_from_game", visibility: "public" },
+  };
+
+  const gripCount = state.runner.grip.length;
+  const heapCount = state.runner.heap.length;
+  const stackCount = state.runner.stack.length;
+  const allIds = [
+    ...state.runner.grip,
+    ...state.runner.heap,
+    ...state.runner.stack,
+  ].filter((id) => id !== sourceCardId);
+  state.runner.grip = [];
+  state.runner.heap = [];
+  state.runner.stack = shuffleStateIds(
+    state,
+    allIds,
+    `${sourceDefinitionId}.shuffle_grip_heap_stack:${state.stateVersion + 1}`,
+  );
+  for (const id of state.runner.stack) {
+    state.cardInstances[id] = {
+      ...mustInstance(state.cardInstances, id),
+      zone: { side: "runner", zone: "stack" },
+    };
+  }
+  const drawSummary = drawRunnerCards(state, drawCount);
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_47_shuffle_grip_heap_stack_then_draw",
+    sourceDefinitionId,
+    shuffledGripCount: gripCount,
+    shuffledTrashCount: heapCount,
+    shuffledStackCount: stackCount,
+    shuffledCardsCount: allIds.length,
+    drawnCount: drawSummary.drawnCount,
+    removedFromGame: true,
+    specialZone: "removed_from_game",
+    specialZoneVisibility: "public",
+    specialZoneReason: sourceDefinitionId,
+    randomCounterAfter: state.randomCounter,
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...payload,
+  };
+  applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
+  return { publicPayload: legalAction.payload ?? payload };
 }
 
 function resolveAiChiefFinancialOfficer(
@@ -19994,6 +20111,9 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith(
       "v1922.runner_grip_trash_gain_credits",
+    ) ||
+    state.pendingChoice.source.startsWith(
+      "p3_47.runner_grip_trash_for_credits",
     )
   ) {
     resolveRunnerGripTrashForCreditsChoice(state, legalAction, playerAction);
@@ -20006,6 +20126,9 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith(
       "v1922.runner_installed_trash_gain_credits",
+    ) ||
+    state.pendingChoice.source.startsWith(
+      "p3_47.runner_installed_trash_for_credits",
     )
   ) {
     resolveRunnerInstalledTrashForCreditsChoice(state, legalAction, playerAction);
@@ -22467,6 +22590,63 @@ function startRunnerGripTrashForCreditsChoice(
   };
 }
 
+function startCardImplementationTrashCardsFromGripForCreditsChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  max: number,
+  gainPerTrashed: number,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const boundedMax = Math.max(0, Math.floor(max));
+  const options = state.runner.grip.map((cardId) => {
+    const definition = definitionFor(state, cardId);
+    return { id: `card_${cardId}`, label: definition.title, value: cardId };
+  });
+  state.pendingChoice = {
+    choiceId: `p3_47_runner_grip_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_47.runner_grip_trash_for_credits:${sourceCardId}:${sourceDefinitionId}:${boundedMax}:${gainPerTrashed}:${state.stateVersion + 1}`,
+    prompt: "Grip-Karten trashen",
+    kind: "select_cards",
+    options,
+    minSelections: 0,
+    maxSelections: Math.min(boundedMax, options.length),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
+    sourceDefinitionId,
+    maxTrashCount: boundedMax,
+    gainPerTrashed,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
+function runnerGripTrashChoiceParameters(choiceSource: string): {
+  max: number;
+  gainPerTrashed: number;
+  hiddenZoneAction: string;
+} {
+  if (choiceSource.startsWith("p3_47.runner_grip_trash_for_credits")) {
+    const [, , , max, gainPerTrashed] = choiceSource.split(":");
+    return {
+      max: Math.max(0, Math.floor(Number(max))),
+      gainPerTrashed: Math.max(0, Math.floor(Number(gainPerTrashed))),
+      hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
+    };
+  }
+  return {
+    max: 5,
+    gainPerTrashed: 2,
+    hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+  };
+}
+
 function resolveRunnerGripTrashForCreditsChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -22474,9 +22654,10 @@ function resolveRunnerGripTrashForCreditsChoice(
 ): void {
   const choice = state.pendingChoice;
   if (!choice) throw new Error("Es ist keine V1.9.22-Grip-Trash-Choice offen.");
+  const parameters = runnerGripTrashChoiceParameters(choice.source);
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
-  if (selectedIds.length > 5)
-    throw new Error("Organ Donor darf hoechstens fuenf Karten trashen.");
+  if (selectedIds.length > parameters.max)
+    throw new Error("Es wurden zu viele Grip-Karten ausgewaehlt.");
   const selectedSet = new Set(selectedIds);
   if (
     selectedSet.size !== selectedIds.length ||
@@ -22492,13 +22673,13 @@ function resolveRunnerGripTrashForCreditsChoice(
       zone: { side: "runner", zone: "heap" },
     };
   }
-  const gainedCredits = selectedIds.length * 2;
+  const gainedCredits = selectedIds.length * parameters.gainPerTrashed;
   if (gainedCredits > 0) credits(state, "runner", gainedCredits);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+    hiddenZoneAction: parameters.hiddenZoneAction,
     trashedCount: selectedIds.length,
     gainedCredits,
     runnerCreditsAfter: state.runner.credits,
@@ -22530,6 +22711,65 @@ function startRunnerInstalledTrashForCreditsChoice(
   };
 }
 
+function startCardImplementationTrashOwnInstalledCardsForCreditsChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  min: 0 | 1,
+  max: "any",
+  gainPerTrashed: number,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  if (max !== "any")
+    throw new Error("Diese installierte-Karten-Auswahl unterstuetzt nur any.");
+  const installed = runnerInstalledCardIds(state);
+  state.pendingChoice = {
+    choiceId: `p3_47_runner_installed_trash_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_47.runner_installed_trash_for_credits:${sourceCardId}:${sourceDefinitionId}:${min}:${gainPerTrashed}:${state.stateVersion + 1}`,
+    prompt: "Installierte Karten trashen",
+    kind: "select_cards",
+    options: installed.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return { id: `card_${cardId}`, label: definition.title, value: cardId };
+    }),
+    minSelections: min,
+    maxSelections: installed.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
+    sourceDefinitionId,
+    minTrashCount: min,
+    gainPerTrashed,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
+function runnerInstalledTrashChoiceParameters(choiceSource: string): {
+  min: number;
+  gainPerTrashed: number;
+  hiddenZoneAction: string;
+} {
+  if (choiceSource.startsWith("p3_47.runner_installed_trash_for_credits")) {
+    const [, , , min, gainPerTrashed] = choiceSource.split(":");
+    return {
+      min: Math.max(0, Math.floor(Number(min))),
+      gainPerTrashed: Math.max(0, Math.floor(Number(gainPerTrashed))),
+      hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
+    };
+  }
+  return {
+    min: 0,
+    gainPerTrashed: 3,
+    hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
+  };
+}
+
 function resolveRunnerInstalledTrashForCreditsChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -22538,7 +22778,10 @@ function resolveRunnerInstalledTrashForCreditsChoice(
   const choice = state.pendingChoice;
   if (!choice)
     throw new Error("Es ist keine V1.9.22-Installed-Trash-Choice offen.");
+  const parameters = runnerInstalledTrashChoiceParameters(choice.source);
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  if (selectedIds.length < parameters.min)
+    throw new Error("Es wurden zu wenige installierte Karten ausgewaehlt.");
   const installed = runnerInstalledCardIds(state);
   const selectedSet = new Set(selectedIds);
   if (
@@ -22555,13 +22798,13 @@ function resolveRunnerInstalledTrashForCreditsChoice(
       zone: { side: "runner", zone: "heap" },
     };
   }
-  const gainedCredits = selectedIds.length * 3;
+  const gainedCredits = selectedIds.length * parameters.gainPerTrashed;
   if (gainedCredits > 0) credits(state, "runner", gainedCredits);
   delete state.pendingChoice;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     hiddenZoneBarrier: true,
-    hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
+    hiddenZoneAction: parameters.hiddenZoneAction,
     trashedCount: selectedIds.length,
     gainedCredits,
     runnerCreditsAfter: state.runner.credits,

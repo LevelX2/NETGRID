@@ -254,8 +254,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
   "onr_v1_099_mantis-fixer-at-large":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
+  "onr_v1_100_misc-for-sale":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/misc-for-sale.ts",
+  "onr_v1_101_mit-west-tier":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/mit-west-tier.ts",
   "onr_v1_102_open-ended-mileage-program":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/open-ended-mileage-program.ts",
+  "onr_v1_103_organ-donor":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/organ-donor.ts",
   "onr_v1_105_priority-wreck":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
   "onr_v1_110_sneak-preview":

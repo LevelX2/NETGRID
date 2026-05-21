@@ -7428,6 +7428,72 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     });
   });
 
+  it("migrates P3.47 runner recycle preps into CardImplementation coverage", () => {
+    expect(
+      cardImplementationForDefinitionId("onr_v1_100_misc-for-sale")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        effects: [
+          {
+            kind: "trash_own_installed_cards_for_credits",
+            target: "chosen_installed_runner_cards",
+            min: 0,
+            max: "any",
+            gainPerTrashed: 3,
+            visibility: "public",
+          },
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_103_organ-donor")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        effects: [
+          {
+            kind: "trash_cards_from_grip_for_credits",
+            target: "chosen_runner_grip_cards",
+            max: 5,
+            gainPerTrashed: 2,
+            visibility: "hidden_info_barrier",
+          },
+        ],
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_101_mit-west-tier")?.abilities,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "on_play",
+        effects: [
+          {
+            kind: "shuffle_grip_trash_and_stack_then_draw",
+            drawCount: 5,
+            removePlayedCardFromGame: true,
+            visibility: "hidden_info_barrier",
+          },
+        ],
+      }),
+    );
+    for (const definitionId of [
+      "onr_v1_100_misc-for-sale",
+      "onr_v1_101_mit-west-tier",
+      "onr_v1_103_organ-donor",
+    ] as const) {
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationCoverageForDefinitionId(
+        "onr_v1_131_microtech-backup-drive",
+      )?.status,
+    ).not.toBe("implemented");
+  });
+
   it("hosts P3.46 programs on Daemons, applies hosted strength penalties and revalidates host capacity", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -26723,14 +26789,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         sourceDefinition(state, action) === "onr_v1_103_organ-donor",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.runner_grip_trash_gain_credits",
+      "p3_47.runner_grip_trash_for_credits",
     );
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_103_organ-donor",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+      hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
+      sourceDefinitionId: "onr_v1_103_organ-donor",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"grip"|"cardInstances"|"privatePayload"/,
@@ -26758,7 +26825,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_runner_grip_trash_gain_credits",
+      hiddenZoneAction: "p3_47_runner_grip_trash_for_credits",
       trashedCount: 2,
       gainedCredits: 4,
     });
@@ -26849,14 +26916,15 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         sourceDefinition(state, action) === "onr_v1_100_misc-for-sale",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.runner_installed_trash_gain_credits",
+      "p3_47.runner_installed_trash_for_credits",
     );
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_100_misc-for-sale",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
+      hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
+      sourceDefinitionId: "onr_v1_100_misc-for-sale",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"stack"|"grip"|"cardInstances"|"privatePayload"/,
@@ -26888,7 +26956,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1922_runner_installed_trash_gain_credits",
+      hiddenZoneAction: "p3_47_runner_installed_trash_for_credits",
       trashedCount: 2,
       gainedCredits: 6,
     });
@@ -43041,7 +43109,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     expect(mit.runner.grip).toHaveLength(5);
     expect(mit.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_101_mit-west-tier",
-      hiddenZoneAction: "mit_west_tier_shuffle_grip_heap_stack",
+      hiddenZoneAction: "p3_47_shuffle_grip_heap_stack_then_draw",
       drawnCount: 5,
     });
     expect(JSON.stringify(mit.eventLog.at(-1)?.publicPayload)).not.toMatch(
