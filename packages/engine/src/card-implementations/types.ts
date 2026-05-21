@@ -12,6 +12,8 @@ import type {
   CardPrintedSubroutineImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
+  HostedProgramCapacityImplementation,
+  HostedProgramModifierImplementation,
   RestrictedHostedCreditSourceImplementation,
   RunnerTraceCounterEffectImplementation,
 } from "../ability-engine/definition-types";
@@ -23,6 +25,8 @@ export type CardImplementationDefinition = {
   };
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
   icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
+  hostedProgramCapacity?: HostedProgramCapacityImplementation;
+  hostedProgramModifiers?: readonly HostedProgramModifierImplementation[];
   modifiers?: CardModifierImplementation[];
   abilities?: CardAbilityImplementation[];
   accessEffects?: readonly CardAccessEffectImplementation[];

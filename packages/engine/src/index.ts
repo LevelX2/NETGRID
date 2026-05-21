@@ -689,7 +689,8 @@ const publicContextDeps: PublicContextForActionDependencies = {
   agendaPointsForScoredCard,
   cardCounter,
   cardStrengthModifier: (state, cardId) =>
-    mustInstance(state.cardInstances, cardId).strengthModifier,
+    mustInstance(state.cardInstances, cardId).strengthModifier +
+    hostedProgramStrengthModifier(state, cardId),
   creditCostForAction,
   definitionFor,
   pumpAmountForLegalAction,
@@ -5015,10 +5016,13 @@ function hasInstalledUniqueCardDefinition(
 }
 
 function daemonHostingCapacity(definition: CardDefinition): number {
-  if (definition.id === "onr_v1_069_succubus") return 3;
-  if (definition.id === "onr_v1_001_afreet") return 3;
-  if (definition.id === "onr_v1_033_imp") return 2;
-  return 0;
+  return Math.max(
+    0,
+    Math.floor(
+      cardImplementationForDefinitionId(definition.id)?.hostedProgramCapacity
+        ?.capacityMu ?? 0,
+    ),
+  );
 }
 
 function daemonHostedMemoryUsed(
@@ -5038,10 +5042,19 @@ function canHostProgramOnDaemon(
   programDefinition: CardDefinition,
 ): boolean {
   if (programDefinition.type !== "program") return false;
+  if (cardHasSubtype(programDefinition, "daemon")) return false;
+  const hostInstance = mustInstance(state.cardInstances, hostId);
+  if (hostInstance.hostedOn) return false;
   const hostDefinition = definitionFor(state, hostId);
   if (
     hostDefinition.type !== "program" ||
     !cardHasSubtype(hostDefinition, "daemon")
+  )
+    return false;
+  const implementation = cardImplementationForDefinitionId(hostDefinition.id);
+  if (
+    implementation?.hostedProgramCapacity?.hostedProgramsAreInstalled !== true ||
+    !implementation.hostedProgramCapacity.allowedCardTypes.includes("program")
   )
     return false;
   const capacity = daemonHostingCapacity(hostDefinition);
@@ -5051,6 +5064,30 @@ function canHostProgramOnDaemon(
       (programDefinition.memoryCost ?? 0) <=
     capacity
   );
+}
+
+function hostedProgramStrengthModifier(
+  state: GameState,
+  cardId: CardInstanceId,
+): number {
+  const instance = state.cardInstances[cardId];
+  if (!instance?.hostedOn) return 0;
+  const definition = definitionFor(state, cardId);
+  if (definition.type !== "program" || !cardHasSubtype(definition, "icebreaker"))
+    return 0;
+  const hostDefinition = definitionFor(state, instance.hostedOn);
+  const modifiers =
+    cardImplementationForDefinitionId(hostDefinition.id)?.hostedProgramModifiers ??
+    [];
+  return modifiers.reduce((sum, modifier) => {
+    if (
+      modifier.appliesTo !== "hosted_icebreakers" ||
+      modifier.kind !== "icebreaker_strength"
+    )
+      return sum;
+    const amount = Math.max(0, Math.floor(modifier.amount));
+    return sum + (modifier.operation === "reduce" ? -amount : amount);
+  }, 0);
 }
 
 function canOverlayProgramOnZetatechSoftwareInstaller(
@@ -6080,6 +6117,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
     const breakerStrength =
       breakerBaseStrength +
       mustInstance(state.cardInstances, breakerId).strengthModifier +
+      hostedProgramStrengthModifier(state, breakerId) +
       cardCounter(state, breakerId, "militech") +
       dupreStrengthCounterBonus(state, breakerId) +
       runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -6558,6 +6596,7 @@ function resolvePileDriverBreakSubroutinesAction(
   const breakerStrength =
     (breakerDefinition.strength ?? 0) +
     mustInstance(state.cardInstances, breakerId).strengthModifier +
+    hostedProgramStrengthModifier(state, breakerId) +
     cardCounter(state, breakerId, "militech") +
     dupreStrengthCounterBonus(state, breakerId) +
     runRemainderStrengthBonusForBreaker(run, breakerId);
@@ -26298,6 +26337,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
               ? iceStrengthFor(state, id)
               : definition.strength +
                 instance.strengthModifier +
+                hostedProgramStrengthModifier(state, id) +
                 runRemainderStrengthBonus,
         }
       : {}),

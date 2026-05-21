@@ -7385,6 +7385,215 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(snowball.run?.remainderStrengthBonusByBreaker?.[snowballId!]).toBe(1);
   });
 
+  it("migrates P3.46 daemon hosting and Chimera into CardImplementation coverage", () => {
+    const daemonSpecs = [
+      ["onr_v1_001_afreet", 3, true],
+      ["onr_v1_033_imp", 2, true],
+      ["onr_v1_069_succubus", 3, false],
+    ] as const;
+    for (const [definitionId, capacityMu, reducesStrength] of daemonSpecs) {
+      const implementation = cardImplementationForDefinitionId(definitionId);
+      expect(implementation?.hostedProgramCapacity).toMatchObject({
+        capacityMu,
+        allowedCardTypes: ["program"],
+        hostedProgramsAreInstalled: true,
+        hostLeavesPlayTrashesHosted: true,
+      });
+      expect(Boolean(implementation?.hostedProgramModifiers?.length)).toBe(
+        reducesStrength,
+      );
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(cardImplementationForDefinitionId("onr_v1_353_chimera")?.accessEffects).toEqual([
+      {
+        kind: "on_access",
+        sourceZones: ["installed"],
+        visibility: "hidden_info_barrier",
+        effects: [
+          {
+            kind: "trash_installed_runner_cards",
+            target: "daemon",
+            amount: 1,
+            visibility: "hidden_info_barrier",
+          },
+        ],
+      },
+    ]);
+    expect(cardImplementationCoverageForDefinitionId("onr_v1_353_chimera")).toMatchObject({
+      cardDefinitionId: "onr_v1_353_chimera",
+      status: "implemented",
+    });
+  });
+
+  it("hosts P3.46 programs on Daemons, applies hosted strength penalties and revalidates host capacity", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p346-daemon-hosting",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 80;
+    state.runner.clicks = 20;
+    state.runner.memoryLimit = 2;
+    p344MoveRunnerCardToGrip(state, "onr_v1_001_afreet");
+    p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
+    p344MoveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    p344MoveRunnerCardToGrip(state, "onr_v1_016_cyfermaster");
+    p344MoveRunnerCardToGrip(state, "onr_v1_014_codecracker");
+    p344MoveRunnerCardToGrip(state, "onr_v1_069_succubus");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_001_afreet",
+    );
+    const afreetId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_001_afreet",
+    );
+    expect(afreetId).toBeDefined();
+    if (!afreetId) throw new Error("Missing Afreet");
+    expect(state.runner.memoryUsed).toBe(1);
+
+    const staleHostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_006_black-dahlia" &&
+        action.payload?.hostOnCardId === afreetId,
+    );
+    const staleHostState = structuredClone(state);
+    removeEverywhere(staleHostState, afreetId);
+    expect(
+      applyAction(staleHostState, {
+        matchId: staleHostState.matchId,
+        side: "runner",
+        actionId: staleHostedInstall.actionId,
+        clientKnownStateVersion: staleHostState.stateVersion,
+        idempotencyKey: "p346-stale-host-install",
+      }).ok,
+    ).toBe(false);
+
+    const hostedDefinitionIds = [
+      "onr_v1_006_black-dahlia",
+      "onr_v1_015_codeslinger",
+      "onr_v1_016_cyfermaster",
+    ] as const;
+    const hostedIds: CardInstanceId[] = [];
+    for (const definitionId of hostedDefinitionIds) {
+      const install = mustAction(
+        state,
+        "runner",
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === definitionId &&
+          action.payload?.hostOnCardId === afreetId,
+      );
+      hostedIds.push(String(install.payload?.cardId ?? "") as CardInstanceId);
+      state = apply(state, "runner", (action) => action.actionId === install.actionId);
+    }
+    expect(state.runner.memoryUsed).toBe(1);
+    for (const hostedId of hostedIds)
+      expect(state.cardInstances[hostedId]?.hostedOn).toBe(afreetId);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === hostedIds[0],
+      )?.strength,
+    ).toBe(4);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === "onr_v1_014_codecracker" &&
+          action.payload?.hostOnCardId === afreetId,
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_069_succubus",
+    );
+    const succubusId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_069_succubus",
+    );
+    expect(succubusId).toBeDefined();
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "install_card" &&
+          sourceDefinition(state, action) === "onr_v1_014_codecracker" &&
+          action.payload?.hostOnCardId === succubusId,
+      ),
+    ).toBe(true);
+  });
+
+  it("resolves P3.46 Chimera through CardImplementation and trashes hosted Daemon programs", () => {
+    let state = toRunnerTurn(v199CardReleaseGame("p346-chimera-card-implementation"));
+    state.runner.credits = 60;
+    state.runner.clicks = 20;
+    state.runner.memoryLimit = 2;
+    p344MoveRunnerCardToGrip(state, "onr_v1_001_afreet");
+    p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_001_afreet",
+    );
+    const afreetId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_001_afreet",
+    );
+    if (!afreetId) throw new Error("Missing Afreet");
+    const hostedInstall = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_006_black-dahlia" &&
+        action.payload?.hostOnCardId === afreetId,
+    );
+    const hostedId = String(hostedInstall.payload?.cardId ?? "") as CardInstanceId;
+    state = apply(state, "runner", (action) => action.actionId === hostedInstall.actionId);
+    const chimeraId = putCorpRootInRemote(state, "onr_v1_353_chimera");
+    state.cardInstances[chimeraId] = {
+      ...state.cardInstances[chimeraId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.heap).toContain(afreetId);
+    expect(state.runner.heap).toContain(hostedId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      trashedCardDefinitionId: "onr_v1_001_afreet",
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
     let rdState = toRunnerTurn(v123CardReleaseGame("v123-custodial-position"));
     moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
@@ -16317,10 +16526,8 @@ describe("V1.9.9 Mechanikpaket R", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.pendingChoice?.source).toContain("v199.chimera_daemon_trash");
-    state = applyChoice(state, "runner", `card_${afreetId}`);
-    expect(state.runner.heap).toContain(afreetId);
     expect(state.pendingChoice).toBeUndefined();
+    expect(state.runner.heap).toContain(afreetId);
     expect(
       getLegalActions(state, "runner").some(
         (action) => action.type === "decline_trash",
@@ -41337,7 +41544,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     expect(hashState(replay.state)).toBe(hashState(accessState));
   });
 
-  it("revalidates Chimera daemon choices against the accessed source", () => {
+  it("resolves migrated Chimera access without legacy daemon choices", () => {
     let state = toRunnerTurn(v199CardReleaseGame("spotcheck-chimera-source"));
     state.runner.credits = 20;
     const daemonId = installRunnerProgramForTest(state, "onr_v1_001_afreet");
@@ -41355,22 +41562,16 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    state = apply(state, "runner", (action) => action.type === "access_card");
-    expect(state.pendingChoice?.source).toContain("v199.chimera_daemon_trash");
-    const choice = mustAction(
+    const access = mustAction(
       state,
       "runner",
-      (action) => action.type === "resolve_choice",
+      (action) => action.type === "access_card",
     );
     const wrongSide = applyAction(state, {
       matchId: state.matchId,
       side: "corp",
-      actionId: choice.actionId,
+      actionId: access.actionId,
       clientKnownStateVersion: state.stateVersion,
-      selectedChoices: {
-        choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${daemonId}`],
-      },
       idempotencyKey: "spotcheck-chimera-wrong-side",
     });
     expect(wrongSide.ok).toBe(false);
@@ -41378,46 +41579,19 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     const stale = applyAction(state, {
       matchId: state.matchId,
       side: "runner",
-      actionId: choice.actionId,
+      actionId: access.actionId,
       clientKnownStateVersion: state.stateVersion - 1,
-      selectedChoices: {
-        choiceId: state.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${daemonId}`],
-      },
       idempotencyKey: "spotcheck-chimera-stale",
     });
     expect(stale.ok).toBe(false);
     if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
 
-    const removedSource = structuredClone(state);
-    removeEverywhere(removedSource, chimeraId);
-    removedSource.corp.archives.push(chimeraId);
-    removedSource.cardInstances[chimeraId] = {
-      ...removedSource.cardInstances[chimeraId]!,
-      zone: { side: "corp", zone: "archives" },
-      faceup: true,
-      rezzed: true,
-    };
-    const removed = applyAction(removedSource, {
-      matchId: removedSource.matchId,
-      side: "runner",
-      actionId: choice.actionId,
-      clientKnownStateVersion: removedSource.stateVersion,
-      selectedChoices: {
-        choiceId: removedSource.pendingChoice?.choiceId,
-        selectedOptionIds: [`card_${daemonId}`],
-      },
-      idempotencyKey: "spotcheck-chimera-removed-source",
-    });
-    expect(removed.ok).toBe(false);
-
-    state = applyChoice(state, "runner", `card_${daemonId}`);
+    state = apply(state, "runner", (action) => action.actionId === access.actionId);
     expect(state.runner.heap).toContain(daemonId);
     expect(state.pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "resolve_choice",
-      chimeraDaemonTrashed: true,
-      chimeraDaemonDefinitionId: "onr_v1_001_afreet",
+      actionType: "access_card",
+      trashedCardDefinitionId: "onr_v1_001_afreet",
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,

@@ -119,6 +119,7 @@ import { teamRestructuringImplementation } from "./onr-v1/corp/operations/team-r
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
+import { chimeraImplementation } from "./onr-v1/corp/upgrades/chimera";
 import { crystalPalaceStationGridImplementation } from "./onr-v1/corp/upgrades/crystal-palace-station-grid";
 import { dedicatedResponseTeamImplementation } from "./onr-v1/corp/upgrades/dedicated-response-team";
 import { dieterEsslinImplementation } from "./onr-v1/corp/upgrades/dieter-esslin";
@@ -176,6 +177,7 @@ import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
 import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/temple-microcode-outlet";
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
+import { afreetImplementation } from "./onr-v1/runner/programs/afreet";
 import { aiBoonImplementation } from "./onr-v1/runner/programs/ai-boon";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
@@ -197,6 +199,7 @@ import { flakImplementation } from "./onr-v1/runner/programs/flak";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { grubbImplementation } from "./onr-v1/runner/programs/grubb";
 import { hammerImplementation } from "./onr-v1/runner/programs/hammer";
+import { impImplementation } from "./onr-v1/runner/programs/imp";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
 import { jackhammerImplementation } from "./onr-v1/runner/programs/jackhammer";
 import { japaneseWaterTortureImplementation } from "./onr-v1/runner/programs/japanese-water-torture";
@@ -223,6 +226,7 @@ import { shieldImplementation } from "./onr-v1/runner/programs/shield";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
 import { snowballImplementation } from "./onr-v1/runner/programs/snowball";
+import { succubusImplementation } from "./onr-v1/runner/programs/succubus";
 import { tinweaselImplementation } from "./onr-v1/runner/programs/tinweasel";
 import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
 import { wildCardImplementation } from "./onr-v1/runner/programs/wild-card";
@@ -281,6 +285,7 @@ export const CARD_IMPLEMENTATIONS = [
   templeMicrocodeOutletImplementation,
   totalGeneticRetrofitImplementation,
   weatherToFinancePipeImplementation,
+  afreetImplementation,
   aiBoonImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
@@ -302,6 +307,7 @@ export const CARD_IMPLEMENTATIONS = [
   forceShieldImplementation,
   grubbImplementation,
   hammerImplementation,
+  impImplementation,
   invisibilityImplementation,
   jackhammerImplementation,
   japaneseWaterTortureImplementation,
@@ -328,6 +334,7 @@ export const CARD_IMPLEMENTATIONS = [
   shredderUplinkProtocolImplementation,
   signpostImplementation,
   snowballImplementation,
+  succubusImplementation,
   tinweaselImplementation,
   vewyVewyQuietImplementation,
   wildCardImplementation,
@@ -501,6 +508,7 @@ export const CARD_IMPLEMENTATIONS = [
   zz22SpeedChipImplementation,
   antiquatedInterfaceRoutinesImplementation,
   chesterMixImplementation,
+  chimeraImplementation,
   crystalPalaceStationGridImplementation,
   dedicatedResponseTeamImplementation,
   dieterEsslinImplementation,

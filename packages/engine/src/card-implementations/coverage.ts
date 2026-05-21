@@ -68,6 +68,9 @@ const IMPLEMENTED_ACCESS_EFFECT_LOCATION =
 const IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_HOSTED_PROGRAM_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/runner/programs";
+
 const IMPLEMENTED_DAMAGE_PREVENTION_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
@@ -77,6 +80,8 @@ const IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION =
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
+  "onr_v1_001_afreet":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/afreet.ts",
   "onr_v1_045_newsgroup-filter":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
   "onr_v1_003_baedekers-net-map":
@@ -113,6 +118,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/grubb.ts",
   "onr_v1_031_hammer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/hammer.ts",
+  "onr_v1_033_imp":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/imp.ts",
   "onr_v1_036_jackhammer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/jackhammer.ts",
   "onr_v1_037_japanese-water-torture":
@@ -137,6 +144,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
   "onr_v1_066_snowball":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/snowball.ts",
+  "onr_v1_069_succubus":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/succubus.ts",
   "onr_v1_070_tinweasel":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
   "onr_v1_072_wild-card":
@@ -549,6 +558,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/antiquated-interface-routines.ts",
   "onr_v1_352_chester-mix":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
+  "onr_v1_353_chimera":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chimera.ts",
   "onr_v1_355_crystal-palace-station-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
   "onr_v1_356_dedicated-response-team":
@@ -718,6 +729,18 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for restricted hosted-credit source behavior.",
     );
     currentLocations.add(IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION);
+  }
+  if (implementation.hostedProgramCapacity) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Daemon hosted-program capacity and host cleanup behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_HOSTED_PROGRAM_LOCATION);
+  }
+  if (implementation.hostedProgramModifiers?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for hosted-program modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_HOSTED_PROGRAM_LOCATION);
   }
   if (implementation.installAdditionalCosts?.length) {
     reasons.push(

@@ -95,6 +95,20 @@ export type CardAccessEffectStepImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type HostedProgramCapacityImplementation = {
+  capacityMu: number;
+  allowedCardTypes: readonly ["program"];
+  hostedProgramsAreInstalled: true;
+  hostLeavesPlayTrashesHosted: true;
+};
+
+export type HostedProgramModifierImplementation = {
+  appliesTo: "hosted_icebreakers";
+  kind: "icebreaker_strength";
+  operation: "reduce";
+  amount: number;
+};
+
 export type CardLifecycleTriggeredAbilityImplementation = {
   condition?: CardConditionImplementation;
   effects: readonly CardEffectImplementation[];
