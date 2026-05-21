@@ -542,7 +542,22 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
-  it("maps campaign stored bit counters to the existing card credit badge pattern", () => {
+  it("maps hosted bit counters to the existing card credit badge pattern", () => {
+    const brokerAfterLoad: VisibleCard = {
+      ...card("broker_1", "Broker", "resource"),
+      definitionId: "onr_v1_154_broker",
+      counters: { bit: 3 }
+    };
+    const brokerTenPlus: VisibleCard = {
+      ...brokerAfterLoad,
+      instanceId: "broker_2",
+      counters: { bit: 12 }
+    };
+    const shortTerm: VisibleCard = {
+      ...card("short_term_1", "Short-Term Contract", "resource"),
+      definitionId: "onr_v1_178_short-term-contract",
+      counters: { bit: 10 }
+    };
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
       definitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -563,6 +578,21 @@ describe("V1.0.6 resource and card-display helpers", () => {
       counters: { power: 8 }
     };
 
+    expect(storedCreditSourceLabel(brokerAfterLoad)).toBe("Broker");
+    expect(storedCreditAmount(brokerAfterLoad)).toBe(3);
+    expect(cardCreditCounterVisual(storedCreditAmount(brokerAfterLoad))).toMatchObject({
+      safeAmount: 3,
+      showCount: false,
+      iconCount: 3
+    });
+    expect(storedCreditAmount(brokerTenPlus)).toBe(12);
+    expect(cardCreditCounterVisual(storedCreditAmount(brokerTenPlus))).toMatchObject({
+      safeAmount: 12,
+      showCount: true,
+      iconCount: 1
+    });
+    expect(storedCreditSourceLabel(shortTerm)).toBe("Short-Term Contract");
+    expect(storedCreditAmount(shortTerm)).toBe(10);
     expect(storedCreditSourceLabel(bbsUnderTen)).toBe("BBS Whispering Campaign");
     expect(storedCreditAmount(bbsUnderTen)).toBe(8);
     expect(cardCreditCounterVisual(storedCreditAmount(bbsUnderTen))).toMatchObject({
