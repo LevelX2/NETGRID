@@ -1080,6 +1080,7 @@ function visibleKnownCardIds(view: PlayerView | undefined): string[] {
     ...(view.opponent.discardCards ?? []),
     ...view.opponent.scoreArea,
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
   ];
   return Array.from(new Set(cards.filter((card) => card.known && card.definitionId).map((card) => card.definitionId!)));
@@ -2508,6 +2509,7 @@ export default function Page() {
   const currentFocusedCard = focusedCard?.matchId === payload?.matchId ? focusedCard : null;
   const previewSelection =
     currentFocusedCard ??
+    (activeView?.run?.approachedIce ? { card: activeView.run.approachedIce, hiddenSide: "corp" as const } : null) ??
     (activeView?.run?.encounteredIce ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const } : null) ??
     (gripPreviewCard ? { card: gripPreviewCard } : null) ??
     (rigPreviewCard ? { card: rigPreviewCard } : null);
@@ -7286,7 +7288,10 @@ function RunTimelineOverlay({
 
   const currentStep = currentRunTimelineStep(view, legalActions);
   const verticalSteps = [...RUN_TIMELINE_STEPS].reverse();
+  const approachedIce = run.approachedIce ? enrichVisibleCard(run.approachedIce, cardDetailsById) : null;
   const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
+  const runFocusIce = encounteredIce ?? approachedIce;
+  const runFocusIceFallback = approachedIce ? "Angesehenes ICE" : "Sichtbares ICE";
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
   const headerStatus = runWindowStatusLabel(view);
@@ -7349,12 +7354,12 @@ function RunTimelineOverlay({
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
         {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
-        {encounteredIce ? (
+        {runFocusIce ? (
           <div className="encounterFocus">
-            {encounteredIce.known ? (
+            {runFocusIce.known ? (
               <div className="encounterFocusBody">
-                <strong>{encounteredIce.title ?? "Sichtbares ICE"}</strong>
-                {encounteredIce.rulesText ? <p>{encounteredIce.rulesText}</p> : null}
+                <strong>{runFocusIce.title ?? runFocusIceFallback}</strong>
+                {runFocusIce.rulesText ? <p>{runFocusIce.rulesText}</p> : null}
               </div>
             ) : (
               <strong>Verdecktes ICE</strong>
@@ -7744,6 +7749,7 @@ function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
     ...(view.specialZones?.setAside ?? []),
     ...(view.specialZones?.removedFromGame ?? []),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
     ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
   ];

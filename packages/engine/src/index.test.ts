@@ -24323,7 +24323,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.approachIceExposeDecision === "expose",
     );
 
-    expect(state.activeSide).toBe("corp");
+    expect(state.activeSide).toBe("runner");
+    expect(state.run?.approachIceExposeViewingIceId).toBe(iceId);
     expect(state.run?.approachIceExposeUsedSourceIdsThisRun).toHaveLength(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
@@ -24333,6 +24334,40 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       cardDefinitionId: "onr_v1_227_cerberus",
     });
     expect(state.cardInstances[iceId]?.rezzed).toBe(false);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(["trigger_ability", "jack_out"]);
+    const runnerView = getPlayerView(state, "runner");
+    expect(runnerView.run?.approachedIce).toMatchObject({
+      instanceId: iceId,
+      known: true,
+      definitionId: "onr_v1_227_cerberus",
+    });
+    expect(
+      runnerView.servers
+        .find((server) => server.id === "rd")
+        ?.ice.find((card) => card.instanceId === iceId),
+    ).toMatchObject({ known: true, definitionId: "onr_v1_227_cerberus" });
+
+    const jackOutState = apply(
+      structuredClone(state),
+      "runner",
+      (action) => action.type === "jack_out",
+    );
+    expect(jackOutState.run).toBeUndefined();
+    expect(jackOutState.timingPoint).toBe("runner_action.main");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.approachIceExposeViewDecision === "finish",
+    );
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.run?.approachIceExposeViewingIceId).toBeUndefined();
     expect(
       getLegalActions(state, "corp").some(
         (action) =>

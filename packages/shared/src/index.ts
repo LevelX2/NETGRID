@@ -803,6 +803,8 @@ export type RunState = {
   encounteredIceId?: CardInstanceId;
   approachIceExposeUsedSourceIdsThisRun?: CardInstanceId[];
   approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
+  approachIceExposeViewingIceId?: CardInstanceId;
+  approachIceExposeViewingSourceCardId?: CardInstanceId;
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
   successful: boolean;
@@ -1236,6 +1238,7 @@ export type PlayerView = {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     position?: RunState["position"];
+    approachedIce?: VisibleCard;
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
     breach?: {

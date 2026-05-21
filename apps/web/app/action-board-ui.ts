@@ -250,6 +250,7 @@ export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "activated_card_ability" && cardRefsForAction(action).length > 0) return true;
   if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
+  if (isApproachIceExposeAction(action)) return false;
   if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
   return cardRefsForAction(action).length > 0 || objectBoundAction(action);
@@ -357,7 +358,21 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
+  if (isApproachIceExposeAction(action)) {
+    return approachIceExposeActionLabel(action);
+  }
   return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
+}
+
+function approachIceExposeActionLabel(action: LegalAction): string {
+  const normalizedLabel = normalizeVisibleTerms(action.label);
+  const sourceTitle = /^([^:]+):/.exec(normalizedLabel)?.[1]?.trim();
+  const prefix = sourceTitle ? `${sourceTitle}: ` : "";
+  if (action.payload?.approachIceExposeViewDecision === "finish")
+    return `${prefix}Ansehen beenden`;
+  return action.payload?.approachIceExposeDecision === "decline"
+    ? `${prefix}Ansehen überspringen`
+    : `${prefix}ICE ansehen`;
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
@@ -727,6 +742,7 @@ export function breachProgressLabel(view: PlayerView): string | null {
 export function activeRunIceInstanceId(view: PlayerView): string | null {
   const run = view.run;
   if (!run) return null;
+  if (run.approachedIce?.instanceId) return run.approachedIce.instanceId;
   if (run.encounteredIce?.instanceId) return run.encounteredIce.instanceId;
   if (run.position?.kind !== "ice") return null;
   const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
@@ -741,7 +757,8 @@ export function runCurrentIceLabel(view: PlayerView): string | null {
 
 function runCurrentIceTargetLabel(view: PlayerView): string | null {
   const iceLabel = runCurrentIceLabel(view);
-  const title = view.run?.encounteredIce?.known === false ? null : view.run?.encounteredIce?.title;
+  const activeIce = view.run?.encounteredIce ?? view.run?.approachedIce;
+  const title = activeIce?.known === false ? null : activeIce?.title;
   if (title && iceLabel) return `${title} (${iceLabel})`;
   return title ?? iceLabel;
 }
@@ -1037,7 +1054,15 @@ function isStartupImmolatorAction(action: Partial<Pick<LegalAction, "type" | "pa
 }
 
 function isRunWindowTriggerAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action);
+  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action) || isApproachIceExposeAction(action);
+}
+
+function isApproachIceExposeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return (
+    action.type === "trigger_ability" &&
+    (typeof action.payload?.approachIceExposeDecision === "string" ||
+      typeof action.payload?.approachIceExposeViewDecision === "string")
+  );
 }
 
 function sourceCardTitleForAction(view: PlayerView, action: LegalAction): string | null {
@@ -1082,6 +1107,7 @@ function visibleActionCards(view: PlayerView): VisibleCard[] {
     ...view.opponent.scoreArea,
     ...(view.opponent.rig ?? []),
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
     ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
   ];

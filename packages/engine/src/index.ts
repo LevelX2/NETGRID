@@ -2269,6 +2269,8 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.timingPoint === "runner_action.main")
     return side === "runner" ? runnerMainActions(state) : [];
   if (state.timingPoint === "run.approach_ice") {
+    if (isApproachIceExposeViewingWindowOpen(state))
+      return side === "runner" ? runnerApproachIceExposeViewingActions(state) : [];
     if (isApproachIceExposeWindowOpen(state))
       return side === "runner" ? runnerApproachIceExposeActions(state) : [];
     return side === "corp" ? corpApproachActions(state) : [];
@@ -2393,6 +2395,16 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
         position: { ...state.run.position },
+        ...(state.run.approachIceExposeViewingIceId
+          ? {
+              approachedIce: visibleCorpCard(
+                state,
+                state.run.approachIceExposeViewingIceId,
+                side,
+                "ice",
+              ),
+            }
+          : {}),
         ...(state.run.encounteredIceId
           ? {
               encounteredIce: visibleCorpCard(
@@ -2695,6 +2707,16 @@ export function validateGameState(state: GameState): ValidationResult {
     !state.cardInstances[state.run.encounteredIceId]
   )
     errors.push("Run references missing encountered ice.");
+  if (
+    state.run?.approachIceExposeViewingIceId &&
+    !state.cardInstances[state.run.approachIceExposeViewingIceId]
+  )
+    errors.push("Run references missing viewed approached ice.");
+  if (
+    state.run?.approachIceExposeViewingSourceCardId &&
+    !state.cardInstances[state.run.approachIceExposeViewingSourceCardId]
+  )
+    errors.push("Run references missing approach expose source card.");
   if (
     state.run?.viral15ActiveSourceIceId &&
     !state.cardInstances[state.run.viral15ActiveSourceIceId]
@@ -6527,10 +6549,20 @@ function isApproachIceExposeWindowOpen(state: GameState): boolean {
   );
 }
 
+function isApproachIceExposeViewingWindowOpen(state: GameState): boolean {
+  return Boolean(
+    state.timingPoint === "run.approach_ice" &&
+    state.activeSide === "runner" &&
+    state.run?.approachIceExposeViewingIceId &&
+    state.run?.approachIceExposeViewingSourceCardId,
+  );
+}
+
 function approachIceExposeCanBeOfferedForCurrentIce(state: GameState): boolean {
   const run = state.run;
   const approachedIceId = run?.approachedIceId;
   if (!run || !approachedIceId) return false;
+  if (run.approachIceExposeViewingIceId) return false;
   if (run.approachIceExposeSkippedIceIdsThisRun?.includes(approachedIceId))
     return false;
   if (installedApproachIceExposeSources(state).length === 0) return false;
@@ -6601,7 +6633,7 @@ function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
       state,
       "runner",
       "trigger_ability",
-      `${definition.title}: ICE expose`,
+      `${definition.title}: ICE ansehen`,
       sourceCardId,
       [],
       {
@@ -6630,13 +6662,49 @@ function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
       state,
       "runner",
       "trigger_ability",
-      "Expose-Fenster überspringen",
+      `${definitionFor(state, primarySource).title}: Ansehen überspringen`,
       primarySource,
       [],
       {
         cardId: primarySource,
         iceId: approachedIceId,
         approachIceExposeDecision: "decline",
+      },
+    ),
+  ];
+}
+
+function runnerApproachIceExposeViewingActions(state: GameState): LegalAction[] {
+  const run = mustRun(state);
+  const sourceCardId = run.approachIceExposeViewingSourceCardId;
+  const viewedIceId = run.approachIceExposeViewingIceId;
+  if (!sourceCardId || !viewedIceId) return [];
+  const definition = definitionFor(state, sourceCardId);
+  return [
+    action(
+      state,
+      "runner",
+      "trigger_ability",
+      `${definition.title}: Ansehen beenden`,
+      sourceCardId,
+      [],
+      {
+        cardId: sourceCardId,
+        iceId: viewedIceId,
+        approachIceExposeViewDecision: "finish",
+      },
+    ),
+    action(
+      state,
+      "runner",
+      "jack_out",
+      "Jack-out",
+      "game_rule",
+      [],
+      {
+        cardId: sourceCardId,
+        iceId: viewedIceId,
+        approachIceExposeJackOut: true,
       },
     ),
   ];
@@ -9335,6 +9403,10 @@ function performAction(
         resolveApproachIceExposeAbility(state, legalAction);
         return;
       }
+      if (legalAction.payload?.approachIceExposeViewDecision) {
+        resolveApproachIceExposeViewingDecision(state, legalAction);
+        return;
+      }
       if (
         legalAction.payload?.v1918UpgradeAbility ===
         "singapore_city_grid_hq_ice_swap"
@@ -11121,6 +11193,41 @@ function resolveApproachIceExposeAbility(
     throw new Error("Approach-Expose-Entscheidung ist ungueltig.");
   }
 
+  if (decision === "expose") {
+    run.approachIceExposeViewingIceId = approachedIceId;
+    run.approachIceExposeViewingSourceCardId = sourceCardId;
+    state.activeSide = "runner";
+  } else {
+    state.activeSide = "corp";
+  }
+  state.timingPoint = "run.approach_ice";
+}
+
+function resolveApproachIceExposeViewingDecision(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf das Ansehen beenden.");
+  if (!isApproachIceExposeViewingWindowOpen(state))
+    throw new Error("Es ist kein Ansehen-Fenster offen.");
+  const run = mustRun(state);
+  const viewedIceId = run.approachIceExposeViewingIceId;
+  const sourceCardId = run.approachIceExposeViewingSourceCardId;
+  if (
+    String(legalAction.payload?.iceId) !== viewedIceId ||
+    String(legalAction.payload?.cardId) !== sourceCardId
+  )
+    throw new Error("Das Ansehen passt nicht mehr zum aktuellen ICE.");
+  if (legalAction.payload?.approachIceExposeViewDecision !== "finish")
+    throw new Error("Die Ansehen-Entscheidung ist ungueltig.");
+  delete run.approachIceExposeViewingIceId;
+  delete run.approachIceExposeViewingSourceCardId;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "approach_ice_expose_finish",
+  };
   state.activeSide = "corp";
   state.timingPoint = "run.approach_ice";
 }
@@ -28574,6 +28681,10 @@ function makeActionId(
     parts.push(String(payload.citySurveillanceDrawDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
+  if (payload?.approachIceExposeViewDecision)
+    parts.push(String(payload.approachIceExposeViewDecision));
+  if (payload?.approachIceExposeJackOut)
+    parts.push(String(payload.approachIceExposeJackOut));
   return parts.filter(Boolean).join(".");
 }
 
@@ -29005,10 +29116,13 @@ function visibleCorpCard(
   const instance = mustInstance(state.cardInstances, id);
   const definition = definitionFor(state, id);
   const accessed = state.run?.accessedCardId === id;
+  const viewedApproachedIce =
+    viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const visible =
     viewer === "corp" ||
     instance.rezzed ||
     accessed ||
+    viewedApproachedIce ||
     state.corp.scoreArea.includes(id) ||
     (state.corp.archives.includes(id) && instance.faceup);
   if (!visible) {

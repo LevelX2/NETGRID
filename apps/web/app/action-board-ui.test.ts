@@ -1049,6 +1049,62 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(runBreakerActionHint(runnerView, [])).toBe("Kein passender Eisbrecher für dieses ICE verfügbar.");
   });
 
+  it("keeps approach-ice expose decisions visible in the main and Run panels", () => {
+    const smarteye = card("smarteye_1", "Smarteye", "program");
+    const running = view("runner", {
+      timingPoint: "run.approach_ice",
+      activeSide: "runner",
+      phase: "run",
+      own: {
+        ...view("runner").own,
+        rig: [smarteye]
+      },
+      servers: [
+        { id: "rd", label: "R&D", ice: [card("ice_1", "Filter", "ice", false)], root: [] }
+      ],
+      run: {
+        attackedServerId: "rd",
+        phase: "approach_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        successful: false
+      }
+    });
+    const expose = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: ICE ansehen",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeDecision: "expose" },
+      "run.approach_ice"
+    );
+    const decline = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: Ansehen überspringen",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeDecision: "decline" },
+      "run.approach_ice"
+    );
+    const finishViewing = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: Ansehen beenden",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeViewDecision: "finish" },
+      "run.approach_ice"
+    );
+
+    const split = splitLegalActions([expose, decline]);
+    const mirrored = runWindowActions(running, [expose, decline, finishViewing]);
+
+    expect(split.primaryActions).toEqual([expose, decline]);
+    expect(split.contextualActions).toEqual([]);
+    expect(mirrored).toEqual([expose, decline, finishViewing]);
+    expect(runWindowActionButtonLabel(running, expose)).toBe("Smarteye: ICE ansehen");
+    expect(runWindowActionButtonLabel(running, decline)).toBe("Smarteye: Ansehen überspringen");
+    expect(runWindowActionButtonLabel(running, finishViewing)).toBe("Smarteye: Ansehen beenden");
+  });
+
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {
     const startup = card("startup_1", "Startup Immolator", "program");
     const running = view("runner", {
