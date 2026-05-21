@@ -35,6 +35,7 @@ import {
   runBreakerActionHint,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
+  runnerProgramInstallTrashChoiceInfo,
   runPositionStatusLabel,
   runTargetServerIds,
   runWindowActionButtonLabel,
@@ -462,6 +463,88 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
+  });
+
+  it("labels Runner program install trash choices for optional and required MU cases", () => {
+    const sourceProgram = {
+      ...card("new_program", "New Program", "program"),
+      memoryCost: 2
+    };
+    const oldBreaker = {
+      ...card("old_breaker", "Old Breaker", "program"),
+      memoryCost: 1
+    };
+    const oldUtility = {
+      ...card("old_utility", "Old Utility", "program"),
+      memoryCost: 2
+    };
+    const pendingChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "runner_program_trash_before_install_7",
+      side: "runner",
+      source: "runner_program_trash_before_install:new_program:7",
+      prompt: "Programme vor Installation trashen",
+      kind: "select_cards",
+      options: [
+        { id: "card_old_breaker", label: "Old Breaker", value: "old_breaker" },
+        { id: "card_old_utility", label: "Old Utility", value: "old_utility" }
+      ],
+      minSelections: 0,
+      maxSelections: 2,
+      stateVersion: 7,
+      visibility: "hidden_info_barrier"
+    };
+    const optionalView = view("runner", {
+      own: {
+        ...view("runner").own,
+        gripOrHq: [sourceProgram],
+        rig: [oldBreaker, oldUtility],
+        memoryUsed: 1,
+        memoryLimit: 4
+      }
+    });
+    const requiredView = view("runner", {
+      own: {
+        ...view("runner").own,
+        gripOrHq: [sourceProgram],
+        rig: [oldBreaker, oldUtility],
+        memoryUsed: 4,
+        memoryLimit: 4
+      }
+    });
+
+    expect(runnerProgramInstallTrashChoiceInfo(pendingChoice, optionalView, [])).toMatchObject({
+      title: "Programme vorher trashen?",
+      submitLabel: "Ohne Trash installieren",
+      canSubmit: true,
+      requiredMemoryToFree: 0,
+      selectedMemoryFreed: 0
+    });
+    expect(
+      runnerProgramInstallTrashChoiceInfo(pendingChoice, requiredView, [
+        "card_old_breaker"
+      ])
+    ).toMatchObject({
+      title: "MU freimachen",
+      submitLabel: "Auswahl bestätigen",
+      canSubmit: false,
+      requiredMemoryToFree: 2,
+      selectedMemoryFreed: 1
+    });
+    expect(
+      runnerProgramInstallTrashChoiceInfo(pendingChoice, requiredView, [
+        "card_old_utility"
+      ])
+    ).toMatchObject({
+      title: "MU freimachen",
+      question: "2/2 MU gewählt. Auswahl bestätigen?",
+      submitLabel: "Auswahl bestätigen",
+      canSubmit: true,
+      selectedMemoryFreed: 2
+    });
+    expect(runnerProgramInstallTrashChoiceInfo(pendingChoice, requiredView, [])).toMatchObject({
+      submitLabel: "Nicht installieren",
+      canSubmit: true
+    });
   });
 });
 

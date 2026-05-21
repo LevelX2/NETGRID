@@ -120,6 +120,16 @@ export type CardCounterBadgeView = {
   testId: string;
 };
 
+export type RunnerProgramInstallTrashChoiceInfo = {
+  title: string;
+  question: string;
+  effectHint: string;
+  submitLabel: string;
+  canSubmit: boolean;
+  requiredMemoryToFree: number;
+  selectedMemoryFreed: number;
+};
+
 export type IceModifierBadgeView = {
   key: string;
   shortLabel: string;
@@ -767,6 +777,101 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
   return minSelections !== 1 || maxSelections !== 1;
+}
+
+export function runnerProgramInstallTrashChoiceInfo(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  view: PlayerView,
+  selectedOptionIds: string[],
+): RunnerProgramInstallTrashChoiceInfo | null {
+  if (!choice.source.startsWith("runner_program_trash_before_install:"))
+    return null;
+  const sourceCardId = choice.source.split(":")[1] ?? "";
+  const sourceCard = view.own.gripOrHq.find((card) => card.instanceId === sourceCardId);
+  const sourceMemoryCost = Math.max(0, Math.floor(sourceCard?.memoryCost ?? 0));
+  const memoryUsed = Math.max(0, Math.floor(view.own.memoryUsed ?? 0));
+  const memoryLimit = Math.max(0, Math.floor(view.own.memoryLimit ?? 0));
+  const requiredMemoryToFree = Math.max(0, memoryUsed + sourceMemoryCost - memoryLimit);
+  const selectedOptionIdSet = new Set(selectedOptionIds);
+  const optionCards = visibleCardsForChoiceInfo(view);
+  const selectedMemoryFreed = choice.options.reduce((sum, option) => {
+    if (!selectedOptionIdSet.has(option.id) || typeof option.value !== "string")
+      return sum;
+    const card = optionCards.get(option.value);
+    return sum + Math.max(0, Math.floor(card?.memoryCost ?? 0));
+  }, 0);
+  const memoryRequired = requiredMemoryToFree > 0;
+  const enoughMemoryFreed = selectedMemoryFreed >= requiredMemoryToFree;
+  return {
+    title: memoryRequired ? "MU freimachen" : "Programme vorher trashen?",
+    question: runnerProgramInstallTrashQuestion(
+      memoryRequired,
+      requiredMemoryToFree,
+      selectedMemoryFreed,
+      selectedOptionIds.length,
+    ),
+    effectHint: memoryRequired
+      ? "Die Installation wird nur durchgeführt, wenn genug MU frei wird. Ohne Auswahl wird sie abgebrochen."
+      : "Du kannst ohne Trash installieren oder vorher installierte Programme trashen.",
+    submitLabel: runnerProgramInstallTrashSubmitLabel(
+      memoryRequired,
+      selectedOptionIds.length,
+    ),
+    canSubmit: !memoryRequired || enoughMemoryFreed || selectedOptionIds.length === 0,
+    requiredMemoryToFree,
+    selectedMemoryFreed,
+  };
+}
+
+function runnerProgramInstallTrashQuestion(
+  memoryRequired: boolean,
+  requiredMemoryToFree: number,
+  selectedMemoryFreed: number,
+  selectedCount: number,
+): string {
+  if (!memoryRequired) {
+    if (selectedCount === 0) return "Ohne Trash installieren?";
+    return selectedCount === 1
+      ? "Dieses Programm vorher trashen und dann installieren?"
+      : `${selectedCount} Programme vorher trashen und dann installieren?`;
+  }
+  if (selectedCount === 0)
+    return `Wähle Programme mit mindestens ${requiredMemoryToFree} MU oder brich die Installation ab.`;
+  if (selectedMemoryFreed >= requiredMemoryToFree)
+    return `${selectedMemoryFreed}/${requiredMemoryToFree} MU gewählt. Auswahl bestätigen?`;
+  return `Noch ${requiredMemoryToFree - selectedMemoryFreed} MU freimachen (${selectedMemoryFreed}/${requiredMemoryToFree}).`;
+}
+
+function runnerProgramInstallTrashSubmitLabel(
+  memoryRequired: boolean,
+  selectedCount: number,
+): string {
+  if (memoryRequired && selectedCount === 0) return "Nicht installieren";
+  if (memoryRequired) return "Auswahl bestätigen";
+  if (selectedCount === 0) return "Ohne Trash installieren";
+  return "Installieren";
+}
+
+function visibleCardsForChoiceInfo(view: PlayerView): Map<string, VisibleCard> {
+  return new Map(
+    [
+      view.own.identity,
+      ...view.own.gripOrHq,
+      ...view.own.heapOrArchives,
+      ...view.own.scoreArea,
+      ...(view.own.rig ?? []),
+      view.opponent.identity,
+      ...(view.opponent.discardCards ?? []),
+      ...view.opponent.scoreArea,
+      ...(view.opponent.rig ?? []),
+      ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+      ...(view.specialZones?.setAside ?? []),
+      ...(view.specialZones?.removedFromGame ?? []),
+      ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
+      ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
+      ...(view.run?.accessedCard ? [view.run.accessedCard] : []),
+    ].map((card) => [card.instanceId, card]),
+  );
 }
 
 export function breachProgressLabel(view: PlayerView): string | null {

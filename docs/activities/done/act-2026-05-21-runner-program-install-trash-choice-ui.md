@@ -1,20 +1,27 @@
 ---
 activityId: act-2026-05-21-runner-program-install-trash-choice-ui
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-runner-program-install-free-mu
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/web test
+  - git diff --check
 ---
 
 # Runner-Programminstallation: Trash-Choice verständlich bedienen
@@ -50,13 +57,13 @@ Der Webclient soll die Engine-Choice beim Installieren eines Runner-Programms ve
 
 ## Akzeptanzkriterien
 
-- [ ] Bei ausreichender MU kann der Runner ein Programm installieren, ohne vorher Programme zu trashen.
-- [ ] Bei ausreichender MU kann der Runner freiwillig installierte Programme auswählen und dann installieren.
-- [ ] Bei MU-Mangel ist der Pflichtcharakter verständlich: genug Programme wählen oder Installation abbrechen.
-- [ ] Der Abbruchpfad verbraucht keine Aktion und keine Credits, soweit die Engine dies vorgibt.
-- [ ] Auswahlmarker oder Choice-Panel zeigen keine verdeckten Informationen.
-- [ ] Die UI nutzt ausschließlich Engine-`pendingChoice`/`LegalActions` als Legalitätsquelle.
-- [ ] Fokussierte Web-Tests decken freiwilliges Überspringen, MU-Pflichtauswahl und Abbruch ab.
+- [x] Bei ausreichender MU kann der Runner ein Programm installieren, ohne vorher Programme zu trashen.
+- [x] Bei ausreichender MU kann der Runner freiwillig installierte Programme auswählen und dann installieren.
+- [x] Bei MU-Mangel ist der Pflichtcharakter verständlich: genug Programme wählen oder Installation abbrechen.
+- [x] Der Abbruchpfad verbraucht keine Aktion und keine Credits, soweit die Engine dies vorgibt.
+- [x] Auswahlmarker oder Choice-Panel zeigen keine verdeckten Informationen.
+- [x] Die UI nutzt ausschließlich Engine-`pendingChoice`/`LegalActions` als Legalitätsquelle.
+- [x] Fokussierte Web-Tests decken freiwilliges Überspringen, MU-Pflichtauswahl und Abbruch ab.
 
 ## Umsetzungshinweise
 
@@ -66,4 +73,4 @@ Der Webclient soll die Engine-Choice beim Installieren eines Runner-Programms ve
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Für `runner_program_trash_before_install` berechnet der Webclient aus side-sicheren PlayerView-Daten den optionalen bzw. verpflichtenden MU-Kontext: Titel, Frage, Hinweistext, Submit-Label und Submit-Freigabe unterscheiden jetzt `Ohne Trash installieren`, freiwillige Auswahl, unzureichende MU-Auswahl und `Nicht installieren` über leere Auswahl. Die UI bleibt bei `pendingChoice.options`/`resolve_choice` und erzeugt keine eigene Legalität.

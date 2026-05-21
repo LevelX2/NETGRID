@@ -138,6 +138,7 @@ import {
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
+  runnerProgramInstallTrashChoiceInfo,
   runBreakerActionHint,
   runTargetServerIds,
   runAwareActionButtonLabel,
@@ -7629,7 +7630,7 @@ function LegalActionsPanel({
           </section>
         );
       }
-      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
+      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} view={view} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
     }
     return (
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
@@ -7758,6 +7759,7 @@ function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
 function CardChoicePanel({
   choice,
   action,
+  view,
   disabled,
   highlighted,
   enrichCard,
@@ -7765,6 +7767,7 @@ function CardChoicePanel({
 }: {
   choice: VisibleChoice;
   action: LegalAction;
+  view: PlayerView;
   disabled: boolean;
   highlighted: boolean;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
@@ -7780,11 +7783,15 @@ function CardChoicePanel({
   const selectedOptions = selected
     .map((optionId) => choice.options.find((option) => option.id === optionId))
     .filter((option): option is VisibleChoiceOption => Boolean(option));
-  const canSubmit = selected.length >= minSelections && selected.length <= maxSelections;
+  const programInstallTrashInfo = runnerProgramInstallTrashChoiceInfo(choice, view, selected);
+  const canSubmit =
+    selected.length >= minSelections &&
+    selected.length <= maxSelections &&
+    (programInstallTrashInfo?.canSubmit ?? true);
   const singleSelection = maxSelections === 1;
-  const title = cardChoiceTitle(choice);
+  const title = programInstallTrashInfo?.title ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
-  const effectHint = cardChoiceEffectHint(choice);
+  const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
 
   useEffect(() => {
     setSelected([]);
@@ -7862,11 +7869,11 @@ function CardChoicePanel({
         <footer className="cardChoiceFooter">
           <div className="cardChoiceFooterText">
             {effectHint ? <p className="cardChoiceEffectHint">{effectHint}</p> : null}
-            <p className="cardChoiceQuestion">{cardChoiceQuestion(choice, selectedOptions)}</p>
+            <p className="cardChoiceQuestion">{programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
           </div>
           <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
             <Check size={15} />
-            {cardChoiceSubmitLabel(selected.length)}
+            {programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(selected.length)}
           </button>
         </footer>
       </div>
