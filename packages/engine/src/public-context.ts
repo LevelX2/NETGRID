@@ -750,6 +750,12 @@ export function publicContextForAction(
       context.hqCardCount = legalAction.payload.hqCardCount;
     if (typeof legalAction.payload.drawnCount === "number")
       context.drawnCount = legalAction.payload.drawnCount;
+    if (typeof legalAction.payload.shownCount === "number")
+      context.shownCount = legalAction.payload.shownCount;
+    if (typeof legalAction.payload.shuffledIntoRndCount === "number")
+      context.shuffledIntoRndCount = legalAction.payload.shuffledIntoRndCount;
+    if (typeof legalAction.payload.combinedAgendaPoints === "number")
+      context.combinedAgendaPoints = legalAction.payload.combinedAgendaPoints;
     if (typeof legalAction.payload.corpDrawnCount === "number")
       context.corpDrawnCount = legalAction.payload.corpDrawnCount;
     if (typeof legalAction.payload.randomDrawRecordPurpose === "string")
@@ -762,6 +768,9 @@ export function publicContextForAction(
     if (typeof legalAction.payload.publicRevealDefinitionIds === "string")
       context.publicRevealDefinitionIds =
         legalAction.payload.publicRevealDefinitionIds;
+    if (typeof legalAction.payload.shownCardDefinitionIds === "string")
+      context.shownCardDefinitionIds =
+        legalAction.payload.shownCardDefinitionIds;
     if (typeof legalAction.payload.exposedServerIds === "string")
       context.exposedServerIds = legalAction.payload.exposedServerIds;
     if (typeof legalAction.payload.exposedServerLabels === "string")

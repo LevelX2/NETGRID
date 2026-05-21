@@ -41,7 +41,7 @@ export type CardEffectExecutionContext = {
   ) => CardEffectHostedCreditsResult;
   addCountersToSource?: (
     sourceCardId: CardInstanceId,
-    counterType: Extract<CounterType, "ablative" | "trauma">,
+    counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
   ) => CardEffectCounterResult;
   removeRunnerTags?: (
@@ -181,7 +181,7 @@ export type CardEffectHostedCreditsResult = {
 
 export type CardEffectCounterResult = {
   amount: number;
-  counterType: Extract<CounterType, "ablative" | "trauma">;
+  counterType: Extract<CounterType, "ablative" | "trauma" | "boon">;
   countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;
 };
@@ -647,10 +647,11 @@ export function executeCardImplementationEffects(
         assertPublicVisibility("add_counters_to_source", effect.visibility);
         if (
           effect.counterType !== "ablative" &&
-          effect.counterType !== "trauma"
+          effect.counterType !== "trauma" &&
+          effect.counterType !== "boon"
         )
           throw new Error(
-            "add_counters_to_source supports only prevention counters.",
+            "add_counters_to_source supports only explicit source counters.",
           );
         if (!context.addCountersToSource)
           throw new Error(

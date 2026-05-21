@@ -10,6 +10,7 @@ import type {
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  CardScoredAgendaImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
@@ -43,6 +44,7 @@ export type CardImplementationDefinition = {
   trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
   virusCounter?: CardVirusCounterImplementation;
+  scoredAgenda?: CardScoredAgendaImplementation;
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";

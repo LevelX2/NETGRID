@@ -261,6 +261,7 @@ import type {
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
   CardFlatlineReplacementSourceImplementation,
+  CardScoredAgendaImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
   IncreaseTraceLinkEffectImplementation,
@@ -1032,6 +1033,24 @@ const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
 const PARIS_CITY_GRID_TRACE_POOL_BITS = 6;
+
+function scoredAgendaImplementationForDefinitionId(
+  definitionId: CardDefinitionId,
+): CardScoredAgendaImplementation | undefined {
+  return cardImplementationForDefinitionId(definitionId)?.scoredAgenda;
+}
+
+function scoredAgendaImplementationForDefinition(
+  definition: CardDefinition,
+): CardScoredAgendaImplementation | undefined {
+  return scoredAgendaImplementationForDefinitionId(definition.id);
+}
+
+function scoredAgendaKindForDefinition(
+  definition: CardDefinition,
+): CardScoredAgendaImplementation["kind"] | undefined {
+  return scoredAgendaImplementationForDefinition(definition)?.kind;
+}
 
 const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_economy_event: {
@@ -3174,7 +3193,12 @@ function corpMainActions(state: GameState): LegalAction[] {
         effectiveAgendaDifficulty(effectiveAgendaDifficultyDeps, state, id) <=
           mustInstance(state.cardInstances, id).advancementCounters
       ) {
-        if (definition.id === SECURITY_NET_OPTIMIZATION_ID) {
+        if (
+          scoredAgendaKindForDefinition(definition) ===
+            "choose_fort_ice_strength_bonus" ||
+          (!scoredAgendaImplementationForDefinition(definition) &&
+            definition.id === SECURITY_NET_OPTIMIZATION_ID)
+        ) {
           for (const targetServer of state.corp.servers) {
             actions.push(
               action(
@@ -3816,7 +3840,17 @@ function corpMainActions(state: GameState): LegalAction[] {
       agendaId,
       definition,
     );
-    if (definition.id === AI_CHIEF_FINANCIAL_OFFICER_ID) {
+    if (
+      scoredAgendaKindForDefinition(definition) ===
+        "ai_cfo_shuffle_hq_archives_into_rd_draw" ||
+      (!scoredAgendaImplementationForDefinition(definition) &&
+        definition.id === AI_CHIEF_FINANCIAL_OFFICER_ID)
+    ) {
+      const implementation = scoredAgendaImplementationForDefinition(definition);
+      const drawCardsAmount =
+        implementation?.kind === "ai_cfo_shuffle_hq_archives_into_rd_draw"
+          ? implementation.drawCount
+          : 5;
       actions.push(
         action(
           state,
@@ -3828,13 +3862,17 @@ function corpMainActions(state: GameState): LegalAction[] {
           {
             cardId: agendaId,
             agendaAbility: "ai_chief_financial_officer",
-            drawCardsAmount: 5,
+            drawCardsAmount,
           },
         ),
       );
       continue;
     }
-    if (definition.id === CORPORATE_DOWNSIZING_ID && state.corp.rd.length > 0) {
+    if (
+      !scoredAgendaImplementationForDefinition(definition) &&
+      definition.id === CORPORATE_DOWNSIZING_ID &&
+      state.corp.rd.length > 0
+    ) {
       actions.push(
         action(
           state,
@@ -3897,7 +3935,10 @@ function corpMainActions(state: GameState): LegalAction[] {
       continue;
     }
     if (
-      definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID &&
+      (scoredAgendaKindForDefinition(definition) ===
+        "corporate_retreat_disable_on_rez_or_install" ||
+        (!scoredAgendaImplementationForDefinition(definition) &&
+          definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)) &&
       isCorporateRetreatInstallCreditAbilityAvailable(state, agendaId)
     ) {
       actions.push(
@@ -3956,14 +3997,24 @@ function isCorporateRetreatInstallCreditAbilityAvailable(
 ): boolean {
   return (
     state.corp.scoreArea.includes(agendaId) &&
-    definitionFor(state, agendaId).id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID &&
+    (scoredAgendaKindForDefinition(definitionFor(state, agendaId)) ===
+      "corporate_retreat_disable_on_rez_or_install" ||
+      (!scoredAgendaImplementationForDefinition(definitionFor(state, agendaId)) &&
+        definitionFor(state, agendaId).id ===
+          CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)) &&
     cardCounter(state, agendaId, "mark") > 0
   );
 }
 
 function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
   for (const agendaId of state.corp.scoreArea) {
-    if (definitionFor(state, agendaId).id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
+    const definition = definitionFor(state, agendaId);
+    if (
+      scoredAgendaKindForDefinition(definition) ===
+        "corporate_retreat_disable_on_rez_or_install" ||
+      (!scoredAgendaImplementationForDefinition(definition) &&
+        definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
+    )
       setCardCounter(state, agendaId, "mark", 0);
   }
 }
@@ -5289,22 +5340,33 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
   let bonus = 0;
   for (const agendaId of scoredCorpAgendaIds(state)) {
     const agendaDefinition = definitionFor(state, agendaId);
-    if (
-      agendaDefinition.id === SECURITY_NET_OPTIMIZATION_ID &&
-      iceServerId &&
-      mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
-    )
-      bonus += 1;
-    if (
-      agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
-      cardHasSubtype(iceDefinition, "code_gate")
-    )
-      bonus += 1;
-    if (
-      agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
-      cardHasSubtype(iceDefinition, "wall")
-    )
-      bonus += 1;
+    const scoredAgenda = scoredAgendaImplementationForDefinition(agendaDefinition);
+    if (scoredAgenda?.kind === "choose_fort_ice_strength_bonus") {
+      if (
+        iceServerId &&
+        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
+      )
+        bonus += scoredAgenda.amount;
+      continue;
+    }
+    if (!scoredAgenda) {
+      if (
+        agendaDefinition.id === SECURITY_NET_OPTIMIZATION_ID &&
+        iceServerId &&
+        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
+      )
+        bonus += 1;
+      if (
+        agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
+        cardHasSubtype(iceDefinition, "code_gate")
+      )
+        bonus += 1;
+      if (
+        agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
+        cardHasSubtype(iceDefinition, "wall")
+      )
+        bonus += 1;
+    }
   }
   bonus += iceStrengthModifierBonusFor(state, iceId);
   bonus += cardCounter(state, iceId, "mark");
@@ -8202,7 +8264,12 @@ function performAction(
         if (!state.corp.scoreArea.includes(sourceCardId))
           throw new Error("Corporate Retreat ist nicht gescort.");
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
+        const implementation = scoredAgendaImplementationForDefinition(definition);
+        if (
+          implementation?.kind !==
+            "corporate_retreat_disable_on_rez_or_install" &&
+          definition.id !== CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID
+        )
           throw new Error(
             "Die Agenda-Aktion passt nicht zu Corporate Retreat.",
           );
@@ -8211,7 +8278,12 @@ function performAction(
             "Corporate Retreat ist nach Install oder Rez nicht mehr verfuegbar.",
           );
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 0);
-        if (!Number.isInteger(gainAmount) || gainAmount !== 2)
+        const expectedGain =
+          implementation?.kind ===
+          "corporate_retreat_disable_on_rez_or_install"
+            ? implementation.gainAmount
+            : 2;
+        if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
           throw new Error(
             "Corporate Retreat gewaehrt in diesem Scope genau 2 Credits.",
           );
@@ -8257,7 +8329,12 @@ function performAction(
             "Die gewaehlte AI Chief Financial Officer Agenda ist nicht gescort.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== AI_CHIEF_FINANCIAL_OFFICER_ID)
+        const implementation = scoredAgendaImplementationForDefinition(definition);
+        if (
+          implementation?.kind !==
+            "ai_cfo_shuffle_hq_archives_into_rd_draw" &&
+          definition.id !== AI_CHIEF_FINANCIAL_OFFICER_ID
+        )
           throw new Error(
             "Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.",
           );
@@ -9735,6 +9812,8 @@ function resolveAiChiefFinancialOfficer(
   agendaId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
+  const sourceDefinition = definitionFor(state, agendaId);
+  const implementation = scoredAgendaImplementationForDefinition(sourceDefinition);
   const previousHq = state.corp.hq.slice();
   const previousArchives = state.corp.archives.slice();
   const merge = [...state.corp.rd, ...previousHq, ...previousArchives];
@@ -9743,7 +9822,7 @@ function resolveAiChiefFinancialOfficer(
   state.corp.rd = shuffleStateIds(
     state,
     merge,
-    `v192.shuffle.${AI_CHIEF_FINANCIAL_OFFICER_ID}.hq_archives_into_rd.${state.stateVersion + 1}`,
+    `v192.shuffle.${sourceDefinition.id}.hq_archives_into_rd.${state.stateVersion + 1}`,
   );
   for (const cardId of state.corp.rd) {
     state.cardInstances[cardId] = {
@@ -9753,14 +9832,17 @@ function resolveAiChiefFinancialOfficer(
       zone: { side: "corp", zone: "rd" },
     };
   }
-  const drawAmount = 5;
+  const drawAmount =
+    implementation?.kind === "ai_cfo_shuffle_hq_archives_into_rd_draw"
+      ? implementation.drawCount
+      : 5;
   const beforeDraw = state.corp.hq.length;
   drawCorpCards(state, drawAmount);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     cardId: agendaId,
-    cardDefinitionId: AI_CHIEF_FINANCIAL_OFFICER_ID,
-    sourceDefinitionId: AI_CHIEF_FINANCIAL_OFFICER_ID,
+    cardDefinitionId: sourceDefinition.id,
+    sourceDefinitionId: sourceDefinition.id,
     hiddenZoneBarrier: true,
     hiddenZoneAction: "ai_cfo_shuffle_hq_archives_into_rd",
     shuffledCardsCount: previousHq.length + previousArchives.length,
@@ -15465,7 +15547,9 @@ function applyCorpStartOfTurnEffects(
   if (!state.pendingChoice) startCorporateNegotiatingCenterChoice(state);
   const employeeEmpowermentCount = state.corp.scoreArea.reduce(
     (sum, cardId) => {
-      return definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID
+      const definition = definitionFor(state, cardId);
+      return !cardImplementationForDefinitionId(definition.id) &&
+        definition.id === EMPLOYEE_EMPOWERMENT_ID
         ? sum + 1
         : sum;
     },
@@ -18021,9 +18105,14 @@ function runnerHasInstalledCorporateAlly(state: GameState): boolean {
 
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
-    (cardId) =>
-      definitionFor(state, cardId).id ===
-      BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID,
+    (cardId) => {
+      const definition = definitionFor(state, cardId);
+      return (
+        scoredAgendaKindForDefinition(definition) === "meat_damage_bonus" ||
+        (!scoredAgendaImplementationForDefinition(definition) &&
+          definition.id === BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID)
+      );
+    },
   );
 }
 
@@ -19184,12 +19273,22 @@ function scoreAgenda(
   if (cardHasSubtype(definition, "black_ops")) {
     ensureCorpTurnFlags(state).scoredBlackOpsAgendaThisTurn = true;
   }
-  if (definition.id === "onr_v1_214_project-babylon") {
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  const scoredAgenda = implementation?.scoredAgenda;
+  const hasCardImplementation = Boolean(implementation);
+  if (
+    scoredAgenda?.kind === "project_babylon_bonus_points" ||
+    (!hasCardImplementation && definition.id === "onr_v1_214_project-babylon")
+  ) {
     const overadvance = Math.max(
       0,
       instanceBefore.advancementCounters - requiredDifficulty,
     );
-    const bonusAgendaPoints = Math.floor(overadvance / 2);
+    const perCounters =
+      scoredAgenda?.kind === "project_babylon_bonus_points"
+        ? scoredAgenda.perExcessAdvancementCounters
+        : 2;
+    const bonusAgendaPoints = Math.floor(overadvance / perCounters);
     setCardCounter(state, cardId, "agenda", bonusAgendaPoints);
     if (legalAction) {
       legalAction.payload = {
@@ -19215,6 +19314,26 @@ function scoreAgenda(
       };
     }
   }
+  if (scoredAgenda?.kind === "gain_credits_on_score") {
+    credits(state, scoredAgenda.recipient, scoredAgenda.amount);
+    if (legalAction)
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        onScoreGainCredits: scoredAgenda.amount,
+        gainedCredits: scoredAgenda.amount,
+        corpCreditsAfter: state.corp.credits,
+      };
+  }
+  if (scoredAgenda?.kind === "add_counters_on_score") {
+    addCardCounter(state, cardId, scoredAgenda.counterType, scoredAgenda.amount);
+    if (legalAction)
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        counterType: scoredAgenda.counterType,
+        addedCounterAmount: scoredAgenda.amount,
+        remainingCounters: cardCounter(state, cardId, scoredAgenda.counterType),
+      };
+  }
   executeCardImplementationLifecycleEffects(
     cardImplementationRuntimeDeps,
     state,
@@ -19223,7 +19342,11 @@ function scoreAgenda(
     cardId,
     "on_score",
   );
-  if (definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID) {
+  if (
+    scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install" ||
+      (!hasCardImplementation &&
+        definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
+  ) {
     setCardCounter(state, cardId, "mark", 1);
     if (legalAction)
       legalAction.payload = {
@@ -19232,7 +19355,7 @@ function scoreAgenda(
         corporateRetreatAvailable: true,
       };
   }
-  if (definition.id === "onr_v1_203_hostile-takeover") {
+  if (!hasCardImplementation && definition.id === "onr_v1_203_hostile-takeover") {
     state.corp.credits += 5;
     if (legalAction)
       legalAction.payload = {
@@ -19241,67 +19364,116 @@ function scoreAgenda(
         corpCreditsAfter: state.corp.credits,
       };
   }
-  if (definition.id === CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID) {
+  if (
+    scoredAgenda?.kind === "corporate_war_credit_swing" ||
+    (!hasCardImplementation &&
+      definition.id === CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID)
+  ) {
     const corpCreditsBefore = state.corp.credits;
-    const thresholdMet = corpCreditsBefore >= 12;
+    const threshold =
+      scoredAgenda?.kind === "corporate_war_credit_swing"
+        ? scoredAgenda.threshold
+        : 12;
+    const gainAmount =
+      scoredAgenda?.kind === "corporate_war_credit_swing"
+        ? scoredAgenda.gainAmount
+        : 12;
+    const thresholdMet = corpCreditsBefore >= threshold;
     if (thresholdMet) {
-      state.corp.credits += 12;
+      state.corp.credits += gainAmount;
     } else {
       state.corp.credits = 0;
     }
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        v1922CorporateWarThreshold: 12,
+        v1922CorporateWarThreshold: threshold,
         corpCreditsBeforeCorporateWar: corpCreditsBefore,
         corporateWarThresholdMet: thresholdMet,
-        onScoreGainCredits: thresholdMet ? 12 : 0,
+        onScoreGainCredits: thresholdMet ? gainAmount : 0,
         onScoreLostAllCredits: !thresholdMet,
         corpCreditsAfter: state.corp.credits,
       };
     }
   }
-  if (definition.id === DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID && legalAction) {
+  if (
+    legalAction &&
+    (scoredAgenda?.kind === "data_fort_reclamation" ||
+      (!hasCardImplementation &&
+        definition.id === DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID))
+  ) {
     startDataFortReclamationChoice(state, cardId, legalAction);
   }
-  if (definition.id === ICE_TRANSMUTATION_AGENDA_ID && legalAction) {
+  if (
+    legalAction &&
+    (scoredAgenda?.kind === "ice_transmutation_rezzed_ice_modifier" ||
+      (!hasCardImplementation && definition.id === ICE_TRANSMUTATION_AGENDA_ID))
+  ) {
     startIceTransmutationChoice(state, cardId, legalAction);
   }
-  if (definition.id === "onr_v1_212_priority-requisition" && legalAction) {
+  if (
+    legalAction &&
+    (scoredAgenda?.kind === "priority_requisition_rez_ice_at_no_cost" ||
+      (!hasCardImplementation && definition.id === "onr_v1_212_priority-requisition"))
+  ) {
     startPriorityRequisitionChoice(state, cardId, legalAction);
   }
-  if (definition.id === ENCRYPTION_BREAKTHROUGH_ID && legalAction) {
-    const codeGateIds = corpInstalledCardIds(state)
+  if (
+    legalAction &&
+    (scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits" ||
+      (!hasCardImplementation && definition.id === ENCRYPTION_BREAKTHROUGH_ID))
+  ) {
+    const subtype =
+      scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
+        ? scoredAgenda.subtype
+        : "code_gate";
+    const matchingIceIds = corpInstalledCardIds(state)
       .filter(
         (iceId) =>
           mustInstance(state.cardInstances, iceId).zone.zone === "serverIce" &&
-          cardHasSubtype(definitionFor(state, iceId), "code_gate"),
+          cardHasSubtype(definitionFor(state, iceId), subtype),
       )
       .sort();
-    let rezzedCodeGateCount = 0;
+    let rezzedMatchingIceCount = 0;
     const publicRevealDefinitionIds: CardDefinitionId[] = [];
-    for (const iceId of codeGateIds) {
+    for (const iceId of matchingIceIds) {
       const instance = mustInstance(state.cardInstances, iceId);
-      if (instance.rezzed) rezzedCodeGateCount += 1;
+      if (instance.rezzed) rezzedMatchingIceCount += 1;
       if (!instance.faceup) {
         state.cardInstances[iceId] = { ...instance, faceup: true };
       }
       publicRevealDefinitionIds.push(definitionFor(state, iceId).id);
     }
-    if (codeGateIds.length > 0) credits(state, "corp", codeGateIds.length);
+    const creditPer =
+      scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
+        ? scoredAgenda.creditPerRevealedOrRezzed
+        : 1;
+    const gainedCredits = matchingIceIds.length * creditPer;
+    if (gainedCredits > 0) credits(state, "corp", gainedCredits);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      agendaAbility: "encryption_breakthrough",
+      agendaAbility:
+        subtype === "wall" ? "superior_net_barriers" : "encryption_breakthrough",
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
-      revealedCount: codeGateIds.length,
-      rezzedCodeGateCount,
-      gainedCredits: codeGateIds.length,
+      hiddenZoneAction:
+        subtype === "wall"
+          ? "superior_net_barriers_reveal_walls"
+          : "encryption_breakthrough_reveal_code_gates",
+      revealedCount: matchingIceIds.length,
+      ...(subtype === "code_gate"
+        ? { rezzedCodeGateCount: rezzedMatchingIceCount }
+        : {}),
+      rezzedMatchingIceCount,
+      gainedCredits,
       corpCreditsAfter: state.corp.credits,
       publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
     };
   }
-  if (definition.id === SECURITY_NET_OPTIMIZATION_ID && legalAction) {
+  if (
+    legalAction &&
+    (scoredAgenda?.kind === "choose_fort_ice_strength_bonus" ||
+      (!hasCardImplementation && definition.id === SECURITY_NET_OPTIMIZATION_ID))
+  ) {
     const selectedServerId =
       typeof legalAction.payload?.selectedServerId === "string"
         ? String(legalAction.payload.selectedServerId)
@@ -19323,7 +19495,22 @@ function scoreAgenda(
       securityNetOptimizationServerId: selectedServerId,
     };
   }
-  if (definition.id === SECURITY_PURGE_PURGE_AGENDA_ID && legalAction) {
+  if (
+    legalAction &&
+    scoredAgenda?.kind === "corporate_downsizing_hq_agendas"
+  ) {
+    startCorporateDownsizingScoreChoice(
+      state,
+      cardId as CardInstanceId,
+      legalAction,
+      scoredAgenda.creditPerAgendaPoint,
+    );
+  }
+  if (
+    legalAction &&
+    (scoredAgenda?.kind === "security_purge_top_rd" ||
+      (!hasCardImplementation && definition.id === SECURITY_PURGE_PURGE_AGENDA_ID))
+  ) {
     resolveSecurityPurgeAgendaPurge(state, legalAction);
   }
   cleanupEmptyRemotes(state);
@@ -19397,7 +19584,9 @@ function resolvePriorityRequisitionChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId) ||
-    definitionFor(state, agendaId).id !== "onr_v1_212_priority-requisition"
+    (scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
+      "priority_requisition_rez_ice_at_no_cost" &&
+      definitionFor(state, agendaId).id !== "onr_v1_212_priority-requisition")
   ) {
     throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
   }
@@ -19557,8 +19746,10 @@ function resolveDataFortReclamationChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    definitionFor(state, agendaId as CardInstanceId).id !==
-      DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID
+    (scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
+      "data_fort_reclamation" &&
+      definitionFor(state, agendaId as CardInstanceId).id !==
+        DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID)
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -19680,8 +19871,10 @@ function resolveDataFortReclamationRezChoice(
     !serverId ||
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    definitionFor(state, agendaId as CardInstanceId).id !==
-      DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID
+    (scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
+      "data_fort_reclamation" &&
+      definitionFor(state, agendaId as CardInstanceId).id !==
+        DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID)
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
   mustServer(state, serverId);
@@ -20436,6 +20629,10 @@ function resolvePendingChoice(
     state.pendingChoice.source.startsWith("p3_36.show_hq_agendas_for_credits")
   ) {
     resolveShowHqAgendasForCreditsChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("p3_50.corporate_downsizing")) {
+    resolveCorporateDownsizingScoreChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
@@ -23715,6 +23912,154 @@ function resolveShowHqAgendasForCreditsChoice(
   };
 }
 
+function startCorporateDownsizingScoreChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  legalAction: LegalAction,
+  creditPerAgendaPoint: number,
+): void {
+  if (state.pendingChoice) return;
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const implementation = scoredAgendaImplementationForDefinition(sourceDefinition);
+  if (
+    !state.corp.scoreArea.includes(sourceCardId) ||
+    implementation?.kind !== "corporate_downsizing_hq_agendas" ||
+    !Number.isInteger(creditPerAgendaPoint) ||
+    creditPerAgendaPoint < 0
+  )
+    return;
+  const agendaIds = state.corp.hq
+    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
+    .sort();
+  if (agendaIds.length === 0) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      agendaAbility: "corporate_downsizing",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      shownCount: 0,
+      shuffledIntoRndCount: 0,
+      gainedCredits: 0,
+      corpCreditsAfter: state.corp.credits,
+    };
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `p3_50_corporate_downsizing_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `p3_50.corporate_downsizing:${sourceCardId}:${creditPerAgendaPoint}:${state.stateVersion + 1}`,
+    prompt: "Corporate Downsizing: HQ-Agenden zeigen",
+    kind: "select_cards",
+    options: agendaIds.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: "HQ-Agenda",
+        value: cardId,
+      };
+    }),
+    minSelections: 0,
+    maxSelections: agendaIds.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: "corporate_downsizing_choice",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "corporate_downsizing_hq_agendas",
+    hqAgendaChoiceCount: agendaIds.length,
+  };
+}
+
+function resolveCorporateDownsizingScoreChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_50.corporate_downsizing"))
+    throw new Error("Es ist keine Corporate-Downsizing-Choice offen.");
+  const [, sourceCardId = "", creditPerAgendaPointRaw = ""] =
+    choice.source.split(":");
+  const creditPerAgendaPoint = Number(creditPerAgendaPointRaw);
+  const sourceDefinition = sourceCardId
+    ? definitionFor(state, sourceCardId)
+    : undefined;
+  const implementation = sourceDefinition
+    ? scoredAgendaImplementationForDefinition(sourceDefinition)
+    : undefined;
+  if (
+    !sourceCardId ||
+    !sourceDefinition ||
+    !state.corp.scoreArea.includes(sourceCardId) ||
+    implementation?.kind !== "corporate_downsizing_hq_agendas" ||
+    !Number.isInteger(creditPerAgendaPoint) ||
+    creditPerAgendaPoint < 0
+  )
+    throw new Error("Corporate Downsizing ist nicht mehr aktiv.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const selectedSet = new Set(selectedIds);
+  if (
+    selectedSet.size !== selectedIds.length ||
+    selectedIds.some(
+      (cardId) =>
+        !state.corp.hq.includes(cardId) ||
+        definitionFor(state, cardId).type !== "agenda",
+    )
+  )
+    throw new Error("Corporate Downsizing darf nur HQ-Agenden zeigen.");
+  const revealedDefinitions = selectedIds.map((cardId) =>
+    definitionFor(state, cardId),
+  );
+  const combinedAgendaPoints = revealedDefinitions.reduce(
+    (sum, definition) => sum + Math.max(0, Math.floor(definition.agendaPoints ?? 0)),
+    0,
+  );
+  const gainedCredits = combinedAgendaPoints * creditPerAgendaPoint;
+  if (gainedCredits > 0) credits(state, "corp", gainedCredits);
+  state.corp.hq = state.corp.hq.filter((cardId) => !selectedSet.has(cardId));
+  const randomPurpose = `p3_50.corporate_downsizing.hq_agendas_into_rd.${sourceCardId}.${state.stateVersion + 1}`;
+  state.corp.rd = shuffleStateIds(
+    state,
+    [...state.corp.rd, ...selectedIds],
+    randomPurpose,
+  );
+  for (const cardId of state.corp.rd) {
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      zone: { side: "corp", zone: "rd" },
+    };
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: "corporate_downsizing",
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "corporate_downsizing_hq_agendas",
+    sourceDefinitionId: sourceDefinition.id,
+    sourceTitle: sourceDefinition.title,
+    publicRevealKind: "reveal",
+    publicRevealDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    publicRevealTitles: revealedDefinitions
+      .map((definition) => definition.title)
+      .join("||"),
+    shownCardDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    shownCount: selectedIds.length,
+    shuffledIntoRndCount: selectedIds.length,
+    combinedAgendaPoints,
+    gainedCredits,
+    corpCreditsAfter: state.corp.credits,
+    randomDrawRecordPurpose: randomPurpose,
+    randomCounterAfter: state.randomCounter,
+  };
+}
+
 function resolveReschedulerHqShuffleDraw(
   state: GameState,
   sourceCardId: CardInstanceId,
@@ -23873,7 +24218,9 @@ function resolveIceTransmutationChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId) ||
-    definitionFor(state, agendaId).id !== ICE_TRANSMUTATION_AGENDA_ID
+    (scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
+      "ice_transmutation_rezzed_ice_modifier" &&
+      definitionFor(state, agendaId).id !== ICE_TRANSMUTATION_AGENDA_ID)
   )
     throw new Error("Ice Transmutation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);

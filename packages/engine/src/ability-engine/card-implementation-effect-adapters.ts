@@ -238,7 +238,7 @@ export function createCardImplementationEffectAdapters(
   function addCountersToSourceForCardImplementationEffect(
     state: GameState,
     sourceCardId: CardInstanceId,
-    counterType: Extract<CounterType, "ablative" | "trauma">,
+    counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
   ): CardEffectCounterResult {
     host.addCardCounter(state, sourceCardId, counterType, amount);

@@ -17281,7 +17281,7 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("uses scored Corporate Downsizing to reveal only the R&D top definition", () => {
+  it("uses scored Corporate Downsizing to reveal HQ agendas and shuffle them into R&D", () => {
     let state = apply(
       MECHANIC_SMOKE_GAMES.hiddenZone("v1911-corporate-downsizing"),
       "corp",
@@ -17289,33 +17289,37 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
     state.corp.clicks = 3;
     const agendaId = moveCorpCardToHq(state, "onr_v1_194_corporate-downsizing");
-    removeEverywhere(state, agendaId);
-    state.corp.scoreArea.push(agendaId);
-    state.cardInstances[agendaId] = {
-      ...state.cardInstances[agendaId]!,
-      zone: { side: "corp", zone: "scoreArea" },
-      faceup: true,
-      rezzed: true,
-    };
-    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    const shownAgendaId = moveCorpCardToHq(state, "simple_agenda");
 
     state = apply(
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.agendaAbility ===
-          "v1911_corporate_downsizing_reveal_rd_top",
+        action.type === "install_card" && action.payload?.cardId === agendaId,
     );
+    state.cardInstances[agendaId]!.advancementCounters = 3;
+    const creditsBefore = state.corp.credits;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === agendaId,
+    );
+    expect(state.pendingChoice?.source).toContain("p3_50.corporate_downsizing");
+    state = applyChoices(state, "corp", [`card_${shownAgendaId}`]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_corp_reveal_rd_top",
-      revealKind: "reveal",
-      cardDefinitionId: "simple_economy_operation",
+      hiddenZoneAction: "corporate_downsizing_hq_agendas",
+      publicRevealKind: "reveal",
+      shownCount: 1,
+      shuffledIntoRndCount: 1,
+      combinedAgendaPoints: 2,
+      gainedCredits: 4,
     });
-    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
-      "simple_economy_operation_",
-    );
+    expect(state.corp.credits).toBe(creditsBefore + 4);
+    expect(state.corp.hq).not.toContain(shownAgendaId);
+    expect(state.corp.rd).toContain(shownAgendaId);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(`${shownAgendaId}`);
   });
 
   it("resolves Ice Pick Willie as program trash plus end-the-run without R&D reveal", () => {
@@ -30655,6 +30659,53 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     });
   });
 
+  it("scores Corporate Boon with Boon counters and spends one per turn for an action", () => {
+    let state = apply(
+      createGameAfterSetup({
+        seed: "v1922-corporate-boon-card-implementation",
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "v1922_corporate_boon_corp",
+          name: "O:NR V1.9.22 Corporate Boon",
+        },
+        agendaPointsToWin: 99,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 20;
+    state.corp.clicks = 10;
+    const agendaId = putCorpRootInRemote(state, "onr_v1_192_corporate-boon");
+    state.cardInstances[agendaId]!.advancementCounters = 6;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" && action.payload?.cardId === agendaId,
+    );
+
+    expect(state.cardInstances[agendaId]?.counters?.boon).toBe(4);
+    const clicksBefore = state.corp.clicks;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === agendaId &&
+        action.payload?.cardImplementationSourceCounterType === "boon",
+    );
+    expect(state.cardInstances[agendaId]?.counters?.boon).toBe(3);
+    expect(state.corp.clicks).toBe(clicksBefore + 1);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "activated_card_ability" &&
+          action.payload?.cardId === agendaId,
+      ),
+    ).toBe(false);
+  });
+
   it("scores Security Purge as a side-safe R&D top-three install and trash resolver", () => {
     const corpDeck: DeckDefinition = {
       ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
@@ -43084,10 +43135,10 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     employee.corp.credits = 10;
     employee.corp.maxHandSize = 100;
     scoreCorpAgendaForTest(employee, "onr_v1_199_employee-empowerment");
+    const hqBeforeEmployeeStart = employee.corp.hq.length;
     employee = apply(employee, "corp", (action) => action.type === "end_turn");
-    const creditsBeforeEmployee = employee.corp.credits;
     employee = apply(employee, "runner", (action) => action.type === "end_turn");
-    expect(employee.corp.credits).toBe(creditsBeforeEmployee + 1);
+    expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart + 1);
 
     let marine = apply(
       createGameAfterSetup({

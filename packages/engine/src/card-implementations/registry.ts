@@ -6,12 +6,23 @@
  * contain legacy resolver branches.
  */
 import type { CardDefinitionId } from "@netgrid/shared";
+import { aiChiefFinancialOfficerImplementation } from "./onr-v1/corp/agendas/ai-chief-financial-officer";
 import { artificialSecurityDirectorsImplementation } from "./onr-v1/corp/agendas/artificial-security-directors";
+import { bioweaponsEngineeringImplementation } from "./onr-v1/corp/agendas/bioweapons-engineering";
 import { blackIceQualityAssuranceImplementation } from "./onr-v1/corp/agendas/black-ice-quality-assurance";
+import { corporateBoonImplementation } from "./onr-v1/corp/agendas/corporate-boon";
 import { corporateCoupImplementation } from "./onr-v1/corp/agendas/corporate-coup";
+import { corporateDownsizingImplementation } from "./onr-v1/corp/agendas/corporate-downsizing";
+import { corporateRetreatImplementation } from "./onr-v1/corp/agendas/corporate-retreat";
+import { corporateWarImplementation } from "./onr-v1/corp/agendas/corporate-war";
+import { dataFortReclamationImplementation } from "./onr-v1/corp/agendas/data-fort-reclamation";
 import { detroitPoliceContractImplementation } from "./onr-v1/corp/agendas/detroit-police-contract";
+import { employeeEmpowermentImplementation } from "./onr-v1/corp/agendas/employee-empowerment";
+import { encryptionBreakthroughImplementation } from "./onr-v1/corp/agendas/encryption-breakthrough";
 import { executiveExtractionImplementation } from "./onr-v1/corp/agendas/executive-extraction";
 import { geneticsVisionaryAcquisitionImplementation } from "./onr-v1/corp/agendas/genetics-visionary-acquisition";
+import { hostileTakeoverImplementation } from "./onr-v1/corp/agendas/hostile-takeover";
+import { iceTransmutationImplementation } from "./onr-v1/corp/agendas/ice-transmutation";
 import { mainOfficeRelocationImplementation } from "./onr-v1/corp/agendas/main-office-relocation";
 import { marineArcologyImplementation } from "./onr-v1/corp/agendas/marine-arcology";
 import { netwatchOperationsOfficeImplementation } from "./onr-v1/corp/agendas/netwatch-operations-office";
@@ -20,8 +31,13 @@ import { politicalCoupImplementation } from "./onr-v1/corp/agendas/political-cou
 import { politicalOverthrowImplementation } from "./onr-v1/corp/agendas/political-overthrow";
 import { polymerBreakthroughImplementation } from "./onr-v1/corp/agendas/polymer-breakthrough";
 import { privateCybernetPoliceImplementation } from "./onr-v1/corp/agendas/private-cybernet-police";
+import { priorityRequisitionImplementation } from "./onr-v1/corp/agendas/priority-requisition";
+import { projectBabylonImplementation } from "./onr-v1/corp/agendas/project-babylon";
+import { securityNetOptimizationImplementation } from "./onr-v1/corp/agendas/security-net-optimization";
+import { securityPurgeImplementation } from "./onr-v1/corp/agendas/security-purge";
 import { strikeForceKaliImplementation } from "./onr-v1/corp/agendas/strike-force-kali";
 import { subsidiaryBranchImplementation } from "./onr-v1/corp/agendas/subsidiary-branch";
+import { superiorNetBarriersImplementation } from "./onr-v1/corp/agendas/superior-net-barriers";
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
 import { bloodCatImplementation } from "./onr-v1/corp/assets/blood-cat";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
@@ -436,11 +452,22 @@ export const CARD_IMPLEMENTATIONS = [
   traumaTeamImplementation,
   umbrellaPolicyImplementation,
   artificialSecurityDirectorsImplementation,
+  aiChiefFinancialOfficerImplementation,
+  bioweaponsEngineeringImplementation,
   blackIceQualityAssuranceImplementation,
+  corporateBoonImplementation,
   corporateCoupImplementation,
+  corporateDownsizingImplementation,
+  corporateRetreatImplementation,
+  corporateWarImplementation,
+  dataFortReclamationImplementation,
   detroitPoliceContractImplementation,
+  employeeEmpowermentImplementation,
+  encryptionBreakthroughImplementation,
   executiveExtractionImplementation,
   geneticsVisionaryAcquisitionImplementation,
+  hostileTakeoverImplementation,
+  iceTransmutationImplementation,
   mainOfficeRelocationImplementation,
   marineArcologyImplementation,
   netwatchOperationsOfficeImplementation,
@@ -449,8 +476,13 @@ export const CARD_IMPLEMENTATIONS = [
   politicalOverthrowImplementation,
   polymerBreakthroughImplementation,
   privateCybernetPoliceImplementation,
+  priorityRequisitionImplementation,
+  projectBabylonImplementation,
+  securityNetOptimizationImplementation,
+  securityPurgeImplementation,
   strikeForceKaliImplementation,
   subsidiaryBranchImplementation,
+  superiorNetBarriersImplementation,
   accountsReceivableImplementation,
   annualReviewsImplementation,
   auditOfCallRecordsImplementation,

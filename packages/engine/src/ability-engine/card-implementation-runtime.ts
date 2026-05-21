@@ -318,7 +318,7 @@ export type CardImplementationRuntimeDependencies = {
   addCountersToSource: (
     state: GameState,
     sourceCardId: CardInstanceId,
-    counterType: Extract<CounterType, "ablative" | "trauma">,
+    counterType: Extract<CounterType, "ablative" | "trauma" | "boon">,
     amount: number,
   ) => CardEffectCounterResult;
   removeRunnerTags: (
@@ -803,6 +803,7 @@ export function executeCardImplementationStartOfCorpTurnEffects(
           sourceTitle: definition.title,
           controller: instance.controller,
           reason: "start_of_turn",
+          drawCards: (side, amount) => deps.drawCards(state, side, amount),
           addHostedCredits: (sourceCardId, amount) =>
             deps.addHostedCredits(state, sourceCardId, amount),
           takeHostedCredits: (sourceCardId, side, amount) =>
@@ -1094,6 +1095,11 @@ function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation advancement counter cost must use source.",
         );
+    } else if (cost.kind === "source_counter") {
+      if (cost.source !== "source")
+        throw new Error(
+          "Activated CardImplementation source counter cost must use source.",
+        );
     } else if (cost.kind === "trash_source") {
       if (cost.amount !== 1)
         throw new Error(
@@ -1119,6 +1125,17 @@ function advancementCounterCostForActivatedAbility(
   return ability.costs
     .filter((cost) => cost.kind === "advancement_counter")
     .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
+}
+
+function sourceCounterCostsForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): Array<{ counterType: Extract<CounterType, "boon">; amount: number }> {
+  return ability.costs
+    .filter((cost) => cost.kind === "source_counter")
+    .map((cost) => ({
+      counterType: cost.counterType,
+      amount: assertActivatedCostAmount(cost),
+    }));
 }
 
 function hasTrashSourceCostForActivatedAbility(
@@ -1161,6 +1178,11 @@ function canPayActivatedCardImplementationCosts(
     if (!source || source.advancementCounters < advancementCounterCost)
       return false;
   }
+  for (const cost of sourceCounterCostsForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    const counters = source?.counters?.[cost.counterType] ?? 0;
+    if (!source || counters < cost.amount) return false;
+  }
   if (hasTrashSourceCostForActivatedAbility(ability)) {
     const source = state.cardInstances[cardId];
     if (
@@ -1195,6 +1217,16 @@ function payActivatedCardImplementationCosts(
       throw new Error("Die Quelle hat nicht genug Advancement-Counter.");
     source.advancementCounters -= advancementCounterCost;
   }
+  for (const cost of sourceCounterCostsForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    const counters = source?.counters?.[cost.counterType] ?? 0;
+    if (!source || counters < cost.amount)
+      throw new Error("Die Quelle hat nicht genug Source-Counter.");
+    source.counters = {
+      ...(source.counters ?? {}),
+      [cost.counterType]: counters - cost.amount,
+    };
+  }
   if (hasTrashSourceCostForActivatedAbility(ability)) {
     const trashResult = deps.trashSource(state, cardId);
     if (!trashResult.sourceTrashed)
@@ -1219,6 +1251,13 @@ function activatedAbilityPayload(
             advancementCounterCostForActivatedAbility(ability),
         }
       : {}),
+    ...sourceCounterCostsForActivatedAbility(ability).reduce<
+      Record<string, string | number | boolean>
+    >((payload, cost) => {
+      payload.cardImplementationSourceCounterType = cost.counterType;
+      payload.cardImplementationSourceCounterCost = cost.amount;
+      return payload;
+    }, {}),
     ...(hasTrashSourceCostForActivatedAbility(ability)
       ? { cardImplementationTrashSourceCost: true }
       : {}),

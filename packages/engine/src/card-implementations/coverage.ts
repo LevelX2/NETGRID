@@ -83,6 +83,9 @@ const IMPLEMENTED_RUN_CONTROL_LOCATION =
 const IMPLEMENTED_VIRUS_COUNTER_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/runner/programs";
 
+const IMPLEMENTED_SCORED_AGENDA_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/corp/agendas";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -833,6 +836,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for Virus-counter successful-run, start-of-turn and purge-linked behavior.",
     );
     currentLocations.add(IMPLEMENTED_VIRUS_COUNTER_LOCATION);
+  }
+  if (implementation.scoredAgenda) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for scored agenda on-score, scored-area ability or persistent scored modifier behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_SCORED_AGENDA_LOCATION);
   }
 
   return {

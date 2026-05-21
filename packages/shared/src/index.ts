@@ -153,7 +153,8 @@ export type CounterType =
   | "bit"
   | "crying"
   | "ablative"
-  | "trauma";
+  | "trauma"
+  | "boon";
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }

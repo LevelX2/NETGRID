@@ -199,6 +199,83 @@ export type CardVirusCounterImplementation = {
       };
 };
 
+export type CardScoredAgendaImplementation =
+  | {
+      kind: "gain_credits_on_score";
+      recipient: "corp";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "add_counters_on_score";
+      counterType: Extract<CounterType, "boon">;
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corporate_war_credit_swing";
+      threshold: number;
+      gainAmount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corporate_retreat_disable_on_rez_or_install";
+      counterType: Extract<CounterType, "mark">;
+      gainAmount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "ai_cfo_shuffle_hq_archives_into_rd_draw";
+      drawCount: 5;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "meat_damage_bonus";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "project_babylon_bonus_points";
+      perExcessAdvancementCounters: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "choose_fort_ice_strength_bonus";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "reveal_installed_ice_subtype_for_credits";
+      subtype: "code_gate" | "wall";
+      creditPerRevealedOrRezzed: number;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "priority_requisition_rez_ice_at_no_cost";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "ice_transmutation_rezzed_ice_modifier";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "corporate_downsizing_hq_agendas";
+      creditPerAgendaPoint: number;
+      shuffleSelectedIntoRnd: true;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "security_purge_top_rd";
+      count: 3;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "data_fort_reclamation";
+      temporaryCredits: 10;
+      maxHqCards: 4;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    };
+
 export type HostedProgramCapacityImplementation = {
   capacityMu: number;
   allowedCardTypes: readonly ["program"];
@@ -280,6 +357,12 @@ export type CardAbilityCostImplementation =
     }
   | {
       kind: "advancement_counter";
+      amount: number;
+      source: "source";
+    }
+  | {
+      kind: "source_counter";
+      counterType: Extract<CounterType, "boon">;
       amount: number;
       source: "source";
     }
@@ -524,7 +607,7 @@ export type ReturnSourceToGripIfPaidEffectImplementation = {
 
 export type AddCountersToSourceEffectImplementation = {
   kind: "add_counters_to_source";
-  counterType: Extract<CounterType, "ablative" | "trauma">;
+  counterType: Extract<CounterType, "ablative" | "trauma" | "boon">;
   amount: number;
   visibility: Extract<EventVisibilityClass, "public">;
 };
