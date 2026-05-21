@@ -790,6 +790,50 @@ describe("formatChronicleEvent", () => {
     expect(JSON.stringify(items)).not.toContain("runner_card_");
   });
 
+  it("names the program trashed by Banpei's trash-a-program subroutine", () => {
+    const items = formatChronicleEffectItems(
+      makeEvent("continue_run", {
+        actor: "runner",
+        encounterContinue: true,
+        result: "ended",
+        resolvedEffects: [
+          {
+            effectId: "subroutine_1",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_223_banpei",
+            sourceTitle: "Banpei",
+            subroutineIndex: 0,
+            subroutineType: "trash_installed_program",
+            cardDefinitionId: "simple_decoder",
+            cardTitle: "Simple Decoder",
+            cardsTrashed: 1
+          },
+          {
+            effectId: "subroutine_2",
+            kind: "resolve_subroutine",
+            visibility: "public",
+            side: "runner",
+            sourceDefinitionId: "onr_v1_223_banpei",
+            sourceTitle: "Banpei",
+            subroutineIndex: 1,
+            subroutineType: "end_the_run",
+            endedRun: true
+          }
+        ]
+      }),
+      "runner"
+    );
+
+    expect(items.map((item) => item.title)).toEqual([
+      "Banpei: Subroutine 1 trashte Simple Decoder.",
+      "Banpei: Subroutine 2 beendet den Run."
+    ]);
+    expect(items[0]?.description).toBe("Simple Decoder wurde in den Heap bewegt.");
+    expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "Simple Decoder", "Programm getrasht", "Banpei"]));
+  });
+
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
@@ -1016,6 +1060,25 @@ describe("formatChronicleEvent", () => {
 
     expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst und der Run endete.");
     expect(item.chips).toContain("Subroutinen");
+  });
+
+  it("includes trashed program titles in Encounter continuation summaries", () => {
+    const item = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        result: "ended",
+        encounterContinue: true,
+        encounterWillEndRun: true,
+        unbrokenSubroutineCount: 2,
+        trashedCardDefinitionId: "simple_decoder",
+        trashedCardType: "program",
+        trashedCount: 1
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast ungebrochene Subroutinen ausgelöst, Simple Decoder getrasht und der Run endete.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Subroutinen", "Simple Decoder", "Programm getrasht"]));
   });
 
   it("shows fully broken Encounter continuation as passed ICE", () => {

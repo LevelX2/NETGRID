@@ -13591,17 +13591,29 @@ describe("V1.9.0 Mechanikpaket I", () => {
       trashedCardDefinitionId: "simple_killer",
       trashedCardType: "program",
       trashedCount: 1,
-      resolvedEffects: [
-        {
+    });
+    expect(unbroken.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "resolve_subroutine",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 0,
+          subroutineType: "trash_installed_program",
+          cardDefinitionId: "simple_killer",
+          cardTitle: "Simple Killer",
+          cardsTrashed: 1,
+        }),
+        expect.objectContaining({
           kind: "resolve_subroutine",
           sourceDefinitionId: "onr_v1_223_banpei",
           sourceTitle: "Banpei",
           subroutineIndex: 1,
           subroutineType: "end_the_run",
           endedRun: true,
-        },
-      ],
-    });
+        }),
+      ]),
+    );
 
     let brokenTrash = setupTrashProgramIce(
       "p326-banpei-break-trash",
@@ -40135,6 +40147,15 @@ describe("Originalset Spotcheck 2026-05-16 Corp ICE/Operation Economy hardening"
           trashedCardType: "program",
           trashedCount: 1,
         });
+        expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+          expect.objectContaining({
+            kind: "resolve_subroutine",
+            subroutineType: "trash_installed_program",
+            cardDefinitionId: "simple_decoder",
+            cardTitle: "Simple Decoder",
+            cardsTrashed: 1,
+          }),
+        );
       }
       expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
         privatePayloadMarkers,

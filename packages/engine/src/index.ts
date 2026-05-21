@@ -10284,7 +10284,24 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
       if (state.winner) return;
     }
     if (subroutine.type === "trash_installed_program") {
-      resolveTrashInstalledProgramSubroutine(state, legalAction);
+      const trashResult = resolveTrashInstalledProgramSubroutine(
+        state,
+        legalAction,
+      );
+      appendResolvedSubroutineEffect(
+        legalAction,
+        definition,
+        index,
+        subroutine,
+        undefined,
+        trashResult
+          ? {
+              cardDefinitionId: trashResult.definitionId,
+              cardTitle: trashResult.title,
+              cardsTrashed: 1,
+            }
+          : { cardsTrashed: 0 },
+      );
     }
     if (subroutine.type === "set_run_encounter_tax") {
       const amount = Math.max(0, Math.floor(subroutine.amount ?? 0));
@@ -10496,7 +10513,13 @@ function appendResolvedSubroutineEffect(
   subroutineIndex: number,
   subroutine: NonNullable<CardDefinition["subroutines"]>[number],
   damageSummary?: DamageSummary,
-  options: { paidCredits?: number; endedRun?: boolean } = {},
+  options: {
+    paidCredits?: number;
+    endedRun?: boolean;
+    cardDefinitionId?: string;
+    cardTitle?: string;
+    cardsTrashed?: number;
+  } = {},
 ): void {
   if (!legalAction) return;
   const dynamicAttribution = dynamicSubroutineAttributionFor(subroutine);
@@ -10527,6 +10550,13 @@ function appendResolvedSubroutineEffect(
         : {}),
       ...(options.paidCredits !== undefined
         ? { paidCredits: options.paidCredits }
+        : {}),
+      ...(options.cardDefinitionId
+        ? { cardDefinitionId: options.cardDefinitionId }
+        : {}),
+      ...(options.cardTitle ? { cardTitle: options.cardTitle } : {}),
+      ...(options.cardsTrashed !== undefined
+        ? { cardsTrashed: options.cardsTrashed }
         : {}),
       ...(subroutine.type === "end_the_run" || options.endedRun
         ? { endedRun: true }
@@ -12462,10 +12492,11 @@ function pickRunnerProgramForUninstall(
 function resolveTrashInstalledProgramSubroutine(
   state: GameState,
   legalAction?: LegalAction,
-): void {
+): { definitionId: string; title: string } | undefined {
   const targetProgramId = pickRunnerProgramForUninstall(state);
-  if (!targetProgramId) return;
-  const targetDefinitionId = definitionFor(state, targetProgramId).id;
+  if (!targetProgramId) return undefined;
+  const targetDefinition = definitionFor(state, targetProgramId);
+  const targetDefinitionId = targetDefinition.id;
   trashRunnerInstalledProgram(state, targetProgramId);
   if (legalAction) {
     legalAction.payload = {
@@ -12475,6 +12506,7 @@ function resolveTrashInstalledProgramSubroutine(
       trashedCount: 1,
     };
   }
+  return { definitionId: targetDefinitionId, title: targetDefinition.title };
 }
 
 function trashRunnerInstalledProgram(
