@@ -9,6 +9,7 @@
 import type {
   CardDefinitionId,
   CardInstanceId,
+  CounterType,
   DamageType,
   GameEndReason,
   GameState,
@@ -38,6 +39,11 @@ export type CardEffectExecutionContext = {
     sourceCardId: CardInstanceId,
     amount: number,
   ) => CardEffectHostedCreditsResult;
+  addCountersToSource?: (
+    sourceCardId: CardInstanceId,
+    counterType: Extract<CounterType, "ablative" | "trauma">,
+    amount: number,
+  ) => CardEffectCounterResult;
   takeHostedCredits?: (
     sourceCardId: CardInstanceId,
     recipient: Side,
@@ -144,6 +150,13 @@ export type CardEffectDamageResult = {
 export type CardEffectHostedCreditsResult = {
   amount: number;
   hostedCreditsAfter: number;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectCounterResult = {
+  amount: number;
+  counterType: Extract<CounterType, "ablative" | "trauma">;
+  countersAfter: number;
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -504,6 +517,43 @@ export function executeCardImplementationEffects(
           amount: effect.amount,
           reason: effectReason(context),
           runnerTagsAfter: state.runner.tags,
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "add_counters_to_source": {
+        assertPositiveIntegerAmount("add_counters_to_source", effect.amount);
+        assertPublicVisibility("add_counters_to_source", effect.visibility);
+        if (
+          effect.counterType !== "ablative" &&
+          effect.counterType !== "trauma"
+        )
+          throw new Error(
+            "add_counters_to_source supports only prevention counters.",
+          );
+        if (!context.addCountersToSource)
+          throw new Error(
+            "add_counters_to_source effect requires an addCountersToSource execution context.",
+          );
+        const addResult = context.addCountersToSource(
+          context.sourceCardId,
+          effect.counterType,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, addResult.publicPayload);
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "add_counters_to_source"),
+          kind: "counter_change",
+          visibility: effect.visibility,
+          side: context.controller,
+          amount: addResult.amount,
+          counterType: addResult.counterType,
+          addedCounterAmount: addResult.amount,
+          remainingCounters: addResult.countersAfter,
+          reason: effectReason(context),
           ...(context.sourceDefinitionId
             ? { sourceDefinitionId: context.sourceDefinitionId }
             : {}),

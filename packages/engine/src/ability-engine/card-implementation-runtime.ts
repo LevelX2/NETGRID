@@ -11,6 +11,7 @@ import type {
   CardDefinition,
   CardInstance,
   CardInstanceId,
+  CounterType,
   DamageType,
   GameState,
   LegalAction,
@@ -25,6 +26,7 @@ import {
   type CardEffectDamageResult,
   type CardEffectDrawCardsResult,
   type CardEffectHostedCreditsResult,
+  type CardEffectCounterResult,
   type CardEffectHiddenInfoResult,
   type CardEffectMakeRunOptions,
   type CardEffectMakeRunResult,
@@ -69,7 +71,7 @@ export type CardImplementationRuntimeDependencies = {
   cardCounter: (
     state: GameState,
     cardId: CardInstanceId,
-    counterType: "bit",
+    counterType: CounterType,
   ) => number;
   rezzedCorpRootCardIds: (state: GameState) => CardInstanceId[];
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
@@ -260,6 +262,12 @@ export type CardImplementationRuntimeDependencies = {
     sourceCardId: CardInstanceId,
     amount: number,
   ) => CardEffectHostedCreditsResult;
+  addCountersToSource: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    counterType: Extract<CounterType, "ablative" | "trauma">,
+    amount: number,
+  ) => CardEffectCounterResult;
   takeHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -552,6 +560,8 @@ export function executeCardImplementationLifecycleEffects(
       controller: deps.mustInstance(state.cardInstances, cardId).controller,
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
+      addCountersToSource: (sourceCardId, counterType, amount) =>
+        deps.addCountersToSource(state, sourceCardId, counterType, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
@@ -929,6 +939,8 @@ export function resolveCardImplementationEndOfRunnerTurnAction(
       reason: "end_of_turn",
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
+      addCountersToSource: (sourceCardId, counterType, amount) =>
+        deps.addCountersToSource(state, sourceCardId, counterType, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
@@ -1543,6 +1555,8 @@ export function resolveActivatedCardImplementationAbility(
         ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
+      addCountersToSource: (sourceCardId, counterType, amount) =>
+        deps.addCountersToSource(state, sourceCardId, counterType, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>

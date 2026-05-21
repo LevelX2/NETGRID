@@ -3,6 +3,7 @@ import type {
   CardAbilityImplementation,
   CardAccessEffectImplementation,
   CardAccessHookImplementation,
+  CardDamagePreventionSourceImplementation,
   CardInstallAdditionalCostImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
@@ -25,4 +26,6 @@ export type CardImplementationDefinition = {
   runnerCounterEffects?: readonly RunnerTraceCounterEffectImplementation[];
   restrictedHostedCreditSource?: RestrictedHostedCreditSourceImplementation;
   installAdditionalCosts?: readonly CardInstallAdditionalCostImplementation[];
+  damagePreventionSources?: readonly CardDamagePreventionSourceImplementation[];
+  hardwareDeck?: true;
 };

@@ -20497,9 +20497,9 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     );
     expect(armoredFridgeId).toBeDefined();
     if (!armoredFridgeId) throw new Error("Missing Armored Fridge install");
-    expect(cardCounterAmount(state, armoredFridgeId, "power")).toBe(7);
+    expect(cardCounterAmount(state, armoredFridgeId, "ablative")).toBe(7);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      counterType: "power",
+      counterType: "ablative",
       addedCounterAmount: 7,
       remainingCounters: 7,
     });
@@ -20524,13 +20524,13 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       "runner",
       String(state.pendingChoice?.options.find((option) => option.id !== "pass")?.id),
     );
-    expect(cardCounterAmount(state, armoredFridgeId, "power")).toBe(6);
+    expect(cardCounterAmount(state, armoredFridgeId, "ablative")).toBe(6);
     expect(state.runner.grip.length).toBe(Math.max(0, gripBefore - 1));
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       eventModificationDecision: "apply",
       preventedAmount: 1,
       damageAmount: 1,
-      counterType: "power",
+      counterType: "ablative",
       removedCounterAmount: 1,
       remainingCounters: 6,
       sourceTrashed: false,
@@ -20542,7 +20542,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
 
-    setCardCounterForTest(state, armoredFridgeId, "power", 1);
+    setCardCounterForTest(state, armoredFridgeId, "ablative", 1);
     moveCorpCardToHq(state, "onr_v1_301_punitive-counterstrike");
     state = apply(
       state,
@@ -22140,13 +22140,13 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     );
     expect(armadilloId).toBeDefined();
     if (!armadilloId) throw new Error("Missing Armadillo");
-    expect(cardCounterAmount(state, armadilloId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, armadilloId, "bit")).toBe(2);
     expect(
       getPlayerView(state, "corp").opponent.rig?.find(
         (card) =>
           card.definitionId ===
           "onr_v1_120_armadillo-armored-road-home",
-      )?.counters?.recurring_credit,
+      )?.counters?.bit,
     ).toBe(2);
 
     state.runner.tags = 1;
@@ -22159,7 +22159,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = apply(state, "runner", (action) => action.type === "remove_tag");
     expect(state.runner.tags).toBe(0);
     expect(state.runner.credits).toBe(0);
-    expect(cardCounterAmount(state, armadilloId, "recurring_credit")).toBe(0);
+    expect(cardCounterAmount(state, armadilloId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "remove_tag",
       amount: 1,
@@ -22193,7 +22193,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         String(state.pendingChoice.options[0]?.id),
       );
     }
-    expect(cardCounterAmount(state, armadilloId, "recurring_credit")).toBe(2);
+    expect(cardCounterAmount(state, armadilloId, "bit")).toBe(2);
   });
 
   it("loads Drifter bits for tag removal and refreshes them at Runner turn start", () => {
@@ -22984,6 +22984,11 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
         action.type === "install_card" &&
         sourceDefinition(state, action) === "onr_v1_140_raven-microcyb-eagle",
     );
+    const eagleId = state.runner.rig.hardware.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId ===
+        "onr_v1_140_raven-microcyb-eagle",
+    );
     state = apply(
       state,
       "runner",
@@ -22995,11 +23000,6 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     const invisibilityId = state.runner.rig.programs.find(
       (id) =>
         state.cardInstances[id]?.definitionId === "onr_v1_035_invisibility",
-    );
-    const eagleId = state.runner.rig.hardware.find(
-      (id) =>
-        state.cardInstances[id]?.definitionId ===
-        "onr_v1_140_raven-microcyb-eagle",
     );
     const owlId = state.runner.rig.hardware.find(
       (id) =>
@@ -23014,7 +23014,8 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(
       state.cardInstances[invisibilityId]?.counters?.bit,
     ).toBe(1);
-    expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
+    expect(state.runner.heap).toContain(eagleId);
+    expect(state.runner.rig.hardware).not.toContain(eagleId);
     expect(state.cardInstances[owlId]?.counters?.bit).toBe(3);
 
     state.cardInstances[invisibilityId] = {
@@ -23022,13 +23023,6 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
       counters: {
         ...state.cardInstances[invisibilityId]!.counters,
         bit: 0,
-      },
-    };
-    state.cardInstances[eagleId] = {
-      ...state.cardInstances[eagleId]!,
-      counters: {
-        ...state.cardInstances[eagleId]!.counters,
-        recurring_credit: 0,
       },
     };
     state.cardInstances[owlId] = {
@@ -23046,7 +23040,6 @@ describe("V1.9.16 Program Subtype/Hosting/Stealth WIP", () => {
     expect(
       state.cardInstances[invisibilityId]?.counters?.bit,
     ).toBe(1);
-    expect(state.cardInstances[eagleId]?.counters?.recurring_credit).toBe(1);
     expect(state.cardInstances[owlId]?.counters?.bit).toBe(3);
   });
 
@@ -28325,16 +28318,66 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       hostedCreditsAdded: 3,
       counterType: "bit",
     });
+
+    let followUpState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-eagle-techtronica-deck-unique",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_eagle_techtronica_runner",
+          name: "Spotcheck Eagle Techtronica Runner",
+          cards: [
+            { id: "onr_v1_140_raven-microcyb-eagle", quantity: 1 },
+            { id: "onr_v1_143_techtronica-utility-suit", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      }),
+    );
+    followUpState.runner.credits = 30;
+    const eagleId = moveRunnerCardToGrip(
+      followUpState,
+      "onr_v1_140_raven-microcyb-eagle",
+    );
+    const techtronicaId = moveRunnerCardToGrip(
+      followUpState,
+      "onr_v1_143_techtronica-utility-suit",
+    );
+    followUpState = apply(
+      followUpState,
+      "runner",
+      (action) =>
+        sourceDefinition(followUpState, action) ===
+        "onr_v1_140_raven-microcyb-eagle",
+    );
+    expect(followUpState.runner.rig.hardware).toContain(eagleId);
+    followUpState = apply(
+      followUpState,
+      "runner",
+      (action) =>
+        sourceDefinition(followUpState, action) ===
+        "onr_v1_143_techtronica-utility-suit",
+    );
+    expect(followUpState.runner.heap).toContain(eagleId);
+    expect(followUpState.runner.rig.hardware).not.toContain(eagleId);
+    expect(followUpState.runner.rig.hardware).toContain(techtronicaId);
+    expect(followUpState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      cardDefinitionId: "onr_v1_143_techtronica-utility-suit",
+      deckUniqueReplacement: true,
+    });
   });
 
-  it("loads P3.40 hardware decks through CardImplementation bits and memory modifiers", () => {
+  it("loads P3.40/P3.41 hardware decks through CardImplementation bits and memory modifiers", () => {
     for (const [definitionId, expectedMu, expectedBits] of [
       ["onr_v1_119_arasaka-portable-prototype", 3, 3],
       ["onr_v1_122_artemis-2020", 2, 2],
       ["onr_v1_136_pandoras-deck", 2, 3],
       ["onr_v1_137_parraline-5750", 1, 1],
       ["onr_v1_138_pk-6089a", 1, 3],
+      ["onr_v1_140_raven-microcyb-eagle", 1, 1],
       ["onr_v1_141_raven-microcyb-owl", 1, 3],
+      ["onr_v1_143_techtronica-utility-suit", 1, 5],
     ] as const) {
       let state = toRunnerTurn(
         createGameAfterSetup({
@@ -42015,7 +42058,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
 
   it("keeps Trauma Team and Umbrella Policy prevention choices source-safe", () => {
     for (const [definitionId, preventedAmount] of [
-      ["onr_v1_185_trauma-team", 2],
+      ["onr_v1_185_trauma-team", 1],
       ["onr_v1_186_umbrella-policy", 1],
     ] as const) {
       let state = toRunnerTurn(

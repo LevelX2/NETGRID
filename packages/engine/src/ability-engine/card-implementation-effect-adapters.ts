@@ -10,6 +10,7 @@ import type {
   CardDefinitionId,
   CardInstance,
   CardInstanceId,
+  CounterType,
   DamageType,
   GameState,
   ImminentEvent,
@@ -20,6 +21,7 @@ import type {
   CardEffectDamageResult,
   CardEffectDrawCardsResult,
   CardEffectHostedCreditsResult,
+  CardEffectCounterResult,
   CardEffectTrashSourceResult,
 } from "./effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "./card-implementation-runtime";
@@ -82,18 +84,18 @@ export type CardImplementationEffectAdapterHost = {
   addCardCounter: (
     state: GameState,
     sourceCardId: CardInstanceId,
-    counterType: "bit",
+    counterType: CounterType,
     amount: number,
   ) => void;
   cardCounter: (
     state: GameState,
     sourceCardId: CardInstanceId,
-    counterType: "bit",
+    counterType: CounterType,
   ) => number;
   spendCardCounter: (
     state: GameState,
     sourceCardId: CardInstanceId,
-    counterType: "bit",
+    counterType: CounterType,
     amount: number,
   ) => void;
   credits: (state: GameState, side: Side, amount: number) => void;
@@ -120,6 +122,7 @@ export type CardImplementationEffectAdapters = Pick<
   | "drawCards"
   | "damageRunner"
   | "addHostedCredits"
+  | "addCountersToSource"
   | "takeHostedCredits"
   | "trashSourceWhenEmpty"
   | "trashSource"
@@ -232,6 +235,26 @@ export function createCardImplementationEffectAdapters(
     };
   }
 
+  function addCountersToSourceForCardImplementationEffect(
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    counterType: Extract<CounterType, "ablative" | "trauma">,
+    amount: number,
+  ): CardEffectCounterResult {
+    host.addCardCounter(state, sourceCardId, counterType, amount);
+    const countersAfter = host.cardCounter(state, sourceCardId, counterType);
+    return {
+      amount,
+      counterType,
+      countersAfter,
+      publicPayload: {
+        counterType,
+        addedCounterAmount: amount,
+        remainingCounters: countersAfter,
+      },
+    };
+  }
+
   function takeHostedCreditsForCardImplementationEffect(
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -304,6 +327,7 @@ export function createCardImplementationEffectAdapters(
     drawCards: drawCardsForCardImplementationEffect,
     damageRunner: damageRunnerForCardImplementationEffect,
     addHostedCredits: addHostedCreditsForCardImplementationEffect,
+    addCountersToSource: addCountersToSourceForCardImplementationEffect,
     takeHostedCredits: takeHostedCreditsForCardImplementationEffect,
     trashSourceWhenEmpty: trashSourceWhenEmptyForCardImplementationEffect,
     trashSource: trashSourceForCardImplementationEffect,

@@ -166,6 +166,7 @@ export type CardEffectImplementation =
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
+  | AddCountersToSourceEffectImplementation
   | DamageEffectImplementation
   | TraceEffectImplementation
   | MakeRunEffectImplementation
@@ -338,6 +339,13 @@ export type AddTagsEffectImplementation = {
   recipient: "runner";
   amount: number;
   visibility: EventVisibilityClass;
+};
+
+export type AddCountersToSourceEffectImplementation = {
+  kind: "add_counters_to_source";
+  counterType: Extract<CounterType, "ablative" | "trauma">;
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type DamageEffectImplementation = {
@@ -655,6 +663,33 @@ export type RestrictedHostedCreditSourceImplementation = {
 export type CardInstallAdditionalCostImplementation = {
   kind: "agenda_point";
   amount: number;
+};
+
+export type CardDamagePreventionSourceImplementation = {
+  kind: "damage_prevention";
+  damageTypes: readonly Extract<DamageType, "net" | "meat" | "core">[];
+  amount: number;
+  limit?:
+    | {
+        kind: "per_turn";
+        amount: number;
+      }
+    | undefined;
+  cost:
+    | {
+        kind: "none";
+      }
+    | {
+        kind: "source_counter";
+        counterType: Extract<CounterType, "ablative" | "trauma">;
+        amount: 1;
+        trashSourceWhenEmpty?: true;
+      }
+    | {
+        kind: "trash_source";
+      };
+  priority: number;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type CardPrintedSubroutineImplementation =

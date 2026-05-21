@@ -65,6 +65,9 @@ const IMPLEMENTED_ACCESS_EFFECT_LOCATION =
 const IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_DAMAGE_PREVENTION_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -88,8 +91,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/vewy-vewy-quiet.ts",
   "onr_v1_075_zetatech-software-installer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/zetatech-software-installer.ts",
+  "onr_v1_028_force-shield":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/force-shield.ts",
+  "onr_v1_061_shield":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
   "onr_v1_119_arasaka-portable-prototype":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/arasaka-portable-prototype.ts",
+  "onr_v1_120_armadillo-armored-road-home":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/armadillo-armored-road-home.ts",
+  "onr_v1_121_armored-fridge":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/armored-fridge.ts",
   "onr_v1_122_artemis-2020":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/artemis-2020.ts",
   "onr_v1_148_access-through-alpha":
@@ -104,18 +115,28 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/back-door-to-orbital-air.ts",
   "onr_v1_181_the-springboard":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/the-springboard.ts",
+  "onr_v1_185_trauma-team":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/trauma-team.ts",
   "onr_v1_124_corolla-speed-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/corolla-speed-chip.ts",
   "onr_v1_126_drifter-mobile-environment":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/drifter-mobile-environment.ts",
+  "onr_v1_125_dermatech-bodyplating":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/dermatech-bodyplating.ts",
+  "onr_v1_128_green-knight-surge-buffers":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/green-knight-surge-buffers.ts",
   "onr_v1_136_pandoras-deck":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/pandoras-deck.ts",
   "onr_v1_137_parraline-5750":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/parraline-5750.ts",
   "onr_v1_138_pk-6089a":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/pk-6089a.ts",
+  "onr_v1_140_raven-microcyb-eagle":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/raven-microcyb-eagle.ts",
   "onr_v1_141_raven-microcyb-owl":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/raven-microcyb-owl.ts",
+  "onr_v1_143_techtronica-utility-suit":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/techtronica-utility-suit.ts",
   "onr_v1_133_militech-mram-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/militech-mram-chip.ts",
   "onr_v1_134_mram-chip":
@@ -611,6 +632,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition declares additional install cost behavior.",
     );
     currentLocations.add(IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION);
+  }
+  if (implementation.damagePreventionSources?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for damage-prevention source behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_DAMAGE_PREVENTION_LOCATION);
   }
 
   return {

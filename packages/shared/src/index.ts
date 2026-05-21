@@ -151,7 +151,9 @@ export type CounterType =
   | "core_damage"
   | "shell"
   | "bit"
-  | "crying";
+  | "crying"
+  | "ablative"
+  | "trauma";
 
 export type TraceSuccessEffect =
   | { type: "add_tag"; amount: number }
@@ -338,6 +340,7 @@ export type EventModificationCandidate = {
   visibility: EventVisibilityClass;
   optional: boolean;
   preventAmount?: number;
+  preventionSourceIndex?: number;
   bypassCostPerDamage?: number;
   bypassPaymentSide?: Side;
 };

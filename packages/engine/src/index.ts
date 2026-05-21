@@ -250,6 +250,7 @@ import type {
   CardAccessEffectImplementation,
   CardAccessEffectStepImplementation,
   CardAccessZone,
+  CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
@@ -9442,9 +9443,9 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     removeFromAllZones(state, cardId);
     if (definition.type === "hardware") {
       const trashedDeckDefinitionIds: string[] = [];
-      if (cardHasSubtype(definition, "deck")) {
+      if (isRunnerHardwareDeckDefinition(definition)) {
         for (const oldDeckId of state.runner.rig.hardware.slice().sort()) {
-          if (!cardHasSubtype(definitionFor(state, oldDeckId), "deck"))
+          if (!isRunnerHardwareDeckDefinition(definitionFor(state, oldDeckId)))
             continue;
           trashedDeckDefinitionIds.push(definitionFor(state, oldDeckId).id);
           trashRunnerInstalledCardToHeap(state, oldDeckId);
@@ -9464,7 +9465,10 @@ function installCard(state: GameState, legalAction: LegalAction): void {
           "recurring_credit",
           definition.recurringCredits ?? 0,
         );
-      if (definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID) {
+      if (
+        definition.id === ABLATIVE_COUNTER_HARDWARE_CARD_ID &&
+        damagePreventionSourcesForDefinition(definition).length === 0
+      ) {
         setCardCounter(
           state,
           cardId,
@@ -15340,6 +15344,20 @@ function collectRuntimeDamagePreventionCandidates(
   const candidates: EventModificationCandidate[] = [];
   for (const cardId of installed) {
     const definition = definitionFor(state, cardId);
+    const cardImplementationPreventionSources =
+      damagePreventionSourcesForDefinition(definition);
+    if (cardImplementationPreventionSources.length > 0) {
+      candidates.push(
+        ...cardImplementationDamagePreventionCandidates(
+          state,
+          event,
+          cardId,
+          definition,
+          cardImplementationPreventionSources,
+        ),
+      );
+      continue;
+    }
     if (
       definition.id === DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
       damageType === "meat"
@@ -15431,6 +15449,84 @@ function collectRuntimeDamagePreventionCandidates(
     });
   }
   return candidates;
+}
+
+function damagePreventionSourcesForDefinition(
+  definition: CardDefinition,
+): readonly CardDamagePreventionSourceImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.damagePreventionSources ?? []
+  );
+}
+
+function isRunnerHardwareDeckDefinition(definition: CardDefinition): boolean {
+  return (
+    definition.type === "hardware" &&
+    (cardHasSubtype(definition, "deck") ||
+      cardImplementationForDefinitionId(definition.id)?.hardwareDeck === true)
+  );
+}
+
+function cardImplementationDamagePreventionCandidates(
+  state: GameState,
+  event: ImminentEvent,
+  cardId: CardInstanceId,
+  definition: CardDefinition,
+  sources: readonly CardDamagePreventionSourceImplementation[],
+): EventModificationCandidate[] {
+  const amount = numberPayload(event, "amount");
+  const damageType = damageTypePayload(event);
+  const candidates: EventModificationCandidate[] = [];
+  sources.forEach((source, sourceIndex) => {
+    if (
+      source.kind !== "damage_prevention" ||
+      source.visibility !== "public" ||
+      !source.damageTypes.includes(damageType)
+    )
+      return;
+    if (!cardImplementationDamagePreventionSourceCanPay(state, cardId, source))
+      return;
+    const preventAmount =
+      source.limit?.kind === "per_turn"
+        ? Math.min(
+            amount,
+            Math.max(
+              0,
+              source.limit.amount - damagePreventionUsedThisTurn(state, cardId),
+            ),
+          )
+        : Math.min(amount, source.amount);
+    if (preventAmount <= 0) return;
+    candidates.push({
+      candidateId: `card_implementation_damage_prevent_${sanitizeId(cardId)}_${sourceIndex}_${preventAmount}`,
+      eventId: event.eventId,
+      kind: "prevent",
+      controller: "runner",
+      sourceRef: {
+        kind: "card",
+        instanceId: cardId,
+        definitionId: definition.id,
+        label: definition.title,
+      },
+      priority: source.priority,
+      visibility: "hidden_info_barrier",
+      optional: true,
+      preventAmount,
+      preventionSourceIndex: sourceIndex,
+    });
+  });
+  return candidates;
+}
+
+function cardImplementationDamagePreventionSourceCanPay(
+  state: GameState,
+  cardId: CardInstanceId,
+  source: CardDamagePreventionSourceImplementation,
+): boolean {
+  if (!runnerInstalledCardIds(state).includes(cardId)) return false;
+  if (source.cost.kind === "none") return true;
+  if (source.cost.kind === "trash_source") return true;
+  return cardCounter(state, cardId, source.cost.counterType) >= source.cost.amount;
 }
 
 function collectHarnessDamagePreventionCandidates(
@@ -16199,12 +16295,44 @@ function applyRuntimeDamagePreventionCost(
   if (
     preventedAmount <= 0 ||
     candidate.sourceRef.kind !== "card" ||
-    !candidate.sourceRef.instanceId ||
-    candidate.sourceRef.definitionId !== ABLATIVE_COUNTER_HARDWARE_CARD_ID
+    !candidate.sourceRef.instanceId
   ) {
     return {};
   }
   const sourceCardId = candidate.sourceRef.instanceId;
+  const definition = definitionFor(state, sourceCardId);
+  const implementationSource = cardImplementationDamagePreventionSourceForCandidate(
+    definition,
+    candidate,
+  );
+  if (implementationSource) {
+    if (implementationSource.cost.kind === "none") return {};
+    if (implementationSource.cost.kind === "trash_source") {
+      trashRunnerInstalledCardToHeap(state, sourceCardId);
+      return {
+        sourceTrashed: true,
+        trashedCardDefinitionId: definition.id,
+      };
+    }
+    const { counterType, amount, trashSourceWhenEmpty } =
+      implementationSource.cost;
+    if (cardCounter(state, sourceCardId, counterType) < amount)
+      throw new Error("Die Prevention-Quelle hat nicht genug Counter.");
+    spendCardCounter(state, sourceCardId, counterType, amount);
+    const remainingCounters = cardCounter(state, sourceCardId, counterType);
+    const sourceTrashed =
+      trashSourceWhenEmpty === true && remainingCounters <= 0;
+    if (sourceTrashed) trashRunnerInstalledCardToHeap(state, sourceCardId);
+    return {
+      counterType,
+      removedCounterAmount: amount,
+      remainingCounters,
+      sourceTrashed,
+      ...(sourceTrashed ? { trashedCardDefinitionId: definition.id } : {}),
+    };
+  }
+  if (candidate.sourceRef.definitionId !== ABLATIVE_COUNTER_HARDWARE_CARD_ID)
+    return {};
   if (!state.runner.rig.hardware.includes(sourceCardId))
     throw new Error("Armored Fridge ist nicht mehr installiert.");
   if (cardCounter(state, sourceCardId, "power") <= 0)
@@ -16219,6 +16347,20 @@ function applyRuntimeDamagePreventionCost(
     remainingCounters,
     sourceTrashed,
   };
+}
+
+function cardImplementationDamagePreventionSourceForCandidate(
+  definition: CardDefinition,
+  candidate: EventModificationCandidate,
+): CardDamagePreventionSourceImplementation | undefined {
+  const sourceIndex = candidate.preventionSourceIndex;
+  if (
+    typeof sourceIndex !== "number" ||
+    !Number.isInteger(sourceIndex) ||
+    sourceIndex < 0
+  )
+    return undefined;
+  return damagePreventionSourcesForDefinition(definition)[sourceIndex];
 }
 
 function revalidateDamagePreventionCandidateSource(
@@ -16237,6 +16379,19 @@ function revalidateDamagePreventionCandidateSource(
   ) {
     throw new Error("Die Prevention-Quelle passt nicht mehr zur Karte.");
   }
+  const implementationSource = cardImplementationDamagePreventionSourceForCandidate(
+    definitionFor(state, sourceCardId),
+    candidate,
+  );
+  if (
+    implementationSource &&
+    !cardImplementationDamagePreventionSourceCanPay(
+      state,
+      sourceCardId,
+      implementationSource,
+    )
+  )
+    throw new Error("Die Prevention-Quelle kann die Kosten nicht mehr zahlen.");
 }
 
 function sanitizeId(value: string): string {

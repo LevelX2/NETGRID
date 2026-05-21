@@ -141,9 +141,13 @@ import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-f
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
 import { arasakaPortablePrototypeImplementation } from "./onr-v1/runner/hardware/arasaka-portable-prototype";
+import { armadilloArmoredRoadHomeImplementation } from "./onr-v1/runner/hardware/armadillo-armored-road-home";
+import { armoredFridgeImplementation } from "./onr-v1/runner/hardware/armored-fridge";
 import { artemis2020Implementation } from "./onr-v1/runner/hardware/artemis-2020";
 import { corollaSpeedChipImplementation } from "./onr-v1/runner/hardware/corolla-speed-chip";
+import { dermatechBodyplatingImplementation } from "./onr-v1/runner/hardware/dermatech-bodyplating";
 import { drifterMobileEnvironmentImplementation } from "./onr-v1/runner/hardware/drifter-mobile-environment";
+import { greenKnightSurgeBuffersImplementation } from "./onr-v1/runner/hardware/green-knight-surge-buffers";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
@@ -151,8 +155,10 @@ import { pandorasDeckImplementation } from "./onr-v1/runner/hardware/pandoras-de
 import { parraline5750Implementation } from "./onr-v1/runner/hardware/parraline-5750";
 import { pk6089aImplementation } from "./onr-v1/runner/hardware/pk-6089a";
 import { rAndDInterfaceImplementation } from "./onr-v1/runner/hardware/r-d-interface";
+import { ravenMicrocybEagleImplementation } from "./onr-v1/runner/hardware/raven-microcyb-eagle";
 import { ravenMicrocybOwlImplementation } from "./onr-v1/runner/hardware/raven-microcyb-owl";
 import { recordReconstructorImplementation } from "./onr-v1/runner/hardware/record-reconstructor";
+import { techtronicaUtilitySuitImplementation } from "./onr-v1/runner/hardware/techtronica-utility-suit";
 import { tychoMemChipImplementation } from "./onr-v1/runner/hardware/tycho-mem-chip";
 import { wutechMemChipImplementation } from "./onr-v1/runner/hardware/wutech-mem-chip";
 import { zetatechMemChipImplementation } from "./onr-v1/runner/hardware/zetatech-mem-chip";
@@ -168,6 +174,7 @@ import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedeker
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
+import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
@@ -178,6 +185,7 @@ import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-p
 import { scatterShotImplementation } from "./onr-v1/runner/programs/scatter-shot";
 import { seeyaImplementation } from "./onr-v1/runner/programs/seeya";
 import { selfModifyingCodeImplementation } from "./onr-v1/runner/programs/self-modifying-code";
+import { shieldImplementation } from "./onr-v1/runner/programs/shield";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
 import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
@@ -202,6 +210,7 @@ import { technicianLoverImplementation } from "./onr-v1/runner/resources/technic
 import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
 import { theShortCircuitImplementation } from "./onr-v1/runner/resources/the-short-circuit";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
+import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -228,6 +237,7 @@ export const CARD_IMPLEMENTATIONS = [
   bakdoorImplementation,
   cloakImplementation,
   expertScheduleAnalyzerImplementation,
+  forceShieldImplementation,
   invisibilityImplementation,
   microtechAiInterfaceImplementation,
   mouseImplementation,
@@ -238,6 +248,7 @@ export const CARD_IMPLEMENTATIONS = [
   scatterShotImplementation,
   seeyaImplementation,
   selfModifyingCodeImplementation,
+  shieldImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
   vewyVewyQuietImplementation,
@@ -256,9 +267,13 @@ export const CARD_IMPLEMENTATIONS = [
   nEtoImplementation,
   roninAroundImplementation,
   arasakaPortablePrototypeImplementation,
+  armadilloArmoredRoadHomeImplementation,
+  armoredFridgeImplementation,
   artemis2020Implementation,
   corollaSpeedChipImplementation,
+  dermatechBodyplatingImplementation,
   drifterMobileEnvironmentImplementation,
+  greenKnightSurgeBuffersImplementation,
   hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
@@ -266,8 +281,10 @@ export const CARD_IMPLEMENTATIONS = [
   parraline5750Implementation,
   pk6089aImplementation,
   rAndDInterfaceImplementation,
+  ravenMicrocybEagleImplementation,
   ravenMicrocybOwlImplementation,
   recordReconstructorImplementation,
+  techtronicaUtilitySuitImplementation,
   riggedInvestmentsImplementation,
   scoreImplementation,
   shortTermContractImplementation,
@@ -276,6 +293,7 @@ export const CARD_IMPLEMENTATIONS = [
   theSpringboardImplementation,
   theShortCircuitImplementation,
   topRunnersConferenceImplementation,
+  traumaTeamImplementation,
   artificialSecurityDirectorsImplementation,
   blackIceQualityAssuranceImplementation,
   corporateCoupImplementation,
