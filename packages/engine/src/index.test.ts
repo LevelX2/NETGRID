@@ -7612,7 +7612,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         kind: "reverse_ice_on_successful_run_fort",
       }),
     );
-    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeDefined();
   });
 
   it("migrates P3.51 Corp utility operations and nodes into CardImplementation coverage", () => {
@@ -7918,8 +7918,116 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeUndefined();
-    expect(cardImplementationForDefinitionId("onr_v1_111_social-engineering")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeDefined();
+    expect(cardImplementationForDefinitionId("onr_v1_111_social-engineering")).toBeDefined();
+  });
+
+  it("migrates P3.58 hidden replacement longtail cards into CardImplementation coverage", () => {
+    const p358Cards = [
+      "onr_v1_088_fortress-respecification",
+      "onr_v1_111_social-engineering",
+      "onr_v1_294_new-blood",
+      "onr_v1_176_the-shell-traders",
+      "onr_v1_351_bizarre-encryption-scheme",
+      "onr_v1_155_code-viral-cache",
+    ] as const;
+
+    for (const definitionId of p358Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(cardImplementationForDefinitionId("onr_v1_131_microtech-backup-drive")).toBeUndefined();
+  });
+
+  it("resolves Social Engineering secret guess and auto-passes the chosen ICE on a wrong guess", () => {
+    const socialRunnerDeck = MECHANIC_SMOKE_DECKS.runAccess.runner;
+    const socialCorpDeck = {
+      ...MECHANIC_SMOKE_DECKS.runAccess.corp,
+      id: "p358_social_engineering_corp",
+      name: "P3.58 Social Engineering Corp",
+      cards: [
+        { id: "simple_barrier_ice", quantity: 2 },
+        ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
+          (card) => card.id !== "simple_barrier_ice",
+        ),
+      ],
+    };
+    let correct = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p358-social-correct",
+        runnerDeck: socialRunnerDeck,
+        corpDeck: socialCorpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    correct.runner.credits = 5;
+    const correctEventId = moveRunnerCardToGrip(correct, "onr_v1_111_social-engineering");
+    correct = apply(
+      correct,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === correctEventId,
+    );
+    expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_hide");
+    expect(getPlayerView(correct, "corp").pendingChoice).toBeUndefined();
+    correct = applyChoice(correct, "runner", "hide_3");
+    expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_guess");
+    correct = applyChoice(correct, "corp", "guess_3");
+    expect(correct.runner.credits).toBe(1);
+    expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      amounts: expect.objectContaining({
+        secretHiddenAmountRevealed: 3,
+        secretGuessAmount: 3,
+      }),
+      targets: expect.objectContaining({
+        socialEngineeringGuessCorrect: true,
+      }),
+    });
+
+    let wrong = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p358-social-wrong",
+        runnerDeck: socialRunnerDeck,
+        corpDeck: socialCorpDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    wrong.runner.credits = 5;
+    const wrongEventId = moveRunnerCardToGrip(wrong, "onr_v1_111_social-engineering");
+    const iceId = putCorpIceOnServer(wrong, "rd", "simple_barrier_ice");
+    wrong.cardInstances[iceId] = {
+      ...wrong.cardInstances[iceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    wrong = apply(
+      wrong,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.cardId === wrongEventId,
+    );
+    wrong = applyChoice(wrong, "runner", "hide_3");
+    wrong = applyChoice(wrong, "corp", "guess_2");
+    expect(wrong.pendingChoice?.source).toContain("p3_58.social_engineering_target");
+    expect(getPlayerView(wrong, "corp").pendingChoice).toBeUndefined();
+    wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
+    expect(wrong.run?.position).toMatchObject({ kind: "server", serverId: "rd" });
+    expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      targets: expect.objectContaining({
+        socialEngineeringGuessCorrect: false,
+        autoPassChosenIce: true,
+      }),
+    });
+    expect(JSON.stringify(wrong.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "simple_barrier_ice",
+    );
   });
 
   it("loads Pocket Virtual Reality temporary encounter trace credits for its printed traces", () => {
@@ -17838,30 +17946,68 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(state.runner.heap).toContain(targetProgramId);
   });
 
-  it("exposes one unrezzed server card via Fortress Respecification without opening opponent choices", () => {
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-expose"));
+  it("reorders the last successful fort with Fortress Respecification without exposing concealed ICE", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-fortress-reorder"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(
       state,
       "onr_v1_088_fortress-respecification",
     );
-    putCorpRootInRemote(state, "simple_upgrade");
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    const firstIceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    const secondIceId = putCorpIceOnServer(state, "remote_1", "simple_code_gate_ice");
+    state.cardInstances[firstIceId] = {
+      ...state.cardInstances[firstIceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    state.cardInstances[secondIceId] = {
+      ...state.cardInstances[secondIceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    state.runnerTurnFlags = {
+      ...state.runnerTurnFlags!,
+      successfulRunThisTurn: true,
+      lastSuccessfulRunServerId: "remote_1",
+    };
 
     state = apply(
       state,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        String(action.payload?.cardId) === eventId &&
-        action.payload?.serverId === "remote_1",
+        String(action.payload?.cardId) === eventId,
     );
-    expect(state.pendingChoice).toBeUndefined();
+    expect(state.pendingChoice?.source).toContain("p3_58.fortress_respecification");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(getPlayerView(state, "runner").pendingChoice?.options.map((option) => option.label)).toEqual([
+      "ICE Position 1",
+      "ICE Position 2",
+    ]);
+
+    state = applyChoices(state, "runner", [`card_${secondIceId}`, `card_${firstIceId}`]);
+    expect(state.corp.servers.find((server) => server.id === "remote_1")?.ice).toEqual([
+      secondIceId,
+      firstIceId,
+    ]);
+    expect(state.cardInstances[firstIceId]?.faceup).toBe(false);
+    expect(state.cardInstances[secondIceId]?.faceup).toBe(false);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      revealKind: "expose",
-      cardDefinitionId: "simple_upgrade",
-      title: "Simple Upgrade",
-      serverLabel: "Remote 1",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      amounts: expect.objectContaining({ reorderedIceCount: 2 }),
+      targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "simple_code_gate_ice",
+    );
   });
 
   it("uses installed V1.9.11 Runner helpers through LegalActions without exposing private choices to the Corp", () => {
@@ -24067,11 +24213,6 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         accessCount: 1,
       },
       {
-        definitionId: "onr_v1_111_social-engineering",
-        serverId: "hq",
-        accessCount: 1,
-      },
-      {
         definitionId: "onr_v1_112_stumble-through-wilderspace",
         serverId: "rd",
         accessCount: 1,
@@ -24623,52 +24764,82 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
-  it("allows New Blood only after a visible Runner run attempt last turn", () => {
-    let noRun = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-new-blood-no-run"));
-    const noRunOperationId = moveCorpCardToHq(noRun, "onr_v1_294_new-blood");
-    noRun = apply(noRun, "runner", (action) => action.type === "end_turn");
-    noRun = apply(noRun, "corp", (action) => action.type === "mandatory_draw");
-    noRun.corp.credits = 6;
-    expect(
-      getLegalActions(noRun, "corp").some(
-        (action) =>
-          action.type === "play_operation" &&
-          action.payload?.cardId === noRunOperationId,
-      ),
-    ).toBe(false);
-
-    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.runAccess("v1915-new-blood-after-run"));
-    moveCorpCardToHq(state, "onr_v1_294_new-blood");
-    state.corp.servers.push({
-      id: "remote_1",
-      kind: "remote",
-      label: "Remote 1",
-      ice: [],
-      root: [],
-    });
-    state = apply(
-      state,
-      "runner",
-      (action) =>
-        action.type === "start_run" && action.payload?.serverId === "remote_1",
+  it("conceals revealed unrezzed ICE and reorders installed ICE with New Blood", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1915-new-blood-reorder",
+        runnerDeck: MECHANIC_SMOKE_DECKS.hiddenZone.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.hiddenZone.corp,
+          id: "v1915_new_blood_reorder_corp",
+          name: "V1.9.15 New Blood Reorder Corp",
+          cards: [
+            { id: "onr_v1_294_new-blood", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 2 },
+            { id: "simple_code_gate_ice", quantity: 2 },
+            ...MECHANIC_SMOKE_DECKS.hiddenZone.corp.cards.filter(
+              (card) =>
+                ![
+                  "onr_v1_294_new-blood",
+                  "simple_barrier_ice",
+                  "simple_code_gate_ice",
+                ].includes(card.id),
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
     );
-    expect(state.run).toBeUndefined();
+    const operationId = moveCorpCardToHq(state, "onr_v1_294_new-blood");
+    const firstIceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const secondIceId = putCorpIceOnServer(state, "hq", "simple_code_gate_ice");
+    state.cardInstances[firstIceId] = {
+      ...state.cardInstances[firstIceId]!,
+      faceup: true,
+      rezzed: false,
+    };
+    state.cardInstances[secondIceId] = {
+      ...state.cardInstances[secondIceId]!,
+      faceup: false,
+      rezzed: false,
+    };
     state = apply(state, "runner", (action) => action.type === "end_turn");
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
     state.corp.credits = 6;
 
-    const beforeCredits = state.corp.credits;
     state = apply(
       state,
       "corp",
       (action) =>
         action.type === "play_operation" &&
-        sourceDefinition(state, action) === "onr_v1_294_new-blood",
+        action.payload?.cardId === operationId,
     );
-    expect(state.corp.credits).toBe(beforeCredits + 3);
+    expect(state.cardInstances[firstIceId]?.faceup).toBe(false);
+    expect(state.pendingChoice?.source).toContain("p3_58.new_blood_reorder");
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "play_operation",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      amounts: expect.objectContaining({ concealedIceCount: 1 }),
+      targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
+
+    state = applyChoices(state, "corp", [`card_${firstIceId}`, `card_${secondIceId}`]);
+    expect(state.corp.servers.find((server) => server.id === "rd")?.ice[0]).toBe(
+      secondIceId,
+    );
+    expect(state.corp.servers.find((server) => server.id === "hq")?.ice[0]).toBe(
+      firstIceId,
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      amounts: expect.objectContaining({ reorderedIceCount: 2 }),
+      targets: expect.objectContaining({ hiddenOrderChoice: true }),
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "simple_code_gate_ice",
+    );
   });
 });
 
@@ -26651,20 +26822,39 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
   const hiddenLeakPattern =
     /"privatePayload"|"cardInstances"|"hq"|"rd"|"grip"|"stack"/;
 
-  it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone expose payloads", () => {
+  it("hardens Fortress Respecification and Ice and Data's Guide hidden-zone payloads", () => {
     let exposeState = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("spotcheck-fortress"));
     exposeState.runner.credits = 20;
     moveRunnerCardToGrip(exposeState, "onr_v1_088_fortress-respecification");
     putCorpRootInRemote(exposeState, "simple_upgrade");
-    putCorpIceOnServer(exposeState, "remote_1", "simple_barrier_ice");
+    const firstIceId = putCorpIceOnServer(exposeState, "remote_1", "simple_barrier_ice");
+    const secondIceId = putCorpIceOnServer(
+      exposeState,
+      "remote_1",
+      "simple_code_gate_ice",
+    );
+    exposeState.cardInstances[firstIceId] = {
+      ...exposeState.cardInstances[firstIceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    exposeState.cardInstances[secondIceId] = {
+      ...exposeState.cardInstances[secondIceId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    exposeState.runnerTurnFlags = {
+      ...exposeState.runnerTurnFlags!,
+      successfulRunThisTurn: true,
+      lastSuccessfulRunServerId: "remote_1",
+    };
     const exposeAction = mustAction(
       exposeState,
       "runner",
       (action) =>
         action.type === "play_event" &&
         sourceDefinition(exposeState, action) ===
-          "onr_v1_088_fortress-respecification" &&
-        action.payload?.serverId === "remote_1",
+          "onr_v1_088_fortress-respecification",
     );
     const exposeInitial = structuredClone(exposeState);
     const exposeReplayStart = exposeState.eventLog.length;
@@ -26691,16 +26881,22 @@ describe("Originalset Spotcheck 2026-05-15 Hidden/Access/Trace Nachtest", () => 
       "runner",
       (action) => action.actionId === exposeAction.actionId,
     );
+    expect(exposeState.pendingChoice?.source).toContain(
+      "p3_58.fortress_respecification",
+    );
+    exposeState = applyChoices(exposeState, "runner", [
+      `card_${secondIceId}`,
+      `card_${firstIceId}`,
+    ]);
     expect(exposeState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_expose_server_card",
-      exposedServerId: "remote_1",
-      publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_upgrade",
+      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      amounts: expect.objectContaining({ reorderedIceCount: 2 }),
+      targets: expect.objectContaining({ hiddenOrderChoice: true }),
     });
     expect(
       JSON.stringify(exposeState.eventLog.at(-1)?.publicPayload),
-    ).not.toMatch(/simple_barrier_ice|Simple Barrier ICE|cardInstances/);
+    ).not.toMatch(/simple_barrier_ice|simple_code_gate_ice|Simple Barrier ICE|Simple Code Gate ICE|cardInstances/);
     const exposeReplay = replayEvents(
       exposeInitial,
       exposeState.eventLog.slice(exposeReplayStart),
@@ -44608,17 +44804,32 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
 
   it("keeps run, stack-search and reprisal events side-safe and replayable", () => {
     let social = toRunnerTurn(
-      MECHANIC_SMOKE_GAMES.runAccess("spotcheck-social-engineering"),
+      createGameAfterSetup({
+        seed: "spotcheck-social-engineering",
+        runnerDeck: MECHANIC_SMOKE_DECKS.runAccess.runner,
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.corp,
+          id: "spotcheck_social_engineering_corp",
+          name: "Spotcheck Social Engineering Corp",
+          cards: [
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
+              (card) => card.id !== "simple_barrier_ice",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
     );
     social.runner.credits = 20;
     moveRunnerCardToGrip(social, "onr_v1_111_social-engineering");
+    const socialIceId = putCorpIceOnServer(social, "hq", "simple_barrier_ice");
     const socialAction = mustAction(
       social,
       "runner",
       (action) =>
         action.type === "play_event" &&
-        sourceDefinition(social, action) === "onr_v1_111_social-engineering" &&
-        action.payload?.serverId === "hq",
+        sourceDefinition(social, action) === "onr_v1_111_social-engineering",
     );
     const socialWrongSide = applyAction(social, {
       matchId: social.matchId,
@@ -44631,11 +44842,17 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     const socialInitial = structuredClone(social);
     const socialReplayStart = social.eventLog.length;
     social = apply(social, "runner", (action) => action.actionId === socialAction.actionId);
+    expect(social.pendingChoice?.source).toContain("p3_58.social_engineering_hide");
+    social = applyChoice(social, "runner", "hide_3");
+    social = applyChoice(social, "corp", "guess_2");
+    social = applyChoice(social, "runner", `ice_${socialIceId}`);
     expect(social.run?.attackedServerId).toBe("hq");
     expect(social.eventLog.at(-1)?.publicPayload).toMatchObject({
-      cardDefinitionId: "onr_v1_111_social-engineering",
-      socialEngineeringRun: true,
-      serverLabel: "HQ",
+      hiddenZoneBarrier: true,
+      targets: expect.objectContaining({
+        socialEngineeringGuessCorrect: false,
+        autoPassChosenIce: true,
+      }),
     });
     expect(replayEvents(socialInitial, social.eventLog.slice(socialReplayStart)).ok).toBe(true);
 

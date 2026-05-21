@@ -1556,24 +1556,22 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   "onr_v1_088_fortress-respecification": {
-    name: "onr_v1911_runner_event_expose_unrezzed_server_card",
-    requiresServer: true,
-    canPlayForServer: (state, serverId) =>
-      exposedCorpCardInServer(state, serverId) !== undefined,
+    name: "onr_v1958_runner_event_reorder_last_successful_fort_ice",
+    canPlay: (state) => hasSuccessfulRunThisTurn(state),
     resolve: (state, legalAction) => {
-      exposeCorpCardInServer(
+      if (!hasSuccessfulRunThisTurn(state))
+        throw new Error(
+          "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
+        );
+      startFortressRespecificationReorderChoice(
         state,
-        String(legalAction.payload?.serverId) as Exclude<
-          ServerId,
-          "new_remote"
-        >,
+        String(legalAction.payload?.cardId ?? ""),
         legalAction,
       );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
-        exposedServerId: String(legalAction.payload?.serverId ?? ""),
-        hiddenZoneAction: "v1911_expose_server_card",
+        hiddenZoneAction: "p3_58_fortress_respecification_reorder",
       };
     },
   },
@@ -1775,18 +1773,20 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
     },
   },
   [RUN_ACCESS_PRESSURE_EVENT_CARD_ID]: {
-    name: "runner_event_run_access_pressure",
-    requiresServer: true,
+    name: "onr_v1958_runner_event_social_engineering_secret_guess",
+    canPlay: (state) => state.runner.credits >= 2,
     resolve: (state, legalAction) => {
-      const serverId = String(legalAction.payload?.serverId) as Exclude<
-        ServerId,
-        "new_remote"
-      >;
-      startRun(state, serverId);
+      if (state.runner.credits < 2)
+        throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
+      startSocialEngineeringHideChoice(
+        state,
+        String(legalAction.payload?.cardId ?? ""),
+        legalAction,
+      );
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        serverId,
-        socialEngineeringRun: true,
+        socialEngineeringSecretChoiceOpened: true,
+        hiddenZoneBarrier: true,
       };
     },
   },
@@ -1989,17 +1989,9 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     },
   },
   "onr_v1_294_new-blood": {
-    name: "onr_v1915_corp_operation_run_pressure_credit",
-    canPlay: (state) => runnerRunAttemptsLastTurn(state) >= 1,
+    name: "onr_v1958_corp_operation_conceal_reorder_installed_ice",
     resolve: (state, legalAction) => {
-      if (runnerRunAttemptsLastTurn(state) < 1)
-        throw new Error("Der Runner hat im letzten Zug keinen Run versucht.");
-      state.corp.credits += 3;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        runnerRunAttemptsLastTurn: runnerRunAttemptsLastTurn(state),
-        recurringPressureCredits: 3,
-      };
+      resolveNewBloodConcealAndReorder(state, legalAction);
     },
   },
   [FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID]: {
@@ -2337,6 +2329,7 @@ export function createGame(config: CreateGameConfig = {}): GameState {
       runAttemptsThisTurn: 0,
       runAttemptsLastTurn: 0,
       successfulHqRunThisTurn: false,
+      successfulRunThisTurn: false,
       damagePreventionUsage: {},
       runnerActionsTakenThisTurn: 0,
     },
@@ -10901,6 +10894,7 @@ type StartRunOptions = Pick<
   | "runTraceLinkBonusSourceDefinitionId"
   | "runnerRunTemporaryCredits"
   | "unpreventableCoreDamageAtRunEnd"
+  | "socialEngineeringAutoPassIceId"
 >;
 
 function startRun(
@@ -11022,6 +11016,9 @@ function startRun(
             ...options.unpreventableCoreDamageAtRunEnd,
           },
         }
+      : {}),
+    ...(options?.socialEngineeringAutoPassIceId
+      ? { socialEngineeringAutoPassIceId: options.socialEngineeringAutoPassIceId }
       : {}),
     ...(pendingSuccessBonusCredits ? { pendingSuccessBonusCredits } : {}),
   };
@@ -11584,6 +11581,18 @@ function approachOrEncounterIce(
   const run = mustRun(state);
   const ice = mustInstance(state.cardInstances, approachedIceId);
   run.approachedIceId = approachedIceId;
+  if (run.socialEngineeringAutoPassIceId === approachedIceId) {
+    delete run.socialEngineeringAutoPassIceId;
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        autoPassChosenIce: true,
+        socialEngineeringAutoPassedIce: true,
+      };
+    }
+    movePastCurrentIce(state);
+    return;
+  }
   if (run.bypassFirstIceRemaining) {
     run.bypassFirstIceRemaining = false;
     movePastCurrentIce(state);
@@ -15878,8 +15887,12 @@ function finishRun(
   if (run && successful) {
     applyBodyweightDataCrecheSuccessfulRun(state, run, legalAction);
   }
-  if (run && successful && run.attackedServerId === "hq")
-    ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
+  if (run && successful) {
+    const flags = ensureRunnerTurnFlags(state);
+    flags.successfulRunThisTurn = true;
+    flags.lastSuccessfulRunServerId = run.attackedServerId;
+    if (run.attackedServerId === "hq") flags.successfulHqRunThisTurn = true;
+  }
   const allNighterBonusRunOnFinish =
     run?.grantAllNighterBonusRunOnFinish === true;
   const bonus = successful ? (run?.pendingSuccessBonusCredits ?? 0) : 0;
@@ -16341,6 +16354,8 @@ function endTurn(
     flags.runAttemptsLastTurn = flags.runAttemptsThisTurn ?? 0;
     flags.runAttemptsThisTurn = 0;
     flags.successfulHqRunThisTurn = false;
+    flags.successfulRunThisTurn = false;
+    delete flags.lastSuccessfulRunServerId;
     flags.runnerActionsTakenThisTurn = 0;
     delete flags.lastDamageRunnerActionOrdinal;
   } else {
@@ -16705,6 +16720,8 @@ function startRunnerTurn(
   flags.runAttemptsThisTurn = 0;
   flags.runAttemptsLastTurn = 0;
   flags.successfulHqRunThisTurn = false;
+  flags.successfulRunThisTurn = false;
+  delete flags.lastSuccessfulRunServerId;
   flags.damagePreventionUsage = {};
   flags.brokerActionCardIdsThisTurn = [];
   flags.startOfTurnFloatingCreditsApplied = false;
@@ -21871,6 +21888,10 @@ function resolvePendingChoice(
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("p3_58.")) {
+    resolveP358HiddenReplacementChoice(state, legalAction, playerAction);
+    return;
+  }
   if (
     state.pendingChoice.source.startsWith(
       "v1911.self_modifying_code_install_program",
@@ -26605,6 +26626,457 @@ function selectedChoiceCardIds(
   });
 }
 
+type InstalledIceSlot = {
+  server: CorpServer;
+  serverId: Exclude<ServerId, "new_remote">;
+  index: number;
+  cardId: CardInstanceId;
+};
+
+function installedIceSlots(state: GameState): InstalledIceSlot[] {
+  const slots: InstalledIceSlot[] = [];
+  for (const server of state.corp.servers) {
+    for (let index = 0; index < server.ice.length; index += 1) {
+      slots.push({
+        server,
+        serverId: server.id,
+        index,
+        cardId: server.ice[index]!,
+      });
+    }
+  }
+  return slots;
+}
+
+function concealedIceCountForCardIds(
+  state: GameState,
+  cardIds: readonly CardInstanceId[],
+): number {
+  return cardIds.filter((cardId) => {
+    const instance = state.cardInstances[cardId];
+    return instance && !instance.rezzed && !instance.faceup;
+  }).length;
+}
+
+function iceChoiceLabelForSide(
+  state: GameState,
+  cardId: CardInstanceId,
+  visibleTo: Side,
+  fallback: string,
+): { label: string; publicLabel: string } {
+  const instance = mustInstance(state.cardInstances, cardId);
+  const definition = definitionFor(state, cardId);
+  if (visibleTo === "corp" || instance.rezzed || instance.faceup) {
+    return { label: definition.title, publicLabel: definition.title };
+  }
+  return { label: fallback, publicLabel: fallback };
+}
+
+function p358ValidateReorderSelection(
+  currentIds: readonly CardInstanceId[],
+  selectedIds: readonly CardInstanceId[],
+  message: string,
+): void {
+  if (selectedIds.length !== currentIds.length) throw new Error(message);
+  const current = [...currentIds].sort();
+  const selected = [...selectedIds].sort();
+  if (current.some((cardId, index) => cardId !== selected[index]))
+    throw new Error(message);
+}
+
+function startFortressRespecificationReorderChoice(
+  state: GameState,
+  sourceCardId: string,
+  legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const flags = ensureRunnerTurnFlags(state);
+  if (!flags.successfulRunThisTurn)
+    throw new Error(
+      "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
+    );
+  const serverId = flags.lastSuccessfulRunServerId;
+  if (!serverId)
+    throw new Error("Kein letzter erfolgreicher Fort fuer Fortress Respecification.");
+  const server = mustServer(state, serverId);
+  if (server.ice.length < 2) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+      serverId,
+      reorderedIceCount: server.ice.length,
+      concealedIceCount: concealedIceCountForCardIds(state, server.ice),
+    };
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `p3_58_fortress_respecification_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_58.fortress_respecification:${sourceCardId}:${serverId}:${state.stateVersion + 1}`,
+    prompt: "ICE auf dem letzten erfolgreichen Fort neu anordnen.",
+    kind: "select_cards",
+    options: server.ice.map((cardId, index) => {
+      const fallback = `ICE Position ${index + 1}`;
+      const labels = iceChoiceLabelForSide(state, cardId, "runner", fallback);
+      return {
+        id: `card_${cardId}`,
+        label: labels.label,
+        publicLabel: labels.publicLabel,
+        value: cardId,
+      };
+    }),
+    minSelections: server.ice.length,
+    maxSelections: server.ice.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function resolveFortressRespecificationReorderChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_58.fortress_respecification:"))
+    throw new Error("Es ist keine Fortress-Respecification-Choice offen.");
+  const [, sourceCardId = "", serverId = ""] = choice.source.split(":");
+  if (definitionFor(state, sourceCardId).id !== "onr_v1_088_fortress-respecification")
+    throw new Error("Die Fortress-Respecification-Quelle passt nicht zur Karte.");
+  const server = mustServer(state, serverId);
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  p358ValidateReorderSelection(
+    server.ice,
+    selectedIds,
+    "Die Fortress-Respecification-Reihenfolge ist nicht legal.",
+  );
+  server.ice = [...selectedIds];
+  server.ice.forEach((cardId) => {
+    const instance = mustInstance(state.cardInstances, cardId);
+    state.cardInstances[cardId] = {
+      ...instance,
+      zone: { side: "corp", zone: "serverIce", serverId: server.id },
+    };
+  });
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenOrderChoice: true,
+    hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+    sourceDefinitionId: "onr_v1_088_fortress-respecification",
+    serverId: server.id,
+    reorderedIceCount: selectedIds.length,
+    concealedIceCount: concealedIceCountForCardIds(state, selectedIds),
+  };
+}
+
+function startSocialEngineeringHideChoice(
+  state: GameState,
+  sourceCardId: string,
+  _legalAction: LegalAction,
+): void {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const maxAmount = Math.max(0, Math.floor(state.runner.credits));
+  if (maxAmount < 2)
+    throw new Error("Social Engineering benoetigt mindestens 2 Credits.");
+  state.pendingChoice = {
+    choiceId: `p3_58_social_engineering_hide_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_58.social_engineering_hide:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Social Engineering: Credits geheim verstecken.",
+    kind: "bid_amount",
+    options: Array.from({ length: maxAmount - 1 }, (_, index) => index + 2).map(
+      (amount) => ({
+        id: `hide_${amount}`,
+        label: `${amount}`,
+        publicLabel: "Versteckte Credits",
+        value: amount,
+      }),
+    ),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "runner";
+}
+
+function socialEngineeringGuessChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): ChoiceRequest {
+  const maxAmount = Math.max(2, Math.floor(state.runner.credits));
+  return {
+    choiceId: `p3_58_social_engineering_guess_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `p3_58.social_engineering_guess:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Social Engineering: versteckte Credits raten.",
+    kind: "bid_amount",
+    options: Array.from({ length: maxAmount + 1 }, (_, amount) => ({
+      id: `guess_${amount}`,
+      label: `${amount}`,
+      publicLabel: "Geratene Credits",
+      value: amount,
+    })),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function startSocialEngineeringTargetChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  const slots = installedIceSlots(state);
+  if (slots.length === 0) {
+    delete state.socialEngineeringSecret;
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      socialEngineeringGuessCorrect: false,
+      socialEngineeringNoIceTarget: true,
+      hiddenZoneBarrier: true,
+    };
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `p3_58_social_engineering_target_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_58.social_engineering_target:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Social Engineering: Fort und ICE fuer Auto-Pass waehlen.",
+    kind: "select_cards",
+    options: slots.map((slot) => {
+      const fallback = `${publicServerLabel(state, slot.serverId) ?? slot.serverId} ICE ${slot.index + 1}`;
+      const labels = iceChoiceLabelForSide(state, slot.cardId, "runner", fallback);
+      return {
+        id: `ice_${slot.cardId}`,
+        label: labels.label,
+        publicLabel: fallback,
+        value: `${slot.serverId}|${slot.cardId}`,
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "runner";
+}
+
+function resolveSocialEngineeringChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_58.social_engineering_"))
+    throw new Error("Es ist keine Social-Engineering-Choice offen.");
+  const [, sourceCardId = ""] = choice.source.split(":");
+  if (definitionFor(state, sourceCardId).id !== RUN_ACCESS_PRESSURE_EVENT_CARD_ID)
+    throw new Error("Die Social-Engineering-Quelle passt nicht zur Karte.");
+  if (choice.source.startsWith("p3_58.social_engineering_hide:")) {
+    const hiddenAmount = selectedBidAmount(choice, playerAction);
+    if (hiddenAmount < 2 || hiddenAmount > state.runner.credits)
+      throw new Error("Der Social-Engineering-Betrag ist nicht legal.");
+    state.socialEngineeringSecret = {
+      sourceCardId,
+      hiddenAmount,
+    };
+    state.pendingChoice = socialEngineeringGuessChoice(state, sourceCardId);
+    state.activeSide = "corp";
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      socialEngineeringStep: "runner_hidden_amount_selected",
+      hiddenZoneBarrier: true,
+    };
+    return;
+  }
+  if (choice.source.startsWith("p3_58.social_engineering_guess:")) {
+    const secret = state.socialEngineeringSecret;
+    if (!secret || secret.sourceCardId !== sourceCardId)
+      throw new Error("Social Engineering hat keinen geheimen Betrag.");
+    const guess = selectedBidAmount(choice, playerAction);
+    const correct = guess === secret.hiddenAmount;
+    if (correct) {
+      state.runner.credits = Math.max(0, state.runner.credits - secret.hiddenAmount);
+      delete state.socialEngineeringSecret;
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        socialEngineeringGuessCorrect: true,
+        secretHiddenAmountRevealed: secret.hiddenAmount,
+        secretGuessAmount: guess,
+        runnerCreditsAfter: state.runner.credits,
+        hiddenZoneBarrier: true,
+      };
+      return;
+    }
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      socialEngineeringGuessCorrect: false,
+      secretHiddenAmountRevealed: secret.hiddenAmount,
+      secretGuessAmount: guess,
+      hiddenZoneBarrier: true,
+    };
+    startSocialEngineeringTargetChoice(state, sourceCardId, legalAction);
+    return;
+  }
+  if (choice.source.startsWith("p3_58.social_engineering_target:")) {
+    const selectedId = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    const option = choice.options.find((candidate) => candidate.id === selectedId);
+    const value = typeof option?.value === "string" ? option.value : "";
+    const [serverId = "", iceId = ""] = value.split("|") as [
+      Exclude<ServerId, "new_remote">,
+      CardInstanceId,
+    ];
+    const server = mustServer(state, serverId);
+    if (!server.ice.includes(iceId))
+      throw new Error("Das Social-Engineering-ICE-Ziel ist nicht mehr installiert.");
+    delete state.socialEngineeringSecret;
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      socialEngineeringGuessCorrect: false,
+      autoPassChosenIce: true,
+      hiddenZoneBarrier: true,
+      serverId,
+      chosenIcePosition: server.ice.indexOf(iceId),
+    };
+    startRun(
+      state,
+      server.id,
+      undefined,
+      1,
+      { socialEngineeringAutoPassIceId: iceId },
+      legalAction,
+    );
+    return;
+  }
+  throw new Error("Unbekannte Social-Engineering-Choice.");
+}
+
+function resolveNewBloodConcealAndReorder(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  let concealedCount = 0;
+  for (const slot of installedIceSlots(state)) {
+    const instance = mustInstance(state.cardInstances, slot.cardId);
+    if (!instance.rezzed && instance.faceup) {
+      state.cardInstances[slot.cardId] = { ...instance, faceup: false };
+      concealedCount += 1;
+    }
+  }
+  const slots = installedIceSlots(state);
+  if (slots.length < 2) {
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+      concealedIceCount: concealedCount,
+      reorderedIceCount: slots.length,
+    };
+    return;
+  }
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  state.pendingChoice = {
+    choiceId: `p3_58_new_blood_reorder_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `p3_58.new_blood_reorder:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Installierte ICE neu anordnen.",
+    kind: "select_cards",
+    options: slots.map((slot) => {
+      const serverLabel = publicServerLabel(state, slot.serverId) ?? slot.serverId;
+      return {
+        id: `card_${slot.cardId}`,
+        label: `${definitionFor(state, slot.cardId).title} (${serverLabel} ${slot.index + 1})`,
+        publicLabel: `${serverLabel} ICE ${slot.index + 1}`,
+        value: slot.cardId,
+      };
+    }),
+    minSelections: slots.length,
+    maxSelections: slots.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  state.activeSide = "corp";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenOrderChoice: true,
+    hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+    concealedIceCount: concealedCount,
+    reorderedIceCount: slots.length,
+  };
+}
+
+function resolveNewBloodReorderChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_58.new_blood_reorder:"))
+    throw new Error("Es ist keine New-Blood-Reorder-Choice offen.");
+  const [, sourceCardId = ""] = choice.source.split(":");
+  if (definitionFor(state, sourceCardId).id !== "onr_v1_294_new-blood")
+    throw new Error("Die New-Blood-Quelle passt nicht zur Karte.");
+  const slots = installedIceSlots(state);
+  const currentIds = slots.map((slot) => slot.cardId);
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  p358ValidateReorderSelection(
+    currentIds,
+    selectedIds,
+    "Die New-Blood-Reihenfolge ist nicht legal.",
+  );
+  slots.forEach((slot, index) => {
+    const cardId = selectedIds[index]!;
+    slot.server.ice[slot.index] = cardId;
+    const instance = mustInstance(state.cardInstances, cardId);
+    state.cardInstances[cardId] = {
+      ...instance,
+      zone: { side: "corp", zone: "serverIce", serverId: slot.serverId },
+    };
+  });
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenOrderChoice: true,
+    hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
+    sourceDefinitionId: "onr_v1_294_new-blood",
+    reorderedIceCount: selectedIds.length,
+    concealedIceCount: concealedIceCountForCardIds(state, selectedIds),
+  };
+}
+
+function resolveP358HiddenReplacementChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const source = state.pendingChoice?.source ?? "";
+  if (source.startsWith("p3_58.fortress_respecification:")) {
+    resolveFortressRespecificationReorderChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (source.startsWith("p3_58.social_engineering_")) {
+    resolveSocialEngineeringChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (source.startsWith("p3_58.new_blood_reorder:")) {
+    resolveNewBloodReorderChoice(state, legalAction, playerAction);
+    return;
+  }
+  throw new Error("Unbekannte P3.58-Choice.");
+}
+
 function startV1921PlayfulAiChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
@@ -31217,6 +31689,8 @@ function ensureRunnerTurnFlags(
     stoleBlackOpsAgendaThisTurn: false,
     runAttemptsThisTurn: 0,
     runAttemptsLastTurn: 0,
+    successfulHqRunThisTurn: false,
+    successfulRunThisTurn: false,
     damagePreventionUsage: {},
     runnerActionsTakenThisTurn: 0,
     brokerActionCardIdsThisTurn: [],
@@ -31242,6 +31716,7 @@ function ensureRunnerTurnFlags(
   flags.runAttemptsThisTurn ??= 0;
   flags.runAttemptsLastTurn ??= 0;
   flags.successfulHqRunThisTurn ??= false;
+  flags.successfulRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
   flags.runnerActionsTakenThisTurn ??= 0;
   flags.brokerActionCardIdsThisTurn ??= [];
@@ -31262,6 +31737,10 @@ function ensureRunnerTurnFlags(
 
 function hasSuccessfulHqRunThisTurn(state: GameState): boolean {
   return state.runnerTurnFlags?.successfulHqRunThisTurn === true;
+}
+
+function hasSuccessfulRunThisTurn(state: GameState): boolean {
+  return state.runnerTurnFlags?.successfulRunThisTurn === true;
 }
 
 function ensureCorpTurnFlags(

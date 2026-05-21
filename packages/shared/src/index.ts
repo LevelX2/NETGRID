@@ -875,6 +875,7 @@ export type RunState = {
   oliviaSalazarTemporaryRezzedIceIds?: CardInstanceId[];
   successfulRunInterventionUsedSourceIds?: CardInstanceId[];
   successfulRunInterventionWindowClosed?: boolean;
+  socialEngineeringAutoPassIceId?: CardInstanceId;
   delayedSuccessfulRun?: {
     originalServerId: Exclude<ServerId, "new_remote">;
     interventionSourceId: CardInstanceId;
@@ -1012,6 +1013,10 @@ export type GameState = {
     subroutineIndex: number;
     corpSpend?: number;
   };
+  socialEngineeringSecret?: {
+    sourceCardId: CardInstanceId;
+    hiddenAmount: number;
+  };
   bizarreEncryptionDelayedAgendas?: Array<{
     agendaId: CardInstanceId;
     serverId: Exclude<ServerId, "new_remote">;
@@ -1036,6 +1041,8 @@ export type GameState = {
     runAttemptsThisTurn?: number;
     runAttemptsLastTurn?: number;
     successfulHqRunThisTurn?: boolean;
+    successfulRunThisTurn?: boolean;
+    lastSuccessfulRunServerId?: Exclude<ServerId, "new_remote">;
     damagePreventionUsage?: Record<CardInstanceId, number>;
     runnerActionsTakenThisTurn?: number;
     lastDamageRunnerActionOrdinal?: number;

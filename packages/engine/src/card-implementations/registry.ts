@@ -145,6 +145,7 @@ import { efficiencyExpertsImplementation } from "./onr-v1/corp/operations/effici
 import { falsifiedTransactionsExpertImplementation } from "./onr-v1/corp/operations/falsified-transactions-expert";
 import { managementShakeUpImplementation } from "./onr-v1/corp/operations/management-shake-up";
 import { netwatchCreditVoucherImplementation } from "./onr-v1/corp/operations/netwatch-credit-voucher";
+import { newBloodImplementation } from "./onr-v1/corp/operations/new-blood";
 import { nightShiftImplementation } from "./onr-v1/corp/operations/night-shift";
 import { offSiteBackupsImplementation } from "./onr-v1/corp/operations/off-site-backups";
 import { overtimeIncentivesImplementation } from "./onr-v1/corp/operations/overtime-incentives";
@@ -160,6 +161,7 @@ import { trojanHorseImplementation } from "./onr-v1/corp/operations/trojan-horse
 import { urbanRenewalImplementation } from "./onr-v1/corp/operations/urban-renewal";
 import { aardvarkImplementation } from "./onr-v1/corp/upgrades/aardvark";
 import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrades/antiquated-interface-routines";
+import { bizarreEncryptionSchemeImplementation } from "./onr-v1/corp/upgrades/bizarre-encryption-scheme";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
 import { chimeraImplementation } from "./onr-v1/corp/upgrades/chimera";
 import { crystalPalaceStationGridImplementation } from "./onr-v1/corp/upgrades/crystal-palace-station-grid";
@@ -190,6 +192,7 @@ import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial
 import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
 import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
 import { forgedActivationOrdersImplementation } from "./onr-v1/runner/preps/forged-activation-orders";
+import { fortressRespecificationImplementation } from "./onr-v1/runner/preps/fortress-respecification";
 import { forgottenBackupChipImplementation } from "./onr-v1/runner/preps/forgotten-backup-chip";
 import { gideonsPawnshopImplementation } from "./onr-v1/runner/preps/gideons-pawnshop";
 import { huntClubBbsImplementation } from "./onr-v1/runner/preps/hunt-club-bbs";
@@ -243,6 +246,7 @@ import { privateLdlAccessImplementation } from "./onr-v1/runner/preps/private-ld
 import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-hq";
 import { securityCodeWormChipImplementation } from "./onr-v1/runner/preps/security-code-worm-chip";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
+import { socialEngineeringImplementation } from "./onr-v1/runner/preps/social-engineering";
 import { stumbleThroughWilderspaceImplementation } from "./onr-v1/runner/preps/stumble-through-wilderspace";
 import { synchronizedAttackOnHqImplementation } from "./onr-v1/runner/preps/synchronized-attack-on-hq";
 import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/temple-microcode-outlet";
@@ -331,6 +335,7 @@ import { diplomaticImmunityImplementation } from "./onr-v1/runner/resources/dipl
 import { fallGuyImplementation } from "./onr-v1/runner/resources/fall-guy";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
+import { codeViralCacheImplementation } from "./onr-v1/runner/resources/code-viral-cache";
 import { hellsRunImplementation } from "./onr-v1/runner/resources/hells-run";
 import { junkyardBbsImplementation } from "./onr-v1/runner/resources/junkyard-bbs";
 import { lelandCorporateBodyguardImplementation } from "./onr-v1/runner/resources/leland-corporate-bodyguard";
@@ -344,6 +349,7 @@ import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/
 import { technicianLoverImplementation } from "./onr-v1/runner/resources/technician-lover";
 import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
 import { theShortCircuitImplementation } from "./onr-v1/runner/resources/the-short-circuit";
+import { theShellTradersImplementation } from "./onr-v1/runner/resources/the-shell-traders";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
@@ -361,6 +367,7 @@ export const CARD_IMPLEMENTATIONS = [
   editedShippingManifestsImplementation,
   executiveWiretapsImplementation,
   forgedActivationOrdersImplementation,
+  fortressRespecificationImplementation,
   forgottenBackupChipImplementation,
   gideonsPawnshopImplementation,
   huntClubBbsImplementation,
@@ -382,6 +389,7 @@ export const CARD_IMPLEMENTATIONS = [
   rompThroughHqImplementation,
   securityCodeWormChipImplementation,
   sneakPreviewImplementation,
+  socialEngineeringImplementation,
   templeMicrocodeOutletImplementation,
   stumbleThroughWilderspaceImplementation,
   synchronizedAttackOnHqImplementation,
@@ -470,6 +478,7 @@ export const CARD_IMPLEMENTATIONS = [
   diplomaticImmunityImplementation,
   fallGuyImplementation,
   brokerImplementation,
+  codeViralCacheImplementation,
   floatingRunnerBbsImplementation,
   hellsRunImplementation,
   junkyardBbsImplementation,
@@ -508,6 +517,7 @@ export const CARD_IMPLEMENTATIONS = [
   technicianLoverImplementation,
   theSpringboardImplementation,
   theShortCircuitImplementation,
+  theShellTradersImplementation,
   topRunnersConferenceImplementation,
   traumaTeamImplementation,
   umbrellaPolicyImplementation,
@@ -557,6 +567,7 @@ export const CARD_IMPLEMENTATIONS = [
   falsifiedTransactionsExpertImplementation,
   managementShakeUpImplementation,
   netwatchCreditVoucherImplementation,
+  newBloodImplementation,
   nightShiftImplementation,
   offSiteBackupsImplementation,
   overtimeIncentivesImplementation,
@@ -669,6 +680,7 @@ export const CARD_IMPLEMENTATIONS = [
   zetatechMemChipImplementation,
   zz22SpeedChipImplementation,
   antiquatedInterfaceRoutinesImplementation,
+  bizarreEncryptionSchemeImplementation,
   chesterMixImplementation,
   chimeraImplementation,
   crystalPalaceStationGridImplementation,

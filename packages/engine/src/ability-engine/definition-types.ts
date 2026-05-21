@@ -109,6 +109,32 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
+export type CardHiddenReplacementLongtailImplementation =
+  | {
+      kind: "fortress_respecification_ice_reorder";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "social_engineering_secret_guess_run";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "new_blood_conceal_reorder_installed_ice";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "shell_traders_delayed_install";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "bizarre_encryption_scheme_access_replacement";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "code_viral_cache_purge_replacement";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    };
+
 export type CardAccessHookImplementation =
   | {
       kind: "pre_access_rd_cut";

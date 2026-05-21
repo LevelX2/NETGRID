@@ -95,11 +95,22 @@ const IMPLEMENTED_FORT_RUN_WINDOW_LOCATION =
 const IMPLEMENTED_RUN_ENCOUNTER_INTERVENTION_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
   "onr_v1_077_anonymous-tip":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/anonymous-tip.ts",
+  "onr_v1_088_fortress-respecification":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/fortress-respecification.ts",
+  "onr_v1_111_social-engineering":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/social-engineering.ts",
+  "onr_v1_155_code-viral-cache":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/code-viral-cache.ts",
+  "onr_v1_176_the-shell-traders":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts",
   "onr_v1_082_deal-with-militech":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/deal-with-militech.ts",
   "onr_v1_083_desperate-competitor":
@@ -116,6 +127,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/valu-pak-software-bundle.ts",
   "onr_v1_349_aardvark":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/aardvark.ts",
+  "onr_v1_351_bizarre-encryption-scheme":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/bizarre-encryption-scheme.ts",
   "onr_v1_358_dr-dreff":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dr-dreff.ts",
   "onr_v1_359_jenny-jett":
@@ -136,6 +149,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/twenty-four-hour-surveillance.ts",
   "onr_v1_286_corporate-detective-agency":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/corporate-detective-agency.ts",
+  "onr_v1_294_new-blood":
+    "packages/engine/src/card-implementations/onr-v1/corp/operations/new-blood.ts",
   "onr_v1_289_edgerunner-inc-temps":
     "packages/engine/src/card-implementations/onr-v1/corp/operations/edgerunner-inc-temps.ts",
   "onr_v1_296_off-site-backups":
@@ -977,6 +992,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for Corp utility operation/node behavior.",
     );
     currentLocations.add(IMPLEMENTED_CORP_UTILITY_LOCATION);
+  }
+  if (implementation.hiddenReplacementLongtail) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for hidden-order, secret-choice or deferred replacement longtail behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION);
   }
 
   return {

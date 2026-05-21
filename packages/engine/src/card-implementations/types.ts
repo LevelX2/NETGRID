@@ -7,6 +7,7 @@ import type {
   CardDamagePreventionSourceImplementation,
   CardFortRunWindowImplementation,
   CardFortCapacityModifierImplementation,
+  CardHiddenReplacementLongtailImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardInstallCapabilityImplementation,
   CardLeavePlayCleanupImplementation,
@@ -61,6 +62,7 @@ export type CardImplementationDefinition = {
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;
+  hiddenReplacementLongtail?: CardHiddenReplacementLongtailImplementation;
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";
