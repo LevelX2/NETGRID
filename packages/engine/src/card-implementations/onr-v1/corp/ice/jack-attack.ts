@@ -8,13 +8,11 @@ export const jackAttackImplementation: CardImplementationDefinition = {
     {
       kind: "run_duration_cannot_jack_out",
       text: "*For the remainder of the run, Runner cannot jack out.",
-      visibility: "public",
     },
     {
       kind: "trace",
       baseTraceStrength: 5,
       text: "*Trace 5-If trace is successful, give Runner a tag.",
-      visibility: "public",
       onSuccess: [
         {
           kind: "add_tags",

@@ -8,12 +8,10 @@ export const reinforcedWallImplementation: CardImplementationDefinition = {
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
 };

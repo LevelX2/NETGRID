@@ -177,6 +177,10 @@ export type CardEffectImplementation =
   | ExposeInstalledCardsEffectImplementation
   | ExposeOutermostIceEachFortEffectImplementation
   | ShowHqAgendasForCreditsEffectImplementation
+  | SearchTrashToGripEffectImplementation
+  | SearchStackToGripEffectImplementation
+  | LookTopStackTakeMatchingEffectImplementation
+  | LookTopStackTakeOneArrangeRestEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -244,6 +248,36 @@ export type ExposeOutermostIceEachFortEffectImplementation = {
 export type ShowHqAgendasForCreditsEffectImplementation = {
   kind: "show_hq_agendas_for_credits";
   creditPerAgenda: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type SearchTrashToGripEffectImplementation = {
+  kind: "search_trash_to_grip";
+  filter: "program" | "any_card";
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type SearchStackToGripEffectImplementation = {
+  kind: "search_stack_to_grip";
+  filter: "program" | "any_card";
+  revealToCorp: boolean;
+  shuffleAfterwards: true;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type LookTopStackTakeMatchingEffectImplementation = {
+  kind: "look_top_stack_take_matching";
+  count: number;
+  allowedTypes: readonly Extract<CardType, "program" | "event" | "resource">[];
+  costPerTaken: number;
+  revealTakenToCorp: true;
+  shuffleRemainder: true;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+};
+
+export type LookTopStackTakeOneArrangeRestEffectImplementation = {
+  kind: "look_top_stack_take_one_arrange_rest";
+  count: 5;
   visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
@@ -557,12 +591,10 @@ export type CardPrintedSubroutineImplementation =
   | {
       kind: "end_the_run";
       text: "*End the run.";
-      visibility: EventVisibilityClass;
     }
   | {
       kind: "trash_program";
       text: "*Trash a program.";
-      visibility: EventVisibilityClass;
     }
   | {
       kind: "damage";
@@ -570,25 +602,21 @@ export type CardPrintedSubroutineImplementation =
       amount: number;
       preventable: true;
       text: string;
-      visibility: EventVisibilityClass;
     }
   | {
       kind: "prohibit_break_next_ice";
       text: "*Runner cannot break any subroutines of the next piece of ice encountered during the run.";
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     }
   | {
       kind: "prohibit_break_and_jack_out_next_ice";
       text: "*Runner cannot break any subroutines of the next piece of ice encountered during the run, and cannot jack out until after that encounter.";
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     }
   | {
       kind: "run_duration_ice_strength";
       amount: number;
       text: string;
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     }
   | {
@@ -596,20 +624,17 @@ export type CardPrintedSubroutineImplementation =
       subroutine: CardSubroutineImplementation;
       append: "after_existing";
       text: string;
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     }
   | {
       kind: "run_duration_break_subroutine_cost";
       amount: number;
       text: string;
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     }
   | {
       kind: "run_duration_cannot_jack_out";
       text: string;
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     }
   | {
@@ -617,7 +642,6 @@ export type CardPrintedSubroutineImplementation =
       baseTraceStrength: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];
       text: string;
-      visibility: EventVisibilityClass;
       breakTags?: readonly string[];
     };
 

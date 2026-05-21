@@ -12,7 +12,6 @@ export const mastiffImplementation: CardImplementationDefinition = {
       amount: 1,
       preventable: true,
       text: "*Do 1 brain damage.",
-      visibility: "public",
     },
     {
       kind: "damage",
@@ -20,19 +19,16 @@ export const mastiffImplementation: CardImplementationDefinition = {
       amount: 1,
       preventable: true,
       text: "*Do 1 Net damage.",
-      visibility: "public",
     },
     {
       kind: "run_duration_ice_strength",
       amount: 1,
       text: "*For the remainder of the run, all ice is encountered at +1 strength.",
-      visibility: "public",
     },
     {
       kind: "trace",
       baseTraceStrength: 5,
       text: "*Trace 5-If trace is successful, give Runner a Mastiff counter.",
-      visibility: "public",
       onSuccess: [
         {
           kind: "add_counter",
@@ -46,7 +42,6 @@ export const mastiffImplementation: CardImplementationDefinition = {
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
   runnerCounterEffects: [

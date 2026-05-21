@@ -8,12 +8,10 @@ export const sentinelsPrimeImplementation: CardImplementationDefinition = {
     {
       kind: "trash_program",
       text: "*Trash a program.",
-      visibility: "public",
     },
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
 };

@@ -156,6 +156,53 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     creditPerAgenda: number,
   ) => CardEffectHiddenInfoResult;
+  searchTrashToGripTargetCount: (
+    state: GameState,
+    filter: "program" | "any_card",
+  ) => number;
+  searchStackToGripTargetCount: (
+    state: GameState,
+    filter: "program" | "any_card",
+  ) => number;
+  lookTopStackTakeMatchingTargetCount: (
+    state: GameState,
+    count: number,
+    allowedTypes: readonly ("program" | "event" | "resource")[],
+  ) => number;
+  startSearchTrashToGripChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    filter: "program" | "any_card",
+  ) => CardEffectHiddenInfoResult;
+  startSearchStackToGripChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    filter: "program" | "any_card",
+    revealToCorp: boolean,
+    shuffleAfterwards: true,
+  ) => CardEffectHiddenInfoResult;
+  startLookTopStackTakeMatchingChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    count: number,
+    allowedTypes: readonly ("program" | "event" | "resource")[],
+    costPerTaken: number,
+    revealTakenToCorp: true,
+    shuffleRemainder: true,
+  ) => CardEffectHiddenInfoResult;
+  startLookTopStackTakeOneArrangeRestChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    count: 5,
+  ) => CardEffectHiddenInfoResult;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -266,6 +313,22 @@ function canResolveOnPlayCardImplementationAbility(
       return deps.exposeInstalledCorpCardTargets(state, "any_installed").length > 0;
     if (effect.kind === "expose_outermost_ice_each_fort")
       return deps.outermostIceEachDataFortExposeCount(state) > 0;
+    if (effect.kind === "search_trash_to_grip")
+      return deps.searchTrashToGripTargetCount(state, effect.filter) > 0;
+    if (effect.kind === "search_stack_to_grip")
+      return deps.searchStackToGripTargetCount(state, effect.filter) > 0;
+    if (effect.kind === "look_top_stack_take_matching")
+      return (
+        state.runner.credits >= 0 &&
+        state.runner.stack.length > 0 &&
+        deps.lookTopStackTakeMatchingTargetCount(
+          state,
+          effect.count,
+          effect.allowedTypes,
+        ) >= 0
+      );
+    if (effect.kind === "look_top_stack_take_one_arrange_rest")
+      return state.runner.stack.length > 0;
     return true;
   });
 }
@@ -290,7 +353,17 @@ function canResolveActivatedCardImplementationAbility(
     )
   )
     return false;
-  return true;
+  return ability.effects.every((effect) => {
+    if (effect.kind === "search_trash_to_grip")
+      return deps.searchTrashToGripTargetCount(state, effect.filter) > 0;
+    if (effect.kind === "search_stack_to_grip")
+      return deps.searchStackToGripTargetCount(state, effect.filter) > 0;
+    if (effect.kind === "look_top_stack_take_matching")
+      return state.runner.stack.length > 0;
+    if (effect.kind === "look_top_stack_take_one_arrange_rest")
+      return state.runner.stack.length > 0;
+    return true;
+  });
 }
 
 export function canPlayPrintedCostOnPlayImplementation(
@@ -1214,6 +1287,50 @@ export function resolveActivatedCardImplementationAbility(
           match.cardId,
           match.definition.id,
         ),
+      startSearchTrashToGrip: (filter) =>
+        deps.startSearchTrashToGripChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          filter,
+        ),
+      startSearchStackToGrip: (filter, revealToCorp, shuffleAfterwards) =>
+        deps.startSearchStackToGripChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          filter,
+          revealToCorp,
+          shuffleAfterwards,
+        ),
+      startLookTopStackTakeMatching: (
+        count,
+        allowedTypes,
+        costPerTaken,
+        revealTakenToCorp,
+        shuffleRemainder,
+      ) =>
+        deps.startLookTopStackTakeMatchingChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          count,
+          allowedTypes,
+          costPerTaken,
+          revealTakenToCorp,
+          shuffleRemainder,
+        ),
+      startLookTopStackTakeOneArrangeRest: (count) =>
+        deps.startLookTopStackTakeOneArrangeRestChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          count,
+        ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
@@ -1329,6 +1446,50 @@ export function executeOnPlayCardImplementationAbility(
           legalAction,
           cardId,
           definition.id,
+        ),
+      startSearchTrashToGrip: (filter) =>
+        deps.startSearchTrashToGripChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          filter,
+        ),
+      startSearchStackToGrip: (filter, revealToCorp, shuffleAfterwards) =>
+        deps.startSearchStackToGripChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          filter,
+          revealToCorp,
+          shuffleAfterwards,
+        ),
+      startLookTopStackTakeMatching: (
+        count,
+        allowedTypes,
+        costPerTaken,
+        revealTakenToCorp,
+        shuffleRemainder,
+      ) =>
+        deps.startLookTopStackTakeMatchingChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          count,
+          allowedTypes,
+          costPerTaken,
+          revealTakenToCorp,
+          shuffleRemainder,
+        ),
+      startLookTopStackTakeOneArrangeRest: (count) =>
+        deps.startLookTopStackTakeOneArrangeRestChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          count,
         ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),

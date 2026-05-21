@@ -9,7 +9,6 @@ export const rexImplementation: CardImplementationDefinition = {
       kind: "trace",
       baseTraceStrength: 3,
       text: "*Trace 3-If trace is successful, end the run, and Runner cannot run again until Runner takes an action to pay [2].",
-      visibility: "public",
       onSuccess: [
         { kind: "end_run", visibility: "public" },
         {

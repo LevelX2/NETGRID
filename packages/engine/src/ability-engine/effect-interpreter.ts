@@ -73,6 +73,24 @@ export type CardEffectExecutionContext = {
   startShowHqAgendasForCredits?: (
     creditPerAgenda: number,
   ) => CardEffectHiddenInfoResult;
+  startSearchTrashToGrip?: (
+    filter: "program" | "any_card",
+  ) => CardEffectHiddenInfoResult;
+  startSearchStackToGrip?: (
+    filter: "program" | "any_card",
+    revealToCorp: boolean,
+    shuffleAfterwards: true,
+  ) => CardEffectHiddenInfoResult;
+  startLookTopStackTakeMatching?: (
+    count: number,
+    allowedTypes: readonly ("program" | "event" | "resource")[],
+    costPerTaken: number,
+    revealTakenToCorp: true,
+    shuffleRemainder: true,
+  ) => CardEffectHiddenInfoResult;
+  startLookTopStackTakeOneArrangeRest?: (
+    count: 5,
+  ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters?: (
     amount: number,
     distribution:
@@ -672,6 +690,92 @@ export function executeCardImplementationEffects(
           effect.creditPerAgenda,
         );
         mergePublicPayload(publicPayload, revealResult.publicPayload);
+        return;
+      }
+      case "search_trash_to_grip": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "search_trash_to_grip visibility must be hidden_info_barrier.",
+          );
+        if (effect.filter !== "program" && effect.filter !== "any_card")
+          throw new Error("search_trash_to_grip filter is invalid.");
+        if (!context.startSearchTrashToGrip)
+          throw new Error(
+            "search_trash_to_grip requires a startSearchTrashToGrip execution context.",
+          );
+        const searchResult = context.startSearchTrashToGrip(effect.filter);
+        mergePublicPayload(publicPayload, searchResult.publicPayload);
+        return;
+      }
+      case "search_stack_to_grip": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "search_stack_to_grip visibility must be hidden_info_barrier.",
+          );
+        if (effect.filter !== "program" && effect.filter !== "any_card")
+          throw new Error("search_stack_to_grip filter is invalid.");
+        if (effect.shuffleAfterwards !== true)
+          throw new Error("search_stack_to_grip must shuffle afterwards.");
+        if (!context.startSearchStackToGrip)
+          throw new Error(
+            "search_stack_to_grip requires a startSearchStackToGrip execution context.",
+          );
+        const searchResult = context.startSearchStackToGrip(
+          effect.filter,
+          effect.revealToCorp,
+          effect.shuffleAfterwards,
+        );
+        mergePublicPayload(publicPayload, searchResult.publicPayload);
+        return;
+      }
+      case "look_top_stack_take_matching": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "look_top_stack_take_matching visibility must be hidden_info_barrier.",
+          );
+        assertPositiveIntegerAmount("look_top_stack_take_matching", effect.count);
+        if (
+          !Number.isInteger(effect.costPerTaken) ||
+          effect.costPerTaken < 0
+        )
+          throw new Error(
+            "look_top_stack_take_matching costPerTaken must be a non-negative integer.",
+          );
+        if (effect.revealTakenToCorp !== true || effect.shuffleRemainder !== true)
+          throw new Error(
+            "look_top_stack_take_matching must reveal taken cards and shuffle remainder.",
+          );
+        if (!context.startLookTopStackTakeMatching)
+          throw new Error(
+            "look_top_stack_take_matching requires a startLookTopStackTakeMatching execution context.",
+          );
+        const lookResult = context.startLookTopStackTakeMatching(
+          effect.count,
+          effect.allowedTypes,
+          effect.costPerTaken,
+          effect.revealTakenToCorp,
+          effect.shuffleRemainder,
+        );
+        mergePublicPayload(publicPayload, lookResult.publicPayload);
+        return;
+      }
+      case "look_top_stack_take_one_arrange_rest": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "look_top_stack_take_one_arrange_rest visibility must be hidden_info_barrier.",
+          );
+        if (effect.count !== 5)
+          throw new Error(
+            "look_top_stack_take_one_arrange_rest supports only count 5.",
+          );
+        if (!context.startLookTopStackTakeOneArrangeRest)
+          throw new Error(
+            "look_top_stack_take_one_arrange_rest requires a startLookTopStackTakeOneArrangeRest execution context.",
+          );
+        const lookResult = context.startLookTopStackTakeOneArrangeRest(
+          effect.count,
+        );
+        mergePublicPayload(publicPayload, lookResult.publicPayload);
         return;
       }
       case "distribute_advancement_counters": {

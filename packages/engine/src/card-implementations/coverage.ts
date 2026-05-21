@@ -105,12 +105,20 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
   "onr_v1_085_executive-wiretaps":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+  "onr_v1_087_forgotten-backup-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/forgotten-backup-chip.ts",
+  "onr_v1_089_gideons-pawnshop":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/gideons-pawnshop.ts",
   "onr_v1_091_hunt-club-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/hunt-club-bbs.ts",
   "onr_v1_092_ice-and-datas-guide-to-the-net":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/ice-and-datas-guide-to-the-net.ts",
+  "onr_v1_093_if-you-want-it-done-right":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/if-you-want-it-done-right.ts",
   "onr_v1_096_kilroy-was-here":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
+  "onr_v1_099_mantis-fixer-at-large":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
   "onr_v1_105_priority-wreck":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
   "onr_v1_095_jack-n-joe":
@@ -123,6 +131,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/romp-through-hq.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_114_temple-microcode-outlet":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/temple-microcode-outlet.ts",
   "onr_v1_118_weather-to-finance-pipe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/weather-to-finance-pipe.ts",
   "onr_v1_024_expert-schedule-analyzer":
@@ -143,10 +153,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/r-d-interface.ts",
   "onr_v1_142_record-reconstructor":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/record-reconstructor.ts",
+  "onr_v1_151_aujourdoui":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/aujourdhui.ts",
   "onr_v1_163_floating-runner-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/floating-runner-bbs.ts",
+  "onr_v1_169_n-e-t-o":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/n-e-t-o.ts",
   "onr_v1_174_rigged-investments":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/rigged-investments.ts",
+  "onr_v1_177_the-short-circuit":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/the-short-circuit.ts",
   "onr_v1_178_short-term-contract":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/short-term-contract.ts",
   "onr_v1_179_silicon-saloon-franchise":

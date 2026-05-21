@@ -8,7 +8,6 @@ export const scrambleImplementation: CardImplementationDefinition = {
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
 };

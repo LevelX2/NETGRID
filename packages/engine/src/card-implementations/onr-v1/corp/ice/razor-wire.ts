@@ -11,12 +11,10 @@ export const razorWireImplementation: CardImplementationDefinition = {
       amount: 2,
       preventable: true,
       text: "*Do 2 Net damage.",
-      visibility: "public",
     },
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
 };

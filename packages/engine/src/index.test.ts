@@ -8823,12 +8823,10 @@ describe("V1.6.2 Mechanikpaket B", () => {
         expect.objectContaining({
           kind: "trash_program",
           text: "*Trash a program.",
-          visibility: "public",
         }),
         expect.objectContaining({
           kind: "end_the_run",
           text: "*End the run.",
-          visibility: "public",
         }),
       ]);
       expect(
@@ -11355,7 +11353,7 @@ describe("V1.7.1 Mechanikpaket E", () => {
         sourceDefinition(state, action) ===
           "onr_v1_114_temple-microcode-outlet",
     );
-    expect(state.pendingChoice?.source.startsWith("v098.search_stack")).toBe(
+    expect(state.pendingChoice?.source.startsWith("p3_37.search_stack_to_grip")).toBe(
       true,
     );
 
@@ -11372,7 +11370,8 @@ describe("V1.7.1 Mechanikpaket E", () => {
     expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("hidden_info_barrier");
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "search_stack",
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      publicRevealDefinitionId: "onr_v1_036_jackhammer",
     });
   });
 
@@ -15817,14 +15816,20 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     ).toBe("playable_mvp");
   });
 
-  it("resolves V1.9.11 stack search through a private PendingChoice, deterministic shuffle and replay-safe StateHash", () => {
+  it("resolves Forgotten Backup Chip trash search through a private PendingChoice and replay-safe StateHash", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-search"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(
       state,
       "onr_v1_087_forgotten-backup-chip",
     );
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const targetProgramId = moveRunnerCardToGrip(state, "simple_decoder");
+    removeEverywhere(state, targetProgramId);
+    state.runner.heap.push(targetProgramId);
+    state.cardInstances[targetProgramId] = {
+      ...state.cardInstances[targetProgramId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
 
@@ -15835,26 +15840,15 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === eventId,
     );
-    expect(state.pendingChoice?.source).toContain("v098.search_stack");
+    expect(state.pendingChoice?.source).toContain("p3_37.search_trash_to_grip");
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
     expect(
       runnerChoice?.options.some((option) => option.label === "Simple Decoder"),
     ).toBe(true);
-    expect(runnerChoice?.stackSearchResolution).toMatchObject({
-      reveal: "hidden",
-      destination: "grip",
-      shuffleAfter: true,
-    });
     expect(
       runnerChoice?.options.find((option) => option.value === targetProgramId)
         ?.card,
-    ).toMatchObject({
-      instanceId: targetProgramId,
-      known: true,
-      title: "Simple Decoder",
-      definitionId: "simple_decoder",
-      type: "program",
-    });
+    ).toBeUndefined();
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
 
     const optionId = runnerChoice?.options.find(
@@ -15863,10 +15857,10 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
     expect(state.runner.grip).toContain(targetProgramId);
-    expect(state.runner.stack).not.toContain(targetProgramId);
+    expect(state.runner.heap).not.toContain(targetProgramId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "search_stack",
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
     });
 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
@@ -15874,18 +15868,30 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("shows the full Runner stack during program search while only programs are selectable", () => {
+  it("shows the full Runner trash during program search while only programs are selectable", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-search"));
     state.runner.credits = 20;
     const eventId = moveRunnerCardToGrip(
       state,
       "onr_v1_087_forgotten-backup-chip",
     );
-    const displayOnlyHardwareId = putRunnerCardOnTopOfStack(
+    const displayOnlyEventId = moveRunnerCardToGrip(
       state,
       "simple_economy_event",
     );
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    removeEverywhere(state, displayOnlyEventId);
+    state.runner.heap.push(displayOnlyEventId);
+    state.cardInstances[displayOnlyEventId] = {
+      ...state.cardInstances[displayOnlyEventId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
+    const targetProgramId = moveRunnerCardToGrip(state, "simple_decoder");
+    removeEverywhere(state, targetProgramId);
+    state.runner.heap.push(targetProgramId);
+    state.cardInstances[targetProgramId] = {
+      ...state.cardInstances[targetProgramId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
 
     state = apply(
       state,
@@ -15899,22 +15905,20 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     const programOption = runnerChoice?.options.find(
       (option) => option.value === targetProgramId,
     );
-    const hardwareOption = runnerChoice?.options.find(
-      (option) => option.value === displayOnlyHardwareId,
+    const eventOption = runnerChoice?.options.find(
+      (option) => option.value === displayOnlyEventId,
     );
 
     expect(programOption).toMatchObject({
       label: "Simple Decoder",
-      card: { definitionId: "simple_decoder", type: "program" },
     });
     expect(programOption?.selectable).toBeUndefined();
-    expect(hardwareOption).toMatchObject({
+    expect(eventOption).toMatchObject({
       label: "Simple Economy Event",
       selectable: false,
-      card: { definitionId: "simple_economy_event", type: "event" },
     });
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
-    expect(() => applyChoice(state, "runner", String(hardwareOption?.id))).toThrow(
+    expect(() => applyChoice(state, "runner", String(eventOption?.id))).toThrow(
       "Eine gewaehlte Option ist fuer diesen Effekt nicht auswaehlbar.",
     );
   });
@@ -15940,19 +15944,140 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     );
 
     const runnerChoice = getPlayerView(state, "runner").pendingChoice;
-    expect(runnerChoice?.source).toContain("v1911.search_stack_card");
+    expect(runnerChoice?.source).toContain("p3_37.search_stack_to_grip");
     const eventOption = runnerChoice?.options.find(
       (option) => option.value === targetEventId,
     );
     expect(eventOption).toMatchObject({
       label: "Simple Economy Event",
-      card: { definitionId: "simple_economy_event", type: "event" },
     });
     expect(eventOption?.selectable).toBeUndefined();
 
     state = applyChoice(state, "runner", String(eventOption?.id));
     expect(state.runner.grip).toContain(targetEventId);
     expect(state.runner.stack).not.toContain(targetEventId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+    });
+  });
+
+  it("lets Gideon's Pawnshop take any Runner trash card into the grip", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-gideon"));
+    state.runner.credits = 20;
+    const eventId = moveRunnerCardToGrip(state, "onr_v1_089_gideons-pawnshop");
+    const targetEventId = moveRunnerCardToGrip(state, "simple_economy_event");
+    removeEverywhere(state, targetEventId);
+    state.runner.heap.push(targetEventId);
+    state.cardInstances[targetEventId] = {
+      ...state.cardInstances[targetEventId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === eventId,
+    );
+    expect(state.pendingChoice?.source).toContain("p3_37.search_trash_to_grip");
+    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+      (option) => option.value === targetEventId,
+    )?.id;
+    expect(optionId).toBeDefined();
+    state = applyChoice(state, "runner", String(optionId));
+    expect(state.runner.grip).toContain(targetEventId);
+    expect(state.runner.heap).not.toContain(targetEventId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
+      cardDefinitionId: "simple_economy_event",
+    });
+  });
+
+  it("uses Aujourd'Oui to take paid shown programs from the stack top", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdhui"));
+    state.runner.credits = 20;
+    installRunnerResourceForTest(state, "onr_v1_151_aujourdoui");
+    const eventId = putRunnerCardOnTopOfStack(state, "simple_economy_event");
+    const decoderId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const fracterId = putRunnerCardOnTopOfStack(state, "simple_fracter");
+    const creditsBefore = state.runner.credits;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_151_aujourdoui",
+    );
+    expect(state.pendingChoice?.source).toContain(
+      "p3_37.look_top_stack_take_matching",
+    );
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(
+      runnerChoice?.options.find((option) => option.value === eventId)?.selectable,
+    ).toBe(false);
+    const selectedOptionIds = [decoderId, fracterId].map(
+      (cardId) =>
+        runnerChoice?.options.find((option) => option.value === cardId)?.id ?? "",
+    );
+    expect(selectedOptionIds.every(Boolean)).toBe(true);
+    state = applyChoices(state, "runner", selectedOptionIds);
+    expect(state.runner.grip).toEqual(
+      expect.arrayContaining([decoderId, fracterId]),
+    );
+    expect(state.runner.credits).toBe(creditsBefore - 2);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+    });
+  });
+
+  it("uses N.E.T.O. to take paid shown prep/resource cards from the stack top", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "v1911-neto",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.hiddenZone.runner,
+          id: "v1911_neto_resource_runner",
+          cards: [
+            ...MECHANIC_SMOKE_DECKS.hiddenZone.runner.cards,
+            { id: "onr_v1_178_short-term-contract", quantity: 1 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.hiddenZone.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 20;
+    installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
+    const programId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const resourceId = putRunnerCardOnTopOfStack(state, "onr_v1_178_short-term-contract");
+    const prepId = putRunnerCardOnTopOfStack(state, "simple_economy_event");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_169_n-e-t-o",
+    );
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(
+      runnerChoice?.options.find((option) => option.value === programId)?.selectable,
+    ).toBe(false);
+    const selectedOptionIds = [prepId, resourceId].map(
+      (cardId) =>
+        runnerChoice?.options.find((option) => option.value === cardId)?.id ?? "",
+    );
+    expect(selectedOptionIds.every(Boolean)).toBe(true);
+    state = applyChoices(state, "runner", selectedOptionIds);
+    expect(state.runner.grip).toEqual(
+      expect.arrayContaining([prepId, resourceId]),
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+    });
   });
 
   it("uses Sneak Preview to choose Stack first, install a program at no cost, shuffle and return it at end of turn", () => {
@@ -16078,40 +16203,39 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     state.runner.credits = 20;
     installRunnerResourceForTest(state, "onr_v1_169_n-e-t-o");
     installRunnerResourceForTest(state, "onr_v1_175_ronin-around");
-    const targetProgramId = putRunnerCardOnTopOfStack(state, "simple_decoder");
+    const targetEventId = putRunnerCardOnTopOfStack(state, "simple_economy_event");
     const searchAction = mustAction(
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility ===
-          "search_stack_program_to_grip",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_169_n-e-t-o",
     );
     expect(searchAction.payload).toMatchObject({
-      abilityFamily: "hidden-zone",
-      abilityId: "search_stack_program_to_grip",
-      effectKind: "hidden_zone",
+      cardImplementationAbility: "activated",
     });
 
     state = apply(
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility ===
-          "search_stack_program_to_grip",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) === "onr_v1_169_n-e-t-o",
     );
-    expect(state.pendingChoice?.source).toContain("v1911.search_stack");
+    expect(state.pendingChoice?.source).toContain(
+      "p3_37.look_top_stack_take_matching",
+    );
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
-      (option) => option.value === targetProgramId,
+      (option) => option.value === targetEventId,
     )?.id;
     expect(optionId).toBeDefined();
     state = applyChoice(state, "runner", String(optionId));
-    expect(state.runner.grip).toContain(targetProgramId);
+    expect(state.runner.grip).toContain(targetEventId);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "search_stack",
+      hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+      publicRevealDefinitionIds: "simple_economy_event",
     });
 
     putRunnerCardOnTopOfStack(state, "simple_decoder");
@@ -25709,7 +25833,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
           "onr_v1_093_if-you-want-it-done-right",
     );
     expect(state.pendingChoice?.source).toContain(
-      "v1922.runner_stack_top5_choose_one_arrange_rest",
+      "p3_37.runner_stack_top5_choose_one_arrange_rest",
     );
     expect(state.pendingChoice?.visibility).toBe("hidden_info_barrier");
     expect(state.pendingChoice?.options).toHaveLength(5);
@@ -32842,9 +32966,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     const creditsBeforeAbility = state.runner.credits;
     const shortCircuitAction = getLegalActions(state, "runner").find(
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility ===
-          "search_stack_program_to_grip" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         action.source === shortCircuitId,
     );
     expect(shortCircuitAction?.costs).toEqual([{ clicks: 1, credits: 1 }]);
@@ -32852,9 +32975,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       state,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility ===
-          "search_stack_program_to_grip" &&
+        action.type === "activated_card_ability" &&
+        action.payload?.cardImplementationAbility === "activated" &&
         sourceDefinition(state, action) === "onr_v1_177_the-short-circuit",
     );
     expect(state.runner.credits).toBe(creditsBeforeAbility - 1);
@@ -32870,7 +32992,7 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       expect(state.runner.heap).not.toContain(shortCircuitId);
     }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v1911_short_circuit_search",
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
       sourceDefinitionId: "onr_v1_177_the-short-circuit",
       cardDefinitionId: "simple_decoder",
       publicRevealDefinitionId: "simple_decoder",
@@ -42022,7 +42144,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     temple = applyChoice(temple, "runner", selectedOption);
     expect(temple.runner.grip).toContain(selectedProgram);
     expect(temple.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "search_stack",
+      hiddenZoneAction: "p3_37_search_stack_to_grip",
+      publicRevealDefinitionId: "onr_v1_036_jackhammer",
     });
     expect(JSON.stringify(temple.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
@@ -42369,7 +42492,13 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     );
     gideon.runner.credits = 20;
     const gideonId = moveRunnerCardToGrip(gideon, "onr_v1_089_gideons-pawnshop");
-    const programId = putRunnerCardOnTopOfStack(gideon, "simple_decoder");
+    const programId = moveRunnerCardToGrip(gideon, "simple_decoder");
+    removeEverywhere(gideon, programId);
+    gideon.runner.heap.push(programId);
+    gideon.cardInstances[programId] = {
+      ...gideon.cardInstances[programId]!,
+      zone: { side: "runner", zone: "heap" },
+    };
     const gideonInitial = structuredClone(gideon);
     const gideonReplayStart = gideon.eventLog.length;
     gideon = apply(
@@ -42383,7 +42512,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Run Access hardening", (
     gideon = applyChoice(gideon, "runner", optionId);
     expect(gideon.runner.grip).toContain(programId);
     expect(gideon.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "search_stack",
+      hiddenZoneAction: "p3_37_search_trash_to_grip",
     });
     expect(JSON.stringify(gideon.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,

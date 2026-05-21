@@ -131,9 +131,13 @@ import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bo
 import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial-position";
 import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
 import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
+import { forgottenBackupChipImplementation } from "./onr-v1/runner/preps/forgotten-backup-chip";
+import { gideonsPawnshopImplementation } from "./onr-v1/runner/preps/gideons-pawnshop";
 import { huntClubBbsImplementation } from "./onr-v1/runner/preps/hunt-club-bbs";
 import { iceAndDatasGuideToTheNetImplementation } from "./onr-v1/runner/preps/ice-and-datas-guide-to-the-net";
+import { ifYouWantItDoneRightImplementation } from "./onr-v1/runner/preps/if-you-want-it-done-right";
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
+import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
@@ -148,6 +152,7 @@ import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires
 import { privateLdlAccessImplementation } from "./onr-v1/runner/preps/private-ldl-access";
 import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-hq";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
+import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/temple-microcode-outlet";
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
@@ -164,14 +169,17 @@ import { accessToArasakaImplementation } from "./onr-v1/runner/resources/access-
 import { accessToKiribatiImplementation } from "./onr-v1/runner/resources/access-to-kiribati";
 import { backDoorToHilliardImplementation } from "./onr-v1/runner/resources/back-door-to-hilliard";
 import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/back-door-to-orbital-air";
+import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
+import { nEtoImplementation } from "./onr-v1/runner/resources/n-e-t-o";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
 import { technicianLoverImplementation } from "./onr-v1/runner/resources/technician-lover";
 import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
+import { theShortCircuitImplementation } from "./onr-v1/runner/resources/the-short-circuit";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import type { CardImplementationDefinition } from "./types";
 
@@ -180,14 +188,19 @@ export const CARD_IMPLEMENTATIONS = [
   custodialPositionImplementation,
   editedShippingManifestsImplementation,
   executiveWiretapsImplementation,
+  forgottenBackupChipImplementation,
+  gideonsPawnshopImplementation,
   huntClubBbsImplementation,
   iceAndDatasGuideToTheNetImplementation,
+  ifYouWantItDoneRightImplementation,
   jackNJoeImplementation,
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
+  mantisFixerAtLargeImplementation,
   priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,
+  templeMicrocodeOutletImplementation,
   weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
@@ -204,9 +217,11 @@ export const CARD_IMPLEMENTATIONS = [
   accessToKiribatiImplementation,
   backDoorToHilliardImplementation,
   backDoorToOrbitalAirImplementation,
+  aujourdhuiImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
   loanFromChibaImplementation,
+  nEtoImplementation,
   hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
@@ -218,6 +233,7 @@ export const CARD_IMPLEMENTATIONS = [
   siliconSaloonFranchiseImplementation,
   technicianLoverImplementation,
   theSpringboardImplementation,
+  theShortCircuitImplementation,
   topRunnersConferenceImplementation,
   artificialSecurityDirectorsImplementation,
   blackIceQualityAssuranceImplementation,

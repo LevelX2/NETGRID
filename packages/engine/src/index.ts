@@ -464,6 +464,80 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       sourceDefinitionId,
       creditPerAgenda,
     ),
+  searchTrashToGripTargetCount: (state, filter) =>
+    searchTrashToGripTargets(state, filter).length,
+  searchStackToGripTargetCount: (state, filter) =>
+    searchStackToGripTargets(state, filter).length,
+  lookTopStackTakeMatchingTargetCount: (state, count, allowedTypes) =>
+    lookTopStackTakeMatchingTargets(state, count, allowedTypes).length,
+  startSearchTrashToGripChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    filter,
+  ) =>
+    startCardImplementationSearchTrashToGripChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      filter,
+    ),
+  startSearchStackToGripChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    filter,
+    revealToCorp,
+    shuffleAfterwards,
+  ) =>
+    startCardImplementationSearchStackToGripChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      filter,
+      revealToCorp,
+      shuffleAfterwards,
+    ),
+  startLookTopStackTakeMatchingChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    count,
+    allowedTypes,
+    costPerTaken,
+    revealTakenToCorp,
+    shuffleRemainder,
+  ) =>
+    startCardImplementationLookTopStackTakeMatchingChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      count,
+      allowedTypes,
+      costPerTaken,
+      revealTakenToCorp,
+      shuffleRemainder,
+    ),
+  startLookTopStackTakeOneArrangeRestChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    count,
+  ) =>
+    startCardImplementationLookTopStackTakeOneArrangeRestChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      count,
+    ),
   startDistributeAdvancementCounters: (
     state,
     legalAction,
@@ -4204,6 +4278,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, cardId);
       if (
         STACK_SEARCH_PROGRAM_CARD_IDS.has(definition.id) &&
+        !cardImplementationForDefinitionId(definition.id) &&
         definition.id !== SELF_MODIFYING_CODE_ID &&
         (definition.id !== SHORT_CIRCUIT_RESOURCE_CARD_ID ||
           state.runner.credits >= 1) &&
@@ -18345,6 +18420,27 @@ function resolvePendingChoice(
     resolveRunnerStackSearchChoice(state, legalAction, playerAction);
     return;
   }
+  if (
+    state.pendingChoice.source.startsWith("p3_37.search_trash_to_grip") ||
+    state.pendingChoice.source.startsWith("p3_37.search_stack_to_grip")
+  ) {
+    resolveCardImplementationSearchToGripChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("p3_37.look_top_stack_take_matching")
+  ) {
+    resolveCardImplementationLookTopStackTakeMatchingChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1911.self_modifying_code_free_mu")) {
     resolveSelfModifyingCodeFreeMuChoice(state, legalAction, playerAction);
     return;
@@ -18484,6 +18580,9 @@ function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith(
       "v1922.runner_stack_top5_choose_one_arrange_rest",
+    ) ||
+    state.pendingChoice.source.startsWith(
+      "p3_37.runner_stack_top5_choose_one_arrange_rest",
     )
   ) {
     resolveRunnerStackTop5Choice(state, legalAction, playerAction);
@@ -18918,6 +19017,209 @@ function startRunnerStackSearchChoice(
   };
 }
 
+function searchTrashToGripTargets(
+  state: GameState,
+  filter: "program" | "any_card",
+): CardInstanceId[] {
+  return state.runner.heap
+    .filter((cardId) => {
+      if (filter === "any_card") return true;
+      return definitionFor(state, cardId).type === "program";
+    })
+    .sort();
+}
+
+function searchStackToGripTargets(
+  state: GameState,
+  filter: "program" | "any_card",
+): CardInstanceId[] {
+  return state.runner.stack.filter((cardId) => {
+    if (filter === "any_card") return true;
+    return definitionFor(state, cardId).type === "program";
+  });
+}
+
+function lookTopStackTakeMatchingTargets(
+  state: GameState,
+  count: number,
+  allowedTypes: readonly ("program" | "event" | "resource")[],
+): CardInstanceId[] {
+  const allowed = new Set(allowedTypes);
+  return state.runner.stack
+    .slice(0, Math.max(0, Math.floor(count)))
+    .filter((cardId) => cardTypeMatchesSearchTypes(definitionFor(state, cardId).type, allowed));
+}
+
+function cardTypeMatchesSearchTypes(
+  cardType: CardDefinition["type"],
+  allowed: ReadonlySet<"program" | "event" | "resource">,
+): boolean {
+  return (
+    (cardType === "program" || cardType === "event" || cardType === "resource") &&
+    allowed.has(cardType)
+  );
+}
+
+function startCardImplementationSearchTrashToGripChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  filter: "program" | "any_card",
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const targets = searchTrashToGripTargets(state, filter);
+  if (targets.length === 0) throw new Error("Im Trash liegt keine suchbare Karte.");
+  state.pendingChoice = {
+    choiceId: `p3_37_search_trash_to_grip_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_37.search_trash_to_grip:${sourceCardId}:${sourceDefinitionId}:${filter}:${state.stateVersion + 1}`,
+    prompt: "Trash durchsuchen",
+    kind: "select_cards",
+    options: state.runner.heap.slice().sort().map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = targets.includes(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_37_search_trash_to_grip",
+    sourceDefinitionId,
+    searchedZone: "runner_heap",
+    searchFilter: filter,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
+function startCardImplementationSearchStackToGripChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  filter: "program" | "any_card",
+  revealToCorp: boolean,
+  shuffleAfterwards: true,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const targets = searchStackToGripTargets(state, filter);
+  if (targets.length === 0) throw new Error("Im Stack liegt keine suchbare Karte.");
+  state.pendingChoice = {
+    choiceId: `p3_37_search_stack_to_grip_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_37.search_stack_to_grip:${sourceCardId}:${sourceDefinitionId}:${filter}:${revealToCorp ? "reveal" : "private"}:${shuffleAfterwards ? "shuffle" : "no_shuffle"}:${state.stateVersion + 1}`,
+    prompt: "Stack durchsuchen",
+    kind: "select_cards",
+    options: state.runner.stack.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = targets.includes(cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_37_search_stack_to_grip",
+    sourceDefinitionId,
+    searchedZone: "runner_stack",
+    searchFilter: filter,
+    searchRevealToCorp: revealToCorp,
+    shufflePerformed: false,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
+function startCardImplementationLookTopStackTakeMatchingChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  count: number,
+  allowedTypes: readonly ("program" | "event" | "resource")[],
+  costPerTaken: number,
+  revealTakenToCorp: true,
+  shuffleRemainder: true,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const topCards = state.runner.stack.slice(0, Math.max(0, Math.floor(count)));
+  if (topCards.length === 0) throw new Error("Der Stack ist leer.");
+  const allowed = new Set(allowedTypes);
+  const maxAffordable =
+    costPerTaken <= 0 ? topCards.length : Math.floor(state.runner.credits / costPerTaken);
+  state.pendingChoice = {
+    choiceId: `p3_37_look_top_stack_take_matching_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_37.look_top_stack_take_matching:${sourceCardId}:${sourceDefinitionId}:${count}:${allowedTypes.join(",")}:${costPerTaken}:${revealTakenToCorp ? "reveal" : "private"}:${shuffleRemainder ? "shuffle" : "no_shuffle"}:${state.stateVersion + 1}`,
+    prompt: "Stack-Spitze ansehen und Karten nehmen",
+    kind: "select_cards",
+    options: topCards.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const selectable = cardTypeMatchesSearchTypes(definition.type, allowed);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+        ...(!selectable ? { selectable: false } : {}),
+      };
+    }),
+    minSelections: 0,
+    maxSelections: Math.min(
+      lookTopStackTakeMatchingTargets(state, count, allowedTypes).length,
+      maxAffordable,
+    ),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+    sourceDefinitionId,
+    privateLookCount: topCards.length,
+    searchedZone: "runner_stack",
+    costPerTaken,
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
+function startCardImplementationLookTopStackTakeOneArrangeRestChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  count: 5,
+): { publicPayload: Record<string, string | number | boolean> } {
+  startRunnerStackTop5Choice(state, sourceCardId, "p3_37", count);
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1922_runner_stack_top5_choose_one_arrange_rest",
+    sourceDefinitionId,
+    privateLookCount: Math.min(count, state.runner.stack.length),
+  };
+  legalAction.payload = { ...(legalAction.payload ?? {}), ...payload };
+  return { publicPayload: payload };
+}
+
 function runnerStackSearchCardMatchesFilter(
   state: GameState,
   cardId: CardInstanceId,
@@ -19220,6 +19522,185 @@ function resolveRunnerStackSearchChoice(
   };
 }
 
+function resolveCardImplementationSearchToGripChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice) throw new Error("Es ist keine CardImplementation-Search-Choice offen.");
+  const sourceParts = choice.source.split(":");
+  const kind = sourceParts[0];
+  const sourceCardId = sourceParts[1] as CardInstanceId | undefined;
+  const sourceDefinitionId = sourceParts[2] as CardDefinition["id"] | undefined;
+  const filter = sourceParts[3] as "program" | "any_card" | undefined;
+  if (
+    (kind !== "p3_37.search_trash_to_grip" &&
+      kind !== "p3_37.search_stack_to_grip") ||
+    !sourceCardId ||
+    !sourceDefinitionId ||
+    (filter !== "program" && filter !== "any_card")
+  )
+    throw new Error("Die CardImplementation-Search-Choice ist ungueltig.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  if (sourceDefinition.id !== sourceDefinitionId)
+    throw new Error("Die Search-Quelle ist nicht mehr gueltig.");
+  if (
+    sourceDefinition.type === "resource" &&
+    !state.runner.rig.resources.includes(sourceCardId)
+  )
+    throw new Error("Die Search-Quelle ist nicht mehr installiert.");
+  const zone = kind === "p3_37.search_trash_to_grip" ? "heap" : "stack";
+  const targets =
+    zone === "heap"
+      ? searchTrashToGripTargets(state, filter)
+      : searchStackToGripTargets(state, filter);
+  const cardId = selectedChoiceCardIds(choice, playerAction)[0];
+  if (!cardId || !targets.includes(cardId))
+    throw new Error("Die gewaehlte Karte ist fuer diese Suche nicht legal.");
+  const definition = definitionFor(state, cardId);
+  removeFromAllZones(state, cardId);
+  state.runner.grip.push(cardId);
+  state.cardInstances[cardId] = {
+    ...mustInstance(state.cardInstances, cardId),
+    zone: { side: "runner", zone: "grip" },
+  };
+  const revealToCorp = sourceParts[4] === "reveal";
+  const shuffleAfterwards = sourceParts[5] === "shuffle";
+  if (zone === "stack" && shuffleAfterwards)
+    shuffleRunnerStack(state, `p3_37_search_stack_to_grip:${choice.choiceId}:shuffle`);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction:
+      zone === "heap"
+        ? "p3_37_search_trash_to_grip"
+        : "p3_37_search_stack_to_grip",
+    sourceDefinitionId,
+    searchedZone: zone === "heap" ? "runner_heap" : "runner_stack",
+    selectedCount: 1,
+    movedCardCount: 1,
+    searchDestination: "runner_grip",
+    shufflePerformed: zone === "stack" && shuffleAfterwards,
+    shuffled: zone === "stack" && shuffleAfterwards,
+    ...(zone === "heap" || revealToCorp
+      ? {
+          cardDefinitionId: definition.id,
+          publicRevealKind: "reveal",
+          publicRevealDefinitionId: definition.id,
+          revealedCardDefinitionIds: definition.id,
+        }
+      : {}),
+  };
+}
+
+function resolveCardImplementationLookTopStackTakeMatchingChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (
+    !choice ||
+    !choice.source.startsWith("p3_37.look_top_stack_take_matching")
+  )
+    throw new Error("Es ist keine Stack-Look-Choice offen.");
+  const [
+    ,
+    sourceCardId = "",
+    sourceDefinitionId = "",
+    countRaw = "0",
+    allowedTypesRaw = "",
+    costPerTakenRaw = "0",
+    revealRaw = "",
+    shuffleRaw = "",
+  ] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    !state.cardInstances[sourceCardId] ||
+    definitionFor(state, sourceCardId).id !== sourceDefinitionId
+  )
+    throw new Error("Die Stack-Look-Quelle ist nicht mehr gueltig.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  if (
+    sourceDefinition.type === "resource" &&
+    !state.runner.rig.resources.includes(sourceCardId)
+  )
+    throw new Error("Die Stack-Look-Quelle ist nicht mehr installiert.");
+  const count = Number(countRaw);
+  const costPerTaken = Number(costPerTakenRaw);
+  const allowedTypes = allowedTypesRaw
+    .split(",")
+    .filter(
+      (type): type is "program" | "event" | "resource" =>
+        type === "program" || type === "event" || type === "resource",
+    );
+  if (
+    !Number.isInteger(count) ||
+    count <= 0 ||
+    !Number.isInteger(costPerTaken) ||
+    costPerTaken < 0 ||
+    revealRaw !== "reveal" ||
+    shuffleRaw !== "shuffle"
+  )
+    throw new Error("Die Stack-Look-Choice ist ungueltig.");
+  const topCards = state.runner.stack.slice(0, count);
+  const legalTargets = new Set(
+    lookTopStackTakeMatchingTargets(state, count, allowedTypes),
+  );
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const selectedSet = new Set(selectedIds);
+  if (
+    selectedSet.size !== selectedIds.length ||
+    selectedIds.some((cardId) => !topCards.includes(cardId) || !legalTargets.has(cardId))
+  )
+    throw new Error("Eine gewaehlte Stack-Karte ist fuer diesen Effekt nicht legal.");
+  const cost = selectedIds.length * costPerTaken;
+  if (state.runner.credits < cost)
+    throw new Error("Der Runner kann die gewaehlten Stack-Karten nicht bezahlen.");
+  spendCredits(state, "runner", cost);
+  const definitions = selectedIds.map((cardId) => definitionFor(state, cardId));
+  for (const cardId of selectedIds) {
+    removeFromAllZones(state, cardId);
+    state.runner.grip.push(cardId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      zone: { side: "runner", zone: "grip" },
+    };
+  }
+  shuffleRunnerStack(state, `p3_37_look_top_stack_take_matching:${choice.choiceId}:shuffle`);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "p3_37_look_top_stack_take_matching",
+    sourceDefinitionId,
+    privateLookCount: topCards.length,
+    searchedZone: "runner_stack",
+    takenCardCount: selectedIds.length,
+    movedCardCount: selectedIds.length,
+    paidCredits: cost,
+    runnerCreditsAfter: state.runner.credits,
+    shufflePerformed: true,
+    shuffled: true,
+    ...(definitions.length > 0
+      ? {
+          publicRevealKind: "reveal",
+          publicRevealDefinitionIds: definitions
+            .map((definition) => definition.id)
+            .join(","),
+          publicRevealTitles: definitions
+            .map((definition) => definition.title)
+            .join("||"),
+          revealedCardDefinitionIds: definitions
+            .map((definition) => definition.id)
+            .join(","),
+        }
+      : {}),
+  };
+}
+
 function sneakPreviewInstallableProgramIds(
   state: GameState,
   zone: "heap" | "stack",
@@ -19485,14 +19966,16 @@ function resolveRunnerStackArrangeChoice(
 function startRunnerStackTop5Choice(
   state: GameState,
   sourceCardId: string,
+  sourcePrefix = "v1922",
+  count = 5,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const topCards = state.runner.stack.slice(0, 5);
+  const topCards = state.runner.stack.slice(0, count);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
   state.pendingChoice = {
-    choiceId: `v1922_runner_stack_top5_${state.stateVersion + 1}`,
+    choiceId: `${sourcePrefix}_runner_stack_top5_${state.stateVersion + 1}`,
     side: "runner",
-    source: `v1922.runner_stack_top5_choose_one_arrange_rest:${sourceCardId}:${state.stateVersion + 1}`,
+    source: `${sourcePrefix}.runner_stack_top5_choose_one_arrange_rest:${sourceCardId}:${state.stateVersion + 1}`,
     prompt: "Stack-Spitze wählen und anordnen",
     kind: "select_cards",
     options: topCards.map((cardId) => {
@@ -21766,6 +22249,8 @@ function resolveV1911RunnerHiddenZoneAbility(
   if (ability === "search_stack_program_to_grip") {
     if (!STACK_SEARCH_PROGRAM_CARD_IDS.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Stack-Search-Ability nutzen.");
+    if (cardImplementationForDefinitionId(sourceDefinition.id))
+      throw new Error("Diese Stack-Search-Ability wird deklarativ abgewickelt.");
     spendCredits(state, "runner", creditCostForAction(legalAction));
     startRunnerStackSearchChoice(
       state,

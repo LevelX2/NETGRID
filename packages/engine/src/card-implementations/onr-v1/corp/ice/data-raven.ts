@@ -9,7 +9,6 @@ export const dataRavenImplementation: CardImplementationDefinition = {
       kind: "trace",
       baseTraceStrength: 5,
       text: "*Trace 5 -If trace is successful, give Runner a tag and a Data Raven counter.",
-      visibility: "public",
       onSuccess: [
         {
           kind: "add_tags",

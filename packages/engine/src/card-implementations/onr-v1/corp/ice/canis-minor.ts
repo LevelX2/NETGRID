@@ -9,7 +9,6 @@ export const canisMinorImplementation: CardImplementationDefinition = {
       kind: "run_duration_ice_strength",
       amount: 1,
       text: "*For the remainder of the run, all further ice is encountered at +1 strength.",
-      visibility: "public",
     },
   ],
 };

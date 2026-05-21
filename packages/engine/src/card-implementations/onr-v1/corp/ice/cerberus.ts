@@ -11,13 +11,11 @@ export const cerberusImplementation: CardImplementationDefinition = {
       amount: 3,
       preventable: true,
       text: "*Do 3 Net damage.",
-      visibility: "public",
     },
     {
       kind: "trace",
       baseTraceStrength: 5,
       text: "*Trace 5-If trace is successful, give Runner a Cerberus counter.",
-      visibility: "public",
       onSuccess: [
         {
           kind: "add_counter",
@@ -31,7 +29,6 @@ export const cerberusImplementation: CardImplementationDefinition = {
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
   runnerCounterEffects: [

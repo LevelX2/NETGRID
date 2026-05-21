@@ -11,12 +11,10 @@ export const neuralBladeImplementation: CardImplementationDefinition = {
       amount: 1,
       preventable: true,
       text: "*Do 1 Net damage.",
-      visibility: "public",
     },
     {
       kind: "prohibit_break_next_ice",
       text: "*Runner cannot break any subroutines of the next piece of ice encountered during the run.",
-      visibility: "public",
     },
   ],
 };

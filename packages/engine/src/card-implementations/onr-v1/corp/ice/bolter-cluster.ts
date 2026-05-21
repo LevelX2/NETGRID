@@ -11,12 +11,10 @@ export const bolterClusterImplementation: CardImplementationDefinition = {
       amount: 4,
       preventable: true,
       text: "*Do 4 Net damage.",
-      visibility: "public",
     },
     {
       kind: "prohibit_break_next_ice",
       text: "*Runner cannot break any subroutines of the next piece of ice encountered during the run.",
-      visibility: "public",
     },
   ],
 };

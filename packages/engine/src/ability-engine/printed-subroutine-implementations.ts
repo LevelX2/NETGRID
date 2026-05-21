@@ -22,8 +22,6 @@ function printedSubroutineDefinitionForImplementation(
   subroutine: CardPrintedSubroutineImplementation,
   index: number,
 ): SubroutineDefinition {
-  if (subroutine.visibility !== "public")
-    throw new Error("Unsupported printed subroutine visibility.");
   if (subroutine.kind === "end_the_run") {
     return {
       id: printedSubroutineId(definition, index, subroutine),

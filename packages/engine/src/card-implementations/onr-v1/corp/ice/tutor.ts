@@ -14,7 +14,6 @@ export const tutorImplementation: CardImplementationDefinition = {
         visibility: "public",
       },
       text: '*For the remainder of the run, all ice encountered has an additional subroutine, "*End the run," after all other subroutines.',
-      visibility: "public",
     },
   ],
 };

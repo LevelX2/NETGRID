@@ -11,12 +11,10 @@ export const laserWireImplementation: CardImplementationDefinition = {
       amount: 1,
       preventable: true,
       text: "*Do 1 Net damage.",
-      visibility: "public",
     },
     {
       kind: "end_the_run",
       text: "*End the run.",
-      visibility: "public",
     },
   ],
 };

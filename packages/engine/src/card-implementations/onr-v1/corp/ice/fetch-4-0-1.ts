@@ -10,7 +10,6 @@ export const fetchFourPointZeroPointOneImplementation: CardImplementationDefinit
         kind: "trace",
         baseTraceStrength: 3,
         text: "*Trace 3-If trace is successful, give Runner a tag.",
-        visibility: "public",
         onSuccess: [
           {
             kind: "add_tags",

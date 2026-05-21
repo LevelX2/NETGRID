@@ -9,7 +9,6 @@ export const fragmentationStormImplementation: CardImplementationDefinition = {
       kind: "trace",
       baseTraceStrength: 4,
       text: "*Trace 4-If trace is successful, end the run and trash a program, and Runner cannot run again until Runner takes an action to pay [1].",
-      visibility: "public",
       onSuccess: [
         { kind: "end_run", visibility: "public" },
         {
