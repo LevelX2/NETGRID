@@ -5855,7 +5855,7 @@ function runnerEncounterActions(state: GameState): LegalAction[] {
       breakerStrength >= encounteredIceStrength &&
       availableRunnerRunCredits(state, breakerId) >=
         (singleBreakCost?.totalCost ?? breakAbility.cost.credits) &&
-      (![RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(breaker.id) ||
+      (breaker.id !== PILE_DRIVER_ID ||
         runnerStealthRecurringCredits(state) >=
           (breakAbility.postBreakStealthLoss ?? 0))
     ) {
@@ -22910,9 +22910,7 @@ function applyPostBreakStealthLoss(
     (sum, source) => sum + source.available,
     0,
   );
-  const exactStealthLoss = [RAMMING_PISTON_ID, PILE_DRIVER_ID].includes(
-    breakerDefinition.id,
-  );
+  const exactStealthLoss = breakerDefinition.id === PILE_DRIVER_ID;
   if (exactStealthLoss && availableStealth < lossAmount)
     throw new Error("Nicht genug Stealth-Credits fuer den Break-Folgeverlust.");
   const requiredLoss = exactStealthLoss

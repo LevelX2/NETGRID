@@ -32570,6 +32570,86 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
   });
 
+  it("offers Ramming Piston wall break without installed Stealth cards because Noisy loss is a penalty", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-ramming-piston-no-stealth",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "spotcheck_ramming_no_stealth_runner",
+          name: "Spotcheck Ramming No Stealth Runner",
+          cards: [
+            { id: "onr_v1_053_ramming-piston", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          cards: [
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    moveRunnerCardToGrip(state, "onr_v1_053_ramming-piston");
+    const iceId = putCorpIceOnServer(state, "remote_1", "onr_v1_237_data-wall");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
+    );
+    const rammingId = state.runner.rig.programs.find(
+      (id) =>
+        state.cardInstances[id]?.definitionId === "onr_v1_053_ramming-piston",
+    );
+    expect(rammingId).toBeDefined();
+    if (!rammingId) throw new Error("Missing Ramming Piston");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+
+    const rammingBreak = getLegalActions(state, "runner").find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_053_ramming-piston",
+    );
+    expect(rammingBreak).toBeDefined();
+    expect(rammingBreak?.costs).toEqual([{ credits: 2 }]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === rammingBreak?.actionId,
+    );
+    expect(state.run?.brokenSubroutineIndexes).toEqual([0]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_053_ramming-piston",
+      targetIceDefinitionId: "onr_v1_237_data-wall",
+    });
+    expect(
+      state.eventLog.at(-1)?.publicPayload.postBreakStealthLoss,
+    ).toBeUndefined();
+  });
+
   it("adds Skivviss counters on successful R&D runs and converts them into Corp start-turn draws", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-skivviss-rd"),
