@@ -62,6 +62,17 @@ export type CardEffectExecutionContext = {
     zone: Extract<ServerId, "rd" | "hq">,
     count: number | "all",
   ) => CardEffectPrivateLookResult;
+  exposeInstalledCard?: (
+    scope: "inside_data_fort" | "any_installed",
+  ) => CardEffectHiddenInfoResult;
+  startExposeInstalledCards?: (
+    min: number,
+    max: number,
+  ) => CardEffectHiddenInfoResult;
+  exposeOutermostIceEachFort?: () => CardEffectHiddenInfoResult;
+  startShowHqAgendasForCredits?: (
+    creditPerAgenda: number,
+  ) => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters?: (
     amount: number,
     distribution:
@@ -131,6 +142,10 @@ export type CardEffectMakeRunResult = {
 };
 
 export type CardEffectPrivateLookResult = {
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectHiddenInfoResult = {
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -580,6 +595,83 @@ export function executeCardImplementationEffects(
           throw new Error("private_look count must be positive or all.");
         const lookResult = context.startPrivateLook(effect.zone, effect.count);
         mergePublicPayload(publicPayload, lookResult.publicPayload);
+        return;
+      }
+      case "expose_installed_card": {
+        assertPublicVisibility("expose_installed_card", effect.visibility);
+        if (effect.target !== "chosen_installed_corp_card")
+          throw new Error(
+            "expose_installed_card target must be chosen_installed_corp_card.",
+          );
+        if (
+          effect.scope !== "inside_data_fort" &&
+          effect.scope !== "any_installed"
+        )
+          throw new Error(
+            "expose_installed_card scope must be inside_data_fort or any_installed.",
+          );
+        if (!context.exposeInstalledCard)
+          throw new Error(
+            "expose_installed_card requires an exposeInstalledCard execution context.",
+          );
+        const exposeResult = context.exposeInstalledCard(effect.scope);
+        mergePublicPayload(publicPayload, exposeResult.publicPayload);
+        return;
+      }
+      case "expose_installed_cards": {
+        assertPublicVisibility("expose_installed_cards", effect.visibility);
+        if (effect.targets !== "chosen_installed_corp_cards")
+          throw new Error(
+            "expose_installed_cards targets must be chosen_installed_corp_cards.",
+          );
+        if (
+          !Number.isInteger(effect.min) ||
+          !Number.isInteger(effect.max) ||
+          effect.min < 0 ||
+          effect.max < effect.min
+        )
+          throw new Error("expose_installed_cards min/max are invalid.");
+        if (!context.startExposeInstalledCards)
+          throw new Error(
+            "expose_installed_cards requires a startExposeInstalledCards execution context.",
+          );
+        const exposeResult = context.startExposeInstalledCards(
+          effect.min,
+          effect.max,
+        );
+        mergePublicPayload(publicPayload, exposeResult.publicPayload);
+        return;
+      }
+      case "expose_outermost_ice_each_fort": {
+        assertPublicVisibility(
+          "expose_outermost_ice_each_fort",
+          effect.visibility,
+        );
+        if (!context.exposeOutermostIceEachFort)
+          throw new Error(
+            "expose_outermost_ice_each_fort requires an exposeOutermostIceEachFort execution context.",
+          );
+        const exposeResult = context.exposeOutermostIceEachFort();
+        mergePublicPayload(publicPayload, exposeResult.publicPayload);
+        return;
+      }
+      case "show_hq_agendas_for_credits": {
+        if (effect.visibility !== "hidden_info_barrier")
+          throw new Error(
+            "show_hq_agendas_for_credits visibility must be hidden_info_barrier.",
+          );
+        assertPositiveIntegerAmount(
+          "show_hq_agendas_for_credits",
+          effect.creditPerAgenda,
+        );
+        if (!context.startShowHqAgendasForCredits)
+          throw new Error(
+            "show_hq_agendas_for_credits requires a startShowHqAgendasForCredits execution context.",
+          );
+        const revealResult = context.startShowHqAgendasForCredits(
+          effect.creditPerAgenda,
+        );
+        mergePublicPayload(publicPayload, revealResult.publicPayload);
         return;
       }
       case "distribute_advancement_counters": {

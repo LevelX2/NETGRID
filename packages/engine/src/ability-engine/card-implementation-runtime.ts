@@ -25,6 +25,7 @@ import {
   type CardEffectDamageResult,
   type CardEffectDrawCardsResult,
   type CardEffectHostedCreditsResult,
+  type CardEffectHiddenInfoResult,
   type CardEffectMakeRunOptions,
   type CardEffectMakeRunResult,
   type CardEffectPrivateLookResult,
@@ -122,6 +123,39 @@ export type CardImplementationRuntimeDependencies = {
     zone: Extract<ServerId, "rd" | "hq">,
     count: number | "all",
   ) => CardEffectPrivateLookResult;
+  exposeInstalledCorpCardTargets: (
+    state: GameState,
+    scope: "inside_data_fort" | "any_installed",
+  ) => CardInstanceId[];
+  exposeInstalledCorpCard: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    targetCardId: CardInstanceId,
+    scope: "inside_data_fort" | "any_installed",
+  ) => CardEffectHiddenInfoResult;
+  startExposeInstalledCorpCardsChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    min: number,
+    max: number,
+  ) => CardEffectHiddenInfoResult;
+  exposeOutermostIceEachDataFort: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+  ) => CardEffectHiddenInfoResult;
+  outermostIceEachDataFortExposeCount: (state: GameState) => number;
+  startShowHqAgendasForCreditsChoice: (
+    state: GameState,
+    sourceCardId: CardInstanceId,
+    sourceDefinitionId: CardDefinition["id"],
+    creditPerAgenda: number,
+  ) => CardEffectHiddenInfoResult;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -222,9 +256,18 @@ function canResolveOnPlayCardImplementationAbility(
   state: GameState,
   ability: OnPlayCardAbilityImplementation,
 ): boolean {
-  return ability.condition
-    ? cardImplementationConditionMet(deps, state, ability.condition)
-    : true;
+  if (
+    ability.condition &&
+    !cardImplementationConditionMet(deps, state, ability.condition)
+  )
+    return false;
+  return ability.effects.every((effect) => {
+    if (effect.kind === "expose_installed_cards")
+      return deps.exposeInstalledCorpCardTargets(state, "any_installed").length > 0;
+    if (effect.kind === "expose_outermost_ice_each_fort")
+      return deps.outermostIceEachDataFortExposeCount(state) > 0;
+    return true;
+  });
 }
 
 function canResolveActivatedCardImplementationAbility(
@@ -500,6 +543,13 @@ export function executeCardImplementationStartOfCorpTurnEffects(
           trashSourceWhenEmpty: (sourceCardId) =>
             deps.trashSourceWhenEmpty(state, sourceCardId),
           trashSource: (sourceCardId) => deps.trashSource(state, sourceCardId),
+          startShowHqAgendasForCredits: (creditPerAgenda) =>
+            deps.startShowHqAgendasForCreditsChoice(
+              state,
+              cardId,
+              definition.id,
+              creditPerAgenda,
+            ),
         },
         ability.effects,
       );
@@ -877,6 +927,20 @@ function activatedAbilityPayload(
   };
 }
 
+function exposeInstalledCardEffect(
+  ability: ActivatedCardAbilityImplementation,
+):
+  | Extract<
+      CardEffectImplementation,
+      { kind: "expose_installed_card" }
+    >
+  | undefined {
+  return ability.effects.length === 1 &&
+    ability.effects[0]?.kind === "expose_installed_card"
+    ? ability.effects[0]
+    : undefined;
+}
+
 /**
  * Adds LegalActions for active declarative abilities on an already-valid source.
  *
@@ -910,6 +974,30 @@ export function pushActivatedCardImplementationActions(
       continue;
     if (!canPayActivatedCardImplementationCosts(state, side, sourceCardId, ability))
       continue;
+    const exposeEffect = exposeInstalledCardEffect(ability);
+    if (exposeEffect) {
+      for (const targetCardId of deps
+        .exposeInstalledCorpCardTargets(state, exposeEffect.scope)
+        .sort()) {
+        const targetDefinition = deps.definitionFor(state, targetCardId);
+        actions.push(
+          deps.createAction(
+            state,
+            side,
+            "activated_card_ability",
+            `${definition.title}: ${targetDefinition.title} exposen`,
+            sourceCardId,
+            activatedAbilityLegalActionCosts(ability),
+            {
+              ...activatedAbilityPayload(sourceCardId, ability, index),
+              cardImplementationExposeTargetId: targetCardId,
+              targetDefinitionId: targetDefinition.id,
+            },
+          ),
+        );
+      }
+      continue;
+    }
     actions.push(
       deps.createAction(
         state,
@@ -1005,6 +1093,18 @@ function validateActivatedCardImplementationAbility(
       ability,
       cardId,
     );
+    const exposeEffect = exposeInstalledCardEffect(ability);
+    if (exposeEffect) {
+      const targetCardId = String(
+        legalAction.payload?.cardImplementationExposeTargetId ?? "",
+      );
+      if (
+        !deps
+          .exposeInstalledCorpCardTargets(state, exposeEffect.scope)
+          .includes(targetCardId)
+      )
+        throw new Error("Die zu exposende Korp-Karte ist nicht mehr gueltig.");
+    }
     return;
   }
   if (legalAction.side !== "corp")
@@ -1088,6 +1188,31 @@ export function resolveActivatedCardImplementationAbility(
           match.definition.id,
           zone,
           count,
+        ),
+      exposeInstalledCard: (scope) =>
+        deps.exposeInstalledCorpCard(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
+          scope,
+        ),
+      startExposeInstalledCards: (min, max) =>
+        deps.startExposeInstalledCorpCardsChoice(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
+          min,
+          max,
+        ),
+      exposeOutermostIceEachFort: () =>
+        deps.exposeOutermostIceEachDataFort(
+          state,
+          legalAction,
+          match.cardId,
+          match.definition.id,
         ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
@@ -1180,6 +1305,31 @@ export function executeOnPlayCardImplementationAbility(
         deps.startRun(state, legalAction, serverId, options),
       startPrivateLook: (zone, count) =>
         deps.startPrivateLook(state, legalAction, cardId, definition.id, zone, count),
+      exposeInstalledCard: (scope) =>
+        deps.exposeInstalledCorpCard(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
+          scope,
+        ),
+      startExposeInstalledCards: (min, max) =>
+        deps.startExposeInstalledCorpCardsChoice(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+          min,
+          max,
+        ),
+      exposeOutermostIceEachFort: () =>
+        deps.exposeOutermostIceEachDataFort(
+          state,
+          legalAction,
+          cardId,
+          definition.id,
+        ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>

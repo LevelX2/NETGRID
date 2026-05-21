@@ -173,6 +173,10 @@ export type CardEffectImplementation =
   | UseBaseLinkEffectImplementation
   | IncreaseTraceLinkEffectImplementation
   | PrivateLookEffectImplementation
+  | ExposeInstalledCardEffectImplementation
+  | ExposeInstalledCardsEffectImplementation
+  | ExposeOutermostIceEachFortEffectImplementation
+  | ShowHqAgendasForCreditsEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -215,6 +219,32 @@ export type DrawCardsEffectImplementation = {
   recipient: "controller" | "runner" | "corp";
   amount: number;
   visibility: EventVisibilityClass;
+};
+
+export type ExposeInstalledCardEffectImplementation = {
+  kind: "expose_installed_card";
+  target: "chosen_installed_corp_card";
+  scope: "inside_data_fort" | "any_installed";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ExposeInstalledCardsEffectImplementation = {
+  kind: "expose_installed_cards";
+  targets: "chosen_installed_corp_cards";
+  min: number;
+  max: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ExposeOutermostIceEachFortEffectImplementation = {
+  kind: "expose_outermost_ice_each_fort";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ShowHqAgendasForCreditsEffectImplementation = {
+  kind: "show_hq_agendas_for_credits";
+  creditPerAgenda: number;
+  visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
 };
 
 export type LoseCreditsEffectImplementation = {

@@ -404,6 +404,66 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
     );
     return { publicPayload: legalAction.payload ?? {} };
   },
+  exposeInstalledCorpCardTargets: (state, scope) =>
+    exposeInstalledCorpCardTargets(state, scope),
+  exposeInstalledCorpCard: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    targetCardId,
+    scope,
+  ) =>
+    exposeInstalledCorpCardForImplementation(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      targetCardId,
+      scope,
+    ),
+  startExposeInstalledCorpCardsChoice: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+    min,
+    max,
+  ) =>
+    startExposeInstalledCorpCardsChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+      min,
+      max,
+    ),
+  exposeOutermostIceEachDataFort: (
+    state,
+    legalAction,
+    sourceCardId,
+    sourceDefinitionId,
+  ) =>
+    exposeOutermostIceOfEachDataFort(
+      state,
+      legalAction,
+      sourceCardId,
+      sourceDefinitionId,
+    ),
+  outermostIceEachDataFortExposeCount: (state) =>
+    outermostIceExposures(state).length,
+  startShowHqAgendasForCreditsChoice: (
+    state,
+    sourceCardId,
+    sourceDefinitionId,
+    creditPerAgenda,
+  ) =>
+    startShowHqAgendasForCreditsChoice(
+      state,
+      sourceCardId,
+      sourceDefinitionId,
+      creditPerAgenda,
+    ),
   startDistributeAdvancementCounters: (
     state,
     legalAction,
@@ -4074,18 +4134,16 @@ function runnerMainActions(state: GameState): LegalAction[] {
       definition.type === "event" &&
       state.runner.credits >= (definition.cost ?? 0)
     ) {
+      const canPlayCardImplementation = canPlayPrintedCostOnPlayImplementation(
+        cardImplementationRuntimeDeps,
+        state,
+        definition,
+      );
       const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
-      if (
-        !resolver &&
-        !canPlayPrintedCostOnPlayImplementation(
-          cardImplementationRuntimeDeps,
-          state,
-          definition,
-        )
-      )
+      if (!resolver && !canPlayCardImplementation) continue;
+      if (!canPlayCardImplementation && resolver?.canPlay && !resolver.canPlay(state))
         continue;
-      if (resolver?.canPlay && !resolver.canPlay(state)) continue;
-      if (resolver?.requiresServer) {
+      if (!canPlayCardImplementation && resolver?.requiresServer) {
         for (const server of state.corp.servers) {
           if (
             resolver.canPlayForServer &&
@@ -4120,9 +4178,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
             ),
           );
           continue;
-        }
-        actions.push(
-          action(
+      }
+      actions.push(
+        action(
             state,
             "runner",
             "play_event",
@@ -4172,11 +4230,12 @@ function runnerMainActions(state: GameState): LegalAction[] {
           ),
         );
       }
-      if (
-        SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
-        state.corp.servers.some(
-          (server) => exposedCorpCardInServer(state, server.id) !== undefined,
-        )
+    if (
+      SERVER_EXPOSE_PROGRAM_CARD_IDS.has(definition.id) &&
+      !cardImplementationForDefinitionId(definition.id) &&
+      state.corp.servers.some(
+        (server) => exposedCorpCardInServer(state, server.id) !== undefined,
+      )
       ) {
         for (const server of state.corp.servers) {
           if (exposedCorpCardInServer(state, server.id) === undefined) continue;
@@ -8910,17 +8969,25 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
     zone: { side: "runner", zone: "heap" },
   };
   const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+  if (canPlayPrintedCostOnPlayImplementation(
+    cardImplementationRuntimeDeps,
+    state,
+    definition,
+  )) {
+    executeOnPlayCardImplementationAbility(
+      cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+      definition,
+      cardId,
+    );
+    return;
+  }
   if (resolver) {
     resolver.resolve(state, legalAction);
     return;
   }
-  executeOnPlayCardImplementationAbility(
-    cardImplementationRuntimeDeps,
-    state,
-    legalAction,
-    definition,
-    cardId,
-  );
+  throw new Error(`Kein Runner-Event-Resolver fuer ${definition.id}.`);
 }
 
 function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
@@ -18297,6 +18364,10 @@ function resolvePendingChoice(
     resolveHuntClubBbsExposeChoice(state, legalAction, playerAction);
     return;
   }
+  if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {
+    resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
+    return;
+  }
   if (
     state.pendingChoice.source.startsWith("v098.arrange_stack_top2") ||
     state.pendingChoice.source.startsWith("v1911.arrange_stack_top2")
@@ -18318,6 +18389,12 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_negotiating_center")) {
     resolveCorporateNegotiatingCenterChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (
+    state.pendingChoice.source.startsWith("p3_36.show_hq_agendas_for_credits")
+  ) {
+    resolveShowHqAgendasForCreditsChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
@@ -20304,7 +20381,8 @@ function startCorporateNegotiatingCenterChoice(state: GameState): void {
     .filter(
       (cardId) =>
         definitionFor(state, cardId).id ===
-        CORP_HQ_AGENDA_REVEAL_CARD_ID,
+          CORP_HQ_AGENDA_REVEAL_CARD_ID &&
+        !cardImplementationForDefinitionId(definitionFor(state, cardId).id),
     )
     .sort();
   if (sourceIds.length === 0) return;
@@ -20331,6 +20409,52 @@ function startCorporateNegotiatingCenterChoice(state: GameState): void {
     maxSelections: agendaIds.length,
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
+  };
+}
+
+function startShowHqAgendasForCreditsChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  creditPerAgenda: number,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) return { publicPayload: {} };
+  if (
+    !rezzedCorpRootCardIds(state).includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== sourceDefinitionId
+  )
+    return { publicPayload: {} };
+  const agendaIds = state.corp.hq
+    .filter((cardId) => definitionFor(state, cardId).type === "agenda")
+    .sort();
+  if (agendaIds.length === 0) return { publicPayload: {} };
+  state.pendingChoice = {
+    choiceId: `p3_36_show_hq_agendas_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `p3_36.show_hq_agendas_for_credits:${sourceCardId}:${sourceDefinitionId}:${creditPerAgenda}:${state.stateVersion + 1}`,
+    prompt: "Corporate Negotiating Center: HQ-Agenden zeigen",
+    kind: "select_cards",
+    options: agendaIds.map((cardId) => {
+      const definition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        publicLabel: "HQ-Agenda",
+        value: cardId,
+      };
+    }),
+    minSelections: 0,
+    maxSelections: agendaIds.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  return {
+    publicPayload: {
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_corporate_negotiating_center_choice",
+      sourceDefinitionId,
+      creditPerAgenda,
+    },
   };
 }
 
@@ -20389,6 +20513,70 @@ function resolveCorporateNegotiatingCenterChoice(
       .join(","),
     revealedCount: selectedIds.length,
     gainedCredits: selectedIds.length,
+    corpCreditsAfter: state.corp.credits,
+  };
+}
+
+function resolveShowHqAgendasForCreditsChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_36.show_hq_agendas_for_credits"))
+    throw new Error("Es ist keine HQ-Agenda-Show-Choice offen.");
+  const [
+    ,
+    sourceCardId = "",
+    sourceDefinitionId = "",
+    creditPerAgendaRaw = "",
+  ] = choice.source.split(":");
+  const creditPerAgenda = Number(creditPerAgendaRaw);
+  if (
+    !sourceCardId ||
+    !rezzedCorpRootCardIds(state).includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== sourceDefinitionId ||
+    !Number.isInteger(creditPerAgenda) ||
+    creditPerAgenda <= 0
+  )
+    throw new Error("Corporate Negotiating Center ist nicht mehr aktiv.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const selectedSet = new Set(selectedIds);
+  if (
+    selectedSet.size !== selectedIds.length ||
+    selectedIds.some(
+      (cardId) =>
+        !state.corp.hq.includes(cardId) ||
+        definitionFor(state, cardId).type !== "agenda",
+    )
+  )
+    throw new Error("Corporate Negotiating Center darf nur HQ-Agenden zeigen.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const revealedDefinitions = selectedIds.map((cardId) =>
+    definitionFor(state, cardId),
+  );
+  const gainedCredits = selectedIds.length * creditPerAgenda;
+  credits(state, "corp", gainedCredits);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+    sourceDefinitionId: sourceDefinition.id,
+    sourceTitle: sourceDefinition.title,
+    publicRevealKind: "reveal",
+    publicRevealDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    publicRevealTitles: revealedDefinitions
+      .map((definition) => definition.title)
+      .join("||"),
+    revealedAgendaDefinitionIds: revealedDefinitions
+      .map((definition) => definition.id)
+      .join(","),
+    revealedCount: selectedIds.length,
+    shownCount: selectedIds.length,
+    gainedCredits,
     corpCreditsAfter: state.corp.credits,
   };
 }
@@ -21602,6 +21790,8 @@ function resolveV1911RunnerHiddenZoneAbility(
   if (ability === "expose_server_card") {
     if (!SERVER_EXPOSE_PROGRAM_CARD_IDS.has(sourceDefinition.id))
       throw new Error("Diese Karte darf keine Expose-Ability nutzen.");
+    if (cardImplementationForDefinitionId(sourceDefinition.id))
+      throw new Error("Diese Expose-Ability wird deklarativ abgewickelt.");
     exposeCorpCardInServer(
       state,
       String(legalAction.payload?.serverId) as Exclude<ServerId, "new_remote">,
@@ -21690,6 +21880,85 @@ function exposeCorpCardInServer(
   };
 }
 
+function installedCorpCardServerContext(
+  state: GameState,
+  cardId: CardInstanceId,
+): { server: CorpServer; area: "root" | "ice"; index: number } | undefined {
+  for (const server of state.corp.servers) {
+    const rootIndex = server.root.indexOf(cardId);
+    if (rootIndex >= 0) return { server, area: "root", index: rootIndex };
+    const iceIndex = server.ice.indexOf(cardId);
+    if (iceIndex >= 0) return { server, area: "ice", index: iceIndex };
+  }
+  return undefined;
+}
+
+function exposeInstalledCorpCardTargets(
+  state: GameState,
+  _scope: "inside_data_fort" | "any_installed",
+): CardInstanceId[] {
+  const targets: CardInstanceId[] = [];
+  for (const server of state.corp.servers) {
+    for (const cardId of [...server.root, ...server.ice]) {
+      const instance = mustInstance(state.cardInstances, cardId);
+      if (!instance.rezzed) targets.push(cardId);
+    }
+  }
+  return targets.sort();
+}
+
+function exposeInstalledCorpCardLabel(
+  state: GameState,
+  cardId: CardInstanceId,
+): string {
+  const context = installedCorpCardServerContext(state, cardId);
+  if (!context) return "Installierte Korp-Karte";
+  return context.area === "ice"
+    ? `${context.server.label} ICE ${context.index + 1}`
+    : `${context.server.label} Root ${context.index + 1}`;
+}
+
+function exposeInstalledCorpCardForImplementation(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  targetCardId: CardInstanceId,
+  scope: "inside_data_fort" | "any_installed",
+): { publicPayload: Record<string, string | number | boolean> } {
+  const legalTargets = new Set(exposeInstalledCorpCardTargets(state, scope));
+  if (!legalTargets.has(targetCardId))
+    throw new Error("Diese installierte Korp-Karte kann nicht exposed werden.");
+  const targetDefinition = definitionFor(state, targetCardId);
+  const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
+  const context = installedCorpCardServerContext(state, targetCardId);
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "v1911_expose_server_card",
+    publicRevealKind: "expose",
+    publicRevealDefinitionId: targetDefinition.id,
+    cardDefinitionId: targetDefinition.id,
+    targetDefinitionId: targetDefinition.id,
+    exposedCardDefinitionId: targetDefinition.id,
+    exposedCardTitle: targetDefinition.title,
+    exposedCardInstanceId: targetCardId,
+    sourceCardId,
+    sourceDefinitionId,
+    ...(sourceDefinition ? { sourceTitle: sourceDefinition.title } : {}),
+    ...(context
+      ? {
+          exposedServerId: context.server.id,
+          exposedServerLabel: context.server.label,
+        }
+      : {}),
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...payload,
+  };
+  return { publicPayload: payload };
+}
+
 function installedRunnerIcebreakerIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.programs
     .filter((cardId) => cardHasSubtype(definitionFor(state, cardId), "icebreaker"))
@@ -21717,33 +21986,22 @@ function resolveDealWithMilitech(
 }
 
 function huntClubBbsExposeTargets(state: GameState): CardInstanceId[] {
-  const targets: CardInstanceId[] = [];
-  for (const server of state.corp.servers) {
-    for (const cardId of [...server.root, ...server.ice]) {
-      const instance = mustInstance(state.cardInstances, cardId);
-      if (!instance.rezzed) targets.push(cardId);
-    }
-  }
-  return targets.sort();
+  return exposeInstalledCorpCardTargets(state, "any_installed");
 }
 
 function huntClubBbsExposeOptionLabel(
   state: GameState,
   cardId: CardInstanceId,
 ): string {
-  const zone = mustInstance(state.cardInstances, cardId).zone;
-  if (zone.side !== "corp") return "Installierte Korp-Karte";
-  if (zone.zone === "serverIce") {
-    const server = mustServer(state, zone.serverId);
-    const index = server.ice.indexOf(cardId);
-    return `${server.label} ICE ${index + 1}`;
-  }
-  if (zone.zone === "serverRoot") {
-    const server = mustServer(state, zone.serverId);
-    const index = server.root.indexOf(cardId);
-    return `${server.label} Root ${index + 1}`;
-  }
-  return "Installierte Korp-Karte";
+  return exposeInstalledCorpCardLabel(state, cardId);
+}
+
+function exposeInstalledCorpCardsChoiceOptions(state: GameState) {
+  return exposeInstalledCorpCardTargets(state, "any_installed").map((cardId) => ({
+    id: `card_${cardId}`,
+    label: exposeInstalledCorpCardLabel(state, cardId),
+    value: cardId,
+  }));
 }
 
 function startHuntClubBbsExposeChoice(
@@ -21778,6 +22036,43 @@ function startHuntClubBbsExposeChoice(
   };
 }
 
+function startExposeInstalledCorpCardsChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinition["id"],
+  min: number,
+  max: number,
+): { publicPayload: Record<string, string | number | boolean> } {
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = exposeInstalledCorpCardsChoiceOptions(state);
+  if (options.length === 0)
+    throw new Error("Es gibt keine installierte verdeckte Korp-Karte.");
+  state.pendingChoice = {
+    choiceId: `p3_36_expose_installed_cards_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_36.expose_installed_cards:${sourceCardId}:${sourceDefinitionId}:${state.stateVersion + 1}`,
+    prompt: "Bis zu drei installierte Korp-Karten exposen",
+    kind: "select_cards",
+    options,
+    minSelections: Math.min(min, options.length),
+    maxSelections: Math.min(max, options.length),
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  const payload = {
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "hunt_club_bbs_expose_choice",
+    choiceVisibility: "runner_private",
+    sourceDefinitionId,
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...payload,
+  };
+  return { publicPayload: payload };
+}
+
 function resolveHuntClubBbsExposeChoice(
   state: GameState,
   legalAction: LegalAction,
@@ -21808,6 +22103,49 @@ function resolveHuntClubBbsExposeChoice(
   };
 }
 
+function resolveExposeInstalledCorpCardsChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_36.expose_installed_cards"))
+    throw new Error("Es ist keine Expose-Choice offen.");
+  const [, sourceCardId = "", sourceDefinitionId = ""] = choice.source.split(":");
+  if (!sourceCardId || !state.cardInstances[sourceCardId])
+    throw new Error("Die Expose-Quelle ist nicht mehr installiert.");
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  if (sourceDefinition.id !== sourceDefinitionId)
+    throw new Error("Die Expose-Quelle passt nicht mehr zur Choice.");
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const legalTargets = new Set(exposeInstalledCorpCardTargets(state, "any_installed"));
+  for (const cardId of selectedIds) {
+    if (!legalTargets.has(cardId))
+      throw new Error("Diese installierte Korp-Karte darf nicht exposed werden.");
+  }
+  const labels = selectedIds.map((cardId) =>
+    exposeInstalledCorpCardLabel(state, cardId),
+  );
+  const definitions = selectedIds.map((cardId) => definitionFor(state, cardId));
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "hunt_club_bbs_expose",
+    publicRevealKind: "expose",
+    sourceDefinitionId,
+    sourceTitle: sourceDefinition.title,
+    revealedCount: selectedIds.length,
+    publicRevealDefinitionIds: definitions
+      .map((definition) => definition.id)
+      .join(","),
+    publicRevealTitles: definitions
+      .map((definition) => definition.title)
+      .join("||"),
+    exposedServerLabels: labels.join(","),
+  };
+}
+
 function outermostIceExposures(
   state: GameState,
 ): Array<{ server: CorpServer; cardId: CardInstanceId }> {
@@ -21822,15 +22160,22 @@ function outermostIceExposures(
 function exposeOutermostIceOfEachDataFort(
   state: GameState,
   legalAction: LegalAction,
-): void {
+  sourceCardId?: CardInstanceId,
+  sourceDefinitionId?: CardDefinition["id"],
+): { publicPayload: Record<string, string | number | boolean> } {
   const exposures = outermostIceExposures(state);
   if (exposures.length === 0)
     throw new Error("Es liegt kein outermost ICE zum Exposen in einem Data Fort.");
-  legalAction.payload = {
-    ...(legalAction.payload ?? {}),
+  const sourceDefinition = sourceDefinitionId
+    ? DEMO_CARDS_BY_ID[sourceDefinitionId]
+    : undefined;
+  const payload = {
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1911_expose_outermost_ice_each_data_fort",
     publicRevealKind: "expose",
+    ...(sourceCardId ? { sourceCardId } : {}),
+    ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
+    ...(sourceDefinition ? { sourceTitle: sourceDefinition.title } : {}),
     revealedCount: exposures.length,
     publicRevealDefinitionIds: exposures
       .map(({ cardId }) => definitionFor(state, cardId).id)
@@ -21838,6 +22183,11 @@ function exposeOutermostIceOfEachDataFort(
     exposedServerIds: exposures.map(({ server }) => server.id).join(","),
     exposedServerLabels: exposures.map(({ server }) => server.label).join(","),
   };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    ...payload,
+  };
+  return { publicPayload: payload };
 }
 
 function swapCorpHqAndRdTop(state: GameState): void {

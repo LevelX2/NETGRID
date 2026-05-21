@@ -26,6 +26,7 @@ import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-wh
 import { bloodCatImplementation } from "./onr-v1/corp/assets/blood-cat";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
 import { chicagoBranchImplementation } from "./onr-v1/corp/assets/chicago-branch";
+import { corporateNegotiatingCenterImplementation } from "./onr-v1/corp/assets/corporate-negotiating-center";
 import { corprunnersShatteredRemainsImplementation } from "./onr-v1/corp/assets/corprunners-shattered-remains";
 import { dataMasonsHostingImplementation } from "./onr-v1/corp/assets/data-masons-hosting";
 import { departmentOfTruthEnhancementImplementation } from "./onr-v1/corp/assets/department-of-truth-enhancement";
@@ -130,6 +131,8 @@ import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bo
 import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial-position";
 import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
 import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
+import { huntClubBbsImplementation } from "./onr-v1/runner/preps/hunt-club-bbs";
+import { iceAndDatasGuideToTheNetImplementation } from "./onr-v1/runner/preps/ice-and-datas-guide-to-the-net";
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
@@ -150,8 +153,10 @@ import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedeker
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
+import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
+import { seeyaImplementation } from "./onr-v1/runner/programs/seeya";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
 import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
@@ -175,6 +180,8 @@ export const CARD_IMPLEMENTATIONS = [
   custodialPositionImplementation,
   editedShippingManifestsImplementation,
   executiveWiretapsImplementation,
+  huntClubBbsImplementation,
+  iceAndDatasGuideToTheNetImplementation,
   jackNJoeImplementation,
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
@@ -186,8 +193,10 @@ export const CARD_IMPLEMENTATIONS = [
   bakdoorImplementation,
   expertScheduleAnalyzerImplementation,
   microtechAiInterfaceImplementation,
+  mouseImplementation,
   newsgroupFilterImplementation,
   rAndDProtocolFilesImplementation,
+  seeyaImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
   accessThroughAlphaImplementation,
@@ -248,6 +257,7 @@ export const CARD_IMPLEMENTATIONS = [
   bloodCatImplementation,
   braindanceCampaignImplementation,
   chicagoBranchImplementation,
+  corporateNegotiatingCenterImplementation,
   corprunnersShatteredRemainsImplementation,
   dataMasonsHostingImplementation,
   departmentOfTruthEnhancementImplementation,

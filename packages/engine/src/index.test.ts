@@ -3677,8 +3677,8 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
       seeya,
       "runner",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1911HiddenZoneAbility === "expose_server_card",
+        action.type === "activated_card_ability" &&
+        sourceDefinition(seeya, action) === "onr_v1_058_seeya",
     );
     const movedTarget = structuredClone(seeya);
     removeEverywhere(movedTarget, upgradeId);
@@ -20020,7 +20020,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
         action.type === "play_event" &&
         String(action.payload?.cardId) === huntClubId,
     );
-    expect(state.pendingChoice?.source).toContain("hunt_club_bbs_expose");
+    expect(state.pendingChoice?.source).toContain("p3_36.expose_installed_cards");
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toContain(
       "Simple Upgrade",
@@ -23934,7 +23934,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
     state = apply(state, "runner", (action) => action.type === "end_turn");
 
     expect(state.pendingChoice?.source).toContain(
-      "v1917.corp_negotiating_center",
+      "p3_36.show_hq_agendas_for_credits",
     );
     expect(getPlayerView(state, "corp").pendingChoice?.options).toHaveLength(1);
     expect(getPlayerView(state, "corp").pendingChoice?.options[0]?.value).toBe(
@@ -43314,7 +43314,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
       toolState,
       "runner",
       (action) =>
-        action.payload?.v1911HiddenZoneAbility === "expose_server_card" &&
+        action.type === "activated_card_ability" &&
         sourceDefinition(toolState, action) === "onr_v1_042_mouse",
     );
     const removedMouse = structuredClone(toolState);

@@ -105,6 +105,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
   "onr_v1_085_executive-wiretaps":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+  "onr_v1_091_hunt-club-bbs":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/hunt-club-bbs.ts",
+  "onr_v1_092_ice-and-datas-guide-to-the-net":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/ice-and-datas-guide-to-the-net.ts",
   "onr_v1_096_kilroy-was-here":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
   "onr_v1_105_priority-wreck":
@@ -123,10 +127,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/weather-to-finance-pipe.ts",
   "onr_v1_024_expert-schedule-analyzer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
+  "onr_v1_042_mouse":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/mouse.ts",
   "onr_v1_041_microtech-ai-interface":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/microtech-ai-interface.ts",
   "onr_v1_050_r-and-d-protocol-files":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/r-d-protocol-files.ts",
+  "onr_v1_058_seeya":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/seeya.ts",
   "onr_v1_062_shredder-uplink-protocol":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shredder-uplink-protocol.ts",
   "onr_v1_129_hq-interface":
@@ -323,6 +331,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/braindance-campaign.ts",
   "onr_v1_312_chicago-branch":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/chicago-branch.ts",
+  "onr_v1_314_corporate-negotiating-center":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/corporate-negotiating-center.ts",
   "onr_v1_317_data-masons":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/data-masons-hosting.ts",
   "onr_v1_318_department-of-truth-enhancement":
@@ -569,16 +579,6 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
         "packages/engine/src/index.ts::startupImmolatorActions",
         "packages/engine/src/index.ts::useStartupImmolator",
         "packages/engine/src/mechanics/longtail-card-effects.ts",
-      ],
-    },
-    {
-      cardDefinitionId: "onr_v1_314_corporate-negotiating-center",
-      status: "legacy_engine_special_case",
-      reason:
-        "HQ-agenda reveal choice and hidden-info-safe resolution are still implemented through legacy engine paths.",
-      currentLocations: [
-        "packages/engine/src/index.ts",
-        "packages/engine/src/mechanics/hidden-zone.ts",
       ],
     },
     {
