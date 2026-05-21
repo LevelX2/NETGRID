@@ -2149,11 +2149,30 @@ describe("formatChronicleEvent", () => {
       "runner"
     );
 
-    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, Simple Decoder, Simple Fracter vorgezeigt und in den Grip genommen.");
+    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, Simple Decoder, Simple Fracter vorgezeigt, in den Grip genommen und danach den Stack gemischt.");
     expect(item.category).toBe("card");
     expect(item.visibility).toBe("public");
     expect(item.cardDefinitionId).toBe("simple_decoder");
     expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "2 Programme", "Vorgezeigt", "Grip", "Shuffle"]);
+  });
+
+  it("describes Aujourd'Oui empty top-five choices with the required shuffle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1911_aujourdoui_top5",
+        sourceDefinitionId: "onr_v1_151_aujourdoui",
+        selectedCount: 0,
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, keine Programme aus den obersten 5 genommen und danach den Stack gemischt.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "0 Programme", "Keine Auswahl", "Shuffle"]);
   });
 
   it("describes hidden stack-search moves without leaking the selected card", () => {

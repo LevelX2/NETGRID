@@ -431,15 +431,15 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const revealedTitles = titlesForDefinitionIds(stringValue(payload.publicRevealDefinitionIds));
         const selectedCount = numberValue(payload.selectedCount) ?? revealedTitles.length;
         const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "Aujourd'Oui";
+        const shuffleSuffix = payload.shuffled === true ? " und danach den Stack gemischt" : "";
         category = "card";
         importance = "important";
         visibility = "public";
         cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
         title =
           selectedCount > 0
-            ? phrase(subject, `${source} genutzt, ${revealedTitles.length > 0 ? revealedTitles.join(", ") : cardCountText(selectedCount)} vorgezeigt und in den Grip genommen`)
-            : phrase(subject, `${source} genutzt und keine Programme aus den obersten 5 genommen`);
-        description = payload.shuffled === true ? "Der Stack wurde danach gemischt." : undefined;
+            ? phrase(subject, `${source} genutzt, ${revealedTitles.length > 0 ? revealedTitles.join(", ") : cardCountText(selectedCount)} vorgezeigt, in den Grip genommen${shuffleSuffix}`)
+            : phrase(subject, `${source} genutzt, keine Programme aus den obersten 5 genommen${shuffleSuffix}`);
         chips.push(source, "Top 5", selectedCount === 1 ? "1 Programm" : `${selectedCount} Programme`, ...(selectedCount > 0 ? ["Vorgezeigt", "Grip"] : ["Keine Auswahl"]), ...(payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
