@@ -140,6 +140,7 @@ import {
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
+  retainedExposeReviewEvent,
   runnerProgramInstallTrashChoiceInfo,
   runBreakerActionHint,
   runTargetServerIds,
@@ -509,6 +510,16 @@ type AccessReveal = {
   card: DisplayVisibleCard;
   actions: LegalAction[];
   trashStatus: string;
+};
+
+type ExposeReview = {
+  eventId: string;
+  actorSide: Side;
+  viewerSide: Side;
+  cards: DisplayVisibleCard[];
+  serverLabels: string[];
+  title: string;
+  description: string;
 };
 
 type DeckCardEntry = {
@@ -1069,6 +1080,7 @@ function revealedEventCardId(event: PublicGameEvent): string | null {
     event.publicPayload.cardDefinitionId ??
     event.publicPayload.sourceDefinitionId ??
     event.publicPayload.targetCardDefinitionId ??
+    event.publicPayload.publicRevealDefinitionId ??
     event.publicPayload.priorityRequisitionTargetDefinitionId;
   return typeof cardId === "string" ? cardId : null;
 }
@@ -1198,6 +1210,47 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
     actions,
     trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
   };
+}
+
+function exposeReviewFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, viewerSide: Side): ExposeReview | null {
+  if (!event || event.publicPayload.publicRevealKind !== "expose") return null;
+  if (event.publicPayload.approachIceExposeDecision) return null;
+  const definitionIds = exposeReviewDefinitionIds(event);
+  if (definitionIds.length === 0) return null;
+  const cards = definitionIds.map((definitionId) => {
+    const detail = detailsById[definitionId] ?? null;
+    const title = detail?.title ?? definitionId;
+    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+  });
+  const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
+  const serverLabels = payloadStringList(event.publicPayload, "exposedServerLabels").map(serverDisplayLabel);
+  return {
+    eventId: event.eventId,
+    actorSide,
+    viewerSide,
+    cards,
+    serverLabels,
+    title: cards.length === 1 ? "Karte angesehen" : `${cards.length} Karten angesehen`,
+    description: exposeReviewDescription(actorSide, viewerSide, cards.length, serverLabels)
+  };
+}
+
+function exposeReviewDefinitionIds(event: PublicGameEvent): string[] {
+  return Array.from(
+    new Set(
+      [
+        payloadString(event.publicPayload, "publicRevealDefinitionId"),
+        ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
+      ].filter((value): value is string => Boolean(value))
+    )
+  );
+}
+
+function exposeReviewDescription(actorSide: Side, viewerSide: Side, count: number, serverLabels: string[]): string {
+  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+  const object = count === 1 ? "eine Karte" : `${count} Karten`;
+  const locations = Array.from(new Set(serverLabels)).filter(Boolean);
+  return `${subject} ${object}${locations.length > 0 ? ` in ${locations.join(", ")}` : ""} angesehen.`;
 }
 
 function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, title: string): DisplayVisibleCard {
@@ -1825,6 +1878,7 @@ export default function Page() {
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
+  const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
@@ -2614,6 +2668,9 @@ export default function Page() {
   const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
+  const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
+  const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
+  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
@@ -5522,6 +5579,13 @@ export default function Page() {
           onDismiss={() => setDismissedAccessEventId(accessReveal.eventId)}
         />
       ) : null}
+      {activeMatchIsGame && showExposeReview && exposeReview ? (
+        <ExposeReviewModal
+          review={exposeReview}
+          displayMode={cardDisplayMode}
+          onDismiss={() => setDismissedExposeReviewEventId(exposeReview.eventId)}
+        />
+      ) : null}
       {optionsDialogOpen ? (
         <OptionsDialog onDismiss={() => setOptionsDialogOpen(false)}>
           <OptionsPanel
@@ -5950,6 +6014,51 @@ function AccessRevealModal({
               ) : null}
             </div>
           </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ExposeReviewModal({
+  review,
+  displayMode,
+  onDismiss
+}: {
+  review: ExposeReview;
+  displayMode: CardDisplayMode;
+  onDismiss(): void;
+}) {
+  return (
+    <div className="accessRevealOverlay exposeReviewOverlay" role="dialog" aria-modal="true" aria-labelledby="expose-review-title">
+      <div className="accessRevealBackdrop" aria-hidden="true" />
+      <section className="accessRevealPanel exposeReviewPanel">
+        <div className="accessRevealHeader">
+          <div>
+            <p className="eyebrow">Ansehen</p>
+            <h2 id="expose-review-title">{review.title}</h2>
+            <p>{review.description}</p>
+          </div>
+          <button className="button iconOnly" onClick={onDismiss} aria-label="Ansehen schließen" title="Ansehen schließen">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="exposeReviewCards" data-testid="expose-review-cards">
+          {review.cards.map((card, index) => (
+            <div className="exposeReviewCard" key={`${review.eventId}-${card.definitionId ?? card.instanceId}-${index}`}>
+              <CardView card={card} displayMode={displayMode} preview />
+              <div className="exposeReviewCardText">
+                <strong>{card.title}</strong>
+                {review.serverLabels[index] ? <span>{review.serverLabels[index]}</span> : null}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="accessRevealActions exposeReviewActions">
+          <button className="button primary" onClick={onDismiss} type="button" data-testid="expose-review-dismiss">
+            <Check size={15} />
+            Gesehen
+          </button>
         </div>
       </section>
     </div>

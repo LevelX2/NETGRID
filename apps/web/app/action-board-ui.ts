@@ -747,9 +747,31 @@ export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEv
   return null;
 }
 
+export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event || event.eventId === dismissedEventId) return null;
+    if (event.publicPayload.publicRevealKind !== "expose") continue;
+    if (event.publicPayload.approachIceExposeDecision) return null;
+    if (!eventHasPublicRevealDefinition(event)) return null;
+    return event;
+  }
+  return null;
+}
+
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
   return newerEvent.publicPayload.actionType === "continue_run" || newerEvent.publicPayload.actionType === "end_turn";
+}
+
+function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {
+  if (typeof event.publicPayload.publicRevealDefinitionId === "string") return true;
+  return (
+    typeof event.publicPayload.publicRevealDefinitionIds === "string" &&
+    event.publicPayload.publicRevealDefinitionIds
+      .split(",")
+      .some((item) => item.trim().length > 0)
+  );
 }
 
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {

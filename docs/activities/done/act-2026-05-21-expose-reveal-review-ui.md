@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-21-expose-reveal-review-ui
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+checks:
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web test -- action-board-ui.test.ts
+  - corepack pnpm exec node -e "<Playwright smoke against http://127.0.0.1:3100>"
+  - git diff --check
 ---
 
 # Ansehen-Auflösung sichtbar bis zur Bestätigung anzeigen
@@ -88,4 +96,8 @@ Ansehen-Effekte sollen nach der bestätigten Zielauswahl stabil und bewusst sich
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der Webclient hält Ansehen-/Expose-Auflösungen mit `publicRevealKind: "expose"` und expliziten `publicRevealDefinitionId(s)` jetzt als lokale Review-Anzeige offen, bis der Spieler `Gesehen` klickt. Die Anzeige nutzt deutsche UI-Texte (`Ansehen`, `angesehen`, `Gesehen`), zeigt mehrere angesehene Karten mit optionalen Standortlabels und verändert keinen Engine-Zustand.
+
+Smarteye-Run-Ansehen wird bewusst nicht durch dieses Overlay ersetzt, weil dafür bereits die Engine-Run-Phase mit `Ansehen beenden`/`Jack-out` der Primärpfad ist. Redaktierte Expose-Events ohne Definitionen erzeugen keine alte oder unsichere Review-Anzeige.
+
+Tests sichern, dass Expose-Review-Events bis zur lokalen Bestätigung erhalten bleiben, dass Dismiss funktioniert und dass Smarteye-Expose-Events nicht in das generische Overlay fallen. Web-Typecheck, Web-Tests und ein Playwright-Smoke gegen den lokalen Webclient waren grün.

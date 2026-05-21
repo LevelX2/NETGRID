@@ -6679,6 +6679,42 @@ select {
   gap: 8px;
 }
 
+.exposeReviewPanel {
+  gap: 16px;
+}
+
+.exposeReviewCards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 14px;
+}
+
+.exposeReviewCard {
+  display: grid;
+  gap: 9px;
+  align-content: start;
+}
+
+.exposeReviewCard .cardSlot {
+  justify-self: center;
+}
+
+.exposeReviewCardText {
+  display: grid;
+  gap: 3px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.exposeReviewCardText strong {
+  color: var(--text);
+}
+
+.exposeReviewActions {
+  justify-content: flex-end;
+}
+
 .button.dangerButton {
   border-color: var(--danger-button-border);
   background: var(--danger-button-bg);

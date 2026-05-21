@@ -35,6 +35,7 @@ import {
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
+  retainedExposeReviewEvent,
   runBreakerActionHint,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
@@ -1545,6 +1546,34 @@ describe("V1.0.6 resource and card-display helpers", () => {
     };
 
     expect(retainedAccessRevealEvent([access, sameActionEffect], null)?.eventId).toBe("evt_access");
+  });
+
+  it("retains expose review events until local dismissal", () => {
+    const expose = publicEvent("evt_expose", "action", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      publicRevealKind: "expose",
+      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+      exposedServerLabels: "HQ,R&D"
+    });
+    const followUp = {
+      ...publicEvent("evt_followup", "effect", {
+        actionType: "gain_credit",
+        actor: "runner"
+      }),
+      stateVersionAfter: 3
+    };
+    const smarteye = publicEvent("evt_smarteye", "action", {
+      actionType: "trigger_ability",
+      actor: "runner",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "simple_barrier_ice",
+      approachIceExposeDecision: "expose"
+    });
+
+    expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe("evt_expose");
+    expect(retainedExposeReviewEvent([expose, followUp], "evt_expose")).toBeNull();
+    expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {
