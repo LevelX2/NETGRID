@@ -4242,7 +4242,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 3,
     trashCost: 1,
     rulesText:
-      "Rezzed server upgrade handled by the generic upgrade/root/server resolver and tied to its installed server.",
+      "Rez Namatoki Plaza when you install it. Install Namatoki Plaza only if you can pay to rez it. Install only inside a subsidiary data fort. That fort may have an additional agenda or node installed inside it. If Namatoki Plaza leaves play while installed, and this results in the fort having too many agendas and nodes installed inside it, trash one of those agendas or nodes.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4303,7 +4303,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 2,
     trashCost: 6,
     rulesText:
-      "When rezzed, put 6 bits from the bank on Paris City Grid. Use these bits only to pay for traces made during runs on this fort. If any are used, replace them at the start of the next Corp turn.",
+      "When rezzed, put 3 bits from the bank on Paris City Grid. Use these bits only to pay for traces made during runs on this fort. If any are used, replace them at the start of the next Corp turn.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4820,7 +4820,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 3,
     trashCost: 0,
     rulesText:
-      "Rezzed server upgrade with advancement, difficulty and overadvance surfaces. Effects stay server-bound.",
+      "Install only inside a subsidiary data fort. This fort may be run only if you installed or advanced a card inside or on this fort during your last turn. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -4993,7 +4993,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 1,
     trashCost: 6,
     rulesText:
-      "Rezzed city-grid upgrade with server-bound deterministic random surfaces. Region scope stays tied to its installed server.",
+      "Roll a die whenever Runner passes a piece of rezzed ice during a run on this fort. On a 1, end the run. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
     mechanics: [
       "install_remote",
       "rez_card",
@@ -6576,7 +6576,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     rezCost: 0,
     trashCost: 6,
     rulesText:
-      "Gain 2 after each unsuccessful run on this fort.\nRez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort.",
+      "Gain 2 after each unsuccessful run on this fort. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
     mechanics: [
       "install_remote",
       "rez_upgrade",

@@ -6,12 +6,16 @@ import type {
   CardCorpUtilityImplementation,
   CardDamagePreventionSourceImplementation,
   CardFortRunWindowImplementation,
+  CardFortCapacityModifierImplementation,
   CardFlatlineReplacementSourceImplementation,
+  CardInstallCapabilityImplementation,
+  CardLeavePlayCleanupImplementation,
   CardIcebreakerAbilityImplementation,
   CardInstallAdditionalCostImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  CardRegionBaselineImplementation,
   CardRunEncounterInterventionImplementation,
   CardScoredAgendaImplementation,
   CardSuccessfulRunFollowupImplementation,
@@ -48,6 +52,10 @@ export type CardImplementationDefinition = {
   successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
   fortRunWindows?: readonly CardFortRunWindowImplementation[];
   runEncounterInterventions?: readonly CardRunEncounterInterventionImplementation[];
+  regionBaseline?: CardRegionBaselineImplementation;
+  installCapabilities?: readonly CardInstallCapabilityImplementation[];
+  fortCapacityModifiers?: readonly CardFortCapacityModifierImplementation[];
+  leavePlayCleanup?: readonly CardLeavePlayCleanupImplementation[];
   virusCounter?: CardVirusCounterImplementation;
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;

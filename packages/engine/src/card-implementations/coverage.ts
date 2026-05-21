@@ -104,6 +104,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/dr-dreff.ts",
   "onr_v1_359_jenny-jett":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/jenny-jett.ts",
+  "onr_v1_361_namatoki-plaza":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/namatoki-plaza.ts",
+  "onr_v1_365_paris-city-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/paris-city-grid.ts",
+  "onr_v1_367_rio-de-janeiro-city-grid":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/rio-de-janeiro-city-grid.ts",
+  "onr_v1_368_roving-submarine":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/roving-submarine.ts",
+  "onr_v1_371_tokyo-chiba-infighting":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/tokyo-chiba-infighting.ts",
   "onr_v1_372_turbeau-delacroix":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/turbeau-delacroix.ts",
   "onr_v1_373_twenty-four-hour-surveillance":
@@ -901,6 +911,30 @@ function implementedCoverageFor(
   if (implementation.fortRunWindows?.length) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for fort-run window ICE-control behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
+  if (implementation.regionBaseline) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition declares existing Region install baseline behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
+  if (implementation.installCapabilities?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for fort-scoped install capability behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
+  if (implementation.fortCapacityModifiers?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for fort agenda/node capacity behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
+  if (implementation.leavePlayCleanup?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for fort capacity leave-play cleanup behavior.",
     );
     currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
   }

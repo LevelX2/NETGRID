@@ -1035,7 +1035,7 @@ const SMARTEYE_ID = "onr_v1_065_smarteye";
 const HELLS_RUN_ID = "onr_v1_164_hells-run";
 const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
-const PARIS_CITY_GRID_TRACE_POOL_BITS = 6;
+const PARIS_CITY_GRID_TRACE_POOL_BITS = 3;
 
 function scoredAgendaImplementationForDefinitionId(
   definitionId: CardDefinitionId,
@@ -3445,7 +3445,8 @@ function corpMainActions(state: GameState): LegalAction[] {
         hasInstalledUniqueCardDefinition(state, "corp", definition.id)
       )
         continue;
-      const regionInstallCost = isRegionUpgrade(definition)
+      const rootRezOnInstall = rootInstallRezzesOnInstall(definition);
+      const regionInstallCost = rootRezOnInstall
         ? rezCostForCard(state, id)
         : 0;
       if (state.corp.credits >= regionInstallCost) {
@@ -3473,12 +3474,14 @@ function corpMainActions(state: GameState): LegalAction[] {
           canInstallCorpRootCardInServer(state, definition, server) &&
           state.corp.credits >= regionInstallCost
         ) {
-          const replacesRootAsset =
-            definition.type === "agenda" &&
-            corpRootAssetIdsInServer(state, server).length > 0;
           const replacesRegion =
             isRegionUpgrade(definition) &&
             corpRegionUpgradeIdsInServer(state, server).length > 0;
+          const rootCapacity = corpRootAgendaOrNodeCapacityInServer(state, server);
+          const replacesRootAsset =
+            definition.type === "agenda" &&
+            corpRootAssetIdsInServer(state, server).length > 0 &&
+            corpRootMainCardIdsInServer(state, server).length >= rootCapacity;
           actions.push(
             action(
               state,
@@ -5596,6 +5599,74 @@ function hasFortRunWindowKind(
   ).some((window) => window.kind === kind);
 }
 
+function fortRunWindowImplementationForCard<
+  K extends CardFortRunWindowImplementation["kind"],
+>(
+  state: GameState,
+  cardId: CardInstanceId,
+  kind: K,
+): Extract<CardFortRunWindowImplementation, { kind: K }> | undefined {
+  return fortRunWindowImplementationsForDefinition(
+    definitionFor(state, cardId).id,
+  ).find(
+    (window): window is Extract<CardFortRunWindowImplementation, { kind: K }> =>
+      window.kind === kind,
+  );
+}
+
+function cardInstallCapabilitiesForDefinition(
+  definitionId: CardDefinitionId,
+) {
+  return cardImplementationForDefinitionId(definitionId)?.installCapabilities ?? [];
+}
+
+function hasInstallCapabilityKindForDefinition(
+  definitionId: CardDefinitionId,
+  kind: NonNullable<
+    ReturnType<typeof cardInstallCapabilitiesForDefinition>
+  >[number]["kind"],
+): boolean {
+  return cardInstallCapabilitiesForDefinition(definitionId).some(
+    (capability) => capability.kind === kind,
+  );
+}
+
+function rootInstallRezzesOnInstall(definition: CardDefinition): boolean {
+  return (
+    isRegionUpgrade(definition) ||
+    hasInstallCapabilityKindForDefinition(definition.id, "rez_on_install")
+  );
+}
+
+function mustInstallInsideSubsidiaryDataFort(
+  definition: CardDefinition,
+): boolean {
+  return hasInstallCapabilityKindForDefinition(
+    definition.id,
+    "install_only_inside_subsidiary_data_fort",
+  );
+}
+
+function fortCapacityModifiersForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+) {
+  return (
+    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
+      ?.fortCapacityModifiers ?? []
+  );
+}
+
+function leavePlayCleanupImplementationsForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+) {
+  return (
+    cardImplementationForDefinitionId(definitionFor(state, cardId).id)
+      ?.leavePlayCleanup ?? []
+  );
+}
+
 function runEncounterInterventionsForDefinition(
   definitionId: CardDefinitionId,
 ): readonly CardRunEncounterInterventionImplementation[] {
@@ -5647,6 +5718,97 @@ function hasStealthPaymentBlockOnServer(
       )
     );
   });
+}
+
+function parisTracePoolImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+):
+  | Extract<
+      CardFortRunWindowImplementation,
+      { kind: "corp_trace_bits_during_runs_on_this_fort" }
+    >
+  | undefined {
+  return fortRunWindowImplementationForCard(
+    state,
+    cardId,
+    "corp_trace_bits_during_runs_on_this_fort",
+  );
+}
+
+function isParisTracePoolSource(state: GameState, cardId: CardInstanceId): boolean {
+  const definitionId = definitionFor(state, cardId).id;
+  return (
+    Boolean(parisTracePoolImplementationForCard(state, cardId)) ||
+    (!cardImplementationForDefinitionId(definitionId) &&
+      definitionId === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID)
+  );
+}
+
+function parisTracePoolCapacityForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): number {
+  return (
+    parisTracePoolImplementationForCard(state, cardId)?.amount ??
+    PARIS_CITY_GRID_TRACE_POOL_BITS
+  );
+}
+
+function isRioPassRezzedIceSource(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const definitionId = definitionFor(state, cardId).id;
+  return (
+    hasFortRunWindowKind(state, cardId, "roll_die_on_pass_rezzed_ice_on_same_fort") ||
+    (!cardImplementationForDefinitionId(definitionId) &&
+      definitionId === RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID)
+  );
+}
+
+function isRovingRunRestrictionSource(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const definitionId = definitionFor(state, cardId).id;
+  return (
+    hasFortRunWindowKind(
+      state,
+      cardId,
+      "can_run_fort_only_if_last_corp_turn_activity_on_fort",
+    ) ||
+    (!cardImplementationForDefinitionId(definitionId) &&
+      definitionId === ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID)
+  );
+}
+
+function tokyoUnsuccessfulRunWindowForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+):
+  | Extract<
+      CardFortRunWindowImplementation,
+      { kind: "gain_credits_after_unsuccessful_run_on_same_fort" }
+    >
+  | undefined {
+  return fortRunWindowImplementationForCard(
+    state,
+    cardId,
+    "gain_credits_after_unsuccessful_run_on_same_fort",
+  );
+}
+
+function isTokyoUnsuccessfulRunSource(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  const definitionId = definitionFor(state, cardId).id;
+  return (
+    Boolean(tokyoUnsuccessfulRunWindowForCard(state, cardId)) ||
+    (!cardImplementationForDefinitionId(definitionId) &&
+      definitionId === "onr_v1_371_tokyo-chiba-infighting")
+  );
 }
 
 function hasSuccessfulRunForceRezFollowup(
@@ -8126,7 +8288,10 @@ function performAction(
             "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID)
+        if (
+          definition.id !== PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID ||
+          cardImplementationForDefinitionId(definition.id)
+        )
           throw new Error(
             "Die V1.9.18-City-Grid-Trace-Faehigkeit passt nicht zur Karte.",
           );
@@ -10395,8 +10560,12 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       "In diesem Server darf diese Karte nicht im Root installiert sein.",
     );
   }
+  const rootCapacity = corpRootAgendaOrNodeCapacityInServer(state, server);
   const replacedRootAssetIds =
-    definition.type === "agenda" ? corpRootAssetIdsInServer(state, server) : [];
+    definition.type === "agenda" &&
+    corpRootMainCardIdsInServer(state, server).length >= rootCapacity
+      ? corpRootAssetIdsInServer(state, server)
+      : [];
   const replacedRootDefinitionIds = replacedRootAssetIds.map(
     (replacedId) => definitionFor(state, replacedId).id,
   );
@@ -10413,8 +10582,8 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     };
   }
   server.root.push(cardId);
-  const regionInstall = isRegionUpgrade(definition);
-  if (regionInstall) {
+  const rootRezOnInstall = rootInstallRezzesOnInstall(definition);
+  if (rootRezOnInstall) {
     spendCredits(
       state,
       "corp",
@@ -10423,10 +10592,21 @@ function installCard(state: GameState, legalAction: LegalAction): void {
   }
   state.cardInstances[cardId] = {
     ...mustInstance(state.cardInstances, cardId),
-    faceup: regionInstall,
-    rezzed: regionInstall,
+    faceup: rootRezOnInstall,
+    rezzed: rootRezOnInstall,
     zone: { side: "corp", zone: "serverRoot", serverId: server.id },
   };
+  if (rootRezOnInstall && isParisTracePoolSource(state, cardId)) {
+    const capacity = parisTracePoolCapacityForCard(state, cardId);
+    setCardCounter(state, cardId, "bit", capacity);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      sourceDefinitionId: definition.id,
+      counterType: "bit",
+      addedCounterAmount: capacity,
+      remainingCounters: capacity,
+    };
+  }
   executeCardImplementationLifecycleEffects(
     cardImplementationRuntimeDeps,
     state,
@@ -10435,7 +10615,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     cardId,
     "on_install",
   );
-  if (regionInstall) {
+  if (isRegionUpgrade(definition)) {
     trashOlderRegionUpgradesInServer(state, server, cardId, legalAction);
   }
   markRovingSubmarineActivityForServer(state, server.id, legalAction);
@@ -10447,12 +10627,49 @@ function canInstallCorpRootCardInServer(
   definition: CardDefinition,
   server: CorpServer,
 ): boolean {
+  if (mustInstallInsideSubsidiaryDataFort(definition) && server.kind !== "remote")
+    return false;
   if (definition.type === "upgrade") return server.kind !== "archives";
   if (server.kind !== "remote") return false;
   if (definition.type !== "agenda" && definition.type !== "asset") return false;
-  if (definition.type === "agenda")
-    return !server.root.some((id) => definitionFor(state, id).type === "agenda");
-  return corpRootMainCardIdsInServer(state, server).length === 0;
+  const capacity = corpRootAgendaOrNodeCapacityInServer(state, server);
+  const mainIds = corpRootMainCardIdsInServer(state, server);
+  if (mainIds.length < capacity) return true;
+  if (definition.type === "agenda") {
+    const hasAgenda = server.root.some(
+      (id) => definitionFor(state, id).type === "agenda",
+    );
+    return !hasAgenda && corpRootAssetIdsInServer(state, server).length > 0;
+  }
+  return false;
+}
+
+function corpRootAgendaOrNodeCapacityInServer(
+  state: GameState,
+  server: CorpServer,
+): number {
+  return (
+    1 +
+    server.root.reduce((sum, cardId) => {
+      const instance = state.cardInstances[cardId];
+      if (
+        instance?.zone.side !== "corp" ||
+        instance.zone.zone !== "serverRoot" ||
+        instance.zone.serverId !== server.id
+      )
+        return sum;
+      return (
+        sum +
+        fortCapacityModifiersForCard(state, cardId)
+          .filter(
+            (modifier) =>
+              modifier.kind === "additional_agenda_or_node_slot_inside_fort" &&
+              modifier.activeWhile === "installed",
+          )
+          .reduce((innerSum, modifier) => innerSum + modifier.amount, 0)
+      );
+    }, 0)
+  );
 }
 
 function corpRootAssetIdsInServer(
@@ -10961,20 +11178,16 @@ function rezCard(
   ) {
     setCardCounter(state, cardId as CardInstanceId, "bit", 1);
   }
-  if (definition.id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID) {
-    setCardCounter(
-      state,
-      cardId as CardInstanceId,
-      "bit",
-      PARIS_CITY_GRID_TRACE_POOL_BITS,
-    );
+  if (isParisTracePoolSource(state, cardId as CardInstanceId)) {
+    const capacity = parisTracePoolCapacityForCard(state, cardId as CardInstanceId);
+    setCardCounter(state, cardId as CardInstanceId, "bit", capacity);
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        sourceDefinitionId: PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
+        sourceDefinitionId: definition.id,
         counterType: "bit",
-        addedCounterAmount: PARIS_CITY_GRID_TRACE_POOL_BITS,
-        remainingCounters: PARIS_CITY_GRID_TRACE_POOL_BITS,
+        addedCounterAmount: capacity,
+        remainingCounters: capacity,
       };
     }
   }
@@ -12263,14 +12476,15 @@ function applyRioDeJaneiroCityGridPassedIceTrigger(
       const instance = state.cardInstances[cardId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, cardId).id === RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID
+        isRioPassRezzedIceSource(state, cardId)
       );
     })
     .sort();
   if (rioIds.length === 0) return false;
 
   for (const rioId of rioIds) {
-    const randomPurpose = `v1921.die.${RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
+    const rioDefinitionId = definitionFor(state, rioId).id;
+    const randomPurpose = `v1921.die.${rioDefinitionId}.passed_ice.${run.runId}.${passedIceId}.${rioId}`;
     const dieRoll = rollDeterministicDie(state, randomPurpose);
     const runEnded = dieRoll === 1;
     if (legalAction) {
@@ -12278,7 +12492,7 @@ function applyRioDeJaneiroCityGridPassedIceTrigger(
         ...(legalAction.payload ?? {}),
         v1921UpgradeAbility: "rio_de_janeiro_passed_ice",
         sourceCardId: rioId,
-        sourceDefinitionId: RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID,
+        sourceDefinitionId: rioDefinitionId,
         passedIceId,
         passedIceDefinitionId: definitionFor(state, passedIceId).id,
         serverLabel: server.label,
@@ -14957,6 +15171,18 @@ function trashCorpInstalledCardToArchives(
   }
   const instance = mustInstance(state.cardInstances, cardId);
   const definition = definitionFor(state, cardId);
+  const sourceServerId =
+    instance.zone.side === "corp" && instance.zone.zone === "serverRoot"
+      ? instance.zone.serverId
+      : undefined;
+  const leavesFortCapacityModifier = leavePlayCleanupImplementationsForCard(
+    state,
+    cardId,
+  ).some(
+    (cleanup) =>
+      cleanup.kind === "trash_agenda_or_node_if_fort_over_capacity" &&
+      cleanup.target === "agenda_or_node_inside_same_fort",
+  );
   const rezzedNevinyrralLeftPlay =
     definition.id === NEVINYRRAL_ID && instance.rezzed === true;
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
@@ -14970,6 +15196,14 @@ function trashCorpInstalledCardToArchives(
     zone: { side: "corp", zone: "archives" },
   };
   clearCardCounters(state, cardId);
+  if (sourceServerId && leavesFortCapacityModifier) {
+    cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay(
+      state,
+      sourceServerId,
+      definition.id,
+      legalAction,
+    );
+  }
   if (rezzedNevinyrralLeftPlay) {
     state.winner = "runner";
     state.gameEndReason = "nevinyrral_left_play";
@@ -14984,6 +15218,49 @@ function trashCorpInstalledCardToArchives(
       };
     }
   }
+}
+
+function cleanupCorpRootAgendaOrNodeCapacityAfterLeavePlay(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+  sourceDefinitionId: CardDefinitionId,
+  legalAction?: LegalAction,
+): void {
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) return;
+  const capacity = corpRootAgendaOrNodeCapacityInServer(state, server);
+  const mainIds = corpRootMainCardIdsInServer(state, server);
+  if (mainIds.length <= capacity) return;
+  const targetId = mainIds[0];
+  if (!targetId) return;
+  const targetDefinition = definitionFor(state, targetId);
+  if (legalAction) {
+    const effectIndex = legalAction.resolvedEffects?.length ?? 0;
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      {
+        effectId: `corp.fort_capacity_cleanup.${server.id}.${effectIndex}`,
+        kind: "trash_card",
+        visibility: "public",
+        side: "corp",
+        reason: "fort_capacity_exceeded",
+        serverId: server.id,
+        serverLabel: server.label,
+        sourceDefinitionId,
+        sourceTitle: publicCardTitle(sourceDefinitionId),
+        cardDefinitionId: targetDefinition.id,
+        cardTitle: targetDefinition.title,
+      },
+    ];
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      namatokiCleanupTrash: true,
+      namatokiCleanupTrashedCardDefinitionId: targetDefinition.id,
+      fortCapacityAfter: capacity,
+      fortAgendaNodeCountBeforeCleanup: mainIds.length,
+    };
+  }
+  trashCorpInstalledCardToArchives(state, targetId, legalAction);
 }
 
 function trashOlderRegionUpgradesInServer(
@@ -15053,8 +15330,7 @@ function rovingSubmarineIdsForServer(
       const instance = state.cardInstances[cardId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, cardId).id ===
-        ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID
+        isRovingRunRestrictionSource(state, cardId)
       );
     })
     .sort();
@@ -15113,12 +15389,14 @@ function tokyoChibaUnsuccessfulRunBonus(
   if (!attackedServer) return { amount: 0 };
   const sourceCardId = attackedServer.root.find((cardId) => {
     const instance = mustInstance(state.cardInstances, cardId);
-    return (
-      instance.rezzed &&
-      definitionFor(state, cardId).id === "onr_v1_371_tokyo-chiba-infighting"
-    );
+    return instance.rezzed && isTokyoUnsuccessfulRunSource(state, cardId);
   });
-  return sourceCardId ? { amount: 2, sourceCardId } : { amount: 0 };
+  return sourceCardId
+    ? {
+        amount: tokyoUnsuccessfulRunWindowForCard(state, sourceCardId)?.amount ?? 2,
+        sourceCardId,
+      }
+    : { amount: 0 };
 }
 
 function finishRun(
@@ -15159,7 +15437,9 @@ function finishRun(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       tokyoChibaInfightingBonus: true,
-      sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+      sourceDefinitionId: corpBonus.sourceCardId
+        ? definitionFor(state, corpBonus.sourceCardId).id
+        : "onr_v1_371_tokyo-chiba-infighting",
       serverId: run.attackedServerId,
       corpCreditsGained: corpBonus.amount,
       corpCreditsAfter: state.corp.credits,
@@ -16037,11 +16317,10 @@ function applyCorpStartOfTurnEffects(
         ),
       );
     }
-    if (
-      definitionId === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID &&
-      cardCounter(state, cardId, "bit") < PARIS_CITY_GRID_TRACE_POOL_BITS
-    ) {
-      setCardCounter(state, cardId, "bit", PARIS_CITY_GRID_TRACE_POOL_BITS);
+    if (isParisTracePoolSource(state, cardId)) {
+      const capacity = parisTracePoolCapacityForCard(state, cardId);
+      if (cardCounter(state, cardId, "bit") < capacity)
+        setCardCounter(state, cardId, "bit", capacity);
     }
     if (definitionId === INVESTMENT_FIRM_ASSET_CARD_ID) {
       if (cardCounter(state, cardId, "recurring_credit") > 0) {
@@ -26461,7 +26740,7 @@ function parisCityGridTracePoolSource(
       const instance = state.cardInstances[rootId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, rootId).id === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID &&
+        isParisTracePoolSource(state, rootId) &&
         cardCounter(state, rootId, "bit") > 0
       );
     });

@@ -3524,7 +3524,7 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
-  it("revalidates legacy tag-condition state, Disinfectant targets and Access to Kiribati trace link", () => {
+  it("revalidates migrated tag-condition suppression, Disinfectant targets and Access to Kiribati trace link", () => {
     let omni = MECHANIC_SMOKE_GAMES.assetNodeEffects("spotcheck-tag-condition-drift");
     omni.corp.credits = 10;
     omni.runner.tags = 1;
@@ -3535,28 +3535,14 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
       faceup: true,
       rezzed: true,
     };
-    const omniLegal = mustAction(
-      omni,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1918UpgradeAbility === "tag_condition_credit" &&
-        String(action.payload?.cardId) === parisId,
-    );
-    const noTag = structuredClone(omni);
-    noTag.runner.tags = 0;
-    const noTagResult = applyAction(noTag, {
-      matchId: noTag.matchId,
-      side: "corp",
-      actionId: omniLegal.actionId,
-      clientKnownStateVersion: noTag.stateVersion,
-    });
-    expect(noTagResult.ok).toBe(false);
-    omni = apply(omni, "corp", (action) => action.actionId === omniLegal.actionId);
-    expect(omni.eventLog.at(-1)?.publicPayload).toMatchObject({
-      v1918UpgradeAbility: "tag_condition_credit",
-      runnerTagsAfter: 1,
-    });
+    expect(
+      getLegalActions(omni, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1918UpgradeAbility === "tag_condition_credit" &&
+          String(action.payload?.cardId) === parisId,
+      ),
+    ).toBe(false);
 
     let disinfectant = MECHANIC_SMOKE_GAMES.assetNodeEffects(
       "spotcheck-disinfectant-target-drift",
@@ -7818,6 +7804,67 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       expect.objectContaining({
         kind: "trace",
         baseTraceStrength: 10,
+      }),
+    );
+  });
+
+  it("migrates P3.55 fort region longtail cards into CardImplementation coverage", () => {
+    const p355Cards = [
+      "onr_v1_365_paris-city-grid",
+      "onr_v1_367_rio-de-janeiro-city-grid",
+      "onr_v1_368_roving-submarine",
+      "onr_v1_371_tokyo-chiba-infighting",
+      "onr_v1_361_namatoki-plaza",
+    ] as const;
+
+    for (const definitionId of p355Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_365_paris-city-grid")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "corp_trace_bits_during_runs_on_this_fort",
+        amount: 3,
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_367_rio-de-janeiro-city-grid")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "roll_die_on_pass_rezzed_ice_on_same_fort",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_368_roving-submarine")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "can_run_fort_only_if_last_corp_turn_activity_on_fort",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_371_tokyo-chiba-infighting")
+        ?.fortRunWindows,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "gain_credits_after_unsuccessful_run_on_same_fort",
+        amount: 2,
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_361_namatoki-plaza")
+        ?.fortCapacityModifiers,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "additional_agenda_or_node_slot_inside_fort",
+        amount: 1,
       }),
     );
   });
@@ -33978,7 +34025,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     });
   });
 
-  it("covers V1.9.18 counter, tag-condition and hidden-zone upgrade actions", () => {
+  it("covers V1.9.18 counter and hidden-zone upgrade actions with migrated tag-condition suppression", () => {
     let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("v1918-counter-tag-hidden-actions");
     state.corp.credits = 10;
     state.runner.tags = 1;
@@ -34015,19 +34062,14 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       remainingCounters: 1,
     });
 
-    state = apply(
-      state,
-      "corp",
-      (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1918UpgradeAbility === "tag_condition_credit",
-    );
-    expect(state.corp.credits).toBe(11);
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "gain_credit",
-      v1918UpgradeAbility: "tag_condition_credit",
-      runnerTagsAfter: 1,
-    });
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "gain_credit" &&
+          action.payload?.v1918UpgradeAbility === "tag_condition_credit" &&
+          action.payload?.cardId === parisId,
+      ),
+    ).toBe(false);
 
     expect(
       getLegalActions(state, "corp").some(
@@ -34532,7 +34574,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       ...traceState.cardInstances[parisId]!,
       faceup: true,
       rezzed: true,
-      counters: { bit: 6 },
+      counters: { bit: 3 },
     };
     const turbeauId = putCorpRootInRemote(
       traceState,
@@ -34564,19 +34606,19 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
     expect(traceState.trace).toMatchObject({
       status: "corp_bid",
       baseTraceStrength: 10,
-      corpBidMax: 11,
+      corpBidMax: 8,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
       parisCityGridPoolSourceCardInstanceId: parisId,
       parisCityGridPoolServerId: "remote_1",
     });
     traceState = applyChoice(traceState, "corp", "bid_6");
     expect(cardCounterAmount(traceState, parisId, "bit")).toBe(0);
-    expect(traceState.corp.credits).toBe(5);
+    expect(traceState.corp.credits).toBe(2);
     expect(traceState.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "corp_bid",
       corpBid: 6,
-      corpCreditBid: 0,
-      parisCityGridPoolSpent: 6,
+      corpCreditBid: 3,
+      parisCityGridPoolSpent: 3,
       parisCityGridPoolRemaining: 0,
       parisCityGridPoolServerId: "remote_1",
     });
@@ -42524,6 +42566,107 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
     const replay = replayEvents(initial, accessState.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(accessState));
+  });
+
+  it("uses Namatoki Plaza install, capacity and leave-play cleanup without region replacement", () => {
+    let state = MECHANIC_SMOKE_GAMES.assetNodeEffects("p355-namatoki-capacity");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    const namatokiId = addCorpCardToHqForTest(
+      state,
+      "onr_v1_361_namatoki-plaza",
+      "namatoki_capacity",
+    );
+    const namatokiInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === namatokiId &&
+        action.payload?.serverId === "new_remote" &&
+        action.payload?.placement === "root",
+    );
+    expect(namatokiInstall.costs).toEqual([{ clicks: 1, credits: 3 }]);
+    state = apply(state, "corp", (action) => action.actionId === namatokiInstall.actionId);
+    expect(state.cardInstances[namatokiId]).toMatchObject({
+      faceup: true,
+      rezzed: true,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+    });
+    expect(state.eventLog.at(-1)?.publicPayload).not.toMatchObject({
+      regionReplacementWarning: true,
+    });
+
+    const agendaId = addCorpCardToHqForTest(
+      state,
+      "simple_agenda",
+      "namatoki_agenda",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === agendaId &&
+        action.payload?.serverId === "remote_1" &&
+        action.payload?.placement === "root",
+    );
+    const assetId = addCorpCardToHqForTest(
+      state,
+      "simple_economy_asset",
+      "namatoki_asset",
+    );
+    const assetInstall = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        action.source === assetId &&
+        action.payload?.serverId === "remote_1" &&
+        action.payload?.placement === "root",
+    );
+    expect(assetInstall.payload?.rootReplacement).toBeUndefined();
+    state = apply(state, "corp", (action) => action.actionId === assetInstall.actionId);
+    const remote = state.corp.servers.find((server) => server.id === "remote_1");
+    if (!remote) throw new Error("remote_1 missing");
+    expect(remote.root).toEqual(expect.arrayContaining([namatokiId, agendaId, assetId]));
+
+    remote.root = [namatokiId, agendaId, assetId];
+    state = toRunnerTurnFromCorpMain(state);
+    state.runner.credits = 10;
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.run?.accessedCardId).toBe(namatokiId);
+    state = apply(state, "runner", (action) => action.type === "trash_accessed_card");
+    expect(state.corp.archives).toContain(namatokiId);
+    expect([agendaId, assetId].filter((id) => state.corp.archives.includes(id))).toHaveLength(1);
+    expect(
+      state.corp.servers
+        .find((server) => server.id === "remote_1")
+        ?.root.filter((id) => [agendaId, assetId].includes(id)),
+    ).toHaveLength(1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "trash_card",
+          reason: "fort_capacity_exceeded",
+          sourceDefinitionId: "onr_v1_361_namatoki-plaza",
+        }),
+      ],
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("resolves migrated Chimera access without legacy daemon choices", () => {

@@ -233,7 +233,67 @@ export type CardFortRunWindowImplementation =
       blocks: "runner_worm_icebreaker_use";
       reaction: "rez_to_trash_worm_and_cancel_current_use";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "corp_trace_bits_during_runs_on_this_fort";
+      timing: "during_run_on_this_fort";
+      amount: number;
+      counterType: Extract<CounterType, "bit">;
+      refresh: "start_of_corp_turn_after_use";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "roll_die_on_pass_rezzed_ice_on_same_fort";
+      timing: "pass_rezzed_ice_on_this_fort";
+      dieFaces: 6;
+      endRunOn: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "can_run_fort_only_if_last_corp_turn_activity_on_fort";
+      timing: "run_start_legal";
+      activity: "corp_installed_or_advanced_inside_or_on_fort_during_last_turn";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "gain_credits_after_unsuccessful_run_on_same_fort";
+      timing: "after_unsuccessful_run_on_this_fort";
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "public">;
     };
+
+export type CardRegionBaselineImplementation = {
+  kind: "region_baseline";
+  rezOnInstall: true;
+  installOnlyIfRezAffordable: true;
+  oneRegionPerFort: true;
+  trashOlderRegions: true;
+};
+
+export type CardInstallCapabilityImplementation =
+  | {
+      kind: "rez_on_install";
+      installOnlyIfRezAffordable: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "install_only_inside_subsidiary_data_fort";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
+export type CardFortCapacityModifierImplementation = {
+  kind: "additional_agenda_or_node_slot_inside_fort";
+  amount: number;
+  activeWhile: "installed";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CardLeavePlayCleanupImplementation = {
+  kind: "trash_agenda_or_node_if_fort_over_capacity";
+  target: "agenda_or_node_inside_same_fort";
+  selection: "deterministic_lowest_instance_id";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
 
 export type CardRunEncounterInterventionImplementation =
   | {

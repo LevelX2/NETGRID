@@ -162,12 +162,17 @@ import { drDreffImplementation } from "./onr-v1/corp/upgrades/dr-dreff";
 import { jennyJettImplementation } from "./onr-v1/corp/upgrades/jenny-jett";
 import { jerusalemCityGridImplementation } from "./onr-v1/corp/upgrades/jerusalem-city-grid";
 import { newGalvestonCityGridImplementation } from "./onr-v1/corp/upgrades/new-galveston-city-grid";
+import { namatokiPlazaImplementation } from "./onr-v1/corp/upgrades/namatoki-plaza";
 import { oliviaSalazarImplementation } from "./onr-v1/corp/upgrades/olivia-salazar";
 import { omniKismetPhDImplementation } from "./onr-v1/corp/upgrades/omni-kismet-ph-d";
+import { parisCityGridImplementation } from "./onr-v1/corp/upgrades/paris-city-grid";
 import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
+import { rioDeJaneiroCityGridImplementation } from "./onr-v1/corp/upgrades/rio-de-janeiro-city-grid";
+import { rovingSubmarineImplementation } from "./onr-v1/corp/upgrades/roving-submarine";
 import { singaporeCityGridImplementation } from "./onr-v1/corp/upgrades/singapore-city-grid";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { twentyFourHourSurveillanceImplementation } from "./onr-v1/corp/upgrades/twenty-four-hour-surveillance";
+import { tokyoChibaInfightingImplementation } from "./onr-v1/corp/upgrades/tokyo-chiba-infighting";
 import { turbeauDelacroixImplementation } from "./onr-v1/corp/upgrades/turbeau-delacroix";
 import { washingtonDcCityGridImplementation } from "./onr-v1/corp/upgrades/washington-d-c-city-grid";
 import { arasakaOwnsYouImplementation } from "./onr-v1/runner/preps/arasaka-owns-you";
@@ -642,13 +647,18 @@ export const CARD_IMPLEMENTATIONS = [
   drDreffImplementation,
   jennyJettImplementation,
   jerusalemCityGridImplementation,
+  namatokiPlazaImplementation,
   newGalvestonCityGridImplementation,
   oliviaSalazarImplementation,
   omniKismetPhDImplementation,
+  parisCityGridImplementation,
   redHerringsImplementation,
+  rioDeJaneiroCityGridImplementation,
+  rovingSubmarineImplementation,
   singaporeCityGridImplementation,
   tesseractFortConstructionImplementation,
   twentyFourHourSurveillanceImplementation,
+  tokyoChibaInfightingImplementation,
   turbeauDelacroixImplementation,
   washingtonDcCityGridImplementation,
 ] as const satisfies readonly CardImplementationDefinition[];
