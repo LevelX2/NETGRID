@@ -40614,6 +40614,159 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(hashState(replay.state)).toBe(hashState(state));
   });
 
+  it("projects special counter displays without changing legal actions or state hash", () => {
+    const requiredRunnerCards = [
+      "onr_v1_011_cloak",
+      "onr_v1_008_boardwalk",
+      "onr_v1_164_hells-run",
+      "onr_v1_121_armored-fridge",
+    ];
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-counter-display-specials",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+          cards: [
+            ...requiredRunnerCards.map((id) => ({ id, quantity: 1 })),
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+              (card) => !requiredRunnerCards.includes(card.id),
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    const recurringId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
+    const restrictedId = installRunnerResourceForTest(
+      state,
+      "onr_v1_164_hells-run",
+    );
+    const virusId = installRunnerProgramForTest(state, "onr_v1_008_boardwalk");
+    const fridgeId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_121_armored-fridge",
+    );
+    setCardCounterForTest(state, recurringId, "recurring_credit", 2);
+    setCardCounterForTest(state, restrictedId, "bit", 1);
+    setCardCounterForTest(state, virusId, "virus", 3);
+    setCardCounterForTest(state, fridgeId, "ablative", 2);
+    setCardCounterForTest(state, state.runner.identity, "data_raven", 1);
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
+    setCardCounterForTest(state, state.runner.identity, "mastiff", 3);
+    setCardCounterForTest(state, state.runner.identity, "crying", 1);
+    state.poxCountersByServer = {
+      ...(state.poxCountersByServer ?? {}),
+      rd: 3,
+    };
+    const legalActionIdsBeforeView = getLegalActions(state, "runner").map(
+      (action) => action.actionId,
+    );
+    const hashBeforeView = hashState(state);
+
+    const runnerView = getPlayerView(state, "runner");
+    const recurringCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === recurringId,
+    );
+    const restrictedCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === restrictedId,
+    );
+    const virusCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === virusId,
+    );
+    const fridgeCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === fridgeId,
+    );
+    const corpView = getPlayerView(state, "corp");
+
+    expect(recurringCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "recurring_credit",
+          amount: 2,
+          displayKind: "recurring_credit",
+          usageHint: "refreshing",
+        }),
+      ]),
+    );
+    expect(restrictedCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "restricted_pool",
+          amount: 1,
+          displayKind: "restricted_pool",
+          counterType: "bit",
+          label: "Link-Bits",
+        }),
+      ]),
+    );
+    expect(virusCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "virus",
+          amount: 3,
+          displayKind: "virus",
+          counterType: "virus",
+        }),
+      ]),
+    );
+    expect(fridgeCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "ablative",
+          amount: 2,
+          displayKind: "damage_prevention",
+          counterType: "ablative",
+        }),
+      ]),
+    );
+    expect(runnerView.own.identity.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "data_raven",
+          amount: 1,
+          displayKind: "trace",
+          counterType: "data_raven",
+        }),
+        expect.objectContaining({
+          id: "cerberus",
+          amount: 2,
+          displayKind: "trace",
+          counterType: "cerberus",
+        }),
+        expect.objectContaining({
+          id: "mastiff",
+          amount: 3,
+          displayKind: "trace",
+          counterType: "mastiff",
+        }),
+        expect.objectContaining({
+          id: "crying",
+          amount: 1,
+          displayKind: "trace",
+          counterType: "crying",
+        }),
+      ]),
+    );
+    expect(
+      corpView.servers.find((server) => server.id === "rd")?.counterDisplays,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "pox",
+          amount: 3,
+          displayKind: "virus",
+          label: "Pox-Counter",
+        }),
+      ]),
+    );
+    expect(hashState(state)).toBe(hashBeforeView);
+    expect(getLegalActions(state, "runner").map((action) => action.actionId)).toEqual(
+      legalActionIdsBeforeView,
+    );
+  });
+
   it("applies P3.7 turn-start economy CardImplementations once from valid sources", () => {
     let corpState = apply(
       createGameAfterSetup({

@@ -2388,6 +2388,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
       server.id === "archives"
         ? visibleCorpArchives(state, side)
         : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
+    ...counterDisplaysField(poxCounterDisplaysForServer(state, server.id)),
   }));
 
   const run = state.run
@@ -29304,6 +29305,9 @@ function counterDisplaysForKnownCard(
   return [
     ...(advancementCounterDisplays(instance.advancementCounters) ?? []),
     ...(storedCreditCounterDisplays(definition, instance) ?? []),
+    ...(restrictedPoolCounterDisplays(definition, instance) ?? []),
+    ...(recurringCreditCounterDisplays(instance) ?? []),
+    ...(specialCounterDisplays(instance) ?? []),
   ];
 }
 
@@ -29346,6 +29350,197 @@ function storedCreditCounterDisplays(
       ariaLabel: `${amount} gespeicherte Credits`,
       counterType: "bit",
       usageHint: "spendable",
+    },
+  ];
+}
+
+function recurringCreditCounterDisplays(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  const amount = Math.max(0, Math.floor(instance.counters?.recurring_credit ?? 0));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "recurring_credit",
+      amount,
+      displayKind: "recurring_credit",
+      label: "Wiederkehrende Credits",
+      ariaLabel: `${amount} wiederkehrende Credits`,
+      counterType: "recurring_credit",
+      usageHint: "refreshing",
+    },
+  ];
+}
+
+function restrictedPoolCounterDisplays(
+  definition: CardDefinition,
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  if (STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
+  const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
+  if (amount <= 0) return undefined;
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  const restrictedSource = implementation?.restrictedHostedCreditSource;
+  const tracePoolSource = implementation?.fortRunWindows?.some(
+    (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
+  );
+  if (!restrictedSource && !tracePoolSource) return undefined;
+  const label = tracePoolSource
+    ? "Trace-Bits"
+    : restrictedPoolDisplayLabel(restrictedSource?.usableFor ?? []);
+  return [
+    {
+      id: "restricted_pool",
+      amount,
+      displayKind: "restricted_pool",
+      label,
+      ariaLabel: `${amount} ${label}`,
+      counterType: "bit",
+      usageHint: "spendable",
+    },
+  ];
+}
+
+function restrictedPoolDisplayLabel(
+  uses: readonly RestrictedHostedCreditUse[],
+): string {
+  if (uses.includes("increase_link")) return "Link-Bits";
+  if (uses.includes("install_programs")) return "Installations-Bits";
+  if (uses.includes("remove_tags")) return "Tag-Entfernungs-Bits";
+  if (uses.includes("trash_nodes") || uses.includes("trash_upgrades"))
+    return "Trash-Bits";
+  if (
+    uses.includes("using_icebreaker_during_run") ||
+    uses.includes("using_icebreaker_during_run_non_noisy") ||
+    uses.includes("using_killer_during_run")
+  )
+    return "Run-Bits";
+  return "Eingeschränkte Bits";
+}
+
+function specialCounterDisplays(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  const counters = instance.counters ?? {};
+  return [
+    ...singleCounterDisplay(counters.shell, {
+      id: "shell",
+      displayKind: "shell",
+      label: "Shell-Counter",
+      ariaLabelName: "Shell-Counter",
+      counterType: "shell",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.ablative, {
+      id: "ablative",
+      displayKind: "damage_prevention",
+      label: "Ablative-Counter",
+      ariaLabelName: "Ablative-Counter",
+      counterType: "ablative",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.virus, {
+      id: "virus",
+      displayKind: "virus",
+      label: "Virus-Counter",
+      ariaLabelName: "Virus-Counter",
+      counterType: "virus",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.data_raven, {
+      id: "data_raven",
+      displayKind: "trace",
+      label: "Data-Raven-Counter",
+      ariaLabelName: "Data-Raven-Counter",
+      counterType: "data_raven",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.cerberus, {
+      id: "cerberus",
+      displayKind: "trace",
+      label: "Cerberus-Counter",
+      ariaLabelName: "Cerberus-Counter",
+      counterType: "cerberus",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.mastiff, {
+      id: "mastiff",
+      displayKind: "trace",
+      label: "Mastiff-Counter",
+      ariaLabelName: "Mastiff-Counter",
+      counterType: "mastiff",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.crying, {
+      id: "crying",
+      displayKind: "trace",
+      label: "Crying-Counter",
+      ariaLabelName: "Crying-Counter",
+      counterType: "crying",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.militech, {
+      id: "militech",
+      displayKind: "generic_counter",
+      label: "Militech-Counter",
+      ariaLabelName: "Militech-Counter",
+      counterType: "militech",
+      usageHint: "spendable",
+    }),
+    ...singleCounterDisplay(counters.mark, {
+      id: "mark",
+      displayKind: "generic_counter",
+      label: "Mark-Counter",
+      ariaLabelName: "Mark-Counter",
+      counterType: "mark",
+      usageHint: "status_marker",
+    }),
+  ];
+}
+
+function poxCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  const amount = poxCountersForServer(state, serverId);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "pox",
+      amount,
+      displayKind: "virus",
+      label: "Pox-Counter",
+      ariaLabel: `${amount} Pox-Counter auf diesem Server`,
+      counterType: "virus",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
+function singleCounterDisplay(
+  rawAmount: number | undefined,
+  display: {
+    id: string;
+    displayKind: NonNullable<VisibleCard["counterDisplays"]>[number]["displayKind"];
+    label: string;
+    ariaLabelName: string;
+    counterType: CounterType;
+    usageHint: NonNullable<
+      NonNullable<VisibleCard["counterDisplays"]>[number]["usageHint"]
+    >;
+  },
+): NonNullable<VisibleCard["counterDisplays"]> {
+  const amount = Math.max(0, Math.floor(rawAmount ?? 0));
+  if (amount <= 0) return [];
+  return [
+    {
+      id: display.id,
+      amount,
+      displayKind: display.displayKind,
+      label: display.label,
+      ariaLabel: `${amount} ${display.ariaLabelName}`,
+      counterType: display.counterType,
+      usageHint: display.usageHint,
     },
   ];
 }

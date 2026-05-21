@@ -1160,6 +1160,9 @@ export type CounterDisplayKind =
   | "recurring_credit"
   | "virus"
   | "trace"
+  | "shell"
+  | "damage_prevention"
+  | "restricted_pool"
   | "generic_counter";
 
 export type CounterUsageHint =
@@ -1252,6 +1255,7 @@ export type PlayerView = {
     label: string;
     ice: VisibleCard[];
     root: VisibleCard[];
+    counterDisplays?: CounterDisplay[];
   }>;
   specialZones?: {
     setAside: VisibleCard[];
