@@ -1,19 +1,23 @@
 ---
 activityId: act-2026-05-21-counter-display-public-view-contract
-status: inbox
+status: done
 kind: architecture
 area: shared
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/architecture/counter-displays/public-view-contract-2026-05-21.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-05.md
+checks:
+  - Dokumentationsreview gegen Akzeptanzkriterien
+  - git diff --check
 ---
 
 # CounterDisplay-PublicView-Vertrag schärfen
@@ -58,11 +62,11 @@ Ein enger Architekturvertrag für `counterDisplays` soll festlegen, dass Counter
 
 ## Akzeptanzkriterien
 
-- [ ] Der Zielvertrag ist in dieser Activity oder einem verlinkten Architekturartefakt eindeutig formuliert.
-- [ ] Der Vertrag schließt `visibility` im UI-Payload für den ersten Schnitt aus.
-- [ ] Der Vertrag benennt `usageHint` ausdrücklich als Anzeigehinweis, nicht als Regelquelle.
-- [ ] Der Vertrag legt fest, dass `counterDisplays` nicht in `GameState` gespeichert werden und `hashState` nicht beeinflussen dürfen.
-- [ ] Der Vertrag nennt verdeckte Korp-Karten als negative Hidden-Info-Referenz: keine Identität, keine Labels, keine sonstigen Counterdetails außer erlaubten öffentlichen Advancement-Countern.
+- [x] Der Zielvertrag ist in dieser Activity oder einem verlinkten Architekturartefakt eindeutig formuliert.
+- [x] Der Vertrag schließt `visibility` im UI-Payload für den ersten Schnitt aus.
+- [x] Der Vertrag benennt `usageHint` ausdrücklich als Anzeigehinweis, nicht als Regelquelle.
+- [x] Der Vertrag legt fest, dass `counterDisplays` nicht in `GameState` gespeichert werden und `hashState` nicht beeinflussen dürfen.
+- [x] Der Vertrag nennt verdeckte Korp-Karten als negative Hidden-Info-Referenz: keine Identität, keine Labels, keine sonstigen Counterdetails außer erlaubten öffentlichen Advancement-Countern.
 
 ## Umsetzungshinweise
 
@@ -71,4 +75,4 @@ Ein enger Architekturvertrag für `counterDisplays` soll festlegen, dass Counter
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Der Vertrag ist als dauerhaftes Architekturartefakt unter `docs/architecture/counter-displays/public-view-contract-2026-05-21.md` dokumentiert. Er definiert den minimalen Typvertrag, schließt `visibility` im UI-Payload aus, grenzt `usageHint` als reinen Anzeigehinweis ab, hält `counterDisplays` aus `GameState`/StateHash/Replay heraus und formuliert die Hidden-Info-Grenze für verdeckte Korp-Karten mit ausschließlich generischen öffentlichen Advancement-Displays. Die Entscheidung ist zusätzlich im Mai-Log vermerkt.
