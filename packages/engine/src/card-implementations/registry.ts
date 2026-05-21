@@ -138,8 +138,10 @@ import { iceAndDatasGuideToTheNetImplementation } from "./onr-v1/runner/preps/ic
 import { ifYouWantItDoneRightImplementation } from "./onr-v1/runner/preps/if-you-want-it-done-right";
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
 import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
+import { openEndedMileageProgramImplementation } from "./onr-v1/runner/preps/open-ended-mileage-program";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
+import { totalGeneticRetrofitImplementation } from "./onr-v1/runner/preps/total-genetic-retrofit";
 import { arasakaPortablePrototypeImplementation } from "./onr-v1/runner/hardware/arasaka-portable-prototype";
 import { armadilloArmoredRoadHomeImplementation } from "./onr-v1/runner/hardware/armadillo-armored-road-home";
 import { armoredFridgeImplementation } from "./onr-v1/runner/hardware/armored-fridge";
@@ -151,6 +153,7 @@ import { greenKnightSurgeBuffersImplementation } from "./onr-v1/runner/hardware/
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
+import { nasukoCycleImplementation } from "./onr-v1/runner/hardware/nasuko-cycle";
 import { pandorasDeckImplementation } from "./onr-v1/runner/hardware/pandoras-deck";
 import { parraline5750Implementation } from "./onr-v1/runner/hardware/parraline-5750";
 import { pk6089aImplementation } from "./onr-v1/runner/hardware/pk-6089a";
@@ -176,6 +179,7 @@ import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
+import { joanOfArcImplementation } from "./onr-v1/runner/programs/joan-of-arc";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
@@ -196,12 +200,16 @@ import { accessToKiribatiImplementation } from "./onr-v1/runner/resources/access
 import { backDoorToHilliardImplementation } from "./onr-v1/runner/resources/back-door-to-hilliard";
 import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/back-door-to-orbital-air";
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
+import { danshisSecondIdImplementation } from "./onr-v1/runner/resources/danshis-second-id";
+import { fallGuyImplementation } from "./onr-v1/runner/resources/fall-guy";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
 import { hellsRunImplementation } from "./onr-v1/runner/resources/hells-run";
 import { junkyardBbsImplementation } from "./onr-v1/runner/resources/junkyard-bbs";
+import { lelandCorporateBodyguardImplementation } from "./onr-v1/runner/resources/leland-corporate-bodyguard";
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { nEtoImplementation } from "./onr-v1/runner/resources/n-e-t-o";
+import { nomadAlliesImplementation } from "./onr-v1/runner/resources/nomad-allies";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { roninAroundImplementation } from "./onr-v1/runner/resources/ronin-around";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
@@ -211,6 +219,7 @@ import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-spri
 import { theShortCircuitImplementation } from "./onr-v1/runner/resources/the-short-circuit";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
+import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -227,11 +236,13 @@ export const CARD_IMPLEMENTATIONS = [
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
   mantisFixerAtLargeImplementation,
+  openEndedMileageProgramImplementation,
   priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,
   sneakPreviewImplementation,
   templeMicrocodeOutletImplementation,
+  totalGeneticRetrofitImplementation,
   weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
@@ -239,6 +250,7 @@ export const CARD_IMPLEMENTATIONS = [
   expertScheduleAnalyzerImplementation,
   forceShieldImplementation,
   invisibilityImplementation,
+  joanOfArcImplementation,
   microtechAiInterfaceImplementation,
   mouseImplementation,
   mysteryBoxImplementation,
@@ -259,12 +271,16 @@ export const CARD_IMPLEMENTATIONS = [
   backDoorToHilliardImplementation,
   backDoorToOrbitalAirImplementation,
   aujourdhuiImplementation,
+  danshisSecondIdImplementation,
+  fallGuyImplementation,
   brokerImplementation,
   floatingRunnerBbsImplementation,
   hellsRunImplementation,
   junkyardBbsImplementation,
+  lelandCorporateBodyguardImplementation,
   loanFromChibaImplementation,
   nEtoImplementation,
+  nomadAlliesImplementation,
   roninAroundImplementation,
   arasakaPortablePrototypeImplementation,
   armadilloArmoredRoadHomeImplementation,
@@ -277,6 +293,7 @@ export const CARD_IMPLEMENTATIONS = [
   hqInterfaceImplementation,
   militechMramChipImplementation,
   mramChipImplementation,
+  nasukoCycleImplementation,
   pandorasDeckImplementation,
   parraline5750Implementation,
   pk6089aImplementation,
@@ -294,6 +311,7 @@ export const CARD_IMPLEMENTATIONS = [
   theShortCircuitImplementation,
   topRunnersConferenceImplementation,
   traumaTeamImplementation,
+  umbrellaPolicyImplementation,
   artificialSecurityDirectorsImplementation,
   blackIceQualityAssuranceImplementation,
   corporateCoupImplementation,

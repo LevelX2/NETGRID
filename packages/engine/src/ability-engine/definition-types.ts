@@ -159,6 +159,10 @@ export type CardAbilityCostImplementation =
       kind: "advancement_counter";
       amount: number;
       source: "source";
+    }
+  | {
+      kind: "trash_source";
+      amount: 1;
     };
 
 export type CardEffectImplementation =
@@ -166,6 +170,9 @@ export type CardEffectImplementation =
   | DrawCardsEffectImplementation
   | LoseCreditsEffectImplementation
   | AddTagsEffectImplementation
+  | RemoveTagsEffectImplementation
+  | AvoidNextTagEffectImplementation
+  | ReturnSourceToGripIfPaidEffectImplementation
   | AddCountersToSourceEffectImplementation
   | DamageEffectImplementation
   | TraceEffectImplementation
@@ -339,6 +346,27 @@ export type AddTagsEffectImplementation = {
   recipient: "runner";
   amount: number;
   visibility: EventVisibilityClass;
+};
+
+export type RemoveTagsEffectImplementation = {
+  kind: "remove_tags";
+  recipient: "runner";
+  mode: "amount" | "up_to_amount" | "all";
+  amount?: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type AvoidNextTagEffectImplementation = {
+  kind: "avoid_next_tag";
+  recipient: "runner";
+  amount: 1;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type ReturnSourceToGripIfPaidEffectImplementation = {
+  kind: "return_source_to_grip_if_paid";
+  amount: number;
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type AddCountersToSourceEffectImplementation = {
@@ -687,6 +715,42 @@ export type CardDamagePreventionSourceImplementation = {
       }
     | {
         kind: "trash_source";
+      }
+    | {
+        kind: "credit";
+        amount: number;
+      };
+  priority: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CardTagPreventionSourceImplementation = {
+  kind: "avoid_tag";
+  amount: 1;
+  cost:
+    | {
+        kind: "trash_source";
+      }
+    | {
+        kind: "credit";
+        amount: number;
+      };
+  priority: number;
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CardTrashPreventionSourceImplementation = {
+  kind: "prevent_installed_card_trash";
+  protectsCardTypes: readonly Extract<CardType, "program" | "hardware">[];
+  excludesSelf?: true;
+  mode: "one_card" | "one_or_more_simultaneous";
+  cost:
+    | {
+        kind: "trash_source";
+      }
+    | {
+        kind: "credit_return_source_to_grip";
+        amount: number;
       };
   priority: number;
   visibility: Extract<EventVisibilityClass, "public">;

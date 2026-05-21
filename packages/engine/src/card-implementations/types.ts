@@ -8,6 +8,8 @@ import type {
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  CardTagPreventionSourceImplementation,
+  CardTrashPreventionSourceImplementation,
   RestrictedHostedCreditSourceImplementation,
   RunnerTraceCounterEffectImplementation,
 } from "../ability-engine/definition-types";
@@ -27,5 +29,7 @@ export type CardImplementationDefinition = {
   restrictedHostedCreditSource?: RestrictedHostedCreditSourceImplementation;
   installAdditionalCosts?: readonly CardInstallAdditionalCostImplementation[];
   damagePreventionSources?: readonly CardDamagePreventionSourceImplementation[];
+  tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];
+  trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
   hardwareDeck?: true;
 };

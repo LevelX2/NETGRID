@@ -7189,6 +7189,167 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       cardDefinitionId: "onr_v1_306_trojan-horse",
     });
   });
+
+  it("uses CardImplementation tag avoidance for Fall Guy and Total Genetic Retrofit", () => {
+    let fallGuyState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p342-fall-guy",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p342_fall_guy_runner",
+          cards: [
+            { id: "onr_v1_161_fall-guy", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "p342_fall_guy_corp",
+          cards: [
+            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    fallGuyState.runner.credits = 8;
+    fallGuyState.runner.clicks = 4;
+    const fallGuyId = moveRunnerCardToGrip(fallGuyState, "onr_v1_161_fall-guy");
+    fallGuyState = apply(
+      fallGuyState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        String(action.payload?.cardId) === fallGuyId,
+    );
+    fallGuyState.runnerTurnFlags = {
+      ...(fallGuyState.runnerTurnFlags ?? {}),
+      stoleAgendaThisTurn: fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaLastTurn: true,
+    };
+    fallGuyState = apply(
+      fallGuyState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    fallGuyState = apply(
+      fallGuyState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    fallGuyState.runnerTurnFlags = {
+      ...(fallGuyState.runnerTurnFlags ?? {}),
+      stoleAgendaThisTurn: fallGuyState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaLastTurn: true,
+    };
+    const trojanId = moveCorpCardToHq(
+      fallGuyState,
+      "onr_v1_306_trojan-horse",
+    );
+    keepOnlyCorpHqCard(fallGuyState, trojanId);
+    fallGuyState.corp.credits = 8;
+    fallGuyState = apply(
+      fallGuyState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(fallGuyState, action) === "onr_v1_306_trojan-horse",
+    );
+    expect(fallGuyState.pendingChoice?.source).toContain(
+      "event_modification",
+    );
+    expect(fallGuyState.runner.tags).toBe(0);
+    const fallGuyOption = fallGuyState.pendingChoice?.options.find((option) =>
+      option.id.includes("avoid_tag"),
+    )?.id;
+    expect(fallGuyOption).toBeDefined();
+    if (!fallGuyOption) throw new Error("Missing Fall Guy tag-avoid option");
+    fallGuyState = applyChoice(fallGuyState, "runner", fallGuyOption);
+    expect(fallGuyState.runner.tags).toBe(0);
+    expect(fallGuyState.runner.heap).toContain(fallGuyId);
+    expect(fallGuyState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_161_fall-guy",
+    });
+
+    let retrofitState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p342-total-genetic-retrofit",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p342_total_genetic_retrofit_runner",
+          cards: [
+            { id: "onr_v1_116_total-genetic-retrofit", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+          id: "p342_total_genetic_retrofit_corp",
+          cards: [
+            { id: "onr_v1_306_trojan-horse", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    retrofitState.runner.credits = 8;
+    retrofitState.runner.clicks = 4;
+    retrofitState.runner.tags = 2;
+    const retrofitId = moveRunnerCardToGrip(
+      retrofitState,
+      "onr_v1_116_total-genetic-retrofit",
+    );
+    retrofitState = apply(
+      retrofitState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        String(action.payload?.cardId) === retrofitId,
+    );
+    expect(retrofitState.runner.tags).toBe(0);
+    expect(retrofitState.runnerTagAvoidanceCredits).toBe(1);
+    retrofitState.runnerTurnFlags = {
+      ...(retrofitState.runnerTurnFlags ?? {}),
+      stoleAgendaThisTurn: retrofitState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaLastTurn: true,
+    };
+    retrofitState = apply(
+      retrofitState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    retrofitState = apply(
+      retrofitState,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    retrofitState.runnerTurnFlags = {
+      ...(retrofitState.runnerTurnFlags ?? {}),
+      stoleAgendaThisTurn: retrofitState.runnerTurnFlags?.stoleAgendaThisTurn ?? false,
+      stoleAgendaLastTurn: true,
+    };
+    const retrofitTrojanId = moveCorpCardToHq(
+      retrofitState,
+      "onr_v1_306_trojan-horse",
+    );
+    keepOnlyCorpHqCard(retrofitState, retrofitTrojanId);
+    retrofitState.corp.credits = 8;
+    retrofitState = apply(
+      retrofitState,
+      "corp",
+      (action) =>
+        action.type === "play_operation" &&
+        sourceDefinition(retrofitState, action) === "onr_v1_306_trojan-horse",
+    );
+    expect(retrofitState.runner.tags).toBe(0);
+    expect(retrofitState.runnerTagAvoidanceCredits).toBe(0);
+    expect(retrofitState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      tagsAdded: 0,
+      runnerTagsAfter: 0,
+    });
+  });
 });
 
 describe("V1.6.1 Mechanikpaket A", () => {
@@ -11939,10 +12100,9 @@ describe("V1.7.2 Mechanikpaket F", () => {
       state,
       "runner",
       (action) =>
-        action.type === "remove_tag" &&
-        action.payload?.resourceAbility === "danshis_second_id" &&
+        action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === danshiId &&
-        action.payload?.removeTagAmount === 3,
+        sourceDefinition(state, action) === "onr_v1_158_danshis-second-id",
     );
     expect(state.runner.tags).toBe(tagsBefore - 3);
     expect(state.runner.credits).toBe(creditsBeforeDanshi);
@@ -44406,9 +44566,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
       danshi,
       "runner",
       (action) =>
-        action.type === "remove_tag" &&
-        action.payload?.resourceAbility === "danshis_second_id" &&
-        action.payload?.removeTagAmount === 3,
+        action.type === "activated_card_ability" &&
+        String(action.payload?.cardId) === danshiId &&
+        sourceDefinition(danshi, action) === "onr_v1_158_danshis-second-id",
     );
     const removedDanshi = structuredClone(danshi);
     removeEverywhere(removedDanshi, danshiId);
@@ -44428,7 +44588,6 @@ describe("Originalset Spotcheck 2026-05-16 Runner Resource Contacts hardening", 
     expect(danshi.runner.heap).toContain(danshiId);
     expect(danshi.eventLog.at(-1)?.publicPayload).toMatchObject({
       cardDefinitionId: "onr_v1_158_danshis-second-id",
-      resourceAbility: "danshis_second_id",
       removedTags: 3,
       runnerTagsAfter: 0,
     });

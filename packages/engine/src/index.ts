@@ -8,6 +8,7 @@ import {
   type CardDefinitionId,
   type CardInstance,
   type CardInstanceId,
+  type CardType,
   type CounterType,
   type CorpServer,
   type CreateGameConfig,
@@ -252,6 +253,8 @@ import type {
   CardAccessZone,
   CardDamagePreventionSourceImplementation,
   CardEffectImplementation,
+  CardTagPreventionSourceImplementation,
+  CardTrashPreventionSourceImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
   RestrictedHostedCreditUse,
@@ -658,6 +661,17 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       sourceDefinitionId,
       source,
       maxAmount,
+    ),
+  removeRunnerTags: (state, mode, amount) =>
+    removeRunnerTagsForCardImplementation(state, mode, amount),
+  avoidNextTag: (state, amount) =>
+    addRunnerTagAvoidanceCredit(state, amount),
+  returnSourceToGripIfPaid: (state, legalAction, sourceCardId, amount) =>
+    startReturnSourceToGripIfPaidChoice(
+      state,
+      legalAction,
+      sourceCardId,
+      amount,
     ),
   abilityLimits: runnerCardImplementationAbilityLimitHost,
 };
@@ -1660,12 +1674,7 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
     resolve: (state, legalAction) => {
       if (!runnerStoleAgendaLastTurn(state))
         throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
-      state.runner.tags += 1;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        tagsAdded: 1,
-        runnerTagsAfter: state.runner.tags,
-      };
+      addRunnerTagsWithPrevention(state, legalAction, 1, "trojan_horse");
     },
   },
   "onr_v1_297_overtime-incentives": {
@@ -4702,7 +4711,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
       }
       if (
         definition.id === "onr_v1_158_danshis-second-id" &&
-        state.runner.tags > 0
+        state.runner.tags > 0 &&
+        !cardImplementationForDefinitionId(definition.id)?.abilities?.some(
+          (ability) => ability.kind === "activated",
+        )
       ) {
         const removeAmount = Math.min(3, state.runner.tags);
         for (let amount = 1; amount <= removeAmount; amount += 1) {
@@ -12812,12 +12824,13 @@ function executeCardImplementationAccessEffectStep(
       return;
     }
     case "add_tags": {
-      state.runner.tags += step.amount;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        tagsAdded: Number(legalAction.payload?.tagsAdded ?? 0) + step.amount,
-        runnerTagsAfter: state.runner.tags,
-      };
+      addRunnerTagsWithPrevention(
+        state,
+        legalAction,
+        step.amount,
+        definition.id,
+      );
+      if (legalAction.payload?.eventModificationWindowOpened === true) return;
       resolvedEffects.push({
         effectId: accessEffectId(definition, cardId, index, "add_tags"),
         kind: "add_tags",
@@ -12917,6 +12930,15 @@ function trashRunnerInstalledTargetsForAccessEffect(
   const targetDefinitionIds = selectedTargetIds.map(
     (targetId) => definitionFor(state, targetId).id,
   );
+  if (
+    openRunnerInstalledTrashPreventionWindow(
+      state,
+      legalAction,
+      selectedTargetIds,
+      sourceDefinition.id,
+    )
+  )
+    return;
   for (const targetId of selectedTargetIds) trashRunnerInstalledCardToHeap(state, targetId);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -13666,6 +13688,16 @@ function resolveTrashInstalledProgramSubroutine(
   const targetProgramId = pickRunnerProgramForUninstall(state);
   if (!targetProgramId) return;
   const targetDefinitionId = definitionFor(state, targetProgramId).id;
+  if (
+    legalAction &&
+    openRunnerInstalledTrashPreventionWindow(
+      state,
+      legalAction,
+      [targetProgramId],
+      "trash_program_subroutine",
+    )
+  )
+    return;
   trashRunnerInstalledProgram(state, targetProgramId);
   if (legalAction) {
     legalAction.payload = {
@@ -13806,6 +13838,41 @@ function trashRunnerInstalledCardToHeap(
     faceup: true,
     rezzed: true,
     zone: { side: "runner", zone: "heap" },
+  };
+  clearCardCounters(state, cardId);
+}
+
+function returnRunnerInstalledCardToGrip(
+  state: GameState,
+  cardId: CardInstanceId,
+): void {
+  const definition = definitionFor(state, cardId);
+  if (!runnerInstalledCardIds(state).includes(cardId)) return;
+  if (definition.type === "program" && runnerProgramUsesMemory(state, cardId)) {
+    state.runner.memoryUsed = Math.max(
+      0,
+      state.runner.memoryUsed - (definition.memoryCost ?? 0),
+    );
+  }
+  if (
+    definition.type === "hardware" &&
+    !hasCardImplementationMemoryUnitModifier(definition) &&
+    (definition.memoryLimitBonus ?? 0) > 0
+  )
+    state.runner.memoryLimit = Math.max(
+      0,
+      state.runner.memoryLimit - (definition.memoryLimitBonus ?? 0),
+    );
+  const instance = mustInstance(state.cardInstances, cardId);
+  const { hostedOn: _hostedOn, ...withoutHost } = instance;
+  void _hostedOn;
+  removeFromAllZones(state, cardId);
+  state.runner.grip.push(cardId);
+  state.cardInstances[cardId] = {
+    ...withoutHost,
+    faceup: true,
+    rezzed: true,
+    zone: { side: "runner", zone: "grip" },
   };
   clearCardCounters(state, cardId);
 }
@@ -15273,6 +15340,74 @@ function createDamageImminentEvent(
   };
 }
 
+function createAddTagImminentEvent(
+  state: GameState,
+  amount: number,
+  source: string,
+): ImminentEvent {
+  return {
+    eventId: `imminent_tag_${state.stateVersion + 1}_${sanitizeId(source)}`,
+    eventType: "add_tag",
+    source: { kind: "game_rule" },
+    controller: "corp",
+    affectedSide: "runner",
+    payload: {
+      amount,
+      source,
+    },
+    visibility: "public",
+    createdAtStateVersion: state.stateVersion + 1,
+  };
+}
+
+function addRunnerTagsWithPrevention(
+  state: GameState,
+  legalAction: LegalAction,
+  amount: number,
+  source: string,
+): void {
+  if (amount <= 0) return;
+  const oneShotAvoidance = Math.max(
+    0,
+    Math.floor(state.runnerTagAvoidanceCredits ?? 0),
+  );
+  if (oneShotAvoidance > 0) {
+    state.runnerTagAvoidanceCredits = oneShotAvoidance - 1;
+    const tagsAdded = Math.max(0, amount - 1);
+    state.runner.tags += tagsAdded;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      tagsAdded,
+      preventedTags: 1,
+      runnerTagsAfter: state.runner.tags,
+      tagAvoidanceCreditsAfter: state.runnerTagAvoidanceCredits,
+    };
+    return;
+  }
+  const event = createAddTagImminentEvent(state, amount, source);
+  if (openEventModificationWindow(state, event, legalAction)) return;
+  resolveAddTagImminentEvent(state, event, legalAction);
+}
+
+function resolveAddTagImminentEvent(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+  preventedTags = 0,
+): void {
+  if (event.eventType !== "add_tag")
+    throw new Error("Nur Add-Tag-ImminentEvents koennen Tags geben.");
+  const amount = numberPayload(event, "amount");
+  const tagsAdded = Math.max(0, amount - preventedTags);
+  state.runner.tags += tagsAdded;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    tagsAdded,
+    ...(preventedTags > 0 ? { preventedTags } : {}),
+    runnerTagsAfter: state.runner.tags,
+  };
+}
+
 function openEventModificationWindow(
   state: GameState,
   event: ImminentEvent,
@@ -15322,11 +15457,17 @@ function collectEventModificationCandidates(
   state: GameState,
   event: ImminentEvent,
 ): EventModificationCandidate[] {
-  if (event.eventType !== "damage") return [];
   if (event.payload.cannotBePrevented === true) return [];
-  const runtime = collectRuntimeDamagePreventionCandidates(state, event);
-  const harness = collectHarnessDamagePreventionCandidates(state, event);
-  return [...runtime, ...harness];
+  if (event.eventType === "damage") {
+    const runtime = collectRuntimeDamagePreventionCandidates(state, event);
+    const harness = collectHarnessDamagePreventionCandidates(state, event);
+    return [...runtime, ...harness];
+  }
+  if (event.eventType === "add_tag")
+    return collectRuntimeTagPreventionCandidates(state, event);
+  if (event.eventType === "runner_installed_trash")
+    return collectRuntimeTrashPreventionCandidates(state, event);
+  return [];
 }
 
 function collectRuntimeDamagePreventionCandidates(
@@ -15459,6 +15600,22 @@ function damagePreventionSourcesForDefinition(
   );
 }
 
+function tagPreventionSourcesForDefinition(
+  definition: CardDefinition,
+): readonly CardTagPreventionSourceImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.tagPreventionSources ?? []
+  );
+}
+
+function trashPreventionSourcesForDefinition(
+  definition: CardDefinition,
+): readonly CardTrashPreventionSourceImplementation[] {
+  return (
+    cardImplementationForDefinitionId(definition.id)?.trashPreventionSources ?? []
+  );
+}
+
 function isRunnerHardwareDeckDefinition(definition: CardDefinition): boolean {
   return (
     definition.type === "hardware" &&
@@ -15526,7 +15683,135 @@ function cardImplementationDamagePreventionSourceCanPay(
   if (!runnerInstalledCardIds(state).includes(cardId)) return false;
   if (source.cost.kind === "none") return true;
   if (source.cost.kind === "trash_source") return true;
+  if (source.cost.kind === "credit")
+    return state.runner.credits >= source.cost.amount;
   return cardCounter(state, cardId, source.cost.counterType) >= source.cost.amount;
+}
+
+function collectRuntimeTagPreventionCandidates(
+  state: GameState,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  const amount = numberPayload(event, "amount");
+  if (amount <= 0 || event.affectedSide !== "runner") return [];
+  const candidates: EventModificationCandidate[] = [];
+  for (const cardId of runnerInstalledCardIds(state)) {
+    const definition = definitionFor(state, cardId);
+    const sources = tagPreventionSourcesForDefinition(definition);
+    sources.forEach((source, sourceIndex) => {
+      if (
+        source.kind !== "avoid_tag" ||
+        source.visibility !== "public" ||
+        !cardImplementationTagPreventionSourceCanPay(state, cardId, source)
+      )
+        return;
+      candidates.push({
+        candidateId: `card_implementation_avoid_tag_${sanitizeId(cardId)}_${sourceIndex}`,
+        eventId: event.eventId,
+        kind: "avoid",
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: definition.id,
+          label: definition.title,
+        },
+        priority: source.priority,
+        visibility: "hidden_info_barrier",
+        optional: true,
+        preventedTags: Math.min(amount, source.amount),
+        tagPreventionSourceIndex: sourceIndex,
+      });
+    });
+  }
+  return candidates;
+}
+
+function collectRuntimeTrashPreventionCandidates(
+  state: GameState,
+  event: ImminentEvent,
+): EventModificationCandidate[] {
+  const targetIds = trashTargetIdsFromEvent(event);
+  if (targetIds.length === 0 || event.affectedSide !== "runner") return [];
+  const candidates: EventModificationCandidate[] = [];
+  for (const cardId of runnerInstalledCardIds(state)) {
+    const definition = definitionFor(state, cardId);
+    const sources = trashPreventionSourcesForDefinition(definition);
+    sources.forEach((source, sourceIndex) => {
+      if (
+        source.kind !== "prevent_installed_card_trash" ||
+        source.visibility !== "public" ||
+        !cardImplementationTrashPreventionSourceCanPay(state, cardId, source)
+      )
+        return;
+      const protectedTargets = targetIds.filter((targetId) =>
+        cardImplementationTrashPreventionProtectsTarget(
+          state,
+          cardId,
+          source,
+          targetId,
+        ),
+      );
+      const preventedTrashTargetIds =
+        source.mode === "one_card"
+          ? protectedTargets.slice(0, 1)
+          : protectedTargets;
+      if (preventedTrashTargetIds.length === 0) return;
+      candidates.push({
+        candidateId: `card_implementation_prevent_trash_${sanitizeId(cardId)}_${sourceIndex}_${preventedTrashTargetIds.length}`,
+        eventId: event.eventId,
+        kind: "prevent",
+        controller: "runner",
+        sourceRef: {
+          kind: "card",
+          instanceId: cardId,
+          definitionId: definition.id,
+          label: definition.title,
+        },
+        priority: source.priority,
+        visibility: "hidden_info_barrier",
+        optional: true,
+        preventedTrashTargetIds,
+        trashPreventionSourceIndex: sourceIndex,
+      });
+    });
+  }
+  return candidates;
+}
+
+function cardImplementationTagPreventionSourceCanPay(
+  state: GameState,
+  cardId: CardInstanceId,
+  source: CardTagPreventionSourceImplementation,
+): boolean {
+  if (!runnerInstalledCardIds(state).includes(cardId)) return false;
+  if (source.cost.kind === "trash_source") return true;
+  return state.runner.credits >= source.cost.amount;
+}
+
+function cardImplementationTrashPreventionSourceCanPay(
+  state: GameState,
+  cardId: CardInstanceId,
+  source: CardTrashPreventionSourceImplementation,
+): boolean {
+  if (!runnerInstalledCardIds(state).includes(cardId)) return false;
+  if (source.cost.kind === "trash_source") return true;
+  return state.runner.credits >= source.cost.amount;
+}
+
+function cardImplementationTrashPreventionProtectsTarget(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  source: CardTrashPreventionSourceImplementation,
+  targetCardId: CardInstanceId,
+): boolean {
+  if (source.excludesSelf === true && sourceCardId === targetCardId)
+    return false;
+  if (!runnerInstalledCardIds(state).includes(targetCardId)) return false;
+  const targetDefinition = definitionFor(state, targetCardId);
+  return source.protectsCardTypes.includes(
+    targetDefinition.type as Extract<CardType, "program" | "hardware">,
+  );
 }
 
 function collectHarnessDamagePreventionCandidates(
@@ -15776,7 +16061,11 @@ function eventModificationChoice(
       id: "pass",
       label: diplomaticImmunityCancel
         ? "1 Agenda-Punkt zahlen und Prevention canceln"
-        : "Nicht verhindern",
+        : event.eventType === "add_tag"
+          ? "Tag nicht vermeiden"
+          : event.eventType === "runner_installed_trash"
+            ? "Trash nicht verhindern"
+            : "Nicht verhindern",
       publicLabel: "Event Modification",
     },
     {
@@ -15784,9 +16073,13 @@ function eventModificationChoice(
       label:
         diplomaticImmunityCancel
           ? "Diplomatic Immunity wirken lassen"
-          : candidate.sourceRef.kind === "card"
-          ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
-          : `${candidate.preventAmount ?? amount} Schaden verhindern`,
+          : event.eventType === "add_tag"
+            ? `${candidate.sourceRef.label}: ${candidate.preventedTags ?? 1} Tag vermeiden`
+            : event.eventType === "runner_installed_trash"
+              ? `${candidate.sourceRef.label}: ${candidate.preventedTrashTargetIds?.length ?? 1} Trash verhindern`
+              : candidate.sourceRef.kind === "card"
+                ? `${candidate.sourceRef.label}: ${candidate.preventAmount ?? amount} Schaden verhindern`
+                : `${candidate.preventAmount ?? amount} Schaden verhindern`,
       publicLabel: "Event Modification",
     },
   ];
@@ -15826,6 +16119,35 @@ function resolveEventModificationChoice(
     redactedKind: "event_modification",
   };
   if (selected === "pass") {
+    if (event.eventType === "add_tag") {
+      resolveAddTagImminentEvent(state, event, legalAction);
+      legalAction.payload = {
+        ...basePayload,
+        ...(legalAction.payload ?? {}),
+        eventModificationDecision: "pass",
+        eventModificationOutcome: "original_resolved",
+        originalAmount: numberPayload(event, "amount"),
+      };
+      clearEventModificationState(state);
+      return;
+    }
+    if (event.eventType === "runner_installed_trash") {
+      const summary = resolveRunnerInstalledTrashImminentEvent(
+        state,
+        event,
+        legalAction,
+        [],
+      );
+      legalAction.payload = {
+        ...basePayload,
+        ...(legalAction.payload ?? {}),
+        eventModificationDecision: "pass",
+        eventModificationOutcome: "original_resolved",
+        originalAmount: summary.originalCount,
+      };
+      clearEventModificationState(state);
+      return;
+    }
     const diplomaticImmunityCancel =
       window.candidates[0]?.sourceRef.definitionId ===
         DIPLOMATIC_IMMUNITY_DAMAGE_PREVENTION_CARD_ID &&
@@ -15928,10 +16250,81 @@ function resolveEventModificationChoice(
   );
   if (!candidate)
     throw new Error("Dieser Event-Modification-Kandidat ist nicht legal.");
-  if (candidate.eventId !== event.eventId || candidate.kind !== "prevent")
+  if (
+    candidate.eventId !== event.eventId ||
+    !(
+      candidate.kind === "prevent" ||
+      (event.eventType === "add_tag" && candidate.kind === "avoid")
+    )
+  )
     throw new Error(
       "Dieser Event-Modification-Kandidat passt nicht zum Fenster.",
     );
+  if (event.eventType === "add_tag") {
+    revalidateTagPreventionCandidateSource(state, candidate);
+    const originalAmount = numberPayload(event, "amount");
+    const preventedTags = Math.min(
+      candidate.preventedTags ?? 0,
+      originalAmount,
+    );
+    const preventionCostPayload = applyRuntimeTagPreventionCost(
+      state,
+      candidate,
+      preventedTags,
+    );
+    resolveAddTagImminentEvent(state, event, legalAction, preventedTags);
+    legalAction.payload = {
+      ...basePayload,
+      ...(legalAction.payload ?? {}),
+      eventModificationDecision: "apply",
+      eventModificationOutcome:
+        originalAmount === preventedTags ? "avoided" : "partially_avoided",
+      candidateId: candidate.candidateId,
+      originalAmount,
+      preventedTags,
+      finalAmount: Math.max(0, originalAmount - preventedTags),
+      sourceKind: candidate.sourceRef.kind,
+      ...(candidate.sourceRef.definitionId
+        ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+        : {}),
+      ...preventionCostPayload,
+    };
+    clearEventModificationState(state);
+    return;
+  }
+  if (event.eventType === "runner_installed_trash") {
+    revalidateTrashPreventionCandidateSource(state, candidate, event);
+    const preventedTrashTargetIds = candidate.preventedTrashTargetIds ?? [];
+    const preventionCostPayload = applyRuntimeTrashPreventionCost(
+      state,
+      candidate,
+      preventedTrashTargetIds.length,
+    );
+    const summary = resolveRunnerInstalledTrashImminentEvent(
+      state,
+      event,
+      legalAction,
+      preventedTrashTargetIds,
+    );
+    legalAction.payload = {
+      ...basePayload,
+      ...(legalAction.payload ?? {}),
+      eventModificationDecision: "apply",
+      eventModificationOutcome:
+        summary.trashedCount === 0 ? "prevented" : "partially_prevented",
+      candidateId: candidate.candidateId,
+      originalAmount: summary.originalCount,
+      preventedTrashCount: summary.preventedCount,
+      trashedCount: summary.trashedCount,
+      sourceKind: candidate.sourceRef.kind,
+      ...(candidate.sourceRef.definitionId
+        ? { sourceDefinitionId: candidate.sourceRef.definitionId }
+        : {}),
+      ...preventionCostPayload,
+    };
+    clearEventModificationState(state);
+    return;
+  }
   revalidateDamagePreventionCandidateSource(state, candidate);
   const originalAmount = numberPayload(event, "amount");
   const preventedAmount = Math.min(
@@ -16187,6 +16580,87 @@ function resolveDamageImminentEvent(
   });
 }
 
+function trashTargetIdsFromEvent(event: ImminentEvent): CardInstanceId[] {
+  const raw = stringPayload(event, "targetCardIds");
+  if (!raw) return [];
+  return raw.split(",").filter((cardId) => cardId.length > 0);
+}
+
+function createRunnerInstalledTrashImminentEvent(
+  state: GameState,
+  targetCardIds: CardInstanceId[],
+  source: string,
+): ImminentEvent {
+  return {
+    eventId: `imminent_runner_trash_${state.stateVersion + 1}_${sanitizeId(source)}`,
+    eventType: "runner_installed_trash",
+    source: { kind: "game_rule" },
+    controller: "corp",
+    affectedSide: "runner",
+    payload: {
+      targetCardIds: targetCardIds.join(","),
+      targetDefinitionIds: targetCardIds
+        .map((cardId) => definitionFor(state, cardId).id)
+        .join(","),
+      amount: targetCardIds.length,
+      source,
+    },
+    visibility: "hidden_info_barrier",
+    createdAtStateVersion: state.stateVersion + 1,
+  };
+}
+
+function openRunnerInstalledTrashPreventionWindow(
+  state: GameState,
+  legalAction: LegalAction,
+  targetCardIds: CardInstanceId[],
+  source: string,
+): boolean {
+  const installedTargets = targetCardIds.filter((cardId) =>
+    runnerInstalledCardIds(state).includes(cardId),
+  );
+  if (installedTargets.length === 0) return false;
+  const event = createRunnerInstalledTrashImminentEvent(
+    state,
+    installedTargets,
+    source,
+  );
+  return openEventModificationWindow(state, event, legalAction);
+}
+
+function resolveRunnerInstalledTrashImminentEvent(
+  state: GameState,
+  event: ImminentEvent,
+  legalAction: LegalAction,
+  preventedTargetIds: CardInstanceId[],
+): { originalCount: number; preventedCount: number; trashedCount: number } {
+  if (event.eventType !== "runner_installed_trash")
+    throw new Error("Nur Runner-Trash-ImminentEvents koennen Trash aufloesen.");
+  const targetIds = trashTargetIdsFromEvent(event);
+  const prevented = new Set(preventedTargetIds);
+  const trashedDefinitionIds: CardDefinitionId[] = [];
+  let trashedCount = 0;
+  for (const targetId of targetIds) {
+    if (prevented.has(targetId)) continue;
+    if (!runnerInstalledCardIds(state).includes(targetId)) continue;
+    trashedDefinitionIds.push(definitionFor(state, targetId).id);
+    trashRunnerInstalledCardToHeap(state, targetId, legalAction);
+    trashedCount += 1;
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    preventedTrashCount: preventedTargetIds.length,
+    trashedCount,
+    trashedCardDefinitionId: trashedDefinitionIds[0] ?? "",
+    trashedCardDefinitionIds: trashedDefinitionIds.join(","),
+  };
+  return {
+    originalCount: targetIds.length,
+    preventedCount: preventedTargetIds.length,
+    trashedCount,
+  };
+}
+
 function clearEventModificationState(state: GameState): void {
   delete state.pendingChoice;
   delete state.eventModificationWindow;
@@ -16314,6 +16788,13 @@ function applyRuntimeDamagePreventionCost(
         trashedCardDefinitionId: definition.id,
       };
     }
+    if (implementationSource.cost.kind === "credit") {
+      spendCredits(state, "runner", implementationSource.cost.amount);
+      return {
+        paidCredits: implementationSource.cost.amount,
+        runnerCreditsAfter: state.runner.credits,
+      };
+    }
     const { counterType, amount, trashSourceWhenEmpty } =
       implementationSource.cost;
     if (cardCounter(state, sourceCardId, counterType) < amount)
@@ -16349,6 +16830,72 @@ function applyRuntimeDamagePreventionCost(
   };
 }
 
+function applyRuntimeTagPreventionCost(
+  state: GameState,
+  candidate: EventModificationCandidate,
+  preventedAmount: number,
+): Record<string, unknown> {
+  if (
+    preventedAmount <= 0 ||
+    candidate.sourceRef.kind !== "card" ||
+    !candidate.sourceRef.instanceId
+  )
+    return {};
+  const sourceCardId = candidate.sourceRef.instanceId;
+  const definition = definitionFor(state, sourceCardId);
+  const source = cardImplementationTagPreventionSourceForCandidate(
+    definition,
+    candidate,
+  );
+  if (!source) return {};
+  if (source.cost.kind === "trash_source") {
+    trashRunnerInstalledCardToHeap(state, sourceCardId);
+    return {
+      sourceTrashed: true,
+      trashedCardDefinitionId: definition.id,
+    };
+  }
+  spendCredits(state, "runner", source.cost.amount);
+  return {
+    paidCredits: source.cost.amount,
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
+function applyRuntimeTrashPreventionCost(
+  state: GameState,
+  candidate: EventModificationCandidate,
+  preventedCount: number,
+): Record<string, unknown> {
+  if (
+    preventedCount <= 0 ||
+    candidate.sourceRef.kind !== "card" ||
+    !candidate.sourceRef.instanceId
+  )
+    return {};
+  const sourceCardId = candidate.sourceRef.instanceId;
+  const definition = definitionFor(state, sourceCardId);
+  const source = cardImplementationTrashPreventionSourceForCandidate(
+    definition,
+    candidate,
+  );
+  if (!source) return {};
+  if (source.cost.kind === "trash_source") {
+    trashRunnerInstalledCardToHeap(state, sourceCardId);
+    return {
+      sourceTrashed: true,
+      trashedCardDefinitionId: definition.id,
+    };
+  }
+  spendCredits(state, "runner", source.cost.amount);
+  returnRunnerInstalledCardToGrip(state, sourceCardId);
+  return {
+    paidCredits: source.cost.amount,
+    returnedSourceToGrip: true,
+    runnerCreditsAfter: state.runner.credits,
+  };
+}
+
 function cardImplementationDamagePreventionSourceForCandidate(
   definition: CardDefinition,
   candidate: EventModificationCandidate,
@@ -16361,6 +16908,34 @@ function cardImplementationDamagePreventionSourceForCandidate(
   )
     return undefined;
   return damagePreventionSourcesForDefinition(definition)[sourceIndex];
+}
+
+function cardImplementationTagPreventionSourceForCandidate(
+  definition: CardDefinition,
+  candidate: EventModificationCandidate,
+): CardTagPreventionSourceImplementation | undefined {
+  const sourceIndex = candidate.tagPreventionSourceIndex;
+  if (
+    typeof sourceIndex !== "number" ||
+    !Number.isInteger(sourceIndex) ||
+    sourceIndex < 0
+  )
+    return undefined;
+  return tagPreventionSourcesForDefinition(definition)[sourceIndex];
+}
+
+function cardImplementationTrashPreventionSourceForCandidate(
+  definition: CardDefinition,
+  candidate: EventModificationCandidate,
+): CardTrashPreventionSourceImplementation | undefined {
+  const sourceIndex = candidate.trashPreventionSourceIndex;
+  if (
+    typeof sourceIndex !== "number" ||
+    !Number.isInteger(sourceIndex) ||
+    sourceIndex < 0
+  )
+    return undefined;
+  return trashPreventionSourcesForDefinition(definition)[sourceIndex];
 }
 
 function revalidateDamagePreventionCandidateSource(
@@ -16394,12 +16969,155 @@ function revalidateDamagePreventionCandidateSource(
     throw new Error("Die Prevention-Quelle kann die Kosten nicht mehr zahlen.");
 }
 
+function revalidateTagPreventionCandidateSource(
+  state: GameState,
+  candidate: EventModificationCandidate,
+): void {
+  if (candidate.sourceRef.kind !== "card" || !candidate.sourceRef.instanceId)
+    throw new Error("Die Tag-Prevention-Quelle fehlt.");
+  const sourceCardId = candidate.sourceRef.instanceId;
+  if (!runnerInstalledCardIds(state).includes(sourceCardId))
+    throw new Error("Die Tag-Prevention-Quelle ist nicht mehr installiert.");
+  if (
+    candidate.sourceRef.definitionId &&
+    definitionFor(state, sourceCardId).id !== candidate.sourceRef.definitionId
+  )
+    throw new Error("Die Tag-Prevention-Quelle passt nicht mehr.");
+  const source = cardImplementationTagPreventionSourceForCandidate(
+    definitionFor(state, sourceCardId),
+    candidate,
+  );
+  if (
+    !source ||
+    !cardImplementationTagPreventionSourceCanPay(state, sourceCardId, source)
+  )
+    throw new Error("Die Tag-Prevention-Quelle kann nicht mehr zahlen.");
+}
+
+function revalidateTrashPreventionCandidateSource(
+  state: GameState,
+  candidate: EventModificationCandidate,
+  event: ImminentEvent,
+): void {
+  if (candidate.sourceRef.kind !== "card" || !candidate.sourceRef.instanceId)
+    throw new Error("Die Trash-Prevention-Quelle fehlt.");
+  const sourceCardId = candidate.sourceRef.instanceId;
+  if (!runnerInstalledCardIds(state).includes(sourceCardId))
+    throw new Error("Die Trash-Prevention-Quelle ist nicht mehr installiert.");
+  if (
+    candidate.sourceRef.definitionId &&
+    definitionFor(state, sourceCardId).id !== candidate.sourceRef.definitionId
+  )
+    throw new Error("Die Trash-Prevention-Quelle passt nicht mehr.");
+  const source = cardImplementationTrashPreventionSourceForCandidate(
+    definitionFor(state, sourceCardId),
+    candidate,
+  );
+  if (
+    !source ||
+    !cardImplementationTrashPreventionSourceCanPay(state, sourceCardId, source)
+  )
+    throw new Error("Die Trash-Prevention-Quelle kann nicht mehr zahlen.");
+  const legalTargets = new Set(trashTargetIdsFromEvent(event));
+  const protectedIds = candidate.preventedTrashTargetIds ?? [];
+  if (
+    protectedIds.length === 0 ||
+    protectedIds.some(
+      (targetId) =>
+        !legalTargets.has(targetId) ||
+        !cardImplementationTrashPreventionProtectsTarget(
+          state,
+          sourceCardId,
+          source,
+          targetId,
+        ),
+    )
+  )
+    throw new Error("Die Trash-Prevention-Ziele sind nicht mehr gueltig.");
+}
+
 function sanitizeId(value: string): string {
   return value.replace(/[^a-zA-Z0-9_.-]+/g, "_").slice(0, 80);
 }
 
 function requireRunnerTagged(state: GameState): void {
   if (state.runner.tags <= 0) throw new Error("Der Runner ist nicht getaggt.");
+}
+
+function removeRunnerTagsForCardImplementation(
+  state: GameState,
+  mode: "amount" | "up_to_amount" | "all",
+  amount?: number,
+): {
+  removedTags: number;
+  runnerTagsAfter: number;
+  publicPayload: Record<string, string | number | boolean>;
+} {
+  const maxAmount =
+    mode === "all" ? state.runner.tags : Math.max(0, Math.floor(amount ?? 0));
+  const removedTags = Math.min(state.runner.tags, maxAmount);
+  state.runner.tags = Math.max(0, state.runner.tags - removedTags);
+  return {
+    removedTags,
+    runnerTagsAfter: state.runner.tags,
+    publicPayload: {
+      removedTags,
+      runnerTagsAfter: state.runner.tags,
+    },
+  };
+}
+
+function addRunnerTagAvoidanceCredit(
+  state: GameState,
+  amount: 1,
+): {
+  amount: number;
+  publicPayload: Record<string, string | number | boolean>;
+} {
+  state.runnerTagAvoidanceCredits =
+    Math.max(0, Math.floor(state.runnerTagAvoidanceCredits ?? 0)) + amount;
+  return {
+    amount,
+    publicPayload: {
+      avoidNextTag: true,
+      tagAvoidanceCreditsAfter: state.runnerTagAvoidanceCredits,
+    },
+  };
+}
+
+function startReturnSourceToGripIfPaidChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceCardId: CardInstanceId,
+  amount: number,
+): {
+  choiceOpened: boolean;
+  publicPayload: Record<string, string | number | boolean>;
+} {
+  if (state.runner.credits < amount) {
+    return {
+      choiceOpened: false,
+      publicPayload: {
+        returnToGripCost: amount,
+        returnToGripChoiceOpened: false,
+      },
+    };
+  }
+  startOpenEndedMileageProgramReturnChoice(state, sourceCardId);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1922RunnerEventAbility: "remove_tag_optional_return",
+    returnToGripCost: amount,
+    returnToGripChoiceOpened: true,
+  };
+  return {
+    choiceOpened: true,
+    publicPayload: {
+      v1922RunnerEventAbility: "remove_tag_optional_return",
+      returnToGripCost: amount,
+      returnToGripChoiceOpened: true,
+    },
+  };
 }
 
 function runnerStoleAgendaLastTurn(state: GameState): boolean {
@@ -16797,8 +17515,8 @@ function resolvePowerGridOverloadChoice(
         "Power Grid Overload darf dieses Hardware-Ziel nicht trashen.",
       );
   }
-  trashPowerGridOverloadHardware(state, selectedIds, legalAction);
   delete state.pendingChoice;
+  trashPowerGridOverloadHardware(state, selectedIds, legalAction);
 }
 
 function trashPowerGridOverloadHardware(
@@ -16809,6 +17527,15 @@ function trashPowerGridOverloadHardware(
   const definitionIds = hardwareIds.map(
     (cardId) => definitionFor(state, cardId).id,
   );
+  if (
+    openRunnerInstalledTrashPreventionWindow(
+      state,
+      legalAction,
+      hardwareIds,
+      "power_grid_overload",
+    )
+  )
+    return;
   for (const cardId of hardwareIds) {
     if (!powerGridOverloadEligibleHardwareIds(state).includes(cardId))
       throw new Error(
@@ -21577,6 +22304,8 @@ function resolveOpenEndedMileageProgramReturnChoice(
   if (selectedOptionId === "pay_1_return_to_grip") {
     if (!state.runner.heap.includes(sourceCardId))
       throw new Error("Open-Ended Mileage Program liegt nicht im Heap.");
+    if (state.runner.credits < 1)
+      throw new Error("Der Runner kann Open-Ended Mileage Program nicht bezahlen.");
     spendCredits(state, "runner", 1);
     removeFromAllZones(state, sourceCardId);
     state.runner.grip.push(sourceCardId);

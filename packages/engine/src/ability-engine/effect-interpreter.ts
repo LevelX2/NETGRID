@@ -44,6 +44,15 @@ export type CardEffectExecutionContext = {
     counterType: Extract<CounterType, "ablative" | "trauma">,
     amount: number,
   ) => CardEffectCounterResult;
+  removeRunnerTags?: (
+    mode: "amount" | "up_to_amount" | "all",
+    amount?: number,
+  ) => CardEffectRemoveTagsResult;
+  avoidNextTag?: (amount: 1) => CardEffectAvoidTagResult;
+  returnSourceToGripIfPaid?: (
+    sourceCardId: CardInstanceId,
+    amount: number,
+  ) => CardEffectReturnSourceResult;
   takeHostedCredits?: (
     sourceCardId: CardInstanceId,
     recipient: Side,
@@ -157,6 +166,22 @@ export type CardEffectCounterResult = {
   amount: number;
   counterType: Extract<CounterType, "ablative" | "trauma">;
   countersAfter: number;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectRemoveTagsResult = {
+  removedTags: number;
+  runnerTagsAfter: number;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectAvoidTagResult = {
+  amount: number;
+  publicPayload?: Record<string, string | number | boolean>;
+};
+
+export type CardEffectReturnSourceResult = {
+  choiceOpened: boolean;
   publicPayload?: Record<string, string | number | boolean>;
 };
 
@@ -522,6 +547,79 @@ export function executeCardImplementationEffects(
             : {}),
           ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
         });
+        return;
+      }
+      case "remove_tags": {
+        assertPublicVisibility("remove_tags", effect.visibility);
+        if (effect.recipient !== "runner")
+          throw new Error("remove_tags effect recipient must be runner.");
+        if (effect.mode !== "amount" && effect.mode !== "up_to_amount" && effect.mode !== "all")
+          throw new Error("remove_tags effect mode is invalid.");
+        if (effect.mode !== "all") {
+          if (effect.amount === undefined)
+            throw new Error("remove_tags amount modes require an amount.");
+          assertPositiveIntegerAmount("remove_tags", effect.amount);
+        }
+        if (!context.removeRunnerTags)
+          throw new Error(
+            "remove_tags effect requires a removeRunnerTags execution context.",
+          );
+        const removeResult = context.removeRunnerTags(
+          effect.mode,
+          effect.amount,
+        );
+        publicPayload.removedTags =
+          Number(publicPayload.removedTags ?? 0) + removeResult.removedTags;
+        publicPayload.runnerTagsAfter = removeResult.runnerTagsAfter;
+        resolvedEffects.push({
+          effectId: publicEffectId(context, index, "remove_tags"),
+          kind: "remove_tags",
+          visibility: effect.visibility,
+          side: "runner",
+          amount: removeResult.removedTags,
+          reason: effectReason(context),
+          runnerTagsAfter: removeResult.runnerTagsAfter,
+          ...(context.sourceDefinitionId
+            ? { sourceDefinitionId: context.sourceDefinitionId }
+            : {}),
+          ...(context.sourceTitle ? { sourceTitle: context.sourceTitle } : {}),
+        });
+        return;
+      }
+      case "avoid_next_tag": {
+        assertPublicVisibility("avoid_next_tag", effect.visibility);
+        if (effect.recipient !== "runner")
+          throw new Error("avoid_next_tag effect recipient must be runner.");
+        if (effect.amount !== 1)
+          throw new Error("avoid_next_tag supports only amount 1.");
+        if (!context.avoidNextTag)
+          throw new Error(
+            "avoid_next_tag effect requires an avoidNextTag execution context.",
+          );
+        const avoidResult = context.avoidNextTag(effect.amount);
+        mergePublicPayload(publicPayload, avoidResult.publicPayload);
+        publicPayload.preventedTagsNext =
+          Number(publicPayload.preventedTagsNext ?? 0) + avoidResult.amount;
+        return;
+      }
+      case "return_source_to_grip_if_paid": {
+        assertPublicVisibility(
+          "return_source_to_grip_if_paid",
+          effect.visibility,
+        );
+        assertPositiveIntegerAmount(
+          "return_source_to_grip_if_paid",
+          effect.amount,
+        );
+        if (!context.returnSourceToGripIfPaid)
+          throw new Error(
+            "return_source_to_grip_if_paid requires a returnSourceToGripIfPaid execution context.",
+          );
+        const returnResult = context.returnSourceToGripIfPaid(
+          context.sourceCardId,
+          effect.amount,
+        );
+        mergePublicPayload(publicPayload, returnResult.publicPayload);
         return;
       }
       case "add_counters_to_source": {

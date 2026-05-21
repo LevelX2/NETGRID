@@ -305,7 +305,11 @@ export type EffectSource =
   | { kind: "core_rule"; ruleId: string }
   | { kind: "system"; systemId: string };
 
-export type ImminentEventType = "damage" | "add_tag" | "test_interrupt";
+export type ImminentEventType =
+  | "damage"
+  | "add_tag"
+  | "runner_installed_trash"
+  | "test_interrupt";
 export type EventModificationKind = "prevent" | "avoid" | "interrupt";
 export type ReplacementEventType = ImminentEventType | "prevent_damage";
 
@@ -341,6 +345,10 @@ export type EventModificationCandidate = {
   optional: boolean;
   preventAmount?: number;
   preventionSourceIndex?: number;
+  preventedTags?: number;
+  tagPreventionSourceIndex?: number;
+  preventedTrashTargetIds?: CardInstanceId[];
+  trashPreventionSourceIndex?: number;
   bypassCostPerDamage?: number;
   bypassPaymentSide?: Side;
 };
@@ -947,6 +955,7 @@ export type GameState = {
   sneakPreviewTemporaryInstalls?: SneakPreviewTemporaryInstall[];
   eventModificationWindow?: EventModificationWindow;
   replacementWindow?: ReplacementWindow;
+  runnerTagAvoidanceCredits?: number;
   eventModificationHarness?: EventModificationTestHarness;
   specialZoneHarness?: SpecialZoneTestHarness;
   deckMetadata?: {

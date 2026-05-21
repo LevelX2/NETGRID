@@ -68,6 +68,9 @@ const IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION =
 const IMPLEMENTED_DAMAGE_PREVENTION_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -95,6 +98,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/force-shield.ts",
   "onr_v1_061_shield":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
+  "onr_v1_038_joan-of-arc":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/joan-of-arc.ts",
   "onr_v1_119_arasaka-portable-prototype":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/arasaka-portable-prototype.ts",
   "onr_v1_120_armadillo-armored-road-home":
@@ -125,6 +130,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/dermatech-bodyplating.ts",
   "onr_v1_128_green-knight-surge-buffers":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/green-knight-surge-buffers.ts",
+  "onr_v1_135_nasuko-cycle":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/nasuko-cycle.ts",
   "onr_v1_136_pandoras-deck":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/pandoras-deck.ts",
   "onr_v1_137_parraline-5750":
@@ -173,6 +180,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
   "onr_v1_099_mantis-fixer-at-large":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/mantis-fixer-at-large.ts",
+  "onr_v1_102_open-ended-mileage-program":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/open-ended-mileage-program.ts",
   "onr_v1_105_priority-wreck":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
   "onr_v1_110_sneak-preview":
@@ -191,6 +200,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/temple-microcode-outlet.ts",
   "onr_v1_118_weather-to-finance-pipe":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/weather-to-finance-pipe.ts",
+  "onr_v1_116_total-genetic-retrofit":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/total-genetic-retrofit.ts",
   "onr_v1_024_expert-schedule-analyzer":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/expert-schedule-analyzer.ts",
   "onr_v1_042_mouse":
@@ -221,8 +232,16 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/hells-run.ts",
   "onr_v1_165_junkyard-bbs":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/junkyard-bbs.ts",
+  "onr_v1_158_danshis-second-id":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/danshis-second-id.ts",
+  "onr_v1_161_fall-guy":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/fall-guy.ts",
+  "onr_v1_167_leland-corporate-bodyguard":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/leland-corporate-bodyguard.ts",
   "onr_v1_169_n-e-t-o":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/n-e-t-o.ts",
+  "onr_v1_170_nomad-allies":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/nomad-allies.ts",
   "onr_v1_175_ronin-around":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/ronin-around.ts",
   "onr_v1_174_rigged-investments":
@@ -237,6 +256,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/top-runners-conference.ts",
   "onr_v1_183_technician-lover":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/technician-lover.ts",
+  "onr_v1_186_umbrella-policy":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/umbrella-policy.ts",
   "onr_v1_189_artificial-security-directors":
     "packages/engine/src/card-implementations/onr-v1/corp/agendas/artificial-security-directors.ts",
   "onr_v1_191_black-ice-quality-assurance":
@@ -638,6 +659,18 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for damage-prevention source behavior.",
     );
     currentLocations.add(IMPLEMENTED_DAMAGE_PREVENTION_LOCATION);
+  }
+  if (implementation.tagPreventionSources?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for tag-prevention source behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION);
+  }
+  if (implementation.trashPreventionSources?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for installed Runner trash-prevention source behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION);
   }
 
   return {

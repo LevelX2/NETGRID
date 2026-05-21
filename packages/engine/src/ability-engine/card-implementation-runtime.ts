@@ -27,10 +27,13 @@ import {
   type CardEffectDrawCardsResult,
   type CardEffectHostedCreditsResult,
   type CardEffectCounterResult,
+  type CardEffectAvoidTagResult,
   type CardEffectHiddenInfoResult,
   type CardEffectMakeRunOptions,
   type CardEffectMakeRunResult,
   type CardEffectPrivateLookResult,
+  type CardEffectRemoveTagsResult,
+  type CardEffectReturnSourceResult,
   type CardEffectTrashSourceResult,
   type CardEffectAdvancementChoiceResult,
 } from "./effect-interpreter";
@@ -268,6 +271,18 @@ export type CardImplementationRuntimeDependencies = {
     counterType: Extract<CounterType, "ablative" | "trauma">,
     amount: number,
   ) => CardEffectCounterResult;
+  removeRunnerTags: (
+    state: GameState,
+    mode: "amount" | "up_to_amount" | "all",
+    amount?: number,
+  ) => CardEffectRemoveTagsResult;
+  avoidNextTag: (state: GameState, amount: 1) => CardEffectAvoidTagResult;
+  returnSourceToGripIfPaid: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+    amount: number,
+  ) => CardEffectReturnSourceResult;
   takeHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -1000,6 +1015,11 @@ function activatedAbilityLegalActionCosts(
         throw new Error(
           "Activated CardImplementation advancement counter cost must use source.",
         );
+    } else if (cost.kind === "trash_source") {
+      if (cost.amount !== 1)
+        throw new Error(
+          "Activated CardImplementation trash_source cost amount must be 1.",
+        );
     } else {
       const unknownCost = cost as { kind?: string };
       throw new Error(
@@ -1020,6 +1040,12 @@ function advancementCounterCostForActivatedAbility(
   return ability.costs
     .filter((cost) => cost.kind === "advancement_counter")
     .reduce((sum, cost) => sum + assertActivatedCostAmount(cost), 0);
+}
+
+function hasTrashSourceCostForActivatedAbility(
+  ability: ActivatedCardAbilityImplementation,
+): boolean {
+  return ability.costs.some((cost) => cost.kind === "trash_source");
 }
 
 function validateActivatedAbilityCosts(
@@ -1056,6 +1082,16 @@ function canPayActivatedCardImplementationCosts(
     if (!source || source.advancementCounters < advancementCounterCost)
       return false;
   }
+  if (hasTrashSourceCostForActivatedAbility(ability)) {
+    const source = state.cardInstances[cardId];
+    if (
+      !source ||
+      source.controller !== "runner" ||
+      source.zone.side !== "runner" ||
+      source.zone.zone !== "rig"
+    )
+      return false;
+  }
   return true;
 }
 
@@ -1080,6 +1116,11 @@ function payActivatedCardImplementationCosts(
       throw new Error("Die Quelle hat nicht genug Advancement-Counter.");
     source.advancementCounters -= advancementCounterCost;
   }
+  if (hasTrashSourceCostForActivatedAbility(ability)) {
+    const trashResult = deps.trashSource(state, cardId);
+    if (!trashResult.sourceTrashed)
+      throw new Error("Die Quelle konnte nicht getrasht werden.");
+  }
 }
 
 function activatedAbilityPayload(
@@ -1098,6 +1139,9 @@ function activatedAbilityPayload(
           cardImplementationAdvancementCounterCost:
             advancementCounterCostForActivatedAbility(ability),
         }
+      : {}),
+    ...(hasTrashSourceCostForActivatedAbility(ability)
+      ? { cardImplementationTrashSourceCost: true }
       : {}),
   };
 }
@@ -1557,6 +1601,16 @@ export function resolveActivatedCardImplementationAbility(
         deps.addHostedCredits(state, sourceCardId, amount),
       addCountersToSource: (sourceCardId, counterType, amount) =>
         deps.addCountersToSource(state, sourceCardId, counterType, amount),
+      removeRunnerTags: (mode, amount) =>
+        deps.removeRunnerTags(state, mode, amount),
+      avoidNextTag: (amount) => deps.avoidNextTag(state, amount),
+      returnSourceToGripIfPaid: (sourceCardId, amount) =>
+        deps.returnSourceToGripIfPaid(
+          state,
+          legalAction,
+          sourceCardId,
+          amount,
+        ),
       takeHostedCredits: (sourceCardId, side, amount) =>
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
@@ -1766,6 +1820,11 @@ export function executeOnPlayCardImplementationAbility(
         ),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
+      removeRunnerTags: (mode, amount) =>
+        deps.removeRunnerTags(state, mode, amount),
+      avoidNextTag: (amount) => deps.avoidNextTag(state, amount),
+      returnSourceToGripIfPaid: (sourceCardId, amount) =>
+        deps.returnSourceToGripIfPaid(state, legalAction, sourceCardId, amount),
       takeHostedCredits: (sourceCardId, side, amount) =>
         deps.takeHostedCredits(state, sourceCardId, side, amount),
       trashSourceWhenEmpty: (sourceCardId) =>
