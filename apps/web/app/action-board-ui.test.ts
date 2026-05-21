@@ -207,7 +207,7 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(basic)).toBe("Credit nehmen");
     expect(actionButtonLabel(privatePolice)).toBe("Private Cybernet Police: Trace 5 starten");
     expect(actionMatchesContext(seeya, { kind: "card", id: "seeya_1", label: "SeeYa" })).toBe(true);
-    expect(contextualCardActionLabel(seeya)).toBe("SeeYa: Karte in HQ expose");
+    expect(contextualCardActionLabel(seeya)).toBe("Karte in HQ expose");
   });
 
   it("removes redundant installed asset names from card-context action labels", () => {
@@ -248,6 +248,16 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(actionButtonLabel(corporateCoup)).toBe("Corporate Coup: 3 Credits aus Coup-Counter");
     expect(contextualCardActionLabel(corporateCoup)).toBe("3 Credits nehmen");
+  });
+
+  it("drops the card-name prefix for V1.9.11 hidden-zone card menu actions", () => {
+    const aujourdOui = legalAction("runner", "gain_credit", "aujourdoui_1", "Aujourd'Oui: Top 5 nach Programmen prüfen", {
+      cardId: "aujourdoui_1",
+      v1911HiddenZoneAbility: "search_stack_program_to_grip"
+    });
+
+    expect(actionButtonLabel(aujourdOui)).toBe("Aujourd'Oui: Top 5 nach Programmen prüfen");
+    expect(contextualCardActionLabel(aujourdOui)).toBe("Top 5 nach Programmen prüfen");
   });
 
   it("labels encounter breaker actions against the current ICE", () => {

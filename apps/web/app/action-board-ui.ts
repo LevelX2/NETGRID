@@ -361,6 +361,9 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
+  if (typeof action.payload?.v1911HiddenZoneAbility === "string") {
+    return stripActionSourcePrefix(action.label);
+  }
   if (typeof action.payload?.v1917AssetAbility === "string") {
     switch (action.payload.v1917AssetAbility) {
       case "gain_credits": {

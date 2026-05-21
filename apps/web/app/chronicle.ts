@@ -427,6 +427,22 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "v1911_aujourdoui_top5") {
+        const revealedTitles = titlesForDefinitionIds(stringValue(payload.publicRevealDefinitionIds));
+        const selectedCount = numberValue(payload.selectedCount) ?? revealedTitles.length;
+        const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "Aujourd'Oui";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+        title =
+          selectedCount > 0
+            ? phrase(subject, `${source} genutzt, ${revealedTitles.length > 0 ? revealedTitles.join(", ") : cardCountText(selectedCount)} vorgezeigt und in den Grip genommen`)
+            : phrase(subject, `${source} genutzt und keine Programme aus den obersten 5 genommen`);
+        description = payload.shuffled === true ? "Der Stack wurde danach gemischt." : undefined;
+        chips.push(source, "Top 5", selectedCount === 1 ? "1 Programm" : `${selectedCount} Programme`, ...(selectedCount > 0 ? ["Vorgezeigt", "Grip"] : ["Keine Auswahl"]), ...(payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       if (hiddenZoneAction === "v1911_short_circuit_search") {
         const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
         const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "The Short Circuit";

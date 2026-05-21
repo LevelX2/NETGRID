@@ -15953,6 +15953,122 @@ describe("V1.9.11 Hidden-Zone Search/Reveal/Reorder WIP", () => {
     expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
   });
 
+  it("uses Aujourd'Oui as a paid top-five program choice and removes the separate top-card reveal action", () => {
+    let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.hiddenZone("v1911-aujourdoui-top5"));
+    state.runner.credits = 2;
+    const aujourdOuiId = installRunnerResourceForTest(
+      state,
+      "onr_v1_151_aujourdoui",
+    );
+
+    const usedIds = new Set<CardInstanceId>();
+    const putCopyOnTop = (definitionId: string): CardInstanceId => {
+      const entry = Object.entries(state.cardInstances).find(
+        ([id, card]) => card.definitionId === definitionId && !usedIds.has(id),
+      );
+      if (!entry) throw new Error(`Missing test card ${definitionId}`);
+      const id = entry[0] as CardInstanceId;
+      usedIds.add(id);
+      removeEverywhere(state, id);
+      state.runner.stack.unshift(id);
+      state.cardInstances[id] = {
+        ...state.cardInstances[id]!,
+        zone: { side: "runner", zone: "stack" },
+        faceup: true,
+        rezzed: true,
+      };
+      return id;
+    };
+
+    const outOfRangeProgramId = putCopyOnTop("simple_decoder");
+    const displayOnlyEvent3Id = putCopyOnTop("simple_economy_event");
+    putCopyOnTop("simple_economy_event");
+    const selectedFracterId = putCopyOnTop("simple_fracter");
+    const displayOnlyEventId = putCopyOnTop("simple_economy_event");
+    const selectedDecoderId = putCopyOnTop("simple_decoder");
+
+    const aujourdOuiActions = getLegalActions(state, "runner").filter(
+      (action) => action.source === aujourdOuiId,
+    );
+    expect(aujourdOuiActions).toHaveLength(1);
+    expect(new Set(aujourdOuiActions.map((action) => action.actionId)).size).toBe(
+      aujourdOuiActions.length,
+    );
+    expect(aujourdOuiActions[0]?.actionId).toContain(
+      "search_stack_program_to_grip",
+    );
+    expect(aujourdOuiActions[0]?.label).toContain("Top 5");
+    expect(
+      aujourdOuiActions.some(
+        (action) => action.payload?.v1911HiddenZoneAbility === "reveal_stack_top",
+      ),
+    ).toBe(false);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.source === aujourdOuiId &&
+        action.payload?.v1911HiddenZoneAbility === "search_stack_program_to_grip",
+    );
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(runnerChoice?.source).toContain("v1911.aujourdoui_top5");
+    expect(runnerChoice?.options).toHaveLength(5);
+    expect(
+      runnerChoice?.options.some((option) => option.value === outOfRangeProgramId),
+    ).toBe(false);
+    expect(
+      runnerChoice?.options.find((option) => option.value === displayOnlyEventId)
+        ?.selectable,
+    ).toBe(false);
+    expect(runnerChoice?.minSelections).toBe(0);
+    expect(runnerChoice?.maxSelections).toBe(2);
+    expect(runnerChoice?.stackSearchResolution).toMatchObject({
+      reveal: "public",
+      destination: "grip",
+      shuffleAfter: true,
+    });
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+
+    const decoderOptionId = runnerChoice?.options.find(
+      (option) => option.value === selectedDecoderId,
+    )?.id;
+    const fracterOptionId = runnerChoice?.options.find(
+      (option) => option.value === selectedFracterId,
+    )?.id;
+    expect(decoderOptionId).toBeDefined();
+    expect(fracterOptionId).toBeDefined();
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = applyChoices(state, "runner", [
+      String(decoderOptionId),
+      String(fracterOptionId),
+    ]);
+
+    expect(state.runner.credits).toBe(0);
+    expect(state.runner.grip).toEqual(
+      expect.arrayContaining([selectedDecoderId, selectedFracterId]),
+    );
+    expect(state.runner.stack).not.toContain(selectedDecoderId);
+    expect(state.runner.stack).not.toContain(selectedFracterId);
+    expect(state.runner.stack).toContain(outOfRangeProgramId);
+    expect(state.runner.stack).toContain(displayOnlyEvent3Id);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1911_aujourdoui_top5",
+      sourceDefinitionId: "onr_v1_151_aujourdoui",
+      selectedCount: 2,
+      publicRevealKind: "reveal",
+      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+      shuffled: true,
+    });
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
   it("limits Self-Modifying Code to ICE encounters and removes the option after the run", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.hiddenZone("v1911-smc-encounter-window"),

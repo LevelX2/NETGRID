@@ -2070,6 +2070,29 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "Stack", "Vorgezeigt", "den Grip", "Shuffle"]);
   });
 
+  it("describes Aujourd'Oui top-five program choices with revealed selected programs only", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "v1911_aujourdoui_top5",
+        sourceDefinitionId: "onr_v1_151_aujourdoui",
+        selectedCount: 2,
+        publicRevealKind: "reveal",
+        publicRevealDefinitionId: "simple_decoder",
+        publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Aujourd'Oui genutzt, Simple Decoder, Simple Fracter vorgezeigt und in den Grip genommen.");
+    expect(item.category).toBe("card");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.chips).toEqual(["Runner", "Aujourd'Oui", "Top 5", "2 Programme", "Vorgezeigt", "Grip", "Shuffle"]);
+  });
+
   it("describes hidden stack-search moves without leaking the selected card", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
