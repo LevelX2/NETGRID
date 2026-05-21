@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-21-generic-field-card-choice-ui
-status: inbox
+status: done
 kind: architecture
 area: web
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/action-board-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web test -- action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm exec node -e "<Playwright smoke against http://127.0.0.1:3100>"
+  - git diff --check
 ---
 
 # Generische Feldkarten-Auswahl im Spielfeld
@@ -93,4 +101,8 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der Webclient erkennt jetzt generische `select_cards`-Choices, deren auswählbare Optionen vollständig auf aktuell gerenderte Feldkarten zeigen. Solche Choices laufen nicht mehr über das große Kartenwahl-Overlay, sondern über einen kompakten Actionboard-Zustand mit Prompt, Auswahlzähler, `Auswahl übernehmen` und `Auswahl leeren`. Betroffene Feldkarten bekommen einen direkten Auswahlmarker; Klick auf Karte oder Marker toggelt nur lokale Auswahl und sendet erst beim Bestätigen die unveränderte `resolve_choice`-Action mit `selectedChoices`.
+
+Die Erkennung nutzt ausschließlich `pendingChoice.options` als Legalitätsquelle und mappt nur gerenderte Feldkarten aus Servern und Runner-Rigs. Stack-/Such-/Hand-/Discard-Choices bleiben auf ihren bisherigen Pfaden. Verdeckte Korp-Karten werden nur als auswählbare verdeckte Boardkarten markiert; Titel oder Definition werden dadurch nicht zusätzlich offengelegt.
+
+Tests decken Hunt-Club-BBS-artige installierte Korp-Karten, ICE-Zielkarten und Runner-Rig-Ziele ab. Web-Typecheck, Web-Tests und ein Playwright-Smoke gegen den lokalen Webclient waren grün.

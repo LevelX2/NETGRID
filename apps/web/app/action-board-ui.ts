@@ -130,6 +130,16 @@ export type RunnerProgramInstallTrashChoiceInfo = {
   selectedMemoryFreed: number;
 };
 
+export type FieldCardChoiceInfo = {
+  title: string;
+  prompt: string;
+  counterLabel: string;
+  canSubmit: boolean;
+  canClear: boolean;
+  submitLabel: string;
+  clearLabel: string;
+};
+
 export type IceModifierBadgeView = {
   key: string;
   shortLabel: string;
@@ -777,6 +787,66 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
   return minSelections !== 1 || maxSelections !== 1;
+}
+
+export function shouldUseFieldCardChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  view: PlayerView,
+): boolean {
+  if (choice.kind !== "select_cards") return false;
+  if (choice.source === "discard_phase") return false;
+  if (choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
+  const selectableOptions = choice.options.filter((option) => option.selectable !== false);
+  if (selectableOptions.length === 0) return false;
+  const fieldCardIds = visibleFieldCardIds(view);
+  return selectableOptions.every(
+    (option) => typeof option.value === "string" && fieldCardIds.has(option.value),
+  );
+}
+
+export function fieldCardChoiceOptionForCard(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+  view: PlayerView,
+  card: Pick<VisibleCard, "instanceId">,
+): NonNullable<PlayerView["pendingChoice"]>["options"][number] | null {
+  if (!choice || !shouldUseFieldCardChoice(choice, view)) return null;
+  return choice.options.find((option) => option.selectable !== false && option.value === card.instanceId) ?? null;
+}
+
+export function fieldCardChoiceInfo(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  selectedOptionIds: string[],
+): FieldCardChoiceInfo {
+  const minSelections = Math.max(0, Math.floor(choice.minSelections));
+  const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
+  const selectedCount = selectedOptionIds.filter((optionId) =>
+    choice.options.some((option) => option.id === optionId && option.selectable !== false),
+  ).length;
+  const exactSelection = minSelections === maxSelections;
+  const canSubmit = selectedCount >= minSelections && selectedCount <= maxSelections;
+  return {
+    title: maxSelections === 1 ? "Feldkarte auswählen" : "Feldkarten auswählen",
+    prompt: choice.prompt,
+    counterLabel: exactSelection ? `${selectedCount}/${maxSelections}` : `${selectedCount}/${minSelections}-${maxSelections}`,
+    canSubmit,
+    canClear: selectedCount > 0,
+    submitLabel: selectedCount === 0 && minSelections === 0 ? "Ohne Auswahl übernehmen" : "Auswahl übernehmen",
+    clearLabel: "Auswahl leeren"
+  };
+}
+
+function visibleFieldCardIds(view: PlayerView): Set<string> {
+  return new Set(visibleFieldCards(view).map((card) => card.instanceId));
+}
+
+function visibleFieldCards(view: PlayerView): VisibleCard[] {
+  return [
+    ...(view.own.rig ?? []),
+    ...(view.opponent.rig ?? []),
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
+    ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
+  ];
 }
 
 export function runnerProgramInstallTrashChoiceInfo(

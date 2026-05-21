@@ -23,7 +23,10 @@ import {
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  fieldCardChoiceInfo,
+  fieldCardChoiceOptionForCard,
   showInstalledCorpState,
+  shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
@@ -463,6 +466,75 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
+  });
+
+  it("detects field-card choices for installed board cards only", () => {
+    const bbs = card("corp_bbs_1", "BBS Whispering Campaign", "asset", false);
+    const ice = card("corp_ice_1", "Wall", "ice", false);
+    const runnerProgram = card("runner_program_1", "Virus Program", "program");
+    const board = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [runnerProgram]
+      },
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [ice], root: [bbs] }]
+    });
+    const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "hunt_club_bbs_choice",
+      side: "runner",
+      source: "v1912.hunt_club_bbs_expose:bbs:1",
+      prompt: "Installierte Korp-Karten ansehen",
+      kind: "select_cards",
+      options: [
+        { id: "card_bbs", label: "Remote 1 Root", value: "corp_bbs_1" },
+        { id: "card_ice", label: "Remote 1 ICE", value: "corp_ice_1" }
+      ],
+      minSelections: 0,
+      maxSelections: 3,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier"
+    };
+    const handChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "grip_choice",
+      source: "v1922.runner_grip_trash_gain_credits:organ_donor:1",
+      options: [{ id: "card_hand", label: "Grip-Karte", value: "runner_hand_1" }]
+    };
+    const stackChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "stack_choice",
+      source: "v1911.search_stack:1",
+      stackSearchResolution: {
+        reveal: "hidden",
+        destination: "grip",
+        shuffleAfter: true
+      }
+    };
+    const runnerRigChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "viral_15_choice",
+      source: "v1922.viral_15_program_trash:virus:1",
+      prompt: "Installiertes Runner-Programm wählen",
+      options: [{ id: "card_runner_program", label: "Runner-Programm", value: "runner_program_1" }],
+      minSelections: 1,
+      maxSelections: 1
+    };
+
+    expect(shouldUseFieldCardChoice(fieldChoice, board)).toBe(true);
+    expect(shouldUseFieldCardChoice(runnerRigChoice, board)).toBe(true);
+    expect(shouldUseCardChoicePanel(fieldChoice)).toBe(true);
+    expect(fieldCardChoiceOptionForCard(fieldChoice, board, bbs)?.id).toBe("card_bbs");
+    expect(fieldCardChoiceOptionForCard(fieldChoice, board, runnerProgram)).toBeNull();
+    expect(fieldCardChoiceOptionForCard(runnerRigChoice, board, runnerProgram)?.id).toBe("card_runner_program");
+    expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({
+      title: "Feldkarten auswählen",
+      counterLabel: "1/0-3",
+      canSubmit: true,
+      canClear: true,
+      submitLabel: "Auswahl übernehmen"
+    });
+    expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
+    expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
   });
 
   it("labels Runner program install trash choices for optional and required MU cases", () => {

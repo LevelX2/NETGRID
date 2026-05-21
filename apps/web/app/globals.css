@@ -3247,6 +3247,11 @@ select {
   gap: 0.5rem;
 }
 
+.fieldChoiceControls {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .cardChoiceOverlay {
   position: fixed;
   inset: 0;
@@ -5466,7 +5471,8 @@ select {
   padding-right: 25px;
 }
 
-.cardDiscardShortcut {
+.cardDiscardShortcut,
+.cardChoiceShortcut {
   position: absolute;
   left: 50%;
   bottom: 4px;
@@ -5491,6 +5497,12 @@ select {
     transform 120ms ease;
 }
 
+.cardChoiceShortcut {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 34%);
+  background: color-mix(in srgb, var(--panel), var(--runner) 16%);
+  color: color-mix(in srgb, var(--runner), white 18%);
+}
+
 .cardDiscardShortcut:hover,
 .cardDiscardShortcut:focus-visible,
 .cardDiscardShortcut.active {
@@ -5499,7 +5511,16 @@ select {
   color: var(--text);
 }
 
-.cardDiscardShortcut:disabled {
+.cardChoiceShortcut:hover,
+.cardChoiceShortcut:focus-visible,
+.cardChoiceShortcut.active {
+  border-color: color-mix(in srgb, var(--runner), white 20%);
+  background: color-mix(in srgb, var(--runner), var(--panel) 54%);
+  color: var(--text);
+}
+
+.cardDiscardShortcut:disabled,
+.cardChoiceShortcut:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }

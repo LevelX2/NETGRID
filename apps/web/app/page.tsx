@@ -131,6 +131,8 @@ import {
   cuePositionClassName,
   cuePositionStyle,
   encounterBreakerActions,
+  fieldCardChoiceInfo,
+  fieldCardChoiceOptionForCard,
   groupRunnerRigCards,
   hasLegalAction,
   iceModifierBadgesForServer,
@@ -150,6 +152,7 @@ import {
   runWindowStatusLabel,
   serializeCuePositionPreference,
   showInstalledCorpState,
+  shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
   safeCounterDisplayAmount,
   serverBoardRows,
@@ -474,6 +477,20 @@ type DisplayVisibleCard = VisibleCard & {
 
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
+
+type CardChoiceShortcut = {
+  selected: boolean;
+  disabled: boolean;
+  onToggle(): void;
+  label: string;
+  selectedLabel: string;
+};
+
+type FieldChoiceCardProps = {
+  choiceSelected?: boolean;
+  choiceShortcut?: CardChoiceShortcut;
+  onSelect?: (card: DisplayVisibleCard, hiddenSide?: Side) => void;
+};
 
 type FocusedCard = {
   card: VisibleCard;
@@ -1842,6 +1859,7 @@ export default function Page() {
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
+  const [fieldCardChoiceSelection, setFieldCardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
@@ -2438,6 +2456,14 @@ export default function Page() {
       ? currentDiscardChoiceSelection.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId))
       : [];
   const selectedDiscardOptionIdSet = useMemo(() => new Set(selectedDiscardOptionIds), [selectedDiscardOptionIds.join("|")]);
+  const activeFieldCardChoice = activeView?.pendingChoice && shouldUseFieldCardChoice(activeView.pendingChoice, activeView) ? activeView.pendingChoice : null;
+  const activeFieldCardChoiceOptionIds = useMemo(() => new Set(activeFieldCardChoice?.options.filter((option) => option.selectable !== false).map((option) => option.id) ?? []), [activeFieldCardChoice]);
+  const currentFieldCardChoiceSelection = fieldCardChoiceSelection;
+  const selectedFieldCardChoiceOptionIds =
+    currentFieldCardChoiceSelection && currentFieldCardChoiceSelection.choiceId === activeFieldCardChoice?.choiceId
+      ? currentFieldCardChoiceSelection.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId))
+      : [];
+  const selectedFieldCardChoiceOptionIdSet = useMemo(() => new Set(selectedFieldCardChoiceOptionIds), [selectedFieldCardChoiceOptionIds.join("|")]);
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
   const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok);
@@ -2531,6 +2557,9 @@ export default function Page() {
     if (!activeDiscardChoice) return null;
     return activeDiscardChoice.options.find((option) => option.value === card.instanceId) ?? null;
   };
+  const fieldChoiceOptionForCard = (card: VisibleCard): VisibleChoiceOption | null => {
+    return activeFieldCardChoice && activeView ? fieldCardChoiceOptionForCard(activeFieldCardChoice, activeView, card) : null;
+  };
   const toggleDiscardOption = (optionId: string) => {
     if (!activeDiscardChoice) return;
     const required = activeDiscardChoice.maxSelections;
@@ -2543,6 +2572,42 @@ export default function Page() {
           : [...currentSelected, optionId];
       return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
     });
+  };
+  const toggleFieldCardChoiceOption = (optionId: string) => {
+    if (!activeFieldCardChoice) return;
+    const minSelections = Math.max(0, Math.floor(activeFieldCardChoice.minSelections));
+    const maxSelections = Math.max(minSelections, Math.floor(activeFieldCardChoice.maxSelections));
+    setFieldCardChoiceSelection((current) => {
+      const currentSelected = current?.choiceId === activeFieldCardChoice.choiceId ? current.selectedOptionIds.filter((id) => activeFieldCardChoiceOptionIds.has(id)) : [];
+      const nextSelected = currentSelected.includes(optionId)
+        ? currentSelected.filter((id) => id !== optionId)
+        : currentSelected.length >= maxSelections
+          ? maxSelections === 1
+            ? [optionId]
+            : currentSelected
+          : [...currentSelected, optionId];
+      return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: nextSelected };
+    });
+  };
+  const clearFieldCardChoiceSelection = () => {
+    if (!activeFieldCardChoice) return;
+    setFieldCardChoiceSelection({ choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] });
+  };
+  const fieldChoiceCardProps = (card: VisibleCard): FieldChoiceCardProps => {
+    const option = fieldChoiceOptionForCard(card);
+    if (!option) return {};
+    const selected = selectedFieldCardChoiceOptionIdSet.has(option.id);
+    return {
+      choiceSelected: selected,
+      choiceShortcut: {
+        selected,
+        disabled: Boolean(payload?.winner) || connection !== "online",
+        onToggle: () => toggleFieldCardChoiceOption(option.id),
+        label: "Für Auswahl markieren",
+        selectedLabel: "Aus Auswahl entfernen"
+      },
+      onSelect: () => toggleFieldCardChoiceOption(option.id)
+    };
   };
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
   const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, accessRevealEvent?.eventId) : null;
@@ -2638,10 +2703,22 @@ export default function Page() {
     }
     setDiscardChoiceSelection((current) => {
       if (!current || current.choiceId !== activeDiscardChoice.choiceId) return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: [] };
-      const nextSelected = current.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId));
-      return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
-    });
+    const nextSelected = current.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId));
+    return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
+  });
   }, [activeDiscardChoice?.choiceId, activeDiscardOptionIds]);
+
+  useEffect(() => {
+    if (!activeFieldCardChoice) {
+      setFieldCardChoiceSelection(null);
+      return;
+    }
+    setFieldCardChoiceSelection((current) => {
+      if (!current || current.choiceId !== activeFieldCardChoice.choiceId) return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] };
+      const nextSelected = current.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId));
+      return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: nextSelected };
+    });
+  }, [activeFieldCardChoice?.choiceId, activeFieldCardChoiceOptionIds]);
 
   useEffect(() => {
     if (!payload || !activeView) return;
@@ -4846,10 +4923,12 @@ export default function Page() {
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
             selectedDiscardOptionIds={selectedDiscardOptionIds}
+            selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
             onAction={submitAction}
             onChoiceOption={submitChoiceOption}
             onChoiceOptions={submitChoiceOptions}
             onDiscardChoiceToggle={toggleDiscardOption}
+            onFieldCardChoiceClear={clearFieldCardChoiceSelection}
             enrichCard={enrichCard}
             connection={connection}
             onClearContext={() => setSelectedActionContext(null)}
@@ -4908,6 +4987,7 @@ export default function Page() {
                 contextualActions={legalActionSplit.contextualActions}
                 actionDisabled={Boolean(payload.winner) || connection !== "online"}
                 highlightedZone={activeCueHighlight}
+                fieldChoiceCardProps={fieldChoiceCardProps}
                 onFocus={focusCard}
                 onActionContext={selectActionCard}
                 onAction={submitAction}
@@ -4921,6 +5001,7 @@ export default function Page() {
               selectedContext={selectedActionContext}
               contextualActions={legalActionSplit.contextualActions}
               actionDisabled={Boolean(payload.winner) || connection !== "online"}
+              fieldChoiceCardProps={fieldChoiceCardProps}
               onFocus={focusCard}
               onActionContext={selectActionCard}
               onAction={submitAction}
@@ -4991,6 +5072,7 @@ export default function Page() {
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
                               : {})}
+                            {...fieldChoiceCardProps(card)}
                             onAction={submitAction}
                             onFocus={focusCard}
                             onActionContextSelect={selectActionCard}
@@ -5254,6 +5336,7 @@ export default function Page() {
                                     selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                                     actions={cardActionsFor(card)}
                                     actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                    {...fieldChoiceCardProps(card)}
                                     onAction={submitAction}
                                     onFocus={focusCard}
                                     onActionContextSelect={selectActionCard}
@@ -7025,6 +7108,7 @@ function RunnerRigStrip({
   contextualActions,
   actionDisabled,
   highlightedZone,
+  fieldChoiceCardProps,
   onFocus,
   onActionContext,
   onAction
@@ -7036,6 +7120,7 @@ function RunnerRigStrip({
   contextualActions: LegalAction[];
   actionDisabled: boolean;
   highlightedZone?: BoardHighlight | null;
+  fieldChoiceCardProps?: (card: VisibleCard) => FieldChoiceCardProps;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
@@ -7104,6 +7189,7 @@ function RunnerRigStrip({
                       actions={cardActionsForRig(card)}
                       actionDisabled={actionDisabled}
                       actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                      {...fieldChoiceCardProps?.(card)}
                       onFocus={onFocus}
                       onActionContextSelect={onActionContext}
                       onAction={onAction}
@@ -7559,10 +7645,12 @@ function LegalActionsPanel({
   disabled,
   highlighted = false,
   selectedDiscardOptionIds,
+  selectedFieldCardChoiceOptionIds,
   onAction,
   onChoiceOption,
   onChoiceOptions,
   onDiscardChoiceToggle,
+  onFieldCardChoiceClear,
   enrichCard,
   connection,
   onClearContext
@@ -7579,10 +7667,12 @@ function LegalActionsPanel({
   disabled: boolean;
   highlighted?: boolean;
   selectedDiscardOptionIds: string[];
+  selectedFieldCardChoiceOptionIds: string[];
   onAction(action: LegalAction): void;
   onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
   onDiscardChoiceToggle(optionId: string): void;
+  onFieldCardChoiceClear(): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
@@ -7616,6 +7706,19 @@ function LegalActionsPanel({
   const genericChoice = view.pendingChoice;
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
+    if (shouldUseFieldCardChoice(genericChoice, view)) {
+      return (
+        <FieldCardChoicePanel
+          choice={genericChoice}
+          action={genericChoiceAction}
+          selected={selectedFieldCardChoiceOptionIds}
+          disabled={disabled}
+          highlighted={highlighted}
+          onClear={onFieldCardChoiceClear}
+          onChoiceOptions={onChoiceOptions}
+        />
+      );
+    }
     if (shouldUseCardChoicePanel(genericChoice)) {
       const cardChoice = enrichVisibleChoiceCardsFromView(genericChoice, view);
       if (connection !== "online") {
@@ -7944,6 +8047,57 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
   return null;
+}
+
+function FieldCardChoicePanel({
+  choice,
+  action,
+  selected,
+  disabled,
+  highlighted,
+  onClear,
+  onChoiceOptions
+}: {
+  choice: NonNullable<PlayerView["pendingChoice"]>;
+  action: LegalAction;
+  selected: string[];
+  disabled: boolean;
+  highlighted: boolean;
+  onClear(): void;
+  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+}) {
+  const info = fieldCardChoiceInfo(choice, selected);
+  return (
+    <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="field-card-choice-panel">
+      <h2>
+        <Crosshair size={16} />
+        {info.title}
+      </h2>
+      <p className="meta">{info.prompt} · {info.counterLabel}</p>
+      <div className="fieldChoiceControls">
+        <button
+          className="button primary wide"
+          onClick={() => onChoiceOptions(action, choice.choiceId, selected)}
+          disabled={disabled || !info.canSubmit}
+          type="button"
+          data-testid="field-card-choice-submit"
+        >
+          <Check size={15} />
+          {info.submitLabel}
+        </button>
+        <button
+          className="button wide"
+          onClick={onClear}
+          disabled={disabled || !info.canClear}
+          type="button"
+          data-testid="field-card-choice-clear"
+        >
+          <X size={15} />
+          {info.clearLabel}
+        </button>
+      </div>
+    </section>
+  );
 }
 
 function DiscardChoicePanel({
@@ -11424,6 +11578,7 @@ function CardView({
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   choiceSelected = false,
+  choiceShortcut,
   discardShortcut,
   onFocus,
   onSelect,
@@ -11448,6 +11603,7 @@ function CardView({
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   choiceSelected?: boolean;
+  choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
@@ -11877,6 +12033,25 @@ function CardView({
           }}
         >
           {discardShortcut.selected ? <Check size={11} strokeWidth={2.5} /> : <Trash2 size={11} strokeWidth={2.35} />}
+        </button>
+      ) : null}
+      {choiceShortcut ? (
+        <button
+          className={`cardChoiceShortcut${choiceShortcut.selected ? " active" : ""}`}
+          type="button"
+          aria-label={choiceShortcut.selected ? choiceShortcut.selectedLabel : choiceShortcut.label}
+          aria-pressed={choiceShortcut.selected}
+          title={choiceShortcut.selected ? choiceShortcut.selectedLabel : choiceShortcut.label}
+          data-testid="field-card-choice-shortcut"
+          disabled={choiceShortcut.disabled}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setSuppressCardTooltip(true);
+            choiceShortcut.onToggle();
+          }}
+        >
+          {choiceShortcut.selected ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.35} />}
         </button>
       ) : null}
       {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}
