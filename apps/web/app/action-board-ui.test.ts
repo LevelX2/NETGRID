@@ -1062,6 +1062,38 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(runWindowActionButtonLabel(running, access)).toBe("Zugriff auf Karte");
   });
 
+  it("keeps City Surveillance draw choices visible in draw action labels", () => {
+    const pay = legalAction(
+      "runner",
+      "draw_card",
+      "basic_action",
+      "Karte ziehen (City Surveillance: 1 Credit zahlen)",
+      {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceDrawDecision: "pay",
+        citySurveillanceProjectedCreditsPaid: 1,
+        citySurveillanceProjectedTagsAdded: 0
+      }
+    );
+    const tag = legalAction(
+      "runner",
+      "draw_card",
+      "basic_action",
+      "Karte ziehen (City Surveillance: 1 Tag nehmen)",
+      {
+        citySurveillanceSourceCount: 1,
+        citySurveillanceDrawDecision: "tag",
+        citySurveillanceProjectedCreditsPaid: 0,
+        citySurveillanceProjectedTagsAdded: 1
+      }
+    );
+    const plain = legalAction("runner", "draw_card", "basic_action", "Karte ziehen");
+
+    expect(actionButtonLabel(pay)).toBe("Karte ziehen (City Surveillance: 1 Credit zahlen)");
+    expect(actionButtonLabel(tag)).toBe("Karte ziehen (City Surveillance: 1 Tag nehmen)");
+    expect(actionButtonLabel(plain)).toBe("Karte ziehen");
+  });
+
   it("describes accessed Archive assets as already trashed instead of blocked by credits", () => {
     const accessedUpgrade = card("upgrade_1", "Dedicated Response Team", "upgrade");
     accessedUpgrade.trashCost = 2;

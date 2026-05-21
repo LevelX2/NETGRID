@@ -276,7 +276,9 @@ export function actionButtonLabel(action: LegalAction): string {
     case "gain_credit":
       return action.source === "basic_action" ? "Credit nehmen" : normalizeVisibleTerms(action.label);
     case "draw_card":
-      return "Karte ziehen";
+      return action.payload?.citySurveillanceDrawDecision
+        ? normalizeVisibleTerms(action.label)
+        : "Karte ziehen";
     case "activated_card_ability":
       return normalizeVisibleTerms(action.label || "Kartenfähigkeit nutzen");
     case "jack_out":
