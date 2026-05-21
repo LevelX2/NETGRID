@@ -70,9 +70,10 @@ export type CardEffectExecutionContext = {
     successEffect: ReturnType<typeof traceSuccessEffectForCardImplementation>,
   ) => CardEffectTraceResult;
   startRun?: (
-    serverId: Extract<ServerId, "hq" | "rd" | "archives">,
+    serverId: Exclude<ServerId, "new_remote">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
+  chosenRunServerId?: () => Exclude<ServerId, "new_remote">;
   startPrivateLook?: (
     zone: Extract<ServerId, "rd" | "hq">,
     count: number | "all",
@@ -137,6 +138,9 @@ export type CardEffectExecutionContext = {
     drawCount: number,
     removePlayedCardFromGame: true,
   ) => CardEffectHiddenInfoResult;
+  startPayRezCostToTrashRezzedIceChoice?: () => CardEffectHiddenInfoResult;
+  startTrashUnrezzedIceChoice?: () => CardEffectHiddenInfoResult;
+  startCorpChoiceRezOrTrashIceChoice?: () => CardEffectHiddenInfoResult;
   startDistributeAdvancementCounters?: (
     amount: number,
     distribution:
@@ -222,6 +226,9 @@ export type CardEffectMakeRunOptions = {
   successfulRunRequiresCorpCredits?: boolean;
   successfulRunPrivateLookCount?: number;
   successfulRunArchivesMoveCount?: number;
+  followupRunOnEnd?: "optional";
+  bypassFirstIce?: boolean;
+  runTraceLinkBonus?: number;
 };
 
 export type CardEffectMakeRunResult = {
@@ -730,9 +737,13 @@ export function executeCardImplementationEffects(
         assertPublicVisibility("make_run", effect.visibility);
         if (!context.startRun)
           throw new Error("make_run effect requires a startRun execution context.");
-        if (effect.target.kind !== "central_server")
-          throw new Error("make_run effect supports only central-server targets.");
-        const runResult = context.startRun(effect.target.server, {
+        const serverId =
+          effect.target.kind === "central_server"
+            ? effect.target.server
+            : context.chosenRunServerId?.();
+        if (!serverId)
+          throw new Error("make_run effect requires a chosen run server.");
+        const runResult = context.startRun(serverId, {
           ...(effect.accessCount !== undefined
             ? { accessCount: effect.accessCount }
             : {}),
@@ -772,8 +783,47 @@ export function executeCardImplementationEffects(
           ...(effect.successfulRunArchivesMoveCount !== undefined
             ? { successfulRunArchivesMoveCount: effect.successfulRunArchivesMoveCount }
             : {}),
+          ...(effect.followupRunOnEnd
+            ? { followupRunOnEnd: effect.followupRunOnEnd }
+            : {}),
+          ...(effect.bypassFirstIce !== undefined
+            ? { bypassFirstIce: effect.bypassFirstIce }
+            : {}),
+          ...(effect.runTraceLinkBonus !== undefined
+            ? { runTraceLinkBonus: effect.runTraceLinkBonus }
+            : {}),
         });
         mergePublicPayload(publicPayload, runResult.publicPayload);
+        return;
+      }
+      case "pay_rez_cost_to_trash_rezzed_ice": {
+        assertPublicVisibility("pay_rez_cost_to_trash_rezzed_ice", effect.visibility);
+        if (effect.target !== "chosen_rezzed_ice")
+          throw new Error("pay_rez_cost_to_trash_rezzed_ice target is invalid.");
+        if (!context.startPayRezCostToTrashRezzedIceChoice)
+          throw new Error("pay_rez_cost_to_trash_rezzed_ice requires a choice context.");
+        const result = context.startPayRezCostToTrashRezzedIceChoice();
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "trash_unrezzed_ice": {
+        assertPublicVisibility("trash_unrezzed_ice", effect.visibility);
+        if (effect.target !== "chosen_unrezzed_ice")
+          throw new Error("trash_unrezzed_ice target is invalid.");
+        if (!context.startTrashUnrezzedIceChoice)
+          throw new Error("trash_unrezzed_ice requires a choice context.");
+        const result = context.startTrashUnrezzedIceChoice();
+        mergePublicPayload(publicPayload, result.publicPayload);
+        return;
+      }
+      case "corp_choice_rez_or_trash_ice": {
+        assertPublicVisibility("corp_choice_rez_or_trash_ice", effect.visibility);
+        if (effect.target !== "chosen_installed_ice")
+          throw new Error("corp_choice_rez_or_trash_ice target is invalid.");
+        if (!context.startCorpChoiceRezOrTrashIceChoice)
+          throw new Error("corp_choice_rez_or_trash_ice requires a choice context.");
+        const result = context.startCorpChoiceRezOrTrashIceChoice();
+        mergePublicPayload(publicPayload, result.publicPayload);
         return;
       }
       case "private_look": {

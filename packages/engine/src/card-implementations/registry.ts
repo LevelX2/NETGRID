@@ -128,16 +128,20 @@ import { newGalvestonCityGridImplementation } from "./onr-v1/corp/upgrades/new-g
 import { redHerringsImplementation } from "./onr-v1/corp/upgrades/red-herrings";
 import { tesseractFortConstructionImplementation } from "./onr-v1/corp/upgrades/tesseract-fort-construction";
 import { washingtonDcCityGridImplementation } from "./onr-v1/corp/upgrades/washington-d-c-city-grid";
-import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
 import { arasakaOwnsYouImplementation } from "./onr-v1/runner/preps/arasaka-owns-you";
+import { allNighterImplementation } from "./onr-v1/runner/preps/all-nighter";
+import { bodyweightSyntheticBloodImplementation } from "./onr-v1/runner/preps/bodyweight-synthetic-blood";
+import { coreCommandJettisonIceImplementation } from "./onr-v1/runner/preps/core-command-jettison-ice";
 import { custodialPositionImplementation } from "./onr-v1/runner/preps/custodial-position";
 import { editedShippingManifestsImplementation } from "./onr-v1/runner/preps/edited-shipping-manifests";
 import { executiveWiretapsImplementation } from "./onr-v1/runner/preps/executive-wiretaps";
+import { forgedActivationOrdersImplementation } from "./onr-v1/runner/preps/forged-activation-orders";
 import { forgottenBackupChipImplementation } from "./onr-v1/runner/preps/forgotten-backup-chip";
 import { gideonsPawnshopImplementation } from "./onr-v1/runner/preps/gideons-pawnshop";
 import { huntClubBbsImplementation } from "./onr-v1/runner/preps/hunt-club-bbs";
 import { iceAndDatasGuideToTheNetImplementation } from "./onr-v1/runner/preps/ice-and-datas-guide-to-the-net";
 import { ifYouWantItDoneRightImplementation } from "./onr-v1/runner/preps/if-you-want-it-done-right";
+import { insideJobImplementation } from "./onr-v1/runner/preps/inside-job";
 import { kilroyWasHereImplementation } from "./onr-v1/runner/preps/kilroy-was-here";
 import { mantisFixerAtLargeImplementation } from "./onr-v1/runner/preps/mantis-fixer-at-large";
 import { miscForSaleImplementation } from "./onr-v1/runner/preps/misc-for-sale";
@@ -151,6 +155,7 @@ import { arasakaPortablePrototypeImplementation } from "./onr-v1/runner/hardware
 import { armadilloArmoredRoadHomeImplementation } from "./onr-v1/runner/hardware/armadillo-armored-road-home";
 import { armoredFridgeImplementation } from "./onr-v1/runner/hardware/armored-fridge";
 import { artemis2020Implementation } from "./onr-v1/runner/hardware/artemis-2020";
+import { bodyweightDataCrecheImplementation } from "./onr-v1/runner/hardware/bodyweight-data-creche";
 import { corollaSpeedChipImplementation } from "./onr-v1/runner/hardware/corolla-speed-chip";
 import { dermatechBodyplatingImplementation } from "./onr-v1/runner/hardware/dermatech-bodyplating";
 import { drifterMobileEnvironmentImplementation } from "./onr-v1/runner/hardware/drifter-mobile-environment";
@@ -177,7 +182,9 @@ import { jackNJoeImplementation } from "./onr-v1/runner/preps/jack-n-joe";
 import { livewiresContactsImplementation } from "./onr-v1/runner/preps/livewires-contacts";
 import { privateLdlAccessImplementation } from "./onr-v1/runner/preps/private-ldl-access";
 import { rompThroughHqImplementation } from "./onr-v1/runner/preps/romp-through-hq";
+import { securityCodeWormChipImplementation } from "./onr-v1/runner/preps/security-code-worm-chip";
 import { scoreImplementation } from "./onr-v1/runner/preps/score";
+import { stumbleThroughWilderspaceImplementation } from "./onr-v1/runner/preps/stumble-through-wilderspace";
 import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/temple-microcode-outlet";
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { afreetImplementation } from "./onr-v1/runner/programs/afreet";
@@ -212,6 +219,7 @@ import { loonyGoonImplementation } from "./onr-v1/runner/programs/loony-goon";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
+import { netspaceInverterImplementation } from "./onr-v1/runner/programs/netspace-inverter";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
 import { pileDriverImplementation } from "./onr-v1/runner/programs/pile-driver";
 import { poltergeistImplementation } from "./onr-v1/runner/programs/poltergeist";
@@ -266,16 +274,20 @@ import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
+  allNighterImplementation,
   arasakaOwnsYouImplementation,
   bodyweightSyntheticBloodImplementation,
+  coreCommandJettisonIceImplementation,
   custodialPositionImplementation,
   editedShippingManifestsImplementation,
   executiveWiretapsImplementation,
+  forgedActivationOrdersImplementation,
   forgottenBackupChipImplementation,
   gideonsPawnshopImplementation,
   huntClubBbsImplementation,
   iceAndDatasGuideToTheNetImplementation,
   ifYouWantItDoneRightImplementation,
+  insideJobImplementation,
   jackNJoeImplementation,
   kilroyWasHereImplementation,
   livewiresContactsImplementation,
@@ -287,8 +299,10 @@ export const CARD_IMPLEMENTATIONS = [
   priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,
+  securityCodeWormChipImplementation,
   sneakPreviewImplementation,
   templeMicrocodeOutletImplementation,
+  stumbleThroughWilderspaceImplementation,
   totalGeneticRetrofitImplementation,
   weatherToFinancePipeImplementation,
   afreetImplementation,
@@ -323,6 +337,7 @@ export const CARD_IMPLEMENTATIONS = [
   microtechAiInterfaceImplementation,
   mouseImplementation,
   mysteryBoxImplementation,
+  netspaceInverterImplementation,
   newsgroupFilterImplementation,
   pileDriverImplementation,
   poltergeistImplementation,
@@ -369,6 +384,7 @@ export const CARD_IMPLEMENTATIONS = [
   armadilloArmoredRoadHomeImplementation,
   armoredFridgeImplementation,
   artemis2020Implementation,
+  bodyweightDataCrecheImplementation,
   corollaSpeedChipImplementation,
   dermatechBodyplatingImplementation,
   drifterMobileEnvironmentImplementation,

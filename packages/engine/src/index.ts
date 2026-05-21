@@ -311,6 +311,8 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
   runnerInstalledCardIds,
   runnerRunAttemptsLastTurn,
   runnerWasDamagedDuringLastThreeActions,
+  runnerMadeSuccessfulRunOnServerThisTurn: (state, server) =>
+    server === "hq" && hasSuccessfulHqRunThisTurn(state),
   spendClick,
   spendCredits,
   createAction: action,
@@ -379,6 +381,23 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
         ...(options.successfulRunArchivesMoveCount !== undefined
           ? { successfulRunArchivesMoveCount: options.successfulRunArchivesMoveCount }
           : {}),
+        ...(options.followupRunOnEnd === "optional"
+          ? { grantAllNighterBonusRunOnFinish: true }
+          : {}),
+        ...(options.bypassFirstIce ? { bypassFirstIceRemaining: true } : {}),
+        ...(options.runTraceLinkBonus !== undefined
+          ? { runTraceLinkBonus: options.runTraceLinkBonus }
+          : {}),
+        ...(options.runTraceLinkBonus !== undefined &&
+        typeof legalAction.source === "string" &&
+        state.cardInstances[legalAction.source]
+          ? {
+              runTraceLinkBonusSourceDefinitionId: definitionFor(
+                state,
+                legalAction.source,
+              ).id,
+            }
+          : {}),
         ...(typeof legalAction.source === "string" &&
         state.cardInstances[legalAction.source]
           ? {
@@ -392,6 +411,27 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       },
       legalAction,
     );
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      ...(options.followupRunOnEnd === "optional"
+        ? { allNighterBonusRunOnFinish: true }
+        : {}),
+      ...(options.bypassFirstIce ? { bypassFirstIce: true } : {}),
+      ...(options.runTraceLinkBonus !== undefined
+        ? {
+            runTraceLinkBonus: options.runTraceLinkBonus,
+            ...(typeof legalAction.source === "string" &&
+            state.cardInstances[legalAction.source]
+              ? {
+                  runTraceLinkBonusSourceDefinitionId: definitionFor(
+                    state,
+                    legalAction.source,
+                  ).id,
+                }
+              : {}),
+          }
+        : {}),
+    };
     return { publicPayload: legalAction.payload ?? {} };
   },
   startPrivateLook: (
@@ -688,6 +728,44 @@ const cardImplementationRuntimeDeps: CardImplementationRuntimeDependencies = {
       drawCount,
       removePlayedCardFromGame,
     ),
+  rezzedIceTargetCount: (state) =>
+    affordableRezzedInstalledIceIdsForRunner(state).length,
+  unrezzedIceTargetCount: (state) => unrezzedInstalledIceIds(state).length,
+  installedIceTargetCount: (state) =>
+    corpInstalledCardIds(state).filter(
+      (cardId) => mustInstance(state.cardInstances, cardId).zone.zone === "serverIce",
+    ).length,
+  startPayRezCostToTrashRezzedIceChoice: (state, legalAction, sourceCardId) => {
+    startCoreCommandJettisonIceChoice(state, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      p3_48RunnerRunControl: "pay_rez_cost_to_trash_rezzed_ice",
+      v1922RunnerEventAbility:
+        "successful_hq_run_pay_rez_cost_trash_rezzed_ice",
+      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    };
+    return { publicPayload: legalAction.payload ?? {} };
+  },
+  startTrashUnrezzedIceChoice: (state, legalAction, sourceCardId) => {
+    startSecurityCodeWormChipTrashIceChoice(state, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      p3_48RunnerRunControl: "trash_unrezzed_ice",
+      v1922RunnerEventAbility: "successful_hq_run_trash_unrezzed_ice",
+      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    };
+    return { publicPayload: legalAction.payload ?? {} };
+  },
+  startCorpChoiceRezOrTrashIceChoice: (state, legalAction, sourceCardId) => {
+    startForgedActivationOrdersTargetChoice(state, sourceCardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      p3_48RunnerRunControl: "corp_choice_rez_or_trash_ice",
+      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    };
+    return { publicPayload: legalAction.payload ?? {} };
+  },
   startDistributeAdvancementCounters: (
     state,
     legalAction,
@@ -4410,7 +4488,23 @@ function runnerMainActions(state: GameState): LegalAction[] {
             ),
           );
           continue;
-      }
+        }
+        if (makeRunEffect?.target.kind === "chosen_server") {
+          for (const server of state.corp.servers) {
+            actions.push(
+              action(
+                state,
+                "runner",
+                "play_event",
+                `${definition.title} auf ${server.label}`,
+                id,
+                [{ clicks: 1, credits: definition.cost ?? 0 }],
+                { cardId: id, serverId: server.id },
+              ),
+            );
+          }
+          continue;
+        }
       actions.push(
         action(
             state,
@@ -7037,7 +7131,16 @@ function successfulRunProgramActions(
         ),
       );
     }
-    if (definition.id === NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID) {
+    const successfulRunFollowups =
+      cardImplementationForDefinitionId(definition.id)?.successfulRunFollowups ??
+      [];
+    if (
+      successfulRunFollowups.some(
+        (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
+      ) ||
+      (!cardImplementationForDefinitionId(definition.id) &&
+        definition.id === NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID)
+    ) {
       const server = mustServer(state, run.attackedServerId);
       if (server.kind === "archives" || server.ice.length <= 1) continue;
       actions.push(
@@ -9103,7 +9206,15 @@ function resolveNetspaceInverterReverseIce(
     );
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Netspace Inverter ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID)
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  const reverseFollowup =
+    cardImplementationForDefinitionId(sourceDefinition.id)?.successfulRunFollowups?.some(
+      (followup) => followup.kind === "reverse_ice_on_successful_run_fort",
+    ) ?? false;
+  if (
+    !reverseFollowup &&
+    sourceDefinition.id !== NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID
+  )
     throw new Error("Die Netspace-Inverter-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
@@ -9115,7 +9226,7 @@ function resolveNetspaceInverterReverseIce(
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId];
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
-    sourceDefinitionId: NETSPACE_INVERTER_REVERSE_ICE_PROGRAM_ID,
+    sourceDefinitionId: sourceDefinition.id,
     serverLabel: publicServerLabel(state, server.id) ?? server.id,
     iceCount: server.ice.length,
     serverIceOrderReversed: true,
@@ -10030,6 +10141,8 @@ type StartRunOptions = Pick<
   | "successfulRunSourceDefinitionId"
   | "successfulRunSourceTitle"
   | "bypassFirstIceRemaining"
+  | "runTraceLinkBonus"
+  | "runTraceLinkBonusSourceDefinitionId"
 >;
 
 function startRun(
@@ -10125,6 +10238,15 @@ function startRun(
       : {}),
     ...(options?.bypassFirstIceRemaining
       ? { bypassFirstIceRemaining: true }
+      : {}),
+    ...(options?.runTraceLinkBonus && options.runTraceLinkBonus > 0
+      ? { runTraceLinkBonus: options.runTraceLinkBonus }
+      : {}),
+    ...(options?.runTraceLinkBonusSourceDefinitionId
+      ? {
+          runTraceLinkBonusSourceDefinitionId:
+            options.runTraceLinkBonusSourceDefinitionId,
+        }
       : {}),
     ...(isV099OrLater(state)
       ? { badPublicityCredits: state.corp.badPublicity }
@@ -14522,8 +14644,19 @@ function applyBodyweightDataCrecheSuccessfulRun(
   const sourceId = state.runner.rig.hardware
     .slice()
     .sort()
-    .find((cardId) => definitionFor(state, cardId).id === BODYWEIGHT_DATA_CRECHE_ID);
+    .find((cardId) => {
+      const definition = definitionFor(state, cardId);
+      const implementation = cardImplementationForDefinitionId(definition.id);
+      return (
+        implementation?.successfulRunFollowups?.some(
+          (followup) =>
+            followup.kind === "optional_make_run_after_successful_run",
+        ) ||
+        (!implementation && definition.id === BODYWEIGHT_DATA_CRECHE_ID)
+      );
+    });
   if (!sourceId) return;
+  const sourceDefinitionId = definitionFor(state, sourceId).id;
   const flags = ensureRunnerTurnFlags(state);
   if (
     flags.bodyweightDataCrecheExtraRunUsedThisTurn ||
@@ -14537,7 +14670,7 @@ function applyBodyweightDataCrecheSuccessfulRun(
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       bodyweightDataCrecheExtraRunPending: true,
-      sourceDefinitionId: BODYWEIGHT_DATA_CRECHE_ID,
+      sourceDefinitionId,
     };
   }
 }
@@ -22231,10 +22364,14 @@ function startForgedActivationOrdersTargetChoice(
   sourceCardId: string,
 ): void {
   if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const targets = unrezzedInstalledIceIds(state);
+  const targets = corpInstalledCardIds(state)
+    .filter(
+      (cardId) =>
+        mustInstance(state.cardInstances, cardId).zone.zone === "serverIce",
+    );
   if (targets.length === 0)
     throw new Error(
-      "Keine unrezzte ICE als Ziel fuer Forged Activation Orders.",
+      "Keine ICE als Ziel fuer Forged Activation Orders.",
     );
   state.pendingChoice = {
     choiceId: `v1922_forged_activation_orders_target_${state.stateVersion + 1}`,
@@ -22272,9 +22409,13 @@ function resolveForgedActivationOrdersTargetChoice(
       "Es ist keine V1.9.22-Forged-Activation-Orders-Ziel-Choice offen.",
     );
   const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
-  if (!selectedId || !unrezzedInstalledIceIds(state).includes(selectedId))
+  if (
+    !selectedId ||
+    !corpInstalledCardIds(state).includes(selectedId) ||
+    mustInstance(state.cardInstances, selectedId).zone.zone !== "serverIce"
+  )
     throw new Error(
-      "Das Forged-Activation-Orders-Ziel ist keine unrezzte installierte ICE.",
+      "Das Forged-Activation-Orders-Ziel ist keine installierte ICE.",
     );
   const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
   const icePositionLabel =
@@ -22286,7 +22427,8 @@ function resolveForgedActivationOrdersTargetChoice(
     prompt: "ICE rezzen oder trashen",
     kind: "select_option",
     options: [
-      ...(state.corp.credits >= rezCostForCard(state, selectedId)
+      ...(!mustInstance(state.cardInstances, selectedId).rezzed &&
+      state.corp.credits >= rezCostForCard(state, selectedId)
         ? [
             {
               id: "rez_ice",
@@ -22331,9 +22473,13 @@ function resolveForgedActivationOrdersCorpChoice(
       "Es ist keine V1.9.22-Forged-Activation-Orders-Korp-Choice offen.",
     );
   const [, targetIceId] = choice.source.split(":");
-  if (!targetIceId || !unrezzedInstalledIceIds(state).includes(targetIceId))
+  if (
+    !targetIceId ||
+    !corpInstalledCardIds(state).includes(targetIceId) ||
+    mustInstance(state.cardInstances, targetIceId).zone.zone !== "serverIce"
+  )
     throw new Error(
-      "Das Forged-Activation-Orders-Ziel ist nicht mehr unrezzte installierte ICE.",
+      "Das Forged-Activation-Orders-Ziel ist nicht mehr installierte ICE.",
     );
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const definition = definitionFor(state, targetIceId);
@@ -22341,7 +22487,11 @@ function resolveForgedActivationOrdersCorpChoice(
   const icePositionLabel =
     publicIcePositionLabelForCard(state, targetIceId) ?? serverLabel;
   if (selected === "rez_ice") {
+    if (mustInstance(state.cardInstances, targetIceId).rezzed)
+      throw new Error("Die ICE ist bereits gerezzt.");
     const rezCost = rezCostForCard(state, targetIceId);
+    if (state.corp.credits < rezCost)
+      throw new Error("Die Korp kann die ICE nicht rezzen.");
     spendCredits(state, "corp", rezCost);
     state.cardInstances[targetIceId] = {
       ...mustInstance(state.cardInstances, targetIceId),
@@ -25983,9 +26133,14 @@ function calculateRunnerLink(state: GameState): number {
           return Math.max(best, cardLink);
         }, 0);
   const link = Math.max(0, coreLink + installedLink + traceBaseLink);
-  if (!Number.isInteger(link) || link < 0)
+  const runTraceLinkBonus = Math.max(
+    0,
+    Math.floor(state.run?.runTraceLinkBonus ?? 0),
+  );
+  const effectiveLink = link + runTraceLinkBonus;
+  if (!Number.isInteger(effectiveLink) || effectiveLink < 0)
     throw new Error("Runner-Link ist ungueltig.");
-  return link;
+  return effectiveLink;
 }
 
 function applyIdentityStaticModifiers(state: GameState): void {

@@ -95,6 +95,20 @@ export type CardAccessEffectStepImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type CardSuccessfulRunFollowupImplementation =
+  | {
+      kind: "optional_make_run_after_successful_run";
+      limit: "once_per_turn_per_source";
+      cost: "none";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "reverse_ice_on_successful_run_fort";
+      timing: "immediately_after_successful_run";
+      cost: "none";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
 export type HostedProgramCapacityImplementation = {
   capacityMu: number;
   allowedCardTypes: readonly ["program"];
@@ -126,7 +140,11 @@ export type CardConditionImplementation =
   | { kind: "source_has_hosted_credits" }
   | { kind: "source_has_advancement_counters"; minimum: number }
   | { kind: "runner_attempted_run_last_turn"; minimumRuns: number }
-  | { kind: "runner_damaged_during_last_three_actions" };
+  | { kind: "runner_damaged_during_last_three_actions" }
+  | {
+      kind: "runner_made_successful_run_on_server_this_turn";
+      server: Extract<ServerId, "hq">;
+    };
 
 export type ActivatedCardAbilityImplementation = {
   kind: "activated";
@@ -216,6 +234,9 @@ export type CardEffectImplementation =
   | TrashOwnInstalledCardsForCreditsEffectImplementation
   | TrashCardsFromGripForCreditsEffectImplementation
   | ShuffleGripTrashAndStackThenDrawEffectImplementation
+  | PayRezCostToTrashRezzedIceEffectImplementation
+  | TrashUnrezzedIceEffectImplementation
+  | CorpChoiceRezOrTrashIceEffectImplementation
   | GainCreditsPerAdvancementCounterOnSourceEffectImplementation
   | DistributeAdvancementCountersEffectImplementation
   | MoveAdvancementCountersEffectImplementation;
@@ -469,6 +490,8 @@ export type MakeRunEffectImplementation = {
   target: {
     kind: "central_server";
     server: Extract<ServerId, "hq" | "rd" | "archives">;
+  } | {
+    kind: "chosen_server";
   };
   accessCount?: number;
   freeTrashAccessZones?: readonly Extract<ServerId, "hq" | "rd">[];
@@ -484,7 +507,28 @@ export type MakeRunEffectImplementation = {
   successfulRunRequiresCorpCredits?: boolean;
   successfulRunPrivateLookCount?: number;
   successfulRunArchivesMoveCount?: number;
+  followupRunOnEnd?: "optional";
+  bypassFirstIce?: boolean;
+  runTraceLinkBonus?: number;
   visibility: EventVisibilityClass;
+};
+
+export type PayRezCostToTrashRezzedIceEffectImplementation = {
+  kind: "pay_rez_cost_to_trash_rezzed_ice";
+  target: "chosen_rezzed_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type TrashUnrezzedIceEffectImplementation = {
+  kind: "trash_unrezzed_ice";
+  target: "chosen_unrezzed_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
+export type CorpChoiceRezOrTrashIceEffectImplementation = {
+  kind: "corp_choice_rez_or_trash_ice";
+  target: "chosen_installed_ice";
+  visibility: Extract<EventVisibilityClass, "public">;
 };
 
 export type PrivateLookEffectImplementation = {

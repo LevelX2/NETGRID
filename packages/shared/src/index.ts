@@ -806,6 +806,8 @@ export type RunState = {
   accessCount?: number;
   microtechAiInterfacePreAccessResolved?: boolean;
   badPublicityCredits?: number;
+  runTraceLinkBonus?: number;
+  runTraceLinkBonusSourceDefinitionId?: CardDefinitionId;
   bypassFirstIceRemaining?: boolean;
   encounterTaxForFutureIce?: number;
   breakSubroutineAdditionalCost?: number;

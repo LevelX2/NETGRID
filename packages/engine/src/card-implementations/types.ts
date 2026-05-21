@@ -10,6 +10,7 @@ import type {
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
+  CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
   HostedProgramCapacityImplementation,
@@ -39,6 +40,7 @@ export type CardImplementationDefinition = {
   flatlineReplacementSources?: readonly CardFlatlineReplacementSourceImplementation[];
   tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];
   trashPreventionSources?: readonly CardTrashPreventionSourceImplementation[];
+  successfulRunFollowups?: readonly CardSuccessfulRunFollowupImplementation[];
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";

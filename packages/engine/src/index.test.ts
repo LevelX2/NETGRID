@@ -1335,11 +1335,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       "trash_ice",
     ]);
     const drifted = structuredClone(state);
-    drifted.cardInstances[rdIce] = {
-      ...drifted.cardInstances[rdIce]!,
-      rezzed: true,
-      faceup: true,
-    };
+    removeEverywhere(drifted, rdIce);
     const driftResult = applyAction(drifted, {
       matchId: drifted.matchId,
       side: "corp",
@@ -7492,6 +7488,89 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         "onr_v1_131_microtech-backup-drive",
       )?.status,
     ).not.toBe("implemented");
+  });
+
+  it("migrates P3.48 run control cards into CardImplementation coverage", () => {
+    const implemented = [
+      "onr_v1_076_all-nighter",
+      "onr_v1_094_inside-job",
+      "onr_v1_112_stumble-through-wilderspace",
+      "onr_v1_123_bodyweight-data-creche",
+      "onr_v1_080_core-command-jettison-ice",
+      "onr_v1_109_security-code-worm-chip",
+      "onr_v1_044_netspace-inverter",
+      "onr_v1_086_forged-activation-orders",
+    ] as const;
+
+    for (const definitionId of implemented) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_123_bodyweight-data-creche")
+        ?.successfulRunFollowups,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "optional_make_run_after_successful_run",
+      }),
+    );
+    expect(
+      cardImplementationForDefinitionId("onr_v1_044_netspace-inverter")
+        ?.successfulRunFollowups,
+    ).toContainEqual(
+      expect.objectContaining({
+        kind: "reverse_ice_on_successful_run_fort",
+      }),
+    );
+    expect(cardImplementationForDefinitionId("onr_v1_098_lucidrine-booster-drug")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_088_fortress-respecification")).toBeUndefined();
+  });
+
+  it("starts Stumble through Wilderspace runs with a temporary trace-link bonus from CardImplementation", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p348-stumble-run-trace-link-bonus",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p348_stumble_runner",
+          name: "P3.48 Stumble Runner",
+          cards: [
+            { id: "onr_v1_112_stumble-through-wilderspace", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    moveRunnerCardToGrip(state, "onr_v1_112_stumble-through-wilderspace");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_112_stumble-through-wilderspace" &&
+        action.payload?.serverId === "rd",
+    );
+
+    expect(state.run?.attackedServerId).toBe("rd");
+    expect(state.run?.runTraceLinkBonus).toBe(9);
+    expect(state.run?.runTraceLinkBonusSourceDefinitionId).toBe(
+      "onr_v1_112_stumble-through-wilderspace",
+    );
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "play_event",
+      cardDefinitionId: "onr_v1_112_stumble-through-wilderspace",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+    );
   });
 
   it("hosts P3.46 programs on Daemons, applies hosted strength penalties and revalidates host capacity", () => {

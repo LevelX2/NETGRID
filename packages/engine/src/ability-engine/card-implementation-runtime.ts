@@ -80,6 +80,10 @@ export type CardImplementationRuntimeDependencies = {
   runnerInstalledCardIds: (state: GameState) => CardInstanceId[];
   runnerRunAttemptsLastTurn: (state: GameState) => number;
   runnerWasDamagedDuringLastThreeActions: (state: GameState) => boolean;
+  runnerMadeSuccessfulRunOnServerThisTurn: (
+    state: GameState,
+    server: Extract<ServerId, "hq">,
+  ) => boolean;
   spendClick: (state: GameState, side: Side) => void;
   spendCredits: (state: GameState, side: Side, amount: number) => void;
   createAction: (
@@ -118,7 +122,7 @@ export type CardImplementationRuntimeDependencies = {
   startRun: (
     state: GameState,
     legalAction: LegalAction,
-    serverId: Extract<ServerId, "hq" | "rd" | "archives">,
+    serverId: Exclude<ServerId, "new_remote">,
     options: CardEffectMakeRunOptions,
   ) => CardEffectMakeRunResult;
   startPrivateLook: (
@@ -288,6 +292,24 @@ export type CardImplementationRuntimeDependencies = {
     drawCount: number,
     removePlayedCardFromGame: true,
   ) => CardEffectHiddenInfoResult;
+  rezzedIceTargetCount: (state: GameState) => number;
+  unrezzedIceTargetCount: (state: GameState) => number;
+  installedIceTargetCount: (state: GameState) => number;
+  startPayRezCostToTrashRezzedIceChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
+  startTrashUnrezzedIceChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
+  startCorpChoiceRezOrTrashIceChoice: (
+    state: GameState,
+    legalAction: LegalAction,
+    sourceCardId: CardInstanceId,
+  ) => CardEffectHiddenInfoResult;
   addHostedCredits: (
     state: GameState,
     sourceCardId: CardInstanceId,
@@ -392,6 +414,11 @@ function cardImplementationConditionMet(
       );
     case "runner_damaged_during_last_three_actions":
       return deps.runnerWasDamagedDuringLastThreeActions(state);
+    case "runner_made_successful_run_on_server_this_turn":
+      return deps.runnerMadeSuccessfulRunOnServerThisTurn(
+        state,
+        condition.server,
+      );
     default: {
       const unknownCondition = condition as { kind?: string };
       throw new Error(
@@ -457,6 +484,12 @@ function canResolveOnPlayCardImplementationAbility(
       return deps.trashOwnInstalledCardTargetCount(state) >= effect.min;
     if (effect.kind === "trash_cards_from_grip_for_credits")
       return effect.max >= 0;
+    if (effect.kind === "pay_rez_cost_to_trash_rezzed_ice")
+      return deps.rezzedIceTargetCount(state) > 0;
+    if (effect.kind === "trash_unrezzed_ice")
+      return deps.unrezzedIceTargetCount(state) > 0;
+    if (effect.kind === "corp_choice_rez_or_trash_ice")
+      return deps.installedIceTargetCount(state) > 0;
     return true;
   });
 }
@@ -540,6 +573,10 @@ function assertOnPlayCardImplementationAbilityCanResolve(
     throw new Error("Der Runner hat im letzten Zug nicht genug Runs versucht.");
   if (ability.condition?.kind === "runner_damaged_during_last_three_actions")
     throw new Error("Der Runner wurde in den letzten drei Aktionen nicht verletzt.");
+  if (ability.condition?.kind === "runner_made_successful_run_on_server_this_turn")
+    throw new Error(
+      "Der Runner hat in diesem Zug keinen passenden erfolgreichen Run gemacht.",
+    );
   throw new Error("Die On-Play-Kartenbedingung ist nicht erfuellt.");
 }
 
@@ -1512,6 +1549,11 @@ export function resolveActivatedCardImplementationAbility(
       }),
       startRun: (serverId, options) =>
         deps.startRun(state, legalAction, serverId, options),
+      chosenRunServerId: () =>
+        String(legalAction.payload?.serverId ?? "") as Exclude<
+          ServerId,
+          "new_remote"
+        >,
       startPrivateLook: (zone, count) =>
         deps.startPrivateLook(
           state,
@@ -1740,6 +1782,11 @@ export function executeOnPlayCardImplementationAbility(
       }),
       startRun: (serverId, options) =>
         deps.startRun(state, legalAction, serverId, options),
+      chosenRunServerId: () =>
+        String(legalAction.payload?.serverId ?? "") as Exclude<
+          ServerId,
+          "new_remote"
+        >,
       startPrivateLook: (zone, count) =>
         deps.startPrivateLook(state, legalAction, cardId, definition.id, zone, count),
       exposeInstalledCard: (scope) =>
@@ -1891,6 +1938,16 @@ export function executeOnPlayCardImplementationAbility(
           drawCount,
           removePlayedCardFromGame,
         ),
+      startPayRezCostToTrashRezzedIceChoice: () =>
+        deps.startPayRezCostToTrashRezzedIceChoice(
+          state,
+          legalAction,
+          cardId,
+        ),
+      startTrashUnrezzedIceChoice: () =>
+        deps.startTrashUnrezzedIceChoice(state, legalAction, cardId),
+      startCorpChoiceRezOrTrashIceChoice: () =>
+        deps.startCorpChoiceRezOrTrashIceChoice(state, legalAction, cardId),
       addHostedCredits: (sourceCardId, amount) =>
         deps.addHostedCredits(state, sourceCardId, amount),
       removeRunnerTags: (mode, amount) =>

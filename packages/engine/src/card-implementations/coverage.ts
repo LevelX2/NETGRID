@@ -77,6 +77,9 @@ const IMPLEMENTED_DAMAGE_PREVENTION_LOCATION =
 const IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION =
   "packages/engine/src/card-implementations/onr-v1";
 
+const IMPLEMENTED_RUN_CONTROL_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1";
+
 const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
   Record<CardDefinitionId, string>
 > = {
@@ -174,6 +177,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/shield.ts",
   "onr_v1_038_joan-of-arc":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/joan-of-arc.ts",
+  "onr_v1_044_netspace-inverter":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/netspace-inverter.ts",
   "onr_v1_119_arasaka-portable-prototype":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/arasaka-portable-prototype.ts",
   "onr_v1_120_armadillo-armored-road-home":
@@ -182,6 +187,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/armored-fridge.ts",
   "onr_v1_122_artemis-2020":
     "packages/engine/src/card-implementations/onr-v1/runner/hardware/artemis-2020.ts",
+  "onr_v1_123_bodyweight-data-creche":
+    "packages/engine/src/card-implementations/onr-v1/runner/hardware/bodyweight-data-creche.ts",
   "onr_v1_148_access-through-alpha":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/access-through-alpha.ts",
   "onr_v1_149_access-to-arasaka":
@@ -234,12 +241,18 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/broker.ts",
   "onr_v1_079_bodyweight-synthetic-blood":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/bodyweight-synthetic-blood.ts",
+  "onr_v1_076_all-nighter":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/all-nighter.ts",
+  "onr_v1_080_core-command-jettison-ice":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/core-command-jettison-ice.ts",
   "onr_v1_081_custodial-position":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/custodial-position.ts",
   "onr_v1_084_edited-shipping-manifests":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/edited-shipping-manifests.ts",
   "onr_v1_085_executive-wiretaps":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/executive-wiretaps.ts",
+  "onr_v1_086_forged-activation-orders":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/forged-activation-orders.ts",
   "onr_v1_087_forgotten-backup-chip":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/forgotten-backup-chip.ts",
   "onr_v1_089_gideons-pawnshop":
@@ -250,6 +263,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/ice-and-datas-guide-to-the-net.ts",
   "onr_v1_093_if-you-want-it-done-right":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/if-you-want-it-done-right.ts",
+  "onr_v1_094_inside-job":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/inside-job.ts",
   "onr_v1_096_kilroy-was-here":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/kilroy-was-here.ts",
   "onr_v1_099_mantis-fixer-at-large":
@@ -276,6 +291,10 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/romp-through-hq.ts",
   onr_v1_108_score:
     "packages/engine/src/card-implementations/onr-v1/runner/preps/score.ts",
+  "onr_v1_109_security-code-worm-chip":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/security-code-worm-chip.ts",
+  "onr_v1_112_stumble-through-wilderspace":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/stumble-through-wilderspace.ts",
   "onr_v1_114_temple-microcode-outlet":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/temple-microcode-outlet.ts",
   "onr_v1_118_weather-to-finance-pipe":
@@ -777,6 +796,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for installed Runner trash-prevention source behavior.",
     );
     currentLocations.add(IMPLEMENTED_TAG_TRASH_PREVENTION_LOCATION);
+  }
+  if (implementation.successfulRunFollowups?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for successful-run follow-up behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_RUN_CONTROL_LOCATION);
   }
 
   return {
