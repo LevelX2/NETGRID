@@ -1,20 +1,27 @@
 ---
 activityId: act-2026-05-21-counter-display-stored-credits-and-agenda-pools
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-counter-display-shared-engine-projection-foundation
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "Broker load|BBS|Braindance|Detroit Police Contract|runner resources source-bound"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - git diff --check
 ---
 
 # CounterDisplay für gespeicherte Credits und Agenda-Pools
@@ -63,12 +70,12 @@ Gespeicherte Credits/Bits auf Karten und Score-Area-Credit-Pools sollen als fach
 
 ## Akzeptanzkriterien
 
-- [ ] Broker zeigt in `PlayerView.counterDisplays` gespeicherte `bit`-Credits als `stored_credit`.
-- [ ] Alle aktuell bekannten `add_hosted_credits`-Familien sind geprüft und entweder projiziert oder begründet ausgenommen.
-- [ ] Score-Area-Credit-Pools erhalten fachlich passende CounterDisplays ohne Web-Hardcoding als Quelle.
-- [ ] Verdeckte Korp-Karten leaken durch CounterDisplays keine Kartendaten oder Counterdetails.
-- [ ] Bestehende `counters` bleiben für Kompatibilität erhalten.
-- [ ] Checks: fokussierte Engine-Tests plus passende Typechecks.
+- [x] Broker zeigt in `PlayerView.counterDisplays` gespeicherte `bit`-Credits als Stored-Credit-Display.
+- [x] Alle aktuell bekannten `add_hosted_credits`-Familien sind geprüft und entweder projiziert oder begründet ausgenommen.
+- [x] Score-Area-Credit-Pools erhalten fachlich passende CounterDisplays ohne Web-Hardcoding als Quelle.
+- [x] Verdeckte Korp-Karten leaken durch CounterDisplays keine Kartendaten oder Counterdetails.
+- [x] Bestehende `counters` bleiben für Kompatibilität erhalten.
+- [x] Checks: fokussierte Engine-Tests plus passende Typechecks.
 
 ## Umsetzungshinweise
 
@@ -77,4 +84,4 @@ Gespeicherte Credits/Bits auf Karten und Score-Area-Credit-Pools sollen als fach
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Engine projiziert gespeicherte öffentliche Bit-/Hosted-Credit-Pools für die aktuell bekannten Quellen als `counterDisplays` mit `displayKind: "stored_credits"`, stabiler ID `stored_credits`, `counterType: "bit"` und `usageHint: "spendable"`. Abgedeckt sind Broker, Short-Term Contract, Rigged Investments, BBS Whispering Campaign, Braindance Campaign, Holovid Campaign, Rockerboy Promotion sowie die Score-Area-Pools Corporate Coup, Detroit Police Contract und Political Coup. Verdeckte Korp-Karten erhalten weiterhin keine Stored-Credit-Displays; `VisibleCard.counters` bleibt kompatibel erhalten.

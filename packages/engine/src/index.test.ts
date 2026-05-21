@@ -1611,6 +1611,19 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         .servers.flatMap((server) => server.root)
         .find((card) => card.instanceId === bbsId)?.counters?.bit,
     ).toBe(14);
+    expect(
+      getPlayerView(assetState, "corp")
+        .servers.flatMap((server) => server.root)
+        .find((card) => card.instanceId === bbsId)?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 14,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "14 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
     expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -1892,6 +1905,21 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(detroit.corp.credits).toBe(detroitCreditsBefore + 1);
     expect(cardCounterAmount(detroit, detroitId, "bit")).toBe(0);
     expect(detroit.corp.scoreArea).toContain(detroitId);
+
+    setCardCounterForTest(detroit, detroitId, "bit", 6);
+    expect(
+      getPlayerView(detroit, "corp").own.scoreArea.find(
+        (card) => card.instanceId === detroitId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 6,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "6 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
 
     let unscored = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.counterRecurring("p36-detroit-unscored"),
@@ -23610,6 +23638,19 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         action.payload?.cardId === brokerId,
     );
     expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === brokerId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 3,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "3 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
     brokerActions = getLegalActions(state, "runner").filter(
       (action) => action.payload?.cardId === brokerId,
     );
@@ -40514,6 +40555,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (server) => server.id === "remote_1",
     )?.root[0];
     expect(hiddenRunnerRoot?.known).toBe(false);
+    expect(hiddenRunnerRoot?.counterDisplays).toBeUndefined();
     expect(JSON.stringify(hiddenRunnerRoot)).not.toContain("braindance");
 
     const creditsBeforeRez = state.corp.credits;
@@ -40537,7 +40579,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         server.root.some(
           (card) =>
             card.definitionId === "onr_v1_311_braindance-campaign" &&
-            card.counters?.bit === 12,
+            card.counters?.bit === 12 &&
+            card.counterDisplays?.some(
+              (counterDisplay) =>
+                counterDisplay.id === "stored_credits" &&
+                counterDisplay.amount === 12 &&
+                counterDisplay.displayKind === "stored_credits",
+            ),
         ),
       ),
     ).toBe(true);
@@ -44255,6 +44303,19 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     expect(state.runner.credits).toBe(creditsBeforeShortTerm + 2);
     expect(cardCounterAmount(state, shortTermId, "bit")).toBe(10);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === shortTermId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 10,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "10 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_178_short-term-contract",

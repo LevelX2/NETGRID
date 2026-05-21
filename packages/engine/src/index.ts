@@ -29259,7 +29259,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(instance.counters
       ? { counters: cloneCounters(instance.counters) }
       : {}),
-    ...counterDisplaysField(counterDisplaysForKnownCard(instance)),
+    ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
     ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
     instance.selectedServerId
@@ -29284,10 +29284,27 @@ function counterDisplaysField(
     : {};
 }
 
+const STORED_CREDIT_COUNTER_DEFINITION_IDS = new Set<string>([
+  "onr_v1_154_broker",
+  "onr_v1_178_short-term-contract",
+  "onr_v1_174_rigged-investments",
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_193_corporate-coup",
+  "onr_v1_198_detroit-police-contract",
+  "onr_v1_209_political-coup",
+]);
+
 function counterDisplaysForKnownCard(
+  definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
-  return advancementCounterDisplays(instance.advancementCounters);
+  return [
+    ...(advancementCounterDisplays(instance.advancementCounters) ?? []),
+    ...(storedCreditCounterDisplays(definition, instance) ?? []),
+  ];
 }
 
 function counterDisplaysForHiddenCorpRootCard(
@@ -29309,6 +29326,26 @@ function advancementCounterDisplays(
       label: "Entwicklung",
       ariaLabel: `${amount} öffentliche Advancement-Counter`,
       usageHint: "score_modifier",
+    },
+  ];
+}
+
+function storedCreditCounterDisplays(
+  definition: CardDefinition,
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  if (!STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
+  const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "stored_credits",
+      amount,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: `${amount} gespeicherte Credits`,
+      counterType: "bit",
+      usageHint: "spendable",
     },
   ];
 }
