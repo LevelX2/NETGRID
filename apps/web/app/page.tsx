@@ -12019,14 +12019,14 @@ function CardActionsPopover({
 }) {
   return (
     <div className={`cardActionsPopover ${placement}`} role="menu" aria-label="Kartenaktionen" style={style} data-card-action-surface="true">
-      {actions.map((action) => {
+      {actions.map((action, index) => {
         const fullLabel = actionLabelForAction(action);
         const label = compactCardActionMenuLabel(action, fullLabel);
         return (
           <OverflowAwareActionButton
             action={action}
             className="button actionButton cardActionButton"
-            key={action.actionId}
+            key={`${action.actionId}:${index}`}
             onClick={() => onAction(action)}
             disabled={disabled}
             type="button"
