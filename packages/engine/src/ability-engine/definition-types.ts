@@ -668,6 +668,34 @@ export type CardAccessCountModifierImplementation = {
   visibility: EventVisibilityClass;
 };
 
+export type CardIcebreakerAbilityImplementation =
+  | {
+      kind: "break_subroutine";
+      cost: {
+        kind: "credit";
+        amount: number;
+      };
+      matches: CardIcebreakerBreakMatcherImplementation;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "increase_strength";
+      cost: {
+        kind: "credit";
+        amount: number;
+      };
+      amount: number;
+      duration: "current_encounter" | "current_run";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
+export type CardIcebreakerBreakMatcherImplementation =
+  | { kind: "any" }
+  | { kind: "ice_subtype"; subtype: string }
+  | { kind: "ice_subtype_any_of"; subtypes: readonly string[] }
+  | { kind: "subroutine_tag"; tag: string }
+  | { kind: "subroutine_traces" };
+
 export type RestrictedHostedCreditUse =
   | "using_icebreaker_during_run"
   | "using_icebreaker_during_run_non_noisy"

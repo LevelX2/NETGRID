@@ -47,6 +47,9 @@ const IMPLEMENTED_ADDITIONAL_SUBROUTINE_MODIFIER_LOCATION =
 const IMPLEMENTED_PRINTED_SUBROUTINE_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/corp/ice";
 
+const IMPLEMENTED_ICEBREAKER_ABILITY_LOCATION =
+  "packages/engine/src/card-implementations/onr-v1/runner/programs";
+
 const IMPLEMENTED_RUNNER_COUNTER_EFFECT_LOCATION =
   "packages/engine/src/card-implementations/onr-v1/corp/ice";
 
@@ -80,6 +83,42 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/programs/baedekers-net-map.ts",
   "onr_v1_004_bakdoor":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/bakdoor.ts",
+  "onr_v1_006_black-dahlia":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/black-dahlia.ts",
+  "onr_v1_014_codecracker":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/codecracker.ts",
+  "onr_v1_015_codeslinger":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/codeslinger.ts",
+  "onr_v1_016_cyfermaster":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/cyfermaster.ts",
+  "onr_v1_018_dogcatcher":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/dogcatcher.ts",
+  "onr_v1_021_dwarf":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/dwarf.ts",
+  "onr_v1_027_flak":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/flak.ts",
+  "onr_v1_039_krash":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/krash.ts",
+  "onr_v1_040_loony-goon":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/loony-goon.ts",
+  "onr_v1_052_raffles":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/raffles.ts",
+  "onr_v1_054_raptor":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/raptor.ts",
+  "onr_v1_055_reflector":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/reflector.ts",
+  "onr_v1_056_replicator":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/replicator.ts",
+  "onr_v1_060_shaka":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/shaka.ts",
+  "onr_v1_070_tinweasel":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/tinweasel.ts",
+  "onr_v1_072_wild-card":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/wild-card.ts",
+  "onr_v1_073_wizards-book":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/wizards-book.ts",
+  "onr_v1_074_worm":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/worm.ts",
   "onr_v1_011_cloak":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/cloak.ts",
   "onr_v1_035_invisibility":
@@ -628,6 +667,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_RUNNER_COUNTER_EFFECT_LOCATION);
   }
+  if (implementation.icebreakerAbilities?.length) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for simple Runner icebreaker break/pump ability behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ICEBREAKER_ABILITY_LOCATION);
+  }
   if (implementation.abilities?.some((ability) => ability.kind === "on_play")) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for printed-cost on-play effect behavior.",
@@ -726,16 +771,6 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
       reason:
         "Server-bound install-cost modifier and selected-server state are still implemented in legacy engine paths.",
       currentLocations: ["packages/engine/src/index.ts"],
-    },
-    {
-      cardDefinitionId: "onr_v1_039_krash",
-      status: "legacy_engine_special_case",
-      reason:
-        "Run-duration breaker strength modifier is still stored in RunState and reconstructed by ActiveModifier query.",
-      currentLocations: [
-        "packages/engine/src/index.ts",
-        "packages/engine/src/ability-engine/active-modifiers.ts",
-      ],
     },
   ];
 

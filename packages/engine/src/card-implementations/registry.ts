@@ -178,25 +178,43 @@ import { templeMicrocodeOutletImplementation } from "./onr-v1/runner/preps/templ
 import { weatherToFinancePipeImplementation } from "./onr-v1/runner/preps/weather-to-finance-pipe";
 import { baedekersNetMapImplementation } from "./onr-v1/runner/programs/baedekers-net-map";
 import { bakdoorImplementation } from "./onr-v1/runner/programs/bakdoor";
+import { blackDahliaImplementation } from "./onr-v1/runner/programs/black-dahlia";
 import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
+import { codecrackerImplementation } from "./onr-v1/runner/programs/codecracker";
+import { codeslingerImplementation } from "./onr-v1/runner/programs/codeslinger";
+import { cyfermasterImplementation } from "./onr-v1/runner/programs/cyfermaster";
+import { dogcatcherImplementation } from "./onr-v1/runner/programs/dogcatcher";
+import { dwarfImplementation } from "./onr-v1/runner/programs/dwarf";
 import { emergencySelfConstructImplementation } from "./onr-v1/runner/programs/emergency-self-construct";
 import { expertScheduleAnalyzerImplementation } from "./onr-v1/runner/programs/expert-schedule-analyzer";
+import { flakImplementation } from "./onr-v1/runner/programs/flak";
 import { forceShieldImplementation } from "./onr-v1/runner/programs/force-shield";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
 import { joanOfArcImplementation } from "./onr-v1/runner/programs/joan-of-arc";
+import { krashImplementation } from "./onr-v1/runner/programs/krash";
+import { loonyGoonImplementation } from "./onr-v1/runner/programs/loony-goon";
 import { microtechAiInterfaceImplementation } from "./onr-v1/runner/programs/microtech-ai-interface";
 import { mouseImplementation } from "./onr-v1/runner/programs/mouse";
 import { mysteryBoxImplementation } from "./onr-v1/runner/programs/mystery-box";
 import { newsgroupFilterImplementation } from "./onr-v1/runner/programs/newsgroup-filter";
 import { poltergeistImplementation } from "./onr-v1/runner/programs/poltergeist";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
+import { rafflesImplementation } from "./onr-v1/runner/programs/raffles";
+import { raptorImplementation } from "./onr-v1/runner/programs/raptor";
+import { reflectorImplementation } from "./onr-v1/runner/programs/reflector";
+import { replicatorImplementation } from "./onr-v1/runner/programs/replicator";
 import { scatterShotImplementation } from "./onr-v1/runner/programs/scatter-shot";
 import { seeyaImplementation } from "./onr-v1/runner/programs/seeya";
 import { selfModifyingCodeImplementation } from "./onr-v1/runner/programs/self-modifying-code";
+import { shakaImplementation } from "./onr-v1/runner/programs/shaka";
 import { shieldImplementation } from "./onr-v1/runner/programs/shield";
 import { shredderUplinkProtocolImplementation } from "./onr-v1/runner/programs/shredder-uplink-protocol";
 import { signpostImplementation } from "./onr-v1/runner/programs/signpost";
+import { tinweaselImplementation } from "./onr-v1/runner/programs/tinweasel";
 import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
+import { wildCardImplementation } from "./onr-v1/runner/programs/wild-card";
+import { wizardsBookImplementation } from "./onr-v1/runner/programs/wizards-book";
+import { wormImplementation } from "./onr-v1/runner/programs/worm";
 import { zetatechSoftwareInstallerImplementation } from "./onr-v1/runner/programs/zetatech-software-installer";
 import { accessThroughAlphaImplementation } from "./onr-v1/runner/resources/access-through-alpha";
 import { accessToArasakaImplementation } from "./onr-v1/runner/resources/access-to-arasaka";
@@ -252,25 +270,43 @@ export const CARD_IMPLEMENTATIONS = [
   weatherToFinancePipeImplementation,
   baedekersNetMapImplementation,
   bakdoorImplementation,
+  blackDahliaImplementation,
   cloakImplementation,
+  codecrackerImplementation,
+  codeslingerImplementation,
+  cyfermasterImplementation,
+  dogcatcherImplementation,
+  dwarfImplementation,
   emergencySelfConstructImplementation,
   expertScheduleAnalyzerImplementation,
+  flakImplementation,
   forceShieldImplementation,
   invisibilityImplementation,
   joanOfArcImplementation,
+  krashImplementation,
+  loonyGoonImplementation,
   microtechAiInterfaceImplementation,
   mouseImplementation,
   mysteryBoxImplementation,
   newsgroupFilterImplementation,
   poltergeistImplementation,
   rAndDProtocolFilesImplementation,
+  rafflesImplementation,
+  raptorImplementation,
+  reflectorImplementation,
+  replicatorImplementation,
   scatterShotImplementation,
   seeyaImplementation,
   selfModifyingCodeImplementation,
+  shakaImplementation,
   shieldImplementation,
   shredderUplinkProtocolImplementation,
   signpostImplementation,
+  tinweaselImplementation,
   vewyVewyQuietImplementation,
+  wildCardImplementation,
+  wizardsBookImplementation,
+  wormImplementation,
   zetatechSoftwareInstallerImplementation,
   accessThroughAlphaImplementation,
   accessToArasakaImplementation,

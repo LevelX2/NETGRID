@@ -5,6 +5,7 @@ import type {
   CardAccessHookImplementation,
   CardDamagePreventionSourceImplementation,
   CardFlatlineReplacementSourceImplementation,
+  CardIcebreakerAbilityImplementation,
   CardInstallAdditionalCostImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
@@ -21,6 +22,7 @@ export type CardImplementationDefinition = {
     while: "installed_before_and_after_rez";
   };
   printedSubroutines?: readonly CardPrintedSubroutineImplementation[];
+  icebreakerAbilities?: readonly CardIcebreakerAbilityImplementation[];
   modifiers?: CardModifierImplementation[];
   abilities?: CardAbilityImplementation[];
   accessEffects?: readonly CardAccessEffectImplementation[];

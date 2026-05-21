@@ -6991,6 +6991,312 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     ).toBe(false);
   });
 
+  const p344SimpleIcebreakers = [
+    "onr_v1_039_krash",
+    "onr_v1_014_codecracker",
+    "onr_v1_016_cyfermaster",
+    "onr_v1_052_raffles",
+    "onr_v1_070_tinweasel",
+    "onr_v1_073_wizards-book",
+    "onr_v1_021_dwarf",
+    "onr_v1_074_worm",
+    "onr_v1_006_black-dahlia",
+    "onr_v1_015_codeslinger",
+    "onr_v1_040_loony-goon",
+    "onr_v1_054_raptor",
+    "onr_v1_060_shaka",
+    "onr_v1_072_wild-card",
+    "onr_v1_027_flak",
+    "onr_v1_018_dogcatcher",
+    "onr_v1_055_reflector",
+    "onr_v1_056_replicator",
+  ] as const;
+
+  function p344MoveRunnerCardToGrip(
+    state: GameState,
+    definitionId: CardDefinitionId,
+  ): CardInstanceId {
+    if (
+      Object.values(state.cardInstances).some(
+        (card) => card.definitionId === definitionId,
+      )
+    )
+      return moveRunnerCardToGrip(state, definitionId);
+    const instanceId =
+      `p344_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
+    state.cardInstances[instanceId] = {
+      instanceId,
+      definitionId,
+      owner: "runner",
+      controller: "runner",
+      zone: { side: "runner", zone: "grip" },
+      faceup: true,
+      rezzed: true,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    state.runner.grip.unshift(instanceId);
+    return instanceId;
+  }
+
+  function p344PutCorpIceOnServer(
+    state: GameState,
+    serverId: "hq" | "rd" | "archives" | `remote_${number}`,
+    definitionId: CardDefinitionId,
+  ): CardInstanceId {
+    if (
+      Object.values(state.cardInstances).some(
+        (card) => card.definitionId === definitionId,
+      )
+    )
+      return putCorpIceOnServer(state, serverId, definitionId);
+    const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+    if (!server) throw new Error("Missing server");
+    const instanceId =
+      `p344_${definitionId}_${Object.keys(state.cardInstances).length}` as CardInstanceId;
+    server.ice.push(instanceId);
+    state.cardInstances[instanceId] = {
+      instanceId,
+      definitionId,
+      owner: "corp",
+      controller: "corp",
+      zone: { side: "corp", zone: "serverIce", serverId },
+      faceup: false,
+      rezzed: false,
+      advancementCounters: 0,
+      strengthModifier: 0,
+    };
+    return instanceId;
+  }
+
+  it("migrates P3.44 simple icebreakers into CardImplementation coverage", () => {
+    for (const definitionId of p344SimpleIcebreakers) {
+      const implementation = cardImplementationForDefinitionId(definitionId);
+      expect(implementation?.icebreakerAbilities?.length, definitionId).toBeGreaterThan(0);
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      CARD_IMPLEMENTATION_COVERAGE_OVERRIDES.some(
+        (entry) => entry.cardDefinitionId === "onr_v1_039_krash",
+      ),
+    ).toBe(false);
+  });
+
+  function p344EncounterState(
+    seed: string,
+    breakerDefinitionId: CardDefinitionId,
+    iceDefinitionId: CardDefinitionId,
+  ): { state: GameState; breakerId: CardInstanceId } {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed,
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 80;
+    state.runner.clicks = 20;
+    state.runner.memoryLimit = 20;
+    state.corp.credits = 80;
+    p344MoveRunnerCardToGrip(state, breakerDefinitionId);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === breakerDefinitionId,
+    );
+    const breakerId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === breakerDefinitionId,
+    );
+    if (!breakerId) throw new Error(`Missing breaker ${breakerDefinitionId}`);
+    p344PutCorpIceOnServer(state, "rd", iceDefinitionId);
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === iceDefinitionId,
+    );
+    return { state, breakerId };
+  }
+
+  function p344PumpUntilBreak(
+    state: GameState,
+    breakerId: CardInstanceId,
+  ): GameState {
+    let current = state;
+    for (let attempt = 0; attempt < 10; attempt += 1) {
+      const breakAction = getLegalActions(current, "runner").find(
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === breakerId &&
+          action.payload?.subroutineIndex === 0,
+      );
+      if (breakAction) return current;
+      const pumpAction = getLegalActions(current, "runner").find(
+        (action) =>
+          action.type === "pump_breaker" &&
+          String(action.payload?.breakerId) === breakerId,
+      );
+      if (!pumpAction) return current;
+      current = apply(current, "runner", (action) => action.actionId === pumpAction.actionId);
+    }
+    return current;
+  }
+
+  it("runs P3.44 simple icebreaker break and pump matchers without duplicate actions", () => {
+    const specs = [
+      ["Krash", "onr_v1_039_krash", "simple_code_gate_ice", 2, true],
+      ["Codecracker", "onr_v1_014_codecracker", "simple_code_gate_ice", 0, true],
+      ["Cyfermaster", "onr_v1_016_cyfermaster", "simple_code_gate_ice", 2, true],
+      ["Raffles", "onr_v1_052_raffles", "simple_code_gate_ice", 1, true],
+      ["Tinweasel", "onr_v1_070_tinweasel", "simple_code_gate_ice", 0, false],
+      ["Wizard's Book", "onr_v1_073_wizards-book", "simple_code_gate_ice", 0, true],
+      ["Dwarf", "onr_v1_021_dwarf", "onr_v1_237_data-wall", 1, true],
+      ["Worm", "onr_v1_074_worm", "onr_v1_237_data-wall", 0, true],
+      ["Black Dahlia", "onr_v1_006_black-dahlia", "simple_sentry_ice", 2, true],
+      ["Codeslinger", "onr_v1_015_codeslinger", "simple_sentry_ice", 1, false],
+      ["Loony Goon", "onr_v1_040_loony-goon", "simple_sentry_ice", 1, true],
+      ["Raptor", "onr_v1_054_raptor", "simple_sentry_ice", 2, true],
+      ["Shaka", "onr_v1_060_shaka", "simple_sentry_ice", 1, true],
+      ["Wild Card", "onr_v1_072_wild-card", "simple_sentry_ice", 0, true],
+      ["Flak", "onr_v1_027_flak", "onr_v1_280_zombie", 1, true],
+      ["Dogcatcher", "onr_v1_018_dogcatcher", "onr_v1_243_fetch-4-0-1", 1, true],
+      ["Reflector", "onr_v1_055_reflector", "onr_v1_271_tko-2-0", 0, false],
+      ["Replicator", "onr_v1_056_replicator", "onr_v1_221_asp", 0, true],
+    ] as const;
+
+    for (const [label, breakerDefinitionId, iceDefinitionId, expectedCost, hasPump] of specs) {
+      const { state: initialEncounter, breakerId } = p344EncounterState(
+        `p344-${label}`,
+        breakerDefinitionId,
+        iceDefinitionId,
+      );
+      let state = p344PumpUntilBreak(initialEncounter, breakerId);
+      expect(
+        getLegalActions(initialEncounter, "runner").some(
+          (action) =>
+            action.type === "pump_breaker" &&
+            String(action.payload?.breakerId) === breakerId,
+        ),
+        label,
+      ).toBe(hasPump);
+      const breakActions = getLegalActions(state, "runner").filter(
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === breakerId &&
+          action.payload?.subroutineIndex === 0,
+      );
+      expect(breakActions, label).toHaveLength(1);
+      expect(breakActions[0]?.costs[0]?.credits, label).toBe(expectedCost);
+      const beforeBreak = structuredClone(state);
+      const replayStart = state.eventLog.length;
+      state = apply(state, "runner", (action) => action.actionId === breakActions[0]?.actionId);
+      expect(state.run?.brokenSubroutineIndexes, label).toContain(0);
+      expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+        actionType: "break_subroutine",
+        cardDefinitionId: breakerDefinitionId,
+      });
+      expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload), label).not.toMatch(
+        /"privatePayload"|"cardInstances"|"grip"|"hq"|"rd"/,
+      );
+      const replay = replayEvents(beforeBreak, state.eventLog.slice(replayStart));
+      expect(replay.ok, label).toBe(true);
+      expect(hashState(replay.state), label).toBe(hashState(state));
+    }
+  });
+
+  it("keeps P3.44 negative matchers and killer restricted credits scoped", () => {
+    let dogcatcher = p344EncounterState(
+      "p344-dogcatcher-negative",
+      "onr_v1_018_dogcatcher",
+      "simple_sentry_ice",
+    ).state;
+    dogcatcher = p344PumpUntilBreak(
+      dogcatcher,
+      dogcatcher.runner.rig.programs.find(
+        (id) => dogcatcher.cardInstances[id]?.definitionId === "onr_v1_018_dogcatcher",
+      )!,
+    );
+    expect(
+      getLegalActions(dogcatcher, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          sourceDefinition(dogcatcher, action) === "onr_v1_018_dogcatcher",
+      ),
+    ).toBe(false);
+
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p344-killer-restricted-credits",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 40;
+    state.runner.clicks = 10;
+    state.runner.memoryLimit = 10;
+    state.corp.credits = 20;
+    p344MoveRunnerCardToGrip(state, "onr_v1_147_zz22-speed-chip");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_147_zz22-speed-chip",
+    );
+    const zz22Id = state.runner.rig.hardware.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_147_zz22-speed-chip",
+    );
+    expect(zz22Id).toBeDefined();
+    p344MoveRunnerCardToGrip(state, "onr_v1_006_black-dahlia");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_006_black-dahlia",
+    );
+    state.runner.credits = 0;
+    p344PutCorpIceOnServer(state, "rd", "simple_sentry_ice");
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_sentry_ice",
+    );
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_006_black-dahlia",
+    );
+    expect(breakAction.costs[0]?.credits).toBe(2);
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(zz22Id && cardCounterAmount(state, zz22Id, "bit")).toBe(0);
+    expect(state.runner.credits).toBe(0);
+  });
+
   it("plays the unlocked R&D and HQ multiaccess events with hidden queues", () => {
     let rdState = toRunnerTurn(v123CardReleaseGame("v123-custodial-position"));
     moveRunnerCardToGrip(rdState, "onr_v1_081_custodial-position");
@@ -43298,6 +43604,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       { id: "simple_barrier_ice", quantity: 2 },
       { id: "simple_code_gate_ice", quantity: 2 },
       { id: "simple_sentry_ice", quantity: 2 },
+      { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
       { id: "simple_economy_operation", quantity: 8 },
     ],
   };
@@ -43470,7 +43777,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       ["onr_v1_006_black-dahlia", "simple_sentry_ice"],
       ["onr_v1_015_codeslinger", "simple_sentry_ice"],
       ["onr_v1_016_cyfermaster", "simple_code_gate_ice"],
-      ["onr_v1_018_dogcatcher", "simple_barrier_ice"],
+      ["onr_v1_018_dogcatcher", "onr_v1_243_fetch-4-0-1"],
       ["onr_v1_019_dropp", "simple_code_gate_ice"],
     ] as const;
 
