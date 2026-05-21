@@ -29259,6 +29259,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(instance.counters
       ? { counters: cloneCounters(instance.counters) }
       : {}),
+    ...counterDisplaysField(counterDisplaysForKnownCard(instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
     ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
     instance.selectedServerId
@@ -29273,6 +29274,43 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+function counterDisplaysField(
+  counterDisplays: VisibleCard["counterDisplays"],
+): Pick<VisibleCard, "counterDisplays"> | Record<string, never> {
+  return counterDisplays && counterDisplays.length > 0
+    ? { counterDisplays }
+    : {};
+}
+
+function counterDisplaysForKnownCard(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  return advancementCounterDisplays(instance.advancementCounters);
+}
+
+function counterDisplaysForHiddenCorpRootCard(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  return advancementCounterDisplays(instance.advancementCounters);
+}
+
+function advancementCounterDisplays(
+  advancementCounters: number,
+): VisibleCard["counterDisplays"] {
+  const amount = Math.max(0, Math.floor(advancementCounters));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "advancement",
+      amount,
+      displayKind: "advancement",
+      label: "Entwicklung",
+      ariaLabel: `${amount} öffentliche Advancement-Counter`,
+      usageHint: "score_modifier",
+    },
+  ];
 }
 
 function visibleRunnerRigCardForViewer(
@@ -29347,6 +29385,9 @@ function visibleCorpCard(
       known: false,
       rezzed: false,
       advancementCounters: area === "root" ? instance.advancementCounters : 0,
+      ...(area === "root"
+        ? counterDisplaysField(counterDisplaysForHiddenCorpRootCard(instance))
+        : {}),
     };
   }
   return visibleOwnCard(state, id);

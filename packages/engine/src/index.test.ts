@@ -4521,6 +4521,7 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
       throw new Error("Missing advanced hidden agenda fixture");
     state.cardInstances[advancedAgendaId].advancementCounters = 5;
 
+    const stateHashBeforeViews = hashState(state);
     const runnerView = getPlayerView(state, "runner");
     const corpView = getPlayerView(state, "corp");
     const serialized = JSON.stringify(runnerView);
@@ -4546,24 +4547,45 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
       known: false,
       rezzed: false,
       advancementCounters: 5,
+      counterDisplays: [
+        {
+          id: "advancement",
+          amount: 5,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "5 öffentliche Advancement-Counter",
+          usageHint: "score_modifier",
+        },
+      ],
     });
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("title");
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("definitionId");
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("type");
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty(
       "advancementRequirement",
     );
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("agendaPoints");
-    expect(
-      corpView.servers
+    const corpAdvancedRoot = corpView.servers
         .flatMap((server) => server.root)
-        .find((card) => card.instanceId === advancedAgendaId),
-    ).toMatchObject({
+        .find((card) => card.instanceId === advancedAgendaId);
+    expect(corpAdvancedRoot).toMatchObject({
       known: true,
       title: "Simple Agenda",
       advancementCounters: 5,
       advancementRequirement: 3,
       agendaPoints: 2,
+      counterDisplays: [
+        {
+          id: "advancement",
+          amount: 5,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "5 öffentliche Advancement-Counter",
+          usageHint: "score_modifier",
+        },
+      ],
     });
+    expect(hashState(state)).toBe(stateHashBeforeViews);
     expect(runnerView.opponent.handCount).toBe(state.corp.hq.length);
     expect(runnerView.opponent.deckCount).toBe(state.corp.rd.length);
     expect(runnerView.opponent.discardCount).toBe(state.corp.archives.length);

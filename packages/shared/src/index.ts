@@ -1154,6 +1154,30 @@ export type ReplayResult = {
   errors: string[];
 };
 
+export type CounterDisplayKind =
+  | "advancement"
+  | "stored_credits"
+  | "recurring_credit"
+  | "virus"
+  | "trace"
+  | "generic_counter";
+
+export type CounterUsageHint =
+  | "spendable"
+  | "refreshing"
+  | "score_modifier"
+  | "status_marker";
+
+export type CounterDisplay = {
+  id: string;
+  amount: number;
+  displayKind: CounterDisplayKind;
+  label: string;
+  ariaLabel: string;
+  counterType?: CounterType;
+  usageHint?: CounterUsageHint;
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -1176,6 +1200,7 @@ export type VisibleCard = {
   agendaPoints?: number;
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
+  counterDisplays?: CounterDisplay[];
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedServerLabel?: string;
