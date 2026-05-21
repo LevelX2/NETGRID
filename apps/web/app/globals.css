@@ -4035,6 +4035,30 @@ select {
   transform: translateX(-50%) translateY(0);
 }
 
+.sidePanel .actions > .actionButton[data-tooltip]::before,
+.sidePanel .selectedActionGroup > .actionButton[data-tooltip]::before {
+  left: 28px;
+  transform: translateY(-3px);
+}
+
+.sidePanel .actions > .actionButton[data-tooltip]::after,
+.sidePanel .selectedActionGroup > .actionButton[data-tooltip]::after {
+  left: 0;
+  max-width: min(430px, calc(100vw - 42px));
+  transform: translateY(-3px);
+}
+
+.sidePanel .actions > .actionButton[data-tooltip]:hover::before,
+.sidePanel .actions > .actionButton[data-tooltip]:hover::after,
+.sidePanel .actions > .actionButton[data-tooltip]:focus-visible::before,
+.sidePanel .actions > .actionButton[data-tooltip]:focus-visible::after,
+.sidePanel .selectedActionGroup > .actionButton[data-tooltip]:hover::before,
+.sidePanel .selectedActionGroup > .actionButton[data-tooltip]:hover::after,
+.sidePanel .selectedActionGroup > .actionButton[data-tooltip]:focus-visible::before,
+.sidePanel .selectedActionGroup > .actionButton[data-tooltip]:focus-visible::after {
+  transform: translateY(0);
+}
+
 .selectedActionGroup {
   padding: 8px;
   border: 1px solid color-mix(in srgb, var(--runner), var(--line) 50%);
@@ -8163,6 +8187,14 @@ select,
 .rightRail {
   position: sticky;
   top: 12px;
+}
+
+.sidePanel {
+  z-index: 12;
+}
+
+.sidePanel.panel {
+  overflow: visible;
 }
 
 .boardPanel {
