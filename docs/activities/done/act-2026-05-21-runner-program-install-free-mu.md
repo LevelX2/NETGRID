@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-05-21-runner-program-install-free-mu
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "Runner trash installed programs|cancels or rejects invalid program-trash|memory chips"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - git diff --check
 ---
 
 # Runner-Programminstallation: Programme vor Installation trashen
@@ -56,16 +62,16 @@ Normale Runner-Programminstallationen aus dem Grip sollen die regelhafte Install
 
 ## Akzeptanzkriterien
 
-- [ ] Bei `4/4 MU` und mindestens einem installierten MU-belegenden Programm erscheint für ein bezahlbares 1-MU-Programm im Grip ein legaler Installationspfad.
-- [ ] Bei ausreichender freier MU kann der Runner das Programm ohne Trash installieren oder optional installierte Programme vorher trashen.
-- [ ] Die Trash-Choice enthält nur installierte Runner-Programme und keine Hardware, Resources oder verdeckten/irrelevanten Karten.
-- [ ] Eine Auswahl, die nach Trashen nicht genug MU freimacht, wird durch `applyAction` abgelehnt oder durch die Choice-Regeln verhindert.
-- [ ] Wenn der Runner bei MU-Mangel keine ausreichende Auswahl bestätigt, wird die Installation nicht durchgeführt und der Zustand bleibt für Klick, Credits, Quelle und Rig konsistent.
-- [ ] Nach erfolgreicher Auswahl liegen die geopferten Programme im Heap, das neue Programm liegt im Rig, `memoryUsed` ist korrekt und `validateGameState` bleibt grün.
-- [ ] Wrong-side-, stale-state-, falsche Zielkarten- und entfernte-Quellkarte-Fälle sind abgedeckt.
-- [ ] Replay und StateHash bleiben deterministisch.
-- [ ] PublicEvents/Chronik bleiben side-sicher und zeigen keine verdeckten Informationen.
-- [ ] Bestehende Tests für `Self-Modifying Code`, `The Shell Traders`, `Valu-Pak Software Bundle`, Hosting und `Zetatech Software Installer` bleiben grün.
+- [x] Bei `4/4 MU` und mindestens einem installierten MU-belegenden Programm erscheint für ein bezahlbares 1-MU-Programm im Grip ein legaler Installationspfad.
+- [x] Bei ausreichender freier MU kann der Runner das Programm ohne Trash installieren oder optional installierte Programme vorher trashen.
+- [x] Die Trash-Choice enthält nur installierte Runner-Programme und keine Hardware, Resources oder verdeckten/irrelevanten Karten.
+- [x] Eine Auswahl, die nach Trashen nicht genug MU freimacht, wird durch `applyAction` abgelehnt oder durch die Choice-Regeln verhindert.
+- [x] Wenn der Runner bei MU-Mangel keine ausreichende Auswahl bestätigt, wird die Installation nicht durchgeführt und der Zustand bleibt für Klick, Credits, Quelle und Rig konsistent.
+- [x] Nach erfolgreicher Auswahl liegen die geopferten Programme im Heap, das neue Programm liegt im Rig, `memoryUsed` ist korrekt und `validateGameState` bleibt grün.
+- [x] Wrong-side-, stale-state-, falsche Zielkarten- und entfernte-Quellkarte-Fälle sind abgedeckt.
+- [x] Replay und StateHash bleiben deterministisch.
+- [x] PublicEvents/Chronik bleiben side-sicher und zeigen keine verdeckten Informationen.
+- [x] Bestehende Tests für `Self-Modifying Code`, `The Shell Traders`, `Valu-Pak Software Bundle`, Hosting und `Zetatech Software Installer` bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -79,4 +85,4 @@ Normale Runner-Programminstallationen aus dem Grip sollen die regelhafte Install
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Normale Runner-Programminstallationen aus dem Grip haben jetzt einen generischen `select_cards`-Pfad für Programmtrash vor der Installation. Bei MU-Mangel bleibt ein legaler Pfad sichtbar, die finale Choice revalidiert Quelle, Seite, Timing, Klick, Credits, Unique-Regeln, Zielkarten und finalen MU-Zustand. Leere Auswahl bei MU-Mangel bricht ohne Klick-/Credit-/Boardkosten ab; erfolgreiche Auswahl trasht öffentliche installierte Programme in den Heap und installiert danach das Grip-Programm. Abgedeckt durch fokussierte Regressionen, Engine-Typecheck, vollständige Engine-Tests und `git diff --check`.

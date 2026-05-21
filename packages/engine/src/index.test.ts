@@ -5585,7 +5585,7 @@ describe("V1.0.5K Card Release", () => {
           action.type === "install_card" &&
           sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger",
       ),
-    ).toBe(false);
+    ).toBe(true);
 
     moveRunnerCardToGrip(gatedState, "onr_v1_144_tycho-mem-chip");
     gatedState = apply(
@@ -5603,6 +5603,158 @@ describe("V1.0.5K Card Release", () => {
           sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger",
       ),
     ).toBe(true);
+  });
+
+  it("lets Runner trash installed programs before normal grip program installs", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("runner-program-trash-install"));
+    state.runner.credits = 40;
+    state.runner.clicks = 10;
+    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
+    const rafflesId = installRunnerProgramForTest(state, "onr_v1_052_raffles");
+    installRunnerProgramForTest(state, "onr_v1_054_raptor");
+    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
+    installRunnerHardwareForTest(state, "onr_v1_144_tycho-mem-chip");
+    const sourceId = moveRunnerCardCopyToGrip(state, "onr_v1_015_codeslinger");
+    const initial = structuredClone(state);
+
+    expect(state.runner.memoryUsed).toBe(4);
+    const installAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_015_codeslinger" &&
+        action.payload?.runnerProgramTrashBeforeInstall === true,
+    );
+
+    state = apply(state, "runner", (action) => action.actionId === installAction.actionId);
+    expect(state.runner.clicks).toBe(10);
+    expect(state.runner.credits).toBe(40);
+    expect(state.runner.grip).toContain(sourceId);
+    expect(state.pendingChoice?.source).toContain(
+      "runner_program_trash_before_install",
+    );
+    expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(
+      state.pendingChoice?.options.every(
+        (option) =>
+          typeof option.value === "string" &&
+          state.runner.rig.programs.includes(option.value),
+      ),
+    ).toBe(true);
+
+    const trashOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === rafflesId,
+    )?.id;
+    if (!trashOptionId) throw new Error("Missing Raffles trash option");
+    state = applyChoice(state, "runner", trashOptionId);
+
+    expect(state.runner.heap).toContain(rafflesId);
+    expect(state.runner.rig.programs).toContain(sourceId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.runner.clicks).toBe(9);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("cancels or rejects invalid program-trash install choices without changing install costs", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("runner-program-trash-cancel"));
+    state.runner.credits = 40;
+    state.runner.clicks = 10;
+    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
+    const rafflesId = installRunnerProgramForTest(state, "onr_v1_052_raffles");
+    installRunnerProgramForTest(state, "onr_v1_054_raptor");
+    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
+    const sourceId = moveRunnerCardCopyToGrip(state, "onr_v1_015_codeslinger");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_015_codeslinger" &&
+        action.payload?.runnerProgramTrashBeforeInstall === true,
+    );
+
+    const clicksBeforeChoice = state.runner.clicks;
+    const creditsBeforeChoice = state.runner.credits;
+    const cancelled = applyChoices(state, "runner", []);
+    expect(cancelled.pendingChoice).toBeUndefined();
+    expect(cancelled.runner.grip).toContain(sourceId);
+    expect(cancelled.runner.rig.programs).not.toContain(sourceId);
+    expect(cancelled.runner.clicks).toBe(clicksBeforeChoice);
+    expect(cancelled.runner.credits).toBe(creditsBeforeChoice);
+    expect(cancelled.runner.memoryUsed).toBe(4);
+
+    const choiceState = structuredClone(state);
+    const resolveAction = mustAction(
+      choiceState,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const trashOptionId = choiceState.pendingChoice?.options.find(
+      (option) => option.value === rafflesId,
+    )?.id;
+    if (!trashOptionId) throw new Error("Missing Raffles trash option");
+
+    const wrongSide = applyAction(choiceState, {
+      matchId: choiceState.matchId,
+      side: "corp",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: choiceState.stateVersion,
+      selectedChoices: {
+        choiceId: choiceState.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOptionId],
+      },
+      idempotencyKey: "corp-wrong-side-program-trash",
+    });
+    expect(wrongSide.ok).toBe(false);
+
+    const stale = applyAction(choiceState, {
+      matchId: choiceState.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: choiceState.stateVersion - 1,
+      selectedChoices: {
+        choiceId: choiceState.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOptionId],
+      },
+      idempotencyKey: "runner-stale-program-trash",
+    });
+    expect(stale.ok).toBe(false);
+
+    const fakeTarget = applyAction(choiceState, {
+      matchId: choiceState.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: choiceState.stateVersion,
+      selectedChoices: {
+        choiceId: choiceState.pendingChoice?.choiceId,
+        selectedOptionIds: ["card_not_installed"],
+      },
+      idempotencyKey: "runner-fake-program-trash",
+    });
+    expect(fakeTarget.ok).toBe(false);
+
+    const removedSource = structuredClone(choiceState);
+    removeEverywhere(removedSource, sourceId);
+    const missingSource = applyAction(removedSource, {
+      matchId: removedSource.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: removedSource.stateVersion,
+      selectedChoices: {
+        choiceId: removedSource.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOptionId],
+      },
+      idempotencyKey: "runner-missing-source-program-trash",
+    });
+    expect(missingSource.ok).toBe(false);
   });
 
   it("breaks matching V1.0.5K ICE subroutines and rejects mismatched breaker targets", () => {

@@ -4154,6 +4154,42 @@ function runnerInstallableProgramIdsForValuPak(
   });
 }
 
+function installedRunnerProgramTrashOptionsForInstall(
+  state: GameState,
+): CardInstanceId[] {
+  return state.runner.rig.programs.slice().sort();
+}
+
+function runnerProgramInstallMemoryReachableAfterTrash(
+  state: GameState,
+  definition: CardDefinition,
+): boolean {
+  const memoryCost = definition.memoryCost ?? 0;
+  if (state.runner.memoryUsed + memoryCost <= runnerMemoryLimit(state))
+    return true;
+  const maximumFreedMemory = installedRunnerProgramTrashOptionsForInstall(
+    state,
+  ).reduce((sum, cardId) => {
+    if (!runnerProgramUsesMemory(state, cardId)) return sum;
+    return sum + (definitionFor(state, cardId).memoryCost ?? 0);
+  }, 0);
+  return (
+    state.runner.memoryUsed + memoryCost - maximumFreedMemory <=
+    runnerMemoryLimit(state)
+  );
+}
+
+function shouldOfferRunnerProgramTrashBeforeInstall(
+  state: GameState,
+  definition: CardDefinition,
+): boolean {
+  return (
+    definition.type === "program" &&
+    installedRunnerProgramTrashOptionsForInstall(state).length > 0 &&
+    runnerProgramInstallMemoryReachableAfterTrash(state, definition)
+  );
+}
+
 function clearValuPakProgramInstallFlags(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);
   flags.valuPakProgramInstallActionsRemaining = 0;
@@ -4325,6 +4361,26 @@ function runnerMainActions(state: GameState): LegalAction[] {
           id,
           [{ clicks: 1, credits: definition.installCost ?? 0 }],
           { cardId: id },
+        ),
+      );
+    }
+    if (
+      hasClicks &&
+      definition.type === "program" &&
+      !uniqueBlocked &&
+      availableRunnerProgramInstallCredits(state) >=
+        (definition.installCost ?? 0) &&
+      shouldOfferRunnerProgramTrashBeforeInstall(state, definition)
+    ) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "install_card",
+          `${definition.title} mit Programmtrash installieren`,
+          id,
+          [{ clicks: 1, credits: definition.installCost ?? 0 }],
+          { cardId: id, runnerProgramTrashBeforeInstall: true },
         ),
       );
     }
@@ -10347,6 +10403,141 @@ function resolveAiChiefFinancialOfficer(
   };
 }
 
+function startRunnerProgramTrashBeforeInstallChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): void {
+  if (!state.runner.grip.includes(sourceCardId))
+    throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.type !== "program")
+    throw new Error(
+      "Nur Programme koennen vor der Installation Programmtrash oeffnen.",
+    );
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
+    throw new Error("Nicht genug Credits fuer die Programminstallation.");
+  const options = installedRunnerProgramTrashOptionsForInstall(state).map(
+    (cardId) => {
+      const optionDefinition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: optionDefinition.title,
+        value: cardId,
+      };
+    },
+  );
+  if (options.length === 0)
+    throw new Error("Es gibt kein installiertes Programm zum Trashen.");
+  if (!runnerProgramInstallMemoryReachableAfterTrash(state, definition))
+    throw new Error("Durch Programmtrash kann nicht genug MU freigemacht werden.");
+  state.pendingChoice = {
+    choiceId: `runner_program_trash_before_install_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Programme vor Installation trashen",
+    kind: "select_cards",
+    options,
+    minSelections: 0,
+    maxSelections: options.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function resolveRunnerProgramTrashBeforeInstallChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("runner_program_trash_before_install"))
+    throw new Error("Es ist keine Programmtrash-Installationschoice offen.");
+  const sourceCardId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (!sourceCardId || !state.runner.grip.includes(sourceCardId))
+    throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
+  if (state.phase !== "runner_action_phase" || state.timingPoint !== "runner_action.main")
+    throw new Error("Programme koennen nur im Runner-Aktionsfenster installiert werden.");
+  if (state.runner.clicks <= 0)
+    throw new Error("Der Runner hat keinen Klick fuer die Installation.");
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.type !== "program")
+    throw new Error("Nur Programme koennen ueber diese Choice installiert werden.");
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
+    throw new Error("Nicht genug Credits fuer die Programminstallation.");
+
+  const trashIds = selectedChoiceCardIds(choice, playerAction);
+  const uniqueTrashIds = [...new Set(trashIds)];
+  if (uniqueTrashIds.length !== trashIds.length)
+    throw new Error("Die Programmtrash-Auswahl enthaelt doppelte Karten.");
+  for (const cardId of uniqueTrashIds) {
+    if (!state.runner.rig.programs.includes(cardId))
+      throw new Error("Die Programmtrash-Auswahl enthaelt kein installiertes Programm.");
+    if (definitionFor(state, cardId).type !== "program")
+      throw new Error("Nur installierte Programme koennen getrasht werden.");
+  }
+
+  const memoryAfterSelection =
+    state.runner.memoryUsed +
+    (definition.memoryCost ?? 0) -
+    uniqueTrashIds.reduce((sum, cardId) => {
+      if (!runnerProgramUsesMemory(state, cardId)) return sum;
+      return sum + (definitionFor(state, cardId).memoryCost ?? 0);
+    }, 0);
+  const needsMemory = memoryAfterSelection > runnerMemoryLimit(state);
+  if (needsMemory && uniqueTrashIds.length === 0) {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      sourceDefinitionId: definition.id,
+      runnerProgramTrashBeforeInstall: true,
+      installed: false,
+      installCancelled: true,
+      installBlockedReason: "insufficient_memory",
+    };
+    return;
+  }
+  if (needsMemory)
+    throw new Error("Die Programmtrash-Auswahl macht nicht genug MU frei.");
+
+  const trashedDefinitionIds = uniqueTrashIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+  for (const cardId of uniqueTrashIds) trashRunnerInstalledCardToHeap(state, cardId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId: sourceCardId,
+    runnerProgramTrashBeforeInstall: true,
+    runnerProgramTrashBeforeInstallResolved: true,
+    trashedCount: uniqueTrashIds.length,
+    ...(trashedDefinitionIds.length > 0
+      ? { trashedCardDefinitionIds: trashedDefinitionIds.join(",") }
+      : {}),
+  };
+  installCard(state, legalAction);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    sourceDefinitionId: definition.id,
+    installed: true,
+    memoryUsedAfter: state.runner.memoryUsed,
+    memoryLimitAfter: runnerMemoryLimit(state),
+  };
+}
+
 function installCard(state: GameState, legalAction: LegalAction): void {
   const cardId = String(legalAction.payload?.cardId);
   const definition = definitionFor(state, cardId);
@@ -10364,6 +10555,19 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     definition,
     legalAction,
   );
+  if (
+    legalAction.side === "runner" &&
+    definition.type === "program" &&
+    legalAction.payload?.runnerProgramTrashBeforeInstall === true &&
+    legalAction.payload?.runnerProgramTrashBeforeInstallResolved !== true
+  ) {
+    startRunnerProgramTrashBeforeInstallChoice(state, cardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerProgramTrashChoiceOpened: true,
+    };
+    return;
+  }
   spendClick(state, legalAction.side);
   if (legalAction.side === "corp") expireCorporateRetreatInstallCreditAbilities(state);
   if (legalAction.side === "runner") {
@@ -21833,6 +22037,16 @@ function resolvePendingChoice(
     resolveSelfModifyingCodeFreeMuChoice(state, legalAction, playerAction);
     return;
   }
+  if (
+    state.pendingChoice.source.startsWith("runner_program_trash_before_install")
+  ) {
+    resolveRunnerProgramTrashBeforeInstallChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1911.sneak_preview_source")) {
     resolveSneakPreviewSourceChoice(state, legalAction, playerAction);
     return;
@@ -28619,6 +28833,8 @@ function makeActionId(
   if (payload?.selectedServerId) parts.push(String(payload.selectedServerId));
   if (payload?.cardId) parts.push(String(payload.cardId));
   if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
+  if (payload?.runnerProgramTrashBeforeInstall)
+    parts.push("runner_program_trash_before_install");
   if (payload?.breakerId) parts.push(String(payload.breakerId));
   if (payload?.iceId) parts.push(String(payload.iceId));
   if (payload?.subroutineIndex !== undefined)
