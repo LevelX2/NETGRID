@@ -54,7 +54,7 @@ import {
 } from "lucide-react";
 import { createContext, Fragment, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
+import type { ButtonHTMLAttributes, CSSProperties, DragEvent as ReactDragEvent, MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import type {
   ApiAiPacingMode,
   ApiClientGameMode,
@@ -7328,21 +7328,19 @@ function RunTimelineOverlay({
                   ? normalizeVisibleTerms(action.label)
                   : runAwareActionButtonLabel(view, action);
               return (
-                <button
+                <OverflowAwareActionButton
+                  action={action}
                   className="button primary actionButton runActionButton"
                   key={action.actionId}
+                  label={fullLabel}
+                  displayLabel={compactLabel}
                   onClick={() => onAction(action)}
                   disabled={actionDisabled}
                   type="button"
-                  data-tooltip={fullLabel}
-                  aria-label={fullLabel}
                   data-testid="run-action-button"
                   data-action-type={action.type}
-                >
-                  <ActionLeadIcon action={action} size={14} />
-                  <span className="actionButtonLabel">{compactLabel}</span>
-                  <CostChips action={action} />
-                </button>
+                  iconSize={14}
+                />
               );
             })}
           </div>
@@ -7672,11 +7670,16 @@ function LegalActionsPanel({
         {primaryActions.map((action) => {
           const label = runAwareActionButtonLabel(view, action);
           return (
-            <button className="button actionButton primary" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
-              <ActionLeadIcon action={action} />
-              <span className="actionButtonLabel">{label}</span>
-              <CostChips action={action} />
-            </button>
+            <OverflowAwareActionButton
+              action={action}
+              className="button actionButton primary"
+              key={action.actionId}
+              label={label}
+              onClick={() => onAction(action)}
+              disabled={disabled}
+              data-testid="action-button"
+              data-action-type={action.type}
+            />
           );
         })}
         {selectedContext ? (
@@ -7690,11 +7693,16 @@ function LegalActionsPanel({
             {contextualActions.map((action) => {
               const label = runAwareActionButtonLabel(view, action);
               return (
-                <button className="button actionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} data-tooltip={label} aria-label={label} data-testid="action-button" data-action-type={action.type}>
-                  <ActionLeadIcon action={action} />
-                  <span className="actionButtonLabel">{label}</span>
-                  <CostChips action={action} />
-                </button>
+                <OverflowAwareActionButton
+                  action={action}
+                  className="button actionButton"
+                  key={action.actionId}
+                  label={label}
+                  onClick={() => onAction(action)}
+                  disabled={disabled}
+                  data-testid="action-button"
+                  data-action-type={action.type}
+                />
               );
             })}
             {contextualActions.length === 0 ? <p className="meta">Keine Aktion für diese Auswahl in diesem Fenster.</p> : null}
@@ -7983,6 +7991,64 @@ function CostChips({ action }: { action: LegalAction }) {
         </span>
       ))}
     </span>
+  );
+}
+
+type OverflowAwareActionButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "aria-label" | "children"> & {
+  action: LegalAction;
+  label: string;
+  displayLabel?: string;
+  iconSize?: number;
+};
+
+function OverflowAwareActionButton({
+  action,
+  label,
+  displayLabel = label,
+  iconSize,
+  type = "button",
+  ...buttonProps
+}: OverflowAwareActionButtonProps) {
+  const labelRef = useRef<HTMLSpanElement | null>(null);
+  const [tooltipEnabled, setTooltipEnabled] = useState(false);
+
+  useEffect(() => {
+    const labelElement = labelRef.current;
+    if (!labelElement) {
+      setTooltipEnabled(false);
+      return;
+    }
+
+    const updateTooltipAvailability = () => {
+      const clipped =
+        labelElement.scrollWidth > labelElement.clientWidth + 1 ||
+        labelElement.scrollHeight > labelElement.clientHeight + 1;
+      setTooltipEnabled((current) => (current === clipped ? current : clipped));
+    };
+
+    updateTooltipAvailability();
+    const frame = window.requestAnimationFrame(updateTooltipAvailability);
+    const resizeObserver = typeof ResizeObserver !== "undefined" ? new ResizeObserver(updateTooltipAvailability) : null;
+    resizeObserver?.observe(labelElement);
+    window.addEventListener("resize", updateTooltipAvailability);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateTooltipAvailability);
+    };
+  }, [displayLabel, label]);
+
+  return (
+    <button
+      {...buttonProps}
+      type={type}
+      aria-label={label}
+      data-tooltip={tooltipEnabled ? label : undefined}
+    >
+      <ActionLeadIcon action={action} {...(iconSize !== undefined ? { size: iconSize } : {})} />
+      <span className="actionButtonLabel" ref={labelRef}>{displayLabel}</span>
+      <CostChips action={action} />
+    </button>
   );
 }
 
@@ -11957,11 +12023,20 @@ function CardActionsPopover({
         const fullLabel = actionLabelForAction(action);
         const label = compactCardActionMenuLabel(action, fullLabel);
         return (
-          <button className="button actionButton cardActionButton" key={action.actionId} onClick={() => onAction(action)} disabled={disabled} type="button" data-tooltip={fullLabel} aria-label={fullLabel} role="menuitem" data-testid="card-action-button" data-action-type={action.type}>
-            <ActionLeadIcon action={action} size={14} />
-            <span className="actionButtonLabel">{label}</span>
-            <CostChips action={action} />
-          </button>
+          <OverflowAwareActionButton
+            action={action}
+            className="button actionButton cardActionButton"
+            key={action.actionId}
+            onClick={() => onAction(action)}
+            disabled={disabled}
+            type="button"
+            label={fullLabel}
+            displayLabel={label}
+            role="menuitem"
+            data-testid="card-action-button"
+            data-action-type={action.type}
+            iconSize={14}
+          />
         );
       })}
     </div>
