@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { buildAiDecisionInput, chooseAiAction } from "@netgrid/ai";
+import { buildAiDecisionInput, chooseAiAction, selectAiDecisionSideForState } from "@netgrid/ai";
 import { buildEngineDeck, type DeckSnapshot } from "@netgrid/decks";
 import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isHiddenInfoBarrierEvent, replayEvents } from "@netgrid/engine";
 import {
@@ -2433,7 +2433,8 @@ export class MultiplayerService {
   private runAiStep(record: StoredMatch): boolean {
     const state = record.gameState;
     if (!state || record.match.status !== "active" || state.winner || !this.aiControllableSide(record)) return false;
-    const side = state.pendingChoice && this.isAiSide(record, state.pendingChoice.side) ? state.pendingChoice.side : state.activeSide;
+    const side = selectAiDecisionSideForState(state).side;
+    if (!side) return false;
     if (!this.isAiSide(record, side)) return false;
     const legalActions = getLegalActions(state, side);
     if (legalActions.length === 0) return false;
@@ -2511,9 +2512,8 @@ export class MultiplayerService {
   private aiControllableSide(record: StoredMatch): Side | undefined {
     const state = record.gameState;
     if (!state) return undefined;
-    if (state.pendingChoice && this.isAiSide(record, state.pendingChoice.side)) return state.pendingChoice.side;
-    if (this.isAiSide(record, state.activeSide)) return state.activeSide;
-    return undefined;
+    const side = selectAiDecisionSideForState(state).side;
+    return side && this.isAiSide(record, side) ? side : undefined;
   }
 
   private isAiSide(record: StoredMatch, side: Side): boolean {

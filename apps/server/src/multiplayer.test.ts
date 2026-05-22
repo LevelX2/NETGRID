@@ -5145,6 +5145,58 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(first.requesterPayload.aiTurnPresentation?.canAdvanceAi).toBe(false);
   });
 
+  it("advances Corp AI in a root-rez window even when activeSide is runner", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "server-corp-ai-root-rez-active-runner" });
+    const created = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "server-corp-ai-root-rez-active-runner",
+      corpDifficulty: "normal"
+    });
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing stored match");
+
+    let gameState = toRunnerTurnEngine(createGameAfterSetup({ matchId: created.matchId, seed: "server-corp-ai-root-rez-active-runner-engine" }));
+    gameState.corp.credits = 5;
+    putCorpRootInRemoteForTest(gameState, "simple_economy_asset");
+    putCorpIceOnServerForTest(gameState, "remote_1", "simple_barrier_ice");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    gameState = applyEngineAction(gameState, "corp", (action) => action.type === "decline_rez" && action.payload?.runRootRezPass !== true);
+    expect(gameState.activeSide).toBe("runner");
+    expect(gameState.timingPoint).toBe("run.jack_out_window");
+    expect(getLegalActions(gameState, "runner")).toEqual([]);
+    expect(getLegalActions(gameState, "corp").map((action) => action.type).sort()).toEqual(["decline_rez", "rez_ice"]);
+
+    record.gameState = gameState;
+    record.match.baseline = gameState.baseline;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_root_rez_active_runner")];
+    record.actionReceipts = [];
+    record.undoSnapshots = [];
+    delete record.pendingUndo;
+    await storage.save(record);
+
+    const before = await service.bootstrap(created.matchId, "runner", created.hostSessionToken);
+    expect("error" in before).toBe(false);
+    if ("error" in before) throw new Error(before.error.message);
+    expect(before.aiTurnPresentation).toEqual({ activeAiSide: "corp", canAdvanceAi: true, pacingMode: "paced" });
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "runner",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: before.playerView.stateVersion,
+      knownMatchVersion: before.matchVersion,
+      mode: "single_step"
+    });
+    expect(advanced.ok).toBe(true);
+    if (!advanced.ok) throw new Error(advanced.error.message);
+    expect(["decline_rez", "rez_ice"]).toContain(advanced.publicEvent?.publicPayload.actionType);
+    expect(advanced.requesterPayload.playerView.stateVersion).toBe(before.playerView.stateVersion + 1);
+    expect(JSON.stringify(advanced.requesterPayload)).not.toContain("cardInstances");
+  });
+
   it("keeps REST ai-advance responses limited to the requesting human side", async () => {
     const service = new MultiplayerService(new InMemoryMatchStorage(), { tokenSalt: "ai-advance-rest" });
     const created = await service.createMatch({
@@ -6125,6 +6177,19 @@ function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "ar
   removeEverywhereForTest(state, id);
   server.ice.push(id);
   state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverIce", serverId }, faceup: false, rezzed: false };
+  return id;
+}
+
+function putCorpRootInRemoteForTest(state: GameState, definitionId: string): CardInstanceId {
+  const id = findCardForTest(state, definitionId);
+  let server = state.corp.servers.find((candidate) => candidate.id === "remote_1");
+  if (!server) {
+    server = { id: "remote_1", kind: "remote", label: "Remote 1", ice: [], root: [] };
+    state.corp.servers.push(server);
+  }
+  removeEverywhereForTest(state, id);
+  server.root.push(id);
+  state.cardInstances[id] = { ...state.cardInstances[id]!, zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" }, faceup: false, rezzed: false };
   return id;
 }
 

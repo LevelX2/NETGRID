@@ -427,6 +427,23 @@ export type AiSimulationSummary = {
   metrics: AiQualityMetrics;
 };
 
+export type AiDecisionSideSelection =
+  | {
+      side: Side;
+      legalActions: LegalAction[];
+      activeSideLegalActions: LegalAction[];
+      inactiveSideLegalActions: LegalAction[];
+      terminal: false;
+    }
+  | {
+      side: undefined;
+      legalActions: [];
+      activeSideLegalActions: LegalAction[];
+      inactiveSideLegalActions: LegalAction[];
+      terminal: boolean;
+      error?: string;
+    };
+
 const FORBIDDEN_AI_INPUT_FIELDS = [
   "cardInstances",
   "privatePayload",
@@ -464,6 +481,48 @@ export function buildAiDecisionInput(
     profileId: options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
     ...(ownDeckDoctrine ? { ownDeckDoctrine } : {})
   });
+}
+
+export function selectAiDecisionSideForState(state: GameState): AiDecisionSideSelection {
+  const activeSide = state.activeSide;
+  const inactiveSide = oppositeSide(activeSide);
+  const activeSideLegalActions = getLegalActions(state, activeSide);
+  const inactiveSideLegalActions = getLegalActions(state, inactiveSide);
+  if (activeSideLegalActions.length > 0) {
+    return {
+      side: activeSide,
+      legalActions: activeSideLegalActions,
+      activeSideLegalActions,
+      inactiveSideLegalActions,
+      terminal: false
+    };
+  }
+  if (inactiveSideLegalActions.length > 0) {
+    return {
+      side: inactiveSide,
+      legalActions: inactiveSideLegalActions,
+      activeSideLegalActions,
+      inactiveSideLegalActions,
+      terminal: false
+    };
+  }
+  const terminal = Boolean(state.winner) || state.phase === "game_over";
+  return {
+    side: undefined,
+    legalActions: [],
+    activeSideLegalActions,
+    inactiveSideLegalActions,
+    terminal,
+    ...(terminal
+      ? {}
+      : {
+          error: `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}).`
+        })
+  };
+}
+
+function oppositeSide(side: Side): Side {
+  return side === "runner" ? "corp" : "runner";
 }
 
 export function chooseAiAction(input: AiDecisionInput): AiDecision {
@@ -618,7 +677,16 @@ export function simulateAiGame(config: AiSimulationConfig = {}): AiSimulationSum
   const maxActions = config.maxActions ?? 120;
 
   for (let index = 0; index < maxActions && !state.winner; index += 1) {
-    const side = state.activeSide;
+    const sideSelection = selectAiDecisionSideForState(state);
+    if (!sideSelection.side) {
+      if (sideSelection.terminal) break;
+      errors.push(
+        sideSelection.error ??
+          `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}).`,
+      );
+      break;
+    }
+    const side = sideSelection.side;
     const input = buildAiDecisionInput(state, side, {
       difficulty: side === "runner" ? config.runnerDifficulty ?? "normal" : config.corpDifficulty ?? "normal",
       actionNumber: index,

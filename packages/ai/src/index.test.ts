@@ -71,6 +71,7 @@ import {
   runnerPlanUsesOnlyAiSupportedCards,
   reconstructBeliefState,
   chooseRunnerAction,
+  selectAiDecisionSideForState,
   simulateAiGame,
   simulateAiSoak,
   summarizeDoctrineQualityMetrics,
@@ -8411,6 +8412,64 @@ describe("MVP 0.3 AI simulation harness", () => {
     );
     expect(JSON.stringify(first)).not.toContain("cardInstances");
     expect(JSON.stringify(first)).not.toContain("sessionToken");
+  });
+
+  it("selects Corp LegalActions in a root-rez window even when activeSide is runner", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-sim-root-rez-active-runner" }),
+    );
+    state.corp.credits = 5;
+    putCorpRootInRemote(state, "simple_economy_asset", 0);
+    putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass !== true,
+    );
+
+    expect(state.activeSide).toBe("runner");
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    expect(
+      getLegalActions(state, "corp").map((action) => action.type).sort(),
+    ).toEqual(["decline_rez", "rez_ice"]);
+
+    const selection = selectAiDecisionSideForState(state);
+    expect(selection.side).toBe("corp");
+    expect(selection.legalActions.map((action) => action.type).sort()).toEqual([
+      "decline_rez",
+      "rez_ice",
+    ]);
+    const input = buildAiDecisionInput(state, selection.side!, {
+      difficulty: "normal",
+      profileId: "corp-ai-v1.4.0-normal",
+    });
+    const decision = chooseAiAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(selected).toBeDefined();
+    if (!selected) throw new Error("Missing selected root-rez legal action");
+
+    const result = applyAction(state, {
+      matchId: state.matchId,
+      side: selection.side!,
+      actionId: selected.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      ...(decision.selectedChoices
+        ? { selectedChoices: decision.selectedChoices }
+        : {}),
+      idempotencyKey: "ai-sim-root-rez-active-runner",
+    });
+    expect(result.ok, result.ok ? "" : result.error.message).toBe(true);
   });
 
   it("summarizes doctrine quality error classes from redaction-safe action tags", () => {
