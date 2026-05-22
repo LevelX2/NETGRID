@@ -3512,21 +3512,59 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     expect(state.pendingChoice).toMatchObject({
       side: "corp",
       visibility: "hidden_info_barrier",
-      minSelections: 0,
+      minSelections: 1,
       maxSelections: 1,
     });
     const corpChoice = getPlayerView(state, "corp").pendingChoice;
     expect(corpChoice?.options.map((option) => option.card?.title)).toEqual([
       "Cortical Scanner",
       "Crystal Wall",
+      undefined,
     ]);
-    expect(corpChoice?.options.every((option) => option.card?.known)).toBe(true);
-    expect(corpChoice?.options.every((option) => option.card?.type === "ice")).toBe(true);
+    expect(corpChoice?.options.at(-1)?.label).toBe("Überspringen");
+    expect(
+      corpChoice?.options
+        .filter((option) => option.id !== "skip")
+        .every((option) => option.card?.known),
+    ).toBe(true);
+    expect(
+      corpChoice?.options
+        .filter((option) => option.id !== "skip")
+        .every((option) => option.card?.type === "ice"),
+    ).toBe(true);
     expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
     expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
       "Cortical Scanner",
     );
-    const legal = mustAction(state, "corp", (action) => action.type === "resolve_choice");
+    const legal = mustAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+    );
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${highCostIceId}`],
+      },
+    });
+    expect(wrongSide.ok).toBe(false);
+    if (!wrongSide.ok) expect(wrongSide.error.code).toBe("ERR_WRONG_SIDE");
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: legal.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      selectedChoices: {
+        choiceId: state.pendingChoice?.choiceId,
+        selectedOptionIds: [`card_${highCostIceId}`],
+      },
+    });
+    expect(stale.ok).toBe(false);
+    if (!stale.ok) expect(stale.error.code).toBe("ERR_STALE_STATE");
     const drift = structuredClone(state);
     drift.cardInstances[highCostIceId] = {
       ...drift.cardInstances[highCostIceId]!,
@@ -3544,6 +3582,19 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     });
     expect(driftResult.ok).toBe(false);
 
+    const skipped = applyChoices(structuredClone(state), "corp", ["skip"]);
+    expect(skipped.pendingChoice).toBeUndefined();
+    expect(skipped.cardInstances[highCostIceId]?.rezzed).toBe(false);
+    expect(skipped.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
+    expect(skipped.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      priorityRequisitionFreeRez: false,
+      priorityRequisitionDeclined: true,
+    });
+    expect(
+      skipped.eventLog.at(-1)?.publicPayload.hiddenZoneAction,
+    ).toBeUndefined();
+
     state = applyChoices(state, "corp", [`card_${highCostIceId}`]);
     expect(state.cardInstances[highCostIceId]?.rezzed).toBe(true);
     expect(state.cardInstances[lowerCostIceId]?.rezzed).toBe(false);
@@ -3556,6 +3607,51 @@ describe("Originalset Spotcheck 2026-05-16 Asset/Upgrade/Trace Modifiers hardeni
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+
+    let noTarget = v162CardReleaseGame(
+      "spotcheck-priority-requisition-no-target",
+    );
+    noTarget = apply(
+      noTarget,
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    noTarget.corp.credits = 30;
+    noTarget.corp.clicks = 10;
+    noTarget.corp.maxHandSize = 100;
+    moveCorpCardToHq(noTarget, "onr_v1_212_priority-requisition");
+    noTarget = apply(
+      noTarget,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(noTarget, action) ===
+          "onr_v1_212_priority-requisition",
+    );
+    for (let index = 0; index < 5; index += 1) {
+      noTarget = apply(
+        noTarget,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(noTarget, action) ===
+            "onr_v1_212_priority-requisition",
+      );
+    }
+    noTarget = apply(
+      noTarget,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(noTarget, action) ===
+          "onr_v1_212_priority-requisition",
+    );
+    expect(noTarget.pendingChoice).toBeUndefined();
+    expect(noTarget.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      priorityRequisitionChoiceOpened: false,
+      priorityRequisitionCandidateCount: 0,
+    });
   });
 
   it("revalidates migrated tag-condition suppression, Disinfectant targets and Access to Kiribati trace link", () => {
@@ -12099,7 +12195,7 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(priority.pendingChoice).toMatchObject({
       side: "corp",
       visibility: "hidden_info_barrier",
-      minSelections: 0,
+      minSelections: 1,
       maxSelections: 1,
     });
     expect(getPlayerView(priority, "runner").pendingChoice).toBeUndefined();

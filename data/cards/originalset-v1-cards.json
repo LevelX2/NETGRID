@@ -6661,7 +6661,7 @@
         "advancementRequirement": 5,
         "agendaPoints": 3
       },
-      "text": "When scored, rez one installed piece of ice at no cost.",
+      "text": "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

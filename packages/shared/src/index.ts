@@ -3668,7 +3668,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 5,
     agendaPoints: 3,
-    rulesText: "When scored, rez one installed piece of ice at no cost.",
+    rulesText:
+      "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
     mechanics: [
       "install_remote",
       "advance",

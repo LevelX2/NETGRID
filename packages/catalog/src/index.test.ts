@@ -56,6 +56,14 @@ describe("card set support catalog source", () => {
     }
   });
 
+  it("keeps Priority Requisition text visibly optional", () => {
+    const priorityRequisition =
+      createRuntimeCardsById()["onr_v1_212_priority-requisition"];
+    expect(priorityRequisition?.text).toBe(
+      "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
+    );
+  });
+
   it("derives runtime and AI support from active support entries", () => {
     const cardsById = createRuntimeCardsById();
     const runtimeIdsFromCards = Object.values(cardsById)

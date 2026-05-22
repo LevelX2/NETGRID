@@ -1,19 +1,31 @@
 ---
 activityId: act-2026-05-22-priority-requisition-optional-free-rez
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - packages/shared/src/index.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+  - packages/catalog/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t 'Priority Requisition'
+  - corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t 'Priority Requisition'
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t 'Priority Requisition'
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/catalog typecheck
+  - git diff --check -- packages/engine/src/index.ts packages/engine/src/index.test.ts packages/shared/src/index.ts packages/catalog/src/index.test.ts data/cards/originalset-v1-cards.json docs/activities/in-progress/act-2026-05-22-priority-requisition-optional-free-rez.md
 ---
 
 # Priority Requisition als optionales kostenloses Rez-Fenster
@@ -46,12 +58,12 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Beim Scoren von `Priority Requisition` kann die Korp ein legales unrezzed ICE kostenlos rezzen.
-- [ ] Die Korp kann den Trigger ohne Rezzen überspringen.
-- [ ] Wenn kein legales ICE vorhanden ist, wird der Score-Vorgang nicht blockiert.
-- [ ] Der Kartentext in App/Katalog enthält sichtbar `may`/`darf`.
-- [ ] Chronik meldet ein kostenloses Rezzen nur bei tatsächlicher Nutzung.
-- [ ] Tests decken Zielwahl, Skip, fehlende Ziele, Wrong-Side, stale State und Hidden-Info-Redaction ab.
+- [x] Beim Scoren von `Priority Requisition` kann die Korp ein legales unrezzed ICE kostenlos rezzen.
+- [x] Die Korp kann den Trigger ohne Rezzen überspringen.
+- [x] Wenn kein legales ICE vorhanden ist, wird der Score-Vorgang nicht blockiert.
+- [x] Der Kartentext in App/Katalog enthält sichtbar `may`/`darf`.
+- [x] Chronik meldet ein kostenloses Rezzen nur bei tatsächlicher Nutzung.
+- [x] Tests decken Zielwahl, Skip, fehlende Ziele, Wrong-Side, stale State und Hidden-Info-Redaction ab.
 
 ## Umsetzungshinweise
 
@@ -60,4 +72,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `Priority Requisition` öffnet bei legalen unrezzed ICE-Zielen jetzt eine explizite Korp-Choice mit Zielauswahl oder `Überspringen`; ohne legales Ziel wird der Score-Vorgang nicht blockiert. Skip erzeugt keine kostenlose-Rez-Chronik, der Zielpfad bleibt hidden-info-sicher, und der sichtbare Kartentext in Daten/Katalog enthält wieder `You may`.

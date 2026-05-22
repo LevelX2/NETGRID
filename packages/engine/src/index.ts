@@ -21834,13 +21834,20 @@ function startPriorityRequisitionChoice(
     source: `v162.priority_requisition:${agendaId}:${state.stateVersion + 1}`,
     prompt: "Priority Requisition: ICE kostenlos rezzen",
     kind: "select_cards",
-    options: candidates.map((cardId) => ({
-      id: `card_${cardId}`,
-      label: definitionFor(state, cardId).title,
-      publicLabel: "Installiertes ICE",
-      value: cardId,
-    })),
-    minSelections: 0,
+    options: [
+      ...candidates.map((cardId) => ({
+        id: `card_${cardId}`,
+        label: definitionFor(state, cardId).title,
+        publicLabel: "Installiertes ICE",
+        value: cardId,
+      })),
+      {
+        id: "skip",
+        label: "Überspringen",
+        publicLabel: "Überspringen",
+      },
+    ],
+    minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
@@ -21871,6 +21878,16 @@ function resolvePriorityRequisitionChoice(
       definitionFor(state, agendaId).id !== "onr_v1_212_priority-requisition")
   ) {
     throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
+  }
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  if (selectedOptionIds.length === 1 && selectedOptionIds[0] === "skip") {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      priorityRequisitionFreeRez: false,
+      priorityRequisitionDeclined: true,
+    };
+    return;
   }
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   if (selectedIds.length > 1)
