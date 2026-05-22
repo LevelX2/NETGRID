@@ -135,6 +135,7 @@ import {
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  corpRootCardsForDisplay,
   cuePositionClassName,
   cuePositionStyle,
   encounterBreakerActions,
@@ -1679,7 +1680,7 @@ function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata
 
 function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
   const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
-  const rootLane = { kind: "root" as const, label: "Root" as const, cards: server.root };
+  const rootLane = { kind: "root" as const, label: "Root" as const, cards: corpRootCardsForDisplay(_side, server.id, server.root) };
   return [rootLane, iceLane];
 }
 

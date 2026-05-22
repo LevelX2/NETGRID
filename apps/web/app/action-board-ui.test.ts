@@ -25,6 +25,7 @@ import {
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  corpRootCardsForDisplay,
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
   showInstalledCorpState,
@@ -381,6 +382,48 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(showInstalledCorpState("archives", "ice")).toBe(true);
     expect(showInstalledCorpState("hq", "root")).toBe(true);
     expect(showInstalledCorpState("remote_1", "root")).toBe(true);
+  });
+
+  it("renders opponent remote root cards in install order without leaked hidden root types", () => {
+    const leakedUpgradeA: VisibleCard = {
+      instanceId: "upgrade_a",
+      known: false,
+      rezzed: false,
+      title: "Simple Upgrade",
+      definitionId: "simple_upgrade",
+      type: "upgrade",
+      trashCost: 4
+    };
+    const rezzedNode = card("node_1", "Simple Economy Asset", "asset", true);
+    const leakedUpgradeB: VisibleCard = {
+      instanceId: "upgrade_b",
+      known: false,
+      rezzed: false,
+      title: "Simple Upgrade",
+      definitionId: "simple_upgrade",
+      type: "upgrade",
+      trashCost: 4
+    };
+
+    const runnerCards = corpRootCardsForDisplay("runner", "remote_1", [leakedUpgradeA, rezzedNode, leakedUpgradeB]);
+
+    expect(runnerCards.map((entry) => entry.instanceId)).toEqual(["upgrade_a", "node_1", "upgrade_b"]);
+    expect(runnerCards[1]).toMatchObject({
+      known: true,
+      title: "Simple Economy Asset",
+      definitionId: "node_1",
+      type: "asset",
+      rezzed: true
+    });
+    for (const hiddenCard of [runnerCards[0], runnerCards[2]]) {
+      expect(hiddenCard).toMatchObject({ known: false, rezzed: false });
+      expect(hiddenCard).not.toHaveProperty("title");
+      expect(hiddenCard).not.toHaveProperty("definitionId");
+      expect(hiddenCard).not.toHaveProperty("type");
+      expect(hiddenCard).not.toHaveProperty("trashCost");
+    }
+
+    expect(corpRootCardsForDisplay("corp", "remote_1", [leakedUpgradeA])).toEqual([leakedUpgradeA]);
   });
 
   it("splits archives into faceup and facedown stacks for runner and corp views", () => {

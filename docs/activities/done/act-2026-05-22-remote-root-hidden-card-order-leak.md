@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-05-22-remote-root-hidden-card-order-leak
-status: inbox
+status: done
 kind: fix
 area: web
 priority: hotfix
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/action-board-ui.test.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "mixed remote root order"
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
 ---
 
 # Remote-Root-Darstellung ohne verdeckte Typ-Leaks
@@ -61,4 +69,8 @@ Verdeckte/unrezzed Root-Karten in Remote/Data Forts dürfen durch Position, Grup
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-22.
+
+- Webclient redaktiert verdeckte Corp-Root-Karten fuer Runner vor der Darstellung defensiv auf neutrale Hidden-Card-Felder und bewahrt dabei die Installationsreihenfolge.
+- Rezzed Root-Karten bleiben sichtbar; verdeckte Nachbarn verlieren Titel, Definition, Typ und sonstige Kartenwerte auch dann, wenn ein fehlerhafter Payload solche Felder enthielte.
+- Engine-Test deckt die Sequenz unrezzed Upgrade, rezzed Node/Asset, unrezzed Upgrade ab, prueft Runner-PlayerView/PublicEvents vor Access und verifiziert den Access aller drei Root-Karten mit Replay/StateHash.

@@ -1186,6 +1186,26 @@ export function showInstalledCorpState(serverId: PlayerView["servers"][number]["
   return serverId !== "archives";
 }
 
+export function hiddenCorpRootCardForOpponent(card: VisibleCard): VisibleCard {
+  if (card.known) return card;
+  return {
+    instanceId: card.instanceId,
+    known: false,
+    rezzed: false,
+    ...(typeof card.advancementCounters === "number" ? { advancementCounters: card.advancementCounters } : {}),
+    ...(card.counterDisplays ? { counterDisplays: card.counterDisplays } : {})
+  };
+}
+
+export function corpRootCardsForDisplay(
+  viewerSide: Side,
+  serverId: PlayerView["servers"][number]["id"],
+  cards: VisibleCard[]
+): VisibleCard[] {
+  if (viewerSide === "corp" || serverId === "archives") return cards;
+  return cards.map(hiddenCorpRootCardForOpponent);
+}
+
 export function splitArchiveCardsForDisplay(
   viewerSide: Side,
   cards: VisibleCard[],

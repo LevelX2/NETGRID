@@ -4729,6 +4729,108 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
     );
   });
 
+  it("keeps mixed remote root order accessible without leaking hidden root types before access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "remote-root-hidden-order",
+        runnerDeck: DEMO_DECKS.demo_runner_004,
+        corpDeck: DEMO_DECKS.demo_corp_004,
+      }),
+    );
+    state.runner.credits = 20;
+    const firstUpgradeId = moveCorpCardToHq(state, "simple_upgrade");
+    const secondUpgradeId = moveCorpCardCopyToHq(state, "simple_upgrade");
+    const rezzedNodeId = moveCorpCardToHq(state, "simple_economy_asset");
+    let remote = state.corp.servers.find((server) => server.id === "remote_1");
+    if (!remote) {
+      remote = {
+        id: "remote_1",
+        kind: "remote",
+        label: "Remote 1",
+        ice: [],
+        root: [],
+      };
+      state.corp.servers.push(remote);
+    }
+    const remoteServer = remote;
+    const installRoot = (cardId: CardInstanceId, rezzed: boolean) => {
+      removeEverywhere(state, cardId);
+      remoteServer.root.push(cardId);
+      state.cardInstances[cardId] = {
+        ...state.cardInstances[cardId]!,
+        zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+        faceup: rezzed,
+        rezzed,
+      };
+    };
+    installRoot(firstUpgradeId, false);
+    installRoot(rezzedNodeId, true);
+    installRoot(secondUpgradeId, false);
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    const runnerRemoteBefore = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(runnerRemoteBefore?.root).toHaveLength(3);
+    expect(runnerRemoteBefore?.root[0]).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
+    expect(runnerRemoteBefore?.root[0]).not.toHaveProperty("definitionId");
+    expect(runnerRemoteBefore?.root[0]).not.toHaveProperty("type");
+    expect(runnerRemoteBefore?.root[1]).toMatchObject({
+      known: true,
+      definitionId: "simple_economy_asset",
+      type: "asset",
+      rezzed: true,
+    });
+    expect(runnerRemoteBefore?.root[2]).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
+    expect(runnerRemoteBefore?.root[2]).not.toHaveProperty("definitionId");
+    expect(runnerRemoteBefore?.root[2]).not.toHaveProperty("type");
+    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents)).not.toContain(
+      "simple_upgrade",
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    expect(state.run?.breach?.queue.map((entry) => entry.cardInstanceId)).toEqual([
+      firstUpgradeId,
+      rezzedNodeId,
+      secondUpgradeId,
+    ]);
+    expect(JSON.stringify(getPlayerView(state, "runner").publicEvents)).not.toContain(
+      "simple_upgrade",
+    );
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+
+    expect(state.run).toBeUndefined();
+    const accessEvents = state.eventLog
+      .slice(replayStart)
+      .filter((event) => event.publicPayload.actionType === "access_card");
+    expect(
+      accessEvents.map((event) => event.publicPayload.cardDefinitionId),
+    ).toEqual(["simple_upgrade", "simple_economy_asset", "simple_upgrade"]);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+    expect(validateGameState(state).ok).toBe(true);
+  });
+
   it("replays actions and reproduces the final StateHash", () => {
     let state = createGameAfterSetup({ seed: "replay" });
     const initial = structuredClone(state);
