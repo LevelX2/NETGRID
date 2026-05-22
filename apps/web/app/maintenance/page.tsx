@@ -42,7 +42,7 @@ import {
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
-type MaintenanceLoadStepId = "summary" | "matches" | "policy" | "aiTraces";
+type MaintenanceLoadStepId = "summary" | "matches" | "policy";
 
 type MaintenanceLoadStep = {
   id: MaintenanceLoadStepId;
@@ -58,8 +58,7 @@ type OperationNotice = {
 const INITIAL_LOAD_STEPS: MaintenanceLoadStep[] = [
   { id: "summary", label: "Backend- und DB-Status", status: "pending" },
   { id: "matches", label: "Matchliste aus der Datenbank", status: "pending" },
-  { id: "policy", label: "Cleanup-Policy", status: "pending" },
-  { id: "aiTraces", label: "KI-Trace-Index", status: "pending" }
+  { id: "policy", label: "Cleanup-Policy", status: "pending" }
 ];
 
 export default function MaintenancePage() {
@@ -483,10 +482,6 @@ export default function MaintenancePage() {
         loadCleanupPolicy().then(() => markLoadStep("policy", "done"), (loadError) => {
           markLoadStep("policy", "error");
           throw loadError;
-        }),
-        loadAiTraceMatches().then(() => markLoadStep("aiTraces", "done"), (loadError) => {
-          markLoadStep("aiTraces", "error");
-          throw loadError;
         })
       ]);
       const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
@@ -581,6 +576,7 @@ export default function MaintenancePage() {
   const selectedAiTraceMatch = aiTraceMatches.find((match) => match.matchId === selectedAiTraceMatchId);
   const selectedMatchTraceEntry = aiTraceMatchesById.get(selectedMatchId);
   const selectedMatchCanEnableAiTrace = Boolean(detail && selectedMatchId && !detail.terminal && detail.mode !== "human_vs_human" && !selectedMatchTraceEntry);
+  const selectedAiTracePageHref = selectedMatchId ? `/maintenance/ai-traces?matchId=${encodeURIComponent(selectedMatchId)}` : "/maintenance/ai-traces";
   const aiTraceEmptyHint = selectedMatchId
     ? selectedMatchCanEnableAiTrace
       ? "Für das ausgewählte Match werden noch keine KI-Entscheidungen aufgezeichnet. Aktiviere die Aufzeichnung hier in der Wartungsansicht; ab dem nächsten KI-Schritt entstehen Trace-Daten."
@@ -812,6 +808,10 @@ export default function MaintenancePage() {
             {aiTraceLiveFollow && !aiTraceFollowPaused ? " · Live-Follow aktiv" : ""}
           </p>
           <div style={buttonRow}>
+            <a href={selectedAiTracePageHref} style={linkButton} title="KI-Trace in eigener Wartungsseite öffnen">
+              <ExternalLink size={16} aria-hidden="true" />
+              Trace-Seite öffnen
+            </a>
             <button type="button" style={button} onClick={() => void enableAiTracingForSelectedMatch()} disabled={!selectedMatchCanEnableAiTrace || aiTraceEnableLoading} title="KI-Tracing für das aktuell ausgewählte Match ab jetzt aktivieren">
               {aiTraceEnableLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Bot size={16} aria-hidden="true" />}
               {aiTraceEnableLoading ? "Aktiviert" : "Für Match aktivieren"}
@@ -1345,7 +1345,7 @@ const skeletonLineLarge: CSSProperties = { display: "block", width: "68%", heigh
 const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };
 const traceList: CSSProperties = { display: "grid", gap: "0.45rem", maxHeight: 340, overflowY: "auto" };
 const traceItem: CSSProperties = { display: "grid", gridTemplateColumns: "1fr auto", gap: "0.2rem 0.75rem", textAlign: "left", border: "1px solid #cbd8e6", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.55rem", cursor: "pointer" };
-const traceItemSelected: CSSProperties = { ...traceItem, borderColor: "#2f74b5", background: "#eef6ff" };
+const traceItemSelected: CSSProperties = { ...traceItem, border: "1px solid #2f74b5", background: "#eef6ff" };
 const traceDetails: CSSProperties = { border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fff" };
 const traceSection: CSSProperties = { display: "grid", gap: "0.35rem" };
 const traceChips: CSSProperties = { display: "flex", flexWrap: "wrap", gap: "0.35rem" };
@@ -1354,10 +1354,10 @@ const traceChip: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 99
 const traceCardGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" };
 const traceCard: CSSProperties = { display: "grid", gap: "0.35rem", border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fbfdff" };
 const traceActionCard: CSSProperties = { ...traceCard, minWidth: 0 };
-const traceActionCardSelected: CSSProperties = { ...traceActionCard, borderColor: "#2f74b5", background: "#eef6ff" };
+const traceActionCardSelected: CSSProperties = { ...traceActionCard, border: "1px solid #2f74b5", background: "#eef6ff" };
 const traceActionHeader: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", minWidth: 0 };
 const traceSelectedPill: CSSProperties = { border: "1px solid #2f74b5", borderRadius: 999, padding: "0.1rem 0.45rem", background: "#dcefff", color: "#12466f", fontSize: "0.74rem", fontWeight: 700 };
-const traceMutedPill: CSSProperties = { ...traceSelectedPill, borderColor: "#c7d4e2", background: "#f6f9fc", color: "#42576b" };
+const traceMutedPill: CSSProperties = { ...traceSelectedPill, border: "1px solid #c7d4e2", background: "#f6f9fc", color: "#42576b" };
 const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
 const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
 const linkButton: CSSProperties = { ...button, textDecoration: "none" };
