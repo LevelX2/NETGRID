@@ -72,12 +72,48 @@ export type MaintenanceMatchDetail = MaintenanceMatchEntry & {
     pendingUndo: number;
     startLobbies: number;
     deckSnapshotsRedacted: number;
+    aiDecisionTraces?: number;
   };
   cleanupAssessment: {
     eligibleInReadOnlySlice: false;
     recommendation: "not_active";
     reason: string;
   };
+};
+
+export type MaintenanceAiTraceMatchEntry = {
+  matchId: string;
+  status: string;
+  mode: string;
+  aiTraceMode: "summary" | "detailed";
+  traceCount: number;
+  createdAt: string;
+  updatedAt: string;
+  firstTraceAt?: string;
+  lastTraceAt?: string;
+};
+
+export type MaintenanceAiTraceIndexEntry = {
+  traceId: string;
+  matchId: string;
+  eventId: string;
+  stateVersion: number;
+  matchVersion: number;
+  side: "runner" | "corp";
+  turn: number;
+  decisionIndex: number;
+  selectedActionId?: string;
+  selectedActionType?: string;
+  planKind?: string;
+  score?: number;
+  confidence?: number;
+  createdAt: string;
+  schemaVersion: string;
+  meta: Record<string, unknown>;
+};
+
+export type MaintenanceAiTraceDetail = MaintenanceAiTraceIndexEntry & {
+  detail: Record<string, unknown>;
 };
 
 export type MaintenanceRecoveryAccess = {
@@ -217,7 +253,9 @@ const SENSITIVE_MARKERS = [
   /privateDeckSnapshots/i,
   /decklist/i,
   /fullState/i,
-  /game_state_json/i
+  /game_state_json/i,
+  /AIInput/i,
+  /C:\\Users/i
 ];
 
 export function buildMaintenanceMatchQuery(filters: MaintenanceFilters): string {
@@ -257,6 +295,30 @@ export function buildMaintenanceRecoveryLink(access: Pick<MaintenanceRecoveryAcc
   url.searchParams.set("side", access.side);
   url.searchParams.set("reconnectToken", access.access);
   return url.toString();
+}
+
+export function aiTraceTitle(trace: Pick<MaintenanceAiTraceIndexEntry, "decisionIndex" | "side" | "planKind" | "selectedActionType">): string {
+  const side = trace.side === "runner" ? "Runner" : "Korp";
+  const plan = trace.planKind ?? trace.selectedActionType ?? "KI-Entscheidung";
+  return `#${trace.decisionIndex} ${side} · ${plan}`;
+}
+
+export function aiTraceMetaRows(trace: MaintenanceAiTraceDetail | MaintenanceAiTraceIndexEntry): Array<[string, string]> {
+  return [
+    ["Entscheidung", String(trace.decisionIndex)],
+    ["Seite", trace.side === "runner" ? "Runner" : "Korp"],
+    ["State", String(trace.stateVersion)],
+    ["Match-Version", String(trace.matchVersion)],
+    ["Aktion", trace.selectedActionType ?? "-"],
+    ["Plan", trace.planKind ?? "-"],
+    ["Score", typeof trace.score === "number" ? trace.score.toFixed(2) : "-"],
+    ["Vertrauen", typeof trace.confidence === "number" ? `${Math.round(trace.confidence * 100)}%` : "-"]
+  ];
+}
+
+export function safeStringList(value: unknown, limit = 6): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string").slice(0, limit);
 }
 
 export function formatBytes(bytes: number): string {

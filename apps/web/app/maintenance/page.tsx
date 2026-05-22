@@ -2,8 +2,10 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { AlertTriangle, CheckCircle2, ChevronDown, Copy, Database, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import {
+  aiTraceMetaRows,
+  aiTraceTitle,
   buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
   buildMaintenanceRecoveryLink,
@@ -15,7 +17,11 @@ import {
   modeLabel,
   participantsLabel,
   resolveMaintenanceServerHttp,
+  safeStringList,
   statusLabel,
+  type MaintenanceAiTraceDetail,
+  type MaintenanceAiTraceIndexEntry,
+  type MaintenanceAiTraceMatchEntry,
   type MaintenanceCleanupApplyResult,
   type MaintenanceCleanupFilters,
   type MaintenanceCleanupPolicy,
@@ -29,7 +35,7 @@ import {
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
-type MaintenanceLoadStepId = "summary" | "matches" | "policy";
+type MaintenanceLoadStepId = "summary" | "matches" | "policy" | "aiTraces";
 
 type MaintenanceLoadStep = {
   id: MaintenanceLoadStepId;
@@ -45,7 +51,8 @@ type OperationNotice = {
 const INITIAL_LOAD_STEPS: MaintenanceLoadStep[] = [
   { id: "summary", label: "Backend- und DB-Status", status: "pending" },
   { id: "matches", label: "Matchliste aus der Datenbank", status: "pending" },
-  { id: "policy", label: "Cleanup-Policy", status: "pending" }
+  { id: "policy", label: "Cleanup-Policy", status: "pending" },
+  { id: "aiTraces", label: "KI-Trace-Index", status: "pending" }
 ];
 
 export default function MaintenancePage() {
@@ -58,6 +65,12 @@ export default function MaintenancePage() {
   const [loading, setLoading] = useState(false);
   const [loadSteps, setLoadSteps] = useState<MaintenanceLoadStep[]>(INITIAL_LOAD_STEPS);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [aiTraceMatches, setAiTraceMatches] = useState<MaintenanceAiTraceMatchEntry[]>([]);
+  const [selectedAiTraceMatchId, setSelectedAiTraceMatchId] = useState("");
+  const [aiTraceIndex, setAiTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>([]);
+  const [selectedAiTraceId, setSelectedAiTraceId] = useState("");
+  const [aiTraceDetail, setAiTraceDetail] = useState<MaintenanceAiTraceDetail | null>(null);
+  const [aiTraceLoading, setAiTraceLoading] = useState(false);
   const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
   const [error, setError] = useState("");
   const [cleanupFilters, setCleanupFilters] = useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
@@ -98,6 +111,47 @@ export default function MaintenancePage() {
     const nextMatches = payload.matches ?? [];
     setMatches(nextMatches);
     if (!selectedMatchId && nextMatches[0]) setSelectedMatchId(nextMatches[0].matchId);
+  };
+
+  const loadAiTraceMatches = async () => {
+    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches`);
+    const payload = (await response.json()) as { matches?: MaintenanceAiTraceMatchEntry[]; error?: { message?: string } };
+    if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Matches konnten nicht geladen werden.");
+    const markers = findForbiddenMaintenanceMarkers(payload);
+    if (markers.length > 0) throw new Error("KI-Trace-Matches wurden wegen Redaktionsprüfung blockiert.");
+    const nextMatches = payload.matches ?? [];
+    setAiTraceMatches(nextMatches);
+    setSelectedAiTraceMatchId((current) => (current && nextMatches.some((match) => match.matchId === current) ? current : nextMatches[0]?.matchId ?? ""));
+  };
+
+  const loadAiTraceIndex = async (matchId: string) => {
+    if (!matchId) {
+      setAiTraceIndex([]);
+      setSelectedAiTraceId("");
+      setAiTraceDetail(null);
+      return;
+    }
+    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}`);
+    const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
+    if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
+    const markers = findForbiddenMaintenanceMarkers(payload);
+    if (markers.length > 0) throw new Error("KI-Trace-Timeline wurde wegen Redaktionsprüfung blockiert.");
+    const traces = payload.traces ?? [];
+    setAiTraceIndex(traces);
+    setSelectedAiTraceId((current) => (current && traces.some((trace) => trace.traceId === current) ? current : traces[0]?.traceId ?? ""));
+  };
+
+  const loadAiTraceDetail = async (traceId: string) => {
+    if (!traceId) {
+      setAiTraceDetail(null);
+      return;
+    }
+    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`);
+    const payload = (await response.json()) as MaintenanceAiTraceDetail | { error?: { message?: string } };
+    if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "KI-Trace-Detail konnte nicht geladen werden." : "KI-Trace-Detail konnte nicht geladen werden.");
+    const markers = findForbiddenMaintenanceMarkers(payload);
+    if (markers.length > 0) throw new Error("KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.");
+    setAiTraceDetail(payload as MaintenanceAiTraceDetail);
   };
 
   const loadDetail = async (matchId: string) => {
@@ -353,6 +407,10 @@ export default function MaintenancePage() {
         loadCleanupPolicy().then(() => markLoadStep("policy", "done"), (loadError) => {
           markLoadStep("policy", "error");
           throw loadError;
+        }),
+        loadAiTraceMatches().then(() => markLoadStep("aiTraces", "done"), (loadError) => {
+          markLoadStep("aiTraces", "error");
+          throw loadError;
         })
       ]);
       const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
@@ -392,6 +450,38 @@ export default function MaintenancePage() {
       closed = true;
     };
   }, [selectedMatchId]);
+
+  useEffect(() => {
+    let closed = false;
+    setAiTraceLoading(true);
+    setError("");
+    loadAiTraceIndex(selectedAiTraceMatchId)
+      .catch((traceError) => {
+        if (!closed) setError(traceError instanceof Error ? traceError.message : "KI-Trace-Timeline konnte nicht geladen werden.");
+      })
+      .finally(() => {
+        if (!closed) setAiTraceLoading(false);
+      });
+    return () => {
+      closed = true;
+    };
+  }, [selectedAiTraceMatchId]);
+
+  useEffect(() => {
+    let closed = false;
+    setAiTraceLoading(true);
+    setError("");
+    loadAiTraceDetail(selectedAiTraceId)
+      .catch((traceError) => {
+        if (!closed) setError(traceError instanceof Error ? traceError.message : "KI-Trace-Detail konnte nicht geladen werden.");
+      })
+      .finally(() => {
+        if (!closed) setAiTraceLoading(false);
+      });
+    return () => {
+      closed = true;
+    };
+  }, [selectedAiTraceId]);
 
   const statusRows = useMemo(() => Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
   const modeRows = useMemo(() => Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
@@ -606,6 +696,46 @@ export default function MaintenancePage() {
           </div>
         </CollapsiblePanel>
       ) : null}
+
+      <CollapsiblePanel title="KI-Entscheidungen" icon={<Bot size={18} aria-hidden="true" />}>
+        <div style={panelHeader}>
+          <p style={subtle}>{aiTraceMatches.length === 0 ? "Keine Matches mit aktivierten KI-Traces gefunden." : `${aiTraceMatches.length} Matches mit KI-Trace-Daten.`}</p>
+          <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={aiTraceLoading} title="KI-Trace-Matches aktualisieren">
+            {aiTraceLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
+            {aiTraceLoading ? "Lädt" : "Aktualisieren"}
+          </button>
+        </div>
+        {aiTraceMatches.length === 0 ? <p style={infoBox}>Matches ohne aktiviertes KI-Tracing erzeugen keine Entscheidungstraces. Starte ein Match mit KI-Tracing, um hier Daten zu sehen.</p> : null}
+        {aiTraceMatches.length > 0 ? (
+          <div style={twoCols}>
+            <div style={cleanupBox}>
+              <h3 style={h3}>Matchauswahl</h3>
+              <div style={traceList}>
+                {aiTraceMatches.map((match) => (
+                  <button key={match.matchId} type="button" style={selectedAiTraceMatchId === match.matchId ? traceItemSelected : traceItem} onClick={() => setSelectedAiTraceMatchId(match.matchId)}>
+                    <span><code>{shortId(match.matchId)}</code> · {modeLabel(match.mode)}</span>
+                    <strong>{match.traceCount}</strong>
+                    <small>{match.lastTraceAt ? new Date(match.lastTraceAt).toLocaleString("de-DE") : match.aiTraceMode}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div style={cleanupBox}>
+              <h3 style={h3}>Timeline</h3>
+              {selectedAiTraceMatchId && aiTraceIndex.length === 0 ? <p style={subtle}>Dieses Match enthält keine KI-Entscheidungen oder der Trace-Index ist leer.</p> : null}
+              <div style={traceList}>
+                {aiTraceIndex.map((trace) => (
+                  <button key={trace.traceId} type="button" style={selectedAiTraceId === trace.traceId ? traceItemSelected : traceItem} onClick={() => setSelectedAiTraceId(trace.traceId)}>
+                    <span>{aiTraceTitle(trace)}</span>
+                    <small>State {trace.stateVersion} · {trace.confidence === undefined ? "Vertrauen -" : `${Math.round(trace.confidence * 100)}%`}</small>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        ) : null}
+        {aiTraceDetail ? <AiTraceDetailView trace={aiTraceDetail} /> : null}
+      </CollapsiblePanel>
 
       <CollapsiblePanel title="Cleanup" icon={<Trash2 size={18} aria-hidden="true" />}>
         <div style={panelHeader}>
@@ -858,6 +988,90 @@ function MiniRows({ rows }: { rows: Array<[string, string]> }) {
   );
 }
 
+function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
+  const detail = trace.detail;
+  const alternatives = recordList(detail.rankedAlternatives).slice(0, 5);
+  const scoreBreakdown = recordList(detail.scoreBreakdown).slice(0, 16);
+  const detailSections = recordList(detail.detailSections).slice(0, 8);
+  return (
+    <div style={cleanupBox}>
+      <div style={panelHeader}>
+        <div>
+          <h3 style={h3}>{aiTraceTitle(trace)}</h3>
+          <p style={subtle}>{typeof detail.summary === "string" ? detail.summary : trace.eventId}</p>
+        </div>
+        <code>{shortId(trace.traceId)}</code>
+      </div>
+      <div style={detailGrid}>
+        {aiTraceMetaRows(trace).map(([label, value]) => (
+          <Metric key={label} label={label} value={value} />
+        ))}
+      </div>
+      <TraceSection title="Warnmarker" items={[...safeStringList(detail.warnings), ...(detail.fallbackUsed === true ? ["fallback"] : []), ...(detail.timeoutUsed === true ? ["timeout"] : [])]} />
+      <TraceSection title="Sichtbare Gründe" items={safeStringList(detail.visibleReasons)} />
+      <TraceSection title="Langfristplan" items={safeStringList(detail.longTermPlan)} />
+      <details style={traceDetails} open>
+        <summary>Top-Alternativen</summary>
+        {alternatives.length === 0 ? <p style={subtle}>Keine Alternativen im Trace.</p> : null}
+        <div style={traceCardGrid}>
+          {alternatives.map((alternative, index) => (
+            <div key={`${String(alternative.planId ?? "alt")}-${index}`} style={traceCard}>
+              <strong>#{String(alternative.rank ?? index + 1)} · {String(alternative.planKind ?? alternative.selectedActionType ?? "Alternative")}</strong>
+              <span>{typeof alternative.score === "number" ? `Score ${alternative.score}` : "Score -"}</span>
+              <TraceSection title="Warum nicht" items={safeStringList(alternative.whyNot, 4)} compact />
+            </div>
+          ))}
+        </div>
+      </details>
+      <details style={traceDetails}>
+        <summary>Score-Komponenten</summary>
+        {scoreBreakdown.length === 0 ? <p style={subtle}>Keine Score-Komponenten im Trace.</p> : null}
+        <MiniRows rows={scoreBreakdown.map((component) => [String(component.label ?? component.key ?? "Komponente"), typeof component.value === "number" ? component.value.toFixed(2) : String(component.value ?? "-")])} />
+      </details>
+      {detailSections.map((section) => (
+        <TraceSection key={String(section.id ?? section.title)} title={String(section.title ?? section.id ?? "Detail")} items={safeStringList(section.items, 12)} collapsible />
+      ))}
+      <details style={traceDetails}>
+        <summary>Technische IDs</summary>
+        <MiniRows rows={[
+          ["Trace", trace.traceId],
+          ["Event", trace.eventId],
+          ["Match", trace.matchId],
+          ["Schema", trace.schemaVersion]
+        ]} />
+      </details>
+    </div>
+  );
+}
+
+function TraceSection({ title, items, compact = false, collapsible = false }: { title: string; items: string[]; compact?: boolean; collapsible?: boolean }) {
+  if (items.length === 0) return null;
+  const content = (
+    <div style={compact ? traceChipsCompact : traceChips}>
+      {items.map((item) => <span key={item} style={traceChip}>{item}</span>)}
+    </div>
+  );
+  if (collapsible) {
+    return (
+      <details style={traceDetails}>
+        <summary>{title}</summary>
+        {content}
+      </details>
+    );
+  }
+  return (
+    <div style={traceSection}>
+      <strong>{title}</strong>
+      {content}
+    </div>
+  );
+}
+
+function recordList(value: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object" && !Array.isArray(entry)));
+}
+
 function Select({ label, value, options, onChange }: { label: string; value: string; options: Array<[string, string]>; onChange: (value: string) => void }) {
   return (
     <label style={field}>
@@ -967,6 +1181,16 @@ const skeletonMetric: CSSProperties = { ...metric, minHeight: 82 };
 const skeletonLineSmall: CSSProperties = { display: "block", width: "42%", height: 10, borderRadius: 999, background: "#d8e4ef" };
 const skeletonLineLarge: CSSProperties = { display: "block", width: "68%", height: 24, borderRadius: 6, background: "#c8d8e8" };
 const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };
+const traceList: CSSProperties = { display: "grid", gap: "0.45rem", maxHeight: 340, overflowY: "auto" };
+const traceItem: CSSProperties = { display: "grid", gridTemplateColumns: "1fr auto", gap: "0.2rem 0.75rem", textAlign: "left", border: "1px solid #cbd8e6", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.55rem", cursor: "pointer" };
+const traceItemSelected: CSSProperties = { ...traceItem, borderColor: "#2f74b5", background: "#eef6ff" };
+const traceDetails: CSSProperties = { border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fff" };
+const traceSection: CSSProperties = { display: "grid", gap: "0.35rem" };
+const traceChips: CSSProperties = { display: "flex", flexWrap: "wrap", gap: "0.35rem" };
+const traceChipsCompact: CSSProperties = { ...traceChips, gap: "0.25rem" };
+const traceChip: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 999, padding: "0.15rem 0.45rem", background: "#f6f9fc", fontSize: "0.78rem", color: "#24394d" };
+const traceCardGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" };
+const traceCard: CSSProperties = { display: "grid", gap: "0.35rem", border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fbfdff" };
 const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
 const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
 const linkButton: CSSProperties = { ...button, textDecoration: "none" };

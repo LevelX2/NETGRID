@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-22-maintenance-ai-decision-viewer
-status: inbox
+status: done
 kind: concept
 area: web
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-22-ai-decision-trace-sqlite-api
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/maintenance.ts
+  - apps/web/app/maintenance/page.tsx
+  - apps/web/app/maintenance.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/maintenance.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check -- apps/web/app/maintenance.ts apps/web/app/maintenance/page.tsx apps/web/app/maintenance.test.ts docs/activities/done/act-2026-05-22-maintenance-ai-decision-viewer.md
 ---
 
 # Private Wartungsansicht für KI-Entscheidungen bauen
@@ -77,4 +83,6 @@ Eine private Backend-/Wartungsseite zeigt pro ausgewähltem Match die KI-Entsche
 
 ## Ergebnisnotiz
 
-Noch offen.
+`/maintenance` enthält jetzt den Bereich `KI-Entscheidungen` mit Trace-Matchauswahl, Timeline/Navigator und Detailpanel. Die Ansicht lädt die privaten Maintenance-Endpunkte für Trace-Matches, Trace-Index und Trace-Detail, zeigt zuerst Meta- und Warnmarker und klappt Alternativen, Score-Komponenten, Detailsektionen und technische IDs separat auf. Matches ohne KI-Tracing zeigen einen leeren Zustand.
+
+Die HTML-Darstellung entsteht ausschließlich im Webclient; die Redaktionsprüfung blockiert weiterhin sensible Marker. Helper-Test und Web-Typecheck sind grün.

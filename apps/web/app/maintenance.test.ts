@@ -3,6 +3,8 @@ import {
   buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
   buildMaintenanceRecoveryLink,
+  aiTraceMetaRows,
+  aiTraceTitle,
   DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
   EMPTY_MAINTENANCE_FILTERS,
   findForbiddenMaintenanceMarkers,
@@ -81,5 +83,27 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(resolveMaintenanceServerHttp("http://192.168.178.141:8787", "127.0.0.1")).toBe("http://127.0.0.1:8787");
     expect(resolveMaintenanceServerHttp("http://192.168.178.141:8787", "localhost")).toBe("http://127.0.0.1:8787");
     expect(resolveMaintenanceServerHttp("http://192.168.178.141:8787", "192.168.178.141")).toBe("http://192.168.178.141:8787");
+  });
+
+  it("formats AI decision trace navigation labels and meta rows", () => {
+    const trace = {
+      traceId: "ai_trace_1",
+      matchId: "match_1",
+      eventId: "evt_1",
+      stateVersion: 4,
+      matchVersion: 5,
+      side: "corp" as const,
+      turn: 4,
+      decisionIndex: 2,
+      selectedActionType: "install_card",
+      planKind: "build_scoring_remote",
+      score: 312.34,
+      confidence: 0.73,
+      createdAt: "2026-05-22T10:00:00.000Z",
+      schemaVersion: "ai-decision-trace-v1",
+      meta: {}
+    };
+    expect(aiTraceTitle(trace)).toBe("#2 Korp · build_scoring_remote");
+    expect(aiTraceMetaRows(trace)).toContainEqual(["Vertrauen", "73%"]);
   });
 });
