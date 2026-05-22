@@ -12,6 +12,7 @@ import {
 } from "../index";
 import {
   applyGameAction,
+  buildPlayerViewProjection,
   createGame,
   createGameAfterSetup,
   hashGameState,
@@ -86,5 +87,17 @@ describe("game facade", () => {
 
     expect(state).toEqual(legacyState);
     expect(afterSetup).toEqual(legacyAfterSetup);
+  });
+
+  it("builds the same player view projection when legal actions are provided", () => {
+    const state = createGame({
+      seed: "arch-5r-player-view-projection",
+      setupMode: "completed",
+    });
+    const legalActions = getLegalActions(state, "corp");
+
+    expect(buildPlayerViewProjection(state, "corp", legalActions)).toEqual(
+      getPlayerView(state, "corp"),
+    );
   });
 });
