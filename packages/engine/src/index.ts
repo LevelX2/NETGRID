@@ -2419,6 +2419,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   return [];
 }
 
+export function legalActionsFor(state: GameState, side: Side): LegalAction[] {
+  return getLegalActions(state, side);
+}
+
 export function applyAction(
   state: GameState,
   playerAction: PlayerAction,
@@ -2507,6 +2511,14 @@ export function applyAction(
         : next.eventLog.map(toPublicEvent),
     stateHash,
   };
+}
+
+export function applyGameAction(
+  state: GameState,
+  playerAction: PlayerAction,
+  options: ApplyActionOptions = {},
+): EngineResult {
+  return applyAction(state, playerAction, options);
 }
 
 export function getPlayerView(state: GameState, side: Side): PlayerView {
@@ -2694,6 +2706,10 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
     agendaPointsToWin: state.agendaPointsToWin,
     ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {}),
   };
+}
+
+export function playerViewFor(state: GameState, side: Side): PlayerView {
+  return getPlayerView(state, side);
 }
 
 export function validateGameState(state: GameState): ValidationResult {
@@ -3099,6 +3115,10 @@ export function validateGameState(state: GameState): ValidationResult {
   return { ok: errors.length === 0, errors };
 }
 
+export function validateGameStateForDebug(state: GameState): ValidationResult {
+  return validateGameState(state);
+}
+
 function placementForZoneRef(zone: CardInstance["zone"]): string | undefined {
   if (zone.side === "corp" && zone.zone === "hq") return "corp.hq";
   if (zone.side === "corp" && zone.zone === "rd") return "corp.rd";
@@ -3260,6 +3280,17 @@ export function replayEvents(
 
 export function hashState(state: GameState): StateHash {
   return hashStateSnapshot(state);
+}
+
+export function hashGameState(state: GameState): StateHash {
+  return hashState(state);
+}
+
+export function replayGameEvents(
+  initialState: GameState,
+  eventLog: GameEvent[],
+): ReplayResult {
+  return replayEvents(initialState, eventLog);
 }
 
 export function applyEffectCommands(
