@@ -92,6 +92,7 @@ import {
   type ChronicleContext,
   type ChronicleItem
 } from "./chronicle";
+import { accessDecisionLabel, accessRevealActionGroups } from "./access-reveal-ui";
 import { shouldActivateChronicleCardTouchDoubleTap } from "./chronicleInteraction";
 import { visibleKnownCardRulesText } from "./card-text-source";
 import {
@@ -5976,8 +5977,7 @@ function AccessRevealModal({
   onAction(action: LegalAction): void;
   onDismiss(): void;
 }) {
-  const primaryActions = reveal.actions.filter((action) => action.type !== "decline_trash");
-  const declineAction = reveal.actions.find((action) => action.type === "decline_trash") ?? null;
+  const { primaryActions, declineAction } = accessRevealActionGroups(reveal.actions);
   const runAction = (action: LegalAction) => {
     onAction(action);
     onDismiss();
@@ -6002,21 +6002,7 @@ function AccessRevealModal({
             <CardView card={reveal.card} displayMode={displayMode} preview />
           </div>
           <div className="accessRevealDecision">
-            <strong>{reveal.card.title}</strong>
-            <p>{reveal.trashStatus}</p>
-            {reveal.card.rulesText ? (
-              <div className="cardRulesDetail">
-                <strong>Regeltext</strong>
-                <span className="cardRulesDetailText">
-                  {rulesTextLines(reveal.card.rulesText).map((line, index) => (
-                    <span key={`${reveal.card.instanceId}-access-rules-${index}`} className={isSubroutineRuleLine(reveal.card.type ?? "", reveal.card.rulesText ?? "", line) ? "subroutineLine" : undefined}>
-                      {shouldAddFallbackSubroutineMarker(reveal.card.type ?? "", reveal.card.rulesText ?? "", line) ? <SubroutineIcon /> : null}
-                      {renderRuleTextSegments(line, `${reveal.card.instanceId}-access-rules-${index}`)}
-                    </span>
-                  ))}
-                </span>
-              </div>
-            ) : null}
+            <p className="accessRevealStatus">{reveal.trashStatus}</p>
             <div className="accessRevealActions">
               {primaryActions.map((action) => (
                 <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
@@ -6033,7 +6019,7 @@ function AccessRevealModal({
               {reveal.actions.length === 0 ? (
                 <button className="button" onClick={onDismiss}>
                   <Check size={15} />
-                  Verstanden
+                  OK
                 </button>
               ) : null}
             </div>
@@ -6087,15 +6073,6 @@ function ExposeReviewModal({
       </section>
     </div>
   );
-}
-
-function accessDecisionLabel(action: LegalAction): string {
-  if (action.type === "access_card") return "Nächste Karte";
-  if (action.type === "steal_agenda") return "Agenda stehlen";
-  if (action.type === "trash_accessed_card") return "Trashen";
-  if (action.type === "trash_resource") return "Resource trashen";
-  if (action.type === "decline_trash") return normalizeVisibleTerms(action.label);
-  return normalizeVisibleTerms(action.label);
 }
 
 function GameOverModal({

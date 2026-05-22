@@ -6754,7 +6754,7 @@ select {
 
 .accessRevealPanel {
   position: relative;
-  width: min(760px, 100%);
+  width: min(680px, 100%);
   max-height: min(720px, calc(100vh - 40px));
   display: grid;
   gap: 14px;
@@ -6786,9 +6786,15 @@ select {
 
 .accessRevealBody {
   display: grid;
-  grid-template-columns: minmax(170px, 230px) minmax(0, 1fr);
+  grid-template-columns: minmax(230px, 320px) minmax(180px, 220px);
   gap: 16px;
-  align-items: start;
+  align-items: center;
+  justify-content: center;
+}
+
+.accessRevealCard {
+  width: min(320px, 100%);
+  justify-self: center;
 }
 
 .accessRevealCard .card.preview {
@@ -6797,16 +6803,12 @@ select {
 
 .accessRevealDecision {
   display: grid;
-  gap: 10px;
+  align-content: center;
+  gap: 12px;
   min-width: 0;
 }
 
-.accessRevealDecision > strong {
-  font-size: 18px;
-  overflow-wrap: anywhere;
-}
-
-.accessRevealDecision > p {
+.accessRevealStatus {
   margin: 0;
   color: var(--muted);
   line-height: 1.4;
@@ -6816,6 +6818,12 @@ select {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.accessRevealActions .button {
+  min-height: 42px;
+  justify-content: center;
+  border-radius: 999px;
 }
 
 .exposeReviewPanel {

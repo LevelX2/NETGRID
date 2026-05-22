@@ -36,4 +36,10 @@ describe("run window layering", () => {
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(190px, 1fr)");
     expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot")).toContain("margin-left: 0");
   });
+
+  it("keeps access reveal cards primary with compact round actions", () => {
+    expect(selectorBlock(".accessRevealBody")).toContain("grid-template-columns: minmax(230px, 320px) minmax(180px, 220px)");
+    expect(selectorBlock(".accessRevealCard")).toContain("width: min(320px, 100%)");
+    expect(selectorBlock(".accessRevealActions .button")).toContain("border-radius: 999px");
+  });
 });
