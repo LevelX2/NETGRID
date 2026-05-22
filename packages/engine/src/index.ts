@@ -220,6 +220,50 @@ import {
   isReplayCompatibilityActionPayload,
 } from "./compatibility/payload-compatibility";
 import {
+  ALL_NIGHTER_ID,
+  ARMADILLO_ARMORED_ROAD_HOME_ID,
+  BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
+  BARTMOSS_ID,
+  BIZARRE_ENCRYPTION_SCHEME_ID,
+  BLINK_ID,
+  BODYWEIGHT_DATA_CRECHE_ID,
+  BUTCHER_BOY_ID,
+  CHIMERA_ID,
+  COCKROACH_ID,
+  CODE_VIRAL_CACHE_ID,
+  DANSHIS_SECOND_ID,
+  DEAL_WITH_MILITECH_ID,
+  DRIFTER_MOBILE_ENVIRONMENT_ID,
+  DUPRE_ID,
+  EMPLOYEE_EMPOWERMENT_ID,
+  FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
+  GRUBB_ID,
+  HELLS_RUN_ID,
+  HUNT_CLUB_BBS_ID,
+  ICE_PICK_WILLIE_ID,
+  INCUBATOR_ID,
+  JUNKYARD_BBS_ID,
+  MICROTECH_TRODE_SET_ID,
+  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
+  MYSTERY_BOX_ID,
+  NEVINYRRAL_ID,
+  PATTELS_VIRUS_ID,
+  PILE_DRIVER_ID,
+  POLTERGEIST_ID,
+  POX_ID,
+  RAMMING_PISTON_ID,
+  RONIN_AROUND_ID,
+  SELF_MODIFYING_CODE_ID,
+  SHELL_TRADERS_ID,
+  SKIVVISS_ID,
+  SMARTEYE_ID,
+  SNEAK_PREVIEW_ID,
+  TERRORIST_REPRISAL_ID,
+  TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE,
+  TOO_MANY_DOORS_ID,
+  ZZ22_SPEED_CHIP_ID,
+} from "./compatibility/runtime-compatibility";
+import {
   AI_BOON_RANDOM_BREAKER_CARD_ID,
   BOARDWALK_RANDOM_PROGRAM_CARD_ID,
   QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
@@ -1190,50 +1234,12 @@ type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
 
 const INITIAL_HAND_SIZE = 5;
-const BARTMOSS_ID = "onr_v1_005_bartmoss-memorial-icebreaker";
-const BLINK_ID = "onr_v1_007_blink";
-const BUTCHER_BOY_ID = "onr_v1_009_butcher-boy";
-const COCKROACH_ID = "onr_v1_013_cockroach";
-const GRUBB_ID = "onr_v1_030_grubb";
-const INCUBATOR_ID = "onr_v1_034_incubator";
-const ALL_NIGHTER_ID = "onr_v1_076_all-nighter";
-const DEAL_WITH_MILITECH_ID = "onr_v1_082_deal-with-militech";
-const HUNT_CLUB_BBS_ID = "onr_v1_091_hunt-club-bbs";
-const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
-const ARMADILLO_ARMORED_ROAD_HOME_ID =
-  "onr_v1_120_armadillo-armored-road-home";
-const DRIFTER_MOBILE_ENVIRONMENT_ID =
-  "onr_v1_126_drifter-mobile-environment";
 const PROTEUS_DIGICONDA_ID = "onr_proteus_020_digiconda";
 const PROTEUS_FOOD_FIGHT_ID = "onr_proteus_022_food-fight";
-const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
-const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
-const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
-const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
-const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
-const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
-const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
-const SKIVVISS_ID = "onr_v1_064_skivviss";
-const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
-const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
-const CHIMERA_ID = "onr_v1_353_chimera";
-const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
-const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
-const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
-const TERRORIST_REPRISAL_ID = "onr_v1_115_terrorist-reprisal";
-const DUPRE_ID = "onr_v1_020_dupre";
-const PATTELS_VIRUS_ID = "onr_v1_046_pattels-virus";
-const POX_ID = "onr_v1_049_pox";
-const MYSTERY_BOX_ID = "onr_v1_043_mystery-box";
-const POLTERGEIST_ID = "onr_v1_048_poltergeist";
-const SMARTEYE_ID = "onr_v1_065_smarteye";
-const HELLS_RUN_ID = "onr_v1_164_hells-run";
-const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
-const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
 const PARIS_CITY_GRID_TRACE_POOL_BITS = 3;
 
 function scoredAgendaImplementationForDefinitionId(
@@ -4255,7 +4261,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         }
       }
       if (
-        definition.id === "onr_v1_158_danshis-second-id" &&
+        definition.id === DANSHIS_SECOND_ID &&
         state.runner.tags > 0 &&
         !cardImplementationForDefinitionId(definition.id)?.abilities?.some(
           (ability) => ability.kind === "activated",
@@ -9730,7 +9736,7 @@ function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
   state.runner.stack = shuffleStateIds(
     state,
     allIds,
-    `onr_v1_101_mit_west_tier:${state.stateVersion + 1}`,
+    `${MIT_WEST_TIER_REMOVED_FROM_GAME_REASON}:${state.stateVersion + 1}`,
   );
   for (const id of state.runner.stack) {
     state.cardInstances[id] = {
@@ -9746,7 +9752,7 @@ function resolveMitWestTier(state: GameState, legalAction: LegalAction): void {
     hiddenZoneAction: "mit_west_tier_shuffle_grip_heap_stack",
     specialZone: "removed_from_game",
     specialZoneVisibility: "public",
-    specialZoneReason: "onr_v1_101_mit_west_tier",
+    specialZoneReason: MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
   };
   applyRunnerDrawSummaryPayload(state, legalAction, drawSummary);
 }
@@ -11433,7 +11439,7 @@ function beginEncounter(
           ...(legalAction.payload ?? {}),
           encounterTaxForFutureIce: encounterTax,
           encounterTaxPaid: 0,
-          encounterTaxSource: "onr_v1_222_ball-and-chain",
+          encounterTaxSource: BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
         };
       }
       finishRun(state, false, legalAction);
@@ -11445,7 +11451,7 @@ function beginEncounter(
         ...(legalAction.payload ?? {}),
         encounterTaxForFutureIce: encounterTax,
         encounterTaxPaid: encounterTax,
-        encounterTaxSource: "onr_v1_222_ball-and-chain",
+        encounterTaxSource: BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
       };
     }
   }
@@ -11927,7 +11933,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
         damageId: `${run.runId}.${encounteredIceId}.fatal_attractor`,
         damageType: "net",
         amount: fatalDamageAmount,
-        source: "subroutine:onr_v1_242_fatal-attractor:next_encounter",
+        source: FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
       });
       damageSummaries.push(summary);
       if (legalAction) {
@@ -15809,7 +15815,7 @@ function finishRun(
       tokyoChibaInfightingBonus: true,
       sourceDefinitionId: corpBonus.sourceCardId
         ? definitionFor(state, corpBonus.sourceCardId).id
-        : "onr_v1_371_tokyo-chiba-infighting",
+        : TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE,
       serverId: run.attackedServerId,
       corpCreditsGained: corpBonus.amount,
       corpCreditsAfter: state.corp.credits,
@@ -30269,7 +30275,7 @@ function runnerRunRecurringCreditSourceIds(
     if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
     const definition = definitionFor(state, cardId);
     if (
-      definition.id === "onr_v1_147_zz22-speed-chip" ||
+      definition.id === ZZ22_SPEED_CHIP_ID ||
       definition.id === COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID
     ) {
       return Boolean(
