@@ -4610,6 +4610,87 @@ describe("MVP 0.1 runs, access and scoring", () => {
     ).toContain("continue_run");
   });
 
+  it("offers Corp root rez before encountering already rezzed ICE", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("root-rez-before-rezzed-ice"),
+    );
+    state.corp.credits = 10;
+    state.runner.credits = 10;
+    const drDreffId = putCorpRootInRemote(state, "onr_v1_358_dr-dreff");
+    const banpeiId = addRezzedCorpIceForTest(
+      state,
+      "onr_v1_223_banpei",
+      "remote_1",
+      "banpei",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("corp");
+    expect(state.run).toMatchObject({
+      phase: "approach_ice",
+      approachedIceId: banpeiId,
+    });
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Dr. Dreff",
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === drDreffId &&
+          action.payload?.rootRez === true,
+      ),
+    ).toBe(true);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "decline_rez" &&
+          action.payload?.runRootRezPass !== true,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === drDreffId &&
+        action.payload?.rootRez === true,
+    );
+    expect(state.cardInstances[drDreffId]?.rezzed).toBe(true);
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("corp");
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass !== true,
+    );
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+    expect(state.run).toMatchObject({
+      phase: "encounter_ice",
+      encounteredIceId: banpeiId,
+    });
+    expect(validateGameState(state).ok).toBe(true);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("lets the Corp score the third Simple Agenda and win at six agenda points", () => {
     let state = createGameAfterSetup({
       seed: "corp-score",
@@ -18080,6 +18161,13 @@ describe("V1.9.9 Mechanikpaket R", () => {
     );
     state = apply(
       state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass !== true,
+    );
+    state = apply(
+      state,
       "runner",
       (action) =>
         action.type === "pump_breaker" && action.payload?.breakerId === wormId,
@@ -31235,8 +31323,22 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
     state = apply(state, "runner", (action) => action.type === "continue_run");
 
     expect(state.run?.successful).toBe(true);
@@ -31934,6 +32036,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         sourceDefinition(state, action) === "simple_fracter",
     );
     state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
     const startupAction = mustAction(
       state,
       "runner",

@@ -12242,6 +12242,18 @@ function approachOrEncounterIce(
     return;
   }
   if (ice.rezzed) {
+    if (corpRunRootRezActions(state).length > 0) {
+      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+      void _encounteredIceId;
+      state.run = {
+        ...runWithoutEncounter,
+        phase: "approach_ice",
+        approachedIceId,
+      };
+      state.timingPoint = "run.approach_ice";
+      state.activeSide = "corp";
+      return;
+    }
     beginEncounter(state, approachedIceId, legalAction);
     return;
   }
