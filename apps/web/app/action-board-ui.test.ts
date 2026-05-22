@@ -972,6 +972,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "install_card", "program_1", "Programm installieren", { cardId: "program_1" }))).toBe("Installieren");
     expect(
       contextualCardActionLabel(
+        legalAction("runner", "install_card", "program_1", "Programm mit Programmtrash installieren", {
+          cardId: "program_1",
+          runnerProgramTrashBeforeInstall: true,
+        }),
+      ),
+    ).toBe("Mit Programmtrash installieren");
+    expect(
+      contextualCardActionLabel(
         legalAction(
           "runner",
           "install_card",

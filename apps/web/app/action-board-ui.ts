@@ -529,6 +529,7 @@ function breakerNameFromActionLabel(label: string | undefined, actionSuffixPatte
 function installContextLabel(action: LegalAction): string {
   const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) return "Mit Programmtrash installieren";
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
   if (isNewRemoteIceInstallAction(action)) return "Neues Remote erstellen";

@@ -46333,6 +46333,44 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
     return state;
   }
 
+  it("emits a single plain hand-install action for Skivviss and Cyfermaster", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-runner-program-hand-install-dedupe",
+        runnerDeck: {
+          ...runnerProgramDeck,
+          id: "spotcheck_runner_program_hand_install_dedupe",
+          cards: [
+            ...runnerProgramDeck.cards,
+            { id: "onr_v1_064_skivviss", quantity: 1 },
+          ],
+        },
+        corpDeck: corpProgramDeck,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 100;
+    state.runner.clicks = 30;
+    state.runner.memoryLimit = 30;
+    const definitions = [
+      "onr_v1_064_skivviss",
+      "onr_v1_016_cyfermaster",
+    ] as const;
+
+    for (const definitionId of definitions) {
+      const cardId = moveRunnerCardToGrip(state, definitionId);
+      const plainInstallActions = getLegalActions(state, "runner").filter(
+        (action) =>
+          action.type === "install_card" &&
+          action.payload?.cardId === cardId &&
+          action.payload?.runnerProgramTrashBeforeInstall !== true &&
+          action.payload?.hostOnCardId === undefined,
+      );
+
+      expect(plainInstallActions, definitionId).toHaveLength(1);
+    }
+  });
+
   it("keeps all core runner program installs source-bound, public-safe and replayable", () => {
     let state = programCoreGame("spotcheck-runner-program-core-installs");
 
