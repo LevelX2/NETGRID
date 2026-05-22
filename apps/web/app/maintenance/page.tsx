@@ -42,7 +42,7 @@ import {
 
 const CONFIGURED_SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 
-type MaintenanceLoadStepId = "summary" | "matches" | "policy" | "aiTraces";
+type MaintenanceLoadStepId = "summary" | "matches" | "aiTraces" | "policy";
 
 type MaintenanceLoadStep = {
   id: MaintenanceLoadStepId;
@@ -58,8 +58,8 @@ type OperationNotice = {
 const INITIAL_LOAD_STEPS: MaintenanceLoadStep[] = [
   { id: "summary", label: "Backend- und DB-Status", status: "pending" },
   { id: "matches", label: "Matchliste aus der Datenbank", status: "pending" },
-  { id: "policy", label: "Cleanup-Policy", status: "pending" },
-  { id: "aiTraces", label: "KI-Trace-Index", status: "pending" }
+  { id: "aiTraces", label: "KI-Trace-Status", status: "pending" },
+  { id: "policy", label: "Cleanup-Policy", status: "pending" }
 ];
 
 export default function MaintenancePage() {
@@ -83,6 +83,7 @@ export default function MaintenancePage() {
   const [aiTraceActivationError, setAiTraceActivationError] = useState("");
   const [aiTraceLiveFollow, setAiTraceLiveFollow] = useState(true);
   const [aiTraceFollowPaused, setAiTraceFollowPaused] = useState(false);
+  const [clientHydrated, setClientHydrated] = useState(false);
   const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
   const [error, setError] = useState("");
   const [cleanupFilters, setCleanupFilters] = useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
@@ -106,7 +107,14 @@ export default function MaintenancePage() {
   const [policyLoading, setPolicyLoading] = useState(false);
 
   const loadSummary = async () => {
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/summary`);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
+    const response = await fetch(`${serverHttp}/api/storage/maintenance/summary`, { signal: controller.signal })
+      .catch((loadError) => {
+        if (loadError instanceof DOMException && loadError.name === "AbortError") throw new Error("Backendstatus hat nach 10 Sekunden nicht geantwortet.");
+        throw loadError;
+      })
+      .finally(() => window.clearTimeout(timeout));
     const payload = (await response.json()) as MaintenanceSummary | { error?: { message?: string } };
     if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "Wartungsdaten konnten nicht geladen werden." : "Wartungsdaten konnten nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -122,10 +130,10 @@ export default function MaintenancePage() {
     if (markers.length > 0) throw new Error("Matchliste wurde wegen Redaktionsprüfung blockiert.");
     const nextMatches = payload.matches ?? [];
     setMatches(nextMatches);
-    if (!selectedMatchId && nextMatches[0]) setSelectedMatchId(nextMatches[0].matchId);
+    setSelectedMatchId((current) => (current && nextMatches.some((match) => match.matchId === current) ? current : ""));
   };
 
-  const loadAiTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry) => {
+  const loadAiTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry, selectTraceMatch = true) => {
     const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches`);
     const payload = (await response.json()) as { matches?: MaintenanceAiTraceMatchEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Matches konnten nicht geladen werden.");
@@ -133,7 +141,10 @@ export default function MaintenancePage() {
     if (markers.length > 0) throw new Error("KI-Trace-Matches wurden wegen Redaktionsprüfung blockiert.");
     const nextMatches = preserveMatch ? mergeMaintenanceAiTraceMatches(payload.matches ?? [], [preserveMatch]) : payload.matches ?? [];
     setAiTraceMatches(nextMatches);
-    setSelectedAiTraceMatchId((current) => (current && nextMatches.some((match) => match.matchId === current) ? current : nextMatches[0]?.matchId ?? ""));
+    setSelectedAiTraceMatchId((current) => {
+      if (current && nextMatches.some((match) => match.matchId === current)) return current;
+      return selectTraceMatch ? nextMatches[0]?.matchId ?? "" : "";
+    });
   };
 
   const enableAiTracingForSelectedMatch = async () => {
@@ -471,26 +482,16 @@ export default function MaintenancePage() {
     });
     setError("");
     try {
-      const results = await Promise.allSettled([
-        loadSummary().then(() => markLoadStep("summary", "done"), (loadError) => {
-          markLoadStep("summary", "error");
-          throw loadError;
-        }),
-        loadMatches(nextFilters).then(() => markLoadStep("matches", "done"), (loadError) => {
-          markLoadStep("matches", "error");
-          throw loadError;
-        }),
-        loadCleanupPolicy().then(() => markLoadStep("policy", "done"), (loadError) => {
-          markLoadStep("policy", "error");
-          throw loadError;
-        }),
-        loadAiTraceMatches().then(() => markLoadStep("aiTraces", "done"), (loadError) => {
-          markLoadStep("aiTraces", "error");
-          throw loadError;
-        })
-      ]);
-      const rejected = results.find((result): result is PromiseRejectedResult => result.status === "rejected");
-      if (rejected) throw rejected.reason;
+      let firstLoadError: unknown = null;
+      await runLoadStep("matches", () => loadMatches(nextFilters), (loadError) => { firstLoadError ??= loadError; });
+      await runLoadStep("aiTraces", () => loadAiTraceMatches(undefined, false), (loadError) => { firstLoadError ??= loadError; });
+      await runLoadStep("policy", () => loadCleanupPolicy(), (loadError) => { firstLoadError ??= loadError; });
+      await runLoadStep("summary", () => loadSummary(), (loadError) => { firstLoadError ??= loadError; });
+      if (firstLoadError) {
+        setError(firstLoadError instanceof Error ? firstLoadError.message : "Wartungsdaten konnten nur teilweise geladen werden.");
+        setOperationNotice({ tone: "success", message: "Wartungsdaten wurden teilweise geladen. Matchliste und KI-Trace-Status bleiben nutzbar." });
+        return;
+      }
       setOperationNotice({
         tone: "success",
         message: reason === "filters" ? "Filter angewendet. Matchliste ist geladen." : "Wartungsdaten sind geladen."
@@ -502,6 +503,20 @@ export default function MaintenancePage() {
       setLoading(false);
     }
   };
+
+  const runLoadStep = async (id: MaintenanceLoadStepId, load: () => Promise<void>, onError?: (loadError: unknown) => void) => {
+    try {
+      await load();
+      markLoadStep(id, "done");
+    } catch (loadError) {
+      markLoadStep(id, "error");
+      onError?.(loadError);
+    }
+  };
+
+  useEffect(() => {
+    setClientHydrated(true);
+  }, []);
 
   useEffect(() => {
     void refresh(filters, "initial");
@@ -581,6 +596,8 @@ export default function MaintenancePage() {
   const selectedAiTraceMatch = aiTraceMatches.find((match) => match.matchId === selectedAiTraceMatchId);
   const selectedMatchTraceEntry = aiTraceMatchesById.get(selectedMatchId);
   const selectedMatchCanEnableAiTrace = Boolean(detail && selectedMatchId && !detail.terminal && detail.mode !== "human_vs_human" && !selectedMatchTraceEntry);
+  const selectedAiTracePageHref = selectedMatchId ? `/maintenance/ai-traces?matchId=${encodeURIComponent(selectedMatchId)}` : "/maintenance/ai-traces";
+  const hydratedDisabled = (disabled: boolean) => (clientHydrated && disabled ? true : undefined);
   const aiTraceEmptyHint = selectedMatchId
     ? selectedMatchCanEnableAiTrace
       ? "Für das ausgewählte Match werden noch keine KI-Entscheidungen aufgezeichnet. Aktiviere die Aufzeichnung hier in der Wartungsansicht; ab dem nächsten KI-Schritt entstehen Trace-Daten."
@@ -812,11 +829,15 @@ export default function MaintenancePage() {
             {aiTraceLiveFollow && !aiTraceFollowPaused ? " · Live-Follow aktiv" : ""}
           </p>
           <div style={buttonRow}>
-            <button type="button" style={button} onClick={() => void enableAiTracingForSelectedMatch()} disabled={!selectedMatchCanEnableAiTrace || aiTraceEnableLoading} title="KI-Tracing für das aktuell ausgewählte Match ab jetzt aktivieren">
+            <a href={selectedAiTracePageHref} style={linkButton} title="KI-Trace in eigener Wartungsseite öffnen">
+              <ExternalLink size={16} aria-hidden="true" />
+              Trace-Seite öffnen
+            </a>
+            <button type="button" style={button} onClick={() => void enableAiTracingForSelectedMatch()} disabled={hydratedDisabled(!selectedMatchCanEnableAiTrace || aiTraceEnableLoading)} title="KI-Tracing für das aktuell ausgewählte Match ab jetzt aktivieren">
               {aiTraceEnableLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Bot size={16} aria-hidden="true" />}
               {aiTraceEnableLoading ? "Aktiviert" : "Für Match aktivieren"}
             </button>
-            <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={aiTraceLoading} title="KI-Trace-Matches aktualisieren">
+            <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={hydratedDisabled(aiTraceLoading)} title="KI-Trace-Matches aktualisieren">
               {aiTraceLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
               {aiTraceLoading ? "Lädt" : "Aktualisieren"}
             </button>
@@ -824,13 +845,13 @@ export default function MaintenancePage() {
               <Bot size={16} aria-hidden="true" />
               {aiTraceLiveFollow ? "Live an" : "Live aus"}
             </button>
-            <button type="button" style={button} onClick={() => setAiTraceFollowPaused((current) => !current)} disabled={!aiTraceLiveFollow} title="Live-Follow pausieren oder fortsetzen">
+            <button type="button" style={button} onClick={() => setAiTraceFollowPaused((current) => !current)} disabled={hydratedDisabled(!aiTraceLiveFollow)} title="Live-Follow pausieren oder fortsetzen">
               {aiTraceFollowPaused ? "Fortsetzen" : "Pausieren"}
             </button>
-            <button type="button" style={button} onClick={() => { setSelectedAiTraceId(latestMaintenanceAiTraceId(aiTraceIndex)); setAiTraceFollowPaused(false); }} disabled={aiTraceIndex.length === 0} title="Zur neuesten KI-Entscheidung springen">
+            <button type="button" style={button} onClick={() => { setSelectedAiTraceId(latestMaintenanceAiTraceId(aiTraceIndex)); setAiTraceFollowPaused(false); }} disabled={hydratedDisabled(aiTraceIndex.length === 0)} title="Zur neuesten KI-Entscheidung springen">
               Zur neuesten
             </button>
-            <button type="button" style={button} onClick={exportAiTraceIndex} disabled={!selectedAiTraceMatchId || aiTraceIndex.length === 0} title="Redigierten KI-Trace-Index als NDJSON exportieren">
+            <button type="button" style={button} onClick={exportAiTraceIndex} disabled={hydratedDisabled(!selectedAiTraceMatchId || aiTraceIndex.length === 0)} title="Redigierten KI-Trace-Index als NDJSON exportieren">
               <Download size={16} aria-hidden="true" />
               Export
             </button>
@@ -1345,7 +1366,7 @@ const skeletonLineLarge: CSSProperties = { display: "block", width: "68%", heigh
 const cleanupBox: CSSProperties = { display: "grid", gap: "0.55rem", border: "1px solid #d7e1eb", borderRadius: 8, padding: "0.75rem", background: "#fbfdff" };
 const traceList: CSSProperties = { display: "grid", gap: "0.45rem", maxHeight: 340, overflowY: "auto" };
 const traceItem: CSSProperties = { display: "grid", gridTemplateColumns: "1fr auto", gap: "0.2rem 0.75rem", textAlign: "left", border: "1px solid #cbd8e6", background: "#fff", color: "#102033", borderRadius: 6, padding: "0.55rem", cursor: "pointer" };
-const traceItemSelected: CSSProperties = { ...traceItem, borderColor: "#2f74b5", background: "#eef6ff" };
+const traceItemSelected: CSSProperties = { ...traceItem, border: "1px solid #2f74b5", background: "#eef6ff" };
 const traceDetails: CSSProperties = { border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fff" };
 const traceSection: CSSProperties = { display: "grid", gap: "0.35rem" };
 const traceChips: CSSProperties = { display: "flex", flexWrap: "wrap", gap: "0.35rem" };
@@ -1354,10 +1375,10 @@ const traceChip: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 99
 const traceCardGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" };
 const traceCard: CSSProperties = { display: "grid", gap: "0.35rem", border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fbfdff" };
 const traceActionCard: CSSProperties = { ...traceCard, minWidth: 0 };
-const traceActionCardSelected: CSSProperties = { ...traceActionCard, borderColor: "#2f74b5", background: "#eef6ff" };
+const traceActionCardSelected: CSSProperties = { ...traceActionCard, border: "1px solid #2f74b5", background: "#eef6ff" };
 const traceActionHeader: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", minWidth: 0 };
 const traceSelectedPill: CSSProperties = { border: "1px solid #2f74b5", borderRadius: 999, padding: "0.1rem 0.45rem", background: "#dcefff", color: "#12466f", fontSize: "0.74rem", fontWeight: 700 };
-const traceMutedPill: CSSProperties = { ...traceSelectedPill, borderColor: "#c7d4e2", background: "#f6f9fc", color: "#42576b" };
+const traceMutedPill: CSSProperties = { ...traceSelectedPill, border: "1px solid #c7d4e2", background: "#f6f9fc", color: "#42576b" };
 const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
 const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
 const linkButton: CSSProperties = { ...button, textDecoration: "none" };

@@ -2126,6 +2126,7 @@ export default function Page() {
     }
     if (matchId && token) {
       if (storedSession && storedSession.matchId === matchId) {
+        setRecoveryTabSelected(true);
         setSession(storedSession);
         void bootstrap(storedSession)
           .then((bootstrapped) => {
@@ -2166,6 +2167,7 @@ export default function Page() {
       setRecentSession(loadRecentSession());
       return;
     }
+    setRecoveryTabSelected(true);
     setSession(storedSession);
     void bootstrap(storedSession)
       .then((bootstrapped) => {
@@ -4304,7 +4306,8 @@ export default function Page() {
   }, [connection, session]);
   const showingStartLobby = Boolean(session && lobby);
   const showingSessionRecovery = Boolean(session && !payload && !lobby);
-  const activeStartTab = recoveryTabSelected && recentSession ? "resume" : mode;
+  const hasRecoveryStartTab = Boolean(showingSessionRecovery || recentSession);
+  const activeStartTab = recoveryTabSelected && hasRecoveryStartTab ? "resume" : mode;
   const canResumeRecentSession = Boolean(recentSession && storedSessionMatches(recentSession));
   const updateAudioEnabled = (enabled: boolean) => {
     if (enabled) primeAudio(audioVolume);
@@ -4385,51 +4388,56 @@ export default function Page() {
               onCopyJoinLink={copyJoinLink}
             />
           ) : null}
-          {showingSessionRecovery && session ? (
-            <section className="resumeSessionPanel" aria-label="Sitzung wiederherstellen">
-              <div>
-                <p className="eyebrow">Aktive lokale Sitzung</p>
-                <h2>Match {session.matchId}</h2>
-                <p className="meta">
-                  {sideLabel(session.side)} · {session.displayName}
-                  {connection !== "online" ? " · nicht verbunden" : ""}
-                </p>
-              </div>
-              <div className="resumeSessionActions">
-                <button className="button primary" onClick={reconnect} type="button" disabled={!canReconnect}>
-                  <Cable size={15} />
-                  Wieder verbinden
-                </button>
-                <button className="button" onClick={copyReconnectLink} type="button" disabled={!canReconnect}>
-                  <Link2 size={15} />
-                  Link kopieren
-                </button>
-                <button className="button" onClick={leaveMatch} type="button">
-                  <Trash2 size={15} />
-                  Lokale Sitzung lösen
-                </button>
-              </div>
-            </section>
-          ) : null}
           <div className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}>
           {notice ? <p className="notice entryNotice">{notice}</p> : null}
           {entryTab === "play" && !showingStartLobby ? (
           <section className="setupPanel">
-            <div className={`tabs ${recentSession ? "threeTabs" : ""}`}>
+            <div className={`tabs ${hasRecoveryStartTab ? "threeTabs" : ""}`}>
               <button className={`tab ${activeStartTab === "host" ? "active" : ""}`} onClick={() => selectStartTab("host")}>
                 Match erstellen
               </button>
               <button className={`tab ${activeStartTab === "join" ? "active" : ""}`} onClick={() => selectStartTab("join")}>
                 Beitreten
               </button>
-              {recentSession ? (
+              {hasRecoveryStartTab ? (
                 <button className={`tab ${activeStartTab === "resume" ? "active" : ""}`} onClick={() => selectStartTab("resume")}>
-                  Fortsetzen
+                  {showingSessionRecovery ? "Wieder verbinden" : "Fortsetzen"}
                 </button>
               ) : null}
             </div>
 
-            {activeStartTab === "resume" && recentSession ? (
+            {activeStartTab === "resume" && showingSessionRecovery && session ? (
+              <section className="resumeSessionInline" aria-label="Sitzung wiederherstellen">
+                <div className="resumeSessionSummary">
+                  <p className="eyebrow">Aktive lokale Sitzung</p>
+                  <h2>Match {session.matchId}</h2>
+                  <p className="meta">
+                    {sideLabel(session.side)} · {session.displayName}
+                    {connection !== "online" ? " · nicht verbunden" : ""}
+                  </p>
+                </div>
+                <div className="resumeSessionActions">
+                  <span className="resumeActionTooltip" data-tooltip={canReconnect ? "Aktive lokale Sitzung wieder verbinden" : "Für diese Sitzung liegt kein Wiederverbindungs-Token vor."}>
+                    <button className="button primary" onClick={reconnect} type="button" disabled={!canReconnect}>
+                      <Cable size={15} />
+                      Wieder verbinden
+                    </button>
+                  </span>
+                  <span className="resumeActionTooltip" data-tooltip={canReconnect ? "Wiederverbindungslink kopieren" : "Für diese Sitzung liegt kein Wiederverbindungs-Token vor."}>
+                    <button className="button" onClick={copyReconnectLink} type="button" disabled={!canReconnect}>
+                      <Link2 size={15} />
+                      Link kopieren
+                    </button>
+                  </span>
+                  <span className="resumeActionTooltip" data-tooltip="Löst nur die lokale Browser-Sitzung. Das serverseitige Match bleibt unverändert.">
+                    <button className="button" onClick={leaveMatch} type="button">
+                      <Trash2 size={15} />
+                      Lokale Sitzung lösen
+                    </button>
+                  </span>
+                </div>
+              </section>
+            ) : activeStartTab === "resume" && recentSession ? (
               <section className="resumeSessionInline" aria-label="Gespeichertes Spiel fortsetzen">
                 <div className="resumeSessionSummary">
                   <p className="eyebrow">Gespeichertes Spiel</p>
@@ -7911,8 +7919,6 @@ function ScoredAgendaOverlay({
                 card={card}
                 displayMode={cardDisplayMode}
                 showAdvancementCounters={false}
-                showScoreStateBadges
-                scoreStateBadges={side === "corp" ? scoreCardStateBadges(card, cards) : []}
                 actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
                 selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
@@ -7920,7 +7926,7 @@ function ScoredAgendaOverlay({
                 {...(onFocus ? { onFocus } : {})}
                 {...(onActionContextSelect ? { onActionContextSelect } : {})}
               />
-              <ScoredAgendaStateLines card={card} side={side} corpScoreAreaCards={side === "corp" ? cards : []} />
+              <ScoredAgendaStateLines card={card} side={side} />
             </div>
           ))}
           {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
@@ -12646,8 +12652,8 @@ type ScoredAgendaStateLine = {
   tone: ScoredAgendaStateTone;
 };
 
-function ScoredAgendaStateLines({ card, side, corpScoreAreaCards }: { card: DisplayVisibleCard; side: Side; corpScoreAreaCards: VisibleCard[] }) {
-  const lines = scoredAgendaStateLines(card, side, corpScoreAreaCards);
+function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side: Side }) {
+  const lines = scoredAgendaStateLines(card, side);
   if (lines.length === 0) return null;
   return (
     <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
@@ -12661,12 +12667,10 @@ function ScoredAgendaStateLines({ card, side, corpScoreAreaCards }: { card: Disp
   );
 }
 
-function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
+function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
   const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
   if (effectLine) lines.push(effectLine);
-  const researchDifficultyLine = side === "corp" ? researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards) : null;
-  if (researchDifficultyLine) lines.push(researchDifficultyLine);
   return lines;
 }
 
