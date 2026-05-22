@@ -26931,7 +26931,12 @@ function resolveFortressRespecificationReorderChoice(
   if (!choice || !choice.source.startsWith("p3_58.fortress_respecification:"))
     throw new Error("Es ist keine Fortress-Respecification-Choice offen.");
   const [, sourceCardId = "", serverId = ""] = choice.source.split(":");
-  if (definitionFor(state, sourceCardId).id !== "onr_v1_088_fortress-respecification")
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  if (
+    cardImplementationForDefinitionId(sourceDefinition.id)
+      ?.hiddenReplacementLongtail?.kind !==
+    "fortress_respecification_ice_reorder"
+  )
     throw new Error("Die Fortress-Respecification-Quelle passt nicht zur Karte.");
   const server = mustServer(state, serverId);
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -26954,7 +26959,7 @@ function resolveFortressRespecificationReorderChoice(
     hiddenZoneBarrier: true,
     hiddenOrderChoice: true,
     hiddenZoneAction: "p3_58_fortress_respecification_reorder",
-    sourceDefinitionId: "onr_v1_088_fortress-respecification",
+    sourceDefinitionId: sourceDefinition.id,
     serverId: server.id,
     reorderedIceCount: selectedIds.length,
     concealedIceCount: concealedIceCountForCardIds(state, selectedIds),
@@ -27214,7 +27219,12 @@ function resolveNewBloodReorderChoice(
   if (!choice || !choice.source.startsWith("p3_58.new_blood_reorder:"))
     throw new Error("Es ist keine New-Blood-Reorder-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
-  if (definitionFor(state, sourceCardId).id !== "onr_v1_294_new-blood")
+  const sourceDefinition = definitionFor(state, sourceCardId);
+  if (
+    cardImplementationForDefinitionId(sourceDefinition.id)
+      ?.hiddenReplacementLongtail?.kind !==
+    "new_blood_conceal_reorder_installed_ice"
+  )
     throw new Error("Die New-Blood-Quelle passt nicht zur Karte.");
   const slots = installedIceSlots(state);
   const currentIds = slots.map((slot) => slot.cardId);
@@ -27239,7 +27249,7 @@ function resolveNewBloodReorderChoice(
     hiddenZoneBarrier: true,
     hiddenOrderChoice: true,
     hiddenZoneAction: "p3_58_new_blood_conceal_reorder",
-    sourceDefinitionId: "onr_v1_294_new-blood",
+    sourceDefinitionId: sourceDefinition.id,
     reorderedIceCount: selectedIds.length,
     concealedIceCount: concealedIceCountForCardIds(state, selectedIds),
   };
