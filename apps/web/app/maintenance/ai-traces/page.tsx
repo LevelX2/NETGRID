@@ -38,12 +38,14 @@ export default function AiTraceMaintenancePage() {
   const [activationLoading, setActivationLoading] = useState(false);
   const [liveFollow, setLiveFollow] = useState(true);
   const [followPaused, setFollowPaused] = useState(false);
+  const [clientHydrated, setClientHydrated] = useState(false);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
 
   const matchesById = useMemo(() => new Map(matches.map((match) => [match.matchId, match])), [matches]);
   const selectedTraceMatch = matchesById.get(selectedMatchId);
   const selectedMatchCanEnable = Boolean(selectedMatchDetail && !selectedMatchDetail.terminal && selectedMatchDetail.mode !== "human_vs_human" && !selectedTraceMatch);
+  const hydratedDisabled = (disabled: boolean) => (clientHydrated && disabled ? true : undefined);
 
   const loadTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry) => {
     const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches`, { cache: "no-store" });
@@ -167,6 +169,10 @@ export default function AiTraceMaintenancePage() {
   };
 
   useEffect(() => {
+    setClientHydrated(true);
+  }, []);
+
+  useEffect(() => {
     setSelectedMatchId(initialMatchId());
     void refresh();
   }, []);
@@ -216,7 +222,7 @@ export default function AiTraceMaintenancePage() {
           </div>
           <div style={buttonRow}>
             <a href="/maintenance" style={linkButton}>Storage Maintenance</a>
-            <button type="button" style={button} onClick={() => void refresh()} disabled={loading}>
+            <button type="button" style={button} onClick={() => void refresh()} disabled={hydratedDisabled(loading)}>
               {loading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
               {loading ? "Lädt" : "Aktualisieren"}
             </button>
@@ -237,9 +243,9 @@ export default function AiTraceMaintenancePage() {
                 <RefreshCcw size={16} aria-hidden="true" />
               </button>
             </div>
-            <MatchJump selectedMatchId={selectedMatchId} onSelect={setSelectedMatchId} />
+            <MatchJump selectedMatchId={selectedMatchId} clientHydrated={clientHydrated} onSelect={setSelectedMatchId} />
             {selectedMatchCanEnable ? (
-              <button type="button" style={button} onClick={() => void enableSelectedMatch()} disabled={activationLoading}>
+              <button type="button" style={button} onClick={() => void enableSelectedMatch()} disabled={hydratedDisabled(activationLoading)}>
                 {activationLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Bot size={16} aria-hidden="true" />}
                 {activationLoading ? "Aktiviert" : "Trace für dieses Match aktivieren"}
               </button>
@@ -266,10 +272,10 @@ export default function AiTraceMaintenancePage() {
                   <Bot size={16} aria-hidden="true" />
                   {liveFollow ? "Live an" : "Live aus"}
                 </button>
-                <button type="button" style={button} onClick={() => setFollowPaused((current) => !current)} disabled={!liveFollow}>
+                <button type="button" style={button} onClick={() => setFollowPaused((current) => !current)} disabled={hydratedDisabled(!liveFollow)}>
                   {followPaused ? "Fortsetzen" : "Pausieren"}
                 </button>
-                <button type="button" style={button} onClick={exportTraceIndex} disabled={!selectedMatchId || traceIndex.length === 0}>
+                <button type="button" style={button} onClick={exportTraceIndex} disabled={hydratedDisabled(!selectedMatchId || traceIndex.length === 0)}>
                   <Download size={16} aria-hidden="true" />
                   Export
                 </button>
@@ -293,7 +299,7 @@ export default function AiTraceMaintenancePage() {
   );
 }
 
-function MatchJump({ selectedMatchId, onSelect }: { selectedMatchId: string; onSelect: (matchId: string) => void }) {
+function MatchJump({ selectedMatchId, clientHydrated, onSelect }: { selectedMatchId: string; clientHydrated: boolean; onSelect: (matchId: string) => void }) {
   const [draft, setDraft] = useState(selectedMatchId);
   useEffect(() => setDraft(selectedMatchId), [selectedMatchId]);
   return (
@@ -302,7 +308,7 @@ function MatchJump({ selectedMatchId, onSelect }: { selectedMatchId: string; onS
         Match-ID
         <input value={draft} onChange={(event) => setDraft(event.target.value)} style={input} />
       </label>
-      <button type="submit" style={button} disabled={!draft.trim()}>Öffnen</button>
+      <button type="submit" style={button} disabled={clientHydrated && !draft.trim() ? true : undefined}>Öffnen</button>
     </form>
   );
 }
