@@ -1,5 +1,5 @@
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionActionAlternative, type AiDecisionDebug, type AiDecisionInput, type AiDecisionRankedAlternative, type AiDecisionScoreComponent, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory, type RndTopFreshnessMemory } from "./belief-state";
 import { assessKnownRezzedIcePath, canBreakerDefinitionBreakIce, iceHasEndTheRun, serverIdFromEvent } from "./visible-run-analysis";
@@ -39,6 +39,7 @@ export type RunnerPlanScore = {
   confidence: number;
   reasons: string[];
   evidence: string[];
+  scoreBreakdown: AiDecisionScoreComponent[];
 };
 
 export type RunnerPlanDebug = AiDecisionDebug & {
@@ -166,6 +167,15 @@ type ShellTradersBacklog = {
   totalShellCounters: number;
 };
 
+type BrokerPoolBuildHorizon = {
+  score: number;
+  priority: number;
+  reason: string;
+  immediateCreditNeed: boolean;
+  visibleThreshold: boolean;
+  clicksRemaining: number;
+};
+
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "activated_card_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
@@ -233,12 +243,20 @@ export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { time
     debug: {
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
+      summary: explanationForPlan(selected.candidate.kind),
       planId: selected.candidate.planId,
       planKind: selected.candidate.kind,
       selectedActionType: action.type,
       score: selected.score.score,
       confidence: selected.score.confidence,
       visibleReasons: selected.score.reasons,
+      rankedAlternatives: rankedRunnerAlternatives(input, scored, selected.candidate.planId),
+      actionAlternatives: runnerActionAlternativesForPlan(input, selected.candidate, action.actionId),
+      scoreBreakdown: selected.score.scoreBreakdown,
+      whyNot: [],
+      longTermPlan: longTermPlanForRunner(input, selected.candidate.kind),
+      warnings: selected.candidate.visibleRisks.slice(0, 4),
+      detailSections: runnerDetailSections(selected.candidate, selected.score),
       uncertainty: selected.candidate.uncertainty,
       evidence: scrubPlanEvidence(selected.score.evidence),
       fallbackUsed: false,
@@ -346,6 +364,23 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
     reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...citySurveillanceDrawRisk.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
+    scoreBreakdown: scoreComponents([
+      ["base", "Grundplan", baseScoreForPlan(candidate.kind), 1, `plan:${candidate.kind}`],
+      ["doctrine", "Deck-Doctrine", doctrinePlanWeight, 1, "doctrine_plan_weight"],
+      ["earlyTurn", "Frühe Zugphase", earlyTurn.score, 1, firstReason(earlyTurn.reasons)],
+      ["runnerRig", "Runner-Rig", rig.score * profile.weights.runnerRig, profile.weights.runnerRig, firstReason(rig.reasons)],
+      ["runCost", "Run-Kosten", runCost.score * profile.weights.runCost, profile.weights.runCost, firstReason(runCost.reasons)],
+      ["serverAccessValue", "Serverwert", access.score * profile.weights.serverAccessValue, profile.weights.serverAccessValue, firstReason(access.reasons)],
+      ["remoteThreat", "Remote-Druck", remote.score * profile.weights.remoteThreat, profile.weights.remoteThreat, firstReason(remote.reasons)],
+      ["corpScoringThreat", "Corp-Scoring-Gefahr", corpThreat.score * profile.weights.corpScoringThreat, profile.weights.corpScoringThreat, firstReason(corpThreat.reasons)],
+      ["breakerPlan", "Breaker-Plan", breakerPlan.score, 1, firstReason(breakerPlan.reasons)],
+      ["twoTurnIntent", "Zwei-Zug-Absicht", twoTurnIntent.score, 1, firstReason(twoTurnIntent.reasons)],
+      ["citySurveillance", "City-Surveillance-Risiko", citySurveillanceDrawRisk.score, 1, firstReason(citySurveillanceDrawRisk.reasons)],
+      ["installedEconomy", "Installierte Economy", installedEconomy.score, 1, firstReason(installedEconomy.reasons)],
+      ["shellTraders", "Shell Traders", shellTraders.score, 1, firstReason(shellTraders.reasons)],
+      ["visibleRisk", "Sichtbares Risiko", -visibleRiskPenalty(candidate, profile.riskTolerance), 1, firstReason(candidate.visibleRisks)],
+      ["easyRunPenalty", "Easy-Run-Bremse", -easyRunPenalty, 1, easyRunPenalty > 0 ? "easy_run_penalty" : undefined]
+    ]),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -1114,16 +1149,13 @@ function evaluateInstalledEconomyActions(input: AiDecisionInput, candidate: Runn
     reasons.push(payout.kind === "pool_payout" ? "installed_economy_pool_payout" : "installed_economy_direct_payout");
   }
   if (poolBuild) {
-    if (input.playerView.own.credits < 4) {
-      score -= 80;
-      reasons.push("installed_economy_pool_build_deferred_for_credit_need");
-    } else {
-      score += 45 + Math.min(80, poolBuild.futurePoolAfter * 8);
-      reasons.push("installed_economy_pool_build_future_value");
-    }
+    const horizon = brokerPoolBuildHorizon(input, poolBuild);
+    score += horizon.score;
+    reasons.push(horizon.reason);
   }
 
   const best = payout ?? poolBuild ?? assessments[0]!;
+  const brokerHorizon = best.kind === "pool_build" ? brokerPoolBuildHorizon(input, best) : undefined;
   return {
     score,
     reasons,
@@ -1134,9 +1166,47 @@ function evaluateInstalledEconomyActions(input: AiDecisionInput, candidate: Runn
       `installed_economy_net_credits:${best.netCredits}`,
       `installed_economy_stored_credits:${best.storedCredits}`,
       `installed_economy_future_pool_after:${best.futurePoolAfter}`,
-      `economy_need:${input.playerView.own.credits < 4 ? "acute" : "stable"}`
+      `economy_need:${input.playerView.own.credits < 4 ? "acute" : "stable"}`,
+      ...(brokerHorizon
+        ? [
+            `broker_horizon:${brokerHorizon.reason}`,
+            `broker_horizon_clicks:${brokerHorizon.clicksRemaining}`,
+            `broker_horizon_visible_threshold:${brokerHorizon.visibleThreshold}`,
+            `broker_horizon_immediate_credit_need:${brokerHorizon.immediateCreditNeed}`
+          ]
+        : [])
     ]
   };
+}
+
+function brokerPoolBuildHorizon(input: AiDecisionInput, assessment: InstalledEconomyActionAssessment): BrokerPoolBuildHorizon {
+  const clicksRemaining = Math.max(0, Math.floor(input.playerView.own.clicks));
+  const visibleThreshold = runnerHasVisibleImmediateCreditThreshold(input);
+  const immediateCreditNeed = input.playerView.own.credits < 3 || visibleThreshold;
+  if (immediateCreditNeed) {
+    return {
+      score: -80,
+      priority: 42,
+      reason: "installed_economy_pool_build_deferred_for_credit_need",
+      immediateCreditNeed,
+      visibleThreshold,
+      clicksRemaining
+    };
+  }
+  const clickWindowBonus = clicksRemaining >= 2 ? 35 : clicksRemaining === 1 ? 8 : -25;
+  return {
+    score: 45 + Math.min(80, assessment.futurePoolAfter * 8) + clickWindowBonus,
+    priority: 68 + Math.min(20, assessment.futurePoolAfter * 2) + (clicksRemaining >= 2 ? 8 : 0),
+    reason: clicksRemaining >= 2 ? "installed_economy_pool_build_horizon_value" : "installed_economy_pool_build_late_click_value",
+    immediateCreditNeed,
+    visibleThreshold,
+    clicksRemaining
+  };
+}
+
+function runnerHasVisibleImmediateCreditThreshold(input: AiDecisionInput): boolean {
+  const features = extractRunnerFeatures(input);
+  return [...features.visibleRunBreakCosts.values()].some((cost) => cost > features.credits && cost <= features.credits + 1);
 }
 
 function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
@@ -1305,7 +1375,8 @@ function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAct
   const netCredits = immediateGain - actionCreditCost(action);
 
   if (ability === "broker_load_credits") {
-    return { kind: "pool_build", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability };
+    const cost = actionCreditCost(action);
+    return { kind: "pool_build", immediateGain: 0, netCredits: cost > 0 ? -cost : 0, storedCredits, futurePoolAfter, ability };
   }
   if (ability === "broker_take_credits") {
     const brokerGain = Math.max(immediateGain, storedCredits);
@@ -1321,7 +1392,8 @@ function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAct
     return { kind: "direct_payout", immediateGain, netCredits, storedCredits, futurePoolAfter, ability: ability || "credit_payout" };
   }
   if (addedCounters > 0 && (ability || roles.some((role) => role.includes("economy")))) {
-    return { kind: "pool_build", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability: ability || "counter_build" };
+    const cost = actionCreditCost(action);
+    return { kind: "pool_build", immediateGain: 0, netCredits: cost > 0 ? -cost : 0, storedCredits, futurePoolAfter, ability: ability || "counter_build" };
   }
   if (roles.some((role) => role.includes("economy")) && ability) {
     return { kind: "side_economy", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability };
@@ -1417,6 +1489,91 @@ function selectPlanAction(input: AiDecisionInput, candidate: RunnerPlanCandidate
     .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
     .filter((action): action is LegalAction => Boolean(action))
     .sort((left, right) => actionPriority(candidate.kind, right, input) - actionPriority(candidate.kind, left, input) || compareAction(left, right))[0];
+}
+
+function runnerActionAlternativesForPlan(input: AiDecisionInput, candidate: RunnerPlanCandidate, selectedActionId: string): AiDecisionActionAlternative[] {
+  return candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => Boolean(action))
+    .map((action) => ({
+      action,
+      priority: actionPriority(candidate.kind, action, input)
+    }))
+    .sort((left, right) => right.priority - left.priority || compareAction(left.action, right.action))
+    .slice(0, 8)
+    .map((entry, index) => runnerActionAlternativeForAction(input, candidate.kind, entry.action, entry.priority, entry.action.actionId === selectedActionId, index + 1));
+}
+
+function runnerActionAlternativeForAction(
+  input: AiDecisionInput,
+  kind: RunnerPlanKind,
+  action: LegalAction,
+  priority: number,
+  selected: boolean,
+  rank: number
+): AiDecisionActionAlternative {
+  const sourceCard = action.source !== "basic_action" && action.source !== "game_rule" ? findVisibleCard(input, action.source) : undefined;
+  const sourceTitle = sourceCard && isDebugPublicSourceCard(input, sourceCard.instanceId) ? sourceCard.title : undefined;
+  const installedEconomy = classifyInstalledEconomyAction(input, action);
+  const economyNeed = input.playerView.own.credits < 4 ? "acute" : "stable";
+  const economy =
+    kind === "recover_economy" && action.type === "gain_credit"
+      ? {
+          economyKind: "basic_credit",
+          immediateGain: 1,
+          netCredits: 1,
+          storedCredits: 0,
+          futurePoolAfter: 0,
+          economyNeed
+        }
+      : installedEconomy
+        ? {
+            economyKind: installedEconomy.kind,
+            ability: installedEconomy.ability,
+            immediateGain: installedEconomy.immediateGain,
+            netCredits: installedEconomy.netCredits,
+            storedCredits: installedEconomy.storedCredits,
+            futurePoolAfter: installedEconomy.futurePoolAfter,
+            economyNeed
+          }
+        : undefined;
+  return {
+    rank,
+    actionId: action.actionId,
+    actionType: action.type,
+    label: sourceTitle || action.source === "basic_action" || action.source === "game_rule" ? action.label : action.type,
+    source: sourceCard ? (sourceTitle ? "visible_card" : "private_card") : action.source,
+    ...(sourceTitle ? { sourceTitle } : {}),
+    selected,
+    priority: roundScore(priority),
+    ...(selected ? { whyChosen: runnerActionWhy(input, action, installedEconomy, true) } : { whyNot: runnerActionWhy(input, action, installedEconomy, false) }),
+    ...(economy ? { economy } : {})
+  };
+}
+
+function isDebugPublicSourceCard(input: AiDecisionInput, instanceId: string): boolean {
+  const ownPublicCards = [
+    input.playerView.own.scoreArea,
+    ...(input.playerView.own.rig ? [input.playerView.own.rig] : []),
+    ...input.playerView.servers.map((server) => [...server.ice, ...server.root])
+  ];
+  const opponentPublicCards = [
+    input.playerView.opponent.scoreArea,
+    ...(input.playerView.opponent.rig ? [input.playerView.opponent.rig] : [])
+  ];
+  return [...ownPublicCards, ...opponentPublicCards].some((cards) => cards.some((card) => card.instanceId === instanceId && card.known));
+}
+
+function runnerActionWhy(input: AiDecisionInput, action: LegalAction, installedEconomy: InstalledEconomyActionAssessment | undefined, selected: boolean): string[] {
+  if (selected) return ["selected_action"];
+  if (action.type === "gain_credit") return ["basic_credit_lower_action_priority"];
+  if (!installedEconomy) return ["lower_action_priority"];
+  if (installedEconomy.kind === "pool_build") {
+    return input.playerView.own.credits < 4 ? ["pool_build_deferred_for_credit_need"] : ["pool_build_future_value_below_selected_action"];
+  }
+  if (installedEconomy.kind === "pool_payout") return ["pool_payout_lower_action_priority"];
+  if (installedEconomy.kind === "direct_payout") return ["direct_payout_lower_action_priority"];
+  return ["side_economy_lower_action_priority"];
 }
 
 function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDecisionInput): number {
@@ -1566,7 +1723,7 @@ function runnerInstalledEconomyPriority(input: AiDecisionInput, action: LegalAct
   if (!assessment) return 10;
   if (assessment.kind === "pool_payout") return 88 + Math.max(0, assessment.netCredits - 1) * 8;
   if (assessment.kind === "direct_payout") return 84 + Math.max(0, assessment.netCredits - 1) * 7;
-  if (assessment.kind === "pool_build") return input.playerView.own.credits < 4 ? 42 : 68 + Math.min(20, assessment.futurePoolAfter * 2);
+  if (assessment.kind === "pool_build") return brokerPoolBuildHorizon(input, assessment).priority;
   return input.playerView.own.credits < 4 ? 35 : 58;
 }
 
@@ -1668,7 +1825,7 @@ function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudget
     selectedActionId: fallbackAction?.actionId ?? "",
     selectedActionType: fallbackAction?.type ?? "none",
     fallbackUsed: true,
-    score: { planId: "fallback", score: 0, confidence: 0.2, reasons: [reason], evidence: [reason] },
+    score: { planId: "fallback", score: 0, confidence: 0.2, reasons: [reason], evidence: [reason], scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]) },
     debug: fallbackDebug(input, undefined, reason, timeBudgetMs, timeoutUsed, beliefState)
   };
 }
@@ -1687,12 +1844,33 @@ function fallbackDebug(
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: 2,
+    summary: "Der Runner nutzt einen legalen Fallback.",
     planId: "fallback",
     planKind: "fallback",
     selectedActionType: fallbackAction?.type ?? "none",
     score: 0,
     confidence: fallbackDecision?.confidence ?? 0.2,
     visibleReasons: [reason],
+    rankedAlternatives: [
+      {
+        rank: 1,
+        planId: "fallback",
+        planKind: "fallback",
+        selectedActionType: fallbackAction?.type ?? "none",
+        summary: "Legal fallback action",
+        score: 0,
+        confidence: fallbackDecision?.confidence ?? 0.2,
+        visibleReasons: [reason],
+        scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]),
+        whyNot: [],
+        warnings: ["fallback_used"]
+      }
+    ],
+    scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]),
+    whyNot: [reason],
+    longTermPlan: longTermPlanForRunner(input, "fallback"),
+    warnings: ["fallback_used"],
+    detailSections: [{ id: "fallback", title: "Fallback", items: [reason] }],
     uncertainty: ["unknown_corp_cards_remain_unknown"],
     evidence: scrubPlanEvidence([reason]),
     fallbackUsed: true,
@@ -1708,6 +1886,76 @@ function fallbackDebug(
     ...(opponentModel ? { opponentModel } : {}),
     ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine), doctrinePlanWeight: 0 } : {})
   };
+}
+
+type ScoreComponentInput = [key: string, label: string, value: number, weight?: number | undefined, reason?: string | undefined];
+
+function scoreComponents(inputs: ScoreComponentInput[]): AiDecisionScoreComponent[] {
+  return inputs
+    .filter(([, , value], index) => index === 0 || value !== 0)
+    .map(([key, label, value, weight, reason]) => ({
+      key,
+      label,
+      value: roundScore(value),
+      ...(weight !== undefined ? { weight: round(weight) } : {}),
+      ...(reason ? { reason } : {})
+    }))
+    .slice(0, 16);
+}
+
+function firstReason(reasons: string[]): string | undefined {
+  return reasons.find((reason) => reason.length > 0);
+}
+
+function rankedRunnerAlternatives(
+  input: AiDecisionInput,
+  scored: Array<{ candidate: RunnerPlanCandidate; score: RunnerPlanScore }>,
+  selectedPlanId: string
+): AiDecisionRankedAlternative[] {
+  const selectedScore = scored.find((entry) => entry.candidate.planId === selectedPlanId)?.score.score ?? scored[0]?.score.score ?? 0;
+  return scored.slice(0, 5).map((entry, index) => {
+    const representativeAction = selectPlanAction(input, entry.candidate);
+    return {
+      rank: index + 1,
+      planId: entry.candidate.planId,
+      planKind: entry.candidate.kind,
+      selectedActionType: representativeAction?.type ?? entry.candidate.steps[0]?.actionType ?? "none",
+      summary: explanationForPlan(entry.candidate.kind),
+      score: entry.score.score,
+      confidence: entry.score.confidence,
+      visibleReasons: entry.score.reasons.slice(0, 4),
+      scoreBreakdown: entry.score.scoreBreakdown.slice(0, 8),
+      whyNot: alternativeWhyNot(entry.candidate, entry.score, selectedScore, entry.candidate.planId === selectedPlanId),
+      warnings: entry.candidate.visibleRisks.slice(0, 3)
+    };
+  });
+}
+
+function alternativeWhyNot(candidate: RunnerPlanCandidate, score: RunnerPlanScore, selectedScore: number, isSelected: boolean): string[] {
+  if (isSelected) return ["selected_plan"];
+  const delta = roundScore(selectedScore - score.score);
+  return sortedUnique([
+    ...(delta > 0 ? [`lower_score_by:${delta}`] : []),
+    ...candidate.visibleRisks.slice(0, 2),
+    ...candidate.uncertainty.slice(0, 2),
+    ...score.reasons.slice(0, 3)
+  ]).slice(0, 6);
+}
+
+function longTermPlanForRunner(input: AiDecisionInput, kind: RunnerPlanKind | "fallback"): string[] {
+  return sortedUnique([
+    `active_plan:${kind}`,
+    ...(input.ownDeckDoctrine?.side === "runner" ? input.ownDeckDoctrine.archetypeTags.slice(0, 3).map((tag) => `doctrine:${tag}`) : ["doctrine:neutral"]),
+    ...(input.ownDeckDoctrine?.side === "runner" ? input.ownDeckDoctrine.riskFlags.slice(0, 2).map((flag) => `risk_flag:${flag}`) : [])
+  ]).slice(0, 6);
+}
+
+function runnerDetailSections(candidate: RunnerPlanCandidate, score: RunnerPlanScore): NonNullable<RunnerPlanDebug["detailSections"]> {
+  return [
+    { id: "visible_reasons", title: "Sichtbare Gründe", items: score.reasons.slice(0, 6) },
+    { id: "evidence", title: "Evidence", items: scrubPlanEvidence(score.evidence).slice(0, 8) },
+    { id: "uncertainty", title: "Unsicherheit", items: candidate.uncertainty.slice(0, 6) }
+  ].filter((section) => section.items.length > 0);
 }
 
 function baseScoreForPlan(kind: RunnerPlanKind): number {

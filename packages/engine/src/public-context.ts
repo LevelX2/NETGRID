@@ -124,6 +124,7 @@ export function publicContextForAction(
     "vacuumLinkTargetIceIndex",
     "oliviaSalazarRunEndDerez",
     "derezzedCount",
+    "runRootRezPass",
   ]) {
     const value = legalAction.payload?.[key];
     if (typeof value === "number" || typeof value === "boolean")
@@ -430,6 +431,7 @@ export function publicContextForAction(
       "futureAgendaPointForfeitPending",
       "sourceDefinitionId",
       "cardDefinitionId",
+      "employeeEmpowermentStartDrawDecision",
       "speedTrapSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",
@@ -961,6 +963,9 @@ export function publicContextForAction(
     "priorityRequisitionFreeRez",
     "priorityRequisitionDeclined",
     "priorityRequisitionTargetDefinitionId",
+    "revealedCount",
+    "rezzedMatchingIceCount",
+    "countedMatchingIceCount",
     "iceCount",
     "serverIceOrderReversed",
     "serverLabel",

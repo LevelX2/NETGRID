@@ -6394,6 +6394,43 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "installed_economy_kind:pool_build",
     );
     expect(lowCreditDecision.evidence).toContain("economy_need:acute");
+    expect(lowCreditDecision.evidence).toContain(
+      "broker_horizon:installed_economy_pool_build_deferred_for_credit_need",
+    );
+    expect(lowCreditDecision.evidence).toContain(
+      "broker_horizon_immediate_credit_need:true",
+    );
+    expect(lowCreditDecision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: lowCreditBasicCredit.actionId,
+        actionType: "gain_credit",
+        selected: true,
+        economy: expect.objectContaining({
+          economyKind: "basic_credit",
+          immediateGain: 1,
+          netCredits: 1,
+          economyNeed: "acute",
+        }),
+      }),
+    );
+    expect(lowCreditDecision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: lowCreditBrokerLoad.actionId,
+        actionType: "activated_card_ability",
+        selected: false,
+        sourceTitle: "Broker",
+        whyNot: ["pool_build_deferred_for_credit_need"],
+        economy: expect.objectContaining({
+          economyKind: "pool_build",
+          ability: "broker_load_credits",
+          immediateGain: 0,
+          netCredits: 0,
+          storedCredits: 0,
+          futurePoolAfter: 3,
+          economyNeed: "acute",
+        }),
+      }),
+    );
 
     const stableLoadInput = installedRunnerEconomyInput(
       "ai-v141-installed-broker-load-stable",
@@ -6423,6 +6460,31 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(stableDecision.actionId).toBe(stableBrokerLoad.actionId);
     expect(stableDecision.reasonCode).toBe("runner.plan.recover_economy");
     expect(stableDecision.evidence).toContain("economy_need:stable");
+    expect(stableDecision.evidence).toContain(
+      "broker_horizon:installed_economy_pool_build_horizon_value",
+    );
+    expect(stableDecision.evidence).toContain(
+      "broker_horizon_clicks:3",
+    );
+    expect(stableDecision.evidence).toContain(
+      "broker_horizon_visible_threshold:false",
+    );
+    expect(stableDecision.decisionDebug?.actionAlternatives?.[0]).toMatchObject(
+      {
+        actionId: stableBrokerLoad.actionId,
+        selected: true,
+        sourceTitle: "Broker",
+        economy: {
+          economyKind: "pool_build",
+          ability: "broker_load_credits",
+          immediateGain: 0,
+          netCredits: 0,
+          storedCredits: 0,
+          futurePoolAfter: 3,
+          economyNeed: "stable",
+        },
+      },
+    );
     expect(JSON.stringify(stableDecision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );
@@ -7616,27 +7678,35 @@ describe("V1.4.2 belief state and opponent model", () => {
         },
         "runner": {
           "keys": [
+            "actionAlternatives",
             "aiLevel",
             "beliefUncertainty",
             "confidence",
+            "detailSections",
             "evidence",
             "facts",
             "fallbackUsed",
             "hypotheses",
             "invalidations",
+            "longTermPlan",
             "memoryVersion",
             "opponentModel",
             "planId",
             "planKind",
             "profileId",
+            "rankedAlternatives",
             "schemaVersion",
             "score",
+            "scoreBreakdown",
             "seed",
             "selectedActionType",
+            "summary",
             "timeBudgetMs",
             "timeoutUsed",
             "uncertainty",
             "visibleReasons",
+            "warnings",
+            "whyNot",
           ],
           "schemaVersion": "ai-decision-debug-v1",
         },
@@ -7647,12 +7717,78 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(JSON.stringify(snapshot)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist/i);
   });
 
+  it("adds side-safe ranked alternatives and score components to Runner DecisionDebug", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-decision-debug-alternatives" }));
+    const decision = chooseRunnerAction(buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    const debug = decision.decisionDebug;
+
+    expect(debug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      summary: expect.any(String),
+      planKind: expect.any(String)
+    });
+    expect(debug?.rankedAlternatives?.[0]).toMatchObject({
+      rank: 1,
+      planKind: debug?.planKind,
+      scoreBreakdown: expect.any(Array),
+      whyNot: ["selected_plan"]
+    });
+    expect(debug?.rankedAlternatives?.length).toBeGreaterThan(1);
+    expect(debug?.actionAlternatives?.[0]).toMatchObject({
+      rank: 1,
+      actionId: expect.any(String),
+      actionType: expect.any(String),
+      selected: true,
+      priority: expect.any(Number)
+    });
+    expect(debug?.scoreBreakdown?.some((component) => component.key === "base")).toBe(true);
+    expect(debug?.detailSections?.some((section) => section.id === "visible_reasons")).toBe(true);
+    expect(JSON.stringify(debug)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i);
+  });
+
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
     const sanitized = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
       planKind: "fallback",
       facts: ["public_fact:ok", "privatePayload runner-sessionToken"],
+      rankedAlternatives: [
+        {
+          rank: 1,
+          planKind: "fallback",
+          summary: "privatePayload hidden-card",
+          score: 10,
+          confidence: 0.5,
+          visibleReasons: ["safe_reason"],
+          scoreBreakdown: [{ key: "decklist", label: "Decklist", value: 12, reason: "hidden-card" }],
+          whyNot: ["privatePayload"]
+        }
+      ],
+      actionAlternatives: [
+        {
+          rank: 1,
+          actionId: "privatePayload-action",
+          actionType: "activated_card_ability",
+          label: "Broker hidden-card",
+          source: "visible_card",
+          sourceTitle: "privatePayload",
+          selected: false,
+          priority: 42,
+          whyNot: ["decklist"],
+          economy: {
+            economyKind: "pool_build",
+            ability: "broker_load_credits",
+            immediateGain: 0,
+            netCredits: -1,
+            storedCredits: 0,
+            futurePoolAfter: 3,
+            economyNeed: "hidden-card"
+          }
+        }
+      ],
+      scoreBreakdown: [{ key: "economy", label: "Economy", value: 4, reason: "public" }],
+      detailSections: [{ id: "details", title: "Details", items: ["safe", "hidden-card"] }],
       opponentHqContents: ["Hidden Priority Agenda"],
       privatePayload: { FullState: true },
       opponentModel: {
@@ -7664,7 +7800,41 @@ describe("V1.4.2 belief state and opponent model", () => {
 
     expect(sanitized).toMatchInlineSnapshot(`
       {
+        "actionAlternatives": [
+          {
+            "actionId": "[redacted-debug-value]",
+            "actionType": "activated_card_ability",
+            "economy": {
+              "ability": "broker_load_credits",
+              "economyKind": "pool_build",
+              "economyNeed": "[redacted-debug-value]",
+              "futurePoolAfter": 3,
+              "immediateGain": 0,
+              "netCredits": -1,
+              "storedCredits": 0,
+            },
+            "label": "[redacted-debug-value]",
+            "priority": 42,
+            "rank": 1,
+            "selected": false,
+            "source": "visible_card",
+            "sourceTitle": "[redacted-debug-value]",
+            "whyNot": [
+              "[redacted-debug-value]",
+            ],
+          },
+        ],
         "aiLevel": 2,
+        "detailSections": [
+          {
+            "id": "details",
+            "items": [
+              "safe",
+              "[redacted-debug-value]",
+            ],
+            "title": "Details",
+          },
+        ],
         "facts": [
           "public_fact:ok",
           "[redacted-debug-value]",
@@ -7675,7 +7845,38 @@ describe("V1.4.2 belief state and opponent model", () => {
           "visibleSignal": "safe",
         },
         "planKind": "fallback",
+        "rankedAlternatives": [
+          {
+            "confidence": 0.5,
+            "planKind": "fallback",
+            "rank": 1,
+            "score": 10,
+            "scoreBreakdown": [
+              {
+                "key": "[redacted-debug-value]",
+                "label": "[redacted-debug-value]",
+                "reason": "[redacted-debug-value]",
+                "value": 12,
+              },
+            ],
+            "summary": "[redacted-debug-value]",
+            "visibleReasons": [
+              "safe_reason",
+            ],
+            "whyNot": [
+              "[redacted-debug-value]",
+            ],
+          },
+        ],
         "schemaVersion": "ai-decision-debug-v1",
+        "scoreBreakdown": [
+          {
+            "key": "economy",
+            "label": "Economy",
+            "reason": "public",
+            "value": 4,
+          },
+        ],
       }
     `);
     expect(JSON.stringify(sanitized)).not.toMatch(/runner-session-secret|privatePayload|FullState|hidden-deck-card|decklist/i);

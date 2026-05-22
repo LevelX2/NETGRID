@@ -1,11 +1,15 @@
-import type { Side } from "@netgrid/shared";
+import type { Side, VisibleCard } from "@netgrid/shared";
+
+export const GENETICS_VISIONARY_ACQUISITION_ID = "onr_v1_202_genetics-visionary-acquisition";
 
 export type ScoredAgendaEffectLine = {
   key: string;
   value: string;
   label: string;
-  tone: "action" | "effect";
+  tone: "action" | "effect" | "agenda";
 };
+
+type ScoreAreaModifierCard = Pick<VisibleCard, "known" | "definitionId" | "type" | "subtypes">;
 
 export function scoredAgendaEffectLineForScoreArea(definitionId: string | undefined, scoreAreaSide: Side): ScoredAgendaEffectLine | null {
   if (scoreAreaSide !== "corp") return null;
@@ -14,6 +18,8 @@ export function scoredAgendaEffectLineForScoreArea(definitionId: string | undefi
       return { key: "effect-ai-cfo", value: "Aktion", label: "HQ/Archiv in R&D mischen, 5 ziehen", tone: "action" };
     case "onr_v1_201_executive-extraction":
       return { key: "effect-executive-extraction", value: "Aktiv", label: "Gray-Ops-Agendas brauchen 1 Entwicklung weniger", tone: "effect" };
+    case GENETICS_VISIONARY_ACQUISITION_ID:
+      return { key: "effect-genetics-visionary", value: "Aktiv", label: "Research-Agendas brauchen 1 Entwicklung weniger", tone: "effect" };
     case "onr_v1_207_netwatch-operations-office":
       return { key: "effect-netwatch", value: "Aktion", label: "Trace 7: bei Erfolg 1 Tag", tone: "action" };
     case "onr_v1_208_on-call-solo-team":
@@ -33,4 +39,19 @@ export function scoredAgendaEffectLineForScoreArea(definitionId: string | undefi
     default:
       return null;
   }
+}
+
+export function corpScoredGeneticsVisionaryAcquisitionActive(corpScoreAreaCards: readonly ScoreAreaModifierCard[]): boolean {
+  return corpScoreAreaCards.some((card) => card.known && card.definitionId === GENETICS_VISIONARY_ACQUISITION_ID);
+}
+
+export function researchAgendaDifficultyModifierLineForCard(card: ScoreAreaModifierCard, corpScoreAreaCards: readonly ScoreAreaModifierCard[]): ScoredAgendaEffectLine | null {
+  if (!card.known || card.type !== "agenda" || !card.subtypes?.includes("research")) return null;
+  if (!corpScoredGeneticsVisionaryAcquisitionActive(corpScoreAreaCards)) return null;
+  return {
+    key: "modifier-research-difficulty-genetics-visionary",
+    value: "Diff -1",
+    label: "Genetics-Visionary Acquisition: braucht 1 Entwicklung weniger",
+    tone: "agenda"
+  };
 }

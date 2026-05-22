@@ -4,7 +4,7 @@ import { dirname, basename, join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { hashState } from "@netgrid/engine";
 import type { GameEvent, GameState } from "@netgrid/shared";
-import type { MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
+import type { AiDecisionTraceRecord, MatchMode, MatchStatus, MultiplayerStorage, StoredMatch } from "./multiplayer";
 
 export const SQLITE_STORAGE_SCHEMA_VERSION = 1;
 export const SQLITE_STORAGE_FORMAT = "netgrid_multiplayer_sqlite";
@@ -252,12 +252,48 @@ export type StorageMaintenanceMatchDetail = StorageMaintenanceMatchEntry & {
     pendingUndo: number;
     startLobbies: number;
     deckSnapshotsRedacted: number;
+    aiDecisionTraces: number;
   };
   cleanupAssessment: {
     eligibleInReadOnlySlice: false;
     recommendation: "not_active";
     reason: string;
   };
+};
+
+export type StorageMaintenanceAiDecisionTraceMatchEntry = {
+  matchId: string;
+  status: MatchStatus;
+  mode: MatchMode;
+  aiTraceMode: "summary" | "detailed";
+  traceCount: number;
+  createdAt: string;
+  updatedAt: string;
+  firstTraceAt?: string;
+  lastTraceAt?: string;
+};
+
+export type StorageMaintenanceAiDecisionTraceIndexEntry = {
+  traceId: string;
+  matchId: string;
+  eventId: string;
+  stateVersion: number;
+  matchVersion: number;
+  side: "runner" | "corp";
+  turn: number;
+  decisionIndex: number;
+  selectedActionId?: string;
+  selectedActionType?: string;
+  planKind?: string;
+  score?: number;
+  confidence?: number;
+  createdAt: string;
+  schemaVersion: string;
+  meta: Record<string, unknown>;
+};
+
+export type StorageMaintenanceAiDecisionTraceDetail = StorageMaintenanceAiDecisionTraceIndexEntry & {
+  detail: Record<string, unknown>;
 };
 
 export class StorageError extends Error {
@@ -411,9 +447,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           (SELECT COUNT(*) FROM undo_snapshots WHERE match_id = ?) AS undoSnapshots,
           (SELECT COUNT(*) FROM pending_undo WHERE match_id = ?) AS pendingUndo,
           (SELECT COUNT(*) FROM start_lobbies WHERE match_id = ?) AS startLobbies,
-          (SELECT COUNT(*) FROM private_deck_snapshots WHERE match_id = ?) AS deckSnapshotsRedacted`
+          (SELECT COUNT(*) FROM private_deck_snapshots WHERE match_id = ?) AS deckSnapshotsRedacted,
+          (SELECT COUNT(*) FROM ai_decision_traces WHERE match_id = ?) AS aiDecisionTraces`
       )
-      .get(matchId, matchId, matchId, matchId, matchId, matchId, matchId) as {
+      .get(matchId, matchId, matchId, matchId, matchId, matchId, matchId, matchId) as {
       events: number;
       stateSnapshots: number;
       actionReceipts: number;
@@ -421,6 +458,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       pendingUndo: number;
       startLobbies: number;
       deckSnapshotsRedacted: number;
+      aiDecisionTraces: number;
     };
     return {
       ...entry,
@@ -431,7 +469,8 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         undoSnapshots: Number(rows.undoSnapshots),
         pendingUndo: Number(rows.pendingUndo),
         startLobbies: Number(rows.startLobbies),
-        deckSnapshotsRedacted: Number(rows.deckSnapshotsRedacted)
+        deckSnapshotsRedacted: Number(rows.deckSnapshotsRedacted),
+        aiDecisionTraces: Number(rows.aiDecisionTraces)
       },
       cleanupAssessment: {
         eligibleInReadOnlySlice: false,
@@ -439,6 +478,56 @@ export class SqliteMatchStorage implements MultiplayerStorage {
         reason: "Backend 0.5 erster Schnitt ist read-only; echte Löschung bleibt bis Backup-, Dry-Run- und Restore-Tests gesperrt."
       }
     };
+  }
+
+  async maintenanceAiDecisionTraceMatches(): Promise<StorageMaintenanceAiDecisionTraceMatchEntry[]> {
+    const rows = this.db
+      .prepare(
+        `SELECT
+          m.match_id AS matchId,
+          m.status AS status,
+          m.mode AS mode,
+          m.created_at AS createdAt,
+          m.updated_at AS updatedAt,
+          m.record_json AS recordJson,
+          COUNT(t.trace_id) AS traceCount,
+          MIN(t.created_at) AS firstTraceAt,
+          MAX(t.created_at) AS lastTraceAt
+         FROM matches m
+         LEFT JOIN ai_decision_traces t ON t.match_id = m.match_id
+         GROUP BY m.match_id
+         ORDER BY COALESCE(lastTraceAt, m.updated_at) DESC, m.updated_at DESC`
+      )
+      .all() as Array<{ matchId: string; status: MatchStatus; mode: MatchMode; createdAt: string; updatedAt: string; recordJson: string; traceCount: number; firstTraceAt?: string; lastTraceAt?: string }>;
+    return rows.flatMap((row) => {
+      const record = JSON.parse(row.recordJson) as StoredMatch;
+      const aiTraceMode = record.match.aiTraceMode === "summary" ? "summary" : record.match.aiTraceMode === "detailed" ? "detailed" : undefined;
+      if (!aiTraceMode && Number(row.traceCount) === 0) return [];
+      return [{
+        matchId: row.matchId,
+        status: row.status,
+        mode: row.mode,
+        aiTraceMode: aiTraceMode ?? "detailed",
+        traceCount: Number(row.traceCount),
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        ...(row.firstTraceAt ? { firstTraceAt: row.firstTraceAt } : {}),
+        ...(row.lastTraceAt ? { lastTraceAt: row.lastTraceAt } : {})
+      }];
+    });
+  }
+
+  async maintenanceAiDecisionTraceIndex(matchId: string, filters: { afterDecisionIndex?: number } = {}): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]> {
+    if (!this.tableExists("ai_decision_traces")) return [];
+    return this.aiDecisionTraceRecords(matchId, filters).map((trace) => aiDecisionTraceIndexEntry(trace));
+  }
+
+  async maintenanceAiDecisionTraceDetail(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
+    if (!this.tableExists("ai_decision_traces")) return undefined;
+    const row = this.db.prepare("SELECT match_id AS matchId FROM ai_decision_traces WHERE trace_id = ? LIMIT 1").get(traceId) as { matchId?: string } | undefined;
+    if (!row?.matchId) return undefined;
+    const trace = this.aiDecisionTraceRecords(row.matchId).find((candidate) => candidate.traceId === traceId);
+    return trace ? { ...aiDecisionTraceIndexEntry(trace), detail: trace.traceJson } : undefined;
   }
 
   async maintenanceCleanupPreview(filters: StorageMaintenanceCleanupFilters, now = new Date()): Promise<StorageMaintenanceCleanupPreview> {
@@ -783,6 +872,29 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           PRIMARY KEY (match_id, event_id),
           FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE
         );
+        CREATE TABLE IF NOT EXISTS ai_decision_traces (
+          match_id TEXT NOT NULL,
+          trace_id TEXT NOT NULL,
+          event_id TEXT NOT NULL,
+          state_version INTEGER NOT NULL,
+          match_version INTEGER NOT NULL,
+          side TEXT NOT NULL,
+          turn INTEGER NOT NULL,
+          decision_index INTEGER NOT NULL,
+          selected_action_id TEXT,
+          selected_action_type TEXT,
+          plan_kind TEXT,
+          score REAL,
+          confidence REAL,
+          created_at TEXT NOT NULL,
+          schema_version TEXT NOT NULL,
+          trace_json TEXT NOT NULL,
+          PRIMARY KEY (match_id, trace_id),
+          FOREIGN KEY (match_id) REFERENCES matches(match_id) ON DELETE CASCADE,
+          FOREIGN KEY (match_id, event_id) REFERENCES events(match_id, event_id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_ai_decision_traces_match_decision ON ai_decision_traces(match_id, decision_index);
+        CREATE INDEX IF NOT EXISTS idx_ai_decision_traces_trace_id ON ai_decision_traces(trace_id);
         CREATE TABLE IF NOT EXISTS action_receipts (
           match_id TEXT NOT NULL,
           idempotency_key TEXT NOT NULL,
@@ -976,6 +1088,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       }
     }
 
+    if (this.tableExists("ai_decision_traces")) {
+      record.aiDecisionTraces = this.aiDecisionTraceRecords(matchId);
+    }
+
     if (this.tableExists("action_receipts")) {
       record.actionReceipts = this.db
         .prepare("SELECT idempotency_key AS idempotencyKey, side, accepted, state_version_before AS stateVersionBefore, state_version_after AS stateVersionAfter, state_hash_after AS stateHashAfter, error_code AS errorCode FROM action_receipts WHERE match_id = ? ORDER BY state_version_after ASC")
@@ -1151,6 +1267,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
 
     this.syncPublicEvents(matchId, record.eventLog);
     this.syncEngineEvents(matchId, record.gameState?.eventLog ?? []);
+    this.syncAiDecisionTraces(matchId, record.aiDecisionTraces ?? []);
 
     const insertReceipt = this.db.prepare(
       `INSERT INTO action_receipts (match_id, idempotency_key, side, accepted, state_version_before, state_version_after, state_hash_after, error_code)
@@ -1216,6 +1333,86 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       const index = prefixLength + offset;
       insertEngineEvent.run(matchId, event.eventId, index, JSON.stringify(event));
     });
+  }
+
+  private syncAiDecisionTraces(matchId: string, traces: AiDecisionTraceRecord[]): void {
+    this.db.prepare("DELETE FROM ai_decision_traces WHERE match_id = ?").run(matchId);
+    if (traces.length === 0) return;
+    const insertTrace = this.db.prepare(
+      `INSERT INTO ai_decision_traces
+       (match_id, trace_id, event_id, state_version, match_version, side, turn, decision_index, selected_action_id, selected_action_type, plan_kind, score, confidence, created_at, schema_version, trace_json)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    );
+    for (const trace of traces) {
+      insertTrace.run(
+        matchId,
+        trace.traceId,
+        trace.eventId,
+        trace.stateVersion,
+        trace.matchVersion,
+        trace.side,
+        trace.turn,
+        trace.decisionIndex,
+        trace.selectedActionId ?? null,
+        trace.selectedActionType ?? null,
+        trace.planKind ?? null,
+        trace.score ?? null,
+        trace.confidence ?? null,
+        trace.createdAt,
+        trace.schemaVersion,
+        JSON.stringify(trace.traceJson)
+      );
+    }
+  }
+
+  private aiDecisionTraceRecords(matchId: string, filters: { afterDecisionIndex?: number } = {}): AiDecisionTraceRecord[] {
+    if (!this.tableExists("ai_decision_traces")) return [];
+    const afterDecisionIndex = Number.isFinite(filters.afterDecisionIndex) ? Math.floor(filters.afterDecisionIndex!) : undefined;
+    const rows = this.db
+      .prepare(
+        `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion, match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
+          selected_action_id AS selectedActionId, selected_action_type AS selectedActionType, plan_kind AS planKind, score, confidence, created_at AS createdAt,
+          schema_version AS schemaVersion, trace_json AS traceJson
+         FROM ai_decision_traces
+         WHERE match_id = ?
+           AND (? IS NULL OR decision_index > ?)
+         ORDER BY decision_index ASC, created_at ASC`
+      )
+      .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as Array<{
+      traceId: string;
+      eventId: string;
+      stateVersion: number;
+      matchVersion: number;
+      side: "runner" | "corp";
+      turn: number;
+      decisionIndex: number;
+      selectedActionId?: string | null;
+      selectedActionType?: string | null;
+      planKind?: string | null;
+      score?: number | null;
+      confidence?: number | null;
+      createdAt: string;
+      schemaVersion: string;
+      traceJson: string;
+    }>;
+    return rows.map((row) => ({
+      traceId: row.traceId,
+      matchId,
+      eventId: row.eventId,
+      stateVersion: Number(row.stateVersion),
+      matchVersion: Number(row.matchVersion),
+      side: row.side,
+      turn: Number(row.turn),
+      decisionIndex: Number(row.decisionIndex),
+      ...(row.selectedActionId ? { selectedActionId: row.selectedActionId } : {}),
+      ...(row.selectedActionType ? { selectedActionType: row.selectedActionType } : {}),
+      ...(row.planKind ? { planKind: row.planKind } : {}),
+      ...(typeof row.score === "number" ? { score: row.score } : {}),
+      ...(typeof row.confidence === "number" ? { confidence: row.confidence } : {}),
+      createdAt: row.createdAt,
+      schemaVersion: row.schemaVersion,
+      traceJson: JSON.parse(row.traceJson) as Record<string, unknown>
+    }));
   }
 
   private truncateEventTable(table: "events" | "engine_events", matchId: string, eventIds: string[]): void {
@@ -1429,6 +1626,7 @@ export class SqliteMatchStorage implements MultiplayerStorage {
       { key: "game_states", label: "Aktuelle GameStates", table: "game_states", expression: "COALESCE(SUM(LENGTH(game_state_json)), 0)" },
       { key: "events", label: "Events", table: "events", expression: "COALESCE(SUM(LENGTH(public_payload_json)), 0)" },
       { key: "engine_events", label: "Engine Events", table: "engine_events", expression: "COALESCE(SUM(LENGTH(event_json)), 0)" },
+      { key: "ai_decision_traces", label: "KI-Entscheidungstraces", table: "ai_decision_traces", expression: "COALESCE(SUM(LENGTH(trace_json)), 0)" },
       { key: "sessions", label: "Sessions (redigiert)", table: "sessions", expression: "COALESCE(SUM(LENGTH(display_name)), 0)" },
       { key: "action_receipts", label: "Action Receipts", table: "action_receipts", expression: "COALESCE(SUM(LENGTH(COALESCE(error_code, ''))), 0)" },
       { key: "undo_snapshots", label: "Undo Snapshots", table: "undo_snapshots", expression: "COUNT(*) * 64" },
@@ -1890,8 +2088,43 @@ function compactRecordForStorage(record: StoredMatch): StoredMatch {
     eventLog: [],
     actionReceipts: [],
     undoSnapshots: [],
-    stateSnapshots: []
+    stateSnapshots: [],
+    aiDecisionTraces: []
   };
+}
+
+function aiDecisionTraceIndexEntry(trace: AiDecisionTraceRecord): StorageMaintenanceAiDecisionTraceIndexEntry {
+  return {
+    traceId: trace.traceId,
+    matchId: trace.matchId,
+    eventId: trace.eventId,
+    stateVersion: trace.stateVersion,
+    matchVersion: trace.matchVersion,
+    side: trace.side,
+    turn: trace.turn,
+    decisionIndex: trace.decisionIndex,
+    ...(trace.selectedActionId ? { selectedActionId: trace.selectedActionId } : {}),
+    ...(trace.selectedActionType ? { selectedActionType: trace.selectedActionType } : {}),
+    ...(trace.planKind ? { planKind: trace.planKind } : {}),
+    ...(trace.score !== undefined ? { score: trace.score } : {}),
+    ...(trace.confidence !== undefined ? { confidence: trace.confidence } : {}),
+    createdAt: trace.createdAt,
+    schemaVersion: trace.schemaVersion,
+    meta: traceMeta(trace.traceJson)
+  };
+}
+
+function traceMeta(traceJson: Record<string, unknown>): Record<string, unknown> {
+  const meta: Record<string, unknown> = {};
+  for (const key of ["schemaVersion", "debugSchemaVersion", "actor", "aiLevel", "summary", "planKind", "selectedActionType", "score", "confidence", "fallbackUsed", "timeoutUsed"] as const) {
+    const value = traceJson[key];
+    if (value !== undefined) meta[key] = value;
+  }
+  for (const key of ["visibleReasons", "warnings", "longTermPlan"] as const) {
+    const value = traceJson[key];
+    if (Array.isArray(value)) meta[key] = value.slice(0, 6);
+  }
+  return meta;
 }
 
 function clone<T>(value: T): T {

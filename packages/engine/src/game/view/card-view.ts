@@ -21,6 +21,7 @@ import {
 } from "../../ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
+import { SKIVVISS_ID } from "../../compatibility/runtime-compatibility";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scoring";
 import { serverChoiceDisplayLabel } from "./server-view";
@@ -100,9 +101,7 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
     ...(definition.trashCost !== undefined
       ? { trashCost: definition.trashCost }
       : {}),
-    ...(instance.counters
-      ? { counters: cloneCounters(instance.counters) }
-      : {}),
+    ...visibleCountersField(visibleCountersForKnownCard(definition, instance)),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
     ...(requiresDataFortInstallTarget(definition) && instance.selectedServerId
@@ -117,6 +116,23 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+export function visibleCorpIdentityCard(state: GameState): VisibleCard {
+  const card = visibleOwnCard(state, state.corp.identity);
+  return {
+    ...card,
+    ...counterDisplaysField([
+      ...(card.counterDisplays ?? []),
+      ...(skivvissCorpCounterDisplays(state) ?? []),
+    ]),
+  };
+}
+
+function visibleCountersField(
+  counters: Partial<Record<CounterType, number>> | undefined,
+): Pick<VisibleCard, "counters"> | Record<string, never> {
+  return counters && Object.keys(counters).length > 0 ? { counters } : {};
 }
 
 export function counterDisplaysField(
@@ -135,10 +151,21 @@ const STORED_CREDIT_COUNTER_DEFINITION_IDS = new Set<string>([
   "onr_v1_311_braindance-campaign",
   "onr_v1_326_holovid-campaign",
   "onr_v1_337_rockerboy-promotion",
+  "onr_v1_318_department-of-truth-enhancement",
   "onr_v1_193_corporate-coup",
   "onr_v1_198_detroit-police-contract",
   "onr_v1_209_political-coup",
 ]);
+
+function visibleCountersForKnownCard(
+  definition: CardDefinition,
+  instance: CardInstance,
+): Partial<Record<CounterType, number>> | undefined {
+  if (!instance.counters) return undefined;
+  const counters = cloneCounters(instance.counters);
+  if (definition.id === SKIVVISS_ID) delete counters.virus;
+  return counters;
+}
 
 function counterDisplaysForKnownCard(
   definition: CardDefinition,
@@ -149,7 +176,7 @@ function counterDisplaysForKnownCard(
     ...(storedCreditCounterDisplays(definition, instance) ?? []),
     ...(restrictedPoolCounterDisplays(definition, instance) ?? []),
     ...(recurringCreditCounterDisplays(instance) ?? []),
-    ...(specialCounterDisplays(instance) ?? []),
+    ...(specialCounterDisplays(definition, instance) ?? []),
   ];
 }
 
@@ -261,6 +288,7 @@ function restrictedPoolDisplayLabel(
 }
 
 function specialCounterDisplays(
+  definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
   const counters = instance.counters ?? {};
@@ -281,14 +309,16 @@ function specialCounterDisplays(
       counterType: "ablative",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.virus, {
-      id: "virus",
-      displayKind: "virus",
-      label: "Virus-Counter",
-      ariaLabelName: "Virus-Counter",
-      counterType: "virus",
-      usageHint: "status_marker",
-    }),
+    ...(definition.id === SKIVVISS_ID
+      ? []
+      : singleCounterDisplay(counters.virus, {
+          id: "virus",
+          displayKind: "virus",
+          label: "Virus-Counter",
+          ariaLabelName: "Virus-Counter",
+          counterType: "virus",
+          usageHint: "status_marker",
+        })),
     ...singleCounterDisplay(counters.data_raven, {
       id: "data_raven",
       displayKind: "trace",
@@ -338,6 +368,29 @@ function specialCounterDisplays(
       usageHint: "status_marker",
     }),
   ];
+}
+
+function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+  const amount = skivvissCounterTotal(state);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "skivviss",
+      amount,
+      displayKind: "virus",
+      label: "Skivviss-Counter",
+      ariaLabel: `${amount} Skivviss-Counter auf der Korp`,
+      counterType: "virus",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
+function skivvissCounterTotal(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+    return sum + cardCounter(state, cardId, "virus");
+  }, 0);
 }
 
 export function poxCounterDisplaysForServer(

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
+import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent, shouldSuppressChronicleEventItem } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -828,11 +828,59 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items.map((item) => item.title)).toEqual([
-      "Banpei: Subroutine 1 trashte Simple Decoder.",
+      "Banpei: Subroutine 1 trasht Simple Decoder.",
       "Banpei: Subroutine 2 beendet den Run."
     ]);
     expect(items[0]?.description).toBe("Simple Decoder wurde in den Heap bewegt.");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "Simple Decoder", "Programm getrasht", "Banpei"]));
+  });
+
+  it("suppresses redundant Encounter summaries when concrete subroutine lines exist", () => {
+    const event = makeEvent("continue_run", {
+      actor: "runner",
+      encounterContinue: true,
+      result: "ended",
+      unbrokenSubroutineCount: 2,
+      trashedCardDefinitionId: "onr_v1_042_self-modifying-code",
+      trashedCardType: "program",
+      trashedCount: 1,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 0,
+          subroutineType: "trash_installed_program",
+          cardDefinitionId: "onr_v1_042_self-modifying-code",
+          cardTitle: "Self-Modifying Code",
+          cardsTrashed: 1
+        },
+        {
+          effectId: "subroutine_2",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 1,
+          subroutineType: "end_the_run",
+          endedRun: true
+        }
+      ]
+    });
+    const eventItem = formatChronicleEvent(event, "runner");
+    const visibleItems = shouldSuppressChronicleEventItem(event) ? formatChronicleEffectItems(event, "runner") : [eventItem, ...formatChronicleEffectItems(event, "runner")];
+
+    expect(shouldSuppressChronicleEventItem(event)).toBe(true);
+    expect(visibleItems.map((item) => item.title)).toEqual([
+      "Banpei: Subroutine 1 trasht Self-Modifying Code.",
+      "Banpei: Subroutine 2 beendet den Run."
+    ]);
+    expect(JSON.stringify(visibleItems)).not.toContain("ungebrochene Subroutinen ausgelöst");
+    expect(visibleItems[0]?.chips).toEqual(expect.arrayContaining(["Banpei", "Self-Modifying Code", "Subroutine 1"]));
   });
 
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {
@@ -1047,6 +1095,28 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]));
   });
 
+  it("summarizes Superior Net Barriers reveal and credit counts", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "superior_net_barriers_reveal_walls",
+        agendaAbility: "superior_net_barriers",
+        revealedCount: 2,
+        rezzedMatchingIceCount: 1,
+        countedMatchingIceCount: 3,
+        gainedCredits: 3
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Du hast Superior Net Barriers genutzt: 2 Walls aufgedeckt, 3 Credits erhalten.");
+    expect(item.category).toBe("agenda");
+    expect(item.visibility).toBe("public");
+    expect(item.description).toBe("3 Walls waren aufgedeckt oder gerezzt; davon 1 bereits gerezzt.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Superior Net Barriers", "2 Reveal", "1 Rez", "+3 Credits"]));
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {
@@ -1195,6 +1265,30 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("Operation");
     expect(item.chips).toContain("3 Karten");
     expect(effects).toEqual([]);
+  });
+
+  it("names Skivviss as the reason for automatic Corp extra draws", () => {
+    const event = makeEvent("end_turn", {
+      actor: "runner",
+      resolvedEffects: [
+        {
+          effectId: "corp.start.skivviss",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_064_skivviss",
+          sourceTitle: "Skivviss",
+          reason: "start_of_turn"
+        }
+      ]
+    });
+
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(effects[0]?.title).toBe("Skivviss zwingt die Korp zu 2 zusätzlichen Karten.");
+    expect(effects[0]?.description).toBe("Grund: 2 Skivviss-Counter auf der Korp.");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Skivviss", "2 Skivviss-Counter", "2 Zusatzkarten"]));
   });
 
   it("merges simple play credit effects into the played card entry", () => {
@@ -1588,6 +1682,58 @@ describe("formatChronicleEvent", () => {
     expect(serialized).not.toContain("simple_agenda");
     expect(serialized).not.toContain("simple_economy_operation");
     expect(effects).toEqual([]);
+  });
+
+  it("distinguishes Employee Empowerment optional start draw from its agenda action", () => {
+    const optionalDraw = makeEvent("resolve_choice", {
+      actor: "corp",
+      sourceDefinitionId: "onr_v1_199_employee-empowerment",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      employeeEmpowermentStartDrawDecision: "draw",
+      drawnCards: 1,
+      resolvedEffects: [
+        {
+          effectId: "corp.start.employee_empowerment.employee_1",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+          sourceTitle: "Employee Empowerment",
+          reason: "start_of_turn"
+        }
+      ]
+    });
+    const skip = makeEvent("resolve_choice", {
+      actor: "corp",
+      sourceDefinitionId: "onr_v1_199_employee-empowerment",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      employeeEmpowermentStartDrawDecision: "skip"
+    });
+    const action = makeEvent("activated_card_ability", {
+      actor: "corp",
+      title: "Employee Empowerment",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      cardImplementationAbility: "activated",
+      drawnCards: 2,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_199_employee-empowerment.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+          sourceTitle: "Employee Empowerment",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    expect(formatChronicleEvent(optionalDraw, "runner").title).toBe("Die Korp hat Employee Empowerment genutzt und eine Karte zusätzlich gezogen.");
+    expect(formatChronicleEvent(optionalDraw, "runner").chips).toEqual(expect.arrayContaining(["Start-of-turn", "Zusatzkarte"]));
+    expect(formatChronicleEvent(skip, "runner").title).toBe("Die Korp hat Employee Empowerment übersprungen.");
+    expect(formatChronicleEvent(action, "runner").title).toBe("Die Korp hat Employee Empowerment genutzt und 2 Karten gezogen.");
   });
 
   it("merges activated economy ability effects with card context", () => {
@@ -2533,6 +2679,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("purge_virus_counters", {
         actor: "corp",
         actionCostClicks: 3,
+        purgedCounterType: "virus",
+        purgedVirusCounters: 4,
         turnActionOrdinalStart: 1,
         turnActionOrdinalEnd: 3
       }),
@@ -2542,6 +2690,9 @@ describe("formatChronicleEvent", () => {
     expect(paid.actionUse).toMatchObject({ label: "2", title: "2. Aktion in diesem Zug", clicks: 1 });
     expect(free.actionUse).toBeUndefined();
     expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
+    expect(multi.title).toBe("Die Korp hat 4 Virus-Counter entfernt.");
+    expect(multi.description).toBe("Kosten: 3 Aktionen; keine Credits.");
+    expect(multi.chips).toEqual(expect.arrayContaining(["Purge", "3 Aktionen", "4 entfernt"]));
   });
 
   it("derives chronicle action numbers across extra actions when payload ordinals reset", () => {
@@ -2617,11 +2768,11 @@ describe("formatChronicleEvent", () => {
       { turnNumber: 5 }
     );
 
-    expect(runnerTurnEnd.title).toBe("Du hast den Zug beendet (Runnerzug 6).");
-    expect(runnerTurnEnd.chips).toContain("Runnerzug 6");
-    expect(runnerTurnEnd.groupLabel).toBe("Runner-Zug 6");
-    expect(corpMandatoryDraw.chips).toContain("Korpzug 5");
-    expect(corpMandatoryDraw.groupLabel).toBe("Korp-Zug 5");
+    expect(runnerTurnEnd.title).toBe("Du hast den Zug beendet (Zug 6 - Runner).");
+    expect(runnerTurnEnd.chips).toContain("Zug 6 - Runner");
+    expect(runnerTurnEnd.groupLabel).toBe("Zug 6 - Runner");
+    expect(corpMandatoryDraw.chips).toContain("Zug 5 - Korp");
+    expect(corpMandatoryDraw.groupLabel).toBe("Zug 5 - Korp");
   });
 
   it("counts Korp and Runner turns as one shared sequence", () => {
@@ -3004,7 +3155,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items[0]?.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
-    expect(items[0]?.groupLabel).toBe("Runner-Zug");
+    expect(items[0]?.groupLabel).toBe("Zug - Runner");
     expect(items[0]?.cardDefinitionId).toBe("simple_fracter");
     expect(items[0]?.cardTitle).toBe("Simple Fracter");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["The Shell Traders", "Shell-Counter", "1 entfernt", "1 übrig"]));

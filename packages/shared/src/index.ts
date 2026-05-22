@@ -890,6 +890,7 @@ export type RunState = {
   };
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
+  rootRezWindowPassedKeys?: string[];
   speedTrapPendingRezCardId?: CardInstanceId;
   speedTrapPendingRezTimingPoint?: string;
   speedTrapPendingRezActiveSide?: Side;
@@ -1080,6 +1081,7 @@ export type GameState = {
     scoredBlackOpsAgendaLastTurn: boolean;
     edgerunnerTempsInstallActionsRemaining?: number;
     disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
+    employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
   };
   ambushHarness?: {
     enabled: boolean;
@@ -1346,18 +1348,86 @@ export const AI_DECISION_DEBUG_REPLAY_FIELDS = [
   "uncertainty",
   "fallbackUsed",
   "timeoutUsed",
-  "confidence"
+  "confidence",
+  "summary",
+  "rankedAlternatives",
+  "actionAlternatives",
+  "scoreBreakdown",
+  "whyNot",
+  "longTermPlan",
+  "warnings",
+  "detailSections"
 ] as const;
+
+export type AiDecisionScoreComponent = {
+  key: string;
+  label: string;
+  value: number;
+  weight?: number;
+  reason?: string;
+};
+
+export type AiDecisionRankedAlternative = {
+  rank: number;
+  planId?: string;
+  planKind?: string;
+  selectedActionType?: string;
+  summary?: string;
+  score?: number;
+  confidence?: number;
+  visibleReasons?: string[];
+  scoreBreakdown?: AiDecisionScoreComponent[];
+  whyNot?: string[];
+  warnings?: string[];
+};
+
+export type AiDecisionActionEconomyDetail = {
+  economyKind: string;
+  ability?: string;
+  immediateGain?: number;
+  netCredits?: number;
+  storedCredits?: number;
+  futurePoolAfter?: number;
+  economyNeed?: string;
+};
+
+export type AiDecisionActionAlternative = {
+  rank: number;
+  actionId: string;
+  actionType: string;
+  label?: string;
+  source?: string;
+  sourceTitle?: string;
+  selected: boolean;
+  priority?: number;
+  whyChosen?: string[];
+  whyNot?: string[];
+  economy?: AiDecisionActionEconomyDetail;
+};
+
+export type AiDecisionDetailSection = {
+  id: string;
+  title: string;
+  items: string[];
+};
 
 export type AiDecisionDebug = {
   schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
   aiLevel: number;
+  summary?: string;
   planId?: string;
   planKind?: string;
   selectedActionType?: string;
   score?: number;
   confidence?: number;
   visibleReasons?: string[];
+  rankedAlternatives?: AiDecisionRankedAlternative[];
+  actionAlternatives?: AiDecisionActionAlternative[];
+  scoreBreakdown?: AiDecisionScoreComponent[];
+  whyNot?: string[];
+  longTermPlan?: string[];
+  warnings?: string[];
+  detailSections?: AiDecisionDetailSection[];
   uncertainty?: string[];
   evidence?: string[];
   fallbackUsed?: boolean;
@@ -1394,7 +1464,7 @@ export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undef
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel
   };
-  const stringFields = ["planId", "planKind", "selectedActionType", "seed", "profileId", "memoryVersion"] as const;
+  const stringFields = ["summary", "planId", "planKind", "selectedActionType", "seed", "profileId", "memoryVersion"] as const;
   for (const field of stringFields) {
     const value = sanitizeAiDecisionDebugString(source[field]);
     if (value !== undefined) result[field] = value;
@@ -1409,16 +1479,145 @@ export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undef
     const value = source[field];
     if (typeof value === "boolean") result[field] = value;
   }
-  const stringArrayFields = ["visibleReasons", "uncertainty", "evidence", "facts", "hypotheses", "invalidations", "beliefUncertainty"] as const;
+  const stringArrayFields = ["visibleReasons", "whyNot", "longTermPlan", "warnings", "uncertainty", "evidence", "facts", "hypotheses", "invalidations", "beliefUncertainty"] as const;
   for (const field of stringArrayFields) {
     const value = sanitizeAiDecisionDebugStringArray(source[field]);
     if (value) result[field] = value;
   }
+  const rankedAlternatives = sanitizeAiDecisionRankedAlternatives(source.rankedAlternatives);
+  if (rankedAlternatives) result.rankedAlternatives = rankedAlternatives;
+  const actionAlternatives = sanitizeAiDecisionActionAlternatives(source.actionAlternatives);
+  if (actionAlternatives) result.actionAlternatives = actionAlternatives;
+  const scoreBreakdown = sanitizeAiDecisionScoreComponents(source.scoreBreakdown);
+  if (scoreBreakdown) result.scoreBreakdown = scoreBreakdown;
+  const detailSections = sanitizeAiDecisionDetailSections(source.detailSections);
+  if (detailSections) result.detailSections = detailSections;
   const opponentModel = sanitizeAiDecisionDebugJson(source.opponentModel);
   if (opponentModel && typeof opponentModel === "object" && !Array.isArray(opponentModel)) result.opponentModel = opponentModel as Record<string, unknown>;
   const ownDeckDoctrine = sanitizeAiDecisionDebugDoctrine(source.ownDeckDoctrine);
   if (ownDeckDoctrine) result.ownDeckDoctrine = ownDeckDoctrine;
   return result;
+}
+
+function sanitizeAiDecisionRankedAlternatives(value: unknown): AiDecisionRankedAlternative[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const alternatives = value
+    .slice(0, 5)
+    .map((entry): AiDecisionRankedAlternative | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const rank = typeof source.rank === "number" && Number.isFinite(source.rank) ? Math.max(1, Math.round(source.rank)) : undefined;
+      if (rank === undefined) return undefined;
+      const result: AiDecisionRankedAlternative = { rank };
+      for (const field of ["planId", "planKind", "selectedActionType", "summary"] as const) {
+        const sanitized = sanitizeAiDecisionDebugString(source[field]);
+        if (sanitized !== undefined) result[field] = sanitized;
+      }
+      for (const field of ["score", "confidence"] as const) {
+        const numberValue = source[field];
+        if (typeof numberValue === "number" && Number.isFinite(numberValue)) result[field] = numberValue;
+      }
+      for (const field of ["visibleReasons", "whyNot", "warnings"] as const) {
+        const values = sanitizeAiDecisionDebugStringArray(source[field]);
+        if (values) result[field] = values;
+      }
+      const scoreBreakdown = sanitizeAiDecisionScoreComponents(source.scoreBreakdown);
+      if (scoreBreakdown) result.scoreBreakdown = scoreBreakdown;
+      return result;
+    })
+    .filter((entry): entry is AiDecisionRankedAlternative => entry !== undefined);
+  return alternatives.length > 0 ? alternatives : undefined;
+}
+
+function sanitizeAiDecisionActionAlternatives(value: unknown): AiDecisionActionAlternative[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const alternatives = value
+    .slice(0, 8)
+    .map((entry): AiDecisionActionAlternative | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const rank = typeof source.rank === "number" && Number.isFinite(source.rank) ? Math.max(1, Math.round(source.rank)) : undefined;
+      const actionId = sanitizeAiDecisionDebugString(source.actionId);
+      const actionType = sanitizeAiDecisionDebugString(source.actionType);
+      const selected = source.selected;
+      if (rank === undefined || !actionId || !actionType || typeof selected !== "boolean") return undefined;
+      const result: AiDecisionActionAlternative = { rank, actionId, actionType, selected };
+      for (const field of ["label", "source", "sourceTitle"] as const) {
+        const sanitized = sanitizeAiDecisionDebugString(source[field]);
+        if (sanitized !== undefined) result[field] = sanitized;
+      }
+      const priority = source.priority;
+      if (typeof priority === "number" && Number.isFinite(priority)) result.priority = priority;
+      const whyChosen = sanitizeAiDecisionDebugStringArray(source.whyChosen);
+      if (whyChosen) result.whyChosen = whyChosen;
+      const whyNot = sanitizeAiDecisionDebugStringArray(source.whyNot);
+      if (whyNot) result.whyNot = whyNot;
+      const economy = sanitizeAiDecisionActionEconomy(source.economy);
+      if (economy) result.economy = economy;
+      return result;
+    })
+    .filter((entry): entry is AiDecisionActionAlternative => entry !== undefined);
+  return alternatives.length > 0 ? alternatives : undefined;
+}
+
+function sanitizeAiDecisionActionEconomy(value: unknown): AiDecisionActionEconomyDetail | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const economyKind = sanitizeAiDecisionDebugString(source.economyKind);
+  if (!economyKind) return undefined;
+  const result: AiDecisionActionEconomyDetail = { economyKind };
+  const ability = sanitizeAiDecisionDebugString(source.ability);
+  if (ability !== undefined) result.ability = ability;
+  const economyNeed = sanitizeAiDecisionDebugString(source.economyNeed);
+  if (economyNeed !== undefined) result.economyNeed = economyNeed;
+  for (const field of ["immediateGain", "netCredits", "storedCredits", "futurePoolAfter"] as const) {
+    const numberValue = source[field];
+    if (typeof numberValue === "number" && Number.isFinite(numberValue)) result[field] = numberValue;
+  }
+  return result;
+}
+
+function sanitizeAiDecisionScoreComponents(value: unknown): AiDecisionScoreComponent[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const components = value
+    .slice(0, 16)
+    .map((entry): AiDecisionScoreComponent | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const key = sanitizeAiDecisionDebugString(source.key);
+      const label = sanitizeAiDecisionDebugString(source.label);
+      const componentValue = source.value;
+      if (!key || !label || typeof componentValue !== "number" || !Number.isFinite(componentValue)) return undefined;
+      const result: AiDecisionScoreComponent = {
+        key,
+        label,
+        value: componentValue
+      };
+      const weight = source.weight;
+      if (typeof weight === "number" && Number.isFinite(weight)) result.weight = weight;
+      const reason = sanitizeAiDecisionDebugString(source.reason);
+      if (reason !== undefined) result.reason = reason;
+      return result;
+    })
+    .filter((entry): entry is AiDecisionScoreComponent => entry !== undefined);
+  return components.length > 0 ? components : undefined;
+}
+
+function sanitizeAiDecisionDetailSections(value: unknown): AiDecisionDetailSection[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const sections = value
+    .slice(0, 8)
+    .map((entry): AiDecisionDetailSection | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const id = sanitizeAiDecisionDebugString(source.id);
+      const title = sanitizeAiDecisionDebugString(source.title);
+      const items = sanitizeAiDecisionDebugStringArray(source.items);
+      if (!id || !title || !items) return undefined;
+      return { id, title, items };
+    })
+    .filter((entry): entry is AiDecisionDetailSection => entry !== undefined);
+  return sections.length > 0 ? sections : undefined;
 }
 
 function sanitizeAiDecisionDebugDoctrine(value: unknown): AiDecisionDebug["ownDeckDoctrine"] | undefined {
@@ -3460,7 +3659,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     advancementRequirement: 4,
     agendaPoints: 1,
     rulesText:
-      "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
+      "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
     mechanics: [
       "install_remote",
       "advance",
@@ -3481,14 +3680,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
     agendaPoints: 3,
-    rulesText: "While scored, gain 1 credit at the start of each Corp turn.",
+    rulesText:
+      "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
     mechanics: [
       "install_remote",
       "advance",
       "score",
       "steal",
       "recurring_start_turn",
-      "gain_credits",
+      "choice",
+      "draw_cards",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -3671,7 +3872,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 5,
     agendaPoints: 3,
-    rulesText: "When scored, rez one installed piece of ice at no cost.",
+    rulesText:
+      "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
     mechanics: [
       "install_remote",
       "advance",
@@ -3755,13 +3957,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 6,
     agendaPoints: 3,
-    rulesText: "While scored, all wall ice gets +1 strength.",
+    rulesText:
+      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
     mechanics: [
       "install_remote",
       "advance",
       "score",
       "steal",
       "global_ice_strength_modifier",
+      "hidden_zone_search_reveal",
+      "on_score_gain_credits",
       "persistent_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],

@@ -29,7 +29,9 @@ import {
   type ApiPlayerClockConfig,
   type ApiPlayerClockSnapshot,
   type ApiPendingUndoRequest,
+  type AiDecision,
   type AiDifficulty,
+  type AiDecisionDebug,
   type DeckPublicMetadata,
   type GameEvent,
   type GameState,
@@ -70,6 +72,9 @@ import type {
   StorageMaintenanceCleanupPolicyInput,
   StorageMaintenanceCleanupPolicyRunResult,
   StorageMaintenanceCleanupPreview,
+  StorageMaintenanceAiDecisionTraceDetail,
+  StorageMaintenanceAiDecisionTraceIndexEntry,
+  StorageMaintenanceAiDecisionTraceMatchEntry,
   StorageMaintenanceMatchDetail,
   StorageMaintenanceMatchEntry,
   StorageMaintenanceMatchFilters,
@@ -82,6 +87,7 @@ export type HostSideSelection = Side | "random";
 export type MatchMode = ApiMatchMode;
 export type MatchFormat = ApiMatchFormat;
 export type AiPacingMode = ApiAiPacingMode;
+export type AiDecisionTraceMode = "off" | "summary" | "detailed";
 export type TokenKind = "join" | "session" | "reconnect";
 export type UndoStatus = "requested" | "accepted" | "declined" | "blocked";
 export type SeriesPlayerSlot = ApiSeriesPlayerSlot;
@@ -178,6 +184,7 @@ export type MatchRecord = {
   };
   aiControllers?: Partial<Record<Side, PlayerController>>;
   aiPacingMode?: AiPacingMode;
+  aiTraceMode?: AiDecisionTraceMode;
   discoverableInLan?: boolean;
   series?: MatchSeriesState;
   retentionProtection?: {
@@ -289,7 +296,27 @@ export type StoredMatch = {
   actionReceipts: ActionReceipt[];
   undoSnapshots: UndoSnapshot[];
   stateSnapshots: StateSnapshot[];
+  aiDecisionTraces?: AiDecisionTraceRecord[];
   pendingUndo?: PendingUndoRequest;
+};
+
+export type AiDecisionTraceRecord = {
+  traceId: string;
+  matchId: string;
+  eventId: string;
+  stateVersion: number;
+  matchVersion: number;
+  side: Side;
+  turn: number;
+  decisionIndex: number;
+  selectedActionId?: string;
+  selectedActionType?: string;
+  planKind?: string;
+  score?: number;
+  confidence?: number;
+  createdAt: string;
+  schemaVersion: string;
+  traceJson: Record<string, unknown>;
 };
 
 export type MultiplayerStorage = {
@@ -302,6 +329,9 @@ export type MultiplayerStorage = {
   maintenanceSummary?(): Promise<StorageMaintenanceSummary>;
   maintenanceMatches?(filters?: StorageMaintenanceMatchFilters): Promise<StorageMaintenanceMatchEntry[]>;
   maintenanceMatchDetail?(matchId: string): Promise<StorageMaintenanceMatchDetail | undefined>;
+  maintenanceAiDecisionTraceMatches?(): Promise<StorageMaintenanceAiDecisionTraceMatchEntry[]>;
+  maintenanceAiDecisionTraceIndex?(matchId: string, filters?: { afterDecisionIndex?: number }): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]>;
+  maintenanceAiDecisionTraceDetail?(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined>;
   maintenanceCleanupPreview?(filters: StorageMaintenanceCleanupFilters): Promise<StorageMaintenanceCleanupPreview>;
   maintenanceCleanupApply?(input: StorageMaintenanceCleanupApplyInput): Promise<StorageMaintenanceCleanupApplyResult>;
   maintenanceCleanupPolicy?(): Promise<StorageMaintenanceCleanupPolicy>;
@@ -645,6 +675,7 @@ export class MultiplayerService {
     runnerDifficulty?: AiDifficulty;
     corpDifficulty?: AiDifficulty;
     aiPacingMode?: AiPacingMode;
+    aiTraceMode?: AiDecisionTraceMode;
     discoverableInLan?: boolean;
   } & MatchDeckSelectionInput): Promise<CreateMatchResult> {
     const seed = input.seed?.trim() || `match-${randomId("seed")}`;
@@ -659,6 +690,7 @@ export class MultiplayerService {
     const aiPlayer = aiPlayerForMode(mode);
     const aiDeckPolicy = aiPlayer ? input.aiDeckPolicy ?? "selected" : undefined;
     const aiPacingMode = input.aiPacingMode ?? (aiPlayer ? "paced" : undefined);
+    const aiTraceMode = normalizeAiDecisionTraceMode(input.aiTraceMode);
     const discoverableInLan = mode === "human_vs_human" ? input.discoverableInLan !== false : false;
     const now = this.now();
     const hostSessionToken = generateToken();
@@ -703,6 +735,7 @@ export class MultiplayerService {
             participants: { player_a: publicParticipantDeckPair(hostDeckPair), player_b: publicParticipantDeckPair(hostDeckPair) }
           },
           ...(aiPacingMode ? { aiPacingMode } : {}),
+          ...(aiTraceMode !== "off" ? { aiTraceMode } : {}),
           ...(matchFormat === "two_game_side_swap"
             ? {
                 series: {
@@ -826,6 +859,7 @@ export class MultiplayerService {
         },
         ...(mode === "human_vs_human" ? {} : { aiControllers: aiControllersFor(controllers) }),
         ...(aiPacingMode ? { aiPacingMode } : {}),
+        ...(aiTraceMode !== "off" ? { aiTraceMode } : {}),
         discoverableInLan,
         ...(settings.matchFormat === "two_game_side_swap"
           ? {
@@ -1731,6 +1765,43 @@ export class MultiplayerService {
     return this.storage.maintenanceMatchDetail?.(matchId);
   }
 
+  async storageMaintenanceAiDecisionTraceMatches(): Promise<StorageMaintenanceAiDecisionTraceMatchEntry[] | undefined> {
+    return this.storage.maintenanceAiDecisionTraceMatches?.();
+  }
+
+  async storageMaintenanceAiDecisionTraceIndex(matchId: string, filters?: { afterDecisionIndex?: number }): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[] | undefined> {
+    return this.storage.maintenanceAiDecisionTraceIndex?.(matchId, filters);
+  }
+
+  async storageMaintenanceAiDecisionTraceDetail(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
+    return this.storage.maintenanceAiDecisionTraceDetail?.(traceId);
+  }
+
+  async enableStorageMaintenanceAiDecisionTrace(matchId: string, mode: Exclude<AiDecisionTraceMode, "off"> = "detailed"): Promise<StorageMaintenanceAiDecisionTraceMatchEntry | undefined> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return undefined;
+      if (!record.match.aiControllers || Object.keys(record.match.aiControllers).length === 0) throw new Error("ai_trace_match_has_no_ai");
+      if (isTerminalStatus(record.match.status)) throw new Error("ai_trace_match_terminal");
+      const now = this.now();
+      record.match.aiTraceMode = mode;
+      record.match.updatedAt = now;
+      await this.storage.save(record);
+      const matches = await this.storageMaintenanceAiDecisionTraceMatches();
+      return (
+        matches?.find((match) => match.matchId === matchId) ?? {
+          matchId,
+          status: record.match.status,
+          mode: record.match.mode,
+          aiTraceMode: mode,
+          traceCount: record.aiDecisionTraces?.length ?? 0,
+          createdAt: record.match.createdAt,
+          updatedAt: record.match.updatedAt
+        }
+      );
+    });
+  }
+
   async storageMaintenanceCleanupPreview(filters: StorageMaintenanceCleanupFilters): Promise<StorageMaintenanceCleanupPreview | undefined> {
     return this.storage.maintenanceCleanupPreview?.(filters);
   }
@@ -2406,10 +2477,17 @@ export class MultiplayerService {
     };
     const barrier = isHiddenInfoBarrier(event);
     record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
+    const occurredAt = this.now();
+    const trace = aiDecisionTraceFor(record, event, side, decision, normalizeAiDecisionTraceMode(record.match.aiTraceMode), occurredAt);
+    if (trace) {
+      const traces = record.aiDecisionTraces ?? [];
+      traces.push(trace);
+      record.aiDecisionTraces = traces;
+    }
     record.gameState = result.state;
     record.eventLog.push(toEventRecord(record.match.matchId, event, barrier));
     record.match.matchVersion += 1;
-    record.match.updatedAt = this.now();
+    record.match.updatedAt = occurredAt;
     if (result.state.winner) this.finalizeFinishedMatch(record);
     return true;
   }
@@ -2591,6 +2669,10 @@ function normalizePlayerClockConfig(config: ApiPlayerClockConfig | undefined): A
   const startingTimeMs = boundedWholeNumber(config.startingTimeMs, 5 * 60_000, 60_000, 120 * 60_000);
   const gracePeriodMs = boundedWholeNumber(config.gracePeriodMs, 10_000, 0, 60_000);
   return { mode: "player_clock", startingTimeMs, gracePeriodMs };
+}
+
+function normalizeAiDecisionTraceMode(value: unknown): AiDecisionTraceMode {
+  return value === "summary" || value === "detailed" ? value : "off";
 }
 
 function initialPlayerClockState(config: ApiPlayerClockConfig): PlayerClockState {
@@ -2840,8 +2922,16 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   const result: Record<string, unknown> = {};
   result.schemaVersion = safeDebug.schemaVersion;
   result.aiLevel = safeDebug.aiLevel;
+  if (typeof safeDebug.summary === "string") result.summary = safeDebug.summary;
   if (typeof safeDebug.planKind === "string") result.planKind = safeDebug.planKind;
   if (typeof safeDebug.memoryVersion === "string") result.memoryVersion = safeDebug.memoryVersion;
+  if (Array.isArray(safeDebug.rankedAlternatives)) result.rankedAlternatives = safeDebug.rankedAlternatives.slice(0, 5);
+  if (Array.isArray(safeDebug.actionAlternatives)) result.actionAlternatives = safeDebug.actionAlternatives.slice(0, 8);
+  if (Array.isArray(safeDebug.scoreBreakdown)) result.scoreBreakdown = safeDebug.scoreBreakdown.slice(0, 16);
+  if (Array.isArray(safeDebug.whyNot)) result.whyNot = safeDebug.whyNot.slice(0, 8);
+  if (Array.isArray(safeDebug.longTermPlan)) result.longTermPlan = safeDebug.longTermPlan.slice(0, 8);
+  if (Array.isArray(safeDebug.warnings)) result.warnings = safeDebug.warnings.slice(0, 8);
+  if (Array.isArray(safeDebug.detailSections)) result.detailSections = safeDebug.detailSections.slice(0, 8);
   if (Array.isArray(safeDebug.facts)) result.facts = safeDebug.facts.slice(0, 8);
   if (Array.isArray(safeDebug.hypotheses)) result.hypotheses = safeDebug.hypotheses.slice(0, 8);
   if (Array.isArray(safeDebug.uncertainty)) result.uncertainty = safeDebug.uncertainty.slice(0, 8);
@@ -2849,6 +2939,74 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   if (typeof safeDebug.timeoutUsed === "boolean") result.timeoutUsed = safeDebug.timeoutUsed;
   if (typeof safeDebug.confidence === "number") result.confidence = safeDebug.confidence;
   if (actor) result.actor = actor;
+  return result;
+}
+
+function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, decision: AiDecision, mode: AiDecisionTraceMode, createdAt: string): AiDecisionTraceRecord | undefined {
+  if (mode === "off" || !decision.decisionDebug) return undefined;
+  const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
+  if (!safeDebug) return undefined;
+  const traceJson = aiDecisionTraceJson(safeDebug, side, mode);
+  const decisionIndex = (record.aiDecisionTraces?.length ?? 0) + 1;
+  const selectedActionType = typeof traceJson.selectedActionType === "string" ? traceJson.selectedActionType : undefined;
+  const planKind = typeof traceJson.planKind === "string" ? traceJson.planKind : undefined;
+  const score = typeof traceJson.score === "number" ? traceJson.score : undefined;
+  const confidence = typeof traceJson.confidence === "number" ? traceJson.confidence : undefined;
+  return {
+    traceId: `ai_trace_${record.match.matchId}_${decisionIndex}`,
+    matchId: record.match.matchId,
+    eventId: event.eventId,
+    stateVersion: event.stateVersionBefore,
+    matchVersion: record.match.matchVersion,
+    side,
+    turn: event.stateVersionBefore,
+    decisionIndex,
+    selectedActionId: decision.actionId,
+    ...(selectedActionType ? { selectedActionType } : {}),
+    ...(planKind ? { planKind } : {}),
+    ...(score !== undefined ? { score } : {}),
+    ...(confidence !== undefined ? { confidence } : {}),
+    createdAt,
+    schemaVersion: "ai-decision-trace-v1",
+    traceJson
+  };
+}
+
+function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, mode: Exclude<AiDecisionTraceMode, "off">): Record<string, unknown> {
+  const result: Record<string, unknown> = {
+    schemaVersion: "ai-decision-trace-v1",
+    debugSchemaVersion: debug.schemaVersion,
+    actor,
+    aiLevel: debug.aiLevel
+  };
+  for (const field of ["summary", "planId", "planKind", "selectedActionType", "profileId", "memoryVersion"] as const) {
+    const value = debug[field];
+    if (typeof value === "string") result[field] = value;
+  }
+  for (const field of ["score", "confidence", "timeBudgetMs", "doctrinePlanWeight"] as const) {
+    const value = debug[field];
+    if (typeof value === "number" && Number.isFinite(value)) result[field] = value;
+  }
+  for (const field of ["fallbackUsed", "timeoutUsed"] as const) {
+    const value = debug[field];
+    if (typeof value === "boolean") result[field] = value;
+  }
+  for (const field of ["visibleReasons", "whyNot", "longTermPlan", "warnings", "uncertainty"] as const) {
+    const value = debug[field];
+    if (Array.isArray(value)) result[field] = value.slice(0, 8);
+  }
+  if (Array.isArray(debug.rankedAlternatives)) result.rankedAlternatives = debug.rankedAlternatives.slice(0, mode === "summary" ? 3 : 5);
+  if (Array.isArray(debug.actionAlternatives)) result.actionAlternatives = debug.actionAlternatives.slice(0, 8);
+  if (Array.isArray(debug.scoreBreakdown)) result.scoreBreakdown = debug.scoreBreakdown.slice(0, 16);
+  if (mode === "detailed") {
+    for (const field of ["facts", "hypotheses", "invalidations", "beliefUncertainty", "evidence"] as const) {
+      const value = debug[field];
+      if (Array.isArray(value)) result[field] = value.slice(0, 12);
+    }
+    if (Array.isArray(debug.detailSections)) result.detailSections = debug.detailSections.slice(0, 8);
+    if (debug.opponentModel) result.opponentModel = debug.opponentModel;
+    if (debug.ownDeckDoctrine) result.ownDeckDoctrine = debug.ownDeckDoctrine;
+  }
   return result;
 }
 

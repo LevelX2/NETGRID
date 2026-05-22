@@ -72,12 +72,59 @@ export type MaintenanceMatchDetail = MaintenanceMatchEntry & {
     pendingUndo: number;
     startLobbies: number;
     deckSnapshotsRedacted: number;
+    aiDecisionTraces?: number;
   };
   cleanupAssessment: {
     eligibleInReadOnlySlice: false;
     recommendation: "not_active";
     reason: string;
   };
+};
+
+export type MaintenanceAiTraceMatchEntry = {
+  matchId: string;
+  status: string;
+  mode: string;
+  aiTraceMode: "summary" | "detailed";
+  traceCount: number;
+  createdAt: string;
+  updatedAt: string;
+  firstTraceAt?: string;
+  lastTraceAt?: string;
+};
+
+export type MaintenanceAiTraceIndexEntry = {
+  traceId: string;
+  matchId: string;
+  eventId: string;
+  stateVersion: number;
+  matchVersion: number;
+  side: "runner" | "corp";
+  turn: number;
+  decisionIndex: number;
+  selectedActionId?: string;
+  selectedActionType?: string;
+  planKind?: string;
+  score?: number;
+  confidence?: number;
+  createdAt: string;
+  schemaVersion: string;
+  meta: Record<string, unknown>;
+};
+
+export type MaintenanceAiTraceDetail = MaintenanceAiTraceIndexEntry & {
+  detail: Record<string, unknown>;
+};
+
+export type MaintenanceAiTraceActionRow = {
+  key: string;
+  rank: number;
+  label: string;
+  selected: boolean;
+  source: string;
+  priority: string;
+  metrics: string[];
+  reason: string;
 };
 
 export type MaintenanceRecoveryAccess = {
@@ -217,7 +264,11 @@ const SENSITIVE_MARKERS = [
   /privateDeckSnapshots/i,
   /decklist/i,
   /fullState/i,
-  /game_state_json/i
+  /game_state_json/i,
+  /AIInput/i,
+  /DecisionDebug/i,
+  /decisionDebug/i,
+  /C:\\Users/i
 ];
 
 export function buildMaintenanceMatchQuery(filters: MaintenanceFilters): string {
@@ -257,6 +308,142 @@ export function buildMaintenanceRecoveryLink(access: Pick<MaintenanceRecoveryAcc
   url.searchParams.set("side", access.side);
   url.searchParams.set("reconnectToken", access.access);
   return url.toString();
+}
+
+export function buildMaintenanceAiTraceIndexPath(matchId: string, afterDecisionIndex?: number): string {
+  const path = `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}`;
+  if (afterDecisionIndex === undefined || !Number.isFinite(afterDecisionIndex)) return path;
+  return `${path}?afterDecisionIndex=${Math.max(0, Math.floor(afterDecisionIndex))}`;
+}
+
+export function buildMaintenanceAiTraceEnablePath(matchId: string): string {
+  return `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}/enable`;
+}
+
+export function mergeMaintenanceAiTraceIndex(current: MaintenanceAiTraceIndexEntry[], incoming: MaintenanceAiTraceIndexEntry[]): MaintenanceAiTraceIndexEntry[] {
+  const byId = new Map<string, MaintenanceAiTraceIndexEntry>();
+  for (const trace of current) byId.set(trace.traceId, trace);
+  for (const trace of incoming) byId.set(trace.traceId, trace);
+  return Array.from(byId.values()).sort((left, right) => left.decisionIndex - right.decisionIndex || left.createdAt.localeCompare(right.createdAt));
+}
+
+export function mergeMaintenanceAiTraceMatches(current: MaintenanceAiTraceMatchEntry[], incoming: MaintenanceAiTraceMatchEntry[]): MaintenanceAiTraceMatchEntry[] {
+  const byId = new Map<string, MaintenanceAiTraceMatchEntry>();
+  for (const match of current) byId.set(match.matchId, match);
+  for (const match of incoming) byId.set(match.matchId, match);
+  return Array.from(byId.values()).sort((left, right) => {
+    const leftDate = Date.parse(left.lastTraceAt ?? left.updatedAt ?? left.createdAt);
+    const rightDate = Date.parse(right.lastTraceAt ?? right.updatedAt ?? right.createdAt);
+    return rightDate - leftDate || left.matchId.localeCompare(right.matchId);
+  });
+}
+
+export function latestMaintenanceAiTraceId(traces: MaintenanceAiTraceIndexEntry[]): string {
+  return traces.at(-1)?.traceId ?? "";
+}
+
+export function buildMaintenanceAiTraceNdjsonExport(input: { matchId: string; generatedAt: string; traces: MaintenanceAiTraceIndexEntry[] }): string {
+  const payload = {
+    exportKind: "netgrid-ai-decision-trace-index-export-v1",
+    redaction: "maintenance-redacted-index-projection",
+    matchId: input.matchId,
+    generatedAt: input.generatedAt,
+    traceCount: input.traces.length
+  };
+  const lines = [payload, ...input.traces].map((entry) => JSON.stringify(entry));
+  const output = `${lines.join("\n")}\n`;
+  const markers = findForbiddenMaintenanceMarkers(output);
+  if (markers.length > 0) throw new Error("ai_trace_export_redaction_failed");
+  return output;
+}
+
+export function aiTraceTitle(trace: Pick<MaintenanceAiTraceIndexEntry, "decisionIndex" | "side" | "planKind" | "selectedActionType">): string {
+  const side = trace.side === "runner" ? "Runner" : "Korp";
+  const plan = trace.planKind ?? trace.selectedActionType ?? "KI-Entscheidung";
+  return `#${trace.decisionIndex} ${side} · ${plan}`;
+}
+
+export function aiTraceMetaRows(trace: MaintenanceAiTraceDetail | MaintenanceAiTraceIndexEntry): Array<[string, string]> {
+  return [
+    ["Entscheidung", String(trace.decisionIndex)],
+    ["Seite", trace.side === "runner" ? "Runner" : "Korp"],
+    ["State", String(trace.stateVersion)],
+    ["Match-Version", String(trace.matchVersion)],
+    ["Aktion", trace.selectedActionType ?? "-"],
+    ["Plan", trace.planKind ?? "-"],
+    ["Score", typeof trace.score === "number" ? trace.score.toFixed(2) : "-"],
+    ["Vertrauen", typeof trace.confidence === "number" ? `${Math.round(trace.confidence * 100)}%` : "-"]
+  ];
+}
+
+export function aiTraceActionRows(detail: Record<string, unknown>): MaintenanceAiTraceActionRow[] {
+  const alternatives = Array.isArray(detail.actionAlternatives) ? detail.actionAlternatives : [];
+  return alternatives
+    .slice(0, 8)
+    .map((entry, index): MaintenanceAiTraceActionRow | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const action = entry as Record<string, unknown>;
+      const rank = typeof action.rank === "number" && Number.isFinite(action.rank) ? Math.max(1, Math.round(action.rank)) : index + 1;
+      const actionId = typeof action.actionId === "string" ? action.actionId : `action-${rank}`;
+      const actionType = typeof action.actionType === "string" ? action.actionType : "Aktion";
+      const economy = action.economy && typeof action.economy === "object" && !Array.isArray(action.economy) ? action.economy as Record<string, unknown> : undefined;
+      const sourceTitle = typeof action.sourceTitle === "string" ? action.sourceTitle : "";
+      const rawLabel = typeof action.label === "string" ? action.label : actionType;
+      const selected = action.selected === true;
+      return {
+        key: `${rank}:${actionId}`,
+        rank,
+        label: aiTraceActionLabel(rawLabel, actionType, sourceTitle, economy),
+        selected,
+        source: sourceTitle || (typeof action.source === "string" ? action.source : "-"),
+        priority: typeof action.priority === "number" && Number.isFinite(action.priority) ? action.priority.toFixed(0) : "-",
+        metrics: aiTraceActionMetrics(economy),
+        reason: aiTraceActionReason(selected ? action.whyChosen : action.whyNot)
+      };
+    })
+    .filter((entry): entry is MaintenanceAiTraceActionRow => Boolean(entry));
+}
+
+function aiTraceActionLabel(rawLabel: string, actionType: string, sourceTitle: string, economy: Record<string, unknown> | undefined): string {
+  const economyKind = typeof economy?.economyKind === "string" ? economy.economyKind : "";
+  if (economyKind === "basic_credit") return "Credit nehmen";
+  if (sourceTitle && economyKind === "pool_build") return `${sourceTitle} laden`;
+  if (sourceTitle && economyKind === "pool_payout") return `${sourceTitle} auszahlen`;
+  return rawLabel || actionType;
+}
+
+function aiTraceActionMetrics(economy: Record<string, unknown> | undefined): string[] {
+  if (!economy) return [];
+  const metrics: string[] = [];
+  const immediateGain = numberField(economy, "immediateGain");
+  const netCredits = numberField(economy, "netCredits");
+  const storedCredits = numberField(economy, "storedCredits");
+  const futurePoolAfter = numberField(economy, "futurePoolAfter");
+  if (immediateGain !== undefined) metrics.push(`jetzt ${formatSignedCredits(immediateGain)}`);
+  if (netCredits !== undefined && netCredits !== immediateGain) metrics.push(`netto ${formatSignedCredits(netCredits)}`);
+  if (storedCredits !== undefined && storedCredits > 0) metrics.push(`gespeichert ${storedCredits}`);
+  if (futurePoolAfter !== undefined) metrics.push(`Pool nachher ${futurePoolAfter}`);
+  if (typeof economy.economyNeed === "string") metrics.push(`Bedarf ${economy.economyNeed}`);
+  return metrics;
+}
+
+function aiTraceActionReason(value: unknown): string {
+  if (!Array.isArray(value)) return "-";
+  return value.find((entry): entry is string => typeof entry === "string") ?? "-";
+}
+
+function numberField(record: Record<string, unknown>, key: string): number | undefined {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function formatSignedCredits(value: number): string {
+  return value > 0 ? `+${value}` : String(value);
+}
+
+export function safeStringList(value: unknown, limit = 6): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === "string").slice(0, limit);
 }
 
 export function formatBytes(bytes: number): string {

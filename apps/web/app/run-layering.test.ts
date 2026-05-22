@@ -30,4 +30,16 @@ describe("run window layering", () => {
     expect(runOverlay).toBeLessThan(zLayer("z-access-reveal-overlay"));
     expect(runOverlay).toBeLessThan(zLayer("z-card-tooltip-overlay"));
   });
+
+  it("keeps stack-search card choices readable instead of overlapped", () => {
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("display: grid");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(190px, 1fr)");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot")).toContain("margin-left: 0");
+  });
+
+  it("keeps access reveal cards primary with compact round actions", () => {
+    expect(selectorBlock(".accessRevealBody")).toContain("grid-template-columns: minmax(220px, 292px) minmax(150px, 180px)");
+    expect(selectorBlock(".accessRevealCard")).toContain("width: min(292px, 100%)");
+    expect(selectorBlock(".accessRevealActions .button")).toContain("border-radius: 999px");
+  });
 });

@@ -404,6 +404,91 @@ describe("Backend 0.5 private storage maintenance", () => {
     }
   });
 
+  it("stores enabled AI decision traces in SQLite and exposes redacted maintenance views only", async () => {
+    const dir = await tempStorageDir();
+    const dbPath = join(dir, "netgrid.sqlite");
+    const backupDir = join(dir, "backups");
+    const storage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const service = new MultiplayerService(storage, { tokenSalt: "backend-05-ai-traces" });
+    const traced = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "backend-05-ai-trace-on",
+      corpDifficulty: "normal",
+      aiTraceMode: "detailed"
+    });
+    const untraced = await service.createMatch({
+      mode: "human_runner_vs_corp_ai",
+      hostSide: "runner",
+      seed: "backend-05-ai-trace-off",
+      corpDifficulty: "normal"
+    });
+    const tracedSetup = await submitChoice(service, traced.matchId, { side: "runner", sessionToken: traced.hostSessionToken, reconnectToken: traced.hostReconnectToken }, "keep", "ai-trace-on-setup");
+    const untracedSetup = await submitChoice(service, untraced.matchId, { side: "runner", sessionToken: untraced.hostSessionToken, reconnectToken: untraced.hostReconnectToken }, "keep", "ai-trace-off-setup");
+    const tracedAdvanced = await service.advanceAi({ matchId: traced.matchId, side: "runner", sessionToken: traced.hostSessionToken, knownStateVersion: tracedSetup.playerView.stateVersion, mode: "single_step" });
+    const untracedAdvanced = await service.advanceAi({ matchId: untraced.matchId, side: "runner", sessionToken: untraced.hostSessionToken, knownStateVersion: untracedSetup.playerView.stateVersion, mode: "single_step" });
+    expect(tracedAdvanced.ok).toBe(true);
+    expect(untracedAdvanced.ok).toBe(true);
+    storage.close?.();
+
+    const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
+    const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "backend-05-ai-traces" });
+    const initialMatches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
+    expect(initialMatches?.map((match) => match.matchId)).toEqual([traced.matchId]);
+    expect(initialMatches?.[0]).toMatchObject({ aiTraceMode: "detailed" });
+    expect(initialMatches?.[0]?.traceCount).toBeGreaterThan(0);
+    const enabledLate = await reopenedService.enableStorageMaintenanceAiDecisionTrace(untraced.matchId, "detailed");
+    expect(enabledLate).toMatchObject({ matchId: untraced.matchId, aiTraceMode: "detailed", traceCount: 0 });
+    const matches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
+    expect(matches?.map((match) => match.matchId)).toEqual(expect.arrayContaining([traced.matchId, untraced.matchId]));
+    const index = await reopenedService.storageMaintenanceAiDecisionTraceIndex(traced.matchId);
+    expect(index?.[0]).toMatchObject({
+      matchId: traced.matchId,
+      eventId: expect.any(String),
+      side: "corp",
+      schemaVersion: "ai-decision-trace-v1",
+      meta: expect.objectContaining({ actor: "corp" })
+    });
+    const cursorIndex = await reopenedService.storageMaintenanceAiDecisionTraceIndex(traced.matchId, { afterDecisionIndex: index?.[0]?.decisionIndex ?? 0 });
+    expect(cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId)).toBe(false);
+    const details = await Promise.all((index ?? []).map((entry) => reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId)));
+    const detail = details[0];
+    expect(detail?.detail).toMatchObject({
+      schemaVersion: "ai-decision-trace-v1",
+      actor: "corp",
+      debugSchemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION
+    });
+    expect(await reopenedService.storageMaintenanceAiDecisionTraceIndex(untraced.matchId)).toEqual([]);
+    expect(JSON.stringify({ matches, index, details })).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privatePayload|privateDeckSnapshots|decklist|fullGameState|FullState|AIInput|C:\\Users/i);
+
+    const handle = createNetgridHttpServer(reopenedService, { deploymentConfig: loadDeploymentConfig({} as NodeJS.ProcessEnv) });
+    const baseUrl = await listen(handle);
+    try {
+      const matchesResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches`);
+      expect(matchesResponse.status).toBe(200);
+      const enableResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(untraced.matchId)}/enable`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mode: "detailed" })
+      });
+      expect(enableResponse.status).toBe(200);
+      expect(await enableResponse.json()).toMatchObject({ match: { matchId: untraced.matchId, aiTraceMode: "detailed" } });
+      const indexResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`);
+      const httpIndex = (await indexResponse.json()) as { traces?: Array<{ traceId: string }> };
+      expect(indexResponse.status).toBe(200);
+      expect(httpIndex.traces?.length).toBeGreaterThan(0);
+      const cursorResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`);
+      const cursorBody = (await cursorResponse.json()) as { traces?: Array<{ traceId: string }> };
+      expect(cursorResponse.status).toBe(200);
+      expect(cursorBody.traces?.some((entry) => entry.traceId === httpIndex.traces?.[0]?.traceId)).toBe(false);
+      const detailResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`);
+      expect(detailResponse.status).toBe(200);
+      expect(JSON.stringify(await detailResponse.json())).not.toMatch(/<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i);
+    } finally {
+      await handle.close();
+    }
+  });
+
   it("issues a local recovery access from maintenance without listing raw token fields", async () => {
     const dir = await tempStorageDir();
     const storage = new SqliteMatchStorage({ dbPath: join(dir, "netgrid.sqlite"), backupDir: join(dir, "backups"), autoImportLegacy: false });

@@ -56,6 +56,22 @@ describe("card set support catalog source", () => {
     }
   });
 
+  it("keeps Priority Requisition text visibly optional", () => {
+    const priorityRequisition =
+      createRuntimeCardsById()["onr_v1_212_priority-requisition"];
+    expect(priorityRequisition?.text).toBe(
+      "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
+    );
+  });
+
+  it("keeps Superior Net Barriers text complete", () => {
+    const superiorNetBarriers =
+      createRuntimeCardsById()["onr_v1_219_superior-net-barriers"];
+    expect(superiorNetBarriers?.text).toBe(
+      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
+    );
+  });
+
   it("derives runtime and AI support from active support entries", () => {
     const cardsById = createRuntimeCardsById();
     const runtimeIdsFromCards = Object.values(cardsById)
@@ -148,5 +164,28 @@ describe("card set support catalog source", () => {
       activeAiApprovedCardIds.length,
     );
     expect(assertCatalogPayloadSafe(index)).toEqual({ ok: true, errors: [] });
+  });
+
+  it("keeps Detroit Police Contract display text aligned to its 12/2 runtime effect", () => {
+    const card = createRuntimeCardsById()["onr_v1_198_detroit-police-contract"];
+
+    expect(card?.text).toBe(
+      "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
+    );
+    expect(card?.numeric.advancementRequirement).toBe(4);
+    expect(card?.numeric.agendaPoints).toBe(1);
+    expect(card?.text).not.toContain("4 power counters");
+    expect(card?.text).not.toContain("Remove 1 power counter");
+  });
+
+  it("keeps Employee Empowerment display text aligned to optional start draw and agenda action", () => {
+    const card = createRuntimeCardsById()["onr_v1_199_employee-empowerment"];
+
+    expect(card?.text).toBe(
+      "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
+    );
+    expect(card?.numeric.advancementRequirement).toBe(4);
+    expect(card?.numeric.agendaPoints).toBe(3);
+    expect(card?.text).not.toContain("gain 1 credit");
   });
 });

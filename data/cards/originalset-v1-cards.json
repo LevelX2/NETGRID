@@ -6213,7 +6213,7 @@
         "advancementRequirement": 4,
         "agendaPoints": 1
       },
-      "text": "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
+      "text": "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -6245,7 +6245,7 @@
         "advancementRequirement": 4,
         "agendaPoints": 3
       },
-      "text": "While scored, gain 1 credit at the start of each Corp turn.",
+      "text": "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -6661,7 +6661,7 @@
         "advancementRequirement": 5,
         "agendaPoints": 3
       },
-      "text": "When scored, rez one installed piece of ice at no cost.",
+      "text": "You may rez a piece of ice, at no cost, when you score Priority Requisition.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -6885,7 +6885,7 @@
         "advancementRequirement": 6,
         "agendaPoints": 3
       },
-      "text": "While scored, all wall ice gets +1 strength.",
+      "text": "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

@@ -63,6 +63,7 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
 
 const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
+const SKIVVISS_ID = "onr_v1_064_skivviss";
 
 type EffectSummary = {
   category?: ChronicleCategory;
@@ -221,6 +222,20 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           ? `${sideLabel(setupSide)} hat ${setupDecision === "keep" ? "die Starthand behalten" : "einen Mulligan genommen"}`
           : `${sideLabel(setupSide)} hat die Mulligan-Entscheidung abgeschlossen`;
         chips.push("Setup", "Starthand", setupDecision === "keep" ? "Behalten" : setupDecision === "mulligan" ? "Mulligan" : "Entscheidung");
+        break;
+      }
+      if (sourceDefinitionId === "onr_v1_199_employee-empowerment") {
+        const decision = stringValue(payload.employeeEmpowermentStartDrawDecision);
+        const drawn = numberValue(payload.drawnCards) ?? numberValue(payload.drawnCount) ?? 0;
+        category = "card";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = cardTitle ?? "Employee Empowerment";
+        title =
+          decision === "draw"
+            ? phrase(subject, `${cardTitle} genutzt und ${cardCountText(drawn)} zusätzlich gezogen`)
+            : phrase(subject, `${cardTitle} übersprungen`);
+        chips.push("Employee Empowerment", "Start-of-turn", decision === "draw" ? "Zusatzkarte" : "Übersprungen");
         break;
       }
       if (payload.traceStep === "corp_bid") {
@@ -598,6 +613,34 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push(source, "HQ Reveal", `${revealedCount} ${revealedCount === 1 ? "Agenda" : "Agenden"}`, `+${gainedCredits} ${creditLabel(gainedCredits)}`, "Start-of-turn");
         break;
       }
+      if (
+        hiddenZoneAction === "superior_net_barriers_reveal_walls" ||
+        hiddenZoneAction === "encryption_breakthrough_reveal_code_gates"
+      ) {
+        const revealedCount = numberValue(payload.revealedCount) ?? 0;
+        const rezzedCount = numberValue(payload.rezzedMatchingIceCount) ?? 0;
+        const countedCount =
+          numberValue(payload.countedMatchingIceCount) ?? revealedCount + rezzedCount;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? countedCount;
+        const source =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Superior Net Barriers"
+            : "Encryption Breakthrough";
+        const subtypeLabel =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Wall"
+            : "Code Gate";
+        category = "agenda";
+        importance = gainedCredits > 0 ? "important" : "normal";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt: ${revealedCount} ${subtypeLabel}${revealedCount === 1 ? "" : "s"} aufgedeckt, ${creditText(gainedCredits)} erhalten`,
+        );
+        description = `${countedCount} ${subtypeLabel}${countedCount === 1 ? "" : "s"} waren aufgedeckt oder gerezzt; davon ${rezzedCount} bereits gerezzt.`;
+        chips.push(source, `${revealedCount} Reveal`, `${rezzedCount} Rez`, `+${gainedCredits} ${creditLabel(gainedCredits)}`);
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -674,6 +717,33 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "der Coup-Agenda"} genommen`);
         chips.push(`+${gainedCredits} ${creditLabel(gainedCredits)}`, `${spentCredits} ${creditLabel(spentCredits)} von Karte`, ...(remainingCredits !== undefined ? [`${remainingCredits} ${creditLabel(remainingCredits)} übrig`] : []));
+        break;
+      }
+      if (
+        hiddenZoneAction === "superior_net_barriers_reveal_walls" ||
+        hiddenZoneAction === "encryption_breakthrough_reveal_code_gates"
+      ) {
+        const revealedCount = numberValue(payload.revealedCount) ?? 0;
+        const rezzedCount = numberValue(payload.rezzedMatchingIceCount) ?? 0;
+        const countedCount = numberValue(payload.countedMatchingIceCount) ?? revealedCount + rezzedCount;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? countedCount;
+        const source =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Superior Net Barriers"
+            : "Encryption Breakthrough";
+        const subtypeLabel =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Wall"
+            : "Code Gate";
+        category = "agenda";
+        importance = gainedCredits > 0 ? "important" : "normal";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt: ${revealedCount} ${subtypeLabel}${revealedCount === 1 ? "" : "s"} aufgedeckt, ${creditText(gainedCredits)} erhalten`,
+        );
+        description = `${countedCount} ${subtypeLabel}${countedCount === 1 ? "" : "s"} waren aufgedeckt oder gerezzt; davon ${rezzedCount} bereits gerezzt.`;
+        chips.push(source, `${revealedCount} Reveal`, `${rezzedCount} Rez`, `+${gainedCredits} ${creditLabel(gainedCredits)}`);
         break;
       }
       if (agendaAbility) {
@@ -1027,6 +1097,26 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, "einen Tag entfernt");
       chips.push("Tag entfernt");
       break;
+    case "purge_virus_counters": {
+      const removed = numberValue(payload.purgedVirusCounters);
+      const clicks = numberValue(payload.actionCostClicks) ?? 3;
+      category = "danger";
+      importance = "important";
+      visibility = "public";
+      title = phrase(
+        subject,
+        removed && removed > 0
+          ? `${removed} Virus-Counter entfernt`
+          : "alle Virus-Counter entfernt",
+      );
+      description = `Kosten: ${clicks} Aktion${clicks === 1 ? "" : "en"}; keine Credits.`;
+      chips.push(
+        "Purge",
+        `${clicks} Aktion${clicks === 1 ? "" : "en"}`,
+        ...(removed && removed > 0 ? [`${removed} entfernt`] : ["Alle Virus-Counter"]),
+      );
+      break;
+    }
     case "move_to_set_aside":
       category = "card";
       importance = "important";
@@ -1224,6 +1314,13 @@ export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): 
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
 }
 
+export function shouldSuppressChronicleEventItem(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType !== "continue_run" || payload.encounterContinue !== true) return false;
+  return resolvedEffectsFromPayload(payload.resolvedEffects).some((effect) => stringValue(effect.kind) === "resolve_subroutine");
+}
+
 export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
   const numbers: Record<string, number> = {};
   let activeSide: Side = "corp";
@@ -1370,8 +1467,20 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       break;
     case "draw_cards":
       category = "card";
-      title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
-      chips.push(amount === 1 ? "Karte ziehen" : `${amount} Karten`, "Automatisch");
+      if (sourceDefinitionId === SKIVVISS_ID) {
+        const targetSubject =
+          subject === "Du"
+            ? "dich"
+            : subject === "Der Runner"
+              ? "den Runner"
+              : subject.replace(/^Die /u, "die ");
+        title = `${sourceTitle ?? "Skivviss"} zwingt ${targetSubject} zu ${amount} ${amount === 1 ? "zusätzlicher Karte" : "zusätzlichen Karten"}`;
+        description = `Grund: ${amount} Skivviss-Counter auf der Korp.`;
+        chips.push("Skivviss", `${amount} Skivviss-Counter`, amount === 1 ? "1 Zusatzkarte" : `${amount} Zusatzkarten`);
+      } else {
+        title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
+        chips.push(amount === 1 ? "Karte ziehen" : `${amount} Karten`, "Automatisch");
+      }
       break;
     case "rez_card":
       category = "card";
@@ -1522,7 +1631,7 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
         subroutineType === "do_damage"
           ? `${source}: ${subroutineChip} macht ${amount} ${damageTypeLabel(damageType)}`
           : trashedProgramTitle
-            ? `${source}: ${subroutineChip} trashte ${trashedProgramTitle}`
+            ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
           : effect.endedRun === true
             ? `${source}: ${subroutineChip} beendet den Run`
             : `${source}: ${subroutineChip} aufgelöst`;
@@ -2005,18 +2114,19 @@ function runPhaseLabel(phase: string): string {
 function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number, turnSide?: Side): string {
   if (category === "system") return "System";
   if (category === "run") return `Run${serverLabel ? ` auf ${serverLabel}` : label && /Run auf/i.test(label) ? ` auf ${runTargetFromLabel(label)}` : ""}`;
-  if (category === "turn" && actor === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
-  if (category === "turn" && actor === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
-  if (turnSide === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
-  if (turnSide === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
-  if (actor === "corp") return "Korp-Zug";
-  if (actor === "runner") return "Runner-Zug";
+  if (category === "turn" && actor) return chronicleTurnGroupLabel(actor, turnNumber);
+  if (turnSide) return chronicleTurnGroupLabel(turnSide, turnNumber);
+  if (actor) return chronicleTurnGroupLabel(actor, undefined);
   return "Spiel";
+}
+
+export function chronicleTurnGroupLabel(side: Side, turnNumber: number | undefined | null): string {
+  return turnNumber ? `Zug ${turnNumber} - ${side === "corp" ? "Korp" : "Runner"}` : `Zug - ${side === "corp" ? "Korp" : "Runner"}`;
 }
 
 function turnLabel(side: Side | undefined, turnNumber: number | undefined): string | undefined {
   if (!side || !turnNumber) return undefined;
-  return `${side === "corp" ? "Korpzug" : "Runnerzug"} ${turnNumber}`;
+  return chronicleTurnGroupLabel(side, turnNumber);
 }
 
 function agendaPointSuffix(points: number | null | undefined): string {

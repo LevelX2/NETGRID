@@ -5,6 +5,7 @@
 ## Enthaltene Artefakte
 
 - `ai-controller-spec.md`: Controller-Schnitt für KI-Entscheidungen.
+- `ai-decision-trace-contract-2026-05-22.md`: lokaler Vertrag für versionierte KI-Entscheidungslogs, Trace-Redaction, Meta/Drilldown, Export und Live-Follow.
 - `ai-simulation-test-matrix.md`: übergreifende Testmatrix für KI-Simulation.
 - `ai-hints-structure-decision-2026-05-15.md`: Strukturentscheidung für aktive AI-Hints.
 - `coaching-boundary-spec-2026-05-17.md`: side-sichere Grenze für AI-Coaching und Hinweise.

@@ -11,6 +11,7 @@ import {
   actionSlotDisplay,
   activeRunIceInstanceId,
   advancementCounterDisplay,
+  approachIceExposeViewingIceId,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   armoredFridgeAblativeCounterBadge,
@@ -18,11 +19,13 @@ import {
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceUsesReadableCards,
   counterDisplayBadgeView,
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  corpRootCardsForDisplay,
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
   showInstalledCorpState,
@@ -32,6 +35,7 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
+  latestRetainableAccessRevealEvent,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
@@ -381,6 +385,48 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(showInstalledCorpState("remote_1", "root")).toBe(true);
   });
 
+  it("renders opponent remote root cards in install order without leaked hidden root types", () => {
+    const leakedUpgradeA: VisibleCard = {
+      instanceId: "upgrade_a",
+      known: false,
+      rezzed: false,
+      title: "Simple Upgrade",
+      definitionId: "simple_upgrade",
+      type: "upgrade",
+      trashCost: 4
+    };
+    const rezzedNode = card("node_1", "Simple Economy Asset", "asset", true);
+    const leakedUpgradeB: VisibleCard = {
+      instanceId: "upgrade_b",
+      known: false,
+      rezzed: false,
+      title: "Simple Upgrade",
+      definitionId: "simple_upgrade",
+      type: "upgrade",
+      trashCost: 4
+    };
+
+    const runnerCards = corpRootCardsForDisplay("runner", "remote_1", [leakedUpgradeA, rezzedNode, leakedUpgradeB]);
+
+    expect(runnerCards.map((entry) => entry.instanceId)).toEqual(["upgrade_a", "node_1", "upgrade_b"]);
+    expect(runnerCards[1]).toMatchObject({
+      known: true,
+      title: "Simple Economy Asset",
+      definitionId: "node_1",
+      type: "asset",
+      rezzed: true
+    });
+    for (const hiddenCard of [runnerCards[0], runnerCards[2]]) {
+      expect(hiddenCard).toMatchObject({ known: false, rezzed: false });
+      expect(hiddenCard).not.toHaveProperty("title");
+      expect(hiddenCard).not.toHaveProperty("definitionId");
+      expect(hiddenCard).not.toHaveProperty("type");
+      expect(hiddenCard).not.toHaveProperty("trashCost");
+    }
+
+    expect(corpRootCardsForDisplay("corp", "remote_1", [leakedUpgradeA])).toEqual([leakedUpgradeA]);
+  });
+
   it("splits archives into faceup and facedown stacks for runner and corp views", () => {
     const faceupA = card("archive_a", "Faceup A", "asset", true);
     const faceupB = card("archive_b", "Faceup B", "operation", true);
@@ -388,10 +434,12 @@ describe("V1.0.5 action board UI helpers", () => {
 
     const runnerSplit = splitArchiveCardsForDisplay("runner", [faceupA, faceupB], 3);
     expect(runnerSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
+    expect(runnerSplit.facedownCards).toEqual([]);
     expect(runnerSplit.facedownCount).toBe(1);
 
     const corpSplit = splitArchiveCardsForDisplay("corp", [faceupA, facedown, faceupB], 3);
     expect(corpSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
+    expect(corpSplit.facedownCards.map((entry) => entry.instanceId)).toEqual(["archive_c"]);
     expect(corpSplit.facedownCount).toBe(1);
   });
   it("keeps cue position local, resettable and clamped", () => {
@@ -467,6 +515,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
+    expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
   });
 
   it("detects field-card choices for installed board cards only", () => {
@@ -536,6 +586,7 @@ describe("V1.0.5 action board UI helpers", () => {
     });
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
+    expect(cardChoiceUsesReadableCards(stackChoice)).toBe(true);
   });
 
   it("labels Runner program install trash choices for optional and required MU cases", () => {
@@ -737,6 +788,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
       ...card("braindance_1", "Braindance Campaign", "asset"),
       counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 12, ariaLabel: "12 gespeicherte Credits" }]
     };
+    const departmentAfterLoad: VisibleCard = {
+      ...card("department_1", "Department of Truth Enhancement", "asset"),
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 3, ariaLabel: "3 gespeicherte Credits" }]
+    };
     const unknownPowerCard: VisibleCard = {
       ...card("unknown_1", "Unknown Power Counter Card", "asset"),
       counters: { power: 8 }
@@ -777,6 +832,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
+    expect(storedCreditSourceLabel(departmentAfterLoad)).toBe("Credits");
+    expect(storedCreditAmount(departmentAfterLoad)).toBe(3);
+    expect(counterDisplaysForRendering(departmentAfterLoad).map((display) => display.id)).toEqual(["stored_credits"]);
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 
@@ -951,7 +1009,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" }))).toBe("Vor R&D");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor Archives installieren", { cardId: "ice_1", serverId: "archives", placement: "ice" }))).toBe("Vor Archive");
     expect(contextualCardActionLabel(legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" }))).toBe("Neues Remote erstellen");
-    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("In neuem Remote");
+    expect(contextualCardActionLabel(legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" }))).toBe("Neues Remote erstellen");
     expect(
       contextualCardActionLabel(
         legalAction("corp", "install_card", "agenda_1", "Karte in Remote 1 installieren", {
@@ -969,6 +1027,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
       "In R&D",
     );
     expect(contextualCardActionLabel(legalAction("runner", "install_card", "program_1", "Programm installieren", { cardId: "program_1" }))).toBe("Installieren");
+    expect(
+      contextualCardActionLabel(
+        legalAction("runner", "install_card", "program_1", "Programm mit Programmtrash installieren", {
+          cardId: "program_1",
+          runnerProgramTrashBeforeInstall: true,
+        }),
+      ),
+    ).toBe("Mit Programmtrash installieren");
     expect(
       contextualCardActionLabel(
         legalAction(
@@ -993,12 +1059,15 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe("Auf Remote 1 ausrichten");
   });
 
-  it("keeps new-remote ICE installs as the last card-context action", () => {
+  it("keeps new-remote installs as the last card-context action", () => {
     const newRemoteIce = legalAction("corp", "install_card", "ice_1", "ICE vor neuem Remote installieren", { cardId: "ice_1", serverId: "new_remote", placement: "ice" });
     const hqIce = legalAction("corp", "install_card", "ice_1", "ICE vor HQ installieren", { cardId: "ice_1", serverId: "hq", placement: "ice" });
     const rdIce = legalAction("corp", "install_card", "ice_1", "ICE vor R&D installieren", { cardId: "ice_1", serverId: "rd", placement: "ice" });
+    const newRemoteRoot = legalAction("corp", "install_card", "agenda_1", "Karte in neuem Remote installieren", { cardId: "agenda_1", serverId: "new_remote", placement: "root" });
+    const remoteRoot = legalAction("corp", "install_card", "agenda_1", "Karte in Remote 1 installieren", { cardId: "agenda_1", serverId: "remote_1", placement: "root" });
 
     expect(orderedCardContextActions([newRemoteIce, hqIce, rdIce])).toEqual([hqIce, rdIce, newRemoteIce]);
+    expect(orderedCardContextActions([newRemoteRoot, remoteRoot])).toEqual([remoteRoot, newRemoteRoot]);
   });
 
   it("moves rig icebreaker actions to their card context", () => {
@@ -1441,13 +1510,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(plain)).toBe("Karte ziehen");
   });
 
-  it("describes accessed Archive assets as already trashed instead of blocked by credits", () => {
+  it("describes accessed Archive assets without redundant trash hints", () => {
     const accessedUpgrade = card("upgrade_1", "Dedicated Response Team", "upgrade");
     accessedUpgrade.trashCost = 2;
     const continueAccess = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
 
-    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).toContain("bereits im Archiv");
+    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).toContain("im Archiv gesehen");
     expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).not.toContain("nicht genug Credits");
+    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).not.toContain("erneut getrasht");
   });
 
   it("keeps the insufficient-credit access hint for installed assets and upgrades", () => {
@@ -1473,6 +1543,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId).toBe("evt_access");
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
+    expect(latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId).toBe("evt_access");
   });
 
   it("retains a visible access reveal across turn end until it is dismissed", () => {
@@ -1493,6 +1564,33 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], null)?.eventId).toBe("evt_access");
     expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], "evt_access")).toBeNull();
+  });
+
+  it("retains a visible access reveal across access resolution and automatic turn end until it is dismissed", () => {
+    const remoteReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_upgrade",
+      title: "Simple Upgrade"
+    });
+    const declineTrash = {
+      ...publicEvent("evt_decline", "action", {
+        actionType: "decline_trash",
+        actor: "runner"
+      }),
+      stateVersionAfter: 2
+    };
+    const runnerEndTurn = {
+      ...publicEvent("evt_runner_end", "action", {
+        actionType: "end_turn",
+        actor: "runner"
+      }),
+      stateVersionAfter: 3
+    };
+
+    expect(retainedAccessRevealEvent([remoteReveal, declineTrash, runnerEndTurn], null)?.eventId).toBe("evt_access");
+    expect(retainedAccessRevealEvent([remoteReveal, declineTrash, runnerEndTurn], "evt_access")).toBeNull();
   });
 
   it("does not retain an old access reveal after later turn and Corp action events", () => {
@@ -1578,13 +1676,40 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "trigger_ability",
       actor: "runner",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_barrier_ice",
-      approachIceExposeDecision: "expose"
+      hiddenZoneAction: "approach_ice_expose",
+      publicRevealDefinitionId: "simple_barrier_ice"
+    });
+    const smarteyeFinish = publicEvent("evt_smarteye_finish", "action", {
+      actionType: "trigger_ability",
+      actor: "runner",
+      approachIceExposeViewDecision: "finish",
+      hiddenZoneAction: "approach_ice_expose_finish"
+    });
+    const jackOut = publicEvent("evt_jack_out", "action", {
+      actionType: "jack_out",
+      actor: "runner"
     });
 
     expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe("evt_expose");
     expect(retainedExposeReviewEvent([expose, followUp], "evt_expose")).toBeNull();
     expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
+    expect(retainedExposeReviewEvent([expose, smarteyeFinish], null)).toBeNull();
+    expect(retainedExposeReviewEvent([smarteye, jackOut], null)).toBeNull();
+  });
+
+  it("detects the active approach-ice viewing target from legal actions", () => {
+    const finishViewing = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: Ansehen beenden",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeViewDecision: "finish" },
+      "run.approach_ice"
+    );
+    const unrelated = legalAction("runner", "gain_credit", "basic_action", "Credit nehmen");
+
+    expect(approachIceExposeViewingIceId([unrelated])).toBeNull();
+    expect(approachIceExposeViewingIceId([unrelated, finishViewing])).toBe("ice_1");
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {

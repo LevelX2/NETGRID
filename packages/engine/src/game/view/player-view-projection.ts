@@ -15,6 +15,7 @@ import {
   poxCounterDisplaysForServer,
   visibleCorpArchives,
   visibleCorpCard,
+  visibleCorpIdentityCard,
   visibleOwnCard,
   visibleRunnerRigCardForViewer,
   visibleSpecialZones,
@@ -125,7 +126,7 @@ export function buildPlayerViewProjection(
           tags: state.runner.tags,
         }
       : {
-          identity: visibleOwnCard(state, state.corp.identity),
+          identity: visibleCorpIdentityCard(state),
           credits: state.corp.credits,
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),
@@ -142,7 +143,7 @@ export function buildPlayerViewProjection(
         },
     opponent: runnerSide
       ? {
-          identity: visibleOwnCard(state, state.corp.identity),
+          identity: visibleCorpIdentityCard(state),
           credits: state.corp.credits,
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),

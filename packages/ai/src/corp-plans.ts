@@ -1,5 +1,5 @@
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type LegalAction, type Side, type VisibleCard } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionActionAlternative, type AiDecisionDebug, type AiDecisionInput, type AiDecisionRankedAlternative, type AiDecisionScoreComponent, type AiDifficulty, type LegalAction, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 import { cardDefinitionStrength, endTheRunSubroutineCount, minimumCreditsToBreakEndTheRunSubroutines, serverIdFromEvent } from "./visible-run-analysis";
@@ -37,6 +37,7 @@ export type CorpPlanScore = {
   confidence: number;
   reasons: string[];
   evidence: string[];
+  scoreBreakdown: AiDecisionScoreComponent[];
 };
 
 export type CorpPlanDebug = AiDecisionDebug & {
@@ -255,12 +256,20 @@ export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBu
     debug: {
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
+      summary: explanationForPlan(selected.candidate.kind),
       planId: selected.candidate.planId,
       planKind: selected.candidate.kind,
       selectedActionType: action.type,
       score: selected.score.score,
       confidence: selected.score.confidence,
       visibleReasons: selected.score.reasons,
+      rankedAlternatives: rankedCorpAlternatives(input, context, scored, selected.candidate.planId),
+      actionAlternatives: corpActionAlternativesForPlan(input, selected.candidate, context, action.actionId),
+      scoreBreakdown: selected.score.scoreBreakdown,
+      whyNot: [],
+      longTermPlan: longTermPlanForCorp(input, selected.candidate.kind),
+      warnings: selected.candidate.visibleRisks.slice(0, 4),
+      detailSections: corpDetailSections(selected.candidate, selected.score),
       evidence: scrubPlanEvidence(selected.score.evidence),
       fallbackUsed: false,
       seed: input.seed,
@@ -373,6 +382,24 @@ export function evaluateCorpPlan(input: AiDecisionInput, candidate: CorpPlanCand
     planId: candidate.planId,
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
+    scoreBreakdown: scoreComponents([
+      ["base", "Grundplan", base, 1, `plan:${candidate.kind}`],
+      ["doctrine", "Deck-Doctrine", doctrinePlanWeight, 1, "doctrine_plan_weight"],
+      ["agendaRisk", "Agenda-Risiko", agendaRisk.score * profile.weights.agendaRisk, profile.weights.agendaRisk, firstReason(agendaRisk.reasons)],
+      ["serverThreat", "Serverdruck", serverThreat.score * profile.weights.serverThreat, profile.weights.serverThreat, firstReason(serverThreat.reasons)],
+      ["economyReserve", "Credit-Reserve", economyReserve.score * profile.weights.economyReserve, profile.weights.economyReserve, firstReason(economyReserve.reasons)],
+      ["iceRez", "ICE-Rez", iceRez.score * profile.weights.iceRez, profile.weights.iceRez, firstReason(iceRez.reasons)],
+      ["scoringWindow", "Scoring-Fenster", scoringWindow.score * profile.weights.scoringWindow, profile.weights.scoringWindow, firstReason(scoringWindow.reasons)],
+      ["scoringProgress", "Scoring-Fortschritt", scoringProgress.score, 1, firstReason(scoringProgress.reasons)],
+      ["runnerContest", "Runner-Contest", runnerContest.score, 1, firstReason(runnerContest.reasons)],
+      ["scoringHorizon", "Scoring-Horizont", scoringHorizon.score, 1, firstReason(scoringHorizon.reasons)],
+      ["remoteRezReserve", "Remote-Rez-Reserve", remoteRezReserve.score, 1, firstReason(remoteRezReserve.reasons)],
+      ["recentRemoteAgendaLoss", "Remote-Agenda-Verlust", recentRemoteAgendaLoss.score, 1, firstReason(recentRemoteAgendaLoss.reasons)],
+      ["installedEconomy", "Installierte Economy", installedEconomy.score, 1, firstReason(installedEconomy.reasons)],
+      ["extraActions", "Extra-Aktionen", extraActions.score, 1, firstReason(extraActions.reasons)],
+      ["remoteIntent", "Remote-Intent-Memory", remoteIntent.remoteInstallSignals * 8 * profile.weights.remoteIntent + remoteIntent.remoteAdvanceSignals * 12 * profile.weights.remoteIntent, profile.weights.remoteIntent, firstReason(remoteIntent.evidence)],
+      ["visibleRisk", "Sichtbares Risiko", -visibleRiskPenalty(candidate, profile.riskTolerance), 1, firstReason(candidate.visibleRisks)]
+    ]),
     reasons: sortedUnique([...agendaRisk.reasons, ...serverThreat.reasons, ...economyReserve.reasons, ...iceRez.reasons, ...scoringWindow.reasons, ...scoringProgress.reasons, ...runnerContest.reasons, ...scoringHorizon.reasons, ...remoteRezReserve.reasons, ...recentRemoteAgendaLoss.reasons, ...installedEconomy.reasons, ...extraActions.reasons]).slice(0, 6),
     evidence: scrubPlanEvidence(evidence)
   };
@@ -1178,6 +1205,83 @@ function selectPlanAction(input: AiDecisionInput, candidate: CorpPlanCandidate, 
   return actions[0];
 }
 
+function corpActionAlternativesForPlan(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+  selectedActionId: string
+): AiDecisionActionAlternative[] {
+  return candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => Boolean(action))
+    .map((action) => ({
+      action,
+      priority: actionPriority(input, candidate.kind, action, context)
+    }))
+    .sort((left, right) => right.priority - left.priority || compareAction(left.action, right.action))
+    .slice(0, 8)
+    .map((entry, index) => corpActionAlternativeForAction(input, entry.action, entry.priority, entry.action.actionId === selectedActionId, index + 1));
+}
+
+function corpActionAlternativeForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  priority: number,
+  selected: boolean,
+  rank: number
+): AiDecisionActionAlternative {
+  const sourceCard = action.source !== "basic_action" && action.source !== "game_rule" ? findVisibleCard(input, action.source) : undefined;
+  const sourceTitle = sourceCard && isDebugPublicSourceCard(input, sourceCard.instanceId) ? sourceCard.title : undefined;
+  const installedEconomy = classifyCorpInstalledEconomyAction(input, action);
+  const economyNeed = input.playerView.own.credits < 5 ? "acute" : "stable";
+  const economy =
+    action.type === "gain_credit"
+      ? {
+          economyKind: "basic_credit",
+          immediateGain: 1,
+          netCredits: 1,
+          storedCredits: 0,
+          futurePoolAfter: 0,
+          economyNeed
+        }
+      : installedEconomy
+        ? {
+            economyKind: installedEconomy.kind,
+            ability: installedEconomy.ability,
+            immediateGain: installedEconomy.immediateGain,
+            netCredits: installedEconomy.netCredits,
+            storedCredits: installedEconomy.storedCredits,
+            futurePoolAfter: installedEconomy.futurePoolAfter,
+            economyNeed
+          }
+        : undefined;
+  return {
+    rank,
+    actionId: action.actionId,
+    actionType: action.type,
+    label: sourceTitle || action.source === "basic_action" || action.source === "game_rule" ? action.label : action.type,
+    source: sourceCard ? (sourceTitle ? "visible_card" : "private_card") : action.source,
+    ...(sourceTitle ? { sourceTitle } : {}),
+    selected,
+    priority: roundScore(priority),
+    ...(selected ? { whyChosen: ["selected_action"] } : { whyNot: [installedEconomy ? `${installedEconomy.kind}_lower_action_priority` : "lower_action_priority"] }),
+    ...(economy ? { economy } : {})
+  };
+}
+
+function isDebugPublicSourceCard(input: AiDecisionInput, instanceId: string): boolean {
+  const ownPublicCards = [
+    input.playerView.own.scoreArea,
+    ...(input.playerView.own.rig ? [input.playerView.own.rig] : []),
+    ...input.playerView.servers.map((server) => [...server.ice, ...server.root])
+  ];
+  const opponentPublicCards = [
+    input.playerView.opponent.scoreArea,
+    ...(input.playerView.opponent.rig ? [input.playerView.opponent.rig] : [])
+  ];
+  return [...ownPublicCards, ...opponentPublicCards].some((cards) => cards.some((card) => card.instanceId === instanceId && card.known));
+}
+
 function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: LegalAction, context: CorpEvaluationContext): number {
   if (kind === "score_now" && action.type === "score_agenda") return 100;
   const extraActionOperation = classifyCorpExtraActionOperation(input, action, context);
@@ -1328,7 +1432,8 @@ function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudget
       score: 0,
       confidence: 0.2,
       reasons: [reason],
-      evidence: [reason]
+      evidence: [reason],
+      scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]])
     },
     debug
   };
@@ -1348,12 +1453,33 @@ function fallbackDebug(
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: 2,
+    summary: "Die Corp nutzt einen legalen Fallback.",
     planId: "fallback",
     planKind: "fallback",
     selectedActionType: fallbackAction?.type ?? "none",
     score: 0,
     confidence: fallbackDecision?.confidence ?? 0.2,
     visibleReasons: [reason],
+    rankedAlternatives: [
+      {
+        rank: 1,
+        planId: "fallback",
+        planKind: "fallback",
+        selectedActionType: fallbackAction?.type ?? "none",
+        summary: "Legal fallback action",
+        score: 0,
+        confidence: fallbackDecision?.confidence ?? 0.2,
+        visibleReasons: [reason],
+        scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]),
+        whyNot: [],
+        warnings: ["fallback_used"]
+      }
+    ],
+    scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]),
+    whyNot: [reason],
+    longTermPlan: longTermPlanForCorp(input, "fallback"),
+    warnings: ["fallback_used"],
+    detailSections: [{ id: "fallback", title: "Fallback", items: [reason] }],
     evidence: scrubPlanEvidence([reason]),
     fallbackUsed: true,
     seed: input.seed,
@@ -1368,6 +1494,76 @@ function fallbackDebug(
     beliefUncertainty: toStringArray(beliefSummary.uncertainty),
     ...(opponentModel ? { opponentModel } : {})
   };
+}
+
+type ScoreComponentInput = [key: string, label: string, value: number, weight?: number | undefined, reason?: string | undefined];
+
+function scoreComponents(inputs: ScoreComponentInput[]): AiDecisionScoreComponent[] {
+  return inputs
+    .filter(([, , value], index) => index === 0 || value !== 0)
+    .map(([key, label, value, weight, reason]) => ({
+      key,
+      label,
+      value: roundScore(value),
+      ...(weight !== undefined ? { weight: round(weight) } : {}),
+      ...(reason ? { reason } : {})
+    }))
+    .slice(0, 16);
+}
+
+function firstReason(reasons: string[]): string | undefined {
+  return reasons.find((reason) => reason.length > 0);
+}
+
+function rankedCorpAlternatives(
+  input: AiDecisionInput,
+  context: CorpEvaluationContext,
+  scored: Array<{ candidate: CorpPlanCandidate; score: CorpPlanScore }>,
+  selectedPlanId: string
+): AiDecisionRankedAlternative[] {
+  const selectedScore = scored.find((entry) => entry.candidate.planId === selectedPlanId)?.score.score ?? scored[0]?.score.score ?? 0;
+  return scored.slice(0, 5).map((entry, index) => {
+    const representativeAction = selectPlanAction(input, entry.candidate, context);
+    return {
+      rank: index + 1,
+      planId: entry.candidate.planId,
+      planKind: entry.candidate.kind,
+      selectedActionType: representativeAction?.type ?? entry.candidate.steps[0]?.actionType ?? "none",
+      summary: explanationForPlan(entry.candidate.kind),
+      score: entry.score.score,
+      confidence: entry.score.confidence,
+      visibleReasons: entry.score.reasons.slice(0, 4),
+      scoreBreakdown: entry.score.scoreBreakdown.slice(0, 8),
+      whyNot: alternativeWhyNot(entry.candidate, entry.score, selectedScore, entry.candidate.planId === selectedPlanId),
+      warnings: entry.candidate.visibleRisks.slice(0, 3)
+    };
+  });
+}
+
+function alternativeWhyNot(candidate: CorpPlanCandidate, score: CorpPlanScore, selectedScore: number, isSelected: boolean): string[] {
+  if (isSelected) return ["selected_plan"];
+  const delta = roundScore(selectedScore - score.score);
+  return sortedUnique([
+    ...(delta > 0 ? [`lower_score_by:${delta}`] : []),
+    ...candidate.visibleRisks.slice(0, 2),
+    ...score.reasons.slice(0, 4)
+  ]).slice(0, 6);
+}
+
+function longTermPlanForCorp(input: AiDecisionInput, kind: CorpPlanKind | "fallback"): string[] {
+  return sortedUnique([
+    `active_plan:${kind}`,
+    ...(input.ownDeckDoctrine?.side === "corp" ? input.ownDeckDoctrine.archetypeTags.slice(0, 3).map((tag) => `doctrine:${tag}`) : ["doctrine:neutral"]),
+    ...(input.ownDeckDoctrine?.side === "corp" ? input.ownDeckDoctrine.riskFlags.slice(0, 2).map((flag) => `risk_flag:${flag}`) : [])
+  ]).slice(0, 6);
+}
+
+function corpDetailSections(candidate: CorpPlanCandidate, score: CorpPlanScore): NonNullable<CorpPlanDebug["detailSections"]> {
+  return [
+    { id: "visible_reasons", title: "Sichtbare Gründe", items: score.reasons.slice(0, 6) },
+    { id: "evidence", title: "Evidence", items: scrubPlanEvidence(score.evidence).slice(0, 8) },
+    { id: "visible_risks", title: "Sichtbare Risiken", items: candidate.visibleRisks.slice(0, 6) }
+  ].filter((section) => section.items.length > 0);
 }
 
 function baseScoreForPlan(kind: CorpPlanKind): number {

@@ -2041,7 +2041,8 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.timingPoint === "run.encounter_ice")
     return side === "runner" ? runnerEncounterActions(state) : [];
   if (state.timingPoint === "run.jack_out_window") {
-    if (side === "corp") return corpRunRootRezActions(state);
+    if (side === "corp") return corpRunRootRezWindowActions(state);
+    if (isCorpRunRootRezWindowOpen(state)) return [];
     return side === "runner" ? runnerMovementActions(state) : [];
   }
   if (state.timingPoint === "access.resolve_card")
@@ -2363,6 +2364,7 @@ export function eventVisibilityForAction(
   if (["mandatory_draw", "draw_card"].includes(legalAction.type))
     return "private_to_side";
   if (legalAction.type === "purge_virus_counters") return "public";
+  if (legalAction.type === "decline_rez") return "public";
   if (legalAction.type === "jack_out") return "public";
   if (legalAction.visibility === "public") return "public";
   if (legalAction.type === "play_event") return "public";
@@ -5795,6 +5797,69 @@ function corpRunRootRezActions(state: GameState): LegalAction[] {
   return actions;
 }
 
+function corpRunRootRezWindowActions(state: GameState): LegalAction[] {
+  const actions = corpRunRootRezActions(state);
+  if (actions.length === 0 || !isCorpRunRootRezWindowOpen(state)) return [];
+  const run = mustRun(state);
+  const server = mustServer(state, run.attackedServerId);
+  return [
+    ...actions,
+    action(
+      state,
+      "corp",
+      "decline_rez",
+      "Nichts rezzen / Weiter",
+      "game_rule",
+      [],
+      {
+        runRootRezPass: true,
+        serverId: server.id,
+        serverLabel: server.label,
+      },
+    ),
+  ];
+}
+
+function isCorpRunRootRezWindowOpen(state: GameState): boolean {
+  if (state.timingPoint !== "run.jack_out_window") return false;
+  const run = state.run;
+  if (!run) return false;
+  if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
+    return false;
+  return corpRunRootRezActions(state).length > 0;
+}
+
+function corpRunRootRezWindowKey(run: ActiveRun): string {
+  const position =
+    run.position.kind === "ice"
+      ? `ice:${run.position.serverId}:${run.position.iceIndex}`
+      : `server:${run.position.serverId}`;
+  return `${run.runId}:${position}`;
+}
+
+function passCorpRunRootRezWindow(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.timingPoint !== "run.jack_out_window")
+    throw new Error("Root-Rez-Fenster ist nicht offen.");
+  const run = mustRun(state);
+  if (!isCorpRunRootRezWindowOpen(state))
+    throw new Error("Root-Rez-Fenster wurde bereits geschlossen.");
+  const server = mustServer(state, run.attackedServerId);
+  const key = corpRunRootRezWindowKey(run);
+  run.rootRezWindowPassedKeys = Array.from(
+    new Set([...(run.rootRezWindowPassedKeys ?? []), key]),
+  ).sort();
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runRootRezPass: true,
+    serverId: server.id,
+    serverLabel: server.label,
+  };
+}
+
 function singaporeCityGridRunActions(
   state: GameState,
   run: ActiveRun,
@@ -8373,6 +8438,10 @@ function performAction(
       expireCorporateRetreatInstallCreditAbilities(state);
       return;
     case "decline_rez":
+      if (legalAction.payload?.runRootRezPass === true) {
+        passCorpRunRootRezWindow(state, legalAction);
+        return;
+      }
       passApproachedIce(state);
       return;
     case "pump_breaker":
@@ -11394,6 +11463,18 @@ function approachOrEncounterIce(
     return;
   }
   if (ice.rezzed) {
+    if (corpRunRootRezActions(state).length > 0) {
+      const { encounteredIceId: _encounteredIceId, ...runWithoutEncounter } = run;
+      void _encounteredIceId;
+      state.run = {
+        ...runWithoutEncounter,
+        phase: "approach_ice",
+        approachedIceId,
+      };
+      state.timingPoint = "run.approach_ice";
+      state.activeSide = "corp";
+      return;
+    }
     beginEncounter(state, approachedIceId, legalAction);
     return;
   }
@@ -16683,6 +16764,7 @@ function startCorpTurn(
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
   applyCorpStartOfTurnEffects(state, effects);
 }
 
@@ -16888,27 +16970,109 @@ function applyCorpStartOfTurnEffects(
     }
   }
   if (!state.pendingChoice) startCorporateNegotiatingCenterChoice(state);
-  const employeeEmpowermentCount = state.corp.scoreArea.reduce(
-    (sum, cardId) => {
-      const definition = definitionFor(state, cardId);
-      return !cardImplementationForDefinitionId(definition.id) &&
-        definition.id === EMPLOYEE_EMPOWERMENT_ID
-        ? sum + 1
-        : sum;
-    },
-    0,
+  if (!state.pendingChoice) startEmployeeEmpowermentStartDrawChoice(state);
+}
+
+function scoredEmployeeEmpowermentSourceIds(state: GameState): CardInstanceId[] {
+  const resolved = new Set(
+    ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds ??
+      [],
   );
-  if (employeeEmpowermentCount > 0) {
-    credits(state, "corp", employeeEmpowermentCount);
-    effects?.push(
-      automaticGainCreditsEffect(
-        "corp.start.employee_empowerment",
+  return state.corp.scoreArea
+    .filter(
+      (cardId) =>
+        definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID &&
+        !resolved.has(cardId),
+    )
+    .sort();
+}
+
+function startEmployeeEmpowermentStartDrawChoice(state: GameState): void {
+  if (state.pendingChoice) return;
+  const sourceCardId = scoredEmployeeEmpowermentSourceIds(state)[0];
+  if (!sourceCardId) return;
+  state.pendingChoice = {
+    choiceId: `v1912_employee_empowerment_start_draw_${sourceCardId}_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1912.employee_empowerment_start_draw:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Employee Empowerment: zusätzliche Karte ziehen?",
+    kind: "select_option",
+    options: [
+      {
+        id: "draw",
+        label: "Zusätzliche Karte ziehen",
+        publicLabel: "Zusätzliche Karte gezogen",
+        value: "draw",
+      },
+      {
+        id: "skip",
+        label: "Überspringen",
+        publicLabel: "Übersprungen",
+        value: "skip",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+}
+
+function resolveEmployeeEmpowermentStartDrawChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1912.employee_empowerment_start_draw"))
+    throw new Error("Es ist keine Employee-Empowerment-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Employee Empowerment nutzen.");
+  if (
+    state.phase !== "corp_draw_phase" ||
+    state.timingPoint !== "corp_draw.mandatory_draw"
+  )
+    throw new Error("Employee Empowerment ist nur am Start des Korp-Zugs nutzbar.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    !state.corp.scoreArea.includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== EMPLOYEE_EMPOWERMENT_ID
+  )
+    throw new Error("Employee Empowerment ist nicht mehr in der Korp-ScoreArea.");
+
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const useDraw = selected === "draw";
+  const flags = ensureCorpTurnFlags(state);
+  flags.employeeEmpowermentStartTurnResolvedSourceIds = [
+    ...(flags.employeeEmpowermentStartTurnResolvedSourceIds ?? []),
+    sourceCardId as CardInstanceId,
+  ];
+  delete state.pendingChoice;
+
+  const rdBefore = state.corp.rd.length;
+  if (useDraw) drawCorpCard(state);
+  const drawnCount = useDraw ? rdBefore - state.corp.rd.length : 0;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    choiceVisibility: "public",
+    sourceDefinitionId: EMPLOYEE_EMPOWERMENT_ID,
+    cardDefinitionId: EMPLOYEE_EMPOWERMENT_ID,
+    employeeEmpowermentStartDrawDecision: useDraw ? "draw" : "skip",
+    ...(useDraw ? { drawnCards: drawnCount, drawnCount } : {}),
+  };
+  if (useDraw) {
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      automaticDrawCardsEffect(
+        `corp.start.employee_empowerment.${sourceCardId}`,
         "corp",
-        employeeEmpowermentCount,
+        drawnCount,
         EMPLOYEE_EMPOWERMENT_ID,
       ),
-    );
+    ];
   }
+  if (!state.winner) startEmployeeEmpowermentStartDrawChoice(state);
 }
 
 function virusCounterDrawsAtCorpStart(state: GameState): number {
@@ -16917,6 +17081,13 @@ function virusCounterDrawsAtCorpStart(state: GameState): number {
     const start = implementation?.startOfCorpTurn;
     if (start?.kind !== "draw_extra_cards_per_counter") return sum;
     return sum + cardCounter(state, cardId, "virus") * start.amountPerCounter;
+  }, 0);
+}
+
+function skivvissCounterTotal(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+    return sum + cardCounter(state, cardId, "virus");
   }, 0);
 }
 
@@ -20887,45 +21058,21 @@ function scoreAgenda(
     legalAction &&
     scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
   ) {
-    const subtype = scoredAgenda.subtype;
-    const matchingIceIds = corpInstalledCardIds(state)
-      .filter(
-        (iceId) =>
-          mustInstance(state.cardInstances, iceId).zone.zone === "serverIce" &&
-          cardHasSubtype(definitionFor(state, iceId), subtype),
-      )
-      .sort();
-    let rezzedMatchingIceCount = 0;
-    const publicRevealDefinitionIds: CardDefinitionId[] = [];
-    for (const iceId of matchingIceIds) {
-      const instance = mustInstance(state.cardInstances, iceId);
-      if (instance.rezzed) rezzedMatchingIceCount += 1;
-      if (!instance.faceup) {
-        state.cardInstances[iceId] = { ...instance, faceup: true };
-      }
-      publicRevealDefinitionIds.push(definitionFor(state, iceId).id);
-    }
-    const creditPer = scoredAgenda.creditPerRevealedOrRezzed;
-    const gainedCredits = matchingIceIds.length * creditPer;
-    if (gainedCredits > 0) credits(state, "corp", gainedCredits);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      agendaAbility:
-        subtype === "wall" ? "superior_net_barriers" : "encryption_breakthrough",
-      hiddenZoneBarrier: true,
-      hiddenZoneAction:
-        subtype === "wall"
-          ? "superior_net_barriers_reveal_walls"
-          : "encryption_breakthrough_reveal_code_gates",
-      revealedCount: matchingIceIds.length,
-      ...(subtype === "code_gate"
-        ? { rezzedCodeGateCount: rezzedMatchingIceCount }
-        : {}),
-      rezzedMatchingIceCount,
-      gainedCredits,
-      corpCreditsAfter: state.corp.credits,
-      publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
-    };
+    const subtype =
+      scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
+        ? scoredAgenda.subtype
+        : "code_gate";
+    const creditPer =
+      scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
+        ? scoredAgenda.creditPerRevealedOrRezzed
+        : 1;
+    startScoredSubtypeRevealChoiceOrResolve(
+      state,
+      cardId,
+      legalAction,
+      subtype,
+      creditPer,
+    );
   }
   if (
     legalAction &&
@@ -20988,6 +21135,192 @@ function priorityRequisitionCandidates(state: GameState): CardInstanceId[] {
     });
 }
 
+type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
+
+function scoredSubtypeRevealAgendaAbility(
+  subtype: ScoredSubtypeRevealSubtype,
+): "encryption_breakthrough" | "superior_net_barriers" {
+  return subtype === "wall" ? "superior_net_barriers" : "encryption_breakthrough";
+}
+
+function scoredSubtypeRevealHiddenZoneAction(
+  subtype: ScoredSubtypeRevealSubtype,
+): "encryption_breakthrough_reveal_code_gates" | "superior_net_barriers_reveal_walls" {
+  return subtype === "wall"
+    ? "superior_net_barriers_reveal_walls"
+    : "encryption_breakthrough_reveal_code_gates";
+}
+
+function scoredSubtypeRevealPrompt(subtype: ScoredSubtypeRevealSubtype): string {
+  return subtype === "wall"
+    ? "Superior Net Barriers: Walls aufdecken"
+    : "Encryption Breakthrough: Code Gates aufdecken";
+}
+
+function scoredSubtypeRevealOptionPublicLabel(
+  subtype: ScoredSubtypeRevealSubtype,
+): string {
+  return subtype === "wall" ? "Installierte Wall" : "Installiertes Code Gate";
+}
+
+function installedIceIdsWithSubtype(
+  state: GameState,
+  subtype: ScoredSubtypeRevealSubtype,
+): CardInstanceId[] {
+  return corpInstalledCardIds(state)
+    .filter((iceId) => {
+      const instance = mustInstance(state.cardInstances, iceId);
+      return (
+        instance.zone.zone === "serverIce" &&
+        cardHasSubtype(definitionFor(state, iceId), subtype)
+      );
+    })
+    .sort();
+}
+
+function startScoredSubtypeRevealChoiceOrResolve(
+  state: GameState,
+  agendaId: CardInstanceId,
+  legalAction: LegalAction,
+  subtype: ScoredSubtypeRevealSubtype,
+  creditPer: number,
+): void {
+  const matchingIceIds = installedIceIdsWithSubtype(state, subtype);
+  const hiddenCandidates = matchingIceIds.filter((iceId) => {
+    const instance = mustInstance(state.cardInstances, iceId);
+    return !instance.rezzed && !instance.faceup;
+  });
+  if (hiddenCandidates.length === 0) {
+    resolveScoredSubtypeReveal(
+      state,
+      legalAction,
+      subtype,
+      creditPer,
+      [],
+    );
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `v162_scored_subtype_reveal_${subtype}_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v162.scored_subtype_reveal:${agendaId}:${subtype}:${creditPer}:${state.stateVersion + 1}`,
+    prompt: scoredSubtypeRevealPrompt(subtype),
+    kind: "select_cards",
+    options: hiddenCandidates.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      publicLabel: scoredSubtypeRevealOptionPublicLabel(subtype),
+      value: cardId,
+    })),
+    minSelections: 0,
+    maxSelections: hiddenCandidates.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
+    scoredSubtypeRevealChoiceOpened: true,
+    scoredSubtypeRevealSubtype: subtype,
+    scoredSubtypeRevealCandidateCount: hiddenCandidates.length,
+  };
+}
+
+function resolveScoredSubtypeRevealChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v162.scored_subtype_reveal"))
+    throw new Error("Es ist keine Scored-Subtype-Reveal-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf diese Reveal-Choice resolven.");
+  const [, agendaId, rawSubtype, rawCreditPer] = choice.source.split(":");
+  const subtype =
+    rawSubtype === "wall" || rawSubtype === "code_gate" ? rawSubtype : undefined;
+  const creditPer = Number(rawCreditPer);
+  if (!agendaId || !subtype || !Number.isInteger(creditPer) || creditPer < 0)
+    throw new Error("Die Scored-Subtype-Reveal-Choice ist ungueltig.");
+  const agendaDefinition = definitionFor(state, agendaId);
+  const scoredAgenda = scoredAgendaImplementationForDefinition(agendaDefinition);
+  if (
+    !state.corp.scoreArea.includes(agendaId) ||
+    scoredAgenda?.kind !== "reveal_installed_ice_subtype_for_credits" ||
+    scoredAgenda.subtype !== subtype
+  ) {
+    throw new Error("Die Reveal-Agenda ist nicht mehr in der Korp-ScoreArea.");
+  }
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const optionValues = new Set(
+    choice.options
+      .map((option) => option.value)
+      .filter((value): value is string => typeof value === "string"),
+  );
+  for (const selectedId of selectedIds) {
+    const instance = state.cardInstances[selectedId];
+    if (
+      !optionValues.has(selectedId) ||
+      !instance ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce" ||
+      instance.rezzed ||
+      instance.faceup ||
+      !cardHasSubtype(definitionFor(state, selectedId), subtype)
+    ) {
+      throw new Error("Das Reveal-Ziel ist nicht mehr gueltig.");
+    }
+  }
+  delete state.pendingChoice;
+  resolveScoredSubtypeReveal(
+    state,
+    legalAction,
+    subtype,
+    creditPer,
+    selectedIds,
+  );
+}
+
+function resolveScoredSubtypeReveal(
+  state: GameState,
+  legalAction: LegalAction,
+  subtype: ScoredSubtypeRevealSubtype,
+  creditPer: number,
+  selectedRevealIds: CardInstanceId[],
+): void {
+  const selectedSet = new Set(selectedRevealIds);
+  for (const iceId of selectedSet) {
+    const instance = mustInstance(state.cardInstances, iceId);
+    state.cardInstances[iceId] = { ...instance, faceup: true };
+  }
+  const matchingIceIds = installedIceIdsWithSubtype(state, subtype);
+  const rezzedMatchingIceCount = matchingIceIds.filter(
+    (iceId) => mustInstance(state.cardInstances, iceId).rezzed,
+  ).length;
+  const countedIds = matchingIceIds.filter((iceId) => {
+    const instance = mustInstance(state.cardInstances, iceId);
+    return selectedSet.has(iceId) || instance.rezzed || instance.faceup;
+  });
+  const gainedCredits = countedIds.length * creditPer;
+  if (gainedCredits > 0) credits(state, "corp", gainedCredits);
+  const publicRevealDefinitionIds = countedIds.map(
+    (iceId) => definitionFor(state, iceId).id,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: scoredSubtypeRevealHiddenZoneAction(subtype),
+    revealedCount: selectedRevealIds.length,
+    ...(subtype === "code_gate" ? { rezzedCodeGateCount: rezzedMatchingIceCount } : {}),
+    rezzedMatchingIceCount,
+    countedMatchingIceCount: countedIds.length,
+    gainedCredits,
+    corpCreditsAfter: state.corp.credits,
+    publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
+  };
+}
+
 function startPriorityRequisitionChoice(
   state: GameState,
   agendaId: CardInstanceId,
@@ -21008,13 +21341,20 @@ function startPriorityRequisitionChoice(
     source: `v162.priority_requisition:${agendaId}:${state.stateVersion + 1}`,
     prompt: "Priority Requisition: ICE kostenlos rezzen",
     kind: "select_cards",
-    options: candidates.map((cardId) => ({
-      id: `card_${cardId}`,
-      label: definitionFor(state, cardId).title,
-      publicLabel: "Installiertes ICE",
-      value: cardId,
-    })),
-    minSelections: 0,
+    options: [
+      ...candidates.map((cardId) => ({
+        id: `card_${cardId}`,
+        label: definitionFor(state, cardId).title,
+        publicLabel: "Installiertes ICE",
+        value: cardId,
+      })),
+      {
+        id: "skip",
+        label: "Überspringen",
+        publicLabel: "Überspringen",
+      },
+    ],
+    minSelections: 1,
     maxSelections: 1,
     stateVersion: state.stateVersion + 1,
     visibility: "hidden_info_barrier",
@@ -21044,6 +21384,16 @@ function resolvePriorityRequisitionChoice(
       "priority_requisition_rez_ice_at_no_cost"
   ) {
     throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
+  }
+  const selectedOptionIds = selectedChoiceIds(playerAction.selectedChoices);
+  if (selectedOptionIds.length === 1 && selectedOptionIds[0] === "skip") {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      priorityRequisitionFreeRez: false,
+      priorityRequisitionDeclined: true,
+    };
+    return;
   }
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
   if (selectedIds.length > 1)
@@ -22018,6 +22368,14 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v162.priority_requisition")) {
     resolvePriorityRequisitionChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v162.scored_subtype_reveal")) {
+    resolveScoredSubtypeRevealChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1912.employee_empowerment_start_draw")) {
+    resolveEmployeeEmpowermentStartDrawChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_rd_arrange_top2")) {
@@ -31375,6 +31733,7 @@ function ensureCorpTurnFlags(
   flags.scoredBlackOpsAgendaLastTurn ??= false;
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   flags.disinfectantUsedSourceIdsThisTurn ??= [];
+  flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
   return flags;
 }
 

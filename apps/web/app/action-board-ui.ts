@@ -376,9 +376,9 @@ export function orderedCardContextActions(actions: LegalAction[]): LegalAction[]
   return actions
     .map((action, index) => ({ action, index }))
     .sort((left, right) => {
-      const leftNewRemoteIce = isNewRemoteIceInstallAction(left.action) ? 1 : 0;
-      const rightNewRemoteIce = isNewRemoteIceInstallAction(right.action) ? 1 : 0;
-      return leftNewRemoteIce - rightNewRemoteIce || left.index - right.index;
+      const leftNewRemoteInstall = isNewRemoteInstallAction(left.action) ? 1 : 0;
+      const rightNewRemoteInstall = isNewRemoteInstallAction(right.action) ? 1 : 0;
+      return leftNewRemoteInstall - rightNewRemoteInstall || left.index - right.index;
     })
     .map(({ action }) => action);
 }
@@ -529,9 +529,10 @@ function breakerNameFromActionLabel(label: string | undefined, actionSuffixPatte
 function installContextLabel(action: LegalAction): string {
   const serverId = typeof action.payload?.serverId === "string" ? action.payload.serverId : null;
   const selectedServerId = typeof action.payload?.selectedServerId === "string" ? action.payload.selectedServerId : null;
+  if (action.payload?.runnerProgramTrashBeforeInstall === true) return "Mit Programmtrash installieren";
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
-  if (isNewRemoteIceInstallAction(action)) return "Neues Remote erstellen";
+  if (isNewRemoteInstallAction(action)) return "Neues Remote erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
   if (
@@ -543,8 +544,8 @@ function installContextLabel(action: LegalAction): string {
   return `Installieren: ${serverLabel}`;
 }
 
-function isNewRemoteIceInstallAction(action: Pick<LegalAction, "type" | "payload">): boolean {
-  return action.type === "install_card" && action.payload?.serverId === "new_remote" && action.payload?.placement === "ice";
+function isNewRemoteInstallAction(action: Pick<LegalAction, "type" | "payload">): boolean {
+  return action.type === "install_card" && action.payload?.serverId === "new_remote";
 }
 
 function playEventContextLabel(action: LegalAction): string {
@@ -693,7 +694,7 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   if (actorSide !== viewerSide) return observedAccessStatusLabel(card, actorSide, fromArchives);
   if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
   if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
-    return "Diese Karte liegt bereits im Archiv. Sie kann beim Archivzugriff nicht noch einmal getrasht werden. Du kannst weiter zugreifen oder den Zugriff abschließen.";
+    return "Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.";
   }
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
@@ -718,11 +719,18 @@ export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEv
   return null;
 }
 
+export function latestRetainableAccessRevealEvent(events: PublicGameEvent[]): PublicGameEvent | null {
+  return retainedAccessRevealEvent(events, null);
+}
+
 export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event || event.eventId === dismissedEventId) return null;
+    if (event.publicPayload.approachIceExposeViewDecision === "finish") return null;
+    if (event.publicPayload.hiddenZoneAction === "approach_ice_expose_finish") return null;
     if (event.publicPayload.publicRevealKind !== "expose") continue;
+    if (event.publicPayload.hiddenZoneAction === "approach_ice_expose") return null;
     if (event.publicPayload.approachIceExposeDecision) return null;
     if (!eventHasPublicRevealDefinition(event)) return null;
     return event;
@@ -730,9 +738,20 @@ export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEv
   return null;
 }
 
+export function approachIceExposeViewingIceId(actions: LegalAction[]): string | null {
+  const action = actions.find(
+    (candidate) =>
+      isApproachIceExposeAction(candidate) &&
+      candidate.payload?.approachIceExposeViewDecision === "finish" &&
+      typeof candidate.payload.iceId === "string"
+  );
+  return typeof action?.payload?.iceId === "string" ? action.payload.iceId : null;
+}
+
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
-  return newerEvent.publicPayload.actionType === "continue_run" || newerEvent.publicPayload.actionType === "end_turn";
+  const actionType = String(newerEvent.publicPayload.actionType ?? "");
+  return ["continue_run", "decline_trash", "steal_agenda", "trash_accessed_card", "end_turn"].includes(actionType);
 }
 
 function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {
@@ -748,7 +767,7 @@ function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
   const subject = actorSide === "corp" ? "Die Korp" : "Der Runner";
   if (card.type === "agenda") return `${subject} kann diese Agenda jetzt stehlen.`;
-  if (fromArchives && (card.type === "asset" || card.type === "upgrade")) return `${subject} hat diese Karte im Archiv gesehen; sie kann dort nicht erneut getrasht werden.`;
+  if (fromArchives && (card.type === "asset" || card.type === "upgrade")) return `${subject} hat diese Karte im Archiv gesehen.`;
   if ((card.type === "asset" || card.type === "upgrade") && typeof card.trashCost === "number") return `${subject} entscheidet jetzt, ob diese Karte getrasht oder liegen gelassen wird.`;
   return `${subject} hat diese Karte gesehen; der Zugriff ist abgeschlossen.`;
 }
@@ -780,6 +799,10 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
   const minSelections = Math.max(0, Math.floor(choice.minSelections));
   const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
   return minSelections !== 1 || maxSelections !== 1;
+}
+
+export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
+  return choice.kind === "select_cards" && Boolean(choice.stackSearchResolution || choice.source.includes("search_stack"));
 }
 
 export function shouldUseFieldCardChoice(
@@ -1167,23 +1190,46 @@ export function showInstalledCorpState(serverId: PlayerView["servers"][number]["
   return serverId !== "archives";
 }
 
+export function hiddenCorpRootCardForOpponent(card: VisibleCard): VisibleCard {
+  if (card.known) return card;
+  return {
+    instanceId: card.instanceId,
+    known: false,
+    rezzed: false,
+    ...(typeof card.advancementCounters === "number" ? { advancementCounters: card.advancementCounters } : {}),
+    ...(card.counterDisplays ? { counterDisplays: card.counterDisplays } : {})
+  };
+}
+
+export function corpRootCardsForDisplay(
+  viewerSide: Side,
+  serverId: PlayerView["servers"][number]["id"],
+  cards: VisibleCard[]
+): VisibleCard[] {
+  if (viewerSide === "corp" || serverId === "archives") return cards;
+  return cards.map(hiddenCorpRootCardForOpponent);
+}
+
 export function splitArchiveCardsForDisplay(
   viewerSide: Side,
   cards: VisibleCard[],
   totalArchivesCount: number
-): { faceupCards: VisibleCard[]; facedownCount: number } {
+): { faceupCards: VisibleCard[]; facedownCards: VisibleCard[]; facedownCount: number } {
   if (viewerSide === "runner") {
     const faceupCards = cards.filter((card) => card.known);
     return {
       faceupCards,
+      facedownCards: [],
       facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
     };
   }
 
   const faceupCards = cards.filter((card) => card.rezzed === true);
+  const facedownCards = cards.filter((card) => card.rezzed !== true);
   return {
     faceupCards,
-    facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
+    facedownCards,
+    facedownCount: Math.max(facedownCards.length, totalArchivesCount - faceupCards.length)
   };
 }
 export function parseCuePositionPreference(raw: string | null): CuePositionPreference {

@@ -85,12 +85,19 @@ import {
   chronicleActionUseByEventId,
   chronicleTurnSideByEventId,
   chronicleTurnNumberByEventId,
+  chronicleTurnGroupLabel,
   formatChronicleEvent,
   formatChronicleEffectItems,
+  shouldSuppressChronicleEventItem,
   type ChronicleCategory,
   type ChronicleContext,
   type ChronicleItem
 } from "./chronicle";
+import { accessDecisionLabel, accessRevealActionGroups } from "./access-reveal-ui";
+import { groupChronicleEntriesForRender } from "./chronicleGrouping";
+import { shouldActivateChronicleCardTouchDoubleTap } from "./chronicleInteraction";
+import { visibleKnownCardRulesText } from "./card-text-source";
+import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-ui";
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
@@ -119,15 +126,18 @@ import {
   actionSlotDisplay,
   activeRunIceInstanceId,
   advancementCounterDisplay,
+  approachIceExposeViewingIceId,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceUsesReadableCards,
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  corpRootCardsForDisplay,
   cuePositionClassName,
   cuePositionStyle,
   encounterBreakerActions,
@@ -139,6 +149,7 @@ import {
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
+  latestRetainableAccessRevealEvent,
   retainedAccessRevealEvent,
   retainedExposeReviewEvent,
   runnerProgramInstallTrashChoiceInfo,
@@ -184,7 +195,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeText, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -204,7 +215,7 @@ import {
 } from "./catalog-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
-import { scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
+import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
   loadCurrentTabSession,
@@ -286,6 +297,7 @@ type MatchFormat = ApiMatchFormat;
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
 type AiPacingMode = ApiAiPacingMode;
+type AiTraceStartMode = "off" | "detailed";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ChronicleDetailMode = "simple" | "medium" | "full";
 type ColorScheme = "black" | "white";
@@ -679,7 +691,7 @@ const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Ar
 
 const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> = [
   { key: "all", label: "Alle Sets" },
-  { key: "original", label: "Original NETGRID" },
+  { key: "original", label: "Original NetGrid Set" },
   { key: "test", label: "Testkarten" },
   { key: "other", label: "Andere Sets" }
 ];
@@ -723,6 +735,8 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
+const RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT = 18;
+const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
 const SPECIAL_ZONE_CARD_WIDTH_MIN = 56;
 const SPECIAL_ZONE_CARD_WIDTH_PREFERRED = 140;
@@ -1124,7 +1138,11 @@ function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, Catalo
     ...(imageUrl ? { imageUrl } : {})
   };
   if (!detail) return enriched;
-  enriched.rulesText = card.rulesText ?? detail.text;
+  const rulesText = visibleKnownCardRulesText({
+    catalogText: detail.text,
+    visibleRulesText: card.rulesText ?? null,
+  });
+  if (rulesText !== undefined) enriched.rulesText = rulesText;
   addNumeric(enriched, "cost", card.cost, detail.numeric.cost);
   addNumeric(enriched, "installCost", card.installCost, detail.numeric.installCost);
   addNumeric(enriched, "memoryCost", card.memoryCost, detail.numeric.memoryCost);
@@ -1167,7 +1185,7 @@ function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "
   target[key] = fallback;
 }
 
-function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side): AccessReveal | null {
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
@@ -1184,14 +1202,14 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
     trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
   };
 }
 
-function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, eventId?: string): AccessReveal | null {
+function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, eventId?: string): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
   const actorSide: Side = "runner";
@@ -1205,7 +1223,7 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
     trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
@@ -1284,10 +1302,35 @@ function payloadSide(payload: Record<string, unknown>, key: string): Side | null
   return value === "corp" || value === "runner" ? value : null;
 }
 
-function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string): string {
+function payloadPositiveInteger(payload: Record<string, unknown>, key: string): number | null {
+  const value = payload[key];
+  return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null;
+}
+
+function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string, archivesRevealCount: number | null): string {
+  if (serverLabel === "Archive" && archivesRevealCount) {
+    const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+    if (archivesRevealCount === 1) return `${subject} eine verdeckte Karte im Archiv aufgedeckt und darauf zugegriffen.`;
+    const currentAccess = actorSide === viewerSide ? "greifst jetzt auf eine Archivkarte zu" : `${accessActorSubject(actorSide)} greift jetzt auf eine Archivkarte zu`;
+    return `${subject} ${archivesRevealCount} verdeckte Karten im Archiv aufgedeckt; ${currentAccess}.`;
+  }
   const location = accessServerLocationPhrase(serverLabel);
   if (actorSide === viewerSide) return `Du hast auf eine Karte ${location} zugegriffen.`;
   return `${accessActorSubject(actorSide)} hat auf eine Karte ${location} zugegriffen.`;
+}
+
+function latestArchivesRevealCount(events: PublicGameEvent[], accessEvent: PublicGameEvent | null): number | null {
+  const stopIndex = accessEvent ? events.findIndex((event) => event.eventId === accessEvent.eventId) : events.length;
+  const startIndex = stopIndex >= 0 ? stopIndex - 1 : events.length - 1;
+  for (let index = startIndex; index >= 0; index -= 1) {
+    const payload = events[index]?.publicPayload;
+    if (!payload) continue;
+    if (payload.actionType === "start_run") {
+      const serverLabel = serverDisplayLabel(payloadString(payload, "serverLabel") ?? payloadString(payload, "serverId") ?? "");
+      return serverLabel === "Archive" ? payloadPositiveInteger(payload, "archivesRevealCount") : null;
+    }
+  }
+  return null;
 }
 
 function accessActorSubject(side: Side): string {
@@ -1663,7 +1706,7 @@ function deckMetadataFromEditable(deck: EditableDeck | null): DeckPublicMetadata
 
 function serverLanesForSide(_side: Side, server: PlayerView["servers"][number]): Array<{ kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }> {
   const iceLane = { kind: "ice" as const, label: "ICE" as const, cards: server.ice };
-  const rootLane = { kind: "root" as const, label: "Root" as const, cards: server.root };
+  const rootLane = { kind: "root" as const, label: "Root" as const, cards: corpRootCardsForDisplay(_side, server.id, server.root) };
   return [rootLane, iceLane];
 }
 
@@ -1678,6 +1721,37 @@ function opponentSide(side: Side): Side {
 
 function sideLabel(side: Side): string {
   return side === "corp" ? "Korp" : "Runner";
+}
+
+function recentSessionHeadline(session: RecentSessionInfo): string {
+  return session.opponentDisplayName ? `${sideLabel(session.side)} gegen ${session.opponentDisplayName}` : `${sideLabel(session.side)}-Spiel`;
+}
+
+function recentSessionStatusLabel(status: RecentSessionInfo["matchStatus"]): string {
+  switch (status) {
+    case "pending":
+      return "Wartet";
+    case "waiting_for_runner":
+    case "waiting_for_corp":
+    case "waiting_for_joiner_decks":
+      return "Wartet auf Beitritt";
+    case "ready_check":
+      return "Startbereitschaft";
+    case "countdown":
+      return "Countdown";
+    case "active":
+      return "Aktiv";
+    case "finished":
+      return "Beendet";
+    case "cancelled":
+      return "Abgebrochen";
+    case "abandoned":
+      return "Verlassen";
+    case "forfeited":
+      return "Aufgegeben";
+    default:
+      return "Gespeichert";
+  }
 }
 
 function turnSideForView(view: PlayerView): Side | null {
@@ -1763,9 +1837,17 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
   const turnNumberByEventId = chronicleTurnNumberByEventId(events);
   const turnSideByEventId = chronicleTurnSideByEventId(events);
   const actionUseByEventId = chronicleActionUseByEventId(events);
+  const hasServerTurnContext = events.some((event) => payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber"));
+  const firstEvent = events[0];
+  const tailLikelyTruncated =
+    firstEvent !== undefined &&
+    !hasServerTurnContext &&
+    firstEvent.type !== "game_created" &&
+    payloadString(firstEvent.publicPayload, "actionType") !== "game_created";
   return Object.fromEntries(
     events.map((event) => {
       const card = eventCardDetail(event, detailsById);
+      const serverTurnNumber = payloadPositiveInteger(event.publicPayload, "chronicleTurnNumber");
       return [
         event.eventId,
         {
@@ -1774,8 +1856,8 @@ function chronicleContextByEventId(events: PublicGameEvent[], detailsById: Recor
           cardType: card?.type ?? null,
           cardDetailLines: card ? catalogDetailLines(card) : [],
           agendaPoints: typeof card?.numeric.agendaPoints === "number" ? card.numeric.agendaPoints : null,
-          turnNumber: turnNumberByEventId[event.eventId] ?? null,
-          turnSide: turnSideByEventId[event.eventId] ?? null,
+          turnNumber: serverTurnNumber ?? (tailLikelyTruncated ? null : turnNumberByEventId[event.eventId]) ?? null,
+          turnSide: payloadSide(event.publicPayload, "chronicleTurnSide") ?? turnSideByEventId[event.eventId] ?? null,
           actionUse: actionUseByEventId[event.eventId] ?? null
         }
       ];
@@ -1795,6 +1877,7 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] = useState<ActiveMatchWorkspace>("game");
   const [mode, setMode] = useState<"host" | "join">("host");
+  const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
   const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
   const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
@@ -1805,6 +1888,7 @@ export default function Page() {
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
+  const [aiTraceStartMode, setAiTraceStartMode] = useState<AiTraceStartMode>("off");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
@@ -1957,6 +2041,15 @@ export default function Page() {
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
   const cardPreviewCollapsedStorageKey = session ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side) : null;
 
+  const selectStartTab = (nextMode: "host" | "join" | "resume") => {
+    if (nextMode === "resume") {
+      setRecoveryTabSelected(true);
+      return;
+    }
+    setRecoveryTabSelected(false);
+    setMode(nextMode);
+  };
+
   const updateCardPreviewCollapsed = (collapsed: boolean) => {
     setCardPreviewCollapsed(collapsed);
     if (cardPreviewCollapsedStorageKey) window.localStorage.setItem(cardPreviewCollapsedStorageKey, collapsed ? "true" : "false");
@@ -2017,7 +2110,7 @@ export default function Page() {
     const storedSession = loadCurrentTabSession();
     if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
       setEntryTab("play");
-      setMode("join");
+      selectStartTab("join");
       void reconnectSession(
         {
           matchId,
@@ -2061,7 +2154,7 @@ export default function Page() {
         return;
       }
       setEntryTab("play");
-      setMode("join");
+      selectStartTab("join");
       setJoinLinkInput(window.location.href);
       setJoinMatchId(matchId);
       setJoinToken(token);
@@ -2663,14 +2756,17 @@ export default function Page() {
       onSelect: () => toggleFieldCardChoiceOption(option.id)
     };
   };
+  const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
-  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, accessRevealEvent?.eventId) : null;
-  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
+  const archivesRevealCount = payload ? latestArchivesRevealCount(payload.eventTail, latestAccessRevealEvent) : null;
+  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, latestAccessRevealEvent?.eventId) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
   const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
-  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal);
+  const viewedApproachIceId = approachIceExposeViewingIceId(payload?.legalActions ?? []);
+  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
@@ -2793,6 +2889,40 @@ export default function Page() {
       return next.runner === current.runner && next.corp === current.corp ? current : next;
     });
   }, [activeView?.activeSide, activeView?.own.clicks, activeView?.opponent.clicks, activeView?.side, payload?.matchId, payload?.playerView.stateVersion]);
+
+  useEffect(() => {
+    if (entryTab !== "decks" || !selectedLocalDeck) return;
+    const catalogCardById = new Map(allCatalogCards.map((card) => [card.catalogCardId, card]));
+    const missingIds = selectedLocalDeck.cards
+      .map((entry) => entry.cardId)
+      .filter((cardId) => {
+        if (catalogDetailsById[cardId]) return false;
+        const catalogCard = catalogCardById.get(cardId);
+        return !catalogCard || catalogCard.type === "agenda";
+      });
+    if (missingIds.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missingIds.map((cardId) =>
+        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
+          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
+          .then((data) => data.card)
+          .catch(() => null)
+      )
+    ).then((details) => {
+      if (cancelled) return;
+      setCatalogDetailsById((current) => {
+        const next = { ...current };
+        details.forEach((detail) => {
+          if (detail) next[detail.catalogCardId] = detail;
+        });
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [entryTab, selectedLocalDeck, allCatalogCards, catalogDetailsById]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -2995,6 +3125,7 @@ export default function Page() {
         runnerDifficulty,
         corpDifficulty,
         ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
+        ...(hasAiOpponent && aiTraceStartMode !== "off" ? { aiTraceMode: aiTraceStartMode } : {}),
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
@@ -3033,15 +3164,16 @@ export default function Page() {
     };
     persistSession(nextSession);
     setSession(nextSession);
+    const aiTraceNotice = hasAiOpponent && aiTraceStartMode !== "off" ? " KI-Trace läuft ab Start." : "";
     if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(created, created.hostSide));
-      setNotice(`Lobby erstellt. Du startest als ${sideLabel(created.hostSide)}.`);
+      setNotice(`Lobby erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`);
       return;
     }
     setPayload(fromInitialResponse(created, created.hostSide));
     setLobby(null);
-    setNotice(`Match erstellt. Du startest als ${sideLabel(created.hostSide)}.`);
+    setNotice(`Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`);
   };
 
   const startNextSeriesGame = async () => {
@@ -3196,7 +3328,7 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (mode !== "join" || session) return;
+    if (mode !== "join" || session || recoveryTabSelected) return;
     void refreshOpenLanMatches();
     const timer = window.setInterval(() => {
       void refreshOpenLanMatches(true);
@@ -3204,7 +3336,7 @@ export default function Page() {
     return () => {
       window.clearInterval(timer);
     };
-  }, [mode, session?.matchId]);
+  }, [mode, recoveryTabSelected, session?.matchId]);
 
   const updateJoinLinkInput = (value: string) => {
     setJoinLinkInput(value);
@@ -3357,7 +3489,7 @@ export default function Page() {
     const nextSession = loadStoredSession();
     if (!nextSession || nextSession.matchId !== recentSession.matchId || nextSession.side !== recentSession.side) {
       setEntryTab("play");
-      setMode("join");
+      selectStartTab("join");
       setJoinMatchId(recentSession.matchId);
       setJoinToken("");
       setNotice("Fortsetzen braucht ein Token aus diesem Tab. Für die Wiederverbindung bitte den Link oder Token erneut eintragen.");
@@ -3389,17 +3521,26 @@ export default function Page() {
   const reconnectFromRecentSession = () => {
     if (!recentSession) return;
     setEntryTab("play");
-    setMode("join");
+    selectStartTab("join");
     setJoinMatchId(recentSession.matchId);
     setJoinToken("");
-    setNotice("Wiederverbindung vorbereitet. Bitte den aktuellen Join- oder Wiederverbindungs-Token eintragen.");
+    setNotice("Beitreten ist vorbereitet. Die Match-ID ist eingetragen; bitte den aktuellen Join- oder Wiederverbindungs-Token aus dem Link ergänzen.");
   };
 
   const discardRecentSession = () => {
     if (!recentSession) return;
-    removeRecentSession(recentSession);
-    setRecentSession(loadRecentSession());
-    setNotice("Lokaler Sitzungseintrag verworfen.");
+    const discardedSession = recentSession;
+    removeRecentSession(discardedSession);
+    clearStoredSession(discardedSession);
+    const nextRecentSession = loadRecentSession();
+    setRecentSession(nextRecentSession);
+    if (nextRecentSession) {
+      setRecoveryTabSelected(true);
+      setNotice("Gespeichertes Spiel verworfen. Ein weiteres gespeichertes Spiel ist verfügbar.");
+    } else {
+      selectStartTab("host");
+      setNotice("Gespeichertes Spiel verworfen. Es gibt kein Spiel zum Fortsetzen.");
+    }
   };
 
   const playImmediateActionAudio = (action: LegalAction, stateVersion: number) => {
@@ -4163,6 +4304,8 @@ export default function Page() {
   }, [connection, session]);
   const showingStartLobby = Boolean(session && lobby);
   const showingSessionRecovery = Boolean(session && !payload && !lobby);
+  const activeStartTab = recoveryTabSelected && recentSession ? "resume" : mode;
+  const canResumeRecentSession = Boolean(recentSession && storedSessionMatches(recentSession));
   const updateAudioEnabled = (enabled: boolean) => {
     if (enabled) primeAudio(audioVolume);
     setAudioEnabled(enabled);
@@ -4224,7 +4367,6 @@ export default function Page() {
               Optionen
             </button>
           </nav>
-          {notice ? <p className="notice entryNotice">{notice}</p> : null}
           {session && lobby ? (
             <StartLobbyPanel
               lobby={lobby}
@@ -4270,45 +4412,59 @@ export default function Page() {
             </section>
           ) : null}
           <div className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}>
-          {entryTab === "play" && !showingStartLobby && !session && recentSession ? (
-            <section className="resumeSessionPanel">
-              <div>
-                <p className="eyebrow">Letzte Sitzung</p>
-                <h2>Match {recentSession.matchId}</h2>
-                <p className="meta">
-                  {sideLabel(recentSession.side)} · {recentSession.displayName}
-                  {recentSession.opponentDisplayName ? ` · gegen ${recentSession.opponentDisplayName}` : ""}
-                  {recentSession.matchStatus ? ` · ${recentSession.matchStatus}` : ""}
-                </p>
-              </div>
-              <div className="resumeSessionActions">
-                <button className="button primary" onClick={resumeRecentSession} type="button" disabled={!storedSessionMatches(recentSession)}>
-                  <Cable size={15} />
-                  Fortsetzen
-                </button>
-                <button className="button" onClick={reconnectFromRecentSession} type="button">
-                  <Link2 size={15} />
-                  Wieder verbinden über Link
-                </button>
-                <button className="button" onClick={discardRecentSession} type="button">
-                  <Trash2 size={15} />
-                  Verwerfen
-                </button>
-              </div>
-            </section>
-          ) : null}
+          {notice ? <p className="notice entryNotice">{notice}</p> : null}
           {entryTab === "play" && !showingStartLobby ? (
           <section className="setupPanel">
-            <div className="tabs">
-              <button className={`tab ${mode === "host" ? "active" : ""}`} onClick={() => setMode("host")}>
+            <div className={`tabs ${recentSession ? "threeTabs" : ""}`}>
+              <button className={`tab ${activeStartTab === "host" ? "active" : ""}`} onClick={() => selectStartTab("host")}>
                 Match erstellen
               </button>
-              <button className={`tab ${mode === "join" ? "active" : ""}`} onClick={() => setMode("join")}>
+              <button className={`tab ${activeStartTab === "join" ? "active" : ""}`} onClick={() => selectStartTab("join")}>
                 Beitreten
               </button>
+              {recentSession ? (
+                <button className={`tab ${activeStartTab === "resume" ? "active" : ""}`} onClick={() => selectStartTab("resume")}>
+                  Fortsetzen
+                </button>
+              ) : null}
             </div>
 
-            {mode === "host" ? (
+            {activeStartTab === "resume" && recentSession ? (
+              <section className="resumeSessionInline" aria-label="Gespeichertes Spiel fortsetzen">
+                <div className="resumeSessionSummary">
+                  <p className="eyebrow">Gespeichertes Spiel</p>
+                  <h2>{recentSessionHeadline(recentSession)}</h2>
+                  <p className="meta">
+                    {recentSession.displayName} · {recentSessionStatusLabel(recentSession.matchStatus)}
+                    {canResumeRecentSession ? " · Fortsetzen verfügbar" : " · Token neu eintragen"}
+                  </p>
+                  <details className="matchIdDetails">
+                    <summary>Match-ID anzeigen</summary>
+                    <code>{recentSession.matchId}</code>
+                  </details>
+                </div>
+                <div className="resumeSessionActions">
+                  <span className="resumeActionTooltip" data-tooltip={canResumeRecentSession ? "Gespeicherte Sitzung fortsetzen" : "Für dieses Spiel liegt kein verwertbares Session-Token mehr vor."}>
+                    <button className="button primary" onClick={resumeRecentSession} type="button" disabled={!canResumeRecentSession}>
+                      <Cable size={15} />
+                      Fortsetzen
+                    </button>
+                  </span>
+                  <span className="resumeActionTooltip" data-tooltip="Öffnet Beitreten mit dieser Match-ID. Den Token musst du aus dem Link ergänzen.">
+                    <button className="button" onClick={reconnectFromRecentSession} type="button">
+                      <Link2 size={15} />
+                      Über Token verbinden
+                    </button>
+                  </span>
+                  <span className="resumeActionTooltip" data-tooltip="Entfernt nur dieses gespeicherte Spiel aus diesem Browser. Das serverseitige Match bleibt unverändert.">
+                    <button className="button" onClick={discardRecentSession} type="button">
+                      <Trash2 size={15} />
+                      Verwerfen
+                    </button>
+                  </span>
+                </div>
+              </section>
+            ) : activeStartTab === "host" ? (
               <div className="matchStartConsole">
                 <section className="matchStartSection" aria-label="Spielart">
                   <p className="eyebrow">Spielart</p>
@@ -4502,6 +4658,15 @@ export default function Page() {
                       Seed
                       <input value={seed} onChange={(event) => setSeed(event.target.value)} />
                     </label>
+                    {hasAiOpponent ? (
+                      <label>
+                        Diagnose
+                        <select value={aiTraceStartMode} onChange={(event) => setAiTraceStartMode(event.target.value as AiTraceStartMode)}>
+                          <option value="off">Keine KI-Aufzeichnung</option>
+                          <option value="detailed">KI-Trace ab Start</option>
+                        </select>
+                      </label>
+                    ) : null}
                     {isHumanVsHuman ? (
                       <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
                         <input checked={testSetupMode} onChange={(event) => setTestSetupMode(event.target.checked)} type="checkbox" />
@@ -5081,6 +5246,16 @@ export default function Page() {
                     const runAction = runActionForServer(server.id);
                     const lanes = serverLanesForSide(activeView.side, server);
                     const isOwnCorpHq = activeView.side === "corp" && server.id === "hq";
+                    const isOpponentCorpHq = activeView.side === "runner" && server.id === "hq";
+                    const isCorpHqComposite = isOwnCorpHq || isOpponentCorpHq;
+                    const opponentCorpHqCount = isOpponentCorpHq ? Math.max(0, Math.floor(activeView.opponent.handCount)) : 0;
+                    const opponentCorpHqPreviewCount = Math.min(opponentCorpHqCount, CORP_OPPONENT_HQ_PREVIEW_LIMIT);
+                    const opponentCorpHqPreviewCards = Array.from({ length: opponentCorpHqPreviewCount }, (_, index): DisplayVisibleCard => ({
+                      instanceId: `corp-opponent-hq-hidden-${index}`,
+                      known: false,
+                      rezzed: false,
+                      owner: "corp"
+                    }));
                     const serverCollapsed = boardZoneCollapsedFor(`corp:${server.id}`);
                     const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
                       if (server.id === "archives" && lane.kind === "root") {
@@ -5125,10 +5300,12 @@ export default function Page() {
                             {...(lane.kind === "ice" ? { slotClassName: iceStackSlotClass(card) } : {})}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
                             {...(lane.kind === "ice" ? { modifierBadges: iceModifierBadgesForServer(server) } : {})}
+                            scoreStateBadges={scoreCardStateBadges(displayCard, scoreAreaCardsBySide("corp"))}
                             runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
                               : {})}
+                            viewMarkerActive={lane.kind === "ice" && viewedApproachIceId === card.instanceId}
                             {...fieldChoiceCardProps(card)}
                             onAction={submitAction}
                             onFocus={focusCard}
@@ -5139,7 +5316,7 @@ export default function Page() {
                     };
                     return (
                       <article
-                        className={`server ${isOwnCorpHq ? "corpHqServer" : ""} ${serverCollapsed ? "serverCollapsed" : ""} ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
+                        className={`server ${isCorpHqComposite ? "corpHqServer" : ""} ${serverCollapsed ? "serverCollapsed" : ""} ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
                         key={server.id}
                         data-testid="server"
                         data-server-id={server.id}
@@ -5182,7 +5359,7 @@ export default function Page() {
                             </div>
                           </div>
                           {!serverCollapsed ? <div className="serverBody">
-                            <div className={isOwnCorpHq ? "corpHqComposite" : "pairedServerLanes"}>
+                            <div className={isCorpHqComposite ? "corpHqComposite" : "pairedServerLanes"}>
                               {isOwnCorpHq ? (
                                 <>
                                   <div className={`corpHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
@@ -5199,6 +5376,7 @@ export default function Page() {
                                             selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                                             actions={cardActionsFor(card)}
                                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                            scoreStateBadges={scoreCardStateBadges(displayCard, scoreAreaCardsBySide("corp"))}
                                             {...(discardOption
                                               ? {
                                                   discardShortcut: {
@@ -5215,6 +5393,37 @@ export default function Page() {
                                         );
                                       })}
                                     </HandCardsRow>
+                                  </div>
+                                  <div className="pairedServerLanes corpHqServerLanes">
+                                    {lanes.map((lane) => (
+                                      <div className="serverLaneGroup pairedServerLane" key={lane.label}>
+                                        <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                          {renderLaneCards(lane)}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : isOpponentCorpHq ? (
+                                <>
+                                  <div className={`corpHqHandPanel corpOpponentHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
+                                    {opponentCorpHqPreviewCards.length > 0 ? (
+                                      <div
+                                        className="corpOpponentHqPreview"
+                                        style={{
+                                          ...zoneCardsStyle,
+                                          "--corp-hq-visible-steps": String(Math.max(0, opponentCorpHqPreviewCards.length - 1))
+                                        } as CSSProperties}
+                                        aria-label={`Korp-HQ: ${formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)}, verdeckte Karten`}
+                                      >
+                                        {opponentCorpHqPreviewCards.map((card) => (
+                                          <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={focusCard} />
+                                        ))}
+                                        {opponentCorpHqCount > CORP_OPPONENT_HQ_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{opponentCorpHqCount - CORP_OPPONENT_HQ_PREVIEW_LIMIT}</span> : null}
+                                      </div>
+                                    ) : (
+                                      <p className="archivesPileEmpty">Keine Karten in HQ.</p>
+                                    )}
                                   </div>
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
@@ -5660,7 +5869,7 @@ export default function Page() {
 function publicEventsAfter(events: PublicGameEvent[], lastPresentedEventId: string | null): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
   const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
-  return index >= 0 ? events.slice(index + 1) : events;
+  return index >= 0 ? events.slice(index + 1) : [];
 }
 
 function eventActionType(event: PublicGameEvent): string {
@@ -5952,8 +6161,7 @@ function AccessRevealModal({
   onAction(action: LegalAction): void;
   onDismiss(): void;
 }) {
-  const primaryActions = reveal.actions.filter((action) => action.type !== "decline_trash");
-  const declineAction = reveal.actions.find((action) => action.type === "decline_trash") ?? null;
+  const { primaryActions, declineAction } = accessRevealActionGroups(reveal.actions);
   const runAction = (action: LegalAction) => {
     onAction(action);
     onDismiss();
@@ -5978,21 +6186,7 @@ function AccessRevealModal({
             <CardView card={reveal.card} displayMode={displayMode} preview />
           </div>
           <div className="accessRevealDecision">
-            <strong>{reveal.card.title}</strong>
-            <p>{reveal.trashStatus}</p>
-            {reveal.card.rulesText ? (
-              <div className="cardRulesDetail">
-                <strong>Regeltext</strong>
-                <span className="cardRulesDetailText">
-                  {rulesTextLines(reveal.card.rulesText).map((line, index) => (
-                    <span key={`${reveal.card.instanceId}-access-rules-${index}`} className={isSubroutineRuleLine(reveal.card.type ?? "", reveal.card.rulesText ?? "", line) ? "subroutineLine" : undefined}>
-                      {shouldAddFallbackSubroutineMarker(reveal.card.type ?? "", reveal.card.rulesText ?? "", line) ? <SubroutineIcon /> : null}
-                      {renderRuleTextSegments(line, `${reveal.card.instanceId}-access-rules-${index}`)}
-                    </span>
-                  ))}
-                </span>
-              </div>
-            ) : null}
+            <p className="accessRevealStatus">{reveal.trashStatus}</p>
             <div className="accessRevealActions">
               {primaryActions.map((action) => (
                 <button className={`button primary ${action.type === "trash_accessed_card" || action.type === "trash_resource" ? "dangerButton" : ""}`} key={action.actionId} onClick={() => runAction(action)} disabled={disabled}>
@@ -6009,7 +6203,7 @@ function AccessRevealModal({
               {reveal.actions.length === 0 ? (
                 <button className="button" onClick={onDismiss}>
                   <Check size={15} />
-                  Verstanden
+                  OK
                 </button>
               ) : null}
             </div>
@@ -6065,15 +6259,6 @@ function ExposeReviewModal({
   );
 }
 
-function accessDecisionLabel(action: LegalAction): string {
-  if (action.type === "access_card") return "Nächste Karte";
-  if (action.type === "steal_agenda") return "Agenda stehlen";
-  if (action.type === "trash_accessed_card") return "Trashen";
-  if (action.type === "trash_resource") return "Resource trashen";
-  if (action.type === "decline_trash") return normalizeVisibleTerms(action.label);
-  return normalizeVisibleTerms(action.label);
-}
-
 function GameOverModal({
   result,
   side,
@@ -6095,12 +6280,12 @@ function GameOverModal({
   onRetentionProtection(protectedValue: boolean): void;
   nextSeriesPending?: boolean;
 }) {
-  const outcomeText =
-    result.winner === "runner"
-      ? "Runner gewinnt."
-      : result.winner === "corp"
-        ? "Korp gewinnt."
-        : "Das Spiel endet unentschieden.";
+  const outcomeText = resultOutcomeText(result.winner);
+  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName) : null;
+  const headlineText = seriesHeadline ?? outcomeText;
+  const reasonText = seriesHeadline
+    ? `Letztes Spiel: ${outcomeText} ${resultReasonLabel(result.reason)}`
+    : resultReasonLabel(result.reason);
   const seriesText = result.series ? seriesStatusText(result.series) : null;
   const gameStanding = gameStandingForResult(result, side);
   const winnerMotif = resultWinnerMotifFor(result.winner);
@@ -6123,8 +6308,8 @@ function GameOverModal({
         <div className={`gameOverHero ${winnerMotifUi.imageSrc ? "withVisualMotif" : ""}`}>
           <div className="gameOverHeroCopy">
             <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
-            <h2 id="game-over-title">{outcomeText}</h2>
-            <p>{resultReasonLabel(result.reason)}</p>
+            <h2 id="game-over-title">{headlineText}</h2>
+            <p>{reasonText}</p>
           </div>
           <ResultWinnerMotif motif={winnerMotif} />
         </div>
@@ -7121,14 +7306,22 @@ function RunnerOpponentZonesStrip({
   const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
   const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
   const [collapsedZones, setCollapsedZones] = useState<Record<string, boolean>>({});
-  const zoneCollapsed = (zone: "grip" | "heap" | "stack") => Boolean(collapsedZones[zone]);
+  const zoneCollapsed = (zone: "grip" | "heap" | "stack") => (zone === "grip" ? collapsedZones[zone] ?? true : Boolean(collapsedZones[zone]));
   const toggleZoneCollapsed = (zone: "grip" | "heap" | "stack") => setCollapsedZones((current) => ({ ...current, [zone]: !current[zone] }));
   if (view.side !== "corp") return null;
   const heapCards = view.opponent.discardCards ?? [];
   const heapCount = view.opponent.discardCount ?? heapCards.length;
+  const gripCount = Math.max(0, Math.floor(view.opponent.handCount));
   const gripCountLabel = formatHandLimitCount(view.opponent.handCount, view.opponent.maxHandSize);
   const stackCountLabel = formatCardCount(view.opponent.deckCount);
   const heapCountLabel = formatCardCount(heapCount);
+  const gripPreviewCount = Math.min(gripCount, RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT);
+  const gripPreviewCards = Array.from({ length: gripPreviewCount }, (_, index): DisplayVisibleCard => ({
+    instanceId: `runner-opponent-grip-hidden-${index}`,
+    known: false,
+    rezzed: false,
+    owner: "runner"
+  }));
   const cardActionsForHeap = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
@@ -7146,8 +7339,28 @@ function RunnerOpponentZonesStrip({
         style={zoneCardsStyle}
         title="Grip: Runner-Hand. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
         ariaLabel={`Runner-Grip ${gripCountLabel}`}
-        collapsed
-      />
+        collapsed={zoneCollapsed("grip")}
+        onToggleCollapse={() => toggleZoneCollapsed("grip")}
+        collapseLabel="Grip"
+      >
+        {gripPreviewCards.length > 0 ? (
+          <div
+            className="runnerOpponentGripPreview"
+            style={{
+              ...zoneCardsStyle,
+              "--runner-grip-visible-steps": String(Math.max(0, gripPreviewCards.length - 1))
+            } as CSSProperties}
+            aria-label={`Runner-Grip: ${gripCountLabel}, verdeckte Karten`}
+          >
+            {gripPreviewCards.map((card) => (
+              <CardView key={card.instanceId} card={card} compact displayMode={displayMode} hiddenSide="runner" onFocus={onFocus} />
+            ))}
+            {gripCount > RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{gripCount - RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT}</span> : null}
+          </div>
+        ) : (
+          <p className="archivesPileEmpty">Keine Karten im Grip.</p>
+        )}
+      </SideZoneFrame>
       <SideZoneFrame
         side="runner"
         label="Stack"
@@ -7699,6 +7912,7 @@ function ScoredAgendaOverlay({
                 displayMode={cardDisplayMode}
                 showAdvancementCounters={false}
                 showScoreStateBadges
+                scoreStateBadges={side === "corp" ? scoreCardStateBadges(card, cards) : []}
                 actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
                 selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
@@ -7706,7 +7920,7 @@ function ScoredAgendaOverlay({
                 {...(onFocus ? { onFocus } : {})}
                 {...(onActionContextSelect ? { onActionContextSelect } : {})}
               />
-              <ScoredAgendaStateLines card={card} side={side} />
+              <ScoredAgendaStateLines card={card} side={side} corpScoreAreaCards={side === "corp" ? cards : []} />
             </div>
           ))}
           {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
@@ -8004,6 +8218,7 @@ function CardChoicePanel({
   const title = programInstallTrashInfo?.title ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
+  const readableCards = cardChoiceUsesReadableCards(choice);
 
   useEffect(() => {
     setSelected([]);
@@ -8022,7 +8237,7 @@ function CardChoicePanel({
 
   const dialog = (
     <section className="cardChoiceOverlay" role="dialog" aria-modal="true" aria-labelledby="card-choice-title" data-testid="card-choice-panel">
-      <div className={`cardChoiceDialog ${highlighted ? "cueHighlight" : ""}`}>
+      <div className={`cardChoiceDialog ${highlighted ? "cueHighlight" : ""}${readableCards ? " readableCards" : ""}`}>
         <header className="cardChoiceHeader">
           <div>
             <h2 id="card-choice-title">
@@ -8261,8 +8476,14 @@ function CostChips({ action }: { action: LegalAction }) {
     <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`} data-testid="cost-chips">
       {chips.map((chip) => (
         <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
-          <span className={chip.kind === "action" ? "costActionIcon" : "costCreditIcon"} aria-hidden="true" />
-          {chip.amount}
+          {chip.kind === "action" ? (
+            Array.from({ length: chip.amount }, (_, index) => <span className="costActionIcon" aria-hidden="true" key={`action-${index}`} />)
+          ) : (
+            <>
+              <span className="costCreditIcon" aria-hidden="true" />
+              {chip.amount}
+            </>
+          )}
         </span>
       ))}
     </span>
@@ -8462,19 +8683,19 @@ function ChroniclePanel({
   onFocusCard(card: DisplayVisibleCard): void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set());
   const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById);
   const entries = chronicleEntriesWithRunGroups(events, side, contextByEventId, cardDetailsById).reverse();
-  const groupedEntries: { label: string; kind: ChronicleGroupKind; entries: typeof entries }[] = [];
-  for (const entry of entries) {
-    const label = entry.groupLabel;
-    const currentGroup = groupedEntries[groupedEntries.length - 1];
-    if (currentGroup?.label === label) {
-      currentGroup.entries.push(entry);
-    } else {
-      groupedEntries.push({ label, kind: entry.groupKind, entries: [entry] });
-    }
-  }
+  const groupedEntries = groupChronicleEntriesForRender(entries);
   const shownChronicleGroupLabels = new Set<string>();
+  function toggleChronicleGroup(key: string) {
+    setCollapsedGroups((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
 
   return (
     <section className={`section chroniclePanel ${collapsed ? "collapsed" : ""}`} data-testid="chronicle">
@@ -8496,18 +8717,52 @@ function ChroniclePanel({
       {!collapsed ? (
         <div className="chronicleList">
           {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
-          {groupedEntries.map((group) => (
-            <div className="chronicleGroupBlock" key={`${group.label}-${group.entries[0]?.item.id ?? "empty"}`}>
-              {chronicleGroupShouldRender(group.label, shownChronicleGroupLabels) ? <div className={`chronicleGroup ${group.kind}`}>{group.label}</div> : null}
-              {group.entries.map((entry) => (
-                <ChronicleEntry key={entry.item.id} item={entry.item} card={entry.card} displayMode={displayMode} detailMode={detailMode} groupKind={entry.groupKind} onFocusCard={onFocusCard} />
-              ))}
-            </div>
-          ))}
+          {groupedEntries.map((group) => {
+            const groupKey = chronicleGroupCollapseKey(group.label, group.kind, group.turnGroupLabel, group.firstItemId);
+            const groupRenderKey = `${groupKey}:${group.firstItemId}`;
+            const turnKey = group.turnGroupLabel ? chronicleTurnGroupCollapseKey(group.turnGroupLabel) : null;
+            const isTurnGroup = Boolean(group.turnGroupLabel && group.label === group.turnGroupLabel);
+            const turnCollapsed = Boolean(turnKey && collapsedGroups.has(turnKey));
+            const groupCollapsed = collapsedGroups.has(groupKey);
+            const hiddenByParent = group.kind === "run" && turnCollapsed;
+            const entriesCollapsed = isTurnGroup ? groupCollapsed : groupCollapsed || turnCollapsed;
+            if (hiddenByParent) return null;
+            const shouldRenderGroup = chronicleGroupShouldRender(group.label, shownChronicleGroupLabels);
+            return (
+              <div className={`chronicleGroupBlock group-${group.kind} ${entriesCollapsed ? "entriesCollapsed" : ""}`} key={groupRenderKey}>
+                {shouldRenderGroup ? (
+                  <button
+                    className={`chronicleGroup ${group.kind} ${groupCollapsed ? "collapsed" : ""}`}
+                    type="button"
+                    aria-expanded={!groupCollapsed}
+                    aria-label={`${group.label} ${groupCollapsed ? "ausklappen" : "einklappen"}`}
+                    onClick={() => toggleChronicleGroup(isTurnGroup && turnKey ? turnKey : groupKey)}
+                  >
+                    <span>{group.label}</span>
+                    {groupCollapsed ? <ChevronDown size={13} /> : <ChevronUp size={13} />}
+                  </button>
+                ) : null}
+                {!entriesCollapsed
+                  ? group.entries.map((entry) => (
+                      <ChronicleEntry key={entry.item.id} item={entry.item} card={entry.card} displayMode={displayMode} detailMode={detailMode} groupKind={entry.groupKind} onFocusCard={onFocusCard} />
+                    ))
+                  : null}
+              </div>
+            );
+          })}
         </div>
       ) : null}
     </section>
   );
+}
+
+function chronicleTurnGroupCollapseKey(label: string): string {
+  return `turn:${label}`;
+}
+
+function chronicleGroupCollapseKey(label: string, kind: ChronicleGroupKind, turnGroupLabel: string | null, firstItemId: string): string {
+  if (turnGroupLabel && label === turnGroupLabel) return chronicleTurnGroupCollapseKey(label);
+  return `${kind}:${turnGroupLabel ?? "none"}:${label}:${firstItemId}`;
 }
 
 function chronicleGroupShouldRender(label: string, shownLabels: Set<string>): boolean {
@@ -8518,7 +8773,7 @@ function chronicleGroupShouldRender(label: string, shownLabels: Set<string>): bo
 }
 
 function chronicleDeduplicatedGroupLabel(label: string): boolean {
-  return /^(Korp|Runner)-Zug(?:\s+\d+)?$/.test(label) || /^Run auf .+/.test(label);
+  return /^Zug(?:\s+\d+)?\s+-\s+(?:Korp|Runner)$/.test(label);
 }
 
 type ChronicleGroupKind = "corp" | "runner" | "run" | "system" | "neutral";
@@ -8528,9 +8783,10 @@ function chronicleEntriesWithRunGroups(
   side: Side,
   contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>
-): Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind }> {
-  const entries: Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind }> = [];
+): Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind; turnGroupLabel: string | null; groupInstanceKey: string | null }> {
+  const entries: Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind; turnGroupLabel: string | null; groupInstanceKey: string | null }> = [];
   let activeRunGroupLabel: string | null = null;
+  let activeRunGroupKey: string | null = null;
   let runEndPending = false;
 
   for (const event of events) {
@@ -8538,26 +8794,30 @@ function chronicleEntriesWithRunGroups(
     const actor = payloadSide(event.publicPayload, "actor");
     const turnNumber = contextByEventId[event.eventId]?.turnNumber ?? null;
     const turnSide = contextByEventId[event.eventId]?.turnSide ?? actor;
-    const turnGroup = turnSide ? { label: `${turnSide === "corp" ? "Korp" : "Runner"}-Zug${turnNumber ? ` ${turnNumber}` : ""}`, kind: turnSide } : null;
+    const turnGroup = turnSide ? { label: chronicleTurnGroupLabel(turnSide, turnNumber), kind: turnSide } : null;
     if (runEndPending && !chronicleActionContinuesCompletedRun(actionType)) {
       activeRunGroupLabel = null;
+      activeRunGroupKey = null;
       runEndPending = false;
     }
     const startedRunGroupLabel = chronicleRunGroupLabelFromEvent(event);
     if (startedRunGroupLabel) {
       activeRunGroupLabel = startedRunGroupLabel;
+      activeRunGroupKey = `run:${event.eventId}`;
       runEndPending = false;
     }
 
     const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
-    const items = [eventItem, ...formatChronicleEffectItems(event, side)];
-    const eventGroupLabel = activeRunGroupLabel && chronicleEventBelongsToActiveRun(actionType, items) ? activeRunGroupLabel : null;
+    const effectItems = formatChronicleEffectItems(event, side);
+    const items = shouldSuppressChronicleEventItem(event) ? effectItems : [eventItem, ...effectItems];
+    const eventGroupLabel = activeRunGroupLabel && chronicleEventBelongsToActiveRun(event, actionType, items, cardDetailsById) ? activeRunGroupLabel : null;
+    const eventGroupInstanceKey = eventGroupLabel ? activeRunGroupKey : null;
     for (const item of items) {
       const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
       const startTurnEffectGroup = chronicleStartTurnEffectGroup(actionType, actor, turnNumber, item);
       const groupLabel = eventGroupLabel ?? startTurnEffectGroup?.label ?? turnGroup?.label ?? chronicleGroupLabel(item);
       const groupKind = eventGroupLabel ? "run" : startTurnEffectGroup?.kind ?? turnGroup?.kind ?? chronicleGroupKindFromItem(item);
-      entries.push({ card, item, groupLabel, groupKind });
+      entries.push({ card, item, groupLabel, groupKind, turnGroupLabel: startTurnEffectGroup?.label ?? turnGroup?.label ?? null, groupInstanceKey: eventGroupInstanceKey });
     }
 
     if (chronicleActionCompletesRun(event, actionType)) runEndPending = true;
@@ -8574,14 +8834,14 @@ function chronicleStartTurnEffectGroup(
 ): { label: string; kind: ChronicleGroupKind } | null {
   if (actionType !== "end_turn" || !eventActor || !item.actor || item.actor === eventActor) return null;
   if (!item.chips.includes("Automatisch")) return null;
-  const label = `${item.actor === "corp" ? "Korp" : "Runner"}-Zug${eventTurnNumber ? ` ${eventTurnNumber + 1}` : ""}`;
+  const label = chronicleTurnGroupLabel(item.actor, eventTurnNumber ? eventTurnNumber + 1 : null);
   return { label, kind: item.actor };
 }
 
 function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
   if (item.groupLabel.startsWith("Run")) return "run";
-  if (item.actor === "corp" || item.groupLabel.startsWith("Korp")) return "corp";
-  if (item.actor === "runner" || item.groupLabel.startsWith("Runner")) return "runner";
+  if (item.actor === "corp" || /^Zug(?:\s+\d+)?\s+-\s+Korp$/.test(item.groupLabel)) return "corp";
+  if (item.actor === "runner" || /^Zug(?:\s+\d+)?\s+-\s+Runner$/.test(item.groupLabel)) return "runner";
   if (item.category === "system") return "system";
   return "neutral";
 }
@@ -8600,12 +8860,33 @@ function chronicleRunTargetFromLabel(label: string | null): string {
   return match?.[1]?.trim() ? serverDisplayLabel(match[1].trim()) : "einen Server";
 }
 
-function chronicleEventBelongsToActiveRun(actionType: string, items: ChronicleItem[]): boolean {
+function chronicleEventBelongsToActiveRun(
+  event: PublicGameEvent,
+  actionType: string,
+  items: ChronicleItem[],
+  cardDetailsById: Record<string, CatalogCardDetail>
+): boolean {
   if (actionType === "end_turn" || actionType === "mandatory_draw") return false;
+  if (actionType === "trigger_ability" || actionType === "activated_card_ability") {
+    const card = eventCardDetail(event, cardDetailsById);
+    return card?.type === "ice" || items.some((item) => chronicleGroupLabel(item).startsWith("Run") || item.category === "run");
+  }
   return chronicleRunContextActionTypes.has(actionType) || items.some((item) => chronicleGroupLabel(item).startsWith("Run") || item.category === "run");
 }
 
-const chronicleRunContextActionTypes = new Set(["start_run", "rez_ice", "decline_rez", "pump_breaker", "break_subroutine", "continue_run", "jack_out", "access_card", "trash_accessed_card", "steal_agenda", "decline_trash"]);
+const chronicleRunContextActionTypes = new Set([
+  "start_run",
+  "rez_ice",
+  "decline_rez",
+  "pump_breaker",
+  "break_subroutine",
+  "continue_run",
+  "jack_out",
+  "access_card",
+  "trash_accessed_card",
+  "steal_agenda",
+  "decline_trash"
+]);
 
 function chronicleActionContinuesCompletedRun(actionType: string): boolean {
   return actionType === "access_card" || actionType === "trash_accessed_card" || actionType === "steal_agenda" || actionType === "decline_trash";
@@ -8745,6 +9026,7 @@ function ChronicleCardTrigger({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTouchTapRef = useRef(0);
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
@@ -8844,6 +9126,11 @@ function ChronicleCardTrigger({
     }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
   };
 
+  const activateCardPreview = () => {
+    if (disabled) return;
+    onClick();
+  };
+
   useEffect(() => {
     if (tooltipEnabled) return;
     clearOpenTimer();
@@ -8872,7 +9159,7 @@ function ChronicleCardTrigger({
       className={`${className}${cardTypeClassName ? ` ${cardTypeClassName}` : ""}`}
       type="button"
       disabled={disabled}
-      onClick={onClick}
+      onClick={activateCardPreview}
       title={title}
       aria-describedby={tooltipId}
       onFocus={(event) => {
@@ -8880,10 +9167,27 @@ function ChronicleCardTrigger({
         if (tooltipEnabled && event.currentTarget.matches(":focus-visible")) setTooltipFocusVisible(true);
       }}
       onBlur={() => setTooltipFocusVisible(false)}
+      onDoubleClick={(event) => {
+        if (disabled) return;
+        event.preventDefault();
+        activateCardPreview();
+      }}
       onPointerEnter={(event) => {
         if (event.pointerType === "touch") return;
         updateTooltipPlacement();
         scheduleOpen();
+      }}
+      onPointerUp={(event) => {
+        if (event.pointerType !== "touch" || disabled) return;
+        updateTooltipPlacement();
+        if (tooltipEnabled) setTooltipFocusVisible(true);
+        const now = Date.now();
+        const previousTapMs = lastTouchTapRef.current;
+        lastTouchTapRef.current = now;
+        if (shouldActivateChronicleCardTouchDoubleTap(previousTapMs, now)) {
+          event.preventDefault();
+          activateCardPreview();
+        }
       }}
       onPointerLeave={(event) => {
         if (event.pointerType === "touch") return;
@@ -9481,6 +9785,7 @@ function DeckEditorPanel({
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
   const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
   const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
+  const agendaStatus = useMemo(() => deckAgendaStatusForEditor(selectedDeck, cardDetailsById, cardLookup), [cardDetailsById, cardLookup, selectedDeck]);
   const tableLayout = useMemo(() => (selectedDeck ? normalizeDeckTableLayout(selectedDeck, cardLookup, cardDetailsById) : null), [cardDetailsById, cardLookup, selectedDeck]);
   const sourceFilteredPlayableCards = useMemo(() => filterCatalogCardsBySet(playableCards, builderSetFilter), [builderSetFilter, playableCards]);
   const rarityFilteredPlayableCards = useMemo(() => filterCatalogCardsByRarity(sourceFilteredPlayableCards, builderRarityFilter), [builderRarityFilter, sourceFilteredPlayableCards]);
@@ -9890,6 +10195,27 @@ function DeckEditorPanel({
       piles: orderedPiles.map((pile, order) => ({ ...pile, order }))
     });
   };
+  const insertTablePileAt = (targetPileId: string) => {
+    if (!tableLayout || !selectedDeck || tableLayout.piles.length >= MAX_DECK_TABLE_PILE_COUNT) return;
+    const orderedPiles = [...tableLayout.piles].sort((left, right) => left.order - right.order);
+    const targetIndex = orderedPiles.findIndex((pile) => pile.id === targetPileId);
+    if (targetIndex < 0) return;
+    const existingPileIds = new Set(orderedPiles.map((pile) => pile.id));
+    let nextPileNumber = orderedPiles.length + 1;
+    while (existingPileIds.has(`pile-${nextPileNumber}`)) nextPileNumber += 1;
+    orderedPiles.splice(targetIndex, 0, {
+      id: `pile-${nextPileNumber}`,
+      name: "Freier Stapel",
+      order: targetIndex,
+      sortMode: "free",
+      entries: []
+    });
+    clearTableSelection();
+    updateTableLayout({
+      ...tableLayout,
+      piles: orderedPiles.map((pile, order) => ({ ...pile, order, entries: reorderDeckTableEntries(pile.entries) }))
+    });
+  };
   const arrangeTableDeck = (mode: DeckTableArrangeMode) => {
     if (!tableLayout || !selectedDeck) return;
     clearTableSelection();
@@ -10209,6 +10535,7 @@ function DeckEditorPanel({
                       selectedCardKeys={selectedTableCardKeySet}
                       selectedCards={selectedTableCards}
                       selectionMode={tableSelectionMode}
+                      agendaStatus={agendaStatus}
                       onBack={() => setDeckEditorMode("list")}
                       onCardClick={handleTableCardClick}
                       onClearSelection={clearTableSelection}
@@ -10218,6 +10545,7 @@ function DeckEditorPanel({
                       onRenamePile={renameTablePile}
                       onRemoveCard={removeTableCardFromPile}
                       onArrangeDeck={arrangeTableDeck}
+                      onInsertPileAt={insertTablePileAt}
                       onSave={onSave}
                       onSelectPile={toggleTablePileSelection}
                       onSetTableWidth={updateTableWidthSetting}
@@ -10235,6 +10563,7 @@ function DeckEditorPanel({
                         <div>
                           <h3>Deckliste</h3>
                           <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                          <DeckAgendaStatusBadge status={agendaStatus} />
                         </div>
                         <button className="button deckTableEnterButton" onClick={() => setDeckEditorMode("table")} type="button">
                           <Move size={15} />
@@ -10347,6 +10676,23 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
   );
 }
 
+function DeckAgendaStatusBadge({ status }: { status: DeckAgendaStatus | null }) {
+  if (!status) return null;
+  const complete = status.missingAgendaPoints === 0;
+  const loading = status.agendaPoints === null;
+  const missingLabel = loading ? "wird geladen" : complete ? "Mindestmenge erfüllt" : `${status.missingAgendaPoints} fehlen`;
+  return (
+    <p
+      className={`deckAgendaStatus ${loading ? "loading" : complete ? "complete" : "missing"}`}
+      title={`Agenda-Mindestmenge berechnet für ${status.effectiveCardsForMinimum} Karten.`}
+    >
+      <AgendaIcon size={14} />
+      <span>{loading ? `Agenda-Punkte / min. ${status.minimumAgendaPoints}` : `${status.agendaPoints} / ${status.minimumAgendaPoints} Agenda-Punkte`}</span>
+      <strong>{missingLabel}</strong>
+    </p>
+  );
+}
+
 function DeckTableBoard({
   layout,
   deckName,
@@ -10363,6 +10709,7 @@ function DeckTableBoard({
   selectedCardKeys,
   selectedCards,
   selectionMode,
+  agendaStatus,
   onBack,
   onCardClick,
   onClearSelection,
@@ -10372,6 +10719,7 @@ function DeckTableBoard({
   onRenamePile,
   onRemoveCard,
   onArrangeDeck,
+  onInsertPileAt,
   onSave,
   onSelectPile,
   onSetTableWidth,
@@ -10398,6 +10746,7 @@ function DeckTableBoard({
   selectedCardKeys: Set<string>;
   selectedCards: DeckTableSelectionEntry[];
   selectionMode: boolean;
+  agendaStatus: DeckAgendaStatus | null;
   onBack(): void;
   onCardClick(event: ReactMouseEvent<HTMLElement>, pileId: string, entry: DeckTableLayoutEntry): void;
   onClearSelection(): void;
@@ -10407,6 +10756,7 @@ function DeckTableBoard({
   onRenamePile(pileId: string, name: string): void;
   onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
   onArrangeDeck(mode: DeckTableArrangeMode): void;
+  onInsertPileAt(pileId: string): void;
   onSave(): void;
   onSelectPile(pileId: string): void;
   onSetTableWidth(value: number): void;
@@ -10425,6 +10775,7 @@ function DeckTableBoard({
         <div>
           <h3>Deck-Tisch</h3>
           <p className="meta">{deckName} · {totalCards} Karten auf {layout.piles.length} Stapeln</p>
+          <DeckAgendaStatusBadge status={agendaStatus} />
         </div>
         <div className="deckTableBoardTools">
           <button className={`button deckTableSelectionButton ${selectionMode ? "active" : ""}`} type="button" onClick={onToggleSelectionMode} aria-pressed={selectionMode}>
@@ -10516,9 +10867,11 @@ function DeckTableBoard({
             selectedCardKeys={selectedCardKeys}
             selectedCards={selectedCards}
             selectionMode={selectionMode}
+            canInsertPile={layout.piles.length < MAX_DECK_TABLE_PILE_COUNT}
             onCardClick={onCardClick}
             onDuplicateCard={onDuplicateCard}
             onDropCard={onDropCard}
+            onInsertPileAt={onInsertPileAt}
             onMenu={onMenu}
             onRenamePile={onRenamePile}
             onRemoveCard={onRemoveCard}
@@ -10543,10 +10896,12 @@ function DeckTablePileView({
   selectedCardKeys,
   selectedCards,
   selectionMode,
+  canInsertPile,
   onCardClick,
   onDuplicateCard,
   onMenu,
   onDropCard,
+  onInsertPileAt,
   onRenamePile,
   onRemoveCard,
   onSelectPile,
@@ -10561,10 +10916,12 @@ function DeckTablePileView({
   selectedCardKeys: Set<string>;
   selectedCards: DeckTableSelectionEntry[];
   selectionMode: boolean;
+  canInsertPile: boolean;
   onCardClick(event: ReactMouseEvent<HTMLElement>, pileId: string, entry: DeckTableLayoutEntry): void;
   onDuplicateCard(pileId: string, cardId: string, sourceOrder: number, copiesToAdd: number): void;
   onMenu(key: string | null): void;
   onDropCard(event: ReactDragEvent<HTMLElement>, pileId: string, targetOrder?: number): void;
+  onInsertPileAt(pileId: string): void;
   onRenamePile(pileId: string, name: string): void;
   onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
   onSelectPile(pileId: string): void;
@@ -10593,6 +10950,16 @@ function DeckTablePileView({
             type="button"
           >
             <Move size={12} />
+          </button>
+          <button
+            aria-label={`Freien Stapel vor ${pile.name || `Stapel ${pile.order + 1}`} einfügen`}
+            className="deckTablePileInsertButton"
+            disabled={!canInsertPile}
+            onClick={() => onInsertPileAt(pile.id)}
+            title={canInsertPile ? "Freien Stapel hier einfügen" : "Maximale Stapelzahl erreicht"}
+            type="button"
+          >
+            <Plus size={12} />
           </button>
           {showName ? (
             <input value={pile.name ?? ""} onChange={(event) => onRenamePile(pile.id, event.target.value)} aria-label="Stapelname" />
@@ -11587,18 +11954,21 @@ function ArchivesDualStackLane({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
 }) {
-  const { faceupCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
+  const { faceupCards, facedownCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
+  const [corpArchivesFacedownView, setCorpArchivesFacedownView] = useState<"details" | "backs">("details");
   const { archivePercent } = useCardScaleSettings();
   const archiveCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, archivePercent / 100);
   const archiveCardsStyle = useMemo(() => ({ "--archive-card-scale": String(archiveCardScale) } as CSSProperties), [archiveCardScale]);
   const shownFaceupCards = faceupCards.slice(0, ARCHIVES_STACK_PREVIEW_LIMIT);
-  const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
+  const shownFacedownCards = facedownCards.slice(0, ARCHIVES_STACK_PREVIEW_LIMIT);
+  const shownFacedownCount = viewerSide === "corp" ? shownFacedownCards.length : Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
   const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
   const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
   const faceupRowItems = shownFaceupCards.length + (faceupOverflow > 0 ? 1 : 0);
   const facedownRowItems = shownFacedownCount + (facedownOverflow > 0 ? 1 : 0);
   const faceupRowStyle = { "--archive-visible-steps": String(Math.max(0, faceupRowItems - 1)) } as CSSProperties;
   const facedownRowStyle = { "--archive-visible-steps": String(Math.max(0, facedownRowItems - 1)) } as CSSProperties;
+  const showCorpFacedownBacks = viewerSide === "corp" && corpArchivesFacedownView === "backs";
 
   if (collapsed) {
     return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label="Archive eingeklappt" />;
@@ -11643,22 +12013,73 @@ function ArchivesDualStackLane({
         </div>
       ) : null}
 
+      {viewerSide === "corp" && faceupCards.length > 0 && facedownCards.length > 0 ? (
+        <div className="archivesToggleColumn">
+          <button
+            className="archivesViewToggle"
+            type="button"
+            aria-label={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+            aria-pressed={showCorpFacedownBacks}
+            onClick={() => setCorpArchivesFacedownView((current) => (current === "details" ? "backs" : "details"))}
+            title={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+          >
+            {showCorpFacedownBacks ? <Eye size={12} strokeWidth={2.4} /> : <Image size={12} strokeWidth={2.4} />}
+          </button>
+        </div>
+      ) : null}
+
       {facedownCount > 0 ? (
-        <div className="archivesPile">
+        <div className="archivesPile archivesFacedownPile">
+          {viewerSide === "corp" && faceupCards.length === 0 && facedownCards.length > 0 ? (
+            <div className="archivesInlineToggle">
+              <button
+                className="archivesViewToggle"
+                type="button"
+                aria-label={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+                aria-pressed={showCorpFacedownBacks}
+                onClick={() => setCorpArchivesFacedownView((current) => (current === "details" ? "backs" : "details"))}
+                title={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+              >
+                {showCorpFacedownBacks ? <Eye size={12} strokeWidth={2.4} /> : <Image size={12} strokeWidth={2.4} />}
+              </button>
+            </div>
+          ) : null}
           <div className="archivesPileBody">
             <div className="archivesOverlapRow" style={facedownRowStyle}>
-              {Array.from({ length: shownFacedownCount }, (_, index) => (
-                <CardView
-                  key={`archives-facedown-${index}`}
-                  card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
-                  compact
-                  displayMode={displayMode}
-                  hiddenSide="corp"
-                  installedCorpCard={false}
-                  actions={[]}
-                  actionDisabled
-                />
-              ))}
+              {viewerSide === "corp"
+                ? shownFacedownCards.map((card) => {
+                    const displayCard = enrichCard(card);
+                    return (
+                      <CardView
+                        key={card.instanceId}
+                        card={displayCard}
+                        compact
+                        displayMode={displayMode}
+                        hiddenSide="corp"
+                        installedCorpCard={false}
+                        archiveFacedown
+                        {...(showCorpFacedownBacks ? { forceCardBack: "corp" as Side } : {})}
+                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                        actions={cardActionsFor(card)}
+                        actionDisabled={actionDisabled}
+                        onAction={onAction}
+                        onFocus={onFocus}
+                        onActionContextSelect={onActionContextSelect}
+                      />
+                    );
+                  })
+                : Array.from({ length: shownFacedownCount }, (_, index) => (
+                    <CardView
+                      key={`archives-facedown-${index}`}
+                      card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
+                      compact
+                      displayMode={displayMode}
+                      hiddenSide="corp"
+                      installedCorpCard={false}
+                      actions={[]}
+                      actionDisabled
+                    />
+                  ))}
               {facedownOverflow > 0 ? <span className="archivesOverflowBadge">+{facedownOverflow}</span> : null}
             </div>
           </div>
@@ -11684,8 +12105,12 @@ function CardView({
   modifierBadges = [],
   runPositionActive = false,
   runPositionLabel,
+  viewMarkerActive = false,
   showAdvancementCounters = true,
   showScoreStateBadges = false,
+  scoreStateBadges: explicitScoreStateBadges = [],
+  archiveFacedown = false,
+  forceCardBack,
   choiceSelected = false,
   choiceShortcut,
   discardShortcut,
@@ -11709,8 +12134,12 @@ function CardView({
   modifierBadges?: IceModifierBadgeView[];
   runPositionActive?: boolean;
   runPositionLabel?: string | undefined;
+  viewMarkerActive?: boolean;
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
+  scoreStateBadges?: ScoredAgendaStateLine[];
+  archiveFacedown?: boolean;
+  forceCardBack?: Side;
   choiceSelected?: boolean;
   choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
@@ -11737,7 +12166,8 @@ function CardView({
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
-  const hiddenBackClass = !card.known && hiddenSide ? " hiddenBack" : "";
+  const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
+  const archiveFacedownClass = archiveFacedown ? " archiveFacedown" : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
@@ -11767,7 +12197,7 @@ function CardView({
         card.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(card.memoryCost) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
-  const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
+  const cardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const isOperationImageCard = Boolean(visualImageUrl) && card.known && isOperationCardType(card.type) && hasGeneratedCardArt(card.definitionId);
@@ -11781,18 +12211,20 @@ function CardView({
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
-  const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
+  const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
   const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
-  const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
+  const scoreStateAriaSuffix = scoreStateBadges.map((badge) => `${badge.value}: ${badge.label}`).join(", ");
+  const cardStateAriaText = [counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
+  const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
@@ -12033,7 +12465,7 @@ function CardView({
   ) : null;
 
   return (
-    <div className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}`}>
+    <div className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}${viewMarkerActive ? " viewMarkerActiveSlot" : ""}`}>
       {positionBadge ? (
         <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: Installationsreihenfolge von innen nach außen`}>
           {positionBadge}
@@ -12044,10 +12476,15 @@ function CardView({
           <Crosshair size={14} strokeWidth={2.4} aria-hidden="true" />
         </span>
       ) : null}
+      {viewMarkerActive ? (
+        <span className="cardViewMarker" tabIndex={0} aria-label="Karte wird gerade angesehen" data-tooltip="Karte wird gerade angesehen" title="Karte wird gerade angesehen">
+          <Eye size={14} strokeWidth={2.4} aria-hidden="true" />
+        </span>
+      ) : null}
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -12093,6 +12530,7 @@ function CardView({
         title={nativeTitle}
         data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
+        data-archive-facedown={archiveFacedown ? "true" : undefined}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} decorative /> : null}
         {isHardwareImageCard ? (
@@ -12208,8 +12646,8 @@ type ScoredAgendaStateLine = {
   tone: ScoredAgendaStateTone;
 };
 
-function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side: Side }) {
-  const lines = scoredAgendaStateLines(card, side);
+function ScoredAgendaStateLines({ card, side, corpScoreAreaCards }: { card: DisplayVisibleCard; side: Side; corpScoreAreaCards: VisibleCard[] }) {
+  const lines = scoredAgendaStateLines(card, side, corpScoreAreaCards);
   if (lines.length === 0) return null;
   return (
     <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
@@ -12223,15 +12661,19 @@ function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side
   );
 }
 
-function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
+function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
   const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
   if (effectLine) lines.push(effectLine);
+  const researchDifficultyLine = side === "corp" ? researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards) : null;
+  if (researchDifficultyLine) lines.push(researchDifficultyLine);
   return lines;
 }
 
-function scoreCardStateBadges(_card: DisplayVisibleCard): ScoredAgendaStateLine[] {
+function scoreCardStateBadges(card: DisplayVisibleCard, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
   const badges: ScoredAgendaStateLine[] = [];
+  const researchDifficultyLine = researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards);
+  if (researchDifficultyLine) badges.push(researchDifficultyLine);
   return badges;
 }
 
