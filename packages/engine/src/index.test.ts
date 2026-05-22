@@ -37168,7 +37168,15 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
     state.phase = "corp_action_phase";
     state.timingPoint = "corp_action.main";
     state.corp.clicks = 3;
+    state.corp.credits = 0;
     const initial = structuredClone(state);
+    const oneClickTwoCreditsState = structuredClone(state);
+    oneClickTwoCreditsState.corp.clicks = 1;
+    oneClickTwoCreditsState.corp.credits = 2;
+
+    expect(
+      getLegalActions(oneClickTwoCreditsState, "corp").map((action) => action.type),
+    ).not.toContain("purge_virus_counters");
 
     const purge = mustAction(
       state,
@@ -37200,6 +37208,7 @@ describe("MVP 0.99 Hosting, Viren, Purge und Counter-Familien", () => {
     );
 
     expect(state.corp.clicks).toBe(0);
+    expect(state.corp.credits).toBe(0);
     expect(state.cardInstances[virusId]?.counters?.virus).toBeUndefined();
     expect(state.cardInstances[virusId]?.counters?.power).toBe(2);
     expect(state.eventLog.at(-1)?.visibilityClass).toBe("public");

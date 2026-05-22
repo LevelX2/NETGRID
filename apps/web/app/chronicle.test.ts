@@ -2533,6 +2533,8 @@ describe("formatChronicleEvent", () => {
       makeEvent("purge_virus_counters", {
         actor: "corp",
         actionCostClicks: 3,
+        purgedCounterType: "virus",
+        purgedVirusCounters: 4,
         turnActionOrdinalStart: 1,
         turnActionOrdinalEnd: 3
       }),
@@ -2542,6 +2544,9 @@ describe("formatChronicleEvent", () => {
     expect(paid.actionUse).toMatchObject({ label: "2", title: "2. Aktion in diesem Zug", clicks: 1 });
     expect(free.actionUse).toBeUndefined();
     expect(multi.actionUse).toMatchObject({ label: "1-3", title: "Aktionen 1 bis 3 in diesem Zug", clicks: 3 });
+    expect(multi.title).toBe("Die Korp hat 4 Virus-Counter entfernt.");
+    expect(multi.description).toBe("Kosten: 3 Aktionen; keine Credits.");
+    expect(multi.chips).toEqual(expect.arrayContaining(["Purge", "3 Aktionen", "4 entfernt"]));
   });
 
   it("derives chronicle action numbers across extra actions when payload ordinals reset", () => {

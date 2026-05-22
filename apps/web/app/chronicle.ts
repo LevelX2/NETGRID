@@ -1027,6 +1027,26 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       title = phrase(subject, "einen Tag entfernt");
       chips.push("Tag entfernt");
       break;
+    case "purge_virus_counters": {
+      const removed = numberValue(payload.purgedVirusCounters);
+      const clicks = numberValue(payload.actionCostClicks) ?? 3;
+      category = "danger";
+      importance = "important";
+      visibility = "public";
+      title = phrase(
+        subject,
+        removed && removed > 0
+          ? `${removed} Virus-Counter entfernt`
+          : "alle Virus-Counter entfernt",
+      );
+      description = `Kosten: ${clicks} Aktion${clicks === 1 ? "" : "en"}; keine Credits.`;
+      chips.push(
+        "Purge",
+        `${clicks} Aktion${clicks === 1 ? "" : "en"}`,
+        ...(removed && removed > 0 ? [`${removed} entfernt`] : ["Alle Virus-Counter"]),
+      );
+      break;
+    }
     case "move_to_set_aside":
       category = "card";
       importance = "important";
