@@ -4,5 +4,6 @@ export { createGame, createGameAfterSetup } from "./create-game";
 export { applyGameAction } from "./apply-game-action";
 export { legalActionsFor } from "./legal-actions";
 export { playerViewFor } from "./player-view";
-export { hashGameState, replayGameEvents } from "./replay";
-export { validateGameStateForDebug } from "./validation";
+export { hashGameState, hashState } from "./hash";
+export { replayGameEvents } from "./replay";
+export { validateGameState, validateGameStateForDebug } from "./validation";

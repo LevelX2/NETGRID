@@ -6,18 +6,20 @@ import {
   createGameAfterSetup as createLegacyGameAfterSetup,
   getLegalActions,
   getPlayerView,
-  hashState,
+  hashState as legacyHashState,
   replayEvents,
-  validateGameState,
+  validateGameState as legacyValidateGameState,
 } from "../index";
 import {
   applyGameAction,
   createGame,
   createGameAfterSetup,
   hashGameState,
+  hashState,
   legalActionsFor,
   playerViewFor,
   replayGameEvents,
+  validateGameState,
   validateGameStateForDebug,
 } from "./index";
 
@@ -38,8 +40,12 @@ describe("game facade", () => {
     expect(state).toEqual(legacyState);
     expect(legalActionsFor(state, "corp")).toEqual(getLegalActions(state, "corp"));
     expect(playerViewFor(state, "corp")).toEqual(getPlayerView(state, "corp"));
-    expect(hashGameState(state)).toBe(hashState(state));
-    expect(validateGameStateForDebug(state)).toEqual(validateGameState(state));
+    expect(hashState(state)).toBe(legacyHashState(state));
+    expect(hashGameState(state)).toBe(legacyHashState(state));
+    expect(validateGameState(state)).toEqual(legacyValidateGameState(state));
+    expect(validateGameStateForDebug(state)).toEqual(
+      legacyValidateGameState(state),
+    );
     expect(replayGameEvents(state, state.eventLog)).toEqual(
       replayEvents(state, state.eventLog),
     );
