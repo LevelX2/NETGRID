@@ -5,6 +5,7 @@
 ## Enthaltene Artefakte
 
 - `capability-deep-analysis-2026-05-17.md`: übergreifende KI-Fähigkeitsanalyse mit Prioritäten.
+- `current-ai-logic-documentation-prompt-2026-05-22.md`: Prompt für eine umfassende, aktuelle Ist-Dokumentation der bestehenden KI-Logik als Grundlage für spätere Prüfung und Verbesserungsvorschläge.
 - `ai-hints-role-gap-report-2026-05-17.md`: Rollenlücken in AI-Hints und Folgepakete.
 - `live-doctrine-input-path-audit-2026-05-17.md`: Audit der Live-Doctrine-Eingangspfade.
 - `match-progression-benchmark-2026-05-17.md`: Diagnosepfad für Matchprogression.
