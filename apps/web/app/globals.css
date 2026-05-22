@@ -2034,7 +2034,7 @@ select {
 
 .deckTablePileTitleRow {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
+  grid-template-columns: 24px 24px minmax(0, 1fr);
   gap: 4px;
   align-items: center;
 }
@@ -2046,7 +2046,7 @@ select {
 }
 
 .deckTablePileTitleRow > .deckTableSelectPileButton {
-  grid-column: 2;
+  grid-column: 3;
   grid-row: 2;
   justify-self: stretch;
 }
@@ -2062,6 +2062,7 @@ select {
 }
 
 .deckTablePileMoveHandle,
+.deckTablePileInsertButton,
 .deckTableSelectPileButton {
   min-width: 0;
   min-height: 24px;
@@ -2084,15 +2085,26 @@ select {
   cursor: grab;
 }
 
+.deckTablePileInsertButton {
+  grid-column: 2;
+  grid-row: 2;
+}
+
 .deckTablePileMoveHandle:active {
   cursor: grabbing;
 }
 
 .deckTablePileMoveHandle:hover,
+.deckTablePileInsertButton:hover,
 .deckTableSelectPileButton:hover,
 .deckTableSelectPileButton.active {
   border-color: var(--focus);
   color: var(--text);
+}
+
+.deckTablePileInsertButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 
 .deckTableSelectPileButton.active {

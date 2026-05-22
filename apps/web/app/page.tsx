@@ -9984,6 +9984,27 @@ function DeckEditorPanel({
       piles: orderedPiles.map((pile, order) => ({ ...pile, order }))
     });
   };
+  const insertTablePileAt = (targetPileId: string) => {
+    if (!tableLayout || !selectedDeck || tableLayout.piles.length >= MAX_DECK_TABLE_PILE_COUNT) return;
+    const orderedPiles = [...tableLayout.piles].sort((left, right) => left.order - right.order);
+    const targetIndex = orderedPiles.findIndex((pile) => pile.id === targetPileId);
+    if (targetIndex < 0) return;
+    const existingPileIds = new Set(orderedPiles.map((pile) => pile.id));
+    let nextPileNumber = orderedPiles.length + 1;
+    while (existingPileIds.has(`pile-${nextPileNumber}`)) nextPileNumber += 1;
+    orderedPiles.splice(targetIndex, 0, {
+      id: `pile-${nextPileNumber}`,
+      name: "Freier Stapel",
+      order: targetIndex,
+      sortMode: "free",
+      entries: []
+    });
+    clearTableSelection();
+    updateTableLayout({
+      ...tableLayout,
+      piles: orderedPiles.map((pile, order) => ({ ...pile, order, entries: reorderDeckTableEntries(pile.entries) }))
+    });
+  };
   const arrangeTableDeck = (mode: DeckTableArrangeMode) => {
     if (!tableLayout || !selectedDeck) return;
     clearTableSelection();
@@ -10312,6 +10333,7 @@ function DeckEditorPanel({
                       onRenamePile={renameTablePile}
                       onRemoveCard={removeTableCardFromPile}
                       onArrangeDeck={arrangeTableDeck}
+                      onInsertPileAt={insertTablePileAt}
                       onSave={onSave}
                       onSelectPile={toggleTablePileSelection}
                       onSetTableWidth={updateTableWidthSetting}
@@ -10466,6 +10488,7 @@ function DeckTableBoard({
   onRenamePile,
   onRemoveCard,
   onArrangeDeck,
+  onInsertPileAt,
   onSave,
   onSelectPile,
   onSetTableWidth,
@@ -10501,6 +10524,7 @@ function DeckTableBoard({
   onRenamePile(pileId: string, name: string): void;
   onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
   onArrangeDeck(mode: DeckTableArrangeMode): void;
+  onInsertPileAt(pileId: string): void;
   onSave(): void;
   onSelectPile(pileId: string): void;
   onSetTableWidth(value: number): void;
@@ -10610,9 +10634,11 @@ function DeckTableBoard({
             selectedCardKeys={selectedCardKeys}
             selectedCards={selectedCards}
             selectionMode={selectionMode}
+            canInsertPile={layout.piles.length < MAX_DECK_TABLE_PILE_COUNT}
             onCardClick={onCardClick}
             onDuplicateCard={onDuplicateCard}
             onDropCard={onDropCard}
+            onInsertPileAt={onInsertPileAt}
             onMenu={onMenu}
             onRenamePile={onRenamePile}
             onRemoveCard={onRemoveCard}
@@ -10637,10 +10663,12 @@ function DeckTablePileView({
   selectedCardKeys,
   selectedCards,
   selectionMode,
+  canInsertPile,
   onCardClick,
   onDuplicateCard,
   onMenu,
   onDropCard,
+  onInsertPileAt,
   onRenamePile,
   onRemoveCard,
   onSelectPile,
@@ -10655,10 +10683,12 @@ function DeckTablePileView({
   selectedCardKeys: Set<string>;
   selectedCards: DeckTableSelectionEntry[];
   selectionMode: boolean;
+  canInsertPile: boolean;
   onCardClick(event: ReactMouseEvent<HTMLElement>, pileId: string, entry: DeckTableLayoutEntry): void;
   onDuplicateCard(pileId: string, cardId: string, sourceOrder: number, copiesToAdd: number): void;
   onMenu(key: string | null): void;
   onDropCard(event: ReactDragEvent<HTMLElement>, pileId: string, targetOrder?: number): void;
+  onInsertPileAt(pileId: string): void;
   onRenamePile(pileId: string, name: string): void;
   onRemoveCard(pileId: string, cardId: string, sourceOrder: number): void;
   onSelectPile(pileId: string): void;
@@ -10687,6 +10717,16 @@ function DeckTablePileView({
             type="button"
           >
             <Move size={12} />
+          </button>
+          <button
+            aria-label={`Freien Stapel vor ${pile.name || `Stapel ${pile.order + 1}`} einfügen`}
+            className="deckTablePileInsertButton"
+            disabled={!canInsertPile}
+            onClick={() => onInsertPileAt(pile.id)}
+            title={canInsertPile ? "Freien Stapel hier einfügen" : "Maximale Stapelzahl erreicht"}
+            type="button"
+          >
+            <Plus size={12} />
           </button>
           {showName ? (
             <input value={pile.name ?? ""} onChange={(event) => onRenamePile(pile.id, event.target.value)} aria-label="Stapelname" />
