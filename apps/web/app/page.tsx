@@ -214,7 +214,7 @@ import {
 } from "./catalog-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
-import { scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
+import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
   loadCurrentTabSession,
@@ -5252,6 +5252,7 @@ export default function Page() {
                             {...(lane.kind === "ice" ? { slotClassName: iceStackSlotClass(card) } : {})}
                             {...(lane.kind === "ice" ? { positionBadge: String(index + 1) } : {})}
                             {...(lane.kind === "ice" ? { modifierBadges: iceModifierBadgesForServer(server) } : {})}
+                            scoreStateBadges={scoreCardStateBadges(displayCard, scoreAreaCardsBySide("corp"))}
                             runPositionActive={lane.kind === "ice" && activeRunIceId === card.instanceId}
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
@@ -5327,6 +5328,7 @@ export default function Page() {
                                             selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                                             actions={cardActionsFor(card)}
                                             actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                            scoreStateBadges={scoreCardStateBadges(displayCard, scoreAreaCardsBySide("corp"))}
                                             {...(discardOption
                                               ? {
                                                   discardShortcut: {
@@ -7803,6 +7805,7 @@ function ScoredAgendaOverlay({
                 displayMode={cardDisplayMode}
                 showAdvancementCounters={false}
                 showScoreStateBadges
+                scoreStateBadges={side === "corp" ? scoreCardStateBadges(card, cards) : []}
                 actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
                 selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
@@ -7810,7 +7813,7 @@ function ScoredAgendaOverlay({
                 {...(onFocus ? { onFocus } : {})}
                 {...(onActionContextSelect ? { onActionContextSelect } : {})}
               />
-              <ScoredAgendaStateLines card={card} side={side} />
+              <ScoredAgendaStateLines card={card} side={side} corpScoreAreaCards={side === "corp" ? cards : []} />
             </div>
           ))}
           {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
@@ -11944,6 +11947,7 @@ function CardView({
   viewMarkerActive = false,
   showAdvancementCounters = true,
   showScoreStateBadges = false,
+  scoreStateBadges: explicitScoreStateBadges = [],
   choiceSelected = false,
   choiceShortcut,
   discardShortcut,
@@ -11970,6 +11974,7 @@ function CardView({
   viewMarkerActive?: boolean;
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
+  scoreStateBadges?: ScoredAgendaStateLine[];
   choiceSelected?: boolean;
   choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
@@ -12040,10 +12045,12 @@ function CardView({
   const advancementCount = advancementDisplay?.amount ?? 0;
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
-  const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
+  const scoreStateBadges = explicitScoreStateBadges.length > 0 ? explicitScoreStateBadges : showScoreStateBadges ? scoreCardStateBadges(card) : [];
   const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
   const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
-  const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
+  const scoreStateAriaSuffix = scoreStateBadges.map((badge) => `${badge.value}: ${badge.label}`).join(", ");
+  const cardStateAriaText = [counterAriaSuffix, scoreStateAriaSuffix].filter(Boolean).join(", ");
+  const cardStateAria = cardStateAriaText ? `, ${cardStateAriaText}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
@@ -12472,8 +12479,8 @@ type ScoredAgendaStateLine = {
   tone: ScoredAgendaStateTone;
 };
 
-function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side: Side }) {
-  const lines = scoredAgendaStateLines(card, side);
+function ScoredAgendaStateLines({ card, side, corpScoreAreaCards }: { card: DisplayVisibleCard; side: Side; corpScoreAreaCards: VisibleCard[] }) {
+  const lines = scoredAgendaStateLines(card, side, corpScoreAreaCards);
   if (lines.length === 0) return null;
   return (
     <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
@@ -12487,15 +12494,19 @@ function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side
   );
 }
 
-function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
+function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
   const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
   if (effectLine) lines.push(effectLine);
+  const researchDifficultyLine = side === "corp" ? researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards) : null;
+  if (researchDifficultyLine) lines.push(researchDifficultyLine);
   return lines;
 }
 
-function scoreCardStateBadges(_card: DisplayVisibleCard): ScoredAgendaStateLine[] {
+function scoreCardStateBadges(card: DisplayVisibleCard, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
   const badges: ScoredAgendaStateLine[] = [];
+  const researchDifficultyLine = researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards);
+  if (researchDifficultyLine) badges.push(researchDifficultyLine);
   return badges;
 }
 
