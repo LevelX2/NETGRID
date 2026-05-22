@@ -6205,6 +6205,16 @@ select {
   overflow: visible;
 }
 
+.chronicleGroupBlock.group-run {
+  margin-left: 12px;
+  padding-left: 14px;
+  border-left: 1px solid color-mix(in srgb, var(--chronicle-run), transparent 54%);
+}
+
+.chronicleGroupBlock.entriesCollapsed {
+  gap: 0;
+}
+
 .chronicleGroup {
   --chronicle-group-accent: var(--muted);
   position: sticky;
@@ -6212,15 +6222,43 @@ select {
   z-index: 2;
   width: fit-content;
   max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 3px 8px;
   border: 1px solid color-mix(in srgb, var(--chronicle-group-accent), var(--line) 45%);
   border-radius: 999px;
   background: color-mix(in srgb, var(--chronicle-group-accent), var(--panel) 86%);
   color: color-mix(in srgb, var(--chronicle-group-accent), white 32%);
+  font-family: inherit;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0;
   text-transform: uppercase;
+  cursor: pointer;
+}
+
+.chronicleGroup:hover,
+.chronicleGroup:focus-visible {
+  border-color: color-mix(in srgb, var(--chronicle-group-accent), white 24%);
+  background: color-mix(in srgb, var(--chronicle-group-accent), var(--panel) 78%);
+}
+
+.chronicleGroup:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--chronicle-group-accent), white 30%);
+  outline-offset: 2px;
+}
+
+.chronicleGroup.run::before {
+  content: "";
+  width: 10px;
+  height: 1px;
+  margin-left: -2px;
+  background: color-mix(in srgb, var(--chronicle-run), white 16%);
+}
+
+.chronicleGroup svg {
+  flex: 0 0 auto;
 }
 
 .chronicleGroup.corp {

@@ -2617,11 +2617,11 @@ describe("formatChronicleEvent", () => {
       { turnNumber: 5 }
     );
 
-    expect(runnerTurnEnd.title).toBe("Du hast den Zug beendet (Runnerzug 6).");
-    expect(runnerTurnEnd.chips).toContain("Runnerzug 6");
-    expect(runnerTurnEnd.groupLabel).toBe("Runner-Zug 6");
-    expect(corpMandatoryDraw.chips).toContain("Korpzug 5");
-    expect(corpMandatoryDraw.groupLabel).toBe("Korp-Zug 5");
+    expect(runnerTurnEnd.title).toBe("Du hast den Zug beendet (Zug 6 - Runner).");
+    expect(runnerTurnEnd.chips).toContain("Zug 6 - Runner");
+    expect(runnerTurnEnd.groupLabel).toBe("Zug 6 - Runner");
+    expect(corpMandatoryDraw.chips).toContain("Zug 5 - Korp");
+    expect(corpMandatoryDraw.groupLabel).toBe("Zug 5 - Korp");
   });
 
   it("counts Korp and Runner turns as one shared sequence", () => {
@@ -3004,7 +3004,7 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items[0]?.title).toBe("Du hast 1 Shell-Counter von Simple Fracter entfernt.");
-    expect(items[0]?.groupLabel).toBe("Runner-Zug");
+    expect(items[0]?.groupLabel).toBe("Zug - Runner");
     expect(items[0]?.cardDefinitionId).toBe("simple_fracter");
     expect(items[0]?.cardTitle).toBe("Simple Fracter");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["The Shell Traders", "Shell-Counter", "1 entfernt", "1 übrig"]));

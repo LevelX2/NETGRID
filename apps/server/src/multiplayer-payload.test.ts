@@ -20,6 +20,8 @@ describe("multiplayer side payload projection", () => {
     expect(payload.playerView.publicEvents).toEqual(payload.eventTail);
     expect(payload.eventTail[0]?.eventId).toBe("evt_7");
     expect(payload.eventTail.at(-1)?.eventId).toBe("evt_86");
+    expect(payload.eventTail[0]?.publicPayload.chronicleTurnNumber).toBeGreaterThan(1);
+    expect(payload.eventTail[0]?.publicPayload.chronicleTurnSide).toBe("corp");
   });
 });
 

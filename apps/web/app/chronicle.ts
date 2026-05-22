@@ -2005,18 +2005,19 @@ function runPhaseLabel(phase: string): string {
 function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, label: string | undefined, serverLabel: string | undefined, turnNumber?: number, turnSide?: Side): string {
   if (category === "system") return "System";
   if (category === "run") return `Run${serverLabel ? ` auf ${serverLabel}` : label && /Run auf/i.test(label) ? ` auf ${runTargetFromLabel(label)}` : ""}`;
-  if (category === "turn" && actor === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
-  if (category === "turn" && actor === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
-  if (turnSide === "corp") return turnNumber ? `Korp-Zug ${turnNumber}` : "Korp-Zug";
-  if (turnSide === "runner") return turnNumber ? `Runner-Zug ${turnNumber}` : "Runner-Zug";
-  if (actor === "corp") return "Korp-Zug";
-  if (actor === "runner") return "Runner-Zug";
+  if (category === "turn" && actor) return chronicleTurnGroupLabel(actor, turnNumber);
+  if (turnSide) return chronicleTurnGroupLabel(turnSide, turnNumber);
+  if (actor) return chronicleTurnGroupLabel(actor, undefined);
   return "Spiel";
+}
+
+export function chronicleTurnGroupLabel(side: Side, turnNumber: number | undefined | null): string {
+  return turnNumber ? `Zug ${turnNumber} - ${side === "corp" ? "Korp" : "Runner"}` : `Zug - ${side === "corp" ? "Korp" : "Runner"}`;
 }
 
 function turnLabel(side: Side | undefined, turnNumber: number | undefined): string | undefined {
   if (!side || !turnNumber) return undefined;
-  return `${side === "corp" ? "Korpzug" : "Runnerzug"} ${turnNumber}`;
+  return chronicleTurnGroupLabel(side, turnNumber);
 }
 
 function agendaPointSuffix(points: number | null | undefined): string {
