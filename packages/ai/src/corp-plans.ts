@@ -1,5 +1,5 @@
 import corpPlanProfilesData from "../../../data/ai/corp-plan-profiles-1.4.0.json";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDecisionRankedAlternative, type AiDecisionScoreComponent, type AiDifficulty, type LegalAction, type Side, type VisibleCard } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionActionAlternative, type AiDecisionDebug, type AiDecisionInput, type AiDecisionRankedAlternative, type AiDecisionScoreComponent, type AiDifficulty, type LegalAction, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState } from "./belief-state";
 import { cardDefinitionStrength, endTheRunSubroutineCount, minimumCreditsToBreakEndTheRunSubroutines, serverIdFromEvent } from "./visible-run-analysis";
@@ -264,6 +264,7 @@ export function chooseCorpPlanDecision(input: AiDecisionInput, options: { timeBu
       confidence: selected.score.confidence,
       visibleReasons: selected.score.reasons,
       rankedAlternatives: rankedCorpAlternatives(input, context, scored, selected.candidate.planId),
+      actionAlternatives: corpActionAlternativesForPlan(input, selected.candidate, context, action.actionId),
       scoreBreakdown: selected.score.scoreBreakdown,
       whyNot: [],
       longTermPlan: longTermPlanForCorp(input, selected.candidate.kind),
@@ -1202,6 +1203,83 @@ function selectPlanAction(input: AiDecisionInput, candidate: CorpPlanCandidate, 
     .filter((action): action is LegalAction => Boolean(action))
     .sort((left, right) => actionPriority(input, candidate.kind, right, context) - actionPriority(input, candidate.kind, left, context) || compareAction(left, right));
   return actions[0];
+}
+
+function corpActionAlternativesForPlan(
+  input: AiDecisionInput,
+  candidate: CorpPlanCandidate,
+  context: CorpEvaluationContext,
+  selectedActionId: string
+): AiDecisionActionAlternative[] {
+  return candidate.legalActionIds
+    .map((actionId) => input.legalActions.find((action) => action.actionId === actionId))
+    .filter((action): action is LegalAction => Boolean(action))
+    .map((action) => ({
+      action,
+      priority: actionPriority(input, candidate.kind, action, context)
+    }))
+    .sort((left, right) => right.priority - left.priority || compareAction(left.action, right.action))
+    .slice(0, 8)
+    .map((entry, index) => corpActionAlternativeForAction(input, entry.action, entry.priority, entry.action.actionId === selectedActionId, index + 1));
+}
+
+function corpActionAlternativeForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  priority: number,
+  selected: boolean,
+  rank: number
+): AiDecisionActionAlternative {
+  const sourceCard = action.source !== "basic_action" && action.source !== "game_rule" ? findVisibleCard(input, action.source) : undefined;
+  const sourceTitle = sourceCard && isDebugPublicSourceCard(input, sourceCard.instanceId) ? sourceCard.title : undefined;
+  const installedEconomy = classifyCorpInstalledEconomyAction(input, action);
+  const economyNeed = input.playerView.own.credits < 5 ? "acute" : "stable";
+  const economy =
+    action.type === "gain_credit"
+      ? {
+          economyKind: "basic_credit",
+          immediateGain: 1,
+          netCredits: 1,
+          storedCredits: 0,
+          futurePoolAfter: 0,
+          economyNeed
+        }
+      : installedEconomy
+        ? {
+            economyKind: installedEconomy.kind,
+            ability: installedEconomy.ability,
+            immediateGain: installedEconomy.immediateGain,
+            netCredits: installedEconomy.netCredits,
+            storedCredits: installedEconomy.storedCredits,
+            futurePoolAfter: installedEconomy.futurePoolAfter,
+            economyNeed
+          }
+        : undefined;
+  return {
+    rank,
+    actionId: action.actionId,
+    actionType: action.type,
+    label: sourceTitle || action.source === "basic_action" || action.source === "game_rule" ? action.label : action.type,
+    source: sourceCard ? (sourceTitle ? "visible_card" : "private_card") : action.source,
+    ...(sourceTitle ? { sourceTitle } : {}),
+    selected,
+    priority: roundScore(priority),
+    ...(selected ? { whyChosen: ["selected_action"] } : { whyNot: [installedEconomy ? `${installedEconomy.kind}_lower_action_priority` : "lower_action_priority"] }),
+    ...(economy ? { economy } : {})
+  };
+}
+
+function isDebugPublicSourceCard(input: AiDecisionInput, instanceId: string): boolean {
+  const ownPublicCards = [
+    input.playerView.own.scoreArea,
+    ...(input.playerView.own.rig ? [input.playerView.own.rig] : []),
+    ...input.playerView.servers.map((server) => [...server.ice, ...server.root])
+  ];
+  const opponentPublicCards = [
+    input.playerView.opponent.scoreArea,
+    ...(input.playerView.opponent.rig ? [input.playerView.opponent.rig] : [])
+  ];
+  return [...ownPublicCards, ...opponentPublicCards].some((cards) => cards.some((card) => card.instanceId === instanceId && card.known));
 }
 
 function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: LegalAction, context: CorpEvaluationContext): number {

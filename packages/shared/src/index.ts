@@ -1344,6 +1344,7 @@ export const AI_DECISION_DEBUG_REPLAY_FIELDS = [
   "confidence",
   "summary",
   "rankedAlternatives",
+  "actionAlternatives",
   "scoreBreakdown",
   "whyNot",
   "longTermPlan",
@@ -1373,6 +1374,30 @@ export type AiDecisionRankedAlternative = {
   warnings?: string[];
 };
 
+export type AiDecisionActionEconomyDetail = {
+  economyKind: string;
+  ability?: string;
+  immediateGain?: number;
+  netCredits?: number;
+  storedCredits?: number;
+  futurePoolAfter?: number;
+  economyNeed?: string;
+};
+
+export type AiDecisionActionAlternative = {
+  rank: number;
+  actionId: string;
+  actionType: string;
+  label?: string;
+  source?: string;
+  sourceTitle?: string;
+  selected: boolean;
+  priority?: number;
+  whyChosen?: string[];
+  whyNot?: string[];
+  economy?: AiDecisionActionEconomyDetail;
+};
+
 export type AiDecisionDetailSection = {
   id: string;
   title: string;
@@ -1390,6 +1415,7 @@ export type AiDecisionDebug = {
   confidence?: number;
   visibleReasons?: string[];
   rankedAlternatives?: AiDecisionRankedAlternative[];
+  actionAlternatives?: AiDecisionActionAlternative[];
   scoreBreakdown?: AiDecisionScoreComponent[];
   whyNot?: string[];
   longTermPlan?: string[];
@@ -1453,6 +1479,8 @@ export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undef
   }
   const rankedAlternatives = sanitizeAiDecisionRankedAlternatives(source.rankedAlternatives);
   if (rankedAlternatives) result.rankedAlternatives = rankedAlternatives;
+  const actionAlternatives = sanitizeAiDecisionActionAlternatives(source.actionAlternatives);
+  if (actionAlternatives) result.actionAlternatives = actionAlternatives;
   const scoreBreakdown = sanitizeAiDecisionScoreComponents(source.scoreBreakdown);
   if (scoreBreakdown) result.scoreBreakdown = scoreBreakdown;
   const detailSections = sanitizeAiDecisionDetailSections(source.detailSections);
@@ -1492,6 +1520,54 @@ function sanitizeAiDecisionRankedAlternatives(value: unknown): AiDecisionRankedA
     })
     .filter((entry): entry is AiDecisionRankedAlternative => entry !== undefined);
   return alternatives.length > 0 ? alternatives : undefined;
+}
+
+function sanitizeAiDecisionActionAlternatives(value: unknown): AiDecisionActionAlternative[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const alternatives = value
+    .slice(0, 8)
+    .map((entry): AiDecisionActionAlternative | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const rank = typeof source.rank === "number" && Number.isFinite(source.rank) ? Math.max(1, Math.round(source.rank)) : undefined;
+      const actionId = sanitizeAiDecisionDebugString(source.actionId);
+      const actionType = sanitizeAiDecisionDebugString(source.actionType);
+      const selected = source.selected;
+      if (rank === undefined || !actionId || !actionType || typeof selected !== "boolean") return undefined;
+      const result: AiDecisionActionAlternative = { rank, actionId, actionType, selected };
+      for (const field of ["label", "source", "sourceTitle"] as const) {
+        const sanitized = sanitizeAiDecisionDebugString(source[field]);
+        if (sanitized !== undefined) result[field] = sanitized;
+      }
+      const priority = source.priority;
+      if (typeof priority === "number" && Number.isFinite(priority)) result.priority = priority;
+      const whyChosen = sanitizeAiDecisionDebugStringArray(source.whyChosen);
+      if (whyChosen) result.whyChosen = whyChosen;
+      const whyNot = sanitizeAiDecisionDebugStringArray(source.whyNot);
+      if (whyNot) result.whyNot = whyNot;
+      const economy = sanitizeAiDecisionActionEconomy(source.economy);
+      if (economy) result.economy = economy;
+      return result;
+    })
+    .filter((entry): entry is AiDecisionActionAlternative => entry !== undefined);
+  return alternatives.length > 0 ? alternatives : undefined;
+}
+
+function sanitizeAiDecisionActionEconomy(value: unknown): AiDecisionActionEconomyDetail | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;
+  const source = value as Record<string, unknown>;
+  const economyKind = sanitizeAiDecisionDebugString(source.economyKind);
+  if (!economyKind) return undefined;
+  const result: AiDecisionActionEconomyDetail = { economyKind };
+  const ability = sanitizeAiDecisionDebugString(source.ability);
+  if (ability !== undefined) result.ability = ability;
+  const economyNeed = sanitizeAiDecisionDebugString(source.economyNeed);
+  if (economyNeed !== undefined) result.economyNeed = economyNeed;
+  for (const field of ["immediateGain", "netCredits", "storedCredits", "futurePoolAfter"] as const) {
+    const numberValue = source[field];
+    if (typeof numberValue === "number" && Number.isFinite(numberValue)) result[field] = numberValue;
+  }
+  return result;
 }
 
 function sanitizeAiDecisionScoreComponents(value: unknown): AiDecisionScoreComponent[] | undefined {

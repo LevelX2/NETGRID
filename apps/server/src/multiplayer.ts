@@ -2926,6 +2926,7 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   if (typeof safeDebug.planKind === "string") result.planKind = safeDebug.planKind;
   if (typeof safeDebug.memoryVersion === "string") result.memoryVersion = safeDebug.memoryVersion;
   if (Array.isArray(safeDebug.rankedAlternatives)) result.rankedAlternatives = safeDebug.rankedAlternatives.slice(0, 5);
+  if (Array.isArray(safeDebug.actionAlternatives)) result.actionAlternatives = safeDebug.actionAlternatives.slice(0, 8);
   if (Array.isArray(safeDebug.scoreBreakdown)) result.scoreBreakdown = safeDebug.scoreBreakdown.slice(0, 16);
   if (Array.isArray(safeDebug.whyNot)) result.whyNot = safeDebug.whyNot.slice(0, 8);
   if (Array.isArray(safeDebug.longTermPlan)) result.longTermPlan = safeDebug.longTermPlan.slice(0, 8);
@@ -2995,6 +2996,7 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, mode: Exclude<
     if (Array.isArray(value)) result[field] = value.slice(0, 8);
   }
   if (Array.isArray(debug.rankedAlternatives)) result.rankedAlternatives = debug.rankedAlternatives.slice(0, mode === "summary" ? 3 : 5);
+  if (Array.isArray(debug.actionAlternatives)) result.actionAlternatives = debug.actionAlternatives.slice(0, 8);
   if (Array.isArray(debug.scoreBreakdown)) result.scoreBreakdown = debug.scoreBreakdown.slice(0, 16);
   if (mode === "detailed") {
     for (const field of ["facts", "hypotheses", "invalidations", "beliefUncertainty", "evidence"] as const) {

@@ -6394,6 +6394,37 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "installed_economy_kind:pool_build",
     );
     expect(lowCreditDecision.evidence).toContain("economy_need:acute");
+    expect(lowCreditDecision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: lowCreditBasicCredit.actionId,
+        actionType: "gain_credit",
+        selected: true,
+        economy: expect.objectContaining({
+          economyKind: "basic_credit",
+          immediateGain: 1,
+          netCredits: 1,
+          economyNeed: "acute",
+        }),
+      }),
+    );
+    expect(lowCreditDecision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: lowCreditBrokerLoad.actionId,
+        actionType: "activated_card_ability",
+        selected: false,
+        sourceTitle: "Broker",
+        whyNot: ["pool_build_deferred_for_credit_need"],
+        economy: expect.objectContaining({
+          economyKind: "pool_build",
+          ability: "broker_load_credits",
+          immediateGain: 0,
+          netCredits: 0,
+          storedCredits: 0,
+          futurePoolAfter: 3,
+          economyNeed: "acute",
+        }),
+      }),
+    );
 
     const stableLoadInput = installedRunnerEconomyInput(
       "ai-v141-installed-broker-load-stable",
@@ -6423,6 +6454,22 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(stableDecision.actionId).toBe(stableBrokerLoad.actionId);
     expect(stableDecision.reasonCode).toBe("runner.plan.recover_economy");
     expect(stableDecision.evidence).toContain("economy_need:stable");
+    expect(stableDecision.decisionDebug?.actionAlternatives?.[0]).toMatchObject(
+      {
+        actionId: stableBrokerLoad.actionId,
+        selected: true,
+        sourceTitle: "Broker",
+        economy: {
+          economyKind: "pool_build",
+          ability: "broker_load_credits",
+          immediateGain: 0,
+          netCredits: 0,
+          storedCredits: 0,
+          futurePoolAfter: 3,
+          economyNeed: "stable",
+        },
+      },
+    );
     expect(JSON.stringify(stableDecision.decisionDebug)).not.toMatch(
       /cardInstances|privatePayload|fullGameState/i,
     );
@@ -7616,6 +7663,7 @@ describe("V1.4.2 belief state and opponent model", () => {
         },
         "runner": {
           "keys": [
+            "actionAlternatives",
             "aiLevel",
             "beliefUncertainty",
             "confidence",
@@ -7672,6 +7720,13 @@ describe("V1.4.2 belief state and opponent model", () => {
       whyNot: ["selected_plan"]
     });
     expect(debug?.rankedAlternatives?.length).toBeGreaterThan(1);
+    expect(debug?.actionAlternatives?.[0]).toMatchObject({
+      rank: 1,
+      actionId: expect.any(String),
+      actionType: expect.any(String),
+      selected: true,
+      priority: expect.any(Number)
+    });
     expect(debug?.scoreBreakdown?.some((component) => component.key === "base")).toBe(true);
     expect(debug?.detailSections?.some((section) => section.id === "visible_reasons")).toBe(true);
     expect(JSON.stringify(debug)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i);
@@ -7695,6 +7750,28 @@ describe("V1.4.2 belief state and opponent model", () => {
           whyNot: ["privatePayload"]
         }
       ],
+      actionAlternatives: [
+        {
+          rank: 1,
+          actionId: "privatePayload-action",
+          actionType: "activated_card_ability",
+          label: "Broker hidden-card",
+          source: "visible_card",
+          sourceTitle: "privatePayload",
+          selected: false,
+          priority: 42,
+          whyNot: ["decklist"],
+          economy: {
+            economyKind: "pool_build",
+            ability: "broker_load_credits",
+            immediateGain: 0,
+            netCredits: -1,
+            storedCredits: 0,
+            futurePoolAfter: 3,
+            economyNeed: "hidden-card"
+          }
+        }
+      ],
       scoreBreakdown: [{ key: "economy", label: "Economy", value: 4, reason: "public" }],
       detailSections: [{ id: "details", title: "Details", items: ["safe", "hidden-card"] }],
       opponentHqContents: ["Hidden Priority Agenda"],
@@ -7708,6 +7785,30 @@ describe("V1.4.2 belief state and opponent model", () => {
 
     expect(sanitized).toMatchInlineSnapshot(`
       {
+        "actionAlternatives": [
+          {
+            "actionId": "[redacted-debug-value]",
+            "actionType": "activated_card_ability",
+            "economy": {
+              "ability": "broker_load_credits",
+              "economyKind": "pool_build",
+              "economyNeed": "[redacted-debug-value]",
+              "futurePoolAfter": 3,
+              "immediateGain": 0,
+              "netCredits": -1,
+              "storedCredits": 0,
+            },
+            "label": "[redacted-debug-value]",
+            "priority": 42,
+            "rank": 1,
+            "selected": false,
+            "source": "visible_card",
+            "sourceTitle": "[redacted-debug-value]",
+            "whyNot": [
+              "[redacted-debug-value]",
+            ],
+          },
+        ],
         "aiLevel": 2,
         "detailSections": [
           {
