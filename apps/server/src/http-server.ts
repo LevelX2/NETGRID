@@ -612,6 +612,33 @@ async function routeHttp(
       return;
     }
 
+    const maintenanceAiTraceEnableRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)\/enable$/.exec(url.pathname);
+    if (maintenanceAiTraceEnableRoute && request.method === "POST") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      const matchId = decodeURIComponent(maintenanceAiTraceEnableRoute[1] ?? "");
+      if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, `storage-maintenance-ai-trace-enable:${matchId}`)) return;
+      const body = await readJson(request);
+      const mode = body.mode === "summary" ? "summary" : "detailed";
+      try {
+        const match = await service.enableStorageMaintenanceAiDecisionTrace(matchId, mode);
+        if (!match) {
+          sendJson(response, 404, { error: { code: "not_found", message: "Diese Wartungsansicht hat keine Daten für dieses Match." } });
+          return;
+        }
+        sendJson(response, 200, { match });
+      } catch (error) {
+        const code = error instanceof Error ? error.message : String(error);
+        const message =
+          code === "ai_trace_match_has_no_ai"
+            ? "Für dieses Match gibt es keine KI-Seite, daher kann kein KI-Entscheidungslog aufgezeichnet werden."
+            : code === "ai_trace_match_terminal"
+              ? "Dieses Match ist bereits beendet. KI-Tracing kann nur für laufende KI-Matches ab jetzt aktiviert werden."
+              : "KI-Tracing konnte für dieses Match nicht aktiviert werden.";
+        sendJson(response, 409, { error: { code, message } });
+      }
+      return;
+    }
+
     const maintenanceAiTraceIndexRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/.exec(url.pathname);
     if (maintenanceAiTraceIndexRoute && request.method === "GET") {
       if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;

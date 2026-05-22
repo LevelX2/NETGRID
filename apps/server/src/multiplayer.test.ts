@@ -433,10 +433,14 @@ describe("Backend 0.5 private storage maintenance", () => {
 
     const reopenedStorage = new SqliteMatchStorage({ dbPath, backupDir, autoImportLegacy: false });
     const reopenedService = new MultiplayerService(reopenedStorage, { tokenSalt: "backend-05-ai-traces" });
+    const initialMatches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
+    expect(initialMatches?.map((match) => match.matchId)).toEqual([traced.matchId]);
+    expect(initialMatches?.[0]).toMatchObject({ aiTraceMode: "detailed" });
+    expect(initialMatches?.[0]?.traceCount).toBeGreaterThan(0);
+    const enabledLate = await reopenedService.enableStorageMaintenanceAiDecisionTrace(untraced.matchId, "detailed");
+    expect(enabledLate).toMatchObject({ matchId: untraced.matchId, aiTraceMode: "detailed", traceCount: 0 });
     const matches = await reopenedService.storageMaintenanceAiDecisionTraceMatches();
-    expect(matches?.map((match) => match.matchId)).toEqual([traced.matchId]);
-    expect(matches?.[0]).toMatchObject({ aiTraceMode: "detailed" });
-    expect(matches?.[0]?.traceCount).toBeGreaterThan(0);
+    expect(matches?.map((match) => match.matchId)).toEqual(expect.arrayContaining([traced.matchId, untraced.matchId]));
     const index = await reopenedService.storageMaintenanceAiDecisionTraceIndex(traced.matchId);
     expect(index?.[0]).toMatchObject({
       matchId: traced.matchId,
@@ -462,6 +466,13 @@ describe("Backend 0.5 private storage maintenance", () => {
     try {
       const matchesResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches`);
       expect(matchesResponse.status).toBe(200);
+      const enableResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(untraced.matchId)}/enable`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mode: "detailed" })
+      });
+      expect(enableResponse.status).toBe(200);
+      expect(await enableResponse.json()).toMatchObject({ match: { matchId: untraced.matchId, aiTraceMode: "detailed" } });
       const indexResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}`);
       const httpIndex = (await indexResponse.json()) as { traces?: Array<{ traceId: string }> };
       expect(indexResponse.status).toBe(200);

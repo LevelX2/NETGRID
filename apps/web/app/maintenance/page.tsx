@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, Download, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import {
   aiTraceMetaRows,
+  buildMaintenanceAiTraceEnablePath,
   aiTraceTitle,
   buildMaintenanceAiTraceIndexPath,
   buildMaintenanceAiTraceNdjsonExport,
@@ -75,6 +76,7 @@ export default function MaintenancePage() {
   const [selectedAiTraceId, setSelectedAiTraceId] = useState("");
   const [aiTraceDetail, setAiTraceDetail] = useState<MaintenanceAiTraceDetail | null>(null);
   const [aiTraceLoading, setAiTraceLoading] = useState(false);
+  const [aiTraceEnableLoading, setAiTraceEnableLoading] = useState(false);
   const [aiTraceLiveFollow, setAiTraceLiveFollow] = useState(true);
   const [aiTraceFollowPaused, setAiTraceFollowPaused] = useState(false);
   const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
@@ -128,6 +130,33 @@ export default function MaintenancePage() {
     const nextMatches = payload.matches ?? [];
     setAiTraceMatches(nextMatches);
     setSelectedAiTraceMatchId((current) => (current && nextMatches.some((match) => match.matchId === current) ? current : nextMatches[0]?.matchId ?? ""));
+  };
+
+  const enableAiTracingForSelectedMatch = async () => {
+    if (!selectedMatchId) return;
+    setAiTraceEnableLoading(true);
+    setOperationNotice({ tone: "working", message: "KI-Tracing wird für das ausgewählte Match ab jetzt aktiviert." });
+    setError("");
+    try {
+      const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceEnablePath(selectedMatchId)}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ mode: "detailed" })
+      });
+      const payload = (await response.json()) as { match?: MaintenanceAiTraceMatchEntry; error?: { message?: string } };
+      if (!response.ok) throw new Error(payload.error?.message ?? "KI-Tracing konnte nicht aktiviert werden.");
+      const markers = findForbiddenMaintenanceMarkers(payload);
+      if (markers.length > 0) throw new Error("KI-Trace-Aktivierung wurde wegen Redaktionsprüfung blockiert.");
+      await loadAiTraceMatches();
+      setSelectedAiTraceMatchId(payload.match?.matchId ?? selectedMatchId);
+      await loadAiTraceIndex(payload.match?.matchId ?? selectedMatchId);
+      setOperationNotice({ tone: "success", message: "KI-Tracing ist für dieses Match ab jetzt aktiv. Neue KI-Schritte werden hier aufgezeichnet." });
+    } catch (traceError) {
+      setError(traceError instanceof Error ? traceError.message : "KI-Tracing konnte nicht aktiviert werden.");
+      setOperationNotice(null);
+    } finally {
+      setAiTraceEnableLoading(false);
+    }
   };
 
   const loadAiTraceIndex = async (matchId: string) => {
@@ -534,6 +563,16 @@ export default function MaintenancePage() {
 
   const statusRows = useMemo(() => Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
   const modeRows = useMemo(() => Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
+  const selectedAiTraceMatch = aiTraceMatches.find((match) => match.matchId === selectedAiTraceMatchId);
+  const selectedMatchTraceEntry = aiTraceMatches.find((match) => match.matchId === selectedMatchId);
+  const selectedMatchCanEnableAiTrace = Boolean(detail && selectedMatchId && !detail.terminal && detail.mode !== "human_vs_human" && !selectedMatchTraceEntry);
+  const aiTraceEmptyHint = selectedMatchId
+    ? selectedMatchCanEnableAiTrace
+      ? "Für das ausgewählte Match werden noch keine KI-Entscheidungen aufgezeichnet. Aktiviere die Aufzeichnung hier in der Wartungsansicht; ab dem nächsten KI-Schritt entstehen Trace-Daten."
+      : selectedMatchTraceEntry
+        ? "Für das ausgewählte Match ist KI-Tracing aktiv. Neue KI-Schritte erscheinen hier, sobald sie aufgezeichnet wurden."
+        : "Für das ausgewählte Match gibt es keine aktivierbare KI-Seite oder es ist bereits beendet."
+    : "Wähle oben in der Matchliste ein KI-Match aus und aktiviere hier die Aufzeichnung. Bereits vergangene KI-Schritte können nicht vollständig nachträglich rekonstruiert werden.";
 
   const applyFilters = () => void refresh(filters, "filters");
 
@@ -749,10 +788,14 @@ export default function MaintenancePage() {
       <CollapsiblePanel title="KI-Entscheidungen" icon={<Bot size={18} aria-hidden="true" />}>
         <div style={panelHeader}>
           <p style={subtle}>
-            {aiTraceMatches.length === 0 ? "Keine Matches mit aktivierten KI-Traces gefunden." : `${aiTraceMatches.length} Matches mit KI-Trace-Daten.`}
+            {aiTraceMatches.length === 0 ? "Keine KI-Trace-Aufzeichnungen vorhanden." : `${aiTraceMatches.length} Matches mit aktivierter KI-Trace-Aufzeichnung.`}
             {aiTraceLiveFollow && !aiTraceFollowPaused ? " · Live-Follow aktiv" : ""}
           </p>
           <div style={buttonRow}>
+            <button type="button" style={button} onClick={() => void enableAiTracingForSelectedMatch()} disabled={!selectedMatchCanEnableAiTrace || aiTraceEnableLoading} title="KI-Tracing für das aktuell ausgewählte Match ab jetzt aktivieren">
+              {aiTraceEnableLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <Bot size={16} aria-hidden="true" />}
+              {aiTraceEnableLoading ? "Aktiviert" : "Für Match aktivieren"}
+            </button>
             <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={aiTraceLoading} title="KI-Trace-Matches aktualisieren">
               {aiTraceLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
               {aiTraceLoading ? "Lädt" : "Aktualisieren"}
@@ -773,24 +816,25 @@ export default function MaintenancePage() {
             </button>
           </div>
         </div>
-        {aiTraceMatches.length === 0 ? <p style={infoBox}>Matches ohne aktiviertes KI-Tracing erzeugen keine Entscheidungstraces. Starte ein Match mit KI-Tracing, um hier Daten zu sehen.</p> : null}
+        {aiTraceMatches.length === 0 ? <p style={infoBox}>{aiTraceEmptyHint}</p> : null}
         {aiTraceMatches.length > 0 ? (
           <div style={twoCols}>
             <div style={cleanupBox}>
               <h3 style={h3}>Matchauswahl</h3>
+              <p style={subtle}>Aufzeichnung kann hier für das aktuell ausgewählte KI-Match aktiviert werden. Sie wirkt ab dem nächsten KI-Schritt.</p>
               <div style={traceList}>
                 {aiTraceMatches.map((match) => (
                   <button key={match.matchId} type="button" style={selectedAiTraceMatchId === match.matchId ? traceItemSelected : traceItem} onClick={() => setSelectedAiTraceMatchId(match.matchId)}>
                     <span><code>{shortId(match.matchId)}</code> · {modeLabel(match.mode)}</span>
                     <strong>{match.traceCount}</strong>
-                    <small>{match.lastTraceAt ? new Date(match.lastTraceAt).toLocaleString("de-DE") : match.aiTraceMode}</small>
+                    <small>{match.lastTraceAt ? new Date(match.lastTraceAt).toLocaleString("de-DE") : `aktiv · ${match.aiTraceMode}`}</small>
                   </button>
                 ))}
               </div>
             </div>
             <div style={cleanupBox}>
               <h3 style={h3}>Timeline</h3>
-              {selectedAiTraceMatchId && aiTraceIndex.length === 0 ? <p style={subtle}>Dieses Match enthält keine KI-Entscheidungen oder der Trace-Index ist leer.</p> : null}
+              {selectedAiTraceMatchId && aiTraceIndex.length === 0 ? <p style={subtle}>{selectedAiTraceMatch?.traceCount === 0 ? "KI-Tracing ist aktiv; die nächste KI-Entscheidung wird hier erscheinen." : "Dieses Match enthält keine KI-Entscheidungen oder der Trace-Index ist leer."}</p> : null}
               <div style={traceList}>
                 {aiTraceIndex.map((trace) => (
                   <button key={trace.traceId} type="button" style={selectedAiTraceId === trace.traceId ? traceItemSelected : traceItem} onClick={() => { setSelectedAiTraceId(trace.traceId); if (trace.traceId !== latestMaintenanceAiTraceId(aiTraceIndex)) setAiTraceFollowPaused(true); }}>

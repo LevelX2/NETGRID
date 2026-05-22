@@ -305,6 +305,10 @@ export function buildMaintenanceAiTraceIndexPath(matchId: string, afterDecisionI
   return `${path}?afterDecisionIndex=${Math.max(0, Math.floor(afterDecisionIndex))}`;
 }
 
+export function buildMaintenanceAiTraceEnablePath(matchId: string): string {
+  return `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}/enable`;
+}
+
 export function mergeMaintenanceAiTraceIndex(current: MaintenanceAiTraceIndexEntry[], incoming: MaintenanceAiTraceIndexEntry[]): MaintenanceAiTraceIndexEntry[] {
   const byId = new Map<string, MaintenanceAiTraceIndexEntry>();
   for (const trace of current) byId.set(trace.traceId, trace);

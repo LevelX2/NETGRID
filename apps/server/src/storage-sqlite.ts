@@ -481,7 +481,6 @@ export class SqliteMatchStorage implements MultiplayerStorage {
   }
 
   async maintenanceAiDecisionTraceMatches(): Promise<StorageMaintenanceAiDecisionTraceMatchEntry[]> {
-    if (!this.tableExists("ai_decision_traces")) return [];
     const rows = this.db
       .prepare(
         `SELECT
@@ -495,24 +494,26 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           MIN(t.created_at) AS firstTraceAt,
           MAX(t.created_at) AS lastTraceAt
          FROM matches m
-         JOIN ai_decision_traces t ON t.match_id = m.match_id
+         LEFT JOIN ai_decision_traces t ON t.match_id = m.match_id
          GROUP BY m.match_id
-         ORDER BY lastTraceAt DESC, m.updated_at DESC`
+         ORDER BY COALESCE(lastTraceAt, m.updated_at) DESC, m.updated_at DESC`
       )
       .all() as Array<{ matchId: string; status: MatchStatus; mode: MatchMode; createdAt: string; updatedAt: string; recordJson: string; traceCount: number; firstTraceAt?: string; lastTraceAt?: string }>;
-    return rows.map((row) => {
+    return rows.flatMap((row) => {
       const record = JSON.parse(row.recordJson) as StoredMatch;
-      return {
+      const aiTraceMode = record.match.aiTraceMode === "summary" ? "summary" : record.match.aiTraceMode === "detailed" ? "detailed" : undefined;
+      if (!aiTraceMode && Number(row.traceCount) === 0) return [];
+      return [{
         matchId: row.matchId,
         status: row.status,
         mode: row.mode,
-        aiTraceMode: record.match.aiTraceMode === "summary" ? "summary" : "detailed",
+        aiTraceMode: aiTraceMode ?? "detailed",
         traceCount: Number(row.traceCount),
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         ...(row.firstTraceAt ? { firstTraceAt: row.firstTraceAt } : {}),
         ...(row.lastTraceAt ? { lastTraceAt: row.lastTraceAt } : {})
-      };
+      }];
     });
   }
 

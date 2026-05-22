@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildMaintenanceCleanupRequest,
+  buildMaintenanceAiTraceEnablePath,
   buildMaintenanceAiTraceIndexPath,
   buildMaintenanceAiTraceNdjsonExport,
   buildMaintenanceMatchQuery,
@@ -128,6 +129,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     const second = { ...first, traceId: "trace_2", eventId: "evt_2", decisionIndex: 2, createdAt: "2026-05-22T10:00:02.000Z" };
 
     expect(buildMaintenanceAiTraceIndexPath("match/1", 1)).toBe("/api/storage/maintenance/ai-decision-traces/matches/match%2F1?afterDecisionIndex=1");
+    expect(buildMaintenanceAiTraceEnablePath("match/1")).toBe("/api/storage/maintenance/ai-decision-traces/matches/match%2F1/enable");
     expect(mergeMaintenanceAiTraceIndex([second], [first, second]).map((trace) => trace.traceId)).toEqual(["trace_1", "trace_2"]);
     expect(latestMaintenanceAiTraceId([first, second])).toBe("trace_2");
   });

@@ -1777,6 +1777,31 @@ export class MultiplayerService {
     return this.storage.maintenanceAiDecisionTraceDetail?.(traceId);
   }
 
+  async enableStorageMaintenanceAiDecisionTrace(matchId: string, mode: Exclude<AiDecisionTraceMode, "off"> = "detailed"): Promise<StorageMaintenanceAiDecisionTraceMatchEntry | undefined> {
+    return this.withMatchLock(matchId, async () => {
+      const record = await this.mustLoad(matchId);
+      if (!record) return undefined;
+      if (!record.match.aiControllers || Object.keys(record.match.aiControllers).length === 0) throw new Error("ai_trace_match_has_no_ai");
+      if (isTerminalStatus(record.match.status)) throw new Error("ai_trace_match_terminal");
+      const now = this.now();
+      record.match.aiTraceMode = mode;
+      record.match.updatedAt = now;
+      await this.storage.save(record);
+      const matches = await this.storageMaintenanceAiDecisionTraceMatches();
+      return (
+        matches?.find((match) => match.matchId === matchId) ?? {
+          matchId,
+          status: record.match.status,
+          mode: record.match.mode,
+          aiTraceMode: mode,
+          traceCount: record.aiDecisionTraces?.length ?? 0,
+          createdAt: record.match.createdAt,
+          updatedAt: record.match.updatedAt
+        }
+      );
+    });
+  }
+
   async storageMaintenanceCleanupPreview(filters: StorageMaintenanceCleanupFilters): Promise<StorageMaintenanceCleanupPreview | undefined> {
     return this.storage.maintenanceCleanupPreview?.(filters);
   }

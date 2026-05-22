@@ -42,7 +42,7 @@ Nicht erlaubter Zugriff:
 
 KI-Trace ist standardmäßig aus.
 
-Aktivierung ist nur pro Match erlaubt, über eine erweiterte lokale Diagnoseoption oder eine lokale Maintenance-Einstellung. Die Aktivierung muss vor der jeweiligen KI-Entscheidung wirksam sein. Nachträgliche Rekonstruktion aus FullState, `AIInput` oder privaten Payloads ist verboten.
+Aktivierung ist nur pro Match erlaubt, über eine lokale Maintenance- oder Diagnoseeinstellung. Sie muss nicht zwingend beim Matchstart erfolgen: Für laufende KI-Matches darf die lokale Wartungsansicht KI-Tracing ab jetzt aktivieren. Die Aktivierung muss aber vor der jeweiligen KI-Entscheidung wirksam sein. Nachträgliche Rekonstruktion vergangener Detailentscheidungen aus FullState, `AIInput` oder privaten Payloads ist verboten.
 
 Ein aktivierter Match speichert im Match-Metadatum mindestens:
 
