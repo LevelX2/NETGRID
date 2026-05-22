@@ -35845,10 +35845,46 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(cardCounterAmount(state, skivvissId, "virus")).toBe(1);
+    const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
+    const visibleSkivviss = runnerView.own.rig?.find(
+      (card) => card.instanceId === skivvissId,
+    );
+    const runnerCorpSkivvissDisplay =
+      runnerView.opponent.identity.counterDisplays?.find(
+        (display) => display.id === "skivviss",
+      );
+    const corpSkivvissDisplay = corpView.own.identity.counterDisplays?.find(
+      (display) => display.id === "skivviss",
+    );
+    expect(visibleSkivviss?.counters?.virus).toBeUndefined();
+    expect(
+      visibleSkivviss?.counterDisplays?.some(
+        (display) => display.id === "virus" || display.id === "skivviss",
+      ),
+    ).not.toBe(true);
+    expect(runnerCorpSkivvissDisplay).toMatchObject({
+      amount: 1,
+      label: "Skivviss-Counter",
+      ariaLabel: "1 Skivviss-Counter auf der Korp",
+    });
+    expect(corpSkivvissDisplay).toMatchObject({
+      amount: 1,
+      label: "Skivviss-Counter",
+    });
     const hqBeforeCorpTurn = state.corp.hq.length;
     state.corp.maxHandSize = 100;
     state = apply(state, "runner", (action) => action.type === "end_turn");
     expect(state.corp.hq.length).toBe(hqBeforeCorpTurn + 1);
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "draw_cards",
+        side: "corp",
+        amount: 1,
+        sourceDefinitionId: "onr_v1_064_skivviss",
+        sourceTitle: "Skivviss",
+      }),
+    );
   });
 
   it("uses P3.49 virus CardImplementations for hidden looks, Cascade trash and Gremlins hand size", () => {

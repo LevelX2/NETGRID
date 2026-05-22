@@ -2611,7 +2611,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
           tags: state.runner.tags,
         }
       : {
-          identity: visibleOwnCard(state, state.corp.identity),
+          identity: visibleCorpIdentityCard(state),
           credits: state.corp.credits,
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),
@@ -2628,7 +2628,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         },
     opponent: runnerSide
       ? {
-          identity: visibleOwnCard(state, state.corp.identity),
+          identity: visibleCorpIdentityCard(state),
           credits: state.corp.credits,
           clicks: state.corp.clicks,
           agendaPoints: agendaPoints(state, "corp"),
@@ -17609,6 +17609,13 @@ function virusCounterDrawsAtCorpStart(state: GameState): number {
   }, 0);
 }
 
+function skivvissCounterTotal(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+    return sum + cardCounter(state, cardId, "virus");
+  }, 0);
+}
+
 function virusCounterCascadeTrashAtCorpStart(state: GameState): {
   amount: number;
   sourceDefinitionId?: CardDefinitionId;
@@ -30409,9 +30416,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(definition.trashCost !== undefined
       ? { trashCost: definition.trashCost }
       : {}),
-    ...(instance.counters
-      ? { counters: cloneCounters(instance.counters) }
-      : {}),
+    ...visibleCountersField(visibleCountersForKnownCard(definition, instance)),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
     ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
@@ -30427,6 +30432,33 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+function visibleCorpIdentityCard(state: GameState): VisibleCard {
+  const card = visibleOwnCard(state, state.corp.identity);
+  return {
+    ...card,
+    ...counterDisplaysField([
+      ...(card.counterDisplays ?? []),
+      ...(skivvissCorpCounterDisplays(state) ?? []),
+    ]),
+  };
+}
+
+function visibleCountersField(
+  counters: Partial<Record<CounterType, number>> | undefined,
+): Pick<VisibleCard, "counters"> | Record<string, never> {
+  return counters && Object.keys(counters).length > 0 ? { counters } : {};
+}
+
+function visibleCountersForKnownCard(
+  definition: CardDefinition,
+  instance: CardInstance,
+): Partial<Record<CounterType, number>> | undefined {
+  if (!instance.counters) return undefined;
+  const counters = cloneCounters(instance.counters);
+  if (definition.id === SKIVVISS_ID) delete counters.virus;
+  return counters;
 }
 
 function counterDisplaysField(
@@ -30459,7 +30491,7 @@ function counterDisplaysForKnownCard(
     ...(storedCreditCounterDisplays(definition, instance) ?? []),
     ...(restrictedPoolCounterDisplays(definition, instance) ?? []),
     ...(recurringCreditCounterDisplays(instance) ?? []),
-    ...(specialCounterDisplays(instance) ?? []),
+    ...(specialCounterDisplays(definition, instance) ?? []),
   ];
 }
 
@@ -30571,6 +30603,7 @@ function restrictedPoolDisplayLabel(
 }
 
 function specialCounterDisplays(
+  definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
   const counters = instance.counters ?? {};
@@ -30591,14 +30624,16 @@ function specialCounterDisplays(
       counterType: "ablative",
       usageHint: "status_marker",
     }),
-    ...singleCounterDisplay(counters.virus, {
-      id: "virus",
-      displayKind: "virus",
-      label: "Virus-Counter",
-      ariaLabelName: "Virus-Counter",
-      counterType: "virus",
-      usageHint: "status_marker",
-    }),
+    ...(definition.id === SKIVVISS_ID
+      ? []
+      : singleCounterDisplay(counters.virus, {
+          id: "virus",
+          displayKind: "virus",
+          label: "Virus-Counter",
+          ariaLabelName: "Virus-Counter",
+          counterType: "virus",
+          usageHint: "status_marker",
+        })),
     ...singleCounterDisplay(counters.data_raven, {
       id: "data_raven",
       displayKind: "trace",
@@ -30647,6 +30682,22 @@ function specialCounterDisplays(
       counterType: "mark",
       usageHint: "status_marker",
     }),
+  ];
+}
+
+function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+  const amount = skivvissCounterTotal(state);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "skivviss",
+      amount,
+      displayKind: "virus",
+      label: "Skivviss-Counter",
+      ariaLabel: `${amount} Skivviss-Counter auf der Korp`,
+      counterType: "virus",
+      usageHint: "status_marker",
+    },
   ];
 }
 

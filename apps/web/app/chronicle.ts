@@ -63,6 +63,7 @@ export const CHRONICLE_CATEGORY_LABELS: Record<ChronicleCategory, string> = {
 
 const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
+const SKIVVISS_ID = "onr_v1_064_skivviss";
 
 type EffectSummary = {
   category?: ChronicleCategory;
@@ -1390,8 +1391,20 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       break;
     case "draw_cards":
       category = "card";
-      title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
-      chips.push(amount === 1 ? "Karte ziehen" : `${amount} Karten`, "Automatisch");
+      if (sourceDefinitionId === SKIVVISS_ID) {
+        const targetSubject =
+          subject === "Du"
+            ? "dich"
+            : subject === "Der Runner"
+              ? "den Runner"
+              : subject.replace(/^Die /u, "die ");
+        title = `${sourceTitle ?? "Skivviss"} zwingt ${targetSubject} zu ${amount} ${amount === 1 ? "zusätzlicher Karte" : "zusätzlichen Karten"}`;
+        description = `Grund: ${amount} Skivviss-Counter auf der Korp.`;
+        chips.push("Skivviss", `${amount} Skivviss-Counter`, amount === 1 ? "1 Zusatzkarte" : `${amount} Zusatzkarten`);
+      } else {
+        title = phrase(subject, `${cardCountText(amount)}${through} gezogen`);
+        chips.push(amount === 1 ? "Karte ziehen" : `${amount} Karten`, "Automatisch");
+      }
       break;
     case "rez_card":
       category = "card";

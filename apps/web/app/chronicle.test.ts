@@ -1197,6 +1197,30 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("names Skivviss as the reason for automatic Corp extra draws", () => {
+    const event = makeEvent("end_turn", {
+      actor: "runner",
+      resolvedEffects: [
+        {
+          effectId: "corp.start.skivviss",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_064_skivviss",
+          sourceTitle: "Skivviss",
+          reason: "start_of_turn"
+        }
+      ]
+    });
+
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(effects[0]?.title).toBe("Skivviss zwingt die Korp zu 2 zusätzlichen Karten.");
+    expect(effects[0]?.description).toBe("Grund: 2 Skivviss-Counter auf der Korp.");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Skivviss", "2 Skivviss-Counter", "2 Zusatzkarten"]));
+  });
+
   it("merges simple play credit effects into the played card entry", () => {
     const event = makeEvent("play_event", {
       actor: "runner",
