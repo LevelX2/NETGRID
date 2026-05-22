@@ -92,6 +92,7 @@ import {
   type ChronicleContext,
   type ChronicleItem
 } from "./chronicle";
+import { shouldActivateChronicleCardTouchDoubleTap } from "./chronicleInteraction";
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
@@ -8831,6 +8832,7 @@ function ChronicleCardTrigger({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastTouchTapRef = useRef(0);
   const [tooltipHoverVisible, setTooltipHoverVisible] = useState(false);
   const [tooltipFocusVisible, setTooltipFocusVisible] = useState(false);
   const [tooltipPlacement, setTooltipPlacement] = useState<"above" | "below">("below");
@@ -8930,6 +8932,11 @@ function ChronicleCardTrigger({
     }, CARD_TOOLTIP_HOVER_CLOSE_DELAY_MS);
   };
 
+  const activateCardPreview = () => {
+    if (disabled) return;
+    onClick();
+  };
+
   useEffect(() => {
     if (tooltipEnabled) return;
     clearOpenTimer();
@@ -8958,7 +8965,7 @@ function ChronicleCardTrigger({
       className={`${className}${cardTypeClassName ? ` ${cardTypeClassName}` : ""}`}
       type="button"
       disabled={disabled}
-      onClick={onClick}
+      onClick={activateCardPreview}
       title={title}
       aria-describedby={tooltipId}
       onFocus={(event) => {
@@ -8966,10 +8973,27 @@ function ChronicleCardTrigger({
         if (tooltipEnabled && event.currentTarget.matches(":focus-visible")) setTooltipFocusVisible(true);
       }}
       onBlur={() => setTooltipFocusVisible(false)}
+      onDoubleClick={(event) => {
+        if (disabled) return;
+        event.preventDefault();
+        activateCardPreview();
+      }}
       onPointerEnter={(event) => {
         if (event.pointerType === "touch") return;
         updateTooltipPlacement();
         scheduleOpen();
+      }}
+      onPointerUp={(event) => {
+        if (event.pointerType !== "touch" || disabled) return;
+        updateTooltipPlacement();
+        if (tooltipEnabled) setTooltipFocusVisible(true);
+        const now = Date.now();
+        const previousTapMs = lastTouchTapRef.current;
+        lastTouchTapRef.current = now;
+        if (shouldActivateChronicleCardTouchDoubleTap(previousTapMs, now)) {
+          event.preventDefault();
+          activateCardPreview();
+        }
       }}
       onPointerLeave={(event) => {
         if (event.pointerType === "touch") return;
