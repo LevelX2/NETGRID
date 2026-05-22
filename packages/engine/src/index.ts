@@ -212,7 +212,6 @@ import {
 import {
   AI_BOON_RANDOM_BREAKER_CARD_ID,
   BOARDWALK_RANDOM_PROGRAM_CARD_ID,
-  PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID,
   QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
   RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID,
   RUNNER_RANDOM_PROGRAM_CARD_IDS,
@@ -265,6 +264,7 @@ import type {
   CardFlatlineReplacementSourceImplementation,
   CardRemainingReplacementLongtailImplementation,
   CardRunEncounterInterventionImplementation,
+  CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
   CardTagPreventionSourceImplementation,
@@ -1086,6 +1086,55 @@ type RunnerEventResolver = {
   resolve: (state: GameState, legalAction: LegalAction) => void;
 };
 
+function installTargetBindingForDefinition(definition: CardDefinition) {
+  return cardImplementationForDefinitionId(definition.id)?.installTargetBinding;
+}
+
+function requiresDataFortInstallTarget(definition: CardDefinition): boolean {
+  return (
+    installTargetBindingForDefinition(definition)?.kind ===
+    "choose_data_fort_on_install"
+  );
+}
+
+function runnerEventLongtailForDefinition(
+  definition: CardDefinition,
+): CardRunnerEventLongtailImplementation | undefined {
+  return cardImplementationForDefinitionId(definition.id)?.runnerEventLongtail;
+}
+
+function runnerEventLongtailKindForDefinition(
+  definition: CardDefinition,
+): CardRunnerEventLongtailImplementation["kind"] | undefined {
+  return runnerEventLongtailForDefinition(definition)?.kind;
+}
+
+function cardImplementationRunnerEventResolver(
+  definition: CardDefinition,
+): RunnerEventResolver | undefined {
+  const longtail = runnerEventLongtailForDefinition(definition);
+  if (!longtail) return undefined;
+  switch (longtail.kind) {
+    case "playful_ai_dice_loop":
+      return {
+        name: "card_implementation_runner_event_playful_ai_dice_loop",
+        resolve: (state, legalAction) =>
+          resolvePlayfulAiDiceLoopEvent(
+            state,
+            legalAction,
+            definition.id,
+            longtail,
+          ),
+      };
+    default: {
+      const unknown = longtail as { kind?: string };
+      throw new Error(
+        `Unsupported runner event longtail: ${unknown.kind ?? "unknown"}`,
+      );
+    }
+  }
+}
+
 function printedCostCardImplementationMakeRunEffect(
   definition: CardDefinition,
 ): MakeRunEffectImplementation | undefined {
@@ -1325,37 +1374,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         ...(legalAction.payload ?? {}),
         removedTags,
         runnerTagsAfter: state.runner.tags,
-      };
-    },
-  },
-  [PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID]: {
-    name: "onr_v1921_runner_event_playful_ai_dice_loop",
-    resolve: (state, legalAction) => {
-      const dieRoll = rollDeterministicDie(
-        state,
-        `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.initial`,
-      );
-      const choiceOpened = dieRoll <= 3;
-      if (choiceOpened) {
-        startV1921PlayfulAiChoice(
-          state,
-          String(legalAction.payload?.cardId ?? ""),
-          dieRoll,
-          0,
-          1,
-        );
-      }
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        v1921RunnerEventAbility: "playful_ai_dice_loop",
-        v1921DieRoll: dieRoll,
-        playfulAiDieRolls: String(dieRoll),
-        playfulAiRolledDice: 1,
-        playfulAiDiceQueuedAfterRolls: 0,
-        playfulAiRemainingDice: 0,
-        playfulAiChoiceOpened: choiceOpened,
-        playfulAiComplete: !choiceOpened,
-        randomCounterAfter: state.randomCounter,
       };
     },
   },
@@ -2977,6 +2995,7 @@ function corpMainActions(state: GameState): LegalAction[] {
           additionalCost,
           reduction,
           reductionSourceDefinitionIds,
+          increaseSourceDefinitionIds,
           totalCost,
         } =
           corpIceInstallTotalCost(state, id, server);
@@ -3000,6 +3019,12 @@ function corpMainActions(state: GameState): LegalAction[] {
                 ? {
                     iceInstallReductionSourceDefinitionIds:
                       reductionSourceDefinitionIds,
+                  }
+                : {}),
+              ...(increaseSourceDefinitionIds
+                ? {
+                    iceInstallIncreaseSourceDefinitionIds:
+                      increaseSourceDefinitionIds,
                   }
                 : {}),
               iceInstallTotalCost: totalCost,
@@ -4183,7 +4208,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
         continue;
       }
-      if (definition.id === "onr_v1_173_restrictive-net-zoning") {
+      if (requiresDataFortInstallTarget(definition)) {
         for (const server of state.corp.servers) {
           const serverLabel = serverChoiceDisplayLabel(state, server.id);
           actions.push(
@@ -4244,7 +4269,9 @@ function runnerMainActions(state: GameState): LegalAction[] {
         state,
         definition,
       );
-      const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+      const resolver =
+        cardImplementationRunnerEventResolver(definition) ??
+        RUNNER_EVENT_RESOLVERS[definition.id];
       if (!resolver && !canPlayCardImplementation) continue;
       if (!canPlayCardImplementation && resolver?.canPlay && !resolver.canPlay(state))
         continue;
@@ -5204,11 +5231,6 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     state.run?.encounteredIceId === iceId
       ? Math.max(0, Math.floor(state.run.futureEncounterIceStrengthBonus ?? 0))
       : 0;
-  const clownReduction =
-    state.run?.encounteredIceId === iceId &&
-    runnerHasInstalledCardDefinition(state, "runner", "onr_v1_012_clown")
-      ? 1
-      : 0;
   const pattelsReduction = cardCounter(state, iceId, "virus");
   const baseStrength =
     instance.proteusVariableIceState?.family === "x_strength" &&
@@ -5220,7 +5242,6 @@ function iceStrengthFor(state: GameState, iceId: CardInstanceId): number {
     instance.strengthModifier +
     iceStrengthBonusFor(state, iceId) +
     runEncounterBonus -
-    clownReduction -
     pattelsReduction;
   return Math.max(0, total);
 }
@@ -5724,18 +5745,6 @@ function spyCountersForServer(
   return Math.max(0, Math.floor(state.spyCountersByServer?.[serverId] ?? 0));
 }
 
-function restrictiveNetZoningInstallTax(
-  state: GameState,
-  serverId: Exclude<ServerId, "new_remote">,
-): number {
-  return state.runner.rig.resources.reduce((sum, cardId) => {
-    const definition = definitionFor(state, cardId);
-    if (definition.id !== "onr_v1_173_restrictive-net-zoning") return sum;
-    const instance = mustInstance(state.cardInstances, cardId);
-    return instance.selectedServerId === serverId ? sum + 2 : sum;
-  }, 0);
-}
-
 function poxInstallTax(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
@@ -5747,10 +5756,7 @@ function corpIceInstallAdditionalCost(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,
 ): number {
-  return (
-    restrictiveNetZoningInstallTax(state, serverId) +
-    poxInstallTax(state, serverId)
-  );
+  return poxInstallTax(state, serverId);
 }
 
 function corpIceInstallTotalCost(
@@ -5762,6 +5768,7 @@ function corpIceInstallTotalCost(
   additionalCost: number;
   reduction: number;
   reductionSourceDefinitionIds?: string;
+  increaseSourceDefinitionIds?: string;
   totalCost: number;
 } {
   const additionalCost = corpIceInstallAdditionalCost(state, server.id);
@@ -5770,12 +5777,21 @@ function corpIceInstallTotalCost(
   });
   return {
     baseCost: quote.baseCredits,
-    additionalCost,
+    additionalCost:
+      typeof quote.publicPayload.iceInstallAdditionalCost === "number"
+        ? quote.publicPayload.iceInstallAdditionalCost
+        : additionalCost,
     reduction: quote.modifiers.reduce(
-      (sum, modifier) => sum + modifier.amount,
+      (sum, modifier) =>
+        modifier.kind === "reduction" ? sum + modifier.amount : sum,
       0,
     ),
     reductionSourceDefinitionIds: quote.modifiers
+      .filter((modifier) => modifier.kind === "reduction")
+      .map((modifier) => modifier.sourceDefinitionId)
+      .join(","),
+    increaseSourceDefinitionIds: quote.modifiers
+      .filter((modifier) => modifier.kind === "increase")
       .map((modifier) => modifier.sourceDefinitionId)
       .join(","),
     totalCost: quote.finalCredits,
@@ -10220,7 +10236,9 @@ function playRunnerEvent(state: GameState, legalAction: LegalAction): void {
     faceup: true,
     zone: { side: "runner", zone: "heap" },
   };
-  const resolver = RUNNER_EVENT_RESOLVERS[definition.id];
+  const resolver =
+    cardImplementationRunnerEventResolver(definition) ??
+    RUNNER_EVENT_RESOLVERS[definition.id];
   if (canPlayPrintedCostOnPlayImplementation(
     cardImplementationRuntimeDeps,
     state,
@@ -10596,10 +10614,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     ) {
       throw new Error("Der angegebene Program-Host ist ungueltig.");
     }
-    if (
-      definition.id === "onr_v1_173_restrictive-net-zoning" &&
-      (!selectedServerId || selectedServerId === "new_remote")
-    ) {
+    if (requiresDataFortInstallTarget(definition) && (!selectedServerId || selectedServerId === "new_remote")) {
       throw new Error(
         "Restrictive Net Zoning benötigt einen gültigen Zielserver.",
       );
@@ -10616,10 +10631,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       selectedServerId && selectedServerId !== "new_remote"
         ? (selectedServerId as Exclude<ServerId, "new_remote">)
         : undefined;
-    if (
-      definition.id === "onr_v1_173_restrictive-net-zoning" &&
-      restrictiveTargetServerId
-    ) {
+    if (requiresDataFortInstallTarget(definition) && restrictiveTargetServerId) {
       mustServer(state, restrictiveTargetServerId);
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
@@ -10784,8 +10796,7 @@ function installCard(state: GameState, legalAction: LegalAction): void {
       rezzed: !concealedHiddenRunnerResource,
       zone: { side: "runner", zone: "rig" },
       ...(hostOnCardId ? { hostedOn: hostOnCardId } : {}),
-      ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
-      restrictiveTargetServerId
+      ...(requiresDataFortInstallTarget(definition) && restrictiveTargetServerId
         ? { selectedServerId: restrictiveTargetServerId }
         : {}),
     };
@@ -27844,6 +27855,49 @@ function resolveP358HiddenReplacementChoice(
   throw new Error("Unbekannte P3.58-Choice.");
 }
 
+function resolvePlayfulAiDiceLoopEvent(
+  state: GameState,
+  legalAction: LegalAction,
+  sourceDefinitionId: CardDefinitionId,
+  implementation: CardRunnerEventLongtailImplementation,
+): void {
+  if (
+    implementation.kind !== "playful_ai_dice_loop" ||
+    implementation.dieFaces !== 6 ||
+    implementation.visibility !== "public"
+  )
+    throw new Error("Playful-AI-Implementation ist ungueltig.");
+  const dieRoll = rollDeterministicDie(
+    state,
+    `v1921.die.${sourceDefinitionId}.dice_loop.initial`,
+  );
+  const choiceOpened = implementation.choiceOn.includes(
+    dieRoll as (typeof implementation.choiceOn)[number],
+  );
+  if (choiceOpened) {
+    startV1921PlayfulAiChoice(
+      state,
+      String(legalAction.payload?.cardId ?? ""),
+      dieRoll,
+      0,
+      1,
+    );
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    v1921RunnerEventAbility: "playful_ai_dice_loop",
+    sourceDefinitionId,
+    v1921DieRoll: dieRoll,
+    playfulAiDieRolls: String(dieRoll),
+    playfulAiRolledDice: 1,
+    playfulAiDiceQueuedAfterRolls: 0,
+    playfulAiRemainingDice: 0,
+    playfulAiChoiceOpened: choiceOpened,
+    playfulAiComplete: !choiceOpened,
+    randomCounterAfter: state.randomCounter,
+  };
+}
+
 function startV1921PlayfulAiChoice(
   state: GameState,
   sourceCardId: CardInstanceId,
@@ -27977,6 +28031,7 @@ function parsePlayfulAiSplit(
 function continueV1921PlayfulAiLoop(
   state: GameState,
   sourceCardId: CardInstanceId,
+  sourceDefinitionId: CardDefinitionId,
   queuedDice: number,
   rollIndex: number,
 ): {
@@ -27997,7 +28052,7 @@ function continueV1921PlayfulAiLoop(
     remainingDice -= 1;
     const nextRoll = rollDeterministicDie(
       state,
-      `v1921.die.${PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID}.dice_loop.followup.${state.stateVersion + 1}.${nextRollIndex}`,
+      `v1921.die.${sourceDefinitionId}.dice_loop.followup.${state.stateVersion + 1}.${nextRollIndex}`,
     );
     nextRollIndex += 1;
     rolledDice.push(nextRoll);
@@ -28040,9 +28095,11 @@ function resolveV1921PlayfulAiChoice(
   if (
     !sourceCardId ||
     !state.runner.heap.includes(sourceCardId) ||
-    definitionFor(state, sourceCardId).id !== PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID
+    runnerEventLongtailKindForDefinition(definitionFor(state, sourceCardId)) !==
+      "playful_ai_dice_loop"
   )
     throw new Error("Die Playful-AI-Choice gehoert nicht zur gespielten Karte.");
+  const sourceDefinitionId = definitionFor(state, sourceCardId).id;
   const selectedOptionId = selectedChoiceIds(playerAction.selectedChoices)[0];
 
   delete state.pendingChoice;
@@ -28065,6 +28122,7 @@ function resolveV1921PlayfulAiChoice(
     progress = continueV1921PlayfulAiLoop(
       state,
       sourceCardId,
+      sourceDefinitionId,
       queuedDiceBeforeRolls,
       rollIndex,
     );
@@ -28073,7 +28131,7 @@ function resolveV1921PlayfulAiChoice(
   const payload: NonNullable<LegalAction["payload"]> = {
     ...(legalAction.payload ?? {}),
     v1921RunnerEventAbility: "playful_ai_dice_loop",
-    sourceDefinitionId: PLAYFUL_AI_DICE_LOOP_EVENT_CARD_ID,
+    sourceDefinitionId,
     playfulAiDieRolls: progress.rolledDice.join(","),
     playfulAiGainedCredits: gainedCredits,
     playfulAiSetAsideDice: setAsideDice,
@@ -30394,8 +30452,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
       : {}),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
-    ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
-    instance.selectedServerId
+    ...(requiresDataFortInstallTarget(definition) && instance.selectedServerId
       ? {
           selectedServerId: instance.selectedServerId,
           selectedServerLabel: serverChoiceDisplayLabel(

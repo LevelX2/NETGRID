@@ -221,6 +221,51 @@ export function collectActiveModifiers(state: GameState): ActiveModifier[] {
       visibility: "public",
     });
   }
+  for (const active of [
+    ...activeCardImplementationModifiersForRunnerInstalled(
+      state,
+      "ice_strength",
+    ).filter((candidate) =>
+      isPublicRunnerInstalledModifier(candidate.modifier),
+    ),
+    ...activeCardImplementationModifiersForCorpRoot(state, "ice_strength").filter(
+      (candidate) => isPublicRezzedCorpRootModifier(candidate.modifier),
+    ),
+    ...activeCardImplementationModifiersForScoredCorpAgendas(
+      state,
+      "ice_strength",
+    ).filter((candidate) =>
+      isPublicScoredCorpAgendaModifier(candidate.modifier),
+    ),
+  ]) {
+    const amount = positiveInteger(active.modifier.amount);
+    if (amount <= 0) continue;
+    modifiers.push({
+      id: `${active.modifier.sourceZone}.ice_strength.${active.sourceCardInstanceId}`,
+      sourceCardInstanceId: active.sourceCardInstanceId,
+      sourceDefinitionId: active.sourceDefinitionId,
+      kind: "ice_strength",
+      side: "corp",
+      amount: active.modifier.operation === "reduce" ? -amount : amount,
+      duration:
+        active.modifier.activeWhile === "installed"
+          ? "while_installed"
+          : active.modifier.activeWhile === "scored"
+            ? "game"
+            : "while_rezzed",
+      target: {
+        kind: active.modifier.appliesTo.sameServerAsSource
+          ? "server"
+          : active.modifier.appliesTo.encounteredOnly
+            ? "run"
+            : "subtype",
+        ...(active.modifier.appliesTo.subtype
+          ? { subtype: active.modifier.appliesTo.subtype }
+          : {}),
+      },
+      visibility: "public",
+    });
+  }
 
   const run = state.run;
   if (!run) return modifiers;

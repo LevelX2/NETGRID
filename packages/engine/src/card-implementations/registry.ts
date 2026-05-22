@@ -213,6 +213,7 @@ import { miscForSaleImplementation } from "./onr-v1/runner/preps/misc-for-sale";
 import { mitWestTierImplementation } from "./onr-v1/runner/preps/mit-west-tier";
 import { openEndedMileageProgramImplementation } from "./onr-v1/runner/preps/open-ended-mileage-program";
 import { organDonorImplementation } from "./onr-v1/runner/preps/organ-donor";
+import { playfulAiImplementation } from "./onr-v1/runner/preps/playful-ai";
 import { priorityWreckImplementation } from "./onr-v1/runner/preps/priority-wreck";
 import { sneakPreviewImplementation } from "./onr-v1/runner/preps/sneak-preview";
 import { totalGeneticRetrofitImplementation } from "./onr-v1/runner/preps/total-genetic-retrofit";
@@ -274,6 +275,7 @@ import { boardwalkImplementation } from "./onr-v1/runner/programs/boardwalk";
 import { butcherBoyImplementation } from "./onr-v1/runner/programs/butcher-boy";
 import { cascadeImplementation } from "./onr-v1/runner/programs/cascade";
 import { cloakImplementation } from "./onr-v1/runner/programs/cloak";
+import { clownImplementation } from "./onr-v1/runner/programs/clown";
 import { codecrackerImplementation } from "./onr-v1/runner/programs/codecracker";
 import { codeslingerImplementation } from "./onr-v1/runner/programs/codeslinger";
 import { cockroachImplementation } from "./onr-v1/runner/programs/cockroach";
@@ -363,6 +365,7 @@ import { nomadAlliesImplementation } from "./onr-v1/runner/resources/nomad-allie
 import { preyingMantisImplementation } from "./onr-v1/runner/resources/preying-mantis";
 import { questForCattekinImplementation } from "./onr-v1/runner/resources/quest-for-cattekin";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
+import { restrictiveNetZoningImplementation } from "./onr-v1/runner/resources/restrictive-net-zoning";
 import { roninAroundImplementation } from "./onr-v1/runner/resources/ronin-around";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
@@ -407,6 +410,7 @@ export const CARD_IMPLEMENTATIONS = [
   mitWestTierImplementation,
   openEndedMileageProgramImplementation,
   organDonorImplementation,
+  playfulAiImplementation,
   priorityWreckImplementation,
   privateLdlAccessImplementation,
   rompThroughHqImplementation,
@@ -431,6 +435,7 @@ export const CARD_IMPLEMENTATIONS = [
   butcherBoyImplementation,
   cascadeImplementation,
   cloakImplementation,
+  clownImplementation,
   codecrackerImplementation,
   codeslingerImplementation,
   cockroachImplementation,
@@ -547,6 +552,7 @@ export const CARD_IMPLEMENTATIONS = [
   recordReconstructorImplementation,
   techtronicaUtilitySuitImplementation,
   riggedInvestmentsImplementation,
+  restrictiveNetZoningImplementation,
   scoreImplementation,
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,

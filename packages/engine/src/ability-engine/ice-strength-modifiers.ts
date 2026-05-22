@@ -7,11 +7,13 @@
 import type { CardDefinition, CardInstanceId, GameState } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
+  activeCardImplementationModifiersForRunnerInstalled,
   activeCardImplementationModifiersForScoredCorpAgendas,
   cardDefinitionForInstance,
   cardInstanceFor,
   cardMatchesModifierAppliesTo,
   isPublicRezzedCorpRootModifier,
+  isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
@@ -24,11 +26,13 @@ function iceStrengthModifierAppliesToIce(
   iceId: CardInstanceId,
   iceDefinition: CardDefinition,
 ): boolean {
-  if (modifier.operation !== "increase") return false;
   if (
     !isPublicRezzedCorpRootModifier(modifier) &&
+    !isPublicRunnerInstalledModifier(modifier) &&
     !isPublicScoredCorpAgendaModifier(modifier)
   )
+    return false;
+  if (modifier.appliesTo.encounteredOnly && state.run?.encounteredIceId !== iceId)
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
   if (!cardMatchesModifierAppliesTo(iceDefinition, modifier.appliesTo))
@@ -70,7 +74,29 @@ export function iceStrengthModifierBonusFor(
       )
     )
       continue;
-    bonus += match.modifier.amount;
+    bonus +=
+      match.modifier.operation === "reduce"
+        ? -match.modifier.amount
+        : match.modifier.amount;
+  }
+  for (const match of activeCardImplementationModifiersForRunnerInstalled(
+    state,
+    "ice_strength",
+  )) {
+    if (
+      !iceStrengthModifierAppliesToIce(
+        state,
+        match.modifier,
+        match.sourceCardInstanceId,
+        iceId,
+        iceDefinition,
+      )
+    )
+      continue;
+    bonus +=
+      match.modifier.operation === "reduce"
+        ? -match.modifier.amount
+        : match.modifier.amount;
   }
   for (const match of activeCardImplementationModifiersForScoredCorpAgendas(
     state,
@@ -86,7 +112,10 @@ export function iceStrengthModifierBonusFor(
       )
     )
       continue;
-    bonus += match.modifier.amount;
+    bonus +=
+      match.modifier.operation === "reduce"
+        ? -match.modifier.amount
+        : match.modifier.amount;
   }
   return bonus;
 }

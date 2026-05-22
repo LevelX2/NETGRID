@@ -8218,6 +8218,27 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     }
   });
 
+  it("migrates P3.62 remaining singleton CardImplementation coverage", () => {
+    const implementedCards = [
+      "onr_v1_012_clown",
+      "onr_v1_104_playful-ai",
+      "onr_v1_173_restrictive-net-zoning",
+    ] as const;
+
+    for (const definitionId of implementedCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(cardImplementationForDefinitionId("onr_v1_220_tycho-extension")).toBeUndefined();
+    expect(cardImplementationCoverageForDefinitionId("onr_v1_220_tycho-extension")).toMatchObject({
+      cardDefinitionId: "onr_v1_220_tycho-extension",
+      status: "no_engine_behavior_required",
+    });
+  });
+
   it("applies Crash Everett draw replacement with private trash or stack-top choice", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -14832,6 +14853,97 @@ describe("V1.8.1 Mechanikpaket H", () => {
     expect(
       getPlayerView(withClown, "runner").run?.encounteredIce?.strength,
     ).toBe(2);
+  });
+
+  it("stacks Clown with CardImplementation ICE-strength increases for break revalidation", () => {
+    let state = toRunnerTurn(v181CardReleaseGame("p362-clown-stack"));
+    state.runner.credits = 40;
+    moveRunnerCardToGrip(state, "onr_v1_012_clown");
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_012_clown",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+    );
+    const dataMasonsId = addCorpCardToHqForTest(
+      state,
+      "onr_v1_317_data-masons",
+      "clown_stack_data_masons",
+    );
+    let remote = state.corp.servers.find((server) => server.id === "remote_1");
+    if (!remote) {
+      remote = {
+        id: "remote_1",
+        kind: "remote",
+        label: "Remote 1",
+        ice: [],
+        root: [],
+      };
+      state.corp.servers.push(remote);
+    }
+    removeEverywhere(state, dataMasonsId);
+    remote.root.push(dataMasonsId);
+    state.cardInstances[dataMasonsId] = {
+      ...state.cardInstances[dataMasonsId]!,
+      zone: { side: "corp", zone: "serverRoot", serverId: "remote_1" },
+      rezzed: true,
+    };
+    const wallId = addCorpCardToHqForTest(
+      state,
+      "onr_v1_232_crystal-wall",
+      "clown_stack_wall",
+    );
+    removeEverywhere(state, wallId);
+    const rd = state.corp.servers.find((server) => server.id === "rd");
+    if (!rd) throw new Error("Missing R&D");
+    rd.ice.push(wallId);
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      zone: { side: "corp", zone: "serverIce", serverId: "rd" },
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
+    );
+    expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(3);
+    const breakAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+    );
+    const removedClown = structuredClone(state);
+    const clownId = removedClown.runner.rig.programs.find(
+      (cardId) => removedClown.cardInstances[cardId]?.definitionId === "onr_v1_012_clown",
+    );
+    if (!clownId) throw new Error("Missing Clown");
+    removeEverywhere(removedClown, clownId);
+    const stale = applyAction(removedClown, {
+      matchId: removedClown.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: removedClown.stateVersion,
+      idempotencyKey: "p362-clown-break-stale",
+    });
+    expect(stale.ok).toBe(false);
   });
 
   it("creates Pattel/Pox run-success counters and clears card/server virus counters with purge", () => {

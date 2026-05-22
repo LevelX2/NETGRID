@@ -162,6 +162,7 @@ export function publicContextForAction(
       "forfeitedAgendaCardId",
       "iceInstallBaseCost",
       "iceInstallAdditionalCost",
+      "iceInstallIncreaseSourceDefinitionIds",
       "iceInstallReduction",
       "iceInstallReductionSourceDefinitionIds",
       "iceInstallTotalCost",

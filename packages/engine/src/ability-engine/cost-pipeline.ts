@@ -17,10 +17,12 @@ import type {
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import {
   activeCardImplementationModifiersForCorpRoot,
+  activeCardImplementationModifiersForRunnerInstalled,
   cardDefinitionForInstance,
   cardMatchesModifierAppliesTo,
   corpServerIdForInstalledCard,
   isPublicRezzedCorpRootModifier,
+  isPublicRunnerInstalledModifier,
   sameServerAsSourceApplies,
 } from "./card-implementation-modifiers";
 import type {
@@ -172,13 +174,18 @@ function corpInstallCostModifierAppliesToCard(
   targetServerId: CorpServer["id"],
 ): boolean {
   if (
-    modifier.operation !== "reduce" ||
-    !isPublicRezzedCorpRootModifier(modifier)
+    !isPublicRezzedCorpRootModifier(modifier) &&
+    !isPublicRunnerInstalledModifier(modifier)
   )
     return false;
   if (modifier.appliesTo.side !== "corp") return false;
   if (!cardMatchesModifierAppliesTo(definition, modifier.appliesTo))
     return false;
+  if (modifier.appliesTo.selectedServerAsSource) {
+    const selectedServerId =
+      state.cardInstances[sourceCardInstanceId]?.selectedServerId;
+    return selectedServerId === targetServerId;
+  }
   if (!modifier.appliesTo.sameServerAsSource) return true;
   return corpServerIdForInstalledCard(state, sourceCardInstanceId) === targetServerId;
 }
@@ -190,6 +197,22 @@ function activeCorpInstallCostModifiersForCard(
 ): ActiveCorpInstallCostModifier[] {
   const matches: ActiveCorpInstallCostModifier[] = [];
   for (const match of activeCardImplementationModifiersForCorpRoot(
+    state,
+    "install_cost",
+  )) {
+    if (
+      !corpInstallCostModifierAppliesToCard(
+        state,
+        match.modifier,
+        match.sourceCardInstanceId,
+        definition,
+        server.id,
+      )
+    )
+      continue;
+    matches.push(match);
+  }
+  for (const match of activeCardImplementationModifiersForRunnerInstalled(
     state,
     "install_cost",
   )) {
@@ -286,29 +309,43 @@ export function quoteCorpIceInstallCost(
       ? activeCorpInstallCostModifiersForCard(state, definition, server)
       : [];
   const modifierReduction = modifierMatches.reduce(
-    (sum, match) => sum + match.modifier.amount,
+    (sum, match) =>
+      match.modifier.operation === "reduce" ? sum + match.modifier.amount : sum,
+    0,
+  );
+  const modifierIncrease = modifierMatches.reduce(
+    (sum, match) =>
+      match.modifier.operation === "increase"
+        ? sum + match.modifier.amount
+        : sum,
     0,
   );
   const totalReduction = legacyReduction + modifierReduction;
   const finalCredits = Math.max(
     0,
-    baseCredits + additionalCredits - totalReduction,
+    baseCredits + additionalCredits + modifierIncrease - totalReduction,
   );
   const publicPayload: NonNullable<LegalAction["payload"]> = {
     cardId,
     serverId: server.id,
     placement: "ice",
     iceInstallBaseCost: baseCredits,
-    iceInstallAdditionalCost: additionalCredits,
+    iceInstallAdditionalCost: additionalCredits + modifierIncrease,
     iceInstallReduction: totalReduction,
     iceInstallTotalCost: finalCredits,
   };
-  const sourceDefinitionIds = modifierMatches.map(
-    (match) => match.sourceDefinitionId,
-  );
-  if (sourceDefinitionIds.length > 0)
+  const reductionSourceDefinitionIds = modifierMatches
+    .filter((match) => match.modifier.operation === "reduce")
+    .map((match) => match.sourceDefinitionId);
+  if (reductionSourceDefinitionIds.length > 0)
     publicPayload.iceInstallReductionSourceDefinitionIds =
-      sourceDefinitionIds.join(",");
+      reductionSourceDefinitionIds.join(",");
+  const increaseSourceDefinitionIds = modifierMatches
+    .filter((match) => match.modifier.operation === "increase")
+    .map((match) => match.sourceDefinitionId);
+  if (increaseSourceDefinitionIds.length > 0)
+    publicPayload.iceInstallIncreaseSourceDefinitionIds =
+      increaseSourceDefinitionIds.join(",");
 
   return {
     purpose: "corp_install",

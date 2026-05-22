@@ -14,12 +14,14 @@ import type {
   CardIcebreakerAbilityImplementation,
   CardIceEncounterImplementation,
   CardInstallAdditionalCostImplementation,
+  CardInstallTargetBindingImplementation,
   CardLifecycleImplementation,
   CardModifierImplementation,
   CardPrintedSubroutineImplementation,
   CardRegionBaselineImplementation,
   CardRemainingReplacementLongtailImplementation,
   CardRunEncounterInterventionImplementation,
+  CardRunnerEventLongtailImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
   CardSuccessfulRunFollowupImplementation,
@@ -51,6 +53,7 @@ export type CardImplementationDefinition = {
   runnerCounterEffects?: readonly RunnerTraceCounterEffectImplementation[];
   restrictedHostedCreditSource?: RestrictedHostedCreditSourceImplementation;
   installAdditionalCosts?: readonly CardInstallAdditionalCostImplementation[];
+  installTargetBinding?: CardInstallTargetBindingImplementation;
   damagePreventionSources?: readonly CardDamagePreventionSourceImplementation[];
   flatlineReplacementSources?: readonly CardFlatlineReplacementSourceImplementation[];
   tagPreventionSources?: readonly CardTagPreventionSourceImplementation[];
@@ -67,6 +70,7 @@ export type CardImplementationDefinition = {
   corpUtility?: CardCorpUtilityImplementation;
   hiddenReplacementLongtail?: CardHiddenReplacementLongtailImplementation;
   runnerUtilityLongtail?: CardRunnerUtilityLongtailImplementation;
+  runnerEventLongtail?: CardRunnerEventLongtailImplementation;
   uniqueDirectLongtail?: CardUniqueDirectLongtailImplementation;
   remainingReplacementLongtail?: CardRemainingReplacementLongtailImplementation;
   hardwareDeck?: true;

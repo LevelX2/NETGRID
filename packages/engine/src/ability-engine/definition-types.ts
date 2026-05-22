@@ -44,6 +44,12 @@ export type CardLifecycleImplementation = {
   on_runner_run_start?: readonly CardLifecycleTriggeredAbilityImplementation[];
 };
 
+export type CardInstallTargetBindingImplementation = {
+  kind: "choose_data_fort_on_install";
+  stores: "selectedServerId";
+  visibility: Extract<EventVisibilityClass, "public">;
+};
+
 export type CardCorpUtilityImplementation =
   | {
       kind: "gain_restricted_install_actions";
@@ -381,6 +387,13 @@ export type CardRunEncounterInterventionImplementation =
       cost: { kind: "credit"; amount: 0 };
       visibility: Extract<EventVisibilityClass, "public">;
     };
+
+export type CardRunnerEventLongtailImplementation = {
+  kind: "playful_ai_dice_loop";
+  dieFaces: 6;
+  choiceOn: readonly [1, 2, 3];
+  visibility: Extract<EventVisibilityClass, "public">;
+};
 
 export type CardVirusCounterKindImplementation =
   | "boardwalk"
@@ -1226,15 +1239,16 @@ export type CardRezCostModifierImplementation = {
 
 export type CardInstallCostModifierImplementation = {
   kind: "install_cost";
-  operation: "reduce";
+  operation: "increase" | "reduce";
   amount: number;
-  activeWhile: "rezzed";
-  sourceZone: "corp_root";
+  activeWhile: "installed" | "rezzed";
+  sourceZone: "corp_root" | "runner_installed";
   visibility: EventVisibilityClass;
   appliesTo: {
     side: Extract<Side, "corp">;
     cardType: Extract<CardType, "ice">;
     sameServerAsSource?: boolean;
+    selectedServerAsSource?: boolean;
   };
 };
 
@@ -1255,16 +1269,17 @@ export type CardStealCostModifierImplementation = {
 
 export type CardIceStrengthModifierImplementation = {
   kind: "ice_strength";
-  operation: "increase";
+  operation: "increase" | "reduce";
   amount: number;
-  activeWhile: "rezzed" | "scored";
-  sourceZone: "corp_root" | "corp_scored_agenda";
+  activeWhile: "installed" | "rezzed" | "scored";
+  sourceZone: "runner_installed" | "corp_root" | "corp_scored_agenda";
   visibility: EventVisibilityClass;
   appliesTo: {
     side: Extract<Side, "corp">;
     cardType: Extract<CardType, "ice">;
     subtype?: string;
     sameServerAsSource?: boolean;
+    encounteredOnly?: boolean;
   };
 };
 

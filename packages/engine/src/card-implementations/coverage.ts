@@ -199,6 +199,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/assets/rescheduler.ts",
   "onr_v1_001_afreet":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/afreet.ts",
+  "onr_v1_012_clown":
+    "packages/engine/src/card-implementations/onr-v1/runner/programs/clown.ts",
   "onr_v1_045_newsgroup-filter":
     "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
   "onr_v1_003_baedekers-net-map":
@@ -419,6 +421,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/open-ended-mileage-program.ts",
   "onr_v1_103_organ-donor":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/organ-donor.ts",
+  "onr_v1_104_playful-ai":
+    "packages/engine/src/card-implementations/onr-v1/runner/preps/playful-ai.ts",
   "onr_v1_105_priority-wreck":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/priority-wreck.ts",
   "onr_v1_110_sneak-preview":
@@ -483,6 +487,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/resources/n-e-t-o.ts",
   "onr_v1_170_nomad-allies":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/nomad-allies.ts",
+  "onr_v1_173_restrictive-net-zoning":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/restrictive-net-zoning.ts",
   "onr_v1_175_ronin-around":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/ronin-around.ts",
   "onr_v1_174_rigged-investments":
@@ -769,7 +775,7 @@ function implementedCoverageFor(
     implementation.modifiers?.some((modifier) => modifier.kind === "ice_strength")
   ) {
     reasons.push(
-      "Engine-local CardImplementationDefinition exists for passive Corp ICE-strength modifier behavior.",
+      "Engine-local CardImplementationDefinition exists for passive ICE-strength modifier behavior.",
     );
     currentLocations.add(IMPLEMENTED_ICE_STRENGTH_MODIFIER_LOCATION);
   }
@@ -923,6 +929,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_RESTRICTED_HOSTED_CREDIT_LOCATION);
   }
+  if (implementation.installTargetBinding) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for install-time public fort target binding behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_FORT_RUN_WINDOW_LOCATION);
+  }
   if (implementation.damagePreventionSources?.length) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for damage-prevention source behavior.",
@@ -1019,6 +1031,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION);
   }
+  if (implementation.runnerEventLongtail) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Runner event longtail behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ON_PLAY_EFFECT_LOCATION);
+  }
   if (implementation.uniqueDirectLongtail) {
     reasons.push(
       "Engine-local CardImplementationDefinition exists for unique/direct-ability longtail behavior.",
@@ -1058,11 +1076,11 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
     {
-      cardDefinitionId: "onr_v1_173_restrictive-net-zoning",
-      status: "legacy_engine_special_case",
+      cardDefinitionId: "onr_v1_220_tycho-extension",
+      status: "no_engine_behavior_required",
       reason:
-        "Server-bound install-cost modifier and selected-server state are still implemented in legacy engine paths.",
-      currentLocations: ["packages/engine/src/index.ts"],
+        "Tycho Extension has no additional rules text; normal agenda scoring and agenda points come from the CardDefinition data.",
+      currentLocations: ["packages/shared/src/index.ts"],
     },
   ];
 
