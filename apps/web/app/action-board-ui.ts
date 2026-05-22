@@ -376,9 +376,9 @@ export function orderedCardContextActions(actions: LegalAction[]): LegalAction[]
   return actions
     .map((action, index) => ({ action, index }))
     .sort((left, right) => {
-      const leftNewRemoteIce = isNewRemoteIceInstallAction(left.action) ? 1 : 0;
-      const rightNewRemoteIce = isNewRemoteIceInstallAction(right.action) ? 1 : 0;
-      return leftNewRemoteIce - rightNewRemoteIce || left.index - right.index;
+      const leftNewRemoteInstall = isNewRemoteInstallAction(left.action) ? 1 : 0;
+      const rightNewRemoteInstall = isNewRemoteInstallAction(right.action) ? 1 : 0;
+      return leftNewRemoteInstall - rightNewRemoteInstall || left.index - right.index;
     })
     .map(({ action }) => action);
 }
@@ -532,7 +532,7 @@ function installContextLabel(action: LegalAction): string {
   if (action.payload?.runnerProgramTrashBeforeInstall === true) return "Mit Programmtrash installieren";
   if (!serverId && selectedServerId) return `Auf ${serverDisplayLabel(selectedServerId)} ausrichten`;
   if (!serverId) return "Installieren";
-  if (isNewRemoteIceInstallAction(action)) return "Neues Remote erstellen";
+  if (isNewRemoteInstallAction(action)) return "Neues Remote erstellen";
   const serverLabel = serverDisplayLabel(serverId);
   if (action.payload?.placement === "ice") return `Vor ${serverLabel}`;
   if (
@@ -544,8 +544,8 @@ function installContextLabel(action: LegalAction): string {
   return `Installieren: ${serverLabel}`;
 }
 
-function isNewRemoteIceInstallAction(action: Pick<LegalAction, "type" | "payload">): boolean {
-  return action.type === "install_card" && action.payload?.serverId === "new_remote" && action.payload?.placement === "ice";
+function isNewRemoteInstallAction(action: Pick<LegalAction, "type" | "payload">): boolean {
+  return action.type === "install_card" && action.payload?.serverId === "new_remote";
 }
 
 function playEventContextLabel(action: LegalAction): string {
