@@ -4,6 +4,7 @@ import {
   catalogSetKeyForCard,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
+  filterCatalogCardsByType,
   nextCatalogSelection,
   summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
@@ -61,16 +62,36 @@ describe("catalog UI filtering", () => {
   it("separates original cards from local test cards in the deck editor source filter", () => {
     const cards = [
       { catalogCardId: "onr", setId: "onr-v1-limited-private-local" },
+      { catalogCardId: "originalset", setId: "originalset-v1" },
+      { catalogCardId: "testset", setId: "testset-v1" },
       { catalogCardId: "demo", setId: "mvp-0.8-demo" },
+      { catalogCardId: "proteus", setId: "proteus-v1" },
       { catalogCardId: "future", setId: "future-private-set" }
     ];
 
     expect(catalogSetKeyForCard(cards[0]!)).toBe("original");
-    expect(catalogSetKeyForCard(cards[1]!)).toBe("test");
-    expect(catalogSetKeyForCard(cards[2]!)).toBe("other");
-    expect(filterCatalogCardsBySet(cards, "original").map((card) => card.catalogCardId)).toEqual(["onr"]);
-    expect(filterCatalogCardsBySet(cards, "test").map((card) => card.catalogCardId)).toEqual(["demo"]);
-    expect(summarizeCatalogSetFilters(cards)).toEqual({ all: 3, original: 1, test: 1, other: 1 });
+    expect(catalogSetKeyForCard(cards[1]!)).toBe("original");
+    expect(catalogSetKeyForCard(cards[2]!)).toBe("test");
+    expect(catalogSetKeyForCard(cards[3]!)).toBe("test");
+    expect(catalogSetKeyForCard(cards[4]!)).toBe("other");
+    expect(catalogSetKeyForCard(cards[5]!)).toBe("other");
+    expect(filterCatalogCardsBySet(cards, "original").map((card) => card.catalogCardId)).toEqual(["onr", "originalset"]);
+    expect(filterCatalogCardsBySet(cards, "test").map((card) => card.catalogCardId)).toEqual(["testset", "demo"]);
+    expect(summarizeCatalogSetFilters(cards)).toEqual({ all: 6, original: 2, test: 2, other: 2 });
+  });
+
+  it("keeps originalset filtering composable with search and type filters", () => {
+    const cards = [
+      { catalogCardId: "original_ice", title: "Original Ice", setId: "originalset-v1", type: "ice", subtypes: [] },
+      { catalogCardId: "original_event", title: "Original Event", setId: "originalset-v1", type: "event", subtypes: [] },
+      { catalogCardId: "test_ice", title: "Original Test Ice", setId: "testset-v1", type: "ice", subtypes: [] },
+      { catalogCardId: "proteus_ice", title: "Original Proteus Ice", setId: "proteus-v1", type: "ice", subtypes: [] }
+    ];
+    const onlyIce = { ...noTypes, ice: true };
+    const originalCards = filterCatalogCardsBySet(cards, "original");
+    const searchedCards = originalCards.filter((card) => card.title.toLowerCase().includes("original"));
+
+    expect(filterCatalogCardsByType(searchedCards, onlyIce).map((card) => card.catalogCardId)).toEqual(["original_ice"]);
   });
 
   it("filters and summarizes rarity metadata without breaking cards that have no rarity", () => {

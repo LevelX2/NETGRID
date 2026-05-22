@@ -688,7 +688,7 @@ const CATALOG_TYPE_FILTER_GROUPS: Array<{ title: string; side: Side; filters: Ar
 
 const DECK_SOURCE_FILTERS: Array<{ key: CatalogSetFilterKey; label: string }> = [
   { key: "all", label: "Alle Sets" },
-  { key: "original", label: "Original NETGRID" },
+  { key: "original", label: "Original NetGrid Set" },
   { key: "test", label: "Testkarten" },
   { key: "other", label: "Andere Sets" }
 ];

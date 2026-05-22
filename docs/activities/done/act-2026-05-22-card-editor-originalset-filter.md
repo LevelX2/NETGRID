@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-22-card-editor-originalset-filter
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/catalog-ui.ts
+  - apps/web/app/catalog-ui.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/catalog-ui.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
 ---
 
 # Karteneditor-Filter für Original NetGrid Set reparieren
@@ -57,4 +62,8 @@ Der Karteneditor muss beim Filter `Original NetGrid Set` ausschließlich Karten 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-22.
+
+- Set-Mapping erkennt `originalset-v1` als Original-NetGrid-Set und `testset-v1` als Testset.
+- Karteneditor-Label fuer den Source-Filter auf `Original NetGrid Set` angepasst.
+- Regressionstest deckt Originalset vs. Testset/Proteus sowie Kombination mit Suche und Typfilter ab.

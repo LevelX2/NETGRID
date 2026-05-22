@@ -38,8 +38,8 @@ const CATALOG_RARITY_LABELS_DE: Record<Exclude<CatalogRarityFilterKey, "all">, s
   vital: "Vital"
 };
 
-const ORIGINAL_SET_PREFIXES = ["onr-"];
-const TEST_SET_PREFIXES = ["mvp-", "v"];
+const ORIGINAL_SET_PREFIXES = ["onr-", "originalset-"];
+const TEST_SET_PREFIXES = ["mvp-", "testset-", "v"];
 
 export function catalogTypeKeysForCard(card: Pick<CatalogCardForTypeFilter, "type" | "subtypes">): CatalogTypeFilterKey[] {
   const type = card.type.toLowerCase();
