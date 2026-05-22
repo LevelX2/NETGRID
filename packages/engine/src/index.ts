@@ -208,6 +208,14 @@ import {
   legacyAbilityPayloadEntries,
 } from "./mechanics/public-payload-schema";
 import {
+  ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
+  isP358FortressRespecificationChoiceSource,
+  isP358HiddenReplacementCompatibilityChoiceSource,
+  isP358NewBloodReorderChoiceSource,
+  isP358SocialEngineeringChoiceSource,
+  isReplayCompatibilityActionPayload,
+} from "./compatibility/payload-compatibility";
+import {
   AI_BOON_RANDOM_BREAKER_CARD_ID,
   BOARDWALK_RANDOM_PROGRAM_CARD_ID,
   QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
@@ -982,27 +990,6 @@ type VisibleCounterPayload = {
 };
 
 const BAD_PUBLICITY_LOSS_THRESHOLD = 7;
-
-const ACTION_ID_ABILITY_PAYLOAD_FIELDS = [
-  "v1911HiddenZoneAbility",
-  "v1917AssetAbility",
-  "v1918UpgradeAbility",
-  "v1919AssetAbility",
-  "v1919OperationAbility",
-  "v1919UpgradeAbility",
-  "v1919RunnerProgramAbility",
-  "v1919RunnerEventAbility",
-  "v1920AssetAbility",
-  "v1921AssetAbility",
-  "v1921UpgradeAbility",
-  "v1921RunnerProgramAbility",
-  "v1921RunnerResourceAbility",
-  "resourceAbility",
-  "runnerAbility",
-  "shellTradersAbility",
-  "acmeSavingsAndLoanAbility",
-  "agendaAbility",
-] as const satisfies readonly LegacyAbilityPayloadField[];
 
 export {
   DEMO_CARDS,
@@ -2254,7 +2241,7 @@ export function replayEvents(
     if (event.type === "game_created") continue;
     const actionPayload =
       event.privatePayload?.[event.publicPayload.actor as Side]?.action;
-    if (!isReplayAction(actionPayload)) {
+    if (!isReplayCompatibilityActionPayload(actionPayload)) {
       errors.push(`Event ${event.eventId} has no replayable action.`);
       continue;
     }
@@ -21887,7 +21874,11 @@ function resolvePendingChoice(
     resolveTraceRunnerBid(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_58.")) {
+  if (
+    isP358HiddenReplacementCompatibilityChoiceSource(
+      state.pendingChoice.source,
+    )
+  ) {
     resolveP358HiddenReplacementChoice(state, legalAction, playerAction);
     return;
   }
@@ -26770,7 +26761,7 @@ function resolveFortressRespecificationReorderChoice(
   playerAction: PlayerAction,
 ): void {
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_58.fortress_respecification:"))
+  if (!choice || !isP358FortressRespecificationChoiceSource(choice.source))
     throw new Error("Es ist keine Fortress-Respecification-Choice offen.");
   const [, sourceCardId = "", serverId = ""] = choice.source.split(":");
   const sourceDefinition = definitionFor(state, sourceCardId);
@@ -26910,7 +26901,7 @@ function resolveSocialEngineeringChoice(
   playerAction: PlayerAction,
 ): void {
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_58.social_engineering_"))
+  if (!choice || !isP358SocialEngineeringChoiceSource(choice.source))
     throw new Error("Es ist keine Social-Engineering-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
   if (definitionFor(state, sourceCardId).id !== RUN_ACCESS_PRESSURE_EVENT_CARD_ID)
@@ -27058,7 +27049,7 @@ function resolveNewBloodReorderChoice(
   playerAction: PlayerAction,
 ): void {
   const choice = state.pendingChoice;
-  if (!choice || !choice.source.startsWith("p3_58.new_blood_reorder:"))
+  if (!choice || !isP358NewBloodReorderChoiceSource(choice.source))
     throw new Error("Es ist keine New-Blood-Reorder-Choice offen.");
   const [, sourceCardId = ""] = choice.source.split(":");
   const sourceDefinition = definitionFor(state, sourceCardId);
@@ -27103,15 +27094,15 @@ function resolveP358HiddenReplacementChoice(
   playerAction: PlayerAction,
 ): void {
   const source = state.pendingChoice?.source ?? "";
-  if (source.startsWith("p3_58.fortress_respecification:")) {
+  if (isP358FortressRespecificationChoiceSource(source)) {
     resolveFortressRespecificationReorderChoice(state, legalAction, playerAction);
     return;
   }
-  if (source.startsWith("p3_58.social_engineering_")) {
+  if (isP358SocialEngineeringChoiceSource(source)) {
     resolveSocialEngineeringChoice(state, legalAction, playerAction);
     return;
   }
-  if (source.startsWith("p3_58.new_blood_reorder:")) {
+  if (isP358NewBloodReorderChoiceSource(source)) {
     resolveNewBloodReorderChoice(state, legalAction, playerAction);
     return;
   }
@@ -29334,7 +29325,7 @@ function makeActionId(
     parts.push(String(payload.payOrEndRunSubroutinePayment));
   for (const entry of legacyAbilityPayloadEntries(
     payload,
-    ACTION_ID_ABILITY_PAYLOAD_FIELDS,
+    ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
   )) {
     parts.push(entry.abilityId);
   }
@@ -31845,15 +31836,4 @@ function cloneGameStateForAction(state: GameState): GameState {
     ...cloneState({ ...state, eventLog: [] }),
     eventLog: state.eventLog.slice(),
   };
-}
-
-function isReplayAction(value: unknown): value is PlayerAction {
-  if (!value || typeof value !== "object") return false;
-  const record = value as Partial<PlayerAction>;
-  return (
-    typeof record.matchId === "string" &&
-    typeof record.side === "string" &&
-    typeof record.actionId === "string" &&
-    typeof record.clientKnownStateVersion === "number"
-  );
 }
