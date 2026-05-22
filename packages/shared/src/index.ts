@@ -893,6 +893,11 @@ export type RunState = {
   speedTrapPendingRezCardId?: CardInstanceId;
   speedTrapPendingRezTimingPoint?: string;
   speedTrapPendingRezActiveSide?: Side;
+  wilsonRunSpendingCap?: {
+    sourceCardInstanceId: CardInstanceId;
+    limit: number;
+    spent: number;
+  };
 };
 
 export type AccessQueueEntry = {
@@ -1067,6 +1072,8 @@ export type GameState = {
     preyingMantisDamageDueSourceIdsThisTurn?: CardInstanceId[];
     questForCattekinPermanentActionGain?: boolean;
     corpRezzedIceThisTurn?: number;
+    wilsonUsedSourceIdsThisTurn?: CardInstanceId[];
+    wilsonRunOnlyActionsRemaining?: number;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;

@@ -1157,9 +1157,9 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     );
     expect(wilsonState.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
-      preventedAmount: 1,
+      preventedAmount: 2,
       damageType: "meat",
-      damageAmount: 1,
+      damageAmount: 0,
     });
     moveCorpCardToHq(wilsonState, "onr_v1_301_punitive-counterstrike");
     wilsonState = apply(
@@ -8192,10 +8192,171 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     }
     expect(
       cardImplementationForDefinitionId("onr_v1_187_wilson-weeflerunner-apprentice"),
-    ).toBeUndefined();
+    ).toBeDefined();
     expect(
       cardImplementationForDefinitionId("onr_v1_157_crash-everett-inventive-fixer"),
-    ).toBeUndefined();
+    ).toBeDefined();
+  });
+
+  it("migrates P3.61 remaining replacement longtail CardImplementation coverage", () => {
+    const p361Cards = [
+      "onr_v1_157_crash-everett-inventive-fixer",
+      "onr_v1_187_wilson-weeflerunner-apprentice",
+      "onr_v1_308_acme-savings-and-loan",
+      "onr_v1_329_investment-firm",
+      "onr_v1_313_city-surveillance",
+      "onr_v1_325_hacker-tracker-central",
+      "onr_v1_354_crybaby",
+    ] as const;
+
+    for (const definitionId of p361Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+  });
+
+  it("applies Crash Everett draw replacement with private trash or stack-top choice", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p361-crash-draw",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "p361_crash_runner",
+          name: "P3.61 Crash Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_157_crash-everett-inventive-fixer", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+            { id: "simple_agenda", quantity: 6 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 4;
+    const crashId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_157_crash-everett-inventive-fixer",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "install_card" && action.payload?.cardId === crashId,
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "draw_card",
+      drawnCount: 2,
+      crashEverettChoiceOpened: true,
+      drawReplacementExtraDrawn: 1,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"grip"|"stack"|"cardInstances"|"privatePayload"|simple_/,
+    );
+    expect(state.pendingChoice?.side).toBe("runner");
+    expect(getPlayerView(state, "corp").pendingChoice).toBeUndefined();
+    expect(state.pendingChoice?.options).toHaveLength(4);
+
+    const topOption = state.pendingChoice?.options.find((option) =>
+      option.id.startsWith("top_"),
+    );
+    const topCardId = String(topOption?.value ?? "").split(":")[0];
+    state = applyChoice(state, "runner", topOption?.id ?? "");
+    expect(state.runner.stack[0]).toBe(topCardId);
+    expect(state.runner.grip).not.toContain(topCardId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      crashEverettDisposition: "top",
+      returnedToStackTop: true,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
+
+    let trashState = structuredClone(initial);
+    trashState = apply(trashState, "runner", (action) => action.type === "draw_card");
+    const trashOption = trashState.pendingChoice?.options.find((option) =>
+      option.id.startsWith("trash_"),
+    );
+    const trashCardId = String(trashOption?.value ?? "").split(":")[0];
+    trashState = applyChoice(trashState, "runner", trashOption?.id ?? "");
+    expect(trashState.runner.heap).toContain(trashCardId);
+    expect(trashState.runner.grip).not.toContain(trashCardId);
+  });
+
+  it("grants Wilson's run-only action and marks the resulting run spending cap", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p361-wilson-run-action",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "p361_wilson_runner",
+          name: "P3.61 Wilson Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+            { id: "simple_agenda", quantity: 6 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.runner.clicks = 1;
+    const wilsonId = moveRunnerCardToGrip(
+      state,
+      "onr_v1_187_wilson-weeflerunner-apprentice",
+    );
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "install_card" && action.payload?.cardId === wilsonId,
+    );
+    state.runner.clicks = 1;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
+    );
+    expect(state.runner.clicks).toBe(2);
+    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(1);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.wilsonRunOnlyAction === true,
+      ),
+    ).toBe(true);
+    state.runner.clicks = 1;
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.type === "gain_credit",
+      ),
+    ).toBe(false);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.wilsonRunOnlyAction === true &&
+        action.payload?.serverId === "rd",
+    );
+    expect(state.run?.wilsonRunSpendingCap).toMatchObject({
+      limit: 3,
+      spent: 0,
+    });
   });
 
   it("resolves P3.60 Karl de Veres successful-run credits and Nevinyrral start-turn actions from CardImplementation", () => {
@@ -23832,7 +23993,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ...state.cardInstances[hackerTrackerId]!,
       faceup: true,
       rezzed: true,
-      counters: { power: 2 },
+      counters: { bit: 2 },
     };
     putCorpIceOnServer(state, "rd", "onr_v1_241_fang-2-0");
     state.corp.credits = 10;
@@ -23854,7 +24015,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     state = apply(state, "runner", (action) => action.type === "continue_run");
     state = applyChoice(state, "corp", "bid_6");
     expect(state.corp.credits).toBe(0);
-    expect(cardCounterAmount(state, hackerTrackerId, "power")).toBe(0);
+    expect(cardCounterAmount(state, hackerTrackerId, "bit")).toBe(0);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "corp_bid",
       corpBid: 6,
@@ -23867,7 +24028,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
     expect(state.runner.tags).toBe(0);
     expect(state.run).toBeUndefined();
     expect(state.runnerTurnFlags?.fangRunLockCreditCost).toBe(2);
-    expect(cardCounterAmount(state, hackerTrackerId, "power")).toBe(1);
+    expect(cardCounterAmount(state, hackerTrackerId, "bit")).toBe(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       traceStep: "runner_bid",
       traceSuccessful: true,

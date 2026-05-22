@@ -109,8 +109,12 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/runner/preps/social-engineering.ts",
   "onr_v1_155_code-viral-cache":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/code-viral-cache.ts",
+  "onr_v1_157_crash-everett-inventive-fixer":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/crash-everett-inventive-fixer.ts",
   "onr_v1_176_the-shell-traders":
     "packages/engine/src/card-implementations/onr-v1/runner/resources/the-shell-traders.ts",
+  "onr_v1_187_wilson-weeflerunner-apprentice":
+    "packages/engine/src/card-implementations/onr-v1/runner/resources/wilson-weeflerunner-apprentice.ts",
   "onr_v1_082_deal-with-militech":
     "packages/engine/src/card-implementations/onr-v1/runner/preps/deal-with-militech.ts",
   "onr_v1_083_desperate-competitor":
@@ -167,10 +171,18 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/operations/trojan-horse.ts",
   "onr_v1_316_cowboy-sysop":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/cowboy-sysop.ts",
+  "onr_v1_308_acme-savings-and-loan":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/acme-savings-and-loan.ts",
+  "onr_v1_313_city-surveillance":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/city-surveillance.ts",
   "onr_v1_319_disinfectant-inc":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/disinfectant-inc.ts",
   "onr_v1_322_euromarket-consortium":
     "packages/engine/src/card-implementations/onr-v1/corp/assets/euromarket-consortium.ts",
+  "onr_v1_325_hacker-tracker-central":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/hacker-tracker-central.ts",
+  "onr_v1_329_investment-firm":
+    "packages/engine/src/card-implementations/onr-v1/corp/assets/investment-firm.ts",
   "onr_v1_363_olivia-salazar":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/olivia-salazar.ts",
   "onr_v1_364_omni-kismet-ph-d":
@@ -721,6 +733,8 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chester-mix.ts",
   "onr_v1_353_chimera":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/chimera.ts",
+  "onr_v1_354_crybaby":
+    "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crybaby.ts",
   "onr_v1_355_crystal-palace-station-grid":
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/crystal-palace-station-grid.ts",
   "onr_v1_356_dedicated-response-team":
@@ -1010,6 +1024,12 @@ function implementedCoverageFor(
       "Engine-local CardImplementationDefinition exists for unique/direct-ability longtail behavior.",
     );
     currentLocations.add(IMPLEMENTED_ACTIVATED_ABILITY_LOCATION);
+  }
+  if (implementation.remainingReplacementLongtail) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for P3.61 remaining replacement, trace-credit, draw-modifier or counter longtail behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION);
   }
   if (implementation.unique) {
     reasons.push(

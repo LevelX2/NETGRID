@@ -41,7 +41,9 @@ import { superiorNetBarriersImplementation } from "./onr-v1/corp/agendas/superio
 import { bbsWhisperingCampaignImplementation } from "./onr-v1/corp/assets/bbs-whispering-campaign";
 import { bloodCatImplementation } from "./onr-v1/corp/assets/blood-cat";
 import { braindanceCampaignImplementation } from "./onr-v1/corp/assets/braindance-campaign";
+import { acmeSavingsAndLoanImplementation } from "./onr-v1/corp/assets/acme-savings-and-loan";
 import { chicagoBranchImplementation } from "./onr-v1/corp/assets/chicago-branch";
+import { citySurveillanceImplementation } from "./onr-v1/corp/assets/city-surveillance";
 import { corporateNegotiatingCenterImplementation } from "./onr-v1/corp/assets/corporate-negotiating-center";
 import { corprunnersShatteredRemainsImplementation } from "./onr-v1/corp/assets/corprunners-shattered-remains";
 import { cowboySysopImplementation } from "./onr-v1/corp/assets/cowboy-sysop";
@@ -54,8 +56,10 @@ import { euromarketConsortiumImplementation } from "./onr-v1/corp/assets/euromar
 import { experimentalAiImplementation } from "./onr-v1/corp/assets/experimental-ai";
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
 import { holovidCampaignImplementation } from "./onr-v1/corp/assets/holovid-campaign";
+import { hackerTrackerCentralImplementation } from "./onr-v1/corp/assets/hacker-tracker-central";
 import { informationLaunderingImplementation } from "./onr-v1/corp/assets/information-laundering";
 import { iGotARockImplementation } from "./onr-v1/corp/assets/i-got-a-rock";
+import { investmentFirmImplementation } from "./onr-v1/corp/assets/investment-firm";
 import { krumzImplementation } from "./onr-v1/corp/assets/krumz";
 import { nevinyrralImplementation } from "./onr-v1/corp/assets/nevinyrral";
 import { newsgroupTauntingImplementation } from "./onr-v1/corp/assets/newsgroup-taunting";
@@ -167,6 +171,7 @@ import { antiquatedInterfaceRoutinesImplementation } from "./onr-v1/corp/upgrade
 import { bizarreEncryptionSchemeImplementation } from "./onr-v1/corp/upgrades/bizarre-encryption-scheme";
 import { chesterMixImplementation } from "./onr-v1/corp/upgrades/chester-mix";
 import { chimeraImplementation } from "./onr-v1/corp/upgrades/chimera";
+import { crybabyImplementation } from "./onr-v1/corp/upgrades/crybaby";
 import { crystalPalaceStationGridImplementation } from "./onr-v1/corp/upgrades/crystal-palace-station-grid";
 import { dedicatedResponseTeamImplementation } from "./onr-v1/corp/upgrades/dedicated-response-team";
 import { dieterEsslinImplementation } from "./onr-v1/corp/upgrades/dieter-esslin";
@@ -338,6 +343,7 @@ import { accessToKiribatiImplementation } from "./onr-v1/runner/resources/access
 import { backDoorToHilliardImplementation } from "./onr-v1/runner/resources/back-door-to-hilliard";
 import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/back-door-to-orbital-air";
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
+import { crashEverettInventiveFixerImplementation } from "./onr-v1/runner/resources/crash-everett-inventive-fixer";
 import { danshisSecondIdImplementation } from "./onr-v1/runner/resources/danshis-second-id";
 import { databrokerImplementation } from "./onr-v1/runner/resources/databroker";
 import { diplomaticImmunityImplementation } from "./onr-v1/runner/resources/diplomatic-immunity";
@@ -369,6 +375,7 @@ import { theShellTradersImplementation } from "./onr-v1/runner/resources/the-she
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
 import { traumaTeamImplementation } from "./onr-v1/runner/resources/trauma-team";
 import { umbrellaPolicyImplementation } from "./onr-v1/runner/resources/umbrella-policy";
+import { wilsonWeeflerunnerApprenticeImplementation } from "./onr-v1/runner/resources/wilson-weeflerunner-apprentice";
 import type { CardImplementationDefinition } from "./types";
 
 export const CARD_IMPLEMENTATIONS = [
@@ -493,6 +500,7 @@ export const CARD_IMPLEMENTATIONS = [
   backDoorToHilliardImplementation,
   backDoorToOrbitalAirImplementation,
   aujourdhuiImplementation,
+  crashEverettInventiveFixerImplementation,
   corporateAllyImplementation,
   danshisSecondIdImplementation,
   databrokerImplementation,
@@ -512,6 +520,7 @@ export const CARD_IMPLEMENTATIONS = [
   preyingMantisImplementation,
   questForCattekinImplementation,
   roninAroundImplementation,
+  wilsonWeeflerunnerApprenticeImplementation,
   arasakaPortablePrototypeImplementation,
   armadilloArmoredRoadHomeImplementation,
   armoredFridgeImplementation,
@@ -610,10 +619,12 @@ export const CARD_IMPLEMENTATIONS = [
   teamRestructuringImplementation,
   trojanHorseImplementation,
   urbanRenewalImplementation,
+  acmeSavingsAndLoanImplementation,
   bbsWhisperingCampaignImplementation,
   bloodCatImplementation,
   braindanceCampaignImplementation,
   chicagoBranchImplementation,
+  citySurveillanceImplementation,
   corporateNegotiatingCenterImplementation,
   corprunnersShatteredRemainsImplementation,
   cowboySysopImplementation,
@@ -626,8 +637,10 @@ export const CARD_IMPLEMENTATIONS = [
   experimentalAiImplementation,
   fortressArchitectsImplementation,
   holovidCampaignImplementation,
+  hackerTrackerCentralImplementation,
   informationLaunderingImplementation,
   iGotARockImplementation,
+  investmentFirmImplementation,
   krumzImplementation,
   nevinyrralImplementation,
   newsgroupTauntingImplementation,
@@ -715,6 +728,7 @@ export const CARD_IMPLEMENTATIONS = [
   bizarreEncryptionSchemeImplementation,
   chesterMixImplementation,
   chimeraImplementation,
+  crybabyImplementation,
   crystalPalaceStationGridImplementation,
   dedicatedResponseTeamImplementation,
   dieterEsslinImplementation,

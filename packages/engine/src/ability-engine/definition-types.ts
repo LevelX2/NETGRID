@@ -207,6 +207,12 @@ export type CardAccessEffectImplementation = {
 export type CardAccessEffectStepImplementation =
   | CardEffectImplementation
   | {
+      kind: "add_runner_counter";
+      counterType: Extract<CounterType, "crying">;
+      amount: number;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
       kind: "trace";
       baseTraceStrength: number;
       onSuccess: readonly CardTraceSuccessEffectImplementation[];
@@ -682,6 +688,56 @@ export type CardUniqueDirectLongtailImplementation =
       damageType: Extract<DamageType, "meat">;
       damageAmount: 10;
       trashSourceOnSuccess: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
+export type CardRemainingReplacementLongtailImplementation =
+  | {
+      kind: "crash_everett_draw_extra_choose_trash_or_top";
+      extraDraw: 1;
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "wilson_run_action_spending_cap";
+      actionGain: 1;
+      spendingCap: 3;
+      appliesTo: readonly ["icebreaker_use", "increase_link"];
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "acme_savings_and_loan_debt";
+      agendaPointRezCost: 1;
+      gainCreditsOnRez: 12;
+      endTurnCreditDebt: 1;
+      removeDebtCost: 12;
+      agendaPointsOnRemove: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "investment_firm_credit_diversion";
+      counterType: Extract<CounterType, "recurring_credit">;
+      hostedCreditsPerDivertedCredit: 2;
+      startTurnTakeCredits: 1;
+      excludeStartTurnCreditGains: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "city_surveillance_draw_tag";
+      avoidTagCost: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "hacker_tracker_trace_bits";
+      counterType: Extract<CounterType, "bit">;
+      addAfterTrace: 1;
+      traceStrengthAndLimitPerBit: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "crybaby_crying_counter";
+      counterType: Extract<CounterType, "crying">;
+      linkReductionPerCounter: 2;
+      removeCost: 2;
       visibility: Extract<EventVisibilityClass, "public">;
     };
 
@@ -1588,7 +1644,10 @@ export type CardIceEncounterImplementation = {
 };
 
 export type RunnerTraceCounterEffectImplementation = {
-  counterType: Extract<CounterType, "data_raven" | "cerberus" | "mastiff">;
+  counterType: Extract<
+    CounterType,
+    "data_raven" | "cerberus" | "mastiff" | "crying"
+  >;
   removeCost: number;
   startOfRunnerTurn?: {
     kind: "add_tags";

@@ -160,8 +160,6 @@ import {
 } from "./mechanics/hidden-zone";
 import {
   BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID,
-  CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
-  HACKER_TRACKER_CENTRAL_RUN_LOCK_ASSET_ID,
   ICE_TRANSMUTATION_AGENDA_ID,
   I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
   NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
@@ -198,7 +196,6 @@ import {
   corpInstalledEconomyActionProfileForDefinition,
   corpInstalledEconomyActionProfileForPayload,
   CORP_RECURRING_ASSET_CARD_IDS,
-  INVESTMENT_FIRM_ASSET_CARD_ID,
   type EconomyActionProfile,
 } from "./mechanics/payment-costs";
 import {
@@ -260,6 +257,7 @@ import type {
   CardEffectImplementation,
   CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
+  CardRemainingReplacementLongtailImplementation,
   CardRunEncounterInterventionImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
@@ -1201,8 +1199,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   simple_draw_event: {
     name: "runner_event_draw_2",
     resolve: (state, legalAction) => {
-      let summary = drawRunnerCard(state);
-      summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+      const summary = drawRunnerCards(state, 2);
       applyRunnerDrawSummaryPayload(state, legalAction, summary);
     },
   },
@@ -1229,9 +1226,7 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
   v08_deep_draw_event: {
     name: "runner_event_draw_3",
     resolve: (state, legalAction) => {
-      let summary = drawRunnerCard(state);
-      summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
-      summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+      const summary = drawRunnerCards(state, 3);
       applyRunnerDrawSummaryPayload(state, legalAction, summary);
     },
   },
@@ -2084,9 +2079,12 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
 
 type RunnerDrawSummary = {
   drawnCount: number;
+  drawnCardIds?: CardInstanceId[];
   citySurveillanceSourceCount: number;
   citySurveillanceCreditsPaid: number;
   citySurveillanceTagsAdded: number;
+  crashEverettSourceCardId?: CardInstanceId;
+  crashEverettChoiceOpened?: boolean;
 };
 
 type CitySurveillanceDrawDecision = "auto" | "pay" | "tag";
@@ -2094,6 +2092,7 @@ type CitySurveillanceDrawDecision = "auto" | "pay" | "tag";
 function emptyRunnerDrawSummary(): RunnerDrawSummary {
   return {
     drawnCount: 0,
+    drawnCardIds: [],
     citySurveillanceSourceCount: 0,
     citySurveillanceCreditsPaid: 0,
     citySurveillanceTagsAdded: 0,
@@ -2106,6 +2105,7 @@ function mergeRunnerDrawSummary(
 ): RunnerDrawSummary {
   return {
     drawnCount: left.drawnCount + right.drawnCount,
+    drawnCardIds: [...(left.drawnCardIds ?? []), ...(right.drawnCardIds ?? [])],
     citySurveillanceSourceCount: Math.max(
       left.citySurveillanceSourceCount,
       right.citySurveillanceSourceCount,
@@ -2114,6 +2114,15 @@ function mergeRunnerDrawSummary(
       left.citySurveillanceCreditsPaid + right.citySurveillanceCreditsPaid,
     citySurveillanceTagsAdded:
       left.citySurveillanceTagsAdded + right.citySurveillanceTagsAdded,
+    crashEverettChoiceOpened:
+      left.crashEverettChoiceOpened === true ||
+      right.crashEverettChoiceOpened === true,
+    ...((left.crashEverettSourceCardId ?? right.crashEverettSourceCardId)
+      ? {
+          crashEverettSourceCardId:
+            left.crashEverettSourceCardId ?? right.crashEverettSourceCardId,
+        }
+      : {}),
   };
 }
 
@@ -2136,11 +2145,19 @@ function runnerDrawSummaryPublicPayload(
   if (summary.drawnCount <= 0) return {};
   return {
     drawnCount: summary.drawnCount,
+    ...(summary.crashEverettChoiceOpened && summary.crashEverettSourceCardId
+      ? {
+          drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
+          drawReplacementExtraDrawn: 1,
+          crashEverettChoiceOpened: true,
+        }
+      : {}),
     ...(summary.citySurveillanceSourceCount > 0
       ? {
           citySurveillanceSourceCount: summary.citySurveillanceSourceCount,
           citySurveillanceCreditsPaid: summary.citySurveillanceCreditsPaid,
           citySurveillanceTagsAdded: summary.citySurveillanceTagsAdded,
+          citySurveillanceTags: summary.citySurveillanceTagsAdded,
           runnerCreditsAfter: state.runner.credits,
           runnerTagsAfter: state.runner.tags,
         }
@@ -3528,11 +3545,11 @@ function corpMainActions(state: GameState): LegalAction[] {
         (definition.type === "asset" || definition.type === "upgrade") &&
         !mustInstance(state.cardInstances, id).rezzed &&
         state.corp.credits >= rezCost &&
-        (definition.id !== ACME_SAVINGS_AND_LOAN_ID ||
+        (!isAcmeSavingsAndLoanDefinition(definition.id) ||
           corpAgendaPointTotal(state) >= 1)
       ) {
         const acmeRezCost =
-          definition.id === ACME_SAVINGS_AND_LOAN_ID
+          isAcmeSavingsAndLoanDefinition(definition.id)
             ? {
                 agendaPointCost: 1,
                 acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
@@ -4271,6 +4288,28 @@ function runnerMainActions(state: GameState): LegalAction[] {
     return actions;
   }
   if (hasClicks) {
+    for (const sourceCardId of activeWilsonSourceIds(state)) {
+      const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
+      if (!used.includes(sourceCardId)) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "trigger_ability",
+            "Wilson: Run-Aktion erhalten",
+            sourceCardId,
+            [],
+            {
+              cardId: sourceCardId,
+              runnerAbility: "wilson_gain_run_action",
+              sourceDefinitionId: definitionFor(state, sourceCardId).id,
+              gainActionsAmount: 1,
+              runSpendingCap: 3,
+            },
+          ),
+        );
+      }
+    }
     actions.push(
       action(
         state,
@@ -4290,7 +4329,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         ]),
       );
     }
-    if (cardCounter(state, state.runner.identity, "crying") > 0 && state.runner.credits >= 4) {
+    if (cardCounter(state, state.runner.identity, "crying") > 0 && state.runner.credits >= 2) {
       actions.push(
         action(
           state,
@@ -4298,18 +4337,20 @@ function runnerMainActions(state: GameState): LegalAction[] {
           "gain_credit",
           "Crying-Counter entfernen",
           state.runner.identity,
-          [{ clicks: 1, credits: 4 }],
+          [{ clicks: 1, credits: 2 }],
           {
             runnerAbility: "remove_crying_counter",
             cardId: state.runner.identity,
             counterType: "crying",
             removeCounterAmount: 1,
+            counterRemoveCreditCost: 2,
             gainCreditsAmount: 0,
           },
         ),
       );
     }
     for (const counterEffect of runnerTraceCounterEffectDefinitions()) {
+      if (counterEffect.counterType === "crying") continue;
       if (cardCounter(state, state.runner.identity, counterEffect.counterType) <= 0)
         continue;
       if (state.runner.credits < counterEffect.removeCost) continue;
@@ -5190,6 +5231,28 @@ function runnerMainActions(state: GameState): LegalAction[] {
       }
     }
     if (
+      Math.max(0, Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0)) > 0 &&
+      !rovingRunBlocked &&
+      (runStartTaxCredits === 0 ||
+        availableRunnerRunStartCredits(state) >= runStartTaxCredits)
+    ) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "start_run",
+          `Wilson-Run auf ${server.label}`,
+          "basic_action",
+          runCosts,
+          {
+            ...runPayload,
+            wilsonRunOnlyAction: true,
+            runSpendingCap: 3,
+          },
+        ),
+      );
+    }
+    if (
       bonusRunPending &&
       !rovingRunBlocked &&
       (runStartTaxCredits === 0 ||
@@ -5248,11 +5311,24 @@ function runnerMainActions(state: GameState): LegalAction[] {
     actions,
   );
   actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+  const wilsonRestrictedActions = Math.max(
+    0,
+    Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
+  );
+  if (wilsonRestrictedActions > 0 && state.runner.clicks <= wilsonRestrictedActions) {
+    return actions.filter(
+      (candidate) =>
+        candidate.type === "end_turn" ||
+        (candidate.type === "start_run" &&
+          candidate.payload?.wilsonRunOnlyAction === true),
+    );
+  }
   return actions;
 }
 
 function runnerDrawCardActions(state: GameState): LegalAction[] {
   const citySurveillanceSourceCount = citySurveillanceSourceIds(state).length;
+  const projectedDrawCount = activeCrashEverettSourceId(state) ? 2 : 1;
   if (citySurveillanceSourceCount <= 0) {
     return [
       action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
@@ -5262,21 +5338,24 @@ function runnerDrawCardActions(state: GameState): LegalAction[] {
   }
 
   const actions: LegalAction[] = [];
-  if (state.runner.credits >= citySurveillanceSourceCount) {
+  const projectedCitySurveillanceCost =
+    citySurveillanceSourceCount * projectedDrawCount;
+  if (state.runner.credits >= projectedCitySurveillanceCost) {
     actions.push(
       action(
         state,
         "runner",
         "draw_card",
-        citySurveillanceSourceCount === 1
+        projectedCitySurveillanceCost === 1
           ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
-          : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Credits zahlen)`,
+          : `Karte ziehen (City Surveillance: ${projectedCitySurveillanceCost} Credits zahlen)`,
         "basic_action",
-        [{ clicks: 1, credits: citySurveillanceSourceCount }],
+        [{ clicks: 1, credits: projectedCitySurveillanceCost }],
         {
           citySurveillanceSourceCount,
+          citySurveillanceProjectedDrawCount: projectedDrawCount,
           citySurveillanceDrawDecision: "pay",
-          citySurveillanceProjectedCreditsPaid: citySurveillanceSourceCount,
+          citySurveillanceProjectedCreditsPaid: projectedCitySurveillanceCost,
           citySurveillanceProjectedTagsAdded: 0,
         },
       ),
@@ -5295,9 +5374,11 @@ function runnerDrawCardActions(state: GameState): LegalAction[] {
       [{ clicks: 1 }],
       {
         citySurveillanceSourceCount,
+        citySurveillanceProjectedDrawCount: projectedDrawCount,
         citySurveillanceDrawDecision: "tag",
         citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded: citySurveillanceSourceCount,
+        citySurveillanceProjectedTagsAdded:
+          citySurveillanceSourceCount * projectedDrawCount,
       },
     ),
   );
@@ -8343,7 +8424,10 @@ function performAction(
         const removeAmount = Number(legalAction.payload?.removeCounterAmount ?? 0);
         if (!Number.isInteger(removeAmount) || removeAmount !== 1)
           throw new Error("Es wird genau 1 Crying-Counter entfernt.");
-        spendCredits(state, "runner", 4);
+        const cost = Number(legalAction.payload?.counterRemoveCreditCost ?? 2);
+        if (!Number.isInteger(cost) || cost !== 2)
+          throw new Error("Crying-Counter entfernen kostet genau 2 Credits.");
+        spendCredits(state, "runner", cost);
         spendCardCounter(state, state.runner.identity, "crying", removeAmount);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
@@ -9057,7 +9141,7 @@ function performAction(
         applyRunnerDrawSummaryPayload(
           state,
           legalAction,
-          drawRunnerCard(state),
+          drawRunnerCards(state, 1),
         );
       }
       return;
@@ -9067,8 +9151,9 @@ function performAction(
         applyRunnerDrawSummaryPayload(
           state,
           legalAction,
-          drawRunnerCard(
+          drawRunnerCards(
             state,
+            1,
             citySurveillanceDrawDecisionFromPayload(legalAction),
           ),
         );
@@ -9148,6 +9233,16 @@ function performAction(
       } else {
         spendClick(state, "runner");
       }
+      if (legalAction.payload?.wilsonRunOnlyAction === true) {
+        const flags = ensureRunnerTurnFlags(state);
+        const remaining = Math.max(
+          0,
+          Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
+        );
+        if (remaining <= 0)
+          throw new Error("Es ist keine Wilson-Run-Aktion verfuegbar.");
+        flags.wilsonRunOnlyActionsRemaining = remaining - 1;
+      }
       startRun(
         state,
         String(legalAction.payload?.serverId) as Exclude<
@@ -9159,6 +9254,20 @@ function performAction(
         undefined,
         legalAction,
       );
+      if (legalAction.payload?.wilsonRunOnlyAction === true && state.run) {
+        const sourceCardId = activeWilsonSourceIds(state)[0];
+        state.run.wilsonRunSpendingCap = {
+          sourceCardInstanceId: sourceCardId ?? ("" as CardInstanceId),
+          limit: 3,
+          spent: 0,
+        };
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          runSpendingCap: 3,
+          runSpendingCapSpent: 0,
+          wilsonRunSpendingCapActive: true,
+        };
+      }
       if (typeof legalAction.payload?.runStartTaxCredits === "number") {
         const taxCredits = legalAction.costs.reduce(
           (sum, cost) =>
@@ -9549,6 +9658,38 @@ function performAction(
         resolveShellTradersRemoveCounter(state, legalAction);
         return;
       }
+      if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
+        if (legalAction.side !== "runner")
+          throw new Error("Nur der Runner darf Wilson nutzen.");
+        if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
+          throw new Error("Wilson ist nur im Runner-Zug nutzbar.");
+        const sourceCardId = String(legalAction.payload?.cardId ?? "");
+        if (
+          !state.runner.rig.resources.includes(sourceCardId as CardInstanceId) ||
+          remainingReplacementLongtailKindForCard(
+            state,
+            sourceCardId as CardInstanceId,
+          ) !== "wilson_run_action_spending_cap"
+        )
+          throw new Error("Wilson ist nicht installiert.");
+        const flags = ensureRunnerTurnFlags(state);
+        const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
+        if (used.includes(sourceCardId as CardInstanceId))
+          throw new Error("Wilson wurde diesen Zug bereits genutzt.");
+        flags.wilsonUsedSourceIdsThisTurn = [
+          ...used,
+          sourceCardId as CardInstanceId,
+        ];
+        flags.wilsonRunOnlyActionsRemaining =
+          Math.max(0, Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0)) + 1;
+        state.runner.clicks += 1;
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          wilsonRunOnlyActionsRemaining: flags.wilsonRunOnlyActionsRemaining,
+          runnerClicksAfter: state.runner.clicks,
+        };
+        return;
+      }
       if (legalAction.payload?.runnerAbility === "remove_runner_trace_counter") {
         resolveRemoveRunnerTraceCounter(state, legalAction);
         return;
@@ -9611,6 +9752,7 @@ function performAction(
           acmeSavingsAndLoanObligationsBefore: obligationsBefore,
           acmeSavingsAndLoanObligationsAfter:
             acmeSavingsAndLoanObligationCount(state),
+          acmeDebtActive: acmeSavingsAndLoanObligationCount(state) > 0,
           acmeSavingsAndLoanPaymentPaid: creditCost,
           gainedAgendaPoints: scorePoints,
           corpBonusAgendaPointsAfter: state.corpBonusAgendaPoints,
@@ -11562,6 +11704,67 @@ function uniqueDirectLongtailKindForCard(
   return uniqueDirectLongtailImplementationForCard(state, cardId)?.kind;
 }
 
+function remainingReplacementLongtailImplementationForDefinition(
+  definitionId: CardDefinitionId,
+): CardRemainingReplacementLongtailImplementation | undefined {
+  return cardImplementationForDefinitionId(definitionId)
+    ?.remainingReplacementLongtail;
+}
+
+function remainingReplacementLongtailKindForDefinition(
+  definitionId: CardDefinitionId,
+): CardRemainingReplacementLongtailImplementation["kind"] | undefined {
+  return remainingReplacementLongtailImplementationForDefinition(definitionId)
+    ?.kind;
+}
+
+function remainingReplacementLongtailImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardRemainingReplacementLongtailImplementation | undefined {
+  return remainingReplacementLongtailImplementationForDefinition(
+    definitionFor(state, cardId).id,
+  );
+}
+
+function remainingReplacementLongtailKindForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardRemainingReplacementLongtailImplementation["kind"] | undefined {
+  return remainingReplacementLongtailImplementationForCard(state, cardId)?.kind;
+}
+
+function isAcmeSavingsAndLoanDefinition(definitionId: CardDefinitionId): boolean {
+  return (
+    remainingReplacementLongtailKindForDefinition(definitionId) ===
+    "acme_savings_and_loan_debt"
+  );
+}
+
+function isCitySurveillanceCard(state: GameState, cardId: CardInstanceId): boolean {
+  return (
+    remainingReplacementLongtailKindForCard(state, cardId) ===
+    "city_surveillance_draw_tag"
+  );
+}
+
+function isInvestmentFirmCard(state: GameState, cardId: CardInstanceId): boolean {
+  return (
+    remainingReplacementLongtailKindForCard(state, cardId) ===
+    "investment_firm_credit_diversion"
+  );
+}
+
+function isHackerTrackerCentralCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): boolean {
+  return (
+    remainingReplacementLongtailKindForCard(state, cardId) ===
+    "hacker_tracker_trace_bits"
+  );
+}
+
 function isSubmarineUplinkSource(state: GameState, cardId: CardInstanceId): boolean {
   return (
     runnerUtilityLongtailKindForCard(state, cardId) ===
@@ -11860,7 +12063,7 @@ function rezCard(
       ...quotePayload,
     };
   }
-  if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
+  if (isAcmeSavingsAndLoanDefinition(definition.id)) {
     if (!legalAction)
       throw new Error("ACME Savings and Loan braucht eine LegalAction.");
     const agendaCost = Number(legalAction?.payload?.agendaPointCost ?? 0);
@@ -12005,7 +12208,7 @@ function resolveCorpRootRezEffect(
   const definition = definitionFor(state, cardId);
   if (!CORP_ROOT_REZ_RESOLVERS[definition.id]) return false;
   CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
-  if (definition.id === ACME_SAVINGS_AND_LOAN_ID) {
+  if (isAcmeSavingsAndLoanDefinition(definition.id)) {
     addAcmeSavingsAndLoanObligation(state, 1);
     trashCorpInstalledCardToArchives(state, cardId as CardInstanceId);
     if (legalAction) {
@@ -12013,6 +12216,7 @@ function resolveCorpRootRezEffect(
         ...(legalAction.payload ?? {}),
         gainedCredits: 12,
         selfTrashed: true,
+        acmeDebtActive: acmeSavingsAndLoanObligationCount(state) > 0,
         acmeSavingsAndLoanObligationsAfter:
           acmeSavingsAndLoanObligationCount(state),
         corpCreditsAfter: state.corp.credits,
@@ -12969,15 +13173,26 @@ function hackerTrackerCardIds(state: GameState): CardInstanceId[] {
       const instance = state.cardInstances[cardId];
       return (
         instance?.rezzed === true &&
-        definitionFor(state, cardId).id === HACKER_TRACKER_CENTRAL_RUN_LOCK_ASSET_ID
+        isHackerTrackerCentralCard(state, cardId)
       );
     })
     .sort();
 }
 
+function hackerTrackerCounterType(
+  state: GameState,
+  cardId: CardInstanceId,
+): "bit" | "power" {
+  return remainingReplacementLongtailImplementationForCard(state, cardId)
+    ?.kind === "hacker_tracker_trace_bits"
+    ? "bit"
+    : "power";
+}
+
 function hackerTrackerCounterTotal(state: GameState): number {
   return hackerTrackerCardIds(state).reduce(
-    (sum, cardId) => sum + cardCounter(state, cardId, "power"),
+    (sum, cardId) =>
+      sum + cardCounter(state, cardId, hackerTrackerCounterType(state, cardId)),
     0,
   );
 }
@@ -12990,10 +13205,11 @@ function spendHackerTrackerCounters(
   let spent = 0;
   for (const cardId of hackerTrackerCardIds(state)) {
     if (remaining <= 0) break;
-    const available = cardCounter(state, cardId, "power");
+    const counterType = hackerTrackerCounterType(state, cardId);
+    const available = cardCounter(state, cardId, counterType);
     const cardSpent = Math.min(available, remaining);
     if (cardSpent <= 0) continue;
-    spendCardCounter(state, cardId, "power", cardSpent);
+    spendCardCounter(state, cardId, counterType, cardSpent);
     remaining -= cardSpent;
     spent += cardSpent;
   }
@@ -13003,7 +13219,7 @@ function spendHackerTrackerCounters(
 function addHackerTrackerTraceCounters(state: GameState): number {
   let added = 0;
   for (const cardId of hackerTrackerCardIds(state)) {
-    addCardCounter(state, cardId, "power", 1);
+    addCardCounter(state, cardId, hackerTrackerCounterType(state, cardId), 1);
     added += 1;
   }
   return added;
@@ -14860,6 +15076,12 @@ function accessEffectHiddenZoneAction(
   effect: CardAccessEffectImplementation,
 ): string {
   if (
+    effect.effects.some(
+      (step) => step.kind === "add_runner_counter" && step.counterType === "crying",
+    )
+  )
+    return "v1918_crybaby_access_counter";
+  if (
     effect.effects.some((step) => step.kind === "trash_installed_runner_cards")
   )
     return "v1919_access_ambush_trash_installed";
@@ -15188,6 +15410,38 @@ function executeCardImplementationAccessEffectStep(
         amount: step.amount,
         reason: "access_effect",
         runnerTagsAfter: state.runner.tags,
+        sourceDefinitionId: definition.id,
+        sourceTitle: definition.title,
+      });
+      return;
+    }
+    case "add_runner_counter": {
+      addCardCounter(state, state.runner.identity, step.counterType, step.amount);
+      const remainingCounters = cardCounter(
+        state,
+        state.runner.identity,
+        step.counterType,
+      );
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        counterType: step.counterType,
+        addedCounterAmount: step.amount,
+        remainingCounters,
+        ...(step.counterType === "crying"
+          ? {
+              cryingCountersAfter: remainingCounters,
+              linkModifierAmount: -2 * remainingCounters,
+            }
+          : {}),
+      };
+      resolvedEffects.push({
+        effectId: accessEffectId(definition, cardId, index, "add_runner_counter"),
+        kind: "counter_change",
+        visibility: step.visibility,
+        side: "runner",
+        counterType: step.counterType,
+        addedCounterAmount: step.amount,
+        remainingCounters,
         sourceDefinitionId: definition.id,
         sourceTitle: definition.title,
       });
@@ -17545,7 +17799,7 @@ function applyCorpStartOfTurnEffects(
       if (cardCounter(state, cardId, "bit") < capacity)
         setCardCounter(state, cardId, "bit", capacity);
     }
-    if (definitionId === INVESTMENT_FIRM_ASSET_CARD_ID) {
+    if (isInvestmentFirmCard(state, cardId)) {
       if (cardCounter(state, cardId, "recurring_credit") > 0) {
         spendCardCounter(state, cardId, "recurring_credit", 1);
         credits(state, "corp", 1);
@@ -18088,9 +18342,8 @@ function drawCorpCards(state: GameState, amount: number): void {
 }
 
 function citySurveillanceSourceIds(state: GameState): CardInstanceId[] {
-  return rezzedCorpRootCardIds(state).filter(
-    (sourceId) =>
-      definitionFor(state, sourceId).id === CITY_SURVEILLANCE_TAG_DAMAGE_ASSET_ID,
+  return rezzedCorpRootCardIds(state).filter((sourceId) =>
+    isCitySurveillanceCard(state, sourceId),
   );
 }
 
@@ -18115,6 +18368,7 @@ function drawRunnerCard(
     zone: { side: "runner", zone: "grip" },
   };
   summary.drawnCount = 1;
+  (summary.drawnCardIds ??= []).push(cardId);
   const citySurveillanceIds = citySurveillanceSourceIds(state);
   summary.citySurveillanceSourceCount = citySurveillanceIds.length;
   for (const _sourceId of citySurveillanceIds) {
@@ -18135,10 +18389,84 @@ function drawRunnerCard(
   return summary;
 }
 
-function drawRunnerCards(state: GameState, amount: number): RunnerDrawSummary {
+function activeCrashEverettSourceId(state: GameState): CardInstanceId | undefined {
+  return state.runner.rig.resources
+    .filter(
+      (cardId) =>
+        remainingReplacementLongtailKindForCard(state, cardId) ===
+        "crash_everett_draw_extra_choose_trash_or_top",
+    )
+    .sort()[0];
+}
+
+function activeWilsonSourceIds(state: GameState): CardInstanceId[] {
+  return state.runner.rig.resources
+    .filter(
+      (cardId) =>
+        remainingReplacementLongtailKindForCard(state, cardId) ===
+        "wilson_run_action_spending_cap",
+    )
+    .sort();
+}
+
+function startCrashEverettDrawChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  drawnCardIds: readonly CardInstanceId[],
+): void {
+  if (drawnCardIds.length === 0) return;
+  if (state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
+  const options = drawnCardIds.flatMap((cardId) => {
+    const title = definitionFor(state, cardId).title;
+    return [
+      {
+        id: `trash_${cardId}`,
+        label: `${title} trashen`,
+        publicLabel: "Gezogene Karte trashen",
+        value: `${cardId}:trash`,
+      },
+      {
+        id: `top_${cardId}`,
+        label: `${title} oben auf den Stack legen`,
+        publicLabel: "Gezogene Karte oben auf den Stack legen",
+        value: `${cardId}:top`,
+      },
+    ];
+  });
+  state.pendingChoice = {
+    choiceId: `p3_61_crash_draw_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `p3_61.crash_draw:${sourceCardId}:${drawnCardIds.join(",")}:${
+      state.stateVersion + 1
+    }`,
+    prompt: "Crash Everett: gezogene Karte waehlen",
+    kind: "select_option",
+    options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function drawRunnerCards(
+  state: GameState,
+  amount: number,
+  citySurveillanceDecision: CitySurveillanceDrawDecision = "auto",
+): RunnerDrawSummary {
   let summary = emptyRunnerDrawSummary();
-  for (let index = 0; index < amount; index += 1)
-    summary = mergeRunnerDrawSummary(summary, drawRunnerCard(state));
+  const crashSourceId = amount > 0 ? activeCrashEverettSourceId(state) : undefined;
+  const drawAmount = amount + (crashSourceId ? 1 : 0);
+  for (let index = 0; index < drawAmount; index += 1)
+    summary = mergeRunnerDrawSummary(
+      summary,
+      drawRunnerCard(state, citySurveillanceDecision),
+    );
+  if (crashSourceId && (summary.drawnCardIds?.length ?? 0) > 0) {
+    startCrashEverettDrawChoice(state, crashSourceId, summary.drawnCardIds ?? []);
+    summary.crashEverettSourceCardId = crashSourceId;
+    summary.crashEverettChoiceOpened = true;
+  }
   return summary;
 }
 
@@ -22515,10 +22843,7 @@ function validateScoredAgendaCounterCreditAction(
 
 function rezzedInvestmentFirmIds(state: GameState): CardInstanceId[] {
   return rezzedCorpRootCardIds(state)
-    .filter(
-      (cardId) =>
-        definitionFor(state, cardId).id === INVESTMENT_FIRM_ASSET_CARD_ID,
-    )
+    .filter((cardId) => isInvestmentFirmCard(state, cardId))
     .sort();
 }
 
@@ -22543,6 +22868,7 @@ function startInvestmentFirmCreditChoice(
   const investmentFirmIds = rezzedInvestmentFirmIds(state);
   if (investmentFirmIds.length === 0)
     throw new Error("Investment Firm ist nicht rezzed installiert.");
+  const sourceDefinitionId = definitionFor(state, investmentFirmIds[0]!).id;
   state.pendingChoice = {
     choiceId: `v1917_investment_firm_credit_${state.stateVersion + 1}`,
     side: "corp",
@@ -22574,7 +22900,7 @@ function startInvestmentFirmCreditChoice(
   legalAction.payload = {
     investmentFirmChoiceOpened: true,
     gainCreditsAmount: 0,
-    sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+    sourceDefinitionId,
   };
 }
 
@@ -22590,12 +22916,16 @@ function resolveInvestmentFirmCreditChoice(
     throw new Error("Nur die Korp darf Investment Firm nutzen.");
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   if (selected === "take_credit") {
+    const sourceDefinitionId = definitionFor(
+      state,
+      rezzedInvestmentFirmIds(state)[0]!,
+    ).id;
     credits(state, "corp", 1);
     delete state.pendingChoice;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       choiceVisibility: "public",
-      sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+      sourceDefinitionId,
       gainCreditsAmount: 1,
       gainedCredits: 1,
       corpCreditsAfter: state.corp.credits,
@@ -22616,12 +22946,73 @@ function resolveInvestmentFirmCreditChoice(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     choiceVisibility: "public",
-    cardDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
-    sourceDefinitionId: INVESTMENT_FIRM_ASSET_CARD_ID,
+    cardDefinitionId: definitionFor(state, sourceCardId).id,
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
     ...counterPayload,
     gainCreditsAmount: 0,
     gainedCredits: 0,
     corpCreditsAfter: state.corp.credits,
+  };
+}
+
+function resolveCrashEverettDrawChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("p3_61.crash_draw"))
+    throw new Error("Es ist keine Crash-Everett-Choice offen.");
+  if (choice.side !== "runner" || legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Crash Everett nutzen.");
+  const [, sourceCardId = "", drawnList = ""] = choice.source.split(":");
+  if (
+    !state.runner.rig.resources.includes(sourceCardId as CardInstanceId) ||
+    remainingReplacementLongtailKindForCard(
+      state,
+      sourceCardId as CardInstanceId,
+    ) !== "crash_everett_draw_extra_choose_trash_or_top"
+  )
+    throw new Error("Crash Everett ist nicht mehr installiert.");
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+  const option = choice.options.find((candidate) => candidate.id === selected);
+  const [cardId = "", disposition = ""] = String(option?.value ?? "").split(":");
+  const legalDrawnCardIds = new Set(drawnList.split(",").filter(Boolean));
+  if (!legalDrawnCardIds.has(cardId))
+    throw new Error("Die gewaehlte Karte wurde nicht in diesem Draw gezogen.");
+  if (!state.runner.grip.includes(cardId as CardInstanceId))
+    throw new Error("Die gewaehlte Karte ist nicht mehr im Grip.");
+  removeFromAllZones(state, cardId as CardInstanceId);
+  if (disposition === "trash") {
+    state.runner.heap.push(cardId as CardInstanceId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId as CardInstanceId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "heap" },
+    };
+  } else if (disposition === "top") {
+    state.runner.stack.unshift(cardId as CardInstanceId);
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId as CardInstanceId),
+      faceup: false,
+      rezzed: false,
+      zone: { side: "runner", zone: "stack" },
+    };
+  } else {
+    throw new Error("Crash Everett braucht Trash oder Stack-Top.");
+  }
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    choiceVisibility: "hidden_info_barrier",
+    drawReplacementSourceTitle: "Crash Everett, Inventive Fixer",
+    sourceDefinitionId: definitionFor(state, sourceCardId as CardInstanceId).id,
+    crashEverettDisposition: disposition,
+    crashEverettDrawnCardCount: legalDrawnCardIds.size,
+    ...(disposition === "trash"
+      ? { trashedCount: 1, destinationZone: "heap" }
+      : { returnedToStackTop: true, destinationZone: "stack" }),
   };
 }
 
@@ -22800,6 +23191,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
     resolveInvestmentFirmCreditChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("p3_61.crash_draw")) {
+    resolveCrashEverettDrawChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1914.power_grid_overload")) {
@@ -28927,7 +29322,10 @@ function resolveTraceCorpBid(
         : {}),
       ...(krumzBitsSpent > 0 ? { krumzBitsSpent } : {}),
       ...(hackerTrackerCountersSpent > 0
-        ? { hackerTrackerCountersSpent }
+        ? {
+            hackerTrackerCountersSpent,
+            traceHostedCreditBoost: hackerTrackerCountersSpent,
+          }
         : {}),
       traceStrength,
       runnerLink,
@@ -28986,7 +29384,10 @@ function resolveTraceCorpBid(
       : {}),
     ...(krumzBitsSpent > 0 ? { krumzBitsSpent } : {}),
     ...(hackerTrackerCountersSpent > 0
-      ? { hackerTrackerCountersSpent }
+      ? {
+          hackerTrackerCountersSpent,
+          traceHostedCreditBoost: hackerTrackerCountersSpent,
+        }
       : {}),
     traceStrength,
     runnerLink,
@@ -29403,7 +29804,12 @@ function resolveTraceRunnerBid(
     traceSuccessful: successful,
     tagsAdded,
     ...traceCounterPayload,
-    ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
+    ...(hackerTrackerCountersAdded > 0
+      ? {
+          hackerTrackerCountersAdded,
+          traceHostedCreditsAdded: hackerTrackerCountersAdded,
+        }
+      : {}),
     ...(runnerRunEnded
       ? {
           fangRunEnded: true,
@@ -29667,7 +30073,12 @@ function completeTraceAfterPostBidLink(
     traceSuccessful: successful,
     tagsAdded,
     ...traceCounterPayload,
-    ...(hackerTrackerCountersAdded > 0 ? { hackerTrackerCountersAdded } : {}),
+    ...(hackerTrackerCountersAdded > 0
+      ? {
+          hackerTrackerCountersAdded,
+          traceHostedCreditsAdded: hackerTrackerCountersAdded,
+        }
+      : {}),
     ...(runnerRunEnded
       ? {
           fangRunEnded: true,
@@ -29732,6 +30143,16 @@ function runnerTraceLinkCredits(state: GameState): number {
   );
 }
 
+function recordWilsonRunCapSpend(state: GameState, amount: number): void {
+  if (amount <= 0) return;
+  const cap = state.run?.wilsonRunSpendingCap;
+  if (!cap) return;
+  const nextSpent = Math.max(0, Math.floor(cap.spent ?? 0)) + amount;
+  if (nextSpent > cap.limit)
+    throw new Error("Wilson erlaubt maximal 3 Credits fuer Icebreaker oder Link.");
+  cap.spent = nextSpent;
+}
+
 function spendRunnerTraceLinkBidCredits(
   state: GameState,
   amount: number,
@@ -29750,6 +30171,7 @@ function spendRunnerTraceLinkBidCredits(
     };
   if (state.runner.credits + runnerTraceLinkCredits(state) < amount)
     throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
+  recordWilsonRunCapSpend(state, amount);
   let remaining = amount;
   let traceLinkCreditSpent = 0;
   let hellsRunSpent = 0;
@@ -29882,8 +30304,11 @@ function executeEffectCommands(
         spendCredits(state, command.side, command.amount);
         break;
       case "draw_card":
-        for (let count = 0; count < (command.amount ?? 1); count += 1) {
-          command.side === "corp" ? drawCorpCard(state) : drawRunnerCard(state);
+        if (command.side === "corp") {
+          for (let count = 0; count < (command.amount ?? 1); count += 1)
+            drawCorpCard(state);
+        } else {
+          drawRunnerCards(state, command.amount ?? 1);
         }
         break;
       case "do_damage":
@@ -31639,6 +32064,7 @@ function spendRunnerRunCredits(
   if (amount <= 0) return;
   if (availableRunnerRunCredits(state, breakerId) < amount)
     throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
+  if (breakerId) recordWilsonRunCapSpend(state, amount);
   const run = mustRun(state);
   let remaining = amount;
   const fromBadPublicity = Math.min(run.badPublicityCredits ?? 0, remaining);

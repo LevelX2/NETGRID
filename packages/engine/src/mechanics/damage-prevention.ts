@@ -92,11 +92,6 @@ export const RUNTIME_DAMAGE_PREVENTION_PROFILES: Readonly<
     damageTypes: ["net", "meat", "core"],
     priority: 129,
   },
-  "onr_v1_187_wilson-weeflerunner-apprentice": {
-    maxPerTurn: 1,
-    damageTypes: ["meat"],
-    priority: 130,
-  },
   "onr_v1_061_shield": {
     maxPerTurn: 2,
     damageTypes: ["net"],
