@@ -26,6 +26,12 @@ import {
   costQuoteToLegalActionCosts,
   type CostQuote,
 } from "./index";
+import {
+  describeCurrentTraceWindow,
+  requireCurrentTrace,
+  requireTracePhase,
+  traceIsInPhase,
+} from "./trace/trace-state";
 
 describe("game facade", () => {
   it("delegates to the existing engine API", () => {
@@ -124,5 +130,39 @@ describe("game facade", () => {
 
     expect(quote.costs).toEqual([{ credits: 2 }]);
     expect(quote.publicPayload).toEqual({ cardId: "ice-1", rezCostPaid: 2 });
+  });
+
+  it("guards and describes the current trace window without mutating state", () => {
+    const state = createGame({
+      seed: "arch-12-trace-state-guards",
+      setupMode: "completed",
+    });
+
+    expect(() => requireCurrentTrace(state)).toThrow("Kein aktiver Trace.");
+
+    state.trace = {
+      traceId: "arch-12.trace",
+      sourceCardInstanceId: state.runner.identity,
+      sourceDefinitionId: "demo_runner_identity",
+      baseTraceStrength: 2,
+      status: "corp_bid",
+      successEffect: { type: "add_tag", amount: 1 },
+    };
+
+    expect(requireCurrentTrace(state)).toBe(state.trace);
+    expect(requireTracePhase(state, "corp_bid")).toBe(state.trace);
+    expect(traceIsInPhase(state, "corp_bid")).toBe(true);
+    expect(traceIsInPhase(state, "runner_bid")).toBe(false);
+    expect(() => requireTracePhase(state, "runner_bid")).toThrow(
+      "Es ist kein Runner-Trace-Bid offen.",
+    );
+    expect(describeCurrentTraceWindow(state)).toMatchObject({
+      traceId: "arch-12.trace",
+      phase: "corp_bid",
+      baseTraceStrength: 2,
+      hasCorpBid: false,
+      hasRunnerBid: false,
+      postBidLinkSourceIds: [],
+    });
   });
 });

@@ -20,6 +20,11 @@ import type {
   ActivatedCardAbilityImplementation,
   UseBaseLinkEffectImplementation,
 } from "../../ability-engine/definition-types";
+import {
+  assertTraceBaseLinkUnused,
+  currentTrace,
+  requireTracePhase,
+} from "./trace-state";
 
 export type TraceBaseLinkChoiceQuote = {
   sourceCardInstanceId: CardInstanceId;
@@ -172,8 +177,9 @@ export function quoteTraceBaseLinkChoices(
   state: GameState,
   trace = state.trace,
 ): TraceBaseLinkChoiceQuote[] {
-  if (!trace || trace.status !== "base_link") return [];
-  if (trace.baseLinkSourceId) return [];
+  const activeTrace = trace ?? currentTrace(state);
+  if (!activeTrace || activeTrace.status !== "base_link") return [];
+  if (activeTrace.baseLinkSourceId) return [];
   const quotes: TraceBaseLinkChoiceQuote[] = [];
   for (const cardId of runnerInstalledCardIds(state).sort()) {
     const instance = state.cardInstances[cardId];
@@ -205,11 +211,8 @@ export function assertTraceBaseLinkChoiceValid(
   state: GameState,
   sourceCardInstanceId: CardInstanceId,
 ): TraceBaseLinkChoiceQuote {
-  const trace = state.trace;
-  if (!trace || trace.status !== "base_link")
-    throw new Error("Es ist kein Base-Link-Fenster offen.");
-  if (trace.baseLinkSourceId)
-    throw new Error("Fuer diesen Trace wurde bereits eine Base-Link-Quelle verwendet.");
+  const trace = requireTracePhase(state, "base_link");
+  assertTraceBaseLinkUnused(trace);
   const quote = quoteTraceBaseLinkChoice(state, sourceCardInstanceId);
   if (!quote.canUse)
     throw new Error("Diese Base-Link-Quelle ist nicht legal.");

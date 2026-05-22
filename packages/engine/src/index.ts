@@ -75,6 +75,11 @@ import {
   quoteTraceBaseLinkChoices,
   traceBaseLinkChoicePublicPayload,
 } from "./game/trace/base-link";
+import {
+  requireTracePhase,
+  traceIsInPhase,
+  tracePostBidLinkSourceUsed,
+} from "./game/trace/trace-state";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -21881,15 +21886,15 @@ function resolvePendingChoice(
     return;
   }
   if (state.trace) {
-    if (state.trace.status === "corp_bid") {
+    if (traceIsInPhase(state, "corp_bid")) {
       resolveTraceCorpBid(state, legalAction, playerAction);
       return;
     }
-    if (state.trace.status === "base_link") {
+    if (traceIsInPhase(state, "base_link")) {
       resolveTraceBaseLinkChoice(state, legalAction, playerAction);
       return;
     }
-    if (state.trace.status === "post_bid_link") {
+    if (traceIsInPhase(state, "post_bid_link")) {
       resolveTracePostBidLinkChoice(state, legalAction, playerAction);
       return;
     }
@@ -28149,9 +28154,7 @@ function resolveTraceCorpBid(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  const trace = state.trace;
-  if (!trace || trace.status !== "corp_bid")
-    throw new Error("Es ist kein Korp-Trace-Bid offen.");
+  const trace = requireTracePhase(state, "corp_bid");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
   const tracePaymentQuote = assertCorpTraceBidPaymentValid(
     corpTracePaymentDeps,
@@ -28348,9 +28351,7 @@ function resolveTraceBaseLinkChoice(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  const trace = state.trace;
-  if (!trace || trace.status !== "base_link")
-    throw new Error("Es ist kein Base-Link-Fenster offen.");
+  const trace = requireTracePhase(state, "base_link");
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   const baseRunnerLink = trace.runnerLink ?? calculateRunnerLink(state);
   if (selected === "pass") {
@@ -28417,9 +28418,7 @@ function resolveTraceRunnerBid(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  const trace = state.trace;
-  if (!trace || trace.status !== "runner_bid")
-    throw new Error("Es ist kein Runner-Trace-Bid offen.");
+  const trace = requireTracePhase(state, "runner_bid");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
   const tracePaymentQuote = assertRunnerTraceBidPaymentValid(
     runnerTracePaymentDeps,
@@ -28582,7 +28581,6 @@ function postBidTraceLinkCandidates(
   state: GameState,
   trace: NonNullable<GameState["trace"]>,
 ): TracePostBidLinkCandidate[] {
-  const used = new Set(trace.postBidLinkSourceIds ?? []);
   const candidates: TracePostBidLinkCandidate[] = [];
   for (const cardId of runnerInstalledCardIds(state).sort()) {
     const instance = state.cardInstances[cardId];
@@ -28601,7 +28599,8 @@ function postBidTraceLinkCandidates(
       const limitOncePerTrace =
         ability.limit?.kind === "once_per_trace_per_source" &&
         ability.limit.scope === "source";
-      if (limitOncePerTrace && used.has(cardId)) continue;
+      if (limitOncePerTrace && tracePostBidLinkSourceUsed(trace, cardId))
+        continue;
       if (
         !Number.isInteger(effect.amount) ||
         effect.amount <= 0 ||
@@ -28656,9 +28655,7 @@ function resolveTracePostBidLinkChoice(
   legalAction: LegalAction,
   playerAction: PlayerAction,
 ): void {
-  const trace = state.trace;
-  if (!trace || trace.status !== "post_bid_link")
-    throw new Error("Es ist kein Post-Bid-Link-Fenster offen.");
+  const trace = requireTracePhase(state, "post_bid_link");
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   if (selected !== "pass") {
     const option = state.pendingChoice?.options.find(
