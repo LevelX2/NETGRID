@@ -149,6 +149,7 @@ import {
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
+  latestRetainableAccessRevealEvent,
   retainedAccessRevealEvent,
   retainedExposeReviewEvent,
   runnerProgramInstallTrashChoiceInfo,
@@ -1181,7 +1182,7 @@ function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "
   target[key] = fallback;
 }
 
-function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side): AccessReveal | null {
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
@@ -1198,14 +1199,14 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
     trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
   };
 }
 
-function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, eventId?: string): AccessReveal | null {
+function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, eventId?: string): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
   const actorSide: Side = "runner";
@@ -1219,7 +1220,7 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
     card,
     actions,
     trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
@@ -1303,10 +1304,30 @@ function payloadPositiveInteger(payload: Record<string, unknown>, key: string): 
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null;
 }
 
-function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string): string {
+function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string, archivesRevealCount: number | null): string {
+  if (serverLabel === "Archive" && archivesRevealCount) {
+    const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+    if (archivesRevealCount === 1) return `${subject} eine verdeckte Karte im Archiv aufgedeckt und darauf zugegriffen.`;
+    const currentAccess = actorSide === viewerSide ? "greifst jetzt auf eine Archivkarte zu" : `${accessActorSubject(actorSide)} greift jetzt auf eine Archivkarte zu`;
+    return `${subject} ${archivesRevealCount} verdeckte Karten im Archiv aufgedeckt; ${currentAccess}.`;
+  }
   const location = accessServerLocationPhrase(serverLabel);
   if (actorSide === viewerSide) return `Du hast auf eine Karte ${location} zugegriffen.`;
   return `${accessActorSubject(actorSide)} hat auf eine Karte ${location} zugegriffen.`;
+}
+
+function latestArchivesRevealCount(events: PublicGameEvent[], accessEvent: PublicGameEvent | null): number | null {
+  const stopIndex = accessEvent ? events.findIndex((event) => event.eventId === accessEvent.eventId) : events.length;
+  const startIndex = stopIndex >= 0 ? stopIndex - 1 : events.length - 1;
+  for (let index = startIndex; index >= 0; index -= 1) {
+    const payload = events[index]?.publicPayload;
+    if (!payload) continue;
+    if (payload.actionType === "start_run") {
+      const serverLabel = serverDisplayLabel(payloadString(payload, "serverLabel") ?? payloadString(payload, "serverId") ?? "");
+      return serverLabel === "Archive" ? payloadPositiveInteger(payload, "archivesRevealCount") : null;
+    }
+  }
+  return null;
 }
 
 function accessActorSubject(side: Side): string {
@@ -2731,9 +2752,11 @@ export default function Page() {
       onSelect: () => toggleFieldCardChoiceOption(option.id)
     };
   };
+  const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
-  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, accessRevealEvent?.eventId) : null;
-  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
+  const archivesRevealCount = payload ? latestArchivesRevealCount(payload.eventTail, latestAccessRevealEvent) : null;
+  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, latestAccessRevealEvent?.eventId) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;

@@ -694,7 +694,7 @@ export function accessRevealStatusLabel(card: Pick<VisibleCard, "type" | "trashC
   if (actorSide !== viewerSide) return observedAccessStatusLabel(card, actorSide, fromArchives);
   if (actions.some((action) => action.type === "steal_agenda")) return "Diese Agenda kann jetzt gestohlen werden.";
   if (fromArchives && (card.type === "asset" || card.type === "upgrade")) {
-    return "Diese Karte liegt bereits im Archiv. Sie kann beim Archivzugriff nicht noch einmal getrasht werden. Du kannst weiter zugreifen oder den Zugriff abschließen.";
+    return "Du hast diese Karte im Archiv gesehen. Du kannst weiter zugreifen oder den Zugriff abschließen.";
   }
   if (actions.some((action) => action.type === "trash_accessed_card")) return "Du kannst diese Karte jetzt trashen oder den Zugriff abschließen.";
   if (actions.some((action) => action.type === "access_card")) return "Der Zugriff auf diese Karte ist abgeschlossen. Du kannst direkt zur nächsten Karte weitergehen.";
@@ -717,6 +717,10 @@ export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEv
     return newerEvents.every((newerEvent) => accessRevealCanBeRetainedPast(newerEvent, event)) ? event : null;
   }
   return null;
+}
+
+export function latestRetainableAccessRevealEvent(events: PublicGameEvent[]): PublicGameEvent | null {
+  return retainedAccessRevealEvent(events, null);
 }
 
 export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
@@ -763,7 +767,7 @@ function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
   const subject = actorSide === "corp" ? "Die Korp" : "Der Runner";
   if (card.type === "agenda") return `${subject} kann diese Agenda jetzt stehlen.`;
-  if (fromArchives && (card.type === "asset" || card.type === "upgrade")) return `${subject} hat diese Karte im Archiv gesehen; sie kann dort nicht erneut getrasht werden.`;
+  if (fromArchives && (card.type === "asset" || card.type === "upgrade")) return `${subject} hat diese Karte im Archiv gesehen.`;
   if ((card.type === "asset" || card.type === "upgrade") && typeof card.trashCost === "number") return `${subject} entscheidet jetzt, ob diese Karte getrasht oder liegen gelassen wird.`;
   return `${subject} hat diese Karte gesehen; der Zugriff ist abgeschlossen.`;
 }

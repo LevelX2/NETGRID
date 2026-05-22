@@ -35,6 +35,7 @@ import {
   currentRunTimelineStep,
   groupRunnerRigCards,
   iceModifierBadgesForServer,
+  latestRetainableAccessRevealEvent,
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
@@ -1507,13 +1508,14 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(actionButtonLabel(plain)).toBe("Karte ziehen");
   });
 
-  it("describes accessed Archive assets as already trashed instead of blocked by credits", () => {
+  it("describes accessed Archive assets without redundant trash hints", () => {
     const accessedUpgrade = card("upgrade_1", "Dedicated Response Team", "upgrade");
     accessedUpgrade.trashCost = 2;
     const continueAccess = legalAction("runner", "decline_trash", "game_rule", "Weiter accessen", { cardId: accessedUpgrade.instanceId }, "access.resolve_card");
 
-    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).toContain("bereits im Archiv");
+    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).toContain("im Archiv gesehen");
     expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).not.toContain("nicht genug Credits");
+    expect(accessRevealStatusLabel(accessedUpgrade, [continueAccess], "runner", "runner", "Archive")).not.toContain("erneut getrasht");
   });
 
   it("keeps the insufficient-credit access hint for installed assets and upgrades", () => {
@@ -1539,6 +1541,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], null)?.eventId).toBe("evt_access");
     expect(retainedAccessRevealEvent([hqReveal, runCleanup], "evt_access")).toBeNull();
+    expect(latestRetainableAccessRevealEvent([hqReveal, runCleanup])?.eventId).toBe("evt_access");
   });
 
   it("retains a visible access reveal across turn end until it is dismissed", () => {
