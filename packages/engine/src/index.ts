@@ -2402,6 +2402,8 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.timingPoint === "runner_action.main")
     return side === "runner" ? runnerMainActions(state) : [];
   if (state.timingPoint === "run.approach_ice") {
+    if (isApproachIceExposeViewingWindowOpen(state))
+      return side === "runner" ? runnerApproachIceExposeViewingActions(state) : [];
     if (isApproachIceExposeWindowOpen(state))
       return side === "runner" ? runnerApproachIceExposeActions(state) : [];
     return side === "corp" ? corpApproachActions(state) : [];
@@ -2519,6 +2521,7 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
       server.id === "archives"
         ? visibleCorpArchives(state, side)
         : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
+    ...counterDisplaysField(poxCounterDisplaysForServer(state, server.id)),
   }));
 
   const run = state.run
@@ -2526,6 +2529,16 @@ export function getPlayerView(state: GameState, side: Side): PlayerView {
         attackedServerId: state.run.attackedServerId,
         phase: state.run.phase,
         position: { ...state.run.position },
+        ...(state.run.approachIceExposeViewingIceId
+          ? {
+              approachedIce: visibleCorpCard(
+                state,
+                state.run.approachIceExposeViewingIceId,
+                side,
+                "ice",
+              ),
+            }
+          : {}),
         ...(state.run.encounteredIceId
           ? {
               encounteredIce: visibleCorpCard(
@@ -2828,6 +2841,16 @@ export function validateGameState(state: GameState): ValidationResult {
     !state.cardInstances[state.run.encounteredIceId]
   )
     errors.push("Run references missing encountered ice.");
+  if (
+    state.run?.approachIceExposeViewingIceId &&
+    !state.cardInstances[state.run.approachIceExposeViewingIceId]
+  )
+    errors.push("Run references missing viewed approached ice.");
+  if (
+    state.run?.approachIceExposeViewingSourceCardId &&
+    !state.cardInstances[state.run.approachIceExposeViewingSourceCardId]
+  )
+    errors.push("Run references missing approach expose source card.");
   if (
     state.run?.viral15ActiveSourceIceId &&
     !state.cardInstances[state.run.viral15ActiveSourceIceId]
@@ -4287,6 +4310,42 @@ function runnerInstallableProgramIdsForValuPak(
   });
 }
 
+function installedRunnerProgramTrashOptionsForInstall(
+  state: GameState,
+): CardInstanceId[] {
+  return state.runner.rig.programs.slice().sort();
+}
+
+function runnerProgramInstallMemoryReachableAfterTrash(
+  state: GameState,
+  definition: CardDefinition,
+): boolean {
+  const memoryCost = definition.memoryCost ?? 0;
+  if (state.runner.memoryUsed + memoryCost <= runnerMemoryLimit(state))
+    return true;
+  const maximumFreedMemory = installedRunnerProgramTrashOptionsForInstall(
+    state,
+  ).reduce((sum, cardId) => {
+    if (!runnerProgramUsesMemory(state, cardId)) return sum;
+    return sum + (definitionFor(state, cardId).memoryCost ?? 0);
+  }, 0);
+  return (
+    state.runner.memoryUsed + memoryCost - maximumFreedMemory <=
+    runnerMemoryLimit(state)
+  );
+}
+
+function shouldOfferRunnerProgramTrashBeforeInstall(
+  state: GameState,
+  definition: CardDefinition,
+): boolean {
+  return (
+    definition.type === "program" &&
+    installedRunnerProgramTrashOptionsForInstall(state).length > 0 &&
+    runnerProgramInstallMemoryReachableAfterTrash(state, definition)
+  );
+}
+
 function clearValuPakProgramInstallFlags(state: GameState): void {
   const flags = ensureRunnerTurnFlags(state);
   flags.valuPakProgramInstallActionsRemaining = 0;
@@ -4458,6 +4517,26 @@ function runnerMainActions(state: GameState): LegalAction[] {
           id,
           [{ clicks: 1, credits: definition.installCost ?? 0 }],
           { cardId: id },
+        ),
+      );
+    }
+    if (
+      hasClicks &&
+      definition.type === "program" &&
+      !uniqueBlocked &&
+      availableRunnerProgramInstallCredits(state) >=
+        (definition.installCost ?? 0) &&
+      shouldOfferRunnerProgramTrashBeforeInstall(state, definition)
+    ) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "install_card",
+          `${definition.title} mit Programmtrash installieren`,
+          id,
+          [{ clicks: 1, credits: definition.installCost ?? 0 }],
+          { cardId: id, runnerProgramTrashBeforeInstall: true },
         ),
       );
     }
@@ -6714,10 +6793,20 @@ function isApproachIceExposeWindowOpen(state: GameState): boolean {
   );
 }
 
+function isApproachIceExposeViewingWindowOpen(state: GameState): boolean {
+  return Boolean(
+    state.timingPoint === "run.approach_ice" &&
+    state.activeSide === "runner" &&
+    state.run?.approachIceExposeViewingIceId &&
+    state.run?.approachIceExposeViewingSourceCardId,
+  );
+}
+
 function approachIceExposeCanBeOfferedForCurrentIce(state: GameState): boolean {
   const run = state.run;
   const approachedIceId = run?.approachedIceId;
   if (!run || !approachedIceId) return false;
+  if (run.approachIceExposeViewingIceId) return false;
   if (run.approachIceExposeSkippedIceIdsThisRun?.includes(approachedIceId))
     return false;
   if (installedApproachIceExposeSources(state).length === 0) return false;
@@ -6788,7 +6877,7 @@ function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
       state,
       "runner",
       "trigger_ability",
-      `${definition.title}: ICE expose`,
+      `${definition.title}: ICE ansehen`,
       sourceCardId,
       [],
       {
@@ -6817,13 +6906,49 @@ function runnerApproachIceExposeActions(state: GameState): LegalAction[] {
       state,
       "runner",
       "trigger_ability",
-      "Expose-Fenster überspringen",
+      `${definitionFor(state, primarySource).title}: Ansehen überspringen`,
       primarySource,
       [],
       {
         cardId: primarySource,
         iceId: approachedIceId,
         approachIceExposeDecision: "decline",
+      },
+    ),
+  ];
+}
+
+function runnerApproachIceExposeViewingActions(state: GameState): LegalAction[] {
+  const run = mustRun(state);
+  const sourceCardId = run.approachIceExposeViewingSourceCardId;
+  const viewedIceId = run.approachIceExposeViewingIceId;
+  if (!sourceCardId || !viewedIceId) return [];
+  const definition = definitionFor(state, sourceCardId);
+  return [
+    action(
+      state,
+      "runner",
+      "trigger_ability",
+      `${definition.title}: Ansehen beenden`,
+      sourceCardId,
+      [],
+      {
+        cardId: sourceCardId,
+        iceId: viewedIceId,
+        approachIceExposeViewDecision: "finish",
+      },
+    ),
+    action(
+      state,
+      "runner",
+      "jack_out",
+      "Jack-out",
+      "game_rule",
+      [],
+      {
+        cardId: sourceCardId,
+        iceId: viewedIceId,
+        approachIceExposeJackOut: true,
       },
     ),
   ];
@@ -9562,6 +9687,10 @@ function performAction(
         resolveApproachIceExposeAbility(state, legalAction);
         return;
       }
+      if (legalAction.payload?.approachIceExposeViewDecision) {
+        resolveApproachIceExposeViewingDecision(state, legalAction);
+        return;
+      }
       if (
         legalAction.payload?.v1918UpgradeAbility ===
         "singapore_city_grid_hq_ice_swap"
@@ -10621,6 +10750,141 @@ function resolveAiChiefFinancialOfficer(
   };
 }
 
+function startRunnerProgramTrashBeforeInstallChoice(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+): void {
+  if (!state.runner.grip.includes(sourceCardId))
+    throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.type !== "program")
+    throw new Error(
+      "Nur Programme koennen vor der Installation Programmtrash oeffnen.",
+    );
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
+    throw new Error("Nicht genug Credits fuer die Programminstallation.");
+  const options = installedRunnerProgramTrashOptionsForInstall(state).map(
+    (cardId) => {
+      const optionDefinition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: optionDefinition.title,
+        value: cardId,
+      };
+    },
+  );
+  if (options.length === 0)
+    throw new Error("Es gibt kein installiertes Programm zum Trashen.");
+  if (!runnerProgramInstallMemoryReachableAfterTrash(state, definition))
+    throw new Error("Durch Programmtrash kann nicht genug MU freigemacht werden.");
+  state.pendingChoice = {
+    choiceId: `runner_program_trash_before_install_${state.stateVersion + 1}`,
+    side: "runner",
+    source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Programme vor Installation trashen",
+    kind: "select_cards",
+    options,
+    minSelections: 0,
+    maxSelections: options.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+}
+
+function resolveRunnerProgramTrashBeforeInstallChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("runner_program_trash_before_install"))
+    throw new Error("Es ist keine Programmtrash-Installationschoice offen.");
+  const sourceCardId = choice.source.split(":")[1] as
+    | CardInstanceId
+    | undefined;
+  if (!sourceCardId || !state.runner.grip.includes(sourceCardId))
+    throw new Error("Die Programmquelle liegt nicht mehr im Grip.");
+  if (state.phase !== "runner_action_phase" || state.timingPoint !== "runner_action.main")
+    throw new Error("Programme koennen nur im Runner-Aktionsfenster installiert werden.");
+  if (state.runner.clicks <= 0)
+    throw new Error("Der Runner hat keinen Klick fuer die Installation.");
+  const definition = definitionFor(state, sourceCardId);
+  if (definition.type !== "program")
+    throw new Error("Nur Programme koennen ueber diese Choice installiert werden.");
+  if (
+    isUniqueCard(definition) &&
+    hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+  )
+    throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+  if (availableRunnerProgramInstallCredits(state) < (definition.installCost ?? 0))
+    throw new Error("Nicht genug Credits fuer die Programminstallation.");
+
+  const trashIds = selectedChoiceCardIds(choice, playerAction);
+  const uniqueTrashIds = [...new Set(trashIds)];
+  if (uniqueTrashIds.length !== trashIds.length)
+    throw new Error("Die Programmtrash-Auswahl enthaelt doppelte Karten.");
+  for (const cardId of uniqueTrashIds) {
+    if (!state.runner.rig.programs.includes(cardId))
+      throw new Error("Die Programmtrash-Auswahl enthaelt kein installiertes Programm.");
+    if (definitionFor(state, cardId).type !== "program")
+      throw new Error("Nur installierte Programme koennen getrasht werden.");
+  }
+
+  const memoryAfterSelection =
+    state.runner.memoryUsed +
+    (definition.memoryCost ?? 0) -
+    uniqueTrashIds.reduce((sum, cardId) => {
+      if (!runnerProgramUsesMemory(state, cardId)) return sum;
+      return sum + (definitionFor(state, cardId).memoryCost ?? 0);
+    }, 0);
+  const needsMemory = memoryAfterSelection > runnerMemoryLimit(state);
+  if (needsMemory && uniqueTrashIds.length === 0) {
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      sourceDefinitionId: definition.id,
+      runnerProgramTrashBeforeInstall: true,
+      installed: false,
+      installCancelled: true,
+      installBlockedReason: "insufficient_memory",
+    };
+    return;
+  }
+  if (needsMemory)
+    throw new Error("Die Programmtrash-Auswahl macht nicht genug MU frei.");
+
+  const trashedDefinitionIds = uniqueTrashIds.map(
+    (cardId) => definitionFor(state, cardId).id,
+  );
+  for (const cardId of uniqueTrashIds) trashRunnerInstalledCardToHeap(state, cardId);
+  delete state.pendingChoice;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    cardId: sourceCardId,
+    runnerProgramTrashBeforeInstall: true,
+    runnerProgramTrashBeforeInstallResolved: true,
+    trashedCount: uniqueTrashIds.length,
+    ...(trashedDefinitionIds.length > 0
+      ? { trashedCardDefinitionIds: trashedDefinitionIds.join(",") }
+      : {}),
+  };
+  installCard(state, legalAction);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    sourceDefinitionId: definition.id,
+    installed: true,
+    memoryUsedAfter: state.runner.memoryUsed,
+    memoryLimitAfter: runnerMemoryLimit(state),
+  };
+}
+
 function installCard(state: GameState, legalAction: LegalAction): void {
   const cardId = String(legalAction.payload?.cardId);
   const definition = definitionFor(state, cardId);
@@ -10638,6 +10902,19 @@ function installCard(state: GameState, legalAction: LegalAction): void {
     definition,
     legalAction,
   );
+  if (
+    legalAction.side === "runner" &&
+    definition.type === "program" &&
+    legalAction.payload?.runnerProgramTrashBeforeInstall === true &&
+    legalAction.payload?.runnerProgramTrashBeforeInstallResolved !== true
+  ) {
+    startRunnerProgramTrashBeforeInstallChoice(state, cardId);
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      runnerProgramTrashChoiceOpened: true,
+    };
+    return;
+  }
   spendClick(state, legalAction.side);
   if (legalAction.side === "corp") expireCorporateRetreatInstallCreditAbilities(state);
   if (legalAction.side === "runner") {
@@ -11530,6 +11807,41 @@ function resolveApproachIceExposeAbility(
     throw new Error("Approach-Expose-Entscheidung ist ungueltig.");
   }
 
+  if (decision === "expose") {
+    run.approachIceExposeViewingIceId = approachedIceId;
+    run.approachIceExposeViewingSourceCardId = sourceCardId;
+    state.activeSide = "runner";
+  } else {
+    state.activeSide = "corp";
+  }
+  state.timingPoint = "run.approach_ice";
+}
+
+function resolveApproachIceExposeViewingDecision(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf das Ansehen beenden.");
+  if (!isApproachIceExposeViewingWindowOpen(state))
+    throw new Error("Es ist kein Ansehen-Fenster offen.");
+  const run = mustRun(state);
+  const viewedIceId = run.approachIceExposeViewingIceId;
+  const sourceCardId = run.approachIceExposeViewingSourceCardId;
+  if (
+    String(legalAction.payload?.iceId) !== viewedIceId ||
+    String(legalAction.payload?.cardId) !== sourceCardId
+  )
+    throw new Error("Das Ansehen passt nicht mehr zum aktuellen ICE.");
+  if (legalAction.payload?.approachIceExposeViewDecision !== "finish")
+    throw new Error("Die Ansehen-Entscheidung ist ungueltig.");
+  delete run.approachIceExposeViewingIceId;
+  delete run.approachIceExposeViewingSourceCardId;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "approach_ice_expose_finish",
+  };
   state.activeSide = "corp";
   state.timingPoint = "run.approach_ice";
 }
@@ -22396,6 +22708,16 @@ function resolvePendingChoice(
     resolveSelfModifyingCodeFreeMuChoice(state, legalAction, playerAction);
     return;
   }
+  if (
+    state.pendingChoice.source.startsWith("runner_program_trash_before_install")
+  ) {
+    resolveRunnerProgramTrashBeforeInstallChoice(
+      state,
+      legalAction,
+      playerAction,
+    );
+    return;
+  }
   if (state.pendingChoice.source.startsWith("v1911.sneak_preview_source")) {
     resolveSneakPreviewSourceChoice(state, legalAction, playerAction);
     return;
@@ -29664,6 +29986,8 @@ function makeActionId(
   if (payload?.selectedServerId) parts.push(String(payload.selectedServerId));
   if (payload?.cardId) parts.push(String(payload.cardId));
   if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
+  if (payload?.runnerProgramTrashBeforeInstall)
+    parts.push("runner_program_trash_before_install");
   if (payload?.breakerId) parts.push(String(payload.breakerId));
   if (payload?.iceId) parts.push(String(payload.iceId));
   if (payload?.subroutineIndex !== undefined)
@@ -29726,6 +30050,10 @@ function makeActionId(
     parts.push(String(payload.citySurveillanceDrawDecision));
   if (payload?.approachIceExposeDecision)
     parts.push(String(payload.approachIceExposeDecision));
+  if (payload?.approachIceExposeViewDecision)
+    parts.push(String(payload.approachIceExposeViewDecision));
+  if (payload?.approachIceExposeJackOut)
+    parts.push(String(payload.approachIceExposeJackOut));
   return parts.filter(Boolean).join(".");
 }
 
@@ -30084,6 +30412,7 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     ...(instance.counters
       ? { counters: cloneCounters(instance.counters) }
       : {}),
+    ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
     ...(definition.id === "onr_v1_173_restrictive-net-zoning" &&
     instance.selectedServerId
@@ -30098,6 +30427,274 @@ function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCard {
     owner: instance.owner,
     controller: instance.controller,
   };
+}
+
+function counterDisplaysField(
+  counterDisplays: VisibleCard["counterDisplays"],
+): Pick<VisibleCard, "counterDisplays"> | Record<string, never> {
+  return counterDisplays && counterDisplays.length > 0
+    ? { counterDisplays }
+    : {};
+}
+
+const STORED_CREDIT_COUNTER_DEFINITION_IDS = new Set<string>([
+  "onr_v1_154_broker",
+  "onr_v1_178_short-term-contract",
+  "onr_v1_174_rigged-investments",
+  "onr_v1_309_bbs-whispering-campaign",
+  "onr_v1_311_braindance-campaign",
+  "onr_v1_326_holovid-campaign",
+  "onr_v1_337_rockerboy-promotion",
+  "onr_v1_193_corporate-coup",
+  "onr_v1_198_detroit-police-contract",
+  "onr_v1_209_political-coup",
+]);
+
+function counterDisplaysForKnownCard(
+  definition: CardDefinition,
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  return [
+    ...(advancementCounterDisplays(instance.advancementCounters) ?? []),
+    ...(storedCreditCounterDisplays(definition, instance) ?? []),
+    ...(restrictedPoolCounterDisplays(definition, instance) ?? []),
+    ...(recurringCreditCounterDisplays(instance) ?? []),
+    ...(specialCounterDisplays(instance) ?? []),
+  ];
+}
+
+function counterDisplaysForHiddenCorpRootCard(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  return advancementCounterDisplays(instance.advancementCounters);
+}
+
+function advancementCounterDisplays(
+  advancementCounters: number,
+): VisibleCard["counterDisplays"] {
+  const amount = Math.max(0, Math.floor(advancementCounters));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "advancement",
+      amount,
+      displayKind: "advancement",
+      label: "Entwicklung",
+      ariaLabel: `${amount} öffentliche Advancement-Counter`,
+      usageHint: "score_modifier",
+    },
+  ];
+}
+
+function storedCreditCounterDisplays(
+  definition: CardDefinition,
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  if (!STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
+  const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "stored_credits",
+      amount,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: `${amount} gespeicherte Credits`,
+      counterType: "bit",
+      usageHint: "spendable",
+    },
+  ];
+}
+
+function recurringCreditCounterDisplays(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  const amount = Math.max(0, Math.floor(instance.counters?.recurring_credit ?? 0));
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "recurring_credit",
+      amount,
+      displayKind: "recurring_credit",
+      label: "Wiederkehrende Credits",
+      ariaLabel: `${amount} wiederkehrende Credits`,
+      counterType: "recurring_credit",
+      usageHint: "refreshing",
+    },
+  ];
+}
+
+function restrictedPoolCounterDisplays(
+  definition: CardDefinition,
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  if (STORED_CREDIT_COUNTER_DEFINITION_IDS.has(definition.id)) return undefined;
+  const amount = Math.max(0, Math.floor(instance.counters?.bit ?? 0));
+  if (amount <= 0) return undefined;
+  const implementation = cardImplementationForDefinitionId(definition.id);
+  const restrictedSource = implementation?.restrictedHostedCreditSource;
+  const tracePoolSource = implementation?.fortRunWindows?.some(
+    (window) => window.kind === "corp_trace_bits_during_runs_on_this_fort",
+  );
+  if (!restrictedSource && !tracePoolSource) return undefined;
+  const label = tracePoolSource
+    ? "Trace-Bits"
+    : restrictedPoolDisplayLabel(restrictedSource?.usableFor ?? []);
+  return [
+    {
+      id: "restricted_pool",
+      amount,
+      displayKind: "restricted_pool",
+      label,
+      ariaLabel: `${amount} ${label}`,
+      counterType: "bit",
+      usageHint: "spendable",
+    },
+  ];
+}
+
+function restrictedPoolDisplayLabel(
+  uses: readonly RestrictedHostedCreditUse[],
+): string {
+  if (uses.includes("increase_link")) return "Link-Bits";
+  if (uses.includes("install_programs")) return "Installations-Bits";
+  if (uses.includes("remove_tags")) return "Tag-Entfernungs-Bits";
+  if (uses.includes("trash_nodes") || uses.includes("trash_upgrades"))
+    return "Trash-Bits";
+  if (
+    uses.includes("using_icebreaker_during_run") ||
+    uses.includes("using_icebreaker_during_run_non_noisy") ||
+    uses.includes("using_killer_during_run")
+  )
+    return "Run-Bits";
+  return "Eingeschränkte Bits";
+}
+
+function specialCounterDisplays(
+  instance: CardInstance,
+): VisibleCard["counterDisplays"] {
+  const counters = instance.counters ?? {};
+  return [
+    ...singleCounterDisplay(counters.shell, {
+      id: "shell",
+      displayKind: "shell",
+      label: "Shell-Counter",
+      ariaLabelName: "Shell-Counter",
+      counterType: "shell",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.ablative, {
+      id: "ablative",
+      displayKind: "damage_prevention",
+      label: "Ablative-Counter",
+      ariaLabelName: "Ablative-Counter",
+      counterType: "ablative",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.virus, {
+      id: "virus",
+      displayKind: "virus",
+      label: "Virus-Counter",
+      ariaLabelName: "Virus-Counter",
+      counterType: "virus",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.data_raven, {
+      id: "data_raven",
+      displayKind: "trace",
+      label: "Data-Raven-Counter",
+      ariaLabelName: "Data-Raven-Counter",
+      counterType: "data_raven",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.cerberus, {
+      id: "cerberus",
+      displayKind: "trace",
+      label: "Cerberus-Counter",
+      ariaLabelName: "Cerberus-Counter",
+      counterType: "cerberus",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.mastiff, {
+      id: "mastiff",
+      displayKind: "trace",
+      label: "Mastiff-Counter",
+      ariaLabelName: "Mastiff-Counter",
+      counterType: "mastiff",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.crying, {
+      id: "crying",
+      displayKind: "trace",
+      label: "Crying-Counter",
+      ariaLabelName: "Crying-Counter",
+      counterType: "crying",
+      usageHint: "status_marker",
+    }),
+    ...singleCounterDisplay(counters.militech, {
+      id: "militech",
+      displayKind: "generic_counter",
+      label: "Militech-Counter",
+      ariaLabelName: "Militech-Counter",
+      counterType: "militech",
+      usageHint: "spendable",
+    }),
+    ...singleCounterDisplay(counters.mark, {
+      id: "mark",
+      displayKind: "generic_counter",
+      label: "Mark-Counter",
+      ariaLabelName: "Mark-Counter",
+      counterType: "mark",
+      usageHint: "status_marker",
+    }),
+  ];
+}
+
+function poxCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  const amount = poxCountersForServer(state, serverId);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "pox",
+      amount,
+      displayKind: "virus",
+      label: "Pox-Counter",
+      ariaLabel: `${amount} Pox-Counter auf diesem Server`,
+      counterType: "virus",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
+function singleCounterDisplay(
+  rawAmount: number | undefined,
+  display: {
+    id: string;
+    displayKind: NonNullable<VisibleCard["counterDisplays"]>[number]["displayKind"];
+    label: string;
+    ariaLabelName: string;
+    counterType: CounterType;
+    usageHint: NonNullable<
+      NonNullable<VisibleCard["counterDisplays"]>[number]["usageHint"]
+    >;
+  },
+): NonNullable<VisibleCard["counterDisplays"]> {
+  const amount = Math.max(0, Math.floor(rawAmount ?? 0));
+  if (amount <= 0) return [];
+  return [
+    {
+      id: display.id,
+      amount,
+      displayKind: display.displayKind,
+      label: display.label,
+      ariaLabel: `${amount} ${display.ariaLabelName}`,
+      counterType: display.counterType,
+      usageHint: display.usageHint,
+    },
+  ];
 }
 
 function visibleRunnerRigCardForViewer(
@@ -30165,11 +30762,14 @@ function visibleCorpCard(
   const exposedBySpyCounter = serverId
     ? spyCountersForServer(state, serverId) > 0
     : false;
+  const viewedApproachedIce =
+    viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const visible =
     viewer === "corp" ||
     instance.rezzed ||
     exposedBySpyCounter ||
     accessed ||
+    viewedApproachedIce ||
     state.corp.scoreArea.includes(id) ||
     (state.corp.archives.includes(id) && instance.faceup);
   if (!visible) {
@@ -30178,6 +30778,9 @@ function visibleCorpCard(
       known: false,
       rezzed: false,
       advancementCounters: area === "root" ? instance.advancementCounters : 0,
+      ...(area === "root"
+        ? counterDisplaysField(counterDisplaysForHiddenCorpRootCard(instance))
+        : {}),
     };
   }
   return visibleOwnCard(state, id);

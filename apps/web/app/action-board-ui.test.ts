@@ -18,10 +18,15 @@ import {
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
+  counterDisplayBadgeView,
+  counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
+  fieldCardChoiceInfo,
+  fieldCardChoiceOptionForCard,
   showInstalledCorpState,
+  shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
   splitArchiveCardsForDisplay,
   currentRunTimelineStep,
@@ -30,9 +35,11 @@ import {
   orderedCardContextActions,
   parseCuePositionPreference,
   retainedAccessRevealEvent,
+  retainedExposeReviewEvent,
   runBreakerActionHint,
   runAwareActionButtonLabel,
   runCurrentIceLabel,
+  runnerProgramInstallTrashChoiceInfo,
   runPositionStatusLabel,
   runTargetServerIds,
   runWindowActionButtonLabel,
@@ -461,6 +468,157 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
   });
+
+  it("detects field-card choices for installed board cards only", () => {
+    const bbs = card("corp_bbs_1", "BBS Whispering Campaign", "asset", false);
+    const ice = card("corp_ice_1", "Wall", "ice", false);
+    const runnerProgram = card("runner_program_1", "Virus Program", "program");
+    const board = view("runner", {
+      own: {
+        ...view("runner").own,
+        rig: [runnerProgram]
+      },
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [ice], root: [bbs] }]
+    });
+    const fieldChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "hunt_club_bbs_choice",
+      side: "runner",
+      source: "v1912.hunt_club_bbs_expose:bbs:1",
+      prompt: "Installierte Korp-Karten ansehen",
+      kind: "select_cards",
+      options: [
+        { id: "card_bbs", label: "Remote 1 Root", value: "corp_bbs_1" },
+        { id: "card_ice", label: "Remote 1 ICE", value: "corp_ice_1" }
+      ],
+      minSelections: 0,
+      maxSelections: 3,
+      stateVersion: 1,
+      visibility: "hidden_info_barrier"
+    };
+    const handChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "grip_choice",
+      source: "v1922.runner_grip_trash_gain_credits:organ_donor:1",
+      options: [{ id: "card_hand", label: "Grip-Karte", value: "runner_hand_1" }]
+    };
+    const stackChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "stack_choice",
+      source: "v1911.search_stack:1",
+      stackSearchResolution: {
+        reveal: "hidden",
+        destination: "grip",
+        shuffleAfter: true
+      }
+    };
+    const runnerRigChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "viral_15_choice",
+      source: "v1922.viral_15_program_trash:virus:1",
+      prompt: "Installiertes Runner-Programm wählen",
+      options: [{ id: "card_runner_program", label: "Runner-Programm", value: "runner_program_1" }],
+      minSelections: 1,
+      maxSelections: 1
+    };
+
+    expect(shouldUseFieldCardChoice(fieldChoice, board)).toBe(true);
+    expect(shouldUseFieldCardChoice(runnerRigChoice, board)).toBe(true);
+    expect(shouldUseCardChoicePanel(fieldChoice)).toBe(true);
+    expect(fieldCardChoiceOptionForCard(fieldChoice, board, bbs)?.id).toBe("card_bbs");
+    expect(fieldCardChoiceOptionForCard(fieldChoice, board, runnerProgram)).toBeNull();
+    expect(fieldCardChoiceOptionForCard(runnerRigChoice, board, runnerProgram)?.id).toBe("card_runner_program");
+    expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({
+      title: "Feldkarten auswählen",
+      counterLabel: "1/0-3",
+      canSubmit: true,
+      canClear: true,
+      submitLabel: "Auswahl übernehmen"
+    });
+    expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
+    expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
+  });
+
+  it("labels Runner program install trash choices for optional and required MU cases", () => {
+    const sourceProgram = {
+      ...card("new_program", "New Program", "program"),
+      memoryCost: 2
+    };
+    const oldBreaker = {
+      ...card("old_breaker", "Old Breaker", "program"),
+      memoryCost: 1
+    };
+    const oldUtility = {
+      ...card("old_utility", "Old Utility", "program"),
+      memoryCost: 2
+    };
+    const pendingChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "runner_program_trash_before_install_7",
+      side: "runner",
+      source: "runner_program_trash_before_install:new_program:7",
+      prompt: "Programme vor Installation trashen",
+      kind: "select_cards",
+      options: [
+        { id: "card_old_breaker", label: "Old Breaker", value: "old_breaker" },
+        { id: "card_old_utility", label: "Old Utility", value: "old_utility" }
+      ],
+      minSelections: 0,
+      maxSelections: 2,
+      stateVersion: 7,
+      visibility: "hidden_info_barrier"
+    };
+    const optionalView = view("runner", {
+      own: {
+        ...view("runner").own,
+        gripOrHq: [sourceProgram],
+        rig: [oldBreaker, oldUtility],
+        memoryUsed: 1,
+        memoryLimit: 4
+      }
+    });
+    const requiredView = view("runner", {
+      own: {
+        ...view("runner").own,
+        gripOrHq: [sourceProgram],
+        rig: [oldBreaker, oldUtility],
+        memoryUsed: 4,
+        memoryLimit: 4
+      }
+    });
+
+    expect(runnerProgramInstallTrashChoiceInfo(pendingChoice, optionalView, [])).toMatchObject({
+      title: "Programme vorher trashen?",
+      submitLabel: "Ohne Trash installieren",
+      canSubmit: true,
+      requiredMemoryToFree: 0,
+      selectedMemoryFreed: 0
+    });
+    expect(
+      runnerProgramInstallTrashChoiceInfo(pendingChoice, requiredView, [
+        "card_old_breaker"
+      ])
+    ).toMatchObject({
+      title: "MU freimachen",
+      submitLabel: "Auswahl bestätigen",
+      canSubmit: false,
+      requiredMemoryToFree: 2,
+      selectedMemoryFreed: 1
+    });
+    expect(
+      runnerProgramInstallTrashChoiceInfo(pendingChoice, requiredView, [
+        "card_old_utility"
+      ])
+    ).toMatchObject({
+      title: "MU freimachen",
+      question: "2/2 MU gewählt. Auswahl bestätigen?",
+      submitLabel: "Auswahl bestätigen",
+      canSubmit: true,
+      selectedMemoryFreed: 2
+    });
+    expect(runnerProgramInstallTrashChoiceInfo(pendingChoice, requiredView, [])).toMatchObject({
+      submitLabel: "Nicht installieren",
+      canSubmit: true
+    });
+  });
 });
 
 describe("V1.0.6 resource and card-display helpers", () => {
@@ -542,43 +700,49 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ]);
   });
 
-  it("maps hosted bit counters to the existing card credit badge pattern", () => {
+  it("maps CounterDisplay stored credits to the existing card credit badge pattern", () => {
     const brokerAfterLoad: VisibleCard = {
       ...card("broker_1", "Broker", "resource"),
-      definitionId: "onr_v1_154_broker",
-      counters: { bit: 3 }
+      counterDisplays: [
+        {
+          id: "stored_credits",
+          amount: 3,
+          displayKind: "stored_credits",
+          label: "Credits",
+          ariaLabel: "3 gespeicherte Credits",
+          counterType: "bit",
+          usageHint: "spendable"
+        }
+      ]
     };
     const brokerTenPlus: VisibleCard = {
       ...brokerAfterLoad,
       instanceId: "broker_2",
-      counters: { bit: 12 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 12, ariaLabel: "12 gespeicherte Credits" }]
     };
     const shortTerm: VisibleCard = {
       ...card("short_term_1", "Short-Term Contract", "resource"),
-      definitionId: "onr_v1_178_short-term-contract",
-      counters: { bit: 10 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 10, ariaLabel: "10 gespeicherte Credits" }]
     };
     const bbsUnderTen: VisibleCard = {
       ...card("bbs_1", "BBS Whispering Campaign", "asset"),
-      definitionId: "onr_v1_309_bbs-whispering-campaign",
-      counters: { bit: 8 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 8, ariaLabel: "8 gespeicherte Credits" }]
     };
     const bbsTenPlus: VisibleCard = {
       ...bbsUnderTen,
       instanceId: "bbs_2",
-      counters: { bit: 10 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 10, ariaLabel: "10 gespeicherte Credits" }]
     };
     const braindanceTenPlus: VisibleCard = {
       ...card("braindance_1", "Braindance Campaign", "asset"),
-      definitionId: "onr_v1_311_braindance-campaign",
-      counters: { bit: 12 }
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 12, ariaLabel: "12 gespeicherte Credits" }]
     };
     const unknownPowerCard: VisibleCard = {
       ...card("unknown_1", "Unknown Power Counter Card", "asset"),
       counters: { power: 8 }
     };
 
-    expect(storedCreditSourceLabel(brokerAfterLoad)).toBe("Broker");
+    expect(storedCreditSourceLabel(brokerAfterLoad)).toBe("Credits");
     expect(storedCreditAmount(brokerAfterLoad)).toBe(3);
     expect(cardCreditCounterVisual(storedCreditAmount(brokerAfterLoad))).toMatchObject({
       safeAmount: 3,
@@ -591,9 +755,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
-    expect(storedCreditSourceLabel(shortTerm)).toBe("Short-Term Contract");
+    expect(storedCreditSourceLabel(shortTerm)).toBe("Credits");
     expect(storedCreditAmount(shortTerm)).toBe(10);
-    expect(storedCreditSourceLabel(bbsUnderTen)).toBe("BBS Whispering Campaign");
+    expect(storedCreditSourceLabel(bbsUnderTen)).toBe("Credits");
     expect(storedCreditAmount(bbsUnderTen)).toBe(8);
     expect(cardCreditCounterVisual(storedCreditAmount(bbsUnderTen))).toMatchObject({
       safeAmount: 8,
@@ -606,7 +770,7 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
-    expect(storedCreditSourceLabel(braindanceTenPlus)).toBe("Braindance Campaign");
+    expect(storedCreditSourceLabel(braindanceTenPlus)).toBe("Credits");
     expect(storedCreditAmount(braindanceTenPlus)).toBe(12);
     expect(cardCreditCounterVisual(storedCreditAmount(braindanceTenPlus))).toMatchObject({
       safeAmount: 12,
@@ -616,39 +780,126 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 
-  it("maps only Armored Fridge power counters to an Ablative Counter badge", () => {
+  it("does not use legacy stored-credit card tables when CounterDisplays are missing", () => {
+    const brokerRawOnly: VisibleCard = {
+      ...card("broker_legacy", "Broker", "resource"),
+      definitionId: "onr_v1_154_broker",
+      counters: { bit: 3 }
+    };
+    const unknownRawOnly: VisibleCard = {
+      ...card("unknown_1", "Unknown Power Counter Card", "asset"),
+      counters: { power: 8 }
+    };
+    expect(storedCreditSourceLabel(brokerRawOnly)).toBeNull();
+    expect(storedCreditAmount(brokerRawOnly)).toBe(0);
+    expect(storedCreditAmount(unknownRawOnly)).toBe(0);
+  });
+
+  it("does not select raw counters for board rendering when CounterDisplays are missing", () => {
+    const rawOnly: VisibleCard = {
+      ...card("broker_raw_only", "Broker", "resource"),
+      definitionId: "onr_v1_154_broker",
+      counters: { bit: 3, recurring_credit: 2, shell: 1 }
+    };
+    const displayCard: VisibleCard = {
+      ...card("broker_display", "Broker", "resource"),
+      counters: { bit: 99 },
+      counterDisplays: [
+        {
+          id: "stored_credits",
+          amount: 3,
+          displayKind: "stored_credits",
+          label: "Credits",
+          ariaLabel: "3 gespeicherte Credits",
+          counterType: "bit",
+          usageHint: "spendable"
+        },
+        {
+          id: "advancement",
+          amount: 2,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "2 Entwicklungen"
+        }
+      ]
+    };
+    expect(counterDisplaysForRendering(rawOnly)).toEqual([]);
+    expect(counterDisplaysForRendering(displayCard).map((display) => display.id)).toEqual(["stored_credits"]);
+  });
+
+  it("maps CounterDisplay special counters to compact badge models", () => {
+    const rawArmoredFridge: VisibleCard = {
+      ...card("fridge_1", "Armored Fridge", "hardware"),
+      definitionId: "onr_v1_121_armored-fridge",
+      counters: { power: 7 }
+    };
+    const rawEmptyArmoredFridge: VisibleCard = {
+      ...card("fridge_1", "Armored Fridge", "hardware"),
+      definitionId: "onr_v1_121_armored-fridge",
+      counters: { power: 0 }
+    };
+    const rawDataRaven: VisibleCard = {
+      ...card("data_raven_1", "Data Raven", "ice"),
+      definitionId: "onr_v1_236_data-raven",
+      counters: { power: 2 }
+    };
+    const rawUnknownPowerCard: VisibleCard = {
+      ...card("unknown_power_1", "Unknown Power Card", "resource"),
+      counters: { power: 3 }
+    };
+
     expect(
       armoredFridgeAblativeCounterBadge({
         ...card("fridge_1", "Armored Fridge", "hardware"),
-        definitionId: "onr_v1_121_armored-fridge",
-        counters: { power: 7 }
+        counterDisplays: [
+          {
+            id: "ablative",
+            amount: 7,
+            displayKind: "damage_prevention",
+            label: "Ablative-Counter",
+            ariaLabel: "7 Ablative-Counter",
+            counterType: "ablative",
+            usageHint: "status_marker"
+          }
+        ]
       })
     ).toEqual({
       amount: 7,
-      label: "7 Ablative Counter",
-      ariaLabel: "7 Ablative Counter",
+      label: "7 Ablative-Counter",
+      ariaLabel: "7 Ablative-Counter",
       shortLabel: "7 Ablative",
       testId: "ablative-counter-badge"
     });
     expect(
-      armoredFridgeAblativeCounterBadge({
-        ...card("fridge_1", "Armored Fridge", "hardware"),
-        definitionId: "onr_v1_121_armored-fridge",
-        counters: { power: 0 }
-      })
+      counterDisplayBadgeView(
+        {
+          id: "data_raven",
+          amount: 2,
+          displayKind: "trace",
+          label: "Data-Raven-Counter",
+          ariaLabel: "2 Data-Raven-Counter",
+          counterType: "data_raven",
+          usageHint: "status_marker"
+        },
+        "data-raven-counter-badge"
+      )
+    ).toMatchObject({
+      amount: 2,
+      label: "2 Data-Raven-Counter",
+      ariaLabel: "2 Data-Raven-Counter",
+      shortLabel: "2 Data-Raven"
+    });
+    expect(
+      armoredFridgeAblativeCounterBadge(rawArmoredFridge)
     ).toBeNull();
     expect(
-      armoredFridgeAblativeCounterBadge({
-        ...card("data_raven_1", "Data Raven", "ice"),
-        definitionId: "onr_v1_236_data-raven",
-        counters: { power: 2 }
-      })
+      armoredFridgeAblativeCounterBadge(rawEmptyArmoredFridge)
     ).toBeNull();
     expect(
-      armoredFridgeAblativeCounterBadge({
-        ...card("unknown_power_1", "Unknown Power Card", "resource"),
-        counters: { power: 3 }
-      })
+      armoredFridgeAblativeCounterBadge(rawDataRaven)
+    ).toBeNull();
+    expect(
+      armoredFridgeAblativeCounterBadge(rawUnknownPowerCard)
     ).toBeNull();
   });
 
@@ -1049,6 +1300,62 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(runBreakerActionHint(runnerView, [])).toBe("Kein passender Eisbrecher für dieses ICE verfügbar.");
   });
 
+  it("keeps approach-ice expose decisions visible in the main and Run panels", () => {
+    const smarteye = card("smarteye_1", "Smarteye", "program");
+    const running = view("runner", {
+      timingPoint: "run.approach_ice",
+      activeSide: "runner",
+      phase: "run",
+      own: {
+        ...view("runner").own,
+        rig: [smarteye]
+      },
+      servers: [
+        { id: "rd", label: "R&D", ice: [card("ice_1", "Filter", "ice", false)], root: [] }
+      ],
+      run: {
+        attackedServerId: "rd",
+        phase: "approach_ice",
+        position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+        successful: false
+      }
+    });
+    const expose = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: ICE ansehen",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeDecision: "expose" },
+      "run.approach_ice"
+    );
+    const decline = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: Ansehen überspringen",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeDecision: "decline" },
+      "run.approach_ice"
+    );
+    const finishViewing = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: Ansehen beenden",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeViewDecision: "finish" },
+      "run.approach_ice"
+    );
+
+    const split = splitLegalActions([expose, decline]);
+    const mirrored = runWindowActions(running, [expose, decline, finishViewing]);
+
+    expect(split.primaryActions).toEqual([expose, decline]);
+    expect(split.contextualActions).toEqual([]);
+    expect(mirrored).toEqual([expose, decline, finishViewing]);
+    expect(runWindowActionButtonLabel(running, expose)).toBe("Smarteye: ICE ansehen");
+    expect(runWindowActionButtonLabel(running, decline)).toBe("Smarteye: Ansehen überspringen");
+    expect(runWindowActionButtonLabel(running, finishViewing)).toBe("Smarteye: Ansehen beenden");
+  });
+
   it("mirrors Startup Immolator post-pass trash into the Run window", () => {
     const startup = card("startup_1", "Startup Immolator", "program");
     const running = view("runner", {
@@ -1250,6 +1557,34 @@ describe("V1.0.6 resource and card-display helpers", () => {
     };
 
     expect(retainedAccessRevealEvent([access, sameActionEffect], null)?.eventId).toBe("evt_access");
+  });
+
+  it("retains expose review events until local dismissal", () => {
+    const expose = publicEvent("evt_expose", "action", {
+      actionType: "resolve_choice",
+      actor: "runner",
+      publicRevealKind: "expose",
+      publicRevealDefinitionIds: "simple_decoder,simple_fracter",
+      exposedServerLabels: "HQ,R&D"
+    });
+    const followUp = {
+      ...publicEvent("evt_followup", "effect", {
+        actionType: "gain_credit",
+        actor: "runner"
+      }),
+      stateVersionAfter: 3
+    };
+    const smarteye = publicEvent("evt_smarteye", "action", {
+      actionType: "trigger_ability",
+      actor: "runner",
+      publicRevealKind: "expose",
+      publicRevealDefinitionId: "simple_barrier_ice",
+      approachIceExposeDecision: "expose"
+    });
+
+    expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe("evt_expose");
+    expect(retainedExposeReviewEvent([expose, followUp], "evt_expose")).toBeNull();
+    expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {

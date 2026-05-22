@@ -1,21 +1,30 @@
 ---
 activityId: act-2026-05-21-web-render-counter-displays
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-counter-display-stored-credits-and-agenda-pools
   - act-2026-05-21-counter-display-special-and-recurring-counters
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/score-area-ui.ts
+  - apps/web/app/score-area-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts app/score-area-ui.test.ts
+  - corepack pnpm --filter @netgrid/web test
+  - git diff --check
 ---
 
 # Web rendert CounterDisplays statt roher Counter
@@ -54,12 +63,12 @@ Der Webclient soll Board-Counter-Badges aus `VisibleCard.counterDisplays` render
 
 ## Akzeptanzkriterien
 
-- [ ] Karten-Badges werden primär aus `counterDisplays` gerendert.
-- [ ] Broker-gespeicherte Credits hängen nicht mehr an einer Web-seitigen Karten-ID-zu-Countertyp-Tabelle.
-- [ ] Data Raven, Ablative, Shell und Recurring zeigen aus CounterDisplays korrekt an.
-- [ ] Fallback auf rohe `counters` ist sichtbar begrenzt und in Tests adressiert.
-- [ ] UI-Texte/Aria-Labels bleiben deutsch und enthalten keine Hidden-Info-Leaks.
-- [ ] Checks: passende Web-Tests und Typecheck.
+- [x] Karten-Badges werden primär aus `counterDisplays` gerendert.
+- [x] Broker-gespeicherte Credits hängen nicht mehr an einer Web-seitigen Karten-ID-zu-Countertyp-Tabelle.
+- [x] Data Raven, Ablative, Shell und Recurring zeigen aus CounterDisplays korrekt an.
+- [x] Fallback auf rohe `counters` ist sichtbar begrenzt und in Tests adressiert.
+- [x] UI-Texte/Aria-Labels bleiben deutsch und enthalten keine Hidden-Info-Leaks.
+- [x] Checks: passende Web-Tests und Typecheck.
 
 ## Umsetzungshinweise
 
@@ -68,4 +77,4 @@ Der Webclient soll Board-Counter-Badges aus `VisibleCard.counterDisplays` render
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `CardView` rendert Counter-Badges primär aus `VisibleCard.counterDisplays`, nutzt die vom Engine-View gelieferten Aria-Labels und filtert Advancement-Displays aus, weil Advancement-Gems weiterhin separat gerendert werden. Stored/Recurring-Displays verwenden das bestehende Credit-Token-Muster; Shell, Data Raven, Ablative und weitere Spezialcounter laufen über kompakte Textbadges. Der Score-Area-Coup-Hardcode wurde entfernt; begrenzte Legacy-Fallbacks für alte rohe `counters` bleiben nur in `action-board-ui.ts` und sind durch Tests markiert.

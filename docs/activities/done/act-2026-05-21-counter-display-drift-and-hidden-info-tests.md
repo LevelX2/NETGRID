@@ -1,20 +1,30 @@
 ---
 activityId: act-2026-05-21-counter-display-drift-and-hidden-info-tests
-status: inbox
+status: done
 kind: fix
 area: test
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-web-render-counter-displays
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.test.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "counter display"
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - corepack pnpm --filter @netgrid/web test
+  - git diff --check
 ---
 
 # CounterDisplay-Drift- und Hidden-Info-Tests
@@ -53,12 +63,12 @@ Die Übergangsphase zwischen rohen `counters` und `counterDisplays` soll durch T
 
 ## Akzeptanzkriterien
 
-- [ ] Alle bekannten Legacy-Badge-Familien sind durch CounterDisplay-Tests abgedeckt oder bewusst ausgenommen.
-- [ ] Verdeckte Korp-Karten leaken keine CounterDisplay-Labels, Definition-IDs oder sonstige nicht erlaubte Counterdetails.
-- [ ] CounterDisplay-IDs und Sortierung sind stabil.
-- [ ] Doppelte Displays für dieselbe fachliche Counterfamilie werden verhindert.
-- [ ] StateHash bleibt durch Projection unverändert.
-- [ ] Checks: passende Engine-/Web-/Server-Tests je berührtem Bereich.
+- [x] Alle bekannten Legacy-Badge-Familien sind durch CounterDisplay-Tests abgedeckt oder bewusst ausgenommen.
+- [x] Verdeckte Korp-Karten leaken keine CounterDisplay-Labels, Definition-IDs oder sonstige nicht erlaubte Counterdetails.
+- [x] CounterDisplay-IDs und Sortierung sind stabil.
+- [x] Doppelte Displays für dieselbe fachliche Counterfamilie werden verhindert.
+- [x] StateHash bleibt durch Projection unverändert.
+- [x] Checks: passende Engine-/Web-/Server-Tests je berührtem Bereich.
 
 ## Umsetzungshinweise
 
@@ -67,4 +77,4 @@ Die Übergangsphase zwischen rohen `counters` und `counterDisplays` soll durch T
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die Engine-Tests prüfen stabile CounterDisplay-IDs/-Sortierung, Duplikatfreiheit, Hidden-Info-Grenzen über verdeckte Korp-Karten sowie unveränderte `hashState`-/LegalActions-Ergebnisse durch View-Projektion. Im Web ist die Render-Auswahl als testbarer Helper abgesichert: rohe `counters` erzeugen ohne `counterDisplays` keine Board-Badges mehr; Advancement-Displays werden für das bestehende Advancement-Gem-Rendering ausgefiltert.

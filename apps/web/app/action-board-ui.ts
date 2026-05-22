@@ -120,6 +120,26 @@ export type CardCounterBadgeView = {
   testId: string;
 };
 
+export type RunnerProgramInstallTrashChoiceInfo = {
+  title: string;
+  question: string;
+  effectHint: string;
+  submitLabel: string;
+  canSubmit: boolean;
+  requiredMemoryToFree: number;
+  selectedMemoryFreed: number;
+};
+
+export type FieldCardChoiceInfo = {
+  title: string;
+  prompt: string;
+  counterLabel: string;
+  canSubmit: boolean;
+  canClear: boolean;
+  submitLabel: string;
+  clearLabel: string;
+};
+
 export type IceModifierBadgeView = {
   key: string;
   shortLabel: string;
@@ -133,15 +153,6 @@ export type AdvancementCounterDisplay = {
   ariaLabel: string;
   visibleGemCount: number;
   overflowLabel: string | null;
-};
-
-type StoredCreditCounterType = "power" | "bit";
-
-const STORED_CREDIT_COUNTER_SOURCES: Record<string, { label: string; counter: StoredCreditCounterType }> = {
-  "onr_v1_154_broker": { label: "Broker", counter: "bit" },
-  "onr_v1_178_short-term-contract": { label: "Short-Term Contract", counter: "bit" },
-  "onr_v1_309_bbs-whispering-campaign": { label: "BBS Whispering Campaign", counter: "bit" },
-  "onr_v1_311_braindance-campaign": { label: "Braindance Campaign", counter: "bit" }
 };
 
 const TESSERACT_FORT_CONSTRUCTION_ID = "onr_v1_370_tesseract-fort-construction";
@@ -163,29 +174,51 @@ function serverHasRezzedTesseractFortConstruction(server: PlayerView["servers"][
   return server.root.some((card) => card.known && card.rezzed === true && card.definitionId === TESSERACT_FORT_CONSTRUCTION_ID);
 }
 
-export function storedCreditSourceLabel(card: Pick<VisibleCard, "definitionId">): string | null {
-  return storedCreditCounterSource(card)?.label ?? null;
+export function storedCreditSourceLabel(card: Pick<VisibleCard, "counterDisplays">): string | null {
+  const display = counterDisplayById(card, "stored_credits");
+  return display?.label ?? null;
 }
 
-export function storedCreditAmount(card: Pick<VisibleCard, "definitionId" | "counters">): number {
-  const source = storedCreditCounterSource(card);
-  if (!source) return 0;
-  const amount = card.counters?.[source.counter] ?? 0;
+export function storedCreditAmount(card: Pick<VisibleCard, "counterDisplays">): number {
+  const display = counterDisplayById(card, "stored_credits");
+  return display ? safeCounterDisplayAmount(display.amount) : 0;
+}
+
+export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "counterDisplays">): CardCounterBadgeView | null {
+  const display = counterDisplayById(card, "ablative");
+  return display ? counterDisplayBadgeView(display, "ablative-counter-badge") : null;
+}
+
+export function counterDisplayById(card: Pick<VisibleCard, "counterDisplays">, id: string): NonNullable<VisibleCard["counterDisplays"]>[number] | null {
+  return card.counterDisplays?.find((display) => display.id === id && safeCounterDisplayAmount(display.amount) > 0) ?? null;
+}
+
+export function counterDisplayBadgeView(display: NonNullable<VisibleCard["counterDisplays"]>[number], testId: string): CardCounterBadgeView {
+  const amount = safeCounterDisplayAmount(display.amount);
+  const label = display.label;
+  return {
+    amount,
+    label: `${amount} ${label}`,
+    ariaLabel: display.ariaLabel,
+    shortLabel: `${amount} ${counterDisplayShortLabel(label)}`,
+    testId
+  };
+}
+
+export function counterDisplaysForRendering(card: Pick<VisibleCard, "counterDisplays">): NonNullable<VisibleCard["counterDisplays"]> {
+  return (card.counterDisplays ?? []).filter(
+    (display) =>
+      display.displayKind !== "advancement" &&
+      safeCounterDisplayAmount(display.amount) > 0,
+  );
+}
+
+export function safeCounterDisplayAmount(amount: number): number {
   return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
 }
 
-export function armoredFridgeAblativeCounterBadge(card: Pick<VisibleCard, "definitionId" | "counters">): CardCounterBadgeView | null {
-  if (card.definitionId !== "onr_v1_121_armored-fridge") return null;
-  const amount = card.counters?.power ?? 0;
-  const safeAmount = Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-  if (safeAmount <= 0) return null;
-  return {
-    amount: safeAmount,
-    label: `${safeAmount} Ablative Counter`,
-    ariaLabel: `${safeAmount} Ablative Counter`,
-    shortLabel: `${safeAmount} Ablative`,
-    testId: "ablative-counter-badge"
-  };
+function counterDisplayShortLabel(label: string): string {
+  return label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "");
 }
 
 export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "advancementCounters">): AdvancementCounterDisplay | null {
@@ -203,10 +236,6 @@ export function advancementCounterDisplay(card: Pick<VisibleCard, "known" | "adv
     visibleGemCount,
     overflowLabel: showCount ? String(safeAmount) : null
   };
-}
-
-function storedCreditCounterSource(card: Pick<VisibleCard, "definitionId">): { label: string; counter: StoredCreditCounterType } | null {
-  return card.definitionId ? STORED_CREDIT_COUNTER_SOURCES[card.definitionId] ?? null : null;
 }
 
 export function cardCreditCounterVisual(amount: number): CardCreditCounterVisual {
@@ -250,6 +279,7 @@ export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "activated_card_ability" && cardRefsForAction(action).length > 0) return true;
   if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
+  if (isApproachIceExposeAction(action)) return false;
   if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
   return cardRefsForAction(action).length > 0 || objectBoundAction(action);
@@ -357,7 +387,21 @@ function triggerAbilityActionLabel(action: LegalAction, compact = false): string
   if (actionHasAbility(action, "self_modifying_code_install_program")) {
     return compact ? "Programm suchen" : "Trashen: Programm aus Stack installieren";
   }
+  if (isApproachIceExposeAction(action)) {
+    return approachIceExposeActionLabel(action);
+  }
   return resourceAbilityContextLabel(action) ?? normalizeVisibleTerms(action.label);
+}
+
+function approachIceExposeActionLabel(action: LegalAction): string {
+  const normalizedLabel = normalizeVisibleTerms(action.label);
+  const sourceTitle = /^([^:]+):/.exec(normalizedLabel)?.[1]?.trim();
+  const prefix = sourceTitle ? `${sourceTitle}: ` : "";
+  if (action.payload?.approachIceExposeViewDecision === "finish")
+    return `${prefix}Ansehen beenden`;
+  return action.payload?.approachIceExposeDecision === "decline"
+    ? `${prefix}Ansehen überspringen`
+    : `${prefix}ICE ansehen`;
 }
 
 function installedCardAbilityContextLabel(action: LegalAction): string | null {
@@ -674,9 +718,31 @@ export function retainedAccessRevealEvent(events: PublicGameEvent[], dismissedEv
   return null;
 }
 
+export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEventId: string | null): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event || event.eventId === dismissedEventId) return null;
+    if (event.publicPayload.publicRevealKind !== "expose") continue;
+    if (event.publicPayload.approachIceExposeDecision) return null;
+    if (!eventHasPublicRevealDefinition(event)) return null;
+    return event;
+  }
+  return null;
+}
+
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
   return newerEvent.publicPayload.actionType === "continue_run" || newerEvent.publicPayload.actionType === "end_turn";
+}
+
+function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {
+  if (typeof event.publicPayload.publicRevealDefinitionId === "string") return true;
+  return (
+    typeof event.publicPayload.publicRevealDefinitionIds === "string" &&
+    event.publicPayload.publicRevealDefinitionIds
+      .split(",")
+      .some((item) => item.trim().length > 0)
+  );
 }
 
 function observedAccessStatusLabel(card: Pick<VisibleCard, "type" | "trashCost">, actorSide: Side, fromArchives: boolean): string {
@@ -716,6 +782,161 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
   return minSelections !== 1 || maxSelections !== 1;
 }
 
+export function shouldUseFieldCardChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  view: PlayerView,
+): boolean {
+  if (choice.kind !== "select_cards") return false;
+  if (choice.source === "discard_phase") return false;
+  if (choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
+  const selectableOptions = choice.options.filter((option) => option.selectable !== false);
+  if (selectableOptions.length === 0) return false;
+  const fieldCardIds = visibleFieldCardIds(view);
+  return selectableOptions.every(
+    (option) => typeof option.value === "string" && fieldCardIds.has(option.value),
+  );
+}
+
+export function fieldCardChoiceOptionForCard(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+  view: PlayerView,
+  card: Pick<VisibleCard, "instanceId">,
+): NonNullable<PlayerView["pendingChoice"]>["options"][number] | null {
+  if (!choice || !shouldUseFieldCardChoice(choice, view)) return null;
+  return choice.options.find((option) => option.selectable !== false && option.value === card.instanceId) ?? null;
+}
+
+export function fieldCardChoiceInfo(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  selectedOptionIds: string[],
+): FieldCardChoiceInfo {
+  const minSelections = Math.max(0, Math.floor(choice.minSelections));
+  const maxSelections = Math.max(minSelections, Math.floor(choice.maxSelections));
+  const selectedCount = selectedOptionIds.filter((optionId) =>
+    choice.options.some((option) => option.id === optionId && option.selectable !== false),
+  ).length;
+  const exactSelection = minSelections === maxSelections;
+  const canSubmit = selectedCount >= minSelections && selectedCount <= maxSelections;
+  return {
+    title: maxSelections === 1 ? "Feldkarte auswählen" : "Feldkarten auswählen",
+    prompt: choice.prompt,
+    counterLabel: exactSelection ? `${selectedCount}/${maxSelections}` : `${selectedCount}/${minSelections}-${maxSelections}`,
+    canSubmit,
+    canClear: selectedCount > 0,
+    submitLabel: selectedCount === 0 && minSelections === 0 ? "Ohne Auswahl übernehmen" : "Auswahl übernehmen",
+    clearLabel: "Auswahl leeren"
+  };
+}
+
+function visibleFieldCardIds(view: PlayerView): Set<string> {
+  return new Set(visibleFieldCards(view).map((card) => card.instanceId));
+}
+
+function visibleFieldCards(view: PlayerView): VisibleCard[] {
+  return [
+    ...(view.own.rig ?? []),
+    ...(view.opponent.rig ?? []),
+    ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
+    ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
+  ];
+}
+
+export function runnerProgramInstallTrashChoiceInfo(
+  choice: NonNullable<PlayerView["pendingChoice"]>,
+  view: PlayerView,
+  selectedOptionIds: string[],
+): RunnerProgramInstallTrashChoiceInfo | null {
+  if (!choice.source.startsWith("runner_program_trash_before_install:"))
+    return null;
+  const sourceCardId = choice.source.split(":")[1] ?? "";
+  const sourceCard = view.own.gripOrHq.find((card) => card.instanceId === sourceCardId);
+  const sourceMemoryCost = Math.max(0, Math.floor(sourceCard?.memoryCost ?? 0));
+  const memoryUsed = Math.max(0, Math.floor(view.own.memoryUsed ?? 0));
+  const memoryLimit = Math.max(0, Math.floor(view.own.memoryLimit ?? 0));
+  const requiredMemoryToFree = Math.max(0, memoryUsed + sourceMemoryCost - memoryLimit);
+  const selectedOptionIdSet = new Set(selectedOptionIds);
+  const optionCards = visibleCardsForChoiceInfo(view);
+  const selectedMemoryFreed = choice.options.reduce((sum, option) => {
+    if (!selectedOptionIdSet.has(option.id) || typeof option.value !== "string")
+      return sum;
+    const card = optionCards.get(option.value);
+    return sum + Math.max(0, Math.floor(card?.memoryCost ?? 0));
+  }, 0);
+  const memoryRequired = requiredMemoryToFree > 0;
+  const enoughMemoryFreed = selectedMemoryFreed >= requiredMemoryToFree;
+  return {
+    title: memoryRequired ? "MU freimachen" : "Programme vorher trashen?",
+    question: runnerProgramInstallTrashQuestion(
+      memoryRequired,
+      requiredMemoryToFree,
+      selectedMemoryFreed,
+      selectedOptionIds.length,
+    ),
+    effectHint: memoryRequired
+      ? "Die Installation wird nur durchgeführt, wenn genug MU frei wird. Ohne Auswahl wird sie abgebrochen."
+      : "Du kannst ohne Trash installieren oder vorher installierte Programme trashen.",
+    submitLabel: runnerProgramInstallTrashSubmitLabel(
+      memoryRequired,
+      selectedOptionIds.length,
+    ),
+    canSubmit: !memoryRequired || enoughMemoryFreed || selectedOptionIds.length === 0,
+    requiredMemoryToFree,
+    selectedMemoryFreed,
+  };
+}
+
+function runnerProgramInstallTrashQuestion(
+  memoryRequired: boolean,
+  requiredMemoryToFree: number,
+  selectedMemoryFreed: number,
+  selectedCount: number,
+): string {
+  if (!memoryRequired) {
+    if (selectedCount === 0) return "Ohne Trash installieren?";
+    return selectedCount === 1
+      ? "Dieses Programm vorher trashen und dann installieren?"
+      : `${selectedCount} Programme vorher trashen und dann installieren?`;
+  }
+  if (selectedCount === 0)
+    return `Wähle Programme mit mindestens ${requiredMemoryToFree} MU oder brich die Installation ab.`;
+  if (selectedMemoryFreed >= requiredMemoryToFree)
+    return `${selectedMemoryFreed}/${requiredMemoryToFree} MU gewählt. Auswahl bestätigen?`;
+  return `Noch ${requiredMemoryToFree - selectedMemoryFreed} MU freimachen (${selectedMemoryFreed}/${requiredMemoryToFree}).`;
+}
+
+function runnerProgramInstallTrashSubmitLabel(
+  memoryRequired: boolean,
+  selectedCount: number,
+): string {
+  if (memoryRequired && selectedCount === 0) return "Nicht installieren";
+  if (memoryRequired) return "Auswahl bestätigen";
+  if (selectedCount === 0) return "Ohne Trash installieren";
+  return "Installieren";
+}
+
+function visibleCardsForChoiceInfo(view: PlayerView): Map<string, VisibleCard> {
+  return new Map(
+    [
+      view.own.identity,
+      ...view.own.gripOrHq,
+      ...view.own.heapOrArchives,
+      ...view.own.scoreArea,
+      ...(view.own.rig ?? []),
+      view.opponent.identity,
+      ...(view.opponent.discardCards ?? []),
+      ...view.opponent.scoreArea,
+      ...(view.opponent.rig ?? []),
+      ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+      ...(view.specialZones?.setAside ?? []),
+      ...(view.specialZones?.removedFromGame ?? []),
+      ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
+      ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
+      ...(view.run?.accessedCard ? [view.run.accessedCard] : []),
+    ].map((card) => [card.instanceId, card]),
+  );
+}
+
 export function breachProgressLabel(view: PlayerView): string | null {
   const breach = view.run?.breach;
   if (!breach) return null;
@@ -727,6 +948,7 @@ export function breachProgressLabel(view: PlayerView): string | null {
 export function activeRunIceInstanceId(view: PlayerView): string | null {
   const run = view.run;
   if (!run) return null;
+  if (run.approachedIce?.instanceId) return run.approachedIce.instanceId;
   if (run.encounteredIce?.instanceId) return run.encounteredIce.instanceId;
   if (run.position?.kind !== "ice") return null;
   const server = view.servers.find((candidate) => candidate.id === run.position?.serverId);
@@ -741,7 +963,8 @@ export function runCurrentIceLabel(view: PlayerView): string | null {
 
 function runCurrentIceTargetLabel(view: PlayerView): string | null {
   const iceLabel = runCurrentIceLabel(view);
-  const title = view.run?.encounteredIce?.known === false ? null : view.run?.encounteredIce?.title;
+  const activeIce = view.run?.encounteredIce ?? view.run?.approachedIce;
+  const title = activeIce?.known === false ? null : activeIce?.title;
   if (title && iceLabel) return `${title} (${iceLabel})`;
   return title ?? iceLabel;
 }
@@ -1037,7 +1260,15 @@ function isStartupImmolatorAction(action: Partial<Pick<LegalAction, "type" | "pa
 }
 
 function isRunWindowTriggerAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
-  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action);
+  return isSelfModifyingCodeAction(action) || isStartupImmolatorAction(action) || isApproachIceExposeAction(action);
+}
+
+function isApproachIceExposeAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return (
+    action.type === "trigger_ability" &&
+    (typeof action.payload?.approachIceExposeDecision === "string" ||
+      typeof action.payload?.approachIceExposeViewDecision === "string")
+  );
 }
 
 function sourceCardTitleForAction(view: PlayerView, action: LegalAction): string | null {
@@ -1082,6 +1313,7 @@ function visibleActionCards(view: PlayerView): VisibleCard[] {
     ...view.opponent.scoreArea,
     ...(view.opponent.rig ?? []),
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
     ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
   ];

@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-05-21-player-view-public-events-tail
-status: inbox
+status: done
 kind: architecture
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer-payload.ts
+  - apps/server/src/multiplayer-payload.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer-payload.test.ts
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "hidden"
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts
+  - git diff --check
 ---
 
 # PlayerView-PublicEvents für Live-Updates verschlanken
@@ -63,4 +72,8 @@ Normale Live-, Bootstrap- und Reconnect-Payloads sollen nicht mehr unnötig die 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Normale SidePayloads projizieren `playerView.publicEvents` jetzt serverseitig auf denselben begrenzten, seitensicher redigierten Event-Tail wie `eventTail` (`SIDE_PAYLOAD_EVENT_TAIL_LIMIT = 80`). Der Engine-Vertrag von `getPlayerView` bleibt unverändert; Replay- und History-Pfade behalten ihre vollständige Historie.
+
+Der Webclient kann Turn-/Chronicle-/Action-Cue-Kontext weiter aus `playerView.publicEvents` lesen, bekommt dort aber keine unbegrenzt wachsende Event-Historie mehr. Der neue Server-Test erzeugt mehr Events als das Limit und sichert, dass `eventTail` und `playerView.publicEvents` im SidePayload identisch begrenzt sind.
+
+Shared-, Server- und Web-Typechecks sowie der neue Payload-Test, der fokussierte Hidden-Info-Test und der vollständige Multiplayer-Testlauf waren grün.

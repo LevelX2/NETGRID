@@ -803,6 +803,8 @@ export type RunState = {
   encounteredIceId?: CardInstanceId;
   approachIceExposeUsedSourceIdsThisRun?: CardInstanceId[];
   approachIceExposeSkippedIceIdsThisRun?: CardInstanceId[];
+  approachIceExposeViewingIceId?: CardInstanceId;
+  approachIceExposeViewingSourceCardId?: CardInstanceId;
   brokenSubroutineIndexes: number[];
   resolvedSubroutineIndexes: number[];
   successful: boolean;
@@ -1174,6 +1176,33 @@ export type ReplayResult = {
   errors: string[];
 };
 
+export type CounterDisplayKind =
+  | "advancement"
+  | "stored_credits"
+  | "recurring_credit"
+  | "virus"
+  | "trace"
+  | "shell"
+  | "damage_prevention"
+  | "restricted_pool"
+  | "generic_counter";
+
+export type CounterUsageHint =
+  | "spendable"
+  | "refreshing"
+  | "score_modifier"
+  | "status_marker";
+
+export type CounterDisplay = {
+  id: string;
+  amount: number;
+  displayKind: CounterDisplayKind;
+  label: string;
+  ariaLabel: string;
+  counterType?: CounterType;
+  usageHint?: CounterUsageHint;
+};
+
 export type VisibleCard = {
   instanceId: CardInstanceId;
   known: boolean;
@@ -1196,6 +1225,7 @@ export type VisibleCard = {
   agendaPoints?: number;
   trashCost?: number;
   counters?: Partial<Record<CounterType, number>>;
+  counterDisplays?: CounterDisplay[];
   hostedOn?: CardInstanceId;
   selectedServerId?: Exclude<ServerId, "new_remote">;
   selectedServerLabel?: string;
@@ -1247,6 +1277,7 @@ export type PlayerView = {
     label: string;
     ice: VisibleCard[];
     root: VisibleCard[];
+    counterDisplays?: CounterDisplay[];
   }>;
   specialZones?: {
     setAside: VisibleCard[];
@@ -1258,6 +1289,7 @@ export type PlayerView = {
     attackedServerId: Exclude<ServerId, "new_remote">;
     phase: RunState["phase"];
     position?: RunState["position"];
+    approachedIce?: VisibleCard;
     encounteredIce?: VisibleCard;
     accessedCard?: VisibleCard;
     breach?: {

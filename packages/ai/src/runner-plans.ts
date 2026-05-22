@@ -168,10 +168,10 @@ type ShellTradersBacklog = {
 
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
-const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
+const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "activated_card_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
 
 export function hasRunnerPlanAction(input: AiDecisionInput): boolean {
-  return input.side === "runner" && input.legalActions.some((action) => PLAN_ACTION_TYPES.has(action.type) && (action.type !== "trigger_ability" || Boolean(classifyInstalledEconomyAction(input, action)) || Boolean(classifyShellTradersAction(input, action))));
+  return input.side === "runner" && input.legalActions.some((action) => PLAN_ACTION_TYPES.has(action.type) && ((action.type !== "trigger_ability" && action.type !== "activated_card_ability") || Boolean(classifyInstalledEconomyAction(input, action)) || Boolean(classifyShellTradersAction(input, action))));
 }
 
 export function chooseRunnerPlanAction(input: AiDecisionInput, fallbackDecision: AiDecision, options: { timeBudgetMs?: number } = {}): AiDecision {
@@ -1289,16 +1289,18 @@ function shellTradersDirectInstallPreparePenalty(assessment: ShellTradersActionA
 }
 
 function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): InstalledEconomyActionAssessment | undefined {
-  if (input.side !== "runner" || action.side !== "runner" || action.type !== "trigger_ability") return undefined;
+  if (input.side !== "runner" || action.side !== "runner" || (action.type !== "trigger_ability" && action.type !== "activated_card_ability")) return undefined;
   if (action.source === "basic_action" || action.source === "game_rule") return undefined;
   const sourceCard = findVisibleCard(input, action.source);
   if (!sourceCard || !input.playerView.own.rig?.some((card) => card.instanceId === sourceCard.instanceId && card.known)) return undefined;
-  const ability = typeof action.payload?.resourceAbility === "string" ? action.payload.resourceAbility : "";
+  const ability = runnerInstalledEconomyAbilityId(action, sourceCard);
   const roles = rolesForCardId(sourceCard.definitionId);
-  const immediateGain = Math.max(0, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removePowerCounterAmount"));
-  const addedCounters = Math.max(0, numberPayload(action, "addCounterAmount"), numberPayload(action, "addedCounterAmount"));
-  const removedCounters = Math.max(0, numberPayload(action, "removePowerCounterAmount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removedCounterAmount"));
   const storedCredits = Math.max(0, sourceCard.counters?.power ?? sourceCard.counters?.bit ?? sourceCard.counters?.recurring_credit ?? 0);
+  const activatedGain = activatedRunnerEconomyCreditGain(action, sourceCard, storedCredits);
+  const activatedBuild = activatedRunnerEconomyCreditBuild(action, sourceCard);
+  const immediateGain = Math.max(0, activatedGain, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removePowerCounterAmount"));
+  const addedCounters = Math.max(0, activatedBuild, numberPayload(action, "addCounterAmount"), numberPayload(action, "addedCounterAmount"));
+  const removedCounters = Math.max(0, activatedGain, numberPayload(action, "removePowerCounterAmount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removedCounterAmount"));
   const futurePoolAfter = Math.max(storedCredits, storedCredits + addedCounters - removedCounters);
   const netCredits = immediateGain - actionCreditCost(action);
 
@@ -1325,6 +1327,66 @@ function classifyInstalledEconomyAction(input: AiDecisionInput, action: LegalAct
     return { kind: "side_economy", immediateGain: 0, netCredits: -actionCreditCost(action), storedCredits, futurePoolAfter, ability };
   }
   return undefined;
+}
+
+function runnerInstalledEconomyAbilityId(action: LegalAction, sourceCard: VisibleCard): string {
+  if (typeof action.payload?.resourceAbility === "string") return action.payload.resourceAbility;
+  if (action.type !== "activated_card_ability") return "";
+  const label =
+    typeof action.payload?.cardImplementationAbilityLabel === "string"
+      ? action.payload.cardImplementationAbilityLabel
+      : action.label;
+  if (sourceCard.definitionId === "onr_v1_154_broker") {
+    if (/auf Broker legen/i.test(label)) return "broker_load_credits";
+    if (/von Broker nehmen/i.test(label)) return "broker_take_credits";
+  }
+  if (
+    sourceCard.definitionId === "onr_v1_178_short-term-contract" &&
+    /Credits?\s+nehmen/i.test(label)
+  )
+    return "short_term_contract_take_credits";
+  return "";
+}
+
+function activatedRunnerEconomyCreditGain(
+  action: LegalAction,
+  sourceCard: VisibleCard,
+  storedCredits: number,
+): number {
+  if (action.type !== "activated_card_ability") return 0;
+  const label =
+    typeof action.payload?.cardImplementationAbilityLabel === "string"
+      ? action.payload.cardImplementationAbilityLabel
+      : action.label;
+  if (
+    sourceCard.definitionId === "onr_v1_154_broker" &&
+    /von Broker nehmen/i.test(label)
+  )
+    return storedCredits;
+  const match = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
+  if (!match) return 0;
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount <= 0) return 0;
+  return Math.min(storedCredits, amount);
+}
+
+function activatedRunnerEconomyCreditBuild(
+  action: LegalAction,
+  sourceCard: VisibleCard,
+): number {
+  if (action.type !== "activated_card_ability") return 0;
+  const label =
+    typeof action.payload?.cardImplementationAbilityLabel === "string"
+      ? action.payload.cardImplementationAbilityLabel
+      : action.label;
+  if (
+    sourceCard.definitionId !== "onr_v1_154_broker" ||
+    !/auf Broker legen/i.test(label)
+  )
+    return 0;
+  const match = /(\d+)\s+Credits?/i.exec(label);
+  const amount = Number(match?.[1] ?? 0);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
 }
 
 function buildCandidate(input: AiDecisionInput, kind: RunnerPlanKind, actions: LegalAction[]): RunnerPlanCandidate | null {
@@ -1365,9 +1427,9 @@ function actionPriority(kind: RunnerPlanKind, action: LegalAction, input: AiDeci
   if (kind === "safe_probe_run" && action.type === "continue_run") return reachedAccessMovement || affordableMovement ? 92 : 70;
   if (kind === "safe_probe_run" && action.type === "jack_out") return reachedAccessMovement || affordableMovement ? 30 : 88;
   if (kind === "build_rig" && action.type === "install_card") return runnerInstallPriority(input, action);
-  if (kind === "build_rig" && action.type === "trigger_ability") return runnerShellTradersPriority(input, action);
+  if (kind === "build_rig" && (action.type === "trigger_ability" || action.type === "activated_card_ability")) return runnerShellTradersPriority(input, action);
   if (kind === "recover_economy" && action.type === "play_event") return 80;
-  if (kind === "recover_economy" && action.type === "trigger_ability") return runnerInstalledEconomyPriority(input, action);
+  if (kind === "recover_economy" && (action.type === "trigger_ability" || action.type === "activated_card_ability")) return runnerInstalledEconomyPriority(input, action);
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "draw_for_answers" && action.type === "play_event") return 70;
   if (kind === "draw_for_answers" && action.type === "draw_card") return 60;

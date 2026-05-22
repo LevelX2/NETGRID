@@ -13,7 +13,7 @@ import type {
   StoredMatch,
 } from "./multiplayer";
 
-const SIDE_PAYLOAD_EVENT_TAIL_LIMIT = 80;
+export const SIDE_PAYLOAD_EVENT_TAIL_LIMIT = 80;
 
 export type SidePayloadBuilderDeps = {
   isAiSide: (side: Side) => boolean;
@@ -37,7 +37,13 @@ export function buildSidePayload(
 ): SidePayload {
   if (!record.gameState) throw new Error("match_not_active");
   const opponentSide = opposite(side);
-  const playerView = getPlayerView(record.gameState, side);
+  const eventTail = record.eventLog
+    .slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)
+    .map((event) => redactPublicEventForSide(event.publicPayload, side));
+  const playerView = {
+    ...getPlayerView(record.gameState, side),
+    publicEvents: eventTail,
+  };
   const opponent = record.sessions.find(
     (session) => session.side === opponentSide,
   );
@@ -74,9 +80,7 @@ export function buildSidePayload(
     playerView,
     legalActions:
       record.match.status === "active" ? getLegalActions(record.gameState, side) : [],
-    eventTail: record.eventLog
-      .slice(-SIDE_PAYLOAD_EVENT_TAIL_LIMIT)
-      .map((event) => redactPublicEventForSide(event.publicPayload, side)),
+    eventTail,
     opponentStatus: {
       side: opponentSide,
       connected: opponentIsAi || (opponent?.connected ?? false),

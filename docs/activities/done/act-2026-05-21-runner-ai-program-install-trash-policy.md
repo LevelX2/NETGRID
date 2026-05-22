@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-21-runner-ai-program-install-trash-policy
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-runner-program-install-free-mu
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "runner program install"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - git diff --check
 ---
 
 # Runner-KI: Programminstallation mit Programm-Trash bewerten
@@ -66,4 +72,6 @@ Die Runner-KI soll nach Umsetzung der regelhaften Programminstallation entscheid
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die Runner-KI behandelt `runner_program_trash_before_install` jetzt als eigene `select_cards`-Policy. Sie berechnet den sichtbaren MU-Druck aus `PlayerView`, wählt nur legal angebotene installierte Programme, schützt sichtbare einzige Breaker-Rollen, vermeidet freiwilligen Trash bei ausreichender MU und bricht konservativ mit leerer Auswahl ab, wenn nicht genug ungeschützte MU freigemacht werden kann. Decision-Evidence nennt side-sicher Choice-Quelle, MU-Bedarf, Kandidatenzahl und geschützte Breaker-Anzahl.
+
+Fokustests decken Redundanz-Opfer, einziger-Breaker-Schutz, ausreichende MU ohne Trash und unzureichende Auswahl ab. Typecheck und fokussierter Vitest sind grün. Der vollständige `packages/ai/src/index.test.ts`-Lauf hat weiterhin die bereits bekannten drei Fremdfehler gemeldet: `answers V1.9.11 Corp R&D reorder choices with all required side-safe options`, `uses installed Runner economy payouts before the basic credit action` und `separates Broker pool loading from visible pool payout`.

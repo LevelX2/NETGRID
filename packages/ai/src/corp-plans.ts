@@ -172,7 +172,7 @@ export type CorpEvaluationContext = {
 
 const AI_HINTS = createAiHintsByCard();
 const CORP_PLAN_PROFILES = corpPlanProfilesData.profiles as CorpPlanProfile[];
-const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["score_agenda", "advance_card", "install_card", "play_operation", "gain_credit", "draw_card", "trigger_ability", "end_turn"]);
+const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["score_agenda", "advance_card", "install_card", "play_operation", "gain_credit", "draw_card", "trigger_ability", "activated_card_ability", "end_turn"]);
 
 function createCorpEvaluationContext(input: AiDecisionInput, beliefState: BeliefState = reconstructBeliefState(input)): CorpEvaluationContext {
   return {
@@ -554,7 +554,7 @@ function evaluateCorpExtraActionOperations(input: AiDecisionInput, candidate: Co
 function classifyCorpInstalledEconomyAction(input: AiDecisionInput, action: LegalAction): CorpInstalledEconomyActionAssessment | undefined {
   if (input.side !== "corp" || action.side !== "corp") return undefined;
   if (action.source === "basic_action" || action.source === "game_rule") return undefined;
-  if (action.type !== "gain_credit" && action.type !== "trigger_ability") return undefined;
+  if (action.type !== "gain_credit" && action.type !== "trigger_ability" && action.type !== "activated_card_ability") return undefined;
   const sourceCard = findVisibleCard(input, action.source);
   if (!sourceCard || sourceCard.rezzed !== true) return undefined;
   const installedInServer = input.playerView.servers.some((server) =>
@@ -565,12 +565,15 @@ function classifyCorpInstalledEconomyAction(input: AiDecisionInput, action: Lega
     action.payload?.v1917AssetAbility,
     action.payload?.v1919AssetAbility,
     action.payload?.v1920AssetAbility,
+    action.payload?.cardImplementationAbilityLabel,
+    action.payload?.cardImplementationAbility,
     action.payload?.resourceAbility,
     action.payload?.abilityId,
   ].find((value): value is string => typeof value === "string") ?? "";
-  const immediateGain = Math.max(0, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"));
-  const removedCounters = Math.max(0, numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"), numberPayload(action, "removedCounterAmount"));
   const storedCredits = Math.max(0, sourceCard.counters?.bit ?? sourceCard.counters?.power ?? sourceCard.counters?.recurring_credit ?? 0);
+  const activatedGain = activatedCardAbilityCreditGain(action, storedCredits);
+  const immediateGain = Math.max(0, activatedGain, numberPayload(action, "gainCreditsAmount"), numberPayload(action, "gainedCredits"), numberPayload(action, "amount"), numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"));
+  const removedCounters = Math.max(0, activatedGain, numberPayload(action, "removeCounterAmount"), numberPayload(action, "removePowerCounterAmount"), numberPayload(action, "removedCounterAmount"));
   const netCredits = immediateGain - actionCreditCost(action);
   if (immediateGain <= 0 && netCredits <= 0) return undefined;
   const futurePoolAfter = Math.max(0, storedCredits - Math.max(removedCounters, immediateGain));
@@ -589,6 +592,23 @@ function classifyCorpInstalledEconomyAction(input: AiDecisionInput, action: Lega
     futurePoolAfter,
     ability: ability || "corp_installed_credit_payout"
   };
+}
+
+function activatedCardAbilityCreditGain(
+  action: LegalAction,
+  storedCredits: number,
+): number {
+  if (action.type !== "activated_card_ability") return 0;
+  const label =
+    typeof action.payload?.cardImplementationAbilityLabel === "string"
+      ? action.payload.cardImplementationAbilityLabel
+      : action.label;
+  const match = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
+  if (!match) return 0;
+  const amount = Number(match[1]);
+  if (!Number.isFinite(amount) || amount <= 0 || storedCredits < amount)
+    return 0;
+  return amount;
 }
 
 function classifyCorpExtraActionOperation(input: AiDecisionInput, action: LegalAction, context: CorpEvaluationContext): CorpExtraActionOperationAssessment | undefined {
@@ -1168,7 +1188,7 @@ function actionPriority(input: AiDecisionInput, kind: CorpPlanKind, action: Lega
   if (kind === "recover_economy" && extraActionOperation) return extraActionOperation.scoreWindowAfterExtraActions ? 88 : 60 + Math.max(0, extraActionOperation.netValue) * 4;
   if (kind === "recover_economy" && action.type === "play_operation") return 80;
   if (kind === "recover_economy" && action.type === "draw_card" && shouldCorpDrawForScoring(input)) return 78;
-  if (kind === "recover_economy" && (action.type === "gain_credit" || action.type === "trigger_ability") && classifyCorpInstalledEconomyAction(input, action)) return corpInstalledEconomyPriority(input, action);
+  if (kind === "recover_economy" && (action.type === "gain_credit" || action.type === "trigger_ability" || action.type === "activated_card_ability") && classifyCorpInstalledEconomyAction(input, action)) return corpInstalledEconomyPriority(input, action);
   if (kind === "recover_economy" && action.type === "gain_credit") return 65;
   if (kind === "build_scoring_remote" && action.type === "install_card" && action.payload?.placement === "ice" && isRemoteServerId(action.payload?.serverId)) return 82;
   if (kind === "score_next_turn" && action.type === "install_card" && action.payload?.placement !== "ice") return 65 + boundedRemotePriorityBonus(input, action, context) + boundedScoreHorizonActionBonus(input, action, context);

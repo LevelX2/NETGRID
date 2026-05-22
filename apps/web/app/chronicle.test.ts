@@ -2252,6 +2252,70 @@ describe("formatChronicleEvent", () => {
     expect(runnerBid.chips).toEqual(["Runner", "Trace", "Korp 2", "Runner 1", "6:1", "Erfolg", "+1 Tag"]);
   });
 
+  it("describes trace base-link and post-bid link choices", () => {
+    const baseLink = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        traceStep: "base_link",
+        sourceDefinitionId: "onr_v1_284_chance-observation",
+        corpBid: 1,
+        traceStrength: 6,
+        baseLinkUsed: true,
+        traceBaseLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
+        traceBaseLinkCostPaid: 0,
+        baseLinkValue: 1,
+        runnerLink: 1
+      }),
+      "runner"
+    );
+    const postBidLink = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        traceStep: "post_bid_link",
+        eventModificationDecision: "apply",
+        sourceDefinitionId: "onr_v1_284_chance-observation",
+        postBidTraceLinkSourceDefinitionId: "onr_v1_003_baedekers-net-map",
+        postBidTraceLinkCostPaid: 1,
+        postBidTraceLinkDelta: 1,
+        postBidTraceLinkBonus: 1,
+        corpBid: 1,
+        traceStrength: 6,
+        runnerLink: 2,
+        runnerBid: 4,
+        runnerStrength: 6,
+        traceSuccessful: false,
+        tagsAdded: 0
+      }),
+      "runner"
+    );
+    const postBidPass = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        traceStep: "post_bid_link",
+        sourceDefinitionId: "onr_v1_284_chance-observation",
+        postBidTraceLinkBonus: 1,
+        corpBid: 1,
+        traceStrength: 6,
+        runnerLink: 2,
+        runnerBid: 4,
+        runnerStrength: 6,
+        traceSuccessful: false
+      }),
+      "runner"
+    );
+
+    expect(baseLink.title).toBe("Du hast Baedeker's Net Map als Base Link 1 genutzt.");
+    expect(baseLink.description).toBe("Runner-Link: 1.");
+    expect(baseLink.chips).toEqual(expect.arrayContaining(["Trace", "Base Link", "Baedeker's Net Map", "Link 1"]));
+    expect(baseLink.title).not.toContain("Entscheidung beantwortet");
+    expect(postBidLink.title).toBe("Du hast Baedeker's Net Map für +1 Link genutzt; Trace abgewehrt.");
+    expect(postBidLink.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.");
+    expect(postBidLink.chips).toEqual(expect.arrayContaining(["Trace", "Baedeker's Net Map", "+1 Link", "-1 Credit", "6:6", "Fehlschlag"]));
+    expect(postBidLink.title).not.toContain("Entscheidung beantwortet");
+    expect(postBidPass.title).toBe("Trace entschieden: Korp 1 Credit, Du 4 Credits; Trace abgewehrt.");
+    expect(postBidPass.description).toBe("Endstand: Trace 6 gegen Runner-Stärke 6; Post-Bid-Link: +1.");
+  });
+
   it("keeps Cinderella trace outcome and break costs distinct", () => {
     const trace = formatChronicleEvent(
       makeEvent("resolve_choice", {

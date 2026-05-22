@@ -754,6 +754,91 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(JSON.stringify(decision)).not.toContain("display_event");
   });
 
+  it("chooses a redundant low-value program for runner program install MU trash", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-redundant",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["simple_fracter", "v099_virus_program"],
+        memoryUsed: 2,
+        memoryLimit: 2,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.reasonCode).toBe("runner.choice.resolve");
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [fixture.optionIdsByDefinition.v099_virus_program!],
+    });
+    expect(decision.evidence).toContain(
+      "choice_source:runner_program_trash_before_install",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
+  });
+
+  it("protects the only visible installed breaker during runner program install MU trash", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-protect-breaker",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["simple_fracter"],
+        memoryUsed: 1,
+        memoryLimit: 1,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [],
+    });
+    expect(decision.evidence).toContain("protected_icebreakers:1");
+  });
+
+  it("does not voluntarily trash installed programs when runner program install has enough MU", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-enough-mu",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["v099_virus_program"],
+        memoryUsed: 1,
+        memoryLimit: 4,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [],
+    });
+    expect(decision.evidence).toContain("memory_required:0");
+  });
+
+  it("avoids insufficient runner program install trash selections", () => {
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-insufficient",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: ["simple_fracter", "v099_virus_program"],
+        memoryUsed: 2,
+        memoryLimit: 1,
+      },
+    );
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [],
+    });
+    expect(decision.evidence).toContain("memory_required:2");
+    expect(decision.evidence).toContain("protected_icebreakers:1");
+  });
+
   it("uses The Shell Traders LegalActions and mandatory Shell-counter choices", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-shell-traders" }),
@@ -1776,7 +1861,7 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(corpSerialized).not.toContain("cardInstances");
   });
 
-  it("answers V1.9.11 Corp R&D reorder choices with all required side-safe options", () => {
+  it("answers Too Many Doors secret-spend choices side-safely", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
         seed: "ai-v1911-too-many-doors",
@@ -1825,17 +1910,22 @@ describe("MVP 0.3 AI controller contract", () => {
     const runnerInput = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
     });
-    const expectedOptionIds = [`card_${firstCardId}`, `card_${secondCardId}`];
+    void firstCardId;
+    void secondCardId;
+    const corpSpendOneOption = corpInput.playerView.pendingChoice?.options.find(
+      (option) => option.value === 1,
+    );
 
     expect(corpInput.playerView.pendingChoice?.source).toContain(
-      "v1911.corp_rd_arrange_top2",
+      "p3_56.too_many_doors_secret_spend",
     );
+    expect(corpInput.playerView.pendingChoice?.kind).toBe("bid_amount");
     expect(corpInput.legalActions.map((action) => action.type)).toEqual([
       "resolve_choice",
     ]);
     expect(corpDecision.selectedChoices).toEqual({
       choiceId: state.pendingChoice?.choiceId,
-      selectedOptionIds: expectedOptionIds,
+      selectedOptionIds: corpSpendOneOption ? [corpSpendOneOption.id] : [],
     });
     expect(assertAiInputIsSideSafe(corpInput)).toBe(true);
     expect(runnerInput.playerView.pendingChoice).toBeUndefined();
@@ -3156,7 +3246,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     const input = installedCorpBbsEconomyInput("ai-corp-installed-bbs-economy");
     const bbsTake = input.legalActions.find(
       (action) =>
-        action.type === "gain_credit" &&
+        action.type === "activated_card_ability" &&
         sourceDefinitionFromInput(input, action) ===
           "onr_v1_309_bbs-whispering-campaign",
     );
@@ -3168,8 +3258,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(basicCredit).toBeDefined();
     if (!bbsTake || !basicCredit)
       throw new Error("Missing installed BBS economy fixture actions");
-    expect(bbsTake.payload?.gainCreditsAmount).toBe(2);
-    expect(bbsTake.payload?.removeCounterAmount).toBe(2);
+    expect(bbsTake.label).toContain("2 Credits nehmen");
 
     const decision = chooseCorpAction({
       ...input,
@@ -3184,6 +3273,69 @@ describe("V1.4.0 plan-based Corp AI", () => {
     expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
     expect(debugText).toContain("installed_corp_economy_stored_credits:16");
     expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("keeps multiple installed Corp BBS economy actions source-bound above basic credit", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-multiple-installed-bbs-economy",
+      [16, 16],
+    );
+    const bbsActions = input.legalActions.filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit" && action.source === "basic_action",
+    );
+
+    expect(bbsActions).toHaveLength(2);
+    expect(new Set(bbsActions.map((action) => action.actionId)).size).toBe(2);
+    expect(new Set(bbsActions.map((action) => String(action.source))).size).toBe(2);
+    expect(
+      bbsActions.every(
+        (action) => action.label.includes("2 Credits nehmen"),
+      ),
+    ).toBe(true);
+    expect(basicCredit).toBeDefined();
+
+    const decision = chooseCorpAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(bbsActions.map((action) => action.actionId)).toContain(decision.actionId);
+    expect(decision.actionId).not.toBe(basicCredit?.actionId);
+    expect(decision.reasonCode).toBe("corp.plan.recover_economy");
+    expect(debugText).toContain("installed_corp_economy:true");
+    expect(debugText).toContain("installed_corp_economy_kind:pool_payout");
+    expect(debugText).toContain("installed_corp_economy_immediate_gain:2");
+    expect(debugText).not.toMatch(/cardInstances|privatePayload/i);
+  });
+
+  it("ignores installed Corp BBS sources with too few stored credits", () => {
+    const input = installedCorpBbsEconomyInput(
+      "ai-corp-low-counter-installed-bbs-economy",
+      [1, 16],
+    );
+    const bbsActions = input.legalActions.filter(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_309_bbs-whispering-campaign",
+    );
+    const sourceCards = new Map(
+      input.playerView.servers
+        .flatMap((server) => server.root)
+        .map((card) => [card.instanceId, card]),
+    );
+    const fullBbsActions = bbsActions.filter((action) => {
+      const sourceCard = sourceCards.get(String(action.source));
+      return (sourceCard?.counters?.bit ?? 0) >= 2;
+    });
+
+    expect(bbsActions).toHaveLength(2);
+    expect(fullBbsActions).toHaveLength(1);
+    expect(chooseCorpAction(input).actionId).toBe(fullBbsActions[0]?.actionId);
   });
 
   it("recovers economy before low-reserve central ICE protection without urgent pressure", () => {
@@ -6145,9 +6297,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     const shortTermTake = shortTermInput.legalActions.find(
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility ===
-          "short_term_contract_take_credits",
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(shortTermInput, action) ===
+          "onr_v1_178_short-term-contract",
     );
     const shortTermBasicCredit = shortTermInput.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -6155,7 +6307,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     expect(shortTermTake).toBeDefined();
     expect(shortTermBasicCredit).toBeDefined();
-    expect(shortTermTake?.payload?.gainCreditsAmount).toBe(2);
+    expect(shortTermTake?.label).toContain("2 Credits nehmen");
     if (!shortTermTake || !shortTermBasicCredit)
       throw new Error("Missing Short-Term Contract economy fixture actions");
 
@@ -6182,8 +6334,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     const brokerTake = payoutInput.legalActions.find(
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_take_credits",
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(payoutInput, action) ===
+          "onr_v1_154_broker" &&
+        action.label.includes("Credits von Broker nehmen"),
     );
     const payoutBasicCredit = payoutInput.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -6191,7 +6345,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
 
     expect(brokerTake).toBeDefined();
     expect(payoutBasicCredit).toBeDefined();
-    expect(brokerTake?.payload?.gainCreditsAmount).toBe(3);
+    expect(brokerTake?.label).toContain("Credits von Broker nehmen");
     if (!brokerTake || !payoutBasicCredit)
       throw new Error("Missing Broker payout fixture actions");
 
@@ -6215,8 +6369,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     const lowCreditBrokerLoad = lowCreditLoadInput.legalActions.find(
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_load_credits",
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(lowCreditLoadInput, action) ===
+          "onr_v1_154_broker" &&
+        action.label.includes("Credits auf Broker legen"),
     );
     const lowCreditBasicCredit = lowCreditLoadInput.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -6245,8 +6401,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
     const stableBrokerLoad = stableLoadInput.legalActions.find(
       (action) =>
-        action.type === "trigger_ability" &&
-        action.payload?.resourceAbility === "broker_load_credits",
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(stableLoadInput, action) ===
+          "onr_v1_154_broker" &&
+        action.label.includes("Credits auf Broker legen"),
     );
     const stableBasicCredit = stableLoadInput.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -8900,7 +9058,7 @@ function corpActionPhaseInput(
   });
 }
 
-function installedCorpBbsEconomyInput(seed: string) {
+function installedCorpBbsEconomyInput(seed: string, bbsBits: number[] = [16]) {
   let state = createGameAfterSetup({
     seed,
     baseline: CURRENT_RULES_BASELINE,
@@ -8920,7 +9078,10 @@ function installedCorpBbsEconomyInput(seed: string) {
       side: "corp",
       identity: "corp_identity_001",
       cards: [
-        { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+        {
+          id: "onr_v1_309_bbs-whispering-campaign",
+          quantity: bbsBits.length,
+        },
         { id: "simple_agenda", quantity: 4 },
         { id: "simple_economy_operation", quantity: 6 },
         { id: "simple_barrier_ice", quantity: 2 },
@@ -8929,24 +9090,45 @@ function installedCorpBbsEconomyInput(seed: string) {
     agendaPointsToWin: 7,
   });
   state = apply(state, "corp", (action) => action.type === "mandatory_draw");
-  ensureRemoteServer(state, "remote_1");
-  const bbsId = putCorpRootInRemote(
-    state,
-    "onr_v1_309_bbs-whispering-campaign",
-    0,
-  );
-  state.cardInstances[bbsId] = {
-    ...state.cardInstances[bbsId]!,
-    faceup: true,
-    rezzed: true,
-    counters: { bit: 16 },
-  };
+  bbsBits.forEach((bitCount, index) => {
+    putInstalledCorpBbsInRemote(state, `remote_${index + 1}`, bitCount);
+  });
   state.corp.credits = 2;
   state.corp.clicks = 3;
   return buildAiDecisionInput(state, "corp", {
     difficulty: "normal",
     profileId: "corp-ai-v1.4.0-normal",
   });
+}
+
+function putInstalledCorpBbsInRemote(
+  state: GameState,
+  serverId: `remote_${number}`,
+  bitCount: number,
+): CardInstanceId {
+  ensureRemoteServer(state, serverId);
+  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  if (!server) throw new Error(`Missing ${serverId}`);
+  const bbsEntry = Object.entries(state.cardInstances).find(
+    ([id, card]) =>
+      card.definitionId === "onr_v1_309_bbs-whispering-campaign" &&
+      !state.corp.servers.some((candidate) =>
+        candidate.root.includes(id as CardInstanceId),
+      ),
+  );
+  if (!bbsEntry) throw new Error("Missing BBS Whispering Campaign copy");
+  const bbsId = bbsEntry[0] as CardInstanceId;
+  removeEverywhere(state, bbsId);
+  server.root.push(bbsId);
+  state.cardInstances[bbsId] = {
+    ...state.cardInstances[bbsId]!,
+    zone: { side: "corp", zone: "serverRoot", serverId },
+    faceup: true,
+    rezzed: true,
+    counters: { bit: bitCount },
+    advancementCounters: 0,
+  };
+  return bbsId;
 }
 
 function runnerActionPhaseInput(
@@ -8960,6 +9142,87 @@ function runnerActionPhaseInput(
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",
   });
+}
+
+function runnerProgramTrashChoiceInput(
+  seed: string,
+  options: {
+    sourceDefinitionId: string;
+    installedDefinitionIds: string[];
+    memoryUsed: number;
+    memoryLimit: number;
+  },
+): {
+  input: AiDecisionInput;
+  optionIdsByDefinition: Record<string, string>;
+} {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `runner_program_trash_choice_${seed}`,
+        name: "Runner Program Trash Choice Fixture",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "simple_decoder", quantity: 3 },
+          { id: "simple_fracter", quantity: 3 },
+          { id: "simple_killer", quantity: 2 },
+          { id: "v099_virus_program", quantity: 3 },
+          { id: "simple_economy_event", quantity: 4 },
+        ],
+      },
+      corpDeck: {
+        id: `runner_program_trash_choice_corp_${seed}`,
+        name: "Runner Program Trash Choice Corp Fixture",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 3 },
+          { id: "simple_barrier_ice", quantity: 2 },
+          { id: "simple_economy_operation", quantity: 4 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  const sourceCardId = moveRunnerCardToGrip(state, options.sourceDefinitionId);
+  const installedCardIds = options.installedDefinitionIds.map((definitionId) =>
+    moveRunnerProgramToRig(state, definitionId),
+  );
+  state.runner.memoryUsed = options.memoryUsed;
+  state.runner.memoryLimit = options.memoryLimit;
+  state.pendingChoice = {
+    choiceId: `runner_program_trash_before_install_${state.stateVersion}`,
+    side: "runner",
+    source: `runner_program_trash_before_install:${sourceCardId}:${state.stateVersion}`,
+    prompt: "Programme vor Installation trashen",
+    kind: "select_cards",
+    options: installedCardIds.map((cardId) => {
+      const definition = DEMO_CARDS_BY_ID[state.cardInstances[cardId]!.definitionId]!;
+      return {
+        id: `card_${cardId}`,
+        label: definition.title,
+        value: cardId,
+      };
+    }),
+    minSelections: 0,
+    maxSelections: installedCardIds.length,
+    stateVersion: state.stateVersion,
+    visibility: "hidden_info_barrier",
+  };
+  return {
+    input: buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    }),
+    optionIdsByDefinition: Object.fromEntries(
+      installedCardIds.map((cardId) => [
+        state.cardInstances[cardId]!.definitionId,
+        `card_${cardId}`,
+      ]),
+    ),
+  };
 }
 
 function runnerShellTradersState(seed: string): GameState {
@@ -9046,14 +9309,14 @@ function installedRunnerEconomyInput(
   );
   if (options.brokerCounters !== undefined) {
     const brokerId = moveRunnerResourceToRig(state, "onr_v1_154_broker");
-    setPowerCountersForTest(state, brokerId, options.brokerCounters);
+    setHostedBitsForTest(state, brokerId, options.brokerCounters);
   }
   if (options.shortTermCounters !== undefined) {
     const shortTermId = moveRunnerResourceToRig(
       state,
       "onr_v1_178_short-term-contract",
     );
-    setPowerCountersForTest(state, shortTermId, options.shortTermCounters);
+    setHostedBitsForTest(state, shortTermId, options.shortTermCounters);
   }
   state.runner.credits = options.credits;
   state.runner.clicks = 3;
@@ -9863,7 +10126,7 @@ function moveRunnerResourceCopyToRig(
   return id;
 }
 
-function setPowerCountersForTest(
+function setHostedBitsForTest(
   state: GameState,
   id: CardInstanceId,
   amount: number,
@@ -9872,7 +10135,7 @@ function setPowerCountersForTest(
     ...state.cardInstances[id]!,
     counters: {
       ...(state.cardInstances[id]?.counters ?? {}),
-      power: amount,
+      bit: amount,
     },
   };
 }

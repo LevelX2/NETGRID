@@ -237,6 +237,33 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Trace", `Korp-Gebot ${corpBid}`, ...(hackerTrackerCountersSpent > 0 ? [`HTC -${hackerTrackerCountersSpent}`] : []), ...(traceStrength !== undefined ? [`Trace ${traceStrength}`] : []), ...(runnerLink !== undefined ? [`Link ${runnerLink}`] : []));
         break;
       }
+      if (payload.traceStep === "base_link") {
+        const baseLinkUsed = payload.baseLinkUsed === true;
+        const baseLinkValue = numberValue(payload.baseLinkValue) ?? 0;
+        const baseLinkCost = numberValue(payload.traceBaseLinkCostPaid) ?? 0;
+        const runnerLink = numberValue(payload.runnerLink);
+        const baseLinkDefinitionId = stringValue(payload.traceBaseLinkSourceDefinitionId);
+        const baseLinkTitle = titleForDefinitionId(baseLinkDefinitionId) ?? "eine Base-Link-Karte";
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = baseLinkUsed
+          ? phrase(subject, `${baseLinkTitle} als Base Link ${baseLinkValue} genutzt`)
+          : phrase(subject, "keine Base-Link-Karte genutzt");
+        description = runnerLink !== undefined
+          ? `Runner-Link: ${runnerLink}${baseLinkUsed && baseLinkCost > 0 ? `; Kosten: ${creditText(baseLinkCost)}` : ""}.`
+          : undefined;
+        cardDefinitionId = cardDefinitionId ?? baseLinkDefinitionId ?? sourceDefinitionId;
+        cardTitle = baseLinkUsed ? baseLinkTitle : cardTitle;
+        chips.push(
+          "Trace",
+          "Base Link",
+          baseLinkUsed ? baseLinkTitle : "Nicht genutzt",
+          ...(baseLinkUsed ? [`Link ${baseLinkValue}`] : []),
+          ...(baseLinkCost > 0 ? [`-${baseLinkCost} Credit${baseLinkCost === 1 ? "" : "s"}`] : []),
+        );
+        break;
+      }
       if (payload.traceStep === "runner_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const runnerBid = numberValue(payload.runnerBid) ?? 0;
@@ -273,6 +300,46 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           ...(hardwareWreckerEffect ? [`Hardware -${trashedCount}`, `${damageAmount} Schaden`, "Run endet"] : []),
           ...(payload.runnerRunEnded === true || payload.fangRunEnded === true ? ["Run endet", `Run-Sperre ${runnerRunLockCreditCost ?? 2}`] : []),
           ...(hackerTrackerCountersAdded > 0 ? [`HTC +${hackerTrackerCountersAdded}`] : [])
+        );
+        break;
+      }
+      if (payload.traceStep === "post_bid_link") {
+        const linkDelta = numberValue(payload.postBidTraceLinkDelta) ?? 0;
+        const linkBonus = numberValue(payload.postBidTraceLinkBonus) ?? 0;
+        const linkCost = numberValue(payload.postBidTraceLinkCostPaid) ?? 0;
+        const linkDefinitionId = stringValue(payload.postBidTraceLinkSourceDefinitionId);
+        const linkTitle = titleForDefinitionId(linkDefinitionId) ?? cardTitle ?? "eine Link-Fähigkeit";
+        const runnerLink = numberValue(payload.runnerLink);
+        const runnerStrength = numberValue(payload.runnerStrength);
+        const traceStrength = numberValue(payload.traceStrength);
+        const runnerBid = numberValue(payload.runnerBid) ?? 0;
+        const corpBid = numberValue(payload.corpBid) ?? 0;
+        const successful = payload.traceSuccessful === true;
+        const resolved = typeof payload.traceSuccessful === "boolean";
+        const openedNext = payload.postBidTraceLinkChoiceOpened === true;
+        const applied = payload.eventModificationDecision === "apply" && linkDelta > 0;
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        title = applied
+          ? phrase(subject, `${linkTitle} für +${linkDelta} Link genutzt${resolved ? `; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}` : ""}`)
+          : resolved
+          ? `Trace entschieden: ${traceParticipantLabel("corp", side)} ${creditText(corpBid)}, ${traceParticipantLabel("runner", side)} ${creditText(runnerBid)}; ${successful ? "Trace erfolgreich" : "Trace abgewehrt"}`
+          : phrase(subject, "keine Post-Bid-Link-Fähigkeit genutzt");
+        description = resolved && traceStrength !== undefined && runnerStrength !== undefined
+          ? `Endstand: Trace ${traceStrength} gegen Runner-Stärke ${runnerStrength}${linkBonus > 0 ? `; Post-Bid-Link: +${linkBonus}` : ""}.`
+          : runnerLink !== undefined || runnerStrength !== undefined
+          ? `Runner-Link: ${runnerLink ?? 0}${runnerStrength !== undefined ? `, Runner-Stärke: ${runnerStrength}` : ""}${openedNext ? "; weitere Link-Fähigkeiten verfügbar" : ""}.`
+          : undefined;
+        cardDefinitionId = cardDefinitionId ?? linkDefinitionId ?? sourceDefinitionId;
+        cardTitle = applied ? linkTitle : cardTitle;
+        chips.push(
+          "Trace",
+          ...(applied ? [linkTitle, `+${linkDelta} Link`] : ["Post-Bid-Link"]),
+          ...(linkCost > 0 ? [`-${linkCost} Credit${linkCost === 1 ? "" : "s"}`] : []),
+          ...(linkBonus > 0 ? [`Gesamt +${linkBonus}`] : []),
+          ...(traceStrength !== undefined && runnerStrength !== undefined ? [`${traceStrength}:${runnerStrength}`] : []),
+          ...(resolved ? [successful ? "Erfolg" : "Fehlschlag"] : []),
         );
         break;
       }

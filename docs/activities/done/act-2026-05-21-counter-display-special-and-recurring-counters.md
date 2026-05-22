@@ -1,20 +1,28 @@
 ---
 activityId: act-2026-05-21-counter-display-special-and-recurring-counters
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-counter-display-shared-engine-projection-foundation
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "counter display"
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine test
+  - git diff --check
 ---
 
 # CounterDisplay für Recurring, Spezialcounter und eingeschränkte Pools
@@ -58,12 +66,12 @@ Recurring Credits, Spezialcounter und eingeschränkte Bit-/Counter-Pools sollen 
 
 ## Akzeptanzkriterien
 
-- [ ] Recurring Credits erhalten fachliche CounterDisplays mit passenden Anzeigehinweisen, ohne Regelwirkung.
-- [ ] Data Raven, Cerberus und Mastiff werden aus den engine-seitigen Countertypen projiziert, nicht aus Web-Karten-ID-Hardcoding.
-- [ ] Shell- und Ablative-Counter erhalten CounterDisplays.
-- [ ] Sichtbare Virus-/Pox-Pfade sind geprüft und passend projiziert oder begründet zurückgestellt.
-- [ ] Eingeschränkte Bit-Pools werden nicht mit generischen Stored Credits verwechselt.
-- [ ] Hidden-Info-, Replay- und StateHash-Grenzen bleiben unverändert.
+- [x] Recurring Credits erhalten fachliche CounterDisplays mit passenden Anzeigehinweisen, ohne Regelwirkung.
+- [x] Data Raven, Cerberus und Mastiff werden aus den engine-seitigen Countertypen projiziert, nicht aus Web-Karten-ID-Hardcoding.
+- [x] Shell- und Ablative-Counter erhalten CounterDisplays.
+- [x] Sichtbare Virus-/Pox-Pfade sind geprüft und passend projiziert oder begründet zurückgestellt.
+- [x] Eingeschränkte Bit-Pools werden nicht mit generischen Stored Credits verwechselt.
+- [x] Hidden-Info-, Replay- und StateHash-Grenzen bleiben unverändert.
 
 ## Umsetzungshinweise
 
@@ -72,4 +80,4 @@ Recurring Credits, Spezialcounter und eingeschränkte Bit-/Counter-Pools sollen 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die PlayerView-Projektion erzeugt additive `counterDisplays` für `recurring_credit`, eingeschränkte Bit-Pools (`restricted_pool`), Shell-, Ablative-, Virus-, Data-Raven-, Cerberus-, Mastiff-, Crying-, Militech- und Mark-Counter. Pox wird als optionales Server-`counterDisplays`-Feld projiziert. Stored Credits bleiben separat und werden nicht mit eingeschränkten Bit-Pools vermischt. Der fokussierte Test prüft außerdem, dass View-Erzeugung weder `hashState` noch `LegalActions` verändert.

@@ -1611,6 +1611,19 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
         .servers.flatMap((server) => server.root)
         .find((card) => card.instanceId === bbsId)?.counters?.bit,
     ).toBe(14);
+    expect(
+      getPlayerView(assetState, "corp")
+        .servers.flatMap((server) => server.root)
+        .find((card) => card.instanceId === bbsId)?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 14,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "14 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
     expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_309_bbs-whispering-campaign",
@@ -1892,6 +1905,21 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
     expect(detroit.corp.credits).toBe(detroitCreditsBefore + 1);
     expect(cardCounterAmount(detroit, detroitId, "bit")).toBe(0);
     expect(detroit.corp.scoreArea).toContain(detroitId);
+
+    setCardCounterForTest(detroit, detroitId, "bit", 6);
+    expect(
+      getPlayerView(detroit, "corp").own.scoreArea.find(
+        (card) => card.instanceId === detroitId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 6,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "6 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
 
     let unscored = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.counterRecurring("p36-detroit-unscored"),
@@ -4527,6 +4555,7 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
       throw new Error("Missing advanced hidden agenda fixture");
     state.cardInstances[advancedAgendaId].advancementCounters = 5;
 
+    const stateHashBeforeViews = hashState(state);
     const runnerView = getPlayerView(state, "runner");
     const corpView = getPlayerView(state, "corp");
     const serialized = JSON.stringify(runnerView);
@@ -4552,24 +4581,45 @@ describe("MVP 0.1 visibility, replay and state hash", () => {
       known: false,
       rezzed: false,
       advancementCounters: 5,
+      counterDisplays: [
+        {
+          id: "advancement",
+          amount: 5,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "5 öffentliche Advancement-Counter",
+          usageHint: "score_modifier",
+        },
+      ],
     });
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("title");
+    expect(runnerHiddenAdvancedRoot).not.toHaveProperty("definitionId");
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("type");
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty(
       "advancementRequirement",
     );
     expect(runnerHiddenAdvancedRoot).not.toHaveProperty("agendaPoints");
-    expect(
-      corpView.servers
+    const corpAdvancedRoot = corpView.servers
         .flatMap((server) => server.root)
-        .find((card) => card.instanceId === advancedAgendaId),
-    ).toMatchObject({
+        .find((card) => card.instanceId === advancedAgendaId);
+    expect(corpAdvancedRoot).toMatchObject({
       known: true,
       title: "Simple Agenda",
       advancementCounters: 5,
       advancementRequirement: 3,
       agendaPoints: 2,
+      counterDisplays: [
+        {
+          id: "advancement",
+          amount: 5,
+          displayKind: "advancement",
+          label: "Entwicklung",
+          ariaLabel: "5 öffentliche Advancement-Counter",
+          usageHint: "score_modifier",
+        },
+      ],
     });
+    expect(hashState(state)).toBe(stateHashBeforeViews);
     expect(runnerView.opponent.handCount).toBe(state.corp.hq.length);
     expect(runnerView.opponent.deckCount).toBe(state.corp.rd.length);
     expect(runnerView.opponent.discardCount).toBe(state.corp.archives.length);
@@ -5591,7 +5641,7 @@ describe("V1.0.5K Card Release", () => {
           action.type === "install_card" &&
           sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger",
       ),
-    ).toBe(false);
+    ).toBe(true);
 
     moveRunnerCardToGrip(gatedState, "onr_v1_144_tycho-mem-chip");
     gatedState = apply(
@@ -5609,6 +5659,158 @@ describe("V1.0.5K Card Release", () => {
           sourceDefinition(gatedState, action) === "onr_v1_015_codeslinger",
       ),
     ).toBe(true);
+  });
+
+  it("lets Runner trash installed programs before normal grip program installs", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("runner-program-trash-install"));
+    state.runner.credits = 40;
+    state.runner.clicks = 10;
+    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
+    const rafflesId = installRunnerProgramForTest(state, "onr_v1_052_raffles");
+    installRunnerProgramForTest(state, "onr_v1_054_raptor");
+    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
+    installRunnerHardwareForTest(state, "onr_v1_144_tycho-mem-chip");
+    const sourceId = moveRunnerCardCopyToGrip(state, "onr_v1_015_codeslinger");
+    const initial = structuredClone(state);
+
+    expect(state.runner.memoryUsed).toBe(4);
+    const installAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_015_codeslinger" &&
+        action.payload?.runnerProgramTrashBeforeInstall === true,
+    );
+
+    state = apply(state, "runner", (action) => action.actionId === installAction.actionId);
+    expect(state.runner.clicks).toBe(10);
+    expect(state.runner.credits).toBe(40);
+    expect(state.runner.grip).toContain(sourceId);
+    expect(state.pendingChoice?.source).toContain(
+      "runner_program_trash_before_install",
+    );
+    expect(state.pendingChoice?.options).toHaveLength(4);
+    expect(
+      state.pendingChoice?.options.every(
+        (option) =>
+          typeof option.value === "string" &&
+          state.runner.rig.programs.includes(option.value),
+      ),
+    ).toBe(true);
+
+    const trashOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === rafflesId,
+    )?.id;
+    if (!trashOptionId) throw new Error("Missing Raffles trash option");
+    state = applyChoice(state, "runner", trashOptionId);
+
+    expect(state.runner.heap).toContain(rafflesId);
+    expect(state.runner.rig.programs).toContain(sourceId);
+    expect(state.runner.memoryUsed).toBe(4);
+    expect(state.runner.clicks).toBe(9);
+    expect(validateGameState(state).ok).toBe(true);
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
+  it("cancels or rejects invalid program-trash install choices without changing install costs", () => {
+    let state = toRunnerTurn(v105kCardReleaseGame("runner-program-trash-cancel"));
+    state.runner.credits = 40;
+    state.runner.clicks = 10;
+    installRunnerProgramForTest(state, "onr_v1_015_codeslinger");
+    const rafflesId = installRunnerProgramForTest(state, "onr_v1_052_raffles");
+    installRunnerProgramForTest(state, "onr_v1_054_raptor");
+    installRunnerProgramForTest(state, "onr_v1_070_tinweasel");
+    const sourceId = moveRunnerCardCopyToGrip(state, "onr_v1_015_codeslinger");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_015_codeslinger" &&
+        action.payload?.runnerProgramTrashBeforeInstall === true,
+    );
+
+    const clicksBeforeChoice = state.runner.clicks;
+    const creditsBeforeChoice = state.runner.credits;
+    const cancelled = applyChoices(state, "runner", []);
+    expect(cancelled.pendingChoice).toBeUndefined();
+    expect(cancelled.runner.grip).toContain(sourceId);
+    expect(cancelled.runner.rig.programs).not.toContain(sourceId);
+    expect(cancelled.runner.clicks).toBe(clicksBeforeChoice);
+    expect(cancelled.runner.credits).toBe(creditsBeforeChoice);
+    expect(cancelled.runner.memoryUsed).toBe(4);
+
+    const choiceState = structuredClone(state);
+    const resolveAction = mustAction(
+      choiceState,
+      "runner",
+      (action) => action.type === "resolve_choice",
+    );
+    const trashOptionId = choiceState.pendingChoice?.options.find(
+      (option) => option.value === rafflesId,
+    )?.id;
+    if (!trashOptionId) throw new Error("Missing Raffles trash option");
+
+    const wrongSide = applyAction(choiceState, {
+      matchId: choiceState.matchId,
+      side: "corp",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: choiceState.stateVersion,
+      selectedChoices: {
+        choiceId: choiceState.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOptionId],
+      },
+      idempotencyKey: "corp-wrong-side-program-trash",
+    });
+    expect(wrongSide.ok).toBe(false);
+
+    const stale = applyAction(choiceState, {
+      matchId: choiceState.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: choiceState.stateVersion - 1,
+      selectedChoices: {
+        choiceId: choiceState.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOptionId],
+      },
+      idempotencyKey: "runner-stale-program-trash",
+    });
+    expect(stale.ok).toBe(false);
+
+    const fakeTarget = applyAction(choiceState, {
+      matchId: choiceState.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: choiceState.stateVersion,
+      selectedChoices: {
+        choiceId: choiceState.pendingChoice?.choiceId,
+        selectedOptionIds: ["card_not_installed"],
+      },
+      idempotencyKey: "runner-fake-program-trash",
+    });
+    expect(fakeTarget.ok).toBe(false);
+
+    const removedSource = structuredClone(choiceState);
+    removeEverywhere(removedSource, sourceId);
+    const missingSource = applyAction(removedSource, {
+      matchId: removedSource.matchId,
+      side: "runner",
+      actionId: resolveAction.actionId,
+      clientKnownStateVersion: removedSource.stateVersion,
+      selectedChoices: {
+        choiceId: removedSource.pendingChoice?.choiceId,
+        selectedOptionIds: [trashOptionId],
+      },
+      idempotencyKey: "runner-missing-source-program-trash",
+    });
+    expect(missingSource.ok).toBe(false);
   });
 
   it("breaks matching V1.0.5K ICE subroutines and rejects mismatched breaker targets", () => {
@@ -23846,6 +24048,19 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
         action.payload?.cardId === brokerId,
     );
     expect(cardCounterAmount(state, brokerId, "bit")).toBe(3);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === brokerId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 3,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "3 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
     brokerActions = getLegalActions(state, "runner").filter(
       (action) => action.payload?.cardId === brokerId,
     );
@@ -24776,7 +24991,8 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
         action.payload?.approachIceExposeDecision === "expose",
     );
 
-    expect(state.activeSide).toBe("corp");
+    expect(state.activeSide).toBe("runner");
+    expect(state.run?.approachIceExposeViewingIceId).toBe(iceId);
     expect(state.run?.approachIceExposeUsedSourceIdsThisRun).toHaveLength(1);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "trigger_ability",
@@ -24786,6 +25002,40 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
       cardDefinitionId: "onr_v1_227_cerberus",
     });
     expect(state.cardInstances[iceId]?.rezzed).toBe(false);
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(["trigger_ability", "jack_out"]);
+    const runnerView = getPlayerView(state, "runner");
+    expect(runnerView.run?.approachedIce).toMatchObject({
+      instanceId: iceId,
+      known: true,
+      definitionId: "onr_v1_227_cerberus",
+    });
+    expect(
+      runnerView.servers
+        .find((server) => server.id === "rd")
+        ?.ice.find((card) => card.instanceId === iceId),
+    ).toMatchObject({ known: true, definitionId: "onr_v1_227_cerberus" });
+
+    const jackOutState = apply(
+      structuredClone(state),
+      "runner",
+      (action) => action.type === "jack_out",
+    );
+    expect(jackOutState.run).toBeUndefined();
+    expect(jackOutState.timingPoint).toBe("runner_action.main");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.approachIceExposeViewDecision === "finish",
+    );
+
+    expect(state.activeSide).toBe("corp");
+    expect(state.run?.approachIceExposeViewingIceId).toBeUndefined();
     expect(
       getLegalActions(state, "corp").some(
         (action) =>
@@ -40813,6 +41063,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (server) => server.id === "remote_1",
     )?.root[0];
     expect(hiddenRunnerRoot?.known).toBe(false);
+    expect(hiddenRunnerRoot?.counterDisplays).toBeUndefined();
     expect(JSON.stringify(hiddenRunnerRoot)).not.toContain("braindance");
 
     const creditsBeforeRez = state.corp.credits;
@@ -40836,7 +41087,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         server.root.some(
           (card) =>
             card.definitionId === "onr_v1_311_braindance-campaign" &&
-            card.counters?.bit === 12,
+            card.counters?.bit === 12 &&
+            card.counterDisplays?.some(
+              (counterDisplay) =>
+                counterDisplay.id === "stored_credits" &&
+                counterDisplay.amount === 12 &&
+                counterDisplay.displayKind === "stored_credits",
+            ),
         ),
       ),
     ).toBe(true);
@@ -40863,6 +41120,185 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
+  });
+
+  it("projects special counter displays without changing legal actions or state hash", () => {
+    const requiredRunnerCards = [
+      "onr_v1_011_cloak",
+      "onr_v1_008_boardwalk",
+      "onr_v1_164_hells-run",
+      "onr_v1_121_armored-fridge",
+    ];
+    const state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-counter-display-specials",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+          cards: [
+            ...requiredRunnerCards.map((id) => ({ id, quantity: 1 })),
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+              (card) => !requiredRunnerCards.includes(card.id),
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.runAccess.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    const recurringId = installRunnerProgramForTest(state, "onr_v1_011_cloak");
+    const restrictedId = installRunnerResourceForTest(
+      state,
+      "onr_v1_164_hells-run",
+    );
+    const virusId = installRunnerProgramForTest(state, "onr_v1_008_boardwalk");
+    const fridgeId = installRunnerHardwareForTest(
+      state,
+      "onr_v1_121_armored-fridge",
+    );
+    setCardCounterForTest(state, recurringId, "recurring_credit", 2);
+    setCardCounterForTest(state, restrictedId, "bit", 1);
+    setCardCounterForTest(state, virusId, "virus", 3);
+    setCardCounterForTest(state, fridgeId, "ablative", 2);
+    setCardCounterForTest(state, state.runner.identity, "data_raven", 1);
+    setCardCounterForTest(state, state.runner.identity, "cerberus", 2);
+    setCardCounterForTest(state, state.runner.identity, "mastiff", 3);
+    setCardCounterForTest(state, state.runner.identity, "crying", 1);
+    state.poxCountersByServer = {
+      ...(state.poxCountersByServer ?? {}),
+      rd: 3,
+    };
+    const legalActionIdsBeforeView = getLegalActions(state, "runner").map(
+      (action) => action.actionId,
+    );
+    const hashBeforeView = hashState(state);
+
+    const runnerView = getPlayerView(state, "runner");
+    const recurringCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === recurringId,
+    );
+    const restrictedCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === restrictedId,
+    );
+    const virusCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === virusId,
+    );
+    const fridgeCard = runnerView.own.rig?.find(
+      (card) => card.instanceId === fridgeId,
+    );
+    const corpView = getPlayerView(state, "corp");
+    const projectedDisplayIds = [
+      recurringCard,
+      restrictedCard,
+      virusCard,
+      fridgeCard,
+      runnerView.own.identity,
+    ].flatMap((card) => card?.counterDisplays?.map((display) => display.id) ?? []);
+    expect(new Set(projectedDisplayIds).size).toBe(projectedDisplayIds.length);
+
+    expect(recurringCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "recurring_credit",
+    ]);
+    expect(recurringCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "recurring_credit",
+          amount: 2,
+          displayKind: "recurring_credit",
+          usageHint: "refreshing",
+        }),
+      ]),
+    );
+    expect(restrictedCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "restricted_pool",
+    ]);
+    expect(restrictedCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "restricted_pool",
+          amount: 1,
+          displayKind: "restricted_pool",
+          counterType: "bit",
+          label: "Link-Bits",
+        }),
+      ]),
+    );
+    expect(virusCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "virus",
+    ]);
+    expect(virusCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "virus",
+          amount: 3,
+          displayKind: "virus",
+          counterType: "virus",
+        }),
+      ]),
+    );
+    expect(fridgeCard?.counterDisplays?.map((display) => display.id)).toEqual([
+      "ablative",
+    ]);
+    expect(fridgeCard?.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "ablative",
+          amount: 2,
+          displayKind: "damage_prevention",
+          counterType: "ablative",
+        }),
+      ]),
+    );
+    expect(runnerView.own.identity.counterDisplays?.map((display) => display.id)).toEqual([
+      "data_raven",
+      "cerberus",
+      "mastiff",
+      "crying",
+    ]);
+    expect(runnerView.own.identity.counterDisplays).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "data_raven",
+          amount: 1,
+          displayKind: "trace",
+          counterType: "data_raven",
+        }),
+        expect.objectContaining({
+          id: "cerberus",
+          amount: 2,
+          displayKind: "trace",
+          counterType: "cerberus",
+        }),
+        expect.objectContaining({
+          id: "mastiff",
+          amount: 3,
+          displayKind: "trace",
+          counterType: "mastiff",
+        }),
+        expect.objectContaining({
+          id: "crying",
+          amount: 1,
+          displayKind: "trace",
+          counterType: "crying",
+        }),
+      ]),
+    );
+    expect(
+      corpView.servers.find((server) => server.id === "rd")?.counterDisplays,
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "pox",
+          amount: 3,
+          displayKind: "virus",
+          label: "Pox-Counter",
+        }),
+      ]),
+    );
+    expect(hashState(state)).toBe(hashBeforeView);
+    expect(getLegalActions(state, "runner").map((action) => action.actionId)).toEqual(
+      legalActionIdsBeforeView,
+    );
   });
 
   it("applies P3.7 turn-start economy CardImplementations once from valid sources", () => {
@@ -44567,6 +45003,19 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     expect(state.runner.credits).toBe(creditsBeforeShortTerm + 2);
     expect(cardCounterAmount(state, shortTermId, "bit")).toBe(10);
+    expect(
+      getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.instanceId === shortTermId,
+      )?.counterDisplays,
+    ).toContainEqual({
+      id: "stored_credits",
+      amount: 10,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "10 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
       cardDefinitionId: "onr_v1_178_short-term-contract",

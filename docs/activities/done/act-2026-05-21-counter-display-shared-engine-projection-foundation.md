@@ -1,20 +1,28 @@
 ---
 activityId: act-2026-05-21-counter-display-shared-engine-projection-foundation
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-21
+completedAt: 2026-05-21
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-21-counter-display-public-view-contract
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t "does not leak hidden Corp card titles"
+  - corepack pnpm --filter @netgrid/engine test
+  - git diff --check
 ---
 
 # CounterDisplay-Projection-Grundlage einführen
@@ -50,12 +58,12 @@ Shared-Typen und Engine-Projection sollen eine additive `counterDisplays`-Grundl
 
 ## Akzeptanzkriterien
 
-- [ ] `CounterDisplay` und `VisibleCard.counterDisplays` sind additiv typisiert.
-- [ ] `getPlayerView` liefert für sichtbare Advancement-Counter passende `counterDisplays`.
-- [ ] Verdeckte Korp-Root-Karten erhalten nur erlaubte öffentliche Advancement-Displays und keine Definition-/Label-Leaks.
-- [ ] `counterDisplays` werden nicht im `GameState` gespeichert und beeinflussen `hashState` nicht.
-- [ ] CounterDisplays haben stabile IDs und eine dokumentierte Sortierung.
-- [ ] Checks: passende Shared-/Engine-Typechecks und fokussierte Engine-Tests.
+- [x] `CounterDisplay` und `VisibleCard.counterDisplays` sind additiv typisiert.
+- [x] `getPlayerView` liefert für sichtbare Advancement-Counter passende `counterDisplays`.
+- [x] Verdeckte Korp-Root-Karten erhalten nur erlaubte öffentliche Advancement-Displays und keine Definition-/Label-Leaks.
+- [x] `counterDisplays` werden nicht im `GameState` gespeichert und beeinflussen `hashState` nicht.
+- [x] CounterDisplays haben stabile IDs und eine dokumentierte Sortierung.
+- [x] Checks: passende Shared-/Engine-Typechecks und fokussierte Engine-Tests.
 
 ## Umsetzungshinweise
 
@@ -65,4 +73,4 @@ Shared-Typen und Engine-Projection sollen eine additive `counterDisplays`-Grundl
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. `CounterDisplay`, `CounterDisplayKind`, `CounterUsageHint` und `VisibleCard.counterDisplays` sind additiv im Shared-Paket typisiert. Die Engine projiziert Advancement-Counter deterministisch als reine PlayerView-Anzeige mit stabiler ID `advancement`, ohne Speicherung im `GameState`. Sichtbare Karten und verdeckte Korp-Root-Karten mit öffentlichen Advancement-Countern erhalten passende Displays; verdeckte Root-Karten bleiben ohne Definition-ID, Titel, Typ oder kartenindividuelle Labels. Der bestehende Visibility-Test prüft zusätzlich, dass `hashState` durch die View-Projection unverändert bleibt.

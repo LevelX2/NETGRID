@@ -121,16 +121,18 @@ import {
   advancementCounterDisplay,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
-  armoredFridgeAblativeCounterBadge,
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
   corpInstalledCardState,
   cuePositionClassName,
   cuePositionStyle,
   encounterBreakerActions,
+  fieldCardChoiceInfo,
+  fieldCardChoiceOptionForCard,
   groupRunnerRigCards,
   hasLegalAction,
   iceModifierBadgesForServer,
@@ -138,6 +140,8 @@ import {
   parseCuePositionPreference,
   normalizeVisibleTerms,
   retainedAccessRevealEvent,
+  retainedExposeReviewEvent,
+  runnerProgramInstallTrashChoiceInfo,
   runBreakerActionHint,
   runTargetServerIds,
   runAwareActionButtonLabel,
@@ -149,13 +153,13 @@ import {
   runWindowStatusLabel,
   serializeCuePositionPreference,
   showInstalledCorpState,
+  shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
+  safeCounterDisplayAmount,
   serverBoardRows,
   serverDisplayLabel,
   splitArchiveCardsForDisplay,
   splitLegalActions,
-  storedCreditAmount,
-  storedCreditSourceLabel,
   currentRunTimelineStep,
   type AdvancementCounterDisplay,
   type ActionContext,
@@ -200,7 +204,7 @@ import {
 } from "./catalog-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
-import { scoredAgendaCreditCounterSource, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
+import { scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
 import {
   clearStoredSession,
   loadCurrentTabSession,
@@ -475,6 +479,20 @@ type DisplayVisibleCard = VisibleCard & {
 type VisibleChoice = NonNullable<PlayerView["pendingChoice"]>;
 type VisibleChoiceOption = VisibleChoice["options"][number];
 
+type CardChoiceShortcut = {
+  selected: boolean;
+  disabled: boolean;
+  onToggle(): void;
+  label: string;
+  selectedLabel: string;
+};
+
+type FieldChoiceCardProps = {
+  choiceSelected?: boolean;
+  choiceShortcut?: CardChoiceShortcut;
+  onSelect?: (card: DisplayVisibleCard, hiddenSide?: Side) => void;
+};
+
 type FocusedCard = {
   card: VisibleCard;
   matchId: string;
@@ -492,6 +510,16 @@ type AccessReveal = {
   card: DisplayVisibleCard;
   actions: LegalAction[];
   trashStatus: string;
+};
+
+type ExposeReview = {
+  eventId: string;
+  actorSide: Side;
+  viewerSide: Side;
+  cards: DisplayVisibleCard[];
+  serverLabels: string[];
+  title: string;
+  description: string;
 };
 
 type DeckCardEntry = {
@@ -1052,6 +1080,7 @@ function revealedEventCardId(event: PublicGameEvent): string | null {
     event.publicPayload.cardDefinitionId ??
     event.publicPayload.sourceDefinitionId ??
     event.publicPayload.targetCardDefinitionId ??
+    event.publicPayload.publicRevealDefinitionId ??
     event.publicPayload.priorityRequisitionTargetDefinitionId;
   return typeof cardId === "string" ? cardId : null;
 }
@@ -1080,6 +1109,7 @@ function visibleKnownCardIds(view: PlayerView | undefined): string[] {
     ...(view.opponent.discardCards ?? []),
     ...view.opponent.scoreArea,
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : [])
   ];
   return Array.from(new Set(cards.filter((card) => card.known && card.definitionId).map((card) => card.definitionId!)));
@@ -1180,6 +1210,47 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
     actions,
     trashStatus: accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel)
   };
+}
+
+function exposeReviewFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, viewerSide: Side): ExposeReview | null {
+  if (!event || event.publicPayload.publicRevealKind !== "expose") return null;
+  if (event.publicPayload.approachIceExposeDecision) return null;
+  const definitionIds = exposeReviewDefinitionIds(event);
+  if (definitionIds.length === 0) return null;
+  const cards = definitionIds.map((definitionId) => {
+    const detail = detailsById[definitionId] ?? null;
+    const title = detail?.title ?? definitionId;
+    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+  });
+  const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
+  const serverLabels = payloadStringList(event.publicPayload, "exposedServerLabels").map(serverDisplayLabel);
+  return {
+    eventId: event.eventId,
+    actorSide,
+    viewerSide,
+    cards,
+    serverLabels,
+    title: cards.length === 1 ? "Karte angesehen" : `${cards.length} Karten angesehen`,
+    description: exposeReviewDescription(actorSide, viewerSide, cards.length, serverLabels)
+  };
+}
+
+function exposeReviewDefinitionIds(event: PublicGameEvent): string[] {
+  return Array.from(
+    new Set(
+      [
+        payloadString(event.publicPayload, "publicRevealDefinitionId"),
+        ...payloadStringList(event.publicPayload, "publicRevealDefinitionIds")
+      ].filter((value): value is string => Boolean(value))
+    )
+  );
+}
+
+function exposeReviewDescription(actorSide: Side, viewerSide: Side, count: number, serverLabels: string[]): string {
+  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+  const object = count === 1 ? "eine Karte" : `${count} Karten`;
+  const locations = Array.from(new Set(serverLabels)).filter(Boolean);
+  return `${subject} ${object}${locations.length > 0 ? ` in ${locations.join(", ")}` : ""} angesehen.`;
 }
 
 function visibleCardFromPublicEvent(event: PublicGameEvent, cardId: string, title: string): DisplayVisibleCard {
@@ -1807,6 +1878,7 @@ export default function Page() {
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
   const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
+  const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
   const [colorScheme, setColorScheme] = useState<ColorScheme>("black");
@@ -1841,6 +1913,7 @@ export default function Page() {
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
   const [discardChoiceSelection, setDiscardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
+  const [fieldCardChoiceSelection, setFieldCardChoiceSelection] = useState<{ choiceId: string; selectedOptionIds: string[] } | null>(null);
   const [cuePosition, setCuePosition] = useState<CuePositionPreference>(DEFAULT_CUE_POSITION);
   const [cuePositionLoaded, setCuePositionLoaded] = useState(false);
   const [cardTooltipHoverDelayMs, setCardTooltipHoverDelayMs] = useState<CardTooltipHoverDelayMs>(CARD_TOOLTIP_HOVER_OPEN_DELAY_MS);
@@ -2437,6 +2510,14 @@ export default function Page() {
       ? currentDiscardChoiceSelection.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId))
       : [];
   const selectedDiscardOptionIdSet = useMemo(() => new Set(selectedDiscardOptionIds), [selectedDiscardOptionIds.join("|")]);
+  const activeFieldCardChoice = activeView?.pendingChoice && shouldUseFieldCardChoice(activeView.pendingChoice, activeView) ? activeView.pendingChoice : null;
+  const activeFieldCardChoiceOptionIds = useMemo(() => new Set(activeFieldCardChoice?.options.filter((option) => option.selectable !== false).map((option) => option.id) ?? []), [activeFieldCardChoice]);
+  const currentFieldCardChoiceSelection = fieldCardChoiceSelection;
+  const selectedFieldCardChoiceOptionIds =
+    currentFieldCardChoiceSelection && currentFieldCardChoiceSelection.choiceId === activeFieldCardChoice?.choiceId
+      ? currentFieldCardChoiceSelection.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId))
+      : [];
+  const selectedFieldCardChoiceOptionIdSet = useMemo(() => new Set(selectedFieldCardChoiceOptionIds), [selectedFieldCardChoiceOptionIds.join("|")]);
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
   const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok);
@@ -2508,6 +2589,7 @@ export default function Page() {
   const currentFocusedCard = focusedCard?.matchId === payload?.matchId ? focusedCard : null;
   const previewSelection =
     currentFocusedCard ??
+    (activeView?.run?.approachedIce ? { card: activeView.run.approachedIce, hiddenSide: "corp" as const } : null) ??
     (activeView?.run?.encounteredIce ? { card: activeView.run.encounteredIce, hiddenSide: "corp" as const } : null) ??
     (gripPreviewCard ? { card: gripPreviewCard } : null) ??
     (rigPreviewCard ? { card: rigPreviewCard } : null);
@@ -2529,6 +2611,9 @@ export default function Page() {
     if (!activeDiscardChoice) return null;
     return activeDiscardChoice.options.find((option) => option.value === card.instanceId) ?? null;
   };
+  const fieldChoiceOptionForCard = (card: VisibleCard): VisibleChoiceOption | null => {
+    return activeFieldCardChoice && activeView ? fieldCardChoiceOptionForCard(activeFieldCardChoice, activeView, card) : null;
+  };
   const toggleDiscardOption = (optionId: string) => {
     if (!activeDiscardChoice) return;
     const required = activeDiscardChoice.maxSelections;
@@ -2542,11 +2627,50 @@ export default function Page() {
       return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
     });
   };
+  const toggleFieldCardChoiceOption = (optionId: string) => {
+    if (!activeFieldCardChoice) return;
+    const minSelections = Math.max(0, Math.floor(activeFieldCardChoice.minSelections));
+    const maxSelections = Math.max(minSelections, Math.floor(activeFieldCardChoice.maxSelections));
+    setFieldCardChoiceSelection((current) => {
+      const currentSelected = current?.choiceId === activeFieldCardChoice.choiceId ? current.selectedOptionIds.filter((id) => activeFieldCardChoiceOptionIds.has(id)) : [];
+      const nextSelected = currentSelected.includes(optionId)
+        ? currentSelected.filter((id) => id !== optionId)
+        : currentSelected.length >= maxSelections
+          ? maxSelections === 1
+            ? [optionId]
+            : currentSelected
+          : [...currentSelected, optionId];
+      return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: nextSelected };
+    });
+  };
+  const clearFieldCardChoiceSelection = () => {
+    if (!activeFieldCardChoice) return;
+    setFieldCardChoiceSelection({ choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] });
+  };
+  const fieldChoiceCardProps = (card: VisibleCard): FieldChoiceCardProps => {
+    const option = fieldChoiceOptionForCard(card);
+    if (!option) return {};
+    const selected = selectedFieldCardChoiceOptionIdSet.has(option.id);
+    return {
+      choiceSelected: selected,
+      choiceShortcut: {
+        selected,
+        disabled: Boolean(payload?.winner) || connection !== "online",
+        onToggle: () => toggleFieldCardChoiceOption(option.id),
+        label: "Für Auswahl markieren",
+        selectedLabel: "Aus Auswahl entfernen"
+      },
+      onSelect: () => toggleFieldCardChoiceOption(option.id)
+    };
+  };
   const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
   const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, accessRevealEvent?.eventId) : null;
   const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side) : null;
   const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
+  const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
+  const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
+  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
@@ -2636,10 +2760,22 @@ export default function Page() {
     }
     setDiscardChoiceSelection((current) => {
       if (!current || current.choiceId !== activeDiscardChoice.choiceId) return { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: [] };
-      const nextSelected = current.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId));
-      return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
-    });
+    const nextSelected = current.selectedOptionIds.filter((optionId) => activeDiscardOptionIds.has(optionId));
+    return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeDiscardChoice.choiceId, selectedOptionIds: nextSelected };
+  });
   }, [activeDiscardChoice?.choiceId, activeDiscardOptionIds]);
+
+  useEffect(() => {
+    if (!activeFieldCardChoice) {
+      setFieldCardChoiceSelection(null);
+      return;
+    }
+    setFieldCardChoiceSelection((current) => {
+      if (!current || current.choiceId !== activeFieldCardChoice.choiceId) return { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: [] };
+      const nextSelected = current.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId));
+      return nextSelected.length === current.selectedOptionIds.length ? current : { choiceId: activeFieldCardChoice.choiceId, selectedOptionIds: nextSelected };
+    });
+  }, [activeFieldCardChoice?.choiceId, activeFieldCardChoiceOptionIds]);
 
   useEffect(() => {
     if (!payload || !activeView) return;
@@ -4844,10 +4980,12 @@ export default function Page() {
             disabled={Boolean(payload.winner) || connection !== "online"}
             highlighted={hasDecisionCue}
             selectedDiscardOptionIds={selectedDiscardOptionIds}
+            selectedFieldCardChoiceOptionIds={selectedFieldCardChoiceOptionIds}
             onAction={submitAction}
             onChoiceOption={submitChoiceOption}
             onChoiceOptions={submitChoiceOptions}
             onDiscardChoiceToggle={toggleDiscardOption}
+            onFieldCardChoiceClear={clearFieldCardChoiceSelection}
             enrichCard={enrichCard}
             connection={connection}
             onClearContext={() => setSelectedActionContext(null)}
@@ -4906,6 +5044,7 @@ export default function Page() {
                 contextualActions={legalActionSplit.contextualActions}
                 actionDisabled={Boolean(payload.winner) || connection !== "online"}
                 highlightedZone={activeCueHighlight}
+                fieldChoiceCardProps={fieldChoiceCardProps}
                 onFocus={focusCard}
                 onActionContext={selectActionCard}
                 onAction={submitAction}
@@ -4919,6 +5058,7 @@ export default function Page() {
               selectedContext={selectedActionContext}
               contextualActions={legalActionSplit.contextualActions}
               actionDisabled={Boolean(payload.winner) || connection !== "online"}
+              fieldChoiceCardProps={fieldChoiceCardProps}
               onFocus={focusCard}
               onActionContext={selectActionCard}
               onAction={submitAction}
@@ -4989,6 +5129,7 @@ export default function Page() {
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
                               : {})}
+                            {...fieldChoiceCardProps(card)}
                             onAction={submitAction}
                             onFocus={focusCard}
                             onActionContextSelect={selectActionCard}
@@ -5252,6 +5393,7 @@ export default function Page() {
                                     selected={selectedActionContext?.kind === "card" && selectedActionContext.id === card.instanceId}
                                     actions={cardActionsFor(card)}
                                     actionDisabled={Boolean(payload.winner) || connection !== "online"}
+                                    {...fieldChoiceCardProps(card)}
                                     onAction={submitAction}
                                     onFocus={focusCard}
                                     onActionContextSelect={selectActionCard}
@@ -5435,6 +5577,13 @@ export default function Page() {
           disabled={Boolean(payload.winner) || connection !== "online"}
           onAction={submitAction}
           onDismiss={() => setDismissedAccessEventId(accessReveal.eventId)}
+        />
+      ) : null}
+      {activeMatchIsGame && showExposeReview && exposeReview ? (
+        <ExposeReviewModal
+          review={exposeReview}
+          displayMode={cardDisplayMode}
+          onDismiss={() => setDismissedExposeReviewEventId(exposeReview.eventId)}
         />
       ) : null}
       {optionsDialogOpen ? (
@@ -5865,6 +6014,51 @@ function AccessRevealModal({
               ) : null}
             </div>
           </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function ExposeReviewModal({
+  review,
+  displayMode,
+  onDismiss
+}: {
+  review: ExposeReview;
+  displayMode: CardDisplayMode;
+  onDismiss(): void;
+}) {
+  return (
+    <div className="accessRevealOverlay exposeReviewOverlay" role="dialog" aria-modal="true" aria-labelledby="expose-review-title">
+      <div className="accessRevealBackdrop" aria-hidden="true" />
+      <section className="accessRevealPanel exposeReviewPanel">
+        <div className="accessRevealHeader">
+          <div>
+            <p className="eyebrow">Ansehen</p>
+            <h2 id="expose-review-title">{review.title}</h2>
+            <p>{review.description}</p>
+          </div>
+          <button className="button iconOnly" onClick={onDismiss} aria-label="Ansehen schließen" title="Ansehen schließen">
+            <X size={16} />
+          </button>
+        </div>
+        <div className="exposeReviewCards" data-testid="expose-review-cards">
+          {review.cards.map((card, index) => (
+            <div className="exposeReviewCard" key={`${review.eventId}-${card.definitionId ?? card.instanceId}-${index}`}>
+              <CardView card={card} displayMode={displayMode} preview />
+              <div className="exposeReviewCardText">
+                <strong>{card.title}</strong>
+                {review.serverLabels[index] ? <span>{review.serverLabels[index]}</span> : null}
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="accessRevealActions exposeReviewActions">
+          <button className="button primary" onClick={onDismiss} type="button" data-testid="expose-review-dismiss">
+            <Check size={15} />
+            Gesehen
+          </button>
         </div>
       </section>
     </div>
@@ -7023,6 +7217,7 @@ function RunnerRigStrip({
   contextualActions,
   actionDisabled,
   highlightedZone,
+  fieldChoiceCardProps,
   onFocus,
   onActionContext,
   onAction
@@ -7034,6 +7229,7 @@ function RunnerRigStrip({
   contextualActions: LegalAction[];
   actionDisabled: boolean;
   highlightedZone?: BoardHighlight | null;
+  fieldChoiceCardProps?: (card: VisibleCard) => FieldChoiceCardProps;
   onFocus(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onActionContext(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onAction(action: LegalAction): void;
@@ -7102,6 +7298,7 @@ function RunnerRigStrip({
                       actions={cardActionsForRig(card)}
                       actionDisabled={actionDisabled}
                       actionLabelForAction={(action) => runAwareActionButtonLabel(view, action)}
+                      {...fieldChoiceCardProps?.(card)}
                       onFocus={onFocus}
                       onActionContextSelect={onActionContext}
                       onAction={onAction}
@@ -7286,7 +7483,10 @@ function RunTimelineOverlay({
 
   const currentStep = currentRunTimelineStep(view, legalActions);
   const verticalSteps = [...RUN_TIMELINE_STEPS].reverse();
+  const approachedIce = run.approachedIce ? enrichVisibleCard(run.approachedIce, cardDetailsById) : null;
   const encounteredIce = run.encounteredIce ? enrichVisibleCard(run.encounteredIce, cardDetailsById) : null;
+  const runFocusIce = encounteredIce ?? approachedIce;
+  const runFocusIceFallback = approachedIce ? "Angesehenes ICE" : "Sichtbares ICE";
   const jackOutAvailable = hasLegalAction(legalActions, "jack_out");
   const breachProgress = breachProgressLabel(view);
   const headerStatus = runWindowStatusLabel(view);
@@ -7349,12 +7549,12 @@ function RunTimelineOverlay({
         ) : null}
         {breachProgress ? <p className="runHint">{breachProgress}</p> : null}
         {breakerHint ? <p className="runHint runBreakerHint">{breakerHint}</p> : null}
-        {encounteredIce ? (
+        {runFocusIce ? (
           <div className="encounterFocus">
-            {encounteredIce.known ? (
+            {runFocusIce.known ? (
               <div className="encounterFocusBody">
-                <strong>{encounteredIce.title ?? "Sichtbares ICE"}</strong>
-                {encounteredIce.rulesText ? <p>{encounteredIce.rulesText}</p> : null}
+                <strong>{runFocusIce.title ?? runFocusIceFallback}</strong>
+                {runFocusIce.rulesText ? <p>{runFocusIce.rulesText}</p> : null}
               </div>
             ) : (
               <strong>Verdecktes ICE</strong>
@@ -7554,10 +7754,12 @@ function LegalActionsPanel({
   disabled,
   highlighted = false,
   selectedDiscardOptionIds,
+  selectedFieldCardChoiceOptionIds,
   onAction,
   onChoiceOption,
   onChoiceOptions,
   onDiscardChoiceToggle,
+  onFieldCardChoiceClear,
   enrichCard,
   connection,
   onClearContext
@@ -7574,10 +7776,12 @@ function LegalActionsPanel({
   disabled: boolean;
   highlighted?: boolean;
   selectedDiscardOptionIds: string[];
+  selectedFieldCardChoiceOptionIds: string[];
   onAction(action: LegalAction): void;
   onChoiceOption(action: LegalAction, choiceId: string, selectedOptionId: string): void;
   onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
   onDiscardChoiceToggle(optionId: string): void;
+  onFieldCardChoiceClear(): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
   connection: "offline" | "connecting" | "online";
   onClearContext(): void;
@@ -7611,6 +7815,19 @@ function LegalActionsPanel({
   const genericChoice = view.pendingChoice;
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
+    if (shouldUseFieldCardChoice(genericChoice, view)) {
+      return (
+        <FieldCardChoicePanel
+          choice={genericChoice}
+          action={genericChoiceAction}
+          selected={selectedFieldCardChoiceOptionIds}
+          disabled={disabled}
+          highlighted={highlighted}
+          onClear={onFieldCardChoiceClear}
+          onChoiceOptions={onChoiceOptions}
+        />
+      );
+    }
     if (shouldUseCardChoicePanel(genericChoice)) {
       const cardChoice = enrichVisibleChoiceCardsFromView(genericChoice, view);
       if (connection !== "online") {
@@ -7625,7 +7842,7 @@ function LegalActionsPanel({
           </section>
         );
       }
-      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
+      return <CardChoicePanel choice={cardChoice} action={genericChoiceAction} view={view} disabled={disabled} highlighted={highlighted} enrichCard={enrichCard} onChoiceOptions={onChoiceOptions} />;
     }
     return (
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
@@ -7744,6 +7961,7 @@ function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
     ...view.servers.flatMap((server) => [...server.ice, ...server.root]),
     ...(view.specialZones?.setAside ?? []),
     ...(view.specialZones?.removedFromGame ?? []),
+    ...(view.run?.approachedIce ? [view.run.approachedIce] : []),
     ...(view.run?.encounteredIce ? [view.run.encounteredIce] : []),
     ...(view.run?.accessedCard ? [view.run.accessedCard] : [])
   ];
@@ -7753,6 +7971,7 @@ function visibleCardsByInstanceId(view: PlayerView): Map<string, VisibleCard> {
 function CardChoicePanel({
   choice,
   action,
+  view,
   disabled,
   highlighted,
   enrichCard,
@@ -7760,6 +7979,7 @@ function CardChoicePanel({
 }: {
   choice: VisibleChoice;
   action: LegalAction;
+  view: PlayerView;
   disabled: boolean;
   highlighted: boolean;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
@@ -7775,11 +7995,15 @@ function CardChoicePanel({
   const selectedOptions = selected
     .map((optionId) => choice.options.find((option) => option.id === optionId))
     .filter((option): option is VisibleChoiceOption => Boolean(option));
-  const canSubmit = selected.length >= minSelections && selected.length <= maxSelections;
+  const programInstallTrashInfo = runnerProgramInstallTrashChoiceInfo(choice, view, selected);
+  const canSubmit =
+    selected.length >= minSelections &&
+    selected.length <= maxSelections &&
+    (programInstallTrashInfo?.canSubmit ?? true);
   const singleSelection = maxSelections === 1;
-  const title = cardChoiceTitle(choice);
+  const title = programInstallTrashInfo?.title ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
-  const effectHint = cardChoiceEffectHint(choice);
+  const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
 
   useEffect(() => {
     setSelected([]);
@@ -7857,11 +8081,11 @@ function CardChoicePanel({
         <footer className="cardChoiceFooter">
           <div className="cardChoiceFooterText">
             {effectHint ? <p className="cardChoiceEffectHint">{effectHint}</p> : null}
-            <p className="cardChoiceQuestion">{cardChoiceQuestion(choice, selectedOptions)}</p>
+            <p className="cardChoiceQuestion">{programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
           </div>
           <button className="button primary cardChoiceSubmit" onClick={() => onChoiceOptions(action, choice.choiceId, selected)} disabled={disabled || !canSubmit} type="button" data-testid="card-choice-submit">
             <Check size={15} />
-            {cardChoiceSubmitLabel(selected.length)}
+            {programInstallTrashInfo?.submitLabel ?? cardChoiceSubmitLabel(selected.length)}
           </button>
         </footer>
       </div>
@@ -7932,6 +8156,57 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (choice.source.includes("arrange_stack")) return "Die gewählte Reihenfolge wird für den Stack übernommen.";
   if (choice.source.includes("search_trash")) return "Die gewählte Karte wird aus dem Heap in den Grip genommen.";
   return null;
+}
+
+function FieldCardChoicePanel({
+  choice,
+  action,
+  selected,
+  disabled,
+  highlighted,
+  onClear,
+  onChoiceOptions
+}: {
+  choice: NonNullable<PlayerView["pendingChoice"]>;
+  action: LegalAction;
+  selected: string[];
+  disabled: boolean;
+  highlighted: boolean;
+  onClear(): void;
+  onChoiceOptions(action: LegalAction, choiceId: string, selectedOptionIds: string[]): void;
+}) {
+  const info = fieldCardChoiceInfo(choice, selected);
+  return (
+    <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="field-card-choice-panel">
+      <h2>
+        <Crosshair size={16} />
+        {info.title}
+      </h2>
+      <p className="meta">{info.prompt} · {info.counterLabel}</p>
+      <div className="fieldChoiceControls">
+        <button
+          className="button primary wide"
+          onClick={() => onChoiceOptions(action, choice.choiceId, selected)}
+          disabled={disabled || !info.canSubmit}
+          type="button"
+          data-testid="field-card-choice-submit"
+        >
+          <Check size={15} />
+          {info.submitLabel}
+        </button>
+        <button
+          className="button wide"
+          onClick={onClear}
+          disabled={disabled || !info.canClear}
+          type="button"
+          data-testid="field-card-choice-clear"
+        >
+          <X size={15} />
+          {info.clearLabel}
+        </button>
+      </div>
+    </section>
+  );
 }
 
 function DiscardChoicePanel({
@@ -11412,6 +11687,7 @@ function CardView({
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   choiceSelected = false,
+  choiceShortcut,
   discardShortcut,
   onFocus,
   onSelect,
@@ -11436,6 +11712,7 @@ function CardView({
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   choiceSelected?: boolean;
+  choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
   onFocus?(card: DisplayVisibleCard, hiddenSide?: Side): void;
   onSelect?(card: DisplayVisibleCard, hiddenSide?: Side): void;
@@ -11505,23 +11782,8 @@ function CardView({
   const advancementLabel = advancementDisplay?.ariaLabel ?? null;
   const strengthModifier = preview ? 0 : Math.max(0, Math.floor(card.strengthModifier ?? 0));
   const scoreStateBadges = showScoreStateBadges ? scoreCardStateBadges(card) : [];
-  const scoredAgendaCreditSource = showScoreStateBadges ? scoredAgendaCreditCounterSource(card.definitionId) : null;
-  const scoredAgendaCredits = scoredAgendaCreditSource ? counterAmount(card, "power") : 0;
-  const storedCredits = preview ? 0 : storedCreditAmount(card);
-  const recurringCredits = preview ? 0 : recurringCreditAmount(card);
-  const shellCounters = preview ? 0 : shellCounterAmount(card);
-  const dataRavenCounters = preview ? 0 : dataRavenCounterAmount(card);
-  const ablativeCounterBadge = preview ? null : armoredFridgeAblativeCounterBadge(card);
-  const storedCreditSource = storedCreditSourceLabel(card);
-  const storedCreditsAria =
-    storedCredits > 0 && storedCreditSource
-      ? `${storedCredits} ${storedCredits === 1 ? "Credit" : "Credits"} auf ${storedCreditSource}`
-      : null;
-  const recurringCreditsAria = recurringCredits > 0 ? `${recurringCredits} wiederkehrende ${creditLabel(recurringCredits)}` : null;
-  const shellCountersAria = shellCounters > 0 ? `${shellCounters} Shell-Counter` : null;
-  const dataRavenCountersAria = dataRavenCounters > 0 ? `${dataRavenCounters} Data-Raven-Counter` : null;
-  const ablativeCountersAria = ablativeCounterBadge?.ariaLabel ?? null;
-  const counterAriaSuffix = [storedCreditsAria, recurringCreditsAria, shellCountersAria, dataRavenCountersAria, ablativeCountersAria].filter(Boolean).join(", ");
+  const renderedCounterDisplays = preview ? [] : counterDisplaysForRendering(card);
+  const counterAriaSuffix = renderedCounterDisplays.map((display) => display.ariaLabel).filter(Boolean).join(", ");
   const cardStateAria = counterAriaSuffix ? `, ${counterAriaSuffix}` : "";
   const modifierBadgeAria = modifierBadges.map((badge) => badge.ariaLabel).join(", ");
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
@@ -11858,12 +12120,9 @@ function CardView({
         ) : null}
         {advancementDisplay ? <AdvancementGems card={card} display={advancementDisplay} /> : null}
         {strengthModifier > 0 ? <StrengthBoostBadge amount={strengthModifier} /> : null}
-        {storedCredits > 0 && storedCreditSource ? <StoredCreditsBadge amount={storedCredits} sourceLabel={storedCreditSource} /> : null}
-        {recurringCredits > 0 ? <RecurringCreditBadge amount={recurringCredits} /> : null}
-        {scoredAgendaCredits > 0 && scoredAgendaCreditSource ? <ScoredAgendaCreditsBadge amount={scoredAgendaCredits} sourceLabel={scoredAgendaCreditSource} /> : null}
-        {shellCounters > 0 ? <ShellCounterBadge amount={shellCounters} /> : null}
-        {dataRavenCounters > 0 ? <DataRavenCounterBadge amount={dataRavenCounters} /> : null}
-        {ablativeCounterBadge ? <AblativeCounterBadge label={ablativeCounterBadge.shortLabel} ariaLabel={ablativeCounterBadge.ariaLabel} testId={ablativeCounterBadge.testId} /> : null}
+        {renderedCounterDisplays.map((display) => (
+          <CounterDisplayBadge key={`${card.instanceId}-counter-display-${display.id}`} display={display} scoreState={showScoreStateBadges} />
+        ))}
         {scoreStateBadges.length > 0 ? <ScoreCardStateBadges badges={scoreStateBadges} /> : null}
       </button>
       {discardShortcut ? (
@@ -11883,6 +12142,25 @@ function CardView({
           }}
         >
           {discardShortcut.selected ? <Check size={11} strokeWidth={2.5} /> : <Trash2 size={11} strokeWidth={2.35} />}
+        </button>
+      ) : null}
+      {choiceShortcut ? (
+        <button
+          className={`cardChoiceShortcut${choiceShortcut.selected ? " active" : ""}`}
+          type="button"
+          aria-label={choiceShortcut.selected ? choiceShortcut.selectedLabel : choiceShortcut.label}
+          aria-pressed={choiceShortcut.selected}
+          title={choiceShortcut.selected ? choiceShortcut.selectedLabel : choiceShortcut.label}
+          data-testid="field-card-choice-shortcut"
+          disabled={choiceShortcut.disabled}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            setSuppressCardTooltip(true);
+            choiceShortcut.onToggle();
+          }}
+        >
+          {choiceShortcut.selected ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.35} />}
         </button>
       ) : null}
       {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}
@@ -11947,33 +12225,13 @@ function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side
 
 function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
-  const bonusAgendaPoints = counterAmount(card, "agenda");
-  if (bonusAgendaPoints > 0) {
-    const totalAgendaPoints = (card.agendaPoints ?? 0) + bonusAgendaPoints;
-    lines.push({
-      key: "agenda-bonus",
-      value: `+${bonusAgendaPoints} Agenda`,
-      label: `Gesamt ${totalAgendaPoints} ${agendaPointLabel(totalAgendaPoints)}`,
-      tone: "agenda"
-    });
-  }
-
   const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
   if (effectLine) lines.push(effectLine);
   return lines;
 }
 
-function scoreCardStateBadges(card: DisplayVisibleCard): ScoredAgendaStateLine[] {
+function scoreCardStateBadges(_card: DisplayVisibleCard): ScoredAgendaStateLine[] {
   const badges: ScoredAgendaStateLine[] = [];
-  const bonusAgendaPoints = counterAmount(card, "agenda");
-  if (bonusAgendaPoints > 0) {
-    badges.push({
-      key: "agenda-bonus-badge",
-      value: `+${bonusAgendaPoints} Agenda`,
-      label: "Bonus-Agenda-Punkte",
-      tone: "agenda"
-    });
-  }
   return badges;
 }
 
@@ -11987,19 +12245,6 @@ function ScoreCardStateBadges({ badges }: { badges: ScoredAgendaStateLine[] }) {
       ))}
     </span>
   );
-}
-
-function counterAmount(card: DisplayVisibleCard, counter: "agenda" | "power" | "shell" | "recurring_credit"): number {
-  const amount = card.counters?.[counter];
-  return typeof amount === "number" && Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function creditLabel(amount: number): string {
-  return amount === 1 ? "Credit" : "Credits";
-}
-
-function agendaPointLabel(amount: number): string {
-  return amount === 1 ? "Agenda-Punkt" : "Agenda-Punkte";
 }
 
 function CardActionsPopover({
@@ -12125,37 +12370,54 @@ function StrengthBoostBadge({ amount }: { amount: number }) {
   );
 }
 
-function StoredCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
+function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<VisibleCard["counterDisplays"]>[number]; scoreState: boolean }) {
+  const amount = safeCounterDisplayAmount(display.amount);
+  if (amount <= 0) return null;
+  if (display.displayKind === "stored_credits") {
+    return (
+      <CardCreditCounter
+        amount={amount}
+        ariaLabel={display.ariaLabel}
+        className={scoreState ? "scoredAgendaCreditsBadge" : "storedCreditsBadge brokerStoredCreditsBadge"}
+        testId={scoreState ? "scored-agenda-credits-badge" : "stored-credits-badge"}
+      />
+    );
+  }
+  if (display.displayKind === "recurring_credit") {
+    return (
+      <CardCreditCounter
+        amount={amount}
+        ariaLabel={display.ariaLabel}
+        className="recurringCreditBadge"
+        testId="recurring-credit-badge"
+      />
+    );
+  }
+  const className =
+    display.displayKind === "shell"
+      ? "shellCounterBadge"
+      : display.id === "data_raven"
+        ? "dataRavenCounterBadge"
+        : "ablativeCounterBadge";
+  const testId =
+    display.displayKind === "shell"
+      ? "shell-counter-badge"
+      : display.id === "data_raven"
+        ? "data-raven-counter-badge"
+        : display.id === "ablative"
+          ? "ablative-counter-badge"
+          : "counter-display-badge";
   return (
-    <CardCreditCounter
-      amount={amount}
-      ariaLabel={`${amount} ${amount === 1 ? "Credit" : "Credits"} auf ${sourceLabel}`}
-      className="storedCreditsBadge brokerStoredCreditsBadge"
-      testId="stored-credits-badge"
-    />
+    <span className={className} aria-label={display.ariaLabel} data-testid={testId} title={display.ariaLabel}>
+      {counterDisplayBadgeText(display, amount)}
+    </span>
   );
 }
 
-function RecurringCreditBadge({ amount }: { amount: number }) {
-  return (
-    <CardCreditCounter
-      amount={amount}
-      ariaLabel={`${amount} wiederkehrende ${creditLabel(amount)}`}
-      className="recurringCreditBadge"
-      testId="recurring-credit-badge"
-    />
-  );
-}
-
-function ScoredAgendaCreditsBadge({ amount, sourceLabel }: { amount: number; sourceLabel: string }) {
-  return (
-    <CardCreditCounter
-      amount={amount}
-      ariaLabel={`${amount} ${creditLabel(amount)} auf ${sourceLabel}`}
-      className="scoredAgendaCreditsBadge"
-      testId="scored-agenda-credits-badge"
-    />
-  );
+function counterDisplayBadgeText(display: NonNullable<VisibleCard["counterDisplays"]>[number], amount: number): string {
+  if (display.displayKind === "shell") return `${amount} Shell`;
+  if (display.id === "data_raven") return `${amount} Raven`;
+  return `${amount} ${display.label.replace(/-Counter$/u, "").replace(/\s+Counter$/u, "")}`;
 }
 
 function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: number; ariaLabel: string; className: string; testId: string }) {
@@ -12176,30 +12438,6 @@ function CardCreditCounter({ amount, ariaLabel, className, testId }: { amount: n
           <span className="cardCreditCounterIcon" key={`card-credit-counter-icon-${index}`} />
         ))}
       </span>
-    </span>
-  );
-}
-
-function ShellCounterBadge({ amount }: { amount: number }) {
-  return (
-    <span className="shellCounterBadge" aria-label={`${amount} Shell-Counter`} data-testid="shell-counter-badge">
-      {amount} Shell
-    </span>
-  );
-}
-
-function DataRavenCounterBadge({ amount }: { amount: number }) {
-  return (
-    <span className="dataRavenCounterBadge" aria-label={`${amount} Data-Raven-Counter`} data-testid="data-raven-counter-badge">
-      {amount} Raven
-    </span>
-  );
-}
-
-function AblativeCounterBadge({ label, ariaLabel, testId }: { label: string; ariaLabel: string; testId: string }) {
-  return (
-    <span className="ablativeCounterBadge" aria-label={ariaLabel} data-testid={testId} title={ariaLabel}>
-      {label}
     </span>
   );
 }
@@ -12264,11 +12502,7 @@ function cardDetailLines(card: VisibleCard): string[] {
     valueLabel("Agenda", card.agendaPoints),
     valueLabel("Stärke", card.strength),
     selectedServerLabel(card),
-    storedCreditsLabel(card),
-    recurringCreditLabel(card),
-    shellCounterLabel(card),
-    dataRavenCounterLabel(card),
-    armoredFridgeAblativeCounterBadge(card)?.label ?? null
+    ...counterDisplayDetailLabels(card)
   ]
     .filter(Boolean)
     .join(" · ");
@@ -12280,46 +12514,10 @@ function selectedServerLabel(card: VisibleCard): string | null {
   return `Zielserver ${card.selectedServerLabel}`;
 }
 
-function storedCreditsLabel(card: VisibleCard): string | null {
-  const sourceLabel = storedCreditSourceLabel(card);
-  if (!sourceLabel) return null;
-  const amount = storedCreditAmount(card);
-  if (amount <= 0) return null;
-  return `${sourceLabel} ${amount} ${amount === 1 ? "Credit" : "Credits"}`;
-}
-
-function shellCounterLabel(card: VisibleCard): string | null {
-  const amount = shellCounterAmount(card);
-  if (amount <= 0) return null;
-  return `${amount} Shell-Counter`;
-}
-
-function recurringCreditLabel(card: VisibleCard): string | null {
-  const amount = recurringCreditAmount(card);
-  if (amount <= 0) return null;
-  return `${amount} wiederkehrende ${creditLabel(amount)}`;
-}
-
-function dataRavenCounterLabel(card: VisibleCard): string | null {
-  const amount = dataRavenCounterAmount(card);
-  if (amount <= 0) return null;
-  return `${amount} Data-Raven-Counter`;
-}
-
-function shellCounterAmount(card: VisibleCard): number {
-  const amount = card.counters?.shell ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function recurringCreditAmount(card: VisibleCard): number {
-  const amount = card.counters?.recurring_credit ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
-}
-
-function dataRavenCounterAmount(card: VisibleCard): number {
-  if (card.definitionId !== "onr_v1_236_data-raven") return 0;
-  const amount = card.counters?.power ?? 0;
-  return Number.isFinite(amount) ? Math.max(0, Math.floor(amount)) : 0;
+function counterDisplayDetailLabels(card: VisibleCard): string[] {
+  return counterDisplaysForRendering(card).map(
+    (display) => `${safeCounterDisplayAmount(display.amount)} ${display.label}`,
+  );
 }
 
 function cardWithoutDevelopmentCounters(card: DisplayVisibleCard): DisplayVisibleCard {

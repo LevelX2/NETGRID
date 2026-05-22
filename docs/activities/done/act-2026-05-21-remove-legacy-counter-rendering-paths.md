@@ -1,14 +1,14 @@
 ---
 activityId: act-2026-05-21-remove-legacy-counter-rendering-paths
-status: inbox
+status: done
 kind: cleanup
 area: web
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-21
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
@@ -18,8 +18,14 @@ blockedBy:
   - act-2026-05-21-counter-display-special-and-recurring-counters
   - act-2026-05-21-web-render-counter-displays
   - act-2026-05-21-counter-display-drift-and-hidden-info-tests
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/page.tsx
+  - apps/web/app/action-board-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web test -- action-board-ui.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Legacy-Counter-Renderingpfade entfernen
@@ -66,4 +72,8 @@ Nach erfolgreicher CounterDisplay-Migration sollen die alten Web-seitigen Counte
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die Web-Helfer für gespeicherte Credits und Ablative-Badges lesen keine Karten-ID-zu-Countertyp-Tabelle und keine rohen `counters` mehr; sie liefern sichtbare Werte nur noch aus `counterDisplays`. Die Tests sichern zusätzlich, dass Broker- und Armored-Fridge-Rohcounter ohne CounterDisplay keine Badge-Werte mehr erzeugen.
+
+Der verbliebene Score-Area-Pfad für Bonus-Agenda-Punkte aus `counters.agenda` wurde aus dem sichtbaren Rendering entfernt. Damit bleiben Board- und Score-Card-Badges auf die Engine-Projektion begrenzt; falls Bonus-Agenda-Counter wieder sichtbar werden sollen, braucht das ein eigenes Engine-CounterDisplay-Paket statt Web-Hardcoding.
+
+Fokussierter Web-Test, Web-Typecheck und `git diff --check` waren grün.
