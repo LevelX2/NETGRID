@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-05-22-maintenance-ai-trace-action-detail-view
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-22-ai-trace-action-level-alternatives
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/maintenance.ts
+  - apps/web/app/maintenance/page.tsx
+  - apps/web/app/maintenance.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/maintenance.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - Browser-Check http://127.0.0.1:3100/maintenance
 ---
 
 # Wartungsansicht: KI-Trace-Details auf Action-Ebene anzeigen
@@ -59,12 +65,12 @@ Die Wartungsseite `KI-Entscheidungen` soll bei einer aufgeklappten KI-Entscheidu
 
 ## Akzeptanzkriterien
 
-- [ ] Eine KI-Entscheidung mit Action-Level-Daten zeigt eine eigene Action-Liste.
-- [ ] Die ausgewählte Action ist visuell eindeutig markiert.
-- [ ] Nicht gewählte Actions zeigen mindestens einen verständlichen Grund oder Kennzahlen, aus denen die Abwertung nachvollziehbar ist.
-- [ ] Bei fehlenden Action-Level-Daten bleibt die bestehende Detailansicht stabil und zeigt keine leeren oder irreführenden Sektionen.
-- [ ] Web-Helper-/Rendering-Tests decken mindestens einen Broker-vs-Basic-Credit-Beispielfall ab.
-- [ ] Die Redaktionsprüfung `findForbiddenMaintenanceMarkers` bleibt auf Detail- und Exportpfaden wirksam.
+- [x] Eine KI-Entscheidung mit Action-Level-Daten zeigt eine eigene Action-Liste.
+- [x] Die ausgewählte Action ist visuell eindeutig markiert.
+- [x] Nicht gewählte Actions zeigen mindestens einen verständlichen Grund oder Kennzahlen, aus denen die Abwertung nachvollziehbar ist.
+- [x] Bei fehlenden Action-Level-Daten bleibt die bestehende Detailansicht stabil und zeigt keine leeren oder irreführenden Sektionen.
+- [x] Web-Helper-/Rendering-Tests decken mindestens einen Broker-vs-Basic-Credit-Beispielfall ab.
+- [x] Die Redaktionsprüfung `findForbiddenMaintenanceMarkers` bleibt auf Detail- und Exportpfaden wirksam.
 
 ## Umsetzungshinweise
 
@@ -74,4 +80,4 @@ Die Wartungsseite `KI-Entscheidungen` soll bei einer aufgeklappten KI-Entscheidu
 
 ## Ergebnisnotiz
 
-Offen.
+Abgeschlossen. Die Maintenance-Detailansicht rendert `actionAlternatives` jetzt als eigenen `Action-Level`-Abschnitt mit Rang, Label, Quelle, Priority, Auswahlmarkierung, Grund und Economy-Kennzahlen. `aiTraceActionRows` formatiert Broker Load als `Broker laden` mit `jetzt 0` und `Pool nachher 3`, Basic Credit als `Credit nehmen` mit `jetzt +1`; fehlende Action-Level-Daten erzeugen keinen leeren Abschnitt. Die bestehende Redaktionsprüfung bleibt auf Detail- und Exportpfaden aktiv und ist im Broker-vs-Basic-Credit-Test mit abgedeckt.

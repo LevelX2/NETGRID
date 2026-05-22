@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
 import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, Download, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import {
   aiTraceMetaRows,
+  aiTraceActionRows,
   buildMaintenanceAiTraceEnablePath,
   aiTraceTitle,
   buildMaintenanceAiTraceIndexPath,
@@ -1129,6 +1130,7 @@ function MiniRows({ rows }: { rows: Array<[string, string]> }) {
 function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
   const detail = trace.detail;
   const alternatives = recordList(detail.rankedAlternatives).slice(0, 5);
+  const actionRows = aiTraceActionRows(detail);
   const scoreBreakdown = recordList(detail.scoreBreakdown).slice(0, 16);
   const detailSections = recordList(detail.detailSections).slice(0, 8);
   return (
@@ -1148,6 +1150,27 @@ function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
       <TraceSection title="Warnmarker" items={[...safeStringList(detail.warnings), ...(detail.fallbackUsed === true ? ["fallback"] : []), ...(detail.timeoutUsed === true ? ["timeout"] : [])]} />
       <TraceSection title="Sichtbare Gründe" items={safeStringList(detail.visibleReasons)} />
       <TraceSection title="Langfristplan" items={safeStringList(detail.longTermPlan)} />
+      {actionRows.length > 0 ? (
+        <details style={traceDetails} open>
+          <summary>Action-Level</summary>
+          <div style={traceCardGrid}>
+            {actionRows.map((action) => (
+              <div key={action.key} style={action.selected ? traceActionCardSelected : traceActionCard}>
+                <div style={traceActionHeader}>
+                  <strong>#{action.rank} · {action.label}</strong>
+                  <span style={action.selected ? traceSelectedPill : traceMutedPill}>{action.selected ? "gewählt" : "Alternative"}</span>
+                </div>
+                <MiniRows rows={[
+                  ["Quelle", action.source],
+                  ["Priority", action.priority],
+                  ["Grund", action.reason]
+                ]} />
+                {action.metrics.length > 0 ? <TraceSection title="Kennzahlen" items={action.metrics} compact /> : null}
+              </div>
+            ))}
+          </div>
+        </details>
+      ) : null}
       <details style={traceDetails} open>
         <summary>Top-Alternativen</summary>
         {alternatives.length === 0 ? <p style={subtle}>Keine Alternativen im Trace.</p> : null}
@@ -1330,6 +1353,11 @@ const traceChipsCompact: CSSProperties = { ...traceChips, gap: "0.25rem" };
 const traceChip: CSSProperties = { border: "1px solid #c7d4e2", borderRadius: 999, padding: "0.15rem 0.45rem", background: "#f6f9fc", fontSize: "0.78rem", color: "#24394d" };
 const traceCardGrid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.5rem", marginTop: "0.5rem" };
 const traceCard: CSSProperties = { display: "grid", gap: "0.35rem", border: "1px solid #d7e1eb", borderRadius: 6, padding: "0.55rem", background: "#fbfdff" };
+const traceActionCard: CSSProperties = { ...traceCard, minWidth: 0 };
+const traceActionCardSelected: CSSProperties = { ...traceActionCard, borderColor: "#2f74b5", background: "#eef6ff" };
+const traceActionHeader: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", minWidth: 0 };
+const traceSelectedPill: CSSProperties = { border: "1px solid #2f74b5", borderRadius: 999, padding: "0.1rem 0.45rem", background: "#dcefff", color: "#12466f", fontSize: "0.74rem", fontWeight: 700 };
+const traceMutedPill: CSSProperties = { ...traceSelectedPill, borderColor: "#c7d4e2", background: "#f6f9fc", color: "#42576b" };
 const recoveryBox: CSSProperties = { ...cleanupBox, marginTop: "0.75rem" };
 const recoveryLinkRow: CSSProperties = { display: "grid", gridTemplateColumns: "minmax(280px, 1fr) auto auto", gap: "0.5rem", alignItems: "center" };
 const linkButton: CSSProperties = { ...button, textDecoration: "none" };

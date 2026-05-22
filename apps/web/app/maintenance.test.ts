@@ -6,6 +6,7 @@ import {
   buildMaintenanceAiTraceNdjsonExport,
   buildMaintenanceMatchQuery,
   buildMaintenanceRecoveryLink,
+  aiTraceActionRows,
   aiTraceMetaRows,
   aiTraceTitle,
   DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
@@ -111,6 +112,71 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     };
     expect(aiTraceTitle(trace)).toBe("#2 Korp · build_scoring_remote");
     expect(aiTraceMetaRows(trace)).toContainEqual(["Vertrauen", "73%"]);
+  });
+
+  it("formats AI trace action-level rows for Broker versus basic credit", () => {
+    const rows = aiTraceActionRows({
+      actionAlternatives: [
+        {
+          rank: 1,
+          actionId: "runner.gain_credit",
+          actionType: "gain_credit",
+          label: "1 Credit nehmen",
+          source: "basic_action",
+          selected: true,
+          priority: 65,
+          whyChosen: ["selected_action"],
+          economy: {
+            economyKind: "basic_credit",
+            immediateGain: 1,
+            netCredits: 1,
+            storedCredits: 0,
+            futurePoolAfter: 0,
+            economyNeed: "acute"
+          }
+        },
+        {
+          rank: 2,
+          actionId: "runner.broker.load",
+          actionType: "activated_card_ability",
+          label: "Broker: 3 Credits auf Broker legen",
+          source: "visible_card",
+          sourceTitle: "Broker",
+          selected: false,
+          priority: 42,
+          whyNot: ["pool_build_deferred_for_credit_need"],
+          economy: {
+            economyKind: "pool_build",
+            ability: "broker_load_credits",
+            immediateGain: 0,
+            netCredits: 0,
+            storedCredits: 0,
+            futurePoolAfter: 3,
+            economyNeed: "acute"
+          }
+        }
+      ]
+    });
+
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toMatchObject({
+      label: "Credit nehmen",
+      selected: true,
+      source: "basic_action",
+      priority: "65",
+      reason: "selected_action"
+    });
+    expect(rows[0]?.metrics).toEqual(["jetzt +1", "Pool nachher 0", "Bedarf acute"]);
+    expect(rows[1]).toMatchObject({
+      label: "Broker laden",
+      selected: false,
+      source: "Broker",
+      priority: "42",
+      reason: "pool_build_deferred_for_credit_need"
+    });
+    expect(rows[1]?.metrics).toEqual(["jetzt 0", "Pool nachher 3", "Bedarf acute"]);
+    expect(aiTraceActionRows({ rankedAlternatives: [] })).toEqual([]);
+    expect(findForbiddenMaintenanceMarkers({ detail: { actionAlternatives: [{ meta: { decisionDebug: true } }] } }).length).toBeGreaterThan(0);
   });
 
   it("builds cursor paths and merges AI decision trace live-follow updates", () => {

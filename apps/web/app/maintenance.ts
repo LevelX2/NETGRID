@@ -116,6 +116,17 @@ export type MaintenanceAiTraceDetail = MaintenanceAiTraceIndexEntry & {
   detail: Record<string, unknown>;
 };
 
+export type MaintenanceAiTraceActionRow = {
+  key: string;
+  rank: number;
+  label: string;
+  selected: boolean;
+  source: string;
+  priority: string;
+  metrics: string[];
+  reason: string;
+};
+
 export type MaintenanceRecoveryAccess = {
   matchId: string;
   side: "runner" | "corp";
@@ -363,6 +374,71 @@ export function aiTraceMetaRows(trace: MaintenanceAiTraceDetail | MaintenanceAiT
     ["Score", typeof trace.score === "number" ? trace.score.toFixed(2) : "-"],
     ["Vertrauen", typeof trace.confidence === "number" ? `${Math.round(trace.confidence * 100)}%` : "-"]
   ];
+}
+
+export function aiTraceActionRows(detail: Record<string, unknown>): MaintenanceAiTraceActionRow[] {
+  const alternatives = Array.isArray(detail.actionAlternatives) ? detail.actionAlternatives : [];
+  return alternatives
+    .slice(0, 8)
+    .map((entry, index): MaintenanceAiTraceActionRow | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const action = entry as Record<string, unknown>;
+      const rank = typeof action.rank === "number" && Number.isFinite(action.rank) ? Math.max(1, Math.round(action.rank)) : index + 1;
+      const actionId = typeof action.actionId === "string" ? action.actionId : `action-${rank}`;
+      const actionType = typeof action.actionType === "string" ? action.actionType : "Aktion";
+      const economy = action.economy && typeof action.economy === "object" && !Array.isArray(action.economy) ? action.economy as Record<string, unknown> : undefined;
+      const sourceTitle = typeof action.sourceTitle === "string" ? action.sourceTitle : "";
+      const rawLabel = typeof action.label === "string" ? action.label : actionType;
+      const selected = action.selected === true;
+      return {
+        key: `${rank}:${actionId}`,
+        rank,
+        label: aiTraceActionLabel(rawLabel, actionType, sourceTitle, economy),
+        selected,
+        source: sourceTitle || (typeof action.source === "string" ? action.source : "-"),
+        priority: typeof action.priority === "number" && Number.isFinite(action.priority) ? action.priority.toFixed(0) : "-",
+        metrics: aiTraceActionMetrics(economy),
+        reason: aiTraceActionReason(selected ? action.whyChosen : action.whyNot)
+      };
+    })
+    .filter((entry): entry is MaintenanceAiTraceActionRow => Boolean(entry));
+}
+
+function aiTraceActionLabel(rawLabel: string, actionType: string, sourceTitle: string, economy: Record<string, unknown> | undefined): string {
+  const economyKind = typeof economy?.economyKind === "string" ? economy.economyKind : "";
+  if (economyKind === "basic_credit") return "Credit nehmen";
+  if (sourceTitle && economyKind === "pool_build") return `${sourceTitle} laden`;
+  if (sourceTitle && economyKind === "pool_payout") return `${sourceTitle} auszahlen`;
+  return rawLabel || actionType;
+}
+
+function aiTraceActionMetrics(economy: Record<string, unknown> | undefined): string[] {
+  if (!economy) return [];
+  const metrics: string[] = [];
+  const immediateGain = numberField(economy, "immediateGain");
+  const netCredits = numberField(economy, "netCredits");
+  const storedCredits = numberField(economy, "storedCredits");
+  const futurePoolAfter = numberField(economy, "futurePoolAfter");
+  if (immediateGain !== undefined) metrics.push(`jetzt ${formatSignedCredits(immediateGain)}`);
+  if (netCredits !== undefined && netCredits !== immediateGain) metrics.push(`netto ${formatSignedCredits(netCredits)}`);
+  if (storedCredits !== undefined && storedCredits > 0) metrics.push(`gespeichert ${storedCredits}`);
+  if (futurePoolAfter !== undefined) metrics.push(`Pool nachher ${futurePoolAfter}`);
+  if (typeof economy.economyNeed === "string") metrics.push(`Bedarf ${economy.economyNeed}`);
+  return metrics;
+}
+
+function aiTraceActionReason(value: unknown): string {
+  if (!Array.isArray(value)) return "-";
+  return value.find((entry): entry is string => typeof entry === "string") ?? "-";
+}
+
+function numberField(record: Record<string, unknown>, key: string): number | undefined {
+  const value = record[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function formatSignedCredits(value: number): string {
+  return value > 0 ? `+${value}` : String(value);
 }
 
 export function safeStringList(value: unknown, limit = 6): string[] {
