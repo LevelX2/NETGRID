@@ -269,6 +269,7 @@ import type {
   CardTagPreventionSourceImplementation,
   CardTraceSuccessEffectImplementation,
   CardTrashPreventionSourceImplementation,
+  CardUniqueDirectLongtailImplementation,
   CardVirusCounterImplementation,
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
@@ -3983,7 +3984,9 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
     if (
       ACTION_ASSET_CARD_IDS.has(definition.id) &&
-      !cardImplementationForDefinitionId(definition.id)
+      !cardImplementationForDefinitionId(definition.id) &&
+      uniqueDirectLongtailKindForDefinition(definition.id) !==
+        "nevinyrral_action_and_lose_on_rezzed_leave"
     ) {
       actions.push(
         action(
@@ -4001,30 +4004,59 @@ function corpMainActions(state: GameState): LegalAction[] {
         ),
       );
     }
+    const iGotARockImplementation = uniqueDirectLongtailImplementationForCard(
+      state,
+      assetId,
+    );
+    const isIGotARockCard =
+      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage" ||
+      (definition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
+        !cardImplementationForDefinitionId(definition.id));
+    const iGotARockRequiredTags =
+      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
+        ? iGotARockImplementation.requiredRunnerTags
+        : 2;
+    const iGotARockAgendaPointCost =
+      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
+        ? iGotARockImplementation.agendaPointCost
+        : 3;
     if (
-      definition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
-      state.runner.tags >= 2 &&
-      corpAgendaPointTotal(state) >= 3
+      isIGotARockCard &&
+      state.runner.tags >= iGotARockRequiredTags &&
+      corpAgendaPointTotal(state) >= iGotARockAgendaPointCost
     ) {
+      const agendaPointCost =
+        iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
+          ? iGotARockImplementation.agendaPointCost
+          : 3;
+      const damageAmount =
+        iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
+          ? iGotARockImplementation.damageAmount
+          : 15;
       actions.push(
         action(
           state,
           "corp",
           "gain_credit",
-          `${definition.title}: 15 Meat Damage`,
+          `${definition.title}: ${damageAmount} Meat Damage`,
           assetId,
           [{ clicks: 1 }],
           {
             cardId: assetId,
             v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
-            agendaPointCost: 3,
+            agendaPointCost,
             damageType: "meat",
-            damageAmount: 15,
+            damageAmount,
           },
         ),
       );
     }
-    if (definition.id === SCHLAGHUND_RANDOM_ASSET_CARD_ID) {
+    if (
+      uniqueDirectLongtailKindForCard(state, assetId) ===
+        "schlaghund_tag_die_meat_damage" ||
+      (definition.id === SCHLAGHUND_RANDOM_ASSET_CARD_ID &&
+        !cardImplementationForDefinitionId(definition.id))
+    ) {
       actions.push(
         action(
           state,
@@ -4699,7 +4731,44 @@ function runnerMainActions(state: GameState): LegalAction[] {
       ) {
         continue;
       }
-      if (definition.id === "onr_v1_156_corporate-ally") {
+      const installAgendaPointCost =
+        cardImplementationAgendaPointInstallCost(definition);
+      if (installAgendaPointCost > 0) {
+        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
+        if (!forfeitAgendaId) continue;
+        actions.push(
+          action(
+            state,
+            "runner",
+            "install_card",
+            `${definition.title} installieren`,
+            id,
+            [{ clicks: 1, credits: definition.installCost ?? 0 }],
+            {
+              cardId: id,
+              installAgendaPointCost,
+              forfeitAgendaCardId: forfeitAgendaId,
+              installCostReason: "card_implementation_agenda_point_cost",
+            },
+            {
+              targetRequirements: [
+                {
+                  id: "resourceCard",
+                  kind: "card",
+                  side: "runner",
+                  zoneScope: ["runner.grip"],
+                  visibility: "known_to_actor",
+                },
+              ],
+            },
+          ),
+        );
+        continue;
+      }
+      if (
+        definition.id === "onr_v1_156_corporate-ally" &&
+        !cardImplementationForDefinitionId(definition.id)
+      ) {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (!forfeitAgendaId) continue;
         actions.push(
@@ -5091,24 +5160,38 @@ function runnerMainActions(state: GameState): LegalAction[] {
     }
     for (const resourceId of state.runner.rig.resources.slice().sort()) {
       const definition = definitionFor(state, resourceId);
-      if (definition.id === "onr_v1_159_databroker") {
+      const uniqueDirectLongtail =
+        uniqueDirectLongtailImplementationForCard(state, resourceId);
+      if (
+        uniqueDirectLongtail?.kind === "databroker_agenda_point_credits" ||
+        (definition.id === "onr_v1_159_databroker" &&
+          !cardImplementationForDefinitionId(definition.id))
+      ) {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
+          const agendaPointCost =
+            uniqueDirectLongtail?.kind === "databroker_agenda_point_credits"
+              ? uniqueDirectLongtail.agendaPointCost
+              : 1;
+          const gainCreditsAmount =
+            uniqueDirectLongtail?.kind === "databroker_agenda_point_credits"
+              ? uniqueDirectLongtail.gainCredits
+              : 10;
           actions.push(
             action(
               state,
               "runner",
               "gain_credit",
-              `${definition.title}: 10 Credits (1 Agenda-Punkt, trashen)`,
+              `${definition.title}: ${gainCreditsAmount} Credits (${agendaPointCost} Agenda-Punkt, trashen)`,
               resourceId,
               [{ clicks: 1 }],
               {
                 cardId: resourceId,
                 resourceAbility: "databroker",
                 forfeitAgendaCardId: forfeitAgendaId,
-                agendaPointCost: 1,
+                agendaPointCost,
                 trashOnUse: true,
-                gainCreditsAmount: 10,
+                gainCreditsAmount,
               },
             ),
           );
@@ -8850,12 +8933,22 @@ function performAction(
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!rezzedCorpRootCardIds(state).includes(sourceCardId))
           throw new Error("I Got a Rock ist nicht rezzed installiert.");
+        const implementation =
+          uniqueDirectLongtailImplementationForCard(state, sourceCardId);
+        const sourceDefinition = definitionFor(state, sourceCardId);
         if (
-          definitionFor(state, sourceCardId).id !==
-          I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID
+          implementation?.kind !== "i_got_a_rock_tagged_meat_damage" &&
+          !(
+            sourceDefinition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
+            !cardImplementationForDefinitionId(sourceDefinition.id)
+          )
         )
           throw new Error("Die I-Got-a-Rock-Faehigkeit passt nicht zur Karte.");
-        if (state.runner.tags < 2)
+        const requiredTags =
+          implementation?.kind === "i_got_a_rock_tagged_meat_damage"
+            ? implementation.requiredRunnerTags
+            : 2;
+        if (state.runner.tags < requiredTags)
           throw new Error("I Got a Rock verlangt mindestens zwei Runner-Tags.");
         resolveIGotARockDamage(state, sourceCardId, legalAction);
         return;
@@ -8876,7 +8969,15 @@ function performAction(
             "Die V1.9.21-Asset-Zufallsfaehigkeit ist nicht rezzed installiert.",
           );
         const definition = definitionFor(state, sourceCardId);
-        if (definition.id !== SCHLAGHUND_RANDOM_ASSET_CARD_ID)
+        const implementation =
+          uniqueDirectLongtailImplementationForDefinition(definition.id);
+        if (
+          implementation?.kind !== "schlaghund_tag_die_meat_damage" &&
+          !(
+            definition.id === SCHLAGHUND_RANDOM_ASSET_CARD_ID &&
+            !cardImplementationForDefinitionId(definition.id)
+          )
+        )
           throw new Error(
             "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
           );
@@ -8896,9 +8997,13 @@ function performAction(
         resolveDamageOperation(
           state,
           legalAction,
-          "meat",
-          10,
-          SCHLAGHUND_RANDOM_ASSET_CARD_ID,
+          implementation?.kind === "schlaghund_tag_die_meat_damage"
+            ? implementation.damageType
+            : "meat",
+          implementation?.kind === "schlaghund_tag_die_meat_damage"
+            ? implementation.damageAmount
+            : 10,
+          definition.id,
         );
         if (!state.pendingChoice) {
           trashCorpInstalledCardToArchives(state, sourceCardId);
@@ -9011,8 +9116,23 @@ function performAction(
         const sourceCardId = String(legalAction.payload?.cardId ?? "");
         if (!state.runner.rig.resources.includes(sourceCardId))
           throw new Error("Databroker ist nicht installiert.");
+        const implementation =
+          uniqueDirectLongtailImplementationForCard(state, sourceCardId);
+        const sourceDefinition = definitionFor(state, sourceCardId);
+        if (
+          implementation?.kind !== "databroker_agenda_point_credits" &&
+          !(
+            sourceDefinition.id === "onr_v1_159_databroker" &&
+            !cardImplementationForDefinitionId(sourceDefinition.id)
+          )
+        )
+          throw new Error("Die Databroker-Faehigkeit passt nicht zur Karte.");
         const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
-        if (!Number.isInteger(agendaCost) || agendaCost !== 1)
+        const expectedAgendaCost =
+          implementation?.kind === "databroker_agenda_point_credits"
+            ? implementation.agendaPointCost
+            : 1;
+        if (!Number.isInteger(agendaCost) || agendaCost !== expectedAgendaCost)
           throw new Error("Der Databroker-Agenda-Kostenpfad ist ungueltig.");
         const forfeitAgendaCardId = String(
           legalAction.payload?.forfeitAgendaCardId ?? "",
@@ -9021,7 +9141,15 @@ function performAction(
         if (legalAction.payload?.trashOnUse === true)
           trashRunnerInstalledCardToHeap(state, sourceCardId);
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 10);
-        if (!Number.isInteger(gainAmount) || gainAmount <= 0)
+        const expectedGainAmount =
+          implementation?.kind === "databroker_agenda_point_credits"
+            ? implementation.gainCredits
+            : 10;
+        if (
+          !Number.isInteger(gainAmount) ||
+          gainAmount !== expectedGainAmount ||
+          gainAmount <= 0
+        )
           throw new Error("Der Databroker-Creditgewinn ist ungueltig.");
         credits(state, "runner", gainAmount);
         legalAction.payload = {
@@ -11023,7 +11151,10 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         : 0;
     const concealedHiddenRunnerResource =
       definition.type === "resource" && cardHasSubtype(definition, "hidden");
-    if (definition.id === "onr_v1_156_corporate-ally") {
+    if (
+      definition.id === "onr_v1_156_corporate-ally" &&
+      !cardImplementationForDefinitionId(definition.id)
+    ) {
       const agendaCost = Number(
         legalAction.payload?.installAgendaPointCost ?? 0,
       );
@@ -11625,6 +11756,34 @@ function runnerUtilityLongtailImplementationForCard(
 ): CardRunnerUtilityLongtailImplementation | undefined {
   return cardImplementationForDefinitionId(definitionFor(state, cardId).id)
     ?.runnerUtilityLongtail;
+}
+
+function uniqueDirectLongtailImplementationForDefinition(
+  definitionId: CardDefinitionId,
+): CardUniqueDirectLongtailImplementation | undefined {
+  return cardImplementationForDefinitionId(definitionId)?.uniqueDirectLongtail;
+}
+
+function uniqueDirectLongtailKindForDefinition(
+  definitionId: CardDefinitionId,
+): CardUniqueDirectLongtailImplementation["kind"] | undefined {
+  return uniqueDirectLongtailImplementationForDefinition(definitionId)?.kind;
+}
+
+function uniqueDirectLongtailImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardUniqueDirectLongtailImplementation | undefined {
+  return uniqueDirectLongtailImplementationForDefinition(
+    definitionFor(state, cardId).id,
+  );
+}
+
+function uniqueDirectLongtailKindForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardUniqueDirectLongtailImplementation["kind"] | undefined {
+  return uniqueDirectLongtailImplementationForCard(state, cardId)?.kind;
 }
 
 function isSubmarineUplinkSource(state: GameState, cardId: CardInstanceId): boolean {
@@ -13856,6 +14015,7 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
   const run = mustRun(state);
   if (startSuccessfulRunInterventionChoice(state, run, legalAction)) return;
   markSuccessfulRunForTurn(state, run);
+  applyUniqueDirectSuccessfulRunTriggers(state, legalAction);
   if (
     run.successfulRunAccessReplacement === "corp_lose_credits" &&
     (!run.successfulRunRequiresCorpCredits || state.corp.credits > 0)
@@ -13936,6 +14096,45 @@ function enterAccess(state: GameState, legalAction?: LegalAction): void {
 function markSuccessfulRunForTurn(state: GameState, run: ActiveRun): void {
   if (run.attackedServerId === "hq")
     ensureRunnerTurnFlags(state).successfulHqRunThisTurn = true;
+}
+
+function applyUniqueDirectSuccessfulRunTriggers(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const karlSources = state.runner.rig.resources
+    .slice()
+    .sort()
+    .filter(
+      (cardId) =>
+        uniqueDirectLongtailKindForCard(state, cardId) ===
+        "karl_successful_run_credit",
+    );
+  if (karlSources.length === 0) return;
+  let gainedCredits = 0;
+  const sourceDefinitionIds: CardDefinitionId[] = [];
+  for (const sourceId of karlSources) {
+    const implementation = uniqueDirectLongtailImplementationForCard(
+      state,
+      sourceId,
+    );
+    if (implementation?.kind !== "karl_successful_run_credit") continue;
+    credits(state, "runner", implementation.amount);
+    gainedCredits += implementation.amount;
+    sourceDefinitionIds.push(definitionFor(state, sourceId).id);
+  }
+  if (gainedCredits <= 0 || !legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    successfulRunRunnerCreditGain:
+      Number(legalAction.payload?.successfulRunRunnerCreditGain ?? 0) +
+      gainedCredits,
+    gainedCredits:
+      Number(legalAction.payload?.gainedCredits ?? 0) + gainedCredits,
+    karlSuccessfulRunCreditGain: gainedCredits,
+    karlSuccessfulRunSourceDefinitionIds: sourceDefinitionIds.sort().join(","),
+    runnerCreditsAfter: state.runner.credits,
+  };
 }
 
 function revealArchivesAtBreachStart(
@@ -16288,7 +16487,11 @@ function trashCorpInstalledCardToArchives(
       cleanup.target === "agenda_or_node_inside_same_fort",
   );
   const rezzedNevinyrralLeftPlay =
-    definition.id === NEVINYRRAL_ID && instance.rezzed === true;
+    (uniqueDirectLongtailKindForDefinition(definition.id) ===
+      "nevinyrral_action_and_lose_on_rezzed_leave" ||
+      (definition.id === NEVINYRRAL_ID &&
+        !cardImplementationForDefinitionId(definition.id))) &&
+    instance.rezzed === true;
   const { hostedOn: _hostedOn, ...withoutHost } = instance;
   void _hostedOn;
   removeFromAllZones(state, cardId);
@@ -16318,7 +16521,7 @@ function trashCorpInstalledCardToArchives(
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         gameEndReason: "nevinyrral_left_play",
-        sourceDefinitionId: NEVINYRRAL_ID,
+        sourceDefinitionId: definition.id,
       };
     }
   }
@@ -17733,7 +17936,12 @@ function applyRunnerStartOfTurnEffects(
   for (const cardId of state.runner.rig.resources.slice().sort()) {
     if (state.pendingChoice) break;
     const definition = definitionFor(state, cardId);
-    if (definition.id === "onr_v1_180_smiths-pawnshop")
+    if (
+      uniqueDirectLongtailKindForCard(state, cardId) ===
+        "smiths_pawnshop_start_turn_trash_for_credits" ||
+      (definition.id === "onr_v1_180_smiths-pawnshop" &&
+        !cardImplementationForDefinitionId(definition.id))
+    )
       startSmithsPawnshopChoice(state, cardId);
   }
 }
@@ -20252,9 +20460,13 @@ function runnerStoleAgendaSubtypeThisTurn(
 }
 
 function runnerHasInstalledCorporateAlly(state: GameState): boolean {
-  return state.runner.rig.resources.some(
-    (cardId) => definitionFor(state, cardId).id === "onr_v1_156_corporate-ally",
-  );
+  return state.runner.rig.resources.some((cardId) => {
+    const definition = definitionFor(state, cardId);
+    if (definition.id !== "onr_v1_156_corporate-ally") return false;
+    return !cardImplementationForDefinitionId(definition.id)?.modifiers?.some(
+      (modifier) => modifier.kind === "agenda_difficulty",
+    );
+  });
 }
 
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
@@ -26432,7 +26644,14 @@ function resolveIGotARockDamage(
   sourceCardId: CardInstanceId,
   legalAction: LegalAction,
 ): void {
-  const requiredPoints = 3;
+  const definition = definitionFor(state, sourceCardId);
+  const implementation = uniqueDirectLongtailImplementationForDefinition(
+    definition.id,
+  );
+  const requiredPoints =
+    implementation?.kind === "i_got_a_rock_tagged_meat_damage"
+      ? implementation.agendaPointCost
+      : 3;
   const forfeitedAgendaIds = chooseCorpAgendasForPointCost(state, requiredPoints);
   const paidPoints = forfeitedAgendaIds.reduce(
     (sum, cardId) => sum + agendaPointsForScoredCard(state, cardId),
@@ -26449,7 +26668,7 @@ function resolveIGotARockDamage(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1920AssetAbility: "i_got_a_rock_tagged_meat_damage",
-    sourceDefinitionId: I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
+    sourceDefinitionId: definition.id,
     sourceCardId,
     runnerTagsBefore: state.runner.tags,
     agendaPointCost: requiredPoints,
@@ -26462,9 +26681,13 @@ function resolveIGotARockDamage(
   resolveDamageOperation(
     state,
     legalAction,
-    "meat",
-    15,
-    I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
+    implementation?.kind === "i_got_a_rock_tagged_meat_damage"
+      ? implementation.damageType
+      : "meat",
+    implementation?.kind === "i_got_a_rock_tagged_meat_damage"
+      ? implementation.damageAmount
+      : 15,
+    definition.id,
   );
 }
 
@@ -26976,6 +27199,14 @@ function resolveSmithsPawnshopChoice(
   const pawnshopId = sourceParts[1];
   if (!pawnshopId || !state.runner.rig.resources.includes(pawnshopId))
     throw new Error("Smith's Pawnshop ist nicht mehr installiert.");
+  const pawnshopDefinition = definitionFor(state, pawnshopId);
+  const implementation = uniqueDirectLongtailImplementationForDefinition(
+    pawnshopDefinition.id,
+  );
+  const gainCredits =
+    implementation?.kind === "smiths_pawnshop_start_turn_trash_for_credits"
+      ? implementation.gainCredits
+      : 2;
   const selectedId =
     selectedChoiceIds(playerAction.selectedChoices)[0] ?? "pass";
   if (selectedId !== "pass") {
@@ -26990,24 +27221,24 @@ function resolveSmithsPawnshopChoice(
       throw new Error("Die gewaehlte Karte ist nicht mehr installiert.");
     const trashedDefinition = definitionFor(state, cardId);
     trashRunnerInstalledCardToHeap(state, cardId);
-    credits(state, "runner", 2);
+    credits(state, "runner", gainCredits);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       smithsPawnshopTriggered: true,
       smithsPawnshopCardId: pawnshopId,
-      sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+      sourceDefinitionId: pawnshopDefinition.id,
       trashedCardId: cardId,
       trashedCardDefinitionId: trashedDefinition.id,
       trashedCardTitle: trashedDefinition.title,
-      creditsGained: 2,
-      gainedCredits: 2,
+      creditsGained: gainCredits,
+      gainedCredits: gainCredits,
     };
   } else {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       smithsPawnshopTriggered: false,
       smithsPawnshopCardId: pawnshopId,
-      sourceDefinitionId: "onr_v1_180_smiths-pawnshop",
+      sourceDefinitionId: pawnshopDefinition.id,
     };
   }
   delete state.pendingChoice;

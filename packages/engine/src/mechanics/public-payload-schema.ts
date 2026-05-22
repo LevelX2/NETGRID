@@ -81,6 +81,7 @@ const AMOUNT_KEYS = [
   "afterRunUnpreventableCoreDamage",
   "corpCreditsAfter",
   "runnerCreditsAfter",
+  "karlSuccessfulRunCreditGain",
   "corpClicksAfter",
   "runnerClicksAfter",
   "hostedCreditsAdded",
@@ -123,6 +124,7 @@ const TARGET_KEYS = [
   "socialEngineeringNoIceTarget",
   "redactedKind",
   "sourceTrashed",
+  "karlSuccessfulRunSourceDefinitionIds",
 ] as const;
 
 export function legacyAbilityPayloadEntries(

@@ -192,6 +192,27 @@ function cardImplementationAgendaDifficultyModifier(
       sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
     );
   }, 0);
+  const runnerInstalledModifier =
+    activeCardImplementationModifiersForRunnerInstalled(
+      state,
+      "agenda_difficulty",
+    ).reduce((sum, active) => {
+      const modifier: CardAgendaDifficultyModifierImplementation =
+        active.modifier;
+      if (!isPublicRunnerInstalledModifier(modifier)) return sum;
+      if (!cardMatchesModifierAppliesTo(agendaDefinition, modifier.appliesTo))
+        return sum;
+      if (
+        typeof modifier.amount !== "number" ||
+        !Number.isInteger(modifier.amount) ||
+        modifier.amount <= 0
+      )
+        return sum;
+      return (
+        sum +
+        (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
+      );
+    }, 0);
   const rootModifier = activeCardImplementationModifiersForCorpRoot(
     state,
     "agenda_difficulty",
@@ -215,7 +236,7 @@ function cardImplementationAgendaDifficultyModifier(
       sum + (modifier.operation === "reduce" ? -modifier.amount : modifier.amount)
     );
   }, 0);
-  return scoredModifier + rootModifier;
+  return scoredModifier + runnerInstalledModifier + rootModifier;
 }
 
 function sameCorpServerAsSource(

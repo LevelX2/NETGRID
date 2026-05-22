@@ -55,11 +55,14 @@ import { experimentalAiImplementation } from "./onr-v1/corp/assets/experimental-
 import { fortressArchitectsImplementation } from "./onr-v1/corp/assets/fortress-architects";
 import { holovidCampaignImplementation } from "./onr-v1/corp/assets/holovid-campaign";
 import { informationLaunderingImplementation } from "./onr-v1/corp/assets/information-laundering";
+import { iGotARockImplementation } from "./onr-v1/corp/assets/i-got-a-rock";
 import { krumzImplementation } from "./onr-v1/corp/assets/krumz";
+import { nevinyrralImplementation } from "./onr-v1/corp/assets/nevinyrral";
 import { newsgroupTauntingImplementation } from "./onr-v1/corp/assets/newsgroup-taunting";
 import { omniscienceFoundationImplementation } from "./onr-v1/corp/assets/omniscience-foundation";
 import { pacificaRegionalAiImplementation } from "./onr-v1/corp/assets/pacifica-regional-ai";
 import { reschedulerImplementation } from "./onr-v1/corp/assets/rescheduler";
+import { schlaghundImplementation } from "./onr-v1/corp/assets/schlaghund";
 import { skaldervikenSaBetaTestSiteImplementation } from "./onr-v1/corp/assets/skalderviken-sa-beta-test-site";
 import { soloSquadImplementation } from "./onr-v1/corp/assets/solo-squad";
 import { southAfricanMiningCorpImplementation } from "./onr-v1/corp/assets/south-african-mining-corp";
@@ -336,7 +339,9 @@ import { backDoorToHilliardImplementation } from "./onr-v1/runner/resources/back
 import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/back-door-to-orbital-air";
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
 import { danshisSecondIdImplementation } from "./onr-v1/runner/resources/danshis-second-id";
+import { databrokerImplementation } from "./onr-v1/runner/resources/databroker";
 import { diplomaticImmunityImplementation } from "./onr-v1/runner/resources/diplomatic-immunity";
+import { corporateAllyImplementation } from "./onr-v1/runner/resources/corporate-ally";
 import { fieldReporterForIceAndDataImplementation } from "./onr-v1/runner/resources/field-reporter-for-ice-and-data";
 import { fallGuyImplementation } from "./onr-v1/runner/resources/fall-guy";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
@@ -344,6 +349,7 @@ import { brokerImplementation } from "./onr-v1/runner/resources/broker";
 import { codeViralCacheImplementation } from "./onr-v1/runner/resources/code-viral-cache";
 import { hellsRunImplementation } from "./onr-v1/runner/resources/hells-run";
 import { junkyardBbsImplementation } from "./onr-v1/runner/resources/junkyard-bbs";
+import { karlDeVeresCorporateStoogeImplementation } from "./onr-v1/runner/resources/karl-de-veres-corporate-stooge";
 import { lelandCorporateBodyguardImplementation } from "./onr-v1/runner/resources/leland-corporate-bodyguard";
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { nEtoImplementation } from "./onr-v1/runner/resources/n-e-t-o";
@@ -354,6 +360,7 @@ import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigge
 import { roninAroundImplementation } from "./onr-v1/runner/resources/ronin-around";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
+import { smithsPawnshopImplementation } from "./onr-v1/runner/resources/smiths-pawnshop";
 import { technicianLoverImplementation } from "./onr-v1/runner/resources/technician-lover";
 import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
 import { submarineUplinkImplementation } from "./onr-v1/runner/resources/submarine-uplink";
@@ -486,7 +493,9 @@ export const CARD_IMPLEMENTATIONS = [
   backDoorToHilliardImplementation,
   backDoorToOrbitalAirImplementation,
   aujourdhuiImplementation,
+  corporateAllyImplementation,
   danshisSecondIdImplementation,
+  databrokerImplementation,
   diplomaticImmunityImplementation,
   fieldReporterForIceAndDataImplementation,
   fallGuyImplementation,
@@ -495,6 +504,7 @@ export const CARD_IMPLEMENTATIONS = [
   floatingRunnerBbsImplementation,
   hellsRunImplementation,
   junkyardBbsImplementation,
+  karlDeVeresCorporateStoogeImplementation,
   lelandCorporateBodyguardImplementation,
   loanFromChibaImplementation,
   nEtoImplementation,
@@ -531,6 +541,7 @@ export const CARD_IMPLEMENTATIONS = [
   scoreImplementation,
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
+  smithsPawnshopImplementation,
   technicianLoverImplementation,
   submarineUplinkImplementation,
   theSpringboardImplementation,
@@ -616,11 +627,14 @@ export const CARD_IMPLEMENTATIONS = [
   fortressArchitectsImplementation,
   holovidCampaignImplementation,
   informationLaunderingImplementation,
+  iGotARockImplementation,
   krumzImplementation,
+  nevinyrralImplementation,
   newsgroupTauntingImplementation,
   omniscienceFoundationImplementation,
   pacificaRegionalAiImplementation,
   reschedulerImplementation,
+  schlaghundImplementation,
   skaldervikenSaBetaTestSiteImplementation,
   soloSquadImplementation,
   remoteFacilityImplementation,

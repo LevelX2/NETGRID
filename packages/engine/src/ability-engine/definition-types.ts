@@ -646,6 +646,45 @@ export type CardAbilityCostImplementation =
       amount: 1;
     };
 
+export type CardUniqueDirectLongtailImplementation =
+  | {
+      kind: "karl_successful_run_credit";
+      amount: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "smiths_pawnshop_start_turn_trash_for_credits";
+      gainCredits: 2;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "databroker_agenda_point_credits";
+      agendaPointCost: 1;
+      gainCredits: 10;
+      trashSource: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "nevinyrral_action_and_lose_on_rezzed_leave";
+      actionGain: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "i_got_a_rock_tagged_meat_damage";
+      requiredRunnerTags: 2;
+      agendaPointCost: 3;
+      damageType: Extract<DamageType, "meat">;
+      damageAmount: 15;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "schlaghund_tag_die_meat_damage";
+      damageType: Extract<DamageType, "meat">;
+      damageAmount: 10;
+      trashSourceOnSuccess: true;
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
 export type CardEffectImplementation =
   | GainCreditsEffectImplementation
   | DrawCardsEffectImplementation
@@ -1212,8 +1251,8 @@ export type CardAgendaDifficultyModifierImplementation = {
   kind: "agenda_difficulty";
   operation: "increase" | "reduce";
   amount: number;
-  activeWhile: "scored" | "rezzed";
-  sourceZone: "corp_scored_agenda" | "corp_root";
+  activeWhile: "installed" | "scored" | "rezzed";
+  sourceZone: "runner_installed" | "corp_scored_agenda" | "corp_root";
   side: "corp";
   visibility: EventVisibilityClass;
   appliesTo: {

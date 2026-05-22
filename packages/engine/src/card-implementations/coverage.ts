@@ -1005,6 +1005,18 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION);
   }
+  if (implementation.uniqueDirectLongtail) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for unique/direct-ability longtail behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ACTIVATED_ABILITY_LOCATION);
+  }
+  if (implementation.unique) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition declares unique-by-title behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_ACTIVATED_ABILITY_LOCATION);
+  }
 
   return {
     cardDefinitionId: implementation.cardDefinitionId,

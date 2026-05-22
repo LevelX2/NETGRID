@@ -24,6 +24,7 @@ import type {
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
   CardTrashPreventionSourceImplementation,
+  CardUniqueDirectLongtailImplementation,
   CardVirusCounterImplementation,
   HostedProgramCapacityImplementation,
   HostedProgramModifierImplementation,
@@ -65,9 +66,10 @@ export type CardImplementationDefinition = {
   corpUtility?: CardCorpUtilityImplementation;
   hiddenReplacementLongtail?: CardHiddenReplacementLongtailImplementation;
   runnerUtilityLongtail?: CardRunnerUtilityLongtailImplementation;
+  uniqueDirectLongtail?: CardUniqueDirectLongtailImplementation;
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";
-    controller: "runner";
+    controller: "runner" | "corp";
   };
 };

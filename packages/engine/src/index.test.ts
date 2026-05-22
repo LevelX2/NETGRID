@@ -8172,6 +8172,98 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     }
   });
 
+  it("migrates P3.60 Corporate Ally Karl de Veres Smith's Pawnshop Databroker Wilson Nevinyrral I Got a Rock Schlaghund Crash Everett unique direct CardImplementation coverage", () => {
+    const p360ImplementedCards = [
+      "onr_v1_156_corporate-ally",
+      "onr_v1_166_karl-de-veres-corporate-stooge",
+      "onr_v1_180_smiths-pawnshop",
+      "onr_v1_159_databroker",
+      "onr_v1_331_nevinyrral",
+      "onr_v1_327_i-got-a-rock",
+      "onr_v1_339_schlaghund",
+    ] as const;
+
+    for (const definitionId of p360ImplementedCards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+    expect(
+      cardImplementationForDefinitionId("onr_v1_187_wilson-weeflerunner-apprentice"),
+    ).toBeUndefined();
+    expect(
+      cardImplementationForDefinitionId("onr_v1_157_crash-everett-inventive-fixer"),
+    ).toBeUndefined();
+  });
+
+  it("resolves P3.60 Karl de Veres successful-run credits and Nevinyrral start-turn actions from CardImplementation", () => {
+    let karlState = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p360-karl-run-credit",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p360_karl_runner",
+          name: "P3.60 Karl Runner",
+          cards: [
+            { id: "onr_v1_166_karl-de-veres-corporate-stooge", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) =>
+                card.id !== "onr_v1_166_karl-de-veres-corporate-stooge",
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    karlState.runner.credits = 10;
+    installRunnerResourceForTest(
+      karlState,
+      "onr_v1_166_karl-de-veres-corporate-stooge",
+    );
+    const creditsBeforeRun = karlState.runner.credits;
+    karlState = apply(
+      karlState,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(karlState.runner.credits).toBe(creditsBeforeRun + 1);
+    expect(karlState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      runnerCreditsAfter: karlState.runner.credits,
+    });
+
+    let nevinyrralState = apply(
+      createGameAfterSetup({
+        seed: "p360-nevinyrral-start-action",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    const nevinyrralId = putCorpRootInRemote(
+      nevinyrralState,
+      "onr_v1_331_nevinyrral",
+    );
+    nevinyrralState.cardInstances[nevinyrralId] = {
+      ...nevinyrralState.cardInstances[nevinyrralId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    nevinyrralState = toRunnerTurnFromCorpMain(nevinyrralState);
+    nevinyrralState = apply(
+      nevinyrralState,
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    expect(nevinyrralState.corp.clicks).toBeGreaterThanOrEqual(4);
+  });
+
   it("resolves P3.59 Field Reporter and Preying Mantis runner-turn windows", () => {
     const p359FieldPreyingRunnerCards = MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
       (card) =>
@@ -20362,7 +20454,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
 
   it("uses rezzed V1.9.20 action-economy assets through explicit legal actions", () => {
     for (const definitionId of [
-      "onr_v1_331_nevinyrral",
+      "onr_v1_334_pacifica-regional-ai",
     ]) {
       let state = apply(
         createGameAfterSetup({
@@ -20383,6 +20475,7 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         ...state.cardInstances[assetId]!,
         faceup: true,
         rezzed: true,
+        advancementCounters: 1,
       };
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;
@@ -20391,16 +20484,14 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         state,
         "corp",
         (action) =>
-          action.type === "gain_credit" &&
-          action.payload?.v1920AssetAbility === "gain_actions" &&
+          action.type === "activated_card_ability" &&
           String(action.payload?.cardId) === assetId,
       );
 
       expect(state.corp.clicks, definitionId).toBe(clicksBefore + 1);
       expect(state.eventLog.at(-1)?.publicPayload, definitionId).toMatchObject({
-        actionType: "gain_credit",
-        v1920AssetAbility: "gain_actions",
-        gainedActions: 2,
+        actionType: "activated_card_ability",
+        gainedActions: 1,
         corpClicksAfter: clicksBefore + 1,
       });
       expect(
@@ -20515,18 +20606,18 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
     state.corp.credits = 20;
     state.corp.clicks = 3;
     state.corp.maxHandSize = 100;
-    const assetId = putCorpRootInRemote(state, "onr_v1_331_nevinyrral");
+    const assetId = putCorpRootInRemote(state, "onr_v1_334_pacifica-regional-ai");
     state.cardInstances[assetId] = {
       ...state.cardInstances[assetId]!,
       faceup: true,
       rezzed: true,
+      advancementCounters: 1,
     };
     const legal = mustAction(
       state,
       "corp",
       (action) =>
-        action.type === "gain_credit" &&
-        action.payload?.v1920AssetAbility === "gain_actions" &&
+        action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === assetId,
     );
 
@@ -42147,7 +42238,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
     expect(install.payload).toMatchObject({
       installAgendaPointCost: 1,
       forfeitAgendaCardId: expectedForfeitId,
-      installCostReason: "corporate_ally",
+      installCostReason: "card_implementation_agenda_point_cost",
     });
     const initial = structuredClone(state);
     const replayStart = state.eventLog.length;
