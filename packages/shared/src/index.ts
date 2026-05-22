@@ -854,6 +854,7 @@ export type RunState = {
   fatalDamageAmountForEncounter?: number;
   fullyBrokenIceIds?: CardInstanceId[];
   startupImmolatorPendingPassedIceId?: CardInstanceId;
+  forceJackOutAfterEncounterSourceId?: CardInstanceId;
   dupreUsedBreakerIdsThisRun?: CardInstanceId[];
   mysteryBoxUsedSourceIdsThisRun?: CardInstanceId[];
   bartmossUsedBreakerIdsThisEncounter?: CardInstanceId[];
@@ -1060,6 +1061,10 @@ export type GameState = {
     bodyweightDataCrecheExtraRunPending?: boolean;
     bodyweightDataCrecheExtraRunUsedThisTurn?: boolean;
     startupImmolatorUsedSourceIdsThisTurn?: CardInstanceId[];
+    preyingMantisUsedSourceIdsThisTurn?: CardInstanceId[];
+    preyingMantisDamageDueSourceIdsThisTurn?: CardInstanceId[];
+    questForCattekinPermanentActionGain?: boolean;
+    corpRezzedIceThisTurn?: number;
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
@@ -1077,6 +1082,7 @@ export type GameState = {
   faitAccompliCountersByServer?: Partial<
     Record<Exclude<ServerId, "new_remote">, number>
   >;
+  spyCountersByServer?: Partial<Record<Exclude<ServerId, "new_remote">, number>>;
   runnerAgendaPointsToForfeit?: number;
   cancelledDamagePreventionSourceIdsUntilEndOfTurn?: CardInstanceId[];
 };

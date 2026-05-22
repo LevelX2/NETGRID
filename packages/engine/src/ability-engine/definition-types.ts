@@ -135,6 +135,46 @@ export type CardHiddenReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
+export type CardRunnerUtilityLongtailImplementation =
+  | {
+      kind: "microtech_backup_drive_program_trash_replacement";
+      visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
+    }
+  | {
+      kind: "startup_immolator_trash_fully_broken_ice";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "rabbit_ice_trace_limit_reduction";
+      amount: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "submarine_uplink_trace_link_force_jack_out";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "i_spy_successful_run_fort_counter_expose";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "field_reporter_end_turn_rezzed_ice_payout";
+      amountPerRezzedIce: 1;
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "preying_mantis_optional_action_unpreventable_core_damage";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "quest_for_cattekin_start_turn_random_permanent_action";
+      visibility: Extract<EventVisibilityClass, "public">;
+    }
+  | {
+      kind: "microtech_trode_set_ap_subroutine_modifier";
+      visibility: Extract<EventVisibilityClass, "public">;
+    };
+
 export type CardAccessHookImplementation =
   | {
       kind: "pre_access_rd_cut";

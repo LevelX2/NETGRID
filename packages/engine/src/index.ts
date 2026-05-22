@@ -264,6 +264,7 @@ import type {
   CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
   CardRunEncounterInterventionImplementation,
+  CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
   CardTagPreventionSourceImplementation,
   CardTraceSuccessEffectImplementation,
@@ -3392,6 +3393,28 @@ function corpMainActions(state: GameState): LegalAction[] {
       ),
     );
   }
+  if (state.corp.credits >= 4) {
+    for (const server of state.corp.servers) {
+      const count = spyCountersForServer(state, server.id);
+      if (count <= 0) continue;
+      actions.push(
+        action(
+          state,
+          "corp",
+          "trigger_ability",
+          `Spy-Counter in ${server.label} entfernen`,
+          "game_rule",
+          [{ clicks: 1, credits: 4 }],
+          {
+            serverId: server.id,
+            corpAbility: "remove_spy_counter",
+            counterType: "spy",
+            removedCounterAmount: 1,
+          },
+        ),
+      );
+    }
+  }
   actions.push(
     action(state, "corp", "gain_credit", "1 Credit nehmen", "basic_action", [
       { clicks: 1 },
@@ -4914,6 +4937,31 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
       if (
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+        "preying_mantis_optional_action_unpreventable_core_damage"
+      ) {
+        const used = new Set(
+          ensureRunnerTurnFlags(state).preyingMantisUsedSourceIdsThisTurn ?? [],
+        );
+        if (!used.has(cardId)) {
+          actions.push(
+            action(
+              state,
+              "runner",
+              "trigger_ability",
+              `${definition.title}: Aktion gewinnen`,
+              cardId,
+              [],
+              {
+                cardId,
+                runnerUtilityAbility: "preying_mantis_gain_action",
+                gainedActions: 1,
+              },
+            ),
+          );
+        }
+      }
+      if (
         definition.id === STACK_TOP_REORDER_RESOURCE_CARD_ID &&
         !cardImplementationForDefinitionId(definition.id) &&
         state.runner.stack.length >= 2
@@ -6051,6 +6099,13 @@ function poxCountersForServer(
   serverId: Exclude<ServerId, "new_remote">,
 ): number {
   return Math.max(0, Math.floor(state.poxCountersByServer?.[serverId] ?? 0));
+}
+
+function spyCountersForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): number {
+  return Math.max(0, Math.floor(state.spyCountersByServer?.[serverId] ?? 0));
 }
 
 function restrictiveNetZoningInstallTax(
@@ -7623,7 +7678,12 @@ function startupImmolatorPostPassActions(
   if (state.runner.credits < rezCost) return [];
   const targetDefinition = definitionFor(state, targetIceId);
   return state.runner.rig.programs
-    .filter((cardId) => definitionFor(state, cardId).id === STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID)
+    .filter(
+      (cardId) =>
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+          "startup_immolator_trash_fully_broken_ice" ||
+        definitionFor(state, cardId).id === STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
+    )
     .filter((cardId) => !used.has(cardId))
     .sort()
     .map((sourceCardId) =>
@@ -7797,6 +7857,29 @@ function successfulRunProgramActions(
             v1919RunnerProgramAbility: "fait_accompli_successful_run_counter",
             counterType: "power",
             addCounterAmount: 1,
+          },
+        ),
+      );
+    }
+    if (
+      runnerUtilityLongtailKindForCard(state, sourceCardId) ===
+      "i_spy_successful_run_fort_counter_expose"
+    ) {
+      const server = mustServer(state, run.attackedServerId);
+      if (server.kind === "archives") continue;
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          `${definition.title}: Spy-Counter platzieren`,
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            serverId: server.id,
+            runnerUtilityAbility: "i_spy_put_spy_counter",
+            counterType: "spy",
           },
         ),
       );
@@ -9375,6 +9458,18 @@ function performAction(
         resolveMicrotechBackupDriveReturnTopHosted(state, legalAction);
         return;
       }
+      if (legalAction.payload?.runnerUtilityAbility === "preying_mantis_gain_action") {
+        resolvePreyingMantisGainAction(state, legalAction);
+        return;
+      }
+      if (legalAction.payload?.runnerUtilityAbility === "i_spy_put_spy_counter") {
+        resolveISpyPutSpyCounter(state, legalAction);
+        return;
+      }
+      if (legalAction.payload?.corpAbility === "remove_spy_counter") {
+        resolveCorpRemoveSpyCounter(state, legalAction);
+        return;
+      }
       if (
         legalAction.payload?.resourceAbility ===
         "junkyard_bbs_return_top_heap"
@@ -9982,7 +10077,11 @@ function resolveStartupImmolatorTrashIce(
   const targetIceId = String(legalAction.payload?.targetIceId ?? "");
   if (!state.runner.rig.programs.includes(sourceCardId))
     throw new Error("Startup Immolator ist nicht installiert.");
-  if (definitionFor(state, sourceCardId).id !== STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID)
+  if (
+    runnerUtilityLongtailKindForCard(state, sourceCardId) !==
+      "startup_immolator_trash_fully_broken_ice" &&
+    definitionFor(state, sourceCardId).id !== STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID
+  )
     throw new Error("Die Startup-Immolator-Faehigkeit passt nicht zur Karte.");
   const flags = ensureRunnerTurnFlags(state);
   const used = flags.startupImmolatorUsedSourceIdsThisTurn ?? [];
@@ -10012,7 +10111,7 @@ function resolveStartupImmolatorTrashIce(
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     v1922RunnerProgramAbility: "startup_immolator_trash_ice",
-    sourceDefinitionId: STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
     targetIceDefinitionId: targetDefinitionId,
     rezCostPaid: rezCost,
     trashedCount: 1,
@@ -10219,6 +10318,121 @@ function resolveMicrotechBackupDriveReturnTopHosted(
     returnedToGrip: true,
     hostedProgramCountAfter: microtechHostedProgramIds(state, sourceCardId)
       .length,
+  };
+}
+
+function resolvePreyingMantisGainAction(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf Preying Mantis nutzen.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  if (!state.runner.rig.resources.includes(sourceCardId))
+    throw new Error("Preying Mantis ist nicht installiert.");
+  if (
+    runnerUtilityLongtailKindForCard(state, sourceCardId) !==
+    "preying_mantis_optional_action_unpreventable_core_damage"
+  )
+    throw new Error("Die Preying-Mantis-Faehigkeit passt nicht zur Karte.");
+  const flags = ensureRunnerTurnFlags(state);
+  const used = flags.preyingMantisUsedSourceIdsThisTurn ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("Preying Mantis wurde in diesem Zug bereits genutzt.");
+  state.runner.clicks += 1;
+  flags.preyingMantisUsedSourceIdsThisTurn = [...used, sourceCardId].sort();
+  flags.preyingMantisDamageDueSourceIdsThisTurn = [
+    ...(flags.preyingMantisDamageDueSourceIdsThisTurn ?? []),
+    sourceCardId,
+  ].sort();
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    gainedActions: 1,
+    runnerClicksAfter: state.runner.clicks,
+    unpreventableDamageDueAtEndOfTurn: true,
+  };
+}
+
+function resolveISpyPutSpyCounter(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "runner")
+    throw new Error("Nur der Runner darf I Spy nutzen.");
+  const run = mustRun(state);
+  if (!run.successful || run.phase !== "access")
+    throw new Error("I Spy ist nur direkt nach einem erfolgreichen Run legal.");
+  const sourceCardId = String(legalAction.payload?.cardId ?? "");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  if (!state.runner.rig.programs.includes(sourceCardId))
+    throw new Error("I Spy ist nicht installiert.");
+  if (
+    runnerUtilityLongtailKindForCard(state, sourceCardId) !==
+    "i_spy_successful_run_fort_counter_expose"
+  )
+    throw new Error("Die I-Spy-Faehigkeit passt nicht zur Karte.");
+  if (serverId !== run.attackedServerId)
+    throw new Error("I Spy kann nur den gerade erfolgreichen Fort markieren.");
+  const server = mustServer(state, serverId);
+  if (server.kind === "archives")
+    throw new Error("I Spy kann nur einen Data Fort markieren.");
+  const used = run.successfulRunAbilityUsedSourceIds ?? [];
+  if (used.includes(sourceCardId))
+    throw new Error("I Spy wurde fuer diesen Run bereits genutzt.");
+  trashRunnerInstalledCardToHeap(state, sourceCardId, legalAction);
+  state.spyCountersByServer = {
+    ...(state.spyCountersByServer ?? {}),
+    [server.id]: spyCountersForServer(state, server.id) + 1,
+  };
+  run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    sourceDefinitionId: definitionFor(state, sourceCardId).id,
+    serverId: server.id,
+    serverLabel: publicServerLabel(state, server.id) ?? server.id,
+    counterType: "spy",
+    addedCounterAmount: 1,
+    spyCounterFort: server.id,
+    spyCountersAfter: spyCountersForServer(state, server.id),
+    exposedServerId: server.id,
+    exposedCount: server.ice.length + server.root.length,
+  };
+}
+
+function resolveCorpRemoveSpyCounter(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Spy-Counter entfernen.");
+  const serverId = String(legalAction.payload?.serverId ?? "") as Exclude<
+    ServerId,
+    "new_remote"
+  >;
+  const server = mustServer(state, serverId);
+  if (spyCountersForServer(state, server.id) <= 0)
+    throw new Error("In diesem Fort liegt kein Spy-Counter.");
+  if (clickCostForAction(legalAction) !== 1 || creditCostForAction(legalAction) !== 4)
+    throw new Error("Spy-Counter entfernen kostet genau 1 Aktion und 4 Credits.");
+  spendClick(state, "corp");
+  spendCredits(state, "corp", 4);
+  state.spyCountersByServer = {
+    ...(state.spyCountersByServer ?? {}),
+    [server.id]: Math.max(0, spyCountersForServer(state, server.id) - 1),
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    serverId: server.id,
+    serverLabel: publicServerLabel(state, server.id) ?? server.id,
+    counterType: "spy",
+    removedCounterAmount: 1,
+    remainingCounters: spyCountersForServer(state, server.id),
+    removedSpyCounter: true,
+    corpCreditsAfter: state.corp.credits,
   };
 }
 
@@ -11083,6 +11297,49 @@ function traceCounterEffectDefinitionFor(
   );
 }
 
+function runnerUtilityLongtailKindForDefinition(
+  definitionId: CardDefinitionId,
+): CardRunnerUtilityLongtailImplementation["kind"] | undefined {
+  return cardImplementationForDefinitionId(definitionId)?.runnerUtilityLongtail
+    ?.kind;
+}
+
+function runnerUtilityLongtailKindForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardRunnerUtilityLongtailImplementation["kind"] | undefined {
+  return runnerUtilityLongtailKindForDefinition(definitionFor(state, cardId).id);
+}
+
+function runnerUtilityLongtailImplementationForCard(
+  state: GameState,
+  cardId: CardInstanceId,
+): CardRunnerUtilityLongtailImplementation | undefined {
+  return cardImplementationForDefinitionId(definitionFor(state, cardId).id)
+    ?.runnerUtilityLongtail;
+}
+
+function isSubmarineUplinkSource(state: GameState, cardId: CardInstanceId): boolean {
+  return (
+    runnerUtilityLongtailKindForCard(state, cardId) ===
+    "submarine_uplink_trace_link_force_jack_out"
+  );
+}
+
+function markSubmarineUplinkJackOutAfterEncounter(
+  state: GameState,
+  cardId: CardInstanceId,
+  legalAction: LegalAction,
+): void {
+  if (!state.run || !isSubmarineUplinkSource(state, cardId)) return;
+  state.run.forceJackOutAfterEncounterSourceId = cardId;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    forceJackOutAfterEncounter: true,
+    sourceDefinitionId: definitionFor(state, cardId).id,
+  };
+}
+
 function resolveRemoveRunnerTraceCounter(
   state: GameState,
   legalAction: LegalAction,
@@ -11360,6 +11617,11 @@ function rezCard(
     faceup: true,
     ...(proteusVariableIceState ? { proteusVariableIceState } : {}),
   };
+  if (definition.type === "ice") {
+    const flags = ensureRunnerTurnFlags(state);
+    flags.corpRezzedIceThisTurn =
+      Math.max(0, Math.floor(flags.corpRezzedIceThisTurn ?? 0)) + 1;
+  }
   if (
     definition.id === KRUMZ_TRACE_ASSET_CARD_ID &&
     !cardImplementationForDefinitionId(definition.id)
@@ -12568,13 +12830,22 @@ function startTraceFromSubroutine(
 }
 
 function rabbitTraceLimitReductionForIceTrace(state: GameState): number {
-  return state.runner.rig.programs.some(
-    (cardId) =>
+  const reductions = state.runner.rig.programs.map((cardId) => {
+    const implementation = runnerUtilityLongtailImplementationForCard(state, cardId);
+    if (
+      implementation?.kind === "rabbit_ice_trace_limit_reduction" &&
+      mustInstance(state.cardInstances, cardId).rezzed
+    )
+      return implementation.amount;
+    if (
+      !implementation &&
       definitionFor(state, cardId).id === RABBIT_HQ_INTERFACE_PROGRAM_ID &&
-      mustInstance(state.cardInstances, cardId).rezzed,
-  )
-    ? 1
-    : 0;
+      mustInstance(state.cardInstances, cardId).rezzed
+    )
+      return 1;
+    return 0;
+  });
+  return Math.max(0, ...reductions);
 }
 
 function startTraceFromOperation(
@@ -12841,6 +13112,20 @@ function movePastCurrentIce(state: GameState, legalAction?: LegalAction): void {
     mustInstance(state.cardInstances, passedIceId).rezzed &&
     applyRioDeJaneiroCityGridPassedIceTrigger(state, run, passedIceId, legalAction)
   ) {
+    return;
+  }
+  if (run.forceJackOutAfterEncounterSourceId) {
+    if (legalAction) {
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        forcedJackOutAfterEncounter: true,
+        forceJackOutAfterEncounterSourceDefinitionId: definitionFor(
+          state,
+          run.forceJackOutAfterEncounterSourceId,
+        ).id,
+      };
+    }
+    finishRun(state, false, legalAction);
     return;
   }
   if (nextIndex >= 0) {
@@ -15511,7 +15796,7 @@ function backupProgramsOnMicrotechBeforeTrash(
     .filter((cardId) => definitionFor(state, cardId).type === "program")
     .filter((cardId) => cardId !== microtechId)
     .sort();
-  if (eligible.length <= 1) return [];
+  if (eligible.length === 0) return [];
   for (const cardId of eligible) {
     if (runnerProgramUsesMemory(state, cardId))
       state.runner.memoryUsed = Math.max(
@@ -15540,6 +15825,8 @@ function runnerProgramUsesMemory(
   if (
     (hostDefinition.type === "program" &&
       cardHasSubtype(hostDefinition, "daemon")) ||
+    runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
+      "microtech_backup_drive_program_trash_replacement" ||
     hostDefinition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID
   )
     return false;
@@ -16327,6 +16614,81 @@ function resolveOmniscienceFoundationEndTurnTag(
   };
 }
 
+function resolveFieldReporterEndOfRunnerTurn(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const sourceIds = state.runner.rig.resources
+    .slice()
+    .sort()
+    .filter(
+      (cardId) =>
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+        "field_reporter_end_turn_rezzed_ice_payout",
+    );
+  if (sourceIds.length === 0) return;
+  const rezzedIceCount = Math.max(
+    0,
+    Math.floor(ensureRunnerTurnFlags(state).corpRezzedIceThisTurn ?? 0),
+  );
+  if (rezzedIceCount <= 0) return;
+  let gained = 0;
+  for (const sourceId of sourceIds) {
+    const implementation = runnerUtilityLongtailImplementationForCard(
+      state,
+      sourceId,
+    );
+    if (
+      implementation?.kind !==
+      "field_reporter_end_turn_rezzed_ice_payout"
+    )
+      continue;
+    gained += rezzedIceCount * implementation.amountPerRezzedIce;
+  }
+  if (gained <= 0) return;
+  credits(state, "runner", gained);
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "field_reporter_end_turn_rezzed_ice_payout",
+    corpRezzedIceThisTurnCount: rezzedIceCount,
+    gainedCredits: gained,
+    runnerCreditsAfter: state.runner.credits,
+    sourceDefinitionId: definitionFor(state, sourceIds[0]!).id,
+    sourceCount: sourceIds.length,
+  };
+}
+
+function resolvePreyingMantisEndOfRunnerTurnDamage(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  const dueSourceIds =
+    ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn ?? [];
+  if (dueSourceIds.length === 0) return;
+  const damageSummary = doDamage(state, {
+    damageId: `runner.end.preying_mantis.${state.stateVersion}`,
+    damageType: "core",
+    amount: dueSourceIds.length,
+    source: "runner_end:preying_mantis",
+  });
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runnerUtilityAbility: "preying_mantis_end_turn_damage",
+    damageCannotBePrevented: true,
+    damageResolved: true,
+    damageType: damageSummary.damageType,
+    damageAmount: damageSummary.amount,
+    cardsTrashed: damageSummary.cardsTrashed,
+    flatline: damageSummary.flatline,
+    sourceDefinitionId: definitionFor(state, dueSourceIds[0]!).id,
+    sourceCount: dueSourceIds.length,
+    ...(damageSummary.coreDamageAfter !== undefined
+      ? { coreDamageAfter: damageSummary.coreDamageAfter }
+      : {}),
+  };
+  ensureRunnerTurnFlags(state).preyingMantisDamageDueSourceIdsThisTurn = [];
+}
+
 function endTurn(
   state: GameState,
   side: Side,
@@ -16339,6 +16701,8 @@ function endTurn(
       legalAction,
     );
     if (state.winner) return;
+    resolveFieldReporterEndOfRunnerTurn(state, legalAction);
+    resolvePreyingMantisEndOfRunnerTurnDamage(state, legalAction);
     resolveOmniscienceFoundationEndTurnTag(state, legalAction);
     resolveSneakPreviewTemporaryInstallReturns(state, legalAction);
     const flags = ensureRunnerTurnFlags(state);
@@ -16694,6 +17058,7 @@ function startCorpTurn(
   clearRovingSubmarineActivityMarkers(state);
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
+  ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   applyCorpStartOfTurnEffects(state, effects);
 }
@@ -16706,6 +17071,8 @@ function startRunnerTurn(
   state.phase = "runner_action_phase";
   state.timingPoint = "runner_action.main";
   state.runner.clicks = runnerActionsPerTurn(state);
+  if (state.runnerTurnFlags?.questForCattekinPermanentActionGain)
+    state.runner.clicks += 1;
   state.corp.clicks = 0;
   clearEdgerunnerTempsInstallFlags(state);
   const flags = ensureRunnerTurnFlags(state);
@@ -16732,6 +17099,9 @@ function startRunnerTurn(
   flags.bodyweightDataCrecheExtraRunPending = false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn = false;
   flags.startupImmolatorUsedSourceIdsThisTurn = [];
+  flags.preyingMantisUsedSourceIdsThisTurn = [];
+  flags.preyingMantisDamageDueSourceIdsThisTurn = [];
+  flags.corpRezzedIceThisTurn = 0;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
@@ -16995,6 +17365,7 @@ function applyRunnerStartOfTurnEffects(
     state,
     effects,
   );
+  applyQuestForCattekinStartOfTurn(state, effects);
   if (!flags.startOfTurnFloatingCreditsApplied) {
     const virusCredits = virusCounterCreditsAtRunnerStart(state);
     if (virusCredits.amount > 0) {
@@ -17021,6 +17392,81 @@ function applyRunnerStartOfTurnEffects(
     const definition = definitionFor(state, cardId);
     if (definition.id === "onr_v1_180_smiths-pawnshop")
       startSmithsPawnshopChoice(state, cardId);
+  }
+}
+
+function applyQuestForCattekinStartOfTurn(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  const sourceIds = state.runner.rig.resources
+    .slice()
+    .sort()
+    .filter(
+      (cardId) =>
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+        "quest_for_cattekin_start_turn_random_permanent_action",
+    );
+  for (const sourceId of sourceIds) {
+    const sourceDefinitionId = definitionFor(state, sourceId).id;
+    const randomPurpose = `p3_59.die.${sourceDefinitionId}.start_runner_turn.${state.stateVersion}.${sourceId}`;
+    const dieRoll = rollDeterministicDie(state, randomPurpose);
+    let damageSummary: DamageSummary | undefined;
+    if (dieRoll === 6) {
+      ensureRunnerTurnFlags(state).questForCattekinPermanentActionGain = true;
+      state.runner.clicks += 1;
+      trashRunnerInstalledCardToHeap(state, sourceId);
+    } else if (dieRoll === 1) {
+      damageSummary = doDamage(state, {
+        damageId: `runner.start.${sourceDefinitionId}.core.${state.stateVersion}`,
+        damageType: "core",
+        amount: 1,
+        source: `runner_start:${sourceDefinitionId}`,
+      });
+    } else if (dieRoll === 2) {
+      damageSummary = doDamage(state, {
+        damageId: `runner.start.${sourceDefinitionId}.net.${state.stateVersion}`,
+        damageType: "net",
+        amount: 1,
+        source: `runner_start:${sourceDefinitionId}`,
+      });
+    }
+    effects?.push({
+      effectId: `runner.start.quest_for_cattekin.${sourceId}`,
+      kind:
+        dieRoll === 6
+          ? "gain_actions"
+        : dieRoll === 1 || dieRoll === 2
+            ? "damage"
+            : "counter_change",
+      visibility: "public",
+      side: "runner",
+      amount: dieRoll === 6 ? 1 : damageSummary?.amount ?? 0,
+      reason: "start_of_turn",
+      sourceDefinitionId,
+      sourceTitle: publicCardTitle(sourceDefinitionId),
+      v1921DieRoll: dieRoll,
+      randomPurpose,
+      randomCounterAfter: state.randomCounter,
+      ...(dieRoll === 6
+        ? {
+            permanentActionGain: true,
+            sourceTrashed: true,
+            runnerClicksAfter: state.runner.clicks,
+          }
+        : {}),
+      ...(damageSummary
+        ? {
+            damageCannotBePrevented: true,
+            damageType: damageSummary.damageType,
+            cardsTrashed: damageSummary.cardsTrashed,
+            flatline: damageSummary.flatline,
+            ...(damageSummary.coreDamageAfter !== undefined
+              ? { coreDamageAfter: damageSummary.coreDamageAfter }
+              : {}),
+          }
+        : {}),
+    } as ResolvedGameEffect);
   }
 }
 
@@ -28295,6 +28741,7 @@ function traceBaseLinkCandidates(
     )) {
       const effect = useBaseLinkEffect(ability);
       if (!effect) continue;
+      if (isSubmarineUplinkSource(state, cardId) && !state.run) continue;
       const creditCost = creditCostForTraceAbility(ability);
       if (state.runner.credits < creditCost) continue;
       if (
@@ -28411,6 +28858,7 @@ function resolveTraceBaseLinkChoice(
   if (!candidate)
     throw new Error("Diese Base-Link-Quelle ist nicht legal.");
   spendCredits(state, "runner", candidate.creditCost);
+  markSubmarineUplinkJackOutAfterEncounter(state, candidate.cardId, legalAction);
   const runnerLink = calculateRunnerLinkCore(state) + candidate.baseLink;
   const nextTrace = {
     ...trace,
@@ -28618,12 +29066,13 @@ function postBidTraceLinkCandidates(
     const instance = state.cardInstances[cardId];
     if (!instance || instance.controller !== "runner") continue;
     const definition = definitionFor(state, cardId);
-  for (const { ability } of activatedCardImplementationTraceAbilities(
+    for (const { ability } of activatedCardImplementationTraceAbilities(
       definition,
       "trace_post_bid_link_window",
     )) {
       const effect = increaseTraceLinkEffect(ability);
       if (!effect) continue;
+      if (isSubmarineUplinkSource(state, cardId) && !state.run) continue;
       const creditCost = creditCostForTraceAbility(ability);
       if (state.runner.credits + runnerTraceLinkCredits(state) < creditCost)
         continue;
@@ -28703,6 +29152,11 @@ function resolveTracePostBidLinkChoice(
     if (!candidate)
       throw new Error("Diese Post-Bid-Link-Quelle ist nicht legal.");
     const payment = spendRunnerTraceLinkBidCredits(state, candidate.creditCost);
+    markSubmarineUplinkJackOutAfterEncounter(
+      state,
+      candidate.cardId,
+      legalAction,
+    );
     const nextTrace = {
       ...trace,
       runnerLink: (trace.runnerLink ?? 0) + candidate.linkDelta,
@@ -29703,9 +30157,18 @@ function visibleCorpCard(
   const instance = mustInstance(state.cardInstances, id);
   const definition = definitionFor(state, id);
   const accessed = state.run?.accessedCardId === id;
+  const serverId =
+    instance.zone.side === "corp" &&
+    (instance.zone.zone === "serverIce" || instance.zone.zone === "serverRoot")
+      ? instance.zone.serverId
+      : undefined;
+  const exposedBySpyCounter = serverId
+    ? spyCountersForServer(state, serverId) > 0
+    : false;
   const visible =
     viewer === "corp" ||
     instance.rezzed ||
+    exposedBySpyCounter ||
     accessed ||
     state.corp.scoreArea.includes(id) ||
     (state.corp.archives.includes(id) && instance.faceup);
@@ -30194,7 +30657,10 @@ function hostedCardsOn(
 function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
   return state.runner.rig.hardware
     .filter(
-      (cardId) => definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
+      (cardId) =>
+        runnerUtilityLongtailKindForCard(state, cardId) ===
+          "microtech_backup_drive_program_trash_replacement" ||
+        definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     )
     .sort();
 }
@@ -31732,6 +32198,9 @@ function ensureRunnerTurnFlags(
   flags.bodyweightDataCrecheExtraRunPending ??= false;
   flags.bodyweightDataCrecheExtraRunUsedThisTurn ??= false;
   flags.startupImmolatorUsedSourceIdsThisTurn ??= [];
+  flags.preyingMantisUsedSourceIdsThisTurn ??= [];
+  flags.preyingMantisDamageDueSourceIdsThisTurn ??= [];
+  flags.corpRezzedIceThisTurn ??= 0;
   return flags;
 }
 

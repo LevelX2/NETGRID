@@ -19,6 +19,7 @@ import type {
   CardPrintedSubroutineImplementation,
   CardRegionBaselineImplementation,
   CardRunEncounterInterventionImplementation,
+  CardRunnerUtilityLongtailImplementation,
   CardScoredAgendaImplementation,
   CardSuccessfulRunFollowupImplementation,
   CardTagPreventionSourceImplementation,
@@ -63,6 +64,7 @@ export type CardImplementationDefinition = {
   scoredAgenda?: CardScoredAgendaImplementation;
   corpUtility?: CardCorpUtilityImplementation;
   hiddenReplacementLongtail?: CardHiddenReplacementLongtailImplementation;
+  runnerUtilityLongtail?: CardRunnerUtilityLongtailImplementation;
   hardwareDeck?: true;
   unique?: {
     kind: "unique_by_title";

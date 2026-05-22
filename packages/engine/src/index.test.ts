@@ -2043,11 +2043,17 @@ describe("Originalset Spotcheck 2026-05-15 Modifier/Agenda risk hardening", () =
     );
     expect(
       getLegalActions(state, "runner").some(
-        (action) =>
-          action.payload?.cardId === gremlinsId ||
-          action.payload?.cardId === mantisId,
+        (action) => action.payload?.cardId === gremlinsId,
       ),
     ).toBe(false);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.runnerUtilityAbility === "preying_mantis_gain_action" &&
+          action.payload?.cardId === mantisId,
+      ),
+    ).toBe(true);
     expect(JSON.stringify(state.eventLog.map((event) => event.publicPayload))).not.toMatch(
       privatePayloadMarkers,
     );
@@ -7574,7 +7580,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       cardImplementationCoverageForDefinitionId(
         "onr_v1_131_microtech-backup-drive",
       )?.status,
-    ).not.toBe("implemented");
+    ).toBe("implemented");
   });
 
   it("migrates P3.48 run control cards into CardImplementation coverage", () => {
@@ -7939,7 +7945,234 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         status: "implemented",
       });
     }
-    expect(cardImplementationForDefinitionId("onr_v1_131_microtech-backup-drive")).toBeUndefined();
+    expect(cardImplementationForDefinitionId("onr_v1_131_microtech-backup-drive")).toBeDefined();
+  });
+
+  it("migrates P3.59 runner utility longtail cards into CardImplementation coverage", () => {
+    const p359Cards = [
+      "onr_v1_131_microtech-backup-drive",
+      "onr_v1_068_startup-immolator",
+      "onr_v1_051_rabbit",
+      "onr_v1_182_submarine-uplink",
+      "onr_v1_032_i-spy",
+      "onr_v1_162_field-reporter-for-ice-and-data",
+      "onr_v1_171_preying-mantis",
+      "onr_v1_172_quest-for-cattekin",
+      "onr_v1_132_microtech-trode-set",
+    ] as const;
+
+    for (const definitionId of p359Cards) {
+      expect(cardImplementationForDefinitionId(definitionId), definitionId).toBeDefined();
+      expect(cardImplementationCoverageForDefinitionId(definitionId)).toMatchObject({
+        cardDefinitionId: definitionId,
+        status: "implemented",
+      });
+    }
+  });
+
+  it("resolves P3.59 Field Reporter and Preying Mantis runner-turn windows", () => {
+    const p359FieldPreyingRunnerCards = MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+      (card) =>
+        card.id !== "onr_v1_162_field-reporter-for-ice-and-data" &&
+        card.id !== "onr_v1_171_preying-mantis",
+    );
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p359-field-preying",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p359_field_preying_runner",
+          name: "P3.59 Field/Preying Runner",
+          cards: [
+            { id: "onr_v1_162_field-reporter-for-ice-and-data", quantity: 1 },
+            { id: "onr_v1_171_preying-mantis", quantity: 1 },
+            ...p359FieldPreyingRunnerCards,
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.corp,
+          id: "p359_i_spy_corp",
+          name: "P3.59 I Spy Corp",
+          cards: [
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards,
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    installRunnerResourceForTest(
+      state,
+      "onr_v1_162_field-reporter-for-ice-and-data",
+    );
+    const mantisId = installRunnerResourceForTest(
+      state,
+      "onr_v1_171_preying-mantis",
+    );
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    const clicksBefore = state.runner.clicks;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerUtilityAbility === "preying_mantis_gain_action" &&
+        action.payload?.cardId === mantisId,
+    );
+    expect(state.runner.clicks).toBe(clicksBefore + 1);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "simple_barrier_ice",
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("runner_action.main");
+
+    const creditsBeforeEnd = state.runner.credits;
+    const coreBeforeEnd = state.runner.coreDamage;
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    expect(state.runner.credits).toBe(creditsBeforeEnd + 1);
+    expect(state.runner.coreDamage).toBe(coreBeforeEnd + 1);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      damageType: "core",
+      damageAmount: 1,
+    });
+  });
+
+  it("resolves P3.59 I Spy fort counters and Corp removal", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p359-i-spy",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.runner,
+          id: "p359_i_spy_runner",
+          name: "P3.59 I Spy Runner",
+          cards: [
+            { id: "onr_v1_032_i-spy", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.runAccess.runner.cards.filter(
+              (card) => card.id !== "onr_v1_032_i-spy",
+            ),
+          ],
+        },
+        corpDeck: {
+          ...MECHANIC_SMOKE_DECKS.runAccess.corp,
+          id: "p359_i_spy_corp",
+          name: "P3.59 I Spy Corp",
+          cards: [
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.runAccess.corp.cards.filter(
+              (card) => card.id !== "simple_barrier_ice",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    state.corp.credits = 10;
+    const iSpyId = installRunnerProgramForTest(state, "onr_v1_032_i-spy");
+    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+
+    state.phase = "run";
+    state.timingPoint = "access.resolve_card";
+    state.activeSide = "runner";
+    state.run = {
+      runId: "p359_i_spy_run",
+      attackedServerId: "rd",
+      phase: "access",
+      position: { kind: "server", serverId: "rd" },
+      brokenSubroutineIndexes: [],
+      resolvedSubroutineIndexes: [],
+      successful: true,
+    };
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter" &&
+        action.payload?.cardId === iSpyId,
+    );
+    expect(state.spyCountersByServer?.rd).toBe(1);
+    expect(state.runner.heap).toContain(iSpyId);
+    expect(getPlayerView(state, "runner").servers.find((server) => server.id === "rd")?.ice[0]?.known).toBe(true);
+
+    delete state.run;
+    state.phase = "corp_action_phase";
+    state.timingPoint = "corp_action.main";
+    state.activeSide = "corp";
+    state.corp.clicks = 3;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "trigger_ability" &&
+        action.payload?.corpAbility === "remove_spy_counter" &&
+        action.payload?.serverId === "rd",
+    );
+    expect(state.spyCountersByServer?.rd).toBe(0);
+  });
+
+  it("rolls Quest for Cattekin at Runner start through replay-safe random", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p359-quest-start-turn",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+          id: "p359_quest_runner",
+          name: "P3.59 Quest Runner",
+          cards: [
+            { id: "onr_v1_172_quest-for-cattekin", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards.filter(
+              (card) => card.id !== "onr_v1_172_quest-for-cattekin",
+            ),
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    installRunnerResourceForTest(state, "onr_v1_172_quest-for-cattekin");
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    const randomBefore = state.randomDrawRecords.length;
+
+    state = apply(state, "runner", (action) => action.type === "end_turn");
+    state = toRunnerTurn(state);
+
+    expect(state.randomDrawRecords.length).toBeGreaterThan(randomBefore);
+    expect(
+      state.randomDrawRecords.some((record) =>
+        record.purpose.includes("quest-for-cattekin.start_runner_turn"),
+      ),
+    ).toBe(true);
+    expect(
+      state.eventLog
+        .slice(replayStart)
+        .flatMap((event) => event.publicPayload.resolvedEffects ?? [])
+        .some(
+          (effect) =>
+            (effect as { sourceDefinitionId?: string }).sourceDefinitionId ===
+            "onr_v1_172_quest-for-cattekin",
+        ),
+    ).toBe(true);
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
   it("resolves Social Engineering secret guess and auto-passes the chosen ICE on a wrong guess", () => {
@@ -42180,9 +42413,22 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     traceState = apply(traceState, "runner", (action) => action.type === "continue_run");
     traceState = applyChoice(traceState, "corp", "bid_1");
     expect(traceState.trace).toMatchObject({
-      status: "runner_bid",
+      status: "base_link",
       traceStrength: 5,
-      runnerLink: 1,
+      runnerLink: 0,
+    });
+    traceState = applyChoice(
+      traceState,
+      "runner",
+      traceChoiceOptionIdForDefinition(
+        traceState,
+        "onr_v1_182_submarine-uplink",
+        "trace_base_link_",
+      ),
+    );
+    expect(traceState.trace).toMatchObject({
+      status: "runner_bid",
+      runnerLink: 4,
     });
 
     let maxLinkState = toRunnerTurn(
@@ -42226,7 +42472,7 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     maxLinkState = applyChoice(maxLinkState, "corp", "bid_1");
     expect(maxLinkState.trace).toMatchObject({
       status: "base_link",
-      runnerLink: 1,
+      runnerLink: 0,
     });
     maxLinkState = applyChoice(
       maxLinkState,

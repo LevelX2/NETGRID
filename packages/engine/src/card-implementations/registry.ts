@@ -220,7 +220,9 @@ import { fullBodyConversionImplementation } from "./onr-v1/runner/hardware/full-
 import { greenKnightSurgeBuffersImplementation } from "./onr-v1/runner/hardware/green-knight-surge-buffers";
 import { hqInterfaceImplementation } from "./onr-v1/runner/hardware/hq-interface";
 import { lifesaverNanosurgeonsImplementation } from "./onr-v1/runner/hardware/lifesaver-nanosurgeons";
+import { microtechBackupDriveImplementation } from "./onr-v1/runner/hardware/microtech-backup-drive";
 import { militechMramChipImplementation } from "./onr-v1/runner/hardware/militech-mram-chip";
+import { microtechTrodeSetImplementation } from "./onr-v1/runner/hardware/microtech-trode-set";
 import { mramChipImplementation } from "./onr-v1/runner/hardware/mram-chip";
 import { nasukoCycleImplementation } from "./onr-v1/runner/hardware/nasuko-cycle";
 import { pandorasDeckImplementation } from "./onr-v1/runner/hardware/pandoras-deck";
@@ -286,6 +288,7 @@ import { hammerImplementation } from "./onr-v1/runner/programs/hammer";
 import { impImplementation } from "./onr-v1/runner/programs/imp";
 import { incubatorImplementation } from "./onr-v1/runner/programs/incubator";
 import { invisibilityImplementation } from "./onr-v1/runner/programs/invisibility";
+import { iSpyImplementation } from "./onr-v1/runner/programs/i-spy";
 import { jackhammerImplementation } from "./onr-v1/runner/programs/jackhammer";
 import { japaneseWaterTortureImplementation } from "./onr-v1/runner/programs/japanese-water-torture";
 import { joanOfArcImplementation } from "./onr-v1/runner/programs/joan-of-arc";
@@ -301,6 +304,7 @@ import { pileDriverImplementation } from "./onr-v1/runner/programs/pile-driver";
 import { poltergeistImplementation } from "./onr-v1/runner/programs/poltergeist";
 import { poxImplementation } from "./onr-v1/runner/programs/pox";
 import { rAndDProtocolFilesImplementation } from "./onr-v1/runner/programs/r-d-protocol-files";
+import { rabbitImplementation } from "./onr-v1/runner/programs/rabbit";
 import { rafflesImplementation } from "./onr-v1/runner/programs/raffles";
 import { rammingPistonImplementation } from "./onr-v1/runner/programs/ramming-piston";
 import { raptorImplementation } from "./onr-v1/runner/programs/raptor";
@@ -317,6 +321,7 @@ import { smarteyeImplementation } from "./onr-v1/runner/programs/smarteye";
 import { skivvissImplementation } from "./onr-v1/runner/programs/skivviss";
 import { snowballImplementation } from "./onr-v1/runner/programs/snowball";
 import { speedTrapImplementation } from "./onr-v1/runner/programs/speed-trap";
+import { startupImmolatorImplementation } from "./onr-v1/runner/programs/startup-immolator";
 import { succubusImplementation } from "./onr-v1/runner/programs/succubus";
 import { tinweaselImplementation } from "./onr-v1/runner/programs/tinweasel";
 import { vewyVewyQuietImplementation } from "./onr-v1/runner/programs/vewy-vewy-quiet";
@@ -332,6 +337,7 @@ import { backDoorToOrbitalAirImplementation } from "./onr-v1/runner/resources/ba
 import { aujourdhuiImplementation } from "./onr-v1/runner/resources/aujourdhui";
 import { danshisSecondIdImplementation } from "./onr-v1/runner/resources/danshis-second-id";
 import { diplomaticImmunityImplementation } from "./onr-v1/runner/resources/diplomatic-immunity";
+import { fieldReporterForIceAndDataImplementation } from "./onr-v1/runner/resources/field-reporter-for-ice-and-data";
 import { fallGuyImplementation } from "./onr-v1/runner/resources/fall-guy";
 import { floatingRunnerBbsImplementation } from "./onr-v1/runner/resources/floating-runner-bbs";
 import { brokerImplementation } from "./onr-v1/runner/resources/broker";
@@ -342,12 +348,15 @@ import { lelandCorporateBodyguardImplementation } from "./onr-v1/runner/resource
 import { loanFromChibaImplementation } from "./onr-v1/runner/resources/loan-from-chiba";
 import { nEtoImplementation } from "./onr-v1/runner/resources/n-e-t-o";
 import { nomadAlliesImplementation } from "./onr-v1/runner/resources/nomad-allies";
+import { preyingMantisImplementation } from "./onr-v1/runner/resources/preying-mantis";
+import { questForCattekinImplementation } from "./onr-v1/runner/resources/quest-for-cattekin";
 import { riggedInvestmentsImplementation } from "./onr-v1/runner/resources/rigged-investments";
 import { roninAroundImplementation } from "./onr-v1/runner/resources/ronin-around";
 import { shortTermContractImplementation } from "./onr-v1/runner/resources/short-term-contract";
 import { siliconSaloonFranchiseImplementation } from "./onr-v1/runner/resources/silicon-saloon-franchise";
 import { technicianLoverImplementation } from "./onr-v1/runner/resources/technician-lover";
 import { theSpringboardImplementation } from "./onr-v1/runner/resources/the-springboard";
+import { submarineUplinkImplementation } from "./onr-v1/runner/resources/submarine-uplink";
 import { theShortCircuitImplementation } from "./onr-v1/runner/resources/the-short-circuit";
 import { theShellTradersImplementation } from "./onr-v1/runner/resources/the-shell-traders";
 import { topRunnersConferenceImplementation } from "./onr-v1/runner/resources/top-runners-conference";
@@ -430,11 +439,13 @@ export const CARD_IMPLEMENTATIONS = [
   impImplementation,
   incubatorImplementation,
   invisibilityImplementation,
+  iSpyImplementation,
   jackhammerImplementation,
   japaneseWaterTortureImplementation,
   joanOfArcImplementation,
   krashImplementation,
   loonyGoonImplementation,
+  rabbitImplementation,
   microtechAiInterfaceImplementation,
   mouseImplementation,
   mysteryBoxImplementation,
@@ -461,6 +472,7 @@ export const CARD_IMPLEMENTATIONS = [
   skivvissImplementation,
   snowballImplementation,
   speedTrapImplementation,
+  startupImmolatorImplementation,
   succubusImplementation,
   tinweaselImplementation,
   vewyVewyQuietImplementation,
@@ -476,6 +488,7 @@ export const CARD_IMPLEMENTATIONS = [
   aujourdhuiImplementation,
   danshisSecondIdImplementation,
   diplomaticImmunityImplementation,
+  fieldReporterForIceAndDataImplementation,
   fallGuyImplementation,
   brokerImplementation,
   codeViralCacheImplementation,
@@ -486,6 +499,8 @@ export const CARD_IMPLEMENTATIONS = [
   loanFromChibaImplementation,
   nEtoImplementation,
   nomadAlliesImplementation,
+  preyingMantisImplementation,
+  questForCattekinImplementation,
   roninAroundImplementation,
   arasakaPortablePrototypeImplementation,
   armadilloArmoredRoadHomeImplementation,
@@ -499,7 +514,9 @@ export const CARD_IMPLEMENTATIONS = [
   greenKnightSurgeBuffersImplementation,
   hqInterfaceImplementation,
   lifesaverNanosurgeonsImplementation,
+  microtechBackupDriveImplementation,
   militechMramChipImplementation,
+  microtechTrodeSetImplementation,
   mramChipImplementation,
   nasukoCycleImplementation,
   pandorasDeckImplementation,
@@ -515,6 +532,7 @@ export const CARD_IMPLEMENTATIONS = [
   shortTermContractImplementation,
   siliconSaloonFranchiseImplementation,
   technicianLoverImplementation,
+  submarineUplinkImplementation,
   theSpringboardImplementation,
   theShortCircuitImplementation,
   theShellTradersImplementation,

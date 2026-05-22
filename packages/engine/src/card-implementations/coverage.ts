@@ -999,6 +999,12 @@ function implementedCoverageFor(
     );
     currentLocations.add(IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION);
   }
+  if (implementation.runnerUtilityLongtail) {
+    reasons.push(
+      "Engine-local CardImplementationDefinition exists for Runner utility, trace, trash-replacement or lifecycle longtail behavior.",
+    );
+    currentLocations.add(IMPLEMENTED_HIDDEN_REPLACEMENT_LONGTAIL_LOCATION);
+  }
 
   return {
     cardDefinitionId: implementation.cardDefinitionId,
@@ -1019,17 +1025,6 @@ const IMPLEMENTED_COVERAGE_ENTRIES: CardImplementationCoverageEntry[] =
 
 export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementationCoverageEntry[] =
   [
-    {
-      cardDefinitionId: "onr_v1_068_startup-immolator",
-      status: "legacy_engine_special_case",
-      reason:
-        "Runner installed-program ability pays the passed ICE rez cost and trashes it after fully broken pass-ice timing; not yet migrated to CardImplementationDefinition.",
-      currentLocations: [
-        "packages/engine/src/index.ts::startupImmolatorActions",
-        "packages/engine/src/index.ts::useStartupImmolator",
-        "packages/engine/src/mechanics/longtail-card-effects.ts",
-      ],
-    },
     {
       cardDefinitionId: "onr_v1_173_restrictive-net-zoning",
       status: "legacy_engine_special_case",
