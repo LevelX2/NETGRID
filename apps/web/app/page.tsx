@@ -297,6 +297,7 @@ type MatchFormat = ApiMatchFormat;
 type AiDifficulty = "easy" | "normal" | "hard";
 type AiDeckPolicy = "fixed" | "selected" | "seeded_random";
 type AiPacingMode = ApiAiPacingMode;
+type AiTraceStartMode = "off" | "detailed";
 type CardDisplayMode = "placeholder" | "text-card" | "compact";
 type ChronicleDetailMode = "simple" | "medium" | "full";
 type ColorScheme = "black" | "white";
@@ -1885,6 +1886,7 @@ export default function Page() {
   const [runnerDifficulty, setRunnerDifficulty] = useState<AiDifficulty>("normal");
   const [corpDifficulty, setCorpDifficulty] = useState<AiDifficulty>("normal");
   const [aiDeckPolicy, setAiDeckPolicy] = useState<AiDeckPolicy>("selected");
+  const [aiTraceStartMode, setAiTraceStartMode] = useState<AiTraceStartMode>("off");
   const [testSetupMode, setTestSetupMode] = useState(false);
   const [displayName, setDisplayName] = useState("Teilnehmer A");
   const [matchStartSettingsLoaded, setMatchStartSettingsLoaded] = useState(false);
@@ -3121,6 +3123,7 @@ export default function Page() {
         runnerDifficulty,
         corpDifficulty,
         ...(hasAiOpponent ? { aiPacingMode: "paced" } : {}),
+        ...(hasAiOpponent && aiTraceStartMode !== "off" ? { aiTraceMode: aiTraceStartMode } : {}),
         ...(isHumanVsHuman ? { countdownSeconds } : {}),
         ...(isHumanVsHuman ? { discoverableInLan } : {}),
         settings: {
@@ -3159,15 +3162,16 @@ export default function Page() {
     };
     persistSession(nextSession);
     setSession(nextSession);
+    const aiTraceNotice = hasAiOpponent && aiTraceStartMode !== "off" ? " KI-Trace läuft ab Start." : "";
     if (created.lobby || created.pendingDeckHandshake || !created.playerView) {
       setPayload(null);
       setLobby(lobbyFromInitialResponse(created, created.hostSide));
-      setNotice(`Lobby erstellt. Du startest als ${sideLabel(created.hostSide)}.`);
+      setNotice(`Lobby erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`);
       return;
     }
     setPayload(fromInitialResponse(created, created.hostSide));
     setLobby(null);
-    setNotice(`Match erstellt. Du startest als ${sideLabel(created.hostSide)}.`);
+    setNotice(`Match erstellt. Du startest als ${sideLabel(created.hostSide)}.${aiTraceNotice}`);
   };
 
   const startNextSeriesGame = async () => {
@@ -4652,6 +4656,15 @@ export default function Page() {
                       Seed
                       <input value={seed} onChange={(event) => setSeed(event.target.value)} />
                     </label>
+                    {hasAiOpponent ? (
+                      <label>
+                        Diagnose
+                        <select value={aiTraceStartMode} onChange={(event) => setAiTraceStartMode(event.target.value as AiTraceStartMode)}>
+                          <option value="off">Keine KI-Aufzeichnung</option>
+                          <option value="detailed">KI-Trace ab Start</option>
+                        </select>
+                      </label>
+                    ) : null}
                     {isHumanVsHuman ? (
                       <label className={`deckBuilderToggle ${testSetupMode ? "checked" : ""}`}>
                         <input checked={testSetupMode} onChange={(event) => setTestSetupMode(event.target.checked)} type="checkbox" />

@@ -316,6 +316,17 @@ export function mergeMaintenanceAiTraceIndex(current: MaintenanceAiTraceIndexEnt
   return Array.from(byId.values()).sort((left, right) => left.decisionIndex - right.decisionIndex || left.createdAt.localeCompare(right.createdAt));
 }
 
+export function mergeMaintenanceAiTraceMatches(current: MaintenanceAiTraceMatchEntry[], incoming: MaintenanceAiTraceMatchEntry[]): MaintenanceAiTraceMatchEntry[] {
+  const byId = new Map<string, MaintenanceAiTraceMatchEntry>();
+  for (const match of current) byId.set(match.matchId, match);
+  for (const match of incoming) byId.set(match.matchId, match);
+  return Array.from(byId.values()).sort((left, right) => {
+    const leftDate = Date.parse(left.lastTraceAt ?? left.updatedAt ?? left.createdAt);
+    const rightDate = Date.parse(right.lastTraceAt ?? right.updatedAt ?? right.createdAt);
+    return rightDate - leftDate || left.matchId.localeCompare(right.matchId);
+  });
+}
+
 export function latestMaintenanceAiTraceId(traces: MaintenanceAiTraceIndexEntry[]): string {
   return traces.at(-1)?.traceId ?? "";
 }

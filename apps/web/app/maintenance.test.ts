@@ -15,6 +15,7 @@ import {
   formatBytes,
   latestMaintenanceAiTraceId,
   mergeMaintenanceAiTraceIndex,
+  mergeMaintenanceAiTraceMatches,
   participantsLabel,
   resolveMaintenanceServerHttp
 } from "./maintenance";
@@ -132,6 +133,31 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(buildMaintenanceAiTraceEnablePath("match/1")).toBe("/api/storage/maintenance/ai-decision-traces/matches/match%2F1/enable");
     expect(mergeMaintenanceAiTraceIndex([second], [first, second]).map((trace) => trace.traceId)).toEqual(["trace_1", "trace_2"]);
     expect(latestMaintenanceAiTraceId([first, second])).toBe("trace_2");
+  });
+
+  it("keeps just-enabled AI trace matches visible while the match index refreshes", () => {
+    const stale = {
+      matchId: "match_old",
+      status: "active",
+      mode: "human_vs_ai",
+      aiTraceMode: "detailed" as const,
+      traceCount: 4,
+      createdAt: "2026-05-22T09:00:00.000Z",
+      updatedAt: "2026-05-22T09:05:00.000Z",
+      lastTraceAt: "2026-05-22T09:05:00.000Z"
+    };
+    const activated = {
+      matchId: "match_new",
+      status: "active",
+      mode: "human_vs_ai",
+      aiTraceMode: "detailed" as const,
+      traceCount: 0,
+      createdAt: "2026-05-22T10:00:00.000Z",
+      updatedAt: "2026-05-22T10:02:00.000Z"
+    };
+
+    expect(mergeMaintenanceAiTraceMatches([stale], [activated]).map((match) => match.matchId)).toEqual(["match_new", "match_old"]);
+    expect(mergeMaintenanceAiTraceMatches([activated], [{ ...activated, traceCount: 1, lastTraceAt: "2026-05-22T10:03:00.000Z" }])[0]?.traceCount).toBe(1);
   });
 
   it("exports only redacted AI trace index projections", () => {

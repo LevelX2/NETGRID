@@ -19,6 +19,7 @@ import {
   formatBytes,
   latestMaintenanceAiTraceId,
   mergeMaintenanceAiTraceIndex,
+  mergeMaintenanceAiTraceMatches,
   modeLabel,
   participantsLabel,
   resolveMaintenanceServerHttp,
@@ -77,6 +78,8 @@ export default function MaintenancePage() {
   const [aiTraceDetail, setAiTraceDetail] = useState<MaintenanceAiTraceDetail | null>(null);
   const [aiTraceLoading, setAiTraceLoading] = useState(false);
   const [aiTraceEnableLoading, setAiTraceEnableLoading] = useState(false);
+  const [aiTraceActivationMessage, setAiTraceActivationMessage] = useState("");
+  const [aiTraceActivationError, setAiTraceActivationError] = useState("");
   const [aiTraceLiveFollow, setAiTraceLiveFollow] = useState(true);
   const [aiTraceFollowPaused, setAiTraceFollowPaused] = useState(false);
   const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
@@ -121,24 +124,27 @@ export default function MaintenancePage() {
     if (!selectedMatchId && nextMatches[0]) setSelectedMatchId(nextMatches[0].matchId);
   };
 
-  const loadAiTraceMatches = async () => {
+  const loadAiTraceMatches = async (preserveMatch?: MaintenanceAiTraceMatchEntry) => {
     const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches`);
     const payload = (await response.json()) as { matches?: MaintenanceAiTraceMatchEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Matches konnten nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
     if (markers.length > 0) throw new Error("KI-Trace-Matches wurden wegen Redaktionsprüfung blockiert.");
-    const nextMatches = payload.matches ?? [];
+    const nextMatches = preserveMatch ? mergeMaintenanceAiTraceMatches(payload.matches ?? [], [preserveMatch]) : payload.matches ?? [];
     setAiTraceMatches(nextMatches);
     setSelectedAiTraceMatchId((current) => (current && nextMatches.some((match) => match.matchId === current) ? current : nextMatches[0]?.matchId ?? ""));
   };
 
   const enableAiTracingForSelectedMatch = async () => {
     if (!selectedMatchId) return;
+    const matchId = selectedMatchId;
     setAiTraceEnableLoading(true);
+    setAiTraceActivationMessage("");
+    setAiTraceActivationError("");
     setOperationNotice({ tone: "working", message: "KI-Tracing wird für das ausgewählte Match ab jetzt aktiviert." });
     setError("");
     try {
-      const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceEnablePath(selectedMatchId)}`, {
+      const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceEnablePath(matchId)}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ mode: "detailed" })
@@ -147,12 +153,19 @@ export default function MaintenancePage() {
       if (!response.ok) throw new Error(payload.error?.message ?? "KI-Tracing konnte nicht aktiviert werden.");
       const markers = findForbiddenMaintenanceMarkers(payload);
       if (markers.length > 0) throw new Error("KI-Trace-Aktivierung wurde wegen Redaktionsprüfung blockiert.");
-      await loadAiTraceMatches();
-      setSelectedAiTraceMatchId(payload.match?.matchId ?? selectedMatchId);
-      await loadAiTraceIndex(payload.match?.matchId ?? selectedMatchId);
-      setOperationNotice({ tone: "success", message: "KI-Tracing ist für dieses Match ab jetzt aktiv. Neue KI-Schritte werden hier aufgezeichnet." });
+      if (!payload.match) throw new Error("KI-Tracing wurde aktiviert, aber die Wartungsantwort enthielt keinen Matchstatus.");
+      const activatedMatch = payload.match;
+      setAiTraceMatches((current) => mergeMaintenanceAiTraceMatches(current, [activatedMatch]));
+      setSelectedAiTraceMatchId(activatedMatch.matchId);
+      const message = `KI-Tracing ist für Match ${shortId(matchId)} ab jetzt aktiv. Neue KI-Schritte werden aufgezeichnet.`;
+      setAiTraceActivationMessage(message);
+      setOperationNotice({ tone: "success", message });
+      await Promise.allSettled([loadAiTraceMatches(activatedMatch), loadAiTraceIndex(activatedMatch.matchId), loadMatches(filters), loadDetail(matchId)]);
+      setSelectedAiTraceMatchId(activatedMatch.matchId);
     } catch (traceError) {
-      setError(traceError instanceof Error ? traceError.message : "KI-Tracing konnte nicht aktiviert werden.");
+      const message = traceError instanceof Error ? traceError.message : "KI-Tracing konnte nicht aktiviert werden.";
+      setAiTraceActivationError(message);
+      setError(message);
       setOperationNotice(null);
     } finally {
       setAiTraceEnableLoading(false);
@@ -563,8 +576,9 @@ export default function MaintenancePage() {
 
   const statusRows = useMemo(() => Object.entries(summary?.matchCountsByStatus ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
   const modeRows = useMemo(() => Object.entries(summary?.matchCountsByMode ?? {}).sort(([a], [b]) => a.localeCompare(b)), [summary]);
+  const aiTraceMatchesById = useMemo(() => new Map(aiTraceMatches.map((match) => [match.matchId, match])), [aiTraceMatches]);
   const selectedAiTraceMatch = aiTraceMatches.find((match) => match.matchId === selectedAiTraceMatchId);
-  const selectedMatchTraceEntry = aiTraceMatches.find((match) => match.matchId === selectedMatchId);
+  const selectedMatchTraceEntry = aiTraceMatchesById.get(selectedMatchId);
   const selectedMatchCanEnableAiTrace = Boolean(detail && selectedMatchId && !detail.terminal && detail.mode !== "human_vs_human" && !selectedMatchTraceEntry);
   const aiTraceEmptyHint = selectedMatchId
     ? selectedMatchCanEnableAiTrace
@@ -673,6 +687,7 @@ export default function MaintenancePage() {
                 <th style={th}>Version</th>
                 <th style={th}>Events</th>
                 <th style={th}>Snapshots</th>
+                <th style={th}>KI-Trace</th>
                 <th style={th}>Größe</th>
                 <th style={th}>Schutz</th>
               </tr>
@@ -680,7 +695,7 @@ export default function MaintenancePage() {
             <tbody>
               {loading && matches.length === 0 ? (
                 <tr>
-                  <td style={loadingCell} colSpan={10}>
+                  <td style={loadingCell} colSpan={11}>
                     <LoaderCircle size={16} aria-hidden="true" style={spinIcon} />
                     Matchliste wird aus der Datenbank geladen ...
                   </td>
@@ -688,23 +703,27 @@ export default function MaintenancePage() {
               ) : null}
               {!loading && matches.length === 0 ? (
                 <tr>
-                  <td style={loadingCell} colSpan={10}>Keine Matches für diese Filter gefunden.</td>
+                  <td style={loadingCell} colSpan={11}>Keine Matches für diese Filter gefunden.</td>
                 </tr>
               ) : null}
-              {matches.map((match) => (
-                <tr key={match.matchId} style={selectedMatchId === match.matchId ? selectedRow : undefined} onClick={() => setSelectedMatchId(match.matchId)}>
-                  <td style={td}><code>{shortId(match.matchId)}</code></td>
-                  <td style={td}>{statusLabel(match.status)}</td>
-                  <td style={td}>{modeLabel(match.mode)}</td>
-                  <td style={td}>{participantsLabel(match.participants)}</td>
-                  <td style={td}>{formatAge(match.ageSeconds)}</td>
-                  <td style={td}>{match.stateVersion ?? "-"} / {match.matchVersion}</td>
-                  <td style={td}>{match.eventCount}</td>
-                  <td style={td}>{match.snapshotCount}</td>
-                  <td style={td}>{formatBytes(match.sizes.approximateTotalBytes)}</td>
-                  <td style={td}>{match.retentionProtected ? "geschützt" : "-"}</td>
-                </tr>
-              ))}
+              {matches.map((match) => {
+                const traceEntry = aiTraceMatchesById.get(match.matchId);
+                return (
+                  <tr key={match.matchId} style={selectedMatchId === match.matchId ? selectedRow : undefined} onClick={() => setSelectedMatchId(match.matchId)}>
+                    <td style={td}><code>{shortId(match.matchId)}</code></td>
+                    <td style={td}>{statusLabel(match.status)}</td>
+                    <td style={td}>{modeLabel(match.mode)}</td>
+                    <td style={td}>{participantsLabel(match.participants)}</td>
+                    <td style={td}>{formatAge(match.ageSeconds)}</td>
+                    <td style={td}>{match.stateVersion ?? "-"} / {match.matchVersion}</td>
+                    <td style={td}>{match.eventCount}</td>
+                    <td style={td}>{match.snapshotCount}</td>
+                    <td style={td}>{traceEntry ? `aktiv · ${traceEntry.traceCount}` : "-"}</td>
+                    <td style={td}>{formatBytes(match.sizes.approximateTotalBytes)}</td>
+                    <td style={td}>{match.retentionProtected ? "geschützt" : "-"}</td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -816,6 +835,13 @@ export default function MaintenancePage() {
             </button>
           </div>
         </div>
+        {aiTraceActivationMessage ? (
+          <p style={successBox} role="status" aria-live="polite">
+            <CheckCircle2 size={16} aria-hidden="true" />
+            {aiTraceActivationMessage}
+          </p>
+        ) : null}
+        {aiTraceActivationError ? <p style={errorBox} role="alert">{aiTraceActivationError}</p> : null}
         {aiTraceMatches.length === 0 ? <p style={infoBox}>{aiTraceEmptyHint}</p> : null}
         {aiTraceMatches.length > 0 ? (
           <div style={twoCols}>
@@ -1279,6 +1305,7 @@ const errorBox: CSSProperties = { margin: 0, border: "1px solid #f3b5b5", backgr
 const warningBox: CSSProperties = { display: "flex", alignItems: "flex-start", gap: "0.55rem", border: "1px solid #e2c16a", background: "#fff9e8", borderRadius: 8, padding: "0.7rem", color: "#5b4200" };
 const warningText: CSSProperties = { margin: 0, color: "#7a4b00", fontSize: "0.86rem" };
 const infoBox: CSSProperties = { margin: 0, border: "1px solid #9db0c3", background: "#f6fbff", color: "#153654", borderRadius: 8, padding: "0.7rem", fontSize: "0.9rem" };
+const successBox: CSSProperties = { margin: 0, border: "1px solid #9bc9b4", background: "#f3fbf7", color: "#155c3c", borderRadius: 8, padding: "0.7rem", fontSize: "0.9rem", display: "flex", alignItems: "center", gap: "0.45rem" };
 const loadStatusBox: CSSProperties = { border: "1px solid #b9cbe0", borderRadius: 8, padding: "0.85rem", background: "#f9fcff", display: "grid", gap: "0.65rem", color: "#102033" };
 const progressTrack: CSSProperties = { height: 8, borderRadius: 999, overflow: "hidden", background: "#d8e4ef" };
 const progressFill: CSSProperties = { height: "100%", borderRadius: 999, background: "#2f74b5", transition: "width 180ms ease" };
