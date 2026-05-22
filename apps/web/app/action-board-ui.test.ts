@@ -434,10 +434,12 @@ describe("V1.0.5 action board UI helpers", () => {
 
     const runnerSplit = splitArchiveCardsForDisplay("runner", [faceupA, faceupB], 3);
     expect(runnerSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
+    expect(runnerSplit.facedownCards).toEqual([]);
     expect(runnerSplit.facedownCount).toBe(1);
 
     const corpSplit = splitArchiveCardsForDisplay("corp", [faceupA, facedown, faceupB], 3);
     expect(corpSplit.faceupCards.map((entry) => entry.instanceId)).toEqual(["archive_a", "archive_b"]);
+    expect(corpSplit.facedownCards.map((entry) => entry.instanceId)).toEqual(["archive_c"]);
     expect(corpSplit.facedownCount).toBe(1);
   });
   it("keeps cue position local, resettable and clamped", () => {

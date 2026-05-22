@@ -735,6 +735,8 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
 const RUNNER_HEAP_PREVIEW_LIMIT = 18;
+const RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT = 18;
+const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
 const SPECIAL_ZONE_CARD_WIDTH_MIN = 56;
 const SPECIAL_ZONE_CARD_WIDTH_PREFERRED = 140;
@@ -5244,6 +5246,16 @@ export default function Page() {
                     const runAction = runActionForServer(server.id);
                     const lanes = serverLanesForSide(activeView.side, server);
                     const isOwnCorpHq = activeView.side === "corp" && server.id === "hq";
+                    const isOpponentCorpHq = activeView.side === "runner" && server.id === "hq";
+                    const isCorpHqComposite = isOwnCorpHq || isOpponentCorpHq;
+                    const opponentCorpHqCount = isOpponentCorpHq ? Math.max(0, Math.floor(activeView.opponent.handCount)) : 0;
+                    const opponentCorpHqPreviewCount = Math.min(opponentCorpHqCount, CORP_OPPONENT_HQ_PREVIEW_LIMIT);
+                    const opponentCorpHqPreviewCards = Array.from({ length: opponentCorpHqPreviewCount }, (_, index): DisplayVisibleCard => ({
+                      instanceId: `corp-opponent-hq-hidden-${index}`,
+                      known: false,
+                      rezzed: false,
+                      owner: "corp"
+                    }));
                     const serverCollapsed = boardZoneCollapsedFor(`corp:${server.id}`);
                     const renderLaneCards = (lane: { kind: "ice" | "root"; label: "ICE" | "Root"; cards: VisibleCard[] }) => {
                       if (server.id === "archives" && lane.kind === "root") {
@@ -5304,7 +5316,7 @@ export default function Page() {
                     };
                     return (
                       <article
-                        className={`server ${isOwnCorpHq ? "corpHqServer" : ""} ${serverCollapsed ? "serverCollapsed" : ""} ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
+                        className={`server ${isCorpHqComposite ? "corpHqServer" : ""} ${serverCollapsed ? "serverCollapsed" : ""} ${serverHighlighted(activeCueHighlight, server.id) ? "cueHighlight" : ""} ${activeRunTargetIds.includes(server.id) ? "activeRunTarget" : ""} ${selectedActionContext?.kind === "server" && selectedActionContext.id === server.id ? "selectedActionSource" : ""}`}
                         key={server.id}
                         data-testid="server"
                         data-server-id={server.id}
@@ -5347,7 +5359,7 @@ export default function Page() {
                             </div>
                           </div>
                           {!serverCollapsed ? <div className="serverBody">
-                            <div className={isOwnCorpHq ? "corpHqComposite" : "pairedServerLanes"}>
+                            <div className={isCorpHqComposite ? "corpHqComposite" : "pairedServerLanes"}>
                               {isOwnCorpHq ? (
                                 <>
                                   <div className={`corpHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
@@ -5381,6 +5393,37 @@ export default function Page() {
                                         );
                                       })}
                                     </HandCardsRow>
+                                  </div>
+                                  <div className="pairedServerLanes corpHqServerLanes">
+                                    {lanes.map((lane) => (
+                                      <div className="serverLaneGroup pairedServerLane" key={lane.label}>
+                                        <div className={`lane ${lane.kind === "ice" ? "iceLane" : "rootLane"}`} style={boardLaneStyle}>
+                                          {renderLaneCards(lane)}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </>
+                              ) : isOpponentCorpHq ? (
+                                <>
+                                  <div className={`corpHqHandPanel corpOpponentHqHandPanel ${zoneHighlighted(activeCueHighlight, activeView.side, "hq") ? "cueHighlightSoft" : ""}`}>
+                                    {opponentCorpHqPreviewCards.length > 0 ? (
+                                      <div
+                                        className="corpOpponentHqPreview"
+                                        style={{
+                                          ...zoneCardsStyle,
+                                          "--corp-hq-visible-steps": String(Math.max(0, opponentCorpHqPreviewCards.length - 1))
+                                        } as CSSProperties}
+                                        aria-label={`Korp-HQ: ${formatHandLimitCount(activeView.opponent.handCount, activeView.opponent.maxHandSize)}, verdeckte Karten`}
+                                      >
+                                        {opponentCorpHqPreviewCards.map((card) => (
+                                          <CardView key={card.instanceId} card={card} compact displayMode={cardDisplayMode} hiddenSide="corp" onFocus={focusCard} />
+                                        ))}
+                                        {opponentCorpHqCount > CORP_OPPONENT_HQ_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{opponentCorpHqCount - CORP_OPPONENT_HQ_PREVIEW_LIMIT}</span> : null}
+                                      </div>
+                                    ) : (
+                                      <p className="archivesPileEmpty">Keine Karten in HQ.</p>
+                                    )}
                                   </div>
                                   <div className="pairedServerLanes corpHqServerLanes">
                                     {lanes.map((lane) => (
@@ -7263,14 +7306,22 @@ function RunnerOpponentZonesStrip({
   const zoneCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, zonePercent / 100);
   const zoneCardsStyle = useMemo(() => ({ "--zone-card-scale": String(zoneCardScale) } as CSSProperties), [zoneCardScale]);
   const [collapsedZones, setCollapsedZones] = useState<Record<string, boolean>>({});
-  const zoneCollapsed = (zone: "grip" | "heap" | "stack") => Boolean(collapsedZones[zone]);
+  const zoneCollapsed = (zone: "grip" | "heap" | "stack") => (zone === "grip" ? collapsedZones[zone] ?? true : Boolean(collapsedZones[zone]));
   const toggleZoneCollapsed = (zone: "grip" | "heap" | "stack") => setCollapsedZones((current) => ({ ...current, [zone]: !current[zone] }));
   if (view.side !== "corp") return null;
   const heapCards = view.opponent.discardCards ?? [];
   const heapCount = view.opponent.discardCount ?? heapCards.length;
+  const gripCount = Math.max(0, Math.floor(view.opponent.handCount));
   const gripCountLabel = formatHandLimitCount(view.opponent.handCount, view.opponent.maxHandSize);
   const stackCountLabel = formatCardCount(view.opponent.deckCount);
   const heapCountLabel = formatCardCount(heapCount);
+  const gripPreviewCount = Math.min(gripCount, RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT);
+  const gripPreviewCards = Array.from({ length: gripPreviewCount }, (_, index): DisplayVisibleCard => ({
+    instanceId: `runner-opponent-grip-hidden-${index}`,
+    known: false,
+    rezzed: false,
+    owner: "runner"
+  }));
   const cardActionsForHeap = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
     return contextualActions.filter((action) => actionMatchesContext(action, { kind: "card", id: card.instanceId, label: card.title ?? "Karte" }));
@@ -7288,8 +7339,28 @@ function RunnerOpponentZonesStrip({
         style={zoneCardsStyle}
         title="Grip: Runner-Hand. Aus Korp-Sicht ist nur die Kartenanzahl sichtbar."
         ariaLabel={`Runner-Grip ${gripCountLabel}`}
-        collapsed
-      />
+        collapsed={zoneCollapsed("grip")}
+        onToggleCollapse={() => toggleZoneCollapsed("grip")}
+        collapseLabel="Grip"
+      >
+        {gripPreviewCards.length > 0 ? (
+          <div
+            className="runnerOpponentGripPreview"
+            style={{
+              ...zoneCardsStyle,
+              "--runner-grip-visible-steps": String(Math.max(0, gripPreviewCards.length - 1))
+            } as CSSProperties}
+            aria-label={`Runner-Grip: ${gripCountLabel}, verdeckte Karten`}
+          >
+            {gripPreviewCards.map((card) => (
+              <CardView key={card.instanceId} card={card} compact displayMode={displayMode} hiddenSide="runner" onFocus={onFocus} />
+            ))}
+            {gripCount > RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{gripCount - RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT}</span> : null}
+          </div>
+        ) : (
+          <p className="archivesPileEmpty">Keine Karten im Grip.</p>
+        )}
+      </SideZoneFrame>
       <SideZoneFrame
         side="runner"
         label="Stack"
@@ -11883,18 +11954,21 @@ function ArchivesDualStackLane({
   onActionContextSelect(card: DisplayVisibleCard, hiddenSide?: Side): void;
   enrichCard(card: VisibleCard): DisplayVisibleCard;
 }) {
-  const { faceupCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
+  const { faceupCards, facedownCards, facedownCount } = splitArchiveCardsForDisplay(viewerSide, visibleCards, totalArchivesCount);
+  const [corpArchivesFacedownView, setCorpArchivesFacedownView] = useState<"details" | "backs">("details");
   const { archivePercent } = useCardScaleSettings();
   const archiveCardScale = Math.max(CARD_SCALE_PERCENT_MIN / 100, archivePercent / 100);
   const archiveCardsStyle = useMemo(() => ({ "--archive-card-scale": String(archiveCardScale) } as CSSProperties), [archiveCardScale]);
   const shownFaceupCards = faceupCards.slice(0, ARCHIVES_STACK_PREVIEW_LIMIT);
-  const shownFacedownCount = Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
+  const shownFacedownCards = facedownCards.slice(0, ARCHIVES_STACK_PREVIEW_LIMIT);
+  const shownFacedownCount = viewerSide === "corp" ? shownFacedownCards.length : Math.min(ARCHIVES_STACK_PREVIEW_LIMIT, facedownCount);
   const faceupOverflow = Math.max(0, faceupCards.length - shownFaceupCards.length);
   const facedownOverflow = Math.max(0, facedownCount - shownFacedownCount);
   const faceupRowItems = shownFaceupCards.length + (faceupOverflow > 0 ? 1 : 0);
   const facedownRowItems = shownFacedownCount + (facedownOverflow > 0 ? 1 : 0);
   const faceupRowStyle = { "--archive-visible-steps": String(Math.max(0, faceupRowItems - 1)) } as CSSProperties;
   const facedownRowStyle = { "--archive-visible-steps": String(Math.max(0, facedownRowItems - 1)) } as CSSProperties;
+  const showCorpFacedownBacks = viewerSide === "corp" && corpArchivesFacedownView === "backs";
 
   if (collapsed) {
     return <span className="laneCollapsedPlaceholder archiveCollapsedPlaceholder" style={archiveCardsStyle} aria-label="Archive eingeklappt" />;
@@ -11939,22 +12013,73 @@ function ArchivesDualStackLane({
         </div>
       ) : null}
 
+      {viewerSide === "corp" && faceupCards.length > 0 && facedownCards.length > 0 ? (
+        <div className="archivesToggleColumn">
+          <button
+            className="archivesViewToggle"
+            type="button"
+            aria-label={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+            aria-pressed={showCorpFacedownBacks}
+            onClick={() => setCorpArchivesFacedownView((current) => (current === "details" ? "backs" : "details"))}
+            title={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+          >
+            {showCorpFacedownBacks ? <Eye size={12} strokeWidth={2.4} /> : <Image size={12} strokeWidth={2.4} />}
+          </button>
+        </div>
+      ) : null}
+
       {facedownCount > 0 ? (
-        <div className="archivesPile">
+        <div className="archivesPile archivesFacedownPile">
+          {viewerSide === "corp" && faceupCards.length === 0 && facedownCards.length > 0 ? (
+            <div className="archivesInlineToggle">
+              <button
+                className="archivesViewToggle"
+                type="button"
+                aria-label={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+                aria-pressed={showCorpFacedownBacks}
+                onClick={() => setCorpArchivesFacedownView((current) => (current === "details" ? "backs" : "details"))}
+                title={showCorpFacedownBacks ? "Verdeckte Karten als lesbare Kartendetails anzeigen" : "Verdeckte Karten als Kartenrückseiten anzeigen"}
+              >
+                {showCorpFacedownBacks ? <Eye size={12} strokeWidth={2.4} /> : <Image size={12} strokeWidth={2.4} />}
+              </button>
+            </div>
+          ) : null}
           <div className="archivesPileBody">
             <div className="archivesOverlapRow" style={facedownRowStyle}>
-              {Array.from({ length: shownFacedownCount }, (_, index) => (
-                <CardView
-                  key={`archives-facedown-${index}`}
-                  card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
-                  compact
-                  displayMode={displayMode}
-                  hiddenSide="corp"
-                  installedCorpCard={false}
-                  actions={[]}
-                  actionDisabled
-                />
-              ))}
+              {viewerSide === "corp"
+                ? shownFacedownCards.map((card) => {
+                    const displayCard = enrichCard(card);
+                    return (
+                      <CardView
+                        key={card.instanceId}
+                        card={displayCard}
+                        compact
+                        displayMode={displayMode}
+                        hiddenSide="corp"
+                        installedCorpCard={false}
+                        archiveFacedown
+                        {...(showCorpFacedownBacks ? { forceCardBack: "corp" as Side } : {})}
+                        selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
+                        actions={cardActionsFor(card)}
+                        actionDisabled={actionDisabled}
+                        onAction={onAction}
+                        onFocus={onFocus}
+                        onActionContextSelect={onActionContextSelect}
+                      />
+                    );
+                  })
+                : Array.from({ length: shownFacedownCount }, (_, index) => (
+                    <CardView
+                      key={`archives-facedown-${index}`}
+                      card={{ instanceId: `archives-facedown-${index}`, known: false, rezzed: false }}
+                      compact
+                      displayMode={displayMode}
+                      hiddenSide="corp"
+                      installedCorpCard={false}
+                      actions={[]}
+                      actionDisabled
+                    />
+                  ))}
               {facedownOverflow > 0 ? <span className="archivesOverflowBadge">+{facedownOverflow}</span> : null}
             </div>
           </div>
@@ -11984,6 +12109,8 @@ function CardView({
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   scoreStateBadges: explicitScoreStateBadges = [],
+  archiveFacedown = false,
+  forceCardBack,
   choiceSelected = false,
   choiceShortcut,
   discardShortcut,
@@ -12011,6 +12138,8 @@ function CardView({
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   scoreStateBadges?: ScoredAgendaStateLine[];
+  archiveFacedown?: boolean;
+  forceCardBack?: Side;
   choiceSelected?: boolean;
   choiceShortcut?: CardChoiceShortcut;
   discardShortcut?: { selected: boolean; disabled: boolean; onToggle(): void };
@@ -12037,7 +12166,8 @@ function CardView({
   const hasCardActions = actions.length > 0;
   const showCardActions = selected && hasCardActions && Boolean(onAction);
   const typeClass = card.known && card.type ? ` ${card.type}` : "";
-  const hiddenBackClass = !card.known && hiddenSide ? " hiddenBack" : "";
+  const hiddenBackClass = forceCardBack ? ` hiddenBack ${forceCardBack}HiddenBack forcedCardBack` : !card.known && hiddenSide ? ` hiddenBack ${hiddenSide}HiddenBack` : "";
+  const archiveFacedownClass = archiveFacedown ? " archiveFacedown" : "";
   const isCompact = compact || displayMode === "compact";
   const modeClass = displayMode === "text-card" ? " textCard" : displayMode === "compact" ? " compactCard" : " placeholderCard";
   const previewCard = preview ? cardWithoutDevelopmentCounters(card) : card;
@@ -12067,7 +12197,7 @@ function CardView({
         card.memoryCost !== undefined ? { icon: "MU", label: "MU", value: String(card.memoryCost) } : null
       ].filter((entry): entry is { icon: string; label: string; value: string } => entry !== null)
     : [];
-  const cardImageUrl = card.known && displayMode === "placeholder" ? card.imageUrl : undefined;
+  const cardImageUrl = card.known && displayMode === "placeholder" && !forceCardBack ? card.imageUrl : undefined;
   const visualImageUrl = cardImageUrl;
   const isHardwareImageCard = Boolean(visualImageUrl) && card.known && isHardwareCardType(card.type) && hasGeneratedCardArt(card.definitionId);
   const isOperationImageCard = Boolean(visualImageUrl) && card.known && isOperationCardType(card.type) && hasGeneratedCardArt(card.definitionId);
@@ -12091,10 +12221,10 @@ function CardView({
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}${archiveFacedown ? ", verdeckt im Archiv" : ""}${forceCardBack ? ", Rückseite angezeigt" : ""}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
@@ -12354,7 +12484,7 @@ function CardView({
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${archiveFacedownClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
@@ -12400,6 +12530,7 @@ function CardView({
         title={nativeTitle}
         data-testid={onSelect ? "card-choice-card" : card.known ? "known-card" : "hidden-card"}
         data-known={card.known ? "true" : "false"}
+        data-archive-facedown={archiveFacedown ? "true" : undefined}
       >
         {visualImageUrl ? <CardImage className="cardImage" src={visualImageUrl} decorative /> : null}
         {isHardwareImageCard ? (

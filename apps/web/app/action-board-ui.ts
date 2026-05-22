@@ -1214,19 +1214,22 @@ export function splitArchiveCardsForDisplay(
   viewerSide: Side,
   cards: VisibleCard[],
   totalArchivesCount: number
-): { faceupCards: VisibleCard[]; facedownCount: number } {
+): { faceupCards: VisibleCard[]; facedownCards: VisibleCard[]; facedownCount: number } {
   if (viewerSide === "runner") {
     const faceupCards = cards.filter((card) => card.known);
     return {
       faceupCards,
+      facedownCards: [],
       facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
     };
   }
 
   const faceupCards = cards.filter((card) => card.rezzed === true);
+  const facedownCards = cards.filter((card) => card.rezzed !== true);
   return {
     faceupCards,
-    facedownCount: Math.max(0, totalArchivesCount - faceupCards.length)
+    facedownCards,
+    facedownCount: Math.max(facedownCards.length, totalArchivesCount - faceupCards.length)
   };
 }
 export function parseCuePositionPreference(raw: string | null): CuePositionPreference {
