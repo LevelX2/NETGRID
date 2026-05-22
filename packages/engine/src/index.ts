@@ -28792,16 +28792,24 @@ function resolveTraceRunnerBid(
   const tracePaymentPayload =
     runnerTracePaymentPublicPayload(tracePaymentReceipt);
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
-  const traceStrength =
-    trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
-  const runnerStrength = runnerLink + bid;
-  const postBidTrace = {
+  const postBidTraceBase = {
     ...trace,
     status: "post_bid_link" as const,
+    runnerLink,
     runnerBid: bid,
-    runnerStrength,
     postBidLinkBonus: 0,
     postBidLinkSourceIds: [],
+  };
+  const result = describeTraceResultFromTrace(postBidTraceBase, {
+    runnerLinkFallback: runnerLink,
+  });
+  const traceStrength = result.corpTraceStrength;
+  const runnerStrength = result.runnerTraceStrength;
+  const successful = result.successful;
+  const postBidTrace = {
+    ...postBidTraceBase,
+    traceStrength,
+    runnerStrength,
   };
   if (startTracePostBidLinkChoice(state, postBidTrace)) {
     state.trace = postBidTrace;
@@ -28821,7 +28829,6 @@ function resolveTraceRunnerBid(
     };
     return;
   }
-  const successful = traceStrength > runnerStrength;
   const tagsAdded =
     successful && trace.successEffect.type === "add_tag_and_counter"
       ? trace.successEffect.tagAmount
