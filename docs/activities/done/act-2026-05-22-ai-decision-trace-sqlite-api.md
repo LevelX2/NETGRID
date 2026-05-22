@@ -1,21 +1,28 @@
 ---
 activityId: act-2026-05-22-ai-decision-trace-sqlite-api
-status: inbox
+status: done
 kind: architecture
 area: server
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-22-ai-decision-trace-contract
   - act-2026-05-22-ai-decision-trace-schema-top-alternatives
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/storage-sqlite.ts
+  - apps/server/src/http-server.ts
+  - apps/server/src/multiplayer.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "AI decision traces|serves a redacted local SQLite storage summary"
+  - git diff --check -- apps/server/src/multiplayer.ts apps/server/src/storage-sqlite.ts apps/server/src/http-server.ts apps/server/src/multiplayer.test.ts docs/activities/done/act-2026-05-22-ai-decision-trace-sqlite-api.md
 ---
 
 # KI-Entscheidungstraces in SQLite speichern und per privater API bereitstellen
@@ -65,4 +72,6 @@ Aktivierte KI-Entscheidungstraces werden matchgebunden in der lokalen SQLite-Run
 
 ## Ergebnisnotiz
 
-Noch offen.
+SQLite speichert aktivierte KI-Entscheidungstraces in `ai_decision_traces`; normale Matches ohne `aiTraceMode` erzeugen keine Trace-Zeilen. `createMatch` akzeptiert `aiTraceMode: "summary" | "detailed"`, `runAiStep` schreibt match-, event-, stateVersion- und decisionIndex-gebundene strukturierte Trace-Daten aus dem sanitisierbaren DecisionDebug-View, nicht aus `AIInput` oder FullState. Private lokale Maintenance-Endpunkte liefern Trace-Matchliste, Trace-Index und Trace-Detail ohne HTML.
+
+Der neue Maintenance-Test deckt SQLite-Roundtrip, deaktivierten Modus, HTTP-Endpunkte und Redaction-Verbote ab. Bekannter Rest außerhalb dieses Pakets: der vollständige AI-Testfile enthält weiterhin bestehende Simulations-Smoke-Failures mit `No legal action for runner ...`; die gezielten Server-Checks dieses Pakets sind grün.

@@ -600,6 +600,46 @@ async function routeHttp(
       return;
     }
 
+    if (url.pathname === "/api/storage/maintenance/ai-decision-traces/matches" && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, "storage-maintenance-ai-trace-matches")) return;
+      const matches = await service.storageMaintenanceAiDecisionTraceMatches();
+      if (!matches) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, { matches });
+      return;
+    }
+
+    const maintenanceAiTraceIndexRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/matches\/([^/]+)$/.exec(url.pathname);
+    if (maintenanceAiTraceIndexRoute && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      const matchId = decodeURIComponent(maintenanceAiTraceIndexRoute[1] ?? "");
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-ai-trace-index:${matchId}`)) return;
+      const traces = await service.storageMaintenanceAiDecisionTraceIndex(matchId);
+      if (!traces) {
+        sendJson(response, 503, maintenanceUnavailablePayload());
+        return;
+      }
+      sendJson(response, 200, { traces });
+      return;
+    }
+
+    const maintenanceAiTraceDetailRoute = /^\/api\/storage\/maintenance\/ai-decision-traces\/([^/]+)$/.exec(url.pathname);
+    if (maintenanceAiTraceDetailRoute && request.method === "GET") {
+      if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
+      const traceId = decodeURIComponent(maintenanceAiTraceDetailRoute[1] ?? "");
+      if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-ai-trace-detail:${traceId}`)) return;
+      const trace = await service.storageMaintenanceAiDecisionTraceDetail(traceId);
+      if (!trace) {
+        sendJson(response, 404, { error: { code: "not_found", message: "Diese Wartungsansicht hat keinen KI-Trace für diese ID." } });
+        return;
+      }
+      sendJson(response, 200, trace);
+      return;
+    }
+
     if (url.pathname === "/api/storage/maintenance/cleanup/preview" && request.method === "POST") {
       if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       if (!checkRateLimit(response, rateLimiter, "lifecycle", request, deploymentConfig, "storage-maintenance-cleanup-preview")) return;
@@ -762,6 +802,7 @@ async function routeHttp(
       if (isDifficulty(body.runnerDifficulty)) createInput.runnerDifficulty = body.runnerDifficulty;
       if (isDifficulty(body.corpDifficulty)) createInput.corpDifficulty = body.corpDifficulty;
       if (isAiPacingMode(body.aiPacingMode)) createInput.aiPacingMode = body.aiPacingMode;
+      if (isAiDecisionTraceMode(body.aiTraceMode)) createInput.aiTraceMode = body.aiTraceMode;
       if (typeof body.discoverableInLan === "boolean") createInput.discoverableInLan = body.discoverableInLan;
       Object.assign(createInput, deckSelectionFromBody(body));
       if (typeof body.settings === "object" && body.settings) {
@@ -1294,6 +1335,10 @@ function isDifficulty(value: unknown): value is AiDifficulty {
 
 function isAiPacingMode(value: unknown): value is NonNullable<Parameters<MultiplayerService["createMatch"]>[0]["aiPacingMode"]> {
   return value === "fast" || value === "paced" || value === "manual";
+}
+
+function isAiDecisionTraceMode(value: unknown): value is NonNullable<Parameters<MultiplayerService["createMatch"]>[0]["aiTraceMode"]> {
+  return value === "summary" || value === "detailed";
 }
 
 function replayPerspectiveFromParam(value: string | null): ReplayPerspective | undefined {
