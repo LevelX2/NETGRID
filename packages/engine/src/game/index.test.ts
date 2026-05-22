@@ -22,6 +22,9 @@ import {
   replayGameEvents,
   validateGameState,
   validateGameStateForDebug,
+  costQuotePublicPayload,
+  costQuoteToLegalActionCosts,
+  type CostQuote,
 } from "./index";
 
 describe("game facade", () => {
@@ -99,5 +102,27 @@ describe("game facade", () => {
     expect(buildPlayerViewProjection(state, "corp", legalActions)).toEqual(
       getPlayerView(state, "corp"),
     );
+  });
+
+  it("exports payment quote helpers with defensive LegalAction copies", () => {
+    const quote: CostQuote = {
+      purpose: "corp_rez",
+      side: "corp",
+      targetCardId: "ice-1",
+      baseCredits: 4,
+      finalCredits: 2,
+      costs: [{ credits: 2 }],
+      modifiers: [],
+      canPay: true,
+      publicPayload: { cardId: "ice-1", rezCostPaid: 2 },
+    };
+
+    const costs = costQuoteToLegalActionCosts(quote);
+    const payload = costQuotePublicPayload(quote);
+    costs[0]!.credits = 99;
+    payload.rezCostPaid = 99;
+
+    expect(quote.costs).toEqual([{ credits: 2 }]);
+    expect(quote.publicPayload).toEqual({ cardId: "ice-1", rezCostPaid: 2 });
   });
 });

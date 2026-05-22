@@ -57,8 +57,8 @@ import {
   quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
-} from "./ability-engine/cost-pipeline";
-export { quoteCorpRezCost } from "./ability-engine/cost-pipeline";
+} from "./game/payment";
+export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
   createGameAfterSetup,

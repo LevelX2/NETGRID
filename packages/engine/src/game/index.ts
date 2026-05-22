@@ -7,3 +7,21 @@ export { buildPlayerViewProjection, playerViewFor } from "./player-view";
 export { hashGameState, hashState } from "./hash";
 export { replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";
+export type {
+  CorpInstallCostOptions,
+  CorpRezCostOptions,
+  CostModifierQuote,
+  CostPurpose,
+  CostQuote,
+} from "./payment";
+export {
+  assertCorpRezCostQuoteValid,
+  corpServerIdForInstalledCard,
+  costQuotePublicPayload,
+  costQuoteToLegalActionCosts,
+  oliviaSalazarRezSourcesForRunIce,
+  quoteCorpIceInstallCost,
+  quoteCorpRezCost,
+  rezCostForCard,
+  rezCostReductionSourceDefinitionIdsFor,
+} from "./payment";

@@ -14,7 +14,7 @@ import {
   type Side,
   type VisibleCard,
 } from "@netgrid/shared";
-import { corpServerIdForInstalledCard } from "../../ability-engine/cost-pipeline";
+import { corpServerIdForInstalledCard } from "../payment";
 import {
   effectiveAgendaDifficulty,
   type EffectiveAgendaDifficultyDependencies,
