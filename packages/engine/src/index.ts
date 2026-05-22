@@ -21709,47 +21709,17 @@ function scoreAgenda(
       scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
         ? scoredAgenda.subtype
         : "code_gate";
-    const matchingIceIds = corpInstalledCardIds(state)
-      .filter(
-        (iceId) =>
-          mustInstance(state.cardInstances, iceId).zone.zone === "serverIce" &&
-          cardHasSubtype(definitionFor(state, iceId), subtype),
-      )
-      .sort();
-    let rezzedMatchingIceCount = 0;
-    const publicRevealDefinitionIds: CardDefinitionId[] = [];
-    for (const iceId of matchingIceIds) {
-      const instance = mustInstance(state.cardInstances, iceId);
-      if (instance.rezzed) rezzedMatchingIceCount += 1;
-      if (!instance.faceup) {
-        state.cardInstances[iceId] = { ...instance, faceup: true };
-      }
-      publicRevealDefinitionIds.push(definitionFor(state, iceId).id);
-    }
     const creditPer =
       scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
         ? scoredAgenda.creditPerRevealedOrRezzed
         : 1;
-    const gainedCredits = matchingIceIds.length * creditPer;
-    if (gainedCredits > 0) credits(state, "corp", gainedCredits);
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      agendaAbility:
-        subtype === "wall" ? "superior_net_barriers" : "encryption_breakthrough",
-      hiddenZoneBarrier: true,
-      hiddenZoneAction:
-        subtype === "wall"
-          ? "superior_net_barriers_reveal_walls"
-          : "encryption_breakthrough_reveal_code_gates",
-      revealedCount: matchingIceIds.length,
-      ...(subtype === "code_gate"
-        ? { rezzedCodeGateCount: rezzedMatchingIceCount }
-        : {}),
-      rezzedMatchingIceCount,
-      gainedCredits,
-      corpCreditsAfter: state.corp.credits,
-      publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
-    };
+    startScoredSubtypeRevealChoiceOrResolve(
+      state,
+      cardId,
+      legalAction,
+      subtype,
+      creditPer,
+    );
   }
   if (
     legalAction &&
@@ -21812,6 +21782,192 @@ function priorityRequisitionCandidates(state: GameState): CardInstanceId[] {
       const rightCost = definitionFor(state, right).rezCost ?? 0;
       return rightCost - leftCost || left.localeCompare(right);
     });
+}
+
+type ScoredSubtypeRevealSubtype = "code_gate" | "wall";
+
+function scoredSubtypeRevealAgendaAbility(
+  subtype: ScoredSubtypeRevealSubtype,
+): "encryption_breakthrough" | "superior_net_barriers" {
+  return subtype === "wall" ? "superior_net_barriers" : "encryption_breakthrough";
+}
+
+function scoredSubtypeRevealHiddenZoneAction(
+  subtype: ScoredSubtypeRevealSubtype,
+): "encryption_breakthrough_reveal_code_gates" | "superior_net_barriers_reveal_walls" {
+  return subtype === "wall"
+    ? "superior_net_barriers_reveal_walls"
+    : "encryption_breakthrough_reveal_code_gates";
+}
+
+function scoredSubtypeRevealPrompt(subtype: ScoredSubtypeRevealSubtype): string {
+  return subtype === "wall"
+    ? "Superior Net Barriers: Walls aufdecken"
+    : "Encryption Breakthrough: Code Gates aufdecken";
+}
+
+function scoredSubtypeRevealOptionPublicLabel(
+  subtype: ScoredSubtypeRevealSubtype,
+): string {
+  return subtype === "wall" ? "Installierte Wall" : "Installiertes Code Gate";
+}
+
+function installedIceIdsWithSubtype(
+  state: GameState,
+  subtype: ScoredSubtypeRevealSubtype,
+): CardInstanceId[] {
+  return corpInstalledCardIds(state)
+    .filter((iceId) => {
+      const instance = mustInstance(state.cardInstances, iceId);
+      return (
+        instance.zone.zone === "serverIce" &&
+        cardHasSubtype(definitionFor(state, iceId), subtype)
+      );
+    })
+    .sort();
+}
+
+function startScoredSubtypeRevealChoiceOrResolve(
+  state: GameState,
+  agendaId: CardInstanceId,
+  legalAction: LegalAction,
+  subtype: ScoredSubtypeRevealSubtype,
+  creditPer: number,
+): void {
+  const matchingIceIds = installedIceIdsWithSubtype(state, subtype);
+  const hiddenCandidates = matchingIceIds.filter((iceId) => {
+    const instance = mustInstance(state.cardInstances, iceId);
+    return !instance.rezzed && !instance.faceup;
+  });
+  if (hiddenCandidates.length === 0) {
+    resolveScoredSubtypeReveal(
+      state,
+      legalAction,
+      subtype,
+      creditPer,
+      [],
+    );
+    return;
+  }
+  state.pendingChoice = {
+    choiceId: `v162_scored_subtype_reveal_${subtype}_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v162.scored_subtype_reveal:${agendaId}:${subtype}:${creditPer}:${state.stateVersion + 1}`,
+    prompt: scoredSubtypeRevealPrompt(subtype),
+    kind: "select_cards",
+    options: hiddenCandidates.map((cardId) => ({
+      id: `card_${cardId}`,
+      label: definitionFor(state, cardId).title,
+      publicLabel: scoredSubtypeRevealOptionPublicLabel(subtype),
+      value: cardId,
+    })),
+    minSelections: 0,
+    maxSelections: hiddenCandidates.length,
+    stateVersion: state.stateVersion + 1,
+    visibility: "hidden_info_barrier",
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
+    scoredSubtypeRevealChoiceOpened: true,
+    scoredSubtypeRevealSubtype: subtype,
+    scoredSubtypeRevealCandidateCount: hiddenCandidates.length,
+  };
+}
+
+function resolveScoredSubtypeRevealChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v162.scored_subtype_reveal"))
+    throw new Error("Es ist keine Scored-Subtype-Reveal-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf diese Reveal-Choice resolven.");
+  const [, agendaId, rawSubtype, rawCreditPer] = choice.source.split(":");
+  const subtype =
+    rawSubtype === "wall" || rawSubtype === "code_gate" ? rawSubtype : undefined;
+  const creditPer = Number(rawCreditPer);
+  if (!agendaId || !subtype || !Number.isInteger(creditPer) || creditPer < 0)
+    throw new Error("Die Scored-Subtype-Reveal-Choice ist ungueltig.");
+  const agendaDefinition = definitionFor(state, agendaId);
+  const scoredAgenda = scoredAgendaImplementationForDefinition(agendaDefinition);
+  if (
+    !state.corp.scoreArea.includes(agendaId) ||
+    scoredAgenda?.kind !== "reveal_installed_ice_subtype_for_credits" ||
+    scoredAgenda.subtype !== subtype
+  ) {
+    throw new Error("Die Reveal-Agenda ist nicht mehr in der Korp-ScoreArea.");
+  }
+  const selectedIds = selectedChoiceCardIds(choice, playerAction);
+  const optionValues = new Set(
+    choice.options
+      .map((option) => option.value)
+      .filter((value): value is string => typeof value === "string"),
+  );
+  for (const selectedId of selectedIds) {
+    const instance = state.cardInstances[selectedId];
+    if (
+      !optionValues.has(selectedId) ||
+      !instance ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce" ||
+      instance.rezzed ||
+      instance.faceup ||
+      !cardHasSubtype(definitionFor(state, selectedId), subtype)
+    ) {
+      throw new Error("Das Reveal-Ziel ist nicht mehr gueltig.");
+    }
+  }
+  delete state.pendingChoice;
+  resolveScoredSubtypeReveal(
+    state,
+    legalAction,
+    subtype,
+    creditPer,
+    selectedIds,
+  );
+}
+
+function resolveScoredSubtypeReveal(
+  state: GameState,
+  legalAction: LegalAction,
+  subtype: ScoredSubtypeRevealSubtype,
+  creditPer: number,
+  selectedRevealIds: CardInstanceId[],
+): void {
+  const selectedSet = new Set(selectedRevealIds);
+  for (const iceId of selectedSet) {
+    const instance = mustInstance(state.cardInstances, iceId);
+    state.cardInstances[iceId] = { ...instance, faceup: true };
+  }
+  const matchingIceIds = installedIceIdsWithSubtype(state, subtype);
+  const rezzedMatchingIceCount = matchingIceIds.filter(
+    (iceId) => mustInstance(state.cardInstances, iceId).rezzed,
+  ).length;
+  const countedIds = matchingIceIds.filter((iceId) => {
+    const instance = mustInstance(state.cardInstances, iceId);
+    return selectedSet.has(iceId) || instance.rezzed || instance.faceup;
+  });
+  const gainedCredits = countedIds.length * creditPer;
+  if (gainedCredits > 0) credits(state, "corp", gainedCredits);
+  const publicRevealDefinitionIds = countedIds.map(
+    (iceId) => definitionFor(state, iceId).id,
+  );
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    agendaAbility: scoredSubtypeRevealAgendaAbility(subtype),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: scoredSubtypeRevealHiddenZoneAction(subtype),
+    revealedCount: selectedRevealIds.length,
+    ...(subtype === "code_gate" ? { rezzedCodeGateCount: rezzedMatchingIceCount } : {}),
+    rezzedMatchingIceCount,
+    countedMatchingIceCount: countedIds.length,
+    gainedCredits,
+    corpCreditsAfter: state.corp.credits,
+    publicRevealDefinitionIds: publicRevealDefinitionIds.join(","),
+  };
 }
 
 function startPriorityRequisitionChoice(
@@ -22935,6 +23091,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v162.priority_requisition")) {
     resolvePriorityRequisitionChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v162.scored_subtype_reveal")) {
+    resolveScoredSubtypeRevealChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1912.employee_empowerment_start_draw")) {

@@ -1047,6 +1047,28 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Priority Requisition", "Rez", "0 Credits"]));
   });
 
+  it("summarizes Superior Net Barriers reveal and credit counts", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "superior_net_barriers_reveal_walls",
+        agendaAbility: "superior_net_barriers",
+        revealedCount: 2,
+        rezzedMatchingIceCount: 1,
+        countedMatchingIceCount: 3,
+        gainedCredits: 3
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Du hast Superior Net Barriers genutzt: 2 Walls aufgedeckt, 3 Credits erhalten.");
+    expect(item.category).toBe("agenda");
+    expect(item.visibility).toBe("public");
+    expect(item.description).toBe("3 Walls waren aufgedeckt oder gerezzt; davon 1 bereits gerezzt.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Superior Net Barriers", "2 Reveal", "1 Rez", "+3 Credits"]));
+  });
+
   it("keeps Encounter continuation chronicle text consistent when subroutines end the run", () => {
     const item = formatChronicleEvent(
       makeEvent("continue_run", {

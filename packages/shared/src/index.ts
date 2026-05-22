@@ -3753,13 +3753,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 6,
     agendaPoints: 3,
-    rulesText: "While scored, all wall ice gets +1 strength.",
+    rulesText:
+      "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
     mechanics: [
       "install_remote",
       "advance",
       "score",
       "steal",
       "global_ice_strength_modifier",
+      "hidden_zone_search_reveal",
+      "on_score_gain_credits",
       "persistent_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],

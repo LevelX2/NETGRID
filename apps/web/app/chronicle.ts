@@ -613,6 +613,34 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push(source, "HQ Reveal", `${revealedCount} ${revealedCount === 1 ? "Agenda" : "Agenden"}`, `+${gainedCredits} ${creditLabel(gainedCredits)}`, "Start-of-turn");
         break;
       }
+      if (
+        hiddenZoneAction === "superior_net_barriers_reveal_walls" ||
+        hiddenZoneAction === "encryption_breakthrough_reveal_code_gates"
+      ) {
+        const revealedCount = numberValue(payload.revealedCount) ?? 0;
+        const rezzedCount = numberValue(payload.rezzedMatchingIceCount) ?? 0;
+        const countedCount =
+          numberValue(payload.countedMatchingIceCount) ?? revealedCount + rezzedCount;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? countedCount;
+        const source =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Superior Net Barriers"
+            : "Encryption Breakthrough";
+        const subtypeLabel =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Wall"
+            : "Code Gate";
+        category = "agenda";
+        importance = gainedCredits > 0 ? "important" : "normal";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt: ${revealedCount} ${subtypeLabel}${revealedCount === 1 ? "" : "s"} aufgedeckt, ${creditText(gainedCredits)} erhalten`,
+        );
+        description = `${countedCount} ${subtypeLabel}${countedCount === 1 ? "" : "s"} waren aufgedeckt oder gerezzt; davon ${rezzedCount} bereits gerezzt.`;
+        chips.push(source, `${revealedCount} Reveal`, `${rezzedCount} Rez`, `+${gainedCredits} ${creditLabel(gainedCredits)}`);
+        break;
+      }
       category = "system";
       visibility = "system";
       title = phrase(subject, "eine Entscheidung beantwortet");
@@ -689,6 +717,33 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         importance = "important";
         title = phrase(subject, `${creditText(gainedCredits)} von ${cardTitle ?? "der Coup-Agenda"} genommen`);
         chips.push(`+${gainedCredits} ${creditLabel(gainedCredits)}`, `${spentCredits} ${creditLabel(spentCredits)} von Karte`, ...(remainingCredits !== undefined ? [`${remainingCredits} ${creditLabel(remainingCredits)} übrig`] : []));
+        break;
+      }
+      if (
+        hiddenZoneAction === "superior_net_barriers_reveal_walls" ||
+        hiddenZoneAction === "encryption_breakthrough_reveal_code_gates"
+      ) {
+        const revealedCount = numberValue(payload.revealedCount) ?? 0;
+        const rezzedCount = numberValue(payload.rezzedMatchingIceCount) ?? 0;
+        const countedCount = numberValue(payload.countedMatchingIceCount) ?? revealedCount + rezzedCount;
+        const gainedCredits = numberValue(payload.gainedCredits) ?? countedCount;
+        const source =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Superior Net Barriers"
+            : "Encryption Breakthrough";
+        const subtypeLabel =
+          hiddenZoneAction === "superior_net_barriers_reveal_walls"
+            ? "Wall"
+            : "Code Gate";
+        category = "agenda";
+        importance = gainedCredits > 0 ? "important" : "normal";
+        visibility = "public";
+        title = phrase(
+          subject,
+          `${source} genutzt: ${revealedCount} ${subtypeLabel}${revealedCount === 1 ? "" : "s"} aufgedeckt, ${creditText(gainedCredits)} erhalten`,
+        );
+        description = `${countedCount} ${subtypeLabel}${countedCount === 1 ? "" : "s"} waren aufgedeckt oder gerezzt; davon ${rezzedCount} bereits gerezzt.`;
+        chips.push(source, `${revealedCount} Reveal`, `${rezzedCount} Rez`, `+${gainedCredits} ${creditLabel(gainedCredits)}`);
         break;
       }
       if (agendaAbility) {

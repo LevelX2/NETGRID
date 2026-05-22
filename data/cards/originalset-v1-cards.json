@@ -6885,7 +6885,7 @@
         "advancementRequirement": 6,
         "agendaPoints": 3
       },
-      "text": "While scored, all wall ice gets +1 strength.",
+      "text": "All walls have +1 strength. When you score Superior Net Barriers, reveal as many walls as you wish. Then, gain 1 for each revealed or rezzed wall.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

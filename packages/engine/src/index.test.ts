@@ -17315,6 +17315,157 @@ describe("V1.9.5 Mechanikpaket N", () => {
     });
   });
 
+  it("lets Superior Net Barriers reveal any number of walls and count rezzed walls", () => {
+    let state = createGameAfterSetup({
+      seed: "v195-superior-net-barriers-reveal-choice",
+      runnerDeck: ONR_V1_9_5_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_9_5_CORP_DECK,
+        cards: [
+          ...ONR_V1_9_5_CORP_DECK.cards,
+          { id: "onr_v1_232_crystal-wall", quantity: 1 },
+          { id: "onr_v1_237_data-wall", quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    });
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 20;
+    state.corp.clicks = 20;
+    state.corp.maxHandSize = 100;
+    moveCorpCardToHq(state, "onr_v1_219_superior-net-barriers");
+    state.corp.servers.push({
+      id: "remote_1",
+      kind: "remote",
+      label: "Remote 1",
+      ice: [],
+      root: [],
+    });
+    const firstHiddenWallId = putCorpIceOnServer(
+      state,
+      "rd",
+      "onr_v1_279_wall-of-static",
+    );
+    const secondHiddenWallId = putCorpIceOnServer(
+      state,
+      "hq",
+      "onr_v1_232_crystal-wall",
+    );
+    const rezzedWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_237_data-wall",
+    );
+    const codeGateId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_code_gate_ice",
+    );
+    state.cardInstances[rezzedWallId] = {
+      ...state.cardInstances[rezzedWallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_219_superior-net-barriers",
+    );
+    for (let index = 0; index < 6; index += 1) {
+      state = apply(
+        state,
+        "corp",
+        (action) =>
+          action.type === "advance_card" &&
+          sourceDefinition(state, action) ===
+            "onr_v1_219_superior-net-barriers",
+      );
+    }
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "score_agenda" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_219_superior-net-barriers",
+    );
+
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+      minSelections: 0,
+      maxSelections: 2,
+    });
+    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    expect(corpChoice?.options.map((option) => option.label)).toEqual([
+      "Crystal Wall",
+      "Wall of Static",
+    ]);
+    expect(corpChoice?.options.map((option) => option.publicLabel)).toEqual([
+      "Installierte Wall",
+      "Installierte Wall",
+    ]);
+    expect(getPlayerView(state, "runner").pendingChoice).toBeUndefined();
+    const rezzedWallView = getPlayerView(state, "runner")
+      .servers.find((server) => server.id === "remote_1")
+      ?.ice.find((ice) => ice.instanceId === rezzedWallId);
+    expect(rezzedWallView?.strength).toBe(
+      (DEMO_CARDS_BY_ID["onr_v1_237_data-wall"]?.strength ?? 0) + 1,
+    );
+
+    const beforeChoiceCredits = state.corp.credits;
+    const skipped = applyChoices(structuredClone(state), "corp", []);
+    expect(skipped.corp.credits).toBe(beforeChoiceCredits + 1);
+    expect(skipped.cardInstances[firstHiddenWallId]?.faceup).toBe(false);
+    expect(skipped.cardInstances[secondHiddenWallId]?.faceup).toBe(false);
+    expect(skipped.cardInstances[codeGateId]?.faceup).toBe(false);
+    expect(skipped.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "superior_net_barriers_reveal_walls",
+      revealedCount: 0,
+      rezzedMatchingIceCount: 1,
+      countedMatchingIceCount: 1,
+      gainedCredits: 1,
+    });
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = applyChoices(state, "corp", [
+      `card_${firstHiddenWallId}`,
+      `card_${secondHiddenWallId}`,
+    ]);
+
+    expect(state.cardInstances[firstHiddenWallId]?.faceup).toBe(true);
+    expect(state.cardInstances[firstHiddenWallId]?.rezzed).toBe(false);
+    expect(state.cardInstances[secondHiddenWallId]?.faceup).toBe(true);
+    expect(state.cardInstances[secondHiddenWallId]?.rezzed).toBe(false);
+    expect(state.cardInstances[codeGateId]?.faceup).toBe(false);
+    expect(state.corp.credits).toBe(beforeChoiceCredits + 3);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "superior_net_barriers_reveal_walls",
+      agendaAbility: "superior_net_barriers",
+      revealedCount: 2,
+      rezzedMatchingIceCount: 1,
+      countedMatchingIceCount: 3,
+      gainedCredits: 3,
+    });
+    expect(
+      String(state.eventLog.at(-1)?.publicPayload.publicRevealDefinitionIds),
+    ).toContain("onr_v1_279_wall-of-static");
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      "simple_code_gate_ice",
+    );
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("requires 1 agenda point to rez ACME Savings and Loan", () => {
     let state = apply(
       v195CardReleaseGame("v195-acme-rez-cost-no-agenda"),
@@ -20101,11 +20252,17 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
         sourceDefinition(state, action) ===
           "onr_v1_200_encryption-breakthrough",
     );
+    expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "hidden_info_barrier",
+      minSelections: 0,
+      maxSelections: 1,
+    });
+    state = applyChoices(state, "corp", [`card_${codeGateId}`]);
     expect(state.corp.credits).toBe(creditsBeforeScore + 1);
     expect(state.cardInstances[codeGateId]?.faceup).toBe(true);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "score_agenda",
-      cardDefinitionId: "onr_v1_200_encryption-breakthrough",
+      actionType: "resolve_choice",
       agendaAbility: "encryption_breakthrough",
       hiddenZoneAction: "encryption_breakthrough_reveal_code_gates",
       revealedCount: 1,

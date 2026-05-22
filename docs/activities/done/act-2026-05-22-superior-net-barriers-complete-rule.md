@@ -1,19 +1,35 @@
 ---
 activityId: act-2026-05-22-superior-net-barriers-complete-rule
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - data/cards/originalset-v1-cards.json
+  - packages/shared/src/index.ts
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+  - packages/engine/src/public-context.ts
+  - packages/catalog/src/index.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t 'Superior Net Barriers|Encryption Breakthrough'
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts
+  - corepack pnpm --filter @netgrid/catalog exec vitest run src/index.test.ts -t 'Superior Net Barriers|Priority Requisition'
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/catalog typecheck
+  - git diff --check -- data/cards/originalset-v1-cards.json packages/shared/src/index.ts packages/engine/src/index.ts packages/engine/src/index.test.ts packages/engine/src/public-context.ts packages/catalog/src/index.test.ts apps/web/app/chronicle.ts apps/web/app/chronicle.test.ts docs/activities/in-progress/act-2026-05-22-superior-net-barriers-complete-rule.md
 ---
 
 # Superior Net Barriers vollständig umsetzen
@@ -46,12 +62,12 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] Gescortes `Superior Net Barriers` erhöht die effektive Stärke aller Corp-Walls um 1.
-- [ ] Die Stärkeänderung ist in der ICE-Anzeige nachvollziehbar.
-- [ ] Beim Scoren kann die Korp null, eine oder mehrere unrezzed Walls revealen.
-- [ ] Credit-Gewinn zählt alle durch den Trigger revealed Walls plus alle bereits rezzed Walls.
-- [ ] PublicEvents/PlayerViews leaken keine verdeckten Nicht-Ziele oder nicht gewählten verdeckten Karten.
-- [ ] Tests decken Modifier, null/mehrere Reveals, bereits rezzed Walls, Creditbetrag, Chronik und StateHash ab.
+- [x] Gescortes `Superior Net Barriers` erhöht die effektive Stärke aller Corp-Walls um 1.
+- [x] Die Stärkeänderung ist in der ICE-Anzeige nachvollziehbar.
+- [x] Beim Scoren kann die Korp null, eine oder mehrere unrezzed Walls revealen.
+- [x] Credit-Gewinn zählt alle durch den Trigger revealed Walls plus alle bereits rezzed Walls.
+- [x] PublicEvents/PlayerViews leaken keine verdeckten Nicht-Ziele oder nicht gewählten verdeckten Karten.
+- [x] Tests decken Modifier, null/mehrere Reveals, bereits rezzed Walls, Creditbetrag, Chronik und StateHash ab.
 
 ## Umsetzungshinweise
 
@@ -60,4 +76,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der gemeinsame Scored-Agenda-Reveal-Resolver öffnet für passende verdeckte ICE jetzt eine Korp-private Mehrfachauswahl mit `minSelections: 0`; `Superior Net Barriers` kann dadurch null, eine oder mehrere Walls aufdecken. Der Credit-Gewinn zählt die gewählten Reveals plus bereits faceup/rezzed passende ICE. Die permanente Wall-Stärke bleibt aktiv und wird in der ICE-Anzeige geprüft. Öffentliche Events enthalten nur resolved Reveal-/Rezzed-Zählungen und keine Kandidatenanzahl verdeckter nicht gewählter Karten.
