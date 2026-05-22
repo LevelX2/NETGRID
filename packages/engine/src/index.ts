@@ -258,6 +258,7 @@ import type {
   CardEffectImplementation,
   CardFortRunWindowImplementation,
   CardFlatlineReplacementSourceImplementation,
+  CardHiddenReplacementLongtailImplementation,
   CardRemainingReplacementLongtailImplementation,
   CardRunEncounterInterventionImplementation,
   CardRunnerEventLongtailImplementation,
@@ -1104,30 +1105,62 @@ function runnerEventLongtailKindForDefinition(
   return runnerEventLongtailForDefinition(definition)?.kind;
 }
 
+function hiddenReplacementLongtailForDefinition(
+  definition: CardDefinition,
+): CardHiddenReplacementLongtailImplementation | undefined {
+  return cardImplementationForDefinitionId(definition.id)
+    ?.hiddenReplacementLongtail;
+}
+
 function cardImplementationRunnerEventResolver(
   definition: CardDefinition,
 ): RunnerEventResolver | undefined {
   const longtail = runnerEventLongtailForDefinition(definition);
-  if (!longtail) return undefined;
-  switch (longtail.kind) {
-    case "playful_ai_dice_loop":
-      return {
-        name: "card_implementation_runner_event_playful_ai_dice_loop",
-        resolve: (state, legalAction) =>
-          resolvePlayfulAiDiceLoopEvent(
-            state,
-            legalAction,
-            definition.id,
-            longtail,
-          ),
-      };
-    default: {
-      const unknown = longtail as { kind?: string };
-      throw new Error(
-        `Unsupported runner event longtail: ${unknown.kind ?? "unknown"}`,
-      );
+  if (longtail) {
+    switch (longtail.kind) {
+      case "playful_ai_dice_loop":
+        return {
+          name: "card_implementation_runner_event_playful_ai_dice_loop",
+          resolve: (state, legalAction) =>
+            resolvePlayfulAiDiceLoopEvent(
+              state,
+              legalAction,
+              definition.id,
+              longtail,
+            ),
+        };
+      default: {
+        const unknown = longtail as { kind?: string };
+        throw new Error(
+          `Unsupported runner event longtail: ${unknown.kind ?? "unknown"}`,
+        );
+      }
     }
   }
+  const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
+  if (hiddenLongtail?.kind === "fortress_respecification_ice_reorder") {
+    return {
+      name: "card_implementation_runner_event_fortress_respecification_ice_reorder",
+      canPlay: (state) => hasSuccessfulRunThisTurn(state),
+      resolve: (state, legalAction) => {
+        if (!hasSuccessfulRunThisTurn(state))
+          throw new Error(
+            "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
+          );
+        startFortressRespecificationReorderChoice(
+          state,
+          String(legalAction.payload?.cardId ?? ""),
+          legalAction,
+        );
+        legalAction.payload = {
+          ...(legalAction.payload ?? {}),
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "p3_58_fortress_respecification_reorder",
+        };
+      },
+    };
+  }
+  return undefined;
 }
 
 function printedCostCardImplementationMakeRunEffect(
@@ -1151,8 +1184,6 @@ type CorpRootRezResolver = {
   name: string;
   resolve: (state: GameState) => void;
 };
-
-const POWER_GRID_OVERLOAD_OPERATION_ID = "onr_v1_299_power-grid-overload";
 
 type DamageSummary = {
   damageType: DamageType;
@@ -1193,7 +1224,6 @@ const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
 const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
-const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
 const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
 const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
@@ -1351,19 +1381,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         >,
         legalAction,
       );
-    },
-  },
-  "onr_v1_116_total-genetic-retrofit": {
-    name: "onr_v1914_runner_event_clear_visible_tag",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      const removedTags = state.runner.tags;
-      state.runner.tags = 0;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        removedTags,
-        runnerTagsAfter: state.runner.tags,
-      };
     },
   },
   [ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID]: {
@@ -1545,80 +1562,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
       };
     },
   },
-  "onr_v1_087_forgotten-backup-chip": {
-    name: "onr_v1911_runner_event_search_stack_program_to_hand",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
-    resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1911_search_stack",
-      };
-    },
-  },
-  "onr_v1_088_fortress-respecification": {
-    name: "onr_v1958_runner_event_reorder_last_successful_fort_ice",
-    canPlay: (state) => hasSuccessfulRunThisTurn(state),
-    resolve: (state, legalAction) => {
-      if (!hasSuccessfulRunThisTurn(state))
-        throw new Error(
-          "Fortress Respecification benoetigt einen erfolgreichen Run in diesem Zug.",
-        );
-      startFortressRespecificationReorderChoice(
-        state,
-        String(legalAction.payload?.cardId ?? ""),
-        legalAction,
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "p3_58_fortress_respecification_reorder",
-      };
-    },
-  },
-  "onr_v1_089_gideons-pawnshop": {
-    name: "onr_v1911_runner_event_search_stack_program_to_hand",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
-    resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1911_search_stack",
-      };
-    },
-  },
-  "onr_v1_092_ice-and-datas-guide-to-the-net": {
-    name: "onr_v1911_runner_event_expose_outermost_ice_each_data_fort",
-    canPlay: (state) => outermostIceExposures(state).length > 0,
-    resolve: (state, legalAction) => {
-      exposeOutermostIceOfEachDataFort(state, legalAction);
-    },
-  },
-  "onr_v1_099_mantis-fixer-at-large": {
-    name: "onr_v1911_runner_event_search_stack_card_to_hand",
-    canPlay: (state) => state.runner.stack.length > 0,
-    resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(
-        state,
-        "v1911.search_stack_card",
-        "v1911_search_stack_card",
-        { cardType: "any" },
-      );
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "v1911_search_stack",
-      };
-    },
-  },
   [SNEAK_PREVIEW_ID]: {
     name: "onr_v1911_runner_event_sneak_preview_temporary_program_install",
     canPlay: (state) => sneakPreviewSourceOptions(state).length > 0,
@@ -1688,77 +1631,6 @@ const RUNNER_EVENT_RESOLVERS: Record<string, RunnerEventResolver> = {
         serverId,
         allNighterBonusRunOnFinish: true,
       };
-    },
-  },
-  "onr_v1_083_desperate-competitor": {
-    name: "onr_runner_event_desperate_competitor",
-    canPlay: (state) => runnerStoleAgendaSubtypeThisTurn(state, "gray_ops"),
-    resolve: (state, legalAction) => {
-      if (!runnerStoleAgendaSubtypeThisTurn(state, "gray_ops")) {
-        throw new Error(
-          "Im aktuellen Runner-Zug wurde keine Gray Ops Agenda gestohlen.",
-        );
-      }
-      awardRunnerEventAgendaPoint(
-        state,
-        legalAction,
-        "onr_v1_083_desperate-competitor",
-      );
-    },
-  },
-  "onr_v1_090_hot-tip-for-wns": {
-    name: "onr_runner_event_hot_tip_for_wns",
-    canPlay: (state) => runnerStoleAgendaSubtypeThisTurn(state, "black_ops"),
-    resolve: (state, legalAction) => {
-      if (!runnerStoleAgendaSubtypeThisTurn(state, "black_ops")) {
-        throw new Error(
-          "Im aktuellen Runner-Zug wurde keine Black Ops Agenda gestohlen.",
-        );
-      }
-      awardRunnerEventAgendaPoint(
-        state,
-        legalAction,
-        "onr_v1_090_hot-tip-for-wns",
-      );
-    },
-  },
-  "onr_v1_094_inside-job": {
-    name: "onr_runner_event_inside_job",
-    requiresServer: true,
-    resolve: (state, legalAction) => {
-      const serverId = String(legalAction.payload?.serverId) as Exclude<
-        ServerId,
-        "new_remote"
-      >;
-      startRun(state, serverId, undefined, 1, {
-        bypassFirstIceRemaining: true,
-      });
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        serverId,
-        bypassFirstIce: true,
-      };
-    },
-  },
-  "onr_v1_114_temple-microcode-outlet": {
-    name: "onr_runner_event_search_stack_program_to_hand",
-    canPlay: (state) =>
-      state.runner.stack.some(
-        (id) => definitionFor(state, id).type === "program",
-      ),
-    resolve: (state, legalAction) => {
-      startRunnerStackSearchChoice(state);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        hiddenZoneBarrier: true,
-        hiddenZoneAction: "search_stack",
-      };
-    },
-  },
-  "onr_v1_101_mit-west-tier": {
-    name: "onr_runner_event_mit_west_tier",
-    resolve: (state, legalAction) => {
-      resolveMitWestTier(state, legalAction);
     },
   },
   [RUN_REPLACEMENT_OVERLAP_EVENT_CARD_ID]: {
@@ -1887,37 +1759,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
       state.corp.badPublicity += 1;
     },
   },
-  "onr_v1_286_corporate-detective-agency": {
-    name: "onr_corp_operation_trash_two_runner_resources",
-    canPlay: (state) => state.runner.tags > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      const targetIds = state.runner.rig.resources.slice().sort().slice(0, 2);
-      const targetDefinitionIds = targetIds.map(
-        (cardId) => definitionFor(state, cardId).id,
-      );
-      for (const cardId of targetIds) {
-        if (!state.runner.rig.resources.includes(cardId)) continue;
-        trashRunnerInstalledCardToHeap(state, cardId);
-      }
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        trashedResourceCount: targetIds.length,
-        trashedResourceDefinitionIds: targetDefinitionIds.join(","),
-      };
-    },
-  },
-  [POWER_GRID_OVERLOAD_OPERATION_ID]: {
-    name: "onr_corp_operation_tagged_runner_trash_hardware",
-    canPlay: (state) =>
-      state.runner.tags > 0 &&
-      state.corp.credits > 0 &&
-      powerGridOverloadEligibleHardwareIds(state).length > 0,
-    resolve: (state, legalAction) => {
-      requireRunnerTagged(state);
-      resolvePowerGridOverloadOperation(state, legalAction);
-    },
-  },
   [CORP_ARCHIVES_TO_HQ_OPERATION_CARD_ID]: {
     name: "onr_v1922_corp_operation_private_archives_to_hq",
     canPlay: (state) => state.corp.archives.length > 0,
@@ -1971,32 +1812,6 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
           flags.edgerunnerTempsInstallActionsRemaining,
         corpClicksAfter: state.corp.clicks,
       };
-    },
-  },
-  "onr_v1_306_trojan-horse": {
-    name: "onr_corp_operation_trojan_horse_tag",
-    canPlay: (state) => runnerStoleAgendaLastTurn(state),
-    resolve: (state, legalAction) => {
-      if (!runnerStoleAgendaLastTurn(state))
-        throw new Error("Runner hat im letzten Zug keine Agenda gestohlen.");
-      addRunnerTagsWithPrevention(state, legalAction, 1, "trojan_horse");
-    },
-  },
-  "onr_v1_297_overtime-incentives": {
-    name: "onr_corp_operation_gain_two_actions",
-    resolve: (state, legalAction) => {
-      state.corp.clicks += 2;
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        gainedActions: 2,
-        corpClicksAfter: state.corp.clicks,
-      };
-    },
-  },
-  "onr_v1_294_new-blood": {
-    name: "onr_v1958_corp_operation_conceal_reorder_installed_ice",
-    resolve: (state, legalAction) => {
-      resolveNewBloodConcealAndReorder(state, legalAction);
     },
   },
   [FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID]: {
@@ -2080,12 +1895,6 @@ const CORP_ROOT_REZ_RESOLVERS: Record<string, CorpRootRezResolver> = {
     name: "corp_asset_rez_gain_4",
     resolve: (state) => {
       state.corp.credits += 4;
-    },
-  },
-  [ACME_SAVINGS_AND_LOAN_ID]: {
-    name: "corp_asset_acme_rez_gain_12_self_trash_persistent_debt",
-    resolve: (state) => {
-      state.corp.credits += 12;
     },
   },
 };
@@ -2761,7 +2570,10 @@ function corpMainActions(state: GameState): LegalAction[] {
       state.corp.credits >= (definition.cost ?? 0) &&
       canPlayCorpOperation(state, definition)
     ) {
-      if (definition.id === POWER_GRID_OVERLOAD_OPERATION_ID) {
+      if (
+        corpUtilityImplementationForDefinition(definition.id)?.kind ===
+        "power_grid_overload"
+      ) {
         actions.push(...powerGridOverloadLegalActions(state, id, definition));
         continue;
       }
@@ -11398,21 +11210,48 @@ function proteusVariableIceStateForRezAction(
   };
 }
 
+function cardImplementationCorpRootRezResolver(
+  definition: CardDefinition,
+): CorpRootRezResolver | undefined {
+  const longtail = remainingReplacementLongtailImplementationForDefinition(
+    definition.id,
+  );
+  if (longtail?.kind === "acme_savings_and_loan_debt") {
+    return {
+      name: "card_implementation_corp_root_rez_acme_savings_and_loan_debt",
+      resolve: (state) => {
+        state.corp.credits += longtail.gainCreditsOnRez;
+      },
+    };
+  }
+  return undefined;
+}
+
 function resolveCorpRootRezEffect(
   state: GameState,
   cardId: string,
   legalAction?: LegalAction,
 ): boolean {
   const definition = definitionFor(state, cardId);
-  if (!CORP_ROOT_REZ_RESOLVERS[definition.id]) return false;
-  CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
+  const resolver =
+    cardImplementationCorpRootRezResolver(definition) ??
+    CORP_ROOT_REZ_RESOLVERS[definition.id];
+  if (!resolver) return false;
+  resolver.resolve(state);
   if (isAcmeSavingsAndLoanDefinition(definition.id)) {
+    const acmeLongtail = remainingReplacementLongtailImplementationForDefinition(
+      definition.id,
+    );
+    const gainedCredits =
+      acmeLongtail?.kind === "acme_savings_and_loan_debt"
+        ? acmeLongtail.gainCreditsOnRez
+        : 12;
     addAcmeSavingsAndLoanObligation(state, 1);
     trashCorpInstalledCardToArchives(state, cardId as CardInstanceId);
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
-        gainedCredits: 12,
+        gainedCredits,
         selfTrashed: true,
         acmeDebtActive: acmeSavingsAndLoanObligationCount(state) > 0,
         acmeSavingsAndLoanObligationsAfter:
@@ -21521,7 +21360,10 @@ function resolveDataFortReclamationRezChoice(
       rezzedIceCount += 1;
     } else {
       rezzedRootCount += 1;
-      CORP_ROOT_REZ_RESOLVERS[definition.id]?.resolve(state);
+      (
+        cardImplementationCorpRootRezResolver(definition) ??
+        CORP_ROOT_REZ_RESOLVERS[definition.id]
+      )?.resolve(state);
     }
   }
   delete state.pendingChoice;
@@ -31297,6 +31139,21 @@ function isVersionAtLeast(state: GameState, minorGate: number): boolean {
   return patch >= 0;
 }
 
+function cardImplementationCorpOperationResolver(
+  definition: CardDefinition,
+): CorpOperationResolver | undefined {
+  const hiddenLongtail = hiddenReplacementLongtailForDefinition(definition);
+  if (hiddenLongtail?.kind === "new_blood_conceal_reorder_installed_ice") {
+    return {
+      name: "card_implementation_corp_operation_new_blood_conceal_reorder_installed_ice",
+      resolve: (state, legalAction) => {
+        resolveNewBloodConcealAndReorder(state, legalAction);
+      },
+    };
+  }
+  return undefined;
+}
+
 function canPlayCorpOperation(
   state: GameState,
   definition: CardDefinition,
@@ -31309,6 +31166,10 @@ function canPlayCorpOperation(
     ) && onPlayCardImplementationChoicesAreAvailable(state, definition);
   const utility = corpUtilityImplementationForDefinition(definition.id);
   if (utility) return canPlayCorpUtilityOperation(state, definition, utility);
+  const implementationResolver =
+    cardImplementationCorpOperationResolver(definition);
+  if (implementationResolver)
+    return implementationResolver.canPlay?.(state) ?? true;
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
   if (resolver) return resolver.canPlay?.(state) ?? true;
   return canPlayPrintedCostOnPlayImplementation(
@@ -31340,6 +31201,12 @@ function resolveCorpOperation(
   const utility = corpUtilityImplementationForDefinition(definition.id);
   if (utility) {
     resolveCorpUtilityOperation(state, definition, legalAction, utility);
+    return;
+  }
+  const implementationResolver =
+    cardImplementationCorpOperationResolver(definition);
+  if (implementationResolver) {
+    implementationResolver.resolve(state, legalAction);
     return;
   }
   const resolver = CORP_OPERATION_RESOLVERS[definition.id];
