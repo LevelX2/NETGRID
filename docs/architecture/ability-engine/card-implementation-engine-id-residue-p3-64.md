@@ -39,3 +39,28 @@ Entfernt wurden ONR-v1-Fallbacks, die nach P3.63 durch CardImplementation-Daten 
 ## Stabilitätsnotiz
 
 CardImplementation-Coverage und Registry wurden nicht geändert. PublicPayload-, PlayerView- und PublicEvent-Shapes wurden nicht erweitert oder entfernt; die Änderungen ersetzen nur tote oder redundante ID-Branches durch bereits vorhandene typed CardImplementation-Abfragen.
+
+## P3.65 Folgecleanup: Cost-/Payment-/Install-nahe Mechanics-ID-Reste
+
+P3.65 hat die eng begrenzten Mechanik- und Ability-Engine-Dateien geprüft:
+
+- `packages/engine/src/mechanics/payment-costs.ts`
+- `packages/engine/src/mechanics/server-upgrades.ts`
+- `packages/engine/src/mechanics/hosting-counters.ts`
+- `packages/engine/src/mechanics/agenda-scoring.ts`
+- `packages/engine/src/ability-engine/cost-pipeline.ts`
+- `packages/engine/src/ability-engine/trash-cost-modifiers.ts`
+- `packages/engine/src/ability-engine/steal-cost-modifiers.ts`
+- `packages/engine/src/ability-engine/break-subroutine-cost-modifiers.ts`
+- `packages/engine/src/ability-engine/active-modifiers.ts`
+
+Die initiale Suche fand 12 direkte `onr_v1_`-Treffer in diesem Scope. Alle 12 direkten Literale wurden aus den Scope-Dateien entfernt und verhaltensneutral an die bereits vorhandenen CardImplementation-Definitionen angebunden:
+
+- `payment-costs.ts`: Investment Firm verwendet jetzt `investmentFirmImplementation.cardDefinitionId`.
+- `agenda-scoring.ts`: Nevinyrral und Pacifica Regional AI verwenden jetzt ihre jeweiligen CardImplementation-IDs.
+- `server-upgrades.ts`: Crybaby, Dedicated Response Team, Dieter Esslin, Dr. Dreff, Omni Kismet, Ph.D., Paris City Grid, Turbeau Delacroix und Twenty-Four-Hour Surveillance verwenden jetzt ihre jeweiligen CardImplementation-IDs.
+- `active-modifiers.ts`: der Virizz-Source-Identifier für den alten `RunState.breakSubroutineAdditionalCost`-Snapshot wird aus `virizzImplementation.cardDefinitionId` gelesen.
+
+Bewusst geblieben sind die exportierten Kompatibilitätskonstanten und Sets als API-Oberfläche für bestehende Runtime-, Payload- und Revalidation-Pfade. Diese Änderung migriert keine Semantik: Kostenhöhe, LegalAction-Erzeugung, Action-IDs, Payment-Reihenfolge, Revalidation, PublicPayload, PlayerView und PublicEvent bleiben unverändert. CardImplementation-Coverage und Registry wurden nicht geändert.
+
+Nicht behandelt wurden Run-/Encounter-, Trace-, Damage-/Prevention-, Hidden-Info-/PublicContext- und Index-Sonderfälle. Der nächste sinnvolle Cleanup-Schritt ist ein eigener Trace-/Run-/Access-Batch für `trace-tags.ts`, die zugehörigen `index.ts`-Kompatibilitätspfade und die dortigen PublicPayload-/Replay-Grenzen.

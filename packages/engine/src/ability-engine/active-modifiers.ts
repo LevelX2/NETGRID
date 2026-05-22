@@ -21,8 +21,10 @@ import {
   isPublicRunnerInstalledModifier,
   isPublicScoredCorpAgendaModifier,
 } from "./card-implementation-modifiers";
+import { virizzImplementation } from "../card-implementations/onr-v1/corp/ice/virizz";
 
-const VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID = "onr_v1_277_virizz";
+const VIRIZZ_BREAK_COST_MODIFIER_DEFINITION_ID =
+  virizzImplementation.cardDefinitionId;
 
 export type ActiveModifierDuration =
   | "encounter"

@@ -1,21 +1,32 @@
+import { crybabyImplementation } from "../card-implementations/onr-v1/corp/upgrades/crybaby";
+import { dedicatedResponseTeamImplementation } from "../card-implementations/onr-v1/corp/upgrades/dedicated-response-team";
+import { dieterEsslinImplementation } from "../card-implementations/onr-v1/corp/upgrades/dieter-esslin";
+import { drDreffImplementation } from "../card-implementations/onr-v1/corp/upgrades/dr-dreff";
+import { omniKismetPhDImplementation } from "../card-implementations/onr-v1/corp/upgrades/omni-kismet-ph-d";
+import { parisCityGridImplementation } from "../card-implementations/onr-v1/corp/upgrades/paris-city-grid";
+import { turbeauDelacroixImplementation } from "../card-implementations/onr-v1/corp/upgrades/turbeau-delacroix";
+import { twentyFourHourSurveillanceImplementation } from "../card-implementations/onr-v1/corp/upgrades/twenty-four-hour-surveillance";
+
 export const DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID =
-  "onr_v1_356_dedicated-response-team";
+  dedicatedResponseTeamImplementation.cardDefinitionId;
 
 export const DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID =
-  "onr_v1_357_dieter-esslin";
+  dieterEsslinImplementation.cardDefinitionId;
 
-export const CRYBABY_ACCESS_COST_UPGRADE_ID = "onr_v1_354_crybaby";
+export const CRYBABY_ACCESS_COST_UPGRADE_ID =
+  crybabyImplementation.cardDefinitionId;
 
-export const DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID = "onr_v1_358_dr-dreff";
+export const DR_DREFF_COUNTER_RUN_TAX_UPGRADE_ID =
+  drDreffImplementation.cardDefinitionId;
 
 export const OMNI_KISMET_TAG_CONDITION_UPGRADE_ID =
-  "onr_v1_364_omni-kismet-ph-d";
+  omniKismetPhDImplementation.cardDefinitionId;
 
 export const PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID =
-  "onr_v1_365_paris-city-grid";
+  parisCityGridImplementation.cardDefinitionId;
 
 export const TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID =
-  "onr_v1_372_turbeau-delacroix";
+  turbeauDelacroixImplementation.cardDefinitionId;
 
 export const TWENTY_FOUR_HOUR_SURVEILLANCE_RUN_TAX_UPGRADE_ID =
-  "onr_v1_373_twenty-four-hour-surveillance";
+  twentyFourHourSurveillanceImplementation.cardDefinitionId;

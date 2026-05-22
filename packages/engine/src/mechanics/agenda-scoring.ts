@@ -8,6 +8,8 @@ import {
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
   VAPOR_OPS_COUNTER_ASSET_ID,
 } from "./agenda-operation-effects";
+import { nevinyrralImplementation } from "../card-implementations/onr-v1/corp/assets/nevinyrral";
+import { pacificaRegionalAiImplementation } from "../card-implementations/onr-v1/corp/assets/pacifica-regional-ai";
 
 export const OVERADVANCE_AGENDA_CARD_IDS = new Set([
   ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
@@ -35,8 +37,8 @@ export const COUNTER_OPERATION_CARD_IDS = new Set([
 ]);
 
 export const ACTION_ASSET_CARD_IDS = new Set([
-  "onr_v1_331_nevinyrral",
-  "onr_v1_334_pacifica-regional-ai",
+  nevinyrralImplementation.cardDefinitionId,
+  pacificaRegionalAiImplementation.cardDefinitionId,
 ]);
 
 export type ScoredAgendaActionProfile = {
