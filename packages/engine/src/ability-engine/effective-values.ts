@@ -2,7 +2,7 @@
  * Calculates effective game values derived from CardImplementation modifiers.
  *
  * This module is read-only. It combines base state/catalog values with active
- * modifier queries and injected legacy host dependencies, but it must not create
+ * modifier queries and injected host dependencies, but it must not create
  * actions, mutate state, or decide visibility beyond public modifier use.
  */
 import type {
@@ -25,10 +25,9 @@ import { cardImplementationForDefinitionId } from "../card-implementations/regis
 import type { CardAgendaDifficultyModifierImplementation } from "./definition-types";
 
 export type EffectiveAgendaDifficultyDependencies = {
-  // Legacy agenda-difficulty rules still live in the host. Injecting them keeps
+  // Remaining agenda-difficulty rules still live in the host. Injecting them keeps
   // this module free of index.ts imports while preserving current ordering.
   definitionFor: (state: GameState, cardId: CardInstanceId) => CardDefinition;
-  runnerHasInstalledCorporateAlly: (state: GameState) => boolean;
   serverDifficultyIncreaseFromFaitAccompli: (
     state: GameState,
     agendaId: CardInstanceId,
@@ -82,7 +81,7 @@ export function runnerMemoryLimit(state: GameState): number {
  * Calculates the effective agenda difficulty used by score LegalActions and
  * revalidation.
  *
- * CardImplementation modifiers are combined with existing host-supplied legacy
+ * CardImplementation modifiers are combined with existing host-supplied
  * adjustments until those older rules can be moved behind the same boundary.
  */
 export function effectiveAgendaDifficulty(
@@ -94,7 +93,6 @@ export function effectiveAgendaDifficulty(
   if (definition.type !== "agenda")
     throw new Error("Difficulty kann nur fuer Agenda-Karten berechnet werden.");
   let difficulty = definition.advancementRequirement ?? 0;
-  if (deps.runnerHasInstalledCorporateAlly(state)) difficulty += 1;
   difficulty += cardImplementationAgendaDifficultyModifier(
     state,
     agendaId,

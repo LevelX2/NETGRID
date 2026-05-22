@@ -40,7 +40,6 @@ const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
-  runnerHasInstalledCorporateAlly,
   serverDifficultyIncreaseFromFaitAccompli,
   serverDifficultyReductionFromUpgrades,
 };
@@ -953,16 +952,6 @@ function hiddenVisibleCardId(id: CardInstanceId): CardInstanceId {
     hash = Math.imul(hash, 0x01000193);
   }
   return `hidden_${(hash >>> 0).toString(16).padStart(8, "0")}`;
-}
-
-function runnerHasInstalledCorporateAlly(state: GameState): boolean {
-  return state.runner.rig.resources.some((cardId) => {
-    const definition = definitionFor(state, cardId);
-    if (definition.id !== "onr_v1_156_corporate-ally") return false;
-    return !cardImplementationForDefinitionId(definition.id)?.modifiers?.some(
-      (modifier) => modifier.kind === "agenda_difficulty",
-    );
-  });
 }
 
 function serverDifficultyIncreaseFromFaitAccompli(

@@ -126,7 +126,6 @@ import {
   INFORMATION_LAUNDERING_ADVANCEMENT_ECONOMY_ASSET_ID,
   MANAGEMENT_SHAKE_UP_ADVANCEMENT_OPERATION_ID,
   PROJECT_CONSULTANTS_ADVANCE_AGENDA_OPERATION_ID,
-  ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID,
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
   SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
@@ -166,20 +165,12 @@ import {
   STACK_TOP_REORDER_RESOURCE_CARD_ID,
   STACK_TOP_REVEAL_PROGRAM_CARD_IDS,
 } from "./mechanics/hidden-zone";
-import {
-  BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID,
-  ICE_TRANSMUTATION_AGENDA_ID,
-  I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID,
-  NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID,
-} from "./mechanics/global-modifiers";
+import { NEWSGROUP_TAUNTING_TAG_HANDSIZE_ASSET_ID } from "./mechanics/global-modifiers";
 import { COUNTER_UPGRADE_CARD_IDS } from "./mechanics/hosting-counters";
 import {
   ANONYMOUS_TIP_DEREZ_BLACK_ICE_EVENT_ID,
   CORE_COMMAND_JETTISON_ICE_HQ_TRASH_EVENT_ID,
-  CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID,
-  CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID,
   COROLLA_SPEED_CHIP_STRENGTH_HARDWARE_ID,
-  DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID,
   EDGERUNNER_TEMPS_INSTALL_OPERATION_ID,
   FALSE_ECHO_FORCE_REZ_PROGRAM_ID,
   FORGED_ACTIVATION_ORDERS_FORCE_REZ_EVENT_ID,
@@ -191,7 +182,6 @@ import {
   RABBIT_HQ_INTERFACE_PROGRAM_ID,
   SCATTER_SHOT_UPGRADE_TRASH_PROGRAM_ID,
   SECURITY_CODE_WORM_CHIP_HQ_TRASH_EVENT_ID,
-  SECURITY_PURGE_PURGE_AGENDA_ID,
   SPEED_TRAP_REZ_INTERRUPT_PROGRAM_ID,
   STARTUP_IMMOLATOR_TRASH_ICE_PROGRAM_ID,
   SYNCHRONIZED_ATTACK_ON_HQ_RETAIN_EVENT_ID,
@@ -214,9 +204,7 @@ import {
   AI_BOON_RANDOM_BREAKER_CARD_ID,
   BOARDWALK_RANDOM_PROGRAM_CARD_ID,
   QUEST_FOR_CATTEKIN_RANDOM_RESOURCE_CARD_ID,
-  RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID,
   RUNNER_RANDOM_PROGRAM_CARD_IDS,
-  SCHLAGHUND_RANDOM_ASSET_CARD_ID,
 } from "./mechanics/random-effects";
 import {
   RUN_ACCESS_PRESSURE_EVENT_CARD_ID,
@@ -286,7 +274,6 @@ type AutomaticEffectCollector = ResolvedGameEffect[];
 // without changing existing score legality or revalidation ordering.
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
-  runnerHasInstalledCorporateAlly,
   serverDifficultyIncreaseFromFaitAccompli,
   serverDifficultyReductionFromUpgrades,
 };
@@ -1184,7 +1171,6 @@ const ALL_NIGHTER_ID = "onr_v1_076_all-nighter";
 const DEAL_WITH_MILITECH_ID = "onr_v1_082_deal-with-militech";
 const HUNT_CLUB_BBS_ID = "onr_v1_091_hunt-club-bbs";
 const SNEAK_PREVIEW_ID = "onr_v1_110_sneak-preview";
-const AI_CHIEF_FINANCIAL_OFFICER_ID = "onr_v1_188_ai-chief-financial-officer";
 const ARMADILLO_ARMORED_ROAD_HOME_ID =
   "onr_v1_120_armadillo-armored-road-home";
 const DRIFTER_MOBILE_ENVIRONMENT_ID =
@@ -1195,23 +1181,18 @@ const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
 const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
-const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
-const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const TAG_REMOVAL_RECURRING_CREDIT_DEFINITION_IDS = new Set([
   ARMADILLO_ARMORED_ROAD_HOME_ID,
   DRIFTER_MOBILE_ENVIRONMENT_ID,
 ]);
-const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 const ACME_SAVINGS_AND_LOAN_ID = "onr_v1_308_acme-savings-and-loan";
 const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
 const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
 const BODYWEIGHT_DATA_CRECHE_ID = "onr_v1_123_bodyweight-data-creche";
-const AARDVARK_ID = "onr_v1_349_aardvark";
 const BIZARRE_ENCRYPTION_SCHEME_ID = "onr_v1_351_bizarre-encryption-scheme";
 const CHIMERA_ID = "onr_v1_353_chimera";
-const CORPORATE_DOWNSIZING_ID = "onr_v1_194_corporate-downsizing";
 const ICE_PICK_WILLIE_ID = "onr_v1_250_ice-pick-willie";
 const TOO_MANY_DOORS_ID = "onr_v1_272_too-many-doors";
 const EMPLOYEE_EMPOWERMENT_ID = "onr_v1_199_employee-empowerment";
@@ -2589,9 +2570,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       ) {
         if (
           scoredAgendaKindForDefinition(definition) ===
-            "choose_fort_ice_strength_bonus" ||
-          (!scoredAgendaImplementationForDefinition(definition) &&
-            definition.id === SECURITY_NET_OPTIMIZATION_ID)
+          "choose_fort_ice_strength_bonus"
         ) {
           for (const targetServer of state.corp.servers) {
             actions.push(
@@ -3211,9 +3190,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       assetId,
     );
     const isIGotARockCard =
-      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage" ||
-      (definition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
-        !cardImplementationForDefinitionId(definition.id));
+      iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage";
     const iGotARockRequiredTags =
       iGotARockImplementation?.kind === "i_got_a_rock_tagged_meat_damage"
         ? iGotARockImplementation.requiredRunnerTags
@@ -3255,9 +3232,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
     if (
       uniqueDirectLongtailKindForCard(state, assetId) ===
-        "schlaghund_tag_die_meat_damage" ||
-      (definition.id === SCHLAGHUND_RANDOM_ASSET_CARD_ID &&
-        !cardImplementationForDefinitionId(definition.id))
+      "schlaghund_tag_die_meat_damage"
     ) {
       actions.push(
         action(
@@ -3309,15 +3284,13 @@ function corpMainActions(state: GameState): LegalAction[] {
     );
     if (
       scoredAgendaKindForDefinition(definition) ===
-        "ai_cfo_shuffle_hq_archives_into_rd_draw" ||
-      (!scoredAgendaImplementationForDefinition(definition) &&
-        definition.id === AI_CHIEF_FINANCIAL_OFFICER_ID)
+      "ai_cfo_shuffle_hq_archives_into_rd_draw"
     ) {
       const implementation = scoredAgendaImplementationForDefinition(definition);
       const drawCardsAmount =
         implementation?.kind === "ai_cfo_shuffle_hq_archives_into_rd_draw"
           ? implementation.drawCount
-          : 5;
+          : 0;
       actions.push(
         action(
           state,
@@ -3330,28 +3303,6 @@ function corpMainActions(state: GameState): LegalAction[] {
             cardId: agendaId,
             agendaAbility: "ai_chief_financial_officer",
             drawCardsAmount,
-          },
-        ),
-      );
-      continue;
-    }
-    if (
-      !scoredAgendaImplementationForDefinition(definition) &&
-      definition.id === CORPORATE_DOWNSIZING_ID &&
-      state.corp.rd.length > 0
-    ) {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "gain_credit",
-          `${definition.title}: R&D-Spitze revealn`,
-          agendaId,
-          [{ clicks: 1 }],
-          {
-            cardId: agendaId,
-            agendaAbility: "v1911_corporate_downsizing_reveal_rd_top",
-            hiddenZoneAction: "v1911_corp_reveal_rd_top",
           },
         ),
       );
@@ -3402,10 +3353,8 @@ function corpMainActions(state: GameState): LegalAction[] {
       continue;
     }
     if (
-      (scoredAgendaKindForDefinition(definition) ===
-        "corporate_retreat_disable_on_rez_or_install" ||
-        (!scoredAgendaImplementationForDefinition(definition) &&
-          definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)) &&
+      scoredAgendaKindForDefinition(definition) ===
+        "corporate_retreat_disable_on_rez_or_install" &&
       isCorporateRetreatInstallCreditAbilityAvailable(state, agendaId)
     ) {
       actions.push(
@@ -3464,11 +3413,8 @@ function isCorporateRetreatInstallCreditAbilityAvailable(
 ): boolean {
   return (
     state.corp.scoreArea.includes(agendaId) &&
-    (scoredAgendaKindForDefinition(definitionFor(state, agendaId)) ===
-      "corporate_retreat_disable_on_rez_or_install" ||
-      (!scoredAgendaImplementationForDefinition(definitionFor(state, agendaId)) &&
-        definitionFor(state, agendaId).id ===
-          CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)) &&
+    scoredAgendaKindForDefinition(definitionFor(state, agendaId)) ===
+      "corporate_retreat_disable_on_rez_or_install" &&
     cardCounter(state, agendaId, "mark") > 0
   );
 }
@@ -3478,9 +3424,7 @@ function expireCorporateRetreatInstallCreditAbilities(state: GameState): void {
     const definition = definitionFor(state, agendaId);
     if (
       scoredAgendaKindForDefinition(definition) ===
-        "corporate_retreat_disable_on_rez_or_install" ||
-      (!scoredAgendaImplementationForDefinition(definition) &&
-        definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
+      "corporate_retreat_disable_on_rez_or_install"
     )
       setCardCounter(state, agendaId, "mark", 0);
   }
@@ -3991,41 +3935,6 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
         continue;
       }
-      if (
-        definition.id === "onr_v1_156_corporate-ally" &&
-        !cardImplementationForDefinitionId(definition.id)
-      ) {
-        const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
-        if (!forfeitAgendaId) continue;
-        actions.push(
-          action(
-            state,
-            "runner",
-            "install_card",
-            `${definition.title} installieren`,
-            id,
-            [{ clicks: 1, credits: definition.installCost ?? 0 }],
-            {
-              cardId: id,
-              installAgendaPointCost: 1,
-              forfeitAgendaCardId: forfeitAgendaId,
-              installCostReason: "corporate_ally",
-            },
-            {
-              targetRequirements: [
-                {
-                  id: "resourceCard",
-                  kind: "card",
-                  side: "runner",
-                  zoneScope: ["runner.grip"],
-                  visibility: "known_to_actor",
-                },
-              ],
-            },
-          ),
-        );
-        continue;
-      }
       if (requiresDataFortInstallTarget(definition)) {
         for (const server of state.corp.servers) {
           const serverLabel = serverChoiceDisplayLabel(state, server.id);
@@ -4390,21 +4299,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
       const definition = definitionFor(state, resourceId);
       const uniqueDirectLongtail =
         uniqueDirectLongtailImplementationForCard(state, resourceId);
-      if (
-        uniqueDirectLongtail?.kind === "databroker_agenda_point_credits" ||
-        (definition.id === "onr_v1_159_databroker" &&
-          !cardImplementationForDefinitionId(definition.id))
-      ) {
+      if (uniqueDirectLongtail?.kind === "databroker_agenda_point_credits") {
         const forfeitAgendaId = pickRunnerAgendaForAgendaPointCost(state);
         if (forfeitAgendaId) {
-          const agendaPointCost =
-            uniqueDirectLongtail?.kind === "databroker_agenda_point_credits"
-              ? uniqueDirectLongtail.agendaPointCost
-              : 1;
-          const gainCreditsAmount =
-            uniqueDirectLongtail?.kind === "databroker_agenda_point_credits"
-              ? uniqueDirectLongtail.gainCredits
-              : 10;
+          const agendaPointCost = uniqueDirectLongtail.agendaPointCost;
+          const gainCreditsAmount = uniqueDirectLongtail.gainCredits;
           actions.push(
             action(
               state,
@@ -5004,7 +4903,6 @@ function scoredCorpAgendaIds(state: GameState): CardInstanceId[] {
 }
 
 function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
-  const iceDefinition = definitionFor(state, iceId);
   const iceServerId = corpServerIdForInstalledCard(state, iceId);
   let bonus = 0;
   for (const agendaId of scoredCorpAgendaIds(state)) {
@@ -5016,25 +4914,6 @@ function iceStrengthBonusFor(state: GameState, iceId: CardInstanceId): number {
         mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
       )
         bonus += scoredAgenda.amount;
-      continue;
-    }
-    if (!scoredAgenda) {
-      if (
-        agendaDefinition.id === SECURITY_NET_OPTIMIZATION_ID &&
-        iceServerId &&
-        mustInstance(state.cardInstances, agendaId).selectedServerId === iceServerId
-      )
-        bonus += 1;
-      if (
-        agendaDefinition.id === ENCRYPTION_BREAKTHROUGH_ID &&
-        cardHasSubtype(iceDefinition, "code_gate")
-      )
-        bonus += 1;
-      if (
-        agendaDefinition.id === SUPERIOR_NET_BARRIERS_ID &&
-        cardHasSubtype(iceDefinition, "wall")
-      )
-        bonus += 1;
     }
   }
   bonus += iceStrengthModifierBonusFor(state, iceId);
@@ -5330,20 +5209,11 @@ function hasRunEncounterInterventionKind(
 }
 
 function isFortIceSwapSource(state: GameState, cardId: CardInstanceId): boolean {
-  const definitionId = definitionFor(state, cardId).id;
-  if (hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice"))
-    return true;
-  return (
-    !cardImplementationForDefinitionId(definitionId) &&
-    definitionId === SERVER_ICE_SWAP_UPGRADE_CARD_ID
-  );
+  return hasFortRunWindowKind(state, cardId, "swap_unrezzed_fort_ice_with_hq_ice");
 }
 
 function isAardvarkSource(state: GameState, cardId: CardInstanceId): boolean {
-  const definitionId = definitionFor(state, cardId).id;
-  if (hasFortRunWindowKind(state, cardId, "aardvark_worm_lock_and_reaction"))
-    return true;
-  return !cardImplementationForDefinitionId(definitionId) && definitionId === AARDVARK_ID;
+  return hasFortRunWindowKind(state, cardId, "aardvark_worm_lock_and_reaction");
 }
 
 function hasStealthPaymentBlockOnServer(
@@ -5380,12 +5250,7 @@ function parisTracePoolImplementationForCard(
 }
 
 function isParisTracePoolSource(state: GameState, cardId: CardInstanceId): boolean {
-  const definitionId = definitionFor(state, cardId).id;
-  return (
-    Boolean(parisTracePoolImplementationForCard(state, cardId)) ||
-    (!cardImplementationForDefinitionId(definitionId) &&
-      definitionId === PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID)
-  );
+  return Boolean(parisTracePoolImplementationForCard(state, cardId));
 }
 
 function parisTracePoolCapacityForCard(
@@ -5402,11 +5267,10 @@ function isRioPassRezzedIceSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
-  const definitionId = definitionFor(state, cardId).id;
-  return (
-    hasFortRunWindowKind(state, cardId, "roll_die_on_pass_rezzed_ice_on_same_fort") ||
-    (!cardImplementationForDefinitionId(definitionId) &&
-      definitionId === RIO_DE_JANEIRO_RANDOM_UPGRADE_CARD_ID)
+  return hasFortRunWindowKind(
+    state,
+    cardId,
+    "roll_die_on_pass_rezzed_ice_on_same_fort",
   );
 }
 
@@ -5414,15 +5278,10 @@ function isRovingRunRestrictionSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
-  const definitionId = definitionFor(state, cardId).id;
-  return (
-    hasFortRunWindowKind(
-      state,
-      cardId,
-      "can_run_fort_only_if_last_corp_turn_activity_on_fort",
-    ) ||
-    (!cardImplementationForDefinitionId(definitionId) &&
-      definitionId === ROVING_SUBMARINE_AGENDA_DIFFICULTY_UPGRADE_ID)
+  return hasFortRunWindowKind(
+    state,
+    cardId,
+    "can_run_fort_only_if_last_corp_turn_activity_on_fort",
   );
 }
 
@@ -5446,12 +5305,7 @@ function isTokyoUnsuccessfulRunSource(
   state: GameState,
   cardId: CardInstanceId,
 ): boolean {
-  const definitionId = definitionFor(state, cardId).id;
-  return (
-    Boolean(tokyoUnsuccessfulRunWindowForCard(state, cardId)) ||
-    (!cardImplementationForDefinitionId(definitionId) &&
-      definitionId === "onr_v1_371_tokyo-chiba-infighting")
-  );
+  return Boolean(tokyoUnsuccessfulRunWindowForCard(state, cardId));
 }
 
 function hasSuccessfulRunForceRezFollowup(
@@ -8195,19 +8049,9 @@ function performAction(
           throw new Error("I Got a Rock ist nicht rezzed installiert.");
         const implementation =
           uniqueDirectLongtailImplementationForCard(state, sourceCardId);
-        const sourceDefinition = definitionFor(state, sourceCardId);
-        if (
-          implementation?.kind !== "i_got_a_rock_tagged_meat_damage" &&
-          !(
-            sourceDefinition.id === I_GOT_A_ROCK_BAD_PUBLICITY_ASSET_ID &&
-            !cardImplementationForDefinitionId(sourceDefinition.id)
-          )
-        )
+        if (implementation?.kind !== "i_got_a_rock_tagged_meat_damage")
           throw new Error("Die I-Got-a-Rock-Faehigkeit passt nicht zur Karte.");
-        const requiredTags =
-          implementation?.kind === "i_got_a_rock_tagged_meat_damage"
-            ? implementation.requiredRunnerTags
-            : 2;
+        const requiredTags = implementation.requiredRunnerTags;
         if (state.runner.tags < requiredTags)
           throw new Error("I Got a Rock verlangt mindestens zwei Runner-Tags.");
         resolveIGotARockDamage(state, sourceCardId, legalAction);
@@ -8231,13 +8075,7 @@ function performAction(
         const definition = definitionFor(state, sourceCardId);
         const implementation =
           uniqueDirectLongtailImplementationForDefinition(definition.id);
-        if (
-          implementation?.kind !== "schlaghund_tag_die_meat_damage" &&
-          !(
-            definition.id === SCHLAGHUND_RANDOM_ASSET_CARD_ID &&
-            !cardImplementationForDefinitionId(definition.id)
-          )
-        )
+        if (implementation?.kind !== "schlaghund_tag_die_meat_damage")
           throw new Error(
             "Die V1.9.21-Asset-Zufallsfaehigkeit passt nicht zur Karte.",
           );
@@ -8378,20 +8216,10 @@ function performAction(
           throw new Error("Databroker ist nicht installiert.");
         const implementation =
           uniqueDirectLongtailImplementationForCard(state, sourceCardId);
-        const sourceDefinition = definitionFor(state, sourceCardId);
-        if (
-          implementation?.kind !== "databroker_agenda_point_credits" &&
-          !(
-            sourceDefinition.id === "onr_v1_159_databroker" &&
-            !cardImplementationForDefinitionId(sourceDefinition.id)
-          )
-        )
+        if (implementation?.kind !== "databroker_agenda_point_credits")
           throw new Error("Die Databroker-Faehigkeit passt nicht zur Karte.");
         const agendaCost = Number(legalAction.payload?.agendaPointCost ?? 0);
-        const expectedAgendaCost =
-          implementation?.kind === "databroker_agenda_point_credits"
-            ? implementation.agendaPointCost
-            : 1;
+        const expectedAgendaCost = implementation.agendaPointCost;
         if (!Number.isInteger(agendaCost) || agendaCost !== expectedAgendaCost)
           throw new Error("Der Databroker-Agenda-Kostenpfad ist ungueltig.");
         const forfeitAgendaCardId = String(
@@ -8401,10 +8229,7 @@ function performAction(
         if (legalAction.payload?.trashOnUse === true)
           trashRunnerInstalledCardToHeap(state, sourceCardId);
         const gainAmount = Number(legalAction.payload?.gainCreditsAmount ?? 10);
-        const expectedGainAmount =
-          implementation?.kind === "databroker_agenda_point_credits"
-            ? implementation.gainCredits
-            : 10;
+        const expectedGainAmount = implementation.gainCredits;
         if (
           !Number.isInteger(gainAmount) ||
           gainAmount !== expectedGainAmount ||
@@ -8436,8 +8261,7 @@ function performAction(
         const implementation = scoredAgendaImplementationForDefinition(definition);
         if (
           implementation?.kind !==
-            "corporate_retreat_disable_on_rez_or_install" &&
-          definition.id !== CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID
+          "corporate_retreat_disable_on_rez_or_install"
         )
           throw new Error(
             "Die Agenda-Aktion passt nicht zu Corporate Retreat.",
@@ -8451,7 +8275,7 @@ function performAction(
           implementation?.kind ===
           "corporate_retreat_disable_on_rez_or_install"
             ? implementation.gainAmount
-            : 2;
+            : 0;
         if (!Number.isInteger(gainAmount) || gainAmount !== expectedGain)
           throw new Error(
             "Corporate Retreat gewaehrt in diesem Scope genau 2 Credits.",
@@ -8499,11 +8323,7 @@ function performAction(
           );
         const definition = definitionFor(state, sourceCardId);
         const implementation = scoredAgendaImplementationForDefinition(definition);
-        if (
-          implementation?.kind !==
-            "ai_cfo_shuffle_hq_archives_into_rd_draw" &&
-          definition.id !== AI_CHIEF_FINANCIAL_OFFICER_ID
-        )
+        if (implementation?.kind !== "ai_cfo_shuffle_hq_archives_into_rd_draw")
           throw new Error(
             "Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.",
           );
@@ -10465,30 +10285,6 @@ function installCard(state: GameState, legalAction: LegalAction): void {
         : 0;
     const concealedHiddenRunnerResource =
       definition.type === "resource" && cardHasSubtype(definition, "hidden");
-    if (
-      definition.id === "onr_v1_156_corporate-ally" &&
-      !cardImplementationForDefinitionId(definition.id)
-    ) {
-      const agendaCost = Number(
-        legalAction.payload?.installAgendaPointCost ?? 0,
-      );
-      if (!Number.isInteger(agendaCost) || agendaCost !== 1)
-        throw new Error(
-          "Corporate Ally benötigt exakt 1 Agenda-Punkt als Zusatzkosten.",
-        );
-      const forfeitAgendaCardId = String(
-        legalAction.payload?.forfeitAgendaCardId ?? "",
-      );
-      forfeitRunnerAgendaForPointCost(state, forfeitAgendaCardId);
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        agendaPointCostPaid: agendaCost,
-        forfeitedAgendaCardId: forfeitAgendaCardId,
-        specialZone: "removed_from_game",
-        specialZoneVisibility: "public",
-        specialZoneReason: "agenda_point_cost_corporate_ally",
-      };
-    }
     const cardImplementationAgendaPointCost =
       cardImplementationAgendaPointInstallCost(definition);
     if (cardImplementationAgendaPointCost > 0) {
@@ -16309,12 +16105,8 @@ function applyBodyweightDataCrecheSuccessfulRun(
     .find((cardId) => {
       const definition = definitionFor(state, cardId);
       const implementation = cardImplementationForDefinitionId(definition.id);
-      return (
-        implementation?.successfulRunFollowups?.some(
-          (followup) =>
-            followup.kind === "optional_make_run_after_successful_run",
-        ) ||
-        (!implementation && definition.id === BODYWEIGHT_DATA_CRECHE_ID)
+      return implementation?.successfulRunFollowups?.some(
+        (followup) => followup.kind === "optional_make_run_after_successful_run",
       );
     });
   if (!sourceId) return;
@@ -17360,12 +17152,9 @@ function applyRunnerStartOfTurnEffects(
   if (startVirusCounterRunnerPrivateLookAtStart(state)) return;
   for (const cardId of state.runner.rig.resources.slice().sort()) {
     if (state.pendingChoice) break;
-    const definition = definitionFor(state, cardId);
     if (
       uniqueDirectLongtailKindForCard(state, cardId) ===
-        "smiths_pawnshop_start_turn_trash_for_credits" ||
-      (definition.id === "onr_v1_180_smiths-pawnshop" &&
-        !cardImplementationForDefinitionId(definition.id))
+      "smiths_pawnshop_start_turn_trash_for_credits"
     )
       startSmithsPawnshopChoice(state, cardId);
   }
@@ -19958,26 +19747,11 @@ function runnerStoleAgendaSubtypeThisTurn(
   return state.runnerTurnFlags?.stoleBlackOpsAgendaThisTurn === true;
 }
 
-function runnerHasInstalledCorporateAlly(state: GameState): boolean {
-  return state.runner.rig.resources.some((cardId) => {
-    const definition = definitionFor(state, cardId);
-    if (definition.id !== "onr_v1_156_corporate-ally") return false;
-    return !cardImplementationForDefinitionId(definition.id)?.modifiers?.some(
-      (modifier) => modifier.kind === "agenda_difficulty",
-    );
-  });
-}
-
 function corpHasScoredBioweaponsEngineering(state: GameState): boolean {
   return scoredCorpAgendaIds(state).some(
-    (cardId) => {
-      const definition = definitionFor(state, cardId);
-      return (
-        scoredAgendaKindForDefinition(definition) === "meat_damage_bonus" ||
-        (!scoredAgendaImplementationForDefinition(definition) &&
-          definition.id === BIOWEAPONS_ENGINEERING_CORE_DAMAGE_AGENDA_ID)
-      );
-    },
+    (cardId) =>
+      scoredAgendaKindForDefinition(definitionFor(state, cardId)) ===
+      "meat_damage_bonus",
   );
 }
 
@@ -21140,19 +20914,12 @@ function scoreAgenda(
   }
   const implementation = cardImplementationForDefinitionId(definition.id);
   const scoredAgenda = implementation?.scoredAgenda;
-  const hasCardImplementation = Boolean(implementation);
-  if (
-    scoredAgenda?.kind === "project_babylon_bonus_points" ||
-    (!hasCardImplementation && definition.id === "onr_v1_214_project-babylon")
-  ) {
+  if (scoredAgenda?.kind === "project_babylon_bonus_points") {
     const overadvance = Math.max(
       0,
       instanceBefore.advancementCounters - requiredDifficulty,
     );
-    const perCounters =
-      scoredAgenda?.kind === "project_babylon_bonus_points"
-        ? scoredAgenda.perExcessAdvancementCounters
-        : 2;
+    const perCounters = scoredAgenda.perExcessAdvancementCounters;
     const bonusAgendaPoints = Math.floor(overadvance / perCounters);
     setCardCounter(state, cardId, "agenda", bonusAgendaPoints);
     if (legalAction) {
@@ -21207,11 +20974,7 @@ function scoreAgenda(
     cardId,
     "on_score",
   );
-  if (
-    scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install" ||
-      (!hasCardImplementation &&
-        definition.id === CORPORATE_RETREAT_INSTALL_CREDIT_AGENDA_ID)
-  ) {
+  if (scoredAgenda?.kind === "corporate_retreat_disable_on_rez_or_install") {
     setCardCounter(state, cardId, "mark", 1);
     if (legalAction)
       legalAction.payload = {
@@ -21220,29 +20983,10 @@ function scoreAgenda(
         corporateRetreatAvailable: true,
       };
   }
-  if (!hasCardImplementation && definition.id === "onr_v1_203_hostile-takeover") {
-    state.corp.credits += 5;
-    if (legalAction)
-      legalAction.payload = {
-        ...(legalAction.payload ?? {}),
-        onScoreGainCredits: 5,
-        corpCreditsAfter: state.corp.credits,
-      };
-  }
-  if (
-    scoredAgenda?.kind === "corporate_war_credit_swing" ||
-    (!hasCardImplementation &&
-      definition.id === CORPORATE_WAR_SCORE_CREDIT_AGENDA_ID)
-  ) {
+  if (scoredAgenda?.kind === "corporate_war_credit_swing") {
     const corpCreditsBefore = state.corp.credits;
-    const threshold =
-      scoredAgenda?.kind === "corporate_war_credit_swing"
-        ? scoredAgenda.threshold
-        : 12;
-    const gainAmount =
-      scoredAgenda?.kind === "corporate_war_credit_swing"
-        ? scoredAgenda.gainAmount
-        : 12;
+    const threshold = scoredAgenda.threshold;
+    const gainAmount = scoredAgenda.gainAmount;
     const thresholdMet = corpCreditsBefore >= threshold;
     if (thresholdMet) {
       state.corp.credits += gainAmount;
@@ -21263,35 +21007,27 @@ function scoreAgenda(
   }
   if (
     legalAction &&
-    (scoredAgenda?.kind === "data_fort_reclamation" ||
-      (!hasCardImplementation &&
-        definition.id === DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID))
+    scoredAgenda?.kind === "data_fort_reclamation"
   ) {
     startDataFortReclamationChoice(state, cardId, legalAction);
   }
   if (
     legalAction &&
-    (scoredAgenda?.kind === "ice_transmutation_rezzed_ice_modifier" ||
-      (!hasCardImplementation && definition.id === ICE_TRANSMUTATION_AGENDA_ID))
+    scoredAgenda?.kind === "ice_transmutation_rezzed_ice_modifier"
   ) {
     startIceTransmutationChoice(state, cardId, legalAction);
   }
   if (
     legalAction &&
-    (scoredAgenda?.kind === "priority_requisition_rez_ice_at_no_cost" ||
-      (!hasCardImplementation && definition.id === "onr_v1_212_priority-requisition"))
+    scoredAgenda?.kind === "priority_requisition_rez_ice_at_no_cost"
   ) {
     startPriorityRequisitionChoice(state, cardId, legalAction);
   }
   if (
     legalAction &&
-    (scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits" ||
-      (!hasCardImplementation && definition.id === ENCRYPTION_BREAKTHROUGH_ID))
+    scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
   ) {
-    const subtype =
-      scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
-        ? scoredAgenda.subtype
-        : "code_gate";
+    const subtype = scoredAgenda.subtype;
     const matchingIceIds = corpInstalledCardIds(state)
       .filter(
         (iceId) =>
@@ -21309,10 +21045,7 @@ function scoreAgenda(
       }
       publicRevealDefinitionIds.push(definitionFor(state, iceId).id);
     }
-    const creditPer =
-      scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits"
-        ? scoredAgenda.creditPerRevealedOrRezzed
-        : 1;
+    const creditPer = scoredAgenda.creditPerRevealedOrRezzed;
     const gainedCredits = matchingIceIds.length * creditPer;
     if (gainedCredits > 0) credits(state, "corp", gainedCredits);
     legalAction.payload = {
@@ -21336,8 +21069,7 @@ function scoreAgenda(
   }
   if (
     legalAction &&
-    (scoredAgenda?.kind === "choose_fort_ice_strength_bonus" ||
-      (!hasCardImplementation && definition.id === SECURITY_NET_OPTIMIZATION_ID))
+    scoredAgenda?.kind === "choose_fort_ice_strength_bonus"
   ) {
     const selectedServerId =
       typeof legalAction.payload?.selectedServerId === "string"
@@ -21373,8 +21105,7 @@ function scoreAgenda(
   }
   if (
     legalAction &&
-    (scoredAgenda?.kind === "security_purge_top_rd" ||
-      (!hasCardImplementation && definition.id === SECURITY_PURGE_PURGE_AGENDA_ID))
+    scoredAgenda?.kind === "security_purge_top_rd"
   ) {
     resolveSecurityPurgeAgendaPurge(state, legalAction);
   }
@@ -21449,9 +21180,8 @@ function resolvePriorityRequisitionChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId) ||
-    (scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
-      "priority_requisition_rez_ice_at_no_cost" &&
-      definitionFor(state, agendaId).id !== "onr_v1_212_priority-requisition")
+    scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
+      "priority_requisition_rez_ice_at_no_cost"
   ) {
     throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
   }
@@ -21611,10 +21341,8 @@ function resolveDataFortReclamationChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    (scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
-      "data_fort_reclamation" &&
-      definitionFor(state, agendaId as CardInstanceId).id !==
-        DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID)
+    scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
+      "data_fort_reclamation"
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -21736,10 +21464,8 @@ function resolveDataFortReclamationRezChoice(
     !serverId ||
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
-    (scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
-      "data_fort_reclamation" &&
-      definitionFor(state, agendaId as CardInstanceId).id !==
-        DATA_FORT_RECLAMATION_REINSTALL_AGENDA_ID)
+    scoredAgendaKindForDefinition(definitionFor(state, agendaId as CardInstanceId)) !==
+      "data_fort_reclamation"
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
   mustServer(state, serverId);
@@ -26324,9 +26050,8 @@ function resolveIceTransmutationChoice(
   if (
     !agendaId ||
     !state.corp.scoreArea.includes(agendaId) ||
-    (scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
-      "ice_transmutation_rezzed_ice_modifier" &&
-      definitionFor(state, agendaId).id !== ICE_TRANSMUTATION_AGENDA_ID)
+    scoredAgendaKindForDefinition(definitionFor(state, agendaId)) !==
+      "ice_transmutation_rezzed_ice_modifier"
   )
     throw new Error("Ice Transmutation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -28111,7 +27836,10 @@ function resolveV1911CorporateDownsizing(
   const sourceCardId = String(legalAction.payload?.cardId ?? "");
   if (!state.corp.scoreArea.includes(sourceCardId))
     throw new Error("Corporate Downsizing ist nicht gescort.");
-  if (definitionFor(state, sourceCardId).id !== CORPORATE_DOWNSIZING_ID)
+  if (
+    scoredAgendaKindForDefinition(definitionFor(state, sourceCardId)) !==
+    "corporate_downsizing_hq_agendas"
+  )
     throw new Error("Die Agenda-Aktion passt nicht zu Corporate Downsizing.");
   revealCorpRdTop(state, legalAction);
 }
