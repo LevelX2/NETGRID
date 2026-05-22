@@ -49,14 +49,18 @@ import {
 } from "@netgrid/shared";
 import {
   assertCorpRezCostQuoteValid,
+  assertCorpTraceBidPaymentValid,
   corpServerIdForInstalledCard,
+  corpTracePaymentPublicPayload,
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
   oliviaSalazarRezSourcesForRunIce,
+  payCorpTraceBidQuote,
   quoteCorpIceInstallCost,
   quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
+  type CorpTracePaymentDependencies,
 } from "./game/payment";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -28097,6 +28101,20 @@ function spendEncounterTemporaryTraceCredits(
   return spent;
 }
 
+const corpTracePaymentDeps: CorpTracePaymentDependencies = {
+  encounterTemporaryTraceCreditsAvailable,
+  spendEncounterTemporaryTraceCredits,
+  parisCityGridTracePoolTotal,
+  spendParisCityGridTracePool,
+  corpCreditsAvailable: (state) => state.corp.credits,
+  spendCorpCredits: (state, amount) => spendCredits(state, "corp", amount),
+  krumzTraceBitTotal,
+  spendKrumzTraceBits,
+  hackerTrackerCounterTotal,
+  spendHackerTrackerCounters,
+  cardCounter,
+};
+
 function resolveTraceCorpBid(
   state: GameState,
   legalAction: LegalAction,
@@ -28106,52 +28124,22 @@ function resolveTraceCorpBid(
   if (!trace || trace.status !== "corp_bid")
     throw new Error("Es ist kein Korp-Trace-Bid offen.");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  const parisCityGridPoolAvailable =
-    trace.parisCityGridPoolSourceCardInstanceId &&
-    trace.parisCityGridPoolServerId
-      ? parisCityGridTracePoolTotal(state)
-      : 0;
-  const encounterTemporaryTraceCreditsBid = Math.min(
-    encounterTemporaryTraceCreditsAvailable(state, trace),
+  const tracePaymentQuote = assertCorpTraceBidPaymentValid(
+    corpTracePaymentDeps,
+    state,
+    trace,
     bid,
   );
-  const parisCityGridPoolBid = Math.min(
-    parisCityGridPoolAvailable,
-    bid - encounterTemporaryTraceCreditsBid,
-  );
-  const creditBid = Math.min(
-    state.corp.credits,
-    bid - encounterTemporaryTraceCreditsBid - parisCityGridPoolBid,
-  );
-  const krumzBitBid = Math.min(
-    krumzTraceBitTotal(state),
-    bid - encounterTemporaryTraceCreditsBid - parisCityGridPoolBid - creditBid,
-  );
-  const hackerTrackerBid =
-    bid -
-    encounterTemporaryTraceCreditsBid -
-    parisCityGridPoolBid -
-    creditBid -
-    krumzBitBid;
-  if (hackerTrackerBid > hackerTrackerCounterTotal(state))
-    throw new Error("Hacker Tracker Central hat nicht genug Counter.");
-  const encounterTemporaryTraceCreditsSpent =
-    spendEncounterTemporaryTraceCredits(
-      state,
-      trace,
-      encounterTemporaryTraceCreditsBid,
-    );
-  const parisCityGridPoolSpent = spendParisCityGridTracePool(
+  const tracePaymentReceipt = payCorpTraceBidQuote(
+    corpTracePaymentDeps,
     state,
-    trace.parisCityGridPoolSourceCardInstanceId,
-    trace.parisCityGridPoolServerId,
-    parisCityGridPoolBid,
+    trace,
+    tracePaymentQuote,
   );
-  spendCredits(state, "corp", creditBid);
-  const krumzBitsSpent = spendKrumzTraceBits(state, krumzBitBid);
-  const hackerTrackerCountersSpent = spendHackerTrackerCounters(
-    state,
-    hackerTrackerBid,
+  const tracePaymentPayload = corpTracePaymentPublicPayload(
+    trace,
+    tracePaymentQuote,
+    tracePaymentReceipt,
   );
   const traceStrength = trace.baseTraceStrength + bid;
   const runnerLink = calculateRunnerLink(state);
@@ -28177,37 +28165,7 @@ function resolveTraceCorpBid(
       ...(typeof trace.rabbitTraceLimitReduction === "number"
         ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
         : {}),
-      corpBid: bid,
-      ...(encounterTemporaryTraceCreditsSpent > 0
-        ? {
-            temporaryTraceCreditsSpent: encounterTemporaryTraceCreditsSpent,
-            temporaryTraceCreditsRemaining:
-              state.run?.encounterTemporaryTraceCredits?.remaining ?? 0,
-            temporaryTraceCreditsSourceDefinitionId:
-              trace.encounterTemporaryTraceCreditSourceDefinitionId,
-          }
-        : {}),
-      corpCreditBid: creditBid,
-      ...(parisCityGridPoolSpent > 0
-        ? {
-            parisCityGridPoolSpent,
-            parisCityGridPoolRemaining: trace.parisCityGridPoolSourceCardInstanceId
-              ? cardCounter(
-                  state,
-                  trace.parisCityGridPoolSourceCardInstanceId,
-                  "bit",
-                )
-              : 0,
-            parisCityGridPoolServerId: trace.parisCityGridPoolServerId,
-          }
-        : {}),
-      ...(krumzBitsSpent > 0 ? { krumzBitsSpent } : {}),
-      ...(hackerTrackerCountersSpent > 0
-        ? {
-            hackerTrackerCountersSpent,
-            traceHostedCreditBoost: hackerTrackerCountersSpent,
-          }
-        : {}),
+      ...tracePaymentPayload,
       traceStrength,
       runnerLink,
       traceBaseLinkChoiceOpened: true,
@@ -28239,37 +28197,7 @@ function resolveTraceCorpBid(
     ...(typeof trace.rabbitTraceLimitReduction === "number"
       ? { rabbitTraceLimitReduction: trace.rabbitTraceLimitReduction }
       : {}),
-    corpBid: bid,
-    ...(encounterTemporaryTraceCreditsSpent > 0
-      ? {
-          temporaryTraceCreditsSpent: encounterTemporaryTraceCreditsSpent,
-          temporaryTraceCreditsRemaining:
-            state.run?.encounterTemporaryTraceCredits?.remaining ?? 0,
-          temporaryTraceCreditsSourceDefinitionId:
-            trace.encounterTemporaryTraceCreditSourceDefinitionId,
-        }
-      : {}),
-    corpCreditBid: creditBid,
-    ...(parisCityGridPoolSpent > 0
-      ? {
-          parisCityGridPoolSpent,
-          parisCityGridPoolRemaining: trace.parisCityGridPoolSourceCardInstanceId
-            ? cardCounter(
-                state,
-                trace.parisCityGridPoolSourceCardInstanceId,
-                "bit",
-              )
-            : 0,
-          parisCityGridPoolServerId: trace.parisCityGridPoolServerId,
-        }
-      : {}),
-    ...(krumzBitsSpent > 0 ? { krumzBitsSpent } : {}),
-    ...(hackerTrackerCountersSpent > 0
-      ? {
-          hackerTrackerCountersSpent,
-          traceHostedCreditBoost: hackerTrackerCountersSpent,
-        }
-      : {}),
+    ...tracePaymentPayload,
     traceStrength,
     runnerLink,
     ...(cryingCounterCount > 0 ? { cryingCounterCount, cryingLinkReduction: cryingCounterCount * 2 } : {}),

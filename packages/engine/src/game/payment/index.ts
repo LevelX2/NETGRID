@@ -8,6 +8,13 @@ export type {
   CostPurpose,
   CostQuote,
 } from "./cost-quote";
+export type {
+  CorpTracePaymentBreakdown,
+  CorpTracePaymentDependencies,
+  CorpTracePaymentQuote,
+  CorpTracePaymentReceipt,
+  CorpTracePaymentSourceKind,
+} from "./trace-payment";
 export {
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
@@ -25,3 +32,10 @@ export type {
   CorpInstallCostOptions,
   CorpRezCostOptions,
 } from "./corp-rez-cost";
+export {
+  assertCorpTraceBidPaymentQuoteValid,
+  assertCorpTraceBidPaymentValid,
+  corpTracePaymentPublicPayload,
+  payCorpTraceBidQuote,
+  quoteCorpTraceBidPayment,
+} from "./trace-payment";
