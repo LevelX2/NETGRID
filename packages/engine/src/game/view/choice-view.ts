@@ -1,0 +1,150 @@
+// ARCH-6 read-only View-Helfer.
+// Keine State-Mutation, keine LegalAction-Erzeugung, kein Import aus index.ts,
+// keine PublicPayload-Vertragsaenderung.
+import {
+  type CardInstanceId,
+  type ChoiceRequest,
+  type GameState,
+  type PlayerView,
+  type VisibleCard,
+} from "@netgrid/shared";
+import { definitionFor, visibleOwnCard } from "./card-view";
+
+export function visibleChoice(
+  state: GameState,
+  choice: ChoiceRequest,
+): NonNullable<PlayerView["pendingChoice"]> {
+  const stackSearchResolution =
+    choice.stackSearchResolution ?? stackSearchResolutionForChoice(choice);
+  return {
+    choiceId: choice.choiceId,
+    side: choice.side,
+    source: choice.source,
+    prompt: choice.prompt,
+    kind: choice.kind,
+    options: choice.options.map((option) => {
+      const card = visibleChoiceCardForOption(state, choice, option);
+      return {
+        id: option.id,
+        label: option.label,
+        ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
+        ...(option.selectable === false ? { selectable: false } : {}),
+        ...(option.value !== undefined &&
+        !(
+          choice.visibility === "public" &&
+          option.publicLabel &&
+          typeof option.value === "string" &&
+          option.id.startsWith("ice_")
+        )
+          ? { value: option.value }
+          : {}),
+        ...(card ? { card } : {}),
+      };
+    }),
+    minSelections: choice.minSelections,
+    maxSelections: choice.maxSelections,
+    stateVersion: choice.stateVersion,
+    visibility: choice.visibility,
+    ...(stackSearchResolution ? { stackSearchResolution } : {}),
+  };
+}
+
+function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {
+  return (
+    choice.kind === "select_cards" &&
+    (choice.source.startsWith("v098.search_stack") ||
+      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.search_stack_card") ||
+      choice.source.startsWith("v1911.search_stack") ||
+      choice.source.startsWith("v1911.aujourdoui_top5") ||
+      choice.source.startsWith("v1912.search_stack") ||
+      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("p3_38.search_stack_install") ||
+      choice.source.startsWith("p3_38.stack_or_trash_program_install"))
+  );
+}
+
+function stackSearchResolutionForChoice(
+  choice: ChoiceRequest,
+): ChoiceRequest["stackSearchResolution"] | undefined {
+  if (!isRunnerStackSearchChoice(choice)) return undefined;
+  return {
+    reveal:
+      choice.source.startsWith("v1911.short_circuit_search") ||
+      choice.source.startsWith("v1911.aujourdoui_top5") ||
+      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("p3_38.search_stack_install") ||
+      (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
+        choice.source.includes(":stack:"))
+        ? "public"
+        : "hidden",
+    destination:
+      choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+      choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+      choice.source.startsWith("p3_38.search_stack_install") ||
+      choice.source.startsWith("p3_38.stack_or_trash_program_install")
+        ? "install_program"
+        : "grip",
+    shuffleAfter: true,
+    ...(choice.source.startsWith("v1911.self_modifying_code_install_program") ||
+    choice.source.startsWith("v1911.sneak_preview_stack_install") ||
+    choice.source.startsWith("p3_38.search_stack_install") ||
+    choice.source.startsWith("p3_38.stack_or_trash_program_install")
+      ? { publicRevealKind: "reveal" }
+      : {}),
+  };
+}
+
+export function visibleChoiceCardForOption(
+  state: GameState,
+  choice: ChoiceRequest,
+  option: ChoiceRequest["options"][number],
+): VisibleCard | undefined {
+  if (typeof option.value !== "string") return undefined;
+  const cardId = option.value as CardInstanceId;
+  const isStackChoice = isRunnerStackSearchChoice(choice);
+  const isSneakHeapChoice =
+    choice.source.startsWith("v1911.sneak_preview_heap_install") ||
+    (choice.source.startsWith("p3_38.stack_or_trash_program_install") &&
+      choice.source.includes(":heap:"));
+  const isPriorityRequisitionChoice = choice.source.startsWith(
+    "v162.priority_requisition",
+  );
+  const isP333PrivateLookChoice = choice.source.startsWith(
+    "p3_33.private_look",
+  );
+  if (
+    !isStackChoice &&
+    !isSneakHeapChoice &&
+    !isPriorityRequisitionChoice &&
+    !isP333PrivateLookChoice
+  )
+    return undefined;
+  if (isP333PrivateLookChoice) {
+    const instance = state.cardInstances[cardId];
+    if (!instance || instance.owner !== "corp") return undefined;
+    return visibleOwnCard(state, cardId);
+  }
+  if (isPriorityRequisitionChoice) {
+    const instance = state.cardInstances[cardId];
+    if (
+      !instance ||
+      instance.owner !== "corp" ||
+      instance.zone.side !== "corp" ||
+      instance.zone.zone !== "serverIce" ||
+      instance.rezzed ||
+      definitionFor(state, cardId).type !== "ice"
+    )
+      return undefined;
+    return visibleOwnCard(state, cardId);
+  }
+  if (isStackChoice && !state.runner.stack.includes(cardId)) return undefined;
+  if (isSneakHeapChoice && !state.runner.heap.includes(cardId)) return undefined;
+  const instance = state.cardInstances[cardId];
+  if (!instance || instance.owner !== "runner") return undefined;
+  if (!isStackChoice && definitionFor(state, cardId).type !== "program")
+    return undefined;
+  return visibleOwnCard(state, cardId);
+}
