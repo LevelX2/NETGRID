@@ -3390,6 +3390,32 @@ select {
   cursor: default;
 }
 
+.cardChoiceDialog.readableCards {
+  width: min(1180px, calc(100vw - 28px));
+}
+
+.cardChoiceDialog.readableCards .cardChoiceOverlapRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 12px;
+  min-height: 0;
+  padding: 4px;
+  overflow: visible;
+}
+
+.cardChoiceDialog.readableCards .cardChoiceOptionSlot {
+  width: auto;
+  max-width: none;
+}
+
+.cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot {
+  margin-left: 0;
+}
+
+.cardChoiceDialog.readableCards .card.textCard {
+  min-height: 168px;
+}
+
 .card.choiceSelected {
   border-color: color-mix(in srgb, var(--ok), white 10%);
   box-shadow:

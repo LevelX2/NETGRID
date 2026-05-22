@@ -19,6 +19,7 @@ import {
   automaticEndTurnAction,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceUsesReadableCards,
   counterDisplayBadgeView,
   counterDisplaysForRendering,
   clampCuePosition,
@@ -468,6 +469,8 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
+    expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
   });
 
   it("detects field-card choices for installed board cards only", () => {
@@ -537,6 +540,7 @@ describe("V1.0.5 action board UI helpers", () => {
     });
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);
+    expect(cardChoiceUsesReadableCards(stackChoice)).toBe(true);
   });
 
   it("labels Runner program install trash choices for optional and required MU cases", () => {

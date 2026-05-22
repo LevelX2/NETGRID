@@ -30,4 +30,10 @@ describe("run window layering", () => {
     expect(runOverlay).toBeLessThan(zLayer("z-access-reveal-overlay"));
     expect(runOverlay).toBeLessThan(zLayer("z-card-tooltip-overlay"));
   });
+
+  it("keeps stack-search card choices readable instead of overlapped", () => {
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("display: grid");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOverlapRow")).toContain("minmax(190px, 1fr)");
+    expect(selectorBlock(".cardChoiceDialog.readableCards .cardChoiceOptionSlot + .cardChoiceOptionSlot")).toContain("margin-left: 0");
+  });
 });

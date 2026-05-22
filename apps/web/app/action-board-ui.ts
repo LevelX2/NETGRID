@@ -797,6 +797,10 @@ export function shouldUseCardChoicePanel(choice: NonNullable<PlayerView["pending
   return minSelections !== 1 || maxSelections !== 1;
 }
 
+export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
+  return choice.kind === "select_cards" && Boolean(choice.stackSearchResolution || choice.source.includes("search_stack"));
+}
+
 export function shouldUseFieldCardChoice(
   choice: NonNullable<PlayerView["pendingChoice"]>,
   view: PlayerView,

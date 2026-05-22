@@ -128,6 +128,7 @@ import {
   baseActionSlotCapacity,
   breachProgressLabel,
   cardCreditCounterVisual,
+  cardChoiceUsesReadableCards,
   counterDisplaysForRendering,
   clampCuePosition,
   contextualCardActionLabel,
@@ -8027,6 +8028,7 @@ function CardChoicePanel({
   const title = programInstallTrashInfo?.title ?? cardChoiceTitle(choice);
   const prompt = choice.prompt.trim();
   const effectHint = programInstallTrashInfo?.effectHint ?? cardChoiceEffectHint(choice);
+  const readableCards = cardChoiceUsesReadableCards(choice);
 
   useEffect(() => {
     setSelected([]);
@@ -8045,7 +8047,7 @@ function CardChoicePanel({
 
   const dialog = (
     <section className="cardChoiceOverlay" role="dialog" aria-modal="true" aria-labelledby="card-choice-title" data-testid="card-choice-panel">
-      <div className={`cardChoiceDialog ${highlighted ? "cueHighlight" : ""}`}>
+      <div className={`cardChoiceDialog ${highlighted ? "cueHighlight" : ""}${readableCards ? " readableCards" : ""}`}>
         <header className="cardChoiceHeader">
           <div>
             <h2 id="card-choice-title">
