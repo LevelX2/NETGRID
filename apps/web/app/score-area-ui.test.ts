@@ -36,6 +36,16 @@ describe("score area UI helpers", () => {
     expect(scoredAgendaEffectLineForScoreArea("onr_v1_202_genetics-visionary-acquisition", "runner")).toBeNull();
   });
 
+  it("shows Encryption Breakthrough as an active Code Gate strength effect only in the Corp scored area", () => {
+    const corpLine = scoredAgendaEffectLineForScoreArea("onr_v1_200_encryption-breakthrough", "corp");
+
+    expect(corpLine).toMatchObject({
+      value: "Aktiv",
+      label: "Code-Gates haben +1 Stärke"
+    });
+    expect(scoredAgendaEffectLineForScoreArea("onr_v1_200_encryption-breakthrough", "runner")).toBeNull();
+  });
+
   it("marks known Research agendas when Genetics-Visionary Acquisition is scored by the Corp", () => {
     const corpScoreAreaCards = [
       {

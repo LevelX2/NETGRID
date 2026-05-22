@@ -7911,8 +7911,6 @@ function ScoredAgendaOverlay({
                 card={card}
                 displayMode={cardDisplayMode}
                 showAdvancementCounters={false}
-                showScoreStateBadges
-                scoreStateBadges={side === "corp" ? scoreCardStateBadges(card, cards) : []}
                 actions={cardActionsFor(card)}
                 actionDisabled={actionDisabled}
                 selected={selectedContext?.kind === "card" && selectedContext.id === card.instanceId}
@@ -7920,7 +7918,7 @@ function ScoredAgendaOverlay({
                 {...(onFocus ? { onFocus } : {})}
                 {...(onActionContextSelect ? { onActionContextSelect } : {})}
               />
-              <ScoredAgendaStateLines card={card} side={side} corpScoreAreaCards={side === "corp" ? cards : []} />
+              <ScoredAgendaStateLines card={card} side={side} />
             </div>
           ))}
           {cards.length > SCORE_AREA_PREVIEW_LIMIT ? <div className="scoredAgendaOverflow">+{cards.length - SCORE_AREA_PREVIEW_LIMIT} weitere</div> : null}
@@ -12646,8 +12644,8 @@ type ScoredAgendaStateLine = {
   tone: ScoredAgendaStateTone;
 };
 
-function ScoredAgendaStateLines({ card, side, corpScoreAreaCards }: { card: DisplayVisibleCard; side: Side; corpScoreAreaCards: VisibleCard[] }) {
-  const lines = scoredAgendaStateLines(card, side, corpScoreAreaCards);
+function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side: Side }) {
+  const lines = scoredAgendaStateLines(card, side);
   if (lines.length === 0) return null;
   return (
     <div className="scoredAgendaStateList" aria-label={`${card.title ?? "Karte"} Status`}>
@@ -12661,12 +12659,10 @@ function ScoredAgendaStateLines({ card, side, corpScoreAreaCards }: { card: Disp
   );
 }
 
-function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side, corpScoreAreaCards: VisibleCard[] = []): ScoredAgendaStateLine[] {
+function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
   const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
   if (effectLine) lines.push(effectLine);
-  const researchDifficultyLine = side === "corp" ? researchAgendaDifficultyModifierLineForCard(card, corpScoreAreaCards) : null;
-  if (researchDifficultyLine) lines.push(researchDifficultyLine);
   return lines;
 }
 
