@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
-import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues, turnStartAudioCue } from "./action-cues";
+import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues, eventsAfter, turnStartAudioCue } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -324,6 +324,24 @@ describe("deriveOpponentActionCues", () => {
 
     expect(cues.map((cue) => cue.actionUse?.label)).toEqual(["1", "2", "3", "4", "5"]);
     expect(cues[4]?.actionUse?.title).toBe("5. Aktion in diesem Zug");
+  });
+
+  it("does not replay an older event tail when undo removes the last presented event", () => {
+    const events = [
+      event("evt_37", "start_run", { actor: "runner", aiExplanation: "Alter Runner-Run." }),
+      event("evt_38", "access_card", { actor: "runner", aiExplanation: "Alter Zugriff." }),
+      event("evt_41", "install_card", { actor: "corp", label: "Korp installiert eine Karte." })
+    ];
+
+    expect(eventsAfter(events, "evt_42")).toEqual([]);
+    expect(
+      deriveOpponentActionCues({
+        viewerSide: "corp",
+        playerView: view("corp"),
+        events,
+        lastPresentedEventId: "evt_42"
+      })
+    ).toEqual([]);
   });
 });
 

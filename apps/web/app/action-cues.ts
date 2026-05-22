@@ -140,10 +140,10 @@ export function cueHasHiddenLeak(cue: OpponentActionCue): boolean {
   return /cardInstances|sessionToken|joinToken|privatePayload|imageUrl|Simple Agenda|simple_agenda/i.test(serialized);
 }
 
-function eventsAfter(events: PublicGameEvent[], lastPresentedEventId?: string | null): PublicGameEvent[] {
+export function eventsAfter(events: PublicGameEvent[], lastPresentedEventId?: string | null): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
   const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
-  return index >= 0 ? events.slice(index + 1) : events;
+  return index >= 0 ? events.slice(index + 1) : [];
 }
 
 function deriveTurnActionUses(events: PublicGameEvent[]): Record<string, CueActionUse> {

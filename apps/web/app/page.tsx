@@ -5785,7 +5785,7 @@ export default function Page() {
 function publicEventsAfter(events: PublicGameEvent[], lastPresentedEventId: string | null): PublicGameEvent[] {
   if (!lastPresentedEventId) return events;
   const index = events.findIndex((event) => event.eventId === lastPresentedEventId);
-  return index >= 0 ? events.slice(index + 1) : events;
+  return index >= 0 ? events.slice(index + 1) : [];
 }
 
 function eventActionType(event: PublicGameEvent): string {
@@ -8615,6 +8615,7 @@ function ChroniclePanel({
           {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
           {groupedEntries.map((group) => {
             const groupKey = chronicleGroupCollapseKey(group.label, group.kind, group.turnGroupLabel, group.entries[0]?.item.id ?? "empty");
+            const groupRenderKey = `${groupKey}:${group.entries[0]?.item.id ?? "empty"}`;
             const turnKey = group.turnGroupLabel ? chronicleTurnGroupCollapseKey(group.turnGroupLabel) : null;
             const isTurnGroup = Boolean(group.turnGroupLabel && group.label === group.turnGroupLabel);
             const turnCollapsed = Boolean(turnKey && collapsedGroups.has(turnKey));
@@ -8624,7 +8625,7 @@ function ChroniclePanel({
             if (hiddenByParent) return null;
             const shouldRenderGroup = chronicleGroupShouldRender(group.label, shownChronicleGroupLabels);
             return (
-              <div className={`chronicleGroupBlock group-${group.kind} ${entriesCollapsed ? "entriesCollapsed" : ""}`} key={groupKey}>
+              <div className={`chronicleGroupBlock group-${group.kind} ${entriesCollapsed ? "entriesCollapsed" : ""}`} key={groupRenderKey}>
                 {shouldRenderGroup ? (
                   <button
                     className={`chronicleGroup ${group.kind} ${groupCollapsed ? "collapsed" : ""}`}
