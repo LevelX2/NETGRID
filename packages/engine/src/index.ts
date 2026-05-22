@@ -30810,6 +30810,7 @@ const STORED_CREDIT_COUNTER_DEFINITION_IDS = new Set<string>([
   "onr_v1_311_braindance-campaign",
   "onr_v1_326_holovid-campaign",
   "onr_v1_337_rockerboy-promotion",
+  "onr_v1_318_department-of-truth-enhancement",
   "onr_v1_193_corporate-coup",
   "onr_v1_198_detroit-police-contract",
   "onr_v1_209_political-coup",

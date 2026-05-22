@@ -742,6 +742,10 @@ describe("V1.0.6 resource and card-display helpers", () => {
       ...card("braindance_1", "Braindance Campaign", "asset"),
       counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 12, ariaLabel: "12 gespeicherte Credits" }]
     };
+    const departmentAfterLoad: VisibleCard = {
+      ...card("department_1", "Department of Truth Enhancement", "asset"),
+      counterDisplays: [{ ...brokerAfterLoad.counterDisplays![0]!, amount: 3, ariaLabel: "3 gespeicherte Credits" }]
+    };
     const unknownPowerCard: VisibleCard = {
       ...card("unknown_1", "Unknown Power Counter Card", "asset"),
       counters: { power: 8 }
@@ -782,6 +786,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: true,
       iconCount: 1
     });
+    expect(storedCreditSourceLabel(departmentAfterLoad)).toBe("Credits");
+    expect(storedCreditAmount(departmentAfterLoad)).toBe(3);
+    expect(counterDisplaysForRendering(departmentAfterLoad).map((display) => display.id)).toEqual(["stored_credits"]);
     expect(storedCreditAmount(unknownPowerCard)).toBe(0);
   });
 

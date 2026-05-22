@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-05-22-department-truth-enhancement-counter-display
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+  - apps/web/app/action-board-ui.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t 'Department of Truth Enhancement|manual hosted-credit abilities'
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts -t 'stored credits'
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t 'Department of Truth Enhancement|hosted'
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check -- packages/engine/src/index.ts packages/engine/src/index.test.ts apps/web/app/action-board-ui.test.ts docs/activities/in-progress/act-2026-05-22-department-truth-enhancement-counter-display.md
 ---
 
 # Department of Truth Enhancement Counter sichtbar machen
@@ -48,12 +57,12 @@ Credits/Bits auf `Department of Truth Enhancement` müssen sichtbar auf der inst
 
 ## Akzeptanzkriterien
 
-- [ ] Nach `A: Put [3]` zeigt die Karte sichtbar 3 zusätzliche Credits/Bits.
-- [ ] Nach `A: Take all` fällt die sichtbare Anzeige auf 0 oder verschwindet fachlich korrekt.
-- [ ] Engine-Projection und Web-Rendering verwenden denselben CounterDisplay-Vertrag.
-- [ ] Verdeckte/unrezzed Karten leaken keine hosted-credit-Details.
-- [ ] Chronik nennt konkrete Beträge für Put und Take.
-- [ ] Regression deckt `Department of Truth Enhancement` und mindestens eine vergleichbare hosted-credit-Karte ab.
+- [x] Nach `A: Put [3]` zeigt die Karte sichtbar 3 zusätzliche Credits/Bits.
+- [x] Nach `A: Take all` fällt die sichtbare Anzeige auf 0 oder verschwindet fachlich korrekt.
+- [x] Engine-Projection und Web-Rendering verwenden denselben CounterDisplay-Vertrag.
+- [x] Verdeckte/unrezzed Karten leaken keine hosted-credit-Details.
+- [x] Chronik nennt konkrete Beträge für Put und Take.
+- [x] Regression deckt `Department of Truth Enhancement` und mindestens eine vergleichbare hosted-credit-Karte ab.
 
 ## Umsetzungshinweise
 
@@ -62,4 +71,4 @@ Credits/Bits auf `Department of Truth Enhancement` müssen sichtbar auf der inst
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `Department of Truth Enhancement` ist jetzt in der Engine-Projektion der gespeicherten Credits enthalten und nutzt denselben `stored_credits`-CounterDisplay-Vertrag wie vergleichbare hosted-credit-Karten. Die Regression spielt `Put [3]` und `Take all`, prüft die sichtbare Anzeige nach beiden Aktionen, Runner-Redaction bei verdeckter Karte, konkrete Chronikbeträge und den bestehenden Web-Rendererpfad.

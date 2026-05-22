@@ -10276,6 +10276,97 @@ describe("V1.6.2 Mechanikpaket B", () => {
     ).toBe("implemented");
   });
 
+  it("projects Department of Truth Enhancement hosted credits as visible stored credits", () => {
+    let state = apply(
+      MECHANIC_SMOKE_GAMES.assetNodeEffects("department-stored-credit-display"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 10;
+    state.corp.clicks = 5;
+    const departmentId = putCorpRootInRemote(
+      state,
+      "onr_v1_318_department-of-truth-enhancement",
+    );
+    state.cardInstances[departmentId] = {
+      ...state.cardInstances[departmentId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const hiddenRunnerView = getPlayerView(
+      {
+        ...state,
+        cardInstances: {
+          ...state.cardInstances,
+          [departmentId]: {
+            ...state.cardInstances[departmentId]!,
+            faceup: false,
+            rezzed: false,
+            counters: { bit: 3 },
+          },
+        },
+      },
+      "runner",
+    );
+    expect(
+      hiddenRunnerView.servers
+        .find((server) => server.id === "remote_1")
+        ?.root.find((card) => card.instanceId === departmentId)
+        ?.counterDisplays,
+    ).toBeUndefined();
+
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_318_department-of-truth-enhancement" &&
+        action.label.includes("3 Credits"),
+    );
+
+    const loadedCard = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.find((card) => card.instanceId === departmentId);
+    expect(loadedCard?.counterDisplays).toEqual([
+      expect.objectContaining({
+        id: "stored_credits",
+        amount: 3,
+        displayKind: "stored_credits",
+        counterType: "bit",
+      }),
+    ]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      hostedCreditsAdded: 3,
+      hostedCreditsAfter: 3,
+    });
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(state, action) ===
+          "onr_v1_318_department-of-truth-enhancement" &&
+        action.label.includes("Credits von der Karte"),
+    );
+    const emptiedCard = getPlayerView(state, "corp")
+      .servers.find((server) => server.id === "remote_1")
+      ?.root.find((card) => card.instanceId === departmentId);
+    expect(emptiedCard?.counterDisplays ?? []).toEqual([]);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      hostedCreditsTaken: 3,
+      hostedCreditsAfter: 0,
+    });
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("describes P3.6 start-of-Corp-turn hosted-credit economy cards", () => {
     for (const [definitionId, startingCredits, takeAmount, trashesWhenEmpty] of [
       ["onr_v1_311_braindance-campaign", 12, 2, true],
