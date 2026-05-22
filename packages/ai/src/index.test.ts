@@ -6394,6 +6394,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "installed_economy_kind:pool_build",
     );
     expect(lowCreditDecision.evidence).toContain("economy_need:acute");
+    expect(lowCreditDecision.evidence).toContain(
+      "broker_horizon:installed_economy_pool_build_deferred_for_credit_need",
+    );
+    expect(lowCreditDecision.evidence).toContain(
+      "broker_horizon_immediate_credit_need:true",
+    );
     expect(lowCreditDecision.decisionDebug?.actionAlternatives).toContainEqual(
       expect.objectContaining({
         actionId: lowCreditBasicCredit.actionId,
@@ -6454,6 +6460,15 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(stableDecision.actionId).toBe(stableBrokerLoad.actionId);
     expect(stableDecision.reasonCode).toBe("runner.plan.recover_economy");
     expect(stableDecision.evidence).toContain("economy_need:stable");
+    expect(stableDecision.evidence).toContain(
+      "broker_horizon:installed_economy_pool_build_horizon_value",
+    );
+    expect(stableDecision.evidence).toContain(
+      "broker_horizon_clicks:3",
+    );
+    expect(stableDecision.evidence).toContain(
+      "broker_horizon_visible_threshold:false",
+    );
     expect(stableDecision.decisionDebug?.actionAlternatives?.[0]).toMatchObject(
       {
         actionId: stableBrokerLoad.actionId,

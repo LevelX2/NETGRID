@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-05-22-runner-ai-broker-pool-horizon
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-plans.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Broker pool|DecisionDebug"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "installed Runner economy|Shell Traders|runner.plan.recover_economy"
+  - corepack pnpm --filter @netgrid/ai typecheck
 ---
 
 # Runner-KI: Broker-Pool-Aufbau mit kleinem Planungshorizont bewerten
@@ -73,11 +78,11 @@ Die Runner-KI soll `Broker` nicht nur als verzögerte Economy erkennen, sondern 
 
 ## Akzeptanzkriterien
 
-- [ ] Ein AI-Test reproduziert einen stabilen Economy-Fall: installierter Broker mit 0 gespeicherten Credits, genügend Runner-Credits und legaler Broker-Load; die Runner-KI wählt Broker Load gegenüber Basic Credit.
-- [ ] Ein AI-Test deckt akuten Creditbedarf ab: Wenn ein sofortiger sichtbarer Schwellenwert wichtiger ist, darf Basic Credit Broker Load weiterhin schlagen.
-- [ ] Ein AI-Test deckt Pool-Auszahlung ab: Bei sichtbaren gespeicherten Broker-Credits wird Take gegenüber Basic Credit sinnvoll priorisiert.
-- [ ] Evidence/Debug unterscheidet verständlich `pool_build`, `pool_payout`, `future_pool_after`, `economy_need` und optional einen Broker-Horizontgrund.
-- [ ] Bestehende Runner-KI-Regressionsfälle zu Runs, Breaker-Aufbau, Shell Traders und installierter Economy bleiben grün oder bekannte Fremdfehler werden sauber benannt.
+- [x] Ein AI-Test reproduziert einen stabilen Economy-Fall: installierter Broker mit 0 gespeicherten Credits, genügend Runner-Credits und legaler Broker-Load; die Runner-KI wählt Broker Load gegenüber Basic Credit.
+- [x] Ein AI-Test deckt akuten Creditbedarf ab: Wenn ein sofortiger sichtbarer Schwellenwert wichtiger ist, darf Basic Credit Broker Load weiterhin schlagen.
+- [x] Ein AI-Test deckt Pool-Auszahlung ab: Bei sichtbaren gespeicherten Broker-Credits wird Take gegenüber Basic Credit sinnvoll priorisiert.
+- [x] Evidence/Debug unterscheidet verständlich `pool_build`, `pool_payout`, `future_pool_after`, `economy_need` und optional einen Broker-Horizontgrund.
+- [x] Bestehende Runner-KI-Regressionsfälle zu Runs, Breaker-Aufbau, Shell Traders und installierter Economy bleiben grün oder bekannte Fremdfehler werden sauber benannt.
 
 ## Umsetzungshinweise
 
@@ -91,4 +96,4 @@ Die Runner-KI soll `Broker` nicht nur als verzögerte Economy erkennen, sondern 
 
 ## Ergebnisnotiz
 
-Offen.
+Abgeschlossen. Broker Pool Build nutzt jetzt einen kleinen sichtbaren Horizont aus verbleibenden Klicks, sichtbarer Sofort-Credit-Schwelle und zukünftigem Poolwert. Bei akutem Bedarf oder sichtbarer Schwelle bleibt Basic Credit vorn; bei stabilem Creditstand und mindestens zwei Klicks erhält Broker Load einen Horizon-Bonus und schlägt Basic Credit. Evidence ergänzt `broker_horizon`, Klickfenster, sichtbare Schwelle und unmittelbaren Creditbedarf; die Action-Level-Trace-Daten zeigen weiterhin `pool_build`, `pool_payout`, `futurePoolAfter` und `economyNeed`. Die fokussierten Broker-/DecisionDebug-/installierte-Economy-/Shell-Traders-Tests sind grün. Der vollständige `packages/ai/src/index.test.ts`-Lauf bleibt wegen der bekannten Simulation-Smoke-Fremdfehler `No legal action for runner at 65/13` rot.

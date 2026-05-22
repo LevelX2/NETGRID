@@ -167,6 +167,15 @@ type ShellTradersBacklog = {
   totalShellCounters: number;
 };
 
+type BrokerPoolBuildHorizon = {
+  score: number;
+  priority: number;
+  reason: string;
+  immediateCreditNeed: boolean;
+  visibleThreshold: boolean;
+  clicksRemaining: number;
+};
+
 const AI_HINTS = createAiHintsByCard();
 const RUNNER_PLAN_PROFILES = runnerPlanProfilesData.profiles as RunnerPlanProfile[];
 const PLAN_ACTION_TYPES = new Set<LegalAction["type"]>(["start_run", "jack_out", "continue_run", "install_card", "play_event", "trigger_ability", "activated_card_ability", "gain_credit", "draw_card", "trash_accessed_card"]);
@@ -1140,16 +1149,13 @@ function evaluateInstalledEconomyActions(input: AiDecisionInput, candidate: Runn
     reasons.push(payout.kind === "pool_payout" ? "installed_economy_pool_payout" : "installed_economy_direct_payout");
   }
   if (poolBuild) {
-    if (input.playerView.own.credits < 4) {
-      score -= 80;
-      reasons.push("installed_economy_pool_build_deferred_for_credit_need");
-    } else {
-      score += 45 + Math.min(80, poolBuild.futurePoolAfter * 8);
-      reasons.push("installed_economy_pool_build_future_value");
-    }
+    const horizon = brokerPoolBuildHorizon(input, poolBuild);
+    score += horizon.score;
+    reasons.push(horizon.reason);
   }
 
   const best = payout ?? poolBuild ?? assessments[0]!;
+  const brokerHorizon = best.kind === "pool_build" ? brokerPoolBuildHorizon(input, best) : undefined;
   return {
     score,
     reasons,
@@ -1160,9 +1166,47 @@ function evaluateInstalledEconomyActions(input: AiDecisionInput, candidate: Runn
       `installed_economy_net_credits:${best.netCredits}`,
       `installed_economy_stored_credits:${best.storedCredits}`,
       `installed_economy_future_pool_after:${best.futurePoolAfter}`,
-      `economy_need:${input.playerView.own.credits < 4 ? "acute" : "stable"}`
+      `economy_need:${input.playerView.own.credits < 4 ? "acute" : "stable"}`,
+      ...(brokerHorizon
+        ? [
+            `broker_horizon:${brokerHorizon.reason}`,
+            `broker_horizon_clicks:${brokerHorizon.clicksRemaining}`,
+            `broker_horizon_visible_threshold:${brokerHorizon.visibleThreshold}`,
+            `broker_horizon_immediate_credit_need:${brokerHorizon.immediateCreditNeed}`
+          ]
+        : [])
     ]
   };
+}
+
+function brokerPoolBuildHorizon(input: AiDecisionInput, assessment: InstalledEconomyActionAssessment): BrokerPoolBuildHorizon {
+  const clicksRemaining = Math.max(0, Math.floor(input.playerView.own.clicks));
+  const visibleThreshold = runnerHasVisibleImmediateCreditThreshold(input);
+  const immediateCreditNeed = input.playerView.own.credits < 3 || visibleThreshold;
+  if (immediateCreditNeed) {
+    return {
+      score: -80,
+      priority: 42,
+      reason: "installed_economy_pool_build_deferred_for_credit_need",
+      immediateCreditNeed,
+      visibleThreshold,
+      clicksRemaining
+    };
+  }
+  const clickWindowBonus = clicksRemaining >= 2 ? 35 : clicksRemaining === 1 ? 8 : -25;
+  return {
+    score: 45 + Math.min(80, assessment.futurePoolAfter * 8) + clickWindowBonus,
+    priority: 68 + Math.min(20, assessment.futurePoolAfter * 2) + (clicksRemaining >= 2 ? 8 : 0),
+    reason: clicksRemaining >= 2 ? "installed_economy_pool_build_horizon_value" : "installed_economy_pool_build_late_click_value",
+    immediateCreditNeed,
+    visibleThreshold,
+    clicksRemaining
+  };
+}
+
+function runnerHasVisibleImmediateCreditThreshold(input: AiDecisionInput): boolean {
+  const features = extractRunnerFeatures(input);
+  return [...features.visibleRunBreakCosts.values()].some((cost) => cost > features.credits && cost <= features.credits + 1);
 }
 
 function evaluateShellTradersActions(input: AiDecisionInput, candidate: RunnerPlanCandidate): RunnerPlanEvaluatorResult {
@@ -1679,7 +1723,7 @@ function runnerInstalledEconomyPriority(input: AiDecisionInput, action: LegalAct
   if (!assessment) return 10;
   if (assessment.kind === "pool_payout") return 88 + Math.max(0, assessment.netCredits - 1) * 8;
   if (assessment.kind === "direct_payout") return 84 + Math.max(0, assessment.netCredits - 1) * 7;
-  if (assessment.kind === "pool_build") return input.playerView.own.credits < 4 ? 42 : 68 + Math.min(20, assessment.futurePoolAfter * 2);
+  if (assessment.kind === "pool_build") return brokerPoolBuildHorizon(input, assessment).priority;
   return input.playerView.own.credits < 4 ? 35 : 58;
 }
 
