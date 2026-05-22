@@ -88,6 +88,7 @@ import {
   chronicleTurnGroupLabel,
   formatChronicleEvent,
   formatChronicleEffectItems,
+  shouldSuppressChronicleEventItem,
   type ChronicleCategory,
   type ChronicleContext,
   type ChronicleItem
@@ -8697,7 +8698,8 @@ function chronicleEntriesWithRunGroups(
     }
 
     const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
-    const items = [eventItem, ...formatChronicleEffectItems(event, side)];
+    const effectItems = formatChronicleEffectItems(event, side);
+    const items = shouldSuppressChronicleEventItem(event) ? effectItems : [eventItem, ...effectItems];
     const eventGroupLabel = activeRunGroupLabel && chronicleEventBelongsToActiveRun(event, actionType, items, cardDetailsById) ? activeRunGroupLabel : null;
     const eventGroupInstanceKey = eventGroupLabel ? activeRunGroupKey : null;
     for (const item of items) {

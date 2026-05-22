@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent } from "./chronicle";
+import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent, shouldSuppressChronicleEventItem } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -828,11 +828,59 @@ describe("formatChronicleEvent", () => {
     );
 
     expect(items.map((item) => item.title)).toEqual([
-      "Banpei: Subroutine 1 trashte Simple Decoder.",
+      "Banpei: Subroutine 1 trasht Simple Decoder.",
       "Banpei: Subroutine 2 beendet den Run."
     ]);
     expect(items[0]?.description).toBe("Simple Decoder wurde in den Heap bewegt.");
     expect(items[0]?.chips).toEqual(expect.arrayContaining(["Subroutine 1", "Simple Decoder", "Programm getrasht", "Banpei"]));
+  });
+
+  it("suppresses redundant Encounter summaries when concrete subroutine lines exist", () => {
+    const event = makeEvent("continue_run", {
+      actor: "runner",
+      encounterContinue: true,
+      result: "ended",
+      unbrokenSubroutineCount: 2,
+      trashedCardDefinitionId: "onr_v1_042_self-modifying-code",
+      trashedCardType: "program",
+      trashedCount: 1,
+      resolvedEffects: [
+        {
+          effectId: "subroutine_1",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 0,
+          subroutineType: "trash_installed_program",
+          cardDefinitionId: "onr_v1_042_self-modifying-code",
+          cardTitle: "Self-Modifying Code",
+          cardsTrashed: 1
+        },
+        {
+          effectId: "subroutine_2",
+          kind: "resolve_subroutine",
+          visibility: "public",
+          side: "runner",
+          sourceDefinitionId: "onr_v1_223_banpei",
+          sourceTitle: "Banpei",
+          subroutineIndex: 1,
+          subroutineType: "end_the_run",
+          endedRun: true
+        }
+      ]
+    });
+    const eventItem = formatChronicleEvent(event, "runner");
+    const visibleItems = shouldSuppressChronicleEventItem(event) ? formatChronicleEffectItems(event, "runner") : [eventItem, ...formatChronicleEffectItems(event, "runner")];
+
+    expect(shouldSuppressChronicleEventItem(event)).toBe(true);
+    expect(visibleItems.map((item) => item.title)).toEqual([
+      "Banpei: Subroutine 1 trasht Self-Modifying Code.",
+      "Banpei: Subroutine 2 beendet den Run."
+    ]);
+    expect(JSON.stringify(visibleItems)).not.toContain("ungebrochene Subroutinen ausgelöst");
+    expect(visibleItems[0]?.chips).toEqual(expect.arrayContaining(["Banpei", "Self-Modifying Code", "Subroutine 1"]));
   });
 
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {

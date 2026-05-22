@@ -1314,6 +1314,13 @@ export function formatChronicleEffectItems(event: PublicGameEvent, side: Side): 
     .map((effect, index) => formatChronicleEffect(event, effect, index, side));
 }
 
+export function shouldSuppressChronicleEventItem(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload ?? {};
+  const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType !== "continue_run" || payload.encounterContinue !== true) return false;
+  return resolvedEffectsFromPayload(payload.resolvedEffects).some((effect) => stringValue(effect.kind) === "resolve_subroutine");
+}
+
 export function chronicleTurnNumberByEventId(events: PublicGameEvent[]): Record<string, number> {
   const numbers: Record<string, number> = {};
   let activeSide: Side = "corp";
@@ -1624,7 +1631,7 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
         subroutineType === "do_damage"
           ? `${source}: ${subroutineChip} macht ${amount} ${damageTypeLabel(damageType)}`
           : trashedProgramTitle
-            ? `${source}: ${subroutineChip} trashte ${trashedProgramTitle}`
+            ? `${source}: ${subroutineChip} trasht ${trashedProgramTitle}`
           : effect.endedRun === true
             ? `${source}: ${subroutineChip} beendet den Run`
             : `${source}: ${subroutineChip} aufgelöst`;
