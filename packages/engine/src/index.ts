@@ -80,6 +80,7 @@ import {
   traceIsInPhase,
   tracePostBidLinkSourceUsed,
 } from "./game/trace/trace-state";
+import { describeTraceResultFromTrace } from "./game/trace/trace-result";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -29086,12 +29087,14 @@ function completeTraceAfterPostBidLink(
   trace: NonNullable<GameState["trace"]>,
   legalAction: LegalAction,
 ): void {
-  const traceStrength =
-    trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
-  const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
-  const runnerBid = trace.runnerBid ?? 0;
-  const runnerStrength = trace.runnerStrength ?? runnerLink + runnerBid;
-  const successful = traceStrength > runnerStrength;
+  const result = describeTraceResultFromTrace(trace, {
+    runnerLinkFallback: calculateRunnerLink(state),
+  });
+  const traceStrength = result.corpTraceStrength;
+  const runnerLink = result.runnerLink;
+  const runnerBid = result.runnerBid;
+  const runnerStrength = result.runnerTraceStrength;
+  const successful = result.successful;
   const tagsAdded =
     successful && trace.successEffect.type === "add_tag_and_counter"
       ? trace.successEffect.tagAmount

@@ -32,6 +32,12 @@ import {
   requireTracePhase,
   traceIsInPhase,
 } from "./trace/trace-state";
+import {
+  describeTraceResultFromTrace,
+  isTraceSuccessful,
+  traceCorpStrength,
+  traceRunnerStrength,
+} from "./trace/trace-result";
 
 describe("game facade", () => {
   it("delegates to the existing engine API", () => {
@@ -164,5 +170,67 @@ describe("game facade", () => {
       hasRunnerBid: false,
       postBidLinkSourceIds: [],
     });
+  });
+
+  it("describes trace results without mutating state", () => {
+    const trace = {
+      traceId: "arch-13.trace",
+      sourceCardInstanceId: "runner-identity",
+      sourceDefinitionId: "demo_runner_identity",
+      baseTraceStrength: 4,
+      status: "post_bid_link",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 2,
+      runnerLink: 3,
+      baseLinkValue: 1,
+      runnerBid: 2,
+      runnerStrength: 6,
+      postBidLinkBonus: 1,
+      postBidLinkSourceIds: ["link-source"],
+    } as NonNullable<ReturnType<typeof createGame>["trace"]>;
+    const before = structuredClone(trace);
+
+    expect(traceCorpStrength(trace)).toBe(6);
+    expect(traceRunnerStrength(trace)).toBe(6);
+    expect(isTraceSuccessful(trace)).toBe(false);
+    expect(describeTraceResultFromTrace(trace)).toEqual({
+      baseTraceStrength: 4,
+      corpBid: 2,
+      corpTraceStrength: 6,
+      baseLinkValue: 1,
+      runnerLink: 3,
+      runnerBid: 2,
+      postBidLinkValue: 1,
+      runnerTraceStrength: 6,
+      successful: false,
+    });
+    expect(trace).toEqual(before);
+  });
+
+  it("keeps trace success strict and includes bid/link fallbacks", () => {
+    const trace = {
+      traceId: "arch-13.strict-success",
+      sourceCardInstanceId: "runner-identity",
+      sourceDefinitionId: "demo_runner_identity",
+      baseTraceStrength: 5,
+      status: "post_bid_link",
+      successEffect: { type: "add_tag", amount: 1 },
+      corpBid: 1,
+      runnerBid: 1,
+    } as NonNullable<ReturnType<typeof createGame>["trace"]>;
+
+    expect(describeTraceResultFromTrace(trace, { runnerLinkFallback: 4 })).toEqual(
+      {
+        baseTraceStrength: 5,
+        corpBid: 1,
+        corpTraceStrength: 6,
+        baseLinkValue: 0,
+        runnerLink: 4,
+        runnerBid: 1,
+        postBidLinkValue: 0,
+        runnerTraceStrength: 5,
+        successful: true,
+      },
+    );
   });
 });
