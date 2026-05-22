@@ -1614,6 +1614,58 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("distinguishes Employee Empowerment optional start draw from its agenda action", () => {
+    const optionalDraw = makeEvent("resolve_choice", {
+      actor: "corp",
+      sourceDefinitionId: "onr_v1_199_employee-empowerment",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      employeeEmpowermentStartDrawDecision: "draw",
+      drawnCards: 1,
+      resolvedEffects: [
+        {
+          effectId: "corp.start.employee_empowerment.employee_1",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+          sourceTitle: "Employee Empowerment",
+          reason: "start_of_turn"
+        }
+      ]
+    });
+    const skip = makeEvent("resolve_choice", {
+      actor: "corp",
+      sourceDefinitionId: "onr_v1_199_employee-empowerment",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      employeeEmpowermentStartDrawDecision: "skip"
+    });
+    const action = makeEvent("activated_card_ability", {
+      actor: "corp",
+      title: "Employee Empowerment",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      cardImplementationAbility: "activated",
+      drawnCards: 2,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_199_employee-empowerment.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+          sourceTitle: "Employee Empowerment",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    expect(formatChronicleEvent(optionalDraw, "runner").title).toBe("Die Korp hat Employee Empowerment genutzt und eine Karte zusätzlich gezogen.");
+    expect(formatChronicleEvent(optionalDraw, "runner").chips).toEqual(expect.arrayContaining(["Start-of-turn", "Zusatzkarte"]));
+    expect(formatChronicleEvent(skip, "runner").title).toBe("Die Korp hat Employee Empowerment übersprungen.");
+    expect(formatChronicleEvent(action, "runner").title).toBe("Die Korp hat Employee Empowerment genutzt und 2 Karten gezogen.");
+  });
+
   it("merges activated economy ability effects with card context", () => {
     for (const [title, cardDefinitionId, amount] of [
       ["Marine Arcology", "onr_v1_206_marine-arcology", 3],

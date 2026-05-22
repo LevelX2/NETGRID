@@ -6245,7 +6245,7 @@
         "advancementRequirement": 4,
         "agendaPoints": 3
       },
-      "text": "While scored, gain 1 credit at the start of each Corp turn.",
+      "text": "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

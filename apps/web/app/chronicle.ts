@@ -224,6 +224,20 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Setup", "Starthand", setupDecision === "keep" ? "Behalten" : setupDecision === "mulligan" ? "Mulligan" : "Entscheidung");
         break;
       }
+      if (sourceDefinitionId === "onr_v1_199_employee-empowerment") {
+        const decision = stringValue(payload.employeeEmpowermentStartDrawDecision);
+        const drawn = numberValue(payload.drawnCards) ?? numberValue(payload.drawnCount) ?? 0;
+        category = "card";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        cardTitle = cardTitle ?? "Employee Empowerment";
+        title =
+          decision === "draw"
+            ? phrase(subject, `${cardTitle} genutzt und ${cardCountText(drawn)} zusätzlich gezogen`)
+            : phrase(subject, `${cardTitle} übersprungen`);
+        chips.push("Employee Empowerment", "Start-of-turn", decision === "draw" ? "Zusatzkarte" : "Übersprungen");
+        break;
+      }
       if (payload.traceStep === "corp_bid") {
         const corpBid = numberValue(payload.corpBid) ?? 0;
         const hackerTrackerCountersSpent = numberValue(payload.hackerTrackerCountersSpent) ?? 0;

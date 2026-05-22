@@ -1073,6 +1073,7 @@ export type GameState = {
     scoredBlackOpsAgendaLastTurn: boolean;
     edgerunnerTempsInstallActionsRemaining?: number;
     disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
+    employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];
   };
   ambushHarness?: {
     enabled: boolean;
@@ -3474,14 +3475,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     advancementRequirement: 4,
     agendaPoints: 3,
-    rulesText: "While scored, gain 1 credit at the start of each Corp turn.",
+    rulesText:
+      "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
     mechanics: [
       "install_remote",
       "advance",
       "score",
       "steal",
       "recurring_start_turn",
-      "gain_credits",
+      "choice",
+      "draw_cards",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

@@ -424,6 +424,7 @@ export function publicContextForAction(
       "futureAgendaPointForfeitPending",
       "sourceDefinitionId",
       "cardDefinitionId",
+      "employeeEmpowermentStartDrawDecision",
       "speedTrapSourceCardId",
       "rezzedCardDefinitionId",
       "serverLabel",

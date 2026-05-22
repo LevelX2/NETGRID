@@ -161,4 +161,15 @@ describe("card set support catalog source", () => {
     expect(card?.text).not.toContain("4 power counters");
     expect(card?.text).not.toContain("Remove 1 power counter");
   });
+
+  it("keeps Employee Empowerment display text aligned to optional start draw and agenda action", () => {
+    const card = createRuntimeCardsById()["onr_v1_199_employee-empowerment"];
+
+    expect(card?.text).toBe(
+      "You may choose to draw an additional card at the start of each of your turns. [A]: Draw two cards.",
+    );
+    expect(card?.numeric.advancementRequirement).toBe(4);
+    expect(card?.numeric.agendaPoints).toBe(3);
+    expect(card?.text).not.toContain("gain 1 credit");
+  });
 });

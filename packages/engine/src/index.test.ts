@@ -45301,11 +45301,124 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
     );
     employee.corp.credits = 10;
     employee.corp.maxHandSize = 100;
-    scoreCorpAgendaForTest(employee, "onr_v1_199_employee-empowerment");
+    const employeeId = scoreCorpAgendaForTest(employee, "onr_v1_199_employee-empowerment");
     const hqBeforeEmployeeStart = employee.corp.hq.length;
     employee = apply(employee, "corp", (action) => action.type === "end_turn");
     employee = apply(employee, "runner", (action) => action.type === "end_turn");
+    expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart);
+    expect(employee.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("v1912.employee_empowerment_start_draw"),
+      prompt: "Employee Empowerment: zusätzliche Karte ziehen?",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(getPlayerView(employee, "corp").pendingChoice?.options.map((option) => option.id)).toEqual(["draw", "skip"]);
+    expect(getPlayerView(employee, "runner").pendingChoice).toBeUndefined();
+    expect(getLegalActions(employee, "corp").map((action) => action.type)).toEqual(["resolve_choice"]);
+    expect(getLegalActions(employee, "runner")).toEqual([]);
+
+    const choiceAction = mustAction(employee, "corp", (action) => action.type === "resolve_choice");
+    const wrongSide = applyAction(employee, {
+      matchId: employee.matchId,
+      side: "runner",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: employee.stateVersion,
+      selectedChoices: {
+        choiceId: employee.pendingChoice?.choiceId,
+        selectedOptionIds: ["draw"],
+      },
+    });
+    expect(wrongSide.ok).toBe(false);
+    const stale = applyAction(employee, {
+      matchId: employee.matchId,
+      side: "corp",
+      actionId: choiceAction.actionId,
+      clientKnownStateVersion: employee.stateVersion - 1,
+      selectedChoices: {
+        choiceId: employee.pendingChoice?.choiceId,
+        selectedOptionIds: ["draw"],
+      },
+    });
+    expect(stale.ok).toBe(false);
+
+    const employeeChoiceInitial = structuredClone(employee);
+    employee = applyChoice(employee, "corp", "skip");
+    expect(employee.pendingChoice).toBeUndefined();
+    expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart);
+    expect(employee.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_199_employee-empowerment",
+      employeeEmpowermentStartDrawDecision: "skip",
+    });
+    const employeeSkipReplay = replayEvents(
+      employeeChoiceInitial,
+      employee.eventLog.slice(employeeChoiceInitial.eventLog.length),
+    );
+    expect(employeeSkipReplay.ok).toBe(true);
+    expect(hashState(employeeSkipReplay.state)).toBe(hashState(employee));
+    employee = apply(employee, "corp", (action) => action.type === "mandatory_draw");
     expect(employee.corp.hq.length).toBe(hqBeforeEmployeeStart + 1);
+
+    const employeeAction = mustAction(
+      employee,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinition(employee, action) === "onr_v1_199_employee-empowerment",
+    );
+    const beforeAgendaAction = employee.corp.hq.length;
+    employee = apply(employee, "corp", (action) => action.actionId === employeeAction.actionId);
+    expect(employee.corp.hq.length).toBe(beforeAgendaAction + 2);
+    expect(employee.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "activated_card_ability",
+      cardDefinitionId: "onr_v1_199_employee-empowerment",
+      drawnCards: 2,
+    });
+
+    const nextTurnStart = apply(
+      apply(employee, "corp", (action) => action.type === "end_turn"),
+      "runner",
+      (action) => action.type === "end_turn",
+    );
+    expect(nextTurnStart.pendingChoice?.source).toContain("v1912.employee_empowerment_start_draw");
+    const hqBeforeOptionalDraw = nextTurnStart.corp.hq.length;
+    const employeeDraw = applyChoice(nextTurnStart, "corp", "draw");
+    expect(employeeDraw.corp.hq.length).toBe(hqBeforeOptionalDraw + 1);
+    expect(employeeDraw.pendingChoice).toBeUndefined();
+    expect(employeeDraw.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      sourceDefinitionId: "onr_v1_199_employee-empowerment",
+      employeeEmpowermentStartDrawDecision: "draw",
+      drawnCards: 1,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "draw_cards",
+          amount: 1,
+          reason: "start_of_turn",
+          sourceDefinitionId: "onr_v1_199_employee-empowerment",
+        }),
+      ],
+    });
+    const employeeDrawReplay = replayEvents(
+      nextTurnStart,
+      employeeDraw.eventLog.slice(nextTurnStart.eventLog.length),
+    );
+    expect(employeeDrawReplay.ok).toBe(true);
+    expect(hashState(employeeDrawReplay.state)).toBe(hashState(employeeDraw));
+    const removedEmployee = structuredClone(nextTurnStart);
+    removeEverywhere(removedEmployee, employeeId);
+    const removedResult = applyAction(removedEmployee, {
+      matchId: removedEmployee.matchId,
+      side: "corp",
+      actionId: mustAction(removedEmployee, "corp", (action) => action.type === "resolve_choice").actionId,
+      clientKnownStateVersion: removedEmployee.stateVersion,
+      selectedChoices: {
+        choiceId: removedEmployee.pendingChoice?.choiceId,
+        selectedOptionIds: ["draw"],
+      },
+    });
+    expect(removedResult.ok).toBe(false);
 
     let marine = apply(
       createGameAfterSetup({

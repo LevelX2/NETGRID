@@ -17372,6 +17372,7 @@ function startCorpTurn(
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
   ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
   applyCorpStartOfTurnEffects(state, effects);
 }
 
@@ -17577,27 +17578,109 @@ function applyCorpStartOfTurnEffects(
     }
   }
   if (!state.pendingChoice) startCorporateNegotiatingCenterChoice(state);
-  const employeeEmpowermentCount = state.corp.scoreArea.reduce(
-    (sum, cardId) => {
-      const definition = definitionFor(state, cardId);
-      return !cardImplementationForDefinitionId(definition.id) &&
-        definition.id === EMPLOYEE_EMPOWERMENT_ID
-        ? sum + 1
-        : sum;
-    },
-    0,
+  if (!state.pendingChoice) startEmployeeEmpowermentStartDrawChoice(state);
+}
+
+function scoredEmployeeEmpowermentSourceIds(state: GameState): CardInstanceId[] {
+  const resolved = new Set(
+    ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds ??
+      [],
   );
-  if (employeeEmpowermentCount > 0) {
-    credits(state, "corp", employeeEmpowermentCount);
-    effects?.push(
-      automaticGainCreditsEffect(
-        "corp.start.employee_empowerment",
+  return state.corp.scoreArea
+    .filter(
+      (cardId) =>
+        definitionFor(state, cardId).id === EMPLOYEE_EMPOWERMENT_ID &&
+        !resolved.has(cardId),
+    )
+    .sort();
+}
+
+function startEmployeeEmpowermentStartDrawChoice(state: GameState): void {
+  if (state.pendingChoice) return;
+  const sourceCardId = scoredEmployeeEmpowermentSourceIds(state)[0];
+  if (!sourceCardId) return;
+  state.pendingChoice = {
+    choiceId: `v1912_employee_empowerment_start_draw_${sourceCardId}_${state.stateVersion + 1}`,
+    side: "corp",
+    source: `v1912.employee_empowerment_start_draw:${sourceCardId}:${state.stateVersion + 1}`,
+    prompt: "Employee Empowerment: zusätzliche Karte ziehen?",
+    kind: "select_option",
+    options: [
+      {
+        id: "draw",
+        label: "Zusätzliche Karte ziehen",
+        publicLabel: "Zusätzliche Karte gezogen",
+        value: "draw",
+      },
+      {
+        id: "skip",
+        label: "Überspringen",
+        publicLabel: "Übersprungen",
+        value: "skip",
+      },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: state.stateVersion + 1,
+    visibility: "public",
+  };
+}
+
+function resolveEmployeeEmpowermentStartDrawChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  playerAction: PlayerAction,
+): void {
+  const choice = state.pendingChoice;
+  if (!choice || !choice.source.startsWith("v1912.employee_empowerment_start_draw"))
+    throw new Error("Es ist keine Employee-Empowerment-Choice offen.");
+  if (legalAction.side !== "corp")
+    throw new Error("Nur die Korp darf Employee Empowerment nutzen.");
+  if (
+    state.phase !== "corp_draw_phase" ||
+    state.timingPoint !== "corp_draw.mandatory_draw"
+  )
+    throw new Error("Employee Empowerment ist nur am Start des Korp-Zugs nutzbar.");
+  const [, sourceCardId] = choice.source.split(":");
+  if (
+    !sourceCardId ||
+    !state.corp.scoreArea.includes(sourceCardId) ||
+    definitionFor(state, sourceCardId).id !== EMPLOYEE_EMPOWERMENT_ID
+  )
+    throw new Error("Employee Empowerment ist nicht mehr in der Korp-ScoreArea.");
+
+  const selected = selectedChoiceIds(playerAction.selectedChoices)[0];
+  const useDraw = selected === "draw";
+  const flags = ensureCorpTurnFlags(state);
+  flags.employeeEmpowermentStartTurnResolvedSourceIds = [
+    ...(flags.employeeEmpowermentStartTurnResolvedSourceIds ?? []),
+    sourceCardId as CardInstanceId,
+  ];
+  delete state.pendingChoice;
+
+  const rdBefore = state.corp.rd.length;
+  if (useDraw) drawCorpCard(state);
+  const drawnCount = useDraw ? rdBefore - state.corp.rd.length : 0;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    choiceVisibility: "public",
+    sourceDefinitionId: EMPLOYEE_EMPOWERMENT_ID,
+    cardDefinitionId: EMPLOYEE_EMPOWERMENT_ID,
+    employeeEmpowermentStartDrawDecision: useDraw ? "draw" : "skip",
+    ...(useDraw ? { drawnCards: drawnCount, drawnCount } : {}),
+  };
+  if (useDraw) {
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      automaticDrawCardsEffect(
+        `corp.start.employee_empowerment.${sourceCardId}`,
         "corp",
-        employeeEmpowermentCount,
+        drawnCount,
         EMPLOYEE_EMPOWERMENT_ID,
       ),
-    );
+    ];
   }
+  if (!state.winner) startEmployeeEmpowermentStartDrawChoice(state);
 }
 
 function virusCounterDrawsAtCorpStart(state: GameState): number {
@@ -22766,6 +22849,10 @@ function resolvePendingChoice(
   }
   if (state.pendingChoice.source.startsWith("v162.priority_requisition")) {
     resolvePriorityRequisitionChoice(state, legalAction, playerAction);
+    return;
+  }
+  if (state.pendingChoice.source.startsWith("v1912.employee_empowerment_start_draw")) {
+    resolveEmployeeEmpowermentStartDrawChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.corp_rd_arrange_top2")) {
@@ -32877,6 +32964,7 @@ function ensureCorpTurnFlags(
   flags.scoredBlackOpsAgendaLastTurn ??= false;
   flags.edgerunnerTempsInstallActionsRemaining ??= 0;
   flags.disinfectantUsedSourceIdsThisTurn ??= [];
+  flags.employeeEmpowermentStartTurnResolvedSourceIds ??= [];
   return flags;
 }
 
