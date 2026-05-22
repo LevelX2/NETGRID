@@ -7619,24 +7619,31 @@ describe("V1.4.2 belief state and opponent model", () => {
             "aiLevel",
             "beliefUncertainty",
             "confidence",
+            "detailSections",
             "evidence",
             "facts",
             "fallbackUsed",
             "hypotheses",
             "invalidations",
+            "longTermPlan",
             "memoryVersion",
             "opponentModel",
             "planId",
             "planKind",
             "profileId",
+            "rankedAlternatives",
             "schemaVersion",
             "score",
+            "scoreBreakdown",
             "seed",
             "selectedActionType",
+            "summary",
             "timeBudgetMs",
             "timeoutUsed",
             "uncertainty",
             "visibleReasons",
+            "warnings",
+            "whyNot",
           ],
           "schemaVersion": "ai-decision-debug-v1",
         },
@@ -7647,12 +7654,49 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(JSON.stringify(snapshot)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist/i);
   });
 
+  it("adds side-safe ranked alternatives and score components to Runner DecisionDebug", () => {
+    const state = toRunnerTurn(createGameAfterSetup({ seed: "ai-decision-debug-alternatives" }));
+    const decision = chooseRunnerAction(buildAiDecisionInput(state, "runner", { difficulty: "normal", profileId: "runner-ai-v1.4.2-normal" }));
+    const debug = decision.decisionDebug;
+
+    expect(debug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      summary: expect.any(String),
+      planKind: expect.any(String)
+    });
+    expect(debug?.rankedAlternatives?.[0]).toMatchObject({
+      rank: 1,
+      planKind: debug?.planKind,
+      scoreBreakdown: expect.any(Array),
+      whyNot: ["selected_plan"]
+    });
+    expect(debug?.rankedAlternatives?.length).toBeGreaterThan(1);
+    expect(debug?.scoreBreakdown?.some((component) => component.key === "base")).toBe(true);
+    expect(debug?.detailSections?.some((section) => section.id === "visible_reasons")).toBe(true);
+    expect(JSON.stringify(debug)).not.toMatch(/privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i);
+  });
+
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
     const sanitized = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
       planKind: "fallback",
       facts: ["public_fact:ok", "privatePayload runner-sessionToken"],
+      rankedAlternatives: [
+        {
+          rank: 1,
+          planKind: "fallback",
+          summary: "privatePayload hidden-card",
+          score: 10,
+          confidence: 0.5,
+          visibleReasons: ["safe_reason"],
+          scoreBreakdown: [{ key: "decklist", label: "Decklist", value: 12, reason: "hidden-card" }],
+          whyNot: ["privatePayload"]
+        }
+      ],
+      scoreBreakdown: [{ key: "economy", label: "Economy", value: 4, reason: "public" }],
+      detailSections: [{ id: "details", title: "Details", items: ["safe", "hidden-card"] }],
       opponentHqContents: ["Hidden Priority Agenda"],
       privatePayload: { FullState: true },
       opponentModel: {
@@ -7665,6 +7709,16 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(sanitized).toMatchInlineSnapshot(`
       {
         "aiLevel": 2,
+        "detailSections": [
+          {
+            "id": "details",
+            "items": [
+              "safe",
+              "[redacted-debug-value]",
+            ],
+            "title": "Details",
+          },
+        ],
         "facts": [
           "public_fact:ok",
           "[redacted-debug-value]",
@@ -7675,7 +7729,38 @@ describe("V1.4.2 belief state and opponent model", () => {
           "visibleSignal": "safe",
         },
         "planKind": "fallback",
+        "rankedAlternatives": [
+          {
+            "confidence": 0.5,
+            "planKind": "fallback",
+            "rank": 1,
+            "score": 10,
+            "scoreBreakdown": [
+              {
+                "key": "[redacted-debug-value]",
+                "label": "[redacted-debug-value]",
+                "reason": "[redacted-debug-value]",
+                "value": 12,
+              },
+            ],
+            "summary": "[redacted-debug-value]",
+            "visibleReasons": [
+              "safe_reason",
+            ],
+            "whyNot": [
+              "[redacted-debug-value]",
+            ],
+          },
+        ],
         "schemaVersion": "ai-decision-debug-v1",
+        "scoreBreakdown": [
+          {
+            "key": "economy",
+            "label": "Economy",
+            "reason": "public",
+            "value": 4,
+          },
+        ],
       }
     `);
     expect(JSON.stringify(sanitized)).not.toMatch(/runner-session-secret|privatePayload|FullState|hidden-deck-card|decklist/i);

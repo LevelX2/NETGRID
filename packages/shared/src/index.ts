@@ -1341,18 +1341,60 @@ export const AI_DECISION_DEBUG_REPLAY_FIELDS = [
   "uncertainty",
   "fallbackUsed",
   "timeoutUsed",
-  "confidence"
+  "confidence",
+  "summary",
+  "rankedAlternatives",
+  "scoreBreakdown",
+  "whyNot",
+  "longTermPlan",
+  "warnings",
+  "detailSections"
 ] as const;
+
+export type AiDecisionScoreComponent = {
+  key: string;
+  label: string;
+  value: number;
+  weight?: number;
+  reason?: string;
+};
+
+export type AiDecisionRankedAlternative = {
+  rank: number;
+  planId?: string;
+  planKind?: string;
+  selectedActionType?: string;
+  summary?: string;
+  score?: number;
+  confidence?: number;
+  visibleReasons?: string[];
+  scoreBreakdown?: AiDecisionScoreComponent[];
+  whyNot?: string[];
+  warnings?: string[];
+};
+
+export type AiDecisionDetailSection = {
+  id: string;
+  title: string;
+  items: string[];
+};
 
 export type AiDecisionDebug = {
   schemaVersion: typeof AI_DECISION_DEBUG_SCHEMA_VERSION;
   aiLevel: number;
+  summary?: string;
   planId?: string;
   planKind?: string;
   selectedActionType?: string;
   score?: number;
   confidence?: number;
   visibleReasons?: string[];
+  rankedAlternatives?: AiDecisionRankedAlternative[];
+  scoreBreakdown?: AiDecisionScoreComponent[];
+  whyNot?: string[];
+  longTermPlan?: string[];
+  warnings?: string[];
+  detailSections?: AiDecisionDetailSection[];
   uncertainty?: string[];
   evidence?: string[];
   fallbackUsed?: boolean;
@@ -1389,7 +1431,7 @@ export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undef
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel
   };
-  const stringFields = ["planId", "planKind", "selectedActionType", "seed", "profileId", "memoryVersion"] as const;
+  const stringFields = ["summary", "planId", "planKind", "selectedActionType", "seed", "profileId", "memoryVersion"] as const;
   for (const field of stringFields) {
     const value = sanitizeAiDecisionDebugString(source[field]);
     if (value !== undefined) result[field] = value;
@@ -1404,16 +1446,95 @@ export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undef
     const value = source[field];
     if (typeof value === "boolean") result[field] = value;
   }
-  const stringArrayFields = ["visibleReasons", "uncertainty", "evidence", "facts", "hypotheses", "invalidations", "beliefUncertainty"] as const;
+  const stringArrayFields = ["visibleReasons", "whyNot", "longTermPlan", "warnings", "uncertainty", "evidence", "facts", "hypotheses", "invalidations", "beliefUncertainty"] as const;
   for (const field of stringArrayFields) {
     const value = sanitizeAiDecisionDebugStringArray(source[field]);
     if (value) result[field] = value;
   }
+  const rankedAlternatives = sanitizeAiDecisionRankedAlternatives(source.rankedAlternatives);
+  if (rankedAlternatives) result.rankedAlternatives = rankedAlternatives;
+  const scoreBreakdown = sanitizeAiDecisionScoreComponents(source.scoreBreakdown);
+  if (scoreBreakdown) result.scoreBreakdown = scoreBreakdown;
+  const detailSections = sanitizeAiDecisionDetailSections(source.detailSections);
+  if (detailSections) result.detailSections = detailSections;
   const opponentModel = sanitizeAiDecisionDebugJson(source.opponentModel);
   if (opponentModel && typeof opponentModel === "object" && !Array.isArray(opponentModel)) result.opponentModel = opponentModel as Record<string, unknown>;
   const ownDeckDoctrine = sanitizeAiDecisionDebugDoctrine(source.ownDeckDoctrine);
   if (ownDeckDoctrine) result.ownDeckDoctrine = ownDeckDoctrine;
   return result;
+}
+
+function sanitizeAiDecisionRankedAlternatives(value: unknown): AiDecisionRankedAlternative[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const alternatives = value
+    .slice(0, 5)
+    .map((entry): AiDecisionRankedAlternative | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const rank = typeof source.rank === "number" && Number.isFinite(source.rank) ? Math.max(1, Math.round(source.rank)) : undefined;
+      if (rank === undefined) return undefined;
+      const result: AiDecisionRankedAlternative = { rank };
+      for (const field of ["planId", "planKind", "selectedActionType", "summary"] as const) {
+        const sanitized = sanitizeAiDecisionDebugString(source[field]);
+        if (sanitized !== undefined) result[field] = sanitized;
+      }
+      for (const field of ["score", "confidence"] as const) {
+        const numberValue = source[field];
+        if (typeof numberValue === "number" && Number.isFinite(numberValue)) result[field] = numberValue;
+      }
+      for (const field of ["visibleReasons", "whyNot", "warnings"] as const) {
+        const values = sanitizeAiDecisionDebugStringArray(source[field]);
+        if (values) result[field] = values;
+      }
+      const scoreBreakdown = sanitizeAiDecisionScoreComponents(source.scoreBreakdown);
+      if (scoreBreakdown) result.scoreBreakdown = scoreBreakdown;
+      return result;
+    })
+    .filter((entry): entry is AiDecisionRankedAlternative => entry !== undefined);
+  return alternatives.length > 0 ? alternatives : undefined;
+}
+
+function sanitizeAiDecisionScoreComponents(value: unknown): AiDecisionScoreComponent[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const components = value
+    .slice(0, 16)
+    .map((entry): AiDecisionScoreComponent | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const key = sanitizeAiDecisionDebugString(source.key);
+      const label = sanitizeAiDecisionDebugString(source.label);
+      const componentValue = source.value;
+      if (!key || !label || typeof componentValue !== "number" || !Number.isFinite(componentValue)) return undefined;
+      const result: AiDecisionScoreComponent = {
+        key,
+        label,
+        value: componentValue
+      };
+      const weight = source.weight;
+      if (typeof weight === "number" && Number.isFinite(weight)) result.weight = weight;
+      const reason = sanitizeAiDecisionDebugString(source.reason);
+      if (reason !== undefined) result.reason = reason;
+      return result;
+    })
+    .filter((entry): entry is AiDecisionScoreComponent => entry !== undefined);
+  return components.length > 0 ? components : undefined;
+}
+
+function sanitizeAiDecisionDetailSections(value: unknown): AiDecisionDetailSection[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const sections = value
+    .slice(0, 8)
+    .map((entry): AiDecisionDetailSection | undefined => {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
+      const source = entry as Record<string, unknown>;
+      const id = sanitizeAiDecisionDebugString(source.id);
+      const title = sanitizeAiDecisionDebugString(source.title);
+      const items = sanitizeAiDecisionDebugStringArray(source.items);
+      if (!id || !title || !items) return undefined;
+      return { id, title, items };
+    })
+    .filter((entry): entry is AiDecisionDetailSection => entry !== undefined);
+  return sections.length > 0 ? sections : undefined;
 }
 
 function sanitizeAiDecisionDebugDoctrine(value: unknown): AiDecisionDebug["ownDeckDoctrine"] | undefined {

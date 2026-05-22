@@ -1,5 +1,5 @@
 import runnerPlanProfilesData from "../../../data/ai/runner-plan-profiles-1.4.1.json";
-import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
+import { AI_DECISION_DEBUG_SCHEMA_VERSION, DEMO_CARDS_BY_ID, type AiDeckDoctrineProfile, type AiDecision, type AiDecisionDebug, type AiDecisionInput, type AiDecisionRankedAlternative, type AiDecisionScoreComponent, type AiDifficulty, type LegalAction, type PublicGameEvent, type Side, type VisibleCard } from "@netgrid/shared";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 import { beliefDebugSummary, reconstructBeliefState, type BeliefState, type KnownHqHandMemory, type RndTopFreshnessMemory } from "./belief-state";
 import { assessKnownRezzedIcePath, canBreakerDefinitionBreakIce, iceHasEndTheRun, serverIdFromEvent } from "./visible-run-analysis";
@@ -39,6 +39,7 @@ export type RunnerPlanScore = {
   confidence: number;
   reasons: string[];
   evidence: string[];
+  scoreBreakdown: AiDecisionScoreComponent[];
 };
 
 export type RunnerPlanDebug = AiDecisionDebug & {
@@ -233,12 +234,19 @@ export function chooseRunnerPlanDecision(input: AiDecisionInput, options: { time
     debug: {
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
+      summary: explanationForPlan(selected.candidate.kind),
       planId: selected.candidate.planId,
       planKind: selected.candidate.kind,
       selectedActionType: action.type,
       score: selected.score.score,
       confidence: selected.score.confidence,
       visibleReasons: selected.score.reasons,
+      rankedAlternatives: rankedRunnerAlternatives(input, scored, selected.candidate.planId),
+      scoreBreakdown: selected.score.scoreBreakdown,
+      whyNot: [],
+      longTermPlan: longTermPlanForRunner(input, selected.candidate.kind),
+      warnings: selected.candidate.visibleRisks.slice(0, 4),
+      detailSections: runnerDetailSections(selected.candidate, selected.score),
       uncertainty: selected.candidate.uncertainty,
       evidence: scrubPlanEvidence(selected.score.evidence),
       fallbackUsed: false,
@@ -346,6 +354,23 @@ export function evaluateRunnerPlan(input: AiDecisionInput, candidate: RunnerPlan
     score: roundScore(score),
     confidence: confidence(score, candidate.legalActionIds.length),
     reasons: sortedUnique([...earlyTurn.reasons, ...rig.reasons, ...runCost.reasons, ...access.reasons, ...remote.reasons, ...corpThreat.reasons, ...breakerPlan.reasons, ...twoTurnIntent.reasons, ...citySurveillanceDrawRisk.reasons, ...installedEconomy.reasons, ...shellTraders.reasons]).slice(0, 6),
+    scoreBreakdown: scoreComponents([
+      ["base", "Grundplan", baseScoreForPlan(candidate.kind), 1, `plan:${candidate.kind}`],
+      ["doctrine", "Deck-Doctrine", doctrinePlanWeight, 1, "doctrine_plan_weight"],
+      ["earlyTurn", "Frühe Zugphase", earlyTurn.score, 1, firstReason(earlyTurn.reasons)],
+      ["runnerRig", "Runner-Rig", rig.score * profile.weights.runnerRig, profile.weights.runnerRig, firstReason(rig.reasons)],
+      ["runCost", "Run-Kosten", runCost.score * profile.weights.runCost, profile.weights.runCost, firstReason(runCost.reasons)],
+      ["serverAccessValue", "Serverwert", access.score * profile.weights.serverAccessValue, profile.weights.serverAccessValue, firstReason(access.reasons)],
+      ["remoteThreat", "Remote-Druck", remote.score * profile.weights.remoteThreat, profile.weights.remoteThreat, firstReason(remote.reasons)],
+      ["corpScoringThreat", "Corp-Scoring-Gefahr", corpThreat.score * profile.weights.corpScoringThreat, profile.weights.corpScoringThreat, firstReason(corpThreat.reasons)],
+      ["breakerPlan", "Breaker-Plan", breakerPlan.score, 1, firstReason(breakerPlan.reasons)],
+      ["twoTurnIntent", "Zwei-Zug-Absicht", twoTurnIntent.score, 1, firstReason(twoTurnIntent.reasons)],
+      ["citySurveillance", "City-Surveillance-Risiko", citySurveillanceDrawRisk.score, 1, firstReason(citySurveillanceDrawRisk.reasons)],
+      ["installedEconomy", "Installierte Economy", installedEconomy.score, 1, firstReason(installedEconomy.reasons)],
+      ["shellTraders", "Shell Traders", shellTraders.score, 1, firstReason(shellTraders.reasons)],
+      ["visibleRisk", "Sichtbares Risiko", -visibleRiskPenalty(candidate, profile.riskTolerance), 1, firstReason(candidate.visibleRisks)],
+      ["easyRunPenalty", "Easy-Run-Bremse", -easyRunPenalty, 1, easyRunPenalty > 0 ? "easy_run_penalty" : undefined]
+    ]),
     evidence: scrubPlanEvidence([
       `plan:${candidate.kind}`,
       `difficulty:${input.difficulty}`,
@@ -1668,7 +1693,7 @@ function fallbackPlanDecision(input: AiDecisionInput, reason: string, timeBudget
     selectedActionId: fallbackAction?.actionId ?? "",
     selectedActionType: fallbackAction?.type ?? "none",
     fallbackUsed: true,
-    score: { planId: "fallback", score: 0, confidence: 0.2, reasons: [reason], evidence: [reason] },
+    score: { planId: "fallback", score: 0, confidence: 0.2, reasons: [reason], evidence: [reason], scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]) },
     debug: fallbackDebug(input, undefined, reason, timeBudgetMs, timeoutUsed, beliefState)
   };
 }
@@ -1687,12 +1712,33 @@ function fallbackDebug(
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: 2,
+    summary: "Der Runner nutzt einen legalen Fallback.",
     planId: "fallback",
     planKind: "fallback",
     selectedActionType: fallbackAction?.type ?? "none",
     score: 0,
     confidence: fallbackDecision?.confidence ?? 0.2,
     visibleReasons: [reason],
+    rankedAlternatives: [
+      {
+        rank: 1,
+        planId: "fallback",
+        planKind: "fallback",
+        selectedActionType: fallbackAction?.type ?? "none",
+        summary: "Legal fallback action",
+        score: 0,
+        confidence: fallbackDecision?.confidence ?? 0.2,
+        visibleReasons: [reason],
+        scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]),
+        whyNot: [],
+        warnings: ["fallback_used"]
+      }
+    ],
+    scoreBreakdown: scoreComponents([["fallback", "Fallback", 0, 1, reason]]),
+    whyNot: [reason],
+    longTermPlan: longTermPlanForRunner(input, "fallback"),
+    warnings: ["fallback_used"],
+    detailSections: [{ id: "fallback", title: "Fallback", items: [reason] }],
     uncertainty: ["unknown_corp_cards_remain_unknown"],
     evidence: scrubPlanEvidence([reason]),
     fallbackUsed: true,
@@ -1708,6 +1754,76 @@ function fallbackDebug(
     ...(opponentModel ? { opponentModel } : {}),
     ...(input.ownDeckDoctrine ? { ownDeckDoctrine: deckDoctrineDebug(input.ownDeckDoctrine), doctrinePlanWeight: 0 } : {})
   };
+}
+
+type ScoreComponentInput = [key: string, label: string, value: number, weight?: number | undefined, reason?: string | undefined];
+
+function scoreComponents(inputs: ScoreComponentInput[]): AiDecisionScoreComponent[] {
+  return inputs
+    .filter(([, , value], index) => index === 0 || value !== 0)
+    .map(([key, label, value, weight, reason]) => ({
+      key,
+      label,
+      value: roundScore(value),
+      ...(weight !== undefined ? { weight: round(weight) } : {}),
+      ...(reason ? { reason } : {})
+    }))
+    .slice(0, 16);
+}
+
+function firstReason(reasons: string[]): string | undefined {
+  return reasons.find((reason) => reason.length > 0);
+}
+
+function rankedRunnerAlternatives(
+  input: AiDecisionInput,
+  scored: Array<{ candidate: RunnerPlanCandidate; score: RunnerPlanScore }>,
+  selectedPlanId: string
+): AiDecisionRankedAlternative[] {
+  const selectedScore = scored.find((entry) => entry.candidate.planId === selectedPlanId)?.score.score ?? scored[0]?.score.score ?? 0;
+  return scored.slice(0, 5).map((entry, index) => {
+    const representativeAction = selectPlanAction(input, entry.candidate);
+    return {
+      rank: index + 1,
+      planId: entry.candidate.planId,
+      planKind: entry.candidate.kind,
+      selectedActionType: representativeAction?.type ?? entry.candidate.steps[0]?.actionType ?? "none",
+      summary: explanationForPlan(entry.candidate.kind),
+      score: entry.score.score,
+      confidence: entry.score.confidence,
+      visibleReasons: entry.score.reasons.slice(0, 4),
+      scoreBreakdown: entry.score.scoreBreakdown.slice(0, 8),
+      whyNot: alternativeWhyNot(entry.candidate, entry.score, selectedScore, entry.candidate.planId === selectedPlanId),
+      warnings: entry.candidate.visibleRisks.slice(0, 3)
+    };
+  });
+}
+
+function alternativeWhyNot(candidate: RunnerPlanCandidate, score: RunnerPlanScore, selectedScore: number, isSelected: boolean): string[] {
+  if (isSelected) return ["selected_plan"];
+  const delta = roundScore(selectedScore - score.score);
+  return sortedUnique([
+    ...(delta > 0 ? [`lower_score_by:${delta}`] : []),
+    ...candidate.visibleRisks.slice(0, 2),
+    ...candidate.uncertainty.slice(0, 2),
+    ...score.reasons.slice(0, 3)
+  ]).slice(0, 6);
+}
+
+function longTermPlanForRunner(input: AiDecisionInput, kind: RunnerPlanKind | "fallback"): string[] {
+  return sortedUnique([
+    `active_plan:${kind}`,
+    ...(input.ownDeckDoctrine?.side === "runner" ? input.ownDeckDoctrine.archetypeTags.slice(0, 3).map((tag) => `doctrine:${tag}`) : ["doctrine:neutral"]),
+    ...(input.ownDeckDoctrine?.side === "runner" ? input.ownDeckDoctrine.riskFlags.slice(0, 2).map((flag) => `risk_flag:${flag}`) : [])
+  ]).slice(0, 6);
+}
+
+function runnerDetailSections(candidate: RunnerPlanCandidate, score: RunnerPlanScore): NonNullable<RunnerPlanDebug["detailSections"]> {
+  return [
+    { id: "visible_reasons", title: "Sichtbare Gründe", items: score.reasons.slice(0, 6) },
+    { id: "evidence", title: "Evidence", items: scrubPlanEvidence(score.evidence).slice(0, 8) },
+    { id: "uncertainty", title: "Unsicherheit", items: candidate.uncertainty.slice(0, 6) }
+  ].filter((section) => section.items.length > 0);
 }
 
 function baseScoreForPlan(kind: RunnerPlanKind): number {

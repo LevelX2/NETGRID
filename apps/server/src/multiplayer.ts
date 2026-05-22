@@ -2840,8 +2840,15 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   const result: Record<string, unknown> = {};
   result.schemaVersion = safeDebug.schemaVersion;
   result.aiLevel = safeDebug.aiLevel;
+  if (typeof safeDebug.summary === "string") result.summary = safeDebug.summary;
   if (typeof safeDebug.planKind === "string") result.planKind = safeDebug.planKind;
   if (typeof safeDebug.memoryVersion === "string") result.memoryVersion = safeDebug.memoryVersion;
+  if (Array.isArray(safeDebug.rankedAlternatives)) result.rankedAlternatives = safeDebug.rankedAlternatives.slice(0, 5);
+  if (Array.isArray(safeDebug.scoreBreakdown)) result.scoreBreakdown = safeDebug.scoreBreakdown.slice(0, 16);
+  if (Array.isArray(safeDebug.whyNot)) result.whyNot = safeDebug.whyNot.slice(0, 8);
+  if (Array.isArray(safeDebug.longTermPlan)) result.longTermPlan = safeDebug.longTermPlan.slice(0, 8);
+  if (Array.isArray(safeDebug.warnings)) result.warnings = safeDebug.warnings.slice(0, 8);
+  if (Array.isArray(safeDebug.detailSections)) result.detailSections = safeDebug.detailSections.slice(0, 8);
   if (Array.isArray(safeDebug.facts)) result.facts = safeDebug.facts.slice(0, 8);
   if (Array.isArray(safeDebug.hypotheses)) result.hypotheses = safeDebug.hypotheses.slice(0, 8);
   if (Array.isArray(safeDebug.uncertainty)) result.uncertainty = safeDebug.uncertainty.slice(0, 8);

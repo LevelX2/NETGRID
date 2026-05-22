@@ -1,20 +1,31 @@
 ---
 activityId: act-2026-05-22-ai-decision-trace-schema-top-alternatives
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-22-ai-decision-trace-contract
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/ai/src/runner-plans.ts
+  - packages/ai/src/corp-plans.ts
+  - packages/ai/src/index.test.ts
+  - apps/server/src/multiplayer.ts
+checks:
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "DecisionDebug|ranked alternatives|side-safe and falls back legally under zero budget"
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "keeps replay DecisionDebug side-safe"
+  - git diff --check -- packages/shared/src/index.ts packages/ai/src/runner-plans.ts packages/ai/src/corp-plans.ts packages/ai/src/index.test.ts apps/server/src/multiplayer.ts docs/activities/done/act-2026-05-22-ai-decision-trace-schema-top-alternatives.md
 ---
 
 # KI-Trace um Top-Alternativen und Score-Komponenten erweitern
@@ -65,4 +76,6 @@ Die KI-Entscheidungsdaten sollen pro KI-Schritt nicht nur die gewählte Aktion e
 
 ## Ergebnisnotiz
 
-Noch offen.
+`AiDecisionDebug` wurde um `summary`, `rankedAlternatives`, `scoreBreakdown`, `whyNot`, `longTermPlan`, `warnings` und `detailSections` erweitert. Runner- und Corp-Planentscheidungen liefern Top-5-Alternativen, maschinenlesbare Score-Komponenten und abstrakte Ausschluss-/Warnhinweise, ohne die Score-Sortierung oder Aktionswahl zu ändern. Der Sanitizer redigiert die neuen Felder inklusive verschachtelter Alternativen und Detailsections; die Replay-Projektion gibt die neuen Felder nur über den bestehenden side-sicheren DecisionDebug-Pfad weiter.
+
+Gezielte Typechecks und DecisionDebug-/Replay-Tests sind grün. Der vollständige Lauf `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts` schlägt weiterhin in bestehenden Simulations-Smokes mit `No legal action for runner at 65.` beziehungsweise `No legal action for runner at 13.` fehl; die gleichen Failures treten isoliert auf und sind nicht Teil der neuen Trace-Felder.
