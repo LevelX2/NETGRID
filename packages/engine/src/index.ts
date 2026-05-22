@@ -69,6 +69,12 @@ import {
   type CorpTracePaymentDependencies,
   type RunnerTracePaymentDependencies,
 } from "./game/payment";
+import {
+  assertTraceBaseLinkChoiceValid,
+  installedTraceBaseLinkCardImplementation,
+  quoteTraceBaseLinkChoices,
+  traceBaseLinkChoicePublicPayload,
+} from "./game/trace/base-link";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -335,7 +341,6 @@ import type {
   IncreaseTraceLinkEffectImplementation,
   MakeRunEffectImplementation,
   RestrictedHostedCreditUse,
-  UseBaseLinkEffectImplementation,
 } from "./ability-engine/definition-types";
 
 type AutomaticEffectCollector = ResolvedGameEffect[];
@@ -28229,14 +28234,6 @@ function resolveTraceCorpBid(
   };
 }
 
-type TraceBaseLinkCandidate = {
-  cardId: CardInstanceId;
-  definitionId: CardDefinitionId;
-  label: string;
-  baseLink: number;
-  creditCost: number;
-};
-
 type TracePostBidLinkCandidate = {
   cardId: CardInstanceId;
   definitionId: CardDefinitionId;
@@ -28284,18 +28281,6 @@ function activatedCardImplementationTraceAbilities(
   );
 }
 
-function useBaseLinkEffect(
-  ability: ActivatedCardAbilityImplementation,
-): UseBaseLinkEffectImplementation | undefined {
-  const effects = ability.effects.filter(
-    (effect): effect is UseBaseLinkEffectImplementation =>
-      effect.kind === "use_base_link",
-  );
-  if (effects.length > 1)
-    throw new Error("Trace base-link ability has multiple use_base_link effects.");
-  return effects[0];
-}
-
 function increaseTraceLinkEffect(
   ability: ActivatedCardAbilityImplementation,
 ): IncreaseTraceLinkEffectImplementation | undefined {
@@ -28310,62 +28295,11 @@ function increaseTraceLinkEffect(
   return effects[0];
 }
 
-function installedTraceBaseLinkCardImplementation(
-  definition: CardDefinition,
-): boolean {
-  return activatedCardImplementationTraceAbilities(
-    definition,
-    "trace_base_link_window",
-  ).some(({ ability }) => useBaseLinkEffect(ability));
-}
-
-function traceBaseLinkCandidates(
-  state: GameState,
-  trace: NonNullable<GameState["trace"]>,
-): TraceBaseLinkCandidate[] {
-  if (trace.baseLinkSourceId) return [];
-  const candidates: TraceBaseLinkCandidate[] = [];
-  for (const cardId of runnerInstalledCardIds(state).sort()) {
-    const instance = state.cardInstances[cardId];
-    if (!instance || instance.controller !== "runner") continue;
-    const definition = definitionFor(state, cardId);
-    for (const { ability } of activatedCardImplementationTraceAbilities(
-      definition,
-      "trace_base_link_window",
-    )) {
-      const effect = useBaseLinkEffect(ability);
-      if (!effect) continue;
-      if (isSubmarineUplinkSource(state, cardId) && !state.run) continue;
-      const creditCost = creditCostForTraceAbility(ability);
-      if (state.runner.credits < creditCost) continue;
-      if (
-        ability.limit?.kind !== "one_base_link_card_per_trace_attempt" ||
-        ability.limit.scope !== "trace_attempt"
-      )
-        throw new Error("Base-link abilities require the trace-attempt limit.");
-      if (
-        !Number.isInteger(effect.baseLink) ||
-        effect.baseLink < 0 ||
-        effect.visibility !== "public"
-      )
-        throw new Error("Base-link effect is invalid.");
-      candidates.push({
-        cardId,
-        definitionId: definition.id,
-        label: definition.title,
-        baseLink: effect.baseLink,
-        creditCost,
-      });
-    }
-  }
-  return candidates;
-}
-
 function startTraceBaseLinkChoice(
   state: GameState,
   trace: NonNullable<GameState["trace"]>,
 ): boolean {
-  const candidates = traceBaseLinkCandidates(state, trace);
+  const candidates = quoteTraceBaseLinkChoices(state, trace);
   if (candidates.length === 0) return false;
   state.pendingChoice = {
     choiceId: `${trace.traceId}.base_link.${state.stateVersion + 1}`,
@@ -28376,10 +28310,10 @@ function startTraceBaseLinkChoice(
     options: [
       { id: "pass", label: "Keine Base-Link-Karte nutzen" },
       ...candidates.map((candidate) => ({
-        id: `trace_base_link_${candidate.cardId}`,
-        label: `${candidate.label}: Base Link ${candidate.baseLink}`,
+        id: `trace_base_link_${candidate.sourceCardInstanceId}`,
+        label: `${candidate.label}: Base Link ${candidate.baseLinkValue}`,
         publicLabel: "Base Link",
-        value: candidate.cardId,
+        value: candidate.sourceCardInstanceId,
       })),
     ],
     minSelections: 1,
@@ -28446,18 +28380,19 @@ function resolveTraceBaseLinkChoice(
     typeof option?.value === "string"
       ? (option.value as CardInstanceId)
       : undefined;
-  const candidate = traceBaseLinkCandidates(state, trace).find(
-    (item) => item.cardId === cardId,
-  );
-  if (!candidate)
-    throw new Error("Diese Base-Link-Quelle ist nicht legal.");
+  if (!cardId) throw new Error("Diese Base-Link-Quelle ist nicht legal.");
+  const candidate = assertTraceBaseLinkChoiceValid(state, cardId);
   spendCredits(state, "runner", candidate.creditCost);
-  markSubmarineUplinkJackOutAfterEncounter(state, candidate.cardId, legalAction);
-  const runnerLink = calculateRunnerLinkCore(state) + candidate.baseLink;
+  markSubmarineUplinkJackOutAfterEncounter(
+    state,
+    candidate.sourceCardInstanceId,
+    legalAction,
+  );
+  const runnerLink = calculateRunnerLinkCore(state) + candidate.baseLinkValue;
   const nextTrace = {
     ...trace,
-    baseLinkSourceId: candidate.cardId,
-    baseLinkValue: candidate.baseLink,
+    baseLinkSourceId: candidate.sourceCardInstanceId,
+    baseLinkValue: candidate.baseLinkValue,
     baseLinkCostPaid: candidate.creditCost,
     runnerLink,
   };
@@ -28471,10 +28406,7 @@ function resolveTraceBaseLinkChoice(
     sourceDefinitionId: trace.sourceDefinitionId,
     corpBid: trace.corpBid ?? 0,
     traceStrength: trace.traceStrength ?? trace.baseTraceStrength,
-    baseLinkUsed: true,
-    traceBaseLinkSourceDefinitionId: candidate.definitionId,
-    traceBaseLinkCostPaid: candidate.creditCost,
-    baseLinkValue: candidate.baseLink,
+    ...traceBaseLinkChoicePublicPayload(candidate),
     runnerLink,
     runnerCreditsAfter: state.runner.credits,
   };

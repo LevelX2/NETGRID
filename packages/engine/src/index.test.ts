@@ -41099,6 +41099,27 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       "onr_v1_003_baedekers-net-map",
       "trace_base_link_",
     );
+    const baedekerSourceId = state.pendingChoice?.options.find(
+      (option) => option.id === baedekerOption,
+    )?.value;
+    if (typeof baedekerSourceId !== "string")
+      throw new Error("Missing Baedeker base-link source id");
+    const removedSource = structuredClone(state);
+    removeEverywhere(removedSource, baedekerSourceId);
+    const removedSourceHash = hashState(removedSource);
+    const removedSourceResult = applyAction(removedSource, {
+      matchId: removedSource.matchId,
+      side: "runner",
+      actionId: baseChoiceAction.actionId,
+      clientKnownStateVersion: removedSource.stateVersion,
+      selectedChoices: {
+        choiceId: baseChoiceId,
+        selectedOptionIds: [baedekerOption],
+      },
+      idempotencyKey: "p331-removed-base-link-source",
+    });
+    expect(removedSourceResult.ok).toBe(false);
+    expect(hashState(removedSource)).toBe(removedSourceHash);
     state = applyChoice(
       state,
       "runner",
