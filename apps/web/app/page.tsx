@@ -93,6 +93,7 @@ import {
   type ChronicleItem
 } from "./chronicle";
 import { shouldActivateChronicleCardTouchDoubleTap } from "./chronicleInteraction";
+import { visibleKnownCardRulesText } from "./card-text-source";
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
@@ -1127,7 +1128,11 @@ function enrichVisibleCard(card: VisibleCard, detailsById: Record<string, Catalo
     ...(imageUrl ? { imageUrl } : {})
   };
   if (!detail) return enriched;
-  enriched.rulesText = card.rulesText ?? detail.text;
+  const rulesText = visibleKnownCardRulesText({
+    catalogText: detail.text,
+    visibleRulesText: card.rulesText ?? null,
+  });
+  if (rulesText !== undefined) enriched.rulesText = rulesText;
   addNumeric(enriched, "cost", card.cost, detail.numeric.cost);
   addNumeric(enriched, "installCost", card.installCost, detail.numeric.installCost);
   addNumeric(enriched, "memoryCost", card.memoryCost, detail.numeric.memoryCost);
