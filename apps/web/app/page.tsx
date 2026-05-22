@@ -1695,6 +1695,37 @@ function sideLabel(side: Side): string {
   return side === "corp" ? "Korp" : "Runner";
 }
 
+function recentSessionHeadline(session: RecentSessionInfo): string {
+  return session.opponentDisplayName ? `${sideLabel(session.side)} gegen ${session.opponentDisplayName}` : `${sideLabel(session.side)}-Spiel`;
+}
+
+function recentSessionStatusLabel(status: RecentSessionInfo["matchStatus"]): string {
+  switch (status) {
+    case "pending":
+      return "Wartet";
+    case "waiting_for_runner":
+    case "waiting_for_corp":
+    case "waiting_for_joiner_decks":
+      return "Wartet auf Beitritt";
+    case "ready_check":
+      return "Startbereitschaft";
+    case "countdown":
+      return "Countdown";
+    case "active":
+      return "Aktiv";
+    case "finished":
+      return "Beendet";
+    case "cancelled":
+      return "Abgebrochen";
+    case "abandoned":
+      return "Verlassen";
+    case "forfeited":
+      return "Aufgegeben";
+    default:
+      return "Gespeichert";
+  }
+}
+
 function turnSideForView(view: PlayerView): Side | null {
   if (view.phase === "corp_draw_phase" || view.phase === "corp_action_phase") return "corp";
   if (view.phase === "runner_action_phase" || view.phase === "run") return "runner";
@@ -1818,6 +1849,7 @@ export default function Page() {
   const [entryTab, setEntryTab] = useState<EntryTab>("play");
   const [activeMatchWorkspace, setActiveMatchWorkspace] = useState<ActiveMatchWorkspace>("game");
   const [mode, setMode] = useState<"host" | "join">("host");
+  const [recoveryTabSelected, setRecoveryTabSelected] = useState(false);
   const [playMode, setPlayMode] = useState<PlayMode>("human_vs_human");
   const [humanSideSelection, setHumanSideSelection] = useState<HumanSideSelection>("random");
   const [humanAiSideSelection, setHumanAiSideSelection] = useState<HumanAiSideSelection>("random");
@@ -1980,6 +2012,15 @@ export default function Page() {
   const lastActionSlotTurnRef = useRef<{ matchId: string; activeSide: Side } | null>(null);
   const cardPreviewCollapsedStorageKey = session ? cardPreviewCollapsedStorageKeyFor(session.matchId, session.side) : null;
 
+  const selectStartTab = (nextMode: "host" | "join" | "resume") => {
+    if (nextMode === "resume") {
+      setRecoveryTabSelected(true);
+      return;
+    }
+    setRecoveryTabSelected(false);
+    setMode(nextMode);
+  };
+
   const updateCardPreviewCollapsed = (collapsed: boolean) => {
     setCardPreviewCollapsed(collapsed);
     if (cardPreviewCollapsedStorageKey) window.localStorage.setItem(cardPreviewCollapsedStorageKey, collapsed ? "true" : "false");
@@ -2040,7 +2081,7 @@ export default function Page() {
     const storedSession = loadCurrentTabSession();
     if (matchId && reconnectToken && (reconnectSide === "runner" || reconnectSide === "corp")) {
       setEntryTab("play");
-      setMode("join");
+      selectStartTab("join");
       void reconnectSession(
         {
           matchId,
@@ -2084,7 +2125,7 @@ export default function Page() {
         return;
       }
       setEntryTab("play");
-      setMode("join");
+      selectStartTab("join");
       setJoinLinkInput(window.location.href);
       setJoinMatchId(matchId);
       setJoinToken(token);
@@ -2818,6 +2859,7 @@ export default function Page() {
     });
   }, [activeView?.activeSide, activeView?.own.clicks, activeView?.opponent.clicks, activeView?.side, payload?.matchId, payload?.playerView.stateVersion]);
 
+
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
     const missingIds = playableCatalogCards.map((card) => card.catalogCardId).filter((cardId) => !catalogDetailsById[cardId]);
@@ -3220,7 +3262,7 @@ export default function Page() {
   };
 
   useEffect(() => {
-    if (mode !== "join" || session) return;
+    if (mode !== "join" || session || recoveryTabSelected) return;
     void refreshOpenLanMatches();
     const timer = window.setInterval(() => {
       void refreshOpenLanMatches(true);
@@ -3228,7 +3270,7 @@ export default function Page() {
     return () => {
       window.clearInterval(timer);
     };
-  }, [mode, session?.matchId]);
+  }, [mode, recoveryTabSelected, session?.matchId]);
 
   const updateJoinLinkInput = (value: string) => {
     setJoinLinkInput(value);
@@ -3381,7 +3423,7 @@ export default function Page() {
     const nextSession = loadStoredSession();
     if (!nextSession || nextSession.matchId !== recentSession.matchId || nextSession.side !== recentSession.side) {
       setEntryTab("play");
-      setMode("join");
+      selectStartTab("join");
       setJoinMatchId(recentSession.matchId);
       setJoinToken("");
       setNotice("Fortsetzen braucht ein Token aus diesem Tab. Für die Wiederverbindung bitte den Link oder Token erneut eintragen.");
@@ -3413,17 +3455,26 @@ export default function Page() {
   const reconnectFromRecentSession = () => {
     if (!recentSession) return;
     setEntryTab("play");
-    setMode("join");
+    selectStartTab("join");
     setJoinMatchId(recentSession.matchId);
     setJoinToken("");
-    setNotice("Wiederverbindung vorbereitet. Bitte den aktuellen Join- oder Wiederverbindungs-Token eintragen.");
+    setNotice("Beitreten ist vorbereitet. Die Match-ID ist eingetragen; bitte den aktuellen Join- oder Wiederverbindungs-Token aus dem Link ergänzen.");
   };
 
   const discardRecentSession = () => {
     if (!recentSession) return;
-    removeRecentSession(recentSession);
-    setRecentSession(loadRecentSession());
-    setNotice("Lokaler Sitzungseintrag verworfen.");
+    const discardedSession = recentSession;
+    removeRecentSession(discardedSession);
+    clearStoredSession(discardedSession);
+    const nextRecentSession = loadRecentSession();
+    setRecentSession(nextRecentSession);
+    if (nextRecentSession) {
+      setRecoveryTabSelected(true);
+      setNotice("Gespeichertes Spiel verworfen. Ein weiteres gespeichertes Spiel ist verfügbar.");
+    } else {
+      selectStartTab("host");
+      setNotice("Gespeichertes Spiel verworfen. Es gibt kein Spiel zum Fortsetzen.");
+    }
   };
 
   const playImmediateActionAudio = (action: LegalAction, stateVersion: number) => {
@@ -4187,6 +4238,8 @@ export default function Page() {
   }, [connection, session]);
   const showingStartLobby = Boolean(session && lobby);
   const showingSessionRecovery = Boolean(session && !payload && !lobby);
+  const activeStartTab = recoveryTabSelected && recentSession ? "resume" : mode;
+  const canResumeRecentSession = Boolean(recentSession && storedSessionMatches(recentSession));
   const updateAudioEnabled = (enabled: boolean) => {
     if (enabled) primeAudio(audioVolume);
     setAudioEnabled(enabled);
@@ -4248,7 +4301,6 @@ export default function Page() {
               Optionen
             </button>
           </nav>
-          {notice ? <p className="notice entryNotice">{notice}</p> : null}
           {session && lobby ? (
             <StartLobbyPanel
               lobby={lobby}
@@ -4294,45 +4346,59 @@ export default function Page() {
             </section>
           ) : null}
           <div className={`entryContent ${entryTab === "decks" ? "deckEntryContent" : ""}`}>
-          {entryTab === "play" && !showingStartLobby && !session && recentSession ? (
-            <section className="resumeSessionPanel">
-              <div>
-                <p className="eyebrow">Letzte Sitzung</p>
-                <h2>Match {recentSession.matchId}</h2>
-                <p className="meta">
-                  {sideLabel(recentSession.side)} · {recentSession.displayName}
-                  {recentSession.opponentDisplayName ? ` · gegen ${recentSession.opponentDisplayName}` : ""}
-                  {recentSession.matchStatus ? ` · ${recentSession.matchStatus}` : ""}
-                </p>
-              </div>
-              <div className="resumeSessionActions">
-                <button className="button primary" onClick={resumeRecentSession} type="button" disabled={!storedSessionMatches(recentSession)}>
-                  <Cable size={15} />
-                  Fortsetzen
-                </button>
-                <button className="button" onClick={reconnectFromRecentSession} type="button">
-                  <Link2 size={15} />
-                  Wieder verbinden über Link
-                </button>
-                <button className="button" onClick={discardRecentSession} type="button">
-                  <Trash2 size={15} />
-                  Verwerfen
-                </button>
-              </div>
-            </section>
-          ) : null}
+          {notice ? <p className="notice entryNotice">{notice}</p> : null}
           {entryTab === "play" && !showingStartLobby ? (
           <section className="setupPanel">
-            <div className="tabs">
-              <button className={`tab ${mode === "host" ? "active" : ""}`} onClick={() => setMode("host")}>
+            <div className={`tabs ${recentSession ? "threeTabs" : ""}`}>
+              <button className={`tab ${activeStartTab === "host" ? "active" : ""}`} onClick={() => selectStartTab("host")}>
                 Match erstellen
               </button>
-              <button className={`tab ${mode === "join" ? "active" : ""}`} onClick={() => setMode("join")}>
+              <button className={`tab ${activeStartTab === "join" ? "active" : ""}`} onClick={() => selectStartTab("join")}>
                 Beitreten
               </button>
+              {recentSession ? (
+                <button className={`tab ${activeStartTab === "resume" ? "active" : ""}`} onClick={() => selectStartTab("resume")}>
+                  Fortsetzen
+                </button>
+              ) : null}
             </div>
 
-            {mode === "host" ? (
+            {activeStartTab === "resume" && recentSession ? (
+              <section className="resumeSessionInline" aria-label="Gespeichertes Spiel fortsetzen">
+                <div className="resumeSessionSummary">
+                  <p className="eyebrow">Gespeichertes Spiel</p>
+                  <h2>{recentSessionHeadline(recentSession)}</h2>
+                  <p className="meta">
+                    {recentSession.displayName} · {recentSessionStatusLabel(recentSession.matchStatus)}
+                    {canResumeRecentSession ? " · Fortsetzen verfügbar" : " · Token neu eintragen"}
+                  </p>
+                  <details className="matchIdDetails">
+                    <summary>Match-ID anzeigen</summary>
+                    <code>{recentSession.matchId}</code>
+                  </details>
+                </div>
+                <div className="resumeSessionActions">
+                  <span className="resumeActionTooltip" data-tooltip={canResumeRecentSession ? "Gespeicherte Sitzung fortsetzen" : "Für dieses Spiel liegt kein verwertbares Session-Token mehr vor."}>
+                    <button className="button primary" onClick={resumeRecentSession} type="button" disabled={!canResumeRecentSession}>
+                      <Cable size={15} />
+                      Fortsetzen
+                    </button>
+                  </span>
+                  <span className="resumeActionTooltip" data-tooltip="Öffnet Beitreten mit dieser Match-ID. Den Token musst du aus dem Link ergänzen.">
+                    <button className="button" onClick={reconnectFromRecentSession} type="button">
+                      <Link2 size={15} />
+                      Über Token verbinden
+                    </button>
+                  </span>
+                  <span className="resumeActionTooltip" data-tooltip="Entfernt nur dieses gespeicherte Spiel aus diesem Browser. Das serverseitige Match bleibt unverändert.">
+                    <button className="button" onClick={discardRecentSession} type="button">
+                      <Trash2 size={15} />
+                      Verwerfen
+                    </button>
+                  </span>
+                </div>
+              </section>
+            ) : activeStartTab === "host" ? (
               <div className="matchStartConsole">
                 <section className="matchStartSection" aria-label="Spielart">
                   <p className="eyebrow">Spielart</p>
@@ -8515,7 +8581,6 @@ function ChroniclePanel({
           {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
           {groupedEntries.map((group) => {
             const groupKey = chronicleGroupCollapseKey(group.label, group.kind, group.turnGroupLabel, group.entries[0]?.item.id ?? "empty");
-            const groupRenderKey = `${groupKey}:${group.entries[0]?.item.id ?? "empty"}`;
             const turnKey = group.turnGroupLabel ? chronicleTurnGroupCollapseKey(group.turnGroupLabel) : null;
             const isTurnGroup = Boolean(group.turnGroupLabel && group.label === group.turnGroupLabel);
             const turnCollapsed = Boolean(turnKey && collapsedGroups.has(turnKey));
@@ -8525,7 +8590,7 @@ function ChroniclePanel({
             if (hiddenByParent) return null;
             const shouldRenderGroup = chronicleGroupShouldRender(group.label, shownChronicleGroupLabels);
             return (
-              <div className={`chronicleGroupBlock group-${group.kind} ${entriesCollapsed ? "entriesCollapsed" : ""}`} key={groupRenderKey}>
+              <div className={`chronicleGroupBlock group-${group.kind} ${entriesCollapsed ? "entriesCollapsed" : ""}`} key={groupKey}>
                 {shouldRenderGroup ? (
                   <button
                     className={`chronicleGroup ${group.kind} ${groupCollapsed ? "collapsed" : ""}`}

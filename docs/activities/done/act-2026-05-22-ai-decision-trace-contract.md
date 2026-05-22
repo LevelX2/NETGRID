@@ -1,19 +1,22 @@
 ---
 activityId: act-2026-05-22-ai-decision-trace-contract
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: false
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/architecture/ai/ai-decision-trace-contract-2026-05-22.md
+  - docs/architecture/ai/README.md
+checks:
+  - git diff --check -- docs/architecture/ai/ai-decision-trace-contract-2026-05-22.md docs/architecture/ai/README.md docs/activities/done/act-2026-05-22-ai-decision-trace-contract.md
 ---
 
 # KI-Entscheidungslog-Vertrag für lokale Analyse festlegen
@@ -64,4 +67,4 @@ Ein knapper Architekturvertrag definiert, wie NETGRID KI-Entscheidungen lokal na
 
 ## Ergebnisnotiz
 
-Noch offen.
+Architekturvertrag unter `docs/architecture/ai/ai-decision-trace-contract-2026-05-22.md` ergänzt und im AI-README verlinkt. Der Vertrag trennt Persistenz, ViewModel und HTML-Rendering, klassifiziert Trace-Daten als lokale private `D6_ai_debug_data`, hält Trace standardmäßig aus und benennt Meta-, Detail-, Export- und Live-Follow-Felder sowie explizite Verbote für Hidden-Info, Tokens, Decklisten, FullState, `privatePayload`, `cardInstances`, `AIInput` und lokale Pfade.
