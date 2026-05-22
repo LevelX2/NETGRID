@@ -2126,6 +2126,7 @@ export default function Page() {
     }
     if (matchId && token) {
       if (storedSession && storedSession.matchId === matchId) {
+        setRecoveryTabSelected(true);
         setSession(storedSession);
         void bootstrap(storedSession)
           .then((bootstrapped) => {
@@ -2166,6 +2167,7 @@ export default function Page() {
       setRecentSession(loadRecentSession());
       return;
     }
+    setRecoveryTabSelected(true);
     setSession(storedSession);
     void bootstrap(storedSession)
       .then((bootstrapped) => {
@@ -4305,7 +4307,7 @@ export default function Page() {
   const showingStartLobby = Boolean(session && lobby);
   const showingSessionRecovery = Boolean(session && !payload && !lobby);
   const hasRecoveryStartTab = Boolean(showingSessionRecovery || recentSession);
-  const activeStartTab = showingSessionRecovery || (recoveryTabSelected && hasRecoveryStartTab) ? "resume" : mode;
+  const activeStartTab = recoveryTabSelected && hasRecoveryStartTab ? "resume" : mode;
   const canResumeRecentSession = Boolean(recentSession && storedSessionMatches(recentSession));
   const updateAudioEnabled = (enabled: boolean) => {
     if (enabled) primeAudio(audioVolume);
