@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   buildMaintenanceCleanupRequest,
+  buildMaintenanceAiTraceIndexPath,
+  buildMaintenanceAiTraceNdjsonExport,
   buildMaintenanceMatchQuery,
   buildMaintenanceRecoveryLink,
   aiTraceMetaRows,
@@ -10,6 +12,8 @@ import {
   findForbiddenMaintenanceMarkers,
   formatAge,
   formatBytes,
+  latestMaintenanceAiTraceId,
+  mergeMaintenanceAiTraceIndex,
   participantsLabel,
   resolveMaintenanceServerHttp
 } from "./maintenance";
@@ -105,5 +109,55 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     };
     expect(aiTraceTitle(trace)).toBe("#2 Korp · build_scoring_remote");
     expect(aiTraceMetaRows(trace)).toContainEqual(["Vertrauen", "73%"]);
+  });
+
+  it("builds cursor paths and merges AI decision trace live-follow updates", () => {
+    const first = {
+      traceId: "trace_1",
+      matchId: "match_1",
+      eventId: "evt_1",
+      stateVersion: 4,
+      matchVersion: 4,
+      side: "corp" as const,
+      turn: 1,
+      decisionIndex: 1,
+      createdAt: "2026-05-22T10:00:00.000Z",
+      schemaVersion: "ai-decision-trace-v1",
+      meta: {}
+    };
+    const second = { ...first, traceId: "trace_2", eventId: "evt_2", decisionIndex: 2, createdAt: "2026-05-22T10:00:02.000Z" };
+
+    expect(buildMaintenanceAiTraceIndexPath("match/1", 1)).toBe("/api/storage/maintenance/ai-decision-traces/matches/match%2F1?afterDecisionIndex=1");
+    expect(mergeMaintenanceAiTraceIndex([second], [first, second]).map((trace) => trace.traceId)).toEqual(["trace_1", "trace_2"]);
+    expect(latestMaintenanceAiTraceId([first, second])).toBe("trace_2");
+  });
+
+  it("exports only redacted AI trace index projections", () => {
+    const trace = {
+      traceId: "trace_1",
+      matchId: "match_1",
+      eventId: "evt_1",
+      stateVersion: 4,
+      matchVersion: 5,
+      side: "runner" as const,
+      turn: 2,
+      decisionIndex: 3,
+      selectedActionType: "start_run",
+      createdAt: "2026-05-22T10:00:00.000Z",
+      schemaVersion: "ai-decision-trace-v1",
+      meta: { actor: "runner" }
+    };
+    const output = buildMaintenanceAiTraceNdjsonExport({ matchId: "match_1", generatedAt: "2026-05-22T10:01:00.000Z", traces: [trace] });
+
+    expect(output).toContain("netgrid-ai-decision-trace-index-export-v1");
+    expect(output).toContain("\"traceId\":\"trace_1\"");
+    expect(output).not.toMatch(/AIInput|DecisionDebug|cardInstances|privatePayload|decklist|C:\\Users/i);
+    expect(() =>
+      buildMaintenanceAiTraceNdjsonExport({
+        matchId: "match_1",
+        generatedAt: "2026-05-22T10:01:00.000Z",
+        traces: [{ ...trace, meta: { decisionDebug: { privatePayload: true } } }]
+      })
+    ).toThrow("ai_trace_export_redaction_failed");
   });
 });

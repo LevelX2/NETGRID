@@ -516,9 +516,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     });
   }
 
-  async maintenanceAiDecisionTraceIndex(matchId: string): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]> {
+  async maintenanceAiDecisionTraceIndex(matchId: string, filters: { afterDecisionIndex?: number } = {}): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]> {
     if (!this.tableExists("ai_decision_traces")) return [];
-    return this.aiDecisionTraceRecords(matchId).map((trace) => aiDecisionTraceIndexEntry(trace));
+    return this.aiDecisionTraceRecords(matchId, filters).map((trace) => aiDecisionTraceIndexEntry(trace));
   }
 
   async maintenanceAiDecisionTraceDetail(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {
@@ -1364,8 +1364,9 @@ export class SqliteMatchStorage implements MultiplayerStorage {
     }
   }
 
-  private aiDecisionTraceRecords(matchId: string): AiDecisionTraceRecord[] {
+  private aiDecisionTraceRecords(matchId: string, filters: { afterDecisionIndex?: number } = {}): AiDecisionTraceRecord[] {
     if (!this.tableExists("ai_decision_traces")) return [];
+    const afterDecisionIndex = Number.isFinite(filters.afterDecisionIndex) ? Math.floor(filters.afterDecisionIndex!) : undefined;
     const rows = this.db
       .prepare(
         `SELECT trace_id AS traceId, event_id AS eventId, state_version AS stateVersion, match_version AS matchVersion, side, turn, decision_index AS decisionIndex,
@@ -1373,9 +1374,10 @@ export class SqliteMatchStorage implements MultiplayerStorage {
           schema_version AS schemaVersion, trace_json AS traceJson
          FROM ai_decision_traces
          WHERE match_id = ?
+           AND (? IS NULL OR decision_index > ?)
          ORDER BY decision_index ASC, created_at ASC`
       )
-      .all(matchId) as Array<{
+      .all(matchId, afterDecisionIndex ?? null, afterDecisionIndex ?? null) as Array<{
       traceId: string;
       eventId: string;
       stateVersion: number;

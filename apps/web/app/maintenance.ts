@@ -255,6 +255,8 @@ const SENSITIVE_MARKERS = [
   /fullState/i,
   /game_state_json/i,
   /AIInput/i,
+  /DecisionDebug/i,
+  /decisionDebug/i,
   /C:\\Users/i
 ];
 
@@ -295,6 +297,38 @@ export function buildMaintenanceRecoveryLink(access: Pick<MaintenanceRecoveryAcc
   url.searchParams.set("side", access.side);
   url.searchParams.set("reconnectToken", access.access);
   return url.toString();
+}
+
+export function buildMaintenanceAiTraceIndexPath(matchId: string, afterDecisionIndex?: number): string {
+  const path = `/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}`;
+  if (afterDecisionIndex === undefined || !Number.isFinite(afterDecisionIndex)) return path;
+  return `${path}?afterDecisionIndex=${Math.max(0, Math.floor(afterDecisionIndex))}`;
+}
+
+export function mergeMaintenanceAiTraceIndex(current: MaintenanceAiTraceIndexEntry[], incoming: MaintenanceAiTraceIndexEntry[]): MaintenanceAiTraceIndexEntry[] {
+  const byId = new Map<string, MaintenanceAiTraceIndexEntry>();
+  for (const trace of current) byId.set(trace.traceId, trace);
+  for (const trace of incoming) byId.set(trace.traceId, trace);
+  return Array.from(byId.values()).sort((left, right) => left.decisionIndex - right.decisionIndex || left.createdAt.localeCompare(right.createdAt));
+}
+
+export function latestMaintenanceAiTraceId(traces: MaintenanceAiTraceIndexEntry[]): string {
+  return traces.at(-1)?.traceId ?? "";
+}
+
+export function buildMaintenanceAiTraceNdjsonExport(input: { matchId: string; generatedAt: string; traces: MaintenanceAiTraceIndexEntry[] }): string {
+  const payload = {
+    exportKind: "netgrid-ai-decision-trace-index-export-v1",
+    redaction: "maintenance-redacted-index-projection",
+    matchId: input.matchId,
+    generatedAt: input.generatedAt,
+    traceCount: input.traces.length
+  };
+  const lines = [payload, ...input.traces].map((entry) => JSON.stringify(entry));
+  const output = `${lines.join("\n")}\n`;
+  const markers = findForbiddenMaintenanceMarkers(output);
+  if (markers.length > 0) throw new Error("ai_trace_export_redaction_failed");
+  return output;
 }
 
 export function aiTraceTitle(trace: Pick<MaintenanceAiTraceIndexEntry, "decisionIndex" | "side" | "planKind" | "selectedActionType">): string {

@@ -617,7 +617,8 @@ async function routeHttp(
       if (!ensureMaintenanceAccess(response, request, deploymentConfig)) return;
       const matchId = decodeURIComponent(maintenanceAiTraceIndexRoute[1] ?? "");
       if (!checkRateLimit(response, rateLimiter, "token_probe", request, deploymentConfig, `storage-maintenance-ai-trace-index:${matchId}`)) return;
-      const traces = await service.storageMaintenanceAiDecisionTraceIndex(matchId);
+      const afterDecisionIndex = numberParam(url.searchParams.get("afterDecisionIndex"));
+      const traces = await service.storageMaintenanceAiDecisionTraceIndex(matchId, afterDecisionIndex === undefined ? undefined : { afterDecisionIndex });
       if (!traces) {
         sendJson(response, 503, maintenanceUnavailablePayload());
         return;

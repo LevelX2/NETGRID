@@ -330,7 +330,7 @@ export type MultiplayerStorage = {
   maintenanceMatches?(filters?: StorageMaintenanceMatchFilters): Promise<StorageMaintenanceMatchEntry[]>;
   maintenanceMatchDetail?(matchId: string): Promise<StorageMaintenanceMatchDetail | undefined>;
   maintenanceAiDecisionTraceMatches?(): Promise<StorageMaintenanceAiDecisionTraceMatchEntry[]>;
-  maintenanceAiDecisionTraceIndex?(matchId: string): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]>;
+  maintenanceAiDecisionTraceIndex?(matchId: string, filters?: { afterDecisionIndex?: number }): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[]>;
   maintenanceAiDecisionTraceDetail?(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined>;
   maintenanceCleanupPreview?(filters: StorageMaintenanceCleanupFilters): Promise<StorageMaintenanceCleanupPreview>;
   maintenanceCleanupApply?(input: StorageMaintenanceCleanupApplyInput): Promise<StorageMaintenanceCleanupApplyResult>;
@@ -1769,8 +1769,8 @@ export class MultiplayerService {
     return this.storage.maintenanceAiDecisionTraceMatches?.();
   }
 
-  async storageMaintenanceAiDecisionTraceIndex(matchId: string): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[] | undefined> {
-    return this.storage.maintenanceAiDecisionTraceIndex?.(matchId);
+  async storageMaintenanceAiDecisionTraceIndex(matchId: string, filters?: { afterDecisionIndex?: number }): Promise<StorageMaintenanceAiDecisionTraceIndexEntry[] | undefined> {
+    return this.storage.maintenanceAiDecisionTraceIndex?.(matchId, filters);
   }
 
   async storageMaintenanceAiDecisionTraceDetail(traceId: string): Promise<StorageMaintenanceAiDecisionTraceDetail | undefined> {

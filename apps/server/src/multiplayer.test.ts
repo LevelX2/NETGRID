@@ -445,6 +445,8 @@ describe("Backend 0.5 private storage maintenance", () => {
       schemaVersion: "ai-decision-trace-v1",
       meta: expect.objectContaining({ actor: "corp" })
     });
+    const cursorIndex = await reopenedService.storageMaintenanceAiDecisionTraceIndex(traced.matchId, { afterDecisionIndex: index?.[0]?.decisionIndex ?? 0 });
+    expect(cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId)).toBe(false);
     const details = await Promise.all((index ?? []).map((entry) => reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId)));
     const detail = details[0];
     expect(detail?.detail).toMatchObject({
@@ -464,6 +466,10 @@ describe("Backend 0.5 private storage maintenance", () => {
       const httpIndex = (await indexResponse.json()) as { traces?: Array<{ traceId: string }> };
       expect(indexResponse.status).toBe(200);
       expect(httpIndex.traces?.length).toBeGreaterThan(0);
+      const cursorResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(traced.matchId)}?afterDecisionIndex=${encodeURIComponent(String(index?.[0]?.decisionIndex ?? 0))}`);
+      const cursorBody = (await cursorResponse.json()) as { traces?: Array<{ traceId: string }> };
+      expect(cursorResponse.status).toBe(200);
+      expect(cursorBody.traces?.some((entry) => entry.traceId === httpIndex.traces?.[0]?.traceId)).toBe(false);
       const detailResponse = await fetch(`${baseUrl}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(httpIndex.traces?.[0]?.traceId ?? "")}`);
       expect(detailResponse.status).toBe(200);
       expect(JSON.stringify(await detailResponse.json())).not.toMatch(/<html|<div|sessionToken|reconnectToken|joinToken|cardInstances|privatePayload|decklist|AIInput/i);

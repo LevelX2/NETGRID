@@ -1,20 +1,31 @@
 ---
 activityId: act-2026-05-22-ai-decision-live-follow-export-redaction
-status: inbox
+status: done
 kind: architecture
 area: server
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-05-22-maintenance-ai-decision-viewer
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/server/src/http-server.ts
+  - apps/server/src/multiplayer.ts
+  - apps/server/src/storage-sqlite.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/maintenance.ts
+  - apps/web/app/maintenance/page.tsx
+  - apps/web/app/maintenance.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/maintenance.test.ts
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "AI decision traces"
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/server typecheck
 ---
 
 # KI-Entscheidungsansicht mit Live-Follow, Export und Redaction-Tests absichern
@@ -64,4 +75,9 @@ Die private KI-Entscheidungsansicht kann einem laufenden Match folgen und option
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-05-22.
+
+- Wartungs-API unterstuetzt fuer KI-Trace-Timelines `afterDecisionIndex`, damit Live-Follow nur neue Entscheidungen seit Cursor abfragt.
+- Private Wartungsansicht hat Live-Follow, Pause/Fortsetzen, Sprung zur neuesten Entscheidung und redigierten NDJSON-Export der Trace-Index-Projektion.
+- Redaction-Helper blockieren `AIInput`, `DecisionDebug`, `decisionDebug`, private Payload-/Token-/Deck-/FullState-Marker und lokale Pfade im Export.
+- Server- und Webtests decken Cursor-Abfrage, Export-Redaction und bestehende Wartungsprojektionen ab.

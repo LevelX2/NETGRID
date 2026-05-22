@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { CSSProperties } from "react";
-import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, Bot, CheckCircle2, ChevronDown, Copy, Database, Download, ExternalLink, Eye, KeyRound, ListFilter, LoaderCircle, RefreshCcw, ShieldCheck, Trash2, XCircle } from "lucide-react";
 import {
   aiTraceMetaRows,
   aiTraceTitle,
+  buildMaintenanceAiTraceIndexPath,
+  buildMaintenanceAiTraceNdjsonExport,
   buildMaintenanceCleanupRequest,
   buildMaintenanceMatchQuery,
   buildMaintenanceRecoveryLink,
@@ -14,6 +16,8 @@ import {
   findForbiddenMaintenanceMarkers,
   formatAge,
   formatBytes,
+  latestMaintenanceAiTraceId,
+  mergeMaintenanceAiTraceIndex,
   modeLabel,
   participantsLabel,
   resolveMaintenanceServerHttp,
@@ -71,6 +75,8 @@ export default function MaintenancePage() {
   const [selectedAiTraceId, setSelectedAiTraceId] = useState("");
   const [aiTraceDetail, setAiTraceDetail] = useState<MaintenanceAiTraceDetail | null>(null);
   const [aiTraceLoading, setAiTraceLoading] = useState(false);
+  const [aiTraceLiveFollow, setAiTraceLiveFollow] = useState(true);
+  const [aiTraceFollowPaused, setAiTraceFollowPaused] = useState(false);
   const [operationNotice, setOperationNotice] = useState<OperationNotice | null>(null);
   const [error, setError] = useState("");
   const [cleanupFilters, setCleanupFilters] = useState<MaintenanceCleanupFilters>(DEFAULT_MAINTENANCE_CLEANUP_FILTERS);
@@ -131,7 +137,7 @@ export default function MaintenancePage() {
       setAiTraceDetail(null);
       return;
     }
-    const response = await fetch(`${serverHttp}/api/storage/maintenance/ai-decision-traces/matches/${encodeURIComponent(matchId)}`);
+    const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceIndexPath(matchId)}`);
     const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
     if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
     const markers = findForbiddenMaintenanceMarkers(payload);
@@ -139,6 +145,21 @@ export default function MaintenancePage() {
     const traces = payload.traces ?? [];
     setAiTraceIndex(traces);
     setSelectedAiTraceId((current) => (current && traces.some((trace) => trace.traceId === current) ? current : traces[0]?.traceId ?? ""));
+  };
+
+  const pollAiTraceUpdates = async (matchId: string) => {
+    if (!matchId) return;
+    const afterDecisionIndex = aiTraceIndex.at(-1)?.decisionIndex;
+    const response = await fetch(`${serverHttp}${buildMaintenanceAiTraceIndexPath(matchId, afterDecisionIndex)}`);
+    const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
+    if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Live-Follow konnte nicht geladen werden.");
+    const markers = findForbiddenMaintenanceMarkers(payload);
+    if (markers.length > 0) throw new Error("KI-Trace-Live-Follow wurde wegen Redaktionsprüfung blockiert.");
+    const incoming = payload.traces ?? [];
+    if (incoming.length === 0) return;
+    setAiTraceIndex((current) => mergeMaintenanceAiTraceIndex(current, incoming));
+    setSelectedAiTraceId(latestMaintenanceAiTraceId(incoming));
+    await loadAiTraceMatches();
   };
 
   const loadAiTraceDetail = async (traceId: string) => {
@@ -329,6 +350,18 @@ export default function MaintenancePage() {
     await navigator.clipboard?.writeText(recoveryLink);
   };
 
+  const exportAiTraceIndex = () => {
+    if (!selectedAiTraceMatchId || aiTraceIndex.length === 0) return;
+    const output = buildMaintenanceAiTraceNdjsonExport({ matchId: selectedAiTraceMatchId, generatedAt: new Date().toISOString(), traces: aiTraceIndex });
+    const blob = new Blob([output], { type: "application/x-ndjson" });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `netgrid-ai-traces-${selectedAiTraceMatchId}.ndjson`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
+
   const saveCleanupPolicy = async () => {
     setPolicyLoading(true);
     setOperationNotice({ tone: "working", message: "Cleanup-Policy wird gespeichert." });
@@ -453,6 +486,7 @@ export default function MaintenancePage() {
 
   useEffect(() => {
     let closed = false;
+    setAiTraceFollowPaused(false);
     setAiTraceLoading(true);
     setError("");
     loadAiTraceIndex(selectedAiTraceMatchId)
@@ -466,6 +500,21 @@ export default function MaintenancePage() {
       closed = true;
     };
   }, [selectedAiTraceMatchId]);
+
+  useEffect(() => {
+    if (!selectedAiTraceMatchId || !aiTraceLiveFollow || aiTraceFollowPaused) return;
+    let closed = false;
+    const poll = () => {
+      pollAiTraceUpdates(selectedAiTraceMatchId).catch((traceError) => {
+        if (!closed) setError(traceError instanceof Error ? traceError.message : "KI-Trace-Live-Follow konnte nicht geladen werden.");
+      });
+    };
+    const timer = window.setInterval(poll, 1500);
+    return () => {
+      closed = true;
+      window.clearInterval(timer);
+    };
+  }, [selectedAiTraceMatchId, aiTraceLiveFollow, aiTraceFollowPaused, aiTraceIndex]);
 
   useEffect(() => {
     let closed = false;
@@ -699,11 +748,30 @@ export default function MaintenancePage() {
 
       <CollapsiblePanel title="KI-Entscheidungen" icon={<Bot size={18} aria-hidden="true" />}>
         <div style={panelHeader}>
-          <p style={subtle}>{aiTraceMatches.length === 0 ? "Keine Matches mit aktivierten KI-Traces gefunden." : `${aiTraceMatches.length} Matches mit KI-Trace-Daten.`}</p>
-          <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={aiTraceLoading} title="KI-Trace-Matches aktualisieren">
-            {aiTraceLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
-            {aiTraceLoading ? "Lädt" : "Aktualisieren"}
-          </button>
+          <p style={subtle}>
+            {aiTraceMatches.length === 0 ? "Keine Matches mit aktivierten KI-Traces gefunden." : `${aiTraceMatches.length} Matches mit KI-Trace-Daten.`}
+            {aiTraceLiveFollow && !aiTraceFollowPaused ? " · Live-Follow aktiv" : ""}
+          </p>
+          <div style={buttonRow}>
+            <button type="button" style={button} onClick={() => void loadAiTraceMatches()} disabled={aiTraceLoading} title="KI-Trace-Matches aktualisieren">
+              {aiTraceLoading ? <LoaderCircle size={16} aria-hidden="true" style={spinIcon} /> : <RefreshCcw size={16} aria-hidden="true" />}
+              {aiTraceLoading ? "Lädt" : "Aktualisieren"}
+            </button>
+            <button type="button" style={button} onClick={() => setAiTraceLiveFollow((current) => !current)} title="Live-Follow ein- oder ausschalten">
+              <Bot size={16} aria-hidden="true" />
+              {aiTraceLiveFollow ? "Live an" : "Live aus"}
+            </button>
+            <button type="button" style={button} onClick={() => setAiTraceFollowPaused((current) => !current)} disabled={!aiTraceLiveFollow} title="Live-Follow pausieren oder fortsetzen">
+              {aiTraceFollowPaused ? "Fortsetzen" : "Pausieren"}
+            </button>
+            <button type="button" style={button} onClick={() => { setSelectedAiTraceId(latestMaintenanceAiTraceId(aiTraceIndex)); setAiTraceFollowPaused(false); }} disabled={aiTraceIndex.length === 0} title="Zur neuesten KI-Entscheidung springen">
+              Zur neuesten
+            </button>
+            <button type="button" style={button} onClick={exportAiTraceIndex} disabled={!selectedAiTraceMatchId || aiTraceIndex.length === 0} title="Redigierten KI-Trace-Index als NDJSON exportieren">
+              <Download size={16} aria-hidden="true" />
+              Export
+            </button>
+          </div>
         </div>
         {aiTraceMatches.length === 0 ? <p style={infoBox}>Matches ohne aktiviertes KI-Tracing erzeugen keine Entscheidungstraces. Starte ein Match mit KI-Tracing, um hier Daten zu sehen.</p> : null}
         {aiTraceMatches.length > 0 ? (
@@ -725,7 +793,7 @@ export default function MaintenancePage() {
               {selectedAiTraceMatchId && aiTraceIndex.length === 0 ? <p style={subtle}>Dieses Match enthält keine KI-Entscheidungen oder der Trace-Index ist leer.</p> : null}
               <div style={traceList}>
                 {aiTraceIndex.map((trace) => (
-                  <button key={trace.traceId} type="button" style={selectedAiTraceId === trace.traceId ? traceItemSelected : traceItem} onClick={() => setSelectedAiTraceId(trace.traceId)}>
+                  <button key={trace.traceId} type="button" style={selectedAiTraceId === trace.traceId ? traceItemSelected : traceItem} onClick={() => { setSelectedAiTraceId(trace.traceId); if (trace.traceId !== latestMaintenanceAiTraceId(aiTraceIndex)) setAiTraceFollowPaused(true); }}>
                     <span>{aiTraceTitle(trace)}</span>
                     <small>State {trace.stateVersion} · {trace.confidence === undefined ? "Vertrauen -" : `${Math.round(trace.confidence * 100)}%`}</small>
                   </button>
