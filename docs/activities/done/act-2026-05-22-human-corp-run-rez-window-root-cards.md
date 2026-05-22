@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-05-22-human-corp-run-rez-window-root-cards
-status: inbox
+status: done
 kind: fix
 area: engine
 priority: hotfix
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-05-22
-startedAt:
-completedAt:
+startedAt: 2026-05-22
+completedAt: 2026-05-22
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/index.ts
+  - packages/engine/src/index.test.ts
+  - packages/engine/src/public-context.ts
+  - packages/shared/src/index.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index.test.ts -t 'blocks Runner movement while Corp has a root rez decision during a run|does not spend Smarteye when declined'
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check -- packages/engine/src/index.ts packages/engine/src/index.test.ts packages/engine/src/public-context.ts packages/shared/src/index.ts docs/activities/in-progress/act-2026-05-22-human-corp-run-rez-window-root-cards.md
 ---
 
 # Menschliche Korp-Rezfenster im Run blockierend machen
@@ -46,12 +56,12 @@ Wenn die Korp während eines Runs legal Karten rezzen darf, muss eine menschlich
 
 ## Akzeptanzkriterien
 
-- [ ] Bei einem Run auf einen Remote mit unrezzed Root-Upgrades erhält die menschliche Korp vor dem relevanten nächsten Schritt eine blockierende Rez-/Pass-Entscheidung.
-- [ ] Der Runner kann nicht automatisch in Access oder die nächste Run-Phase springen, solange diese Korp-Entscheidung offen ist.
-- [ ] `Nichts rezzen / Weiter` oder äquivalente Pass-Aktion ist klar sichtbar und wird als bewusste Korp-Entscheidung protokolliert.
-- [ ] Auto-End-Turn, AI-Pacing und Cue-Auto-Dismiss lösen kein implizites Korp-Passen aus.
-- [ ] Human-vs-Human und Human-vs-AI sind geprüft; KI darf nur für KI-Korp automatisiert entscheiden.
-- [ ] Tests decken ICE-Rezfenster und Root-Upgrade/Node-Rezfenster im Run getrennt ab.
+- [x] Bei einem Run auf einen Remote mit unrezzed Root-Upgrades erhält die menschliche Korp vor dem relevanten nächsten Schritt eine blockierende Rez-/Pass-Entscheidung.
+- [x] Der Runner kann nicht automatisch in Access oder die nächste Run-Phase springen, solange diese Korp-Entscheidung offen ist.
+- [x] `Nichts rezzen / Weiter` oder äquivalente Pass-Aktion ist klar sichtbar und wird als bewusste Korp-Entscheidung protokolliert.
+- [x] Auto-End-Turn, AI-Pacing und Cue-Auto-Dismiss lösen kein implizites Korp-Passen aus.
+- [x] Human-vs-Human und Human-vs-AI sind geprüft; KI darf nur für KI-Korp automatisiert entscheiden.
+- [x] Tests decken ICE-Rezfenster und Root-Upgrade/Node-Rezfenster im Run getrennt ab.
 
 ## Umsetzungshinweise
 
@@ -61,4 +71,4 @@ Wenn die Korp während eines Runs legal Karten rezzen darf, muss eine menschlich
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. `run.jack_out_window` behandelt offene Korp-Root-Rez-Aktionen jetzt als blockierende Korp-Entscheidung: Runner-LegalActions bleiben leer, bis die Korp alle gewünschten Root-Karten gerezzt oder explizit `Nichts rezzen / Weiter` gewählt hat. Der Pass wird als öffentlicher `decline_rez`-Event mit Serverlabel protokolliert, ohne verdeckte Root-Kartennamen an den Runner zu leaken. Der bestehende ICE-Rez-Pass bleibt unverändert; ein neuer Engine-Test deckt Root-Rezfenster separat ab.

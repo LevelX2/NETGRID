@@ -25135,6 +25135,108 @@ describe("V1.9.15 Run/Access/Multiaccess WIP", () => {
     ).toBe(true);
   });
 
+  it("blocks Runner movement while Corp has a root rez decision during a run", () => {
+    let state = toRunnerTurn(v199CardReleaseGame("root-rez-window"));
+    state.corp.credits = 10;
+    const aardvarkId = putCorpRootInRemote(state, "onr_v1_349_aardvark");
+    const bizarreEncryptionId = putCorpRootInRemote(
+      state,
+      "onr_v1_351_bizarre-encryption-scheme",
+    );
+    putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    const initial = structuredClone(state);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass !== true,
+    );
+
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    expect(getPlayerView(state, "runner").legalActions).toEqual([]);
+    expect(
+      getLegalActions(state, "corp").filter(
+        (action) => action.type === "rez_ice",
+      ),
+    ).toHaveLength(2);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "decline_rez" &&
+          action.payload?.runRootRezPass === true &&
+          action.payload?.serverLabel === "Remote 1",
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Aardvark",
+    );
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Bizarre Encryption Scheme",
+    );
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === aardvarkId &&
+        action.payload?.rootRez === true,
+    );
+
+    expect(state.cardInstances[aardvarkId]?.rezzed).toBe(true);
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === bizarreEncryptionId,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
+
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.activeSide).toBe("runner");
+    expect(
+      getLegalActions(state, "runner").map((action) => action.type),
+    ).toEqual(["jack_out", "continue_run"]);
+    expect(
+      getLegalActions(state, "corp").map((action) => action.type),
+    ).toEqual([]);
+    expect(state.eventLog.at(-1)).toMatchObject({
+      type: "decline_rez",
+      visibilityClass: "public",
+      publicPayload: {
+        actionType: "decline_rez",
+        runRootRezPass: true,
+        serverLabel: "Remote 1",
+      },
+    });
+
+    const replay = replayEvents(
+      initial,
+      state.eventLog.slice(initial.eventLog.length),
+    );
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("keeps V1.9.15 ICE overlaps side-safe through trace and damage windows", () => {
     for (const [definitionId, baseTraceStrength] of [
       ["onr_v1_227_cerberus", 5],

@@ -119,6 +119,7 @@ export function publicContextForAction(
     "vacuumLinkTargetIceIndex",
     "oliviaSalazarRunEndDerez",
     "derezzedCount",
+    "runRootRezPass",
   ]) {
     const value = legalAction.payload?.[key];
     if (typeof value === "number" || typeof value === "boolean")

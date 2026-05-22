@@ -890,6 +890,7 @@ export type RunState = {
   };
   breach?: BreachState;
   successfulRunAbilityUsedSourceIds?: CardInstanceId[];
+  rootRezWindowPassedKeys?: string[];
   speedTrapPendingRezCardId?: CardInstanceId;
   speedTrapPendingRezTimingPoint?: string;
   speedTrapPendingRezActiveSide?: Side;

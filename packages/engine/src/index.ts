@@ -2411,7 +2411,8 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   if (state.timingPoint === "run.encounter_ice")
     return side === "runner" ? runnerEncounterActions(state) : [];
   if (state.timingPoint === "run.jack_out_window") {
-    if (side === "corp") return corpRunRootRezActions(state);
+    if (side === "corp") return corpRunRootRezWindowActions(state);
+    if (isCorpRunRootRezWindowOpen(state)) return [];
     return side === "runner" ? runnerMovementActions(state) : [];
   }
   if (state.timingPoint === "access.resolve_card")
@@ -3325,6 +3326,7 @@ export function eventVisibilityForAction(
   if (["mandatory_draw", "draw_card"].includes(legalAction.type))
     return "private_to_side";
   if (legalAction.type === "purge_virus_counters") return "public";
+  if (legalAction.type === "decline_rez") return "public";
   if (legalAction.type === "jack_out") return "public";
   if (legalAction.visibility === "public") return "public";
   if (legalAction.type === "play_event") return "public";
@@ -6737,6 +6739,69 @@ function corpRunRootRezActions(state: GameState): LegalAction[] {
   return actions;
 }
 
+function corpRunRootRezWindowActions(state: GameState): LegalAction[] {
+  const actions = corpRunRootRezActions(state);
+  if (actions.length === 0 || !isCorpRunRootRezWindowOpen(state)) return [];
+  const run = mustRun(state);
+  const server = mustServer(state, run.attackedServerId);
+  return [
+    ...actions,
+    action(
+      state,
+      "corp",
+      "decline_rez",
+      "Nichts rezzen / Weiter",
+      "game_rule",
+      [],
+      {
+        runRootRezPass: true,
+        serverId: server.id,
+        serverLabel: server.label,
+      },
+    ),
+  ];
+}
+
+function isCorpRunRootRezWindowOpen(state: GameState): boolean {
+  if (state.timingPoint !== "run.jack_out_window") return false;
+  const run = state.run;
+  if (!run) return false;
+  if (run.rootRezWindowPassedKeys?.includes(corpRunRootRezWindowKey(run)))
+    return false;
+  return corpRunRootRezActions(state).length > 0;
+}
+
+function corpRunRootRezWindowKey(run: ActiveRun): string {
+  const position =
+    run.position.kind === "ice"
+      ? `ice:${run.position.serverId}:${run.position.iceIndex}`
+      : `server:${run.position.serverId}`;
+  return `${run.runId}:${position}`;
+}
+
+function passCorpRunRootRezWindow(
+  state: GameState,
+  legalAction: LegalAction,
+): void {
+  if (state.timingPoint !== "run.jack_out_window")
+    throw new Error("Root-Rez-Fenster ist nicht offen.");
+  const run = mustRun(state);
+  if (!isCorpRunRootRezWindowOpen(state))
+    throw new Error("Root-Rez-Fenster wurde bereits geschlossen.");
+  const server = mustServer(state, run.attackedServerId);
+  const key = corpRunRootRezWindowKey(run);
+  run.rootRezWindowPassedKeys = Array.from(
+    new Set([...(run.rootRezWindowPassedKeys ?? []), key]),
+  ).sort();
+  state.activeSide = "runner";
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    runRootRezPass: true,
+    serverId: server.id,
+    serverLabel: server.label,
+  };
+}
+
 function singaporeCityGridRunActions(
   state: GameState,
   run: ActiveRun,
@@ -9276,6 +9341,10 @@ function performAction(
       expireCorporateRetreatInstallCreditAbilities(state);
       return;
     case "decline_rez":
+      if (legalAction.payload?.runRootRezPass === true) {
+        passCorpRunRootRezWindow(state, legalAction);
+        return;
+      }
       passApproachedIce(state);
       return;
     case "pump_breaker":
