@@ -722,6 +722,8 @@ export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEv
   for (let index = events.length - 1; index >= 0; index -= 1) {
     const event = events[index];
     if (!event || event.eventId === dismissedEventId) return null;
+    if (event.publicPayload.approachIceExposeViewDecision === "finish") return null;
+    if (event.publicPayload.hiddenZoneAction === "approach_ice_expose_finish") return null;
     if (event.publicPayload.publicRevealKind !== "expose") continue;
     if (event.publicPayload.approachIceExposeDecision) return null;
     if (!eventHasPublicRevealDefinition(event)) return null;
@@ -730,9 +732,20 @@ export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEv
   return null;
 }
 
+export function approachIceExposeViewingIceId(actions: LegalAction[]): string | null {
+  const action = actions.find(
+    (candidate) =>
+      isApproachIceExposeAction(candidate) &&
+      candidate.payload?.approachIceExposeViewDecision === "finish" &&
+      typeof candidate.payload.iceId === "string"
+  );
+  return typeof action?.payload?.iceId === "string" ? action.payload.iceId : null;
+}
+
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
   if (newerEvent.stateVersionAfter === accessEvent.stateVersionAfter) return true;
-  return newerEvent.publicPayload.actionType === "continue_run" || newerEvent.publicPayload.actionType === "end_turn";
+  const actionType = String(newerEvent.publicPayload.actionType ?? "");
+  return ["continue_run", "decline_trash", "steal_agenda", "trash_accessed_card", "end_turn"].includes(actionType);
 }
 
 function eventHasPublicRevealDefinition(event: PublicGameEvent): boolean {

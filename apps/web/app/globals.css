@@ -5101,6 +5101,10 @@ select {
   z-index: 70;
 }
 
+.viewMarkerActiveSlot {
+  z-index: 72;
+}
+
 .card.runPositionActive {
   border-color: color-mix(in srgb, var(--runner), white 26%);
   box-shadow:
@@ -5109,12 +5113,18 @@ select {
     var(--card-shadow);
 }
 
-.runPositionMarker {
+.card.viewMarkerActive {
+  border-color: color-mix(in srgb, var(--ok), white 18%);
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--ok), transparent 44%),
+    0 0 18px color-mix(in srgb, var(--ok), transparent 62%),
+    var(--card-shadow);
+}
+
+.runPositionMarker,
+.cardViewMarker {
   position: absolute;
-  left: 50%;
-  top: 50%;
   z-index: 64;
-  transform: translate(-50%, -50%);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5133,15 +5143,38 @@ select {
   cursor: help;
 }
 
+.runPositionMarker {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.cardViewMarker {
+  top: 6px;
+  right: 6px;
+  z-index: 65;
+  border-color: color-mix(in srgb, var(--ok), white 22%);
+  background: color-mix(in srgb, var(--ok), var(--panel) 44%);
+}
+
 .runPositionMarker:hover,
-.runPositionMarker:focus-visible {
+.runPositionMarker:focus-visible,
+.cardViewMarker:hover,
+.cardViewMarker:focus-visible {
   opacity: 1;
   outline: none;
   border-color: color-mix(in srgb, var(--runner), white 42%);
 }
 
+.cardViewMarker:hover,
+.cardViewMarker:focus-visible {
+  border-color: color-mix(in srgb, var(--ok), white 42%);
+}
+
 .runPositionMarker::before,
-.runPositionMarker::after {
+.runPositionMarker::after,
+.cardViewMarker::before,
+.cardViewMarker::after {
   position: absolute;
   left: 50%;
   opacity: 0;
@@ -5152,7 +5185,8 @@ select {
     transform 120ms ease;
 }
 
-.runPositionMarker::before {
+.runPositionMarker::before,
+.cardViewMarker::before {
   content: "";
   bottom: calc(100% + 3px);
   border-left: 5px solid transparent;
@@ -5161,7 +5195,12 @@ select {
   transform: translateX(-50%) translateY(-2px);
 }
 
-.runPositionMarker::after {
+.cardViewMarker::before {
+  border-top-color: color-mix(in srgb, var(--ok), var(--line));
+}
+
+.runPositionMarker::after,
+.cardViewMarker::after {
   content: attr(data-tooltip);
   bottom: calc(100% + 8px);
   max-width: min(220px, calc(100vw - 32px));
@@ -5178,10 +5217,18 @@ select {
   transform: translateX(-50%) translateY(-2px);
 }
 
+.cardViewMarker::after {
+  border-color: color-mix(in srgb, var(--ok), var(--line));
+}
+
 .runPositionMarker:hover::before,
 .runPositionMarker:hover::after,
 .runPositionMarker:focus-visible::before,
-.runPositionMarker:focus-visible::after {
+.runPositionMarker:focus-visible::after,
+.cardViewMarker:hover::before,
+.cardViewMarker:hover::after,
+.cardViewMarker:focus-visible::before,
+.cardViewMarker:focus-visible::after {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
@@ -5260,7 +5307,15 @@ select {
   height: calc(26px * var(--lane-card-scale, 1));
 }
 
-.lane .runPositionMarker svg {
+.lane .cardViewMarker {
+  top: calc(6px * var(--lane-card-scale, 1));
+  right: calc(6px * var(--lane-card-scale, 1));
+  width: calc(26px * var(--lane-card-scale, 1));
+  height: calc(26px * var(--lane-card-scale, 1));
+}
+
+.lane .runPositionMarker svg,
+.lane .cardViewMarker svg {
   width: calc(14px * var(--lane-card-scale, 1));
   height: calc(14px * var(--lane-card-scale, 1));
 }

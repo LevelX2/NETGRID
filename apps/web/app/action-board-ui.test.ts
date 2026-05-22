@@ -11,6 +11,7 @@ import {
   actionSlotDisplay,
   activeRunIceInstanceId,
   advancementCounterDisplay,
+  approachIceExposeViewingIceId,
   aiPacingFallbackDelayMs,
   aiPacingDelayMs,
   armoredFridgeAblativeCounterBadge,
@@ -1495,6 +1496,33 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(retainedAccessRevealEvent([rdReveal, runnerEndTurn], "evt_access")).toBeNull();
   });
 
+  it("retains a visible access reveal across access resolution and automatic turn end until it is dismissed", () => {
+    const remoteReveal = publicEvent("evt_access", "action", {
+      actionType: "access_card",
+      actor: "runner",
+      serverLabel: "Remote 1",
+      cardDefinitionId: "simple_upgrade",
+      title: "Simple Upgrade"
+    });
+    const declineTrash = {
+      ...publicEvent("evt_decline", "action", {
+        actionType: "decline_trash",
+        actor: "runner"
+      }),
+      stateVersionAfter: 2
+    };
+    const runnerEndTurn = {
+      ...publicEvent("evt_runner_end", "action", {
+        actionType: "end_turn",
+        actor: "runner"
+      }),
+      stateVersionAfter: 3
+    };
+
+    expect(retainedAccessRevealEvent([remoteReveal, declineTrash, runnerEndTurn], null)?.eventId).toBe("evt_access");
+    expect(retainedAccessRevealEvent([remoteReveal, declineTrash, runnerEndTurn], "evt_access")).toBeNull();
+  });
+
   it("does not retain an old access reveal after later turn and Corp action events", () => {
     const access = publicEvent("evt_access", "action", {
       actionType: "access_card",
@@ -1581,10 +1609,32 @@ describe("V1.0.6 resource and card-display helpers", () => {
       publicRevealDefinitionId: "simple_barrier_ice",
       approachIceExposeDecision: "expose"
     });
+    const smarteyeFinish = publicEvent("evt_smarteye_finish", "action", {
+      actionType: "trigger_ability",
+      actor: "runner",
+      approachIceExposeViewDecision: "finish",
+      hiddenZoneAction: "approach_ice_expose_finish"
+    });
 
     expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe("evt_expose");
     expect(retainedExposeReviewEvent([expose, followUp], "evt_expose")).toBeNull();
     expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
+    expect(retainedExposeReviewEvent([expose, smarteyeFinish], null)).toBeNull();
+  });
+
+  it("detects the active approach-ice viewing target from legal actions", () => {
+    const finishViewing = legalAction(
+      "runner",
+      "trigger_ability",
+      "smarteye_1",
+      "Smarteye: Ansehen beenden",
+      { cardId: "smarteye_1", iceId: "ice_1", approachIceExposeViewDecision: "finish" },
+      "run.approach_ice"
+    );
+    const unrelated = legalAction("runner", "gain_credit", "basic_action", "Credit nehmen");
+
+    expect(approachIceExposeViewingIceId([unrelated])).toBeNull();
+    expect(approachIceExposeViewingIceId([unrelated, finishViewing])).toBe("ice_1");
   });
 
   it("does not retain redacted central-access events without the accessed card identity", () => {

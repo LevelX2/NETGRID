@@ -119,6 +119,7 @@ import {
   actionSlotDisplay,
   activeRunIceInstanceId,
   advancementCounterDisplay,
+  approachIceExposeViewingIceId,
   automaticCorpMandatoryDrawAction,
   automaticEndTurnAction,
   baseActionSlotCapacity,
@@ -2670,7 +2671,8 @@ export default function Page() {
   const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
   const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
-  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal);
+  const viewedApproachIceId = approachIceExposeViewingIceId(payload?.legalActions ?? []);
+  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
@@ -5129,6 +5131,7 @@ export default function Page() {
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
                               : {})}
+                            viewMarkerActive={lane.kind === "ice" && viewedApproachIceId === card.instanceId}
                             {...fieldChoiceCardProps(card)}
                             onAction={submitAction}
                             onFocus={focusCard}
@@ -11684,6 +11687,7 @@ function CardView({
   modifierBadges = [],
   runPositionActive = false,
   runPositionLabel,
+  viewMarkerActive = false,
   showAdvancementCounters = true,
   showScoreStateBadges = false,
   choiceSelected = false,
@@ -11709,6 +11713,7 @@ function CardView({
   modifierBadges?: IceModifierBadgeView[];
   runPositionActive?: boolean;
   runPositionLabel?: string | undefined;
+  viewMarkerActive?: boolean;
   showAdvancementCounters?: boolean;
   showScoreStateBadges?: boolean;
   choiceSelected?: boolean;
@@ -11789,10 +11794,10 @@ function CardView({
   const modifierBadgeAriaSuffix = modifierBadgeAria ? `, ${modifierBadgeAria}` : "";
   const cardAriaLabel = showAdvancementCounters && advancementLabel
     ? card.known
-      ? `Karte ${card.title}, ${advancementLabel}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}, ${advancementLabel}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte, ${advancementLabel}`
     : card.known
-      ? `Karte ${card.title}${cardStateAria}${modifierBadgeAriaSuffix}`
+      ? `Karte ${card.title}${viewMarkerActive ? ", wird gerade angesehen" : ""}${cardStateAria}${modifierBadgeAriaSuffix}`
       : `Verdeckte Karte${modifierBadgeAriaSuffix}`;
 
   const estimatedTooltipHeight = (): number => {
@@ -12033,7 +12038,7 @@ function CardView({
   ) : null;
 
   return (
-    <div className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}`}>
+    <div className={`cardSlot${slotClassName ? ` ${slotClassName}` : ""}${showCardActions ? " actionMenuOpen" : ""}${runPositionActive ? " runPositionActiveSlot" : ""}${viewMarkerActive ? " viewMarkerActiveSlot" : ""}`}>
       {positionBadge ? (
         <span className="cardPositionBadge" aria-label={`ICE ${positionBadge}: Installationsreihenfolge von innen nach außen`}>
           {positionBadge}
@@ -12044,10 +12049,15 @@ function CardView({
           <Crosshair size={14} strokeWidth={2.4} aria-hidden="true" />
         </span>
       ) : null}
+      {viewMarkerActive ? (
+        <span className="cardViewMarker" tabIndex={0} aria-label="Karte wird gerade angesehen" data-tooltip="Karte wird gerade angesehen" title="Karte wird gerade angesehen">
+          <Eye size={14} strokeWidth={2.4} aria-hidden="true" />
+        </span>
+      ) : null}
       <button
         ref={cardRef}
         type="button"
-        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}`}
+        className={`card${card.known ? typeClass : " hidden"}${hiddenBackClass}${modeClass}${visualImageUrl ? " withImage" : ""}${preview ? " preview" : ""}${installedState === "unrezzed" ? " unrezzedInstalled" : ""}${installedState === "rezzed" ? " rezzedInstalled" : ""}${modifierBadges.length > 0 ? " hasModifierBadges" : ""}${hasCardActions ? " hasActions" : ""}${selected ? " selectedActionSource" : ""}${choiceSelected ? " choiceSelected" : ""}${discardShortcut?.selected ? " discardSelected" : ""}${runPositionActive ? " runPositionActive" : ""}${viewMarkerActive ? " viewMarkerActive" : ""}`}
         onClick={() => {
           if (showCardActions) setSuppressCardTooltip(true);
           updateOverlayPlacement();
