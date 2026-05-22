@@ -3453,7 +3453,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     advancementRequirement: 4,
     agendaPoints: 1,
     rulesText:
-      "Put 4 power counters on Detroit Police Contract when you score it. [A]: Remove 1 power counter to gain 1 credit.",
+      "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
     mechanics: [
       "install_remote",
       "advance",

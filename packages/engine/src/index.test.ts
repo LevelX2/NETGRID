@@ -22554,6 +22554,18 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
   });
 
   it("scores V1.9.12 Corp agendas with typed counter and start-of-turn economy paths", () => {
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_198_detroit-police-contract"]?.rulesText,
+    ).toBe(
+      "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
+    );
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_198_detroit-police-contract"]
+        ?.advancementRequirement,
+    ).toBe(4);
+    expect(
+      DEMO_CARDS_BY_ID["onr_v1_198_detroit-police-contract"]?.agendaPoints,
+    ).toBe(1);
     let state = apply(
       MECHANIC_SMOKE_GAMES.counterRecurring("v1912-corp-agendas"),
       "corp",
@@ -22598,6 +22610,21 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     );
     expect(detroitId).toBeDefined();
     if (detroitId) expect(cardCounterAmount(state, detroitId, "bit")).toBe(12);
+    if (detroitId) {
+      expect(
+        getPlayerView(state, "corp").own.scoreArea.find(
+          (card) => card.instanceId === detroitId,
+        )?.counterDisplays,
+      ).toContainEqual({
+        id: "stored_credits",
+        amount: 12,
+        displayKind: "stored_credits",
+        label: "Credits",
+        ariaLabel: "12 gespeicherte Credits",
+        counterType: "bit",
+        usageHint: "spendable",
+      });
+    }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "score_agenda",
       cardDefinitionId: "onr_v1_198_detroit-police-contract",

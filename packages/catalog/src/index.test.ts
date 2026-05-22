@@ -149,4 +149,16 @@ describe("card set support catalog source", () => {
     );
     expect(assertCatalogPayloadSafe(index)).toEqual({ ok: true, errors: [] });
   });
+
+  it("keeps Detroit Police Contract display text aligned to its 12/2 runtime effect", () => {
+    const card = createRuntimeCardsById()["onr_v1_198_detroit-police-contract"];
+
+    expect(card?.text).toBe(
+      "Put [12] from the bank on Detroit Police Contract when you score it. Take [2] from Detroit Police Contract, if it has any bits, at the start of each of your turns.",
+    );
+    expect(card?.numeric.advancementRequirement).toBe(4);
+    expect(card?.numeric.agendaPoints).toBe(1);
+    expect(card?.text).not.toContain("4 power counters");
+    expect(card?.text).not.toContain("Remove 1 power counter");
+  });
 });
