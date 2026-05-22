@@ -1,9 +1,8 @@
 /**
- * ARCH-9 Corp Trace Bid Payment.
- * Quotet, validiert und zahlt nur Corp-Bids.
+ * ARCH-9/10 Trace Bid Payment.
+ * Quotet, validiert und zahlt Trace-Bid-/Link-Payment.
  * Orchestriert keinen Trace.
- * Keine Runner-Bids.
- * Keine Base-Link-/Post-Bid-Link-Logik.
+ * Keine Base-Link-Logik.
  * Keine PublicPayload-Vertragsänderung.
  * Kein Import aus index.ts.
  */
@@ -23,8 +22,20 @@ export type CorpTracePaymentSourceKind =
   | "krumz_trace_bit"
   | "hacker_tracker_counter";
 
+export type RunnerTracePaymentSourceKind =
+  | "runner_credits"
+  | "restricted_trace_link_credit"
+  | "hells_run_trace_credit";
+
 export type CorpTracePaymentBreakdown = {
   kind: CorpTracePaymentSourceKind;
+  amount: number;
+  sourceCardInstanceId?: CardInstanceId;
+  sourceDefinitionId?: CardDefinitionId;
+};
+
+export type RunnerTracePaymentBreakdown = {
+  kind: RunnerTracePaymentSourceKind;
   amount: number;
   sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
@@ -51,6 +62,27 @@ export type CorpTracePaymentReceipt = {
   corpCreditsSpent: number;
   krumzBitsSpent: number;
   hackerTrackerCountersSpent: number;
+};
+
+export type RunnerTracePaymentPurpose = "runner_trace_bid" | "post_bid_link";
+
+export type RunnerTracePaymentQuote = {
+  side: "runner";
+  purpose: RunnerTracePaymentPurpose;
+  amount: number;
+  canPay: boolean;
+  breakdown: RunnerTracePaymentBreakdown[];
+  traceLinkCreditsToPay: number;
+  hellsRunCreditsToPay: number;
+  normalCreditsToPay: number;
+  sourceDefinitionIds: CardDefinitionId[];
+};
+
+export type RunnerTracePaymentReceipt = {
+  traceLinkCreditsSpent: number;
+  hellsRunTraceCreditsSpent: number;
+  runnerCreditsSpent: number;
+  sourceDefinitionIds: CardDefinitionId[];
 };
 
 export type CorpTracePaymentDependencies = {
@@ -83,13 +115,41 @@ export type CorpTracePaymentDependencies = {
   ) => number;
 };
 
+export type RunnerTracePaymentDependencies = {
+  runnerTraceLinkCreditSourceIds: (state: GameState) => CardInstanceId[];
+  hostedPaymentCredits: (state: GameState, cardId: CardInstanceId) => number;
+  spendHostedPaymentCredits: (
+    state: GameState,
+    cardId: CardInstanceId,
+    amount: number,
+  ) => void;
+  runnerCreditsAvailable: (state: GameState) => number;
+  spendRunnerCredits: (state: GameState, amount: number) => void;
+  recordWilsonRunCapSpend: (state: GameState, amount: number) => void;
+  definitionIdForCard: (
+    state: GameState,
+    cardId: CardInstanceId,
+  ) => CardDefinitionId;
+  hellsRunDefinitionId: CardDefinitionId;
+};
+
 function isValidBidAmount(bid: number): boolean {
   return Number.isInteger(bid) && bid >= 0;
+}
+
+function isValidPaymentAmount(amount: number): boolean {
+  return Number.isInteger(amount) && amount >= 0;
 }
 
 function positiveBreakdown(
   breakdown: CorpTracePaymentBreakdown[],
 ): CorpTracePaymentBreakdown[] {
+  return breakdown.filter((entry) => entry.amount > 0);
+}
+
+function positiveRunnerBreakdown(
+  breakdown: RunnerTracePaymentBreakdown[],
+): RunnerTracePaymentBreakdown[] {
   return breakdown.filter((entry) => entry.amount > 0);
 }
 
@@ -105,6 +165,112 @@ function paymentBreakdown(
     ...(sourceCardInstanceId ? { sourceCardInstanceId } : {}),
     ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
   };
+}
+
+function runnerPaymentBreakdown(
+  kind: RunnerTracePaymentSourceKind,
+  amount: number,
+  sourceCardInstanceId?: CardInstanceId,
+  sourceDefinitionId?: CardDefinitionId,
+): RunnerTracePaymentBreakdown {
+  return {
+    kind,
+    amount,
+    ...(sourceCardInstanceId ? { sourceCardInstanceId } : {}),
+    ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
+  };
+}
+
+function emptyRunnerTracePaymentQuote(
+  purpose: RunnerTracePaymentPurpose,
+  amount: number,
+): RunnerTracePaymentQuote {
+  return {
+    side: "runner",
+    purpose,
+    amount,
+    canPay: false,
+    breakdown: [],
+    traceLinkCreditsToPay: 0,
+    hellsRunCreditsToPay: 0,
+    normalCreditsToPay: 0,
+    sourceDefinitionIds: [],
+  };
+}
+
+function quoteRunnerTracePayment(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  purpose: RunnerTracePaymentPurpose,
+  amount: number,
+): RunnerTracePaymentQuote {
+  if (!isValidPaymentAmount(amount))
+    return emptyRunnerTracePaymentQuote(purpose, amount);
+
+  let remaining = amount;
+  let traceLinkCreditsToPay = 0;
+  let hellsRunCreditsToPay = 0;
+  const breakdown: RunnerTracePaymentBreakdown[] = [];
+  const sourceDefinitionIds = new Set<CardDefinitionId>();
+  for (const cardId of deps.runnerTraceLinkCreditSourceIds(state)) {
+    if (remaining <= 0) break;
+    const available = Math.max(
+      0,
+      Math.floor(deps.hostedPaymentCredits(state, cardId)),
+    );
+    const spent = Math.min(available, remaining);
+    if (spent <= 0) continue;
+    const definitionId = deps.definitionIdForCard(state, cardId);
+    const isHellsRun = definitionId === deps.hellsRunDefinitionId;
+    breakdown.push(
+      runnerPaymentBreakdown(
+        isHellsRun ? "hells_run_trace_credit" : "restricted_trace_link_credit",
+        spent,
+        cardId,
+        definitionId,
+      ),
+    );
+    remaining -= spent;
+    traceLinkCreditsToPay += spent;
+    if (isHellsRun) hellsRunCreditsToPay += spent;
+    sourceDefinitionIds.add(definitionId);
+  }
+
+  const normalCreditsToPay = Math.min(
+    Math.max(0, Math.floor(deps.runnerCreditsAvailable(state))),
+    remaining,
+  );
+  remaining -= normalCreditsToPay;
+  if (normalCreditsToPay > 0)
+    breakdown.push(runnerPaymentBreakdown("runner_credits", normalCreditsToPay));
+
+  return {
+    side: "runner",
+    purpose,
+    amount,
+    canPay: remaining === 0,
+    breakdown: positiveRunnerBreakdown(breakdown),
+    traceLinkCreditsToPay,
+    hellsRunCreditsToPay,
+    normalCreditsToPay,
+    sourceDefinitionIds: [...sourceDefinitionIds].sort(),
+  };
+}
+
+export function quoteRunnerTraceBidPayment(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  bid: number,
+): RunnerTracePaymentQuote {
+  return quoteRunnerTracePayment(deps, state, "runner_trace_bid", bid);
+}
+
+export function quotePostBidLinkPayment(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  amount: number,
+): RunnerTracePaymentQuote {
+  return quoteRunnerTracePayment(deps, state, "post_bid_link", amount);
 }
 
 export function quoteCorpTraceBidPayment(
@@ -201,6 +367,197 @@ function quoteMatchesCurrent(
     left.krumzBitsToPay === right.krumzBitsToPay &&
     left.hackerTrackerCountersToPay === right.hackerTrackerCountersToPay
   );
+}
+
+function sameDefinitionIds(
+  left: CardDefinitionId[],
+  right: CardDefinitionId[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((definitionId, index) => definitionId === right[index])
+  );
+}
+
+function sameRunnerBreakdown(
+  left: RunnerTracePaymentBreakdown[],
+  right: RunnerTracePaymentBreakdown[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((entry, index) => {
+      const other = right[index];
+      return (
+        other !== undefined &&
+        entry.kind === other.kind &&
+        entry.amount === other.amount &&
+        entry.sourceCardInstanceId === other.sourceCardInstanceId &&
+        entry.sourceDefinitionId === other.sourceDefinitionId
+      );
+    })
+  );
+}
+
+function runnerQuoteMatchesCurrent(
+  left: RunnerTracePaymentQuote,
+  right: RunnerTracePaymentQuote,
+): boolean {
+  return (
+    left.purpose === right.purpose &&
+    left.amount === right.amount &&
+    left.canPay === right.canPay &&
+    left.traceLinkCreditsToPay === right.traceLinkCreditsToPay &&
+    left.hellsRunCreditsToPay === right.hellsRunCreditsToPay &&
+    left.normalCreditsToPay === right.normalCreditsToPay &&
+    sameDefinitionIds(left.sourceDefinitionIds, right.sourceDefinitionIds) &&
+    sameRunnerBreakdown(left.breakdown, right.breakdown)
+  );
+}
+
+export function assertRunnerTraceBidPaymentQuoteValid(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  quote: RunnerTracePaymentQuote,
+): RunnerTracePaymentQuote {
+  if (state.trace?.status !== "runner_bid")
+    throw new Error("Es ist kein Runner-Trace-Bid offen.");
+  if (quote.purpose !== "runner_trace_bid")
+    throw new Error("Die Runner-Trace-Zahlungsquote ist nicht fuer Runner-Bids.");
+  if (!isValidPaymentAmount(quote.amount))
+    throw new Error("Der Trace-Bid ist ungueltig.");
+  const current = quoteRunnerTraceBidPayment(deps, state, quote.amount);
+  if (!current.canPay)
+    throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
+  if (!runnerQuoteMatchesCurrent(quote, current))
+    throw new Error("Die Runner-Trace-Zahlungsquote ist nicht mehr gueltig.");
+  return current;
+}
+
+export function assertRunnerTraceBidPaymentValid(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  bid: number,
+): RunnerTracePaymentQuote {
+  return assertRunnerTraceBidPaymentQuoteValid(
+    deps,
+    state,
+    quoteRunnerTraceBidPayment(deps, state, bid),
+  );
+}
+
+export function assertPostBidLinkPaymentQuoteValid(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  quote: RunnerTracePaymentQuote,
+): RunnerTracePaymentQuote {
+  if (state.trace?.status !== "post_bid_link")
+    throw new Error("Es ist kein Post-Bid-Link-Fenster offen.");
+  if (quote.purpose !== "post_bid_link")
+    throw new Error(
+      "Die Runner-Trace-Zahlungsquote ist nicht fuer Post-Bid-Link.",
+    );
+  if (!isValidPaymentAmount(quote.amount))
+    throw new Error("Die Post-Bid-Link-Kosten sind ungueltig.");
+  const current = quotePostBidLinkPayment(deps, state, quote.amount);
+  if (!current.canPay)
+    throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
+  if (!runnerQuoteMatchesCurrent(quote, current))
+    throw new Error("Die Post-Bid-Link-Zahlungsquote ist nicht mehr gueltig.");
+  return current;
+}
+
+export function assertPostBidLinkPaymentValid(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  amount: number,
+): RunnerTracePaymentQuote {
+  return assertPostBidLinkPaymentQuoteValid(
+    deps,
+    state,
+    quotePostBidLinkPayment(deps, state, amount),
+  );
+}
+
+function payRunnerTracePaymentQuote(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  quote: RunnerTracePaymentQuote,
+): RunnerTracePaymentReceipt {
+  deps.recordWilsonRunCapSpend(state, quote.amount);
+  for (const entry of quote.breakdown) {
+    if (
+      entry.kind !== "restricted_trace_link_credit" &&
+      entry.kind !== "hells_run_trace_credit"
+    )
+      continue;
+    if (!entry.sourceCardInstanceId)
+      throw new Error("Trace-Link-Zahlungsquelle fehlt.");
+    deps.spendHostedPaymentCredits(
+      state,
+      entry.sourceCardInstanceId,
+      entry.amount,
+    );
+  }
+  deps.spendRunnerCredits(state, quote.normalCreditsToPay);
+  return {
+    traceLinkCreditsSpent: quote.traceLinkCreditsToPay,
+    hellsRunTraceCreditsSpent: quote.hellsRunCreditsToPay,
+    runnerCreditsSpent: quote.normalCreditsToPay,
+    sourceDefinitionIds: quote.sourceDefinitionIds,
+  };
+}
+
+export function payRunnerTraceBidQuote(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  quote: RunnerTracePaymentQuote,
+): RunnerTracePaymentReceipt {
+  return payRunnerTracePaymentQuote(
+    deps,
+    state,
+    assertRunnerTraceBidPaymentQuoteValid(deps, state, quote),
+  );
+}
+
+export function payPostBidLinkPaymentQuote(
+  deps: RunnerTracePaymentDependencies,
+  state: GameState,
+  quote: RunnerTracePaymentQuote,
+): RunnerTracePaymentReceipt {
+  return payRunnerTracePaymentQuote(
+    deps,
+    state,
+    assertPostBidLinkPaymentQuoteValid(deps, state, quote),
+  );
+}
+
+export function runnerTracePaymentPublicPayload(
+  receipt: RunnerTracePaymentReceipt,
+): NonNullable<LegalAction["payload"]> {
+  return receipt.traceLinkCreditsSpent > 0
+    ? {
+        traceLinkCreditsSpent: receipt.traceLinkCreditsSpent,
+        ...(receipt.hellsRunTraceCreditsSpent > 0
+          ? { hellsRunTraceCreditsSpent: receipt.hellsRunTraceCreditsSpent }
+          : {}),
+        runnerCreditsSpent: receipt.runnerCreditsSpent,
+        traceLinkCreditSourceDefinitionIds:
+          receipt.sourceDefinitionIds.join(","),
+      }
+    : {};
+}
+
+export function postBidLinkPaymentPublicPayload(
+  receipt: RunnerTracePaymentReceipt,
+): NonNullable<LegalAction["payload"]> {
+  return receipt.traceLinkCreditsSpent > 0
+    ? {
+        traceLinkCreditsSpent: receipt.traceLinkCreditsSpent,
+        runnerCreditsSpent: receipt.runnerCreditsSpent,
+        traceLinkCreditSourceDefinitionIds:
+          receipt.sourceDefinitionIds.join(","),
+      }
+    : {};
 }
 
 export function assertCorpTraceBidPaymentQuoteValid(

@@ -50,17 +50,24 @@ import {
 import {
   assertCorpRezCostQuoteValid,
   assertCorpTraceBidPaymentValid,
+  assertPostBidLinkPaymentValid,
+  assertRunnerTraceBidPaymentValid,
   corpServerIdForInstalledCard,
   corpTracePaymentPublicPayload,
   costQuotePublicPayload,
   costQuoteToLegalActionCosts,
   oliviaSalazarRezSourcesForRunIce,
+  payPostBidLinkPaymentQuote,
   payCorpTraceBidQuote,
+  payRunnerTraceBidQuote,
+  postBidLinkPaymentPublicPayload,
   quoteCorpIceInstallCost,
   quoteCorpRezCost,
   rezCostForCard,
   rezCostReductionSourceDefinitionIdsFor,
+  runnerTracePaymentPublicPayload,
   type CorpTracePaymentDependencies,
+  type RunnerTracePaymentDependencies,
 } from "./game/payment";
 export { quoteCorpRezCost } from "./game/payment";
 export {
@@ -28121,6 +28128,17 @@ const corpTracePaymentDeps: CorpTracePaymentDependencies = {
   cardCounter,
 };
 
+const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
+  runnerTraceLinkCreditSourceIds,
+  hostedPaymentCredits,
+  spendHostedPaymentCredits,
+  runnerCreditsAvailable: (state) => state.runner.credits,
+  spendRunnerCredits: (state, amount) => spendCredits(state, "runner", amount),
+  recordWilsonRunCapSpend,
+  definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
+  hellsRunDefinitionId: HELLS_RUN_ID,
+};
+
 function resolveTraceCorpBid(
   state: GameState,
   legalAction: LegalAction,
@@ -28471,7 +28489,18 @@ function resolveTraceRunnerBid(
   if (!trace || trace.status !== "runner_bid")
     throw new Error("Es ist kein Runner-Trace-Bid offen.");
   const bid = selectedBidAmount(state.pendingChoice, playerAction);
-  const tracePayment = spendRunnerTraceLinkBidCredits(state, bid);
+  const tracePaymentQuote = assertRunnerTraceBidPaymentValid(
+    runnerTracePaymentDeps,
+    state,
+    bid,
+  );
+  const tracePaymentReceipt = payRunnerTraceBidQuote(
+    runnerTracePaymentDeps,
+    state,
+    tracePaymentQuote,
+  );
+  const tracePaymentPayload =
+    runnerTracePaymentPublicPayload(tracePaymentReceipt);
   const runnerLink = trace.runnerLink ?? calculateRunnerLink(state);
   const traceStrength =
     trace.traceStrength ?? trace.baseTraceStrength + (trace.corpBid ?? 0);
@@ -28496,17 +28525,7 @@ function resolveTraceRunnerBid(
       traceStrength,
       runnerLink,
       runnerBid: bid,
-      ...(tracePayment.traceLinkCreditSpent > 0
-        ? {
-            traceLinkCreditsSpent: tracePayment.traceLinkCreditSpent,
-            ...(tracePayment.hellsRunSpent > 0
-              ? { hellsRunTraceCreditsSpent: tracePayment.hellsRunSpent }
-              : {}),
-            runnerCreditsSpent: tracePayment.runnerCreditsSpent,
-            traceLinkCreditSourceDefinitionIds:
-              tracePayment.sourceDefinitionIds.join(","),
-          }
-        : {}),
+      ...tracePaymentPayload,
       runnerStrength,
       postBidTraceLinkChoiceOpened: true,
     };
@@ -28604,17 +28623,7 @@ function resolveTraceRunnerBid(
     traceStrength,
     runnerLink,
     runnerBid: bid,
-    ...(tracePayment.traceLinkCreditSpent > 0
-      ? {
-          traceLinkCreditsSpent: tracePayment.traceLinkCreditSpent,
-          ...(tracePayment.hellsRunSpent > 0
-            ? { hellsRunTraceCreditsSpent: tracePayment.hellsRunSpent }
-            : {}),
-          runnerCreditsSpent: tracePayment.runnerCreditsSpent,
-          traceLinkCreditSourceDefinitionIds:
-            tracePayment.sourceDefinitionIds.join(","),
-        }
-      : {}),
+    ...tracePaymentPayload,
     runnerStrength,
     traceSuccessful: successful,
     tagsAdded,
@@ -28732,7 +28741,17 @@ function resolveTracePostBidLinkChoice(
     );
     if (!candidate)
       throw new Error("Diese Post-Bid-Link-Quelle ist nicht legal.");
-    const payment = spendRunnerTraceLinkBidCredits(state, candidate.creditCost);
+    const paymentQuote = assertPostBidLinkPaymentValid(
+      runnerTracePaymentDeps,
+      state,
+      candidate.creditCost,
+    );
+    const paymentReceipt = payPostBidLinkPaymentQuote(
+      runnerTracePaymentDeps,
+      state,
+      paymentQuote,
+    );
+    const paymentPayload = postBidLinkPaymentPublicPayload(paymentReceipt);
     markSubmarineUplinkJackOutAfterEncounter(
       state,
       candidate.cardId,
@@ -28760,14 +28779,7 @@ function resolveTracePostBidLinkChoice(
       sourceDefinitionId: candidate.definitionId,
       postBidTraceLinkSourceDefinitionId: candidate.definitionId,
       postBidTraceLinkCostPaid: candidate.creditCost,
-      ...(payment.traceLinkCreditSpent > 0
-        ? {
-            traceLinkCreditsSpent: payment.traceLinkCreditSpent,
-            runnerCreditsSpent: payment.runnerCreditsSpent,
-            traceLinkCreditSourceDefinitionIds:
-              payment.sourceDefinitionIds.join(","),
-          }
-        : {}),
+      ...paymentPayload,
       postBidTraceLinkDelta: candidate.linkDelta,
       postBidTraceLinkBonus: nextTrace.postBidLinkBonus ?? 0,
       runnerLink: nextTrace.runnerLink ?? 0,
@@ -28966,49 +28978,6 @@ function recordWilsonRunCapSpend(state: GameState, amount: number): void {
   if (nextSpent > cap.limit)
     throw new Error("Wilson erlaubt maximal 3 Credits fuer Icebreaker oder Link.");
   cap.spent = nextSpent;
-}
-
-function spendRunnerTraceLinkBidCredits(
-  state: GameState,
-  amount: number,
-): {
-  traceLinkCreditSpent: number;
-  hellsRunSpent: number;
-  runnerCreditsSpent: number;
-  sourceDefinitionIds: string[];
-} {
-  if (amount <= 0)
-    return {
-      traceLinkCreditSpent: 0,
-      hellsRunSpent: 0,
-      runnerCreditsSpent: 0,
-      sourceDefinitionIds: [],
-    };
-  if (state.runner.credits + runnerTraceLinkCredits(state) < amount)
-    throw new Error("Der Runner kann den Link-Bid nicht bezahlen.");
-  recordWilsonRunCapSpend(state, amount);
-  let remaining = amount;
-  let traceLinkCreditSpent = 0;
-  let hellsRunSpent = 0;
-  const sourceDefinitionIds = new Set<string>();
-  for (const cardId of runnerTraceLinkCreditSourceIds(state)) {
-    if (remaining <= 0) break;
-    const spent = Math.min(hostedPaymentCredits(state, cardId), remaining);
-    if (spent <= 0) continue;
-    spendHostedPaymentCredits(state, cardId, spent);
-    remaining -= spent;
-    traceLinkCreditSpent += spent;
-    const definitionId = definitionFor(state, cardId).id;
-    if (definitionId === HELLS_RUN_ID) hellsRunSpent += spent;
-    sourceDefinitionIds.add(definitionId);
-  }
-  spendCredits(state, "runner", remaining);
-  return {
-    traceLinkCreditSpent,
-    hellsRunSpent,
-    runnerCreditsSpent: remaining,
-    sourceDefinitionIds: [...sourceDefinitionIds].sort(),
-  };
 }
 
 function selectedBidAmount(

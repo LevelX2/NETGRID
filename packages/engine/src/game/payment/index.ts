@@ -14,6 +14,12 @@ export type {
   CorpTracePaymentQuote,
   CorpTracePaymentReceipt,
   CorpTracePaymentSourceKind,
+  RunnerTracePaymentBreakdown,
+  RunnerTracePaymentDependencies,
+  RunnerTracePaymentPurpose,
+  RunnerTracePaymentQuote,
+  RunnerTracePaymentReceipt,
+  RunnerTracePaymentSourceKind,
 } from "./trace-payment";
 export {
   costQuotePublicPayload,
@@ -35,7 +41,17 @@ export type {
 export {
   assertCorpTraceBidPaymentQuoteValid,
   assertCorpTraceBidPaymentValid,
+  assertPostBidLinkPaymentQuoteValid,
+  assertPostBidLinkPaymentValid,
+  assertRunnerTraceBidPaymentQuoteValid,
+  assertRunnerTraceBidPaymentValid,
   corpTracePaymentPublicPayload,
+  payPostBidLinkPaymentQuote,
   payCorpTraceBidQuote,
+  payRunnerTraceBidQuote,
+  postBidLinkPaymentPublicPayload,
+  quotePostBidLinkPayment,
   quoteCorpTraceBidPayment,
+  quoteRunnerTraceBidPayment,
+  runnerTracePaymentPublicPayload,
 } from "./trace-payment";
