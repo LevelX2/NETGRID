@@ -1,7 +1,5 @@
 import {
-  CURRENT_RULES_BASELINE,
   DEMO_CARDS_BY_ID,
-  DEMO_DECKS,
   type ActionType,
   type ChoiceRequest,
   type CardDefinition,
@@ -11,7 +9,6 @@ import {
   type CardType,
   type CounterType,
   type CorpServer,
-  type CreateGameConfig,
   type DeckDefinition,
   type DemoDeckId,
   type DamageType,
@@ -51,10 +48,6 @@ import {
   type Winner,
 } from "@netgrid/shared";
 import {
-  cardPoolVersionForDecks,
-  metadataForDeck,
-} from "./card-pool";
-import {
   assertCorpRezCostQuoteValid,
   corpServerIdForInstalledCard,
   costQuotePublicPayload,
@@ -66,6 +59,10 @@ import {
   rezCostReductionSourceDefinitionIdsFor,
 } from "./ability-engine/cost-pipeline";
 export { quoteCorpRezCost } from "./ability-engine/cost-pipeline";
+export {
+  createGame,
+  createGameAfterSetup,
+} from "./game/create-game";
 import {
   additionalSubroutinesForIce,
   dynamicSubroutineAttributionFor,
@@ -1122,9 +1119,7 @@ type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type BreachEntryStatus = ActiveBreach["queue"][number]["status"];
 
-const STANDARD_AGENDA_POINTS_TO_WIN = 7;
 const INITIAL_HAND_SIZE = 5;
-const BASE_MAX_HAND_SIZE = 5;
 const BARTMOSS_ID = "onr_v1_005_bartmoss-memorial-icebreaker";
 const BLINK_ID = "onr_v1_007_blink";
 const BUTCHER_BOY_ID = "onr_v1_009_butcher-boy";
@@ -2151,225 +2146,6 @@ function runnerDrawSummaryPublicPayload(
         }
       : {}),
   };
-}
-
-export function createGame(config: CreateGameConfig = {}): GameState {
-  const seed = config.seed ?? "mvp-0.1-default-seed";
-  const random = { counter: 0, records: [] as GameState["randomDrawRecords"] };
-  const instances: Record<CardInstanceId, CardInstance> = {};
-  const runnerDeckId = config.runnerDeckId ?? "demo_runner_001";
-  const corpDeckId = config.corpDeckId ?? "demo_corp_001";
-  const runnerDeckDefinition = config.runnerDeck ?? DEMO_DECKS[runnerDeckId];
-  const corpDeckDefinition = config.corpDeck ?? DEMO_DECKS[corpDeckId];
-  const cardPoolVersion = cardPoolVersionForDecks(
-    runnerDeckDefinition,
-    corpDeckDefinition,
-  );
-  const runnerDeckMetadata =
-    config.runnerDeckMetadata ??
-    metadataForDeck(runnerDeckDefinition, cardPoolVersion);
-  const corpDeckMetadata =
-    config.corpDeckMetadata ??
-    metadataForDeck(corpDeckDefinition, cardPoolVersion);
-
-  const runnerIdentity = createInstance(
-    "runner",
-    runnerDeckDefinition.identity,
-    0,
-    {
-      side: "runner",
-      zone: "rig",
-    },
-  );
-  const corpIdentity = createInstance("corp", corpDeckDefinition.identity, 0, {
-    side: "corp",
-    zone: "scoreArea",
-  });
-  instances[runnerIdentity.instanceId] = runnerIdentity;
-  instances[corpIdentity.instanceId] = corpIdentity;
-
-  const runnerDeck = expandDeck(
-    "runner",
-    runnerDeckDefinition.cards,
-    instances,
-  );
-  const corpDeck = expandDeck("corp", corpDeckDefinition.cards, instances);
-
-  const runnerStack = shuffleIds(
-    runnerDeck,
-    seed,
-    "setup.shuffle.runner.start_stack",
-    random,
-  );
-  const corpRd = shuffleIds(
-    corpDeck,
-    seed,
-    "setup.shuffle.corp.start_rnd",
-    random,
-  );
-  const runnerGrip = runnerStack.splice(0, INITIAL_HAND_SIZE);
-  const corpHq = corpRd.splice(0, INITIAL_HAND_SIZE);
-  recordRandomMarkers(
-    seed,
-    "setup.draw.runner.initial_hand",
-    runnerGrip.length,
-    random,
-  );
-  recordRandomMarkers(
-    seed,
-    "setup.draw.corp.initial_hand",
-    corpHq.length,
-    random,
-  );
-
-  for (const id of runnerGrip)
-    instances[id] = {
-      ...mustInstance(instances, id),
-      zone: { side: "runner", zone: "grip" },
-    };
-  for (const id of runnerStack)
-    instances[id] = {
-      ...mustInstance(instances, id),
-      zone: { side: "runner", zone: "stack" },
-    };
-  for (const id of corpHq)
-    instances[id] = {
-      ...mustInstance(instances, id),
-      zone: { side: "corp", zone: "hq" },
-    };
-  for (const id of corpRd)
-    instances[id] = {
-      ...mustInstance(instances, id),
-      zone: { side: "corp", zone: "rd" },
-    };
-
-  const state: GameState = {
-    matchId: config.matchId ?? "local-demo-match",
-    baseline: config.baseline ?? CURRENT_RULES_BASELINE,
-    stateVersion: 0,
-    seed,
-    randomCounter: random.counter,
-    randomDrawRecords: random.records,
-    activeSide: config.setupMode === "completed" ? "corp" : "runner",
-    phase: config.setupMode === "completed" ? "corp_draw_phase" : "setup",
-    timingPoint:
-      config.setupMode === "completed"
-        ? "corp_draw.mandatory_draw"
-        : "setup.mulligan.runner",
-    corp: {
-      identity: corpIdentity.instanceId,
-      credits: 5,
-      clicks: 3,
-      maxHandSize: BASE_MAX_HAND_SIZE,
-      badPublicity: 0,
-      hq: corpHq,
-      rd: corpRd,
-      archives: [],
-      scoreArea: [],
-      servers: [
-        { id: "hq", kind: "hq", label: "HQ", ice: [], root: [] },
-        { id: "rd", kind: "rd", label: "R&D", ice: [], root: [] },
-        {
-          id: "archives",
-          kind: "archives",
-          label: "Archives",
-          ice: [],
-          root: [],
-        },
-      ],
-    },
-    runner: {
-      identity: runnerIdentity.instanceId,
-      credits: 5,
-      clicks: 0,
-      maxHandSize: BASE_MAX_HAND_SIZE,
-      coreDamage: 0,
-      tags: 0,
-      memoryUsed: 0,
-      memoryLimit: 4,
-      grip: runnerGrip,
-      stack: runnerStack,
-      heap: [],
-      scoreArea: [],
-      rig: { programs: [], hardware: [], resources: [] },
-    },
-    specialZones: { setAside: [], removedFromGame: [] },
-    cardInstances: instances,
-    eventLog: [],
-    winner: null,
-    agendaPointsToWin:
-      config.agendaPointsToWin ?? STANDARD_AGENDA_POINTS_TO_WIN,
-    acmeSavingsAndLoanObligations: 0,
-    corpBonusAgendaPoints: 0,
-    setup:
-      config.setupMode === "completed"
-        ? {
-            status: "complete",
-            initialHandSize: INITIAL_HAND_SIZE,
-            resolved: { runner: "keep", corp: "keep" },
-            mulligansTaken: {},
-          }
-        : {
-            status: "mulligan_runner",
-            initialHandSize: INITIAL_HAND_SIZE,
-            resolved: {},
-            mulligansTaken: {},
-          },
-    deckMetadata: {
-      runner: runnerDeckMetadata,
-      corp: corpDeckMetadata,
-    },
-    runnerTurnFlags: {
-      stoleAgendaThisTurn: false,
-      stoleAgendaLastTurn: false,
-      stolenAgendaAdvancementCountersThisTurn: 0,
-      stolenAgendaAdvancementCountersLastTurn: 0,
-      runnerReceivedTagThisTurn: false,
-      stoleResearchAgendaThisTurn: false,
-      stoleGrayOpsAgendaThisTurn: false,
-      stoleBlackOpsAgendaThisTurn: false,
-      runAttemptsThisTurn: 0,
-      runAttemptsLastTurn: 0,
-      successfulHqRunThisTurn: false,
-      successfulRunThisTurn: false,
-      damagePreventionUsage: {},
-      runnerActionsTakenThisTurn: 0,
-    },
-    corpTurnFlags: {
-      scoredBlackOpsAgendaThisTurn: false,
-      scoredBlackOpsAgendaLastTurn: false,
-      disinfectantUsedSourceIdsThisTurn: [],
-    },
-  };
-
-  applyIdentityStaticModifiers(state);
-  applyIdentitySetupAbilities(state);
-  if (config.setupMode !== "completed")
-    state.pendingChoice = setupMulliganChoice(state, "runner");
-
-  const initialHash = hashState(state);
-  state.eventLog.push({
-    eventId: "evt_0",
-    type: "game_created",
-    stateVersionBefore: 0,
-    stateVersionAfter: 0,
-    stateHashAfter: initialHash,
-    publicPayload: {
-      baseline: state.baseline,
-      runnerDeckId: runnerDeckDefinition.id,
-      corpDeckId: corpDeckDefinition.id,
-      runnerDeck: runnerDeckMetadata,
-      corpDeck: corpDeckMetadata,
-      agendaPointsToWin: state.agendaPointsToWin,
-      ...(state.setup ? { setupStatus: state.setup.status } : {}),
-    },
-  });
-
-  return state;
-}
-
-export function createGameAfterSetup(config: CreateGameConfig = {}): GameState {
-  return createGame({ ...config, setupMode: "completed" });
 }
 
 export function getLegalActions(state: GameState, side: Side): LegalAction[] {
@@ -30063,40 +29839,6 @@ function calculateRunnerLink(state: GameState): number {
   return effectiveLink;
 }
 
-function applyIdentityStaticModifiers(state: GameState): void {
-  const memoryModifier = identityModifierAmount(
-    state,
-    "runner",
-    "memory_limit",
-    "static",
-  );
-  state.runner.memoryLimit += memoryModifier;
-  if (
-    !Number.isInteger(state.runner.memoryLimit) ||
-    state.runner.memoryLimit < 0
-  ) {
-    throw new Error("Runner-Memory-Limit ist ungueltig.");
-  }
-}
-
-function applyIdentitySetupAbilities(state: GameState): void {
-  for (const side of ["corp", "runner"] as const) {
-    const identity = identityDefinition(state, side);
-    for (const modifier of identity.modifiers ?? []) {
-      if (
-        modifier.duration !== "setup" ||
-        modifier.kind !== "starting_credits" ||
-        modifier.side !== side
-      )
-        continue;
-      if (!Number.isInteger(modifier.amount) || modifier.amount < 0)
-        throw new Error("Setup-Credit-Modifier ist ungueltig.");
-      credits(state, side, modifier.amount);
-      recordIdentitySetupAbility(state, side, modifier.modifierId);
-    }
-  }
-}
-
 function identityModifierAmount(
   state: GameState,
   side: Side,
@@ -30123,21 +29865,6 @@ function identityDefinition(state: GameState, side: Side): CardDefinition {
     state,
     side === "runner" ? state.runner.identity : state.corp.identity,
   );
-}
-
-function recordIdentitySetupAbility(
-  state: GameState,
-  side: Side,
-  modifierId: string,
-): void {
-  const usage = (state.identityAbilityUsage ??= {});
-  const sideUsage = (usage[side] ??= {
-    setupAbilities: [],
-    turn: 0,
-    usedThisTurn: [],
-  });
-  if (!sideUsage.setupAbilities.includes(modifierId))
-    sideUsage.setupAbilities.push(modifierId);
 }
 
 function executeEffectCommands(
@@ -32638,29 +32365,6 @@ function recordStateRandomMarkers(
   state.randomCounter = random.counter;
 }
 
-function expandDeck(
-  side: Side,
-  cards: Array<{ id: string; quantity: number }>,
-  instances: Record<CardInstanceId, CardInstance>,
-): CardInstanceId[] {
-  const ids: CardInstanceId[] = [];
-  for (const card of cards) {
-    for (let copy = 1; copy <= card.quantity; copy += 1) {
-      const instance = createInstance(
-        side,
-        card.id,
-        copy,
-        side === "corp"
-          ? { side: "corp", zone: "rd" }
-          : { side: "runner", zone: "stack" },
-      );
-      instances[instance.instanceId] = instance;
-      ids.push(instance.instanceId);
-    }
-  }
-  return ids;
-}
-
 function isV097OrLater(state: GameState): boolean {
   return isVersionAtLeast(state, 97);
 }
@@ -32922,27 +32626,6 @@ function onPlayCardImplementationChoicesAreAvailable(
       return false;
   }
   return true;
-}
-
-function createInstance(
-  side: Side,
-  definitionId: string,
-  copy: number,
-  zone: CardInstance["zone"],
-): CardInstance {
-  return {
-    instanceId: `${side}_${definitionId}_${copy}`,
-    definitionId,
-    owner: side,
-    controller: side,
-    zone,
-    faceup:
-      side === "runner" || DEMO_CARDS_BY_ID[definitionId]?.type === "identity",
-    rezzed:
-      side === "runner" || DEMO_CARDS_BY_ID[definitionId]?.type === "identity",
-    advancementCounters: 0,
-    strengthModifier: 0,
-  };
 }
 
 function removeFromAllZones(state: GameState, cardId: string): void {

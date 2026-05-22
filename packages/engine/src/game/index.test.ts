@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   applyAction,
   createGame as createLegacyGame,
+  createGameAfterSetup as createLegacyGameAfterSetup,
   getLegalActions,
   getPlayerView,
   hashState,
@@ -12,6 +13,7 @@ import {
 import {
   applyGameAction,
   createGame,
+  createGameAfterSetup,
   hashGameState,
   legalActionsFor,
   playerViewFor,
@@ -60,5 +62,23 @@ describe("game facade", () => {
         clientKnownStateVersion: state.stateVersion,
       }),
     );
+  });
+
+  it("keeps setup creation compatible through both entrypoints", () => {
+    const state = createGame({
+      seed: "arch-3-game-facade",
+    });
+    const legacyState = createLegacyGame({
+      seed: "arch-3-game-facade",
+    });
+    const afterSetup = createGameAfterSetup({
+      seed: "arch-3-game-facade-after-setup",
+    });
+    const legacyAfterSetup = createLegacyGameAfterSetup({
+      seed: "arch-3-game-facade-after-setup",
+    });
+
+    expect(state).toEqual(legacyState);
+    expect(afterSetup).toEqual(legacyAfterSetup);
   });
 });
