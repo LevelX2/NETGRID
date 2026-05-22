@@ -1765,6 +1765,47 @@ select {
   font-size: 15px;
 }
 
+.deckAgendaStatus {
+  width: fit-content;
+  max-width: 100%;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 6px 0 0;
+  padding: 4px 8px;
+  border: 1px solid color-mix(in srgb, var(--focus), var(--line) 55%);
+  border-radius: 7px;
+  color: var(--text);
+  background: color-mix(in srgb, var(--focus), transparent 88%);
+  font-size: 12px;
+  font-weight: 800;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.deckAgendaStatus svg {
+  flex: 0 0 auto;
+  color: var(--agenda);
+}
+
+.deckAgendaStatus strong {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.deckAgendaStatus.missing {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 45%);
+  background: color-mix(in srgb, var(--danger), transparent 90%);
+}
+
+.deckAgendaStatus.missing strong {
+  color: var(--danger);
+}
+
+.deckAgendaStatus.complete strong {
+  color: var(--ok);
+}
 
 .deckBuilderSearch {
   display: grid;

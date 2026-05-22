@@ -95,6 +95,7 @@ import {
 import { accessDecisionLabel, accessRevealActionGroups } from "./access-reveal-ui";
 import { shouldActivateChronicleCardTouchDoubleTap } from "./chronicleInteraction";
 import { visibleKnownCardRulesText } from "./card-text-source";
+import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-ui";
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
@@ -2859,6 +2860,39 @@ export default function Page() {
     });
   }, [activeView?.activeSide, activeView?.own.clicks, activeView?.opponent.clicks, activeView?.side, payload?.matchId, payload?.playerView.stateVersion]);
 
+  useEffect(() => {
+    if (entryTab !== "decks" || !selectedLocalDeck) return;
+    const catalogCardById = new Map(allCatalogCards.map((card) => [card.catalogCardId, card]));
+    const missingIds = selectedLocalDeck.cards
+      .map((entry) => entry.cardId)
+      .filter((cardId) => {
+        if (catalogDetailsById[cardId]) return false;
+        const catalogCard = catalogCardById.get(cardId);
+        return !catalogCard || catalogCard.type === "agenda";
+      });
+    if (missingIds.length === 0) return;
+    let cancelled = false;
+    void Promise.all(
+      missingIds.map((cardId) =>
+        fetch(`/api/cards/catalog/${encodeURIComponent(cardId)}`, { cache: "no-store" })
+          .then((response) => response.json() as Promise<{ card?: CatalogCardDetail }>)
+          .then((data) => data.card)
+          .catch(() => null)
+      )
+    ).then((details) => {
+      if (cancelled) return;
+      setCatalogDetailsById((current) => {
+        const next = { ...current };
+        details.forEach((detail) => {
+          if (detail) next[detail.catalogCardId] = detail;
+        });
+        return next;
+      });
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [entryTab, selectedLocalDeck, allCatalogCards, catalogDetailsById]);
 
   useEffect(() => {
     if (entryTab !== "decks" || playableCatalogCards.length === 0) return;
@@ -9641,6 +9675,7 @@ function DeckEditorPanel({
   const totalCards = selectedDeck?.cards.reduce((sum, entry) => sum + entry.quantity, 0) ?? 0;
   const deckQuantities = useMemo(() => new Map(selectedDeck?.cards.map((entry) => [entry.cardId, entry.quantity]) ?? []), [selectedDeck?.cards]);
   const cardLookup = useMemo(() => new Map(playableCards.map((card) => [card.catalogCardId, card])), [playableCards]);
+  const agendaStatus = useMemo(() => deckAgendaStatusForEditor(selectedDeck, cardDetailsById, cardLookup), [cardDetailsById, cardLookup, selectedDeck]);
   const tableLayout = useMemo(() => (selectedDeck ? normalizeDeckTableLayout(selectedDeck, cardLookup, cardDetailsById) : null), [cardDetailsById, cardLookup, selectedDeck]);
   const sourceFilteredPlayableCards = useMemo(() => filterCatalogCardsBySet(playableCards, builderSetFilter), [builderSetFilter, playableCards]);
   const rarityFilteredPlayableCards = useMemo(() => filterCatalogCardsByRarity(sourceFilteredPlayableCards, builderRarityFilter), [builderRarityFilter, sourceFilteredPlayableCards]);
@@ -10390,6 +10425,7 @@ function DeckEditorPanel({
                       selectedCardKeys={selectedTableCardKeySet}
                       selectedCards={selectedTableCards}
                       selectionMode={tableSelectionMode}
+                      agendaStatus={agendaStatus}
                       onBack={() => setDeckEditorMode("list")}
                       onCardClick={handleTableCardClick}
                       onClearSelection={clearTableSelection}
@@ -10417,6 +10453,7 @@ function DeckEditorPanel({
                         <div>
                           <h3>Deckliste</h3>
                           <p className="meta">{totalCards} Karten im aktuellen Entwurf</p>
+                          <DeckAgendaStatusBadge status={agendaStatus} />
                         </div>
                         <button className="button deckTableEnterButton" onClick={() => setDeckEditorMode("table")} type="button">
                           <Move size={15} />
@@ -10529,6 +10566,23 @@ function DeckBuilderPreview({ card, detail, quantity, onAdd, onRemove }: { card:
   );
 }
 
+function DeckAgendaStatusBadge({ status }: { status: DeckAgendaStatus | null }) {
+  if (!status) return null;
+  const complete = status.missingAgendaPoints === 0;
+  const loading = status.agendaPoints === null;
+  const missingLabel = loading ? "wird geladen" : complete ? "Mindestmenge erfüllt" : `${status.missingAgendaPoints} fehlen`;
+  return (
+    <p
+      className={`deckAgendaStatus ${loading ? "loading" : complete ? "complete" : "missing"}`}
+      title={`Agenda-Mindestmenge berechnet für ${status.effectiveCardsForMinimum} Karten.`}
+    >
+      <AgendaIcon size={14} />
+      <span>{loading ? `Agenda-Punkte / min. ${status.minimumAgendaPoints}` : `${status.agendaPoints} / ${status.minimumAgendaPoints} Agenda-Punkte`}</span>
+      <strong>{missingLabel}</strong>
+    </p>
+  );
+}
+
 function DeckTableBoard({
   layout,
   deckName,
@@ -10545,6 +10599,7 @@ function DeckTableBoard({
   selectedCardKeys,
   selectedCards,
   selectionMode,
+  agendaStatus,
   onBack,
   onCardClick,
   onClearSelection,
@@ -10581,6 +10636,7 @@ function DeckTableBoard({
   selectedCardKeys: Set<string>;
   selectedCards: DeckTableSelectionEntry[];
   selectionMode: boolean;
+  agendaStatus: DeckAgendaStatus | null;
   onBack(): void;
   onCardClick(event: ReactMouseEvent<HTMLElement>, pileId: string, entry: DeckTableLayoutEntry): void;
   onClearSelection(): void;
@@ -10609,6 +10665,7 @@ function DeckTableBoard({
         <div>
           <h3>Deck-Tisch</h3>
           <p className="meta">{deckName} · {totalCards} Karten auf {layout.piles.length} Stapeln</p>
+          <DeckAgendaStatusBadge status={agendaStatus} />
         </div>
         <div className="deckTableBoardTools">
           <button className={`button deckTableSelectionButton ${selectionMode ? "active" : ""}`} type="button" onClick={onToggleSelectionMode} aria-pressed={selectionMode}>
