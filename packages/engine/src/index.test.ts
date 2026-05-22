@@ -30,6 +30,24 @@ import {
   CARD_IMPLEMENTATIONS_BY_DEFINITION_ID,
   cardImplementationForDefinitionId,
 } from "./card-implementations/registry";
+import {
+  ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
+  isP358FortressRespecificationChoiceSource,
+  isP358HiddenReplacementCompatibilityChoiceSource,
+  isP358NewBloodReorderChoiceSource,
+  isP358SocialEngineeringChoiceSource,
+  isReplayCompatibilityActionPayload,
+} from "./compatibility/payload-compatibility";
+import {
+  BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE,
+  BIZARRE_ENCRYPTION_SCHEME_ID,
+  CODE_VIRAL_CACHE_ID,
+  FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE,
+  MICROTECH_TRODE_SET_ID,
+  MIT_WEST_TIER_REMOVED_FROM_GAME_REASON,
+  SHELL_TRADERS_ID,
+  TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE,
+} from "./compatibility/runtime-compatibility";
 import { buildPublicAbilitySchemaContext } from "./mechanics/public-payload-schema";
 import {
   MECHANIC_SMOKE_CARD_IDS,
@@ -254,6 +272,94 @@ function addCorpCardToHqForTest(
   };
   return cardId;
 }
+
+describe("P3.71 PendingChoice replay compatibility marker stability", () => {
+  it("keeps legacy PublicPayload ability fields stable for ActionID and replay compatibility", () => {
+    expect(ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS).toStrictEqual([
+      "v1911HiddenZoneAbility",
+      "v1917AssetAbility",
+      "v1918UpgradeAbility",
+      "v1919AssetAbility",
+      "v1919OperationAbility",
+      "v1919UpgradeAbility",
+      "v1919RunnerProgramAbility",
+      "v1919RunnerEventAbility",
+      "v1920AssetAbility",
+      "v1921AssetAbility",
+      "v1921UpgradeAbility",
+      "v1921RunnerProgramAbility",
+      "v1921RunnerResourceAbility",
+      "resourceAbility",
+      "runnerAbility",
+      "shellTradersAbility",
+      "acmeSavingsAndLoanAbility",
+      "agendaAbility",
+    ]);
+  });
+
+  it("keeps P3.58 PendingChoice source helpers stable", () => {
+    expect(
+      isP358HiddenReplacementCompatibilityChoiceSource(
+        "p3_58.fortress_respecification:source:rd:1",
+      ),
+    ).toBe(true);
+    expect(
+      isP358FortressRespecificationChoiceSource(
+        "p3_58.fortress_respecification:source:rd:1",
+      ),
+    ).toBe(true);
+    expect(
+      isP358SocialEngineeringChoiceSource(
+        "p3_58.social_engineering_guess:source:1",
+      ),
+    ).toBe(true);
+    expect(
+      isP358NewBloodReorderChoiceSource("p3_58.new_blood_reorder:source:1"),
+    ).toBe(true);
+    expect(
+      isP358HiddenReplacementCompatibilityChoiceSource("p3_59.future_marker"),
+    ).toBe(false);
+  });
+
+  it("keeps replay PlayerAction compatibility guard narrow", () => {
+    expect(
+      isReplayCompatibilityActionPayload({
+        matchId: "match",
+        side: "runner",
+        actionId: "runner.resolve_choice.choice",
+        clientKnownStateVersion: 12,
+      }),
+    ).toBe(true);
+    expect(
+      isReplayCompatibilityActionPayload({
+        matchId: "match",
+        side: "runner",
+        actionId: "runner.resolve_choice.choice",
+      }),
+    ).toBe(false);
+  });
+
+  it("keeps runtime compatibility source marker values stable", () => {
+    expect(MIT_WEST_TIER_REMOVED_FROM_GAME_REASON).toBe(
+      "onr_v1_101_mit_west_tier",
+    );
+    expect(BALL_AND_CHAIN_ENCOUNTER_TAX_SOURCE).toBe(
+      "onr_v1_222_ball-and-chain",
+    );
+    expect(FATAL_ATTRACTOR_NEXT_ENCOUNTER_DAMAGE_SOURCE).toBe(
+      "subroutine:onr_v1_242_fatal-attractor:next_encounter",
+    );
+    expect(TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE).toBe(
+      "onr_v1_371_tokyo-chiba-infighting",
+    );
+    expect(SHELL_TRADERS_ID).toBe("onr_v1_176_the-shell-traders");
+    expect(BIZARRE_ENCRYPTION_SCHEME_ID).toBe(
+      "onr_v1_351_bizarre-encryption-scheme",
+    );
+    expect(CODE_VIRAL_CACHE_ID).toBe("onr_v1_155_code-viral-cache");
+    expect(MICROTECH_TRODE_SET_ID).toBe("onr_v1_132_microtech-trode-set");
+  });
+});
 
 function addRezzedCorpRootForTest(
   state: GameState,

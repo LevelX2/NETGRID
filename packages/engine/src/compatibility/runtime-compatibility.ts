@@ -20,6 +20,9 @@ export const SELF_MODIFYING_CODE_ID = "onr_v1_059_self-modifying-code";
 export const CODE_VIRAL_CACHE_ID = "onr_v1_155_code-viral-cache";
 export const JUNKYARD_BBS_ID = "onr_v1_165_junkyard-bbs";
 export const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
+
+// Icebreaker and hosted-credit guards still participate in payment and
+// revalidation paths. Their string values are compatibility inputs.
 export const MICROTECH_TRODE_SET_ID = "onr_v1_132_microtech-trode-set";
 export const PILE_DRIVER_ID = "onr_v1_047_pile-driver";
 export const RAMMING_PISTON_ID = "onr_v1_053_ramming-piston";
@@ -42,6 +45,8 @@ export const HELLS_RUN_ID = "onr_v1_164_hells-run";
 export const RONIN_AROUND_ID = "onr_v1_175_ronin-around";
 export const NEVINYRRAL_ID = "onr_v1_331_nevinyrral";
 
+// Legacy source markers below are visible in old payloads, run state, damage
+// attribution, or replay records. Rename only through a migration batch.
 export const DANSHIS_SECOND_ID = "onr_v1_158_danshis-second-id";
 export const ZZ22_SPEED_CHIP_ID = "onr_v1_147_zz22-speed-chip";
 export const MIT_WEST_TIER_REMOVED_FROM_GAME_REASON =
