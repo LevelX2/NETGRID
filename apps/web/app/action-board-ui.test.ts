@@ -1606,8 +1606,8 @@ describe("V1.0.6 resource and card-display helpers", () => {
       actionType: "trigger_ability",
       actor: "runner",
       publicRevealKind: "expose",
-      publicRevealDefinitionId: "simple_barrier_ice",
-      approachIceExposeDecision: "expose"
+      hiddenZoneAction: "approach_ice_expose",
+      publicRevealDefinitionId: "simple_barrier_ice"
     });
     const smarteyeFinish = publicEvent("evt_smarteye_finish", "action", {
       actionType: "trigger_ability",
@@ -1615,11 +1615,16 @@ describe("V1.0.6 resource and card-display helpers", () => {
       approachIceExposeViewDecision: "finish",
       hiddenZoneAction: "approach_ice_expose_finish"
     });
+    const jackOut = publicEvent("evt_jack_out", "action", {
+      actionType: "jack_out",
+      actor: "runner"
+    });
 
     expect(retainedExposeReviewEvent([expose, followUp], null)?.eventId).toBe("evt_expose");
     expect(retainedExposeReviewEvent([expose, followUp], "evt_expose")).toBeNull();
     expect(retainedExposeReviewEvent([smarteye], null)).toBeNull();
     expect(retainedExposeReviewEvent([expose, smarteyeFinish], null)).toBeNull();
+    expect(retainedExposeReviewEvent([smarteye, jackOut], null)).toBeNull();
   });
 
   it("detects the active approach-ice viewing target from legal actions", () => {

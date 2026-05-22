@@ -725,6 +725,7 @@ export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEv
     if (event.publicPayload.approachIceExposeViewDecision === "finish") return null;
     if (event.publicPayload.hiddenZoneAction === "approach_ice_expose_finish") return null;
     if (event.publicPayload.publicRevealKind !== "expose") continue;
+    if (event.publicPayload.hiddenZoneAction === "approach_ice_expose") return null;
     if (event.publicPayload.approachIceExposeDecision) return null;
     if (!eventHasPublicRevealDefinition(event)) return null;
     return event;
