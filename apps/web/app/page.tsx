@@ -8278,8 +8278,14 @@ function CostChips({ action }: { action: LegalAction }) {
     <span className="costChips" aria-label={`Kosten: ${chips.map((chip) => chip.label).join(" + ")}`} data-testid="cost-chips">
       {chips.map((chip) => (
         <span className={`costChip ${chip.kind}`} key={`${chip.kind}-${chip.amount}`}>
-          <span className={chip.kind === "action" ? "costActionIcon" : "costCreditIcon"} aria-hidden="true" />
-          {chip.amount}
+          {chip.kind === "action" ? (
+            Array.from({ length: chip.amount }, (_, index) => <span className="costActionIcon" aria-hidden="true" key={`action-${index}`} />)
+          ) : (
+            <>
+              <span className="costCreditIcon" aria-hidden="true" />
+              {chip.amount}
+            </>
+          )}
         </span>
       ))}
     </span>

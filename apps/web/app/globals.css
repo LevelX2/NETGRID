@@ -3701,8 +3701,23 @@ select {
 }
 
 .costChip.action {
-  border-radius: 4px;
-  border-color: color-mix(in srgb, var(--runner), var(--line) 40%);
+  gap: 3px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.costChip.action .costActionIcon {
+  width: 18px;
+  height: 18px;
+}
+
+.costChip.action .costActionIcon::before {
+  border-top-width: 3px;
+  border-bottom-width: 3px;
+  border-left-width: 6px;
 }
 
 .costChip.credit {
@@ -4443,13 +4458,18 @@ select {
 }
 
 .serverRunActionIcon {
-  width: 24px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
   display: inline-grid;
   place-items: center;
-  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 40%);
-  border-radius: 4px;
-  background: var(--section-bg);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.serverRunActionIcon .costActionIcon {
+  width: 14px;
+  height: 14px;
 }
 
 .serverCount {
@@ -5659,7 +5679,7 @@ select {
   margin-left: 6px;
 }
 
-.cardActionButton .costChip {
+.cardActionButton .costChip.credit {
   background: color-mix(in srgb, var(--panel), var(--primary-bg) 44%);
 }
 
