@@ -93,6 +93,7 @@ import {
   type ChronicleItem
 } from "./chronicle";
 import { accessDecisionLabel, accessRevealActionGroups } from "./access-reveal-ui";
+import { groupChronicleEntriesForRender } from "./chronicleGrouping";
 import { shouldActivateChronicleCardTouchDoubleTap } from "./chronicleInteraction";
 import { visibleKnownCardRulesText } from "./card-text-source";
 import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-ui";
@@ -8574,16 +8575,7 @@ function ChroniclePanel({
   const [collapsedGroups, setCollapsedGroups] = useState<Set<string>>(() => new Set());
   const contextByEventId = chronicleContextByEventId(turnContextEvents, cardDetailsById);
   const entries = chronicleEntriesWithRunGroups(events, side, contextByEventId, cardDetailsById).reverse();
-  const groupedEntries: { label: string; kind: ChronicleGroupKind; turnGroupLabel: string | null; entries: typeof entries }[] = [];
-  for (const entry of entries) {
-    const label = entry.groupLabel;
-    const currentGroup = groupedEntries[groupedEntries.length - 1];
-    if (currentGroup?.label === label && currentGroup.turnGroupLabel === entry.turnGroupLabel) {
-      currentGroup.entries.push(entry);
-    } else {
-      groupedEntries.push({ label, kind: entry.groupKind, turnGroupLabel: entry.turnGroupLabel, entries: [entry] });
-    }
-  }
+  const groupedEntries = groupChronicleEntriesForRender(entries);
   const shownChronicleGroupLabels = new Set<string>();
   function toggleChronicleGroup(key: string) {
     setCollapsedGroups((current) => {
@@ -8615,8 +8607,8 @@ function ChroniclePanel({
         <div className="chronicleList">
           {entries.length === 0 ? <p className="meta">Noch keine Einträge.</p> : null}
           {groupedEntries.map((group) => {
-            const groupKey = chronicleGroupCollapseKey(group.label, group.kind, group.turnGroupLabel, group.entries[0]?.item.id ?? "empty");
-            const groupRenderKey = `${groupKey}:${group.entries[0]?.item.id ?? "empty"}`;
+            const groupKey = chronicleGroupCollapseKey(group.label, group.kind, group.turnGroupLabel, group.firstItemId);
+            const groupRenderKey = `${groupKey}:${group.firstItemId}`;
             const turnKey = group.turnGroupLabel ? chronicleTurnGroupCollapseKey(group.turnGroupLabel) : null;
             const isTurnGroup = Boolean(group.turnGroupLabel && group.label === group.turnGroupLabel);
             const turnCollapsed = Boolean(turnKey && collapsedGroups.has(turnKey));
@@ -8680,9 +8672,10 @@ function chronicleEntriesWithRunGroups(
   side: Side,
   contextByEventId: Record<string, Omit<ChronicleContext, "side">>,
   cardDetailsById: Record<string, CatalogCardDetail>
-): Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind; turnGroupLabel: string | null }> {
-  const entries: Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind; turnGroupLabel: string | null }> = [];
+): Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind; turnGroupLabel: string | null; groupInstanceKey: string | null }> {
+  const entries: Array<{ card: CatalogCardDetail | null; item: ChronicleItem; groupLabel: string; groupKind: ChronicleGroupKind; turnGroupLabel: string | null; groupInstanceKey: string | null }> = [];
   let activeRunGroupLabel: string | null = null;
+  let activeRunGroupKey: string | null = null;
   let runEndPending = false;
 
   for (const event of events) {
@@ -8693,23 +8686,26 @@ function chronicleEntriesWithRunGroups(
     const turnGroup = turnSide ? { label: chronicleTurnGroupLabel(turnSide, turnNumber), kind: turnSide } : null;
     if (runEndPending && !chronicleActionContinuesCompletedRun(actionType)) {
       activeRunGroupLabel = null;
+      activeRunGroupKey = null;
       runEndPending = false;
     }
     const startedRunGroupLabel = chronicleRunGroupLabelFromEvent(event);
     if (startedRunGroupLabel) {
       activeRunGroupLabel = startedRunGroupLabel;
+      activeRunGroupKey = `run:${event.eventId}`;
       runEndPending = false;
     }
 
     const eventItem = formatChronicleEvent(event, side, contextByEventId[event.eventId] ?? {});
     const items = [eventItem, ...formatChronicleEffectItems(event, side)];
     const eventGroupLabel = activeRunGroupLabel && chronicleEventBelongsToActiveRun(event, actionType, items, cardDetailsById) ? activeRunGroupLabel : null;
+    const eventGroupInstanceKey = eventGroupLabel ? activeRunGroupKey : null;
     for (const item of items) {
       const card = item.cardDefinitionId ? (cardDetailsById[item.cardDefinitionId] ?? null) : eventCardDetail(event, cardDetailsById);
       const startTurnEffectGroup = chronicleStartTurnEffectGroup(actionType, actor, turnNumber, item);
       const groupLabel = eventGroupLabel ?? startTurnEffectGroup?.label ?? turnGroup?.label ?? chronicleGroupLabel(item);
       const groupKind = eventGroupLabel ? "run" : startTurnEffectGroup?.kind ?? turnGroup?.kind ?? chronicleGroupKindFromItem(item);
-      entries.push({ card, item, groupLabel, groupKind, turnGroupLabel: startTurnEffectGroup?.label ?? turnGroup?.label ?? null });
+      entries.push({ card, item, groupLabel, groupKind, turnGroupLabel: startTurnEffectGroup?.label ?? turnGroup?.label ?? null, groupInstanceKey: eventGroupInstanceKey });
     }
 
     if (chronicleActionCompletesRun(event, actionType)) runEndPending = true;
