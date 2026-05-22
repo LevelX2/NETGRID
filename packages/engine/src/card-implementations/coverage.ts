@@ -14,6 +14,7 @@ export type CardImplementationCoverageStatus =
   | "partial_implementation"
   | "legacy_engine_special_case"
   | "no_engine_behavior_required"
+  | "outside_current_release_scope"
   | "pending_implementation";
 
 export type CardImplementationCoverageEntry = {
@@ -759,6 +760,14 @@ const IMPLEMENTED_CARD_LOCATION_BY_DEFINITION_ID: Partial<
     "packages/engine/src/card-implementations/onr-v1/corp/upgrades/washington-d-c-city-grid.ts",
 };
 
+const CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN = /^onr_v1_\d{3}_/;
+
+export function isCurrentCardImplementationReleaseScopeDefinitionId(
+  definitionId: CardDefinitionId,
+): boolean {
+  return CURRENT_RELEASE_CARD_DEFINITION_ID_PATTERN.test(definitionId);
+}
+
 function implementedCoverageFor(
   implementation: (typeof CARD_IMPLEMENTATIONS)[number],
 ): CardImplementationCoverageEntry {
@@ -1087,6 +1096,15 @@ export const CARD_IMPLEMENTATION_COVERAGE_OVERRIDES: readonly CardImplementation
 function pendingCoverageFor(
   cardDefinitionId: CardDefinitionId,
 ): CardImplementationCoverageEntry {
+  if (!isCurrentCardImplementationReleaseScopeDefinitionId(cardDefinitionId)) {
+    return {
+      cardDefinitionId,
+      status: "outside_current_release_scope",
+      reason:
+        "CardDefinition is a demo, test harness, Proteus planning, or non-ONR-v1 catalog card outside the current CardImplementation release scope.",
+    };
+  }
+
   return {
     cardDefinitionId,
     status: "pending_implementation",

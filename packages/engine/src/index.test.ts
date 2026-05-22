@@ -23,6 +23,7 @@ import {
   CARD_IMPLEMENTATION_COVERAGE_ENTRIES,
   CARD_IMPLEMENTATION_COVERAGE_OVERRIDES,
   cardImplementationCoverageForDefinitionId,
+  isCurrentCardImplementationReleaseScopeDefinitionId,
 } from "./card-implementations/coverage";
 import {
   CARD_IMPLEMENTATIONS,
@@ -11114,6 +11115,57 @@ describe("V1.6.2 Mechanikpaket B", () => {
         )?.status,
         implementation.cardDefinitionId,
       ).toMatch(/^(implemented|partial_implementation)$/);
+    }
+  });
+
+  it("reconciles CardImplementation coverage against the ONR-v1 release scope", () => {
+    const coverageByStatus = new Map<string, number>();
+    for (const entry of CARD_IMPLEMENTATION_COVERAGE_ENTRIES) {
+      coverageByStatus.set(
+        entry.status,
+        (coverageByStatus.get(entry.status) ?? 0) + 1,
+      );
+    }
+
+    const currentReleaseDefinitionIds = Object.keys(DEMO_CARDS_BY_ID).filter(
+      (definitionId) =>
+        isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
+    );
+    const outsideScopeDefinitionIds = Object.keys(DEMO_CARDS_BY_ID).filter(
+      (definitionId) =>
+        !isCurrentCardImplementationReleaseScopeDefinitionId(definitionId),
+    );
+
+    expect(currentReleaseDefinitionIds).toHaveLength(374);
+    expect(outsideScopeDefinitionIds).toHaveLength(55);
+    expect(CARD_IMPLEMENTATIONS).toHaveLength(373);
+    expect(coverageByStatus.get("implemented")).toBe(373);
+    expect(coverageByStatus.get("no_engine_behavior_required")).toBe(1);
+    expect(coverageByStatus.get("outside_current_release_scope")).toBe(55);
+    expect(coverageByStatus.get("pending_implementation") ?? 0).toBe(0);
+    expect(coverageByStatus.get("partial_implementation") ?? 0).toBe(0);
+    expect(coverageByStatus.get("legacy_engine_special_case") ?? 0).toBe(0);
+
+    for (const definitionId of currentReleaseDefinitionIds) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).not.toBe("outside_current_release_scope");
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).not.toBe("pending_implementation");
+    }
+
+    for (const definitionId of outsideScopeDefinitionIds) {
+      expect(
+        cardImplementationCoverageForDefinitionId(definitionId)?.status,
+        definitionId,
+      ).toBe("outside_current_release_scope");
+      expect(
+        CARD_IMPLEMENTATIONS_BY_DEFINITION_ID[definitionId],
+        definitionId,
+      ).toBeUndefined();
     }
   });
 
