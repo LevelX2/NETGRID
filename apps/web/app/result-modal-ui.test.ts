@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeText, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline } from "./result-modal-ui";
 
 describe("result modal UI helpers", () => {
   it("selects winner motifs for runner, corp and draw results", () => {
@@ -29,6 +29,14 @@ describe("result modal UI helpers", () => {
     expect(resultFooterOutcomeLabel("runner", "runner")).toBe("Deine Seite");
     expect(resultFooterOutcomeLabel("corp", "runner", "Korp-KI")).toBe("Korp-KI");
     expect(resultFooterOutcomeLabel("draw", "runner")).toBe("Draw");
+  });
+
+  it("uses the finished series winner as the primary result headline", () => {
+    expect(seriesResultHeadline(series("won"), "Korp-KI")).toBe("Du hast die Match-Serie gewonnen.");
+    expect(seriesResultHeadline(series("lost"), "Korp-KI")).toBe("Korp-KI hat die Match-Serie gewonnen.");
+    expect(seriesResultHeadline(series("draw"), "Korp-KI")).toBe("Die Match-Serie endet unentschieden.");
+    expect(seriesResultHeadline({ ...series("won"), status: "between_games" }, "Korp-KI")).toBeNull();
+    expect(resultOutcomeText("runner")).toBe("Runner gewinnt.");
   });
 
   it("uses replay-safe retention labels without the old aufheben wording", () => {
@@ -100,3 +108,24 @@ describe("result modal UI helpers", () => {
     });
   });
 });
+
+function series(viewerSeriesOutcome: "won" | "lost" | "draw") {
+  return {
+    seriesId: "series_1",
+    mode: "two_game_side_swap" as const,
+    status: "finished" as const,
+    gameNumber: 2,
+    gamesPlanned: 2,
+    viewerPlayer: "player_a" as const,
+    viewerWins: viewerSeriesOutcome === "won" ? 1 : 0,
+    opponentWins: viewerSeriesOutcome === "lost" ? 1 : 0,
+    draws: viewerSeriesOutcome === "draw" ? 1 : 0,
+    viewerMatchPoints: viewerSeriesOutcome === "won" ? 12 : 10,
+    opponentMatchPoints: viewerSeriesOutcome === "lost" ? 12 : 10,
+    viewerAgendaPoints: 7,
+    opponentAgendaPoints: 6,
+    viewerSeriesOutcome,
+    seriesDecision: viewerSeriesOutcome === "draw" ? "draw" as const : "match_points" as const,
+    nextAvailable: false,
+  };
+}

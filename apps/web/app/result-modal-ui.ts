@@ -1,4 +1,4 @@
-import type { ApiGameResultSummary, Side, Winner } from "@netgrid/shared";
+import type { ApiGameResultSummary, ApiSeriesResultSummary, Side, Winner } from "@netgrid/shared";
 
 export type ResultWinnerMotifKind = Side | "draw";
 export type ResultWinnerMotifUi = {
@@ -42,6 +42,19 @@ export function resultWinnerMotifUi(motif: ResultWinnerMotifKind): ResultWinnerM
 export function resultFooterOutcomeLabel(winner: Winner, viewerSide: Side, opponentName?: string): string {
   if (winner === "draw") return "Draw";
   return winner === viewerSide ? "Deine Seite" : opponentName ?? "Gegenseite";
+}
+
+export function resultOutcomeText(winner: Winner): string {
+  if (winner === "runner") return "Runner gewinnt.";
+  if (winner === "corp") return "Korp gewinnt.";
+  return "Das Spiel endet unentschieden.";
+}
+
+export function seriesResultHeadline(series: ApiSeriesResultSummary, opponentName?: string): string | null {
+  if (series.status !== "finished") return null;
+  if (series.viewerSeriesOutcome === "won") return "Du hast die Match-Serie gewonnen.";
+  if (series.viewerSeriesOutcome === "lost") return `${opponentName ?? "Gegenseite"} hat die Match-Serie gewonnen.`;
+  return "Die Match-Serie endet unentschieden.";
 }
 
 export function retentionProtectionUi(retentionProtected: boolean): { label: string; title: string } {

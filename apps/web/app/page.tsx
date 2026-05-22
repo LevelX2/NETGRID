@@ -189,7 +189,7 @@ import {
 import { formatMatchTimerDuration, matchTimerDecisionKey, matchTimerScopeLabel } from "./match-timer-ui";
 import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStorage, type MatchStartPlayerClockGraceSeconds, type MatchStartPlayerClockMinutes, type MatchStartPlayerClockMode } from "./match-start-storage";
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
-import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, type ResultWinnerMotifKind } from "./result-modal-ui";
+import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeText, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
   CATALOG_RARITY_FILTERS,
   catalogCardMatchesTypeFilters,
@@ -6119,12 +6119,12 @@ function GameOverModal({
   onRetentionProtection(protectedValue: boolean): void;
   nextSeriesPending?: boolean;
 }) {
-  const outcomeText =
-    result.winner === "runner"
-      ? "Runner gewinnt."
-      : result.winner === "corp"
-        ? "Korp gewinnt."
-        : "Das Spiel endet unentschieden.";
+  const outcomeText = resultOutcomeText(result.winner);
+  const seriesHeadline = result.series ? seriesResultHeadline(result.series, opponentName) : null;
+  const headlineText = seriesHeadline ?? outcomeText;
+  const reasonText = seriesHeadline
+    ? `Letztes Spiel: ${outcomeText} ${resultReasonLabel(result.reason)}`
+    : resultReasonLabel(result.reason);
   const seriesText = result.series ? seriesStatusText(result.series) : null;
   const gameStanding = gameStandingForResult(result, side);
   const winnerMotif = resultWinnerMotifFor(result.winner);
@@ -6147,8 +6147,8 @@ function GameOverModal({
         <div className={`gameOverHero ${winnerMotifUi.imageSrc ? "withVisualMotif" : ""}`}>
           <div className="gameOverHeroCopy">
             <p className="eyebrow">{matchFormatLabel(result.matchFormat)}</p>
-            <h2 id="game-over-title">{outcomeText}</h2>
-            <p>{resultReasonLabel(result.reason)}</p>
+            <h2 id="game-over-title">{headlineText}</h2>
+            <p>{reasonText}</p>
           </div>
           <ResultWinnerMotif motif={winnerMotif} />
         </div>
