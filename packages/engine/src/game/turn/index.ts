@@ -48,3 +48,13 @@ export {
 export {
   buildRunnerProgramTrashBeforeInstallAction,
 } from "./runner-program-trash-install-actions";
+export {
+  buildRunnerSelfModifyingCodeInstallAction,
+  buildRunnerShellTradersRemoveCounterAction,
+  buildRunnerShellTradersSetAsideAction,
+  buildRunnerValuPakInstallAction,
+  buildRunnerValuPakSequenceEndAction,
+  type RunnerShellTradersRemoveCounterActionInput,
+  type RunnerShellTradersSetAsideActionInput,
+  type RunnerValuPakInstallActionInput,
+} from "./runner-special-zone-install-actions";

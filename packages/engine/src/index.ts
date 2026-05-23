@@ -122,6 +122,13 @@ import {
 import {
   buildRunnerProgramTrashBeforeInstallAction,
 } from "./game/turn/runner-program-trash-install-actions";
+import {
+  buildRunnerSelfModifyingCodeInstallAction,
+  buildRunnerShellTradersRemoveCounterAction,
+  buildRunnerShellTradersSetAsideAction,
+  buildRunnerValuPakInstallAction,
+  buildRunnerValuPakSequenceEndAction,
+} from "./game/turn/runner-special-zone-install-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -3477,18 +3484,10 @@ function runnerMainActions(state: GameState): LegalAction[] {
     for (const id of runnerInstallableProgramIdsForValuPak(state)) {
       const definition = definitionFor(state, id);
       actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          {
-            cardId: id,
-            v1922ValuPakInstallAction: true,
-          },
-        ),
+        buildRunnerValuPakInstallAction(state, {
+          cardId: id,
+          definition,
+        }),
       );
     }
     pushCardImplementationEndOfRunnerTurnActions(
@@ -3496,11 +3495,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state,
       actions,
     );
-    actions.push(
-      action(state, "runner", "end_turn", "Zug beenden", "game_rule", [], {
-        v1922ValuPakSequenceEnd: true,
-      }),
-    );
+    actions.push(buildRunnerValuPakSequenceEndAction(state));
     return actions;
   }
   if (hasClicks) {
@@ -4097,76 +4092,28 @@ function runnerMainActions(state: GameState): LegalAction[] {
           const targetDefinition = definitionFor(state, targetCardId);
           const shellCounterAmount = shellTradersInstallCost(targetDefinition);
           actions.push(
-            action(
-              state,
-              "runner",
-              "trigger_ability",
-              `${definition.title}: ${targetDefinition.title} vorbereiten`,
-              resourceId,
-              [{ clicks: 1 }],
-              {
-                cardId: resourceId,
-                shellTradersAbility: "set_aside_from_grip",
-                targetCardId,
-                targetCardDefinitionId: targetDefinition.id,
-                shellCounterAmount,
-                counterType: "shell",
-                addedCounterAmount: shellCounterAmount,
-                sourceDefinitionId: SHELL_TRADERS_ID,
-                specialZone: "set_aside",
-                specialZoneVisibility: "public",
-                abilityFamily: "hosting-counters",
-                effectKind: "counter_change",
-              },
-              {
-                targetRequirements: [
-                  {
-                    id: "shellTradersTarget",
-                    kind: "card",
-                    side: "runner",
-                    zoneScope: ["runner.grip"],
-                    visibility: "known_to_actor",
-                  },
-                ],
-              },
-            ),
+            buildRunnerShellTradersSetAsideAction(state, {
+              sourceCardId: resourceId,
+              sourceTitle: definition.title,
+              sourceDefinitionId: SHELL_TRADERS_ID,
+              targetCardId,
+              targetDefinition,
+              shellCounterAmount,
+            }),
           );
         }
         if (state.runner.credits >= 1) {
           for (const targetCardId of shellTradersPreparedTargetIds(state)) {
             const remainingCounters = cardCounter(state, targetCardId, "shell");
             actions.push(
-              action(
-                state,
-                "runner",
-                "trigger_ability",
-                `${definition.title}: Shell-Counter entfernen`,
-                resourceId,
-                [{ credits: 1 }],
-                {
-                  cardId: resourceId,
-                  shellTradersAbility: "remove_shell_counter",
-                  targetCardId,
-                  targetCardDefinitionId: definitionFor(state, targetCardId).id,
-                  counterType: "shell",
-                  removeCounterAmount: 1,
-                  remainingCountersBefore: remainingCounters,
-                  sourceDefinitionId: SHELL_TRADERS_ID,
-                  abilityFamily: "hosting-counters",
-                  effectKind: "counter_change",
-                },
-                {
-                  targetRequirements: [
-                    {
-                      id: "shellTradersPreparedCard",
-                      kind: "card",
-                      side: "runner",
-                      zoneScope: ["special.set_aside"],
-                      visibility: "public",
-                    },
-                  ],
-                },
-              ),
+              buildRunnerShellTradersRemoveCounterAction(state, {
+                sourceCardId: resourceId,
+                sourceTitle: definition.title,
+                sourceDefinitionId: SHELL_TRADERS_ID,
+                targetCardId,
+                targetDefinitionId: definitionFor(state, targetCardId).id,
+                remainingCountersBefore: remainingCounters,
+              }),
             );
           }
         }
@@ -5934,26 +5881,7 @@ function selfModifyingCodeEncounterActions(state: GameState): LegalAction[] {
         !cardImplementationForDefinitionId(definitionFor(state, cardId).id),
     )
     .map((cardId) =>
-      action(
-        state,
-        "runner",
-        "trigger_ability",
-        "Self-Modifying Code trashen: Programm aus Stack installieren",
-        cardId,
-        [],
-        {
-          cardId,
-          v1911HiddenZoneAbility: "self_modifying_code_install_program",
-          hiddenZoneBarrier: true,
-        },
-        {
-          abilityRef: {
-            sourceCardInstanceId: cardId,
-            abilityId: "self_modifying_code_install_program",
-          },
-          effectRef: "effect.self_modifying_code_install_program",
-        },
-      ),
+      buildRunnerSelfModifyingCodeInstallAction(state, cardId),
     );
 }
 
