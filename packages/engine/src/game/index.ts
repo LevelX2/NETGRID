@@ -7,6 +7,31 @@ export { buildPlayerViewProjection, playerViewFor } from "./player-view";
 export { hashGameState, hashState } from "./hash";
 export { replayGameEvents } from "./replay";
 export { validateGameState, validateGameStateForDebug } from "./validation";
+export {
+  buildCorpDrawAction,
+  buildCorpEndTurnAction,
+  buildCorpGainCreditAction,
+  buildCorpNewRemoteIceInstallAction,
+  buildCorpNewRemoteRootInstallAction,
+  buildCorpPurgeVirusAction,
+  buildCorpServerIceInstallAction,
+  buildCorpServerRootInstallAction,
+  buildRunnerEndTurnAction,
+  buildRunnerDrawCardActions,
+  buildRunnerGainCreditAction,
+  buildRunnerHardwareInstallAction,
+  buildRunnerProgramInstallAction,
+  buildRunnerRemoveTagAction,
+  buildRunnerResourceInstallAction,
+  buildLegalAction,
+  makeActionId,
+  stableLegalActionPayload,
+  type CorpIceInstallCostDetails,
+  type CorpInstallServerRef,
+  type CorpRootInstallOptions,
+  type LegalActionMetadata,
+  type RunnerDrawActionContext,
+} from "./turn";
 export type {
   CorpInstallCostOptions,
   CorpRezCostOptions,

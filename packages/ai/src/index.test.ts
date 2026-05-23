@@ -107,6 +107,7 @@ import type {
   PublicGameEvent,
   Side,
   VisibleCard,
+  VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
@@ -647,6 +648,140 @@ describe("MVP 0.3 AI controller contract", () => {
       expect(unaffordable.blocked, pair.role).toBe(true);
       expect(unaffordable.visibleBreakCost, pair.role).toBe(pair.expectedCost);
     }
+  });
+
+  it("counts effective break and pay-or-end costs from an engine run quote", () => {
+    const cardsById = createRuntimeCardsById();
+    const effectiveRunQuote = {
+      iceInstanceId: "ai_visible_crystal_wall",
+      iceDefinitionId: "onr_v1_232_crystal-wall",
+      effectiveStrength: 3,
+      subroutines: [
+        { id: "onr_v1_232_crystal_wall_etr", type: "end_the_run" },
+        {
+          id: "card_implementation.onr_v1_370_tesseract-fort-construction.additional_subroutine.1.end_the_run_unless_runner_pays",
+          type: "end_the_run_unless_runner_pays",
+          amount: 1,
+          sourceDefinitionId: "onr_v1_370_tesseract-fort-construction",
+          sourceTitle: "Tesseract Fort Construction",
+          dynamicSourceKind: "additional_subroutine",
+        },
+      ],
+      breakSubroutineAdditionalCostPerSubroutine: 1,
+      breakSubroutineCostSourceDefinitionIds: [
+        "onr_v1_355_crystal-palace-station-grid",
+      ],
+      breakSubroutineCostSourceTitles: ["Crystal Palace Station Grid"],
+    } satisfies VisibleEffectiveIceRunQuote;
+    const ice = {
+      ...runtimeVisibleIce(cardsById["onr_v1_232_crystal-wall"]),
+      effectiveRunQuote,
+    };
+    const breaker = runtimeVisibleBreaker(cardsById["onr_v1_021_dwarf"]);
+
+    expect(assessKnownRezzedIcePath([ice], [breaker], 2)).toEqual({
+      blocked: true,
+      visibleBreakCost: 3,
+    });
+    expect(assessKnownRezzedIcePath([ice], [breaker], 3)).toEqual({
+      blocked: false,
+      visibleBreakCost: 3,
+    });
+  });
+
+  it("ignores visible root identities unless the engine exposes an effective quote", () => {
+    const cardsById = createRuntimeCardsById();
+    const ice = runtimeVisibleIce(cardsById["onr_v1_232_crystal-wall"]);
+    const breaker = runtimeVisibleBreaker(cardsById["onr_v1_021_dwarf"]);
+    const root = [
+      {
+        instanceId: "ai_unrezzed_tesseract",
+        known: false,
+        type: "upgrade",
+        rezzed: false,
+      },
+    ] satisfies VisibleCard[];
+
+    expect(assessKnownRezzedIcePath([ice], [breaker], 1, root)).toEqual({
+      blocked: false,
+      visibleBreakCost: 1,
+    });
+  });
+
+  it("passes generic effective ICE quotes through AI input without hidden root leaks", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-effective-run-quote-encoder",
+        runnerDeck: batchARunnerDeck(),
+        corpDeck: {
+          id: "ai_effective_run_quote_encoder_corp",
+          name: "AI Effective Run Quote Encoder Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_261_quandary", quantity: 1 },
+            { id: "onr_v1_320_encoder-inc", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+      }),
+    );
+    ensureRemoteServer(state, "remote_1");
+    const quandaryId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_261_quandary",
+    );
+    const encoderId = putCorpRootInRemote(state, "onr_v1_320_encoder-inc", 0);
+    state.cardInstances[quandaryId] = {
+      ...state.cardInstances[quandaryId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    state.cardInstances[encoderId] = {
+      ...state.cardInstances[encoderId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const quote = input.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )?.ice[0]?.effectiveRunQuote;
+    expect(quote?.subroutines.map((subroutine) => subroutine.type)).toEqual([
+      "end_the_run",
+      "end_the_run",
+    ]);
+    expect(quote?.subroutines[1]).toMatchObject({
+      sourceDefinitionId: "onr_v1_320_encoder-inc",
+      sourceTitle: "Encoder, Inc.",
+      dynamicSourceKind: "additional_subroutine",
+    });
+
+    state = structuredClone(state);
+    state.cardInstances[encoderId] = {
+      ...state.cardInstances[encoderId]!,
+      faceup: false,
+      rezzed: false,
+    };
+    const hiddenInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+    });
+    const hiddenQuote = hiddenInput.playerView.servers.find(
+      (server) => server.id === "remote_1",
+    )?.ice[0]?.effectiveRunQuote;
+    const hiddenJson = JSON.stringify(hiddenInput);
+    expect(
+      hiddenQuote?.subroutines.some(
+        (subroutine) => subroutine.sourceDefinitionId === "onr_v1_320_encoder-inc",
+      ),
+    ).toBe(false);
+    expect(hiddenJson).not.toContain("Encoder, Inc.");
+    expect(hiddenJson).not.toContain("onr_v1_320_encoder-inc");
+    expect(assertAiInputIsSideSafe(hiddenInput)).toBe(true);
   });
 
   it("keeps visible run analysis invariant across hidden-info variants", () => {
@@ -2441,6 +2576,92 @@ describe("MVP 0.3 Runner AI", () => {
 
     expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
     expect(runCost.evidence).toContain("visible_etr_break_cost:6");
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.reasonCode).toBe("runner.plan.recover_economy");
+  });
+
+  it("backs off from a Crystal Wall remote when Tesseract and Crystal Palace make the visible path unaffordable", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-tesseract-crystal-palace-remote-cost",
+        runnerDeck: batchARunnerDeck(),
+        corpDeck: {
+          id: "ai_tesseract_crystal_palace_corp",
+          name: "AI Tesseract Crystal Palace Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_232_crystal-wall", quantity: 1 },
+            { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
+            { id: "onr_v1_370_tesseract-fort-construction", quantity: 1 },
+            { id: "simple_agenda", quantity: 6 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    moveRunnerCardToGrip(state, "onr_v1_021_dwarf");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "onr_v1_021_dwarf",
+    );
+    ensureRemoteServer(state, "remote_1");
+    const crystalWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_232_crystal-wall",
+    );
+    state.cardInstances[crystalWallId] = {
+      ...state.cardInstances[crystalWallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    for (const rootId of [
+      putCorpRootInRemote(state, "onr_v1_355_crystal-palace-station-grid", 0),
+      putCorpRootInRemote(state, "onr_v1_370_tesseract-fort-construction", 0),
+    ]) {
+      state.cardInstances[rootId] = {
+        ...state.cardInstances[rootId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    state.runner.credits = 2;
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing Tesseract/Crystal Palace fixture actions");
+
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate) throw new Error("Missing contest_remote candidate");
+    const runCost = estimateRunCost(input, contestCandidate);
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gain],
+    });
+
+    expect(runCost.reasons).toContain("visible_ice_unaffordable_to_break");
+    expect(runCost.evidence).toContain("visible_etr_break_cost:3");
     expect(decision.actionId).toBe(gain.actionId);
     expect(decision.reasonCode).toBe("runner.plan.recover_economy");
   });

@@ -13,6 +13,7 @@ import {
   type TargetRequirement,
   type VisibleCard,
   type VisibleChoiceRequest,
+  type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 
 type AiPublicPayloadAbilityFamily =
@@ -412,6 +413,50 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
+    ...(card.effectiveRunQuote
+      ? { effectiveRunQuote: sanitizeVisibleEffectiveIceRunQuote(card.effectiveRunQuote) }
+      : {}),
+  };
+}
+
+function sanitizeVisibleEffectiveIceRunQuote(
+  quote: VisibleEffectiveIceRunQuote,
+): VisibleEffectiveIceRunQuote {
+  return {
+    iceInstanceId: quote.iceInstanceId,
+    iceDefinitionId: quote.iceDefinitionId,
+    effectiveStrength: quote.effectiveStrength,
+    subroutines: quote.subroutines.map((subroutine) => ({
+      id: subroutine.id,
+      type: subroutine.type,
+      ...(subroutine.amount !== undefined ? { amount: subroutine.amount } : {}),
+      ...(subroutine.breakTags ? { breakTags: subroutine.breakTags.slice() } : {}),
+      ...(subroutine.sourceDefinitionId
+        ? { sourceDefinitionId: subroutine.sourceDefinitionId }
+        : {}),
+      ...(subroutine.sourceTitle ? { sourceTitle: subroutine.sourceTitle } : {}),
+      ...(subroutine.dynamicSourceKind
+        ? { dynamicSourceKind: subroutine.dynamicSourceKind }
+        : {}),
+    })),
+    ...(quote.breakSubroutineAdditionalCostPerSubroutine !== undefined
+      ? {
+          breakSubroutineAdditionalCostPerSubroutine:
+            quote.breakSubroutineAdditionalCostPerSubroutine,
+        }
+      : {}),
+    ...(quote.breakSubroutineCostSourceDefinitionIds
+      ? {
+          breakSubroutineCostSourceDefinitionIds:
+            quote.breakSubroutineCostSourceDefinitionIds.slice(),
+        }
+      : {}),
+    ...(quote.breakSubroutineCostSourceTitles
+      ? {
+          breakSubroutineCostSourceTitles:
+            quote.breakSubroutineCostSourceTitles.slice(),
+        }
+      : {}),
   };
 }
 

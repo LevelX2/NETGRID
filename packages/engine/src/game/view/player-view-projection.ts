@@ -22,22 +22,36 @@ import {
 } from "./card-view";
 import { visibleChoice } from "./choice-view";
 import { redactPublicEventForSide, toPublicEvent } from "./public-event-view";
+import { visibleEffectiveIceRunQuote } from "./visible-run-quote";
 export function buildPlayerViewProjection(
   state: GameState,
   side: Side,
   legalActions: LegalAction[],
 ): PlayerView {
   const runnerSide = side === "runner";
-  const visibleServers = state.corp.servers.map((server) => ({
-    id: server.id,
-    label: server.label,
-    ice: server.ice.map((id) => visibleCorpCard(state, id, side, "ice")),
-    root:
-      server.id === "archives"
-        ? visibleCorpArchives(state, side)
-        : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
-    ...counterDisplaysField(poxCounterDisplaysForServer(state, server.id)),
-  }));
+  const visibleServers = state.corp.servers.map((server) => {
+    const ice = server.ice.map((id) => {
+      const visibleIce = visibleCorpCard(state, id, side, "ice");
+      const effectiveRunQuote = visibleEffectiveIceRunQuote(
+        state,
+        id,
+        visibleIce,
+      );
+      return effectiveRunQuote
+        ? { ...visibleIce, effectiveRunQuote }
+        : visibleIce;
+    });
+    return {
+      id: server.id,
+      label: server.label,
+      ice,
+      root:
+        server.id === "archives"
+          ? visibleCorpArchives(state, side)
+          : server.root.map((id) => visibleCorpCard(state, id, side, "root")),
+      ...counterDisplaysField(poxCounterDisplaysForServer(state, server.id)),
+    };
+  });
 
   const run = state.run
     ? {

@@ -81,6 +81,36 @@ import {
   tracePostBidLinkSourceUsed,
 } from "./game/trace/trace-state";
 import { describeTraceResultFromTrace } from "./game/trace/trace-result";
+import {
+  buildLegalAction as action,
+  makeActionId,
+} from "./game/turn/action-builders";
+import {
+  buildCorpDrawAction,
+  buildCorpEndTurnAction,
+  buildCorpGainCreditAction,
+  buildCorpPurgeVirusAction,
+} from "./game/turn/corp-basic-actions";
+import {
+  buildCorpNewRemoteIceInstallAction,
+  buildCorpNewRemoteRootInstallAction,
+  buildCorpServerIceInstallAction,
+  buildCorpServerRootInstallAction,
+} from "./game/turn/corp-install-actions";
+import {
+  buildRunnerEndTurnAction,
+  buildRunnerGainCreditAction,
+  buildRunnerRemoveTagAction,
+} from "./game/turn/runner-basic-actions";
+import {
+  buildRunnerDrawCardActions,
+  type RunnerDrawActionContext,
+} from "./game/turn/runner-draw-actions";
+import {
+  buildRunnerHardwareInstallAction,
+  buildRunnerProgramInstallAction,
+  buildRunnerResourceInstallAction,
+} from "./game/turn/runner-install-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -231,7 +261,6 @@ import {
   legacyAbilityPayloadEntries,
 } from "./mechanics/public-payload-schema";
 import {
-  ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
   isP358FortressRespecificationChoiceSource,
   isP358HiddenReplacementCompatibilityChoiceSource,
   isP358NewBloodReorderChoiceSource,
@@ -2011,7 +2040,13 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
   const sharedRunWindow =
     state.timingPoint === "run.approach_ice" ||
     state.timingPoint === "run.jack_out_window";
-  if (side !== state.activeSide && !sharedRunWindow)
+  const inactiveCorpRunnerActionPaidWindow =
+    state.timingPoint === "runner_action.main" && side === "corp";
+  if (
+    side !== state.activeSide &&
+    !sharedRunWindow &&
+    !inactiveCorpRunnerActionPaidWindow
+  )
     return [];
 
   if (state.timingPoint === "corp_draw.mandatory_draw") {
@@ -2030,8 +2065,10 @@ export function getLegalActions(state: GameState, side: Side): LegalAction[] {
 
   if (state.timingPoint === "corp_action.main")
     return side === "corp" ? corpMainActions(state) : [];
-  if (state.timingPoint === "runner_action.main")
-    return side === "runner" ? runnerMainActions(state) : [];
+  if (state.timingPoint === "runner_action.main") {
+    if (side === "runner") return runnerMainActions(state);
+    return side === "corp" ? corpRunnerActionPaidWindowActions(state) : [];
+  }
   if (state.timingPoint === "run.approach_ice") {
     if (isApproachIceExposeViewingWindowOpen(state))
       return side === "runner" ? runnerApproachIceExposeViewingActions(state) : [];
@@ -2391,6 +2428,62 @@ export function isHiddenInfoBarrierEvent(event: GameEvent): boolean {
   ].includes(event.type);
 }
 
+function corpRunnerActionPaidWindowActions(state: GameState): LegalAction[] {
+  const actions: LegalAction[] = [];
+  for (const server of state.corp.servers) {
+    for (const id of server.root) {
+      const definition = definitionFor(state, id);
+      const instance = mustInstance(state.cardInstances, id);
+      if (
+        (definition.type !== "asset" && definition.type !== "upgrade") ||
+        instance.rezzed
+      )
+        continue;
+      const rezCost = rezCostForCard(state, id);
+      if (state.corp.credits < rezCost) continue;
+      if (
+        isAcmeSavingsAndLoanDefinition(definition.id) &&
+        corpAgendaPointTotal(state) < 1
+      )
+        continue;
+      const rezCostReductionSourceDefinitionIds =
+        rezCostReductionSourceDefinitionIdsFor(state, id, definition);
+      const acmeRezCost = isAcmeSavingsAndLoanDefinition(definition.id)
+        ? {
+            agendaPointCost: 1,
+            acmeSavingsAndLoanAbility: "rez_with_agenda_point_cost",
+          }
+        : {};
+      actions.push(
+        action(
+          state,
+          "corp",
+          "rez_ice",
+          `${definition.title} in ${server.label} rezzen`,
+          id,
+          [{ credits: rezCost }],
+          {
+            cardId: id,
+            rootRez: true,
+            runnerActionPaidWindowRez: true,
+            serverId: server.id,
+            ...acmeRezCost,
+            ...(rezCostReductionSourceDefinitionIds.length > 0
+              ? {
+                  rezCostReductionSourceDefinitionIds:
+                    rezCostReductionSourceDefinitionIds.join(","),
+                  rezCostReductionAmount: (definition.rezCost ?? 0) - rezCost,
+                  rezCostPaid: rezCost,
+                }
+              : {}),
+          },
+        ),
+      );
+    }
+  }
+  return actions;
+}
+
 function corpMainActions(state: GameState): LegalAction[] {
   const actions: LegalAction[] = [];
   for (const server of state.corp.servers) {
@@ -2438,22 +2531,11 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
   }
   if (state.corp.clicks <= 0) {
-    actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
+    actions.push(buildCorpEndTurnAction(state));
     return actions;
   }
   if (state.corp.clicks >= 3 && totalCounters(state, "virus") > 0) {
-    actions.push(
-      action(
-        state,
-        "corp",
-        "purge_virus_counters",
-        "Virus-Counter purgen",
-        "basic_action",
-        [{ clicks: 3 }],
-        { purgedCounterType: "virus" },
-        { targetRequirements: [] },
-      ),
-    );
+    actions.push(buildCorpPurgeVirusAction(state));
   }
   if (state.corp.credits >= 4) {
     for (const server of state.corp.servers) {
@@ -2477,11 +2559,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
   }
-  actions.push(
-    action(state, "corp", "gain_credit", "1 Credit nehmen", "basic_action", [
-      { clicks: 1 },
-    ]),
-  );
+  actions.push(buildCorpGainCreditAction(state));
   if (acmeSavingsAndLoanObligationCount(state) > 0 && state.corp.credits >= 12) {
     actions.push(
       action(
@@ -2502,11 +2580,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     );
   }
   if (state.corp.rd.length > 0)
-    actions.push(
-      action(state, "corp", "draw_card", "Karte ziehen", "basic_action", [
-        { clicks: 1 },
-      ]),
-    );
+    actions.push(buildCorpDrawAction(state));
   if (state.runner.tags > 0 && state.corp.credits >= 2) {
     for (const id of state.runner.rig.resources) {
       const hiddenResource = isConcealedRunnerResource(state, id);
@@ -2611,17 +2685,7 @@ function corpMainActions(state: GameState): LegalAction[] {
       );
     }
     if (definition.type === "ice") {
-      actions.push(
-        action(
-          state,
-          "corp",
-          "install_card",
-          `ICE vor neuem Remote installieren`,
-          id,
-          [{ clicks: 1 }],
-          { cardId: id, serverId: "new_remote", placement: "ice" },
-        ),
-      );
+      actions.push(buildCorpNewRemoteIceInstallAction(state, id));
       for (const server of state.corp.servers) {
         const {
           baseCost,
@@ -2634,33 +2698,21 @@ function corpMainActions(state: GameState): LegalAction[] {
           corpIceInstallTotalCost(state, id, server);
         if (state.corp.credits < totalCost) continue;
         actions.push(
-          action(
+          buildCorpServerIceInstallAction(
             state,
-            "corp",
-            "install_card",
-            `ICE vor ${server.label} installieren`,
             id,
-            [{ clicks: 1, ...(totalCost > 0 ? { credits: totalCost } : {}) }],
+            server,
             {
-              cardId: id,
-              serverId: server.id,
-              placement: "ice",
-              iceInstallBaseCost: baseCost,
-              iceInstallAdditionalCost: additionalCost,
-              iceInstallReduction: reduction,
+              baseCost,
+              additionalCost,
+              reduction,
               ...(reductionSourceDefinitionIds
-                ? {
-                    iceInstallReductionSourceDefinitionIds:
-                      reductionSourceDefinitionIds,
-                  }
+                ? { reductionSourceDefinitionIds }
                 : {}),
               ...(increaseSourceDefinitionIds
-                ? {
-                    iceInstallIncreaseSourceDefinitionIds:
-                      increaseSourceDefinitionIds,
-                  }
+                ? { increaseSourceDefinitionIds }
                 : {}),
-              iceInstallTotalCost: totalCost,
+              totalCost,
             },
           ),
         );
@@ -2682,22 +2734,7 @@ function corpMainActions(state: GameState): LegalAction[] {
         : 0;
       if (state.corp.credits >= regionInstallCost) {
         actions.push(
-          action(
-            state,
-            "corp",
-            "install_card",
-            `Karte in neuem Remote installieren`,
-            id,
-            [
-              {
-                clicks: 1,
-                ...(regionInstallCost > 0
-                  ? { credits: regionInstallCost }
-                  : {}),
-              },
-            ],
-            { cardId: id, serverId: "new_remote", placement: "root" },
-          ),
+          buildCorpNewRemoteRootInstallAction(state, id, regionInstallCost),
         );
       }
       for (const server of state.corp.servers) {
@@ -2714,31 +2751,12 @@ function corpMainActions(state: GameState): LegalAction[] {
             corpRootAssetIdsInServer(state, server).length > 0 &&
             corpRootMainCardIdsInServer(state, server).length >= rootCapacity;
           actions.push(
-            action(
+            buildCorpServerRootInstallAction(
               state,
-              "corp",
-              "install_card",
-              `Karte in ${server.label} installieren`,
               id,
-              [
-                {
-                  clicks: 1,
-                  ...(regionInstallCost > 0
-                    ? { credits: regionInstallCost }
-                    : {}),
-                },
-              ],
-              {
-                cardId: id,
-                serverId: server.id,
-                placement: "root",
-                ...(replacesRootAsset
-                  ? { rootReplacement: "asset_to_agenda" }
-                  : {}),
-                ...(replacesRegion
-                  ? { regionReplacementWarning: true }
-                  : {}),
-              },
+              server,
+              regionInstallCost,
+              { replacesRootAsset, replacesRegion },
             ),
           );
         }
@@ -3212,7 +3230,7 @@ function corpMainActions(state: GameState): LegalAction[] {
     }
   }
   actions.push(...specialZoneHarnessActions(state, "corp"));
-  actions.push(action(state, "corp", "end_turn", "Zug beenden", "game_rule"));
+  actions.push(buildCorpEndTurnAction(state));
   if (edgerunnerTempsInstallActionsRemaining(state) > 0) {
     return actions
       .filter(
@@ -3441,9 +3459,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state,
       actions,
     );
-    actions.push(
-      action(state, "runner", "end_turn", "Zug beenden", "game_rule"),
-    );
+    actions.push(buildRunnerEndTurnAction(state));
     return actions;
   }
   if (valuPakProgramInstallActionsRemaining(state) > 0) {
@@ -3499,24 +3515,13 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
     }
-    actions.push(
-      action(
-        state,
-        "runner",
-        "gain_credit",
-        "1 Credit nehmen",
-        "basic_action",
-        [{ clicks: 1 }],
-      ),
-    );
+    actions.push(buildRunnerGainCreditAction(state));
     if (state.runner.stack.length > 0)
-      actions.push(...runnerDrawCardActions(state));
-    if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
       actions.push(
-        action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [
-          { clicks: 1, credits: 2 },
-        ]),
+        ...buildRunnerDrawCardActions(state, runnerDrawActionContext(state)),
       );
+    if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
+      actions.push(buildRunnerRemoveTagAction(state));
     }
     if (cardCounter(state, state.runner.identity, "crying") > 0 && state.runner.credits >= 2) {
       actions.push(
@@ -3577,17 +3582,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state.runner.memoryUsed + (definition.memoryCost ?? 0) <=
         runnerMemoryLimit(state)
     ) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id },
-        ),
-      );
+      actions.push(buildRunnerProgramInstallAction(state, id, definition));
     }
     if (
       hasClicks &&
@@ -3713,17 +3708,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
         continue;
       }
-      actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id },
-        ),
-      );
+      actions.push(buildRunnerHardwareInstallAction(state, id, definition));
     }
     if (
       hasClicks &&
@@ -3799,28 +3784,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
         }
         continue;
       }
-      actions.push(
-        action(
-          state,
-          "runner",
-          "install_card",
-          `${definition.title} installieren`,
-          id,
-          [{ clicks: 1, credits: definition.installCost ?? 0 }],
-          { cardId: id },
-          {
-            targetRequirements: [
-              {
-                id: "resourceCard",
-                kind: "card",
-                side: "runner",
-                zoneScope: ["runner.grip"],
-                visibility: "known_to_actor",
-              },
-            ],
-          },
-        ),
-      );
+      actions.push(buildRunnerResourceInstallAction(state, id, definition));
     }
     if (
       hasClicks &&
@@ -4456,7 +4420,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     state,
     actions,
   );
-  actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+  actions.push(buildRunnerEndTurnAction(state));
   const wilsonRestrictedActions = Math.max(
     0,
     Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
@@ -4472,63 +4436,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
   return actions;
 }
 
-function runnerDrawCardActions(state: GameState): LegalAction[] {
-  const citySurveillanceSourceCount = citySurveillanceSourceIds(state).length;
-  const projectedDrawCount = activeCrashEverettSourceId(state) ? 2 : 1;
-  if (citySurveillanceSourceCount <= 0) {
-    return [
-      action(state, "runner", "draw_card", "Karte ziehen", "basic_action", [
-        { clicks: 1 },
-      ]),
-    ];
-  }
-
-  const actions: LegalAction[] = [];
-  const projectedCitySurveillanceCost =
-    citySurveillanceSourceCount * projectedDrawCount;
-  if (state.runner.credits >= projectedCitySurveillanceCost) {
-    actions.push(
-      action(
-        state,
-        "runner",
-        "draw_card",
-        projectedCitySurveillanceCost === 1
-          ? "Karte ziehen (City Surveillance: 1 Credit zahlen)"
-          : `Karte ziehen (City Surveillance: ${projectedCitySurveillanceCost} Credits zahlen)`,
-        "basic_action",
-        [{ clicks: 1, credits: projectedCitySurveillanceCost }],
-        {
-          citySurveillanceSourceCount,
-          citySurveillanceProjectedDrawCount: projectedDrawCount,
-          citySurveillanceDrawDecision: "pay",
-          citySurveillanceProjectedCreditsPaid: projectedCitySurveillanceCost,
-          citySurveillanceProjectedTagsAdded: 0,
-        },
-      ),
-    );
-  }
-
-  actions.push(
-    action(
-      state,
-      "runner",
-      "draw_card",
-      citySurveillanceSourceCount === 1
-        ? "Karte ziehen (City Surveillance: 1 Tag nehmen)"
-        : `Karte ziehen (City Surveillance: ${citySurveillanceSourceCount} Tags nehmen)`,
-      "basic_action",
-      [{ clicks: 1 }],
-      {
-        citySurveillanceSourceCount,
-        citySurveillanceProjectedDrawCount: projectedDrawCount,
-        citySurveillanceDrawDecision: "tag",
-        citySurveillanceProjectedCreditsPaid: 0,
-        citySurveillanceProjectedTagsAdded:
-          citySurveillanceSourceCount * projectedDrawCount,
-      },
-    ),
-  );
-  return actions;
+function runnerDrawActionContext(state: GameState): RunnerDrawActionContext {
+  return {
+    citySurveillanceSourceCount: citySurveillanceSourceIds(state).length,
+    projectedDrawCount: activeCrashEverettSourceId(state) ? 2 : 1,
+  };
 }
 
 function normalizeSubtypeLabel(subtype: string): string {
@@ -11228,8 +11140,28 @@ function rezCard(
   if (rootRez && startSpeedTrapRezInterruptChoice(state, cardId, legalAction))
     return;
   if (rootRez && resolveCorpRootRezEffect(state, cardId, legalAction)) return;
-  if (rootRez) return;
+  if (rootRez) {
+    continueAfterCorpRootRezIfWindowIsComplete(state, legalAction);
+    return;
+  }
   beginEncounter(state, cardId as CardInstanceId, legalAction);
+}
+
+function continueAfterCorpRootRezIfWindowIsComplete(
+  state: GameState,
+  legalAction?: LegalAction,
+): void {
+  const run = state.run;
+  if (
+    state.timingPoint !== "run.approach_ice" ||
+    run?.phase !== "approach_ice" ||
+    !run.approachedIceId ||
+    corpRunRootRezActions(state).length > 0
+  )
+    return;
+  const approachedIce = mustInstance(state.cardInstances, run.approachedIceId);
+  if (!approachedIce.rezzed) return;
+  beginEncounter(state, run.approachedIceId, legalAction);
 }
 
 function proteusVariableIceStateForRezAction(
@@ -11995,6 +11927,7 @@ function continueRun(state: GameState, legalAction?: LegalAction): void {
     }
   }
   for (const index of payOrEndRunIndexesForThisContinue) {
+    if (ended) break;
     if (paidPayOrEndRunIndexes.has(index)) continue;
     const alreadyResolved = (legalAction?.resolvedEffects ?? []).some(
       (effect) =>
@@ -21748,78 +21681,6 @@ function resolveDataFortReclamationRezChoice(
   };
 }
 
-function action(
-  state: GameState,
-  side: Side,
-  type: ActionType,
-  label: string,
-  source: LegalAction["source"],
-  costs: LegalAction["costs"] = [],
-  payload?: LegalAction["payload"],
-  metadata: Partial<
-    Pick<
-      LegalAction,
-      "abilityRef" | "effectRef" | "choiceRequirements" | "targetRequirements"
-    >
-  > = {},
-): LegalAction {
-  const visibility =
-    type.startsWith("rez") ||
-    type === "score_agenda" ||
-    type === "trash_resource" ||
-    payload?.v1917AssetAbility ||
-    payload?.cardImplementationAbility ||
-    payload?.resourceAbility ||
-    payload?.runnerAbility ||
-    payload?.shellTradersAbility ||
-    payload?.acmeSavingsAndLoanAbility ||
-    (side === "runner" && type === "install_card")
-      ? "public"
-      : "private_to_actor";
-  const payloadFields: Pick<LegalAction, "payload"> | Record<string, never> =
-    payload
-      ? { payload: stableLegalActionPayload(type, payload, visibility) }
-      : {};
-  return {
-    actionId: makeActionId(type, side, payload, source),
-    side,
-    type,
-    label,
-    source,
-    timingPoint: state.timingPoint,
-    costs,
-    targetRequirements: metadata.targetRequirements ?? [],
-    visibility,
-    expiresAtStateVersion: state.stateVersion,
-    ...(metadata.choiceRequirements
-      ? { choiceRequirements: metadata.choiceRequirements }
-      : {}),
-    ...(metadata.abilityRef ? { abilityRef: metadata.abilityRef } : {}),
-    ...(metadata.effectRef ? { effectRef: metadata.effectRef } : {}),
-    ...payloadFields,
-  };
-}
-
-function stableLegalActionPayload(
-  actionType: ActionType,
-  payload: NonNullable<LegalAction["payload"]>,
-  visibility: LegalAction["visibility"],
-): NonNullable<LegalAction["payload"]> {
-  const schema = buildPublicAbilitySchemaContext(
-    actionType,
-    payload,
-    {},
-    visibility === "public" ? "public" : "private_to_side",
-  );
-  const stableFields: Record<string, string | number | boolean> = {};
-  if (schema.abilityFamily) stableFields.abilityFamily = schema.abilityFamily;
-  if (schema.abilityId) stableFields.abilityId = schema.abilityId;
-  if (schema.effectKind) stableFields.effectKind = schema.effectKind;
-  return Object.keys(stableFields).length > 0
-    ? { ...payload, ...stableFields }
-    : payload;
-}
-
 function choiceAction(state: GameState, choice: ChoiceRequest): LegalAction {
   return action(
     state,
@@ -29536,91 +29397,6 @@ function hasLegacyAbilityPayload(
   );
 }
 
-function makeActionId(
-  type: ActionType,
-  side: Side,
-  payload: LegalAction["payload"] | undefined,
-  source: LegalAction["source"],
-): string {
-  const parts = [
-    side,
-    type,
-    source === "basic_action" || source === "game_rule" ? "" : source,
-  ];
-  if (payload?.serverId) parts.push(String(payload.serverId));
-  if (payload?.selectedServerId) parts.push(String(payload.selectedServerId));
-  if (payload?.cardId) parts.push(String(payload.cardId));
-  if (payload?.hostOnCardId) parts.push(String(payload.hostOnCardId));
-  if (payload?.runnerProgramTrashBeforeInstall)
-    parts.push("runner_program_trash_before_install");
-  if (payload?.breakerId) parts.push(String(payload.breakerId));
-  if (payload?.iceId) parts.push(String(payload.iceId));
-  if (payload?.subroutineIndex !== undefined)
-    parts.push(String(payload.subroutineIndex));
-  if (payload?.subroutineId !== undefined)
-    parts.push(String(payload.subroutineId));
-  if (payload?.subroutineIndexes !== undefined)
-    parts.push(String(payload.subroutineIndexes));
-  if (payload?.pumpAmount !== undefined)
-    parts.push(String(payload.pumpAmount));
-  if (payload?.proteusVariableRez !== undefined)
-    parts.push(String(payload.proteusVariableRez));
-  if (payload?.variableRezAdditionalCost !== undefined)
-    parts.push(String(payload.variableRezAdditionalCost));
-  if (payload?.variableRezValue !== undefined)
-    parts.push(String(payload.variableRezValue));
-  if (payload?.removeTagAmount !== undefined)
-    parts.push(String(payload.removeTagAmount));
-  if (payload?.cardImplementationAbility)
-    parts.push(String(payload.cardImplementationAbility));
-  if (payload?.cardImplementationAbilityIndex !== undefined)
-    parts.push(String(payload.cardImplementationAbilityIndex));
-  if (payload?.cardImplementationLifecycleAction)
-    parts.push(String(payload.cardImplementationLifecycleAction));
-  if (payload?.cardImplementationLifecycleAbilityIndex !== undefined)
-    parts.push(String(payload.cardImplementationLifecycleAbilityIndex));
-  if (payload?.iceInstallTotalCost !== undefined)
-    parts.push(String(payload.iceInstallTotalCost));
-  if (payload?.iceInstallReductionSourceDefinitionIds)
-    parts.push(String(payload.iceInstallReductionSourceDefinitionIds));
-  if (payload?.accessTrashTotalCost !== undefined)
-    parts.push(String(payload.accessTrashTotalCost));
-  if (payload?.accessTrashCostSourceDefinitionIds)
-    parts.push(String(payload.accessTrashCostSourceDefinitionIds));
-  if (payload?.encounterSubroutineIds !== undefined)
-    parts.push(String(payload.encounterSubroutineIds));
-  if (payload?.payOrEndRunSubroutineIndexes !== undefined)
-    parts.push(String(payload.payOrEndRunSubroutineIndexes));
-  if (payload?.payOrEndRunSubroutinePayment !== undefined)
-    parts.push(String(payload.payOrEndRunSubroutinePayment));
-  for (const entry of legacyAbilityPayloadEntries(
-    payload,
-    ACTION_ID_LEGACY_ABILITY_PAYLOAD_FIELDS,
-  )) {
-    parts.push(entry.abilityId);
-  }
-  if (payload?.stealCost !== undefined) parts.push(String(payload.stealCost));
-  if (payload?.stealCostSourceDefinitionIds)
-    parts.push(String(payload.stealCostSourceDefinitionIds));
-  if (payload?.stealCostPersistedForCurrentAccess !== undefined)
-    parts.push(String(payload.stealCostPersistedForCurrentAccess));
-  if (payload?.oliviaSalazarRezSourceCardId)
-    parts.push(String(payload.oliviaSalazarRezSourceCardId));
-  if (payload?.targetCardId) parts.push(String(payload.targetCardId));
-  if (payload?.secondTargetCardId)
-    parts.push(String(payload.secondTargetCardId));
-  if (payload?.powerGridOverloadTrashCount)
-    parts.push(String(payload.powerGridOverloadTrashCount));
-  if (payload?.citySurveillanceDrawDecision)
-    parts.push(String(payload.citySurveillanceDrawDecision));
-  if (payload?.approachIceExposeDecision)
-    parts.push(String(payload.approachIceExposeDecision));
-  if (payload?.approachIceExposeViewDecision)
-    parts.push(String(payload.approachIceExposeViewDecision));
-  if (payload?.approachIceExposeJackOut)
-    parts.push(String(payload.approachIceExposeJackOut));
-  return parts.filter(Boolean).join(".");
-}
 
 function buildEvent(
   before: number,
