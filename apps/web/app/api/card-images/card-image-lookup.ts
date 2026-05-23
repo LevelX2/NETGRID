@@ -8,8 +8,7 @@ const IMAGE_DIR = path.join(REPO_ROOT, "data", "local-assets", "card-images");
 const LOCAL_ONR_SNAPSHOT_PATH = path.join(REPO_ROOT, "data", "local", "card-import", "onr-v1-limited", "card-snapshot-onr-v1-limited.local.json");
 const LOCAL_ONR_ASSET_INDEX_PATH = path.join(IMAGE_DIR, "onr-1996", "card-image-index.local.json");
 const PROTEUS_CARD_SET_PATH = path.join(REPO_ROOT, "data", "cards", "proteus-cards.json");
-
-let localOnrImageLookupPromise: Promise<Map<string, string>> | null = null;
+const CLASSIC_CARD_SET_PATH = path.join(REPO_ROOT, "data", "cards", "classic-cards.json");
 
 export type CardImageLookupResult = {
   cardId: string;
@@ -49,14 +48,14 @@ function hasVersionParam(requestUrl: string): boolean {
 }
 
 async function localOnrImageLookup(): Promise<Map<string, string>> {
-  localOnrImageLookupPromise ??= readLocalOnrImageLookup();
-  return localOnrImageLookupPromise;
+  return readLocalOnrImageLookup();
 }
 
 async function readLocalOnrImageLookup(): Promise<Map<string, string>> {
   const lookup = new Map<string, string>();
   await addLocalOnrV1SnapshotImages(lookup);
-  await addProteusLocalIndexImages(lookup);
+  await addLocalOnrSetIndexImages(lookup, "v21-proteus", PROTEUS_CARD_SET_PATH);
+  await addLocalOnrSetIndexImages(lookup, "v22-classic", CLASSIC_CARD_SET_PATH);
   return lookup;
 }
 
@@ -79,31 +78,31 @@ function isSafeLocalImagePath(value: string | undefined, kind: CardImageLookupRe
 }
 
 function isLocalOnrCatalogCardId(cardId: string): boolean {
-  return cardId.startsWith("onr_v1_") || cardId.startsWith("onr_proteus_");
+  return cardId.startsWith("onr_v1_") || cardId.startsWith("onr_proteus_") || cardId.startsWith("onr_classic_");
 }
 
-async function addProteusLocalIndexImages(lookup: Map<string, string>): Promise<void> {
+async function addLocalOnrSetIndexImages(lookup: Map<string, string>, imageSet: string, cardSetPath: string): Promise<void> {
   try {
-    const [assetIndex, proteusSet] = await Promise.all([
+    const [assetIndex, cardSet] = await Promise.all([
       readJson<LocalOnrAssetIndex>(LOCAL_ONR_ASSET_INDEX_PATH),
-      readJson<ProteusCardSet>(PROTEUS_CARD_SET_PATH),
+      readJson<LocalOnrCardSet>(cardSetPath),
     ]);
     const assetsByTitle = new Map<string, LocalOnrAsset>();
     const assetsBySlug = new Map<string, LocalOnrAsset>();
     for (const asset of assetIndex.assets) {
-      if (asset.set !== "v21-proteus" || !isSafeLocalImagePath(asset.relativePath, "local_onr")) continue;
+      if (asset.set !== imageSet || !isSafeLocalImagePath(asset.relativePath, "local_onr")) continue;
       assetsByTitle.set(titleKey(asset.side, asset.title), asset);
       assetsBySlug.set(`${asset.side}:${asset.slug}`, asset);
     }
 
-    for (const card of proteusSet.cards) {
+    for (const card of cardSet.cards) {
       const titleAsset = assetsByTitle.get(titleKey(card.side, card.title));
-      const slugAsset = assetsBySlug.get(`${card.side}:${proteusSlugFromCardId(card.cardId)}`);
+      const slugAsset = assetsBySlug.get(`${card.side}:${slugFromOnrCardId(card.cardId)}`);
       const asset = titleAsset ?? slugAsset;
       if (asset && isSafeLocalImagePath(asset.relativePath, "local_onr")) lookup.set(card.cardId, asset.relativePath);
     }
   } catch {
-    // The Proteus image cache is private/local and ignored by git.
+    // Private/local O:NR image caches are optional and ignored by git.
   }
 }
 
@@ -115,8 +114,8 @@ function titleKey(side: string, title: string): string {
   return `${side}:${title.trim().toLocaleLowerCase("en-US")}`;
 }
 
-function proteusSlugFromCardId(cardId: string): string {
-  return cardId.replace(/^onr_proteus_\d{3}_/, "");
+function slugFromOnrCardId(cardId: string): string {
+  return cardId.replace(/^onr_(?:proteus|classic)_\d{3}_/, "");
 }
 
 type LocalOnrSnapshot = {
@@ -142,7 +141,7 @@ type LocalOnrAsset = {
   relativePath: string;
 };
 
-type ProteusCardSet = {
+type LocalOnrCardSet = {
   cards: Array<{
     cardId: string;
     title: string;
