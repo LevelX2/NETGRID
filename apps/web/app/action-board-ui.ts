@@ -353,7 +353,7 @@ export function contextualCardActionLabel(action: LegalAction): string {
     case "advance_card":
       return "Ausbauen";
     case "score_agenda":
-      return "Scoren";
+      return scoreAgendaContextLabel(action);
     case "rez_ice":
       return "Rezzen";
     case "pump_breaker":
@@ -555,6 +555,16 @@ function playEventContextLabel(action: LegalAction): string {
   const fullLabel = actionButtonLabel(action);
   if (/\bRun\b/i.test(fullLabel) || /\bDeep Dive\b/i.test(fullLabel)) return `Run auf ${serverLabel}`;
   return `Spielen auf ${serverLabel}`;
+}
+
+function scoreAgendaContextLabel(action: LegalAction): string {
+  const selectedServerLabel =
+    typeof action.payload?.selectedServerLabel === "string"
+      ? action.payload.selectedServerLabel
+      : typeof action.payload?.selectedServerId === "string"
+        ? serverDisplayLabel(action.payload.selectedServerId)
+        : null;
+  return selectedServerLabel ? `Scoren: ${selectedServerLabel} wählen` : "Scoren";
 }
 
 export function baseActionSlotCapacity(side: Side): number {

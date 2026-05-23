@@ -104,7 +104,7 @@ export function visibleOwnCard(state: GameState, id: CardInstanceId): VisibleCar
     ...visibleCountersField(visibleCountersForKnownCard(definition, instance)),
     ...counterDisplaysField(counterDisplaysForKnownCard(definition, instance)),
     ...(instance.hostedOn ? { hostedOn: instance.hostedOn } : {}),
-    ...(requiresDataFortInstallTarget(definition) && instance.selectedServerId
+    ...(instance.selectedServerId
       ? {
           selectedServerId: instance.selectedServerId,
           selectedServerLabel: serverChoiceDisplayLabel(

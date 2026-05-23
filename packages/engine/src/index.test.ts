@@ -12647,6 +12647,16 @@ describe("V1.6.2 Mechanikpaket B", () => {
     expect(
       securityNet.cardInstances[securityNetAgendaId!]?.selectedServerId,
     ).toBe("rd");
+    expect(
+      getPlayerView(securityNet, "corp").own.scoreArea.find(
+        (card) => card.instanceId === securityNetAgendaId,
+      ),
+    ).toMatchObject({ selectedServerId: "rd", selectedServerLabel: "R&D" });
+    expect(securityNet.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "score_agenda",
+      selectedServerId: "rd",
+      selectedServerLabel: "R&D",
+    });
     securityNet = apply(
       securityNet,
       "corp",

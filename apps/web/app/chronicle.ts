@@ -931,12 +931,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       const points = agendaPointSuffix(agendaPoints);
       const scoreEffect = mergedCardResolverEffect;
+      const selectedServerSuffix = selectedServerLabel ? ` und ${selectedServerLabel} gewählt` : "";
       category = scoreEffect?.category ?? category;
       title = phrase(
         subject,
-        `${cardTitle ?? "eine Agenda"} gescored${points}${scoreEffect?.suffix ? ` und ${scoreEffect.suffix}` : ""}`,
+        `${cardTitle ?? "eine Agenda"} gescored${points}${selectedServerSuffix}${scoreEffect?.suffix ? ` und ${scoreEffect.suffix}` : ""}`,
       );
-      chips.push("Score", ...agendaPointChips(agendaPoints), ...(scoreEffect?.chips ?? []));
+      chips.push("Score", ...agendaPointChips(agendaPoints), ...(selectedServerLabel ? [selectedServerLabel] : []), ...(scoreEffect?.chips ?? []));
       break;
     }
     case "start_run": {

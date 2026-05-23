@@ -1002,6 +1002,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Remote 2");
+    expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Security Net Optimization scoren und R&D wählen", { cardId: "agenda_1", selectedServerId: "rd" }))).toBe("Scoren: R&D wählen");
+    expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Security Net Optimization scoren und Remote 2 wählen", { cardId: "agenda_1", selectedServerId: "remote_2" }))).toBe("Scoren: Remote 2 wählen");
+    expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" }))).toBe("Scoren");
   });
 
   it("names Corp install destinations in card context actions", () => {

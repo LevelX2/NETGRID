@@ -1027,6 +1027,23 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Install", "Resource", "Remote 1"]));
   });
 
+  it("names Security Net Optimization selected servers in the chronicle", () => {
+    const item = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        title: "Security Net Optimization",
+        cardDefinitionId: "onr_v1_215_security-net-optimization",
+        selectedServerId: "remote_1",
+        selectedServerLabel: "Remote 1"
+      }),
+      "runner",
+      { cardTitle: "Security Net Optimization" }
+    );
+
+    expect(item.title).toBe("Die Korp hat Security Net Optimization gescored und Remote 1 gewählt.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Score", "Remote 1"]));
+  });
+
   it("describes Data Fort Reclamation and Aardvark hidden-zone choices", () => {
     const dataFortInstall = formatChronicleEvent(
       makeEvent("resolve_choice", {

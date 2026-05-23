@@ -12672,7 +12672,7 @@ function ScoredAgendaStateLines({ card, side }: { card: DisplayVisibleCard; side
 
 function scoredAgendaStateLines(card: DisplayVisibleCard, side: Side): ScoredAgendaStateLine[] {
   const lines: ScoredAgendaStateLine[] = [];
-  const effectLine = scoredAgendaEffectLineForScoreArea(card.definitionId, side);
+  const effectLine = scoredAgendaEffectLineForScoreArea(card, side);
   if (effectLine) lines.push(effectLine);
   return lines;
 }
