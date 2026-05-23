@@ -287,6 +287,23 @@ describe("catalog API filters", () => {
     ).toMatchObject({ code: "uncommon", labelDe: "Ungewöhnlich" });
   });
 
+  it("serves The Shell Traders catalog text from the confirmed spoiler instead of the old recurring-credit placeholder", () => {
+    const response = catalogDetailResponse("onr_v1_176_the-shell-traders");
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        text: string;
+      };
+    };
+
+    expect(body.card.text).toContain(
+      "Choose a program or hardware card from your hand.",
+    );
+    expect(body.card.text).toContain("Shell counters");
+    expect(body.card.text).toContain("install that card, at no cost");
+    expect(body.card.text).not.toContain("recurring credit");
+  });
+
   it("shows promoted longtail card details in the web catalog API", () => {
     for (const cardId of [
       "onr_v1_026_false-echo",
