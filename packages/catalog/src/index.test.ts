@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
+import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
   activeAiApprovedCardIds,
   activeRuntimeCardIds,
@@ -85,7 +86,9 @@ describe("card set support catalog source", () => {
 
     expect(activeRuntimeCardIds.slice().sort()).toEqual(runtimeIdsFromCards);
     expect(activeAiApprovedCardIds.slice().sort()).toEqual(aiIdsFromCards);
-    expect(Object.keys(runtimeGateByCardId).sort()).toEqual(runtimeIdsFromCards);
+    expect(Object.keys(runtimeGateByCardId).sort()).toEqual(
+      runtimeIdsFromCards,
+    );
 
     for (const cardId of activeRuntimeCardIds) {
       const card = cardsById[cardId];
@@ -116,15 +119,58 @@ describe("card set support catalog source", () => {
     }
   });
 
-  it("keeps all ai_supported cards linked to active hints and scenarios", () => {
+  it("keeps active AI support, active hints and the approval scenario aligned", () => {
+    const activeAiSupportScenario =
+      cardSupportAiSupportedScenarioData.scenarios.find(
+        (scenario) => scenario.id === "active_card_support_ai_supported",
+      );
+    expect(
+      cardSupportAiSupportedScenarioData.status,
+      "card support approval scenario pack status",
+    ).toBe("ai_supported");
+    expect(activeAiSupportScenario).toBeDefined();
+
+    const cardsById = createRuntimeCardsById();
     const hintsById = new Map(
       activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
+    const activeAiApprovedIdSet = new Set(activeAiApprovedCardIds);
+    const hintCardIds = activeAiHintsData.cards.map((hint) => hint.cardId);
+    const scenarioCardIds = activeAiSupportScenario?.coversCards ?? [];
+    const runtimeIdsWithoutHints = activeRuntimeCardIds
+      .filter((cardId) => !hintsById.has(cardId))
+      .sort();
+
+    expect(hintsById.size, "active AI hint card ids must be unique").toBe(
+      hintCardIds.length,
+    );
+    expect([...hintsById.keys()].sort()).toEqual(
+      activeAiApprovedCardIds.slice().sort(),
+    );
+    expect([...new Set(scenarioCardIds)].sort()).toEqual(
+      activeAiApprovedCardIds.slice().sort(),
+    );
+    expect(runtimeIdsWithoutHints).toEqual([
+      "onr_proteus_041_toughoniumtm-wall",
+    ]);
+
     for (const cardId of activeAiApprovedCardIds) {
+      const card = cardsById[cardId];
       const hint = hintsById.get(cardId);
+      expect(card, cardId).toBeDefined();
+      expect(card?.statuses.ai_supported, cardId).toBe(true);
       expect(hint, cardId).toBeDefined();
       expect(hint?.aiSupportStatus, cardId).toBe("ai_supported");
       expect(hint?.scenarioRefs.length, cardId).toBeGreaterThan(0);
+    }
+
+    for (const hint of activeAiHintsData.cards) {
+      const card = cardsById[hint.cardId];
+      expect(card, hint.cardId).toBeDefined();
+      if (hint.aiSupportStatus === "ai_supported")
+        expect(activeAiApprovedIdSet.has(hint.cardId), hint.cardId).toBe(true);
+      else
+        expect(activeAiApprovedIdSet.has(hint.cardId), hint.cardId).toBe(false);
     }
   });
 

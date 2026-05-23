@@ -545,7 +545,11 @@
       "side": "runner",
       "cardType": "program",
       "roles": [
-        "breaker_decoder"
+        "program",
+        "icebreaker",
+        "breaker_decoder",
+        "code_gate_breaker",
+        "efficient_breaker"
       ],
       "planRoles": [
         "build_rig",
@@ -554,15 +558,18 @@
       "requiredMechanics": [
         "install_program",
         "memory",
+        "pump_breaker",
+        "break_subroutine",
         "subtype_decoder",
         "subtype_icebreaker"
       ],
       "valueHints": {
         "runPressure": 2,
-        "rigCoverage": 2
+        "rigCoverage": 3
       },
       "riskTags": [
-        "encounter"
+        "encounter",
+        "credit_reserve"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1505,20 +1512,31 @@
       "cardType": "program",
       "roles": [
         "program",
-        "icebreaker"
+        "icebreaker",
+        "breaker_fracter",
+        "wall_breaker",
+        "stealth_loss"
       ],
       "planRoles": [
         "build_rig",
+        "break_walls",
         "run_support"
       ],
       "requiredMechanics": [
-        "install_program"
+        "install_program",
+        "memory",
+        "pump_breaker",
+        "break_wall_subroutine",
+        "subtype_noisy",
+        "stealth_loss"
       ],
       "valueHints": {
-        "rig": 1
+        "rigCoverage": 2,
+        "runPressure": 2
       },
       "riskTags": [
-        "breaker_future_detail"
+        "credit_reserve",
+        "stealth_conflict"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1653,7 +1671,12 @@
       "side": "runner",
       "cardType": "program",
       "roles": [
-        "breaker_decoder"
+        "program",
+        "icebreaker",
+        "breaker_decoder",
+        "code_gate_breaker",
+        "efficient_breaker",
+        "high_install_cost"
       ],
       "planRoles": [
         "build_rig",
@@ -1662,15 +1685,18 @@
       "requiredMechanics": [
         "install_program",
         "memory",
+        "pump_breaker",
+        "break_subroutine",
         "subtype_decoder",
         "subtype_icebreaker"
       ],
       "valueHints": {
         "runPressure": 2,
-        "rigCoverage": 2
+        "rigCoverage": 3
       },
       "riskTags": [
         "encounter",
+        "credit_reserve",
         "credit_intensive"
       ],
       "aiSupportStatus": "ai_supported",
@@ -1715,7 +1741,11 @@
       "side": "runner",
       "cardType": "program",
       "roles": [
-        "breaker_killer"
+        "program",
+        "icebreaker",
+        "breaker_killer",
+        "sentry_breaker",
+        "low_install_breaker"
       ],
       "planRoles": [
         "build_rig",
@@ -1724,15 +1754,20 @@
       "requiredMechanics": [
         "install_program",
         "memory",
+        "pump_breaker",
+        "break_subroutine",
         "subtype_icebreaker",
         "subtype_killer"
       ],
       "valueHints": {
         "runPressure": 2,
-        "rigCoverage": 2
+        "rigCoverage": 2,
+        "tempo": 1
       },
       "riskTags": [
         "encounter",
+        "credit_reserve",
+        "low_base_strength",
         "credit_intensive"
       ],
       "aiSupportStatus": "ai_supported",
@@ -1907,7 +1942,11 @@
       "side": "runner",
       "cardType": "program",
       "roles": [
-        "breaker_killer"
+        "program",
+        "icebreaker",
+        "breaker_killer",
+        "sentry_breaker",
+        "efficient_sentry_breaker"
       ],
       "planRoles": [
         "build_rig",
@@ -1916,15 +1955,18 @@
       "requiredMechanics": [
         "install_program",
         "memory",
+        "pump_breaker",
+        "break_subroutine",
         "subtype_icebreaker",
         "subtype_killer"
       ],
       "valueHints": {
         "runPressure": 2,
-        "rigCoverage": 2
+        "rigCoverage": 3
       },
       "riskTags": [
         "encounter",
+        "credit_reserve",
         "credit_intensive"
       ],
       "aiSupportStatus": "ai_supported",
@@ -4736,21 +4778,28 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "tag_risk"
+        "tag_risk",
+        "recursion",
+        "trash_recovery"
       ],
       "planRoles": [
         "build_rig",
-        "economy"
+        "recover_key_card",
+        "resource_value_engine"
       ],
       "requiredMechanics": [
         "install_resource",
-        "resource_tag_interaction"
+        "resource_tag_interaction",
+        "public_trash_to_hand",
+        "take_click_ability"
       ],
       "valueHints": {
-        "economy": 1
+        "utility": 2,
+        "cardFlow": 2
       },
       "riskTags": [
-        "resource_trash_if_tagged"
+        "resource_trash_if_tagged",
+        "trash_top_card_dependency"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5461,21 +5510,30 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "economy"
+        "economy",
+        "bit_depot",
+        "click_economy",
+        "drip_economy"
       ],
       "planRoles": [
         "build_rig",
-        "economy"
+        "recover_economy",
+        "click_for_credits_when_safe"
       ],
       "requiredMechanics": [
         "install_resource",
-        "gain_credit"
+        "gain_credit",
+        "bit_depot",
+        "take_click_ability"
       ],
       "valueHints": {
-        "economy": 1
+        "economy": 3,
+        "tempo": 1
       },
       "riskTags": [
-        "resource_trash_if_tagged"
+        "resource_trash_if_tagged",
+        "finite_credit_pool",
+        "click_cost"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6524,26 +6582,34 @@
       "cardType": "agenda",
       "roles": [
         "agenda",
+        "agenda_3pt",
         "score_plan",
-        "rez_bonus"
+        "rez_bonus",
+        "free_rez_tempo",
+        "expensive_ice_synergy"
       ],
       "planRoles": [
         "score_now",
         "score_next_turn",
-        "build_scoring_remote"
+        "build_scoring_remote",
+        "rez_expensive_ice_after_score"
       ],
       "requiredMechanics": [
         "install_remote",
         "advance",
         "score",
+        "rez_ice",
         "on_score_rez_ice_free"
       ],
       "valueHints": {
-        "scoring": 3,
-        "tempo": 2
+        "scoring": 4,
+        "tempo": 3,
+        "defense": 2
       },
       "riskTags": [
-        "hidden_until_score_or_access"
+        "hidden_until_score_or_access",
+        "score_window",
+        "target_unrezzed_ice"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6750,29 +6816,36 @@
       "cardType": "agenda",
       "roles": [
         "agenda",
+        "agenda_3pt",
         "score_plan",
-        "wall_ice_armor"
+        "wall_ice_armor",
+        "wall_economy",
+        "global_ice_strength_modifier"
       ],
       "planRoles": [
         "score_now",
         "score_next_turn",
-        "build_scoring_remote"
+        "build_scoring_remote",
+        "wall_remote_plan"
       ],
       "requiredMechanics": [
         "install_remote",
         "advance",
         "score",
         "steal",
+        "gain_credit",
         "global_ice_strength_modifier",
         "persistent_modifier"
       ],
       "valueHints": {
-        "scoring": 3,
-        "defense": 2
+        "scoring": 4,
+        "defense": 3,
+        "economy": 2
       },
       "riskTags": [
         "hidden_until_score_or_access",
-        "global_modifier"
+        "global_modifier",
+        "wall_reveal_choice"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -6917,22 +6990,32 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "damage"
+        "damage",
+        "damage_ice",
+        "ap_ice",
+        "sentry_ice",
+        "run_lock_ice"
       ],
       "planRoles": [
-        "defend_server"
+        "build_scoring_remote",
+        "protect_hq",
+        "protect_rnd"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "encounter_ice",
-        "net_damage"
+        "net_damage",
+        "breaker_restriction"
       ],
       "valueHints": {
-        "defense": 1
+        "defense": 2,
+        "threat": 4
       },
       "riskTags": [
-        "damage_window"
+        "damage_window",
+        "hidden_ice",
+        "next_ice_lock"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -8033,22 +8116,32 @@
       "cardType": "ice",
       "roles": [
         "ice",
-        "damage"
+        "damage",
+        "damage_ice",
+        "ap_ice",
+        "sentry_ice",
+        "run_lock_ice"
       ],
       "planRoles": [
-        "defend_server"
+        "build_scoring_remote",
+        "protect_hq",
+        "protect_rnd"
       ],
       "requiredMechanics": [
         "install_ice",
         "rez_ice",
         "encounter_ice",
-        "net_damage"
+        "net_damage",
+        "breaker_restriction"
       ],
       "valueHints": {
-        "defense": 2
+        "defense": 2,
+        "threat": 3
       },
       "riskTags": [
-        "damage_window"
+        "damage_window",
+        "hidden_ice",
+        "next_ice_lock"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -10502,24 +10595,33 @@
         "corp",
         "asset",
         "random",
-        "damage"
+        "damage",
+        "tag_punishment",
+        "meat_damage"
       ],
       "planRoles": [
         "corp_rez_root_asset",
-        "corp_asset_tag_checked_damage"
+        "corp_asset_tag_checked_damage",
+        "punish_tagged_runner"
       ],
       "requiredMechanics": [
         "deterministic_random_card_resolver",
+        "deterministic_die_roll",
         "generic_asset_node_ability_resolver",
+        "tag_condition",
+        "meat_damage",
         "damage_event_prevention_resolver"
       ],
       "valueHints": {
-        "tagDamagePriority": 2
+        "tagDamagePriority": 3,
+        "threat": 4
       },
       "riskTags": [
         "random_counter_replay_required",
         "public_payload_only",
-        "legal_actions_only"
+        "legal_actions_only",
+        "tag_dependency",
+        "self_trash"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11120,21 +11222,34 @@
       "side": "corp",
       "cardType": "upgrade",
       "roles": [
-        "upgrade"
+        "upgrade",
+        "run_defense",
+        "sysop",
+        "server_ice_install",
+        "successful_run_punish"
       ],
       "planRoles": [
-        "remote_upgrade_support"
+        "remote_upgrade_support",
+        "remote_upgrade_reactive_defense",
+        "build_scoring_remote"
       ],
       "requiredMechanics": [
         "install_upgrade",
         "rez_card",
-        "trash_on_access"
+        "trash_on_access",
+        "successful_run_trigger",
+        "install_ice",
+        "encounter_ice"
       ],
       "valueHints": {
-        "remote": 1
+        "remote": 2,
+        "defense": 2,
+        "tempo": 1
       },
       "riskTags": [
-        "runner_trash_value"
+        "runner_trash_value",
+        "hq_ice_dependency",
+        "successful_run_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11175,21 +11290,30 @@
       "side": "corp",
       "cardType": "upgrade",
       "roles": [
-        "upgrade"
+        "upgrade",
+        "remote_capacity",
+        "scoring_remote_support",
+        "agenda_node_slot"
       ],
       "planRoles": [
-        "remote_upgrade_support"
+        "remote_upgrade_support",
+        "build_scoring_remote"
       ],
       "requiredMechanics": [
         "install_upgrade",
         "rez_card",
-        "trash_on_access"
+        "trash_on_access",
+        "persistent_modifier"
       ],
       "valueHints": {
-        "remote": 1
+        "remote": 2,
+        "scoring": 1,
+        "utility": 1
       },
       "riskTags": [
-        "runner_trash_value"
+        "runner_trash_value",
+        "subsidiary_only",
+        "overcapacity_trash_choice"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11332,10 +11456,14 @@
       "cardType": "upgrade",
       "roles": [
         "upgrade",
-        "access_tax"
+        "access_tax",
+        "agenda_steal_tax",
+        "remote_agenda_protection"
       ],
       "planRoles": [
-        "remote_upgrade_tax"
+        "remote_upgrade_tax",
+        "build_scoring_remote",
+        "protect_remote"
       ],
       "requiredMechanics": [
         "install_upgrade",
@@ -11344,10 +11472,12 @@
         "access_breach"
       ],
       "valueHints": {
-        "tax": 1
+        "tax": 3,
+        "scoring": 2
       },
       "riskTags": [
-        "access_window"
+        "access_window",
+        "runner_trash_value"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11448,21 +11578,29 @@
       "side": "corp",
       "cardType": "upgrade",
       "roles": [
-        "upgrade"
+        "upgrade",
+        "run_defense",
+        "remote_upgrade_tax",
+        "etr_tax"
       ],
       "planRoles": [
-        "remote_upgrade_support"
+        "remote_upgrade_support",
+        "remote_upgrade_tax"
       ],
       "requiredMechanics": [
         "install_upgrade",
         "rez_card",
-        "trash_on_access"
+        "trash_on_access",
+        "persistent_modifier",
+        "subroutine_modifier_resolver"
       ],
       "valueHints": {
-        "remote": 1
+        "remote": 2,
+        "tax": 2
       },
       "riskTags": [
-        "runner_trash_value"
+        "runner_trash_value",
+        "fort_ice_modifier"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -11620,9 +11758,12 @@
       "cardType": "agenda",
       "roles": [
         "agenda_2pt",
-        "score_plan"
+        "score_plan",
+        "testset_baseline_agenda",
+        "no_ability_agenda"
       ],
       "planRoles": [
+        "build_scoring_remote",
         "score_next_turn"
       ],
       "requiredMechanics": [
