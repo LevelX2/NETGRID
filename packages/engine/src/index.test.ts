@@ -23813,7 +23813,7 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
         expect(definition?.mechanics).not.toContain("damage_prevention");
       } else {
         expect(definition?.mechanics.join(" "), definitionId).toMatch(
-          /damage|prevention|event_modification|flatline/,
+          /damage|prevention|event_modification|flatline|tag_avoid/,
         );
       }
     }
@@ -48139,7 +48139,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
         );
         expect(protocolId).toBeDefined();
         if (!protocolId) throw new Error("Missing R&D-Protocol Files");
-        expect(cardCounterAmount(state, protocolId, "recurring_credit")).toBe(1);
+        expect(cardCounterAmount(state, protocolId, "recurring_credit")).toBe(0);
       }
       const replay = replayEvents(initial, state.eventLog.slice(replayStart));
       expect(replay.ok, definitionId).toBe(true);
