@@ -91,6 +91,11 @@ import {
   buildCorpGainCreditAction,
   buildCorpPurgeVirusAction,
 } from "./game/turn/corp-basic-actions";
+import {
+  buildRunnerEndTurnAction,
+  buildRunnerGainCreditAction,
+  buildRunnerRemoveTagAction,
+} from "./game/turn/runner-basic-actions";
 export { quoteCorpRezCost } from "./game/payment";
 export {
   createGame,
@@ -3431,9 +3436,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
       state,
       actions,
     );
-    actions.push(
-      action(state, "runner", "end_turn", "Zug beenden", "game_rule"),
-    );
+    actions.push(buildRunnerEndTurnAction(state));
     return actions;
   }
   if (valuPakProgramInstallActionsRemaining(state) > 0) {
@@ -3489,24 +3492,11 @@ function runnerMainActions(state: GameState): LegalAction[] {
         );
       }
     }
-    actions.push(
-      action(
-        state,
-        "runner",
-        "gain_credit",
-        "1 Credit nehmen",
-        "basic_action",
-        [{ clicks: 1 }],
-      ),
-    );
+    actions.push(buildRunnerGainCreditAction(state));
     if (state.runner.stack.length > 0)
       actions.push(...runnerDrawCardActions(state));
     if (state.runner.tags > 0 && availableRunnerTagRemovalCredits(state) >= 2) {
-      actions.push(
-        action(state, "runner", "remove_tag", "Tag entfernen", "basic_action", [
-          { clicks: 1, credits: 2 },
-        ]),
-      );
+      actions.push(buildRunnerRemoveTagAction(state));
     }
     if (cardCounter(state, state.runner.identity, "crying") > 0 && state.runner.credits >= 2) {
       actions.push(
@@ -4446,7 +4436,7 @@ function runnerMainActions(state: GameState): LegalAction[] {
     state,
     actions,
   );
-  actions.push(action(state, "runner", "end_turn", "Zug beenden", "game_rule"));
+  actions.push(buildRunnerEndTurnAction(state));
   const wilsonRestrictedActions = Math.max(
     0,
     Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),

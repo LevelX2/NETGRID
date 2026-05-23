@@ -10,3 +10,8 @@ export {
   buildCorpGainCreditAction,
   buildCorpPurgeVirusAction,
 } from "./corp-basic-actions";
+export {
+  buildRunnerEndTurnAction,
+  buildRunnerGainCreditAction,
+  buildRunnerRemoveTagAction,
+} from "./runner-basic-actions";
