@@ -3,6 +3,7 @@ import {
   activeAiApprovedCardIds,
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
+import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
 import { catalogDetailResponse, catalogListResponse } from "./catalog-data";
 
 type CatalogAiHintExpectation = {
@@ -285,6 +286,530 @@ describe("catalog API filters", () => {
       listBody.cards.find((card) => card.catalogCardId === "onr_v1_001_afreet")
         ?.rarity,
     ).toMatchObject({ code: "uncommon", labelDe: "Ungewöhnlich" });
+  });
+
+  it("serves The Shell Traders catalog text from the confirmed spoiler instead of the old recurring-credit placeholder", () => {
+    const response = catalogDetailResponse("onr_v1_176_the-shell-traders");
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      card: {
+        text: string;
+      };
+    };
+
+    expect(body.card.text).toContain(
+      "Choose a program or hardware card from your hand.",
+    );
+    expect(body.card.text).toContain("Shell counters");
+    expect(body.card.text).toContain("install that card, at no cost");
+    expect(body.card.text).not.toContain("recurring credit");
+  });
+
+  it("serves corrected Corp spoiler-aligned catalog text for active V1 cards", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_220_tycho-extension",
+        contains: ["No additional ability."],
+        notContains: ["Regeltext"],
+      },
+      {
+        cardId: "onr_v1_222_ball-and-chain",
+        contains: ["Runner must pay 2"],
+        notContains: ["Runner must pay 1"],
+      },
+      {
+        cardId: "onr_v1_234_data-darts",
+        contains: [
+          "Do 3 net damage",
+          "cannot break any subroutines of the next piece of ice",
+        ],
+        notContains: ["Do 1 net damage", "End the run"],
+      },
+      {
+        cardId: "onr_v1_236_data-raven",
+        contains: [
+          "give Runner a tag and a Data Raven counter",
+          "taking an action to pay 1",
+        ],
+        notContains: ["counter on Data Raven", "End the run"],
+      },
+      {
+        cardId: "onr_v1_320_encoder-inc",
+        contains: [
+          "cost 1 less to rez",
+          'additional "End the run" subroutine',
+        ],
+        notContains: ["cost 2 less to rez"],
+      },
+      {
+        cardId: "onr_v1_349_aardvark",
+        contains: ["any bits spent using that worm", "further icebreakers"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_351_bizarre-encryption-scheme",
+        contains: [
+          "return that agenda to the fort",
+          "This does not affect any further runs",
+        ],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_352_chester-mix",
+        contains: ["reduced by 2"],
+        notContains: ["reduced by 1"],
+      },
+      {
+        cardId: "onr_v1_353_chimera",
+        contains: ["When Runner accesses Chimera, trash a daemon."],
+        notContains: ["installed daemon program"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      for (const snippet of expectation.contains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("serves corrected Runner icebreaker spoiler-aligned catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_015_codeslinger",
+        catalogContains: ["1 credit: Break sentry subroutine."],
+        sharedContains: ["1 Credits: Break 1 sentry subroutine."],
+        notContains: ["0 credits: Break sentry subroutine."],
+      },
+      {
+        cardId: "onr_v1_018_dogcatcher",
+        catalogContains: ["pit bull, hellhound, bloodhound, or watchdog"],
+        sharedContains: ["Pit Bull, Hellhound, Bloodhound, or Watchdog"],
+        notContains: ["Break ice subroutine"],
+      },
+      {
+        cardId: "onr_v1_019_dropp",
+        catalogContains: [
+          "0 credits: Break ice subroutine.",
+          "1 credit: +1 strength.",
+          "Using Dropp ends your run.",
+        ],
+        sharedContains: [
+          "0 Credits: Break 1 ice subroutine.",
+          "Using Dropp ends your run.",
+        ],
+        notContains: ["2 credits: +1 strength."],
+      },
+      {
+        cardId: "onr_v1_036_jackhammer",
+        catalogContains: ["lose 1 credit, if you can, from a stealth card"],
+        sharedContains: ["lose 1 from a Stealth card, if you can"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_052_raffles",
+        catalogContains: ["1 credit: Break code gate subroutine."],
+        sharedContains: ["1 Credits: Break 1 code gate subroutine."],
+        notContains: ["0 credits: Break code gate subroutine."],
+      },
+      {
+        cardId: "onr_v1_053_ramming-piston",
+        catalogContains: [
+          "2 credits: Break wall subroutine.",
+          "lose a total of 2 credits from stealth cards",
+        ],
+        sharedContains: [
+          "[2]: Break wall subroutine.",
+          "lose a total of 2 credits from Stealth cards",
+        ],
+        notContains: ["trace limit reduced"],
+      },
+      {
+        cardId: "onr_v1_066_snowball",
+        catalogContains: [
+          "Snowball has +1 strength for each subroutine it has broken during a run",
+        ],
+        sharedContains: [
+          "Snowball has +1 strength for each subroutine it has broken during a run",
+        ],
+        notContains: [],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(sharedText, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("exposes corrected Runner icebreaker AI hints", () => {
+    expectCatalogAiHints({
+      title: "Dogcatcher restriction",
+      cardId: "onr_v1_018_dogcatcher",
+      roles: ["restricted_breaker"],
+      requiredMechanics: ["restricted_breaker_targets"],
+    });
+    expectCatalogAiHints({
+      title: "Dropp end-run drawback",
+      cardId: "onr_v1_019_dropp",
+      roles: ["breaker_end_run"],
+      requiredMechanics: ["end_run_after_breaker_use"],
+    });
+    expectCatalogAiHints({
+      title: "Snowball run strength",
+      cardId: "onr_v1_066_snowball",
+      requiredMechanics: ["run_strength_modifier"],
+    });
+  });
+
+  it("serves corrected Runner prevention and tag-protection catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_038_joan-of-arc",
+        catalogContains: ["other installed programs", "bring Joan of Arc"],
+        sharedContains: ["other installed programs", "bring Joan of Arc"],
+        notContains: ["prevent 1 net or core damage"],
+      },
+      {
+        cardId: "onr_v1_121_armored-fridge",
+        catalogContains: ["seven Ablative counters", "Prevent 1 meat damage"],
+        sharedContains: ["7 Ablative counters", "prevent 1 meat damage"],
+        notContains: ["prevent 2 meat damage"],
+      },
+      {
+        cardId: "onr_v1_128_green-knight-surge-buffers",
+        catalogContains: ["Prevents 1 net damage each turn."],
+        sharedContains: ["Prevents 1 net damage each turn."],
+        notContains: ["prevent 2 net damage"],
+      },
+      {
+        cardId: "onr_v1_130_lifesaver-nanosurgeons",
+        catalogContains: ["Draw two cards", "Prevent 1 brain damage"],
+        sharedContains: ["Draw two cards", "Prevent 1 brain damage"],
+        notContains: ["prevent 1 core damage."],
+      },
+      {
+        cardId: "onr_v1_135_nasuko-cycle",
+        catalogContains: ["Avoid receiving a tag"],
+        sharedContains: ["Avoid receiving a tag"],
+        notContains: ["prevent 1 net or meat damage"],
+      },
+      {
+        cardId: "onr_v1_143_techtronica-utility-suit",
+        catalogContains: ["Provides +1 MU", "increasing your link"],
+        sharedContains: ["Provides +1 MU", "increasing your link"],
+        notContains: ["prevent 1 meat or net damage"],
+      },
+      {
+        cardId: "onr_v1_161_fall-guy",
+        catalogContains: ["Avoid receiving a tag"],
+        sharedContains: ["Avoid receiving a tag"],
+        notContains: ["prevent 1 meat or net damage"],
+      },
+      {
+        cardId: "onr_v1_170_nomad-allies",
+        catalogContains: ["Remove a tag", "Avoid receiving a tag"],
+        sharedContains: ["Remove a tag", "Avoid receiving a tag"],
+        notContains: ["prevent 1 net or meat damage"],
+      },
+      {
+        cardId: "onr_v1_185_trauma-team",
+        catalogContains: ["two Trauma counters", "Put one Trauma counter"],
+        sharedContains: ["2 Trauma counters", "Put 1 Trauma counter"],
+        notContains: ["prevent 2 meat damage"],
+      },
+      {
+        cardId: "onr_v1_186_umbrella-policy",
+        catalogContains: ["program or hardware card from being trashed"],
+        sharedContains: ["program or hardware card from being trashed"],
+        notContains: ["prevent 1 net, meat or core damage"],
+      },
+      {
+        cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
+        catalogContains: ["gain an action", "Prevent any amount of meat damage"],
+        sharedContains: ["gain an action", "Prevent any amount of meat damage"],
+        notContains: ["prevent 1 meat damage"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(sharedText, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("exposes corrected Runner prevention and tag-protection AI hints", () => {
+    expectCatalogAiHints({
+      title: "Joan trash prevention",
+      cardId: "onr_v1_038_joan-of-arc",
+      roles: ["trash_prevention"],
+      requiredMechanics: ["program_trash_prevention", "return_to_hand"],
+    });
+    expectCatalogAiHints({
+      title: "Nasuko tag avoid",
+      cardId: "onr_v1_135_nasuko-cycle",
+      roles: ["tag_avoid"],
+      requiredMechanics: ["tag_avoid", "credit_cost"],
+    });
+    expectCatalogAiHints({
+      title: "Techtronica deck link package",
+      cardId: "onr_v1_143_techtronica-utility-suit",
+      roles: ["memory", "link", "deck"],
+      requiredMechanics: ["link_bits", "deck_unique_replacement"],
+    });
+    expectCatalogAiHints({
+      title: "Umbrella trash prevention",
+      cardId: "onr_v1_186_umbrella-policy",
+      roles: ["trash_prevention"],
+      requiredMechanics: [
+        "program_trash_prevention",
+        "hardware_trash_prevention",
+      ],
+    });
+    expectCatalogAiHints({
+      title: "Wilson run action and tag protection",
+      cardId: "onr_v1_187_wilson-weeflerunner-apprentice",
+      roles: ["run_action", "tag_avoid"],
+      requiredMechanics: ["run_action_gain", "run_spending_cap"],
+    });
+  });
+
+  it("serves corrected Runner run, access and resource catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_032_i-spy",
+        catalogContains: ["Spy counter", "successful run on that fort"],
+        sharedContains: ["Spy counter", "successful run on that fort"],
+        notContains: ["top card of the Runner stack"],
+      },
+      {
+        cardId: "onr_v1_050_r-and-d-protocol-files",
+        catalogContains: ["look at the top five cards of R&D"],
+        sharedContains: ["look at the top five cards of R&D"],
+        notContains: ["Microcyb Owl", "Stealth program"],
+      },
+      {
+        cardId: "onr_v1_082_deal-with-militech",
+        catalogContains: ["Militech counter", "+1 strength"],
+        sharedContains: ["Militech counter", "+1 strength"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_084_edited-shipping-manifests",
+        catalogContains: ["Corp loses 1 credit", "you gain 10 credits"],
+        sharedContains: ["Corp loses 1", "you gain 10"],
+        notContains: ["Corp draws 1 card"],
+      },
+      {
+        cardId: "onr_v1_091_hunt-club-bbs",
+        catalogContains: ["Expose up to three installed cards."],
+        sharedContains: ["Expose up to three installed Corp cards."],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_101_mit-west-tier",
+        catalogContains: ["remove it from the game instead of trashing it"],
+        sharedContains: ["remove MIT West Tier from the game"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_106_private-ldl-access",
+        catalogContains: ["treat run as a successful run on R&D"],
+        sharedContains: ["treat run as a successful run on R&D"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_114_temple-microcode-outlet",
+        catalogContains: ["Show that program to the Corp"],
+        sharedContains: ["Show that program to the Corp"],
+        notContains: ["reveal it"],
+      },
+      {
+        cardId: "onr_v1_139_r-and-d-interface",
+        catalogContains: ["access an additional card from R&D"],
+        sharedContains: ["access 1 additional card whenever you access R&D"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_155_code-viral-cache",
+        catalogContains: ["two counters of your choice are not removed"],
+        sharedContains: ["choose up to two Virus counters that are not removed"],
+        notContains: [],
+      },
+      {
+        cardId: "onr_v1_173_restrictive-net-zoning",
+        catalogContains: ["must pay 2"],
+        sharedContains: ["must pay 2"],
+        notContains: ["must pay 1"],
+      },
+      {
+        cardId: "onr_v1_174_rigged-investments",
+        catalogContains: ["Put 12 credits", "take 1 credit"],
+        sharedContains: ["Put 12 credits", "take 1 credit"],
+        notContains: ["2 recurring credits", "Install with 6 Bits"],
+      },
+      {
+        cardId: "onr_v1_184_top-runners-conference",
+        catalogContains: ["Gain 2 credits"],
+        sharedContains: ["Gain 2 credits"],
+        notContains: ["Gain 3"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.notContains) {
+        expect(body.card.text, expectation.cardId).not.toContain(snippet);
+        expect(sharedText, expectation.cardId).not.toContain(snippet);
+      }
+    }
+  });
+
+  it("exposes corrected Runner run, access and resource AI hints", () => {
+    expectCatalogAiHints({
+      title: "I Spy fort counter",
+      cardId: "onr_v1_032_i-spy",
+      roles: ["spy_counter"],
+      requiredMechanics: ["spy_counter", "expose_fort_cards"],
+    });
+    expectCatalogAiHints({
+      title: "R&D Protocol top-card replacement",
+      cardId: "onr_v1_050_r-and-d-protocol-files",
+      roles: ["rd_run", "access_replacement"],
+      requiredMechanics: ["top_rd_look"],
+    });
+    expectCatalogAiHints({
+      title: "Edited Shipping Manifests payout",
+      cardId: "onr_v1_084_edited-shipping-manifests",
+      roles: ["tag_self"],
+      requiredMechanics: ["runner_gain_credits", "runner_gain_tag"],
+    });
+    expectCatalogAiHints({
+      title: "Rigged Investments bit pool",
+      cardId: "onr_v1_174_rigged-investments",
+      roles: ["economy", "counter"],
+      requiredMechanics: ["bit_counter_pool_12", "trash_when_empty"],
+    });
+    expectCatalogAiHints({
+      title: "Top Runners Conference economy",
+      cardId: "onr_v1_184_top-runners-conference",
+      roles: ["run_drawback"],
+      requiredMechanics: ["start_turn_gain_2", "trash_on_run"],
+    });
+  });
+
+  it("serves corrected Runner virus-counter catalog and shared text", () => {
+    const expectations = [
+      {
+        cardId: "onr_v1_009_butcher-boy",
+        catalogContains: ["Butcher Boy counter", "start of each of your turns"],
+        sharedContains: ["Butcher Boy counter", "start of each of your turns"],
+      },
+      {
+        cardId: "onr_v1_010_cascade",
+        catalogContains: ["Cascade counter", "trash faceup one card stored in R&D"],
+        sharedContains: ["Cascade counter", "trash faceup one card stored in R&D"],
+      },
+      {
+        cardId: "onr_v1_017_deep-thought",
+        catalogContains: ["Thought counter", "look at the top card of R&D"],
+        sharedContains: ["Thought counter", "look at the top card of R&D"],
+      },
+      {
+        cardId: "onr_v1_064_skivviss",
+        catalogContains: ["Skivviss counter", "draw one extra card"],
+        sharedContains: ["Skivviss counter", "draw one extra card"],
+      },
+    ];
+
+    for (const expectation of expectations) {
+      const response = catalogDetailResponse(expectation.cardId);
+      expect(response.status, expectation.cardId).toBe(200);
+      const body = response.body as { card: { text: string } };
+      const sharedText = DEMO_CARDS_BY_ID[expectation.cardId]?.rulesText ?? "";
+
+      for (const snippet of expectation.catalogContains) {
+        expect(body.card.text, expectation.cardId).toContain(snippet);
+      }
+      for (const snippet of expectation.sharedContains) {
+        expect(sharedText, expectation.cardId).toContain(snippet);
+      }
+      expect(body.card.text, expectation.cardId).not.toContain(
+        "recurring credit for run costs",
+      );
+      expect(sharedText, expectation.cardId).not.toContain(
+        "recurring credit for run costs",
+      );
+    }
+  });
+
+  it("exposes corrected Runner virus-counter AI hints", () => {
+    expectCatalogAiHints({
+      title: "Butcher Boy counter economy",
+      cardId: "onr_v1_009_butcher-boy",
+      roles: ["hq_run_reward", "economy"],
+      requiredMechanics: ["butcher_boy_counter"],
+    });
+    expectCatalogAiHints({
+      title: "Cascade start-turn trash",
+      cardId: "onr_v1_010_cascade",
+      roles: ["corp_start_turn_pressure"],
+      requiredMechanics: ["cascade_counter", "corp_start_turn_trash_faceup_rd"],
+    });
+    expectCatalogAiHints({
+      title: "Deep Thought hidden look",
+      cardId: "onr_v1_017_deep-thought",
+      roles: ["hidden_zone_tool"],
+      requiredMechanics: ["thought_counter", "top_rd_look_threshold_3"],
+    });
+    expectCatalogAiHints({
+      title: "Skivviss draw pressure",
+      cardId: "onr_v1_064_skivviss",
+      roles: ["corp_draw_pressure"],
+      requiredMechanics: ["skivviss_counter", "corp_start_turn_extra_draw"],
+    });
   });
 
   it("shows promoted longtail card details in the web catalog API", () => {

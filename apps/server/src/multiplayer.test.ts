@@ -1815,7 +1815,7 @@ describe("MVP 0.2 multiplayer service", () => {
     expect((await countdown.service.loadForTest(countdown.created.matchId))?.gameState).toBeFalsy();
   });
 
-  it("handles V1.0.4 joiner leave before deck submission, from ready_check and from countdown", async () => {
+  it("keeps the host lobby open when the joiner leaves before game start", async () => {
     const pending = await pendingDeckMatch("v104-leave-pending");
     const noServerSessionLeave = await pending.service.leaveMatch({
       matchId: pending.created.matchId,
@@ -1829,21 +1829,77 @@ describe("MVP 0.2 multiplayer service", () => {
     const readyLeave = await ready.service.leaveMatch({ matchId: ready.created.matchId, side: ready.joined.side, sessionToken: ready.joined.sessionToken });
     expect(readyLeave.ok).toBe(true);
     if (!readyLeave.ok) throw new Error(readyLeave.error.message);
-    expect(readyLeave.actorPayload.matchStatus).toBe("abandoned");
-    expect(readyLeave.opponentPayload?.matchStatus).toBe("abandoned");
-    expect(readyLeave.actorPayload.lifecycleResult).toMatchObject({ status: "abandoned", reason: "leave", actorSide: ready.joined.side });
+    expect(readyLeave.actorPayload.matchStatus).toBe("pending");
+    expect(readyLeave.opponentPayload?.matchStatus).toBe("pending");
+    if (!readyLeave.opponentPayload || !("startLobby" in readyLeave.opponentPayload)) throw new Error("Expected host lobby payload");
+    expect(readyLeave.opponentPayload.startLobby?.participants.player_b.connected).toBe(false);
+    expect(readyLeave.opponentPayload.startLobby?.hostReady).toBe(false);
+    expect(readyLeave.actorPayload.lifecycleResult).toBeUndefined();
     expectLifecyclePayloadSafe(readyLeave.actorPayload);
     await expectOldTokensRejected(ready.service, ready.created.matchId, ready.joined.side, ready.joined.sessionToken, ready.joined.reconnectToken);
+    const readyRejoin = await ready.service.joinMatch(ready.created.matchId, {
+      token: ready.joinToken,
+      displayName: "Joiner mit neuem Deck",
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+    });
+    expect("error" in readyRejoin).toBe(false);
+    if ("error" in readyRejoin) throw new Error(readyRejoin.error.message);
+    expect(readyRejoin.matchStatus).toBe("ready_check");
 
     const countdown = await countdownLobby("v104-leave-countdown");
     const countdownLeave = await countdown.service.leaveMatch({ matchId: countdown.created.matchId, side: countdown.joined.side, sessionToken: countdown.joined.sessionToken });
     expect(countdownLeave.ok).toBe(true);
     if (!countdownLeave.ok) throw new Error(countdownLeave.error.message);
-    expect(countdownLeave.actorPayload.matchStatus).toBe("abandoned");
-    expect(countdownLeave.opponentPayload?.matchStatus).toBe("abandoned");
+    expect(countdownLeave.actorPayload.matchStatus).toBe("pending");
+    expect(countdownLeave.opponentPayload?.matchStatus).toBe("pending");
+    if (!countdownLeave.opponentPayload || !("startLobby" in countdownLeave.opponentPayload)) throw new Error("Expected host lobby payload");
+    expect(countdownLeave.opponentPayload.startLobby?.countdownEndsAt).toBeUndefined();
     const activateAfterLeave = await countdown.service.activateLobbyCountdown(countdown.created.matchId);
     expect(activateAfterLeave.ok).toBe(false);
     expect((await countdown.service.loadForTest(countdown.created.matchId))?.gameState).toBeFalsy();
+  });
+
+  it("exposes player-clock settings in start lobby payloads", async () => {
+    const service = new MultiplayerService(new InMemoryMatchStorage(), {
+      tokenSalt: "player-clock-lobby",
+      publicWebBaseUrl: "http://127.0.0.1:3100",
+      publicServerBaseUrl: "http://127.0.0.1:8787"
+    });
+    const created = await service.createMatch({
+      hostSide: "runner",
+      seed: "player-clock-lobby",
+      mode: "human_vs_human",
+      settings: { playerClock: { mode: "player_clock", startingTimeMs: 20 * 60_000, gracePeriodMs: 15_000 } },
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+        corpDeckSnapshotId: "demo_corp_001_snapshot_v0_6"
+      }
+    });
+    expect(created.playerClock).toMatchObject({
+      schemaVersion: "player-clock-v1",
+      mode: "player_clock",
+      startingTimeMs: 20 * 60_000,
+      gracePeriodMs: 15_000,
+      warningLevel: "none"
+    });
+    const joinToken = new URL(created.joinUrl ?? "").searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, {
+      token: joinToken,
+      displayName: "Joiner",
+      runnerDeckSnapshotId: "demo_runner_008_snapshot_v0_8",
+      corpDeckSnapshotId: "demo_corp_008_snapshot_v0_8"
+    });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    expect(joined.playerClock).toMatchObject({
+      mode: "player_clock",
+      startingTimeMs: 20 * 60_000,
+      gracePeriodMs: 15_000,
+      warningLevel: "none"
+    });
+    expect(JSON.stringify(joined.playerClock)).not.toMatch(/cardInstances|privatePayload|decklist|AIInput|DecisionDebug|FullState/i);
   });
 
   it("records V1.0.4 forfeit without faking an Engine win or changing replay StateHash", async () => {

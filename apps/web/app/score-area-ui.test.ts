@@ -46,6 +46,21 @@ describe("score area UI helpers", () => {
     expect(scoredAgendaEffectLineForScoreArea("onr_v1_200_encryption-breakthrough", "runner")).toBeNull();
   });
 
+  it("shows Security Net Optimization selected server in the Corp scored area", () => {
+    const corpLine = scoredAgendaEffectLineForScoreArea(
+      {
+        definitionId: "onr_v1_215_security-net-optimization",
+        selectedServerLabel: "Remote 1"
+      },
+      "corp"
+    );
+
+    expect(corpLine).toMatchObject({
+      value: "Aktiv",
+      label: "Remote 1: ICE hat +1 Stärke"
+    });
+  });
+
   it("marks known Research agendas when Genetics-Visionary Acquisition is scored by the Corp", () => {
     const corpScoreAreaCards = [
       {

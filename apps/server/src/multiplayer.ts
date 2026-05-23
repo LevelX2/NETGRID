@@ -460,6 +460,7 @@ export type CreateMatchResult = {
   matchVersion: number;
   lobby?: MatchStartLobbyPayload;
   pendingChoice?: PlayerView["pendingChoice"];
+  playerClock?: ApiPlayerClockSnapshot;
   aiTurnPresentation?: AiTurnPresentationState;
   winner?: Side | "draw";
   finalStateHash?: string;
@@ -727,6 +728,7 @@ export class MultiplayerService {
             matchFormat,
             ...(playerClockConfig.mode === "player_clock" ? { playerClock: playerClockConfig } : {})
           },
+          ...(playerClockConfig.mode === "player_clock" ? { playerClock: initialPlayerClockState(playerClockConfig) } : {}),
           deckSetup: {
             runnerSnapshotId: hostDeckPair.runnerSnapshot.deckSnapshotId,
             corpSnapshotId: hostDeckPair.corpSnapshot.deckSnapshotId,
@@ -800,6 +802,7 @@ export class MultiplayerService {
         playerView: undefined as unknown as PlayerView,
         legalActions: [],
         matchVersion: record.match.matchVersion,
+        ...(lobbyPayload.playerClock ? { playerClock: lobbyPayload.playerClock } : {}),
         ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
       };
     }
@@ -1074,6 +1077,7 @@ export class MultiplayerService {
         legalActions: [],
         matchVersion: record.match.matchVersion,
         matchStatus: record.match.status,
+        ...(lobbyPayload.playerClock ? { playerClock: lobbyPayload.playerClock } : {}),
         ...(lobbyPayload.startLobby ? { lobby: lobbyPayload.startLobby } : {})
       };
     }
@@ -1142,7 +1146,7 @@ export class MultiplayerService {
       matchStatus: payload.matchStatus,
       ...(!isSidePayload(payload) && payload.startLobby ? { lobby: payload.startLobby } : {}),
       ...(isSidePayload(payload) && payload.pendingChoice ? { pendingChoice: payload.pendingChoice } : {}),
-      ...(isSidePayload(payload) && payload.playerClock ? { playerClock: payload.playerClock } : {}),
+      ...(payload.playerClock ? { playerClock: payload.playerClock } : {}),
       ...(isSidePayload(payload) && payload.pendingUndo ? { pendingUndo: payload.pendingUndo } : {}),
       ...(isSidePayload(payload) && payload.aiTurnPresentation ? { aiTurnPresentation: payload.aiTurnPresentation } : {}),
       ...(isSidePayload(payload) && payload.winner ? { winner: payload.winner } : {}),
@@ -1262,24 +1266,19 @@ export class MultiplayerService {
       if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
       if (isTerminalStatus(record.match.status)) return { ok: true, actorPayload: this.safePayloadFor(record, input.side) };
       if (isHostSession(record, session)) return { ok: false, error: safeError("leave_requires_joiner", "Der Host bricht die Lobby über Abbrechen ab."), payload: this.safePayloadFor(record, input.side) };
-      if (record.match.status === "pending" || record.match.status === "waiting_for_joiner_decks" || record.match.status === "waiting_for_runner" || record.match.status === "waiting_for_corp") {
-        const now = this.now();
-        this.revokeTokenByHash(record, "session", session.sessionTokenHash, now);
-        this.revokeTokenByHash(record, "reconnect", session.reconnectTokenHash, now);
-        record.sessions = record.sessions.filter((candidate) => candidate.sessionId !== session.sessionId);
-        record.match.status = "pending";
-        record.match.matchVersion += 1;
-        record.match.updatedAt = now;
+      if (
+        record.match.status === "pending" ||
+        record.match.status === "waiting_for_joiner_decks" ||
+        record.match.status === "waiting_for_runner" ||
+        record.match.status === "waiting_for_corp" ||
+        record.match.status === "ready_check" ||
+        record.match.status === "countdown"
+      ) {
+        this.removeJoinerFromOpenLobby(record, session);
         await this.storage.save(record);
         return this.lifecycleResultFor(record, input.side);
       }
-      if (record.match.status !== "ready_check" && record.match.status !== "countdown") {
-        return { ok: false, error: safeError("match_not_leavable", "Dieses Match kann nicht als Lobby verlassen werden."), payload: this.safePayloadFor(record, input.side) };
-      }
-
-      this.terminalizeLifecycle(record, "abandoned", "leave", input.side);
-      await this.storage.save(record);
-      return this.lifecycleResultFor(record, input.side);
+      return { ok: false, error: safeError("match_not_leavable", "Dieses Match kann nicht als Lobby verlassen werden."), payload: this.safePayloadFor(record, input.side) };
     });
   }
 
@@ -1993,6 +1992,28 @@ export class MultiplayerService {
     record.match.updatedAt = now;
   }
 
+  private removeJoinerFromOpenLobby(record: StoredMatch, session: SessionRecord): void {
+    const now = this.now();
+    this.clearCountdown(record);
+    this.revokeTokenByHash(record, "session", session.sessionTokenHash, now);
+    this.revokeTokenByHash(record, "reconnect", session.reconnectTokenHash, now);
+    record.sessions = record.sessions.filter((candidate) => candidate.sessionId !== session.sessionId);
+    record.tokens = record.tokens.map((token) => {
+      if (token.kind !== "join" || token.allowedSide !== session.side || token.revokedAt) return token;
+      const reopened = { ...token };
+      delete reopened.usedAt;
+      return reopened;
+    });
+    if (record.startLobby) {
+      record.startLobby.hostReady = false;
+      record.startLobby.joinerReady = false;
+    }
+    record.match.status = "pending";
+    delete record.lifecycleResult;
+    record.match.matchVersion += 1;
+    record.match.updatedAt = now;
+  }
+
   private recreateInputFor(record: StoredMatch, session: SessionRecord, displayName: string | undefined): Parameters<MultiplayerService["createMatch"]>[0] {
     const participants = participantDeckInputsForRecord(record);
     const requesterPlayer = playerSlotForSession(record, session);
@@ -2222,6 +2243,7 @@ export class MultiplayerService {
   private lobbyPayloadFor(record: StoredMatch, side: Side): LobbyPayload {
     const lobby = record.startLobby;
     const opponent = record.sessions.find((session) => session.side === opposite(side));
+    const playerClockSnapshot = this.playerClockSnapshotFor(record);
     return {
       matchId: record.match.matchId,
       matchStatus: record.match.status,
@@ -2234,6 +2256,7 @@ export class MultiplayerService {
         ...(this.safeDisplayNameFor(record, opposite(side)) ? { displayName: this.safeDisplayNameFor(record, opposite(side))! } : {})
       },
       ...(record.lifecycleResult ? { lifecycleResult: record.lifecycleResult } : {}),
+      ...(playerClockSnapshot ? { playerClock: playerClockSnapshot } : {}),
       ...retentionProtectionPayload(record),
       ...((record.match.status === "pending" && !record.gameState) || record.match.status === "waiting_for_joiner_decks"
         ? {

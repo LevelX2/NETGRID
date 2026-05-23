@@ -488,6 +488,19 @@ export type StackSearchResolution = {
   publicRevealKind?: string;
 };
 
+export type CardSearchPresentation = StackSearchResolution & {
+  sourceZone: "stack" | "heap";
+  selectableFilter:
+    | "program"
+    | "any_card"
+    | "event"
+    | "resource"
+    | "hardware"
+    | "matching_cards";
+  showNonMatchingCards: boolean;
+  temporaryReturnAtEndOfTurn?: boolean;
+};
+
 export type SneakPreviewTemporaryInstall = {
   cardId: CardInstanceId;
   sourceCardDefinitionId: CardDefinitionId;
@@ -509,6 +522,7 @@ export type ChoiceRequest = {
   stateVersion: number;
   visibility: EventVisibilityClass;
   stackSearchResolution?: StackSearchResolution;
+  cardSearchPresentation?: CardSearchPresentation;
 };
 
 export type PendingChoice = ChoiceRequest;
@@ -1701,6 +1715,7 @@ function onrBreaker(params: {
   pumpCost?: number;
   iceSubtype: string;
   iceLabel: string;
+  rulesText?: string;
   extraMechanics?: string[];
 }): CardDefinition {
   const pumpText =
@@ -1725,7 +1740,9 @@ function onrBreaker(params: {
     installCost: params.installCost,
     memoryCost: params.memoryCost,
     strength: params.strength,
-    rulesText: `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine.${pumpText}`,
+    rulesText:
+      params.rulesText ??
+      `${params.breakCost} Credits: Break 1 ${params.iceLabel} subroutine.${pumpText}`,
     abilities: [
       ...(params.pumpCost === undefined
         ? []
@@ -1760,6 +1777,7 @@ function onrUniversalBreaker(params: {
   strength: number;
   breakCost: number;
   pumpCost: number;
+  rulesText?: string;
 }): CardDefinition {
   return {
     id: params.id,
@@ -1771,7 +1789,9 @@ function onrUniversalBreaker(params: {
     installCost: params.installCost,
     memoryCost: params.memoryCost,
     strength: params.strength,
-    rulesText: `${params.breakCost} Credits: Break 1 ice subroutine. ${params.pumpCost} Credits: +1 strength.`,
+    rulesText:
+      params.rulesText ??
+      `${params.breakCost} Credits: Break 1 ice subroutine. ${params.pumpCost} Credits: +1 strength.`,
     abilities: [
       {
         id: `${params.id}_pump`,
@@ -2055,17 +2075,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     memoryCost: 1,
-    recurringCredits: 1,
     rulesText:
-      "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "Whenever you make a successful run on R&D, give the Corp a Cascade counter. Every two Cascade counters require the Corp to trash faceup one card stored in R&D at the start of each of its turns. The Corp may remove all Virus counters by forgoing its next three actions.",
     mechanics: [
       "install_program",
       "memory",
       "counter",
       "virus",
       "purge",
-      "recurring_credit",
-      "recurring_start_turn",
+      "successful_rd_run_counter",
+      "corp_start_turn_trash",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2078,17 +2097,17 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     memoryCost: 1,
-    recurringCredits: 1,
     rulesText:
-      "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "Whenever you make a successful run on R&D, give the Corp a Thought counter. Three or more Thought counters allow you to look at the top card of R&D at the start of each of your turns. The Corp may remove all Virus counters by forgoing its next three actions.",
     mechanics: [
       "install_program",
       "memory",
       "counter",
       "virus",
       "purge",
-      "recurring_credit",
-      "recurring_start_turn",
+      "successful_rd_run_counter",
+      "top_rd_look",
+      "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2158,7 +2177,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 7,
     memoryCost: 1,
     strength: 3,
-    breakCost: 0,
+    breakCost: 1,
     iceSubtype: "sentry",
     iceLabel: "sentry",
   }),
@@ -2171,6 +2190,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     strength: 3,
     breakCost: 1,
     pumpCost: 1,
+    rulesText:
+      "1 Credits: Break 1 Pit Bull, Hellhound, Bloodhound, or Watchdog subroutine. 1 Credits: +1 strength.",
   }),
   onrUniversalBreaker({
     id: "onr_v1_019_dropp",
@@ -2179,8 +2200,10 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 3,
     memoryCost: 1,
     strength: 4,
-    breakCost: 1,
-    pumpCost: 2,
+    breakCost: 0,
+    pumpCost: 1,
+    rulesText:
+      "0 Credits: Break 1 ice subroutine. 1 Credits: +1 strength. Using Dropp ends your run.",
   }),
   onrBreaker({
     id: "onr_v1_052_raffles",
@@ -2189,7 +2212,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 7,
     memoryCost: 1,
     strength: 4,
-    breakCost: 0,
+    breakCost: 1,
     pumpCost: 2,
     iceSubtype: "code_gate",
     iceLabel: "code gate",
@@ -2373,13 +2396,13 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     memoryCost: 1,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net or core damage.",
+      "[T]: Prevent one or more of your other installed programs from being trashed. 1 Credit: Prevent one or more of your other installed programs from being trashed, and bring Joan of Arc into your hand.",
     mechanics: [
       "install_program",
       "memory",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "core_damage",
+      "trash_prevention",
+      "program_trash_prevention",
+      "return_to_hand",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -2428,12 +2451,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 0,
     memoryCost: 1,
     rulesText:
-      "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
+      "[T]: Put a Spy counter in a data fort. A Spy counter exposes all cards installed inside or on a fort containing it. The Corp may remove a Spy counter by taking an action to pay 4. Use this ability only immediately after a successful run on that fort.",
     mechanics: [
       "install_program",
       "memory",
       "counter",
-      "reveal",
+      "spy_counter",
+      "expose",
+      "successful_run_trigger",
       "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -2449,6 +2474,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     pumpCost: 1,
     iceSubtype: "wall",
     iceLabel: "wall",
+    rulesText:
+      "0 Credits: Break 1 wall subroutine. 1 Credits: +1 strength. Whenever you break a wall subroutine with Jackhammer, lose 1 from a Stealth card, if you can.",
     extraMechanics: ["subtype_noisy"],
   }),
   onrUniversalBreaker({
@@ -2600,7 +2627,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     installCost: 3,
     memoryCost: 1,
     rulesText:
-      "Whenever you make a successful run on R&D, put a Virus counter on Skivviss. Each Skivviss counter forces the Corp to draw 1 additional card at the start of each Corp turn. The Corp may purge Virus counters.",
+      "Whenever you make a successful run on R&D, give the Corp a Skivviss counter. Each Skivviss counter requires the Corp to draw one extra card at the start of each of its turns. The Corp may remove all Virus counters by forgoing its next three actions.",
     mechanics: [
       "install_program",
       "memory",
@@ -2623,6 +2650,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     pumpCost: 1,
     iceSubtype: "sentry",
     iceLabel: "sentry",
+    rulesText:
+      "Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run. 1 Credits: Break 1 sentry subroutine. 1 Credits: +1 strength.",
   }),
   onrBreaker({
     id: "onr_v1_072_wild-card",
@@ -3047,16 +3076,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: ["connection"],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    rulesText:
-      "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
-    mechanics: [
-      "install_resource",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "meat_damage",
-      "net_damage",
-      ONR_V1_LOCAL_PRIVATE,
-    ],
+    rulesText: "[T]: Avoid receiving a tag.",
+    mechanics: ["install_resource", "tag_avoid", ONR_V1_LOCAL_PRIVATE],
   },
   {
     id: "onr_v1_158_danshis-second-id",
@@ -3117,13 +3138,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 2,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+      "A, 1 Credit: Remove a tag, at no cost. [T]: Avoid receiving a tag.",
     mechanics: [
       "install_resource",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "net_damage",
-      "meat_damage",
+      "action_economy",
+      "remove_tag",
+      "tag_avoid",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -3153,7 +3173,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     rulesText:
-      "Install with 6 Bits. At the start of each Runner turn, take 1 Bit from Rigged Investments as 1 credit. Trash Rigged Investments when the last Bit is removed.",
+      "Put 12 credits on Rigged Investments when it is installed. At the start of each of your turns, take 1 credit from Rigged Investments. When all credits have been removed, trash Rigged Investments.",
     mechanics: [
       "install_resource",
       "counter",
@@ -3245,7 +3265,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+      "Gain 2 credits at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
     mechanics: [
       "install_resource",
       "start_of_turn_credit_gain",
@@ -3262,12 +3282,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 2 meat damage.",
+      "Put 2 Trauma counters on Trauma Team when it is installed. Trauma counter: Prevent 1 meat damage. A: Put 1 Trauma counter on Trauma Team.",
     mechanics: [
       "install_resource",
+      "counter",
       "damage_prevention",
-      "damage_prevention_turn_limit",
+      "damage_prevention_counter_cost",
       "meat_damage",
+      "action_counter",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -3280,14 +3302,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 0,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net, meat or core damage.",
+      "[T]: Prevent an installed program or hardware card from being trashed.",
     mechanics: [
       "install_resource",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "net_damage",
-      "meat_damage",
-      "core_damage",
+      "trash_prevention",
+      "program_trash_prevention",
+      "hardware_trash_prevention",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -3300,12 +3320,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 4,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 meat damage.",
+      "Once each of your turns, you may gain an action that can only be used to make a run. During that run, you cannot spend more than 3 credits to use icebreakers or increase your link. [T]: Avoid receiving a tag. [T]: Prevent any amount of meat damage.",
     mechanics: [
       "install_resource",
       "unique_card",
+      "action_gain",
+      "run_spending_cap",
+      "tag_avoid",
       "damage_prevention",
-      "damage_prevention_turn_limit",
       "meat_damage",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -3415,7 +3437,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     cost: 1,
     rulesText:
-      "Search your stack for a program, reveal it and bring it into your hand. Shuffle your stack afterwards.",
+      "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
     mechanics: ["play_event", "search_stack", "shuffle", ONR_V1_LOCAL_PRIVATE],
   },
   {
@@ -3498,8 +3520,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
-    rulesText:
-      "Installed prevention tool: once each turn, prevent 2 net damage.",
+    rulesText: "Prevents 1 net damage each turn.",
     mechanics: [
       "install_hardware",
       "damage_prevention",
@@ -3517,11 +3538,12 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 1,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 core damage.",
+      "A: Draw two cards. Use this ability only if you were damaged during any of your last three actions. [T]: Prevent 1 brain damage.",
     mechanics: [
       "install_hardware",
+      "draw_cards",
+      "recent_damage_gate",
       "damage_prevention",
-      "damage_prevention_turn_limit",
       "core_damage",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -3534,16 +3556,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 1,
-    rulesText:
-      "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
-    mechanics: [
-      "install_hardware",
-      "damage_prevention",
-      "damage_prevention_turn_limit",
-      "net_damage",
-      "meat_damage",
-      ONR_V1_LOCAL_PRIVATE,
-    ],
+    rulesText: "3 Credits: Avoid receiving a tag.",
+    mechanics: ["install_hardware", "tag_avoid", ONR_V1_LOCAL_PRIVATE],
   },
   {
     id: "onr_v1_139_r-and-d-interface",
@@ -3572,13 +3586,16 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     installCost: 6,
     rulesText:
-      "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+      "Provides +1 MU. Prevents 1 meat damage each turn. Put 5 credits on Techtronica Utility Suit when it is installed. Use these credits only to pay for increasing your link. If you use any of these credits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
     mechanics: [
       "install_hardware",
+      "memory",
       "damage_prevention",
       "damage_prevention_turn_limit",
       "meat_damage",
-      "net_damage",
+      "link",
+      "recurring_credit",
+      "deck_unique",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -6730,12 +6747,14 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     rezCost: 0,
     trashCost: 1,
-    rulesText: "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
+    rulesText:
+      'Code gates cost 1 less to rez while Encoder, Inc. is rezzed. All code gates have an additional "*End the run" subroutine after all other subroutines.',
     mechanics: [
       "install_remote",
       "rez_card",
       "trash_on_access",
       "global_ice_rez_cost_modifier",
+      "subroutine_modifier",
       "persistent_modifier",
       ONR_V1_LOCAL_PRIVATE,
     ],
@@ -6827,7 +6846,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     implementationStatus: "playable_mvp",
     rezCost: 0,
     trashCost: 3,
-    rulesText: "Cost to install ice on this fort is reduced by 1.",
+    rulesText: "Cost to install ice on this fort is reduced by 2.",
     mechanics: [
       "install_remote",
       "rez_upgrade",
@@ -7420,7 +7439,6 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "bid_amount",
       "counter",
       "persistent_tag_counter",
-      "end_the_run",
     ],
   }),
   onrIce({
@@ -7889,7 +7907,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "Ramming Piston",
     side: "runner",
     type: "program",
-    subtypes: ["icebreaker"],
+    subtypes: ["icebreaker", "noisy"],
     implementationStatus: "playable_mvp",
     installCost: 4,
     memoryCost: 1,
@@ -7920,6 +7938,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
       "wall_breaker",
       "pump_strength",
       "stealth_loss",
+      "subtype_noisy",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },
@@ -8868,18 +8887,19 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     title: "R&D-Protocol Files",
     side: "runner",
     type: "program",
-    subtypes: ["stealth"],
+    subtypes: [],
     implementationStatus: "playable_mvp",
     installCost: 0,
     memoryCost: 1,
-    recurringCredits: 1,
-    rulesText: "Stealth program with recurring run credits.",
+    rulesText:
+      "A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D.",
     mechanics: [
       "install_program",
       "memory",
-      "subtype_stealth",
-      "recurring_credit",
-      "recurring_start_turn",
+      "start_run",
+      "rd_run",
+      "access_replacement",
+      "hidden_zone_tool",
       ONR_V1_LOCAL_PRIVATE,
     ],
   },

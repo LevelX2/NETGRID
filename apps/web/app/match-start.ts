@@ -1,3 +1,5 @@
+import type { ApiMatchStatus, ApiPlayerClockSnapshot } from "@netgrid/shared";
+
 export type PlayMode = "human_vs_human" | "human_vs_ai" | "ai_vs_ai";
 export type HumanSideSelection = "runner" | "corp" | "random";
 export type HumanAiSideSelection = "runner" | "corp" | "random";
@@ -120,6 +122,26 @@ export function matchStartSummary(input: {
           ? "Simulationsdecks: deterministisch zufällig"
           : "Simulationsdecks: ausgewählt";
   return [playMode, side, format, deckPolicy];
+}
+
+export function matchStartLobbyBlocksSetup(status: ApiMatchStatus | undefined): boolean {
+  return (
+    status === "pending" ||
+    status === "waiting_for_runner" ||
+    status === "waiting_for_corp" ||
+    status === "waiting_for_joiner_decks" ||
+    status === "ready_check" ||
+    status === "countdown"
+  );
+}
+
+export function matchStartPlayerClockLabel(snapshot: ApiPlayerClockSnapshot | undefined): string {
+  if (!snapshot || snapshot.mode === "none") return "Ohne Spielerzeit";
+  const minutes = snapshot.startingTimeMs ? Math.round(snapshot.startingTimeMs / 60_000) : null;
+  const graceSeconds = snapshot.gracePeriodMs !== undefined ? Math.round(snapshot.gracePeriodMs / 1000) : null;
+  if (minutes && graceSeconds !== null) return `Spielerzeit ${minutes} Min · ${graceSeconds} s Kulanz`;
+  if (minutes) return `Spielerzeit ${minutes} Min`;
+  return "Spielerzeit aktiv";
 }
 
 export function sideSelectionLabel(selection: HumanSideSelection): string {

@@ -1,0 +1,1679 @@
+{
+  "schemaVersion": "card-set-v1",
+  "setId": "classic",
+  "setName": "Classic",
+  "cards": [
+    {
+      "cardId": "onr_classic_001_data-fort-remapping",
+      "setId": "classic",
+      "title": "Data Fort Remapping",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 4,
+        "agendaPoints": 2
+      },
+      "text": "Put a Remap counter on Data Fort Remapping when you score it. Remap Counter: End a run.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C001",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_002_superserum",
+      "setId": "classic",
+      "title": "Superserum",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "text": "When you score Superserum, remove all Virus counters, and avoid receiving the next two Virus counters Runner gives to you.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C002",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_003_unlisted-research-lab",
+      "setId": "classic",
+      "title": "Unlisted Research Lab",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "asset",
+        "gray_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 3,
+        "agendaPoints": 2
+      },
+      "text": "Draw an additional card at the start of each of your turns.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C003",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_004_theorem-proof",
+      "setId": "classic",
+      "title": "Theorem Proof",
+      "side": "corp",
+      "type": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": 5,
+        "agendaPoints": 3
+      },
+      "text": "If Runner accesses Theorem Proof, he or she does not score it, but instead may install it as a 2 MU program that has the ability \"A: Score Theorem Proof\" but is removed from the game if it leaves play in any other way.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C004",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_005_baskerville",
+      "setId": "classic",
+      "title": "Baskerville",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "hellhound",
+        "sleepy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 10,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 2 Net damage. *Trace5 - If trace is successful, give Runner a Baskerville counter. Each counter does 2 Net damage at the start of each run. Runner may remove a Baskerville counter by taking an action to spend [3]. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Baskerville is reduced by [5].",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C005",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_006_bolter-swarm",
+      "setId": "classic",
+      "title": "Bolter Swarm",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "ap",
+        "hellbolt",
+        "sleepy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 8,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Do 4 Net damage. *Runner cannot break any subroutines on the next piece of ice encountered during this run. If Runner has used a noisy icebreaker during this run, the cost to rez Bolter Swarm is reduced by [5].",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C006",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_007_brain-drain",
+      "setId": "classic",
+      "title": "Brain Drain",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "black_ice",
+        "ap"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Roll a die. On a 1, do 3 brain damage.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C007",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_008_deadeye",
+      "setId": "classic",
+      "title": "Deadeye",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "killer",
+        "sleepy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 0,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trash a program. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Deadeye is reduced by [5].",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C008",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_009_dumpster",
+      "setId": "classic",
+      "title": "Dumpster",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 5,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Dumpster cannot be installed on the Archives. *Runner is now encountering the outermost piece of rezzed ice on the Archives, instead of passing Dumpster. The run is now considered to be a run on the Archives. If there is no rezzed ice on the Archives, Runner is considered to have passed the last piece of ice on the Archives.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C009",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_010_entrapment",
+      "setId": "classic",
+      "title": "Entrapment",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 4,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*If you pay [2], Runner is now encountering the outermost piece of rezzed ice on a data fort of your choice, instead of passing Entrapment. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C010",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_011_glacier",
+      "setId": "classic",
+      "title": "Glacier",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Rezzing Glacier cost 1 agenda point, in addition to the normal cost. *End the run. *End the run. [1]: Move Glacier to the outermost position of any other data fort. Use this ability only at the start of a run. You may use this ability even if Glacier is unrezzed, in which case, you reveal it.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C011",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_012_imperial-guard",
+      "setId": "classic",
+      "title": "Imperial Guard",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "sentry",
+        "killer",
+        "sleepy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 10,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*Trash a program. *End the run. If Runner has used a noisy icebreaker during this run, the cost to rez Imperial Guard is reduced by [5].",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C012",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_013_puzzle",
+      "setId": "classic",
+      "title": "Puzzle",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 5,
+        "rezCost": 2,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*End the run, and trash Puzzle at end of turn. *End the run, and trash Puzzle at end of turn.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C013",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_014_trapdoor",
+      "setId": "classic",
+      "title": "Trapdoor",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 3,
+        "rezCost": 3,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Trapdoor only on R&D or HQ. *Runner is now encountering the outermost piece of rezzed ice on a subsidiary data fort of your choice, instead of passing Trapdoor. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort. Runner automatically breaks this subroutine if there are no subsidiary data forts.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C014",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_015_vortex",
+      "setId": "classic",
+      "title": "Vortex",
+      "side": "corp",
+      "type": "ice",
+      "subtypes": [
+        "code_gate",
+        "deflector"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": 2,
+        "rezCost": 0,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "*If you pay [2], Runner is now encountering the outermost piece of rezzed ice on a data fort of your choice, instead of passing Vortex. The run is now considered to be a run on that data fort. If there is no rezzed ice on that fort, Runner is considered to have passed the last piece of ice on that fort.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C015",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_016_badtimes",
+      "setId": "classic",
+      "title": "Badtimes",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "virus"
+      ],
+      "numeric": {
+        "cost": 4,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if Runner is tagged. Runner's MU is reduced by 2 until end of turn.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C016",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_017_corporate-shuffle",
+      "setId": "classic",
+      "title": "Corporate Shuffle",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "double"
+      ],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Draw five cards, then shuffle a card stored in HQ into R&D. Playing a double operation costs two consecutive actions this turn instead of one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C017",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_018_reclamation-project",
+      "setId": "classic",
+      "title": "Reclamation Project",
+      "side": "corp",
+      "type": "operation",
+      "subtypes": [
+        "double"
+      ],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Search the archives for any number of ice cards. Show those cards to Runner, then store them in HQ. Playing a double operation costs two consecutive actions this turn instead of one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C018",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_019_indiscriminate-response-team",
+      "setId": "classic",
+      "title": "Indiscriminate Response Team",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "black_ops"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 2,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "After Runner makes a successful run, you may have Runner shuffle his or her hand into his or her stack and then draw as many cards as he or she had before.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C019",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_020_london-city-grid",
+      "setId": "classic",
+      "title": "London City Grid",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "region"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 3,
+        "trashCost": 6,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Runner must pay [1], in addition to the normal cost, to use each subroutine of a noisy icebreaker during runs on this fort. Rez a region when you install it. Install a region only if you can pay to rez it. Only one region may be installed in each fort. Trash older ones.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C020",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_021_satellite-monitors",
+      "setId": "classic",
+      "title": "Satellite Monitors",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 3,
+        "trashCost": 1,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "At the start of each of your turns, you may roll a die for each run Runner made during his or her last turn. Dor each 1, give Runner a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C021",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_022_self-destruct",
+      "setId": "classic",
+      "title": "Self-Destruct",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "ambush"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Install Self-Destruct only in a subsidiary data fort. [T]. Trash all other cards installed in or on this data fort. Do 1 Net damage for each card successfully trashed in this way. Use this ability only when Runner accesses Self-Destruct.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C022",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_023_shock-treatment",
+      "setId": "classic",
+      "title": "Shock Treatment",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "ambush"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 5,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "When Runner accesses Shock Treatment, trash all pieces of hardware and two programs. Ignore this effect unless Runner has four or more tags.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C023",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_024_sterdroid",
+      "setId": "classic",
+      "title": "Sterdroid",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 0,
+        "trashCost": 0,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[3], [T]: Choose a piece of ice. That ice's strength is doubled until end of turn. If this would raise the ice's strength above 10, ist strength becomes 10.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C024",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_025_strategic-planning-group",
+      "setId": "classic",
+      "title": "Strategic Planning Group",
+      "side": "corp",
+      "type": "asset",
+      "subtypes": [
+        "node",
+        "unique"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 2,
+        "trashCost": 4,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Whenever you draw one or more cards, draw an extra card. Then place one of the drawn cards on the bottom of R&D. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C025",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_026_street-enforcer",
+      "setId": "classic",
+      "title": "Street Enforcer",
+      "side": "corp",
+      "type": "upgrade",
+      "subtypes": [
+        "sysop"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": 1,
+        "trashCost": 3,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "At the start of each run on this data fort, Runner loses [X], where X is equal to the number of tags Runner has.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C026",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_027_early-worm",
+      "setId": "classic",
+      "title": "Early Worm",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "worm"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break wall subroutine. [2]: +3 strength",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C027",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_028_matador",
+      "setId": "classic",
+      "title": "Matador",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 0,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break sentry subroutine. [3]: +5 strength",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C028",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_029_ms-todon",
+      "setId": "classic",
+      "title": "MS-todon",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker",
+        "killer",
+        "noisy"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": 1,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break sentry subroutine. [1]: +1 strength The first time during each run that you break a sentry subroutine with MS-todon, lose all bits from all stealth cards, if you can, and the Corp gives you a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C029",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_030_psychic-friend",
+      "setId": "classic",
+      "title": "Psychic Friend",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": 1,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break code gate subroutine. [2]: +1 strength until end of turn",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C030",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_031_rent-i-con",
+      "setId": "classic",
+      "title": "Rent-I-Con",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [
+        "icebreaker"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": 2,
+        "strength": 2,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1]: Break ice subroutine. At the end of this run, trash Rent-I-Con. [1]: +1 strength",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C031",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_032_schematics-search-engine",
+      "setId": "classic",
+      "title": "Schematics Search Engine",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Whenever you access cards from HQ, expose all of the Corp's installed cards.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C032",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_033_superglue",
+      "setId": "classic",
+      "title": "Superglue",
+      "side": "runner",
+      "type": "program",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": 1,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[T]: Derez a piece of ice. Use this ability only if you have just broken all the subroutines of that piece of ice.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C033",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_034_boostergang-connections",
+      "setId": "classic",
+      "title": "Boostergang Connections",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 7,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Trash your hand. Search your stack for as many cards as were successfully trashed in this way and bring them into your hand. Shuffle your stack afterward.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C034",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_035_corruption",
+      "setId": "classic",
+      "title": "Corruption",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Play only if you scored any agendas this turn. Lose all agenda points you scored this turn, and the Corp scores that many agenda points. Gain [10] per agenda point lost in this way, and the Corp gives you a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C035",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_036_do-the-drine",
+      "setId": "classic",
+      "title": "Do the 'Drine",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 0,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Suffer any amount of brain damage, but not enough to flatline you or to reduce your hand size to less than 0. Gain [4] for each point of brain damage you suffer in this way. This damage cannot be prevented.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C036",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_037_finders-keepers",
+      "setId": "classic",
+      "title": "Finders Keepers",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "random"
+      ],
+      "numeric": {
+        "cost": 7,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Roll three dice. Gain that many bits.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C037",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_038_gypsytm-schedule-analyzer",
+      "setId": "classic",
+      "title": "Gypsy™ Schedule Analyzer",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run on R&D. If run is successful, do not access any cards. Instead, reveal cards one at a time from R&D until you reveal an agenda card or there are no cards left in R&D. Store the agenda, if any, in HQ and shuffle the other revealed cards, if any, into R&D.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C038",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_039_library-search",
+      "setId": "classic",
+      "title": "Library Search",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run on R&D or HQ. If run is successful, access two additional cards if you used no noisy icebreakers during the run and if no trace attempts were made during the run.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C039",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_040_meat-upgrade",
+      "setId": "classic",
+      "title": "Meat Upgrade",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "double"
+      ],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Remove up to two tags, at no cost, and draw three cards. Playing a double prep costs two consecutive actions this turn instead of one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C040",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_041_networking",
+      "setId": "classic",
+      "title": "Networking",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "double"
+      ],
+      "numeric": {
+        "cost": 3,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [9]. Playing a double prep costs two consecutive actions this turn instead of one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C041",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_042_panzer-run",
+      "setId": "classic",
+      "title": "Panzer Run",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "double"
+      ],
+      "numeric": {
+        "cost": 1,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [4] and draw two cards. Playing a double prep costs two consecutive actions this turn instead of one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C042",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_043_running-interference",
+      "setId": "classic",
+      "title": "Running Interference",
+      "side": "runner",
+      "type": "event",
+      "subtypes": [
+        "double"
+      ],
+      "numeric": {
+        "cost": 2,
+        "installCost": null,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Make a run. During that run, the Corp must pay [X], in addition to the normal cost, to rez each piece of ice, where X is the rez cost of that piece of ice. Playing a double prep costs two consecutive actions this turn instead of one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C043",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_044_crash-space",
+      "setId": "classic",
+      "title": "Crash Space",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "unique"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 2,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Gain [1] at the start of each of your turns. All trace attempts are automatically successful, and give you a tag in addition to their other effects. If Crash Space leaves play, lose [2]. A: Trash Crash Space. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C044",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_045_elena-laskova",
+      "setId": "classic",
+      "title": "Elena Laskova",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection",
+        "unique"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Whenever you play a prep, gain an additional [1] the first time you gain bits from its effect. Only one unique card of a particular name can be in play at a time. If for some reason more than one is in play, trash all but one.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C045",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_046_executive-file-clerk",
+      "setId": "classic",
+      "title": "Executive File Clerk",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "connection",
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[2],[T]: Look at all cards stored in HQ. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C046",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_047_little-black-box",
+      "setId": "classic",
+      "title": "Little Black Box",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "deck"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 4,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Provides +1 MU and +1 hand size. Prevent up to 1 Net or brain damage each turn. Put [1] from the bank on Little Black Box when it is installed. Use this bit only to pay for increasing your link. If you use the bit, replace it from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C047",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      "setId": "classic",
+      "title": "Omnitech \"Spinal Tap\" Cybermodem",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "deck",
+        "random"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 5,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Provides +1 Mu. Put [2] from the bank on Omnitech \"Spinal Tap\" Cybermodem when it is installed. Use this bits only to pay for using icebreakers during runs or increasing your link. If you use any of these bits, replace them at the start of your next turn. At the start of each of your turns roll a die. On a 1, suffer 2 brain damage. This damage cannot be prevented. If Omnitech \"Spinal Tap\" Cyermodem leaves play suffer 2 brain damage. Only one deck can be in play at a time. Trash any older decks.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C048",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_049_omnitech-wet-drive",
+      "setId": "classic",
+      "title": "Omnitech Wet Drive",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Your base MU is equal to the number of cards in your hand instead of 4.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C049",
+      "rarity": {
+        "code": "rare",
+        "labelDe": "Selten",
+        "labelEn": "Rare",
+        "sourceValue": "Rare",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_050_sandbox-dig",
+      "setId": "classic",
+      "title": "Sandbox Dig",
+      "side": "runner",
+      "type": "resource",
+      "subtypes": [
+        "hidden"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 0,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[3], [T]: Look at the top three cards stored in R&D. Hidden resources are installed face down, but are put into the trash face up.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C050",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_051_vintage-camaro",
+      "setId": "classic",
+      "title": "Vintage Camaro",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [
+        "vehicle"
+      ],
+      "numeric": {
+        "cost": null,
+        "installCost": 1,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "[1], Forgo your next action: Avoid receiving a tag.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C051",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    },
+    {
+      "cardId": "onr_classic_052_zetatech-portastation",
+      "setId": "classic",
+      "title": "Zetatech Portastation",
+      "side": "runner",
+      "type": "hardware",
+      "subtypes": [],
+      "numeric": {
+        "cost": null,
+        "installCost": 3,
+        "memoryCost": null,
+        "strength": null,
+        "rezCost": null,
+        "trashCost": null,
+        "advancementRequirement": null,
+        "agendaPoints": null
+      },
+      "text": "Put [1] from the bank on Zetatech Portostation when it is installed. Use this bit only to pay for playing preps. If you use the bit, replace it from the bank at the start of your next turn.",
+      "displayOnlyText": true,
+      "faction": "onr_classic",
+      "setName": "Classic",
+      "collectorNumber": "C052",
+      "rarity": {
+        "code": "common",
+        "labelDe": "Häufig",
+        "labelEn": "Common",
+        "sourceValue": "Common",
+        "sourceId": "onr-classic-spoiler"
+      }
+    }
+  ]
+}

@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { NextResponse } from "next/server";
 import { lookupCardImage, type CardImageLookupResult } from "../card-image-lookup";
 
-const LOCAL_ONR_CACHE_CONTROL = "private, max-age=3600, must-revalidate";
+const LOCAL_ONR_CACHE_CONTROL = "private, max-age=0, must-revalidate";
 const VERSIONED_CACHE_CONTROL = "private, max-age=31536000, immutable";
 
 export async function GET(request: Request, context: { params: Promise<{ cardId: string }> }) {

@@ -317,16 +317,17 @@
       "roles": [
         "program",
         "virus",
-        "recurring"
+        "hq_run_reward",
+        "economy"
       ],
       "planRoles": [
         "build_rig"
       ],
       "requiredMechanics": [
-        "install_program",
-        "virus",
-        "purge",
-        "recurring_credit"
+        "successful_hq_run_counter",
+        "butcher_boy_counter",
+        "start_turn_credit_from_counter_pairs",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
@@ -347,23 +348,25 @@
       "roles": [
         "program",
         "virus",
-        "recurring"
+        "rd_run_reward",
+        "corp_start_turn_pressure"
       ],
       "planRoles": [
         "build_rig"
       ],
       "requiredMechanics": [
-        "install_program",
-        "virus",
-        "purge",
-        "recurring_credit"
+        "successful_rd_run_counter",
+        "cascade_counter",
+        "corp_start_turn_trash_faceup_rd",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
         "economy": 1
       },
       "riskTags": [
-        "counter_state"
+        "counter_state",
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -524,7 +527,9 @@
         "install_program",
         "memory",
         "subtype_icebreaker",
-        "subtype_killer"
+        "subtype_killer",
+        "break_subroutine",
+        "encounter_ice"
       ],
       "valueHints": {
         "rigCoverage": 2,
@@ -583,23 +588,25 @@
       "roles": [
         "program",
         "virus",
-        "recurring"
+        "rd_run_reward",
+        "hidden_zone_tool"
       ],
       "planRoles": [
         "build_rig"
       ],
       "requiredMechanics": [
-        "install_program",
-        "virus",
-        "purge",
-        "recurring_credit"
+        "successful_rd_run_counter",
+        "thought_counter",
+        "top_rd_look_threshold_3",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
         "economy": 1
       },
       "riskTags": [
-        "counter_state"
+        "counter_state",
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -613,7 +620,7 @@
       "roles": [
         "program",
         "icebreaker",
-        "generic_breaker",
+        "restricted_breaker",
         "run_pressure"
       ],
       "planRoles": [
@@ -626,7 +633,8 @@
         "memory",
         "pump_breaker",
         "break_subroutine",
-        "encounter_ice"
+        "encounter_ice",
+        "restricted_breaker_targets"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -661,7 +669,8 @@
         "memory",
         "pump_breaker",
         "break_subroutine",
-        "encounter_ice"
+        "encounter_ice",
+        "end_run_after_breaker_use"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -1056,23 +1065,28 @@
       "cardType": "program",
       "roles": [
         "program",
-        "counter",
-        "hidden_zone_tool"
+        "spy_counter",
+        "expose",
+        "successful_run_reward"
       ],
       "planRoles": [
-        "build_rig",
-        "safe_probe_run"
+        "information",
+        "pressure_remote"
       ],
       "requiredMechanics": [
         "install_program",
-        "reveal_stack_top",
-        "legal_action_only"
+        "memory",
+        "spy_counter",
+        "successful_run_trigger",
+        "expose_fort_cards",
+        "corp_paid_counter_removal"
       ],
       "valueHints": {
         "information": 2
       },
       "riskTags": [
-        "public_reveal"
+        "hidden_zone_projection",
+        "successful_run_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1184,7 +1198,8 @@
         "memory",
         "pump_breaker",
         "break_subroutine",
-        "subtype_noisy"
+        "subtype_noisy",
+        "stealth_loss"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -1236,21 +1251,23 @@
       "cardType": "program",
       "roles": [
         "program",
-        "damage_prevention"
+        "trash_prevention"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "protect_rig"
       ],
       "requiredMechanics": [
         "install_program",
-        "damage_prevention"
+        "memory",
+        "program_trash_prevention",
+        "return_to_hand"
       ],
       "valueHints": {
         "survival": 2
       },
       "riskTags": [
-        "damage_window"
+        "trash_prevention_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1615,20 +1632,27 @@
       "cardType": "program",
       "roles": [
         "program",
-        "access"
+        "rd_run",
+        "access_replacement",
+        "hidden_zone_tool"
       ],
       "planRoles": [
-        "build_rig",
-        "run_pressure"
+        "pressure_rnd",
+        "information"
       ],
       "requiredMechanics": [
-        "install_program"
+        "install_program",
+        "memory",
+        "rd_run",
+        "access_replacement",
+        "top_rd_look"
       ],
       "valueHints": {
         "access": 1
       },
       "riskTags": [
-        "display_only_access_text"
+        "hidden_zone_projection",
+        "access_replacement"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1688,7 +1712,9 @@
         "pump_breaker",
         "break_subroutine",
         "subtype_decoder",
-        "subtype_icebreaker"
+        "subtype_icebreaker",
+        "break_subroutine",
+        "encounter_ice"
       ],
       "valueHints": {
         "runPressure": 2,
@@ -2068,26 +2094,25 @@
       "roles": [
         "program",
         "virus",
-        "rd_pressure"
+        "rd_run_reward",
+        "corp_draw_pressure"
       ],
       "planRoles": [
         "build_rig",
         "pressure_rnd"
       ],
       "requiredMechanics": [
-        "install_program",
         "successful_rd_run_counter",
-        "corp_start_turn_draw",
-        "virus",
-        "purge"
+        "skivviss_counter",
+        "corp_start_turn_extra_draw",
+        "virus_purge"
       ],
       "valueHints": {
         "tempo": 1,
         "pressure": 2
       },
       "riskTags": [
-        "counter_state",
-        "start_turn_trigger"
+        "counter_state"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2140,7 +2165,11 @@
         "install_program",
         "memory",
         "subtype_icebreaker",
-        "subtype_killer"
+        "subtype_killer",
+        "pump_breaker",
+        "break_subroutine",
+        "encounter_ice",
+        "run_strength_modifier"
       ],
       "valueHints": {
         "rigCoverage": 2,
@@ -2619,17 +2648,16 @@
       "cardType": "event",
       "roles": [
         "event",
-        "counter",
-        "icebreaker_strength_modifier"
+        "agenda_reward",
+        "icebreaker_support"
       ],
       "planRoles": [
         "agenda_reward",
         "build_rig"
       ],
       "requiredMechanics": [
-        "play_event",
-        "agenda_subtype_condition",
-        "counter",
+        "research_agenda_liberated_condition",
+        "militech_counter",
         "icebreaker_strength_modifier"
       ],
       "valueHints": {
@@ -2681,27 +2709,29 @@
       "cardType": "event",
       "roles": [
         "event",
-        "hq_pressure",
-        "run_event",
-        "tag_cost_event"
+        "hq_run",
+        "access_replacement",
+        "economy",
+        "tag_self"
       ],
       "planRoles": [
         "contest_remote",
         "pressure_hq"
       ],
       "requiredMechanics": [
-        "add_tag",
-        "corp_draw",
-        "play_event",
-        "run",
-        "successful_run"
+        "hq_run",
+        "access_replacement",
+        "corp_credit_loss",
+        "runner_gain_credits",
+        "runner_gain_tag"
       ],
       "valueHints": {
         "runPressure": 2,
         "utility": 2
       },
       "riskTags": [
-        "tag"
+        "access_replacement",
+        "tag_self"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -2905,10 +2935,8 @@
         "safe_probe_run"
       ],
       "requiredMechanics": [
-        "play_event",
-        "expose",
-        "target_choice",
-        "hidden_info_barrier"
+        "expose_installed_cards",
+        "side_safe_targeting"
       ],
       "valueHints": {
         "information": 2
@@ -3198,22 +3226,23 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "draw",
-        "event"
+        "event",
+        "draw_cards",
+        "recycle_zones"
       ],
       "planRoles": [
         "draw_for_answers"
       ],
       "requiredMechanics": [
-        "draw",
-        "play_event",
-        "shuffle"
+        "shuffle_grip_heap_stack",
+        "draw_cards",
+        "remove_from_game"
       ],
       "valueHints": {
         "cardFlow": 3
       },
       "riskTags": [
-        "hidden_zone_change"
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3346,25 +3375,23 @@
       "cardType": "event",
       "roles": [
         "event",
-        "rd_pressure",
-        "run_event",
-        "server_redirect"
+        "hq_run",
+        "rd_success_replacement"
       ],
       "planRoles": [
         "pressure_hq",
         "pressure_rnd"
       ],
       "requiredMechanics": [
-        "access_server_override",
-        "play_event",
-        "run",
-        "successful_run"
+        "hq_run",
+        "access_replacement",
+        "successful_rd_run"
       ],
       "valueHints": {
         "runPressure": 3
       },
       "riskTags": [
-        "encounter"
+        "access_replacement"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3598,25 +3625,24 @@
       "cardType": "event",
       "roles": [
         "event",
-        "program_setup",
-        "tutor"
+        "program_search",
+        "hidden_zone_tool"
       ],
       "planRoles": [
         "build_rig",
         "draw_for_answers"
       ],
       "requiredMechanics": [
-        "play_event",
-        "reveal_card",
         "search_stack",
-        "shuffle"
+        "show_to_corp",
+        "shuffle_stack"
       ],
       "valueHints": {
         "rigCoverage": 2,
         "cardFlow": 2
       },
       "riskTags": [
-        "hidden_zone_change"
+        "hidden_zone_projection"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -3816,7 +3842,8 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "damage_prevention"
+        "damage_prevention",
+        "counter"
       ],
       "planRoles": [
         "build_rig",
@@ -3825,7 +3852,8 @@
       "requiredMechanics": [
         "install_hardware",
         "meat_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "ablative_counter"
       ],
       "valueHints": {
         "survival": 2
@@ -4034,7 +4062,8 @@
       "requiredMechanics": [
         "install_hardware",
         "net_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "damage_prevention_turn_limit"
       ],
       "valueHints": {
         "survival": 2
@@ -4083,16 +4112,20 @@
       "roles": [
         "hardware",
         "damage_prevention",
-        "core_damage"
+        "core_damage",
+        "draw_cards"
       ],
       "planRoles": [
         "build_rig",
-        "survive_core_damage"
+        "survive_core_damage",
+        "recover_cards"
       ],
       "requiredMechanics": [
         "install_hardware",
         "core_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "recent_damage_gate",
+        "draw_cards"
       ],
       "valueHints": {
         "survival": 2
@@ -4225,21 +4258,22 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "avoid_tags"
       ],
       "requiredMechanics": [
         "install_hardware",
-        "damage_prevention"
+        "tag_avoid",
+        "credit_cost"
       ],
       "valueHints": {
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -4345,8 +4379,7 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "access",
-        "multiaccess"
+        "rd_multiaccess"
       ],
       "planRoles": [
         "build_rig",
@@ -4354,9 +4387,7 @@
       ],
       "requiredMechanics": [
         "install_hardware",
-        "access",
-        "breach",
-        "multiaccess"
+        "rd_additional_access"
       ],
       "valueHints": {
         "run": 2
@@ -4453,15 +4484,23 @@
       "cardType": "hardware",
       "roles": [
         "hardware",
-        "damage_prevention"
+        "damage_prevention",
+        "memory",
+        "link",
+        "deck"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "survive_meat_damage",
+        "increase_link"
       ],
       "requiredMechanics": [
         "install_hardware",
-        "damage_prevention"
+        "memory",
+        "meat_damage",
+        "damage_prevention",
+        "link_bits",
+        "deck_unique_replacement"
       ],
       "valueHints": {
         "survival": 1
@@ -4812,8 +4851,7 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "virus_counter",
-        "purge_replacement"
+        "virus_counter_protection"
       ],
       "planRoles": [
         "build_rig",
@@ -4821,10 +4859,9 @@
         "successful_hq_run_payoff"
       ],
       "requiredMechanics": [
-        "install_resource",
         "successful_hq_run_condition",
         "virus_counter_purge_replacement",
-        "corp_trash_action"
+        "corp_paid_trash_action"
       ],
       "valueHints": {
         "virus": 2
@@ -4993,21 +5030,21 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "avoid_tags"
       ],
       "requiredMechanics": [
         "install_resource",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "valueHints": {
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5259,21 +5296,26 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "tag_avoid",
+        "remove_tag"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "avoid_tags",
+        "remove_tags"
       ],
       "requiredMechanics": [
         "install_resource",
-        "damage_prevention"
+        "tag_avoid",
+        "remove_tag",
+        "action_cost",
+        "credit_cost"
       ],
       "valueHints": {
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5349,18 +5391,16 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "remote_tax",
         "resource",
-        "server_pressure"
+        "install_cost_modifier"
       ],
       "planRoles": [
         "contest_remote",
         "recover_economy"
       ],
       "requiredMechanics": [
-        "choose_server",
-        "install_resource",
-        "persistent_modifier"
+        "choose_data_fort_on_install",
+        "ice_install_extra_cost_2"
       ],
       "valueHints": {
         "utility": 2,
@@ -5380,17 +5420,17 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "bit_depot",
-        "economy"
+        "economy",
+        "counter"
       ],
       "planRoles": [
         "build_economy"
       ],
       "requiredMechanics": [
         "install_resource",
-        "bit_counter_depot",
-        "runner_start_turn_credit",
-        "auto_trash"
+        "bit_counter_pool_12",
+        "start_turn_take_credit",
+        "trash_when_empty"
       ],
       "valueHints": {
         "economy": 2
@@ -5701,17 +5741,15 @@
       "roles": [
         "resource",
         "economy",
-        "run_linked_resource"
+        "run_drawback"
       ],
       "planRoles": [
         "recover_economy",
         "contest_remote"
       ],
       "requiredMechanics": [
-        "install_resource",
-        "run_start_trigger",
-        "start_of_turn_trigger",
-        "trash_self"
+        "start_turn_gain_2",
+        "trash_on_run"
       ],
       "valueHints": {
         "economy": 2,
@@ -5732,7 +5770,8 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "damage_prevention",
+        "counter"
       ],
       "planRoles": [
         "build_rig",
@@ -5741,7 +5780,9 @@
       "requiredMechanics": [
         "install_resource",
         "meat_damage",
-        "damage_prevention"
+        "damage_prevention",
+        "trauma_counter",
+        "action_counter"
       ],
       "valueHints": {
         "survival": 2
@@ -5760,22 +5801,22 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "trash_prevention"
       ],
       "planRoles": [
         "build_rig",
-        "survive_damage"
+        "protect_rig"
       ],
       "requiredMechanics": [
         "install_resource",
-        "damage_prevention",
-        "core_damage"
+        "program_trash_prevention",
+        "hardware_trash_prevention"
       ],
       "valueHints": {
         "survival": 2
       },
       "riskTags": [
-        "damage_window"
+        "trash_prevention_window"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -5788,14 +5829,22 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "damage_prevention"
+        "tag_avoid",
+        "damage_prevention",
+        "run_action"
       ],
       "planRoles": [
         "build_rig",
+        "safe_probe_run",
+        "avoid_tags",
         "survive_meat_damage"
       ],
       "requiredMechanics": [
         "install_resource",
+        "unique_card",
+        "run_action_gain",
+        "run_spending_cap",
+        "tag_avoid",
         "meat_damage",
         "damage_prevention"
       ],
@@ -5803,7 +5852,9 @@
         "survival": 1
       },
       "riskTags": [
-        "damage_window"
+        "tag_window",
+        "damage_window",
+        "run_spending_cap"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -7407,8 +7458,7 @@
         "encounter_ice",
         "trace",
         "counter",
-        "runner_counter_removal",
-        "end_the_run"
+        "runner_counter_removal"
       ],
       "valueHints": {
         "defense": 4,
@@ -10028,6 +10078,7 @@
         "install_remote",
         "rez_card",
         "global_ice_rez_cost_modifier",
+        "subroutine_modifier_resolver",
         "persistent_modifier"
       ],
       "valueHints": {

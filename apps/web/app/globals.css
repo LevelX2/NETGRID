@@ -975,9 +975,43 @@ select {
   margin: 0;
 }
 
+.catalogFilterBar {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.catalogFilterToggle {
+  width: 100%;
+  min-height: 38px;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  background: var(--panel-soft);
+  cursor: pointer;
+  text-align: left;
+}
+
+.catalogFilterToggle:hover,
+.catalogFilterToggle:focus-visible {
+  border-color: var(--runner);
+}
+
+.catalogFilterToggle small {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .catalogControls {
   display: grid;
-  grid-template-columns: minmax(220px, 1fr) minmax(120px, 160px) minmax(150px, 210px) minmax(130px, max-content);
+  grid-template-columns: minmax(220px, 1fr) minmax(150px, 220px) minmax(120px, 150px) minmax(150px, 210px) minmax(130px, 170px) minmax(130px, max-content);
   align-items: end;
   gap: 10px;
   padding: 12px 14px;
@@ -3584,12 +3618,19 @@ select {
 }
 
 .cardChoiceSelectButton {
-  width: fit-content;
-  min-height: 28px;
-  padding: 4px 8px;
+  width: 30px;
+  min-width: 30px;
+  min-height: 30px;
+  padding: 0;
   justify-self: start;
-  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 50%;
   font-size: 12px;
+}
+
+.cardChoiceSelectButton:disabled {
+  opacity: 0.54;
 }
 
 .cardChoiceFallback {
@@ -3954,11 +3995,24 @@ select {
 }
 
 .turnActionHeader {
+  --turn-action-header-accent: var(--runner-zone-accent);
   display: grid;
   gap: 5px;
-  padding-bottom: 8px;
+  padding: 8px 10px 9px;
   margin: 0 0 8px;
-  border-bottom: 1px solid var(--line);
+  border: 1px solid color-mix(in srgb, var(--turn-action-header-accent), var(--line) 42%);
+  border-radius: 8px;
+  background:
+    linear-gradient(color-mix(in srgb, var(--turn-action-header-accent), transparent 84%), color-mix(in srgb, var(--turn-action-header-accent), transparent 84%)),
+    var(--section-bg);
+}
+
+.turnActionHeader.side-corp {
+  --turn-action-header-accent: var(--corp-status-accent);
+}
+
+.turnActionHeader.side-runner {
+  --turn-action-header-accent: var(--runner-zone-accent);
 }
 
 .turnActionHeader h2 {

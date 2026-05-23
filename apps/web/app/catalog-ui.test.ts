@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   catalogRarityLabel,
+  catalogSetFilterOptions,
   catalogSetKeyForCard,
+  filterCatalogCardsBySetId,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
   filterCatalogCardsByType,
@@ -92,6 +94,28 @@ describe("catalog UI filtering", () => {
     const searchedCards = originalCards.filter((card) => card.title.toLowerCase().includes("original"));
 
     expect(filterCatalogCardsByType(searchedCards, onlyIce).map((card) => card.catalogCardId)).toEqual(["original_ice"]);
+  });
+
+  it("builds dynamic catalog set filters from concrete set ids", () => {
+    const cards = [
+      { catalogCardId: "original", setId: "originalset-v1" },
+      { catalogCardId: "proteus_a", setId: "proteus" },
+      { catalogCardId: "proteus_b", setId: "proteus" },
+      { catalogCardId: "classic", setId: "classic-v1" },
+      { catalogCardId: "custom", setId: "android-custom-alpha" },
+      { catalogCardId: "test", setId: "testset" }
+    ];
+
+    expect(catalogSetFilterOptions(cards)).toEqual([
+      { key: "all", label: "Alle Sets", count: 6 },
+      { key: "android-custom-alpha", label: "Android: Netrunner", count: 1 },
+      { key: "classic-v1", label: "Classic", count: 1 },
+      { key: "originalset-v1", label: "Original Version 1", count: 1 },
+      { key: "proteus", label: "Proteus", count: 2 },
+      { key: "testset", label: "Testkarten", count: 1 }
+    ]);
+    expect(filterCatalogCardsBySetId(cards, "proteus").map((card) => card.catalogCardId)).toEqual(["proteus_a", "proteus_b"]);
+    expect(filterCatalogCardsBySetId(cards, "all")).toEqual(cards);
   });
 
   it("filters and summarizes rarity metadata without breaking cards that have no rarity", () => {

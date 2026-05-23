@@ -5010,7 +5010,9 @@ function isSearchChoice(
   choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
 ): boolean {
   return Boolean(
-    choice.stackSearchResolution || /search|stack/i.test(choice.source),
+    choice.cardSearchPresentation ||
+      choice.stackSearchResolution ||
+      /search|stack/i.test(choice.source),
   );
 }
 
@@ -5032,7 +5034,9 @@ function scoreSearchChoiceOption(
 ): number {
   const card = option.card;
   if (!card) return 0;
-  const destination = choice.stackSearchResolution?.destination;
+  const destination =
+    choice.cardSearchPresentation?.destination ??
+    choice.stackSearchResolution?.destination;
   const roles = rolesForCardId(card.definitionId);
   const subtypes = (card.subtypes ?? []).map((subtype) =>
     subtype.toLowerCase(),

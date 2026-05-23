@@ -282,7 +282,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "text": "Whenever you make a successful run on HQ, give the Corp a Butcher Boy counter. Every two Butcher Boy counters gain you 1 credit at the start of each of your turns. The Corp may remove all Virus counters by forgoing its next three actions.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -314,7 +314,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "text": "Whenever you make a successful run on R&D, give the Corp a Cascade counter. Every two Cascade counters require the Corp to trash faceup one card stored in R&D at the start of each of its turns. The Corp may remove all Virus counters by forgoing its next three actions.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -473,7 +473,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break sentry subroutine.",
+      "text": "1 credit: Break sentry subroutine.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -537,7 +537,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "text": "Whenever you make a successful run on R&D, give the Corp a Thought counter. Three or more Thought counters allow you to look at the top card of R&D at the start of each of your turns. The Corp may remove all Virus counters by forgoing its next three actions.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -569,7 +569,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 credit: Break ice subroutine.\n1 credit: +1 strength.",
+      "text": "1 credit: Break pit bull, hellhound, bloodhound, or watchdog subroutine.\n1 credit: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -601,7 +601,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 credit: Break ice subroutine.\n2 credits: +1 strength.",
+      "text": "0 credits: Break ice subroutine.\n1 credit: +1 strength.\nUsing Dropp ends your run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1011,7 +1011,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed helper: reveal the top card of the Runner stack through a side-safe reveal action.",
+      "text": "[T]: Put a Spy counter in a data fort. A Spy counter exposes all cards installed inside or on a fort containing it. The Corp may remove a Spy counter by taking an action to pay 4. Use this ability only immediately after a successful run on that fort.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1141,7 +1141,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break wall subroutine.\n1 credit: +1 strength.",
+      "text": "0 credits: Break wall subroutine.\n1 credit: +1 strength.\nWhenever you break a wall subroutine with Jackhammer, lose 1 credit, if you can, from a stealth card.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1203,7 +1203,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net or core damage.",
+      "text": "[T]: Prevent one or more of your other installed programs from being trashed.\n1 credit: Prevent one or more of your other installed programs from being trashed, and bring Joan of Arc into your hand.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1577,7 +1577,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Provides +1 MU. Put 9 from the bank on Microcyb Owl when it is installed. Use these bits only to pay for using icebreakers during runs, but not for using noisy icebreakers. If you use any of these bits, replace them at the start of your next turn. You may place only one deck can be in play at a time. Trash any older decks.",
+      "text": "A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1639,7 +1639,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break code gate subroutine.\n2 credits: +1 strength.",
+      "text": "1 credit: Break code gate subroutine.\n2 credits: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -1672,7 +1672,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Ice that attempts to trace you has its trace limit reduced by 1.",
+      "text": "2 credits: Break wall subroutine.\n1 credit: +1 strength.\nWhenever you break a wall subroutine with Ramming Piston, lose a total of 2 credits from stealth cards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2016,7 +2016,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When installed, place 1 Virus counter on this program. 1 recurring credit for run costs. The Corp may purge Virus counters.",
+      "text": "Whenever you make a successful run on R&D, give the Corp a Skivviss counter. Each Skivviss counter requires the Corp to draw one extra card at the start of each of its turns. The Corp may remove all Virus counters by forgoing its next three actions.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2081,7 +2081,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
+      "text": "Snowball has +1 strength for each subroutine it has broken during a run, until the end of that run.\n1 credit: Break sentry subroutine.\n1 credit: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2581,7 +2581,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Play only if the Runner liberated a Research agenda this turn. Put a Militech counter on each installed icebreaker.",
+      "text": "Play only if you liberated any Research agendas this turn. Put a Militech counter on each of your icebreakers. A Militech counter gives the icebreaker it is on +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2643,7 +2643,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Make a run on HQ. If run is successful, do not access cards from HQ; instead, the Corp loses 1, Runner gains 1 tag and the Corp draws 1 card.",
+      "text": "Make a run on HQ. If run is successful, and the Corp has any credits when you would access HQ, do not access cards from HQ; instead, the Corp loses 1 credit and gives you a tag, and you gain 10 credits.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -2859,7 +2859,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Expose up to three installed Corp cards through a side-safe target choice.",
+      "text": "Expose up to three installed cards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3163,7 +3163,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Shuffle your grip, heap and stack together, draw five cards, then remove MIT West Tier from the game.",
+      "text": "Shuffle your hand, trash, and stack together, and then draw five cards. When you play MIT West Tier, remove it from the game instead of trashing it.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3318,7 +3318,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Make a run on HQ. If run is successful, treat it as a successful run on R&D instead of accessing HQ.",
+      "text": "Make a run on HQ. If run is successful, do not access cards from HQ; instead, treat run as a successful run on R&D.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3564,7 +3564,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Search your stack for a program, reveal it and bring it into your hand. Shuffle your stack afterwards.",
+      "text": "Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Shuffle your stack afterwards.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -3780,7 +3780,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 2 meat damage.",
+      "text": "Put seven Ablative counters on Armored Fridge when it is installed. When the last Ablative counter has been removed, trash Armored Fridge.\nAblative counter: Prevent 1 meat damage.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4002,7 +4002,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 2 net damage.",
+      "text": "Prevents 1 net damage each turn.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4064,7 +4064,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 core damage.",
+      "text": "A: Draw two cards. Use this ability only if you were damaged during any of your last three actions.\n[T]: Prevent 1 brain damage.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4222,7 +4222,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+      "text": "3 credits: Avoid receiving a tag.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4348,7 +4348,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed access tool: access 1 additional card whenever you access R&D.",
+      "text": "Whenever you access cards from R&D, access an additional card from R&D.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4475,7 +4475,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+      "text": "Provides +1 MU. Prevents 1 meat damage each turn. Put 5 credits on Techtronica Utility Suit when it is installed. Use these credits only to pay for increasing your link. If you use any of these credits, replace them at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -4857,7 +4857,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Play only after a successful HQ run this turn. When the Corp purges Virus counters, choose up to two counters that are not removed. The Corp may take an action and pay 5 to trash Code Viral Cache.",
+      "text": "Play only if you made a successful run on HQ this turn. If the Corp forgoes actions to lose Virus counters, two counters of your choice are not removed. The Corp may trash Code Viral Cache by taking an action to pay 5.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5047,7 +5047,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 meat or net damage.",
+      "text": "[T]: Avoid receiving a tag.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5331,7 +5331,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net or meat damage.",
+      "text": "A, 1 credit: Remove a tag, at no cost.\n[T]: Avoid receiving a tag.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5425,7 +5425,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 1, in addition to the normal cost, to install ice on that fort.",
+      "text": "Choose a data fort when Restrictive Net Zoning is installed. The Corp must pay 2, in addition to the normal cost, to install ice on that fort.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5455,7 +5455,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "2 recurring credits for run costs. Used counters refresh at the start of each Runner turn without accumulation.",
+      "text": "Put 12 credits on Rigged Investments when it is installed. At the start of each of your turns, take 1 credit from Rigged Investments. When all credits have been removed, trash Rigged Investments.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5517,7 +5517,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "1 recurring credit for run costs. Used counters refresh at the start of each Runner turn.",
+      "text": "A: Choose a program or hardware card from your hand. Set that card aside, and put a number of Shell counters on it equal to its installation cost. When the last Shell counter on that card has been removed, install that card, at no cost. Remove one Shell counter from one card at the start of each of your turns. [1]: Remove one Shell counter from a card.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5770,7 +5770,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Gain 3 at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
+      "text": "Gain 2 credits at the start of each of your turns. Trash Top Runners' Conference when you make a run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5800,7 +5800,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 2 meat damage.",
+      "text": "Put two Trauma counters on Trauma Team when it is installed.\nTrauma counter: Prevent 1 meat damage.\nA: Put one Trauma counter on Trauma Team.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5830,7 +5830,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 net, meat or core damage.",
+      "text": "[T]: Prevent an installed program or hardware card from being trashed.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -5860,7 +5860,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Installed prevention tool: once each turn, prevent 1 meat damage.",
+      "text": "Each of your turns, you may choose to gain an action, which you may use only to make a run. You cannot spend more than 3 credits during that run to pay for using icebreakers or increasing your link. Use this ability only once per turn and only during your turn.\n[T]: Avoid receiving a tag.\n[T]: Prevent any amount of meat damage.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -6917,7 +6917,7 @@
         "advancementRequirement": 4,
         "agendaPoints": 4
       },
-      "text": "No additional Regeltext.",
+      "text": "No additional ability.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -6982,7 +6982,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[Subroutine] For the remainder of the run, Runner must pay 1 when encountering a piece of ice, in addition to any other costs, or end the run.",
+      "text": "[Subroutine] For the remainder of the run, Runner must pay 2 when encountering a piece of ice, in addition to any other costs, or end the run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -7386,7 +7386,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[Subroutine] Do 1 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.\n[Subroutine] End the run.",
+      "text": "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -7451,7 +7451,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and put a Data Raven counter on Data Raven. Each Data Raven counter gives Runner a tag at the start of each Runner turn.\n[Subroutine] End the run.",
+      "text": "[Subroutine] Trace 5 - If trace is successful, give Runner a tag and a Data Raven counter. Each Data Raven counter gives Runner a tag at the start of each Runner turn. Runner may remove a Data Raven counter by taking an action to pay 1.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -10130,7 +10130,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "Code gates cost 2 less to rez while Encoder, Inc. is rezzed.",
+      "text": "Code gates cost 1 less to rez while Encoder, Inc. is rezzed. All code gates have an additional \"End the run\" subroutine after all other subroutines.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11045,7 +11045,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When Runner uses a Worm icebreaker during a run on this fort, Corp may rez Aardvark. If rezzed this way, trash that Worm. Worm icebreakers cannot be used during runs on this fort while Aardvark is rezzed.",
+      "text": "Runner cannot use worms during runs on this fort. If Runner uses a worm during a run on this fort before Aardvark is rezzed, you may rez Aardvark to trash that worm, and any bits spent using that worm on the current piece of ice are lost to no effect. Runner may then use further icebreakers to break the ice.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11105,7 +11105,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "If Runner accesses an agenda from this fort, Runner does not score it immediately. Leave the agenda installed; Runner scores it at the start of the next Runner turn if it is still installed here.",
+      "text": "Runner does not score any agenda or agendas on a run during which Bizarre Encryption Scheme is accessed; return that agenda to the fort instead. Runner scores the agenda at the start of his or her next turn, if neither you nor Runner has scored it by then. This does not affect any further runs.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11137,7 +11137,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "The cost to install ice on this fort is reduced by 1.",
+      "text": "The cost to install ice on this fort is reduced by 2.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",
@@ -11169,7 +11169,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "When accessed, Runner trashes one installed daemon program.",
+      "text": "When Runner accesses Chimera, trash a daemon.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

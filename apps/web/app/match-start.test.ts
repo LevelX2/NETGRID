@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { deriveMatchStart, matchFormatCardLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
+import { deriveMatchStart, matchFormatCardLabel, matchStartLobbyBlocksSetup, matchStartPlayerClockLabel, matchStartSummary, parseJoinLinkInput, playModeCardLabel } from "./match-start";
 
 describe("V1.0.4 match start derivation", () => {
   it("keeps Human-vs-Human side assignment server-readable", () => {
@@ -75,5 +75,31 @@ describe("V1.0.4 match start derivation", () => {
     expect(summary).toContain("Seite wird ausgelost");
     expect(summary).toContain("Regelmatch bis 7 Agendapunkte");
     expect(summary.join(" ")).not.toMatch(/token|hash|deck_/i);
+  });
+
+  it("does not let terminal lobby statuses block the match-start setup", () => {
+    expect(matchStartLobbyBlocksSetup("pending")).toBe(true);
+    expect(matchStartLobbyBlocksSetup("ready_check")).toBe(true);
+    expect(matchStartLobbyBlocksSetup("countdown")).toBe(true);
+    expect(matchStartLobbyBlocksSetup("cancelled")).toBe(false);
+    expect(matchStartLobbyBlocksSetup("abandoned")).toBe(false);
+    expect(matchStartLobbyBlocksSetup("finished")).toBe(false);
+    expect(matchStartLobbyBlocksSetup("forfeited")).toBe(false);
+  });
+
+  it("labels player-clock settings for the start lobby", () => {
+    expect(matchStartPlayerClockLabel(undefined)).toBe("Ohne Spielerzeit");
+    expect(matchStartPlayerClockLabel({ schemaVersion: "player-clock-v1", mode: "none", consumedMs: { runner: 0, corp: 0 }, warningLevel: "none" })).toBe("Ohne Spielerzeit");
+    expect(
+      matchStartPlayerClockLabel({
+        schemaVersion: "player-clock-v1",
+        mode: "player_clock",
+        startingTimeMs: 20 * 60_000,
+        gracePeriodMs: 15_000,
+        remainingMs: { runner: 20 * 60_000, corp: 20 * 60_000 },
+        consumedMs: { runner: 0, corp: 0 },
+        warningLevel: "none"
+      })
+    ).toBe("Spielerzeit 20 Min · 15 s Kulanz");
   });
 });

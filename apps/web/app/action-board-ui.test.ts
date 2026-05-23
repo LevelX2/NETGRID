@@ -511,12 +511,28 @@ describe("V1.0.5 action board UI helpers", () => {
       source: "v1911.search_stack:7",
       prompt: "Stack durchsuchen"
     };
+    const heapSearchChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...exactSingleChoice,
+      choiceId: "p3_37_search_trash_to_grip_7",
+      source: "p3_37.search_trash_to_grip:source:onr_v1_087_forgotten-backup-chip:program:7",
+      prompt: "Heap durchsuchen",
+      cardSearchPresentation: {
+        sourceZone: "heap",
+        selectableFilter: "program",
+        reveal: "hidden",
+        destination: "grip",
+        shuffleAfter: false,
+        showNonMatchingCards: true
+      }
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
     expect(shouldUseCardChoicePanel(forgottenBackupChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
   });
 
   it("detects field-card choices for installed board cards only", () => {
@@ -1002,6 +1018,9 @@ describe("V1.0.6 resource and card-display helpers", () => {
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Run Event auf Archives", { cardId: "card_1", serverId: "archives" }))).toBe("Run auf Archive");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Simple Draw Event spielen", { cardId: "card_1" }))).toBe("Spielen");
     expect(contextualCardActionLabel(legalAction("runner", "play_event", "card_1", "Expose Event auf Remote 2", { cardId: "card_1", serverId: "remote_2" }))).toBe("Spielen auf Remote 2");
+    expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Security Net Optimization scoren und R&D wählen", { cardId: "agenda_1", selectedServerId: "rd" }))).toBe("Scoren: R&D wählen");
+    expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Security Net Optimization scoren und Remote 2 wählen", { cardId: "agenda_1", selectedServerId: "remote_2" }))).toBe("Scoren: Remote 2 wählen");
+    expect(contextualCardActionLabel(legalAction("corp", "score_agenda", "agenda_1", "Agenda scoren", { cardId: "agenda_1" }))).toBe("Scoren");
   });
 
   it("names Corp install destinations in card context actions", () => {
@@ -1721,6 +1740,36 @@ describe("V1.0.6 resource and card-display helpers", () => {
     });
 
     expect(retainedAccessRevealEvent([redactedRdAccess], null)).toBeNull();
+  });
+
+  it("explains Red Herrings steal costs when the agenda can be stolen", () => {
+    const steal = {
+      ...legalAction("runner", "steal_agenda", "agenda_1", "Priority Requisition stehlen", {
+        cardId: "agenda_1",
+        stealAdditionalCost: 5,
+        stealCost: 5,
+        stealCostSourceTitles: "Red Herrings"
+      }),
+      costs: [{ credits: 5 }]
+    };
+
+    expect(accessRevealStatusLabel({ type: "agenda" }, [steal], "runner", "runner", "Remote 1")).toBe(
+      "Red Herrings: 5 Credits zusätzliche Stehlkosten. Diese Agenda kann jetzt gestohlen werden."
+    );
+  });
+
+  it("explains Red Herrings when the Runner cannot pay the steal cost", () => {
+    const decline = legalAction("runner", "decline_trash", "game_rule", "Priority Requisition nicht stehlen", {
+      cardId: "agenda_1",
+      stealAdditionalCost: 5,
+      stealCost: 5,
+      stealCostSourceTitles: "Red Herrings",
+      stealBlockedByCost: true
+    });
+
+    expect(accessRevealStatusLabel({ type: "agenda" }, [decline], "runner", "runner", "Remote 1")).toBe(
+      "Red Herrings: 5 Credits zusätzliche Stehlkosten. Du hast nicht genug Credits, um diese Agenda zu stehlen."
+    );
   });
 });
 

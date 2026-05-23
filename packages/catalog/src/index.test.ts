@@ -6,6 +6,7 @@ import {
   activeRuntimeCardIds,
   assertCatalogPayloadSafe,
   cardFactsById,
+  CLASSIC_CARD_IDS,
   computeSnapshotHash,
   createCatalogIndex,
   createRuntimeCardsById,
@@ -28,10 +29,12 @@ describe("card set support catalog source", () => {
       "testset",
       "originalset-v1",
       "proteus",
+      "classic",
     ]);
     expect(TESTSET_CARD_IDS).toHaveLength(38);
     expect(ORIGINALSET_V1_CARD_IDS).toHaveLength(374);
     expect(PROTEUS_CARD_IDS).toHaveLength(154);
+    expect(CLASSIC_CARD_IDS).toHaveLength(52);
     expect(validateLoadedCardSets(sets)).toEqual([]);
   });
 
@@ -196,12 +199,27 @@ describe("card set support catalog source", () => {
     expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
   });
 
+  it("imports Classic as catalog-visible but blocked planning data", () => {
+    const classicCards = Object.values(createRuntimeCardsById()).filter((card) =>
+      card.catalogCardId.startsWith("onr_classic_"),
+    );
+    expect(classicCards).toHaveLength(52);
+    expect(classicCards.every((card) => card.setId === "classic")).toBe(true);
+    expect(classicCards.every((card) => card.statuses.catalog_ready)).toBe(true);
+    expect(classicCards.every((card) => card.statuses.blocked)).toBe(true);
+    expect(classicCards.every((card) => !card.statuses.human_playable)).toBe(true);
+    expect(classicCards.every((card) => !card.statuses.deck_legal)).toBe(true);
+    expect(createRuntimeCardsById()["onr_classic_001_data-fort-remapping"]?.rarity?.code).toBe("common");
+    expect(createRuntimeCardsById()["onr_classic_052_zetatech-portastation"]?.title).toBe("Zetatech Portastation");
+  });
+
   it("creates a valid runtime snapshot, index and public payload", () => {
     const snapshot = createRuntimeCardSnapshot();
     const hash = computeSnapshotHash(snapshot);
     const index = createCatalogIndex(snapshot, hash);
     expect(validateSnapshot(snapshot)).toEqual({ ok: true, errors: [] });
     expect(index.filters.sets.sort()).toEqual([
+      "classic",
       "originalset-v1",
       "proteus",
       "testset",

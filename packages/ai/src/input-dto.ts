@@ -417,6 +417,7 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
 
 function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoiceRequest {
   const stackSearchResolution = sanitizeStackSearchResolution(choice.stackSearchResolution);
+  const cardSearchPresentation = sanitizeCardSearchPresentation(choice.cardSearchPresentation);
   return {
     choiceId: choice.choiceId,
     side: choice.side,
@@ -439,6 +440,7 @@ function sanitizeVisibleChoiceRequest(choice: VisibleChoiceRequest): VisibleChoi
     stateVersion: choice.stateVersion,
     visibility: choice.visibility,
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
+    ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
   };
 }
 
@@ -602,6 +604,22 @@ function sanitizeStackSearchResolution(value: VisibleChoiceRequest["stackSearchR
     destination: value.destination,
     shuffleAfter: value.shuffleAfter,
     ...(value.publicRevealKind ? { publicRevealKind: value.publicRevealKind } : {}),
+  };
+}
+
+function sanitizeCardSearchPresentation(value: VisibleChoiceRequest["cardSearchPresentation"]): VisibleChoiceRequest["cardSearchPresentation"] | undefined {
+  if (!value) return undefined;
+  return {
+    sourceZone: value.sourceZone,
+    selectableFilter: value.selectableFilter,
+    reveal: value.reveal,
+    destination: value.destination,
+    shuffleAfter: value.shuffleAfter,
+    showNonMatchingCards: value.showNonMatchingCards,
+    ...(value.publicRevealKind ? { publicRevealKind: value.publicRevealKind } : {}),
+    ...(value.temporaryReturnAtEndOfTurn
+      ? { temporaryReturnAtEndOfTurn: value.temporaryReturnAtEndOfTurn }
+      : {}),
   };
 }
 
